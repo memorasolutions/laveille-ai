@@ -1,0 +1,35 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app/
+        - Modules/Api/app/
+        - Modules/Auth/app/
+        - Modules/Backoffice/app/
+        - Modules/Core/app/
+        - Modules/FrontTheme/app/
+        - Modules/Health/app/
+        - Modules/Logging/app/
+        - Modules/Media/app/
+        - Modules/Notifications/app/
+        - Modules/RolesPermissions/app/
+        - Modules/SEO/app/
+        - Modules/Settings/app/
+        - Modules/Storage/app/
+        - Modules/Webhooks/app/
+        - database/
+        - routes/
+    excludePaths:
+        - vendor/
+        - storage/
+        - bootstrap/cache/
+        - database/migrations/2026_02_15_214425_create_pulse_tables.php
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#^Access to an undefined property [a-zA-Z\\]+::\$\w+#'
+        - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::#'
+        - '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\#'
+        - '#^Trait .+ is used zero times and is not analysed#'
+        - '#^Call to an undefined method Spatie\\MediaLibrary\\HasMedia::#'

@@ -1,0 +1,11 @@
+{
+    "name": "FrontTheme",
+    "alias": "fronttheme",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\FrontTheme\\Providers\\FrontThemeServiceProvider"
+    ],
+    "files": []
+}
