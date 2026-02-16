@@ -1,0 +1,18 @@
+{
+    "Core": true,
+    "Auth": true,
+    "RolesPermissions": true,
+    "Settings": true,
+    "Logging": true,
+    "Health": true,
+    "Storage": true,
+    "Media": true,
+    "Notifications": true,
+    "Webhooks": true,
+    "Api": true,
+    "SEO": true,
+    "Backoffice": true,
+    "FrontTheme": true,
+    "SaaS": false,
+    "Tenancy": false
+}

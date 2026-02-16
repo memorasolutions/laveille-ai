@@ -1,0 +1,11 @@
+{
+    "name": "Backoffice",
+    "alias": "backoffice",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Backoffice\\Providers\\BackofficeServiceProvider"
+    ],
+    "files": []
+}

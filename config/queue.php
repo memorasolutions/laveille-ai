@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -84,8 +86,9 @@ return [
         'failover' => [
             'driver' => 'failover',
             'connections' => [
+                'redis',
                 'database',
-                'deferred',
+                'sync',
             ],
         ],
 

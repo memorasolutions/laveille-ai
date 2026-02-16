@@ -1,50 +1,53 @@
 # Plan de match - CORE Laravel 12 modulaire
 
 ## Phase 0 : initialisation du projet
-- [ ] Installer Laravel 12 via composer
-- [ ] Configurer .env (MySQL, app name, domaine local)
-- [ ] Configurer config/database.php (MySQL/MariaDB)
-- [ ] Installer nwidart/laravel-modules
-- [ ] Configurer la structure de base des modules
-- [ ] Installer Vite + Tailwind CSS 4 + Alpine.js
-- [ ] Installer Livewire 3
-- [ ] Installer Laravel Pint + IDE Helper
-- [ ] Installer Pest PHP
-- [ ] Configurer git + .gitignore
-- [ ] Créer la base de données
+- [x] Installer Laravel 12 via composer (v12.51.0)
+- [x] Configurer .env (MySQL/MariaDB, app name, domaine local laravel-core.test)
+- [x] Configurer config/database.php (MariaDB 10.11.6 via Herd)
+- [x] Installer nwidart/laravel-modules (v12)
+- [x] Configurer la structure de base des modules
+- [x] Installer Vite + Tailwind CSS 4 + Alpine.js (Vite 7, TW4, Alpine 3)
+- [x] Installer Livewire (v4.1)
+- [x] Installer IDE Helper (v3.6)
+- [x] Installer Pest PHP (v3.8)
+- [x] Configurer git + .gitignore
+- [x] Créer la base de données (laravel_core)
+- [x] .env.production template créé
 
 ## Phase 1 : module Core (fondation)
-- [ ] Créer le module Core
-- [ ] BaseModel (UUID/ULID, soft deletes, traits)
-- [ ] Traits : HasUuid, HasSlug, Filterable, Sortable, HasMeta
-- [ ] BaseService + ServiceInterface
-- [ ] BaseFormRequest
-- [ ] Middleware : SecurityHeaders, ForceHttps, SanitizeInput
-- [ ] Exception Handler custom (JSON API + Blade web)
-- [ ] Pages d'erreur custom (403, 404, 419, 429, 500)
-- [ ] Helpers globaux
-- [ ] Configuration .env multi-environnement
-- [ ] Tests du module Core
+- [x] Créer le module Core
+- [x] BaseModel (UUID, soft deletes, traits)
+- [x] Traits : HasUuid, HasSlug, Filterable, Sortable, HasMeta
+- [x] BaseService + ServiceInterface
+- [x] BaseFormRequest (validation JSON/Blade)
+- [x] Middleware : SecurityHeaders, ForceHttps, SanitizeInput
+- [x] ApiException (render JSON)
+- [x] Pages d'erreur custom (403, 404, 419, 429, 500)
+- [x] Helpers globaux (format_date, format_money, is_active_route)
+- [x] Configuration autoloader modules (composer-merge-plugin)
+- [x] Tests du module Core (9/9 passent)
+- [x] Filament v5 installé
 
 ## Phase 2 : module Auth
-- [ ] Installer Sanctum
-- [ ] Créer le module Auth
-- [ ] Composants Livewire : Login, Register, ForgotPassword, ResetPassword, EmailVerification
-- [ ] AuthService
-- [ ] Guards custom
-- [ ] Middleware auth personnalisé
-- [ ] Vues Blade (thème login séparé)
-- [ ] Rate limiting sur login/register
-- [ ] Tests Auth
+- [x] Installer Sanctum (v4.3)
+- [x] Créer le module Auth
+- [x] Composants Livewire : Login, Register, ForgotPassword, ResetPassword
+- [x] AuthService (authenticate, register, logout, resetPassword)
+- [x] Vues Blade (thème guest séparé, Tailwind)
+- [x] Rate limiting sur login (5 tentatives)
+- [x] Routes auth (guest/auth middleware)
+- [x] Dashboard minimal + route
+- [x] Tests Auth (5/5 passent)
 
 ## Phase 3 : module RolesPermissions
-- [ ] Installer spatie/laravel-permission
-- [ ] Créer le module RolesPermissions
-- [ ] Seeder rôles de base (super-admin, admin, user)
-- [ ] Permissions par défaut
-- [ ] Middleware CheckPermission
-- [ ] Composants Livewire admin (gestion rôles/permissions/users)
-- [ ] Tests RolesPermissions
+- [x] Installer spatie/laravel-permission (v6.24)
+- [x] Créer le module RolesPermissions
+- [x] Seeder rôles de base (super_admin, admin, user)
+- [x] Permissions par défaut (16 permissions CRUD)
+- [x] RoleService (create, update, delete, assign, sync)
+- [x] User model configuré (HasRoles, HasApiTokens, FilamentUser, LogsActivity)
+- [x] Tests RolesPermissions (9/9 passent)
+- [x] Filament admin panel configuré (canAccessPanel)
 
 ## Phase 4 : module Admin (panneau d'administration)
 - [ ] Créer le module Admin

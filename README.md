@@ -1,59 +1,130 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel CORE Template
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![PHP](https://img.shields.io/badge/PHP-8.4-blue) ![Laravel](https://img.shields.io/badge/Laravel-12-red) ![Filament](https://img.shields.io/badge/Filament-v5-yellow) ![Tests](https://img.shields.io/badge/Tests-174%2B-green)
 
-## About Laravel
+Template Laravel 12 modulaire et prêt pour la production. Architecture basée sur 15 modules nwidart avec panneau admin Filament v5, authentification 2FA, API versionnée, monitoring complet et outils de qualité de code.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fonctionnalités
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Architecture modulaire (15 modules nwidart)
+- Panneau admin Filament v5 avec 4 resources et 4 widgets
+- Authentification 2FA (Filament Breezy)
+- Rôles et permissions (Spatie)
+- API versionnée /api/v1/ avec documentation Scramble
+- Authentification API (Laravel Sanctum)
+- Monitoring : Sentry, Pulse, Telescope, Horizon
+- Health checks (Spatie Health - 7 vérifications)
+- Backups automatiques (Spatie Backup)
+- Activity logging (Spatie ActivityLog)
+- Media library (Spatie Media)
+- Response caching (Spatie ResponseCache)
+- SEO, Webhooks, Notifications, Storage
+- CI/CD GitHub Actions
+- Docker dev (PHP 8.4, nginx, MySQL, Redis, Mailpit)
+- Qualité : Larastan niveau 5, Pint, Rector, Pest arch tests
+- Localisation fr/en
+- Feature flags (Laravel Pennant)
+- Rate limiting configurable
+- Makefile avec 20+ commandes
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Prérequis
 
-## Learning Laravel
+- PHP 8.4+
+- Composer 2+
+- Node.js 20+ et npm
+- MySQL 8.0+ ou MariaDB 10.6+
+- Redis 7+
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git clone [url-du-repo] mon-projet
+cd mon-projet
+make install
+php artisan core:setup
+```
 
-## Laravel Sponsors
+## Docker
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+docker compose up -d
+# App: http://localhost:8080
+# Mailpit: http://localhost:8025
+```
 
-### Premium Partners
+## Architecture
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```
+Modules/
+├── Core/             # Traits, middleware, helpers, base classes
+├── Auth/             # Livewire login/register, Filament UserResource
+├── RolesPermissions/ # Spatie roles, Filament RoleResource
+├── Settings/         # Paramètres dynamiques, Filament SettingResource
+├── Logging/          # Activity log, Filament ActivityLogResource
+├── Health/           # Health checks (7 vérifications)
+├── Storage/          # Service de stockage unifié
+├── Media/            # Spatie Media Library service
+├── Notifications/    # Service de notifications
+├── Webhooks/         # Client et serveur webhooks
+├── Api/              # Base API controller
+├── SEO/              # Service SEO (meta, sitemap, robots)
+├── Backoffice/       # Module backoffice
+├── FrontTheme/       # Thème frontend
+├── SaaS/             # (désactivé) Multi-tenancy SaaS
+└── Tenancy/          # (désactivé) Tenancy
+```
 
-## Contributing
+## Commandes
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Commande | Description |
+|----------|-------------|
+| `make install` | Installation complète |
+| `make dev` | Serveur de développement |
+| `make test` | Lancer les tests |
+| `make lint` | Corriger le style (Pint) |
+| `make analyse` | Analyse statique (Larastan) |
+| `make rector` | Modernisation du code (dry-run) |
+| `make cache` | Mettre en cache la configuration |
+| `make docker-up` | Démarrer Docker |
+| `make deploy` | Déploiement production |
+| `make ide-helper` | Générer les helpers IDE |
 
-## Code of Conduct
+## API
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+L'API est versionnée sous `/api/v1/`. Documentation automatique via Scramble a `/docs/api`.
 
-## Security Vulnerabilities
+### Authentification
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# Créer un token
+POST /api/v1/login
+Content-Type: application/json
+{"email": "admin@laravel-core.test", "password": "password"}
 
-## License
+# Utiliser le token
+GET /api/v1/status
+Authorization: Bearer {token}
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Endpoints
+
+| Méthode | URL | Description |
+|---------|-----|-------------|
+| GET | `/api/health` | Status de santé |
+| GET | `/api/v1/status` | Informations de l'application |
+| GET | `/api/v1/user` | Utilisateur authentifié |
+
+## Tests
+
+```bash
+make test              # Tous les tests
+make test-coverage     # Avec couverture
+make analyse           # Analyse statique
+make lint-check        # Vérification du style
+```
+
+174+ tests couvrant l'ensemble du code.
+
+## Licence
+
+Ce projet est sous licence MIT.
