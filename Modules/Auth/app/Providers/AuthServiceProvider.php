@@ -68,10 +68,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        $this->app->booted(function () {
-            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
-            $schedule->command('app:block-suspicious-ips')->everyFiveMinutes();
-        });
+        // Scheduling centralisé dans routes/console.php (Laravel standard)
     }
 
     /**

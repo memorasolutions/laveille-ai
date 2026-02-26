@@ -75,10 +75,7 @@ class NotificationsServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        // Scheduling in routes/console.php (Laravel standard)
     }
 
     /**

@@ -29,6 +29,9 @@ Schedule::command('app:cleanup')->dailyAt('02:00');
 // Trial expiry notifications (3 days before + day of)
 Schedule::command('saas:trial-expiry-notify')->dailyAt('09:00');
 
+// IP blocking (suspicious login attempts)
+Schedule::command('app:block-suspicious-ips')->everyFiveMinutes();
+
 // Notification digests
 Schedule::command('notifications:send-digest --frequency=daily')->dailyAt('08:00');
 Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '08:00');

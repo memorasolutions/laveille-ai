@@ -74,10 +74,7 @@ class CoreServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        $this->app->booted(function () {
-            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
-            $schedule->command('app:cleanup')->daily()->at('03:00');
-        });
+        // Scheduling centralisé dans routes/console.php (Laravel standard)
     }
 
     /**
