@@ -22,6 +22,7 @@
 - [x] **Fix XSS critique** - HTML Purifier (mews/purifier), safe_content accessor sur Article + StaticPage, 8 vues corrigees
 - [x] **Fix index manquant** - Migration ajout index is_active sur users
 - [x] **Fix Queue::failing** - Handler global pour jobs en echec dans AppServiceProvider
+- [x] **app:install wizard** - Commande interactive setup complet (DB validation, admin, Stripe, .env)
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 

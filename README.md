@@ -2,7 +2,7 @@
 
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
-![Tests](https://img.shields.io/badge/tests-2156_passed-brightgreen?style=flat)
+![Tests](https://img.shields.io/badge/tests-2159_passed-brightgreen?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
 Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (25 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2156 tests, 4192 assertions, 0 échec).
@@ -48,9 +48,14 @@ npm install && npm run build
 # 5. Base de données
 php artisan migrate --seed
 
-# 6. Setup initial (optionnel)
-php artisan core:setup
+# 6. Setup interactif (recommandé)
+php artisan app:install
+
+# OU setup rapide (CI/CD)
+php artisan app:install --force
 ```
+
+La commande `app:install` guide la configuration complète : application, base de données, administrateur et services optionnels (Stripe). Elle valide la connexion DB avant de migrer.
 
 ## Structure des modules
 
