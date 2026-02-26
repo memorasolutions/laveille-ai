@@ -24,6 +24,7 @@
 - [x] **Fix Queue::failing** - Handler global pour jobs en echec dans AppServiceProvider
 - [x] **app:install wizard** - Commande interactive setup complet (DB validation, admin, Stripe, .env)
 - [x] **app:demo** - Donnees demo realistes (users, articles, comments, pages, activity, subscribers)
+- [x] **app:status** - Dashboard systeme (DB, cache, queue, storage, modules, stats)
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 
