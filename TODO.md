@@ -30,6 +30,7 @@
 - [x] **CI/CD amélioré** - Concurrency cancel, npm audit, coverage-text dans PR, caches optimisés
 - [x] **app:logs** - Tail logs colorés avec filtrage par niveau, timestamps relatifs, --clear
 - [x] **app:setup-hooks** - Git pre-commit hook (Pint + PHPStan sur fichiers stagés uniquement)
+- [x] **VS Code config** - extensions.json (9 extensions recommandées) + settings.json (PHP 8.4, Pest, Blade, search excludes)
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 

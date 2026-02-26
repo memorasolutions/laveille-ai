@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "bmewburn.vscode-intelephense-client",
+        "onecentlin.laravel-blade",
+        "xdebug.php-debug",
+        "bradlc.vscode-tailwindcss",
+        "adrianwilczynski.alpine-js-intellisense",
+        "editorconfig.editorconfig",
+        "mikestead.dotenv",
+        "pest.pest-vscode",
+        "ms-ceintl.vscode-language-pack-fr"
+    ]
+}
