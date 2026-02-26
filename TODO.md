@@ -26,6 +26,7 @@
 - [x] **app:demo** - Donnees demo realistes (users, articles, comments, pages, activity, subscribers)
 - [x] **app:status** - Dashboard systeme (DB, cache, queue, storage, modules, stats)
 - [x] **app:check** - Pre-deploy validation (env, DB, PHPStan, tests, security, config, storage) + make check
+- [x] **app:make-module** - Scaffolder module complet (16 fichiers, providers, routes, tests, plugin.json, module.json)
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 
