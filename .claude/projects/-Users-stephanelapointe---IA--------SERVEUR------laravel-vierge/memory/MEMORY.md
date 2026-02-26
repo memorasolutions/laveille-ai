@@ -162,18 +162,18 @@
 - [x] 3 thèmes synchronisés (backend, wowdash, tabler) pour rôles et articles
 
 ## Todo actif (2026-02-26)
-### Priorité haute
-- [ ] Synchroniser README.md (indique 1216 tests au lieu de 2156, 21 modules au lieu de 25)
-- [ ] Audit hardcode wowdash dans Newsletter, Pages, Editor
-- [ ] Nettoyer docs obsolètes (DOCUMENTATION_SUMMARY.md, SESSION_STATE.md)
-- [ ] Nettoyage vues dupliquées (21 anciennes vues Backoffice identifiées)
-- [ ] Commiter les 105+ fichiers modifiés
+### Priorité haute - TOUT COMPLÉTÉ
+- [x] README.md déjà à jour
+- [x] Audit hardcode wowdash - 6 modules vérifiés, aucun hardcode
+- [x] Docs obsolètes supprimées (4 fichiers)
+- [x] Vues orphelines supprimées (22 dossiers, 38 fichiers)
+- [x] Commit massif 4e0500c (4835 fichiers)
 
 ### Priorité moyenne
-- [ ] Découplage Core (déplacer EnsureIsAdmin, 4 dépendances circulaires)
+- [x] Découplage Core : SetBackofficeTheme config-driven, BlockSuspiciousIps→Auth, CleanupOldRecords→DB direct
 - [ ] Extraction code partagé (traits ParsesTags, VerifiesPassword, FormRequests dupliqués)
 - [ ] Harmoniser boutons d'action admin (kebab vs liens texte)
-- [ ] Nettoyage 200+ screenshots .png à la racine
+- [x] Screenshots .png exclus via .gitignore
 
 ### Priorité basse (phases 154-158+)
 - [ ] Phase 154 : email digest
