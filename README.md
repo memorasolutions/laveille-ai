@@ -2,10 +2,10 @@
 
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
-![Tests](https://img.shields.io/badge/tests-2159_passed-brightgreen?style=flat)
+![Tests](https://img.shields.io/badge/tests-2169_passed-brightgreen?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
-Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (25 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2156 tests, 4192 assertions, 0 échec).
+Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (25 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2169+ tests, 0 échec).
 
 ## Table des matières
 
@@ -141,7 +141,7 @@ php artisan test tests/Feature/Phase46Test.php
 php artisan test --filter "Auth"
 ```
 
-Suite actuelle : **2156 tests, 4192 assertions, 0 échec**. PHPStan niveau 6, 0 erreur. Pint 100%.
+Suite actuelle : **2169+ tests, 0 échec**. PHPStan niveau 6, 0 erreur. Pint 100%.
 
 ## Sécurité
 
@@ -160,12 +160,38 @@ Suite actuelle : **2156 tests, 4192 assertions, 0 échec**. PHPStan niveau 6, 0 
 
 ## Commandes artisan custom
 
+### Commandes DX (developer experience)
+
+| Commande | Description |
+|----------|-------------|
+| `php artisan app:install` | Setup interactif complet (DB, admin, Stripe, .env). Flag `--force` pour CI/CD |
+| `php artisan app:demo` | Génère des données démo réalistes (users, articles, comments, pages, subscribers). Flag `--fresh` pour recréer |
+| `php artisan app:status` | Dashboard santé système (DB, cache, queue, storage, modules, stats) |
+| `php artisan app:check` | Validation pre-deploy (env, DB, PHPStan, tests, sécurité, config, storage). Flag `--quick` pour skip PHPStan/tests |
+| `php artisan app:make-module {Name}` | Scaffolder de module complet (16 fichiers : providers, routes, config, tests, plugin.json, module.json) |
+
+### Commandes métier
+
 | Commande | Description |
 |----------|-------------|
 | `php artisan core:setup` | Setup initial du projet |
 | `php artisan roles:sync` | Synchronise les permissions Spatie |
 | `php artisan make:crud {Model}` | Génère un CRUD complet (modèle, migration, contrôleur, vues, tests) |
 | `php artisan new:project` | Initialise un nouveau projet depuis ce template |
+
+### Raccourcis Makefile
+
+```bash
+make install        # Installation complète (composer, npm, env, migrate, build)
+make dev            # Serveur de développement (artisan serve + npm dev)
+make test           # Lancer les tests
+make check          # Validation pre-deploy complète (app:check)
+make check-quick    # Validation rapide sans PHPStan/tests
+make analyse        # PHPStan analyse statique
+make lint           # Laravel Pint (format)
+make cache          # Cache config/routes/views
+make cache-clear    # Vider tous les caches
+```
 
 ## Contribution
 
