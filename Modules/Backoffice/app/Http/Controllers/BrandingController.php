@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Modules\Core\Services\GoogleFontService;
 use Modules\Settings\Models\Setting;
 
 class BrandingController
@@ -38,7 +39,7 @@ class BrandingController
             'site_description' => ['nullable', 'string', 'max:500'],
             'primary_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'font_family' => ['required', 'string', 'max:100'],
-            'font_url' => ['nullable', 'url', 'max:500'],
+            'font_url' => ['nullable', 'string', 'max:500'],
             'footer_text' => ['nullable', 'string', 'max:500'],
             'footer_right' => ['nullable', 'string', 'max:500'],
             'login_title' => ['nullable', 'string', 'max:255'],
@@ -61,6 +62,21 @@ class BrandingController
         // Sauvegarder site_name et site_description dans le groupe "general" (source unique)
         Setting::set('site_name', $validated['site_name'] ?? '', 'string', 'general');
         Setting::set('site_description', $validated['site_description'] ?? '', 'string', 'general');
+
+        // Télécharger la police Google Fonts localement si elle change
+        $fontFamily = $validated['font_family'] ?? 'Inter';
+        $fontService = app(GoogleFontService::class);
+
+        if ($fontFamily !== 'Inter' && ! $fontService->isDownloaded($fontFamily)) {
+            $localCssPath = $fontService->download($fontFamily);
+            if ($localCssPath !== '') {
+                $validated['font_url'] = $localCssPath;
+            }
+        } elseif ($fontFamily !== 'Inter' && $fontService->isDownloaded($fontFamily)) {
+            $validated['font_url'] = $fontService->getLocalCssPath($fontFamily);
+        } else {
+            $validated['font_url'] = '';
+        }
 
         // Sauvegarder les champs texte branding
         $textFields = [

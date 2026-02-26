@@ -30,6 +30,11 @@
     <!-- Main CSS -->
     <link href="{{ asset('assets/backoffice/backend/css/style.css') }}" rel="stylesheet">
 
+    {{-- Police custom (locale) --}}
+    @if(! empty($branding['font_url'] ?? ''))
+        <link rel="stylesheet" href="{{ asset($branding['font_url']) }}">
+    @endif
+
     {{-- Dynamic branding CSS variables --}}
     @php
         $primaryColor = $branding['primary_color'] ?? '#7B2CF5';

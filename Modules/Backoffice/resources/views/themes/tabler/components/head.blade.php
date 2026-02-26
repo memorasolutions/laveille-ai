@@ -51,6 +51,11 @@
 {{-- ApexCharts CSS --}}
 <link rel="stylesheet" href="{{ asset('assets/backoffice/tabler/libs/apexcharts/dist/apexcharts.css') }}">
 
+{{-- Police custom (locale) --}}
+@if(! empty(\Modules\Settings\Models\Setting::get('branding.font_url', '')))
+    <link rel="stylesheet" href="{{ asset(\Modules\Settings\Models\Setting::get('branding.font_url')) }}">
+@endif
+
 {{-- Dynamic branding CSS variables --}}
 <style>
     :root {

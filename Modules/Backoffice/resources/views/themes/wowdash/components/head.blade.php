@@ -36,9 +36,9 @@
     <!-- main css -->
     <link rel="stylesheet" href="{{ asset('assets/backoffice/wowdash/css/style.css') }}">
 
-    {{-- Police custom --}}
+    {{-- Police custom (locale) --}}
     @if(! empty($branding['font_url'] ?? ''))
-        <style>@import url('{{ $branding['font_url'] }}');</style>
+        <link rel="stylesheet" href="{{ asset($branding['font_url']) }}">
     @endif
 
     {{-- Variables CSS dynamiques depuis les settings branding --}}

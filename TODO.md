@@ -32,6 +32,28 @@
 - [x] **app:setup-hooks** - Git pre-commit hook (Pint + PHPStan sur fichiers stagés uniquement)
 - [x] **VS Code config** - extensions.json (9 extensions recommandées) + settings.json (PHP 8.4, Pest, Blade, search excludes)
 
+## Prochaine priorite - Google Fonts local
+
+Objectif : quand un admin choisit une police Google dans le branding, la telecharger localement (RGPD, performance, fiabilite).
+
+### Sous-taches (dans l'ordre)
+
+- [x] **Font download service** - GoogleFontService telecharge WOFF2 depuis Google Fonts, stocke dans `public/fonts/`, genere CSS @font-face local
+- [x] **BrandingController update** - Appelle GoogleFontService quand font change, stocke chemin local
+- [x] **Head components (3 themes)** - `<link>` vers CSS local au lieu de `@import url(googleapis)`
+- [ ] **Frontend font** - Remplacer fonts.bunny.net hardcode (Figtree) par le meme systeme local
+- [ ] **Audit select font** - Verifier que le selecteur est bien un `<select>` partout (audit confirme : deja le cas dans les 3 themes)
+- [ ] **Tests** - Test du service de telechargement, test d'integration branding
+- [ ] **Playwright** - Validation visuelle que les fonts s'appliquent correctement
+
+### Constats de l'audit
+
+- Le selecteur de police est DEJA un `<select>` dans les 3 themes (10 polices predefinies)
+- WowDash : charge les fonts via `@import url(googleapis)` dynamique
+- Backend/Tabler : utilisent CSS variables mais ne chargent PAS les fonts dynamiquement (bug)
+- Frontend : hardcode fonts.bunny.net (Figtree), non lie aux settings branding
+- 3 fichiers de selection identiques (backend/wowdash/tabler branding/edit.blade.php)
+
 ## Restant (priorite basse - nouvelles fonctionnalites)
 
 - [ ] Phase 154 : email digest
