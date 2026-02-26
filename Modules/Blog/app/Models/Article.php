@@ -6,11 +6,13 @@ namespace Modules\Blog\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 use Laravel\Scout\Searchable;
 use Modules\Blog\Database\Factories\ArticleFactory;
 use Modules\Blog\States\ArticleState;
@@ -93,6 +95,11 @@ class Article extends Model
     public function shouldBeSearchable(): bool
     {
         return $this->status instanceof PublishedArticleState;
+    }
+
+    protected function safeContent(): Attribute
+    {
+        return Attribute::get(fn () => Purifier::clean($this->content ?? ''));
     }
 
     public function getRouteKeyName(): string

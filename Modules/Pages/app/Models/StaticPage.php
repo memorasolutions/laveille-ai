@@ -6,10 +6,12 @@ namespace Modules\Pages\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 use Laravel\Scout\Searchable;
 use Modules\Pages\Database\Factories\StaticPageFactory;
 use Spatie\Translatable\HasTranslations;
@@ -63,6 +65,11 @@ class StaticPage extends Model
     public function scopePublished($query)
     {
         return $query->where('status', self::STATUS_PUBLISHED);
+    }
+
+    protected function safeContent(): Attribute
+    {
+        return Attribute::get(fn () => Purifier::clean($this->content ?? ''));
     }
 
     public function getRouteKeyName(): string

@@ -11,13 +11,24 @@ use Modules\Api\Http\Requests\ChangePasswordRequest;
 use Modules\Api\Http\Requests\UpdateProfileRequest;
 use Modules\Auth\Http\Resources\UserResource;
 
+/**
+ * @group Profile
+ *
+ * Endpoints for the authenticated user to read and update their own profile.
+ */
 class ProfileApiController extends BaseApiController
 {
+    /**
+     * Return the authenticated user's profile with roles.
+     */
     public function show(Request $request): JsonResponse
     {
         return $this->respondSuccess(new UserResource($request->user()->load('roles')));
     }
 
+    /**
+     * Update the authenticated user's profile information.
+     */
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -27,6 +38,9 @@ class ProfileApiController extends BaseApiController
         return $this->respondSuccess(new UserResource($request->user()->fresh()->load('roles')));
     }
 
+    /**
+     * Change the authenticated user's password after verifying the current one.
+     */
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
 

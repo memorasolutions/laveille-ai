@@ -61,7 +61,7 @@
                 <h1 class="cs_fs_50 cs_mb_20">{{ $article->title }}</h1>
 
                 <div class="cs_post_content cs_fs_18" style="line-height:1.8">
-                    {!! render_shortcodes($article->content) !!}
+                    {!! render_shortcodes($article->safe_content) !!}
                 </div>
 
                 {{-- Author box --}}

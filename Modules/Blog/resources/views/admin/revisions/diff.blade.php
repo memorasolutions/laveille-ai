@@ -47,7 +47,7 @@
                     <div class="card-body p-16">
                         <h6 class="mb-8">{{ $article->title }}</h6>
                         <div class="border radius-8 p-12 bg-base" style="max-height: 400px; overflow-y: auto;">
-                            {!! $article->content !!}
+                            {!! $article->safe_content !!}
                         </div>
                     </div>
                 </div>

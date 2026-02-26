@@ -93,7 +93,7 @@ test('seo seeder creates default metatags', function () {
 test('database seeder runs without errors', function () {
     $this->seed(\Database\Seeders\DatabaseSeeder::class);
 
-    expect(User::where('email', 'stephane@memora.ca')->exists())->toBeTrue()
+    expect(User::where('email', env('ADMIN_EMAIL', 'admin@example.com'))->exists())->toBeTrue()
         ->and(User::where('email', 'moderator@laravel-core.test')->exists())->toBeTrue()
         ->and(User::count())->toBeGreaterThanOrEqual(7)
         ->and(Setting::count())->toBeGreaterThanOrEqual(7)

@@ -11,8 +11,18 @@ use Modules\Api\Http\Resources\ArticleResource;
 use Modules\Api\Http\Resources\CommentResource;
 use Modules\Blog\Models\Article;
 
+/**
+ * @group Blog
+ *
+ * Public endpoints for browsing published articles, searching and listing categories.
+ */
 final class BlogApiController extends BaseApiController
 {
+    /**
+     * Return a paginated list of published articles, optionally filtered by category.
+     *
+     * @unauthenticated
+     */
     public function index(Request $request): JsonResponse
     {
         $articles = Article::published()
@@ -24,6 +34,11 @@ final class BlogApiController extends BaseApiController
         return $this->respondSuccess(ArticleResource::collection($articles));
     }
 
+    /**
+     * Return a single published article and its approved comments by slug.
+     *
+     * @unauthenticated
+     */
     public function show(string $slug): JsonResponse
     {
         $article = Article::with(['user', 'blogCategory'])
@@ -41,6 +56,11 @@ final class BlogApiController extends BaseApiController
         ]);
     }
 
+    /**
+     * Full-text search across published article titles and content.
+     *
+     * @unauthenticated
+     */
     public function search(Request $request): JsonResponse
     {
         $request->validate(['q' => ['required', 'string', 'min:2']]);
@@ -57,6 +77,11 @@ final class BlogApiController extends BaseApiController
         return $this->respondSuccess(ArticleResource::collection($articles));
     }
 
+    /**
+     * Return a deduplicated list of all categories used by published articles.
+     *
+     * @unauthenticated
+     */
     public function categories(): JsonResponse
     {
         $categories = Cache::remember('api.blog.categories', 3600, fn () => Article::published()

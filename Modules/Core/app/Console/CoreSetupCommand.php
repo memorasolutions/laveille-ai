@@ -58,8 +58,8 @@ class CoreSetupCommand extends Command
             ['Item', 'Value'],
             [
                 ['Admin URL', url('/admin')],
-                ['Admin email', 'stephane@memora.ca'],
-                ['Admin password', '(défini dans le seeder)'],
+                ['Admin email', env('ADMIN_EMAIL', 'admin@example.com')],
+                ['Admin password', '(défini dans .env → ADMIN_PASSWORD)'],
             ]
         );
 

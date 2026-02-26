@@ -9,8 +9,16 @@ use Modules\Api\Http\Requests\StoreCommentRequest;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Comment;
 
+/**
+ * @group Comments
+ *
+ * Endpoints for submitting comments on blog articles.
+ */
 class CommentApiController extends BaseApiController
 {
+    /**
+     * Submit a comment on a specific article (pending moderation).
+     */
     public function store(StoreCommentRequest $request, Article $article): JsonResponse
     {
         $validated = $request->validated();

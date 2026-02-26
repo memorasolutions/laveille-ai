@@ -51,7 +51,7 @@
                     <div class="card-body p-4">
                         <h6 class="fw-semibold text-body mb-3 small">{{ $article->title }}</h6>
                         <div class="border rounded-3 p-3 overflow-auto small" style="max-height:24rem;">
-                            {!! $article->content !!}
+                            {!! $article->safe_content !!}
                         </div>
                     </div>
                 </div>

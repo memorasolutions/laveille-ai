@@ -16,6 +16,12 @@
 - [x] **Decouplage Core** - SetBackofficeTheme config-driven, BlockSuspiciousIps deplace vers Auth, CleanupOldRecords sans import Settings
 - [x] **Code partage** - Audit confirme : deja bien centralise (85/100), aucune extraction necessaire
 - [x] **Boutons d'action admin** - Audit confirme : 95% coherence kebab pattern, pas d'intervention necessaire
+- [x] **PHPDoc API Scramble** - 10 controleurs annotes (@group, @unauthenticated, descriptions)
+- [x] **Clone readiness** - .env.example complete (OAuth, admin env vars), seeder decouple (env() au lieu de hardcode), CoreSetupCommand corrige
+- [x] **Audit robustesse complet** - 3 audits paralleles (securite OWASP, performance N+1, robustesse)
+- [x] **Fix XSS critique** - HTML Purifier (mews/purifier), safe_content accessor sur Article + StaticPage, 8 vues corrigees
+- [x] **Fix index manquant** - Migration ajout index is_active sur users
+- [x] **Fix Queue::failing** - Handler global pour jobs en echec dans AppServiceProvider
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 

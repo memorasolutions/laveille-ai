@@ -13,8 +13,18 @@ use Modules\Api\Http\Requests\LoginRequest;
 use Modules\Api\Http\Requests\RegisterRequest;
 use Modules\Auth\Http\Resources\UserResource;
 
+/**
+ * @group Authentication
+ *
+ * Endpoints for registering, logging in and managing the current session.
+ */
 class AuthController extends BaseApiController
 {
+    /**
+     * Log in with email and password and receive a Sanctum token.
+     *
+     * @unauthenticated
+     */
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
@@ -32,6 +42,11 @@ class AuthController extends BaseApiController
         ]);
     }
 
+    /**
+     * Create a new user account and receive a Sanctum token.
+     *
+     * @unauthenticated
+     */
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
@@ -49,6 +64,9 @@ class AuthController extends BaseApiController
         ]);
     }
 
+    /**
+     * Revoke the current Sanctum token and log out.
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -56,6 +74,9 @@ class AuthController extends BaseApiController
         return $this->respondSuccess(message: 'Déconnecté avec succès.');
     }
 
+    /**
+     * Return the authenticated user's profile with roles.
+     */
     public function user(Request $request): JsonResponse
     {
         return $this->respondSuccess(new UserResource($request->user()->load('roles')));

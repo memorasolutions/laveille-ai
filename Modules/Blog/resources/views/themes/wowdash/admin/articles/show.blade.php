@@ -24,7 +24,7 @@
                 @endif
                 <div class="mb-20">
                     <label class="form-label fw-semibold text-secondary-light text-sm">{{ __('Contenu') }}</label>
-                    <div class="border radius-8 p-16">{!! $article->content !!}</div>
+                    <div class="border radius-8 p-16">{!! $article->safe_content !!}</div>
                 </div>
                 @if($article->excerpt)
                 <div class="mb-0">

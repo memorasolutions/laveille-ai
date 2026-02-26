@@ -43,7 +43,7 @@ test('database seeder can run', function () {
     $this->artisan('migrate:fresh');
     $this->seed(\Database\Seeders\DatabaseSeeder::class);
 
-    $admin = \App\Models\User::where('email', 'stephane@memora.ca')->first();
+    $admin = \App\Models\User::where('email', env('ADMIN_EMAIL', 'admin@example.com'))->first();
     expect($admin)->not->toBeNull();
     expect($admin->hasRole('super_admin'))->toBeTrue();
 });

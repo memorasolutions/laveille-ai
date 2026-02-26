@@ -9,8 +9,18 @@ use Modules\Api\Http\Requests\SubscribeRequest;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Notifications\WelcomeNewsletterNotification;
 
+/**
+ * @group Newsletter
+ *
+ * Public endpoints for managing newsletter subscriptions.
+ */
 final class NewsletterApiController extends BaseApiController
 {
+    /**
+     * Subscribe an email address to the newsletter (idempotent).
+     *
+     * @unauthenticated
+     */
     public function subscribe(SubscribeRequest $request): JsonResponse
     {
         $subscriber = Subscriber::firstOrCreate(['email' => $request->validated('email')]);

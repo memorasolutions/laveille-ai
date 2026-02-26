@@ -18,10 +18,10 @@ class DatabaseSeeder extends Seeder
 
         // 2. Superadmin principal (ID #1 - JAMAIS supprimer)
         $superAdmin = User::updateOrCreate(
-            ['email' => 'stephane@memora.ca'],
+            ['email' => env('ADMIN_EMAIL', 'admin@example.com')],
             [
-                'name' => 'Stéphane Lapointe',
-                'password' => bcrypt('Admin123!'),
+                'name' => env('ADMIN_NAME', 'Admin'),
+                'password' => bcrypt(env('ADMIN_PASSWORD', 'Admin123!')),
                 'email_verified_at' => now(),
                 'is_active' => true,
             ]

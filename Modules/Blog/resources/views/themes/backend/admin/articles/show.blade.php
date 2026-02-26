@@ -38,7 +38,7 @@
                 @endif
                 <div class="mb-3">
                     <label class="form-label small fw-semibold text-muted text-uppercase mb-2">{{ __('Contenu') }}</label>
-                    <div class="border rounded-3 p-4">{!! $article->content !!}</div>
+                    <div class="border rounded-3 p-4">{!! $article->safe_content !!}</div>
                 </div>
                 @if($article->excerpt)
                 <div>

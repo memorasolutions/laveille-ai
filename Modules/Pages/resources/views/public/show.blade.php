@@ -27,7 +27,7 @@
             @endif
             <h1 class="cs_fs_50 cs_mb_30">{{ $page->title }}</h1>
             <div class="cs_page_content cs_fs_18" style="line-height:1.8">
-                {!! render_shortcodes($page->content) !!}
+                {!! render_shortcodes($page->safe_content) !!}
             </div>
         </div>
     </div>

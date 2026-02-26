@@ -11,8 +11,16 @@ use Modules\Api\Http\Requests\UpdateArticleRequest;
 use Modules\Api\Http\Resources\ArticleResource;
 use Modules\Blog\Models\Article;
 
+/**
+ * @group Articles
+ *
+ * Endpoints for creating, updating and deleting blog articles (authenticated editors/admins).
+ */
 class ArticleApiController extends BaseApiController
 {
+    /**
+     * Create a new blog article (draft or published).
+     */
     public function store(StoreArticleRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -30,6 +38,9 @@ class ArticleApiController extends BaseApiController
         return $this->respondCreated(new ArticleResource($article->load(['user', 'blogCategory'])));
     }
 
+    /**
+     * Update an existing article's content or status.
+     */
     public function update(UpdateArticleRequest $request, Article $article): JsonResponse
     {
         $this->authorize('update', $article);
@@ -45,6 +56,9 @@ class ArticleApiController extends BaseApiController
         return $this->respondSuccess(new ArticleResource($article->fresh()->load(['user', 'blogCategory'])));
     }
 
+    /**
+     * Delete an article permanently.
+     */
     public function destroy(Article $article): JsonResponse
     {
         $this->authorize('delete', $article);

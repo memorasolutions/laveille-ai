@@ -8,6 +8,9 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -48,6 +51,18 @@ class AppServiceProvider extends ServiceProvider
         Feature::define('module-sms', false);
 
         $this->configureRateLimiting();
+        $this->configureQueueFailureHandling();
+    }
+
+    protected function configureQueueFailureHandling(): void
+    {
+        Queue::failing(function (JobFailed $event) {
+            Log::error('Queue job failed', [
+                'job' => $event->job->resolveName(),
+                'connection' => $event->connectionName,
+                'exception' => $event->exception->getMessage(),
+            ]);
+        });
     }
 
     protected function configureRateLimiting(): void

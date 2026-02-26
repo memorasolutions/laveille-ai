@@ -7,8 +7,16 @@ namespace Modules\Api\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @group Push Subscriptions
+ *
+ * Endpoints for managing Web Push notification subscriptions for the authenticated user.
+ */
 class PushSubscriptionController extends BaseApiController
 {
+    /**
+     * Register or update the user's Web Push subscription endpoint and keys.
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -26,6 +34,9 @@ class PushSubscriptionController extends BaseApiController
         return $this->respondSuccess(null, 'Subscription saved');
     }
 
+    /**
+     * Remove a specific Web Push subscription endpoint for the authenticated user.
+     */
     public function destroy(Request $request): JsonResponse
     {
         $request->validate(['endpoint' => 'required|url']);
