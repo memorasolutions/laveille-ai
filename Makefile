@@ -1,4 +1,4 @@
-.PHONY: install dev test test-coverage lint lint-check analyse rector rector-fix seed migrate fresh cache cache-clear horizon telescope docker-up docker-down docker-build deploy ide-helper check check-quick
+.PHONY: install dev test test-coverage lint lint-check analyse rector rector-fix seed migrate fresh cache cache-clear horizon telescope docker-up docker-down docker-build deploy ide-helper check check-quick logs
 
 install:
 	composer install
@@ -82,3 +82,6 @@ check:
 
 check-quick:
 	php artisan app:check --quick
+
+logs:
+	php artisan app:logs
