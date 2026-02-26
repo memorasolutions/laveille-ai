@@ -23,6 +23,7 @@
 - [x] **Fix index manquant** - Migration ajout index is_active sur users
 - [x] **Fix Queue::failing** - Handler global pour jobs en echec dans AppServiceProvider
 - [x] **app:install wizard** - Commande interactive setup complet (DB validation, admin, Stripe, .env)
+- [x] **app:demo** - Donnees demo realistes (users, articles, comments, pages, activity, subscribers)
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 
