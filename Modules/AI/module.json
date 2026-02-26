@@ -1,0 +1,13 @@
+{
+    "name": "AI",
+    "alias": "ai",
+    "description": "Module AI - Service OpenRouter pour intégration LLM",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AI\\Providers\\AiServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

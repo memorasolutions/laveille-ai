@@ -15,7 +15,8 @@ test('all modules are loaded', function () {
         'Core', 'Auth', 'RolesPermissions', 'Settings',
         'Logging', 'Health', 'Storage', 'Media',
         'Notifications', 'Webhooks', 'Api', 'SEO',
-        'Backoffice', 'FrontTheme',
+        'Backoffice', 'FrontTheme', 'SaaS', 'Tenancy',
+        'Backup', 'Translation', 'Export', 'Search',
     ];
 
     foreach ($expectedModules as $module) {
@@ -23,22 +24,26 @@ test('all modules are loaded', function () {
     }
 });
 
-test('saas and tenancy modules are disabled', function () {
-    $disabled = app('modules')->allDisabled();
-    $disabledNames = collect($disabled)->map(fn ($m) => $m->getName())->toArray();
-    expect($disabledNames)->toContain('SaaS');
-    expect($disabledNames)->toContain('Tenancy');
+test('saas and tenancy modules are enabled with feature flags defined', function () {
+    $enabled = app('modules')->allEnabled();
+    $enabledNames = collect($enabled)->map(fn ($m) => $m->getName())->toArray();
+    expect($enabledNames)->toContain('SaaS');
+    expect($enabledNames)->toContain('Tenancy');
+
+    $defined = \Laravel\Pennant\Feature::defined();
+    expect($defined)->toContain('module-saas');
+    expect($defined)->toContain('module-tenancy');
 });
 
-test('admin panel provider is registered', function () {
-    expect(class_exists(\Modules\Backoffice\Providers\AdminPanelProvider::class))->toBeTrue();
+test('backoffice service provider is registered', function () {
+    expect(class_exists(\Modules\Backoffice\Providers\BackofficeServiceProvider::class))->toBeTrue();
 });
 
 test('database seeder can run', function () {
     $this->artisan('migrate:fresh');
     $this->seed(\Database\Seeders\DatabaseSeeder::class);
 
-    $admin = \App\Models\User::where('email', 'admin@laravel-core.test')->first();
+    $admin = \App\Models\User::where('email', 'stephane@memora.ca')->first();
     expect($admin)->not->toBeNull();
     expect($admin->hasRole('super_admin'))->toBeTrue();
 });

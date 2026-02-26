@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Auth\Providers;
 
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Auth\Listeners\LogFailedLogin;
+use Modules\Auth\Listeners\LogLoginAttempt;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -13,7 +17,14 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        Login::class => [
+            LogLoginAttempt::class,
+        ],
+        Failed::class => [
+            LogFailedLogin::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.

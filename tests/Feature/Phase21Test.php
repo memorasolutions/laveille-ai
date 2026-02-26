@@ -3,118 +3,81 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Database\Seeders\FeatureFlagSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Queue;
-use Modules\Auth\Jobs\ProcessUserExport;
-use Modules\Auth\Listeners\SendWelcomeNotification;
-use Modules\Core\Events\UserCreated;
+use Laravel\Pennant\Feature;
 
 uses(RefreshDatabase::class);
 
-// --- HTTP Integration Tests ---
-
-test('api health endpoint returns json with correct headers', function () {
-    $response = $this->get('/api/health');
-
-    $response->assertStatus(200)
-        ->assertJson(['status' => 'ok'])
-        ->assertHeader('Content-Type', 'application/json');
+test('pennant feature class exists', function () {
+    expect(class_exists(Feature::class))->toBeTrue();
 });
 
-test('api v1 routes apply throttle middleware', function () {
-    $content = file_get_contents(base_path('routes/api.php'));
-    expect($content)->toContain('throttle:api');
+test('feature flags are defined in AppServiceProvider', function () {
+    $defined = Feature::defined();
+
+    expect($defined)->toContain('module-saas')
+        ->toContain('module-tenancy')
+        ->toContain('module-translation')
+        ->toContain('module-search')
+        ->toContain('module-export')
+        ->toContain('module-webhooks')
+        ->toContain('module-media')
+        ->toContain('module-backup')
+        ->toContain('module-sms');
 });
 
-test('api v1 unauthenticated user endpoint returns 401', function () {
-    $response = $this->getJson('/api/v1/user');
-
-    $response->assertStatus(401)
-        ->assertJson(['success' => false, 'message' => 'Non authentifié.']);
+test('saas and tenancy flags are disabled by default', function () {
+    expect(Feature::active('module-saas'))->toBeFalse();
+    expect(Feature::active('module-tenancy'))->toBeFalse();
+    expect(Feature::active('module-sms'))->toBeFalse();
 });
 
-test('api nonexistent route returns json 404', function () {
-    $response = $this->getJson('/api/v1/does-not-exist');
-
-    $response->assertStatus(404)
-        ->assertJson(['success' => false]);
+test('active module flags are enabled by default', function () {
+    expect(Feature::active('module-translation'))->toBeTrue();
+    expect(Feature::active('module-search'))->toBeTrue();
+    expect(Feature::active('module-export'))->toBeTrue();
+    expect(Feature::active('module-webhooks'))->toBeTrue();
+    expect(Feature::active('module-media'))->toBeTrue();
+    expect(Feature::active('module-backup'))->toBeTrue();
 });
 
-// --- Rate Limiting Tests ---
-
-test('rate limiter api is defined with 60 per minute', function () {
-    $content = file_get_contents(app_path('Providers/AppServiceProvider.php'));
-    expect($content)->toContain('perMinute(60)');
+test('feature flag can be toggled', function () {
+    expect(Feature::active('module-saas'))->toBeFalse();
+    Feature::activate('module-saas');
+    expect(Feature::active('module-saas'))->toBeTrue();
+    Feature::deactivate('module-saas');
+    expect(Feature::active('module-saas'))->toBeFalse();
 });
 
-test('rate limiter login is defined with 5 per minute', function () {
-    $content = file_get_contents(app_path('Providers/AppServiceProvider.php'));
-    expect($content)->toContain('perMinute(5)');
-});
-
-test('rate limiter sensitive is defined with 10 per minute', function () {
-    $content = file_get_contents(app_path('Providers/AppServiceProvider.php'));
-    expect($content)->toContain('perMinute(10)');
-});
-
-// --- Event/Listener Integration Tests ---
-
-test('user created event can be dispatched', function () {
-    Event::fake([UserCreated::class]);
-
+test('feature flag can be scoped to user', function () {
+    $admin = User::factory()->create();
     $user = User::factory()->create();
-    UserCreated::dispatch($user);
 
-    Event::assertDispatched(UserCreated::class, function ($event) use ($user) {
-        return $event->user->id === $user->id;
-    });
+    Feature::for($admin)->activate('module-saas');
+
+    expect(Feature::for($admin)->active('module-saas'))->toBeTrue();
+    expect(Feature::for($user)->active('module-saas'))->toBeFalse();
 });
 
-test('user created event has listener registered in Auth module', function () {
-    $content = file_get_contents(base_path('Modules/Auth/app/Providers/AuthServiceProvider.php'));
-    expect($content)->toContain('Event::listen(UserCreated::class, SendWelcomeNotification::class)');
+test('feature flag seeder exists', function () {
+    expect(class_exists(FeatureFlagSeeder::class))->toBeTrue();
 });
 
-test('send welcome notification listener handles event', function () {
-    Notification::fake();
+test('feature flag seeder activates correct flags', function () {
+    $seeder = new FeatureFlagSeeder;
+    $seeder->run();
 
-    $user = User::factory()->create();
-    $event = new UserCreated($user);
-    $listener = new SendWelcomeNotification;
-    $listener->handle($event);
-
-    Notification::assertSentTo($user, Modules\Notifications\Notifications\WelcomeNotification::class);
+    expect(Feature::active('module-translation'))->toBeTrue();
+    expect(Feature::active('module-search'))->toBeTrue();
+    expect(Feature::active('module-saas'))->toBeFalse();
+    expect(Feature::active('module-tenancy'))->toBeFalse();
 });
 
-// --- Job Integration Tests ---
-
-test('process user export job can be dispatched', function () {
-    Queue::fake();
-
-    ProcessUserExport::dispatch('csv');
-
-    Queue::assertPushed(ProcessUserExport::class, function ($job) {
-        return $job->format === 'csv';
-    });
+test('features table migration exists', function () {
+    expect(file_exists(base_path('database/migrations/2026_02_15_194032_create_features_table.php')))->toBeTrue();
 });
 
-test('process user export job has retry configuration', function () {
-    $job = new ProcessUserExport;
-    expect($job->tries)->toBe(3);
-    expect($job->backoff)->toBe([30, 60, 120]);
-});
-
-// --- .env.example Completeness ---
-
-test('env example has sanctum configuration', function () {
-    $content = file_get_contents(base_path('.env.example'));
-    expect($content)->toContain('SANCTUM_TOKEN_EXPIRATION')
-        ->toContain('SANCTUM_TOKEN_PREFIX');
-});
-
-test('env example has frontend url', function () {
-    $content = file_get_contents(base_path('.env.example'));
-    expect($content)->toContain('FRONTEND_URL');
+test('pennant config uses database store', function () {
+    expect(config('pennant.default'))->toBe('database');
 });

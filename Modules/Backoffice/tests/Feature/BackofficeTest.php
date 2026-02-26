@@ -23,8 +23,8 @@ test('admin dashboard redirects guests', function () {
         ->assertRedirect();
 });
 
-test('filament panel is configured', function () {
-    $panels = filament()->getPanels();
-
-    expect($panels)->toHaveKey('admin');
+test('admin routes are registered', function () {
+    $this->assertTrue(
+        collect(app('router')->getRoutes())->contains(fn ($route) => str_starts_with($route->uri(), 'admin'))
+    );
 });

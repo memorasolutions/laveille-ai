@@ -1,0 +1,24 @@
+
+.draggable {
+    transition: opacity .3s ease;
+    outline: 0 !important; 
+}
+.draggable.draggable-mirror {
+    opacity: .8;
+    transition: opacity .3s ease;
+    border-radius: 0.375rem;
+    background: #fff;
+    border: 2px dashed #e4e6ef !important; 
+}
+.draggable.draggable--original {
+    opacity: 0 !important; 
+}
+.draggable.draggable-source--is-dragging.draggable--over {
+    opacity: 0 !important; 
+}
+.draggable-handle {
+    cursor: all-scroll; 
+}
+.draggable-zone {
+    outline: 0 !important; 
+}

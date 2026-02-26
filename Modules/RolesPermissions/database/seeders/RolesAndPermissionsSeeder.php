@@ -14,38 +14,66 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Permissions de base
-        $permissions = [
-            // Users
-            'users.view', 'users.create', 'users.edit', 'users.delete',
-            // Roles
-            'roles.view', 'roles.create', 'roles.edit', 'roles.delete',
-            // Settings
-            'settings.view', 'settings.edit',
-            // Media
-            'media.view', 'media.upload', 'media.delete',
-            // Logs
-            'logs.view',
-            // Backups
-            'backups.view', 'backups.create', 'backups.delete',
+        $permissionNames = [
+            // Gestion des entités
+            'manage_users',
+            'manage_roles',
+            'manage_articles',
+            'manage_comments',
+            'manage_categories',
+            'manage_pages',
+            'manage_media',
+            'manage_settings',
+            'manage_plans',
+            'manage_seo',
+            'manage_newsletter',
+            'manage_campaigns',
+            'manage_webhooks',
+            'manage_notifications',
+            'manage_translations',
+            'manage_themes',
+            'manage_branding',
+            'manage_feature_flags',
+            'manage_activity_logs',
+            'manage_backups',
+            'manage_exports',
+            'manage_imports',
+            'manage_api',
+            // Accès en lecture
+            'view_admin_panel',
+            'view_dashboard',
+            'view_health',
+            'view_horizon',
+            'view_logs',
+            'view_telescope',
         ];
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+        foreach ($permissionNames as $name) {
+            Permission::firstOrCreate(['name' => $name]);
         }
 
-        // Super admin - a toutes les permissions
+        // Super admin - toutes les permissions
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
         $superAdmin->givePermissionTo(Permission::all());
 
         // Admin - tout sauf gestion des rôles
         $admin = Role::firstOrCreate(['name' => 'admin']);
-        $admin->givePermissionTo(
-            Permission::whereNotIn('name', ['roles.create', 'roles.edit', 'roles.delete'])->get()
-        );
+        $admin->givePermissionTo(Permission::where('name', '!=', 'manage_roles')->get());
 
-        // User - permissions de base
+        // Éditeur - contenu uniquement
+        $editor = Role::firstOrCreate(['name' => 'editor']);
+        $editor->givePermissionTo([
+            'manage_articles',
+            'manage_comments',
+            'manage_categories',
+            'manage_media',
+            'manage_pages',
+            'view_admin_panel',
+            'view_dashboard',
+        ]);
+
+        // Utilisateur - accès minimal
         $user = Role::firstOrCreate(['name' => 'user']);
-        $user->givePermissionTo(['users.view', 'media.view', 'media.upload']);
+        $user->givePermissionTo('view_dashboard');
     }
 }

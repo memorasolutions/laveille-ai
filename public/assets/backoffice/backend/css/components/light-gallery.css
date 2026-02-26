@@ -1,0 +1,10 @@
+
+.lg-backdrop {
+    background-color: rgba(30, 30, 30, 0.9);
+}
+.lg-thumb-outer.lg-grab, .lg-toogle-thumb.lg-icon {
+    background-color: rgba(30, 30, 30, 0.6);
+}
+.lg-outer .lg-thumb-item.active, .lg-outer .lg-thumb-item:hover {
+    border-color: var(--primary);
+}

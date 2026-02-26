@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace Modules\SaaS\Providers;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
+use Modules\SaaS\Models\Plan;
+use Modules\SaaS\Observers\PlanObserver;
+use Modules\SaaS\Policies\PlanPolicy;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -29,6 +34,10 @@ class SaaSServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+        Gate::policy(Plan::class, PlanPolicy::class);
+        Plan::observe(PlanObserver::class);
+
+        $this->registerSubscriptionGates();
     }
 
     /**
@@ -38,6 +47,12 @@ class SaaSServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(\Modules\SaaS\Services\BillingService::class);
+        $this->app->singleton(\Modules\SaaS\Services\SaasMetricsService::class);
+
+        // Désactiver les routes par défaut de Cashier pour utiliser notre webhook personnalisé
+        Cashier::ignoreRoutes();
     }
 
     /**
@@ -45,7 +60,9 @@ class SaaSServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\SaaS\Console\SendTrialExpiryNotifications::class,
+        ]);
     }
 
     /**
@@ -140,6 +157,34 @@ class SaaSServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [];
+    }
+
+    private function registerSubscriptionGates(): void
+    {
+        $plans = config('saas.plans', []);
+
+        foreach ($plans as $slug => $plan) {
+            $features = $plan['features'] ?? [];
+
+            foreach ($features as $feature) {
+                if (! Gate::has($feature)) {
+                    Gate::define($feature, function ($user) use ($feature) {
+                        if ($user->hasRole(['super_admin', 'admin'])) {
+                            return true;
+                        }
+
+                        if (! $user->subscribed('default')) {
+                            return false;
+                        }
+
+                        $subscription = $user->subscription('default');
+                        $currentPlan = Plan::where('stripe_price_id', $subscription?->stripe_price)->first();
+
+                        return $currentPlan && in_array($feature, $currentPlan->features ?? [], true);
+                    });
+                }
+            }
+        }
     }
 
     private function getPublishableViewPaths(): array

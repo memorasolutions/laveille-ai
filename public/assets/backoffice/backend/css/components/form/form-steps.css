@@ -1,0 +1,156 @@
+
+.form-wizard {
+    border: 0;
+}
+.form-wizard .nav-wizard {
+    box-shadow: none !important;
+    margin-bottom: 2rem;
+}
+.form-wizard .nav-wizard li .nav-link {
+    position: relative;
+}
+.form-wizard .nav-wizard li .nav-link span {
+    border-radius: 3.125rem;
+    width: 3rem;
+    height: 3rem;
+    border: 0.125rem solid var(--primary);
+    display: block;
+    line-height: 3rem;
+    color: var(--primary);
+    font-size: 1.125rem;
+    margin: auto;
+    background-color: var(--card);
+    position: relative;
+    z-index: 1;
+}
+.form-wizard .nav-wizard li .nav-link:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 0.1875rem;
+    transform: translateY(-50%);
+    background: var(--body-bg) !important;
+    z-index: 0;
+    width: 100%;
+}
+.form-wizard .nav-wizard li .nav-link.active:after {
+    background: var(--primary) !important;
+}
+.form-wizard .nav-wizard li .nav-link.active span {
+    background: var(--primary);
+    color: white;
+}
+.form-wizard .nav-wizard li .nav-link.done:after {
+    background: var(--primary) !important;
+}
+.form-wizard .nav-wizard li .nav-link.done span {
+    background-color: var(--primary);
+    color: white;
+}
+.form-wizard .nav-wizard li:last-child .nav-link:after {
+    content: none;
+}
+.form-wizard .toolbar-bottom .btn {
+    background-color: var(--primary);
+    border: 0;
+    padding: 0.75rem 1.125rem;
+}
+.form-wizard .tab-content .tab-pane {
+    padding: 0;
+}
+.form-wizard .emial-setup label.mailclinet {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: #eef5f9;
+    text-align: center;
+    margin: auto;
+}
+.form-wizard .emial-setup label.mailclinet .mail-icon {
+    font-size: 3rem;
+    display: inline-block;
+    line-height: 1;
+    margin-top: -1rem;
+}
+.form-wizard .emial-setup label.mailclinet .mail-text {
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-weight: 400;
+}
+.form-wizard .emial-setup label.mailclinet input[type="radio"] {
+    display: none;
+}
+.form-wizard .emial-setup label.mailclinet {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: #eef5f9;
+    text-align: center;
+    margin: auto;
+}
+.form-wizard .emial-setup label.mailclinet .mail-icon {
+    font-size: 3rem;
+    display: inline-block;
+    line-height: 1;
+    margin-top: -1rem;
+}
+.form-wizard .emial-setup label.mailclinet .mail-text {
+    font-size: 1rem;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+.form-wizard .emial-setup label.mailclinet input[type="radio"] {
+    display: none;
+}
+.form-wizard .tab-content{
+    display: block;
+}
+.form-wizard i {
+    color: var(--text);
+}
+[data-theme-version="dark"] .form-wizard .nav-wizard li .nav-link.active span, [data-theme-version="dark"] .form-wizard .nav-wizard li .nav-link.done span {
+    background: var(--primary);
+}
+[data-theme-version="dark"] .form-wizard .emial-setup label.mailclinet {
+    background-color: #17171E;
+}
+@media only screen and (max-width: 767px){
+    .form-wizard .nav-wizard {
+        flex-direction: unset !important;
+    }
+}
+@media only screen and (max-width: 35.9375rem) {
+    .form-wizard .nav-wizard li .nav-link {
+      padding: 0;
+    }
+    .form-wizard .emial-setup label.mailclinet {
+        width: 7rem;
+        height: 7rem;
+    }
+    .form-wizard .emial-setup label.mailclinet .mail-icon {
+        font-size: 2rem;
+    }
+    .form-wizard .emial-setup label.mailclinet .mail-text {
+        font-size: 0.7rem;
+        line-height: 0.95rem;
+    }
+    .form-wizard .toolbar-bottom .btn {
+        padding: 0.75rem 1.125rem;
+        font-size: 12px;
+    }
+    .form-wizard .nav-wizard li .nav-link span {
+        line-height: 2.7rem;
+        font-size: 16px;
+    }
+}

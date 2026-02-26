@@ -1,0 +1,16 @@
+{
+    "name": "Backoffice",
+    "description": "Interface administration WowDash",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core",
+        "Auth",
+        "Settings",
+        "Blog",
+        "Newsletter",
+        "SaaS",
+        "SEO"
+    ],
+    "priority": 30
+}

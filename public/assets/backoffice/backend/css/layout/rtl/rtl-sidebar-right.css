@@ -1,0 +1,39 @@
+
+/* SWICTHER */
+[direction="rtl"] .sidebar-right.show {
+    right: auto;
+    left: 5.25rem;
+}
+[direction="rtl"] .sidebar-right {
+    left: -50rem; 
+    right: auto;
+}
+[direction="rtl"] .sidebar-right-trigger {
+    right: auto;
+    left: 100%;
+    border-radius: 0 0.3125rem 0.3125rem 0;
+}
+[direction="rtl"] .sidebar-right .sidebar-close-trigger {
+    left: -3rem;
+    right: auto;
+}
+[direction="rtl"] .dlab-demo-panel {
+    right: auto;
+    left: -100%;
+}
+[direction="rtl"] .dlab-demo-panel .dlab-demo-trigger {
+    right: auto;
+    left: 100%;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+[direction="rtl"] .dlab-demo-panel.show {
+    right: auto;
+    left: 0;
+}
+[direction="rtl"] .dlab-demo-panel.show .bg-close {
+    left: auto;
+    left: 0;
+}

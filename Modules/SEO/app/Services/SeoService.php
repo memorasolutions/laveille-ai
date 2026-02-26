@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\SEO\Services;
 
+use Modules\SEO\Models\MetaTag;
+
 class SeoService
 {
     protected string $title = '';
@@ -123,18 +125,31 @@ class SeoService
         return $html;
     }
 
-    public function generateRobotsTxt(bool $allowAll = true): string
+    public function loadFromUrl(string $url): static
     {
-        $content = "User-agent: *\n";
+        $metaTag = MetaTag::findForUrl($url);
 
-        if ($allowAll) {
-            $content .= "Allow: /\n";
-        } else {
-            $content .= "Disallow: /\n";
+        if ($metaTag) {
+            $this->title = $metaTag->title ?? '';
+            $this->description = $metaTag->description ?? '';
+            $this->keywords = $metaTag->keywords ?? '';
+            $this->ogImage = $metaTag->og_image ?? '';
+            $this->canonicalUrl = $metaTag->canonical_url ?? '';
+            $this->robots = $metaTag->robots ?? 'index, follow';
         }
 
-        $content .= "\nSitemap: ".url('/sitemap.xml')."\n";
+        return $this;
+    }
 
-        return $content;
+    public function generateRobotsTxt(): string
+    {
+        return implode("\n", [
+            'User-agent: *',
+            'Allow: /',
+            'Disallow: /admin/',
+            'Disallow: /api/',
+            '',
+            'Sitemap: '.url('/sitemap.xml'),
+        ]);
     }
 }

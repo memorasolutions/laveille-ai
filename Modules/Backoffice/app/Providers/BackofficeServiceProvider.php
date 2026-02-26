@@ -5,7 +5,29 @@ declare(strict_types=1);
 namespace Modules\Backoffice\Providers;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
+use Modules\Backoffice\Livewire\ActivityLogsTable;
+use Modules\Backoffice\Livewire\ArticlesTable;
+use Modules\Backoffice\Livewire\CampaignsTable;
+use Modules\Backoffice\Livewire\CategoriesTable;
+use Modules\Backoffice\Livewire\CommentsTable;
+use Modules\Backoffice\Livewire\FeatureFlagsTable;
+use Modules\Backoffice\Livewire\GlobalSearch;
+use Modules\Backoffice\Livewire\LookerStudioStats;
+use Modules\Backoffice\Livewire\MediaTable;
+use Modules\Backoffice\Livewire\MetaTagsTable;
+use Modules\Backoffice\Livewire\NotificationBell;
+use Modules\Backoffice\Livewire\PlansTable;
+use Modules\Backoffice\Livewire\RolesTable;
+use Modules\Backoffice\Livewire\SettingsManager;
+use Modules\Backoffice\Livewire\SettingsTable;
+use Modules\Backoffice\Livewire\ShortcodesTable;
+use Modules\Backoffice\Livewire\SubscribersTable;
+use Modules\Backoffice\Livewire\TranslationsManager;
+use Modules\Backoffice\Livewire\UsersTable;
+use Modules\Backoffice\Livewire\WebhooksManager;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -28,6 +50,8 @@ class BackofficeServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+        $this->registerLivewireComponents();
+        $this->registerBrandingComposer();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
     }
 
@@ -38,7 +62,6 @@ class BackofficeServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
-        $this->app->register(AdminPanelProvider::class);
     }
 
     /**
@@ -130,9 +153,49 @@ class BackofficeServiceProvider extends ServiceProvider
 
         $this->publishes([$sourcePath => $viewPath], ['views', $this->nameLower.'-module-views']);
 
-        $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
+        $theme = config('backoffice.theme', 'wowdash');
+        $themePath = module_path($this->name, 'resources/views/themes/'.$theme);
+
+        $paths = $this->getPublishableViewPaths();
+
+        if (is_dir($themePath)) {
+            array_unshift($paths, $themePath);
+        }
+
+        $paths[] = $sourcePath;
+
+        $this->loadViewsFrom($paths, $this->nameLower);
 
         Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
+    }
+
+    protected function registerLivewireComponents(): void
+    {
+        Livewire::component('backoffice-activity-logs-table', ActivityLogsTable::class);
+        Livewire::component('backoffice-articles-table', ArticlesTable::class);
+        Livewire::component('backoffice-categories-table', CategoriesTable::class);
+        Livewire::component('backoffice-campaigns-table', CampaignsTable::class);
+        Livewire::component('backoffice-webhooks-manager', WebhooksManager::class);
+        Livewire::component('backoffice-subscribers-table', SubscribersTable::class);
+        Livewire::component('backoffice-comments-table', CommentsTable::class);
+        Livewire::component('backoffice-users-table', UsersTable::class);
+        Livewire::component('backoffice-roles-table', RolesTable::class);
+        Livewire::component('backoffice-settings-table', SettingsTable::class);
+        Livewire::component('backoffice-settings-manager', SettingsManager::class);
+        Livewire::component('backoffice-global-search', GlobalSearch::class);
+        Livewire::component('backoffice-notification-bell', NotificationBell::class);
+        Livewire::component('backoffice-plans-table', PlansTable::class);
+        Livewire::component('backoffice-feature-flags-table', FeatureFlagsTable::class);
+        Livewire::component('backoffice-meta-tags-table', MetaTagsTable::class);
+        Livewire::component('backoffice-media-table', MediaTable::class);
+        Livewire::component('shortcodes-table', ShortcodesTable::class);
+        Livewire::component('backoffice-translations-manager', TranslationsManager::class);
+        Livewire::component('backoffice-looker-studio-stats', LookerStudioStats::class);
+    }
+
+    protected function registerBrandingComposer(): void
+    {
+        View::composer('backoffice::*', BrandingViewComposer::class);
     }
 
     /**

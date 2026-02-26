@@ -1,0 +1,10 @@
+{
+    "name": "FrontTheme",
+    "description": "Thème frontal GoSass",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 20
+}

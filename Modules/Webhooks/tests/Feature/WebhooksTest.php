@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Queue;
+use Modules\Backoffice\Models\WebhookEndpoint;
+use Modules\Webhooks\Enums\WebhookEvent;
+use Modules\Webhooks\Jobs\DispatchWebhookJob;
 use Modules\Webhooks\Services\WebhookService;
-use Spatie\WebhookServer\CallWebhookJob;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
@@ -18,26 +20,21 @@ test('webhook service is registered as singleton', function () {
 });
 
 test('webhook service dispatches webhook call', function () {
-    Bus::fake();
+    Queue::fake();
+    WebhookEndpoint::factory()->create(['is_active' => true, 'events' => null]);
 
     $service = app(WebhookService::class);
-    $service->send('https://example.com/webhook', ['event' => 'test'], 'secret123');
+    $count = $service->dispatch(WebhookEvent::ArticleCreated, ['id' => 1]);
 
-    Bus::assertDispatched(CallWebhookJob::class);
+    expect($count)->toBe(1);
+    Queue::assertPushed(DispatchWebhookJob::class);
 });
 
-test('webhook service dispatches with custom headers', function () {
-    Bus::fake();
-
+test('webhook service generates signature', function () {
     $service = app(WebhookService::class);
-    $service->sendWithHeaders(
-        'https://example.com/webhook',
-        ['event' => 'test'],
-        ['X-Custom' => 'header-value'],
-        'secret123'
-    );
+    $signature = $service->generateSignature(['test' => true], 'secret');
 
-    Bus::assertDispatched(CallWebhookJob::class);
+    expect($signature)->toBeString()->not->toBeEmpty();
 });
 
 test('webhook server package is available', function () {

@@ -1,0 +1,11 @@
+{
+    "name": "Api",
+    "description": "API RESTful avec Sanctum et Scramble",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core",
+        "Auth"
+    ],
+    "priority": 25
+}

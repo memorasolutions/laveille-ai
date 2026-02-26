@@ -1,0 +1,1 @@
+!function(){"use strict";jQuery("#tags_1").tagsinput()}();

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Auth\Http\Requests;
 
+use Modules\Auth\Rules\PasswordPolicyRule;
+
 trait UserRules
 {
     protected function baseRules(): array
@@ -18,6 +20,10 @@ trait UserRules
 
     protected function passwordRules(): array
     {
-        return ['string', 'min:8', 'confirmed'];
+        return [
+            'string',
+            'confirmed',
+            new PasswordPolicyRule,
+        ];
     }
 }

@@ -4,16 +4,51 @@ declare(strict_types=1);
 
 namespace Modules\Settings\Models;
 
+use Database\Factories\SettingFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Laravel\Scout\Searchable;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class Setting extends Model
 {
+    use HasFactory, Searchable;
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => ResponseCache::clear());
+        static::deleted(fn () => ResponseCache::clear());
+    }
+
+    protected static function newFactory(): SettingFactory
+    {
+        return SettingFactory::new();
+    }
+
     protected $fillable = ['group', 'key', 'value', 'type', 'description', 'is_public'];
 
     protected $casts = [
         'is_public' => 'boolean',
     ];
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'key' => $this->key,
+            'value' => is_string($this->value) ? $this->value : null,
+            'description' => $this->description,
+            'group' => $this->group,
+        ];
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return ! in_array($this->group, ['security', 'secrets']);
+    }
 
     public function getTypedValueAttribute(): mixed
     {

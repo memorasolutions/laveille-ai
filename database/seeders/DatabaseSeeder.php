@@ -11,19 +11,21 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // 1. Rôles et permissions (fondation)
         $this->call([
             RolesAndPermissionsSeeder::class,
         ]);
 
-        $superAdmin = User::firstOrCreate(
-            ['email' => 'admin@laravel-core.test'],
+        // 2. Superadmin principal (ID #1 - JAMAIS supprimer)
+        $superAdmin = User::updateOrCreate(
+            ['email' => 'stephane@memora.ca'],
             [
-                'name' => 'Admin',
-                'password' => bcrypt('password'),
+                'name' => 'Stéphane Lapointe',
+                'password' => bcrypt('Admin123!'),
                 'email_verified_at' => now(),
+                'is_active' => true,
             ]
         );
-
         $superAdmin->assignRole('super_admin');
 
         $admin = User::firstOrCreate(
@@ -34,20 +36,32 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-
         $admin->assignRole('admin');
 
+        // 3. Feature flags Pennant
+        $this->call(FeatureFlagSeeder::class);
+
+        // 4. Seeders des modules actifs
+        $moduleSeeders = [
+            \Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class,
+            \Modules\SEO\Database\Seeders\SEODatabaseSeeder::class,
+            \Modules\SaaS\Database\Seeders\SaaSDatabaseSeeder::class,
+            CookieCategorySeeder::class,
+            OnboardingStepSeeder::class,
+        ];
+
+        foreach ($moduleSeeders as $seeder) {
+            if (class_exists($seeder)) {
+                $this->call($seeder);
+            }
+        }
+
+        // 5. Données de démo (hors production)
         if (! app()->isProduction()) {
             $users = User::factory()->count(5)->create();
             foreach ($users as $user) {
                 $user->assignRole('user');
             }
-        }
-
-        if (class_exists('\Modules\Settings\Database\Seeders\SettingsDatabaseSeeder')) {
-            $this->call([
-                \Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class,
-            ]);
         }
     }
 }

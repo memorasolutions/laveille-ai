@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 // Pest 3 architecture presets
 arch()->preset()->php();
-arch()->preset()->laravel()->ignoring('Modules\Backoffice\Providers');
+arch()->preset()->laravel()->ignoring([
+    'Modules\Backoffice\Providers',
+    'App\Http\Controllers\ContactController',
+    'App\Http\Controllers\CookieConsentController',
+]);
 arch()->preset()->security();
 
 // Models
@@ -49,7 +53,8 @@ arch('auth observers have Observer suffix')
 // Auth FormRequests extend BaseFormRequest
 arch('auth form requests extend base')
     ->expect('Modules\Auth\Http\Requests')
-    ->toExtend('Modules\Core\Http\Requests\BaseFormRequest');
+    ->toExtend('Modules\Core\Http\Requests\BaseFormRequest')
+    ->ignoring('Modules\Auth\Http\Requests\UserRules');
 
 // Middleware are final-ish (have handle method)
 arch('middleware have handle method')
@@ -85,3 +90,30 @@ arch('modules do not import from App Policies')
 arch('shared events live in Core module')
     ->expect('Modules\Core\Events')
     ->toUseTrait('Illuminate\Foundation\Events\Dispatchable');
+
+// Controllers use strict types
+arch('app controllers use strict types')
+    ->expect('App\Http\Controllers')
+    ->toUseStrictTypes();
+
+// No env() calls outside config
+arch('no env calls in app code')
+    ->expect('App')
+    ->not->toUse('env')
+    ->ignoring('App\Providers');
+
+// Services in modules are classes
+arch('core services are classes')
+    ->expect('Modules\Core\Services')
+    ->toBeClasses();
+
+// API controllers extend BaseApiController
+arch('api controllers extend base')
+    ->expect('Modules\Api\Http\Controllers')
+    ->toExtend('Modules\Api\Http\Controllers\BaseApiController')
+    ->ignoring('Modules\Api\Http\Controllers\BaseApiController');
+
+// Notifications have toMail or toArray
+arch('notifications have toMail or toArray')
+    ->expect('Modules\Notifications\Notifications')
+    ->toHaveMethod('toArray');

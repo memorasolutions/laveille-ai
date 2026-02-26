@@ -1,0 +1,117 @@
+
+.ai-slider .noUi-connects {
+    background-color: var(--rgba-primary-1);
+    height: 5px;
+}
+.noUi-connect {
+    background-color: var(--primary);
+}
+html:not([dir=rtl]) .noUi-horizontal .noUi-handle {
+    right: -6px;
+}
+.ai-slider .noUi-handle {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #fff;
+    box-shadow: 0px 0px 30px rgba(70, 49, 125, 0.5);
+    border-radius: 50%;
+}
+.noUi-horizontal .noUi-handle, .noUi-vertical .noUi-handle {
+    background-color: var(--primary);
+}
+.noUi-handle:after, .noUi-handle:before {
+    display: none !important;
+}
+.noUi-horizontal {
+    height: 0.375rem;
+    margin-bottom: 10px;
+}
+.noUi-pips-horizontal {
+    width: 95%;
+}
+.noUi-connects {
+    background-color: #D2D6DE;
+}
+[data-theme-version="dark"] .noUi-target .noUi-connects {
+    background: #2e2e42;
+}
+.noUi-horizontal .noUi-handle {
+    top: -4px;
+    cursor: pointer;
+    right: -17px;
+    left: auto;
+}
+.noUi-vertical .noUi-handle {
+    left: -7.8px;
+    bottom: -6px;
+    right: unset;
+}
+.noUi-horizontal .noUi-handle, .noUi-vertical .noUi-handle {
+    height: 12px;
+    width: 12px;
+    border-radius: 50px;
+    box-shadow: none;
+    border: none;
+    background-color: var(--primary);
+}
+.noUi-connect.c-1-color {
+    background-color: #2BC155;
+}
+.noUi-connect.c-2-color {
+    background-color: #D653C1;
+}
+.noUi-connect.c-4-color {
+    background-color: #FE8024;
+}
+.example-val {
+    color: var(--text);
+}
+.noUi-pips-horizontal, .noUi-value {
+    font-size: 14px;
+}
+.slider-vertical {
+    height: 18rem;
+    width: 0.375rem;
+}
+.colorpicker-slider .sliders.noUi-target#red, .colorpicker-slider .sliders.noUi-target#green, .colorpicker-slider .sliders.noUi-target#blue {
+    margin: 0.625rem;
+    display: inline-block;
+    height: 12.5rem;
+}
+.colorpicker-slider .sliders.noUi-target#red .noUi-connect {
+    background: #c0392b;
+}
+.colorpicker-slider .sliders.noUi-target#green .noUi-connect {
+    background: #27ae60;
+}
+.colorpicker-slider #result {
+    margin: 3.75rem 1.625rem;
+    height: 6.25rem;
+    width: 6.25rem;
+    display: inline-block;
+    vertical-align: top;
+    color: #7f7f7f;
+    background: #7f7f7f;
+    border: 0.0625rem solid #fff;
+    box-shadow: 0 0 0.625rem;
+}
+.noUi-vertical {
+    width: 0.375rem;
+}
+#slider-toggle {
+    height: 3.125rem;
+}
+.noUi-target {
+    border-color: transparent;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    background: transparent;
+}
+@media only screen and (max-width: 35.9375rem) {
+    .example-val {
+        font-size: 14px;
+    }
+    .noUi-pips-horizontal, .noUi-value {
+        font-size: 12px;
+    }
+}

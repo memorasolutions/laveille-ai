@@ -4,29 +4,38 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 use Modules\Auth\Observers\UserObserver;
 use Modules\Core\Contracts\UserInterface;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
 #[ObservedBy(UserObserver::class)]
-class User extends Authenticatable implements FilamentUser, UserInterface
+class User extends Authenticatable implements HasMedia, MustVerifyEmail, UserInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, TwoFactorAuthenticatable;
+    use Billable, HasApiTokens, HasFactory, HasPushSubscriptions, HasRoles, InteractsWithMedia, LogsActivity, Notifiable, Searchable;
 
-    public function canAccessPanel(Panel $panel): bool
+    /**
+     * @return array<string>
+     */
+    public function toSearchableArray(): array
     {
-        return $this->hasRole(['super_admin', 'admin']);
+        return [
+            'name' => $this->name,
+            'email' => $this->email,
+        ];
     }
 
     public function getName(): string
@@ -55,6 +64,22 @@ class User extends Authenticatable implements FilamentUser, UserInterface
         'name',
         'email',
         'password',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+        'social_provider',
+        'social_id',
+        'avatar',
+        'bio',
+        'is_active',
+        'phone',
+        'phone_verified_at',
+        'must_change_password',
+        'failed_login_count',
+        'locked_until',
+        'onboarding_step',
+        'onboarding_completed_at',
+        'notification_frequency',
     ];
 
     /**
@@ -65,6 +90,8 @@ class User extends Authenticatable implements FilamentUser, UserInterface
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -77,6 +104,44 @@ class User extends Authenticatable implements FilamentUser, UserInterface
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_confirmed_at' => 'datetime',
+            'is_active' => 'boolean',
+            'phone_verified_at' => 'datetime',
+            'must_change_password' => 'boolean',
+            'failed_login_count' => 'integer',
+            'locked_until' => 'datetime',
+            'onboarding_step' => 'integer',
+            'onboarding_completed_at' => 'datetime',
         ];
+    }
+
+    public function hasEnabledTwoFactor(): bool
+    {
+        return ! is_null($this->two_factor_confirmed_at);
+    }
+
+    public function hasTwoFactorSecret(): bool
+    {
+        return ! is_null($this->two_factor_secret);
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->locked_until !== null && $this->locked_until->isFuture();
+    }
+
+    public function roleRequiresPassword(): bool
+    {
+        return $this->roles->every(fn ($role) => (bool) $role->requires_password);
+    }
+
+    public function needsOnboarding(): bool
+    {
+        return $this->onboarding_completed_at === null;
+    }
+
+    public function hasCompletedOnboarding(): bool
+    {
+        return $this->onboarding_completed_at !== null;
     }
 }

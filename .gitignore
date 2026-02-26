@@ -25,3 +25,27 @@ Thumbs.db
 _ide_helper.php
 _ide_helper_models.php
 .phpstorm.meta.php
+
+# Screenshots d'audit (generees localement)
+/*.png
+
+# Outils dev locaux
+storage/debugbar/
+test-results/
+.playwright-audit/
+.playwright-mcp/
+tests/Browser/screenshots/
+
+# Sources themes (copie locale, pas dans le repo)
+.themes/
+
+# Fichiers Claude/AI session
+.claude/SESSION_STATE.md
+.claude/plans/
+
+# Docs temporaires
+AUDIT_REPORT.md
+MIGRATION_PLAN.md
+
+# CSRF temp
+csrf*

@@ -2,4 +2,4 @@
 
 declare(strict_types=1);
 
-// Settings managed via Filament admin panel
+// Settings managed via backoffice admin panel

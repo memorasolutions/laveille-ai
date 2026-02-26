@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\Notification;
+use Modules\Notifications\Contracts\SmsDriverInterface;
+use Modules\Notifications\Drivers\NullSmsDriver;
 use Modules\Notifications\Services\NotificationService;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
@@ -110,4 +112,45 @@ test('notification service can get all notifications', function () {
     $all = $service->getAll($user->fresh());
 
     expect($all)->toHaveCount(2);
+});
+
+// --- SMS Driver Tests ---
+
+test('SmsDriverInterface exists', function () {
+    expect(interface_exists(SmsDriverInterface::class))->toBeTrue();
+});
+
+test('NullSmsDriver implements SmsDriverInterface', function () {
+    $driver = new NullSmsDriver;
+
+    expect($driver)->toBeInstanceOf(SmsDriverInterface::class);
+});
+
+test('NullSmsDriver send returns true', function () {
+    $driver = new NullSmsDriver;
+
+    expect($driver->send('+15141234567', 'Test SMS'))->toBeTrue();
+});
+
+test('NullSmsDriver sendBulk returns results', function () {
+    $driver = new NullSmsDriver;
+    $recipients = ['+15141111111', '+15142222222'];
+
+    $results = $driver->sendBulk($recipients, 'Bulk test');
+
+    expect($results)->toHaveCount(2);
+    expect($results['+15141111111'])->toBeTrue();
+});
+
+test('NullSmsDriver is not configured', function () {
+    $driver = new NullSmsDriver;
+
+    expect($driver->isConfigured())->toBeFalse();
+    expect($driver->getBalance())->toBeNull();
+});
+
+test('SmsDriverInterface is bound in container', function () {
+    $driver = app(SmsDriverInterface::class);
+
+    expect($driver)->toBeInstanceOf(NullSmsDriver::class);
 });

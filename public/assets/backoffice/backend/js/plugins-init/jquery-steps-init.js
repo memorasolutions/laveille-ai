@@ -1,0 +1,1 @@
+!function(){"use strict";var n=jQuery("#step-form-horizontal");n.children("div").steps({headerTag:"h4",bodyTag:"section",transitionEffect:"slideLeft",transitionEffect:"slideLeft",autoFocus:!0,onStepChanging:function(t,e,i){return n.validate().settings.ignore=":disabled,:hidden",n.valid()}})}();

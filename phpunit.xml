@@ -18,7 +18,31 @@
     <source>
         <include>
             <directory>app</directory>
+            <directory>Modules/Api/app</directory>
+            <directory>Modules/Auth/app</directory>
+            <directory>Modules/Backoffice/app</directory>
+            <directory>Modules/Backup/app</directory>
+            <directory>Modules/Core/app</directory>
+            <directory>Modules/Export/app</directory>
+            <directory>Modules/FrontTheme/app</directory>
+            <directory>Modules/Health/app</directory>
+            <directory>Modules/Logging/app</directory>
+            <directory>Modules/Media/app</directory>
+            <directory>Modules/Notifications/app</directory>
+            <directory>Modules/RolesPermissions/app</directory>
+            <directory>Modules/SaaS/app</directory>
+            <directory>Modules/Search/app</directory>
+            <directory>Modules/SEO/app</directory>
+            <directory>Modules/Settings/app</directory>
+            <directory>Modules/Storage/app</directory>
+            <directory>Modules/Tenancy/app</directory>
+            <directory>Modules/Translation/app</directory>
+            <directory>Modules/Webhooks/app</directory>
         </include>
+        <exclude>
+            <directory suffix=".php">Modules/*/app/Livewire</directory>
+            <directory suffix=".php">Modules/Backoffice/app</directory>
+        </exclude>
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
@@ -34,5 +58,6 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="RESPONSE_CACHE_ENABLED" value="false"/>
     </php>
 </phpunit>

@@ -1,31 +1,27 @@
 <div>
-    <h2 class="text-xl font-semibold text-center mb-4">Mot de passe oublié</h2>
-    <p class="text-sm text-gray-600 text-center mb-6">
-        Entrez votre courriel et nous vous enverrons un lien de réinitialisation.
-    </p>
+    <h4 class="mb-12">{{ __('Mot de passe oublié') }}</h4>
+    <p class="mb-32 text-secondary-light text-lg">{{ __('Entrez votre courriel et nous vous enverrons un lien de réinitialisation.') }}</p>
 
-    @if ($status)
-        <div class="mb-4 text-sm text-green-600 bg-green-50 p-3 rounded">
-            {{ $status }}
-        </div>
+    @if($status)
+        <div class="alert alert-success radius-8 mb-20">{{ $status }}</div>
     @endif
 
     <form wire:submit="sendResetLink">
-        <div class="mb-4">
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Courriel</label>
-            <input wire:model="email" type="email" id="email" required autofocus
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            @error('email') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+        <div class="icon-field">
+            <span class="icon top-50 translate-middle-y">
+                <iconify-icon icon="mage:email"></iconify-icon>
+            </span>
+            <input wire:model="email" type="email" class="form-control h-56-px bg-neutral-50 radius-12 @error('email') is-invalid @enderror" placeholder="{{ __('Courriel') }}" required autofocus>
         </div>
+        @error('email')<div class="text-danger-main text-sm mt-8">{{ $message }}</div>@enderror
 
-        <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
-                wire:loading.attr="disabled">
-            <span wire:loading.remove>Envoyer le lien</span>
-            <span wire:loading>Envoi...</span>
+        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32">
+            <span wire:loading.remove>{{ __('Envoyer le lien') }}</span>
+            <span wire:loading>{{ __('Envoi...') }}</span>
         </button>
-    </form>
 
-    <p class="text-center text-sm text-gray-600 mt-4">
-        <a href="{{ route('login') }}" class="text-blue-600 hover:underline" wire:navigate>Retour à la connexion</a>
-    </p>
+        <div class="text-center mt-24">
+            <a href="{{ route('login') }}" class="text-primary-600 fw-bold" wire:navigate>{{ __('Retour à la connexion') }}</a>
+        </div>
+    </form>
 </div>

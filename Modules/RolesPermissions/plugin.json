@@ -1,0 +1,10 @@
+{
+    "name": "RolesPermissions",
+    "description": "Gestion des rôles et permissions",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 5
+}

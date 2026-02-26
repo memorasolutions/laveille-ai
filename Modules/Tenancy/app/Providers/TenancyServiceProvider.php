@@ -38,6 +38,8 @@ class TenancyServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(\Modules\Tenancy\Services\TenantService::class);
     }
 
     /**

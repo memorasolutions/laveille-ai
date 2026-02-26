@@ -18,12 +18,18 @@ test('StoreUserRequest requires email', function () {
     expect($rules['email'])->toContain('required');
 });
 
-test('StoreUserRequest requires password with min 8', function () {
+test('StoreUserRequest requires password with complexity rules', function () {
     $request = new StoreUserRequest;
     $rules = $request->rules();
     expect($rules['password'])->toContain('required')
-        ->toContain('min:8')
+        ->toContain('string')
         ->toContain('confirmed');
+
+    // Vérifie qu'un objet PasswordPolicyRule est présent (complexité)
+    $hasPasswordRule = collect($rules['password'])->contains(
+        fn ($rule) => $rule instanceof \Modules\Auth\Rules\PasswordPolicyRule
+    );
+    expect($hasPasswordRule)->toBeTrue();
 });
 
 test('StoreUserRequest has french validation messages', function () {

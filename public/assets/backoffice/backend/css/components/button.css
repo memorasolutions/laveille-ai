@@ -1,0 +1,32 @@
+
+.light.g [fill] {
+    fill: var(--primary);
+}
+.light.btn-primary:hover g [fill] {
+    fill: #fff;
+}
+.light.btn-info g [fill] {
+    fill: #D653C1;
+}
+.light.btn-secondary g [fill] {
+    fill: #145650;
+}
+.light.btn-danger g [fill] {
+    fill: #FF5E5E;
+}
+.light.btn-success g [fill] {
+    fill: #2BC155;
+}
+.light.btn-warning g [fill] {
+    fill: #FF9F00;
+}
+.light.btn-primary:hover svg path
+,.light.btn-danger:hover svg path 
+,.light.btn-info:hover g [fill] 
+,.light.btn-secondary:hover g [fill]
+,.light.btn-danger:hover g [fill] 
+,.light.btn-success:hover g [fill]
+,.btn.tp-btn.btn-primary:hover g [fill],
+.light.btn-warning:hover g [fill]{
+    fill: #fff;
+}

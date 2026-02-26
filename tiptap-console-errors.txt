@@ -1,0 +1,21 @@
+Total messages: 4 (Errors: 2, Warnings: 2)
+Returning 2 messages for level "error"
+
+RangeError: Applying a mismatched transaction
+    at Jn.applyInner (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:10:24917)
+    at Jn.applyTransaction (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:10:24349)
+    at Mw.dispatchTransaction (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:88:7602)
+    at Wf.dispatch (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:15:49441)
+    at Proxy.<anonymous> (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:15:54542)
+    at https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:15:60963
+RangeError: Applying a mismatched transaction
+    at Jn.applyInner (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:10:24917)
+    at Jn.applyTransaction (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:10:24349)
+    at Mw.dispatchTransaction (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:88:7602)
+    at Wf.dispatch (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:15:49441)
+    at Object.c [as run] (https://laravel_vierge.test/build/assets/app-CgJr9ZI_.js:15:54802)
+    at [Alpine] editor.chain().focus().toggleBold().run() (eval at safeAsyncFunction (https://laravel_vierge.test/livewire-59e910af/livewire.js?id=cfc5c1ae:1385:21), <anonymous>:3:68)
+    at https://laravel_vierge.test/livewire-59e910af/livewire.js?id=cfc5c1ae:1410:28
+    at tryCatch (https://laravel_vierge.test/livewire-59e910af/livewire.js?id=cfc5c1ae:1309:14)
+    at https://laravel_vierge.test/livewire-59e910af/livewire.js?id=cfc5c1ae:4215:7
+    at handler4 (https://laravel_vierge.test/livewire-59e910af/livewire.js?id=cfc5c1ae:3465:27)

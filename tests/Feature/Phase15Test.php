@@ -13,7 +13,7 @@ test('cors config exists', function () {
 
 test('database seeder has admin user creation', function () {
     $content = file_get_contents(base_path('database/seeders/DatabaseSeeder.php'));
-    expect($content)->toContain('admin@laravel-core.test')
+    expect($content)->toContain('stephane@memora.ca')
         ->toContain('moderator@laravel-core.test')
         ->toContain('super_admin')
         ->toContain('RolesAndPermissionsSeeder');

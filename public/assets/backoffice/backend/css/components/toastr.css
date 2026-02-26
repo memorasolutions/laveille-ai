@@ -1,0 +1,21 @@
+
+.toast-title {
+    margin-bottom: 0.3125rem;
+    font-weight: 600;
+}
+.toast-message {
+    font-size: 0.75rem;
+}
+#toast-container > div {
+    box-shadow: none;
+    border-radius: 0;
+    width: auto;
+    max-width: 250px;
+    opacity: 1;
+}
+.toast-close-button {
+    opacity: 1;
+    font-size: 1.25rem;
+    font-weight: normal;
+    text-shadow: none;
+}

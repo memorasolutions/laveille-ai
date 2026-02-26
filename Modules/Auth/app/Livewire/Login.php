@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Auth\Livewire;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -28,18 +30,47 @@ class Login extends Component
         $this->validate();
         $this->ensureIsNotRateLimited();
 
-        if (! $authService->authenticate($this->email, $this->password, $this->remember)) {
-            RateLimiter::hit($this->throttleKey());
-
+        // Vérifier si le compte est verrouillé
+        $user = User::where('email', $this->email)->first();
+        if ($user && $user->isLocked()) {
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'email' => __('Votre compte est temporairement verrouillé. Réessayez plus tard.'),
             ]);
         }
 
+        // Vérifier si le rôle de l'utilisateur nécessite un mot de passe
+        if ($user && ! $user->roleRequiresPassword()) {
+            $this->redirect(route('magic-link.request', ['email' => $this->email]), navigate: false);
+
+            return;
+        }
+
+        if (! $authService->authenticate($this->email, $this->password, $this->remember)) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages(['email' => __('auth.failed')]);
+        }
+
         RateLimiter::clear($this->throttleKey());
+
+        $user = Auth::user();
+
+        if ($user->two_factor_confirmed_at !== null) {
+            Auth::logout();
+            session(['auth.2fa_user_id' => $user->id]);
+            $this->redirect(route('auth.two-factor-challenge'), navigate: false);
+
+            return;
+        }
+
         session()->regenerate();
 
-        $this->redirectIntended(default: route('dashboard'), navigate: true);
+        if ($user->must_change_password) {
+            $this->redirect(route('password.force-change'), navigate: false);
+
+            return;
+        }
+
+        $this->redirectIntended(default: route('user.dashboard'), navigate: true);
     }
 
     protected function ensureIsNotRateLimited(): void

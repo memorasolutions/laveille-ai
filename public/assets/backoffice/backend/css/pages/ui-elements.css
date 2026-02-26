@@ -1,0 +1,112 @@
+
+/* Ui Accordion */
+.element-area .demo-view {
+    width: calc(100% - 270px);
+}
+@media only screen and (max-width: 100rem){
+    .element-area .demo-view {
+        width: calc(100% - 236px);
+    }
+}
+@media only screen and (max-width: 74.9375rem){
+    .element-area .demo-view {
+        width: calc(100% - 224px);
+    }
+}
+@media only screen and (max-width: 61.9375rem) {
+    .element-area .demo-right {
+        display: none;
+    }
+    .element-area .demo-view {
+        width: 100%;
+    }
+}
+.demo-right-inner li:after {
+    content: "";
+    position: absolute;
+    background-color: #dfdfdf;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    top: 18px;
+    left: 0px;
+}
+.tab-content{
+    display: none;
+    transition: all 0.5s;
+}
+.tab-content.show {
+    display: block;
+    transition: all 0.5s;
+}
+.icon-bell-53::before {
+    content: "\ea0e";
+}
+/* Proggressbar */
+.progress-bar-striped {
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+}
+/* Popover */
+.dz-popover-content.hide {
+    display: none;
+}
+.visuallyHidden {
+    opacity: 0;
+}
+.dz-popover + .dz-popover-content:after {
+    bottom: -8px;
+    content: " ";
+    height: 0;
+    margin-left: -13px;
+    position: absolute;
+    width: 0;
+}
+.dz-popover + .dz-popover-content.left:after {
+    border-left: solid #d1d1d1 8px;
+    border-right: solid transparent 8px;
+    border-top: solid transparent 8px;
+    border-bottom: solid transparent 8px;
+    top: 45%;
+    right: -5.5%;
+}
+.dz-popover + .dz-popover-content.top:after {
+    border-left: solid transparent 8px;
+    border-right: solid transparent 8px;
+    border-top: solid #d1d1d1 8px;
+    left: 48%;
+}
+.dz-popover + .dz-popover-content.bottom:after {
+    border-left: solid transparent 8px;
+    border-right: solid transparent 8px;
+    border-bottom: solid #d1d1d1 8px;
+    left: 46%;
+    bottom: 100%;
+}
+.dz-popover + .dz-popover-content.right:after {
+    border-top: solid transparent 8px;
+    border-bottom: solid transparent 8px;
+    border-left: solid transparent 8px;
+    border-right: solid #d1d1d1 8px;
+    top: 46%;
+    left: -3px;
+}
+@media (max-width: 1480px) {
+    .dz-popover + .dz-popover-content.left:after {
+        border-left: solid transparent 8px;
+        border-right: solid transparent 8px;
+        border-top: solid #d1d1d1 8px;
+        right: 48%;
+        top: 100%;
+    }
+}
+@media (max-width: 35.9375rem) {
+    .dz-popover + .dz-popover-content.right:after {
+        border-left: solid transparent 8px;
+        border-right: solid transparent 8px;
+        border-bottom: solid #d1d1d1 8px;
+        left: 46%;
+        bottom: 100%;
+        top: auto;
+    }
+}

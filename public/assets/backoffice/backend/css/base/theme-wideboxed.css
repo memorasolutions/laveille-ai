@@ -1,0 +1,58 @@
+
+@media (min-width: 992px) {
+    [data-container="wide-boxed"] #main-wrapper {
+        max-width: 1480px;
+        margin: 0 auto;
+        box-shadow:0 0 1.875rem 0 rgba(0, 0, 0, 0.1);
+    }
+    [data-container="wide-boxed"][data-sidebar-style="full"]  .header {
+        width: 100%;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="full"]  .menu-toggle .header {
+        width: 100%;
+    }
+    [data-header-position="fixed"][data-header-position="fixed"] [data-container="wide-boxed"][data-sidebar-style="full"] .header {
+        max-width: 1480px;
+    }
+    [data-header-position="fixed"][data-header-position="fixed"] [data-container="wide-boxed"][data-sidebar-style="full"]  .menu-toggle .header {
+        max-width: 1480px;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="mini"] .header {
+        width: 100%;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="mini"] [data-header-position="fixed"][data-header-position="fixed"] .header {
+        max-width: 1480px;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="mini"] [data-header-position="fixed"][data-layout="horizontal"] .header {
+        max-width: 1480px;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="compact"] .header {
+        width: 100%;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="compact"] [data-header-position="fixed"][data-header-position="fixed"] .header {
+        max-width: 1480px;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="overlay"] .header {
+        width: 100%;
+    }
+    [data-container="wide-boxed"][data-sidebar-style="overlay"] [data-header-position="fixed"][data-header-position="fixed"] .header {
+        max-width: 1480px;
+    }
+}
+[data-layout="horizontal"][data-container="wide-boxed"] .header {
+    width: 100%;
+}
+[data-layout="horizontal"][data-container="wide-boxed"] [data-sidebar-style="full"][data-header-position="fixed"] .header {
+    max-width: 1480px;
+}
+[data-layout="horizontal"][data-container="wide-boxed"] [data-sidebar-style="mini"] .header {
+    width: 100%;
+}
+[data-layout="horizontal"][data-container="wide-boxed"][data-sidebar-position="fixed"] .dlabnav.fixed {
+    max-width: 1480px;
+    transition: none;
+}
+[data-layout="horizontal"][data-container="wide-boxed"][data-sidebar-position="fixed"][data-header-position="fixed"] .dlabnav {
+    max-width: 1480px;
+    left: 11%;
+}

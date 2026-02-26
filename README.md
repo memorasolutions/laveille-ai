@@ -1,130 +1,177 @@
-# Laravel CORE Template
+# Laravel Core Template
 
-![PHP](https://img.shields.io/badge/PHP-8.4-blue) ![Laravel](https://img.shields.io/badge/Laravel-12-red) ![Filament](https://img.shields.io/badge/Filament-v5-yellow) ![Tests](https://img.shields.io/badge/Tests-174%2B-green)
+![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
+![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
+![Tests](https://img.shields.io/badge/tests-2156_passed-brightgreen?style=flat)
+![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
-Template Laravel 12 modulaire et prêt pour la production. Architecture basée sur 15 modules nwidart avec panneau admin Filament v5, authentification 2FA, API versionnée, monitoring complet et outils de qualité de code.
+Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (25 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2156 tests, 4192 assertions, 0 échec).
 
-## Fonctionnalités
+## Table des matières
 
-- Architecture modulaire (15 modules nwidart)
-- Panneau admin Filament v5 avec 4 resources et 4 widgets
-- Authentification 2FA (Filament Breezy)
-- Rôles et permissions (Spatie)
-- API versionnée /api/v1/ avec documentation Scramble
-- Authentification API (Laravel Sanctum)
-- Monitoring : Sentry, Pulse, Telescope, Horizon
-- Health checks (Spatie Health - 7 vérifications)
-- Backups automatiques (Spatie Backup)
-- Activity logging (Spatie ActivityLog)
-- Media library (Spatie Media)
-- Response caching (Spatie ResponseCache)
-- SEO, Webhooks, Notifications, Storage
-- CI/CD GitHub Actions
-- Docker dev (PHP 8.4, nginx, MySQL, Redis, Mailpit)
-- Qualité : Larastan niveau 5, Pint, Rector, Pest arch tests
-- Localisation fr/en
-- Feature flags (Laravel Pennant)
-- Rate limiting configurable
-- Makefile avec 20+ commandes
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Structure des modules](#structure-des-modules)
+- [Fonctionnalités clés](#fonctionnalités-clés)
+- [API REST](#api-rest)
+- [Tests](#tests)
+- [Sécurité](#sécurité)
+- [Commandes artisan custom](#commandes-artisan-custom)
+- [Contribution](#contribution)
+- [Licence](#licence)
 
 ## Prérequis
 
 - PHP 8.4+
-- Composer 2+
-- Node.js 20+ et npm
-- MySQL 8.0+ ou MariaDB 10.6+
-- Redis 7+
+- Composer 2.5+
+- Node.js 20+ et NPM 10+
+- MySQL 8.0+ ou MariaDB 10.5+
 
 ## Installation
 
 ```bash
-git clone [url-du-repo] mon-projet
-cd mon-projet
-make install
+# 1. Cloner le dépôt
+git clone https://github.com/votre-org/laravel-core-template.git
+cd laravel-core-template
+
+# 2. Dépendances PHP
+composer install
+
+# 3. Configurer l'environnement
+cp .env.example .env
+php artisan key:generate
+# Configurer DB_*, MAIL_*, STRIPE_* dans .env
+
+# 4. Frontend
+npm install && npm run build
+
+# 5. Base de données
+php artisan migrate --seed
+
+# 6. Setup initial (optionnel)
 php artisan core:setup
 ```
 
-## Docker
+## Structure des modules
 
-```bash
-docker compose up -d
-# App: http://localhost:8080
-# Mailpit: http://localhost:8025
-```
+Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/) pour isoler les domaines fonctionnels :
 
-## Architecture
+| Groupe | Modules |
+|--------|---------|
+| Fondation | `Core`, `Auth`, `RolesPermissions`, `Settings`, `Logging`, `Health`, `Storage` |
+| Contenu et médias | `Media`, `Blog`, `Newsletter`, `SEO`, `Editor`, `Pages` |
+| API et intégrations | `Api`, `Notifications`, `Webhooks` |
+| Backoffice | `Backoffice`, `SaaS`, `Tenancy`, `Backup`, `Translation`, `Export`, `Search` |
+| Frontend | `FrontTheme` |
+| Intelligence artificielle | `AI` |
 
-```
-Modules/
-├── Core/             # Traits, middleware, helpers, base classes
-├── Auth/             # Livewire login/register, Filament UserResource
-├── RolesPermissions/ # Spatie roles, Filament RoleResource
-├── Settings/         # Paramètres dynamiques, Filament SettingResource
-├── Logging/          # Activity log, Filament ActivityLogResource
-├── Health/           # Health checks (7 vérifications)
-├── Storage/          # Service de stockage unifié
-├── Media/            # Spatie Media Library service
-├── Notifications/    # Service de notifications
-├── Webhooks/         # Client et serveur webhooks
-├── Api/              # Base API controller
-├── SEO/              # Service SEO (meta, sitemap, robots)
-├── Backoffice/       # Module backoffice
-├── FrontTheme/       # Thème frontend
-├── SaaS/             # (désactivé) Multi-tenancy SaaS
-└── Tenancy/          # (désactivé) Tenancy
-```
+## Fonctionnalités clés
 
-## Commandes
+- Architecture modulaire (25 modules autonomes, nwidart/laravel-modules, plugin.json par module)
+- Backoffice admin multi-thèmes (3 thèmes : backend/NobleUI, wowdash, tabler - Bootstrap 5)
+- Authentification complète : login/register Livewire, 2FA TOTP (Google Authenticator)
+- SaaS : plans, abonnements Stripe via Laravel Cashier, multi-tenant
+- API REST v1 sécurisée : Sanctum, rate limiting, JSON resources
+- Blog : CRUD admin, commentaires (guest/user), RSS feed, Livewire SearchBar live
+- Médias : Spatie Media Library, upload et gestion de fichiers
+- Recherche : Laravel Scout full-text
+- Journalisation : Spatie Activity Log, toutes les actions tracées
+- Notifications multi-drivers : mail, SMS, push
+- Export : Excel/CSV
+- Webhooks : envoi et réception
+- Internationalisation : Spatie Translatable, support multi-langue
+- Formulaire de contact avec rate limiting et envoi email
+- FAQ publique avec accordion Alpine.js
+- Module IA : chatbot, générateur d'articles, modération, suggestions SEO, traduction automatique (OpenRouter)
+- Pages statiques : CRUD admin, éditeur TipTap
+- PWA : service worker, manifest, notifications push
+- Feature flags : Laravel Pennant avec conditions avancées
+- Cookie consent : bannière RGPD, catégories configurables
+- Onboarding : wizard multi-étapes pour nouveaux utilisateurs
+- Revenue dashboard : MRR, ARR, churn, graphiques ApexCharts
+- Temps réel : Laravel Reverb (WebSocket)
 
-| Commande | Description |
-|----------|-------------|
-| `make install` | Installation complète |
-| `make dev` | Serveur de développement |
-| `make test` | Lancer les tests |
-| `make lint` | Corriger le style (Pint) |
-| `make analyse` | Analyse statique (Larastan) |
-| `make rector` | Modernisation du code (dry-run) |
-| `make cache` | Mettre en cache la configuration |
-| `make docker-up` | Démarrer Docker |
-| `make deploy` | Déploiement production |
-| `make ide-helper` | Générer les helpers IDE |
+## API REST
 
-## API
+Base URL : `/api/v1/`
 
-L'API est versionnée sous `/api/v1/`. Documentation automatique via Scramble a `/docs/api`.
+**Authentification (public, throttle: 5/min)**
 
-### Authentification
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/v1/login` | Connexion, retourne token Sanctum |
+| POST | `/api/v1/register` | Inscription |
+| POST | `/api/v1/logout` | Déconnexion (auth requis) |
+| GET | `/api/v1/user` | Profil utilisateur (auth requis) |
 
-```bash
-# Créer un token
-POST /api/v1/login
-Content-Type: application/json
-{"email": "admin@laravel-core.test", "password": "password"}
+**Blog (public)**
 
-# Utiliser le token
-GET /api/v1/status
-Authorization: Bearer {token}
-```
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/v1/articles` | Liste des articles publiés |
+| GET | `/api/v1/articles/{slug}` | Article par slug |
+| GET | `/api/v1/blog/categories` | Catégories disponibles |
 
-### Endpoints
+**Newsletter**
 
-| Méthode | URL | Description |
-|---------|-----|-------------|
-| GET | `/api/health` | Status de santé |
-| GET | `/api/v1/status` | Informations de l'application |
-| GET | `/api/v1/user` | Utilisateur authentifié |
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/api/v1/newsletter/subscribe` | Abonnement email |
+
+Header requis pour routes protégées : `Authorization: Bearer {token}`
 
 ## Tests
 
 ```bash
-make test              # Tous les tests
-make test-coverage     # Avec couverture
-make analyse           # Analyse statique
-make lint-check        # Vérification du style
+# Tous les tests (séquentiel)
+php artisan test
+
+# Avec parallélisation (plus rapide)
+php artisan test --parallel
+
+# Un fichier spécifique
+php artisan test tests/Feature/Phase46Test.php
+
+# Filtrer par nom
+php artisan test --filter "Auth"
 ```
 
-174+ tests couvrant l'ensemble du code.
+Suite actuelle : **2156 tests, 4192 assertions, 0 échec**. PHPStan niveau 6, 0 erreur. Pint 100%.
+
+## Sécurité
+
+- CSRF : protection native Laravel sur toutes les routes web
+- XSS : échappement Blade automatique (`{{ }}`)
+- SQL Injection : Eloquent ORM, requêtes paramétrées
+- Rate limiting : 5 tentatives/min sur login, throttle:api sur tous les endpoints
+- 2FA TOTP : code à usage unique via Google Authenticator
+- OAuth social : Google, GitHub, Facebook
+- Magic links : connexion sans mot de passe
+- Protection brute-force : blocage IP après tentatives échouées
+- SecurityHeaders middleware : HSTS, X-Frame-Options, X-Content-Type-Options, CSP
+- HTTPS forcé en production (`URL::forceScheme('https')`)
+- Sanctum : token API révocable par session
+- Policies et Gates : contrôle d'accès granulaire par ressource
+
+## Commandes artisan custom
+
+| Commande | Description |
+|----------|-------------|
+| `php artisan core:setup` | Setup initial du projet |
+| `php artisan roles:sync` | Synchronise les permissions Spatie |
+| `php artisan make:crud {Model}` | Génère un CRUD complet (modèle, migration, contrôleur, vues, tests) |
+| `php artisan new:project` | Initialise un nouveau projet depuis ce template |
+
+## Contribution
+
+1. Forker le projet
+2. Créer une branche : `git checkout -b feature/ma-fonctionnalite`
+3. Commiter : `git commit -m 'feat: description'`
+4. Pousser : `git push origin feature/ma-fonctionnalite`
+5. Ouvrir une Pull Request
+
+Les tests doivent tous passer avant soumission : `php artisan test`.
 
 ## Licence
 
-Ce projet est sous licence MIT.
+Ce projet est distribué sous la licence [MIT](LICENSE).

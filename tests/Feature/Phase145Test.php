@@ -1,0 +1,153 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\CookieCategory;
+use App\Models\User;
+use Database\Seeders\CookieCategorySeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(CookieCategorySeeder::class);
+    $this->admin = User::factory()->create();
+    $this->admin->assignRole('super_admin');
+});
+
+it('seeds 4 cookie categories', function () {
+    expect(CookieCategory::count())->toBe(4);
+});
+
+it('has active scope', function () {
+    expect(CookieCategory::active()->count())->toBe(4);
+});
+
+it('has ordered scope', function () {
+    $categories = CookieCategory::ordered()->pluck('name')->toArray();
+    expect($categories)->toBe(['essential', 'functional', 'analytics', 'marketing']);
+});
+
+it('isRequired returns true for essential category', function () {
+    $essential = CookieCategory::where('name', 'essential')->first();
+    expect($essential->isRequired())->toBeTrue();
+
+    $analytics = CookieCategory::where('name', 'analytics')->first();
+    expect($analytics->isRequired())->toBeFalse();
+});
+
+it('returns 200 for cookie preferences page', function () {
+    $this->get('/cookie-preferences')->assertOk();
+});
+
+it('cookie preferences page shows category labels from database', function () {
+    $this->get('/cookie-preferences')
+        ->assertOk()
+        ->assertSee('Cookies essentiels')
+        ->assertSee('Cookies analytiques')
+        ->assertSee('Cookies marketing')
+        ->assertSee('Cookies fonctionnels');
+});
+
+it('accept sets all categories to true in cookie', function () {
+    $response = $this->post(route('cookie.accept'));
+    $response->assertRedirect();
+    $cookie = $response->getCookie('cookie_consent');
+    $data = json_decode($cookie->getValue(), true);
+
+    expect($data['essential'])->toBeTrue();
+    expect($data['functional'])->toBeTrue();
+    expect($data['analytics'])->toBeTrue();
+    expect($data['marketing'])->toBeTrue();
+});
+
+it('decline sets only required categories to true', function () {
+    $response = $this->post(route('cookie.decline'));
+    $response->assertRedirect();
+    $cookie = $response->getCookie('cookie_consent');
+    $data = json_decode($cookie->getValue(), true);
+
+    expect($data['essential'])->toBeTrue();
+    expect($data['functional'])->toBeFalse();
+    expect($data['analytics'])->toBeFalse();
+    expect($data['marketing'])->toBeFalse();
+});
+
+it('customize with analytics=1 sets analytics true and marketing false', function () {
+    $response = $this->post(route('cookie.customize'), ['analytics' => '1']);
+    $response->assertRedirect();
+    $cookie = $response->getCookie('cookie_consent');
+    $data = json_decode($cookie->getValue(), true);
+
+    expect($data['essential'])->toBeTrue();
+    expect($data['analytics'])->toBeTrue();
+    expect($data['marketing'])->toBeFalse();
+});
+
+it('admin can access cookie categories index', function () {
+    $this->actingAs($this->admin)
+        ->get(route('admin.cookie-categories.index'))
+        ->assertOk();
+});
+
+it('admin can access cookie categories create', function () {
+    $this->actingAs($this->admin)
+        ->get(route('admin.cookie-categories.create'))
+        ->assertOk();
+});
+
+it('admin can store a new cookie category', function () {
+    $response = $this->actingAs($this->admin)->post(route('admin.cookie-categories.store'), [
+        'name' => 'preferences',
+        'label' => 'Cookies de préférences',
+        'description' => 'Test description',
+        'order' => 5,
+        'is_active' => '1',
+    ]);
+    $response->assertRedirect(route('admin.cookie-categories.index'));
+    expect(CookieCategory::where('name', 'preferences')->exists())->toBeTrue();
+});
+
+it('admin can update a cookie category', function () {
+    $category = CookieCategory::where('name', 'analytics')->first();
+    $response = $this->actingAs($this->admin)->put(route('admin.cookie-categories.update', $category), [
+        'name' => 'analytics',
+        'label' => 'Statistiques modifié',
+        'order' => 3,
+        'is_active' => '1',
+    ]);
+    $response->assertRedirect(route('admin.cookie-categories.index'));
+    expect($category->fresh()->label)->toBe('Statistiques modifié');
+});
+
+it('admin cannot delete required category', function () {
+    $required = CookieCategory::where('name', 'essential')->first();
+    $this->actingAs($this->admin)
+        ->delete(route('admin.cookie-categories.destroy', $required))
+        ->assertRedirect();
+    expect(CookieCategory::where('id', $required->id)->exists())->toBeTrue();
+});
+
+it('admin can delete optional category', function () {
+    $optional = CookieCategory::where('name', 'marketing')->first();
+    $this->actingAs($this->admin)
+        ->delete(route('admin.cookie-categories.destroy', $optional))
+        ->assertRedirect();
+    expect(CookieCategory::where('id', $optional->id)->exists())->toBeFalse();
+});
+
+it('non-admin cannot access cookie categories admin', function () {
+    $user = User::factory()->create();
+    $user->assignRole('user');
+    $this->actingAs($user)
+        ->get(route('admin.cookie-categories.index'))
+        ->assertForbidden();
+});
+
+it('cookie banner shows dynamic categories', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Cookies essentiels');
+});

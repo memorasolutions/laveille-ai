@@ -15,7 +15,7 @@ beforeEach(function () {
 });
 
 test('login page is accessible', function () {
-    $this->get('/admin/login')->assertOk();
+    $this->get('/login')->assertOk();
 });
 
 test('admin user can access admin dashboard', function () {
@@ -37,7 +37,7 @@ test('non-admin user is forbidden from admin panel', function () {
 
 test('guest is redirected to login', function () {
     $this->get('/admin')
-        ->assertRedirect('/admin/login');
+        ->assertRedirect('/login');
 });
 
 test('user model has HasRoles trait', function () {

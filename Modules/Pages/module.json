@@ -1,0 +1,10 @@
+{
+  "name": "Pages",
+  "alias": "pages",
+  "description": "Static pages CMS",
+  "keywords": [],
+  "priority": 0,
+  "providers": ["Modules\\Pages\\Providers\\PagesServiceProvider"],
+  "aliases": {},
+  "files": []
+}

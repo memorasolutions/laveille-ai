@@ -1,0 +1,10 @@
+{
+    "name": "Newsletter",
+    "description": "Gestion des newsletters et campagnes",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 15
+}

@@ -1,0 +1,11 @@
+{
+    "name": "SEO",
+    "description": "Optimisation SEO, meta tags, sitemap",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core",
+        "Blog"
+    ],
+    "priority": 20
+}

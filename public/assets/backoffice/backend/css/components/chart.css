@@ -1,0 +1,111 @@
+
+.legend > div {
+    background: transparent !important;
+}
+.flot-chart .legend table tbody tr:last-child .legendLabel {
+    color: #ffaa2b;
+}
+/* Chartist css */
+.ct-chart .ct-label {
+    fill: #a3afb7;
+    color: #a3afb7;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+.ct-chart .ct-series.ct-series-a .ct-bar, .ct-chart .ct-series.ct-series-a .ct-line, .ct-chart .ct-series.ct-series-a .ct-point, .ct-chart .ct-series.ct-series-a .ct-slice-donut {
+    stroke: var(--primary);
+}
+.ct-chart .ct-series.ct-series-b .ct-bar, .ct-chart .ct-series.ct-series-b .ct-line, .ct-chart .ct-series.ct-series-b .ct-point, .ct-chart .ct-series.ct-series-b .ct-slice-donut {
+    stroke: #3AC977;
+}
+.ct-chart .ct-series.ct-series-c .ct-bar, .ct-chart .ct-series.ct-series-c .ct-line, .ct-chart .ct-series.ct-series-c .ct-point, .ct-chart .ct-series.ct-series-c .ct-slice-donut {
+    stroke: #FF9F00;
+}
+.ct-series-b .ct-area, .ct-series-b .ct-slice-pie {
+    fill: #00A2FF;
+}
+.ct-series-c .ct-area, .ct-series-c .ct-slice-pie {
+    fill: #ff9800;
+}
+.ct-chart .ct-series.ct-series-e .ct-bar, .ct-chart .ct-series.ct-series-e .ct-line, .ct-chart .ct-series.ct-series-e .ct-point, .ct-chart .ct-series.ct-series-e .ct-slice-donut {
+    stroke: #D653C1;
+}
+.ct-chart .ct-series.ct-series-d .ct-bar, .ct-chart .ct-series.ct-series-d .ct-line, .ct-chart .ct-series.ct-series-d .ct-point, .ct-chart .ct-series.ct-series-d .ct-slice-donut {
+    stroke: #FF5E5E;
+}
+.ct-chart .ct-series.ct-series-g .ct-bar,
+.ct-chart .ct-series.ct-series-g .ct-line,
+.ct-chart .ct-series.ct-series-g .ct-point,
+.ct-chart .ct-series.ct-series-g .ct-slice-donut {
+	stroke: #8d6e63;
+}
+.ct-chart.simple-pie-chart-chartist .ct-label {
+	color: #ffffff;
+	fill: #ffffff;
+	font-size: 0.625rem;
+}
+.chartist-tooltip {
+	position: absolute;
+	display: inline-block;
+	opacity: 0;
+	min-width: 0.625rem;
+	padding: 0.125rem 0.625rem;
+	border-radius: 0.125rem;
+	background: #313a46;
+	color: #ffffff;
+	text-align: center;
+	pointer-events: none;
+	z-index: 1;
+ transition: opacity .2s linear;
+}
+.morris-hover.morris-default-style {
+    border-radius: 0.3125rem;
+    padding: 0;
+    margin: 0;
+    border: none;
+    overflow: hidden;
+}
+.morris-hover {
+    position: absolute;
+    z-index: 1;
+    background: var(--primary);
+    color: #fff;
+}
+.morris-hover .morris-hover-row-label {
+    background-color: #6e6e6e;
+    text-align: center;
+    padding: 0.3125rem;
+    color: #fff !important;
+    margin-bottom: 0.3125rem; 
+}
+.morris-hover .morris-hover-point {
+    color: #fff !important;
+    margin: 0.1875rem 0;
+    text-align: center;
+    padding: 0 1.5625rem;
+}
+.ct-grid {
+    stroke: rgba(49, 58, 70, 0.1);
+}
+.ct-series-a .ct-area, .ct-series-a .ct-slice-pie {
+    fill: #145650;
+}
+/* chart sparkline */
+#sparkline-composite-chart canvas, 
+#composite-bar canvas, 
+#sparkline11 canvas, 
+#StackedBarChart canvas, 
+#spark-bar canvas, 
+#tristate canvas {
+    height: 6.25rem !important;
+}
+#activity {
+	height: 20.575rem !important;
+}
+/* CHART DARK MODE */
+[data-theme-version="dark"] .legendLabel {
+    color: #fff;
+}
+[data-theme-version="dark"] .morris_chart_height text tspan {
+	fill: #fff;
+}

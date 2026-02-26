@@ -1,0 +1,19 @@
+{
+    "name": "modules/newsletter",
+    "description": "Newsletter module",
+    "authors": [{"name": "Laravel Core"}],
+    "autoload": {
+        "psr-4": {
+            "Modules\\Newsletter\\": "app/",
+            "Modules\\Newsletter\\Database\\Factories\\": "database/factories/",
+            "Modules\\Newsletter\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": []
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

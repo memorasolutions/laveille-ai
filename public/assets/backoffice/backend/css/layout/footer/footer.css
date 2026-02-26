@@ -1,0 +1,14 @@
+
+.footer {
+    padding-left: 15rem;
+}
+@media only screen and (max-width: 61.9375rem) {
+    .footer {
+        padding-left: 3.8rem;
+    }
+}
+@media (max-width: 47.9375rem) {
+    .footer {
+        padding-left: 0;
+    }
+}

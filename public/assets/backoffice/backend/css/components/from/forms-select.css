@@ -1,0 +1,88 @@
+
+.select2-container--default .select2-results__option--highlighted .select2-result-repository__title {
+    color: #fff;
+}
+.select2-container--default .select2-results__option--highlighted .select2-result-repository__forks, .select2-container--default .select2-results__option--highlighted .select2-result-repository__stargazers, .select2-container--default .select2-results__option--highlighted .select2-result-repository__watchers {
+    color: #fff;
+}
+.select2-container--default .select2-result-repository {
+    display: flex;
+    align-items: center;
+}
+.select2-container--default .select2-result-repository__avatar {
+    height: 50px;
+    width: 50px;
+    margin-right: 12px;
+}
+.select2-container--default .select2-result-repository__avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.5rem;
+}
+.select2-container--default .select2-result-repository__meta {
+    flex: 1;
+}
+.select2-container--default .select2-result-repository__title {
+    font-size: .95rem;
+    color: #000;
+}
+.select2-container--default .select2-result-repository__description {
+    font-size: .75rem;
+    margin-bottom: 3px;
+}
+.select2-container--default .select2-result-repository__statistics {
+    display: flex;
+}
+.select2-container--default .select2-result-repository__forks, .select2-container--default .select2-result-repository__stargazers, .select2-container--default .select2-result-repository__watchers {
+    margin-right: 12px;
+    font-size: .75rem;
+    color: #000;
+}
+
+.status-complete,
+.status-high{
+    background-color: var(--success-light) !important;
+    color: var(--success) !important;
+}
+.status-pending,
+.status-low{
+    background-color: var(--danger-light) !important;
+    color: var(--danger) !important;
+}
+.status-testing{
+    background-color: var(--warning-light) !important;
+    color: rgb(255, 159, 0) !important;
+}
+.status-progress{
+    background-color: #bb6bd91a !important;
+    color: rgb(187, 107, 217) !important;
+}
+.status-medium{
+    background-color: #2c2c2c1a !important;
+    color: var(--text) !important;
+}
+
+.nice-select.dropUp ul.list{
+    top:auto!important;
+    bottom: 100%!important;
+    -webkit-transform: scale(0.75) translateY(21px);
+    -ms-transform: scale(0.75) translateY(21px);
+    transform: scale(0.75) translateY(21px);
+    -webkit-transform-origin: 50%;
+    -ms-transform-origin: 50%;
+    transform-origin: 50%;
+}
+.nice-select.dropUp.open ul.list{
+    -webkit-transform: scale(1) translateY(0);
+    -ms-transform: scale(1) translateY(0);
+    transform: scale(1) translateY(0);
+}
+select.nice-select{
+    display: block ;
+    position: absolute;
+    height: 0px!important;
+    width: 0px!important;
+    opacity: 0;
+    z-index: -1;
+    padding: 0!important;
+}

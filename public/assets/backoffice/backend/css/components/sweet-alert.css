@@ -1,0 +1,14 @@
+
+.swal2-popup .swal2-styled:focus {
+    box-shadow: none;
+}
+.sweet-image {
+    width: 20%;
+}
+.swal2-popup .swal2-content {
+    color: #888888;
+}
+.swal2-popup {
+    background: var(--card);
+    color: var(--dark);
+}

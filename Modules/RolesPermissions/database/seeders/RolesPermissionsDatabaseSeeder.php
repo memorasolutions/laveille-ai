@@ -8,11 +8,10 @@ use Illuminate\Database\Seeder;
 
 class RolesPermissionsDatabaseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // $this->call([]);
+        $this->call([
+            RolesAndPermissionsSeeder::class,
+        ]);
     }
 }

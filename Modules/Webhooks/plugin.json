@@ -1,0 +1,10 @@
+{
+    "name": "Webhooks",
+    "description": "Gestion des webhooks",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 15
+}

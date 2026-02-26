@@ -1,0 +1,28 @@
+@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Rôles', 'subtitle' => 'Liste'])
+
+@section('content')
+
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Rôles') }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="shield" class="icon-md text-primary"></i>{{ __('Rôles') }}</h4>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.roles.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+            <i data-lucide="plus"></i>
+            {{ __('Ajouter') }}
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @livewire('backoffice-roles-table')
+    </div>
+</div>
+
+@endsection

@@ -1,0 +1,1 @@
+!function(o){"use strict";o(".colorpicker").asColorPicker(),o(".complex-colorpicker").asColorPicker({mode:"complex"}),o(".gradient-colorpicker").asColorPicker({mode:"gradient"})}(jQuery);

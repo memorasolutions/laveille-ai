@@ -1,0 +1,10 @@
+{
+    "name": "Blog",
+    "description": "Système de blog avec articles, catégories, commentaires",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 15
+}

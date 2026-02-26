@@ -1,0 +1,196 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Blog\Http\Controllers\Admin;
+
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
+use Modules\AI\Services\AiService;
+use Modules\Blog\Models\Article;
+use Modules\Blog\Models\Category;
+use Modules\Blog\States\DraftArticleState;
+use Modules\Blog\States\PublishedArticleState;
+use Modules\Core\Shared\Traits\ParsesTags;
+use Modules\SEO\Models\MetaTag;
+
+class ArticleController extends Controller
+{
+    use ParsesTags;
+
+    public function index(): View
+    {
+        return view('blog::admin.articles.index');
+    }
+
+    public function create(): View
+    {
+        $categories = Category::active()->orderBy('name')->get();
+        $existingTags = Article::whereNotNull('tags')->pluck('tags')->flatten()->unique()->sort()->values()->toArray();
+
+        return view('blog::admin.articles.create', compact('categories', 'existingTags'));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'excerpt' => 'nullable|string|max:500',
+            'featured_image' => 'nullable|image|max:2048',
+            'status' => 'nullable|in:draft,published,archived',
+            'category_id' => 'nullable|integer|exists:blog_categories,id',
+            'tags_input' => 'nullable|string',
+            'published_at' => 'nullable|date',
+        ]);
+
+        $validated['user_id'] = auth()->id();
+        $validated['status'] = $validated['status'] ?? 'draft';
+        $validated['tags'] = $this->parseTagsInput($validated['tags_input'] ?? '');
+        unset($validated['tags_input']);
+
+        if ($request->hasFile('featured_image')) {
+            $validated['featured_image'] = $request->file('featured_image')
+                ->store('articles', 'public');
+        }
+
+        Article::create($validated);
+
+        return redirect()->route('admin.blog.articles.index')
+            ->with('success', 'Article créé avec succès.');
+    }
+
+    public function show(Article $article): View
+    {
+        return view('blog::admin.articles.show', compact('article'));
+    }
+
+    public function edit(Article $article): View
+    {
+        $categories = Category::active()->orderBy('name')->get();
+        $existingTags = Article::whereNotNull('tags')->pluck('tags')->flatten()->unique()->sort()->values()->toArray();
+
+        return view('blog::admin.articles.edit', compact('article', 'categories', 'existingTags'));
+    }
+
+    public function update(Request $request, Article $article): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'excerpt' => 'nullable|string|max:500',
+            'featured_image' => 'nullable|image|max:2048',
+            'status' => 'nullable|in:draft,published,archived',
+            'category_id' => 'nullable|integer|exists:blog_categories,id',
+            'tags_input' => 'nullable|string',
+            'published_at' => 'nullable|date',
+        ]);
+
+        $validated['tags'] = $this->parseTagsInput($validated['tags_input'] ?? '');
+        unset($validated['tags_input']);
+
+        if ($request->hasFile('featured_image')) {
+            $validated['featured_image'] = $request->file('featured_image')
+                ->store('articles', 'public');
+        } else {
+            unset($validated['featured_image']);
+        }
+
+        $article->update($validated);
+
+        return redirect()->route('admin.blog.articles.index')
+            ->with('success', 'Article mis à jour.');
+    }
+
+    public function destroy(Article $article): RedirectResponse
+    {
+        $article->delete();
+
+        return redirect()->route('admin.blog.articles.index')
+            ->with('success', 'Article supprimé.');
+    }
+
+    public function publish(Article $article): RedirectResponse
+    {
+        $article->status->transitionTo(PublishedArticleState::class);
+
+        return back()->with('success', 'Article publié.');
+    }
+
+    public function unpublish(Article $article): RedirectResponse
+    {
+        $article->status->transitionTo(DraftArticleState::class);
+
+        return back()->with('success', 'Article dépublié.');
+    }
+
+    public function regenerateSeo(Article $article): JsonResponse
+    {
+        $service = app(AiService::class);
+        $seoData = $service->generateSeoMeta($article->title, strip_tags($article->content));
+
+        MetaTag::updateOrCreate(
+            ['url_pattern' => '/blog/'.$article->slug],
+            array_merge($seoData, ['is_active' => true])
+        );
+
+        return response()->json(['success' => true, 'message' => __('SEO généré avec succès')]);
+    }
+
+    public function analyzeContent(Article $article): JsonResponse
+    {
+        $service = app(AiService::class);
+        $analysis = $service->analyzeContent($article->title, $article->content, app()->getLocale());
+
+        return response()->json(['success' => true, 'message' => __('Analyse générée avec succès'), 'analysis' => $analysis]);
+    }
+
+    public function regenerateSummary(Article $article): JsonResponse
+    {
+        $service = app(AiService::class);
+        $summary = $service->generateSummary($article->content, app()->getLocale());
+
+        $article->setTranslation('excerpt', app()->getLocale(), $summary);
+        $article->saveQuietly();
+
+        return response()->json(['success' => true, 'message' => __('Résumé généré avec succès'), 'summary' => $summary]);
+    }
+
+    public function translateArticle(Article $article, Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'target_locale' => 'required|in:en,fr',
+        ]);
+
+        $targetLocale = $validated['target_locale'];
+        $sourceLocale = $targetLocale === 'en' ? 'fr' : 'en';
+
+        try {
+            $service = app(AiService::class);
+
+            foreach (['title', 'content', 'excerpt'] as $field) {
+                $original = $article->getTranslation($field, $sourceLocale, false);
+
+                if (! empty($original)) {
+                    $translated = $service->translateContent($original, $sourceLocale, $targetLocale);
+                    $article->setTranslation($field, $targetLocale, $translated);
+                }
+            }
+
+            $translatedTitle = $article->getTranslation('title', $targetLocale, false);
+            if (! empty($translatedTitle)) {
+                $article->setTranslation('slug', $targetLocale, Str::slug($translatedTitle));
+            }
+
+            $article->save();
+
+            return response()->json(['success' => true, 'message' => __('Article traduit avec succès')]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => __('Échec de la traduction.')], 500);
+        }
+    }
+}

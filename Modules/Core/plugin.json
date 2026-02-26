@@ -1,0 +1,8 @@
+{
+    "name": "Core",
+    "description": "Fondation du système - contracts, events, traits, middleware",
+    "version": "1.0.0",
+    "type": "module",
+    "dependencies": [],
+    "priority": 1
+}

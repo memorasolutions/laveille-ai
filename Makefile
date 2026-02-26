@@ -16,7 +16,7 @@ test:
 	php artisan test
 
 test-coverage:
-	php artisan test --coverage
+	php -d "zend_extension=/Applications/Herd.app/Contents/Resources/xdebug/xdebug-84-arm64.so" -d "xdebug.mode=coverage" vendor/bin/pest --coverage --min=80
 
 lint:
 	vendor/bin/pint

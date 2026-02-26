@@ -23,6 +23,7 @@ class FrontThemeServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerHelpers();
         $this->registerCommands();
         $this->registerCommandSchedules();
         $this->registerTranslations();
@@ -140,6 +141,14 @@ class FrontThemeServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [];
+    }
+
+    protected function registerHelpers(): void
+    {
+        $helperPath = module_path($this->name, 'app/Helpers/fronttheme.php');
+        if (file_exists($helperPath)) {
+            require_once $helperPath;
+        }
     }
 
     private function getPublishableViewPaths(): array

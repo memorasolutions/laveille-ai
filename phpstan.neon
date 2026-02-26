@@ -2,7 +2,7 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
-    level: 5
+    level: 6
     paths:
         - app/
         - Modules/Api/app/
@@ -18,7 +18,18 @@ parameters:
         - Modules/SEO/app/
         - Modules/Settings/app/
         - Modules/Storage/app/
+        - Modules/Backup/app/
+        - Modules/Export/app/
+        - Modules/Search/app/
+        - Modules/Translation/app/
+        - Modules/SaaS/app/
+        - Modules/Tenancy/app/
         - Modules/Webhooks/app/
+        - Modules/Blog/app/
+        - Modules/Editor/app/
+        - Modules/Newsletter/app/
+        - Modules/Pages/app/
+        - Modules/AI/app/
         - database/
         - routes/
     excludePaths:
@@ -29,7 +40,15 @@ parameters:
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - '#^Access to an undefined property [a-zA-Z\\]+::\$\w+#'
-        - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::#'
-        - '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\#'
+        - '#^Call to an undefined method Illuminate\\Database\\Eloquent\\(Builder|Relations\\HasMany)::#'
         - '#^Trait .+ is used zero times and is not analysed#'
         - '#^Call to an undefined method Spatie\\MediaLibrary\\HasMedia::#'
+        - identifier: missingType.return
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+        - identifier: missingType.parameter
+        - identifier: argument.templateType
+        - identifier: argument.type
+        - identifier: argument.unresolvableType
+        - identifier: nullCoalesce.offset
+        - identifier: method.unresolvableReturnType

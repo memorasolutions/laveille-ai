@@ -1,0 +1,10 @@
+{
+    "name": "Editor",
+    "description": "Éditeur de contenu TipTap",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 15
+}

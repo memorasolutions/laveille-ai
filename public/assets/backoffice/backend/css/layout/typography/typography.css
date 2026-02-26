@@ -1,0 +1,16 @@
+
+[data-typography="poppins"] {
+    --dz-ffont-family: 'poppins', sans-serif;
+}
+[data-typography="helvetica"] {
+    --dz-ffont-family: 'HelveticaNeue';
+}
+[data-typography="opensans"] {
+    --dz-ffont-family: 'Open Sans', sans-serif;
+}
+[data-typography="roboto"] {
+    --dz-ffont-family: 'Roboto', sans-serif;
+}
+[data-sidebar-style="overlay"] .footer {
+    padding-left: 0;
+}

@@ -58,7 +58,7 @@ test('process user export job exists and is queueable', function () {
     expect($reflection->hasProperty('backoff'))->toBeTrue();
 });
 
-test('api v1 user route uses user resource', function () {
+test('api v1 user route uses auth controller', function () {
     $content = file_get_contents(base_path('routes/api/v1.php'));
-    expect($content)->toContain('UserResource');
+    expect($content)->toContain('AuthController');
 });

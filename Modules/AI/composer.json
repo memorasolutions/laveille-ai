@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/ai",
+    "description": "Module AI - OpenRouter LLM integration",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\AI\\": "app/",
+            "Modules\\AI\\Database\\Factories\\": "database/factories/",
+            "Modules\\AI\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\AI\\Tests\\": "tests/"
+        }
+    }
+}

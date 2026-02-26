@@ -4,34 +4,82 @@ declare(strict_types=1);
 
 namespace Modules\Webhooks\Services;
 
-use Spatie\WebhookServer\WebhookCall;
+use Modules\Backoffice\Models\WebhookEndpoint;
+use Modules\Webhooks\Enums\WebhookEvent;
+use Modules\Webhooks\Jobs\DispatchWebhookJob;
+use Modules\Webhooks\Models\WebhookCall;
 
 class WebhookService
 {
-    public function send(string $url, array $payload, string $secret = ''): void
+    public function dispatch(WebhookEvent $event, array $payload): int
     {
-        $webhook = WebhookCall::create()
-            ->url($url)
-            ->payload($payload);
+        $endpoints = WebhookEndpoint::where('is_active', true)->get();
+        $dispatched = 0;
 
-        if ($secret !== '') {
-            $webhook->useSecret($secret);
+        foreach ($endpoints as $endpoint) {
+            if (! $this->endpointListensTo($endpoint, $event)) {
+                continue;
+            }
+
+            $call = WebhookCall::create([
+                'webhook_endpoint_id' => $endpoint->id,
+                'event' => $event->value,
+                'payload' => array_merge($payload, [
+                    'event' => $event->value,
+                    'timestamp' => now()->toIso8601String(),
+                ]),
+                'status' => WebhookCall::STATUS_PENDING,
+            ]);
+
+            DispatchWebhookJob::dispatch($call);
+            $dispatched++;
         }
 
-        $webhook->dispatch();
+        return $dispatched;
     }
 
-    public function sendWithHeaders(string $url, array $payload, array $headers, string $secret = ''): void
+    public function retry(WebhookCall $call): void
     {
-        $webhook = WebhookCall::create()
-            ->url($url)
-            ->payload($payload)
-            ->withHeaders($headers);
+        $call->update([
+            'status' => WebhookCall::STATUS_PENDING,
+        ]);
 
-        if ($secret !== '') {
-            $webhook->useSecret($secret);
+        DispatchWebhookJob::dispatch($call);
+    }
+
+    public function testEndpoint(WebhookEndpoint $endpoint): WebhookCall
+    {
+        $call = WebhookCall::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event' => 'test.ping',
+            'payload' => [
+                'event' => 'test.ping',
+                'timestamp' => now()->toIso8601String(),
+                'message' => 'Test webhook delivery',
+            ],
+            'status' => WebhookCall::STATUS_PENDING,
+        ]);
+
+        DispatchWebhookJob::dispatch($call);
+
+        return $call;
+    }
+
+    public function generateSignature(array $payload, string $secret): string
+    {
+        $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        return hash_hmac('sha256', (string) $json, $secret);
+    }
+
+    private function endpointListensTo(WebhookEndpoint $endpoint, WebhookEvent $event): bool
+    {
+        $events = $endpoint->events;
+
+        if (empty($events)) {
+            return true;
         }
 
-        $webhook->dispatch();
+        return in_array($event->value, $events, true);
     }
 }

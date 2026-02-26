@@ -52,7 +52,7 @@
         <div class="error-code">@yield('code')</div>
         <h1 class="error-title">@yield('title')</h1>
         <p class="error-message">@yield('message')</p>
-        <a href="{{ url('/') }}" class="error-link">Retour à l'accueil</a>
+        <a href="{{ url('/') }}" class="error-link">{{ __('Retour à l\'accueil') }}</a>
     </div>
 </body>
 </html>

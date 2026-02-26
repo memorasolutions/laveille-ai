@@ -1,0 +1,67 @@
+
+@media (min-width: 992px){
+    [data-container="boxed"] #main-wrapper {
+        max-width: 1199px;
+        margin: 0 auto;
+        box-shadow: 0 0 1.875rem 0 rgba(0, 0, 0, 0.1);
+    }
+    [data-container="boxed"] .search-area{
+        display:none!important;
+    }
+}
+[data-layout="vertical"][data-container="boxed"][data-header-position="fixed"] .header,
+[data-layout="horizontal"][data-container="boxed"][data-header-position="fixed"] .header {
+    width: 1199px;
+}
+[data-container="boxed"] .nav-control {
+    right: -1.0625rem;
+}
+[data-container="boxed"] .header .header-content {
+    padding-left: 2.3125rem;
+    padding-right: 1.3125rem;
+}
+[data-container="boxed"] .header .header-content .header-right > li:not(:first-child) {
+    padding-left: 1.3rem;
+}
+[data-container="boxed"] .header-right .header-profile > a.nav-link .header-info {
+    padding-right: 10px;
+}
+@media (min-width: 1350px) {
+    [data-layout="vertical"][data-sidebar-style="overlay"][data-container="boxed"][data-header-position="fixed"] .header {
+        width: 1199px;
+    }
+}
+@media only screen and (min-width: 1200px) and (max-width: 1349px) {
+    [data-layout="vertical"][data-sidebar-style="overlay"][data-container="boxed"][data-header-position="fixed"] .header {
+        width: 1199px;
+    }
+}
+[data-header-position="fixed"][data-layout="horizontal"][data-container="boxed"] .dlabnav {
+        max-width: 1199px;
+    }
+[data-layout="horizontal"][data-container="boxed"][data-header-position="fixed"] .header {
+        width: 1199px;
+    }
+[data-layout="horizontal"][data-container="boxed"][data-header-position="fixed"][data-sidebar-style="mini"] .header {
+        width: 1199px;
+    }
+[data-layout="vertical"][data-container="boxed"][data-header-position="fixed"][data-sidebar-style="mini"] .header {
+        width: 1199px;
+    }
+[data-container="boxed"] .page-titles {
+    margin-bottom: 3rem;
+    padding: 15px 15px;
+}
+[data-container="boxed"] .content-body .container-fluid {
+    padding: 15px 15px 0 15px;
+}
+[data-container="boxed"][data-layout="vertical"] .page-titles {
+    margin-left: 0;
+    margin-right: 0;
+}
+[data-layout="vertical"][data-container="boxed"][data-sidebar-position="fixed"][data-header-position="static"][data-sidebar-style="overlay"] .nav-header {
+    position: absolute;
+}
+[data-layout="vertical"][data-container="boxed"][data-sidebar-position="fixed"][data-header-position="static"][data-sidebar-style="overlay"] .menu-toggle .dlabnav {
+    position: absolute;
+}

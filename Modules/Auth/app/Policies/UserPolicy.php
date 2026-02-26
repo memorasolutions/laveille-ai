@@ -30,6 +30,11 @@ class UserPolicy
 
     public function delete(User $user, User $model): bool
     {
+        // Le superadmin #1 ne peut JAMAIS être supprimé
+        if ($model->id === 1) {
+            return false;
+        }
+
         return $user->hasRole('super_admin') && $user->id !== $model->id;
     }
 }

@@ -1,0 +1,10 @@
+{
+    "name": "Settings",
+    "description": "Gestion des paramètres du site",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 5
+}

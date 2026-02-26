@@ -1,0 +1,11 @@
+{
+    "name": "AI",
+    "description": "Intelligence artificielle via OpenRouter API",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core",
+        "Settings"
+    ],
+    "priority": 25
+}

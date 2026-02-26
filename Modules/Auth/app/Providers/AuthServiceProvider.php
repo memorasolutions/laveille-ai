@@ -40,6 +40,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::policy(User::class, UserPolicy::class);
         User::observe(UserObserver::class);
         Event::listen(UserCreated::class, SendWelcomeNotification::class);
+
     }
 
     /**
@@ -56,7 +57,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Auth\Console\UnlockUserCommand::class,
+        ]);
     }
 
     /**
@@ -143,6 +146,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
 
         Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
+        Blade::anonymousComponentPath($sourcePath.'/layouts', $this->nameLower.'::layouts');
     }
 
     /**

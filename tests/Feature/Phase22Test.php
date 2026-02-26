@@ -54,8 +54,8 @@ test('user api store creates user for super_admin', function () {
     $response = $this->actingAs($admin, 'sanctum')->postJson('/api/v1/users', [
         'name' => 'Nouveau Utilisateur',
         'email' => 'nouveau@test.com',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
+        'password' => 'Password1test',
+        'password_confirmation' => 'Password1test',
     ]);
 
     $response->assertStatus(201)
@@ -155,4 +155,23 @@ test('api v1 has crud routes for users', function () {
     $content = file_get_contents(base_path('routes/api/v1.php'));
     expect($content)->toContain('apiResource')
         ->toContain('UserController');
+});
+
+// --- Superadmin #1 Protection ---
+
+test('superadmin user 1 cannot be deleted via api', function () {
+    Role::findOrCreate('super_admin', 'web');
+
+    // Simuler le user #1 (superadmin principal)
+    $superadmin1 = User::factory()->create(['id' => 1]);
+    $superadmin1->assignRole('super_admin');
+
+    // Un autre superadmin tente de le supprimer
+    $otherAdmin = User::factory()->create();
+    $otherAdmin->assignRole('super_admin');
+
+    $response = $this->actingAs($otherAdmin, 'sanctum')->deleteJson('/api/v1/users/1');
+
+    $response->assertStatus(403);
+    $this->assertDatabaseHas('users', ['id' => 1]);
 });

@@ -53,17 +53,12 @@ test('production json log channel exists', function () {
     expect($config['driver'])->toBe('daily');
 });
 
-test('breezy 2fa package is installed', function () {
-    expect(class_exists(\Jeffgreco13\FilamentBreezy\BreezyCore::class))->toBeTrue();
+test('admin livewire users table component exists', function () {
+    expect(class_exists(\Modules\Backoffice\Livewire\UsersTable::class))->toBeTrue();
 });
 
-test('user model has two factor authenticatable trait', function () {
-    $user = new \App\Models\User;
-    expect(method_exists($user, 'hasConfirmedTwoFactor'))->toBeTrue();
-});
-
-test('activity chart widget exists', function () {
-    expect(class_exists(\Modules\Backoffice\Filament\Widgets\ActivityChart::class))->toBeTrue();
+test('admin middleware ensure is admin exists', function () {
+    expect(class_exists(\Modules\Core\Http\Middleware\EnsureIsAdmin::class))->toBeTrue();
 });
 
 test('api v1 routes file exists', function () {

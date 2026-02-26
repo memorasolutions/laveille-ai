@@ -7,7 +7,9 @@ namespace App\Providers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Pennant\Feature;
 
@@ -26,11 +28,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->isProduction()) {
+            URL::forceScheme('https');
+        }
+
         Model::automaticallyEagerLoadRelationships();
         Model::preventLazyLoading(! app()->isProduction());
 
+        Paginator::useBootstrapFive();
+
         Feature::define('module-saas', false);
         Feature::define('module-tenancy', false);
+        Feature::define('module-translation', true);
+        Feature::define('module-search', true);
+        Feature::define('module-export', true);
+        Feature::define('module-webhooks', true);
+        Feature::define('module-media', true);
+        Feature::define('module-backup', true);
+        Feature::define('module-sms', false);
 
         $this->configureRateLimiting();
     }
@@ -38,7 +53,9 @@ class AppServiceProvider extends ServiceProvider
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return $request->user()
+                ? Limit::perMinute(120)->by($request->user()->id)
+                : Limit::perMinute(30)->by($request->ip());
         });
 
         RateLimiter::for('login', function (Request $request) {
@@ -47,6 +64,22 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('sensitive', function (Request $request) {
             return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('export', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('import', function (Request $request) {
+            return Limit::perMinute(5)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('search', function (Request $request) {
+            return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('newsletter', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
         });
     }
 }

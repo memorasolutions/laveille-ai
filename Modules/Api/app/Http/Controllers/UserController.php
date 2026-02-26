@@ -6,19 +6,31 @@ namespace Modules\Api\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Hash;
 use Modules\Auth\Http\Requests\StoreUserRequest;
 use Modules\Auth\Http\Requests\UpdateUserRequest;
 use Modules\Auth\Http\Resources\UserResource;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class UserController extends BaseApiController
 {
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::with('roles')->latest()->paginate(15);
+        $users = QueryBuilder::for(User::class)
+            ->allowedFilters([
+                AllowedFilter::partial('name'),
+                AllowedFilter::exact('email'),
+                AllowedFilter::exact('roles.name', null, false),
+            ])
+            ->allowedSorts(['name', 'email', 'created_at'])
+            ->defaultSort('-created_at')
+            ->with('roles')
+            ->paginate($request->integer('per_page', 15));
 
         return UserResource::collection($users);
     }

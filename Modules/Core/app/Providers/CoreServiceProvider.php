@@ -40,6 +40,7 @@ class CoreServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+        $this->app->register(PluginServiceProvider::class);
 
         $this->app->bind(UserInterface::class, function () {
             return config('auth.providers.users.model');
@@ -61,6 +62,11 @@ class CoreServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Core\Console\CoreSetupCommand::class,
+            \Modules\Core\Console\MakeCrudCommand::class,
+            \Modules\Core\Console\NewProjectCommand::class,
+            \Modules\Core\Console\CleanupOldRecords::class,
+            \Modules\Core\Console\BlockSuspiciousIps::class,
+            \Modules\Core\Console\AuditCommand::class,
         ]);
     }
 
@@ -69,10 +75,11 @@ class CoreServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+            $schedule->command('app:cleanup')->daily()->at('03:00');
+            $schedule->command('app:block-suspicious-ips')->everyFiveMinutes();
+        });
     }
 
     /**

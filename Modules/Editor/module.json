@@ -1,0 +1,11 @@
+{
+    "name": "Editor",
+    "alias": "editor",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Editor\\Providers\\EditorServiceProvider"
+    ],
+    "files": []
+}

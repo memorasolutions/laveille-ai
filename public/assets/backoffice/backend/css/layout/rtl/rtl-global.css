@@ -1,0 +1,155 @@
+
+[direction="rtl"] .content-body {
+    margin-left: 0;
+    margin-right: 16.5rem;
+}
+[direction="rtl"][data-sidebar-style="overlay"] .content-body {
+    margin-right: 0;
+}
+[direction="rtl"][data-layout="horizontal"][data-sidebar-style="compact"] .content-body {
+	margin-right: 0;
+}
+[direction="rtl"][data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .content-body {
+    margin-left: 0;
+    margin-right: 6rem;
+}
+[direction="rtl"][data-sidebar-style="compact"] .content-body {
+    margin-right: 10rem;
+}
+/* TABLE */
+[direction="rtl"] table.dataTable thead th,
+[direction="rtl"] table.dataTable thead td,
+[direction="rtl"] table.dataTable tfoot th,
+[direction="rtl"] table.dataTable tfoot td {
+    text-align: right;
+}
+[direction="rtl"] table.dataTable thead > tr > th.sorting::after,
+[direction="rtl"] table.dataTable thead > tr > th.sorting_desc::after,
+[direction="rtl"] table.dataTable thead > tr > th.sorting_asc::after{
+    margin-right: 5px;
+}
+[direction="rtl"] table.dataTable thead>tr>th.sorting,
+[direction="rtl"] table.dataTable thead>tr>th.sorting_asc{
+    padding-left: 26px;
+}
+/* MY PROFILE PAGE */
+[direction="rtl"] .text-youtube:after,
+[direction="rtl"] .text-linkedin:after,
+[direction="rtl"] .text-facebook:after,
+[direction="rtl"] .text-dribble:after {
+    left: auto;
+    right: 22px;
+}
+/* DROPDOWN */
+[direction="rtl"] .dropdown-toggle::after ,
+[direction="rtl"] .dropup .dropdown-toggle::after ,
+[direction="rtl"] .dropstart .dropdown-toggle::before ,
+[direction="rtl"] .dropend .dropdown-toggle::after{
+    margin-right: 0.255em;
+    margin-left: 0;
+}
+/* FORM */
+[direction="rtl"] .form-check .form-check-input {
+    float: right;
+    margin-right: -1.5em;
+    margin-left: 0;
+}
+[direction="rtl"] .asColorPicker-trigger {
+    right: auto;
+    left: 0;
+}
+[direction="rtl"] .asColorPicker-trigger span {
+    border-radius: 0.375rem 0 0 0.375rem;
+}
+[direction="rtl"] .form-wizard .nav-wizard li .nav-link:after {
+    right: 50%;
+    left: auto;
+}
+/* OTHER */
+[direction="rtl"] .recent-activity:after {
+    left: auto;
+    right: 0.5rem;
+}
+[direction="rtl"] .author-profile .upload-link{
+    left: 0px;
+    right: auto;
+
+}
+[direction="rtl"] #external-events .external-event:before {
+    margin-left: .9rem;
+    margin-right: 0;
+}
+[direction="rtl"] .widget-timeline .timeline:before {
+    left: auto;
+    right: 0.5625rem;
+}
+[direction="rtl"] .widget-timeline .timeline > li > .timeline-panel {
+    margin-left: 0;
+    margin-right: 2.5rem;
+}
+[direction="rtl"] .widget-timeline.style-1 .timeline .timeline-badge.timeline-badge + .timeline-panel {
+    border-width: 0 0.3125rem 0 0;
+}
+[direction="rtl"] .widget-timeline.style-1 .timeline .timeline-badge.timeline-badge + .timeline-panel:after {
+    border: 0;
+    right: -0.5625rem;
+    width: 0.4375rem;
+    height: 0.4375rem;
+    left: 0;
+
+}
+[direction="rtl"] .widget-timeline .timeline > li > .timeline-panel:after {
+    right: -0.3125rem;
+    left: 0;
+}
+[direction="rtl"] .nice-select:after {
+    right: auto;
+    margin-right: 16px;
+    margin-left: 0;
+}
+[direction="rtl"] [type="file"]::-webkit-file-upload-button {
+    margin-right: 0;
+    margin-left: 10px;
+}
+[direction="rtl"] .modal-header .btn-close {
+    margin-right: auto;
+    margin-left: 0;
+}
+[direction="rtl"] .ck.ck-toolbar > .ck-toolbar__items {
+    flex-flow: row-reverse wrap !important;
+}
+[direction="rtl"] .mySwiper{
+    direction: ltr;
+}
+@media (min-width: 47.9375rem) {
+    [direction="rtl"][data-sidebar-style="icon-hover"][data-layout="vertical"] .content-body {
+		margin-left: 0;
+		margin-right: 5.2rem;
+	}
+}
+@media only screen and (max-width: 47.9375rem){
+    [direction="rtl"] .content-body .container-flui {
+        padding-right: 1.25rem;
+        padding-left: 0;
+    }
+    [direction="rtl"][data-sidebar-style="compact"] .content-body {
+        margin-left: 0;
+        margin-right: 10rem;
+    }
+}
+@media only screen and (min-width: 48rem) {
+    [direction="rtl"][data-sidebar-style="mini"] .content-body {
+        margin-left: 0;
+        margin-right: 6rem;
+    }
+}
+@media (min-width: 64rem) {
+    [direction="rtl"][data-layout="horizontal"] .content-body {
+        margin-right: 0 !important;
+    }
+}
+@media only screen and (max-width: 47.9375rem){
+    [direction="rtl"] .content-body {
+        padding-left: 0rem;
+    }
+}

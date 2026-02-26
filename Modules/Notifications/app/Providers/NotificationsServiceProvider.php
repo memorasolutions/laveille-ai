@@ -40,6 +40,23 @@ class NotificationsServiceProvider extends ServiceProvider
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->singleton(\Modules\Notifications\Services\NotificationService::class);
+        $this->app->singleton(\Modules\Notifications\Services\EmailTemplateService::class);
+
+        $this->app->bind(
+            \Modules\Notifications\Contracts\SmsDriverInterface::class,
+            function () {
+                $smsEnabled = \Modules\Settings\Facades\Settings::get('sms_enabled', false);
+                if ($smsEnabled) {
+                    return new \Modules\Notifications\Drivers\VoipMsService(
+                        (string) \Modules\Settings\Facades\Settings::get('voipms_api_username', ''),
+                        (string) \Modules\Settings\Facades\Settings::get('voipms_api_password', ''),
+                        (string) \Modules\Settings\Facades\Settings::get('voipms_did_number', ''),
+                    );
+                }
+
+                return new \Modules\Notifications\Drivers\NullSmsDriver;
+            },
+        );
     }
 
     /**
@@ -47,7 +64,10 @@ class NotificationsServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Notifications\Console\GenerateVapidKeysCommand::class,
+            \Modules\Notifications\Console\SendNotificationDigest::class,
+        ]);
     }
 
     /**

@@ -69,16 +69,17 @@ test('super_admin has all permissions', function () {
     expect($superAdmin->permissions->count())->toBe(Permission::count());
 });
 
-test('non-admin user cannot access panel', function () {
+test('non-admin user does not have admin role', function () {
     $user = User::factory()->create();
     $user->assignRole(Role::create(['name' => 'user']));
 
-    expect($user->canAccessPanel(\Filament\Facades\Filament::getDefaultPanel()))->toBeFalse();
+    expect($user->hasRole('admin'))->toBeFalse();
+    expect($user->hasRole('super_admin'))->toBeFalse();
 });
 
-test('admin user can access panel', function () {
+test('admin user has admin role', function () {
     $user = User::factory()->create();
     $user->assignRole(Role::create(['name' => 'admin']));
 
-    expect($user->canAccessPanel(\Filament\Facades\Filament::getDefaultPanel()))->toBeTrue();
+    expect($user->hasRole('admin'))->toBeTrue();
 });

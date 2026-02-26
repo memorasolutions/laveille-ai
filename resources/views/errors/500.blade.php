@@ -1,4 +1,4 @@
 @extends('errors.layout')
 @section('code', '500')
-@section('title', 'Erreur serveur')
-@section('message', 'Une erreur interne est survenue. Notre équipe a été notifiée.')
+@section('title', __('Erreur serveur'))
+@section('message', __('Une erreur interne est survenue. Notre équipe a été notifiée.'))

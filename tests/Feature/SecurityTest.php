@@ -40,3 +40,66 @@ test('rate limiter login is configured', function () {
 test('rate limiter sensitive is configured', function () {
     expect(RateLimiter::limiter('sensitive'))->not->toBeNull();
 });
+
+// Phase 24 - Corrections sécurité
+
+test('password rules include PasswordPolicyRule', function () {
+    $rules = (new \Modules\Auth\Http\Requests\StoreUserRequest)->rules();
+
+    $hasPasswordRule = collect($rules['password'])->contains(
+        fn ($rule) => $rule instanceof \Modules\Auth\Rules\PasswordPolicyRule
+    );
+
+    expect($hasPasswordRule)->toBeTrue();
+});
+
+test('models use fillable for mass assignment protection', function () {
+    $modelFiles = [
+        base_path('app/Models/User.php'),
+        base_path('Modules/SEO/app/Models/MetaTag.php'),
+        base_path('Modules/Settings/app/Models/Setting.php'),
+    ];
+
+    foreach ($modelFiles as $file) {
+        $content = file_get_contents($file);
+        expect($content)->toContain('fillable');
+    }
+});
+
+test('api routes require sanctum authentication', function () {
+    $content = file_get_contents(base_path('routes/api/v1.php'));
+    expect($content)->toContain('auth:sanctum');
+});
+
+test('debug mode defaults to false in config', function () {
+    $content = file_get_contents(base_path('config/app.php'));
+    expect($content)->toContain("env('APP_DEBUG', false)");
+});
+
+test('honeypot middleware exists', function () {
+    expect(class_exists(\App\Http\Middleware\HoneypotProtection::class))->toBeTrue();
+});
+
+test('honeypot middleware rejects filled bot field', function () {
+    $middleware = new \App\Http\Middleware\HoneypotProtection;
+    $request = \Illuminate\Http\Request::create('/test', 'POST', ['website_url' => 'spam']);
+
+    expect(fn () => $middleware->handle($request, fn ($r) => new \Illuminate\Http\Response('OK')))
+        ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+});
+
+test('honeypot middleware allows empty bot field', function () {
+    $middleware = new \App\Http\Middleware\HoneypotProtection;
+    $request = \Illuminate\Http\Request::create('/test', 'POST', ['website_url' => '']);
+
+    $response = $middleware->handle($request, fn ($r) => new \Illuminate\Http\Response('OK'));
+    expect($response->getStatusCode())->toBe(200);
+});
+
+test('contact route has honeypot middleware', function () {
+    $routes = collect(app('router')->getRoutes()->getRoutes());
+    $route = $routes->first(fn ($r) => $r->getName() === 'contact.send');
+
+    expect($route)->not->toBeNull();
+    expect($route->gatherMiddleware())->toContain('honeypot');
+});

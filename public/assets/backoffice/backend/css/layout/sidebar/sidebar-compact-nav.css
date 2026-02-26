@@ -1,0 +1,186 @@
+
+/* Compact Nav */
+@media (min-width: 47.9375rem) {
+	[data-sidebar-style="compact"] .nav-header {
+		width: 10rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .metismenu .has-arrow[aria-expanded=true]:after, [data-sidebar-style="compact"] .dlabnav .metismenu .mm-active > .has-arrow:after {
+		margin-right: 0;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile {
+		margin-bottom: 0.3125rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile > a.nav-link {
+		display: block;
+		text-align: center;
+		border: 0;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile > a.nav-link img {
+		margin-bottom: 0.3125rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile > a.nav-link .header-info {
+		margin-left: 0 !important;
+		text-align: center;
+		display: none;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile > a.nav-link .header-info small {
+		text-align: center !important;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile .dropdown-menu {
+		min-width: 11rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile a svg {
+		display: unset !important;
+	}
+	[data-sidebar-style="compact"] .dlabnav .nav-user {
+		display: none;
+	}
+	[data-sidebar-style="compact"] .dlabnav .metismenu li {
+		text-align: center;
+	}
+	[data-sidebar-style="compact"] .dlabnav .metismenu li a {
+		padding: 0.5rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .metismenu li a svg {
+		margin-right: 0.0125rem;
+		margin-top: -1.3875rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .metismenu li a .menu-icon {
+		display: block;
+		padding: 0;
+		background-color: rgba(13, 153, 255, 0.05);
+		color: rgba(0, 0, 0, 0.3);
+		width: 3.125rem;
+		height: 3.125rem;
+		border-radius: 0.5rem;
+		line-height: 4.25rem;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: 0.3125rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .metismenu li ul:after {
+		content: none;
+	}
+	[data-sidebar-style="compact"] .dlabnav .metismenu li > a {
+		box-shadow: none;
+	}
+	[data-layout="vertical"][data-sidebar-style="compact"] .dlabnav .metismenu > li > a > i {
+		margin-right: auto;
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(255,255,255,0.1);
+		border-radius: 0.5rem;
+		height: 3.2rem;
+		width: 3.2rem;
+	}
+	/* [data-layout="vertical"][data-sidebar-style="compact"] .dlabnav .metismenu > li a > i {
+	} */
+	[data-sidebar-style="compact"] .dlabnav .plus-box, [data-sidebar-style="compact"] .dlabnav .copyright {
+		display: none;
+	}
+	[data-sidebar-style="compact"] .dlabnav .copyright {
+		padding: 0 1.25rem;
+		margin-top: 1.25rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-info2 {
+		padding: 0;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-info2 img {
+		margin-left: -1rem;
+	}
+	[data-sidebar-style="compact"] .dlabnav .sidebar-info {
+		display: none !important;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-profile2 {
+		text-align: center;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-info2 {
+		justify-content: center;
+		padding: .35rem;
+		display: inline-flex !important;
+	}
+	[data-sidebar-style="compact"] .dlabnav .header-info2 img {
+		margin: 0 !important;
+	}
+	
+	[data-sidebar-style="compact"] .nav-text {
+		display: inline-block;
+		margin-top: 0.3125rem;
+	}
+	[data-sidebar-style="compact"] .nav-label.first {
+		display: none;
+	}
+	[data-sidebar-style="compact"] .nav-badge {
+		display: none;
+	}
+	[data-sidebar-style="compact"] .footer {
+		padding-left: 11.25rem;
+	}
+	[data-sidebar-style="compact"] .content-body {
+		margin-left: 10rem;
+	}
+	[data-sidebarbg="color_1"][data-sidebar-style="compact"][data-theme-version="dark"][data-layout="vertical"] .dlabnav .metismenu li.mm-active > a i {
+		background: var(--rgba-primary-1);
+        color: var(--primary);
+	}
+	[data-sidebar-style="compact"][data-layout="vertical"] .dlabnav .metismenu li:hover > a i {
+		background: rgba(255,255,255,0.2);
+		color: #fff;
+   }
+}
+[data-layout="horizontal"][data-sidebar-style="compact"] .footer {
+	padding-left: 0;
+}
+[data-layout="horizontal"][data-sidebar-style="compact"] .content-body {
+	margin-left: 0;
+}
+[data-layout="horizontal"][data-sidebar-style="compact"] .dlabnav {
+	margin-bottom: 0;
+}
+[data-layout="horizontal"][data-sidebar-style="compact"] .header {
+	padding-left: 17.5rem;
+}
+[data-layout="horizontal"][data-sidebar-style="compact"] .nav-header {
+	width: 17.5rem;
+}
+[data-layout="horizontal"][data-sidebar-style="compact"] .nav-header .brand-logo {
+	padding-left: 2.5rem;
+	padding-right: 2.5rem;
+}
+[data-layout="vertical"][data-sidebar-style="compact"] .dlabnav {
+	width: 10rem;
+}
+[data-layout="vertical"][data-sidebar-style="compact"] .dlabnav .metismenu ul {
+	margin-left: 0;
+	border: 0;
+	/* background: rgba(255, 255, 255, 0.10); */
+	padding: 0.625rem 0;
+}
+[data-layout="vertical"][data-sidebar-style="compact"] .dlabnav .metismenu ul ul a {
+	padding: 0.625rem 15px;
+}
+[data-layout="vertical"][data-sidebar-style="compact"] .dlabnav .metismenu > li > a {
+	padding: 1rem 0.5rem;
+}
+[data-layout="vertical"][data-sidebar-style="compact"] .dlabnav .metismenu > li > a.has-arrow::after {
+	top: 0.0625rem;
+	display: inline-block;
+	right: auto;
+	margin-left: 0.3125rem;
+	position: relative;
+	width: 7px;
+	height: 7px;
+	border-width: 0.125rem 0rem 0rem 0.125rem;
+}
+[data-layout="vertical"][data-sidebar-style="compact"] .dlabnav .metismenu > li.mm-active > a {
+	background: transparent;
+}
+[data-sidebarbg="color_1"][data-sidebar-style="compact"][data-layout="vertical"] .dlabnav .metismenu > li:hover .nav-text,[data-sidebarbg="color_1"] [data-sidebar-style="compact"][data-layout="vertical"] .dlabnav .metismenu > li.mm-active .nav-text {
+    color: var(--primary);
+}
+[data-sidebarbg="color_1"][data-sidebar-style="compact"][data-layout="vertical"] .dlabnav .metismenu > li:hover > a.has-arrow::after, [data-sidebarbg="color_1"][data-sidebar-style="compact"][data-layout="vertical"] .dlabnav .metismenu > li.mm-active > a.has-arrow::after {
+    border-top-color: var(--primary);
+    border-left-color: var(--primary);
+}

@@ -41,3 +41,33 @@ test('media service delete returns false for nonexistent media', function () {
 
     expect($service->deleteMedia(99999))->toBeFalse();
 });
+
+test('HasMediaAttachments trait defines media conversions', function () {
+    $content = file_get_contents(base_path('Modules/Media/app/Traits/HasMediaAttachments.php'));
+
+    expect($content)->toContain('registerMediaConversions')
+        ->toContain('thumbnail')
+        ->toContain('medium')
+        ->toContain('large');
+});
+
+test('HasMediaAttachments trait has avatar collection', function () {
+    $content = file_get_contents(base_path('Modules/Media/app/Traits/HasMediaAttachments.php'));
+
+    expect($content)->toContain("'avatar'")
+        ->toContain('singleFile');
+});
+
+test('media service has all required methods', function () {
+    $service = app(MediaService::class);
+    $methods = get_class_methods($service);
+
+    expect($methods)->toContain('addMedia')
+        ->toContain('addMediaFromUrl')
+        ->toContain('getMedia')
+        ->toContain('getFirstMedia')
+        ->toContain('getFirstMediaUrl')
+        ->toContain('deleteMedia')
+        ->toContain('clearMediaCollection')
+        ->toContain('getAllMedia');
+});

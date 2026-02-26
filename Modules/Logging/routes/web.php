@@ -2,4 +2,4 @@
 
 declare(strict_types=1);
 
-// Activity logs managed via Filament admin panel
+// Activity logs managed via backoffice admin panel

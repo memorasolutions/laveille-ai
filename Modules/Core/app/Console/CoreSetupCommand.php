@@ -37,14 +37,7 @@ class CoreSetupCommand extends Command
         $this->call('db:seed');
         $this->newLine();
 
-        // 3. Filament Shield (generate permissions for resources)
-        if (class_exists(\BezhanSalleh\FilamentShield\FilamentShieldPlugin::class)) {
-            $this->info('Generating Filament Shield permissions...');
-            $this->call('shield:generate', ['--all' => true]);
-            $this->newLine();
-        }
-
-        // 4. Clear caches
+        // 3. Clear caches
         $this->info('Clearing caches...');
         $this->call('config:clear');
         $this->call('cache:clear');
@@ -52,7 +45,7 @@ class CoreSetupCommand extends Command
         $this->call('view:clear');
         $this->newLine();
 
-        // 5. Storage link
+        // 4. Storage link
         if (! file_exists(public_path('storage'))) {
             $this->info('Creating storage link...');
             $this->call('storage:link');
@@ -65,8 +58,8 @@ class CoreSetupCommand extends Command
             ['Item', 'Value'],
             [
                 ['Admin URL', url('/admin')],
-                ['Admin email', 'admin@laravel-core.test'],
-                ['Admin password', 'password'],
+                ['Admin email', 'stephane@memora.ca'],
+                ['Admin password', '(défini dans le seeder)'],
             ]
         );
 

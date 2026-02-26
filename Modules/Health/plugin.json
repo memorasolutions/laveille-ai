@@ -1,0 +1,10 @@
+{
+    "name": "Health",
+    "description": "Vérification de santé du système",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 10
+}
