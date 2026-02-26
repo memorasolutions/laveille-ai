@@ -6,7 +6,7 @@ namespace Modules\Core\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Modules\Settings\Models\Setting;
+use Illuminate\Support\Facades\Schema;
 
 class CleanupOldRecords extends Command
 {
@@ -17,10 +17,10 @@ class CleanupOldRecords extends Command
     public function handle(): int
     {
         $dryRun = (bool) $this->option('dry-run');
-        $daysLogin = (int) Setting::get('retention.login_attempts_days', 90);
-        $daysEmails = (int) Setting::get('retention.sent_emails_days', 90);
-        $daysActivity = (int) Setting::get('retention.activity_log_days', 180);
-        $daysBlockedIps = (int) Setting::get('retention.blocked_ips_days', 365);
+        $daysLogin = (int) $this->getSetting('retention.login_attempts_days', 90);
+        $daysEmails = (int) $this->getSetting('retention.sent_emails_days', 90);
+        $daysActivity = (int) $this->getSetting('retention.activity_log_days', 180);
+        $daysBlockedIps = (int) $this->getSetting('retention.blocked_ips_days', 365);
 
         if ($dryRun) {
             $this->warn('Mode simulation (dry-run) - aucune donnée ne sera supprimée.');
@@ -62,5 +62,16 @@ class CleanupOldRecords extends Command
 
         $prefix = $dryRun ? '[DRY-RUN] Supprimerait' : 'Supprimé';
         $this->info("{$prefix} {$count} enregistrement(s) de {$table} > {$days} jours");
+    }
+
+    private function getSetting(string $key, mixed $default = null): mixed
+    {
+        if (! Schema::hasTable('settings')) {
+            return $default;
+        }
+
+        $setting = DB::table('settings')->where('key', $key)->first();
+
+        return $setting !== null ? $setting->value : $default;
     }
 }

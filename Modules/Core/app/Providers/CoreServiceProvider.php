@@ -65,7 +65,6 @@ class CoreServiceProvider extends ServiceProvider
             \Modules\Core\Console\MakeCrudCommand::class,
             \Modules\Core\Console\NewProjectCommand::class,
             \Modules\Core\Console\CleanupOldRecords::class,
-            \Modules\Core\Console\BlockSuspiciousIps::class,
             \Modules\Core\Console\AuditCommand::class,
         ]);
     }
@@ -78,7 +77,6 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
             $schedule->command('app:cleanup')->daily()->at('03:00');
-            $schedule->command('app:block-suspicious-ips')->everyFiveMinutes();
         });
     }
 

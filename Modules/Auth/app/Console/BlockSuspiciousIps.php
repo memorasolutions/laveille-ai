@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Core\Console;
+namespace Modules\Auth\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;

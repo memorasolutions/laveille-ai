@@ -59,6 +59,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Auth\Console\UnlockUserCommand::class,
+            \Modules\Auth\Console\BlockSuspiciousIps::class,
         ]);
     }
 
@@ -67,10 +68,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+            $schedule->command('app:block-suspicious-ips')->everyFiveMinutes();
+        });
     }
 
     /**

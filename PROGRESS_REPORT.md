@@ -126,7 +126,7 @@
 1. ~~**Synchroniser README.md**~~ - ✅ Déjà à jour (2156 tests, 25 modules)
 2. ~~**Audit hardcode wowdash**~~ - ✅ Tous les modules vérifiés, aucun hardcode restant
 3. ~~**Nettoyer docs obsolètes**~~ - ✅ Supprimés (DOCUMENTATION_SUMMARY, SESSION_STATE, ROADMAP, MCP_NOTES)
-4. **Nettoyage vues dupliquées** (Phase 1 AUDIT_REPORT) - 21 anciennes vues Backoffice identifiées
+4. ~~**Nettoyage vues dupliquées**~~ - ✅ 22 répertoires racine supprimés (38 fichiers, -3577 lignes)
 
 ### Priorité moyenne
 5. **Découplage Core** (Phase 2 AUDIT_REPORT) - Déplacer EnsureIsAdmin, résoudre 4 dépendances circulaires
