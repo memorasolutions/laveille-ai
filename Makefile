@@ -1,4 +1,4 @@
-.PHONY: install dev test test-coverage lint lint-check analyse rector rector-fix seed migrate fresh cache cache-clear horizon telescope docker-up docker-down docker-build deploy ide-helper
+.PHONY: install dev test test-coverage lint lint-check analyse rector rector-fix seed migrate fresh cache cache-clear horizon telescope docker-up docker-down docker-build deploy ide-helper check check-quick
 
 install:
 	composer install
@@ -76,3 +76,9 @@ ide-helper:
 	php artisan ide-helper:generate
 	php artisan ide-helper:models -N
 	php artisan ide-helper:meta
+
+check:
+	php artisan app:check
+
+check-quick:
+	php artisan app:check --quick

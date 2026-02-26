@@ -25,6 +25,7 @@
 - [x] **app:install wizard** - Commande interactive setup complet (DB validation, admin, Stripe, .env)
 - [x] **app:demo** - Donnees demo realistes (users, articles, comments, pages, activity, subscribers)
 - [x] **app:status** - Dashboard systeme (DB, cache, queue, storage, modules, stats)
+- [x] **app:check** - Pre-deploy validation (env, DB, PHPStan, tests, security, config, storage) + make check
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 
