@@ -27,6 +27,7 @@
 - [x] **app:status** - Dashboard systeme (DB, cache, queue, storage, modules, stats)
 - [x] **app:check** - Pre-deploy validation (env, DB, PHPStan, tests, security, config, storage) + make check
 - [x] **app:make-module** - Scaffolder module complet (16 fichiers, providers, routes, tests, plugin.json, module.json)
+- [x] **CI/CD amélioré** - Concurrency cancel, npm audit, coverage-text dans PR, caches optimisés
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 
