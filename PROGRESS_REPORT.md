@@ -114,26 +114,26 @@
 
 | Tâche | % estimé | Ce qui manque |
 |-------|----------|---------------|
-| Audit hardcode wowdash dans modules | 60% | Blog fait. Newsletter, Pages, Editor à vérifier |
+| Audit hardcode wowdash dans modules | 100% | Blog + Newsletter + Pages + Editor + Export + Search + Translation - tous propres |
 | Migration architecture plugins (AUDIT_REPORT) | 15% | plugin.json 25/25. Renommage Modules/ et PluginManager UI non faits |
-| Nettoyage docs obsolètes | 30% | DOCUMENTATION_SUMMARY.md, SESSION_STATE.md, ROADMAP.md à mettre à jour |
+| Nettoyage docs obsolètes | 100% | DOCUMENTATION_SUMMARY.md, SESSION_STATE.md, ROADMAP.md, MCP_NOTES.md supprimés |
 
 ---
 
 ## ⬜ Restant (par priorité)
 
 ### Priorité haute
-1. **Synchroniser README.md** - Indique 1216 tests au lieu de 2156, 21 modules au lieu de 25
-2. **Audit hardcode wowdash** - Newsletter, Pages, Editor possiblement affectés
-3. **Nettoyer docs obsolètes** - DOCUMENTATION_SUMMARY.md (1655 tests), SESSION_STATE.md (placeholder)
+1. ~~**Synchroniser README.md**~~ - ✅ Déjà à jour (2156 tests, 25 modules)
+2. ~~**Audit hardcode wowdash**~~ - ✅ Tous les modules vérifiés, aucun hardcode restant
+3. ~~**Nettoyer docs obsolètes**~~ - ✅ Supprimés (DOCUMENTATION_SUMMARY, SESSION_STATE, ROADMAP, MCP_NOTES)
 4. **Nettoyage vues dupliquées** (Phase 1 AUDIT_REPORT) - 21 anciennes vues Backoffice identifiées
 
 ### Priorité moyenne
 5. **Découplage Core** (Phase 2 AUDIT_REPORT) - Déplacer EnsureIsAdmin, résoudre 4 dépendances circulaires
 6. **Extraction code partagé** (Phase 3-4 AUDIT_REPORT) - Traits ParsesTags, VerifiesPassword, FormRequests dupliqués
 7. **Harmoniser boutons d'action admin** - kebab vs liens texte inconsistants
-8. **Nettoyage screenshots racine** - 200+ fichiers .png à la racine (audits, phases)
-9. **Commit des changements** - 105+ fichiers modifiés non commités depuis feature/plugin-architecture
+8. ~~**Nettoyage screenshots racine**~~ - ✅ Ajoutés au .gitignore (/*.png)
+9. ~~**Commit des changements**~~ - ✅ Commit 4e0500c (4835 fichiers, 584K insertions)
 
 ### Priorité basse
 10. **Phase 154 : email digest** - Non commencé
@@ -151,13 +151,13 @@
 
 | # | Incohérence | Source doc | Réalité |
 |---|-------------|-----------|---------|
-| 1 | "1216 tests, 21 modules" | README.md | 2156 tests, 25 modules |
-| 2 | "1655 tests, 24 modules" | DOCUMENTATION_SUMMARY.md | Très obsolète |
-| 3 | "26 modules actifs" | Ancienne MEMORY.md | 25 modules (vérifié modules_statuses.json) |
-| 4 | "78 migrations" | Ancien PROGRESS_REPORT | 57 migrations (vérifié par scan) |
-| 5 | "Filament v5" | DOCUMENTATION_SUMMARY.md | Filament retiré, remplacé par NobleUI |
-| 6 | SESSION_STATE.md | .claude/ | Obsolète (renvoie à MEMORY.md) |
-| 7 | "456 routes" | Ancien rapport | 312 routes (vérifié par scan récent) |
+| 1 | ~~"1216 tests, 21 modules"~~ | README.md | ✅ Corrigé (2156 tests, 25 modules) |
+| 2 | ~~"1655 tests, 24 modules"~~ | DOCUMENTATION_SUMMARY.md | ✅ Fichier supprimé |
+| 3 | "26 modules actifs" | Ancienne MEMORY.md | ✅ Corrigé (25 modules) |
+| 4 | "78 migrations" | Ancien PROGRESS_REPORT | ✅ Corrigé (57 migrations) |
+| 5 | ~~"Filament v5"~~ | DOCUMENTATION_SUMMARY.md | ✅ Fichier supprimé |
+| 6 | ~~SESSION_STATE.md~~ | .claude/ | ✅ Fichier supprimé |
+| 7 | "456 routes" | MEMORY.md | ✅ Corrigé (312 routes) |
 
 ---
 
@@ -167,8 +167,8 @@
 |---|----------|----------|
 | 1 | **Migration Modules/ vers plugins/** | Le renommage physique est-il toujours souhaité ? Risque élevé, valeur incertaine. |
 | 2 | **Priorité Phase 154-158** | Email digest, doc auto, multi-tenant, marketing, A/B - toujours prioritaires ? |
-| 3 | **Nettoyage screenshots** | 200+ fichiers .png à la racine du projet. Supprimer ou déplacer ? |
-| 4 | **Commit massif** | 105+ fichiers modifiés depuis le merge feature/plugin-architecture. Faut-il commiter maintenant ? |
+| 3 | ~~**Nettoyage screenshots**~~ | ✅ Ajoutés au .gitignore |
+| 4 | ~~**Commit massif**~~ | ✅ Commit 4e0500c effectué |
 
 ---
 
