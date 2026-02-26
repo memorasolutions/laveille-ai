@@ -29,6 +29,7 @@
 - [x] **app:make-module** - Scaffolder module complet (16 fichiers, providers, routes, tests, plugin.json, module.json)
 - [x] **CI/CD amélioré** - Concurrency cancel, npm audit, coverage-text dans PR, caches optimisés
 - [x] **app:logs** - Tail logs colorés avec filtrage par niveau, timestamps relatifs, --clear
+- [x] **app:setup-hooks** - Git pre-commit hook (Pint + PHPStan sur fichiers stagés uniquement)
 
 ## Restant (priorite basse - nouvelles fonctionnalites)
 

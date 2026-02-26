@@ -169,6 +169,8 @@ Suite actuelle : **2169+ tests, 0 échec**. PHPStan niveau 6, 0 erreur. Pint 100
 | `php artisan app:status` | Dashboard santé système (DB, cache, queue, storage, modules, stats) |
 | `php artisan app:check` | Validation pre-deploy (env, DB, PHPStan, tests, sécurité, config, storage). Flag `--quick` pour skip PHPStan/tests |
 | `php artisan app:make-module {Name}` | Scaffolder de module complet (16 fichiers : providers, routes, config, tests, plugin.json, module.json) |
+| `php artisan app:logs` | Tail des logs colorés avec filtrage par niveau. Flags `--level=error`, `--lines=50`, `--clear` |
+| `php artisan app:setup-hooks` | Installe le git pre-commit hook (Pint + PHPStan sur fichiers modifiés). Flag `--force` |
 
 ### Commandes métier
 
