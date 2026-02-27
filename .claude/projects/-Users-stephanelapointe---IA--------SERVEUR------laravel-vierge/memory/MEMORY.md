@@ -1,44 +1,25 @@
 # Laravel CORE Template - Mémoire projet
 
-## État actuel (2026-02-26)
-- **2156 tests, 4192 assertions, 100% pass**
-- **PHPStan** : 0 erreurs (niveau 6)
-- **Branche** : master (105+ fichiers modifiés non commités depuis merge feature/plugin-architecture)
-- **25 modules actifs**, 312 routes, 57 migrations
-- **3 thèmes backoffice** : wowdash (Bootstrap 5), tabler, backend (NobleUI Bootstrap 5.3.8)
-- **Thème actif** : backend (NobleUI) - conversion Tailwind→Bootstrap 5 TERMINÉE (0 Tailwind restant)
-- **i18n** : 100% français (validation 148 clés, passwords 5, pagination 2, auth 3, fr.json 670+)
-- **WCAG 2.2 AA** : ~85 aria-labels ajoutés sur 17 composants Livewire
-- **UX** : hook wire:loading global (spinner + disable sur tous les boutons Livewire), toasts Bootstrap 5
+## État actuel (2026-02-27)
+- **2294 tests, 4543 assertions, 4 échecs WCAG pré-existants (Phase188)**
+- **PHPStan** : 4 erreurs pré-existantes (env() hors config/, niveau 6)
+- **30 modules actifs**, ~497 routes, 68 migrations
+- **1 thème backoffice** : backend (NobleUI Bootstrap 5.3.8) - wowdash/tabler supprimés
+- **Auth layouts** : guest = NobleUI, user dashboard = Jobick (Deznav sidebar)
+- **39 permissions**, 4 rôles (super_admin, admin, editor, user)
+- **RBAC** : Gate::before super_admin, middleware permission: sur routes, policies can()
 - **SaaS** : Stripe Cashier, plans, checkout, revenue dashboard ApexCharts
 - **IA** : Module AI OpenRouter (chat, articles, modération, SEO, traduction)
 - **PWA** : service-worker.js + manifest.json
 - Superadmin : stephane@memora.ca / Admin123!
 
-## Theme switcher dynamique (VALIDÉ 2026-02-24)
-
-### Architecture
-- **Middleware** `SetBackofficeTheme` : lit `backoffice.theme` depuis Settings DB, prepend 3 namespaces (backoffice, auth, blog)
-- **Middleware appliqué** sur : routes admin (Backoffice), routes user dashboard (Auth), routes blog admin (Blog)
-- **Setting DB** : `backoffice.theme` (groupe branding, id 60). Actuellement = `backend`
-- **saveTheme()** dans `SettingsManager` Livewire + sélecteur UI dans chaque thème
-- **3 thèmes disponibles** : wowdash (Bootstrap 5), tabler (Tabler CSS), backend (Jobick/Tailwind)
-- **Layouts Auth** : 3 variantes dans `Modules/Auth/resources/views/themes/{theme}/layouts/app.blade.php`
-- **Blog refactoré** : contrôleurs utilisent `blog::admin.*` (plus de hardcode wowdash), vues base + backend créées
+## Theme switcher dynamique
+- **Middleware** `SetBackofficeTheme` : lit `backoffice.theme` depuis Settings DB, prepend namespaces
+- **Setting DB** : `backoffice.theme` = `backend` (seul thème restant)
+- **1 thème** : backend (NobleUI Bootstrap 5.3.8). wowdash et tabler supprimés.
+- **Auth guest** : NobleUI (guest.blade.php réécrit, jQuery supprimé → vanilla JS)
+- **Auth user** : Jobick (app.blade.php, Deznav sidebar, FontAwesome)
 - `BACKOFFICE_THEME` retiré du `.env` - la DB gère tout
-- Tests rendus theme-agnostic (Phase63, Phase65, Phase97, Phase99, Phase154, Phase174, Phase175, Phase187)
-
-### Corrections validées (2026-02-24)
-- **Flatpickr** : JS chargé APRÈS jQuery (global.min.js) dans script.blade.php + Auth app.blade.php
-- **Breadcrumb** : subtitle "Accueil" → "Administration" (élimine double "Accueil/Accueil")
-- **Auth layout JS** : ordre corrigé (global→flatpickr→dlabnav-init→custom)
-- **Middleware étendu** à : Backoffice, Auth, Blog, Pages, Newsletter
-- **15 controllers refactorisés** (supprimé hardcode wowdash), 21 vues base fallback créées
-- **2156 tests, 0 échec** - Playwright 9.6/10
-
-### Todo restant
-- MakeCrudCommand stubs hardcode wowdash → à rendre theme-agnostic
-- README.md → sync (2156 tests, 25+ modules)
 
 ## Phase 185 - Catégories et tags dropdown WordPress-style (TERMINÉE)
 - Tom-Select 2.4.3 CDN (Bootstrap 5, 10KB, pas jQuery)

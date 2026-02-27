@@ -63,6 +63,15 @@
                         </select>
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-heading mb-1.5">Template</label>
+                        <select name="template" class="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @foreach(\Modules\Pages\Models\StaticPage::TEMPLATES as $key => $label)
+                                <option value="{{ $key }}" {{ old('template', $page->template) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-secondary mt-1">Mise en page utilisée pour l'affichage public</p>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-heading mb-1.5">Slug</label>
                         <input type="text" class="w-full border border-border rounded-lg px-3 py-2 text-sm bg-neutral-50 text-secondary cursor-not-allowed"
                                value="{{ $page->slug }}" readonly>

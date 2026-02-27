@@ -1,95 +1,82 @@
 # Rapport de progression - Laravel SaaS Boilerplate
 
-**Dernière mise à jour** : 2026-02-26 (session RBAC)
+**Dernière mise à jour** : 2026-02-27 (correction layouts auth + fix tests post-nettoyage thèmes)
 **Croisement** : docs + scan code réel + exécution tests
 
 ---
 
-## Indicateurs clés (vérifiés)
+## Indicateurs clés (vérifiés par scan code réel)
 
 | Métrique | Valeur | Source |
 |----------|--------|--------|
-| Tests | 2185 passés, 4248 assertions | `php artisan test` (486s, 2 flaky StorageServiceProvider en parallèle) |
+| Tests | 2294 passés, 4543 assertions, 4 échecs WCAG pré-existants | `php artisan test` |
 | PHPStan | 4 erreurs pré-existantes | `env()` hors config/ (CoreSetupCommand, DatabaseSeeder) |
-| Modules actifs | 25/25 | `modules_statuses.json` |
-| Routes | 460 | `php artisan route:list` |
-| Migrations | 58 | `database/migrations/` + `Modules/*/database/migrations/` |
-| Commandes artisan | 11 | `php artisan list app` |
-| Thèmes backoffice | 3 | wowdash, tabler, backend (NobleUI) |
-| Permissions | 36 (fonctionnelles) | `RolesAndPermissionsSeeder`, middleware route + policies |
+| Modules actifs | 30/30 | `modules_statuses.json` |
+| Routes | ~497 | `php artisan route:list` |
+| Migrations | 68 | `database/migrations/` + `Modules/*/database/migrations/` |
+| Commandes artisan | 11+ | `php artisan list app` |
+| Thème backoffice | 1 (backend/NobleUI) | wowdash et tabler supprimés |
+| Thème auth (guest) | NobleUI Bootstrap 5.3.8 | `guest.blade.php` réécrit |
+| Thème auth (user) | Jobick | `app.blade.php` (Deznav sidebar) |
+| Permissions | 39 (fonctionnelles) | `RolesAndPermissionsSeeder` |
 | Rôles | 4 | super_admin, admin, editor, user |
-| Packages clés | 9 | Cashier, Spatie Permission, Purifier, Scramble, Sanctum, Livewire, Scout, ActivityLog, nwidart |
+| Fichiers tests | 226 | 189 root + 37 modules |
+| plugin.json | 28/30 modules | Config metadata par module |
 
 ---
 
-## ✅ Complété (28 fonctionnalités, preuves vérifiées)
+## ✅ Complété (40 fonctionnalités, preuves vérifiées)
 
 | # | Fonctionnalité | Preuve (fichier/test) |
 |---|----------------|----------------------|
-| 1 | Architecture modulaire 25 modules | `modules_statuses.json`, `Modules/*/module.json` |
-| 2 | Auth complet (Login, Register, 2FA TOTP, Magic Link, Social Auth, Lockout) | `Modules/Auth/`, `Modules/Auth/tests/` |
+| 1 | Architecture modulaire 30 modules | `modules_statuses.json`, `Modules/*/module.json` |
+| 2 | Auth complet (Login, Register, 2FA TOTP, Magic Link, Social Auth, Lockout) | `Modules/Auth/`, tests Feature |
 | 3 | API REST v1 Sanctum + Scramble docs | `routes/api/v1.php`, 10 contrôleurs annotés |
-| 4 | SaaS/Billing Stripe Cashier, Plans, Checkout | `Modules/SaaS/`, `Modules/SaaS/app/Services/BillingService.php` |
-| 5 | Blog (Articles, Categories, Comments, Tags) | `Modules/Blog/`, tests Feature |
+| 4 | SaaS/Billing Stripe Cashier, Plans, Checkout | `Modules/SaaS/`, `BillingService.php` |
+| 5 | Blog (Articles, Catégories, Commentaires, Tags, Révisions) | `Modules/Blog/`, `BlogTagTest.php` |
 | 6 | Newsletter (Campaigns, Subscribers, Templates) | `Modules/Newsletter/` |
 | 7 | Backoffice admin (Dashboard, CRUD complet) | `Modules/Backoffice/`, 40+ pages admin |
-| 8 | 3 thèmes admin switchables dynamiquement | `config/backoffice.php`, `SetBackofficeTheme` middleware |
+| 8 | Thème backend unique (NobleUI Bootstrap 5.3.8) | `config/backoffice.php` → `'backend'` |
 | 9 | Module IA - OpenRouter (chat, articles, modération, SEO, traduction) | `Modules/AI/app/Services/AiService.php` |
 | 10 | Notifications (Email, WebPush, Digest) | `Modules/Notifications/` |
 | 11 | i18n FR/EN complète (670+ clés) | `lang/fr.json`, `lang/en.json` |
 | 12 | PWA (manifest, service worker) | `public/manifest.json`, `public/service-worker.js` |
-| 13 | SEO (Meta tags, Sitemap dynamique) | `Modules/SEO/` |
-| 14 | Media (Spatie MediaLibrary, conversions) | `Modules/Media/` |
+| 13 | SEO (Meta tags, Sitemap, JSON-LD Schema.org) | `Modules/SEO/`, `JsonLdService.php`, `JsonLdTest.php` |
+| 14 | Media (Spatie MediaLibrary, conversions, picker TipTap) | `Modules/Media/`, `MediaPickerTest.php` |
 | 15 | Search (Laravel Scout) | `Modules/Search/` |
-| 16 | Editor TipTap | `Modules/Editor/` |
+| 16 | Editor TipTap (avec media picker Alpine.js) | `Modules/Editor/`, `tiptap.blade.php` |
 | 17 | Export CSV (6 ressources) | `Modules/Export/` |
 | 18 | Backup Spatie | `Modules/Backup/` |
 | 19 | Webhooks | `Modules/Webhooks/` |
 | 20 | Multi-tenant (base) | `Modules/Tenancy/` |
-| 21 | Feature Flags (Laravel Pennant) | `Modules/Core/`, 9 flags dans AppServiceProvider |
-| 22 | Sécurité OWASP (XSS Purifier, CSRF, Headers, Rate Limiting) | `mews/purifier`, `SecurityHeaders` middleware, `SECURITY_AUDIT_REPORT.md` |
-| 23 | 11 commandes DX artisan | `app:install`, `app:demo`, `app:status`, `app:check`, `app:make-module`, `app:logs`, `app:setup-hooks`, `app:audit`, `app:sync-permissions`, `app:cleanup`, `app:block-suspicious-ips` |
-| 24 | CI/CD GitHub Actions | `.github/workflows/ci.yml` (concurrency, npm audit, coverage) |
-| 25 | VS Code config | `.vscode/extensions.json`, `.vscode/settings.json` |
-| 26 | Google Fonts local (RGPD) | `GoogleFontService.php`, 23 fichiers bunny.net nettoyés |
-| 27 | Git pre-commit hooks | `scripts/pre-commit`, `app:setup-hooks` |
-| 28 | Rôles/Permissions (4 rôles, 29 permissions, Policies) | `Modules/RolesPermissions/` |
-| 29 | **RBAC fonctionnel** (36 permissions, Gate::before, middleware route, AdminOnlyPolicy) | Voir détail ci-dessous |
-
-### Détail RBAC (session 2026-02-26)
-
-Le système de permissions était **purement décoratif** (29 permissions existaient mais aucun contrôleur ni route ne les vérifiait). Reconstruction complète :
-
-| Composant | Fichier | Changement |
-|-----------|---------|------------|
-| Gate::before super_admin | `RolesPermissionsServiceProvider.php` | Bypass total pour super_admin |
-| EnsureIsAdmin | `EnsureIsAdmin.php` | `hasRole()` → `can('view_admin_panel')` |
-| AdminOnlyPolicy (base) | `Modules/Core/app/Shared/Policies/AdminOnlyPolicy.php` | Classe abstraite avec `$permission` configurable |
-| SettingPolicy | `Modules/Settings/app/Policies/SettingPolicy.php` | `$permission = 'manage_settings'` |
-| PlanPolicy | `Modules/SaaS/app/Policies/PlanPolicy.php` | `$permission = 'manage_plans'` |
-| UserPolicy | `Modules/Auth/app/Policies/UserPolicy.php` | `hasRole()` → `can('manage_users')` + ownership |
-| ArticlePolicy | `Modules/Blog/app/Policies/ArticlePolicy.php` | `can('manage_articles')` + ownership |
-| CommentPolicy | `Modules/Blog/app/Policies/CommentPolicy.php` | `can('manage_comments')` + ownership |
-| Routes backoffice | `Modules/Backoffice/routes/web.php` | Middleware `permission:xxx` sur tous les groupes |
-| Middleware Spatie | `bootstrap/app.php` | Aliases `permission`, `role`, `role_or_permission` |
-| Seeder | `RolesAndPermissionsSeeder.php` | 29 → 36 permissions (7 nouvelles : système, sécurité, etc.) |
-| Telescope/Horizon | `TelescopeServiceProvider.php`, `HorizonServiceProvider.php` | `can('view_telescope')`, `can('view_horizon')` |
-| API protection | `Api/UserController.php` | Protection hardcodée user #1 + self-deletion (bypass Gate::before) |
-| TestCase | `tests/TestCase.php` | Auto-seed `RolesAndPermissionsSeeder` |
-| Tests parallèles | `MakeModuleCommandTest.php` | Groupe `sequential` pour éviter race condition |
-| RoleController | `RoleController.php` | Catégorie "Système" avec nouvelles permissions |
-| SyncPermissionsCommand | `SyncPermissionsCommand.php` | Exécute le seeder (idempotent) |
-
-**Décision architecture** : `ImpersonationController` garde volontairement `hasRole('super_admin')` (identité, pas permission).
+| 21 | Feature Flags (Laravel Pennant) | `Modules/Core/`, 9 flags |
+| 22 | Sécurité OWASP (XSS Purifier, CSRF, Headers, Rate Limiting) | `mews/purifier`, `SecurityHeaders` |
+| 23 | 11 commandes DX artisan | `app:install/demo/status/check/make-module/logs/setup-hooks` |
+| 24 | CI/CD GitHub Actions | `.github/workflows/ci.yml` |
+| 25 | Google Fonts local (RGPD) | `GoogleFontService.php` |
+| 26 | Git pre-commit hooks | `scripts/pre-commit`, `app:setup-hooks` |
+| 27 | RBAC fonctionnel (39 permissions, Gate::before, middleware, policies) | `RolesAndPermissionsSeeder.php`, middleware `permission:` |
+| 28 | Sidebar @can directives (backend uniquement) | `partials/sidebar.blade.php`, `RbacSidebarTest.php` |
+| 29 | Tests RBAC dédiés (11 tests, 57 assertions) | `tests/Feature/RbacSidebarTest.php` |
+| 30 | Menu dynamique (drag-and-drop, cache, Blade component) | `Modules/Menu/`, commit 928a915, 14 tests |
+| 31 | FAQ module (CRUD admin, page publique, JSON-LD) | `Modules/Faq/`, commit dc1fcd6, 15 tests |
+| 32 | Contact messages DB (admin UI, filtres, lu/non lu) | Commit 0aa8cae, 12 tests |
+| 33 | Homepage configurable (landing ou page statique) | Commit bea7e03, 7 tests |
+| 34 | Templates de pages (default, full-width, sidebar, landing) | `Modules/Pages/views/public/templates/`, 4 fichiers, `PageTemplateTest.php` |
+| 35 | Tags blog dédiés (modèle Tag, CRUD admin, archive) | `Modules/Blog/app/Models/Tag.php`, `BlogTagTest.php` |
+| 36 | Témoignages (CRUD admin + affichage public) | `Modules/Testimonials/`, 17 fichiers, `TestimonialTest.php` |
+| 37 | Nettoyage thèmes (wowdash/tabler supprimés, ~133 Mo libérés) | `git status`, 0 référence restante |
+| 38 | Layout auth guest (login/register) réécrit NobleUI | `Modules/Auth/resources/views/layouts/guest.blade.php` |
+| 39 | Layout auth user (dashboard utilisateur) corrigé Jobick | `Modules/Auth/resources/views/layouts/app.blade.php` |
+| 40 | jQuery supprimé des vues auth (vanilla JS) | `login.blade.php`, `register.blade.php`, `reset-password.blade.php` |
 
 ---
 
-## 🔄 En cours (2 éléments)
+## 🔄 En cours (1 élément)
 
 | Tâche | % | Ce qui manque |
 |-------|---|---------------|
-| Migration architecture plugins | 15% | `plugin.json` 25/25 fait. Renommage `Modules/` → `plugins/`, PluginManager UI, adaptation autoload/namespaces non faits. **Décision utilisateur requise.** |
-| PHPStan 4 erreurs `env()` | - | Volontaire : `env()` dans CoreSetupCommand (wizard interactif) et DatabaseSeeder (flexibilité clone). Correction triviale si souhaitée. |
+| Migration architecture plugins | 15% | `plugin.json` 28/30 fait. Renommage `Modules/` → `plugins/`, PluginManager UI, adaptation autoload/namespaces non faits. **Décision utilisateur requise.** |
 
 ---
 
@@ -97,18 +84,23 @@ Le système de permissions était **purement décoratif** (29 permissions exista
 
 | # | Tâche | Dépendances | Complexité |
 |---|-------|-------------|------------|
-| 1 | Sidebar @can directives (masquer liens sans permission) | RBAC fonctionnel ✅ | Faible |
-| 2 | Tests RBAC dédiés (editor ne voit pas backups, etc.) | RBAC fonctionnel ✅ | Faible |
-| 3 | Validation visuelle Playwright du RBAC | RBAC + sidebar @can | Moyenne |
-| 4 | Supprimer CrudService mort | Aucune | Triviale |
-| 5 | Phase 154 : Email digest | NotificationFrequency, Queue scheduling | Moyenne |
-| 6 | Phase 155 : Documentation technique auto-générée | Scramble API, PHPDoc | Faible |
-| 7 | Phase 156 : Multi-tenant avancé (isolation DB) | Modules/Tenancy existant | Élevée |
-| 8 | Phase 157 : Marketing automation (drip campaigns) | Newsletter, SaaS | Élevée |
-| 9 | Phase 158 : Tests A/B (flags + analytics) | Feature Flags Pennant | Moyenne |
-| 10 | Migration Modules/ → plugins/ | Décision utilisateur | Élevée (risque) |
-| 11 | API v2 GraphQL | API v1 existante | Élevée |
-| 12 | Tests E2E Playwright (suite complète) | Toutes les pages | Moyenne |
+| 1 | **Commit des changements en attente** (~100+ fichiers modifiés) | Aucune | Triviale |
+| 2 | Retirer packages npm @tabler du package.json | Aucune | Triviale |
+| 3 | Corriger 4 tests WCAG Phase188 (accessibilité layout admin) | Aucune | Faible |
+| 4 | Validation visuelle Playwright du RBAC | RBAC ✅ | Moyenne |
+| 5 | Corriger 4 erreurs PHPStan env() | Aucune | Triviale |
+| 6 | Corriger `@push('js')` → `@push('scripts')` dans les vues (revenue déjà fait) | Aucune | Triviale |
+| 7 | Mettre à jour README.md (tests 2294, 30 modules, 1 thème) | Aucune | Triviale |
+| 6 | Phase 154 : Email digest | Notifications, Queue | Moyenne |
+| 7 | Phase 155 : Documentation technique auto-générée | Scramble | Faible |
+| 8 | Phase 156 : Multi-tenant avancé (isolation DB) | Tenancy existant | Élevée |
+| 9 | Phase 157 : Marketing automation (drip campaigns) | Newsletter, SaaS | Élevée |
+| 10 | Phase 158 : Tests A/B (flags + analytics) | Feature Flags | Moyenne |
+| 11 | Migration Modules/ → plugins/ | Décision utilisateur | Élevée (risque) |
+| 12 | API v2 GraphQL | API v1 existante | Élevée |
+| 13 | Tests E2E Playwright automatisés (suite complète) | Toutes les pages | Moyenne |
+| 14 | Widgets/blocs configurables (zones sidebar, footer) | Pages module | Moyenne |
+| 15 | Form builder dynamique | Pages module | Élevée |
 
 ---
 
@@ -116,17 +108,17 @@ Le système de permissions était **purement décoratif** (29 permissions exista
 
 | Document | Affirmation | Réalité | Action |
 |----------|-------------|---------|--------|
-| MEMORY.md | 2169+ tests | **2185 tests** (augmenté session RBAC) | Mis à jour ✅ |
-| MEMORY.md | PHPStan 0 erreurs | **4 erreurs** pré-existantes (`env()` hors config/) | Mis à jour ✅ |
-| MEMORY.md | 57 migrations | **58 migrations** | Mis à jour ✅ |
-| MEMORY.md | 29 permissions | **36 permissions** (7 nouvelles session RBAC) | Mis à jour ✅ |
-| MEMORY.md | 456 routes | **460 routes** | Mis à jour ✅ |
-| SECURITY_AUDIT_REPORT.md | 2 XSS critiques (blog content) | **Corrigé** : `mews/purifier` installé, `safe_content` accessor | Rapport obsolète |
-| SECURITY_AUDIT_REPORT.md | Permissions décoratives | **Corrigé** : RBAC fonctionnel (middleware + policies + Gate::before) | Rapport obsolète |
-| AUDIT_REPORT.md | CrudService mort | **Encore présent** : `Modules/Core/app/Services/CrudService.php` | Suppression recommandée |
-| AUDIT_REPORT.md | 21 vues dupliquées | **Supprimées** (session précédente, -3577 lignes) | Rapport obsolète |
-| AUDIT_REPORT.md | 4 dépendances circulaires | **2 résolues** (Core↔Auth, EnsureIsAdmin déplacé) | 2 restantes mineures |
-| README.md | 2169+ tests | **2185 tests** | À mettre à jour |
+| MEMORY.md | 27 modules | **30 modules** (Faq, Menu, Testimonials ajoutés) | Corrigé ✅ |
+| MEMORY.md | 36 permissions | **39 permissions** (3 nouvelles) | Corrigé ✅ |
+| MEMORY.md | 62 migrations | **68 migrations** | Corrigé ✅ |
+| README.md | 2169+ tests | **2294 tests** | À corriger |
+| README.md | 25 modules | **30 modules** | À corriger |
+| TODO.md | CrudService mort (0 import) | **Utilisé dans 4 fichiers** (Phase4Test, Phase30Test, MakeCrudCommand, CrudService lui-même) | NE PAS supprimer |
+| TODO.md | 3 thèmes | **1 thème** (backend seul, wowdash/tabler supprimés) | Corrigé ✅ |
+| PROGRESS_REPORT.md (ancien) | 25 modules, 460 routes, 58 migrations | **30 modules, ~497 routes, 68 migrations** | Corrigé ✅ |
+| SECURITY_AUDIT_REPORT.md | XSS critiques, permissions décoratives | **Corrigé** : purifier + RBAC fonctionnel | Rapport obsolète |
+| AUDIT_REPORT.md | 21 vues dupliquées | **Supprimées** | Rapport obsolète |
+| package.json | @tabler/core, @tabler/icons-webfont | **Plus utilisés** (thème tabler supprimé) | À retirer |
 
 ---
 
@@ -134,7 +126,21 @@ Le système de permissions était **purement décoratif** (29 permissions exista
 
 | # | Question | Impact | Options |
 |---|----------|--------|---------|
-| 1 | Migration `Modules/` vers `plugins/` souhaitée ? | Risque élevé : 25 modules + 2185 tests + 58 migrations à adapter | A) Garder `Modules/` (0 risque) B) Renommer progressivement (risque moyen) C) Migration complète (risque élevé) |
-| 2 | Priorité Phases 154-158 ? | Planification prochaines sessions | Choisir 1-2 phases prioritaires ou autre direction |
-| 3 | Supprimer CrudService mort ? | Nettoyage code, -1 fichier inutile | Suppression recommandée (0 import trouvé) |
-| 4 | Corriger les 4 erreurs PHPStan `env()` ? | PHPStan 0 erreurs, mais perd flexibilité clone | Correction triviale via `config()` wrapper |
+| 1 | Migration `Modules/` vers `plugins/` souhaitée ? | Risque élevé : 30 modules + 2294 tests + 68 migrations à adapter | A) Garder `Modules/` (0 risque) B) Progressif C) Complet |
+| 2 | Priorité Phases 154-158 ? | Planification prochaines sessions | Choisir 1-2 phases prioritaires |
+| 3 | Corriger les 4 erreurs PHPStan `env()` ? | PHPStan 0 erreurs, mais perd flexibilité clone | Correction triviale via `config()` wrapper |
+
+---
+
+## Documents du projet (inventaire)
+
+| Fichier | Contenu | Statut |
+|---------|---------|--------|
+| `TODO.md` | Tâches actives et complétées | ✅ À jour |
+| `PROGRESS_REPORT.md` | Ce rapport | ✅ À jour |
+| `README.md` | Documentation projet | ⚠️ Chiffres obsolètes (tests, modules) |
+| `AUDIT_REPORT.md` | Audit refactoring (2026-02-21) | ⚠️ Partiellement obsolète |
+| `SECURITY_AUDIT_REPORT.md` | Audit OWASP (2026-02-26) | Supprimé (obsolète, XSS/RBAC corrigés) |
+| `SECURITY_FINDINGS_SUMMARY.txt` | Résumé audit sécurité | Supprimé (obsolète) |
+| `MIGRATION_PLAN.md` | Plan migration plugins (7 phases) | En attente de décision |
+| `MEMORY.md` | Mémoire auto Claude | ✅ À jour |

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 return [
-    'theme' => env('BACKOFFICE_THEME', 'wowdash'),
+    'theme' => env('BACKOFFICE_THEME', 'backend'),
 
     /*
     |--------------------------------------------------------------------------

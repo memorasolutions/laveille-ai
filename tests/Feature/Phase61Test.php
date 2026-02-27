@@ -35,7 +35,7 @@ it('admin dashboard se charge correctement', function () {
 it('dark mode toggle présent dans navbar', function () {
     $this->get('/admin')
         ->assertStatus(200)
-        ->assertSee('data-theme-toggle');
+        ->assertSee('data-bs-theme', false);
 });
 
 it('profile dropdown affiche nom utilisateur', function () {

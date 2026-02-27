@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
+use Modules\Blog\Models\Tag;
 use Modules\Blog\States\PublishedArticleState;
 
 class PublicArticleController extends Controller
@@ -26,7 +27,7 @@ class PublicArticleController extends Controller
             $query->where('category_id', $currentCategory->id);
         }
 
-        $query->when($tagFilter, fn ($q) => $q->whereJsonContains('tags', $tagFilter));
+        $query->when($tagFilter, fn ($q) => $q->whereHas('tagsRelation', fn ($t) => $t->where('slug', $tagFilter)));
 
         $articles = $query->paginate(9)->withQueryString();
 
@@ -37,16 +38,11 @@ class PublicArticleController extends Controller
 
         $recentArticles = Article::published()->latest('published_at')->take(5)->get();
 
-        $popularTags = Article::published()
-            ->whereNotNull('tags')
-            ->get()
-            ->flatMap(fn ($a) => $a->tags ?? [])
-            ->filter()
-            ->countBy()
-            ->sortDesc()
+        $popularTags = Tag::whereHas('articles', fn ($q) => $q->published())
+            ->withCount(['articles' => fn ($q) => $q->published()])
+            ->orderByDesc('articles_count')
             ->take(10)
-            ->keys()
-            ->toArray();
+            ->get();
 
         return view('blog::public.index', compact(
             'articles', 'categories', 'recentArticles', 'currentCategory', 'popularTags', 'currentTag'
@@ -59,7 +55,7 @@ class PublicArticleController extends Controller
             abort(404);
         }
 
-        $article->load(['blogCategory', 'user']);
+        $article->load(['blogCategory', 'user', 'tagsRelation']);
 
         $comments = $article->comments()
             ->approved()

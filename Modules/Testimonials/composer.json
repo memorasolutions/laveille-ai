@@ -1,0 +1,10 @@
+{
+    "name": "modules/testimonials",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Testimonials\\": "app/",
+            "Modules\\Testimonials\\Database\\": "database/",
+            "Modules\\Testimonials\\Tests\\": "tests/"
+        }
+    }
+}

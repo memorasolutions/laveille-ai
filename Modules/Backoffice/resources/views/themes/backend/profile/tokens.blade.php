@@ -5,7 +5,7 @@
 <nav class="page-breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.profile.edit') }}">{{ __('Profil') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.profile') }}">{{ __('Profil') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('API Tokens') }}</li>
     </ol>
 </nav>

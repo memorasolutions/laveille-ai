@@ -12,6 +12,10 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta name="twitter:card" content="summary">
     @yield('meta')
+    {!! \Modules\SEO\Services\JsonLdService::render(
+        \Modules\SEO\Services\JsonLdService::organization(),
+        \Modules\SEO\Services\JsonLdService::website()
+    ) !!}
     <link href="{{ asset('themes/gosass/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('themes/gosass/css/fontawesome.min.css') }}" rel="stylesheet">
     <link href="{{ asset('themes/gosass/css/animate.css') }}" rel="stylesheet">
@@ -50,7 +54,7 @@
     </button>
 
     <script src="{{ asset('themes/gosass/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/backoffice/wowdash/js/lib/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/backoffice/backend/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('themes/gosass/js/wow.min.js') }}"></script>
     <script src="{{ asset('themes/gosass/js/jquery.slick.min.js') }}"></script>
     <script src="{{ asset('themes/gosass/js/odometer.js') }}"></script>

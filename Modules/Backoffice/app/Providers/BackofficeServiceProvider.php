@@ -153,7 +153,7 @@ class BackofficeServiceProvider extends ServiceProvider
 
         $this->publishes([$sourcePath => $viewPath], ['views', $this->nameLower.'-module-views']);
 
-        $theme = config('backoffice.theme', 'wowdash');
+        $theme = config('backoffice.theme', 'backend');
         $themePath = module_path($this->name, 'resources/views/themes/'.$theme);
 
         $paths = $this->getPublishableViewPaths();

@@ -21,25 +21,19 @@ it('page admin se charge en mode clair', function () {
         ->assertOk();
 });
 
-it('navbar WowDash contient le bouton dark mode', function () {
+it('navbar Backend contient le bouton dark mode', function () {
     $admin = User::factory()->create();
     $admin->assignRole('admin');
 
     $response = $this->actingAs($admin)->get('/admin');
     $response->assertOk();
-    $response->assertSee('data-theme-toggle', false);
+    $response->assertSee('data-bs-theme', false);
 });
 
-it('layout WowDash définit le data-theme', function () {
-    $layout = file_get_contents(module_path('Backoffice', 'resources/views/themes/wowdash/layouts/admin.blade.php'));
+it('layout Backend définit le data-bs-theme', function () {
+    $layout = file_get_contents(module_path('Backoffice', 'resources/views/themes/backend/layouts/admin.blade.php'));
 
-    expect($layout)->toContain('data-theme');
-});
-
-it('app.css référence WowDash comme gestionnaire CSS', function () {
-    $css = file_get_contents(resource_path('css/app.css'));
-
-    expect($css)->toContain('WowDash');
+    expect($layout)->toContain('data-bs-theme');
 });
 
 it('layout Tailwind lie darkMode au localStorage', function () {

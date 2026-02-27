@@ -27,19 +27,19 @@ test('mail log page uses WowDash card pattern', function () {
         ->assertSee('card', false);
 });
 
-test('scheduler page uses WowDash table pattern', function () {
+test('scheduler page uses card table pattern', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.scheduler'))
         ->assertOk()
-        ->assertSee('bordered-table', false)
-        ->assertSee('radius-12', false);
+        ->assertSee('table', false)
+        ->assertSee('card', false);
 });
 
-test('failed jobs page uses WowDash card pattern', function () {
+test('failed jobs page uses card pattern', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.failed-jobs.index'))
         ->assertOk()
-        ->assertSee('radius-12', false);
+        ->assertSee('card', false);
 });
 
 test('blocked ips page uses WowDash card pattern', function () {
@@ -49,12 +49,12 @@ test('blocked ips page uses WowDash card pattern', function () {
         ->assertSee('card', false);
 });
 
-test('security page uses WowDash table pattern', function () {
+test('security page uses card table pattern', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.security'))
         ->assertOk()
-        ->assertSee('bordered-table', false)
-        ->assertSee('radius-12', false);
+        ->assertSee('table', false)
+        ->assertSee('card', false);
 });
 
 test('logs page uses WowDash table pattern', function () {
@@ -78,9 +78,9 @@ test('email templates index page uses WowDash card pattern', function () {
         ->assertSee('card', false);
 });
 
-test('cache page uses WowDash radius pattern', function () {
+test('cache page uses card pattern', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.cache'))
         ->assertOk()
-        ->assertSee('radius-12', false);
+        ->assertSee('card', false);
 });

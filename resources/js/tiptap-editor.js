@@ -56,7 +56,7 @@ export function tiptapEditorComponent(config = {}) {
                 el._tiptapEditor.destroy()
                 delete el._tiptapEditor
             }
-            this.editor = new Editor({
+            const editorInstance = new Editor({
                 element: el,
                 extensions: [
                     StarterKit.configure({ codeBlock: false, link: false, underline: false }),
@@ -92,7 +92,11 @@ export function tiptapEditorComponent(config = {}) {
                     }
                 },
             })
-            el._tiptapEditor = this.editor
+            this.editor = editorInstance
+            // Store RAW (non-proxied) editor on DOM element.
+            // Alpine wraps this.editor in a Proxy; ProseMirror's applyInner
+            // compares tr.doc === state.doc by reference, which fails through proxies.
+            el._tiptapEditor = editorInstance
         },
         destroy() {
             if (this.editor) {
@@ -119,9 +123,86 @@ export function tiptapEditorComponent(config = {}) {
             const url = prompt('URL du lien :')
             if (url) this.cmd(() => this.editor.chain().focus().setLink({ href: url }).run())
         },
+        // Media picker state
+        mediaPickerOpen: false,
+        mediaItems: [],
+        mediaLoading: false,
+        mediaUploading: false,
+        mediaSearch: '',
+        mediaPage: 1,
+        mediaLastPage: 1,
+
         addImage() {
-            const url = prompt("URL de l'image :")
-            if (url) this.cmd(() => this.editor.chain().focus().setImage({ src: url }).run())
+            this.mediaPickerOpen = true
+            this.mediaSearch = ''
+            this.mediaUrlInput = ''
+            this.mediaPage = 1
+            this.fetchMedia()
+        },
+
+        async fetchMedia() {
+            this.mediaLoading = true
+            try {
+                const params = new URLSearchParams({ page: this.mediaPage })
+                if (this.mediaSearch) params.set('search', this.mediaSearch)
+                const res = await fetch(`/admin/media-api?${params}`, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                })
+                const data = await res.json()
+                this.mediaItems = data.items || []
+                this.mediaLastPage = data.meta?.last_page || 1
+            } catch (e) {
+                console.warn('[MediaPicker] fetch error:', e)
+                this.mediaItems = []
+            }
+            this.mediaLoading = false
+        },
+
+        async uploadMedia(event) {
+            const file = event.target.files?.[0]
+            if (!file) return
+            this.mediaUploading = true
+            try {
+                const form = new FormData()
+                form.append('file', file)
+                const token = document.querySelector('meta[name="csrf-token"]')?.content
+                const res = await fetch('/admin/media-api', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+                    body: form,
+                })
+                if (res.ok) {
+                    await this.fetchMedia()
+                }
+            } catch (e) {
+                console.warn('[MediaPicker] upload error:', e)
+            }
+            this.mediaUploading = false
+            event.target.value = ''
+        },
+
+        selectMedia(item) {
+            this.insertMediaImage(item.url)
+        },
+
+        insertMediaImage(url) {
+            if (url && this.editor) {
+                // Use RAW (non-proxied) editor to avoid Alpine Proxy breaking
+                // ProseMirror's reference equality check (tr.doc === state.doc)
+                const rawEditor = this.$refs.editorContent?._tiptapEditor
+                if (rawEditor && !rawEditor.isDestroyed) {
+                    rawEditor.commands.setImage({ src: url })
+                }
+            }
+            this.mediaPickerOpen = false
+        },
+
+        mediaUrlInput: '',
+        insertImageByUrl() {
+            if (this.mediaUrlInput.trim()) {
+                this.insertMediaImage(this.mediaUrlInput.trim())
+                this.mediaUrlInput = ''
+            }
         },
         insertTable() {
             this.cmd(() => this.editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run())

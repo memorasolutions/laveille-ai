@@ -87,7 +87,7 @@ test('search page uses WowDash pattern', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.search'))
         ->assertOk()
-        ->assertSee('radius-12', false)
+        ->assertSee('card', false)
         ->assertSee('form-control', false);
 });
 

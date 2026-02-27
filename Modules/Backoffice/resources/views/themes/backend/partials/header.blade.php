@@ -118,9 +118,9 @@
         </ul>
 
         {{-- Mobile sidebar toggler --}}
-        <a href="#" class="sidebar-toggler">
-            <i data-lucide="menu"></i>
-        </a>
+        <button type="button" class="sidebar-toggler" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="sidebarNav">
+            <i data-lucide="menu" aria-hidden="true"></i>
+        </button>
 
     </div>
 </nav>

@@ -64,18 +64,15 @@
 
     @push('scripts')
     <script>
-        function initializePasswordToggle(toggleSelector) {
-            $(toggleSelector).on("click", function() {
-                $(this).toggleClass("ri-eye-off-line");
-                var input = $($(this).attr("data-toggle"));
-                if (input.attr("type") === "password") {
-                    input.attr("type", "text");
-                } else {
-                    input.attr("type", "password");
+        document.querySelectorAll('.toggle-password').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var input = document.querySelector(this.getAttribute('data-toggle'));
+                if (input) {
+                    input.type = input.type === 'password' ? 'text' : 'password';
+                    this.classList.toggle('ri-eye-off-line');
                 }
             });
-        }
-        initializePasswordToggle(".toggle-password");
+        });
     </script>
     @endpush
 </div>

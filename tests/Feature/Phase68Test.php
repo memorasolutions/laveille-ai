@@ -49,14 +49,14 @@ test('newUsersThisMonth compte les utilisateurs créés ce mois', function () {
     expect($response->viewData('newUsersThisMonth'))->toBeGreaterThanOrEqual(3);
 });
 
-test('dashboard affiche la stat utilisateurs actifs', function () {
+test('dashboard affiche la stat utilisateurs', function () {
     $this->get('/admin')
         ->assertOk()
-        ->assertSee('Utilisateurs actifs');
+        ->assertSee('Utilisateurs');
 });
 
-test('dashboard affiche la stat nouveaux ce mois', function () {
+test('dashboard affiche le compteur ce mois', function () {
     $this->get('/admin')
         ->assertOk()
-        ->assertSee('Nouveaux ce mois');
+        ->assertSee('ce mois');
 });

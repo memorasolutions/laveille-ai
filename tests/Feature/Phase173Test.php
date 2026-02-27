@@ -133,5 +133,5 @@ test('notifications route exists', function () {
 test('toast partial included in admin layout', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.dashboard'))
-        ->assertSee('notification-toast', false);
+        ->assertSee('toast-container', false);
 });

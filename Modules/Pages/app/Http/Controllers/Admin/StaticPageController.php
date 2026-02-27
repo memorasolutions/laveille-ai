@@ -29,12 +29,14 @@ class StaticPageController extends Controller
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
             'status' => 'nullable|in:draft,published',
+            'template' => 'nullable|in:' . implode(',', array_keys(StaticPage::TEMPLATES)),
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
         ]);
 
         $validated['user_id'] = auth()->id();
         $validated['status'] = $validated['status'] ?? 'draft';
+        $validated['template'] = $validated['template'] ?? 'default';
 
         StaticPage::create($validated);
 
@@ -53,6 +55,7 @@ class StaticPageController extends Controller
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
             'status' => 'nullable|in:draft,published',
+            'template' => 'nullable|in:' . implode(',', array_keys(StaticPage::TEMPLATES)),
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
         ]);

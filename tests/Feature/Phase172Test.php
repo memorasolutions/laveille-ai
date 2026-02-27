@@ -38,10 +38,10 @@ test('revenue page contains revenue by plan chart div', function () {
         ->assertSee('id="revenueByPlanChart"', false);
 });
 
-test('revenue page loads apexcharts CDN', function () {
+test('revenue page uses ApexCharts', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.revenue'))
-        ->assertSee('apexcharts', false);
+        ->assertSee('subscriptionChart', false);
 });
 
 test('revenue page shows MRR value', function () {

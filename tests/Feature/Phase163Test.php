@@ -278,7 +278,10 @@ it('AiService generateArticle handles invalid JSON with defaults', function () {
 // --- Layout inclusion ---
 
 it('includes ai-article-generator in blog create view', function () {
-    $path = module_path('Blog', 'resources/views/themes/wowdash/admin/articles/create.blade.php');
+    $path = module_path('Blog', 'resources/views/themes/backend/admin/articles/create.blade.php');
+    if (! file_exists($path)) {
+        $path = module_path('Blog', 'resources/views/admin/articles/create.blade.php');
+    }
     $content = file_get_contents($path);
 
     expect($content)->toContain("@livewire('ai-article-generator')");

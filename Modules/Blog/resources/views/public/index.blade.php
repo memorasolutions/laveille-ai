@@ -2,6 +2,16 @@
 
 @section('title', $currentCategory ? $currentCategory->name.' — Blog' : 'Blog')
 
+@section('meta')
+    {!! \Modules\SEO\Services\JsonLdService::render(
+        ['@type' => 'CollectionPage', 'name' => 'Blog', 'url' => route('blog.index'), 'description' => 'Articles, tutoriels et actualités.'],
+        \Modules\SEO\Services\JsonLdService::breadcrumbs([
+            ['name' => 'Accueil', 'url' => url('/')],
+            ['name' => 'Blog'],
+        ])
+    ) !!}
+@endsection
+
 @section('page_header')
     <div class="text-center">
         <h2 class="cs_fs_50 cs_mb_15 wow fadeInDown">
@@ -68,13 +78,13 @@
                 </div>
 
                 {{-- Tags populaires --}}
-                @if(!empty($popularTags))
+                @if($popularTags->isNotEmpty())
                 <div class="cs_sidebar_widget">
                     <h3 class="cs_widget_title cs_fs_29 cs_normal cs_mb_23">Tags populaires</h3>
                     <div class="d-flex flex-wrap gap-2">
                         @foreach($popularTags as $tag)
-                        <a href="{{ route('blog.index', ['tag' => $tag]) }}" class="cs_btn cs_style_1 cs_gray_bg_1 cs_heading_color cs_fs_14 cs_radius_30 py-1 px-3 {{ $currentTag === $tag ? 'cs_accent_bg cs_white_color' : '' }}">
-                            {{ $tag }}
+                        <a href="{{ route('blog.tag', $tag) }}" class="cs_btn cs_style_1 cs_gray_bg_1 cs_heading_color cs_fs_14 cs_radius_30 py-1 px-3 {{ ($currentTag ?? '') === $tag->slug ? 'cs_accent_bg cs_white_color' : '' }}">
+                            {{ $tag->name }} ({{ $tag->articles_count }})
                         </a>
                         @endforeach
                     </div>

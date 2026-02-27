@@ -7,6 +7,8 @@ use Modules\Blog\Http\Controllers\Admin\ArticleController;
 use Modules\Blog\Http\Controllers\Admin\ArticleRevisionController;
 use Modules\Blog\Http\Controllers\Admin\CategoryController;
 use Modules\Blog\Http\Controllers\Admin\CommentAdminController;
+use Modules\Blog\Http\Controllers\Admin\TagController;
+use Modules\Blog\Http\Controllers\PublicTagController;
 use Modules\Blog\Http\Controllers\AuthorController;
 use Modules\Blog\Http\Controllers\CommentController;
 use Modules\Blog\Http\Controllers\FeedController;
@@ -36,6 +38,8 @@ Route::prefix('admin/blog')
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::post('categories/quick-create', [CategoryController::class, 'quickCreate'])->name('categories.quick-create');
 
+        Route::resource('tags', TagController::class)->except(['show']);
+
         // Modération des commentaires
         Route::get('comments', [CommentAdminController::class, 'index'])->name('comments.index');
         Route::get('comments/{comment}/approve', [CommentAdminController::class, 'approve'])->name('comments.approve');
@@ -52,6 +56,7 @@ Route::prefix('blog')
             Route::get('/', [PublicArticleController::class, 'index'])->name('index');
             Route::get('/feed.xml', [FeedController::class, 'feed'])->name('feed');
             Route::get('/author/{user}', [AuthorController::class, 'show'])->name('author');
+            Route::get('/tag/{tag:slug}', [PublicTagController::class, 'show'])->name('tag');
             Route::get('/{article:slug}', [PublicArticleController::class, 'show'])->name('show');
         });
         Route::post('/{article:slug}/comments', [CommentController::class, 'store'])->name('comments.store');

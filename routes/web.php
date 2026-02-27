@@ -22,7 +22,13 @@ Route::middleware('cacheResponse')->group(function () {
         if ($homepageType === 'page' && $pageId && class_exists(\Modules\Pages\Models\StaticPage::class)) {
             $page = \Modules\Pages\Models\StaticPage::where('status', 'published')->find($pageId);
             if ($page) {
-                return view('pages::public.show', compact('page'));
+                $template = $page->template ?? 'default';
+                $viewName = "pages::public.templates.{$template}";
+                if (! view()->exists($viewName)) {
+                    $viewName = 'pages::public.templates.default';
+                }
+
+                return view($viewName, compact('page'));
             }
         }
 

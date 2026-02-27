@@ -45,7 +45,15 @@ class StaticPage extends Model
         'status',
         'meta_title',
         'meta_description',
+        'template',
         'user_id',
+    ];
+
+    public const TEMPLATES = [
+        'default'    => 'Standard',
+        'full-width' => 'Pleine largeur',
+        'sidebar'    => 'Avec barre latérale',
+        'landing'    => 'Page d\'atterrissage',
     ];
 
     public const STATUS_DRAFT = 'draft';

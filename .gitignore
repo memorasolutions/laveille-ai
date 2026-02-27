@@ -16,6 +16,7 @@
 /auth.json
 /node_modules
 /public/build
+!/public/build/nobleui
 /public/fonts
 /public/hot
 /public/storage

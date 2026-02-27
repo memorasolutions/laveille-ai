@@ -12,6 +12,14 @@
     @if($article->cover_image)
         <meta property="og:image" content="{{ Storage::url($article->cover_image) }}">
     @endif
+    {!! \Modules\SEO\Services\JsonLdService::render(
+        \Modules\SEO\Services\JsonLdService::article($article),
+        \Modules\SEO\Services\JsonLdService::breadcrumbs([
+            ['name' => 'Accueil', 'url' => url('/')],
+            ['name' => 'Blog', 'url' => route('blog.index')],
+            ['name' => $article->title],
+        ])
+    ) !!}
 @endsection
 
 @section('page_header')
@@ -86,12 +94,12 @@
                 @endif
 
                 {{-- Tags --}}
-                @if(!empty($article->tags))
+                @if($article->tagsRelation->isNotEmpty())
                 <div class="mt-4 mb-2">
                     <p class="cs_fs_14 cs_semibold mb-2">Tags :</p>
                     <div class="d-flex flex-wrap gap-2">
-                        @foreach($article->tags as $tag)
-                        <a href="{{ route('blog.index', ['tag' => $tag]) }}" class="cs_btn cs_style_1 cs_gray_bg_1 cs_heading_color cs_fs_14 cs_semibold cs_radius_30 py-1 px-3">{{ $tag }}</a>
+                        @foreach($article->tagsRelation as $tag)
+                        <a href="{{ route('blog.tag', $tag) }}" class="cs_btn cs_style_1 cs_fs_14 cs_semibold cs_radius_30 py-1 px-3" style="background-color: {{ $tag->color }}20; color: {{ $tag->color }}; border: 1px solid {{ $tag->color }}40;">{{ $tag->name }}</a>
                         @endforeach
                     </div>
                 </div>

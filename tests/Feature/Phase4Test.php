@@ -37,8 +37,8 @@ afterEach(function () {
     }
     // Supprimer dossiers de vues générées
     $viewDirs = [
-        base_path('Modules/Core/resources/views/themes/wowdash/test-models'),
-        base_path('Modules/Core/resources/views/themes/wowdash/dupe-models'),
+        base_path('Modules/Core/resources/views/themes/backend/test-models'),
+        base_path('Modules/Core/resources/views/themes/backend/dupe-models'),
     ];
     foreach ($viewDirs as $dir) {
         if (is_dir($dir)) {

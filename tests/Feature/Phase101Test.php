@@ -31,7 +31,7 @@ it('les non admin obtiennent 403', function () {
 
 it('la page affiche le titre journaux activite', function () {
     $this->actingAs($this->admin)->get('/admin/activity-logs')
-        ->assertSee("Journaux d'activité", false);
+        ->assertSee("Journaux d'activité");
 });
 
 it('la page affiche le bouton reinitialiser', function () {

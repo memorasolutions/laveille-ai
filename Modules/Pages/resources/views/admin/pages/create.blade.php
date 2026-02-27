@@ -61,6 +61,15 @@
                             <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Publié</option>
                         </select>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-heading mb-1.5">Template</label>
+                        <select name="template" class="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @foreach(\Modules\Pages\Models\StaticPage::TEMPLATES as $key => $label)
+                                <option value="{{ $key }}" {{ old('template', 'default') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-secondary mt-1">Mise en page utilisée pour l'affichage public</p>
+                    </div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" class="btn btn-primary flex-1 py-2 text-sm rounded-lg">Enregistrer</button>
                         <a href="{{ route('admin.pages.index') }}" class="btn btn-outline flex-1 py-2 text-sm rounded-lg text-center">Annuler</a>

@@ -108,6 +108,62 @@
         <small class="text-muted" x-text="charCount + ' caractères'"></small>
     </div>
     <input type="hidden" x-ref="hiddenInput" name="{{ $name }}" :value="content">
+
+    {{-- Media Picker Modal --}}
+    <div x-show="mediaPickerOpen" x-cloak class="position-fixed top-0 start-0 w-100 h-100" style="z-index:10000;background:rgba(0,0,0,.5)" @click.self="mediaPickerOpen=false">
+        <div class="bg-white rounded shadow-lg mx-auto mt-5" style="max-width:800px;width:calc(100% - 32px);max-height:80vh;overflow:hidden;display:flex;flex-direction:column">
+            {{-- Header --}}
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                <h5 class="mb-0 fw-semibold">Sélectionner une image</h5>
+                <button type="button" class="btn-close" @click="mediaPickerOpen=false"></button>
+            </div>
+
+            {{-- Toolbar --}}
+            <div class="d-flex align-items-center gap-2 p-3 border-bottom bg-light">
+                <input type="text" class="form-control form-control-sm" placeholder="Rechercher..." x-model.debounce.300ms="mediaSearch" @input="mediaPage=1; fetchMedia()">
+                <label class="btn btn-primary btn-sm text-nowrap mb-0" :class="{'disabled': mediaUploading}">
+                    <i data-lucide="upload" style="width:14px;height:14px" class="me-1"></i>
+                    <span x-text="mediaUploading ? 'Envoi...' : 'Envoyer'"></span>
+                    <input type="file" accept="image/*" class="d-none" @change="uploadMedia($event)" :disabled="mediaUploading">
+                </label>
+            </div>
+            <div class="d-flex gap-2 px-3 pb-2">
+                <input type="url" x-model="mediaUrlInput" placeholder="https://example.com/image.jpg" class="form-control form-control-sm" @keydown.enter.prevent="insertImageByUrl()">
+                <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap" @click="insertImageByUrl()" :disabled="!mediaUrlInput.trim()">
+                    <i data-lucide="link" style="width:14px;height:14px" class="me-1"></i> URL
+                </button>
+            </div>
+
+            {{-- Grid --}}
+            <div class="flex-grow-1 overflow-auto p-3">
+                <div x-show="mediaLoading" class="text-center py-5">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <span class="ms-2 text-muted">Chargement...</span>
+                </div>
+                <div x-show="!mediaLoading && mediaItems.length === 0" class="text-center py-5">
+                    <p class="text-muted mb-2">Aucune image trouvée.</p>
+                    <p class="text-muted small">Envoyez votre première image avec le bouton ci-dessus.</p>
+                </div>
+                <div x-show="!mediaLoading && mediaItems.length > 0" class="row g-2">
+                    <template x-for="item in mediaItems" :key="item.id">
+                        <div class="col-4 col-md-3">
+                            <div class="border rounded overflow-hidden position-relative cursor-pointer" style="aspect-ratio:1;cursor:pointer" @click="selectMedia(item)" :title="item.file_name">
+                                <img :src="item.thumbnail || item.url" :alt="item.file_name" class="w-100 h-100" style="object-fit:cover">
+                            </div>
+                            <small class="text-muted d-block text-truncate mt-1" style="font-size:11px" x-text="item.file_name"></small>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            {{-- Pagination --}}
+            <div x-show="mediaLastPage > 1" class="d-flex justify-content-center gap-2 p-2 border-top">
+                <button type="button" class="btn btn-sm btn-outline-secondary" :disabled="mediaPage <= 1" @click="mediaPage--; fetchMedia()">Précédent</button>
+                <span class="align-self-center small text-muted" x-text="'Page ' + mediaPage + ' / ' + mediaLastPage"></span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" :disabled="mediaPage >= mediaLastPage" @click="mediaPage++; fetchMedia()">Suivant</button>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
 

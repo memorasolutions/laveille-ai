@@ -177,7 +177,7 @@
 
 @endsection
 
-@push('js')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Donut Chart - Subscription Distribution

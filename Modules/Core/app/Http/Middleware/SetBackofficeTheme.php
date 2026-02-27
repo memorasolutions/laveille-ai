@@ -12,7 +12,7 @@ class SetBackofficeTheme
 {
     public function handle(Request $request, Closure $next)
     {
-        $theme = Settings::get('backoffice.theme', config('backoffice.theme', 'wowdash'));
+        $theme = Settings::get('backoffice.theme', config('backoffice.theme', 'backend'));
 
         $modules = config('backoffice.theme_modules', []);
 

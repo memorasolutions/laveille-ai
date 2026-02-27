@@ -114,6 +114,19 @@ Route::prefix('admin')
             Route::post('faqs/reorder', [\Modules\Faq\Http\Controllers\FaqController::class, 'reorder'])->name('faqs.reorder');
         });
 
+        // ── Témoignages ──
+        Route::middleware('permission:manage_testimonials')->group(function () {
+            Route::resource('testimonials', \Modules\Testimonials\Http\Controllers\TestimonialController::class)->except(['show']);
+            Route::post('testimonials/reorder', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'reorder'])->name('testimonials.reorder');
+        });
+
+        // ── Media API (pour TipTap editor) ──
+        Route::middleware('permission:manage_media')->group(function () {
+            Route::get('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'index'])->name('media-api.index');
+            Route::post('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'store'])->name('media-api.store');
+            Route::delete('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'destroy'])->name('media-api.destroy');
+        });
+
         // ── Paramètres ──
         Route::middleware('permission:manage_settings')->group(function () {
             Route::resource('settings', SettingController::class)->except(['show']);

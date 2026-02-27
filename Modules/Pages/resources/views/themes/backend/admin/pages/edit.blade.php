@@ -72,6 +72,15 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-semibold">Template</label>
+                        <select name="template" class="form-control">
+                            @foreach(\Modules\Pages\Models\StaticPage::TEMPLATES as $key => $label)
+                                <option value="{{ $key }}" {{ old('template', $page->template) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text text-muted">Mise en page utilisée pour l'affichage public</div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-semibold">Slug</label>
                         <input type="text" class="form-control bg-light text-muted"
                                value="{{ $page->slug }}" readonly>

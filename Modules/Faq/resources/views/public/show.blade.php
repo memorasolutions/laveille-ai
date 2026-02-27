@@ -8,6 +8,12 @@
 @if(!empty($jsonLdString))
 <script type="application/ld+json">{!! $jsonLdString !!}</script>
 @endif
+{!! \Modules\SEO\Services\JsonLdService::render(
+    \Modules\SEO\Services\JsonLdService::breadcrumbs([
+        ['name' => 'Accueil', 'url' => url('/')],
+        ['name' => 'FAQ'],
+    ])
+) !!}
 
 <div class="cs_height_85 cs_height_lg_80"></div>
 <div class="container text-center">

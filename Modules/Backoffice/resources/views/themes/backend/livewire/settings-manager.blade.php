@@ -150,10 +150,8 @@ $helpTextsData = [
                                 $themesDir = module_path('Backoffice', 'resources/views/themes');
                                 $availableThemes = array_map('basename', array_filter(glob($themesDir . '/*'), 'is_dir'));
                                 $currentTheme = \Modules\Settings\Models\Setting::where('key', 'backoffice.theme')->value('value')
-                                    ?? config('backoffice.theme', 'wowdash');
+                                    ?? config('backoffice.theme', 'backend');
                                 $themeLabels = [
-                                    'wowdash' => 'WowDash',
-                                    'tabler'  => 'Tabler',
                                     'backend' => 'Backend',
                                 ];
                             @endphp

@@ -70,6 +70,15 @@
                             <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Publié</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Template</label>
+                        <select name="template" class="form-control">
+                            @foreach(\Modules\Pages\Models\StaticPage::TEMPLATES as $key => $label)
+                                <option value="{{ $key }}" {{ old('template', 'default') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text text-muted">Mise en page utilisée pour l'affichage public</div>
+                    </div>
                     <div class="d-flex gap-2 pt-2">
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
                         <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary text-center">Annuler</a>

@@ -2,10 +2,10 @@
 
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
-![Tests](https://img.shields.io/badge/tests-2169_passed-brightgreen?style=flat)
+![Tests](https://img.shields.io/badge/tests-2298_passed-brightgreen?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
-Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (25 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2169+ tests, 0 échec).
+Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (30 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2298+ tests, 0 échec).
 
 ## Table des matières
 
@@ -64,7 +64,7 @@ Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/
 | Groupe | Modules |
 |--------|---------|
 | Fondation | `Core`, `Auth`, `RolesPermissions`, `Settings`, `Logging`, `Health`, `Storage` |
-| Contenu et médias | `Media`, `Blog`, `Newsletter`, `SEO`, `Editor`, `Pages` |
+| Contenu et médias | `Media`, `Blog`, `Newsletter`, `SEO`, `Editor`, `Pages`, `Faq`, `Menu`, `Testimonials` |
 | API et intégrations | `Api`, `Notifications`, `Webhooks` |
 | Backoffice | `Backoffice`, `SaaS`, `Tenancy`, `Backup`, `Translation`, `Export`, `Search` |
 | Frontend | `FrontTheme` |
@@ -72,8 +72,8 @@ Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/
 
 ## Fonctionnalités clés
 
-- Architecture modulaire (25 modules autonomes, nwidart/laravel-modules, plugin.json par module)
-- Backoffice admin multi-thèmes (3 thèmes : backend/NobleUI, wowdash, tabler - Bootstrap 5)
+- Architecture modulaire (30 modules autonomes, nwidart/laravel-modules, plugin.json par module)
+- Backoffice admin (thème Backend/NobleUI, Bootstrap 5.3.8, Lucide icons, dark mode)
 - Authentification complète : login/register Livewire, 2FA TOTP (Google Authenticator)
 - SaaS : plans, abonnements Stripe via Laravel Cashier, multi-tenant
 - API REST v1 sécurisée : Sanctum, rate limiting, JSON resources
@@ -86,7 +86,10 @@ Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/
 - Webhooks : envoi et réception
 - Internationalisation : Spatie Translatable, support multi-langue
 - Formulaire de contact avec rate limiting et envoi email
-- FAQ publique avec accordion Alpine.js
+- FAQ dynamique : CRUD admin, page publique, JSON-LD Schema.org
+- Menu dynamique : drag-and-drop admin, cache, Blade component
+- Témoignages : CRUD admin, affichage frontend
+- Homepage configurable : page d'accueil = landing ou page statique (via admin)
 - Module IA : chatbot, générateur d'articles, modération, suggestions SEO, traduction automatique (OpenRouter)
 - Pages statiques : CRUD admin, éditeur TipTap
 - PWA : service worker, manifest, notifications push
@@ -141,7 +144,7 @@ php artisan test tests/Feature/Phase46Test.php
 php artisan test --filter "Auth"
 ```
 
-Suite actuelle : **2169+ tests, 0 échec**. PHPStan niveau 6, 0 erreur. Pint 100%.
+Suite actuelle : **2298+ tests, 0 échec**. PHPStan niveau 6. Pint 100%.
 
 ## Sécurité
 

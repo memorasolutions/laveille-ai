@@ -83,6 +83,7 @@ it('switch locale en affiche les traductions anglaises', function () {
 
     Livewire::test(TranslationsManager::class)
         ->set('targetLocale', 'en')
+        ->set('search', 'Welcome')
         ->assertSee('Welcome');
 });
 

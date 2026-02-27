@@ -16,6 +16,13 @@ class PublicPageController extends Controller
             ->where('status', 'published')
             ->firstOrFail();
 
-        return view('pages::public.show', compact('page'));
+        $template = $page->template ?? 'default';
+        $viewName = "pages::public.templates.{$template}";
+
+        if (! view()->exists($viewName)) {
+            $viewName = 'pages::public.templates.default';
+        }
+
+        return view($viewName, compact('page'));
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Blog\Models\Article;
+use Modules\Blog\Models\Tag;
 use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
@@ -16,15 +17,21 @@ beforeEach(function () {
 });
 
 it('blog index filters by tag shows tagged article', function () {
-    $article = Article::factory()->published()->create(['tags' => ['laravel', 'php'], 'user_id' => $this->user->id]);
+    $tag = Tag::create(['name' => 'Laravel']);
+    $article = Article::factory()->published()->create(['user_id' => $this->user->id]);
+    $article->tagsRelation()->attach($tag);
     $this->get(route('blog.index', ['tag' => 'laravel']))
         ->assertOk()
         ->assertSee($article->title);
 });
 
 it('blog index tag filter is applied', function () {
-    $article = Article::factory()->published()->create(['tags' => ['laravel'], 'user_id' => $this->user->id]);
-    Article::factory()->published()->create(['tags' => ['vue'], 'user_id' => $this->user->id]);
+    $tagLaravel = Tag::create(['name' => 'Laravel']);
+    $tagVue = Tag::create(['name' => 'Vue']);
+    $article = Article::factory()->published()->create(['user_id' => $this->user->id]);
+    $article->tagsRelation()->attach($tagLaravel);
+    $other = Article::factory()->published()->create(['user_id' => $this->user->id]);
+    $other->tagsRelation()->attach($tagVue);
     $this->get(route('blog.index', ['tag' => 'laravel']))
         ->assertOk()
         ->assertSee($article->title);
@@ -81,15 +88,19 @@ it('article show page has author link', function () {
 });
 
 it('article show tags are clickable links', function () {
-    $article = Article::factory()->published()->create(['tags' => ['laravel', 'php'], 'user_id' => $this->user->id]);
+    $tag = Tag::create(['name' => 'Laravel']);
+    $article = Article::factory()->published()->create(['user_id' => $this->user->id]);
+    $article->tagsRelation()->attach($tag);
     $this->get(route('blog.show', $article->slug))
         ->assertOk()
-        ->assertSee('?tag=laravel', false);
+        ->assertSee('/blog/tag/laravel', false);
 });
 
 it('blog index sidebar tags are clickable links', function () {
-    Article::factory()->published()->create(['tags' => ['laravel'], 'user_id' => $this->user->id]);
+    $tag = Tag::create(['name' => 'Laravel']);
+    $article = Article::factory()->published()->create(['user_id' => $this->user->id]);
+    $article->tagsRelation()->attach($tag);
     $this->get(route('blog.index'))
         ->assertOk()
-        ->assertSee('?tag=laravel', false);
+        ->assertSee('/blog/tag/laravel', false);
 });

@@ -27,7 +27,7 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'seo', 'key' => 'looker_studio_url', 'value' => '', 'type' => 'string', 'description' => 'URL du rapport Google Looker Studio (embed)'],
 
             // Branding
-            ['group' => 'branding', 'key' => 'backoffice.theme', 'value' => 'backend', 'type' => 'string', 'description' => 'Thème du panneau administration (wowdash, tabler, backend)', 'is_public' => false],
+            ['group' => 'branding', 'key' => 'backoffice.theme', 'value' => 'backend', 'type' => 'string', 'description' => 'Thème du panneau administration', 'is_public' => false],
             ['group' => 'branding', 'key' => 'branding.logo_light', 'value' => '', 'type' => 'string', 'description' => 'Logo pour le mode clair (chemin relatif)'],
             ['group' => 'branding', 'key' => 'branding.logo_dark', 'value' => '', 'type' => 'string', 'description' => 'Logo pour le mode sombre (chemin relatif)'],
             ['group' => 'branding', 'key' => 'branding.logo_icon', 'value' => '', 'type' => 'string', 'description' => 'Logo icône pour la sidebar réduite'],

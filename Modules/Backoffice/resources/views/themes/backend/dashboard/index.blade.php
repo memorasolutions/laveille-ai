@@ -1,12 +1,15 @@
 @extends('backoffice::themes.backend.layouts.admin', ['title' => __('Tableau de bord')])
 
 @section('content')
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ __('Tableau de bord') }}</li>
-    </ol>
-</nav>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h1 class="fw-semibold fs-5 mb-0">{{ __('Tableau de bord') }}</h1>
+    <nav aria-label="Fil d'Ariane">
+        <ol class="breadcrumb mb-0 small">
+            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('Tableau de bord') }}</li>
+        </ol>
+    </nav>
+</div>
 
 {{-- Stats cards --}}
 <div class="row mb-4">
@@ -121,9 +124,11 @@
             </div>
             <div class="card-body p-4">
                 <div class="d-grid gap-2">
+                    @can('manage_users')
                     <a href="{{ route('admin.users.create') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="user-plus" class="icon-sm"></i> {{ __('Nouvel utilisateur') }}
                     </a>
+                    @endcan
                     @if(Route::has('admin.blog.articles.create'))
                     <a href="{{ route('admin.blog.articles.create') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="file-plus" class="icon-sm"></i> {{ __('Nouvel article') }}
@@ -134,9 +139,12 @@
                         <i data-lucide="layout" class="icon-sm"></i> {{ __('Nouvelle page') }}
                     </a>
                     @endif
+                    @can('manage_settings')
                     <a href="{{ route('admin.settings.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="settings" class="icon-sm"></i> {{ __('Paramètres') }}
                     </a>
+                    @endcan
+                    @can('manage_backups')
                     <a href="{{ route('admin.health') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="activity" class="icon-sm"></i> {{ __('Santé système') }}
                     </a>
@@ -145,6 +153,7 @@
                         <i data-lucide="hard-drive" class="icon-sm"></i> {{ __('Sauvegardes') }}
                     </a>
                     @endif
+                    @endcan
                 </div>
             </div>
         </div>
