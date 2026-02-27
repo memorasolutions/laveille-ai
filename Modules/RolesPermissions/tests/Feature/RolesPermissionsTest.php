@@ -11,7 +11,7 @@ use Spatie\Permission\Models\Role;
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 test('roles can be created', function () {
-    $role = Role::create(['name' => 'test_role']);
+    $role = Role::firstOrCreate(['name' => 'test_role']);
 
     expect($role)->toBeInstanceOf(Role::class);
     expect($role->name)->toBe('test_role');
@@ -26,7 +26,7 @@ test('permissions can be created', function () {
 
 test('role can be assigned to user', function () {
     $user = User::factory()->create();
-    $role = Role::create(['name' => 'editor']);
+    $role = Role::firstOrCreate(['name' => 'editor']);
 
     $user->assignRole('editor');
 
@@ -34,8 +34,8 @@ test('role can be assigned to user', function () {
 });
 
 test('permission can be assigned to role', function () {
-    $role = Role::create(['name' => 'editor']);
-    $permission = Permission::create(['name' => 'edit_posts']);
+    $role = Role::firstOrCreate(['name' => 'editor']);
+    $permission = Permission::firstOrCreate(['name' => 'edit_posts']);
 
     $role->givePermissionTo('edit_posts');
 
@@ -44,8 +44,8 @@ test('permission can be assigned to role', function () {
 
 test('user inherits permissions from role', function () {
     $user = User::factory()->create();
-    $role = Role::create(['name' => 'editor']);
-    $permission = Permission::create(['name' => 'edit_posts']);
+    $role = Role::firstOrCreate(['name' => 'editor']);
+    $permission = Permission::firstOrCreate(['name' => 'edit_posts']);
 
     $role->givePermissionTo($permission);
     $user->assignRole($role);
@@ -71,7 +71,7 @@ test('super_admin has all permissions', function () {
 
 test('non-admin user does not have admin role', function () {
     $user = User::factory()->create();
-    $user->assignRole(Role::create(['name' => 'user']));
+    $user->assignRole('user');
 
     expect($user->hasRole('admin'))->toBeFalse();
     expect($user->hasRole('super_admin'))->toBeFalse();
@@ -79,7 +79,7 @@ test('non-admin user does not have admin role', function () {
 
 test('admin user has admin role', function () {
     $user = User::factory()->create();
-    $user->assignRole(Role::create(['name' => 'admin']));
+    $user->assignRole('admin');
 
     expect($user->hasRole('admin'))->toBeTrue();
 });

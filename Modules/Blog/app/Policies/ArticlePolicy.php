@@ -11,31 +11,31 @@ class ArticlePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'admin']);
+        return $user->can('manage_articles');
     }
 
     public function view(User $user, Article $article): bool
     {
-        return $user->hasRole(['super_admin', 'admin']) || $user->id === $article->user_id;
+        return $user->can('manage_articles') || $user->id === $article->user_id;
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'admin']);
+        return $user->can('manage_articles');
     }
 
     public function update(User $user, Article $article): bool
     {
-        return $user->hasRole(['super_admin', 'admin']) || $user->id === $article->user_id;
+        return $user->can('manage_articles') || $user->id === $article->user_id;
     }
 
     public function delete(User $user, Article $article): bool
     {
-        return $user->hasRole(['super_admin', 'admin']) || $user->id === $article->user_id;
+        return $user->can('manage_articles') || $user->id === $article->user_id;
     }
 
     public function publish(User $user, Article $article): bool
     {
-        return $user->hasRole(['super_admin', 'admin']);
+        return $user->can('manage_articles');
     }
 }

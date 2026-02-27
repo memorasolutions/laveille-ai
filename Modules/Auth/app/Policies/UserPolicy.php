@@ -10,22 +10,22 @@ class UserPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'admin']);
+        return $user->can('manage_users');
     }
 
     public function view(User $user, User $model): bool
     {
-        return $user->hasRole(['super_admin', 'admin']) || $user->id === $model->id;
+        return $user->can('manage_users') || $user->id === $model->id;
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->can('manage_users');
     }
 
     public function update(User $user, User $model): bool
     {
-        return $user->hasRole('super_admin') || ($user->hasRole('admin') && ! $model->hasRole('super_admin'));
+        return $user->can('manage_users') && ! $model->hasRole('super_admin');
     }
 
     public function delete(User $user, User $model): bool
@@ -35,6 +35,6 @@ class UserPolicy
             return false;
         }
 
-        return $user->hasRole('super_admin') && $user->id !== $model->id;
+        return $user->can('manage_users') && $user->id !== $model->id;
     }
 }

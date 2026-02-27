@@ -8,11 +8,7 @@ use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
-    Role::create(['name' => 'super_admin']);
-    Role::create(['name' => 'admin']);
-    Role::create(['name' => 'user']);
-});
+// Roles are auto-seeded via TestCase::$seed
 
 // --- UserController CRUD Tests ---
 

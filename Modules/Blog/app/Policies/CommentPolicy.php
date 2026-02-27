@@ -16,11 +16,11 @@ class CommentPolicy
 
     public function delete(User $user, Comment $comment): bool
     {
-        return $user->hasRole(['admin', 'super_admin']) || $user->id === $comment->user_id;
+        return $user->can('manage_comments') || $user->id === $comment->user_id;
     }
 
     public function update(User $user, Comment $comment): bool
     {
-        return $user->hasRole(['admin', 'super_admin']);
+        return $user->can('manage_comments');
     }
 }

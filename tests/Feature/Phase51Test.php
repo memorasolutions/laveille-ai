@@ -90,7 +90,6 @@ it('unlock user command fails for unknown email', function () {
 });
 
 it('admin can unlock user via route', function () {
-    \Spatie\Permission\Models\Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
     $admin = User::factory()->create();
     $admin->assignRole('super_admin');
     $user = User::factory()->create([

@@ -16,7 +16,7 @@ beforeEach(function () {
         'password' => Hash::make('Password1!'),
     ]);
 
-    $this->adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $this->adminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
     $this->admin->assignRole($this->adminRole);
 
     $this->actingAs($this->admin);
@@ -92,20 +92,21 @@ test('page créer rôle retourne 200', function () {
     $this->get(route('admin.roles.create'))->assertOk();
 });
 
-test('store crée un rôle editor', function () {
-    $this->post(route('admin.roles.store'), ['name' => 'editor'])
+test('store crée un rôle moderator', function () {
+    $this->post(route('admin.roles.store'), ['name' => 'moderator'])
         ->assertRedirect(route('admin.roles.index'));
 
-    $this->assertDatabaseHas('roles', ['name' => 'editor']);
+    $this->assertDatabaseHas('roles', ['name' => 'moderator']);
 });
 
 test('page show rôle retourne 200', function () {
-    $role = Role::create(['name' => 'viewer', 'guard_name' => 'web']);
+    $role = Role::firstOrCreate(['name' => 'viewer', 'guard_name' => 'web']);
     $this->get(route('admin.roles.show', $role))->assertOk();
 });
 
 test('destroy empêche suppression rôle admin', function () {
-    $this->delete(route('admin.roles.destroy', $this->adminRole))
+    $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $this->delete(route('admin.roles.destroy', $adminRole))
         ->assertRedirect();
 
     $this->assertDatabaseHas('roles', ['name' => 'admin']);

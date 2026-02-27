@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\RolesPermissions\Providers;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
@@ -29,6 +30,9 @@ class RolesPermissionsServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        // super_admin bypasses all permission/policy checks
+        Gate::before(fn ($user) => $user->hasRole('super_admin') ? true : null);
     }
 
     /**

@@ -8,23 +8,29 @@ use App\Models\User;
 
 abstract class AdminOnlyPolicy
 {
+    /**
+     * The permission required for this policy.
+     * Override in child classes to specify the permission.
+     */
+    protected string $permission = 'view_admin_panel';
+
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['super_admin', 'admin']);
+        return $user->can($this->permission);
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->can($this->permission);
     }
 
     public function update(User $user, $model = null): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->can($this->permission);
     }
 
     public function delete(User $user, $model = null): bool
     {
-        return $user->hasRole('super_admin');
+        return $user->can($this->permission);
     }
 }

@@ -38,12 +38,12 @@ it('stores user with role atomically', function () {
 
 it('stores role with permissions atomically', function () {
     $response = $this->actingAs($this->admin)->post(route('admin.roles.store'), [
-        'name' => 'editor',
+        'name' => 'content_manager',
         'permissions' => [],
     ]);
 
     $response->assertRedirect(route('admin.roles.index'));
-    $this->assertDatabaseHas('roles', ['name' => 'editor']);
+    $this->assertDatabaseHas('roles', ['name' => 'content_manager']);
 });
 
 // --- FormRequest Validation ---

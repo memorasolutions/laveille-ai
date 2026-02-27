@@ -6,4 +6,7 @@ namespace Modules\Settings\Policies;
 
 use Modules\Core\Shared\Policies\AdminOnlyPolicy;
 
-class SettingPolicy extends AdminOnlyPolicy {}
+class SettingPolicy extends AdminOnlyPolicy
+{
+    protected string $permission = 'manage_settings';
+}

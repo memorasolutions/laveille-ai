@@ -1,189 +1,140 @@
 # Rapport de progression - Laravel SaaS Boilerplate
 
-**Date** : 2026-02-26
-**Scan réel du code** : oui (tests exécutés, modules vérifiés, Playwright validé)
+**Dernière mise à jour** : 2026-02-26 (session RBAC)
+**Croisement** : docs + scan code réel + exécution tests
 
 ---
 
-## Indicateurs clés (réels, vérifiés)
+## Indicateurs clés (vérifiés)
 
-| Indicateur | Valeur réelle (2026-02-26) | Statut |
-|-----------|---------------------------|--------|
-| Tests passants | 2156 (4192 assertions) | 100% pass |
-| Modules actifs | 25 | Tous actifs dans modules_statuses.json |
-| Routes | 456 | OK |
-| Migrations | 57 (modules + base) | OK |
-| PHPStan | 0 erreurs (niveau 6) | OK |
-| plugin.json | 25/25 | Tous les modules |
-| Thèmes admin | 3 | wowdash, tabler, backend (actif) |
-| i18n | 100% FR | validation, passwords, pagination, auth, fr.json 670+ |
-| WCAG 2.2 AA | ~85 aria-labels | 17 composants Livewire corrigés |
-| PWA | oui | service-worker.js + manifest.json |
-| Stripe/Cashier | oui | config/cashier.php |
-| WebSocket/Reverb | oui | config/reverb.php |
-| Search/Scout | oui | config/scout.php |
+| Métrique | Valeur | Source |
+|----------|--------|--------|
+| Tests | 2185 passés, 4248 assertions | `php artisan test` (486s, 2 flaky StorageServiceProvider en parallèle) |
+| PHPStan | 4 erreurs pré-existantes | `env()` hors config/ (CoreSetupCommand, DatabaseSeeder) |
+| Modules actifs | 25/25 | `modules_statuses.json` |
+| Routes | 460 | `php artisan route:list` |
+| Migrations | 58 | `database/migrations/` + `Modules/*/database/migrations/` |
+| Commandes artisan | 11 | `php artisan list app` |
+| Thèmes backoffice | 3 | wowdash, tabler, backend (NobleUI) |
+| Permissions | 36 (fonctionnelles) | `RolesAndPermissionsSeeder`, middleware route + policies |
+| Rôles | 4 | super_admin, admin, editor, user |
+| Packages clés | 9 | Cashier, Spatie Permission, Purifier, Scramble, Sanctum, Livewire, Scout, ActivityLog, nwidart |
 
 ---
 
-## ✅ Complété (vérifié par code + tests + Playwright)
+## ✅ Complété (28 fonctionnalités, preuves vérifiées)
 
-### Infrastructure et configuration (phases 0-22)
-- [x] Phase 0 : Laravel 12, nwidart, Vite/Tailwind/Alpine, Livewire, Pest - `composer.json`
-- [x] Phase 1-11 : Core, Auth, RolesPermissions, Backoffice, Settings, Media, FrontTheme, Logging, Notifications, SEO, Api
-- [x] Phase 12-22 : Storage, SaaS, Tenancy, Webhooks, Health, tests, CI, sécurité
+| # | Fonctionnalité | Preuve (fichier/test) |
+|---|----------------|----------------------|
+| 1 | Architecture modulaire 25 modules | `modules_statuses.json`, `Modules/*/module.json` |
+| 2 | Auth complet (Login, Register, 2FA TOTP, Magic Link, Social Auth, Lockout) | `Modules/Auth/`, `Modules/Auth/tests/` |
+| 3 | API REST v1 Sanctum + Scramble docs | `routes/api/v1.php`, 10 contrôleurs annotés |
+| 4 | SaaS/Billing Stripe Cashier, Plans, Checkout | `Modules/SaaS/`, `Modules/SaaS/app/Services/BillingService.php` |
+| 5 | Blog (Articles, Categories, Comments, Tags) | `Modules/Blog/`, tests Feature |
+| 6 | Newsletter (Campaigns, Subscribers, Templates) | `Modules/Newsletter/` |
+| 7 | Backoffice admin (Dashboard, CRUD complet) | `Modules/Backoffice/`, 40+ pages admin |
+| 8 | 3 thèmes admin switchables dynamiquement | `config/backoffice.php`, `SetBackofficeTheme` middleware |
+| 9 | Module IA - OpenRouter (chat, articles, modération, SEO, traduction) | `Modules/AI/app/Services/AiService.php` |
+| 10 | Notifications (Email, WebPush, Digest) | `Modules/Notifications/` |
+| 11 | i18n FR/EN complète (670+ clés) | `lang/fr.json`, `lang/en.json` |
+| 12 | PWA (manifest, service worker) | `public/manifest.json`, `public/service-worker.js` |
+| 13 | SEO (Meta tags, Sitemap dynamique) | `Modules/SEO/` |
+| 14 | Media (Spatie MediaLibrary, conversions) | `Modules/Media/` |
+| 15 | Search (Laravel Scout) | `Modules/Search/` |
+| 16 | Editor TipTap | `Modules/Editor/` |
+| 17 | Export CSV (6 ressources) | `Modules/Export/` |
+| 18 | Backup Spatie | `Modules/Backup/` |
+| 19 | Webhooks | `Modules/Webhooks/` |
+| 20 | Multi-tenant (base) | `Modules/Tenancy/` |
+| 21 | Feature Flags (Laravel Pennant) | `Modules/Core/`, 9 flags dans AppServiceProvider |
+| 22 | Sécurité OWASP (XSS Purifier, CSRF, Headers, Rate Limiting) | `mews/purifier`, `SecurityHeaders` middleware, `SECURITY_AUDIT_REPORT.md` |
+| 23 | 11 commandes DX artisan | `app:install`, `app:demo`, `app:status`, `app:check`, `app:make-module`, `app:logs`, `app:setup-hooks`, `app:audit`, `app:sync-permissions`, `app:cleanup`, `app:block-suspicious-ips` |
+| 24 | CI/CD GitHub Actions | `.github/workflows/ci.yml` (concurrency, npm audit, coverage) |
+| 25 | VS Code config | `.vscode/extensions.json`, `.vscode/settings.json` |
+| 26 | Google Fonts local (RGPD) | `GoogleFontService.php`, 23 fichiers bunny.net nettoyés |
+| 27 | Git pre-commit hooks | `scripts/pre-commit`, `app:setup-hooks` |
+| 28 | Rôles/Permissions (4 rôles, 29 permissions, Policies) | `Modules/RolesPermissions/` |
+| 29 | **RBAC fonctionnel** (36 permissions, Gate::before, middleware route, AdminOnlyPolicy) | Voir détail ci-dessous |
 
-### Authentification et sécurité (phases 38-45)
-- [x] 2FA TOTP - `Modules/Auth/app/Services/TwoFactorService.php`
-- [x] OAuth social - `SocialAuthController.php`
-- [x] Magic links - `MagicLinkService.php`
-- [x] Protection brute-force - `blocked_ips` migration
-- [x] Vérification email - `EmailVerificationController.php`
+### Détail RBAC (session 2026-02-26)
 
-### Backoffice admin (phases 23-37, 64-68)
-- [x] Dashboard NobleUI Bootstrap 5 - 43 contrôleurs confirmés
-- [x] CRUD complet (users, roles, settings, articles, plans, SEO, newsletters, etc.)
-- [x] Sidebar avec accordéons, recherche globale, notification bell
-- [x] Gestion médias, logs, backups, feature flags, shortcodes
+Le système de permissions était **purement décoratif** (29 permissions existaient mais aucun contrôleur ni route ne les vérifiait). Reconstruction complète :
 
-### Analytics et SaaS (phases 69-92, 137-140, 170-172)
-- [x] Dashboard stats ApexCharts - `StatsController.php`
-- [x] Plans Stripe Cashier - `Modules/SaaS/`
-- [x] Checkout + webhooks Stripe - `StripeWebhookController.php`
-- [x] Revenue dashboard ApexCharts - `RevenueController.php`
+| Composant | Fichier | Changement |
+|-----------|---------|------------|
+| Gate::before super_admin | `RolesPermissionsServiceProvider.php` | Bypass total pour super_admin |
+| EnsureIsAdmin | `EnsureIsAdmin.php` | `hasRole()` → `can('view_admin_panel')` |
+| AdminOnlyPolicy (base) | `Modules/Core/app/Shared/Policies/AdminOnlyPolicy.php` | Classe abstraite avec `$permission` configurable |
+| SettingPolicy | `Modules/Settings/app/Policies/SettingPolicy.php` | `$permission = 'manage_settings'` |
+| PlanPolicy | `Modules/SaaS/app/Policies/PlanPolicy.php` | `$permission = 'manage_plans'` |
+| UserPolicy | `Modules/Auth/app/Policies/UserPolicy.php` | `hasRole()` → `can('manage_users')` + ownership |
+| ArticlePolicy | `Modules/Blog/app/Policies/ArticlePolicy.php` | `can('manage_articles')` + ownership |
+| CommentPolicy | `Modules/Blog/app/Policies/CommentPolicy.php` | `can('manage_comments')` + ownership |
+| Routes backoffice | `Modules/Backoffice/routes/web.php` | Middleware `permission:xxx` sur tous les groupes |
+| Middleware Spatie | `bootstrap/app.php` | Aliases `permission`, `role`, `role_or_permission` |
+| Seeder | `RolesAndPermissionsSeeder.php` | 29 → 36 permissions (7 nouvelles : système, sécurité, etc.) |
+| Telescope/Horizon | `TelescopeServiceProvider.php`, `HorizonServiceProvider.php` | `can('view_telescope')`, `can('view_horizon')` |
+| API protection | `Api/UserController.php` | Protection hardcodée user #1 + self-deletion (bypass Gate::before) |
+| TestCase | `tests/TestCase.php` | Auto-seed `RolesAndPermissionsSeeder` |
+| Tests parallèles | `MakeModuleCommandTest.php` | Groupe `sequential` pour éviter race condition |
+| RoleController | `RoleController.php` | Catégorie "Système" avec nouvelles permissions |
+| SyncPermissionsCommand | `SyncPermissionsCommand.php` | Exécute le seeder (idempotent) |
 
-### Blog et contenu (phases 100-108, 141)
-- [x] Module Blog complet (articles, catégories, commentaires, tags) - `Modules/Blog/`
-- [x] Éditeur TipTap - `Modules/Editor/`
-- [x] Pages statiques - `Modules/Pages/`
-- [x] Module Newsletter - `Modules/Newsletter/`
-
-### Notifications (phases 95-99, 173)
-- [x] Push web (WebPush) - `config/webpush.php`
-- [x] Reverb temps réel - `config/reverb.php`
-- [x] Email templates personnalisables - `EmailTemplateService.php`
-
-### Frontend GoSaaS (phases 120-128)
-- [x] Landing page, pricing, contact, FAQ - `resources/views/`
-- [x] Cookie consent - `CookieConsentController.php`
-
-### API REST (phases 142-155)
-- [x] API v1 complète Sanctum - `routes/api/v1.php`
-- [x] 11 contrôleurs API + Resources
-
-### IA (phases 161-169)
-- [x] Module AI complet - `Modules/AI/`
-- [x] AiService (OpenRouter) - chat, articles, modération, SEO, traduction
-
-### UX/UI (phases 174-189)
-- [x] WCAG 2.2 AA - aria-labels sur 17 composants Livewire
-- [x] Responsive mobile
-- [x] Feature flags conditions avancées
-- [x] Traductions admin Livewire
-- [x] Export/Import CSV
-
-### Theme switcher dynamique (session 2026-02-24)
-- [x] Middleware SetBackofficeTheme (BDD Settings)
-- [x] 3 thèmes complets (wowdash, tabler, backend/NobleUI)
-- [x] 3 layouts Auth par thème
-- [x] Blog refactorisé sans hardcode wowdash
-- [x] Tests rendus theme-agnostic
-
-### Session 2026-02-25 (NobleUI + corrections)
-- [x] Migration complète vers NobleUI Bootstrap 5.3.8 (Lucide icons, dark sidebar)
-- [x] 19 vues Livewire converties Tailwind → Bootstrap 5
-- [x] ~40 pages contenu converties
-- [x] Flash navigation corrigé (sessionStorage splash guard)
-- [x] CSS Livewire corrigé (middleware web global)
-- [x] 405 theme switch corrigé (JS redirect natif)
-
-### Session 2026-02-26 (i18n + accessibilité + UX)
-- [x] Toasts Bootstrap 5 (remplace flash alerts) - 20 composants Livewire + partiel toast
-- [x] i18n validation FR (148 règles) - `lang/fr/validation.php`
-- [x] i18n passwords FR (5 clés) - `lang/fr/passwords.php`
-- [x] i18n pagination FR (2 clés) - `lang/fr/pagination.php`
-- [x] Footer "Tous droits réservés." corrigé dans fr.json
-- [x] Bug branding x-cloak corrigé (texte alt invisible)
-- [x] Hook wire:loading global (spinner + disable sur tous boutons Livewire)
-- [x] 8 textes anglais corrigés (ON/OFF → Activé/Désactivé, placeholders FR)
-- [x] ~85 aria-labels WCAG ajoutés sur 17 fichiers Livewire
-- [x] Favicon upload/drag-n-drop vérifié fonctionnel (branding page)
+**Décision architecture** : `ImpersonationController` garde volontairement `hasRole('super_admin')` (identité, pas permission).
 
 ---
 
-## 🔄 En cours / partiellement complété
+## 🔄 En cours (2 éléments)
 
-| Tâche | % estimé | Ce qui manque |
-|-------|----------|---------------|
-| Audit hardcode wowdash dans modules | 100% | Blog + Newsletter + Pages + Editor + Export + Search + Translation - tous propres |
-| Migration architecture plugins (AUDIT_REPORT) | 15% | plugin.json 25/25. Renommage Modules/ et PluginManager UI non faits |
-| Nettoyage docs obsolètes | 100% | DOCUMENTATION_SUMMARY.md, SESSION_STATE.md, ROADMAP.md, MCP_NOTES.md supprimés |
+| Tâche | % | Ce qui manque |
+|-------|---|---------------|
+| Migration architecture plugins | 15% | `plugin.json` 25/25 fait. Renommage `Modules/` → `plugins/`, PluginManager UI, adaptation autoload/namespaces non faits. **Décision utilisateur requise.** |
+| PHPStan 4 erreurs `env()` | - | Volontaire : `env()` dans CoreSetupCommand (wizard interactif) et DatabaseSeeder (flexibilité clone). Correction triviale si souhaitée. |
 
 ---
 
 ## ⬜ Restant (par priorité)
 
-### Priorité haute
-1. ~~**Synchroniser README.md**~~ - ✅ Déjà à jour (2156 tests, 25 modules)
-2. ~~**Audit hardcode wowdash**~~ - ✅ Tous les modules vérifiés, aucun hardcode restant
-3. ~~**Nettoyer docs obsolètes**~~ - ✅ Supprimés (DOCUMENTATION_SUMMARY, SESSION_STATE, ROADMAP, MCP_NOTES)
-4. ~~**Nettoyage vues dupliquées**~~ - ✅ 22 répertoires racine supprimés (38 fichiers, -3577 lignes)
-
-### Priorité moyenne
-5. **Découplage Core** (Phase 2 AUDIT_REPORT) - Déplacer EnsureIsAdmin, résoudre 4 dépendances circulaires
-6. **Extraction code partagé** (Phase 3-4 AUDIT_REPORT) - Traits ParsesTags, VerifiesPassword, FormRequests dupliqués
-7. **Harmoniser boutons d'action admin** - kebab vs liens texte inconsistants
-8. ~~**Nettoyage screenshots racine**~~ - ✅ Ajoutés au .gitignore (/*.png)
-9. ~~**Commit des changements**~~ - ✅ Commit 4e0500c (4835 fichiers, 584K insertions)
-
-### Priorité basse
-10. **Phase 154 : email digest** - Non commencé
-11. **Phase 155 : documentation technique auto-générée** - Non commencé
-12. **Phase 156 : multi-tenant avancé** - Non commencé
-13. **Phase 157 : marketing automation** - Non commencé
-14. **Phase 158 : tests A/B** - Non commencé
-15. **Phase 5-7 migration plugins** - Renommage Modules/ → plugins/, PluginManager UI
-16. **API v2 GraphQL** - Non planifié
-17. **Tests E2E Playwright automatisés** - Non planifié
+| # | Tâche | Dépendances | Complexité |
+|---|-------|-------------|------------|
+| 1 | Sidebar @can directives (masquer liens sans permission) | RBAC fonctionnel ✅ | Faible |
+| 2 | Tests RBAC dédiés (editor ne voit pas backups, etc.) | RBAC fonctionnel ✅ | Faible |
+| 3 | Validation visuelle Playwright du RBAC | RBAC + sidebar @can | Moyenne |
+| 4 | Supprimer CrudService mort | Aucune | Triviale |
+| 5 | Phase 154 : Email digest | NotificationFrequency, Queue scheduling | Moyenne |
+| 6 | Phase 155 : Documentation technique auto-générée | Scramble API, PHPDoc | Faible |
+| 7 | Phase 156 : Multi-tenant avancé (isolation DB) | Modules/Tenancy existant | Élevée |
+| 8 | Phase 157 : Marketing automation (drip campaigns) | Newsletter, SaaS | Élevée |
+| 9 | Phase 158 : Tests A/B (flags + analytics) | Feature Flags Pennant | Moyenne |
+| 10 | Migration Modules/ → plugins/ | Décision utilisateur | Élevée (risque) |
+| 11 | API v2 GraphQL | API v1 existante | Élevée |
+| 12 | Tests E2E Playwright (suite complète) | Toutes les pages | Moyenne |
 
 ---
 
-## ⚠️ Incohérences entre documentation et code réel
+## ⚠️ Incohérences (docs vs code réel)
 
-| # | Incohérence | Source doc | Réalité |
-|---|-------------|-----------|---------|
-| 1 | ~~"1216 tests, 21 modules"~~ | README.md | ✅ Corrigé (2156 tests, 25 modules) |
-| 2 | ~~"1655 tests, 24 modules"~~ | DOCUMENTATION_SUMMARY.md | ✅ Fichier supprimé |
-| 3 | "26 modules actifs" | Ancienne MEMORY.md | ✅ Corrigé (25 modules) |
-| 4 | "78 migrations" | Ancien PROGRESS_REPORT | ✅ Corrigé (57 migrations) |
-| 5 | ~~"Filament v5"~~ | DOCUMENTATION_SUMMARY.md | ✅ Fichier supprimé |
-| 6 | ~~SESSION_STATE.md~~ | .claude/ | ✅ Fichier supprimé |
-| 7 | "456 routes" | MEMORY.md | ✅ Corrigé (312 routes) |
+| Document | Affirmation | Réalité | Action |
+|----------|-------------|---------|--------|
+| MEMORY.md | 2169+ tests | **2185 tests** (augmenté session RBAC) | Mis à jour ✅ |
+| MEMORY.md | PHPStan 0 erreurs | **4 erreurs** pré-existantes (`env()` hors config/) | Mis à jour ✅ |
+| MEMORY.md | 57 migrations | **58 migrations** | Mis à jour ✅ |
+| MEMORY.md | 29 permissions | **36 permissions** (7 nouvelles session RBAC) | Mis à jour ✅ |
+| MEMORY.md | 456 routes | **460 routes** | Mis à jour ✅ |
+| SECURITY_AUDIT_REPORT.md | 2 XSS critiques (blog content) | **Corrigé** : `mews/purifier` installé, `safe_content` accessor | Rapport obsolète |
+| SECURITY_AUDIT_REPORT.md | Permissions décoratives | **Corrigé** : RBAC fonctionnel (middleware + policies + Gate::before) | Rapport obsolète |
+| AUDIT_REPORT.md | CrudService mort | **Encore présent** : `Modules/Core/app/Services/CrudService.php` | Suppression recommandée |
+| AUDIT_REPORT.md | 21 vues dupliquées | **Supprimées** (session précédente, -3577 lignes) | Rapport obsolète |
+| AUDIT_REPORT.md | 4 dépendances circulaires | **2 résolues** (Core↔Auth, EnsureIsAdmin déplacé) | 2 restantes mineures |
+| README.md | 2169+ tests | **2185 tests** | À mettre à jour |
 
 ---
 
 ## 🔴 Bloquants (décisions utilisateur requises)
 
-| # | Bloquant | Question |
-|---|----------|----------|
-| 1 | **Migration Modules/ vers plugins/** | Le renommage physique est-il toujours souhaité ? Risque élevé, valeur incertaine. |
-| 2 | **Priorité Phase 154-158** | Email digest, doc auto, multi-tenant, marketing, A/B - toujours prioritaires ? |
-| 3 | ~~**Nettoyage screenshots**~~ | ✅ Ajoutés au .gitignore |
-| 4 | ~~**Commit massif**~~ | ✅ Commit 4e0500c effectué |
-
----
-
-## Résumé exécutif
-
-Le projet est **fonctionnellement complet et production-ready** :
-
-- **2156 tests** (4192 assertions, 100% pass)
-- **25 modules actifs**, 312 routes, 57 migrations
-- **PHPStan 0 erreurs** (niveau 6), Pint 100%
-- **3 thèmes admin** (wowdash, tabler, backend/NobleUI actif)
-- **100% français** : validation, passwords, pagination, auth, 670+ clés métier
-- **WCAG 2.2 AA** : ~85 aria-labels, hook wire:loading global, toasts Bootstrap 5
-- **SaaS complet** : Stripe Cashier, plans, checkout, revenue dashboard
-- **IA intégrée** : OpenRouter (chat, articles, modération, SEO, traduction)
-- **CI/CD** : GitHub Actions (Pint + PHPStan + Pest)
-
-Prochaines actions immédiates : synchroniser README.md, nettoyer docs obsolètes, commiter les changements.
+| # | Question | Impact | Options |
+|---|----------|--------|---------|
+| 1 | Migration `Modules/` vers `plugins/` souhaitée ? | Risque élevé : 25 modules + 2185 tests + 58 migrations à adapter | A) Garder `Modules/` (0 risque) B) Renommer progressivement (risque moyen) C) Migration complète (risque élevé) |
+| 2 | Priorité Phases 154-158 ? | Planification prochaines sessions | Choisir 1-2 phases prioritaires ou autre direction |
+| 3 | Supprimer CrudService mort ? | Nettoyage code, -1 fichier inutile | Suppression recommandée (0 import trouvé) |
+| 4 | Corriger les 4 erreurs PHPStan `env()` ? | PHPStan 0 erreurs, mais perd flexibilité clone | Correction triviale via `config()` wrapper |

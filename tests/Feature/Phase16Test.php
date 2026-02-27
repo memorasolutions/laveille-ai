@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-test('telescope gate restricts to admin roles', function () {
+test('telescope gate uses permission-based access', function () {
     $content = file_get_contents(base_path('Modules/Core/app/Providers/TelescopeServiceProvider.php'));
-    expect($content)->toContain("hasRole(['super_admin', 'admin'])");
+    expect($content)->toContain("can('view_telescope')");
 });
 
-test('horizon gate restricts to admin roles', function () {
+test('horizon gate uses permission-based access', function () {
     $content = file_get_contents(base_path('Modules/Core/app/Providers/HorizonServiceProvider.php'));
-    expect($content)->toContain("hasRole(['super_admin', 'admin'])");
+    expect($content)->toContain("can('view_horizon')");
 });
 
 test('gitattributes has export-ignore rules', function () {

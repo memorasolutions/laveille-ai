@@ -15,8 +15,13 @@ class SyncPermissionsCommand extends Command
     public function handle(): int
     {
         $this->info('Synchronisation des permissions...');
+
+        $this->call('db:seed', [
+            '--class' => \Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder::class,
+            '--force' => true,
+        ]);
+
         $this->call('permission:cache-reset');
-        $this->call('cache:clear');
         $this->info('Permissions synchronisées avec succès.');
 
         return Command::SUCCESS;

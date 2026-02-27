@@ -12,7 +12,7 @@ class EnsureIsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->hasRole(['super_admin', 'admin'])) {
+        if (! $request->user()?->can('view_admin_panel')) {
             abort(403);
         }
 

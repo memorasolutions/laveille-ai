@@ -32,6 +32,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'force.password.change' => \Modules\Auth\Http\Middleware\ForcePasswordChange::class,
             'onboarding' => \Modules\Auth\Http\Middleware\EnsureOnboardingCompleted::class,
             'subscribed' => \Modules\SaaS\Http\Middleware\EnsureSubscribed::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ];
 
         if (class_exists(\Modules\FrontTheme\Http\Middleware\ThemeMiddleware::class)) {

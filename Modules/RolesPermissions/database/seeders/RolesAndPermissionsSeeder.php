@@ -39,6 +39,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_exports',
             'manage_imports',
             'manage_api',
+            // Gestion système et sécurité
+            'manage_system',
+            'manage_security',
+            'manage_email_templates',
+            'manage_shortcodes',
+            'manage_cookies',
+            'manage_onboarding',
+            'manage_trash',
             // Accès en lecture
             'view_admin_panel',
             'view_dashboard',

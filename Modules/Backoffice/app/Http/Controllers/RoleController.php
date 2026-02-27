@@ -62,6 +62,19 @@ class RoleController
                     'manage_exports' => ['label' => 'Exporter les données', 'desc' => 'Exporter les données au format CSV (utilisateurs, articles, plans, etc.).'],
                     'manage_imports' => ['label' => 'Importer les données', 'desc' => 'Importer des données depuis des fichiers CSV.'],
                     'manage_api' => ['label' => 'Gérer l\'API', 'desc' => 'Gérer les tokens API, configurer les accès et les rate limits.'],
+                    'manage_trash' => ['label' => 'Gérer la corbeille', 'desc' => 'Restaurer ou supprimer définitivement les éléments mis à la corbeille.'],
+                    'manage_shortcodes' => ['label' => 'Gérer les shortcodes', 'desc' => 'Créer, modifier et supprimer les shortcodes disponibles.'],
+                    'manage_email_templates' => ['label' => 'Gérer les emails', 'desc' => 'Personnaliser les templates d\'emails transactionnels.'],
+                ],
+            ],
+            'systeme' => [
+                'label' => 'Système',
+                'icon' => 'server',
+                'permissions' => [
+                    'manage_system' => ['label' => 'Administration système', 'desc' => 'Maintenance, cache, scheduler, jobs échoués, rétention des données, infos système.'],
+                    'manage_security' => ['label' => 'Sécurité', 'desc' => 'Tableau de bord sécurité, IPs bloquées, historique des connexions.'],
+                    'manage_cookies' => ['label' => 'Gérer les cookies', 'desc' => 'Configurer les catégories de cookies pour la conformité RGPD.'],
+                    'manage_onboarding' => ['label' => 'Gérer l\'onboarding', 'desc' => 'Configurer les étapes d\'accueil des nouveaux utilisateurs.'],
                 ],
             ],
             'acces' => [

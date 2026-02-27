@@ -1,60 +1,53 @@
 # TODO - Laravel SaaS Boilerplate
 
-**Derniere mise a jour** : 2026-02-26
+**Derniere mise a jour** : 2026-02-26 (session RBAC)
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet)
 
 ---
 
-## Completes (cette session)
+## Completes (sessions recentes)
 
-- [x] **Commit massif** - 4e0500c (4835 fichiers, 584K insertions)
-- [x] **README.md** - Deja a jour (2156 tests, 25 modules)
-- [x] **Audit hardcode wowdash** - 6 modules verifies, aucun hardcode restant
-- [x] **Docs obsoletes** - 4 fichiers supprimes (DOCUMENTATION_SUMMARY, SESSION_STATE, ROADMAP, MCP_NOTES)
-- [x] **Vues orphelines** - 22 dossiers racine supprimes (38 fichiers, -3577 lignes)
-- [x] **Screenshots** - Exclus via .gitignore (/*.png)
-- [x] **Decouplage Core** - SetBackofficeTheme config-driven, BlockSuspiciousIps deplace vers Auth, CleanupOldRecords sans import Settings
-- [x] **Code partage** - Audit confirme : deja bien centralise (85/100), aucune extraction necessaire
-- [x] **Boutons d'action admin** - Audit confirme : 95% coherence kebab pattern, pas d'intervention necessaire
-- [x] **PHPDoc API Scramble** - 10 controleurs annotes (@group, @unauthenticated, descriptions)
-- [x] **Clone readiness** - .env.example complete (OAuth, admin env vars), seeder decouple (env() au lieu de hardcode), CoreSetupCommand corrige
-- [x] **Audit robustesse complet** - 3 audits paralleles (securite OWASP, performance N+1, robustesse)
-- [x] **Fix XSS critique** - HTML Purifier (mews/purifier), safe_content accessor sur Article + StaticPage, 8 vues corrigees
-- [x] **Fix index manquant** - Migration ajout index is_active sur users
-- [x] **Fix Queue::failing** - Handler global pour jobs en echec dans AppServiceProvider
-- [x] **app:install wizard** - Commande interactive setup complet (DB validation, admin, Stripe, .env)
-- [x] **app:demo** - Donnees demo realistes (users, articles, comments, pages, activity, subscribers)
-- [x] **app:status** - Dashboard systeme (DB, cache, queue, storage, modules, stats)
-- [x] **app:check** - Pre-deploy validation (env, DB, PHPStan, tests, security, config, storage) + make check
-- [x] **app:make-module** - Scaffolder module complet (16 fichiers, providers, routes, tests, plugin.json, module.json)
-- [x] **CI/CD amélioré** - Concurrency cancel, npm audit, coverage-text dans PR, caches optimisés
-- [x] **app:logs** - Tail logs colorés avec filtrage par niveau, timestamps relatifs, --clear
-- [x] **app:setup-hooks** - Git pre-commit hook (Pint + PHPStan sur fichiers stagés uniquement)
-- [x] **VS Code config** - extensions.json (9 extensions recommandées) + settings.json (PHP 8.4, Pest, Blade, search excludes)
+- [x] Commit massif 4e0500c (4835 fichiers, 584K insertions)
+- [x] Audit hardcode wowdash, docs obsoletes, vues orphelines (-3577 lignes)
+- [x] Decouplage Core, code partage, PHPDoc API Scramble
+- [x] Fix XSS critique (mews/purifier), index manquant, Queue::failing
+- [x] Clone readiness (.env.example, seeder decouple, CoreSetupCommand)
+- [x] DX : app:install, app:demo, app:status, app:check, app:make-module, app:logs, app:setup-hooks
+- [x] CI/CD GitHub Actions (concurrency, npm audit, coverage-text)
+- [x] VS Code config (extensions.json + settings.json)
+- [x] Google Fonts local RGPD (GoogleFontService, 3 themes, 23 fichiers bunny.net nettoyes, Playwright 10/10)
+- [x] PROGRESS_REPORT.md (croisement docs + code reel + tests)
+- [x] RBAC fonctionnel (29 decoratives → 36 permissions actives, Gate::before, middleware route, AdminOnlyPolicy, 18+ fichiers modifies, 2185 tests 100%)
+- [x] Fix tests paralleles (race condition MakeModuleCommandTest → groupe sequential)
 
-## Prochaine priorite - Google Fonts local
+## Restant - Remplacement WordPress (par priorite)
 
-Objectif : quand un admin choisit une police Google dans le branding, la telecharger localement (RGPD, performance, fiabilite).
+### Critique (sans ca, pas de remplacement WP)
+- [ ] Menu dynamique (table menus, admin UI drag-and-drop, rendu header/footer)
+- [ ] FAQ en base de donnees (module CRUD admin, page publique, schema.org FAQ)
+- [ ] Stockage messages contact en DB (table contact_messages, liste admin, accuse reception)
+- [ ] Homepage configurable (choisir une page statique comme accueil depuis admin)
+- [ ] Templates de pages (landing, sidebar, full-width, selectable dans admin)
 
-### Sous-taches (dans l'ordre)
+### Important (ameliore le SEO et le contenu)
+- [ ] Schema.org / JSON-LD (articles, pages, FAQ, organisation)
+- [ ] Tags blog dedies (modele Tag, CRUD admin, page archive /blog/tag/{slug})
+- [ ] Temoignages (module CRUD admin + affichage frontend carousel/grid)
+- [ ] Media picker dans TipTap (browser images dans editeur)
 
-- [x] **Font download service** - GoogleFontService telecharge WOFF2 depuis Google Fonts, stocke dans `public/fonts/`, genere CSS @font-face local
-- [x] **BrandingController update** - Appelle GoogleFontService quand font change, stocke chemin local
-- [x] **Head components (3 themes)** - `<link>` vers CSS local au lieu de `@import url(googleapis)`
-- [ ] **Frontend font** - Remplacer fonts.bunny.net hardcode (Figtree) par le meme systeme local
-- [ ] **Audit select font** - Verifier que le selecteur est bien un `<select>` partout (audit confirme : deja le cas dans les 3 themes)
-- [ ] **Tests** - Test du service de telechargement, test d'integration branding
-- [ ] **Playwright** - Validation visuelle que les fonts s'appliquent correctement
+### Secondaire (nice-to-have)
+- [ ] Widgets/blocs configurables (zones sidebar, footer, via admin)
+- [ ] Form builder dynamique (formulaires configurables depuis admin)
 
-### Constats de l'audit
+## Restant - Technique
 
-- Le selecteur de police est DEJA un `<select>` dans les 3 themes (10 polices predefinies)
-- WowDash : charge les fonts via `@import url(googleapis)` dynamique
-- Backend/Tabler : utilisent CSS variables mais ne chargent PAS les fonts dynamiquement (bug)
-- Frontend : hardcode fonts.bunny.net (Figtree), non lie aux settings branding
-- 3 fichiers de selection identiques (backend/wowdash/tabler branding/edit.blade.php)
+- [ ] Sidebar @can directives (masquer liens sans permission)
+- [ ] Tests RBAC dedies (editor ne voit pas backups, etc.)
+- [ ] Validation visuelle Playwright du RBAC
+- [ ] Supprimer CrudService mort (0 import, dead code)
+- [ ] Commit des changements RBAC en attente (52 fichiers)
 
-## Restant (priorite basse - nouvelles fonctionnalites)
+## Restant - Nouvelles fonctionnalites (priorite basse)
 
 - [ ] Phase 154 : email digest
 - [ ] Phase 155 : documentation technique auto-generee
@@ -71,3 +64,5 @@ Objectif : quand un admin choisit une police Google dans le branding, la telecha
 |---|----------|--------|
 | 1 | Migration Modules/ vers plugins/ souhaitee ? | Risque eleve, valeur incertaine |
 | 2 | Priorite Phases 154-158 ? | Planification prochaines sessions |
+| 3 | Supprimer CrudService mort ? | Nettoyage, -1 fichier inutile (0 import) |
+| 4 | Corriger 4 erreurs PHPStan env() ? | PHPStan 0 erreurs mais perd flexibilite clone |

@@ -9,7 +9,6 @@ use Spatie\Permission\Models\Role;
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 test('admin dashboard is accessible for admin users', function () {
-    Role::create(['name' => 'super_admin']);
     $user = User::factory()->create();
     $user->assignRole('super_admin');
 

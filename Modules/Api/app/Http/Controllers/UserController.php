@@ -100,6 +100,11 @@ class UserController extends BaseApiController
      */
     public function destroy(User $user): JsonResponse
     {
+        // Protection absolue (bypass Gate::before pour super_admin)
+        if ($user->id === 1 || $user->id === auth()->id()) {
+            abort(403);
+        }
+
         $this->authorize('delete', $user);
 
         $user->delete();

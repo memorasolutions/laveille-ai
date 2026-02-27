@@ -5,6 +5,9 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
 
+// Run sequentially to avoid polluting modules_statuses.json for parallel tests
+uses()->group('sequential');
+
 $originalStatuses = null;
 
 beforeEach(function () use (&$originalStatuses) {

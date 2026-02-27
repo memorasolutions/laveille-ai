@@ -14,7 +14,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->admin = User::factory()->create(['is_active' => true]);
-    $this->admin->assignRole(Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']));
+    $this->admin->assignRole(Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']));
     $this->actingAs($this->admin);
 });
 
@@ -25,7 +25,7 @@ test('roles table monte sans erreur', function () {
 });
 
 test('roles table recherche filtre par nom', function () {
-    Role::create(['name' => 'editor', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
 
     Livewire::test(RolesTable::class)
         ->set('search', 'editor')
@@ -33,8 +33,8 @@ test('roles table recherche filtre par nom', function () {
 });
 
 test('roles table recherche masque les non-correspondants', function () {
-    Role::create(['name' => 'editor', 'guard_name' => 'web']);
-    Role::create(['name' => 'viewer', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
+    Role::firstOrCreate(['name' => 'viewer', 'guard_name' => 'web']);
 
     Livewire::test(RolesTable::class)
         ->set('search', 'editor')

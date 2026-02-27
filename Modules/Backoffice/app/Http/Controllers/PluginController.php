@@ -15,7 +15,6 @@ class PluginController
 
     public function index(): View
     {
-        abort_unless(auth()->user()?->hasRole('super_admin'), 403);
 
         /** @var array<string, array<string, mixed>> $registry */
         $registry = app('plugin.registry');
@@ -46,7 +45,6 @@ class PluginController
 
     public function toggle(string $name): RedirectResponse
     {
-        abort_unless(auth()->user()?->hasRole('super_admin'), 403);
 
         if (in_array($name, self::PROTECTED_MODULES, true)) {
             return back()->with('error', "Le module {$name} est protégé et ne peut pas être désactivé.");
