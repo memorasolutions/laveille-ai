@@ -11,6 +11,7 @@ use Modules\Backoffice\Http\Controllers\BackupController;
 use Modules\Backoffice\Http\Controllers\BlockedIpController;
 use Modules\Backoffice\Http\Controllers\BrandingController;
 use Modules\Backoffice\Http\Controllers\CacheController;
+use Modules\Backoffice\Http\Controllers\ContactMessageController;
 use Modules\Backoffice\Http\Controllers\CookieCategoryController;
 use Modules\Backoffice\Http\Controllers\DashboardController;
 use Modules\Backoffice\Http\Controllers\DataRetentionController;
@@ -98,6 +99,13 @@ Route::prefix('admin')
         Route::middleware('permission:manage_menus')->group(function () {
             Route::resource('menus', \Modules\Menu\Http\Controllers\MenuController::class);
             Route::post('menus/{menu}/save-items', [\Modules\Menu\Http\Controllers\MenuController::class, 'saveItems'])->name('menus.save-items');
+        });
+
+        // ── Messages contact ──
+        Route::middleware('permission:manage_contacts')->group(function () {
+            Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+            Route::get('contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
+            Route::delete('contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
         });
 
         // ── FAQ ──

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Mail\ContactMail;
+use App\Models\ContactMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -38,6 +39,11 @@ class ContactController extends Controller
         }
 
         RateLimiter::hit($key, 3600);
+
+        ContactMessage::create([
+            ...$validated,
+            'ip_address' => $request->ip(),
+        ]);
 
         Mail::to(config('mail.from.address'))->send(new ContactMail($validated));
 

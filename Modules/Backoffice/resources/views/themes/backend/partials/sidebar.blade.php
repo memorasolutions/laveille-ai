@@ -79,14 +79,14 @@
 
             {{-- ===== UTILISATEURS ===== --}}
             <li class="nav-item nav-category">{{ __('Utilisateurs') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#usersMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="users"></i>
                     <span class="link-title">{{ __('Utilisateurs') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*') ? 'show' : '' }}" id="usersMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'show' : '' }}" id="usersMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         <li class="nav-item">
                             <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">{{ __('Membres') }}</a>
@@ -102,6 +102,11 @@
                         @if(Route::has('admin.newsletter.campaigns.index'))
                         <li class="nav-item">
                             <a href="{{ route('admin.newsletter.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'active' : '' }}">{{ __('Campagnes') }}</a>
+                        </li>
+                        @endif
+                        @if(Route::has('admin.contact-messages.index'))
+                        <li class="nav-item">
+                            <a href="{{ route('admin.contact-messages.index') }}" class="nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">{{ __('Messages') }}</a>
                         </li>
                         @endif
                     </ul>

@@ -25,6 +25,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_media',
             'manage_menus',
             'manage_faqs',
+            'manage_contacts',
             'manage_settings',
             'manage_plans',
             'manage_seo',
