@@ -40,6 +40,10 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'branding', 'key' => 'branding.login_title', 'value' => 'Connexion', 'type' => 'string', 'description' => 'Titre de la page de connexion'],
             ['group' => 'branding', 'key' => 'branding.login_subtitle', 'value' => '', 'type' => 'string', 'description' => 'Sous-titre de la page de connexion'],
 
+            // Homepage
+            ['group' => 'homepage', 'key' => 'homepage.type', 'value' => 'landing', 'type' => 'string', 'description' => 'Type de page d\'accueil (landing = page par défaut, page = page statique)'],
+            ['group' => 'homepage', 'key' => 'homepage.page_id', 'value' => '', 'type' => 'string', 'description' => 'ID de la page statique à utiliser comme accueil (si type = page)'],
+
             // SMS (voip.ms)
             // Sécurité
             ['group' => 'security', 'key' => 'security.max_login_attempts', 'value' => '5', 'type' => 'number', 'description' => 'Nombre max de tentatives de connexion avant verrouillage'],

@@ -28,6 +28,7 @@ $helpTextsData = [
     @php
         $icons = [
             'general'   => 'settings',
+            'homepage'  => 'home',
             'mail'      => 'mail',
             'seo'       => 'bar-chart-2',
             'sms'       => 'smartphone',
@@ -40,6 +41,7 @@ $helpTextsData = [
         ];
         $labels = [
             'general'   => 'Général',
+            'homepage'  => 'Accueil',
             'mail'      => 'Courriel',
             'seo'       => 'SEO',
             'sms'       => 'SMS',
@@ -85,6 +87,62 @@ $helpTextsData = [
             <div x-show="activeTab === '{{ $groupName }}'" x-transition role="tabpanel">
                 <div class="card border">
                     <div class="card-body p-4">
+
+                        {{-- Sélecteur de page d'accueil (uniquement dans l'onglet Accueil) --}}
+                        @if($groupName === 'homepage')
+                            @php
+                                $homepageTypeSetting = $settings->firstWhere('key', 'homepage.type');
+                                $homepagePageSetting = $settings->firstWhere('key', 'homepage.page_id');
+                                $publishedPages = class_exists(\Modules\Pages\Models\StaticPage::class)
+                                    ? \Modules\Pages\Models\StaticPage::where('status', 'published')->get(['id', 'title'])
+                                    : collect();
+                            @endphp
+                            <div class="mb-4 pb-4 border-bottom">
+                                <label class="fw-semibold text-dark mb-3 d-block">
+                                    <i data-lucide="home" class="icon-sm me-1"></i> Page d'accueil du site
+                                </label>
+                                <p class="small text-muted mb-3">Choisissez ce qui s'affiche quand un visiteur arrive sur votre site.</p>
+
+                                @if($homepageTypeSetting)
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small">Type d'accueil</label>
+                                        <select wire:model="values.{{ $homepageTypeSetting->id }}"
+                                                class="form-select"
+                                                aria-label="Type de page d'accueil">
+                                            <option value="landing">Landing page (par défaut)</option>
+                                            <option value="page">Page statique</option>
+                                        </select>
+                                    </div>
+                                    @if($homepagePageSetting)
+                                    <div class="col-md-6">
+                                        <label class="form-label small">Page statique</label>
+                                        <select wire:model="values.{{ $homepagePageSetting->id }}"
+                                                class="form-select"
+                                                aria-label="Page statique comme accueil">
+                                            <option value="">-- Sélectionner une page --</option>
+                                            @foreach($publishedPages as $pg)
+                                                <option value="{{ $pg->id }}">{{ $pg->title }}</option>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted">Visible uniquement si le type est "Page statique".</small>
+                                    </div>
+                                    @endif
+                                </div>
+                                @endif
+
+                                <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                                    <button wire:click="saveGroup('homepage')"
+                                            class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+                                        <i data-lucide="check" class="icon-sm"></i>
+                                        Sauvegarder
+                                    </button>
+                                </div>
+                            </div>
+                            @php
+                                $settings = $settings->reject(fn($s) => in_array($s->key, ['homepage.type', 'homepage.page_id']));
+                            @endphp
+                        @endif
 
                         {{-- Sélecteur de thème (uniquement dans l'onglet Apparence) --}}
                         @if($groupName === 'branding')

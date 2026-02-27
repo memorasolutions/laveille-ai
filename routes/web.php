@@ -9,12 +9,23 @@ use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 use Modules\Blog\Models\Article;
 use Modules\SaaS\Models\Plan;
+use Modules\Settings\Models\Setting;
 
 // Sitemap dynamique
 Route::get('/sitemap.xml', [\Modules\SEO\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
 Route::middleware('cacheResponse')->group(function () {
     Route::get('/', function () {
+        $homepageType = Setting::get('homepage.type', 'landing');
+        $pageId = Setting::get('homepage.page_id');
+
+        if ($homepageType === 'page' && $pageId && class_exists(\Modules\Pages\Models\StaticPage::class)) {
+            $page = \Modules\Pages\Models\StaticPage::where('status', 'published')->find($pageId);
+            if ($page) {
+                return view('pages::public.show', compact('page'));
+            }
+        }
+
         return view('landing', [
             'plans' => Plan::active()->ordered()->get(),
             'recentPosts' => Article::published()->latest('published_at')->take(3)->get(),
