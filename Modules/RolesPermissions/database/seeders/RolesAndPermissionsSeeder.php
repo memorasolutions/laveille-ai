@@ -23,6 +23,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_categories',
             'manage_pages',
             'manage_media',
+            'manage_menus',
             'manage_settings',
             'manage_plans',
             'manage_seo',

@@ -94,6 +94,12 @@ Route::prefix('admin')
             Route::resource('roles', RoleController::class);
         });
 
+        // ── Menus ──
+        Route::middleware('permission:manage_menus')->group(function () {
+            Route::resource('menus', \Modules\Menu\Http\Controllers\MenuController::class);
+            Route::post('menus/{menu}/save-items', [\Modules\Menu\Http\Controllers\MenuController::class, 'saveItems'])->name('menus.save-items');
+        });
+
         // ── Paramètres ──
         Route::middleware('permission:manage_settings')->group(function () {
             Route::resource('settings', SettingController::class)->except(['show']);

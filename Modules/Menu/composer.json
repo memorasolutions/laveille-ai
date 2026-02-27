@@ -1,0 +1,10 @@
+{
+    "name": "modules/menu",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Menu\\": "app/",
+            "Modules\\Menu\\Database\\": "database/",
+            "Modules\\Menu\\Tests\\": "tests/"
+        }
+    }
+}
