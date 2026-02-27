@@ -104,9 +104,9 @@
                             </a>
                         </li>
                         <li>
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
-                                <button type="submit" class="dropdown-item py-2 text-body ms-0">
+                                <button type="button" class="dropdown-item py-2 text-body ms-0" onclick="document.getElementById('logout-form').submit()">
                                     <i class="me-2 icon-md" data-lucide="log-out"></i>
                                     <span>{{ __('Déconnexion') }}</span>
                                 </button>
