@@ -29,14 +29,14 @@
 
             {{-- ===== CONTENU ===== --}}
             <li class="nav-item nav-category">{{ __('Contenu') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#contentMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="file-text"></i>
                     <span class="link-title">{{ __('Contenu') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.blog.articles.index'))
                         <li class="nav-item">
@@ -66,6 +66,11 @@
                         @if(Route::has('admin.menus.index'))
                         <li class="nav-item">
                             <a href="{{ route('admin.menus.index') }}" class="nav-link {{ request()->routeIs('admin.menus.*') ? 'active' : '' }}">{{ __('Menus') }}</a>
+                        </li>
+                        @endif
+                        @if(Route::has('admin.faqs.index'))
+                        <li class="nav-item">
+                            <a href="{{ route('admin.faqs.index') }}" class="nav-link {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}">{{ __('FAQ') }}</a>
                         </li>
                         @endif
                     </ul>

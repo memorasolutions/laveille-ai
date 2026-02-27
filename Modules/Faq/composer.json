@@ -1,0 +1,10 @@
+{
+    "name": "modules/faq",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Faq\\": "app/",
+            "Modules\\Faq\\Database\\": "database/",
+            "Modules\\Faq\\Tests\\": "tests/"
+        }
+    }
+}

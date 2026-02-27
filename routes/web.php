@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CookieConsentController;
-use App\Http\Controllers\FaqController;
+use Modules\Faq\Http\Controllers\PublicFaqController;
 use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 use Modules\Blog\Models\Article;
@@ -21,7 +21,7 @@ Route::middleware('cacheResponse')->group(function () {
         ]);
     })->name('home');
 
-    Route::get('/faq', [FaqController::class, 'show'])->name('faq.show');
+    Route::get('/faq', [PublicFaqController::class, 'show'])->name('faq.show');
     Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
 
     Route::get('/pricing', function () {

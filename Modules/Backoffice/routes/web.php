@@ -100,6 +100,12 @@ Route::prefix('admin')
             Route::post('menus/{menu}/save-items', [\Modules\Menu\Http\Controllers\MenuController::class, 'saveItems'])->name('menus.save-items');
         });
 
+        // ── FAQ ──
+        Route::middleware('permission:manage_faqs')->group(function () {
+            Route::resource('faqs', \Modules\Faq\Http\Controllers\FaqController::class);
+            Route::post('faqs/reorder', [\Modules\Faq\Http\Controllers\FaqController::class, 'reorder'])->name('faqs.reorder');
+        });
+
         // ── Paramètres ──
         Route::middleware('permission:manage_settings')->group(function () {
             Route::resource('settings', SettingController::class)->except(['show']);

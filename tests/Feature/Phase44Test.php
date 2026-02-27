@@ -38,7 +38,8 @@ it('la page FAQ retourne 200', function () {
 });
 
 it('la page FAQ affiche les questions', function () {
+    \Modules\Faq\Models\Faq::create(['question' => 'Test FAQ dynamique ?', 'answer' => 'Oui.', 'order' => 0]);
     $response = $this->get('/faq');
     $response->assertSee('Questions fréquentes');
-    $response->assertSee('Laravel SaaS');
+    $response->assertSee('Test FAQ dynamique ?');
 });
