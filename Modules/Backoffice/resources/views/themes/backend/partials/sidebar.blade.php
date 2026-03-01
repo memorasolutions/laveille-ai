@@ -189,16 +189,16 @@
             @endcan
 
             {{-- ===== CONFIGURATION ===== --}}
-            @canany(['manage_settings', 'manage_branding', 'manage_seo', 'manage_feature_flags', 'manage_translations', 'manage_system', 'manage_email_templates', 'manage_webhooks', 'manage_shortcodes', 'manage_cookies', 'manage_onboarding'])
+            @canany(['manage_settings', 'manage_branding', 'manage_seo', 'manage_feature_flags', 'manage_translations', 'manage_system', 'manage_email_templates', 'manage_webhooks', 'manage_shortcodes', 'manage_cookies', 'manage_onboarding', 'manage_widgets'])
             <li class="nav-item nav-category">{{ __('Configuration') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*', 'admin.widgets.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#configMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*', 'admin.widgets.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="settings"></i>
                     <span class="link-title">{{ __('Configuration') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*') ? 'show' : '' }}" id="configMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*', 'admin.widgets.*') ? 'show' : '' }}" id="configMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @can('manage_settings')
                         <li class="nav-item"><a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">{{ __('Paramètres') }}</a></li>
@@ -243,6 +243,11 @@
                         @if(Route::has('admin.onboarding-steps.index'))
                         @can('manage_onboarding')
                         <li class="nav-item"><a href="{{ route('admin.onboarding-steps.index') }}" class="nav-link {{ request()->routeIs('admin.onboarding-steps.*') ? 'active' : '' }}">{{ __('Onboarding') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.widgets.index'))
+                        @can('manage_widgets')
+                        <li class="nav-item"><a href="{{ route('admin.widgets.index') }}" class="nav-link {{ request()->routeIs('admin.widgets.*') ? 'active' : '' }}">{{ __('Widgets') }}</a></li>
                         @endcan
                         @endif
                     </ul>

@@ -28,6 +28,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_testimonials',
             'manage_contacts',
             'manage_forms',
+            'manage_widgets',
             'manage_settings',
             'manage_plans',
             'manage_seo',

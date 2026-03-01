@@ -1,0 +1,10 @@
+{
+    "name": "Widget",
+    "description": "Module Widget",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 10
+}

@@ -27,5 +27,6 @@
     "Tenancy": true,
     "Testimonials": true,
     "Translation": true,
-    "Webhooks": true
+    "Webhooks": true,
+    "Widget": true
 }

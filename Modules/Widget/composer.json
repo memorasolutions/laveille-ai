@@ -1,0 +1,10 @@
+{
+    "name": "modules/widget",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Widget\\": "app/",
+            "Modules\\Widget\\Database\\": "database/",
+            "Modules\\Widget\\Tests\\": "tests/"
+        }
+    }
+}
