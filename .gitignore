@@ -37,6 +37,7 @@ _ide_helper_models.php
 # Outils dev locaux
 storage/debugbar/
 test-results/
+playwright-report/
 .playwright-audit/
 .playwright-mcp/
 tests/Browser/screenshots/

@@ -1,6 +1,6 @@
 # TODO - Laravel SaaS Boilerplate
 
-**Dernière mise à jour** : 2026-02-28
+**Dernière mise à jour** : 2026-03-01
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croisé docs/code)
 
 ---
@@ -44,9 +44,13 @@
 - [x] Vues Livewire auth converties Bootstrap→Tailwind (login, register, forgot-password, reset-password)
 - [x] Fix 16 tests cassés post-nettoyage thèmes (assertions wowdash→backend)
 - [x] Fix @push('js')→@push('scripts') vue revenue (ApexCharts rendu)
-- [x] Fix Phase57 (bg-success→bg-green-500, Tailwind colors)
+- [x] Fix Phase57 (bg-success→bg-green-500, Tailwind colors → inline colors)
 - [x] jQuery supprimé des vues auth (vanilla JS)
 - [x] Tests WCAG Phase188 (h1, nav landmark, aria-labels layout admin)
+- [x] Harmonisation 9 vues auth design Authero (auth-* CSS, inline SVGs, 0 Bootstrap)
+- [x] Guest layout split 50/50 (formulaire + hero image, responsive)
+- [x] Pages légales dynamiques via Settings (mentions légales, confidentialité)
+- [x] Onglet "Légal" dans SettingsManager admin
 - [x] NobleUI SCSS compilation via Vite (54 fichiers source, 381 KB CSS)
 - [x] Audit 140+ vues admin (0 Tailwind/WowDash/FontAwesome restant)
 - [x] Settings dark mode fix (tabs, labels, TipTap toolbar)
@@ -58,14 +62,14 @@
 
 ## Restant - Immédiat (trivial)
 
-- [ ] Commit des changements en attente (~100+ fichiers modifiés)
-- [ ] Corriger 13 erreurs PHPStan (7 Blog scope, 3 env(), 3 Media)
-- [ ] Supprimer `public/assets/` Jobick (~45 Mo, plus utilisé après migration NobleUI)
+- [x] Commit des changements en attente (d42db7e, d382d99, d47a082, b03cd5b)
+- [x] Corriger 13 erreurs PHPStan → 0 erreurs (niveau 6, 439 fichiers)
+- [x] Supprimer `public/assets/` Jobick (déjà supprimé)
 
 ## Restant - Technique (moyen terme)
 
-- [ ] Validation visuelle Playwright du RBAC (4 rôles x pages admin)
-- [ ] Tests E2E Playwright automatisés (suite complète)
+- [x] Validation visuelle Playwright du RBAC (4 rôles x pages admin, 0 bug sécurité)
+- [x] Tests E2E Playwright automatisés (15 tests : 5 auth, 5 RBAC, 5 pages publiques)
 
 ## Restant - Nice-to-have WordPress
 
@@ -90,4 +94,4 @@
 |---|----------|--------|
 | 1 | Migration Modules/ vers plugins/ souhaitée ? | Risque élevé, 28 modules à adapter |
 | 2 | Priorité Phases 154-158 ? | Planification prochaines sessions |
-| 3 | Corriger 13 erreurs PHPStan ? | 7 Blog scope, 3 env(), 3 Media image |
+| 3 | ~~Corriger 13 erreurs PHPStan~~ | ✅ Résolu (0 erreurs) |
