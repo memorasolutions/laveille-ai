@@ -2,53 +2,56 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Artisan;
 
-// Run sequentially to avoid polluting modules_statuses.json for parallel tests
+// Run sequentially to avoid polluting Modules/ for parallel processes
 uses()->group('sequential');
 
-$originalStatuses = null;
+$tempModulesPath = null;
+$tempStatusesPath = null;
 
-beforeEach(function () use (&$originalStatuses) {
-    $statusesPath = base_path('modules_statuses.json');
-    if (File::exists($statusesPath)) {
-        $originalStatuses = File::get($statusesPath);
+beforeEach(function () use (&$tempModulesPath, &$tempStatusesPath) {
+    // Create an isolated temp directory for the test module
+    // This prevents nwidart/modules from scanning TestModule in the real Modules/ folder
+    $tempModulesPath = sys_get_temp_dir() . '/laravel_test_modules_' . getmypid();
+    $tempStatusesPath = $tempModulesPath . '/modules_statuses.json';
+
+    File::ensureDirectoryExists($tempModulesPath);
+
+    // Copy current statuses to temp
+    $realPath = base_path('modules_statuses.json');
+    if (File::exists($realPath)) {
+        File::copy($realPath, $tempStatusesPath);
     }
 
-    // Defensive cleanup: remove leftover TestModule from a crashed previous run
+    // Redirect both the modules path and statuses file to temp
+    Config::set('modules.paths.modules', $tempModulesPath);
+    Config::set('modules.activators.file.statuses-file', $tempStatusesPath);
+});
+
+afterEach(function () use (&$tempModulesPath) {
+    // Clean up entire temp directory
+    if ($tempModulesPath && File::exists($tempModulesPath)) {
+        File::deleteDirectory($tempModulesPath);
+    }
+
+    // Also clean up any leftover in real Modules/ (defensive)
     $modulePath = base_path('Modules/TestModule');
     if (File::exists($modulePath)) {
         File::deleteDirectory($modulePath);
     }
 });
 
-afterEach(function () use (&$originalStatuses) {
-    try {
-        // FIRST: restore modules_statuses.json IMMEDIATELY to prevent race conditions
-        // Other parallel processes read this file at boot; it must not contain TestModule
-        $statusesPath = base_path('modules_statuses.json');
-        if ($originalStatuses !== null) {
-            File::put($statusesPath, $originalStatuses);
-        }
-    } finally {
-        // THEN: clean up the TestModule directory
-        $modulePath = base_path('Modules/TestModule');
-        if (File::exists($modulePath)) {
-            File::deleteDirectory($modulePath);
-        }
-    }
-});
-
 test('make-module command is registered', function () {
-    expect(Artisan::all())->toHaveKey('app:make-module');
+    expect(\Illuminate\Support\Facades\Artisan::all())->toHaveKey('app:make-module');
 });
 
-test('make-module creates module directory structure', function () {
+test('make-module creates module directory structure', function () use (&$tempModulesPath) {
     $this->artisan('app:make-module', ['name' => 'TestModule'])
         ->assertExitCode(0);
 
-    $base = base_path('Modules/TestModule');
+    $base = "{$tempModulesPath}/TestModule";
 
     expect(File::exists($base))->toBeTrue()
         ->and(File::exists("{$base}/module.json"))->toBeTrue()
@@ -63,18 +66,18 @@ test('make-module creates module directory structure', function () {
         ->and(File::exists("{$base}/tests/Feature/TestModuleTest.php"))->toBeTrue();
 });
 
-test('make-module fails if module already exists', function () {
-    File::makeDirectory(base_path('Modules/TestModule'), 0755, true);
+test('make-module fails if module already exists', function () use (&$tempModulesPath) {
+    File::makeDirectory("{$tempModulesPath}/TestModule", 0755, true);
 
     $this->artisan('app:make-module', ['name' => 'TestModule'])
         ->assertExitCode(1);
 });
 
-test('make-module updates modules_statuses.json', function () {
+test('make-module updates modules_statuses.json', function () use (&$tempStatusesPath) {
     $this->artisan('app:make-module', ['name' => 'TestModule'])
         ->assertExitCode(0);
 
-    $statuses = json_decode(File::get(base_path('modules_statuses.json')), true);
+    $statuses = json_decode(File::get($tempStatusesPath), true);
 
     expect($statuses)->toHaveKey('TestModule')
         ->and($statuses['TestModule'])->toBeTrue();

@@ -20,7 +20,8 @@ class MakeModuleCommand extends Command
     {
         $name = Str::studly(trim($this->argument('name')));
         $lower = Str::lower($name);
-        $path = base_path("Modules/{$name}");
+        $modulesPath = config('modules.paths.modules', base_path('Modules'));
+        $path = "{$modulesPath}/{$name}";
 
         if (File::exists($path)) {
             $this->components->error("Module {$name} already exists!");
@@ -329,7 +330,7 @@ class MakeModuleCommand extends Command
 
     private function updateModulesStatuses(string $name): void
     {
-        $statusesPath = base_path('modules_statuses.json');
+        $statusesPath = config('modules.activators.file.statuses-file', base_path('modules_statuses.json'));
         $statuses = [];
 
         if (File::exists($statusesPath)) {
