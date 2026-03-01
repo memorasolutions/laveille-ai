@@ -1,6 +1,14 @@
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Nouveau widget'])
+@extends('backoffice::themes.backend.layouts.admin')
+@section('title', 'Nouveau widget')
 
 @section('content')
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.widgets.index') }}">Widgets</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Nouveau widget</li>
+    </ol>
+</nav>
 <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
     <h4 class="mb-3 mb-md-0">Nouveau widget</h4>
 </div>

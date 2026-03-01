@@ -1,6 +1,13 @@
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Champs personnalisés'])
+@extends('backoffice::themes.backend.layouts.admin')
+@section('title', 'Champs personnalisés')
 
 @section('content')
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Champs personnalisés</li>
+    </ol>
+</nav>
 <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
     <h4 class="mb-3 mb-md-0">Champs personnalisés</h4>
     <a href="{{ route('admin.custom-fields.create') }}" class="btn btn-primary btn-icon-text">

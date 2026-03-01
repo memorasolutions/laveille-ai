@@ -1,16 +1,19 @@
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Formulaires'])
+@extends('backoffice::themes.backend.layouts.admin')
+@section('title', 'Formulaires')
 
 @section('content')
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Formulaires</li>
+    </ol>
+</nav>
 <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
-    <div>
-        <h4 class="mb-3 mb-md-0">Formulaires</h4>
-    </div>
-    <div>
-        <a href="{{ route('admin.formbuilder.forms.create') }}" class="btn btn-primary btn-icon-text">
-            <i class="btn-icon-prepend" data-lucide="plus"></i>
-            Nouveau formulaire
-        </a>
-    </div>
+    <h4 class="mb-3 mb-md-0">Formulaires</h4>
+    <a href="{{ route('admin.formbuilder.forms.create') }}" class="btn btn-primary btn-icon-text">
+        <i class="btn-icon-prepend" data-lucide="plus"></i>
+        Nouveau formulaire
+    </a>
 </div>
 
 @if(session('success'))
@@ -73,7 +76,16 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">Aucun formulaire.</td>
+                            <td colspan="5">
+                                <div class="text-center py-5 text-muted">
+                                    <i data-lucide="file-text" style="width:48px;height:48px;" class="mb-3 d-block mx-auto opacity-25"></i>
+                                    <h5 class="mb-1">Aucun formulaire</h5>
+                                    <p class="mb-3">Créez votre premier formulaire pour collecter des données.</p>
+                                    <a href="{{ route('admin.formbuilder.forms.create') }}" class="btn btn-primary btn-sm">
+                                        <i data-lucide="plus" style="width:14px;height:14px;" class="me-1"></i> Créer un formulaire
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>

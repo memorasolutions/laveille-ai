@@ -1,6 +1,14 @@
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Modifier : ' . $form->title])
+@extends('backoffice::themes.backend.layouts.admin')
+@section('title', 'Modifier : ' . $form->title)
 
 @section('content')
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.formbuilder.forms.index') }}">Formulaires</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+    </ol>
+</nav>
 <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
     <h4 class="mb-3 mb-md-0">Modifier : {{ $form->title }}</h4>
 </div>
