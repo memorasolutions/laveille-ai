@@ -77,6 +77,9 @@
 - [x] Widgets/blocs configurables (module Widget : 6 types, 3 zones, CRUD admin, drag-and-drop reorder, cache, partials frontend, 13 tests)
 - [x] Form builder dynamique (module FormBuilder : CRUD forms, champs drag-and-drop, soumissions, export CSV, honeypot, rate limiting, 14 tests)
 
+### Modules avancés
+- [x] Custom fields dynamiques (module CustomFields : EAV polymorphe, trait HasCustomFields, 10 types, CRUD admin, partial Blade, 14 tests)
+
 ## Restant - Nouvelles fonctionnalités (priorité basse)
 
 - [ ] Phase 154 : email digest

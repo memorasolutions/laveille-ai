@@ -13,12 +13,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Mews\Purifier\Facades\Purifier;
 use Laravel\Scout\Searchable;
+use Modules\CustomFields\Traits\HasCustomFields;
 use Modules\Pages\Database\Factories\StaticPageFactory;
 use Spatie\Translatable\HasTranslations;
 
 class StaticPage extends Model
 {
-    use HasFactory, HasTranslations, Searchable, SoftDeletes;
+    use HasCustomFields, HasFactory, HasTranslations, Searchable, SoftDeletes;
 
     public function toSearchableArray(): array
     {

@@ -1,0 +1,10 @@
+{
+    "name": "modules/customfields",
+    "autoload": {
+        "psr-4": {
+            "Modules\\CustomFields\\": "app/",
+            "Modules\\CustomFields\\Database\\": "database/",
+            "Modules\\CustomFields\\Tests\\": "tests/"
+        }
+    }
+}

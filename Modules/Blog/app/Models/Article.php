@@ -21,6 +21,7 @@ use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
 use Spatie\ModelStates\HasStates;
 use Spatie\ResponseCache\Facades\ResponseCache;
+use Modules\CustomFields\Traits\HasCustomFields;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -28,7 +29,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class Article extends Model
 {
-    use HasFactory, HasStates, HasTranslations, Searchable, SoftDeletes;
+    use HasCustomFields, HasFactory, HasStates, HasTranslations, Searchable, SoftDeletes;
 
     public array $translatable = ['title', 'slug', 'content', 'excerpt'];
 

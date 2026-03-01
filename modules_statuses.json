@@ -6,6 +6,7 @@
     "Backup": true,
     "Blog": true,
     "Core": true,
+    "CustomFields": true,
     "Editor": true,
     "Export": true,
     "Faq": true,
