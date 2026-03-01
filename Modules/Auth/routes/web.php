@@ -30,7 +30,7 @@ use Modules\Auth\Livewire\TwoFactorChallenge;
 use Modules\Auth\Services\AuthService;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'throttle:10,1'])->group(function () {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');
     Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
@@ -38,12 +38,12 @@ Route::middleware('guest')->group(function () {
 });
 
 // MagicLink - connexion sans mot de passe avec code 6 caractères
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'throttle:5,1'])->group(function () {
     Route::get('/magic-link', [MagicLinkController::class, 'showRequestForm'])->name('magic-link.request');
     Route::post('/magic-link', [MagicLinkController::class, 'sendLink'])->name('magic-link.send');
     Route::get('/magic-link/verify', [MagicLinkController::class, 'showVerifyForm'])->name('magic-link.verify');
     Route::post('/magic-link/verify', [MagicLinkController::class, 'verify'])->name('magic-link.confirm');
-    Route::post('/magic-link/sms', [MagicLinkController::class, 'sendSms'])->name('magic-link.sms');
+    Route::post('/magic-link/sms', [MagicLinkController::class, 'sendSms'])->name('magic-link.sms')->middleware('throttle:3,1');
 });
 
 // Route 2FA : accessible sans auth (l'utilisateur est temporairement déconnecté)

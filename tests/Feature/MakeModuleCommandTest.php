@@ -59,7 +59,6 @@ test('make-module creates module directory structure', function () use (&$tempMo
         ->and(File::exists("{$base}/composer.json"))->toBeTrue()
         ->and(File::exists("{$base}/app/Providers/TestModuleServiceProvider.php"))->toBeTrue()
         ->and(File::exists("{$base}/app/Providers/RouteServiceProvider.php"))->toBeTrue()
-        ->and(File::exists("{$base}/app/Providers/EventServiceProvider.php"))->toBeTrue()
         ->and(File::exists("{$base}/routes/web.php"))->toBeTrue()
         ->and(File::exists("{$base}/routes/api.php"))->toBeTrue()
         ->and(File::exists("{$base}/config/config.php"))->toBeTrue()

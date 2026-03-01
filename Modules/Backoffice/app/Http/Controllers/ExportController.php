@@ -28,8 +28,7 @@ class ExportController extends Controller
 
     public function users(): BinaryFileResponse
     {
-        /** @var \Illuminate\Support\Collection<int, array<string, mixed>> $data */
-        $data = User::all()->map(fn (User $u) => [
+        $data = User::cursor()->map(fn (User $u) => [
             'id' => $u->id,
             'name' => $u->name,
             'email' => $u->email,
@@ -60,7 +59,7 @@ class ExportController extends Controller
 
     public function settings(): BinaryFileResponse
     {
-        $data = collect(Setting::all()->toArray());
+        $data = Setting::all()->toArray();
 
         $path = $this->exportService->toCsv($data, 'settings_export.csv', ['id', 'key', 'value', 'group']);
 
@@ -72,7 +71,7 @@ class ExportController extends Controller
     public function articles(): BinaryFileResponse
     {
         $locale = app()->getLocale();
-        $data = Article::all()->map(fn (Article $a) => [
+        $data = Article::cursor()->map(fn (Article $a) => [
             'id' => $a->id,
             'title' => $a->getTranslation('title', $locale),
             'slug' => $a->getTranslation('slug', $locale),
@@ -127,7 +126,7 @@ class ExportController extends Controller
 
     public function campaigns(): BinaryFileResponse
     {
-        $data = Campaign::all()->map(fn (Campaign $c) => [
+        $data = Campaign::cursor()->map(fn (Campaign $c) => [
             'id' => $c->id,
             'subject' => $c->subject,
             'status' => (string) $c->status,
@@ -146,7 +145,7 @@ class ExportController extends Controller
     public function pages(): BinaryFileResponse
     {
         $locale = app()->getLocale();
-        $data = StaticPage::all()->map(fn (StaticPage $p) => [
+        $data = StaticPage::cursor()->map(fn (StaticPage $p) => [
             'id' => $p->id,
             'title' => $p->getTranslation('title', $locale),
             'slug' => $p->getTranslation('slug', $locale),
@@ -163,7 +162,7 @@ class ExportController extends Controller
 
     public function comments(): BinaryFileResponse
     {
-        $data = Comment::all()->map(fn (Comment $c) => [
+        $data = Comment::cursor()->map(fn (Comment $c) => [
             'id' => $c->id,
             'author_name' => $c->author_name,
             'content' => $c->content,
