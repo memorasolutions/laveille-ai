@@ -75,7 +75,7 @@
 ## Restant - Nice-to-have WordPress
 
 - [ ] Widgets/blocs configurables (zones sidebar, footer, via admin)
-- [ ] Form builder dynamique (formulaires configurables depuis admin)
+- [x] Form builder dynamique (module FormBuilder : CRUD forms, champs drag-and-drop, soumissions, export CSV, honeypot, rate limiting, 14 tests)
 
 ## Restant - Nouvelles fonctionnalités (priorité basse)
 

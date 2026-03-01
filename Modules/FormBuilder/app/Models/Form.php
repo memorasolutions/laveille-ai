@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\FormBuilder\Models;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+
+class Form extends Model
+{
+    /** @var list<string> */
+    protected $fillable = [
+        'title',
+        'slug',
+        'description',
+        'settings',
+        'is_published',
+    ];
+
+    /** @var array<string, string> */
+    protected $casts = [
+        'settings' => 'array',
+        'is_published' => 'boolean',
+    ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Form $form): void {
+            if (empty($form->slug)) {
+                $form->slug = Str::slug($form->title);
+            }
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function fields(): HasMany
+    {
+        return $this->hasMany(FormField::class)->orderBy('sort_order');
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(FormSubmission::class);
+    }
+
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('is_published', true);
+    }
+}

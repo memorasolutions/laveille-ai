@@ -33,16 +33,16 @@
             @endif
 
             {{-- ===== CONTENU ===== --}}
-            @canany(['manage_articles', 'manage_comments', 'manage_categories', 'manage_pages', 'manage_media', 'manage_menus', 'manage_faqs', 'manage_testimonials'])
+            @canany(['manage_articles', 'manage_comments', 'manage_categories', 'manage_pages', 'manage_media', 'manage_menus', 'manage_faqs', 'manage_testimonials', 'manage_forms'])
             <li class="nav-item nav-category">{{ __('Contenu') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*', 'admin.testimonials.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*', 'admin.testimonials.*', 'admin.formbuilder.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#contentMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*', 'admin.testimonials.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*', 'admin.testimonials.*', 'admin.formbuilder.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="file-text"></i>
                     <span class="link-title">{{ __('Contenu') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*', 'admin.testimonials.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.menus.*', 'admin.faqs.*', 'admin.testimonials.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.blog.articles.index'))
                         @can('manage_articles')
@@ -104,6 +104,13 @@
                         @can('manage_testimonials')
                         <li class="nav-item">
                             <a href="{{ route('admin.testimonials.index') }}" class="nav-link {{ request()->routeIs('admin.testimonials.*') ? 'active' : '' }}">{{ __('Témoignages') }}</a>
+                        </li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.formbuilder.forms.index'))
+                        @can('manage_forms')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.formbuilder.*') ? 'active' : '' }}">{{ __('Formulaires') }}</a>
                         </li>
                         @endcan
                         @endif

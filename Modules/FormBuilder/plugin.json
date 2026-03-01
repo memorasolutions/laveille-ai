@@ -1,0 +1,10 @@
+{
+    "name": "FormBuilder",
+    "description": "Module FormBuilder",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 10
+}

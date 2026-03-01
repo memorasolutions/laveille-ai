@@ -1,0 +1,10 @@
+{
+    "name": "modules/formbuilder",
+    "autoload": {
+        "psr-4": {
+            "Modules\\FormBuilder\\": "app/",
+            "Modules\\FormBuilder\\Database\\": "database/",
+            "Modules\\FormBuilder\\Tests\\": "tests/"
+        }
+    }
+}
