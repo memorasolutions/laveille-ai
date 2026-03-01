@@ -70,6 +70,7 @@
 
 - [x] Validation visuelle Playwright du RBAC (4 rôles x pages admin, 0 bug sécurité)
 - [x] Tests E2E Playwright automatisés (15 tests : 5 auth, 5 RBAC, 5 pages publiques)
+- [x] Fix race condition TestModule en tests parallèles (0 flaky, 2333/2333 pass)
 
 ## Restant - Nice-to-have WordPress
 
