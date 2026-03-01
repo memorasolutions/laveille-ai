@@ -80,6 +80,12 @@
 ### Modules avancés
 - [x] Custom fields dynamiques (module CustomFields : EAV polymorphe, trait HasCustomFields, 10 types, CRUD admin, partial Blade, 14 tests)
 
+### Consolidation qualité
+- [x] Fix N+1 query Menu admin (withCount au lieu de count() en boucle) - 1c3a592
+- [x] Index form_submissions.status ajouté (migration) - 1c3a592
+- [x] Fix XSS Widget HTML (Purifier::clean) - 4dc4250
+- [x] Audit Playwright Widget/CustomFields/FormBuilder (breadcrumbs, layouts 2 colonnes, empty states) - 5a25e8d
+
 ## Restant - Nouvelles fonctionnalités (priorité basse)
 
 - [ ] Phase 154 : email digest
