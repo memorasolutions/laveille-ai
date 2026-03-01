@@ -87,7 +87,8 @@
 - [x] Audit Playwright Widget/CustomFields/FormBuilder (breadcrumbs, layouts 2 colonnes, empty states) - 5a25e8d
 - [x] Module Import de données (CSV/Excel, OpenSpout, preview + mapping colonnes, 14 tests) - 4d661a6
 - [x] Attribution auteur MEMORA solutions (1072 fichiers PHP/Blade/JS/CSS) - fdbb19c
-- [x] Architecture audit Phase A : -25 EventServiceProvider vides, -20 master.blade.php morts, HasBulkActions→Core, scaffolder mis à jour
+- [x] Architecture audit Phase A : -25 EventServiceProvider vides, -20 master.blade.php morts, HasBulkActions→Core, scaffolder mis à jour - 614247e
+- [x] Production readiness : rate limiting auth (throttle 3-10/min), ExportController ::cursor(), index blog_comments/categories - a939bb9
 
 ## Restant - Nouvelles fonctionnalités (priorité basse)
 
