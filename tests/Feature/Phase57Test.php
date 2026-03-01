@@ -31,9 +31,9 @@ it('vue register affiche les règles de mot de passe', function () {
 it('vue register contient la barre de progression', function () {
     $view = file_get_contents(module_path('Auth', 'resources/views/livewire/register.blade.php'));
 
-    expect($view)->toContain('bg-success')
-        ->toContain('bg-danger')
-        ->toContain('bg-warning');
+    expect($view)->toContain('#22c55e')
+        ->toContain('#dc2626')
+        ->toContain('#f59e0b');
 });
 
 it('vue register contient x-model lié au mot de passe', function () {

@@ -1,29 +1,26 @@
 @extends('auth::layouts.guest')
 @section('title', __('Confirmation requise'))
 @section('content')
-<div class="text-center mb-5">
-    <div class="d-flex align-items-center justify-content-center mb-4">
-        <div class="rounded-3 d-flex justify-content-center align-items-center bg-warning bg-opacity-10 mx-auto" style="width:72px;height:72px;">
-            <i data-lucide="lock" class="text-warning" style="width:32px;height:32px;"></i>
-        </div>
-    </div>
-    <h4 class="mb-2">{{ __('Confirmation requise') }}</h4>
-    <p class="text-muted mb-0">{{ __('Cette action nécessite de confirmer votre mot de passe pour continuer.') }}</p>
-</div>
+<h1 class="auth-title">{{ __('Confirmation requise') }}</h1>
+<p class="auth-subtitle">{{ __('Cette action nécessite de confirmer votre mot de passe pour continuer.') }}</p>
+
 <form method="POST" action="{{ route('password.confirm') }}">
     @csrf
-    <div class="input-group mb-3">
-        <span class="input-group-text"><i data-lucide="lock"></i></span>
-        <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="{{ __('Votre mot de passe') }}" class="form-control @error('password') is-invalid @enderror">
+    <div style="margin-bottom:1.25rem;">
+        <label for="confirm-password" class="auth-label">{{ __('Mot de passe') }}</label>
+        <div class="auth-input-group">
+            <div class="auth-input-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <input id="confirm-password" type="password" name="password" autocomplete="current-password" class="auth-input" placeholder="{{ __('Votre mot de passe') }}" required>
+        </div>
+        @error('password')<p class="auth-error">{{ $message }}</p>@enderror
     </div>
-    @error('password')<div class="text-danger small mb-3">{{ $message }}</div>@enderror
-    <button type="submit" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center gap-1">
-        <i data-lucide="shield-check"></i>{{ __('Confirmer') }}
-    </button>
+
+    <button type="submit" class="auth-btn">{{ __('Confirmer') }}</button>
 </form>
-<div class="text-center mt-4">
-    <a href="{{ route('user.dashboard') }}" class="text-primary text-decoration-underline d-inline-flex align-items-center gap-1">
-        <i data-lucide="arrow-left"></i>{{ __('Retour au tableau de bord') }}
-    </a>
+
+<div style="text-align:center;margin-top:1.5rem;">
+    <a href="{{ route('user.dashboard') }}" class="auth-link">{{ __('Retour au tableau de bord') }}</a>
 </div>
 @endsection

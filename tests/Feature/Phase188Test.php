@@ -90,7 +90,7 @@ test('guest layout uses dynamic lang attribute', function () {
 test('guest layout uses main element instead of section', function () {
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee('<main>', false);
+        ->assertSee('<main', false);
 });
 
 // ============================================================

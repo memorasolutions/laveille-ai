@@ -1,81 +1,66 @@
 @extends('auth::layouts.guest')
 @section('title', __('Saisir votre code'))
 @section('content')
-<div class="d-flex align-items-center gap-2 mb-4">
-    <div class="rounded-2 d-flex justify-content-center align-items-center bg-primary bg-opacity-10 flex-shrink-0" style="width:40px;height:40px;">
-        <i data-lucide="hash" class="text-primary"></i>
-    </div>
-    <div>
-        <h4 class="mb-0">{{ __('Saisir votre code') }}</h4>
-        <p class="text-muted mb-0 small">{{ __('Entrez le code à 6 chiffres reçu.') }}</p>
-    </div>
-</div>
+<h1 class="auth-title">{{ __('Saisir votre code') }}</h1>
+<p class="auth-subtitle">{{ __('Entrez le code à 6 chiffres reçu par courriel.') }}</p>
+
 @if(session('status'))
-    <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
-        <i data-lucide="check-circle" class="text-success"></i>
-        <span>{{ session('status') }}</span>
-    </div>
+    <div class="auth-alert-success" role="alert">{{ session('status') }}</div>
 @endif
 @if(session('sms_sent'))
-    <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
-        <i data-lucide="phone" class="text-info"></i>
-        <span>{{ session('sms_sent') }}</span>
-    </div>
+    <div class="auth-alert-success" role="alert">{{ session('sms_sent') }}</div>
 @endif
 @if($errors->has('sms'))
-    <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
-        <i data-lucide="alert-triangle" class="text-danger"></i>
-        <span>{{ $errors->first('sms') }}</span>
-    </div>
+    <div class="auth-alert-error" role="alert">{{ $errors->first('sms') }}</div>
 @endif
 @if($errors->has('token'))
-    <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
-        <i data-lucide="alert-triangle" class="text-danger"></i>
-        <span>{{ $errors->first('token') }}</span>
-    </div>
+    <div class="auth-alert-error" role="alert">{{ $errors->first('token') }}</div>
 @endif
+
 <form action="{{ route('magic-link.confirm') }}" method="POST">
     @csrf
-    <div class="input-group mb-3">
-        <span class="input-group-text"><i data-lucide="mail"></i></span>
-        <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $email) }}" required>
+    <div style="margin-bottom:1.25rem;">
+        <label for="verify-email" class="auth-label">{{ __('Courriel') }}</label>
+        <div class="auth-input-group">
+            <div class="auth-input-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </div>
+            <input id="verify-email" name="email" type="email" autocomplete="email" class="auth-input" value="{{ old('email', $email) }}" required>
+        </div>
+        @error('email')<p class="auth-error">{{ $message }}</p>@enderror
     </div>
-    @error('email')<div class="text-danger small mb-3">{{ $message }}</div>@enderror
-    <div class="mb-3">
-        <label for="token" class="form-label fw-medium text-muted">{{ __('Code de connexion') }}</label>
-        <input id="token" name="token" type="text" inputmode="numeric" pattern="[0-9]*" class="form-control text-center fw-bold @error('token') is-invalid @enderror" style="font-size:1.5rem;letter-spacing:0.4em;font-family:monospace;" placeholder="000000" maxlength="6" value="{{ old('token') }}" required autofocus>
-        <div class="form-text text-center text-muted">{{ __('Code valide') }} {{ $expiryMinutes ?? 15 }} {{ __('minutes') }}</div>
+
+    <div style="margin-bottom:1.25rem;">
+        <label for="token" class="auth-label">{{ __('Code de connexion') }}</label>
+        <input id="token" name="token" type="text" inputmode="numeric" pattern="[0-9]*" class="auth-input" style="text-align:center;font-weight:700;font-size:1.5rem;letter-spacing:0.4em;font-family:monospace;padding-inline-start:1rem;" placeholder="000000" maxlength="6" value="{{ old('token') }}" required autofocus>
+        <p class="auth-text-muted" style="text-align:center;font-size:0.85rem;margin-top:0.5rem;">{{ __('Code valide') }} {{ $expiryMinutes ?? 15 }} {{ __('minutes') }}</p>
+        @error('token')<p class="auth-error">{{ $message }}</p>@enderror
     </div>
-    @error('token')<div class="text-danger small mb-3">{{ $message }}</div>@enderror
-    <button type="submit" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center gap-1">
-        <i data-lucide="log-in"></i>{{ __('Se connecter') }}
-    </button>
+
+    <button type="submit" class="auth-btn">{{ __('Se connecter') }}</button>
+
     @if($hasPhone ?? false)
-        <div class="border-top mt-4 pt-4"
+        <div style="border-top:1px solid #e5e7eb;margin-top:1.5rem;padding-top:1.5rem;"
              x-data="{ countdown: {{ $smsButtonDelay ?? 10 }}, ready: false }"
              x-init="if(countdown > 0) { let t = setInterval(() => { countdown--; if(countdown <= 0) { ready = true; clearInterval(t); } }, 1000); } else { ready = true; }">
-            <p class="text-center text-muted small mb-3">{{ __('Vous n\'avez pas reçu le code ?') }}</p>
-            <div x-show="!ready" class="text-center">
-                <span class="text-muted small">
-                    <i data-lucide="phone" style="width:16px;height:16px;"></i>
-                    {{ __('SMS disponible dans') }} <span x-text="countdown" class="fw-bold text-primary"></span> {{ __('secondes') }}
+            <p class="auth-text-muted" style="text-align:center;font-size:0.85rem;margin-bottom:0.75rem;">{{ __('Vous n\'avez pas reçu le code ?') }}</p>
+            <div x-show="!ready" style="text-align:center;">
+                <span class="auth-text-muted" style="font-size:0.85rem;">
+                    {{ __('SMS disponible dans') }} <span x-text="countdown" style="font-weight:700;color:#0284c7;"></span> {{ __('secondes') }}
                 </span>
             </div>
             <div x-show="ready" x-cloak>
                 <form action="{{ route('magic-link.sms') }}" method="POST">
                     @csrf
                     <input type="hidden" name="email" value="{{ old('email', $email) }}">
-                    <button type="submit" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center gap-1">
-                        <i data-lucide="phone"></i>{{ __('Recevoir par SMS') }}
-                    </button>
+                    <button type="submit" class="auth-btn" style="background:transparent;color:#0284c7;border:2px solid #e5e7eb;">{{ __('Recevoir par SMS') }}</button>
                 </form>
             </div>
         </div>
     @endif
-    <div class="text-center mt-4">
-        <a href="{{ route('magic-link.request') }}" class="text-primary text-decoration-underline d-inline-flex align-items-center gap-1">
-            <i data-lucide="arrow-left"></i>{{ __('Demander un nouveau code') }}
-        </a>
+
+    <div style="text-align:center;margin-top:1.5rem;">
+        <a href="{{ route('magic-link.request') }}" class="auth-link">{{ __('Demander un nouveau code') }}</a>
     </div>
 </form>
 @endsection
