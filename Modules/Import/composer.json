@@ -1,0 +1,10 @@
+{
+    "name": "modules/import",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Import\\": "app/",
+            "Modules\\Import\\Database\\": "database/",
+            "Modules\\Import\\Tests\\": "tests/"
+        }
+    }
+}

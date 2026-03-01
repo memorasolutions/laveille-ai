@@ -13,6 +13,7 @@
     "FormBuilder": true,
     "FrontTheme": true,
     "Health": true,
+    "Import": true,
     "Logging": true,
     "Media": true,
     "Menu": true,
