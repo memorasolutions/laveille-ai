@@ -85,6 +85,7 @@
 - [x] Index form_submissions.status ajouté (migration) - 1c3a592
 - [x] Fix XSS Widget HTML (Purifier::clean) - 4dc4250
 - [x] Audit Playwright Widget/CustomFields/FormBuilder (breadcrumbs, layouts 2 colonnes, empty states) - 5a25e8d
+- [x] Module Import de données (CSV/Excel, OpenSpout, preview + mapping colonnes, 14 tests) - 4d661a6
 
 ## Restant - Nouvelles fonctionnalités (priorité basse)
 
