@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="row mt-4">
 
     <div class="col-xl-6 mb-4 mb-xl-0">

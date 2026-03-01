@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @component('mail::message')
 # Réinitialisation du mot de passe
 

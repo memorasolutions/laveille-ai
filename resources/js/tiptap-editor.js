@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'

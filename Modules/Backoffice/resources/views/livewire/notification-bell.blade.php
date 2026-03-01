@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div x-data="{ open: false }" class="relative" wire:poll.30s>
     <button
         @click="open = !open"

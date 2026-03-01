@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @props(['name' => 'content', 'value' => '', 'label' => null, 'required' => false])
 
 <div wire:ignore>

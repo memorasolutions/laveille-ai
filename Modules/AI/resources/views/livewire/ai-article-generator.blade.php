@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
 @if($enabled)
     <button type="button" class="btn btn-outline-primary btn-sm" wire:click="openModal" aria-label="{{ __('Générer avec l\'IA') }}">

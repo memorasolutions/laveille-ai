@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     <h1 class="auth-title">{{ Settings::get('branding.login_title', __('Connexion')) }}</h1>
     @if(Settings::get('branding.login_subtitle'))

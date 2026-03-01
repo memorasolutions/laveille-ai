@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @component('mail::message')
 # Vérification de votre adresse email
 

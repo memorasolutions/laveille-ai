@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     @if($lookerUrl)
         <div class="w-100" style="aspect-ratio: 16/10;">

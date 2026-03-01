@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php
     $postCount = $widget->settings['post_count'] ?? 5;
     $posts = \Modules\Blog\Models\Article::published()->latest('published_at')->take($postCount)->get();

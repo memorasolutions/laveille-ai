@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @props(['title', 'value', 'icon' => null, 'color' => 'indigo', 'description' => null])
 
 @php

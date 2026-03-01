@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     <h1 class="auth-title">{{ __('Double authentification') }}</h1>
     <p class="auth-subtitle">

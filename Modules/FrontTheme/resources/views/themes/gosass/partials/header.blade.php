@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <header class="cs_site_header cs_style_1 cs_sticky_header">
     <div class="cs_main_header cs_fs_18 cs_heading_color">
         <div class="container">

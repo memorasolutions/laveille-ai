@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="position-relative" x-data="{ open: false }" @click.outside="open = false" wire:poll.30s>
     <button
         @click="open = !open"

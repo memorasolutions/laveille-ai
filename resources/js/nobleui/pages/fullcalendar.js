@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: fullcalendar
 // github link: https://github.com/fullcalendar/fullcalendar
 

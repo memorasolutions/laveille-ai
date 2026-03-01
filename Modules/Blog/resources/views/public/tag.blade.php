@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('blog::public.layout')
 
 @section('title', $tag->name . ' — Blog')

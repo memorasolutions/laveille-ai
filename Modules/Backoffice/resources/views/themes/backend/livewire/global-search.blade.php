@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div x-data="{ open: false }" @click.outside="open = false" class="position-relative">
     <div class="position-relative">
         <input

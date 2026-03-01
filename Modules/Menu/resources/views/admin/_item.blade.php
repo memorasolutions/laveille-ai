@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="menu-item" data-id="{{ $item->id }}" data-type="{{ $item->type }}" data-linkable-type="{{ $item->linkable_type }}" data-linkable-id="{{ $item->linkable_id }}">
     <div class="item-header">
         <i data-lucide="grip-vertical" class="text-muted"></i>

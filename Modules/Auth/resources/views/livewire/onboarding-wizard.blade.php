@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
 @if(!$dismissed && auth()->user()->needsOnboarding())
 <div class="card rounded-2 border border-primary border-opacity-25 mb-4">

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="header">
     <div class="header-content">
         <nav class="navbar navbar-expand">

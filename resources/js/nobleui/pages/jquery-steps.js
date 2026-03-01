@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: jquery-steps
 // github link: https://github.com/rstaib/jquery-steps/
 

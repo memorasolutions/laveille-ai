@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 {{-- Toast container (top-right, auto-dismiss) --}}
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1090;" id="toast-container">
     @foreach(['success' => ['bg-success', 'check-circle', 'Succès'], 'error' => ['bg-danger', 'alert-circle', 'Erreur'], 'warning' => ['bg-warning', 'alert-triangle', 'Attention'], 'info' => ['bg-info', 'info', 'Information']] as $type => [$bg, $icon, $label])

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="footer py-4 text-center">
     <div class="container-fluid">
         <p class="small text-muted mb-0">

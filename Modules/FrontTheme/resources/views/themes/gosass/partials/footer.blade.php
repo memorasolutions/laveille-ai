@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <footer class="cs_footer cs_style_1">
     <div class="cs_height_130 cs_height_lg_80"></div>
     <div class="container">

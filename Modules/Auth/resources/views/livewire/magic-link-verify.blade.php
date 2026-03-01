@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('auth::layouts.guest')
 @section('title', __('Saisir votre code'))
 @section('content')

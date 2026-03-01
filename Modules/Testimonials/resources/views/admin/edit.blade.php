@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin', ['title' => 'Modifier : ' . $testimonial->author_name, 'subtitle' => 'Témoignages'])
 
 @section('content')

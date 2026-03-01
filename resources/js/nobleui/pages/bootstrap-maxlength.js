@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: bootstrap-maxlength
 // github link: https://github.com/mimo84/bootstrap-maxlength
 

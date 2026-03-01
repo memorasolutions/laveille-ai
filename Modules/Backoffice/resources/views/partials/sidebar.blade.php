@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <aside class="fixed inset-y-0 left-0 z-30 flex flex-col bg-gray-800 text-white transition-all duration-300"
        :class="sidebarOpen ? 'w-64' : 'w-16'">
     {{-- Logo --}}

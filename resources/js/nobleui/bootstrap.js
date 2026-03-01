@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 import axios from 'axios';
 window.axios = axios;
 

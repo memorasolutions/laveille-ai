@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     {{-- Filtres --}}
     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">

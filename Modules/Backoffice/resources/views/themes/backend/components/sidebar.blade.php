@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php
     $siteName = $branding['site_name'] ?? config('app.name');
     $initial  = mb_strtoupper(mb_substr($siteName, 0, 1));

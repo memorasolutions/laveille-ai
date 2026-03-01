@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('fronttheme::themes.gosass.layouts.app')
 
 @section('title', __('Conditions d\'utilisation').' - '.config('app.name'))

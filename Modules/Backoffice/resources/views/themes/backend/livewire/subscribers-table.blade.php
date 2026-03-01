@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     {{-- Stats --}}
     <div class="row g-3 mb-4">

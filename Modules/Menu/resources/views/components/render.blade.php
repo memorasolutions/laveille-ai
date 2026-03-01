@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @props(['location', 'class' => '', 'itemClass' => '', 'linkClass' => ''])
 
 @php

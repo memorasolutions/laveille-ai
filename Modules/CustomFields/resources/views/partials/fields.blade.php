@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php
     $definitions = \Modules\CustomFields\Models\CustomFieldDefinition::active()
         ->forModel($modelType ?? '')

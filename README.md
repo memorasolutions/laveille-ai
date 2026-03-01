@@ -208,6 +208,10 @@ make cache-clear    # Vider tous les caches
 
 Les tests doivent tous passer avant soumission : `php artisan test`.
 
+## Auteur
+
+**MEMORA solutions** - [https://memora.solutions](https://memora.solutions) - info@memora.ca
+
 ## Licence
 
 Ce projet est distribué sous la licence [MIT](LICENSE).

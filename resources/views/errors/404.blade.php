@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('errors.layout')
 @section('code', '404')
 @section('title', __('Page introuvable'))

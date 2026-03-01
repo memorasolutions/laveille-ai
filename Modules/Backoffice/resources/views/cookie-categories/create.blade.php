@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::layouts.admin')
 @section('title', 'Créer catégorie cookie')
 @section('content')

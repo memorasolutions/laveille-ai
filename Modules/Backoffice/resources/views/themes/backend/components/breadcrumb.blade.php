@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="breadcrumb-area py-3 mb-4">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <h1 class="fw-semibold fs-5 mb-0">{{ $title ?? '' }}</h1>

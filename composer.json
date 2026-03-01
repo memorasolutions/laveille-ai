@@ -1,10 +1,17 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "memora/laravel-saas-boilerplate",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Laravel SaaS Boilerplate by MEMORA solutions",
+    "keywords": ["laravel", "framework", "saas", "boilerplate"],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "MEMORA solutions",
+            "email": "info@memora.ca",
+            "homepage": "https://memora.solutions"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "bacon/bacon-qr-code": "^3.0",

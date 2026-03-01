@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <h1 class="fw-semibold mb-0" style="font-size: 1rem;">{{ $title }}</h1>
     <nav aria-label="{{ __('Fil d\'Ariane') }}">

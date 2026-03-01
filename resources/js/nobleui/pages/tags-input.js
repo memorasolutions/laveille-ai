@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: jquery-tags-input
 // github link: https://github.com/xoxco/jQuery-Tags-Input
 

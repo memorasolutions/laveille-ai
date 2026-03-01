@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div x-data="{ open: false }" @click.outside="open = false" class="position-relative w-100">
     <div class="input-group">
         <div class="input-group-text"><i data-lucide="search"></i></div>

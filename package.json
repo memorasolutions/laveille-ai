@@ -1,6 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
+    "author": "MEMORA solutions <info@memora.ca> (https://memora.solutions)",
     "type": "module",
     "scripts": {
         "build": "vite build",

@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: datatables.net-bs5
 // github link: https://github.com/DataTables/Dist-DataTables-Bootstrap5
 

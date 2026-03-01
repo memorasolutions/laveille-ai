@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="widget widget-newsletter mb-3">
     <h5 class="widget-title">{{ $widget->title }}</h5>
     @if($widget->content)

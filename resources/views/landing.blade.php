@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('fronttheme::themes.gosass.layouts.app')
 
 @section('title', config('app.name').' - '.__('Plateforme SaaS Laravel 12'))

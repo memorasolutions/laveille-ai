@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     {{-- Header --}}
     <div class="d-block d-md-flex align-items-center justify-content-between mb-3">

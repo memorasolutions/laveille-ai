@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1055; max-width: 380px;"
      x-data="{
          toasts: [],

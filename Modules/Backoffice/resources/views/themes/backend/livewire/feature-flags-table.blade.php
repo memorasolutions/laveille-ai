@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     {{-- Recherche --}}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">

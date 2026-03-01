@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: easymde
 // github link: https://github.com/Ionaru/easy-markdown-editor
 

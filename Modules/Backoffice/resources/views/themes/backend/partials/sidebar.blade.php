@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <nav class="sidebar" aria-label="Menu administration">
     <div class="sidebar-header">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php
     $hasChildren = $item->children->isNotEmpty();
     $isActive = $item->isActive();

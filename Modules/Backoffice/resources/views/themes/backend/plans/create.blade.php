@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin', ['title' => 'Créer un plan', 'subtitle' => 'SaaS'])
 
 @section('content')

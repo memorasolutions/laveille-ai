@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     @if($articles->isEmpty())
         <div class="text-center py-20 text-gray-400">

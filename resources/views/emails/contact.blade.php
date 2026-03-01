@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><title>Message de contact</title></head>

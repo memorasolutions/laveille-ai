@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('auth::layouts.app')
 
 @section('title', 'Codes de secours 2FA')

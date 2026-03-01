@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ * @project memora/laravel-saas-boilerplate
+ */
+
 namespace Modules\Core\Database\Factories;
 
 use Modules\Core\Models\DupeModel;

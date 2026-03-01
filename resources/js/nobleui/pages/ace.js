@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: ace-builds (Ajax.org Cloud9 Editor)
 // github link: https://github.com/ajaxorg/ace-builds
 

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::layouts.admin', ['title' => 'Modifier le tag', 'subtitle' => 'Blog'])
 @section('content')
 <div class="card"><div class="card-body">

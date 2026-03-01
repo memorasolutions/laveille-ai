@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php
     $widgets = \Modules\Widget\Services\WidgetService::getWidgetsForZone($zone ?? '');
 @endphp

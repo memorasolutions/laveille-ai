@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     <h1 class="auth-title">{{ __('Réinitialiser le mot de passe') }}</h1>
     <p class="auth-subtitle">{{ __('Choisissez un nouveau mot de passe pour votre compte.') }}</p>

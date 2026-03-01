@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: jquery-validation
 // github link: https://github.com/jquery-validation/jquery-validation
 

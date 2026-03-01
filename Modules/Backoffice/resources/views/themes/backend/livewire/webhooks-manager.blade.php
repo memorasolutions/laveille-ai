@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     @if($successMessage)
         <div class="alert alert-success d-flex align-items-center gap-2 mb-3" wire:key="success-msg">

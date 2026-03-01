@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: owl.carousel
 // github link: https://github.com/OwlCarousel2/OwlCarousel2
 

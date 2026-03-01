@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php
 $helpTextsData = [
     'ai.openrouter_api_key'  => 'Votre clé API OpenRouter. Créez un compte gratuit sur openrouter.ai, puis copiez votre clé depuis le tableau de bord. Les modèles gratuits ne coûtent rien.',

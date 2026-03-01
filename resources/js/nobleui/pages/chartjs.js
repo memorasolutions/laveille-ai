@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: chart.js
 // github link: https://github.com/chartjs/Chart.js
 

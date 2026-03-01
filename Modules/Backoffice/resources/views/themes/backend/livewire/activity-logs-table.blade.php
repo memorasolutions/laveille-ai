@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
     {{-- Filtres --}}
     <div class="border-bottom pb-3 mb-3">

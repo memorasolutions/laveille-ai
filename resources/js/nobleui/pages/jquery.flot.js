@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 // npm package: jquery.flot
 // github link: https://github.com/flot/flot
 

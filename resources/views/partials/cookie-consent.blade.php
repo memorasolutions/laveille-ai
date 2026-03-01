@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @unless(request()->cookie('cookie_consent'))
 <div x-data="{ showDetails: false }" class="fixed-bottom" style="background-color: #1c1c1e; color: white; z-index: 9999;" role="dialog" aria-label="{{ __('Gestion des cookies') }}" aria-modal="false">
     <div class="container-fluid py-3 px-4">
