@@ -21,7 +21,7 @@ class MenuController extends Controller
 
     public function index(): View
     {
-        $menus = Menu::all();
+        $menus = Menu::withCount('allItems')->get();
         $locations = $this->menuService->getAvailableLocations();
 
         return view('menu::admin.index', compact('menus', 'locations'));
