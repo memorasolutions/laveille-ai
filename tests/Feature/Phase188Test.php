@@ -51,7 +51,7 @@ test('login email input has associated label', function () {
 test('login password input has associated label', function () {
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee('for="your-password"', false);
+        ->assertSee('for="login-password"', false);
 });
 
 test('login email has autocomplete attribute', function () {
