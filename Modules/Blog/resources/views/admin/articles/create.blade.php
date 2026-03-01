@@ -3,7 +3,7 @@
 @section('content')
 
 @if($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show mb-24" role="alert">
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
         <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -19,13 +19,13 @@
                     @livewire('ai-article-generator')
                 </div>
                 <div class="card-body">
-                    <div class="mb-20">
-                        <label class="form-label">Titre <span class="text-danger-main">*</span></label>
+                    <div class="mb-3">
+                        <label class="form-label">Titre <span class="text-danger">*</span></label>
                         <input type="text" name="title" class="form-control @error('title') is-invalid @enderror"
                                value="{{ old('title') }}" required>
                         @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <x-editor::tiptap name="content" :value="old('content', '')" label="Contenu" />
                     </div>
                     <div class="mb-0">
@@ -39,12 +39,12 @@
 
         <div class="col-md-4">
             {{-- Publication --}}
-            <div class="card mb-20">
+            <div class="card mb-3">
                 <div class="card-header">
                     <h6 class="mb-0">Publication</h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <label class="form-label">Statut</label>
                         <div class="btn-group w-100" role="group" aria-label="Statut de publication">
                             <input type="radio" class="btn-check" name="status" value="draft" id="status-draft" autocomplete="off" {{ old('status', 'draft') === 'draft' ? 'checked' : '' }}>
@@ -55,25 +55,25 @@
                             <label class="btn btn-outline-warning" for="status-archived">Archivé</label>
                         </div>
                     </div>
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <label class="form-label">Date de publication</label>
                         <input type="datetime-local" name="published_at" class="form-control"
                                value="{{ old('published_at') }}">
                     </div>
-                    <div class="d-flex gap-3 mt-24">
-                        <button type="submit" class="btn btn-primary-600">Enregistrer</button>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
                         <a href="{{ route('admin.blog.articles.index') }}" class="btn btn-outline-secondary">Annuler</a>
                     </div>
                 </div>
             </div>
 
             {{-- Catégorie et tags --}}
-            <div class="card mb-20">
+            <div class="card mb-3">
                 <div class="card-header">
                     <h6 class="mb-0">Catégorie et tags</h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <label for="category-select" class="form-label">Catégorie</label>
                         <select id="category-select" name="category_id" class="form-select" aria-label="Sélectionner une catégorie">
                             <option value="">— Sélectionner —</option>
@@ -124,14 +124,14 @@
                          :style="{'border-color': isDragging ? '#487fff' : '#dee2e6'}">
                         <template x-if="!preview">
                             <div>
-                                <iconify-icon icon="solar:upload-square-outline" style="font-size:2rem;" class="text-secondary-light d-block mb-8 mx-auto"></iconify-icon>
-                                <p class="mb-4 text-sm fw-medium">Glissez une image ici</p>
-                                <p class="mb-0 text-xs text-secondary-light">JPG, PNG, WebP — max 2 Mo</p>
+                                <i data-lucide="upload" class="text-muted d-block mb-2 mx-auto" style="width:32px;height:32px;"></i>
+                                <p class="mb-1 text-sm fw-medium">Glissez une image ici</p>
+                                <p class="mb-0 small text-muted">JPG, PNG, WebP — max 2 Mo</p>
                             </div>
                         </template>
                         <template x-if="preview">
                             <div>
-                                <img :src="preview" class="img-fluid rounded mb-8" style="max-height:180px;">
+                                <img :src="preview" class="img-fluid rounded mb-2" style="max-height:180px;">
                                 <button type="button" class="btn btn-sm btn-outline-secondary d-block mx-auto"
                                         @click.stop="preview = null; $refs.featuredImageInput.value = ''">
                                     Changer

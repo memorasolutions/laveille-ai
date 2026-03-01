@@ -6,7 +6,7 @@
 
 <div class="mb-3">
     <h1 class="fw-semibold mb-1" style="font-size:1.25rem;">{{ __('Mon profil') }}</h1>
-    <p class="text-secondary-light mb-0 text-sm">{{ __('Gérez vos informations personnelles et votre sécurité.') }}</p>
+    <p class="text-muted mb-0 text-sm">{{ __('Gérez vos informations personnelles et votre sécurité.') }}</p>
 </div>
 
 <div class="row gy-3">
@@ -27,13 +27,13 @@
                     </div>
                 @endif
                 <h5 class="fw-semibold mb-1" style="font-size:1rem;">{{ $user->name }}</h5>
-                <p class="text-secondary-light mb-2" style="font-size:0.8rem;">{{ $user->email }}</p>
+                <p class="text-muted mb-2" style="font-size:0.8rem;">{{ $user->email }}</p>
                 @if($user->bio)
-                    <p class="text-sm text-secondary-light mb-2 fst-italic" style="font-size:0.8rem;">{{ $user->bio }}</p>
+                    <p class="text-sm text-muted mb-2 fst-italic" style="font-size:0.8rem;">{{ $user->bio }}</p>
                 @endif
                 <div class="d-flex flex-wrap justify-content-center gap-1">
                     @foreach($user->getRoleNames() as $role)
-                        <span class="badge text-sm fw-semibold px-2 py-1 radius-4 bg-primary-100 text-primary-600">
+                        <span class="badge fw-semibold px-2 py-1 rounded-1 bg-primary bg-opacity-10 text-primary">
                             {{ ucfirst($role) }}
                         </span>
                     @endforeach
@@ -47,11 +47,11 @@
             </div>
             <div class="card-body py-2">
                 <div class="d-flex justify-content-between mb-1" style="font-size:0.85rem;">
-                    <span class="text-secondary-light">{{ __('Membre depuis') }}</span>
+                    <span class="text-muted">{{ __('Membre depuis') }}</span>
                     <span class="fw-semibold">{{ $user->created_at->format('d M Y') }}</span>
                 </div>
                 <div class="d-flex justify-content-between" style="font-size:0.85rem;">
-                    <span class="text-secondary-light">{{ __('Articles publiés') }}</span>
+                    <span class="text-muted">{{ __('Articles publiés') }}</span>
                     <span class="fw-semibold">
                         {{ \Modules\Blog\Models\Article::where('user_id', $user->id)->where('status', 'published')->count() }}
                     </span>
@@ -72,7 +72,7 @@
             <div class="card-body py-3">
                 @if(session('success'))
                 <div class="alert alert-success d-flex align-items-center gap-2 mb-2 py-2">
-                    <i class="fas fa-check-circle"></i>
+                    <i data-lucide="check-circle"></i>
                     {{ session('success') }}
                 </div>
                 @endif
@@ -81,28 +81,28 @@
                     @csrf @method('PUT')
                     <div class="row gy-2 mb-2">
                         <div class="col-sm-6">
-                            <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Nom complet') }} <span class="text-danger-main">*</span></label>
+                            <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Nom complet') }} <span class="text-danger">*</span></label>
                             <input type="text" name="name" value="{{ old('name', $user->name) }}" required
-                                   class="form-control radius-8 @error('name') is-invalid @enderror">
+                                   class="form-control rounded-2 @error('name') is-invalid @enderror">
                             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-sm-6">
-                            <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Adresse courriel') }} <span class="text-danger-main">*</span></label>
+                            <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Adresse courriel') }} <span class="text-danger">*</span></label>
                             <input type="email" name="email" value="{{ old('email', $user->email) }}" required
-                                   class="form-control radius-8 @error('email') is-invalid @enderror">
+                                   class="form-control rounded-2 @error('email') is-invalid @enderror">
                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Biographie') }}</label>
+                        <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Biographie') }}</label>
                         <textarea name="bio" rows="2"
-                                  class="form-control radius-8 @error('bio') is-invalid @enderror"
+                                  class="form-control rounded-2 @error('bio') is-invalid @enderror"
                                   placeholder="{{ __('Quelques mots sur vous...') }}">{{ old('bio', $user->bio) }}</textarea>
                         @error('bio')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         <div class="form-text">{{ __('Max. 500 caractères') }}</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Photo de profil') }}</label>
+                        <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Photo de profil') }}</label>
                         <div class="d-flex align-items-center gap-2">
                             @if($user->avatar)
                                 <img src="{{ Storage::url($user->avatar) }}"
@@ -115,13 +115,13 @@
                                 </div>
                             @endif
                             <div class="flex-grow-1">
-                                <input type="file" name="avatar" accept="image/*" class="form-control radius-8">
-                                @error('avatar')<div class="text-danger-main text-xs mt-1">{{ $message }}</div>@enderror
+                                <input type="file" name="avatar" accept="image/*" class="form-control rounded-2">
+                                @error('avatar')<div class="text-danger text-xs mt-1">{{ $message }}</div>@enderror
                                 <div class="form-text">{{ __('PNG, JPG, WebP - max. 2 Mo') }}</div>
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary radius-8">{{ __('Mettre à jour le profil') }}</button>
+                    <button type="submit" class="btn btn-primary rounded-2">{{ __('Mettre à jour le profil') }}</button>
                 </form>
             </div>
         </div>
@@ -136,23 +136,23 @@
                     @csrf @method('PUT')
                     <div class="row gy-2 mb-3">
                         <div class="col-md-4">
-                            <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Mot de passe actuel') }} <span class="text-danger-main">*</span></label>
+                            <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Mot de passe actuel') }} <span class="text-danger">*</span></label>
                             <input type="password" name="current_password" required
-                                   class="form-control radius-8 @error('current_password') is-invalid @enderror">
+                                   class="form-control rounded-2 @error('current_password') is-invalid @enderror">
                             @error('current_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Nouveau mot de passe') }} <span class="text-danger-main">*</span></label>
+                            <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Nouveau mot de passe') }} <span class="text-danger">*</span></label>
                             <input type="password" name="password" required minlength="8"
-                                   class="form-control radius-8">
+                                   class="form-control rounded-2">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Confirmer') }} <span class="text-danger-main">*</span></label>
+                            <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Confirmer') }} <span class="text-danger">*</span></label>
                             <input type="password" name="password_confirmation" required
-                                   class="form-control radius-8">
+                                   class="form-control rounded-2">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-outline-primary radius-8">{{ __('Modifier le mot de passe') }}</button>
+                    <button type="submit" class="btn btn-outline-primary rounded-2">{{ __('Modifier le mot de passe') }}</button>
                 </form>
             </div>
         </div>
@@ -162,17 +162,17 @@
         <div class="card mb-3" x-data="pushToggle()">
             <div class="card-header py-2">
                 <h5 class="card-title fw-semibold mb-0 d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                    <i class="fas fa-bell text-primary-600"></i>
+                    <i data-lucide="bell" class="text-primary"></i>
                     {{ __('Notifications push') }}
                 </h5>
             </div>
             <div class="card-body py-3">
-                <p class="text-secondary-light mb-2" style="font-size:0.85rem;">{{ __('Recevez des notifications directement dans votre navigateur, même lorsque le site est fermé.') }}</p>
+                <p class="text-muted mb-2" style="font-size:0.85rem;">{{ __('Recevez des notifications directement dans votre navigateur, même lorsque le site est fermé.') }}</p>
                 <template x-if="!supported">
-                    <p class="text-warning-600 text-sm">{{ __('Les notifications push ne sont pas supportées par votre navigateur.') }}</p>
+                    <p class="text-warning text-sm">{{ __('Les notifications push ne sont pas supportées par votre navigateur.') }}</p>
                 </template>
                 <template x-if="supported && permission === 'denied'">
-                    <p class="text-danger-600 text-sm">{{ __('Les notifications sont bloquées. Modifiez les paramètres de votre navigateur pour les autoriser.') }}</p>
+                    <p class="text-danger text-sm">{{ __('Les notifications sont bloquées. Modifiez les paramètres de votre navigateur pour les autoriser.') }}</p>
                 </template>
                 <template x-if="supported && permission !== 'denied'">
                     <div class="d-flex align-items-center justify-content-between">
@@ -183,7 +183,7 @@
                         </div>
                     </div>
                 </template>
-                <p x-show="message" x-text="message" class="text-sm mt-2 text-success-600" x-cloak></p>
+                <p x-show="message" x-text="message" class="text-sm mt-2 text-success" x-cloak></p>
             </div>
         </div>
         <script>
@@ -264,50 +264,50 @@
         <div class="card mb-3">
             <div class="card-header py-2">
                 <h5 class="card-title fw-semibold mb-0 d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                    <i class="fas fa-bell text-primary-600"></i>
+                    <i data-lucide="bell" class="text-primary"></i>
                     {{ __('Préférences de notification') }}
                 </h5>
             </div>
             <div class="card-body py-3">
                 @if(session('success') && str_contains(session('success'), 'notification'))
                 <div class="alert alert-success d-flex align-items-center gap-2 mb-2 py-2">
-                    <i class="fas fa-check-circle"></i>
+                    <i data-lucide="check-circle"></i>
                     {{ session('success') }}
                 </div>
                 @endif
 
-                <p class="text-secondary-light mb-2" style="font-size:0.85rem;">{{ __('Choisissez la fréquence de réception de vos notifications par courriel.') }}</p>
+                <p class="text-muted mb-2" style="font-size:0.85rem;">{{ __('Choisissez la fréquence de réception de vos notifications par courriel.') }}</p>
 
                 <form method="POST" action="{{ route('user.notifications.updateFrequency') }}">
                     @csrf @method('PUT')
                     <div class="list-group mb-3">
-                        <label class="list-group-item d-flex align-items-start gap-3 p-2 cursor-pointer">
+                        <label class="list-group-item d-flex align-items-start gap-3 p-2" style="cursor:pointer;">
                             <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="notification_frequency"
                                    value="immediate" {{ old('notification_frequency', $user->notification_frequency) == 'immediate' ? 'checked' : '' }}>
                             <div>
                                 <div class="fw-semibold" style="font-size:0.85rem;">{{ __('Immédiate') }}</div>
-                                <small class="text-secondary-light">{{ __('Recevoir chaque notification par courriel dès qu\'elle arrive') }}</small>
+                                <small class="text-muted">{{ __('Recevoir chaque notification par courriel dès qu\'elle arrive') }}</small>
                             </div>
                         </label>
-                        <label class="list-group-item d-flex align-items-start gap-3 p-2 cursor-pointer">
+                        <label class="list-group-item d-flex align-items-start gap-3 p-2" style="cursor:pointer;">
                             <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="notification_frequency"
                                    value="daily" {{ old('notification_frequency', $user->notification_frequency) == 'daily' ? 'checked' : '' }}>
                             <div>
                                 <div class="fw-semibold" style="font-size:0.85rem;">{{ __('Résumé quotidien') }}</div>
-                                <small class="text-secondary-light">{{ __('Un seul courriel par jour avec toutes vos notifications') }}</small>
+                                <small class="text-muted">{{ __('Un seul courriel par jour avec toutes vos notifications') }}</small>
                             </div>
                         </label>
-                        <label class="list-group-item d-flex align-items-start gap-3 p-2 cursor-pointer">
+                        <label class="list-group-item d-flex align-items-start gap-3 p-2" style="cursor:pointer;">
                             <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="notification_frequency"
                                    value="weekly" {{ old('notification_frequency', $user->notification_frequency) == 'weekly' ? 'checked' : '' }}>
                             <div>
                                 <div class="fw-semibold" style="font-size:0.85rem;">{{ __('Résumé hebdomadaire') }}</div>
-                                <small class="text-secondary-light">{{ __('Un seul courriel par semaine avec toutes vos notifications') }}</small>
+                                <small class="text-muted">{{ __('Un seul courriel par semaine avec toutes vos notifications') }}</small>
                             </div>
                         </label>
                     </div>
-                    @error('notification_frequency')<div class="text-danger-main text-sm mb-2">{{ $message }}</div>@enderror
-                    <button type="submit" class="btn btn-primary radius-8">{{ __('Enregistrer') }}</button>
+                    @error('notification_frequency')<div class="text-danger text-sm mb-2">{{ $message }}</div>@enderror
+                    <button type="submit" class="btn btn-primary rounded-2">{{ __('Enregistrer') }}</button>
                 </form>
             </div>
         </div>
@@ -316,14 +316,14 @@
         <div class="card mb-3">
             <div class="card-header py-2">
                 <h5 class="card-title fw-semibold mb-0 d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                    <i class="fas fa-download text-primary-600"></i>
+                    <i data-lucide="download" class="text-primary"></i>
                     {{ __('Exporter mes données') }}
                 </h5>
             </div>
             <div class="card-body py-3">
-                <p class="text-secondary-light mb-2" style="font-size:0.85rem;">{{ __('Téléchargez une copie de vos données personnelles (profil, articles, tokens) au format JSON.') }}</p>
-                <a href="{{ route('user.export-data') }}" class="btn btn-outline-primary radius-8">
-                    <i class="fas fa-file-download me-1"></i>
+                <p class="text-muted mb-2" style="font-size:0.85rem;">{{ __('Téléchargez une copie de vos données personnelles (profil, articles, tokens) au format JSON.') }}</p>
+                <a href="{{ route('user.export-data') }}" class="btn btn-outline-primary rounded-2">
+                    <i data-lucide="file-down" class="me-1"></i>
                     {{ __('Exporter mes données (JSON)') }}
                 </a>
             </div>
@@ -333,21 +333,21 @@
         <div class="card mb-3">
             <div class="card-header py-2">
                 <h5 class="card-title fw-semibold mb-0 d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                    <i class="fas fa-shield-alt text-primary-600"></i>
+                    <i data-lucide="shield" class="text-primary"></i>
                     {{ __('Double authentification (2FA)') }}
                 </h5>
             </div>
             <div class="card-body py-3">
                 @if($user->hasEnabledTwoFactor())
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                        <span class="badge fw-semibold px-3 py-2 radius-4 bg-success-focus text-success-main">
-                            <i class="fas fa-shield-alt me-1"></i>
+                        <span class="badge fw-semibold px-3 py-2 rounded-1 bg-success bg-opacity-10 text-success">
+                            <i data-lucide="shield-check" class="me-1"></i>
                             {{ __('Double authentification activée') }}
                         </span>
                         <div class="d-flex gap-2">
                             <a href="{{ route('user.two-factor.recovery-codes') }}"
-                               class="btn btn-sm btn-outline-secondary radius-8">
-                                <i class="fas fa-key me-1"></i> {{ __('Codes de secours') }}
+                               class="btn btn-sm btn-outline-secondary rounded-2">
+                                <i data-lucide="key" class="me-1"></i> {{ __('Codes de secours') }}
                             </a>
                             <form action="{{ route('user.two-factor.disable') }}" method="POST"
                                   onsubmit="return confirm('{{ __('Désactiver la double authentification ?') }}')">
@@ -355,24 +355,24 @@
                                 <input type="hidden" name="password" id="disable-2fa-password">
                                 <button type="button"
                                         onclick="var p=prompt('{{ __('Confirmez votre mot de passe pour désactiver le 2FA :') }}'); if(p){document.getElementById('disable-2fa-password').value=p; this.form.submit();}"
-                                        class="btn btn-sm btn-danger radius-8">
-                                    <i class="fas fa-times me-1"></i> {{ __('Désactiver') }}
+                                        class="btn btn-sm btn-danger rounded-2">
+                                    <i data-lucide="x" class="me-1"></i> {{ __('Désactiver') }}
                                 </button>
                             </form>
                         </div>
                     </div>
                 @else
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                        <span class="badge fw-semibold px-3 py-2 radius-4 bg-neutral-focus text-neutral-main">
+                        <span class="badge fw-semibold px-3 py-2 rounded-1 bg-secondary bg-opacity-10 text-secondary">
                             {{ __('Double authentification désactivée') }}
                         </span>
-                        <a href="{{ route('user.two-factor.setup') }}" class="btn btn-primary radius-8">
-                            <i class="fas fa-shield-alt me-1"></i> {{ __('Activer le 2FA') }}
+                        <a href="{{ route('user.two-factor.setup') }}" class="btn btn-primary rounded-2">
+                            <i data-lucide="shield" class="me-1"></i> {{ __('Activer le 2FA') }}
                         </a>
                     </div>
                 @endif
                 @error('password')
-                    <div class="text-danger-main text-sm mt-2">{{ $message }}</div>
+                    <div class="text-danger text-sm mt-2">{{ $message }}</div>
                 @enderror
             </div>
         </div>
@@ -381,17 +381,17 @@
         <div class="card mb-3">
             <div class="card-body py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary-100"
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10"
                          style="width:36px;height:36px;flex-shrink:0;">
-                        <i class="fas fa-history text-primary-600"></i>
+                        <i data-lucide="history" class="text-primary"></i>
                     </div>
                     <div>
                         <h6 class="fw-semibold mb-0" style="font-size:0.9rem;">{{ __('Journal d\'activité') }}</h6>
-                        <p class="text-secondary-light mb-0" style="font-size:0.8rem;">{{ __('Consultez l\'historique de vos actions.') }}</p>
+                        <p class="text-muted mb-0" style="font-size:0.8rem;">{{ __('Consultez l\'historique de vos actions.') }}</p>
                     </div>
                 </div>
-                <a href="{{ route('user.activity') }}" class="btn btn-outline-secondary radius-8 btn-sm">
-                    <i class="fas fa-list me-1"></i> {{ __('Voir mon activité') }}
+                <a href="{{ route('user.activity') }}" class="btn btn-outline-secondary rounded-2 btn-sm">
+                    <i data-lucide="list" class="me-1"></i> {{ __('Voir mon activité') }}
                 </a>
             </div>
         </div>
@@ -400,31 +400,31 @@
         <div class="card mb-3">
             <div class="card-body py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary-100"
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10"
                          style="width:36px;height:36px;flex-shrink:0;">
-                        <i class="fas fa-desktop text-primary-600"></i>
+                        <i data-lucide="monitor-smartphone" class="text-primary"></i>
                     </div>
                     <div>
                         <h6 class="fw-semibold mb-0" style="font-size:0.9rem;">{{ __('Sessions actives') }}</h6>
-                        <p class="text-secondary-light mb-0" style="font-size:0.8rem;">{{ __('Gérez les appareils connectés à votre compte.') }}</p>
+                        <p class="text-muted mb-0" style="font-size:0.8rem;">{{ __('Gérez les appareils connectés à votre compte.') }}</p>
                     </div>
                 </div>
-                <a href="{{ route('user.sessions') }}" class="btn btn-outline-secondary radius-8 btn-sm">
-                    <i class="fas fa-shield-alt me-1"></i> {{ __('Gérer mes sessions') }}
+                <a href="{{ route('user.sessions') }}" class="btn btn-outline-secondary rounded-2 btn-sm">
+                    <i data-lucide="shield" class="me-1"></i> {{ __('Gérer mes sessions') }}
                 </a>
             </div>
         </div>
 
         {{-- Suppression de compte --}}
-        <div class="card border border-danger-focus">
+        <div class="card border border-danger border-opacity-25">
             <div class="card-header py-2">
-                <h5 class="card-title fw-semibold mb-0 text-danger-main d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                    <i class="fas fa-trash"></i>
+                <h5 class="card-title fw-semibold mb-0 text-danger d-flex align-items-center gap-2" style="font-size:0.9rem;">
+                    <i data-lucide="trash-2"></i>
                     {{ __('Supprimer mon compte') }}
                 </h5>
             </div>
             <div class="card-body py-3">
-                <p class="text-secondary-light mb-2" style="font-size:0.85rem;">{{ __('Cette action est irréversible. Toutes vos données seront définitivement supprimées.') }}</p>
+                <p class="text-muted mb-2" style="font-size:0.85rem;">{{ __('Cette action est irréversible. Toutes vos données seront définitivement supprimées.') }}</p>
 
                 @if(session('delete_error'))
                     <div class="alert alert-danger mb-2">{{ session('delete_error') }}</div>
@@ -434,15 +434,15 @@
                       onsubmit="return confirm('{{ __('Êtes-vous sûr ? Cette action est IRRÉVERSIBLE.') }}');">
                     @csrf @method('DELETE')
                     <div class="mb-3">
-                        <label class="form-label fw-medium text-secondary-light mb-1" style="font-size:0.85rem;">{{ __('Confirmez avec votre mot de passe') }}</label>
+                        <label class="form-label fw-medium text-muted mb-1" style="font-size:0.85rem;">{{ __('Confirmez avec votre mot de passe') }}</label>
                         <input type="password" name="password" required
                                placeholder="{{ __('Votre mot de passe actuel') }}"
-                               class="form-control radius-8 @error('password') is-invalid @enderror"
+                               class="form-control rounded-2 @error('password') is-invalid @enderror"
                                style="max-width:320px;">
                         @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <button type="submit" class="btn btn-danger radius-8">
-                        <i class="fas fa-trash me-1"></i>
+                    <button type="submit" class="btn btn-danger rounded-2">
+                        <i data-lucide="trash-2" class="me-1"></i>
                         {{ __('Supprimer définitivement mon compte') }}
                     </button>
                 </form>

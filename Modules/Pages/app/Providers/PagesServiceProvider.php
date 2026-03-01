@@ -49,9 +49,13 @@ class PagesServiceProvider extends ServiceProvider
         $viewPath = resource_path('views/modules/'.$this->nameLower);
         $sourcePath = module_path($this->name, 'resources/views');
         $this->publishes([$sourcePath => $viewPath], ['views', $this->nameLower.'-module-views']);
-        $this->loadViewsFrom(array_merge(
-            is_dir($viewPath) ? [$viewPath] : [],
-            [$sourcePath]
-        ), $this->nameLower);
+        $theme = config('backoffice.theme', 'backend');
+        $themePath = module_path($this->name, 'resources/views/themes/'.$theme);
+        $paths = is_dir($viewPath) ? [$viewPath] : [];
+        if (is_dir($themePath)) {
+            array_unshift($paths, $themePath);
+        }
+        $paths[] = $sourcePath;
+        $this->loadViewsFrom($paths, $this->nameLower);
     }
 }

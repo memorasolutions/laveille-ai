@@ -1,78 +1,87 @@
 <div>
-    <h1 class="mb-12 fw-bold" style="font-size: 1.5rem;">{{ __('Connexion') }}</h1>
-    <p class="mb-32 text-secondary-light text-lg">{{ __('Bienvenue ! Entrez vos identifiants') }}</p>
-
+    <h1 class="h2 text-dark">{{ __('Connexion') }}</h1>
+    <p class="mt-2 text-muted">{{ __('Bienvenue ! Entrez vos identifiants') }}</p>
     @if(session('status'))
-        <div class="alert alert-success radius-8 mb-20">{{ session('status') }}</div>
+        <div class="alert alert-success mt-4 mb-3">{{ session('status') }}</div>
     @endif
-
-    <form wire:submit="authenticate">
-        <div class="icon-field mb-16">
-            <label for="login-email" class="visually-hidden">{{ __('Courriel') }}</label>
-            <span class="icon top-50 translate-middle-y" aria-hidden="true">
-                <iconify-icon icon="mage:email"></iconify-icon>
-            </span>
-            <input wire:model="email" type="email" id="login-email" autocomplete="email" class="form-control h-56-px bg-neutral-50 radius-12 @error('email') is-invalid @enderror" placeholder="{{ __('Courriel') }}" required autofocus>
-        </div>
-        @error('email')<div class="text-danger-main text-sm mb-16">{{ $message }}</div>@enderror
-
-        <div class="position-relative mb-20">
-            <div class="icon-field">
-                <label for="your-password" class="visually-hidden">{{ __('Mot de passe') }}</label>
-                <span class="icon top-50 translate-middle-y" aria-hidden="true">
-                    <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
+    <form wire:submit="authenticate" class="mt-5">
+        <div class="mb-4">
+            <label for="login-email" class="form-label">{{ __('Courriel') }}</label>
+            <div class="input-group @error('email') is-invalid @enderror">
+                <span class="input-group-text">
+                    <i data-lucide="mail" aria-hidden="true"></i>
                 </span>
-                <input wire:model="password" type="password" class="form-control h-56-px bg-neutral-50 radius-12 @error('password') is-invalid @enderror" id="your-password" autocomplete="current-password" placeholder="{{ __('Mot de passe') }}" required>
+                <input wire:model="email" type="email" id="login-email" autocomplete="email" class="form-control @error('email') is-invalid @enderror" placeholder="{{ __('Courriel') }}" required autofocus>
             </div>
-            <button type="button" class="toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light border-0 bg-transparent p-0" data-toggle="#your-password" aria-label="{{ __('Afficher le mot de passe') }}"></button>
+            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
-        @error('password')<div class="text-danger-main text-sm mb-16">{{ $message }}</div>@enderror
-
-        <div class="d-flex justify-content-between gap-2">
-            <div class="form-check style-check d-flex align-items-center">
-                <input wire:model="remember" class="form-check-input border border-neutral-300" type="checkbox" id="remember">
-                <label class="form-check-label" for="remember">{{ __('Se souvenir de moi') }}</label>
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label for="your-password" class="form-label mb-0">{{ __('Mot de passe') }}</label>
+                <a href="{{ route('password.request') }}" class="text-decoration-none text-primary small" wire:navigate>{{ __('Mot de passe oublié ?') }}</a>
             </div>
-            <a href="{{ route('password.request') }}" class="text-primary-600 fw-medium" wire:navigate>{{ __('Mot de passe oublié ?') }}</a>
+            <div class="input-group @error('password') is-invalid @enderror">
+                <span class="input-group-text">
+                    <i data-lucide="fingerprint" aria-hidden="true"></i>
+                </span>
+                <input wire:model="password" type="password" class="form-control @error('password') is-invalid @enderror" id="your-password" autocomplete="current-password" placeholder="{{ __('Mot de passe') }}" required>
+                <button type="button" class="btn btn-outline-secondary toggle-password" data-toggle="#your-password" aria-label="{{ __('Afficher le mot de passe') }}">
+                    <i data-lucide="eye" class="toggle-password-icon"></i>
+                </button>
+            </div>
+            @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
-
-        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32">
+        <div class="mb-4 form-check">
+            <input wire:model="remember" class="form-check-input" type="checkbox" id="remember">
+            <label class="form-check-label" for="remember">{{ __('Se souvenir de moi') }}</label>
+        </div>
+        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-100 py-3 mb-4">
             <span wire:loading.remove>{{ __('Se connecter') }}</span>
             <span wire:loading>{{ __('Connexion...') }}</span>
         </button>
-
-        <div class="mt-32 center-border-horizontal text-center">
-            <span class="bg-base z-1 px-4">{{ __('Ou continuer avec') }}</span>
+        <div class="d-flex align-items-center my-4">
+            <div class="flex-grow-1 border-top"></div>
+            <span class="mx-3 text-muted small">{{ __('Ou continuer avec') }}</span>
+            <div class="flex-grow-1 border-top"></div>
         </div>
-
-        <div class="mt-32 d-flex align-items-center gap-3">
-            <a href="{{ route('social.redirect', 'google') }}" class="fw-semibold text-primary-light py-16 px-24 w-50 border radius-12 text-md d-flex align-items-center justify-content-center gap-12 line-height-1 bg-hover-primary-50">
-                <iconify-icon icon="logos:google-icon" class="text-xl line-height-1" aria-hidden="true"></iconify-icon>
-                Google
-            </a>
-            <a href="{{ route('social.redirect', 'github') }}" class="fw-semibold text-primary-light py-16 px-24 w-50 border radius-12 text-md d-flex align-items-center justify-content-center gap-12 line-height-1 bg-hover-primary-50">
-                <iconify-icon icon="mdi:github" class="text-xl line-height-1" aria-hidden="true"></iconify-icon>
-                GitHub
-            </a>
+        <div class="row g-3 mb-4">
+            <div class="col-6">
+                <a href="{{ route('social.redirect', 'google') }}" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center py-3">
+                    <svg class="me-2" width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Google
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="{{ route('social.redirect', 'github') }}" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center py-3">
+                    <svg class="me-2" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
         </div>
-
-        <div class="mt-32 text-center text-sm">
-            <p class="mb-8">{{ __('Pas de compte ?') }} <a href="{{ route('register') }}" class="text-primary-600 fw-semibold" wire:navigate>{{ __('Créer un compte') }}</a></p>
-            <a href="{{ route('magic-link.request') }}" class="text-primary-600 fw-medium" wire:navigate>{{ __('Connexion sans mot de passe (code)') }}</a>
+        <div class="text-center">
+            <p class="mb-2 text-muted">{{ __('Pas de compte ?') }} <a href="{{ route('register') }}" class="text-decoration-none text-primary fw-semibold" wire:navigate>{{ __('Créer un compte') }}</a></p>
+            <a href="{{ route('magic-link.request') }}" class="text-decoration-none text-primary" wire:navigate>{{ __('Connexion sans mot de passe (code)') }}</a>
         </div>
     </form>
-
     @push('scripts')
     <script>
         document.querySelectorAll('.toggle-password').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var input = document.querySelector(this.getAttribute('data-toggle'));
-                if (input) {
-                    input.type = input.type === 'password' ? 'text' : 'password';
-                    this.classList.toggle('ri-eye-off-line');
+                var icon = this.querySelector('.toggle-password-icon');
+                if (input && icon) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.setAttribute('data-lucide', 'eye-off');
+                    } else {
+                        input.type = 'password';
+                        icon.setAttribute('data-lucide', 'eye');
+                    }
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
                 }
             });
         });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     </script>
     @endpush
 </div>

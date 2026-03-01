@@ -29,9 +29,9 @@
                 <div class="mb-5">
                     <form action="{{ route('search.front') }}" method="GET" class="d-flex">
                         <input type="text" name="q" value="{{ $q }}"
-                               class="form-control cs_radius_30 me-16"
+                               class="form-control cs_radius_30 me-3"
                                placeholder="{{ __('Rechercher...') }}" autofocus>
-                        <button type="submit" class="btn cs_accent_bg cs_white_color cs_radius_30 cs_semibold px-32">
+                        <button type="submit" class="btn cs_accent_bg cs_white_color cs_radius_30 cs_semibold px-4">
                             {{ __('Rechercher') }}
                         </button>
                     </form>
@@ -39,52 +39,52 @@
 
                 @if(!empty($q))
                 <!-- Results Count -->
-                <div class="mb-32">
-                    <h2 class="cs_fs_48 cs_heading_color mb-8">
+                <div class="mb-4">
+                    <h2 class="cs_fs_48 cs_heading_color mb-2">
                         {{ $total }} {{ __('résultat(s) pour') }} "{{ $q }}"
                     </h2>
                 </div>
 
                 @if($total == 0)
                     <!-- Empty State -->
-                    <div class="text-center py-60">
-                        <div class="cs_fs_48 cs_heading_color mb-24">
+                    <div class="text-center py-5">
+                        <div class="cs_fs_48 cs_heading_color mb-4">
                             <i class="fas fa-search"></i>
                         </div>
-                        <h3 class="cs_heading_color mb-16">{{ __('Aucun résultat trouvé') }}</h3>
+                        <h3 class="cs_heading_color mb-3">{{ __('Aucun résultat trouvé') }}</h3>
                         <p class="text-muted">{{ __('Essayez avec d\'autres termes de recherche.') }}</p>
                     </div>
                 @else
                     <!-- Articles Results -->
                     @if($articles->count() > 0)
-                        <div class="mb-48">
-                            <h3 class="cs_heading_color mb-24">
-                                <i class="fas fa-newspaper me-8 cs_accent_color"></i>
+                        <div class="mb-5">
+                            <h3 class="cs_heading_color mb-4">
+                                <i class="fas fa-newspaper me-2 cs_accent_color"></i>
                                 {{ __('Articles') }}
                                 <span class="badge bg-primary ms-2">{{ $articles->total() }}</span>
                             </h3>
 
                             @foreach($articles as $article)
-                                <div class="bg-white radius-8 p-24 mb-16 shadow-sm">
-                                    <h4 class="cs_heading_color mb-12">
+                                <div class="bg-white rounded-2 p-4 mb-3 shadow-sm">
+                                    <h4 class="cs_heading_color mb-2">
                                         <a href="{{ route('blog.show', $article) }}" class="text-decoration-none cs_heading_color">
                                             {{ $article->title }}
                                         </a>
                                     </h4>
                                     @if($article->excerpt)
-                                    <p class="text-muted mb-16">
+                                    <p class="text-muted mb-3">
                                         {{ Str::limit(strip_tags($article->excerpt), 160) }}
                                     </p>
                                     @endif
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex align-items-center">
-                                            <span class="text-muted me-16">
-                                                <i class="far fa-calendar me-4"></i>
+                                            <span class="text-muted me-3">
+                                                <i class="far fa-calendar me-1"></i>
                                                 {{ $article->created_at->format('d/m/Y') }}
                                             </span>
                                             @if($article->category)
                                                 <span class="cs_accent_color cs_semibold">
-                                                    <i class="far fa-folder me-4"></i>
+                                                    <i class="far fa-folder me-1"></i>
                                                     {{ $article->category->name }}
                                                 </span>
                                             @endif
@@ -97,7 +97,7 @@
                             @endforeach
 
                             @if($articles->hasPages())
-                                <div class="mt-32">
+                                <div class="mt-4">
                                     {{ $articles->appends(['q' => $q])->links() }}
                                 </div>
                             @endif
@@ -106,22 +106,22 @@
 
                     <!-- Pages Results -->
                     @if($pages->count() > 0)
-                        <div class="mb-48">
-                            <h3 class="cs_heading_color mb-24">
-                                <i class="fas fa-file-alt me-8 cs_accent_color"></i>
+                        <div class="mb-5">
+                            <h3 class="cs_heading_color mb-4">
+                                <i class="fas fa-file-alt me-2 cs_accent_color"></i>
                                 {{ __('Pages') }}
                                 <span class="badge bg-secondary ms-2">{{ $pages->total() }}</span>
                             </h3>
 
                             @foreach($pages as $page)
-                                <div class="bg-white radius-8 p-24 mb-16 shadow-sm">
-                                    <h4 class="cs_heading_color mb-12">
+                                <div class="bg-white rounded-2 p-4 mb-3 shadow-sm">
+                                    <h4 class="cs_heading_color mb-2">
                                         <a href="{{ route('pages.show', $page->slug) }}" class="text-decoration-none cs_heading_color">
                                             {{ $page->title }}
                                         </a>
                                     </h4>
                                     @if($page->content)
-                                    <p class="text-muted mb-16">
+                                    <p class="text-muted mb-3">
                                         {{ Str::limit(strip_tags($page->content), 160) }}
                                     </p>
                                     @endif
@@ -134,7 +134,7 @@
                             @endforeach
 
                             @if($pages->hasPages())
-                                <div class="mt-32">
+                                <div class="mt-4">
                                     {{ $pages->appends(['q' => $q])->links() }}
                                 </div>
                             @endif

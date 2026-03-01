@@ -1,7 +1,7 @@
 <div>
 @if($enabled)
     <button type="button" class="btn btn-outline-primary btn-sm" wire:click="openModal" aria-label="{{ __('Générer avec l\'IA') }}">
-        <iconify-icon icon="solar:magic-stick-3-bold" class="me-1"></iconify-icon>{{ __('Générer avec l\'IA') }}
+        <i data-lucide="wand-2" class="me-1"></i>{{ __('Générer avec l\'IA') }}
     </button>
 
     @if($showModal)
@@ -9,18 +9,18 @@
         <div class="modal fade show d-block" style="z-index: 9999;" aria-modal="true" role="dialog" aria-labelledby="aiArticleModalLabel" @keydown.escape.window="$wire.closeModal()">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header bg-primary-600 text-white">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="aiArticleModalLabel">{{ __('Génération d\'article IA') }}</h5>
                         <button type="button" class="btn-close btn-close-white" wire:click="closeModal" aria-label="{{ __('Fermer') }}"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-16">
+                        <div class="mb-3">
                             <label for="ai-topic" class="form-label fw-semibold">{{ __('Sujet de l\'article') }} <span class="text-danger">*</span></label>
                             <textarea id="ai-topic" class="form-control @error('topic') is-invalid @enderror" wire:model="topic" rows="2" placeholder="{{ __('Ex : Les meilleures pratiques Laravel en 2026') }}"></textarea>
                             @error('topic')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
-                        <div class="row mb-16">
+                        <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="ai-tone" class="form-label">{{ __('Ton') }}</label>
                                 <select id="ai-tone" class="form-select" wire:model="tone">
@@ -51,76 +51,76 @@
                                 <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                                 {{ __('Génération en cours...') }}
                             @else
-                                <iconify-icon icon="solar:magic-stick-3-bold" class="me-1"></iconify-icon>
+                                <i data-lucide="wand-2" class="me-1"></i>
                                 {{ __('Générer') }}
                             @endif
                         </button>
 
                         @if($error)
-                            <div class="alert alert-danger mt-16" role="alert">{{ $error }}</div>
+                            <div class="alert alert-danger mt-3" role="alert">{{ $error }}</div>
                         @endif
 
                         @if(!empty($generatedContent) && isset($generatedContent['title']))
-                            <hr class="my-20">
-                            <h6 class="mb-16 fw-semibold">{{ __('Résultats générés') }}</h6>
+                            <hr class="my-3">
+                            <h6 class="mb-3 fw-semibold">{{ __('Résultats générés') }}</h6>
 
-                            <div class="card mb-12 border">
-                                <div class="card-body py-12 d-flex justify-content-between align-items-start">
+                            <div class="card mb-2 border">
+                                <div class="card-body py-2 d-flex justify-content-between align-items-start">
                                     <div>
                                         <small class="text-muted fw-semibold">{{ __('Titre') }}</small>
                                         <p class="mb-0">{{ $generatedContent['title'] }}</p>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-12" wire:click="applyField('title')">{{ __('Appliquer') }}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-2" wire:click="applyField('title')">{{ __('Appliquer') }}</button>
                                 </div>
                             </div>
 
-                            <div class="card mb-12 border">
-                                <div class="card-body py-12 d-flex justify-content-between align-items-start">
+                            <div class="card mb-2 border">
+                                <div class="card-body py-2 d-flex justify-content-between align-items-start">
                                     <div class="overflow-hidden">
                                         <small class="text-muted fw-semibold">{{ __('Contenu') }}</small>
                                         <p class="mb-0 text-truncate" style="max-width: 500px;">{{ Str::limit(strip_tags($generatedContent['content'] ?? ''), 200) }}</p>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-12" wire:click="applyField('content')">{{ __('Appliquer') }}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-2" wire:click="applyField('content')">{{ __('Appliquer') }}</button>
                                 </div>
                             </div>
 
-                            <div class="card mb-12 border">
-                                <div class="card-body py-12 d-flex justify-content-between align-items-start">
+                            <div class="card mb-2 border">
+                                <div class="card-body py-2 d-flex justify-content-between align-items-start">
                                     <div>
                                         <small class="text-muted fw-semibold">{{ __('Extrait') }}</small>
                                         <p class="mb-0">{{ $generatedContent['excerpt'] ?? '' }}</p>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-12" wire:click="applyField('excerpt')">{{ __('Appliquer') }}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-2" wire:click="applyField('excerpt')">{{ __('Appliquer') }}</button>
                                 </div>
                             </div>
 
-                            <div class="card mb-12 border">
-                                <div class="card-body py-12 d-flex justify-content-between align-items-start">
+                            <div class="card mb-2 border">
+                                <div class="card-body py-2 d-flex justify-content-between align-items-start">
                                     <div>
                                         <small class="text-muted fw-semibold">{{ __('Meta description') }}</small>
                                         <p class="mb-0">{{ $generatedContent['meta_description'] ?? '' }}</p>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-12" wire:click="applyField('meta_description')">{{ __('Appliquer') }}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-2" wire:click="applyField('meta_description')">{{ __('Appliquer') }}</button>
                                 </div>
                             </div>
 
-                            <div class="card mb-16 border">
-                                <div class="card-body py-12 d-flex justify-content-between align-items-start">
+                            <div class="card mb-3 border">
+                                <div class="card-body py-2 d-flex justify-content-between align-items-start">
                                     <div>
                                         <small class="text-muted fw-semibold">{{ __('Tags') }}</small>
-                                        <div class="mt-4">
+                                        <div class="mt-1">
                                             @foreach(($generatedContent['tags'] ?? []) as $tag)
-                                                <span class="badge bg-primary-100 text-primary-600 me-4">{{ $tag }}</span>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary me-1">{{ $tag }}</span>
                                             @endforeach
                                         </div>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-12" wire:click="applyField('tags')">{{ __('Appliquer') }}</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success flex-shrink-0 ms-2" wire:click="applyField('tags')">{{ __('Appliquer') }}</button>
                                 </div>
                             </div>
 
                             <div class="d-grid">
                                 <button type="button" class="btn btn-success" wire:click="applyAll">
-                                    <iconify-icon icon="solar:check-circle-bold" class="me-1"></iconify-icon>
+                                    <i data-lucide="check-circle" class="me-1"></i>
                                     {{ __('Appliquer tout') }}
                                 </button>
                             </div>

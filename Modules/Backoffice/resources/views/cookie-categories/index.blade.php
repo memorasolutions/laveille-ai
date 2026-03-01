@@ -1,9 +1,9 @@
 @extends('backoffice::layouts.admin', ['title' => 'Catégories cookies', 'subtitle' => 'Gestion'])
 
 @section('content')
-<div class="d-flex justify-content-end align-items-center mb-24">
-    <a href="{{ route('admin.cookie-categories.create') }}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
-        <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon> Créer
+<div class="d-flex justify-content-end align-items-center mb-4">
+    <a href="{{ route('admin.cookie-categories.create') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+        <i data-lucide="plus"></i> Créer
     </a>
 </div>
 
@@ -14,9 +14,9 @@
     <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
 
-<div class="card radius-12">
+<div class="card">
     <div class="card-body p-0">
-        <table class="table bordered-table sm-table mb-0">
+        <table class="table table-sm mb-0">
             <thead>
                 <tr>
                     <th>Ordre</th>
@@ -34,7 +34,7 @@
                         <td><code>{{ $category->name }}</code></td>
                         <td>{{ $category->label }}</td>
                         <td>
-                            <span class="badge {{ $category->required ? 'bg-primary' : 'bg-secondary-light text-secondary' }}">{{ $category->required ? 'Oui' : 'Non' }}</span>
+                            <span class="badge {{ $category->required ? 'bg-primary' : 'bg-secondary bg-opacity-25 text-secondary' }}">{{ $category->required ? 'Oui' : 'Non' }}</span>
                         </td>
                         <td>
                             <span class="badge {{ $category->is_active ? 'bg-success' : 'bg-danger' }}">{{ $category->is_active ? 'Oui' : 'Non' }}</span>

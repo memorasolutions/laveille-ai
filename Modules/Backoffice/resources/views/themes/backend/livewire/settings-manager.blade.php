@@ -37,6 +37,7 @@ $helpTextsData = [
             'push'      => 'bell',
             'blog'      => 'file-text',
             'retention' => 'clock',
+            'legal'     => 'scale',
             'ai'        => 'sparkles',
         ];
         $labels = [
@@ -47,10 +48,11 @@ $helpTextsData = [
             'sms'       => 'SMS',
             'branding'  => 'Apparence',
             'security'  => 'Sécurité',
-            'push'      => 'Notifications push',
+            'push'      => 'Push',
             'blog'      => 'Blog',
             'retention' => 'Rétention',
-            'ai'        => 'Intelligence artificielle',
+            'legal'     => 'Légal',
+            'ai'        => 'IA',
         ];
     @endphp
 
@@ -66,7 +68,7 @@ $helpTextsData = [
                 class="btn btn-sm d-inline-flex align-items-center gap-2"
                 :class="activeTab === '{{ $groupName }}'
                     ? 'btn-primary fw-medium'
-                    : 'btn-light text-muted'"
+                    : 'btn-outline-secondary'"
                 @click="activeTab = '{{ $groupName }}'; history.replaceState(null, '', '?tab={{ $groupName }}')"
                 :aria-selected="activeTab === '{{ $groupName }}'"
                 role="tab"
@@ -98,7 +100,7 @@ $helpTextsData = [
                                     : collect();
                             @endphp
                             <div class="mb-4 pb-4 border-bottom">
-                                <label class="fw-semibold text-dark mb-3 d-block">
+                                <label class="fw-semibold text-body mb-3 d-block">
                                     <i data-lucide="home" class="icon-sm me-1"></i> Page d'accueil du site
                                 </label>
                                 <p class="small text-muted mb-3">Choisissez ce qui s'affiche quand un visiteur arrive sur votre site.</p>
@@ -156,7 +158,7 @@ $helpTextsData = [
                                 ];
                             @endphp
                             <div class="mb-4 pb-4 border-bottom">
-                                <label class="fw-semibold text-dark mb-3 d-block">
+                                <label class="fw-semibold text-body mb-3 d-block">
                                     Thème du panneau administration
                                 </label>
                                 <div class="d-flex flex-wrap gap-3">
@@ -168,7 +170,7 @@ $helpTextsData = [
                                              wire:click="saveTheme('{{ $themeName }}')">
                                             <div class="text-center py-4 px-3">
                                                 <i data-lucide="palette" class="{{ $isActive ? 'text-primary' : 'text-muted' }} icon-md"></i>
-                                                <p class="mt-2 mb-0 fw-semibold {{ $isActive ? 'text-primary' : 'text-dark' }}">
+                                                <p class="mt-2 mb-0 fw-semibold {{ $isActive ? 'text-primary' : 'text-body' }}">
                                                     {{ $themeLabels[$themeName] ?? ucfirst($themeName) }}
                                                 </p>
                                                 @if($isActive)
@@ -188,8 +190,8 @@ $helpTextsData = [
                             <div class="row g-3 align-items-start {{ !$loop->last ? 'pb-4 mb-4 border-bottom' : '' }}">
                                 <div class="col-md-5">
                                     <div class="d-flex align-items-center gap-2">
-                                        <label class="fw-semibold text-dark mb-0">
-                                            {{ ucwords(str_replace(['branding.', '_', '.'], ['', ' ', ' '], $setting->key)) }}
+                                        <label class="fw-semibold text-body mb-0">
+                                            {{ $setting->description ?: ucwords(str_replace(['branding.', '_', '.'], ['', ' ', ' '], $setting->key)) }}
                                         </label>
                                         @if(str_starts_with($setting->key, 'ai.'))
                                             <button type="button"
@@ -200,9 +202,6 @@ $helpTextsData = [
                                                     title="Aide">?</button>
                                         @endif
                                     </div>
-                                    @if($setting->description)
-                                        <small class="d-block text-muted mt-1">{{ $setting->description }}</small>
-                                    @endif
                                     @if(str_starts_with($setting->key, 'ai.'))
                                         <div x-show="helpOpen === '{{ $setting->key }}'" x-transition
                                              class="mt-2 p-3 bg-primary bg-opacity-10 rounded small text-muted lh-base"

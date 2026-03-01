@@ -37,15 +37,15 @@ trait HasMediaAttachments
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumbnail')
-            ->fit(Fit::Crop, 150, 150)
-            ->nonQueued();
+            ->nonQueued()
+            ->fit(Fit::Crop, 150, 150);
 
         $this->addMediaConversion('medium')
-            ->fit(Fit::Contain, 600, 600)
-            ->nonQueued();
+            ->nonQueued()
+            ->fit(Fit::Contain, 600, 600);
 
         $this->addMediaConversion('large')
-            ->fit(Fit::Contain, 1200, 1200)
-            ->nonQueued();
+            ->nonQueued()
+            ->fit(Fit::Contain, 1200, 1200);
     }
 }

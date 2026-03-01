@@ -1,1 +1,0 @@
-!function(c){"use strict";var e=c("#single-input").clockpicker({placement:"bottom",align:"left",autoclose:!0,default:"now"});c(".clockpicker").clockpicker({donetext:"Done"}).find("input").change(function(){console.log(this.value)}),c("#check-minutes").click(function(c){c.stopPropagation(),e.clockpicker("show").clockpicker("toggleView","minutes")})}(jQuery);

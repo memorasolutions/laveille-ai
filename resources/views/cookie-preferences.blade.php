@@ -3,11 +3,11 @@
 @section('content')
 <div class="container py-5">
     <h1 class="mb-3">{{ __('Préférences cookies') }}</h1>
-    <p class="text-secondary-light mb-4">
+    <p class="text-muted mb-4">
         {{ __('Nous utilisons des cookies pour améliorer votre expérience de navigation, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos choix en acceptant ou en refusant les catégories non essentielles.') }}
     </p>
 
-    <div class="card radius-12">
+    <div class="card">
         <div class="card-body">
             <form action="{{ route('cookie.customize') }}" method="POST">
                 @csrf
@@ -28,7 +28,7 @@
                                     <span class="badge bg-primary ms-1">{{ __('Obligatoire') }}</span>
                                 @endif
                             </label>
-                            <p class="text-secondary-light mb-0 mt-1">{{ $category->description }}</p>
+                            <p class="text-muted mb-0 mt-1">{{ $category->description }}</p>
                         </div>
                     </div>
                 @endforeach

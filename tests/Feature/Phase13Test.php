@@ -82,8 +82,8 @@ test('env example has all required sections', function () {
 });
 
 // Task 7: Email template + deploy
-test('base email template exists', function () {
-    expect(file_exists(resource_path('views/emails/base.blade.php')))->toBeTrue();
+test('welcome email template exists', function () {
+    expect(file_exists(resource_path('views/emails/welcome.blade.php')))->toBeTrue();
 });
 
 test('deploy script exists and is executable', function () {

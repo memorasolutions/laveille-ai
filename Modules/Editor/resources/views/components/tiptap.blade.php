@@ -9,7 +9,7 @@
         </label>
     @endif
 
-    <div class="tiptap-toolbar d-flex flex-wrap align-items-center gap-1 p-2 border rounded-top bg-white">
+    <div class="tiptap-toolbar d-flex flex-wrap align-items-center gap-1 p-2 border rounded-top bg-body-tertiary">
         {{-- Groupe 1 : Historique --}}
         <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().undo().run())" data-bs-toggle="tooltip" title="Annuler (Ctrl+Z)"><i data-lucide="undo-2" style="width:14px;height:14px;"></i></button>
         <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().redo().run())" data-bs-toggle="tooltip" title="Rétablir (Ctrl+Y)"><i data-lucide="redo-2" style="width:14px;height:14px;"></i></button>

@@ -93,7 +93,7 @@ class SettingsManager extends Component
 
     public function render(): \Illuminate\View\View
     {
-        $order = ['general', 'homepage', 'mail', 'seo', 'sms', 'branding', 'security', 'push', 'blog', 'retention', 'ai'];
+        $order = ['general', 'homepage', 'mail', 'seo', 'sms', 'branding', 'security', 'push', 'blog', 'retention', 'legal', 'ai'];
         $all = Setting::orderBy('key')->get()->groupBy('group');
         $groups = collect($order)->filter(fn ($g) => $all->has($g))->mapWithKeys(fn ($g) => [$g => $all[$g]]);
 

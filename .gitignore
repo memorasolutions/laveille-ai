@@ -17,6 +17,7 @@
 /node_modules
 /public/build
 !/public/build/nobleui
+!/public/build/authero
 /public/fonts
 /public/hot
 /public/storage

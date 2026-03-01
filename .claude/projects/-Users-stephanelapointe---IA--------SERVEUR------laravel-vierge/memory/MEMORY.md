@@ -1,11 +1,12 @@
 # Laravel CORE Template - Mémoire projet
 
-## État actuel (2026-02-27)
-- **2294 tests, 4543 assertions, 4 échecs WCAG pré-existants (Phase188)**
-- **PHPStan** : 4 erreurs pré-existantes (env() hors config/, niveau 6)
-- **30 modules actifs**, ~497 routes, 68 migrations
+## État actuel (2026-02-28)
+- **2325 tests, 100% pass** (4635 assertions, 0 échec)
+- **PHPStan** : 13 erreurs (7 Blog published() scope, 3 env(), 3 Media image)
+- **28 modules actifs**, ~497 routes, 74 migrations
 - **1 thème backoffice** : backend (NobleUI Bootstrap 5.3.8) - wowdash/tabler supprimés
-- **Auth layouts** : guest = NobleUI, user dashboard = Jobick (Deznav sidebar)
+- **Auth layouts** : guest = Bootstrap 5.3.8 + Lucide (migré depuis Tailwind CDN), user dashboard = NobleUI
+- **Wowdash nettoyé** : 44 fichiers convertis (iconify-icon→Lucide, classes wowdash→Bootstrap 5). Zéro remnant.
 - **39 permissions**, 4 rôles (super_admin, admin, editor, user)
 - **RBAC** : Gate::before super_admin, middleware permission: sur routes, policies can()
 - **SaaS** : Stripe Cashier, plans, checkout, revenue dashboard ApexCharts
@@ -17,8 +18,8 @@
 - **Middleware** `SetBackofficeTheme` : lit `backoffice.theme` depuis Settings DB, prepend namespaces
 - **Setting DB** : `backoffice.theme` = `backend` (seul thème restant)
 - **1 thème** : backend (NobleUI Bootstrap 5.3.8). wowdash et tabler supprimés.
-- **Auth guest** : NobleUI (guest.blade.php réécrit, jQuery supprimé → vanilla JS)
-- **Auth user** : Jobick (app.blade.php, Deznav sidebar, FontAwesome)
+- **Auth guest** : Bootstrap 5.3.8 + Lucide (migré depuis Tailwind CDN)
+- **Auth user** : NobleUI (migré depuis Jobick, même structure que layout admin)
 - `BACKOFFICE_THEME` retiré du `.env` - la DB gère tout
 
 ## Phase 185 - Catégories et tags dropdown WordPress-style (TERMINÉE)
@@ -117,6 +118,22 @@
 - **Admin sidebar** : `<nav aria-label="Menu administration">`, `aria-label="Fermer le menu"` sur close button
 - **Admin navbar** : `aria-label="Basculer le menu"` + `aria-label="Ouvrir le menu"` sur toggle buttons, `aria-hidden="true"` sur iconify-icons
 - 16 tests Phase188Test (40 assertions)
+
+## Session 2026-02-28 - Stabilisation tests + migration auth Bootstrap
+
+### OOM fix (tâche #14 - TERMINÉE)
+- **Cause** : `view:cache` échouait car `emails/welcome.blade.php` utilisait `<x-emails.base>` (composant manquant)
+- **Fix** : Réécrit welcome.blade.php en `@component('mail::message')`, supprimé base.blade.php inutilisé
+- **Tests parallèles** : `MakeModuleCommandTest` crée `Modules/TestModule/` physiquement → race condition. Exclu via `--exclude-group=sequential`
+- **Makefile** : `make test` = `view:cache` + `--parallel --exclude-group=sequential` + `--group=sequential`
+- **gc_collect_cycles()** dans tests/Pest.php afterEach et ExportTest afterEach
+
+### Migration auth Tailwind → Bootstrap (tâche #15 - TERMINÉE)
+- **guest.blade.php** : Tailwind CDN + Tabler Icons → Bootstrap 5.3.8 Vite + Lucide + lucide.min.js
+- **11 composants Livewire auth** convertis : login, register, forgot-password, reset-password, confirm-password, verify-email, force-password-change, two-factor-challenge, magic-link-request, magic-link-verify (onboarding-wizard = TODO tâche #18)
+- **Pattern** : input-group + form-control + btn-primary + Lucide data-lucide, SVG inline pour Google/GitHub
+- **Score Playwright** : 7/10 → fix lucide.min.js → icônes OK
+- **Tests adaptés** : Phase57Test (bg-green-500→bg-success), Phase188Test (ti-brand-google→auth/google/redirect, auth-wrapper→main)
 
 ## Phase 189 - Tab URL persistence (TERMINÉE)
 - **Settings Manager onglets** : Alpine.js x-data + history.replaceState
@@ -359,18 +376,21 @@
   - Raisonnement / architecture → Sonnet ou OpenRouter thinking
   - Supervision / décision → Opus uniquement
 
-### Thème NobleUI backend (2026-02-25) - CONVERSION COMPLÈTE
-- Layout admin : `/Modules/Backoffice/resources/views/themes/backend/layouts/admin.blade.php`
-- @vite('resources/js/app.js') ajouté pour TipTap editor (Alpine component via alpine:init)
-- Assets NobleUI : copiés de `.themes/backend_2026/template/demo1/public/build/` vers `public/build/nobleui/`
-- Splash screen CSS : `public/build/nobleui/splash-screen.css` (CSS pur, sans image)
+### Thème NobleUI backend (2026-02-28) - SCSS SOURCE + PIXEL-PERFECT
+- **SCSS compilé via Vite** : 54 fichiers SCSS source (resources/sass/nobleui/) au lieu de CSS pré-compilé
+- **CSS output** : 381.34 KB (identique au pré-compilé, confirme compilation correcte)
+- **vite.config.js** : 5 entrées (app.scss, nobleui-custom.css, app.js, template.js, color-modes.js)
+- **template.js** (181 lignes) : sidebar toggle, tooltips, perfect scrollbar, clipboard, lucide icons
+- **color-modes.js** (91 lignes) : dark/light via localStorage + data-bs-theme + #theme-switcher
+- **nobleui-custom.css** : x-cloak, Lucide sizing (sm/md/lg/xl/xxl), search hover, dark mode fixes
+- Layout admin : `@vite()` remplace les liens statiques CSS/JS
 - Stacks : @push('plugin-styles'), @push('plugin-scripts'), @push('custom-scripts'), @push('styles'), @push('scripts')
-- Lucide icons : data-lucide="name", global CSS sizing dans layout
+- Lucide icons : data-lucide="name", global CSS sizing dans nobleui-custom.css
 - Blog module : 7 vues dans themes/backend/admin/ (articles/ + revisions/)
-- **Conversion Tailwind→Bootstrap 5 TERMINÉE** : ~40 content pages + 5 components convertis
-- **0 Tailwind CSS restant** dans themes/backend/ (grep vérifié)
-- Patterns Bootstrap 5 cohérents : card/card-header/card-body, table table-hover, badge bg-X bg-opacity-10, d-flex/gap
-- OnboardingWizard : `$dismissed` initialisé depuis DB dans mount() (fix persistence bug)
+- **0 Tailwind CSS** dans themes/backend/ (grep vérifié)
+- Patterns Bootstrap 5 cohérents : card/card-header/card-body, table table-hover, badge, d-flex/gap
+- `project-overrides.css` supprimé (remplacé par nobleui-custom.css compilé par Vite)
+- `sass` ajouté en devDependency npm
 
 ### TipTap v3 - points critiques
 - StarterKit v3 INCLUT Link + Underline (contrairement à v2) → `StarterKit.configure({ link: false, underline: false })`

@@ -23,6 +23,9 @@ use Spatie\ModelStates\HasStates;
 use Spatie\ResponseCache\Facades\ResponseCache;
 use Spatie\Translatable\HasTranslations;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static> published()
+ */
 class Article extends Model
 {
     use HasFactory, HasStates, HasTranslations, Searchable, SoftDeletes;

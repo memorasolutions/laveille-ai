@@ -6,9 +6,9 @@
     <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
 
-<div class="card radius-12">
+<div class="card">
     <div class="card-body p-0">
-        <table class="table bordered-table sm-table mb-0">
+        <table class="table table-sm mb-0">
             <thead>
                 <tr>
                     <th>Ordre</th>

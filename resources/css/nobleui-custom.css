@@ -1,1 +1,42 @@
-/* Write your custom css here */
+/*
+ * Project custom styles for NobleUI v3.0.1
+ * Compiled via Vite alongside NobleUI SCSS source
+ */
+
+/* Alpine.js x-cloak - hide until Alpine initializes */
+[x-cloak] { display: none !important; }
+
+/* Lucide icon sizing defaults (used outside sidebar where .link-icon is not set) */
+[data-lucide] { width: 18px; height: 18px; }
+.icon-sm [data-lucide], [data-lucide].icon-sm { width: 14px; height: 14px; }
+.icon-md [data-lucide], [data-lucide].icon-md { width: 20px; height: 20px; }
+.icon-lg [data-lucide], [data-lucide].icon-lg { width: 24px; height: 24px; }
+.icon-xl [data-lucide], [data-lucide].icon-xl { width: 32px; height: 32px; }
+.icon-xxl [data-lucide], [data-lucide].icon-xxl { width: 48px; height: 48px; }
+
+/* Global search: result hover + dark mode */
+.search-result-item:hover {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+}
+[data-bs-theme="dark"] .search-form .position-absolute {
+    background-color: var(--bs-body-bg, #1a1d21) !important;
+    border-color: var(--bs-border-color, #2c3036) !important;
+}
+
+/* Settings tabs: hide scrollbar but allow scroll */
+.settings-tabs-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+/* Sidebar toggler: reset browser button defaults (NobleUI expects anchor, we use button for a11y) */
+.sidebar-header .sidebar-toggler {
+    border: none;
+    background: none;
+    padding: 0;
+    appearance: none;
+}
+
+/* TipTap editor: dark mode text color */
+[data-bs-theme="dark"] .tiptap-editor {
+    color: var(--bs-body-color);
+}

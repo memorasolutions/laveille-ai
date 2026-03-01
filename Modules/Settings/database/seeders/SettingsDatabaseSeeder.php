@@ -68,6 +68,13 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'sms', 'key' => 'sms_button_delay_seconds', 'value' => '10', 'type' => 'number', 'description' => 'Délai en secondes avant d\'afficher le bouton SMS'],
             ['group' => 'sms', 'key' => 'magic_link_expiry_minutes', 'value' => '15', 'type' => 'number', 'description' => 'Durée de validité du code OTP (minutes)'],
 
+            // Mentions légales
+            ['group' => 'legal', 'key' => 'legal.company_address', 'value' => '', 'type' => 'string', 'description' => 'Adresse de l\'entreprise (affichée sur la page mentions légales)'],
+            ['group' => 'legal', 'key' => 'legal.director_name', 'value' => '', 'type' => 'string', 'description' => 'Nom du directeur de la publication'],
+            ['group' => 'legal', 'key' => 'legal.hosting_name', 'value' => '', 'type' => 'string', 'description' => 'Nom de l\'hébergeur'],
+            ['group' => 'legal', 'key' => 'legal.hosting_address', 'value' => '', 'type' => 'string', 'description' => 'Adresse de l\'hébergeur'],
+            ['group' => 'legal', 'key' => 'legal.hosting_phone', 'value' => '', 'type' => 'string', 'description' => 'Numéro de téléphone de l\'hébergeur'],
+
             // Blog - Révisions
             ['group' => 'blog', 'key' => 'blog.revision_max_count', 'value' => '50', 'type' => 'number', 'description' => 'Nombre maximum de révisions conservées par article'],
             ['group' => 'blog', 'key' => 'blog.revision_auto_cleanup', 'value' => 'true', 'type' => 'boolean', 'description' => 'Nettoyage automatique des anciennes révisions'],

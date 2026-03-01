@@ -1,1 +1,0 @@
-!function(t){"use strict";t("#mdate").bootstrapMaterialDatePicker({weekStart:0,time:!1}),t("#timepicker").bootstrapMaterialDatePicker({format:"HH:mm",time:!0,date:!1}),t("#date-format").bootstrapMaterialDatePicker({format:"dddd DD MMMM YYYY - HH:mm"}),t("#min-date").bootstrapMaterialDatePicker({format:"DD/MM/YYYY HH:mm",minDate:new Date})}(jQuery);

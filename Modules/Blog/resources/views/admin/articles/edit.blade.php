@@ -3,17 +3,17 @@
 @section('content')
 
 @if($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show mb-24" role="alert">
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
         <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
 
-<div class="d-flex justify-content-end mb-16">
-    <a href="{{ route('admin.blog.articles.revisions', $article) }}" class="btn btn-sm btn-outline-primary-600 radius-8 d-flex align-items-center gap-2">
-        <iconify-icon icon="solar:history-outline" class="icon"></iconify-icon>
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ route('admin.blog.articles.revisions', $article) }}" class="btn btn-sm btn-outline-primary rounded-2 d-flex align-items-center gap-2">
+        <i data-lucide="history"></i>
         {{ __('Historique') }}
-        <span class="badge bg-primary-100 text-primary-600">{{ $article->revisions()->count() }}</span>
+        <span class="badge bg-primary bg-opacity-10 text-primary">{{ $article->revisions()->count() }}</span>
     </a>
 </div>
 
@@ -27,13 +27,13 @@
                     <h6 class="mb-0">Contenu</h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-20">
-                        <label class="form-label">Titre <span class="text-danger-main">*</span></label>
+                    <div class="mb-3">
+                        <label class="form-label">Titre <span class="text-danger">*</span></label>
                         <input type="text" name="title" class="form-control @error('title') is-invalid @enderror"
                                value="{{ old('title', $article->title) }}" required>
                         @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <x-editor::tiptap name="content" :value="old('content', $article->content ?? '')" label="Contenu" />
                     </div>
                     <div class="mb-0">
@@ -47,12 +47,12 @@
 
         <div class="col-md-4">
             {{-- Publication --}}
-            <div class="card mb-20">
+            <div class="card mb-3">
                 <div class="card-header">
                     <h6 class="mb-0">Publication</h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <label class="form-label">Statut</label>
                         <div class="btn-group w-100" role="group" aria-label="Statut de publication">
                             <input type="radio" class="btn-check" name="status" value="draft" id="status-draft" autocomplete="off" {{ old('status', (string) $article->status) === 'draft' ? 'checked' : '' }}>
@@ -63,22 +63,22 @@
                             <label class="btn btn-outline-warning" for="status-archived">Archivé</label>
                         </div>
                     </div>
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <label class="form-label">Date de publication</label>
                         <input type="datetime-local" name="published_at" class="form-control"
                                value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}">
                     </div>
-                    <div class="d-flex gap-3 mt-24">
-                        <button type="submit" class="btn btn-primary-600">Enregistrer</button>
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
                         <a href="{{ route('admin.blog.articles.index') }}" class="btn btn-outline-secondary">Annuler</a>
                     </div>
                     @if($article->status === 'published')
-                        <form action="{{ route('admin.blog.articles.unpublish', $article->id) }}" method="POST" class="mt-8">
+                        <form action="{{ route('admin.blog.articles.unpublish', $article->id) }}" method="POST" class="mt-2">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-outline-warning w-100">Dépublier</button>
                         </form>
                     @else
-                        <form action="{{ route('admin.blog.articles.publish', $article->id) }}" method="POST" class="mt-8">
+                        <form action="{{ route('admin.blog.articles.publish', $article->id) }}" method="POST" class="mt-2">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-outline-success w-100">Publier</button>
                         </form>
@@ -87,12 +87,12 @@
             </div>
 
             {{-- Catégorie et tags --}}
-            <div class="card mb-20">
+            <div class="card mb-3">
                 <div class="card-header">
                     <h6 class="mb-0">Catégorie et tags</h6>
                 </div>
                 <div class="card-body">
-                    <div class="mb-20">
+                    <div class="mb-3">
                         <label for="category-select" class="form-label">Catégorie</label>
                         <select id="category-select" name="category_id" class="form-select" aria-label="Sélectionner une catégorie">
                             <option value="">— Sélectionner —</option>
@@ -123,7 +123,7 @@
                 <div class="card-body">
                     @if($article->featured_image)
                         <img src="{{ Storage::url($article->featured_image) }}"
-                             class="img-thumbnail mb-8 w-100" style="max-height:150px;object-fit:cover;">
+                             class="img-thumbnail mb-2 w-100" style="max-height:150px;object-fit:cover;">
                     @endif
                     <input type="file" name="featured_image" class="form-control" accept="image/*">
                     <div class="form-text">Laissez vide pour conserver l'image actuelle</div>

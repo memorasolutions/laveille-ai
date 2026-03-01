@@ -85,7 +85,7 @@
 
 {{-- Pricing Section --}}
 @if(isset($plans) && $plans->count() > 0)
-<section class="cs_gray_bg_5">
+<section class="cs_gray_bg_4">
     <div class="cs_height_100 cs_height_lg_80"></div>
     <div class="container">
         <div class="text-center">
@@ -175,7 +175,7 @@
 @endif
 
 {{-- CTA Section --}}
-<section class="cs_gray_bg_5">
+<section class="cs_gray_bg_4">
     <div class="container">
         <div class="cs_support_content_wrapper">
             <div class="cs_support_text">

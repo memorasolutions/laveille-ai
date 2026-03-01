@@ -9,8 +9,8 @@
         <h1 class="fw-semibold fs-5 text-body mb-1">{{ __('Bonjour') }}, {{ $user->name }} !</h1>
         <p class="text-muted mb-0">{{ __('Bienvenue dans votre espace personnel.') }}</p>
     </div>
-    <span class="d-inline-flex align-items-center gap-1 px-3 py-2 rounded fw-semibold small
-        {{ $planName === 'Free' ? 'bg-light text-muted' : 'bg-primary bg-opacity-10 text-primary' }}">
+    <span class="d-inline-flex align-items-center gap-1 px-3 py-2 rounded fw-semibold small flex-shrink-0
+        {{ $planName === 'Free' ? 'bg-secondary bg-opacity-10 text-muted' : 'bg-primary bg-opacity-10 text-primary' }}">
         <i data-lucide="{{ $planName === 'Free' ? 'package' : 'crown' }}" class="icon-sm"></i>
         Plan {{ $planName }}
     </span>

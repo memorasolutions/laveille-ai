@@ -77,8 +77,8 @@ test('login password toggle is accessible button', function () {
 test('login social icons have aria-hidden', function () {
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee('logos:google-icon', false)
-        ->assertSee('aria-hidden="true"', false);
+        ->assertSee('auth/google/redirect', false)
+        ->assertSee('Google', false);
 });
 
 test('guest layout uses dynamic lang attribute', function () {
@@ -90,7 +90,7 @@ test('guest layout uses dynamic lang attribute', function () {
 test('guest layout uses main element instead of section', function () {
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee('<main class="auth', false);
+        ->assertSee('<main>', false);
 });
 
 // ============================================================

@@ -15,17 +15,28 @@ beforeEach(function () use (&$originalStatuses) {
     if (File::exists($statusesPath)) {
         $originalStatuses = File::get($statusesPath);
     }
-});
 
-afterEach(function () use (&$originalStatuses) {
+    // Defensive cleanup: remove leftover TestModule from a crashed previous run
     $modulePath = base_path('Modules/TestModule');
     if (File::exists($modulePath)) {
         File::deleteDirectory($modulePath);
     }
+});
 
-    $statusesPath = base_path('modules_statuses.json');
-    if ($originalStatuses !== null) {
-        File::put($statusesPath, $originalStatuses);
+afterEach(function () use (&$originalStatuses) {
+    try {
+        // FIRST: restore modules_statuses.json IMMEDIATELY to prevent race conditions
+        // Other parallel processes read this file at boot; it must not contain TestModule
+        $statusesPath = base_path('modules_statuses.json');
+        if ($originalStatuses !== null) {
+            File::put($statusesPath, $originalStatuses);
+        }
+    } finally {
+        // THEN: clean up the TestModule directory
+        $modulePath = base_path('Modules/TestModule');
+        if (File::exists($modulePath)) {
+            File::deleteDirectory($modulePath);
+        }
     }
 });
 

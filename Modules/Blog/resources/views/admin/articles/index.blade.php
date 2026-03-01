@@ -2,14 +2,14 @@
 
 @section('content')
 
-<div class="card h-100 p-0 radius-12">
-    <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-end">
-        <a href="{{ route('admin.blog.articles.create') }}" class="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
-            <iconify-icon icon="ic:baseline-plus" class="icon text-xl line-height-1"></iconify-icon>
+<div class="card h-100 p-0 rounded-3">
+    <div class="card-header border-bottom bg-body py-3 px-4 d-flex align-items-center flex-wrap gap-3 justify-content-end">
+        <a href="{{ route('admin.blog.articles.create') }}" class="btn btn-primary btn-sm px-2 py-2 rounded-2 d-flex align-items-center gap-2">
+            <i data-lucide="plus"></i>
             Nouvel article
         </a>
     </div>
-    <div class="card-body p-24">
+    <div class="card-body px-4 py-4">
         @livewire('backoffice-articles-table')
     </div>
 </div>

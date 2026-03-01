@@ -11,14 +11,14 @@
     </nav>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show radius-8">
+        <div class="alert alert-success alert-dismissible fade show rounded-2">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show radius-8">
+        <div class="alert alert-danger alert-dismissible fade show rounded-2">
             {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -26,7 +26,7 @@
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="card radius-8 bordered">
+            <div class="card rounded-2">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">{{ $emailTemplate->name }}</h5>
                 </div>
@@ -36,7 +36,7 @@
                         @method('PUT')
                         <div class="mb-3">
                             <label for="subject" class="form-label">Sujet</label>
-                            <input type="text" name="subject" id="subject" class="form-control radius-8" value="{{ old('subject', $emailTemplate->subject) }}" required>
+                            <input type="text" name="subject" id="subject" class="form-control rounded-2" value="{{ old('subject', $emailTemplate->subject) }}" required>
                             @error('subject') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
                         <div class="mb-3">
@@ -49,36 +49,36 @@
                             <label class="form-check-label" for="is_active">Activer ce template</label>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" class="btn btn-primary-600 radius-8">Sauvegarder</button>
-                            <a href="{{ route('admin.email-templates.preview', $emailTemplate) }}" target="_blank" class="btn btn-outline-primary-600 radius-8">Prévisualiser</a>
+                            <button type="submit" class="btn btn-primary rounded-2">Sauvegarder</button>
+                            <a href="{{ route('admin.email-templates.preview', $emailTemplate) }}" target="_blank" class="btn btn-outline-primary rounded-2">Prévisualiser</a>
                         </div>
                     </form>
 
                     <form method="POST" action="{{ route('admin.email-templates.reset', $emailTemplate) }}" class="mt-3" x-data onsubmit="return confirm('Restaurer ce template aux valeurs par défaut ?')">
                         @csrf
-                        <button type="submit" class="btn btn-outline-danger-600 radius-8">Restaurer les valeurs par défaut</button>
+                        <button type="submit" class="btn btn-outline-danger rounded-2">Restaurer les valeurs par défaut</button>
                     </form>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="card radius-8 bordered">
+            <div class="card rounded-2">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">Variables disponibles</h5>
                 </div>
                 <div class="card-body" x-data>
-                    <p class="text-secondary-light mb-3">Cliquez sur une variable pour la copier :</p>
+                    <p class="text-muted mb-3">Cliquez sur une variable pour la copier :</p>
                     @foreach($variables as $var => $desc)
                         @php $varStr = '{{'.$var.'}}'; @endphp
                         <div class="mb-2">
                             <button type="button"
-                                    class="badge bg-primary-50 text-primary-600 border-0 cursor-pointer"
+                                    class="badge bg-primary bg-opacity-10 text-primary border-0"
                                     style="cursor:pointer"
                                     @click="navigator.clipboard.writeText('{{ $varStr }}'); $dispatch('toast', {message: 'Variable copiée !', type: 'success'})"
                                     title="Copier {{ $varStr }}">
                                 {{ $varStr }}
                             </button>
-<br><small class="text-secondary-light">{{ $desc }}</small>
+<br><small class="text-muted">{{ $desc }}</small>
                         </div>
                     @endforeach
                 </div>

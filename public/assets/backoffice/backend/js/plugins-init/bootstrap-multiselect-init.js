@@ -1,1 +1,0 @@
-!function(e){"use strict";e(".basic-multiselect").multiselect(),e(".basic-multiselect-optgroup").multiselect({enableClickableOptGroups:!0}),e(".basic-multiselect-selectall").multiselect({enableClickableOptGroups:!0,includeSelectAllOption:!0})}(jQuery);

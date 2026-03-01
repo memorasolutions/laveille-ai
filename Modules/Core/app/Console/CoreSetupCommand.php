@@ -58,7 +58,7 @@ class CoreSetupCommand extends Command
             ['Item', 'Value'],
             [
                 ['Admin URL', url('/admin')],
-                ['Admin email', env('ADMIN_EMAIL', 'admin@example.com')],
+                ['Admin email', config('app.admin_email')],
                 ['Admin password', '(défini dans .env → ADMIN_PASSWORD)'],
             ]
         );

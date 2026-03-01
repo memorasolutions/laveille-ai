@@ -1,15 +1,18 @@
-<x-emails.base title="Bienvenue sur {{ config('app.name') }}">
-    <p>Bonjour {{ $user->name }},</p>
+@component('mail::message')
+# Bienvenue sur {{ config('app.name') }}
 
-    <p>Bienvenue sur <strong>{{ config('app.name') }}</strong> ! Votre compte a été créé avec succès.</p>
+Bonjour {{ $user->name }},
 
-    <p>Vous pouvez dès maintenant accéder à votre tableau de bord :</p>
+Bienvenue sur **{{ config('app.name') }}** ! Votre compte a été créé avec succès.
 
-    <x-slot:action url="{{ url('/admin') }}">
-        Accéder au tableau de bord
-    </x-slot:action>
+Vous pouvez dès maintenant accéder à votre tableau de bord :
 
-    <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+@component('mail::button', ['url' => url('/admin')])
+Accéder au tableau de bord
+@endcomponent
 
-    <p>Cordialement,<br>L'équipe {{ config('app.name') }}</p>
-</x-emails.base>
+Si vous avez des questions, n'hésitez pas à nous contacter.
+
+Cordialement,<br>
+L'équipe {{ config('app.name') }}
+@endcomponent

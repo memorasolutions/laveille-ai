@@ -13,7 +13,12 @@ dev:
 	npm run dev
 
 test:
-	php artisan test
+	php artisan view:cache
+	php artisan test --parallel --exclude-group=sequential
+	php artisan test --group=sequential
+
+test-sequential:
+	php -d memory_limit=2G artisan test
 
 test-coverage:
 	php -d "zend_extension=/Applications/Herd.app/Contents/Resources/xdebug/xdebug-84-arm64.so" -d "xdebug.mode=coverage" vendor/bin/pest --coverage --min=80

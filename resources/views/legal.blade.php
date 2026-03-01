@@ -16,16 +16,16 @@
     <div class="cs_radius_15 cs_white_bg p-4 p-lg-5 wow fadeIn">
         <h4 class="cs_mb_15">{{ __('Éditeur du site') }}</h4>
         <p>{{ __('Le site') }} {{ config('app.url') }} {{ __('est édité par') }} {{ config('app.name') }}.</p>
-        <p>{{ __('Adresse') }} : [{{ __('Adresse de l\'entreprise') }}]<br>
+        <p>{{ __('Adresse') }} : {{ Settings::get('legal.company_address') ?: __('Non renseignée') }}<br>
         {{ __('Courriel') }} : {{ config('mail.from.address', 'contact@example.com') }}<br>
-        {{ __('Directeur de la publication') }} : [{{ __('Nom du responsable') }}]</p>
+        {{ __('Directeur de la publication') }} : {{ Settings::get('legal.director_name') ?: __('Non renseigné') }}</p>
 
         <hr class="my-4">
 
         <h4 class="cs_mb_15">{{ __('Hébergement') }}</h4>
-        <p>{{ __('Le site est hébergé par') }} [{{ __('Nom de l\'hébergeur') }}].<br>
-        {{ __('Adresse') }} : [{{ __('Adresse de l\'hébergeur') }}]<br>
-        {{ __('Téléphone') }} : [{{ __('Numéro de l\'hébergeur') }}]</p>
+        <p>{{ __('Le site est hébergé par') }} {{ Settings::get('legal.hosting_name') ?: __('Non renseigné') }}.<br>
+        {{ __('Adresse') }} : {{ Settings::get('legal.hosting_address') ?: __('Non renseignée') }}<br>
+        {{ __('Téléphone') }} : {{ Settings::get('legal.hosting_phone') ?: __('Non renseigné') }}</p>
 
         <hr class="my-4">
 

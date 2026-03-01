@@ -7,6 +7,11 @@ use Modules\Export\Services\ExportService;
 
 uses(Tests\TestCase::class);
 
+afterEach(function () {
+    app()->forgetInstance(ExportService::class);
+    gc_collect_cycles();
+});
+
 test('export service is registered as singleton', function () {
     $service1 = app(ExportService::class);
     $service2 = app(ExportService::class);

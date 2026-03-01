@@ -41,7 +41,7 @@ $featureLabels = [
 </section>
 
 {{-- Plans --}}
-<section class="cs_gray_bg_5">
+<section class="cs_gray_bg_4">
     <div class="cs_height_100 cs_height_lg_80"></div>
     <div class="container">
         <div class="row cs_gap_y_24 justify-content-center">
@@ -172,7 +172,7 @@ $featureLabels = [
 </section>
 
 {{-- CTA --}}
-<section class="cs_gray_bg_5">
+<section class="cs_gray_bg_4">
     <div class="cs_height_100 cs_height_lg_80"></div>
     <div class="container">
         <div class="cs_support_content_wrapper">

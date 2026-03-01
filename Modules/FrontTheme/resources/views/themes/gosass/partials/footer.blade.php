@@ -29,6 +29,7 @@
                             <li><a href="{{ route('about') }}" aria-label="À propos">À propos</a></li>
                             <li><a href="{{ route('legal') }}" aria-label="Mentions légales">Mentions légales</a></li>
                             <li><a href="{{ route('privacy') }}" aria-label="Confidentialité">Confidentialité</a></li>
+                            <li><a href="{{ route('terms') }}" aria-label="Conditions d'utilisation">Conditions d'utilisation</a></li>
                             <li><a href="{{ route('login') }}" aria-label="Connexion">Connexion</a></li>
                         </ul>
                     </div>

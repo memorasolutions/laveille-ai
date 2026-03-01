@@ -1,94 +1,95 @@
 <div>
-    <h4 class="mb-12">{{ __('Créer un compte') }}</h4>
-    <p class="mb-32 text-secondary-light text-lg">{{ __('Entrez vos informations pour commencer') }}</p>
-
-    <form wire:submit="register">
-        <div class="icon-field mb-16">
-            <span class="icon top-50 translate-middle-y">
-                <iconify-icon icon="f7:person"></iconify-icon>
-            </span>
-            <input wire:model="name" type="text" class="form-control h-56-px bg-neutral-50 radius-12 @error('name') is-invalid @enderror" placeholder="{{ __('Nom complet') }}" required autofocus>
-        </div>
-        @error('name')<div class="text-danger-main text-sm mb-16">{{ $message }}</div>@enderror
-
-        <div class="icon-field mb-16">
-            <span class="icon top-50 translate-middle-y">
-                <iconify-icon icon="mage:email"></iconify-icon>
-            </span>
-            <input wire:model="email" type="email" class="form-control h-56-px bg-neutral-50 radius-12 @error('email') is-invalid @enderror" placeholder="{{ __('Courriel') }}" required>
-        </div>
-        @error('email')<div class="text-danger-main text-sm mb-16">{{ $message }}</div>@enderror
-
-        <div class="mb-20" x-data="{
-            pwd: '',
-            get strength() {
-                if (!this.pwd) return 0;
-                let s = 0;
-                if (this.pwd.length >= 8) s++;
-                if (/[A-Z]/.test(this.pwd)) s++;
-                if (/[0-9]/.test(this.pwd)) s++;
-                if (/[^A-Za-z0-9]/.test(this.pwd)) s++;
-                return s;
-            },
-            get label() { return ['', '{{ __('Faible') }}', '{{ __('Moyen') }}', '{{ __('Fort') }}', '{{ __('Très fort') }}'][this.strength] ?? ''; },
-            get color() { return ['', 'bg-danger', 'bg-warning', 'bg-primary', 'bg-success'][this.strength] ?? ''; }
-        }">
-            <div class="position-relative">
-                <div class="icon-field">
-                    <span class="icon top-50 translate-middle-y">
-                        <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
-                    </span>
-                    <input wire:model="password" x-model="pwd" type="password" class="form-control h-56-px bg-neutral-50 radius-12 @error('password') is-invalid @enderror" id="your-password" placeholder="{{ __('Mot de passe') }}" required>
-                </div>
-                <span class="toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light" data-toggle="#your-password"></span>
+    <h2 class="h2 text-dark">{{ __('Créer un compte') }}</h2>
+    <p class="mt-2 text-muted">{{ __('Entrez vos informations pour commencer') }}</p>
+    <form wire:submit="register" class="mt-5">
+        <div class="mb-4">
+            <label class="form-label">{{ __('Nom complet') }}</label>
+            <div class="input-group @error('name') is-invalid @enderror">
+                <span class="input-group-text">
+                    <i data-lucide="user" aria-hidden="true"></i>
+                </span>
+                <input wire:model="name" type="text" class="form-control @error('name') is-invalid @enderror" placeholder="{{ __('Nom complet') }}" required autofocus>
             </div>
-            <div x-show="pwd.length > 0" class="mt-8">
-                <div class="progress mb-4" style="height:4px;">
-                    <div class="progress-bar rounded-pill transition"
-                         :class="color"
-                         :style="'width:' + (strength * 25) + '%'"></div>
+            @error('name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+        </div>
+        <div class="mb-4">
+            <label class="form-label">{{ __('Courriel') }}</label>
+            <div class="input-group @error('email') is-invalid @enderror">
+                <span class="input-group-text">
+                    <i data-lucide="at-sign" aria-hidden="true"></i>
+                </span>
+                <input wire:model="email" type="email" class="form-control @error('email') is-invalid @enderror" placeholder="{{ __('Courriel') }}" required>
+            </div>
+            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+        </div>
+        <div x-data="{
+                pwd: '',
+                get strength() { if (!this.pwd) return 0; let s = 0; if (this.pwd.length >= 8) s++; if (/[A-Z]/.test(this.pwd)) s++; if (/[0-9]/.test(this.pwd)) s++; if (/[^A-Za-z0-9]/.test(this.pwd)) s++; return s; },
+                get label() { return ['', '{{ __('Faible') }}', '{{ __('Moyen') }}', '{{ __('Fort') }}', '{{ __('Très fort') }}'][this.strength] ?? ''; },
+                get color() { return ['', 'bg-danger', 'bg-warning', 'bg-info', 'bg-success'][this.strength] ?? ''; }
+            }" class="mb-4">
+            <label class="form-label">{{ __('Mot de passe') }}</label>
+            <div class="input-group @error('password') is-invalid @enderror">
+                <span class="input-group-text">
+                    <i data-lucide="fingerprint" aria-hidden="true"></i>
+                </span>
+                <input wire:model="password" x-model="pwd" type="password" class="form-control @error('password') is-invalid @enderror" id="your-password" placeholder="{{ __('Mot de passe') }}" required>
+                <button type="button" class="btn btn-outline-secondary toggle-password" data-toggle="#your-password" aria-label="{{ __('Afficher le mot de passe') }}">
+                    <i data-lucide="eye" class="toggle-password-icon"></i>
+                </button>
+            </div>
+            <div x-show="pwd.length > 0" class="mt-3">
+                <div class="progress mb-2" style="height: 4px;">
+                    <div class="progress-bar" :class="color" role="progressbar" :style="'width:' + (strength * 25) + '%'" :aria-valuenow="strength * 25" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="text-xs fw-medium" x-text="label"></span>
-                    <div class="d-flex gap-12 text-xs text-secondary-light">
-                        <span :class="pwd.length >= 8 ? 'text-success-600' : ''">{{ __('8+ caract.') }}</span>
-                        <span :class="/[A-Z]/.test(pwd) ? 'text-success-600' : ''">{{ __('Majuscule') }}</span>
-                        <span :class="/[0-9]/.test(pwd) ? 'text-success-600' : ''">{{ __('Chiffre') }}</span>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small fw-medium" x-text="label"></span>
+                    <div class="d-flex gap-3 small text-muted">
+                        <span :class="pwd.length >= 8 ? 'text-success' : ''">{{ __('8+ caract.') }}</span>
+                        <span :class="/[A-Z]/.test(pwd) ? 'text-success' : ''">{{ __('Majuscule') }}</span>
+                        <span :class="/[0-9]/.test(pwd) ? 'text-success' : ''">{{ __('Chiffre') }}</span>
                     </div>
                 </div>
             </div>
-            <span class="mt-12 text-sm text-secondary-light">{{ __('Minimum 8 caractères requis') }}</span>
-            @error('password')<div class="text-danger-main text-sm mt-4">{{ $message }}</div>@enderror
+            <p class="mt-2 small text-muted">{{ __('Minimum 8 caractères requis') }}</p>
+            @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
-
-        <div class="icon-field mb-16">
-            <span class="icon top-50 translate-middle-y">
-                <iconify-icon icon="solar:lock-outline"></iconify-icon>
-            </span>
-            <input wire:model="password_confirmation" type="password" class="form-control h-56-px bg-neutral-50 radius-12" placeholder="{{ __('Confirmer le mot de passe') }}" required>
+        <div class="mb-4">
+            <label class="form-label">{{ __('Confirmer le mot de passe') }}</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i data-lucide="lock" aria-hidden="true"></i>
+                </span>
+                <input wire:model="password_confirmation" type="password" class="form-control" placeholder="{{ __('Confirmer le mot de passe') }}" required>
+            </div>
         </div>
-
-        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32">
+        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-100 py-3 mb-4">
             <span wire:loading.remove>{{ __('Créer le compte') }}</span>
             <span wire:loading>{{ __('Création...') }}</span>
         </button>
-
-        <div class="mt-32 text-center text-sm">
-            <p class="mb-0">{{ __('Déjà un compte ?') }} <a href="{{ route('login') }}" class="text-primary-600 fw-semibold" wire:navigate>{{ __('Se connecter') }}</a></p>
+        <div class="text-center">
+            <p class="mb-0 text-muted">{{ __('Déjà un compte ?') }} <a href="{{ route('login') }}" class="text-decoration-none text-primary fw-semibold" wire:navigate>{{ __('Se connecter') }}</a></p>
         </div>
     </form>
-
     @push('scripts')
     <script>
         document.querySelectorAll('.toggle-password').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var input = document.querySelector(this.getAttribute('data-toggle'));
-                if (input) {
-                    input.type = input.type === 'password' ? 'text' : 'password';
-                    this.classList.toggle('ri-eye-off-line');
+                var icon = this.querySelector('.toggle-password-icon');
+                if (input && icon) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.setAttribute('data-lucide', 'eye-off');
+                    } else {
+                        input.type = 'password';
+                        icon.setAttribute('data-lucide', 'eye');
+                    }
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
                 }
             });
         });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     </script>
     @endpush
 </div>

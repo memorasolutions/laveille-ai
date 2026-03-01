@@ -30,10 +30,10 @@ it('navbar Backend contient le bouton dark mode', function () {
     $response->assertSee('data-bs-theme', false);
 });
 
-it('layout Backend définit le data-bs-theme', function () {
-    $layout = file_get_contents(module_path('Backoffice', 'resources/views/themes/backend/layouts/admin.blade.php'));
+it('layout Backend définit le data-bs-theme via color-modes.js', function () {
+    $colorModes = file_get_contents(base_path('resources/js/nobleui/color-modes.js'));
 
-    expect($layout)->toContain('data-bs-theme');
+    expect($colorModes)->toContain('data-bs-theme');
 });
 
 it('layout Tailwind lie darkMode au localStorage', function () {

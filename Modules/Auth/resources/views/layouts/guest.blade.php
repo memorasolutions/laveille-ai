@@ -1,71 +1,77 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-
-    {{-- Fonts --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-    {{-- NobleUI Bootstrap 5.3.8 CSS --}}
-    <link href="{{ asset('build/nobleui/assets/app-B-efjZPS.css') }}" rel="stylesheet">
-    <link href="{{ asset('build/nobleui/assets/custom-tn0RQdqM.css') }}" rel="stylesheet">
-
-    <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; }
-        .auth-wrapper { min-height: 100vh; }
-        .auth-left {
-            background: linear-gradient(135deg, rgba(101, 113, 255, 0.9), rgba(101, 113, 255, 0.7)),
-                        url('{{ asset('assets/auth/login-bg.jpg') }}') center/cover no-repeat;
-        }
-        .auth-form-card {
-            max-width: 440px;
-            width: 100%;
-        }
-        [x-cloak] { display: none !important; }
-    </style>
-
+    @vite(['resources/sass/nobleui/app.scss', 'resources/css/nobleui-custom.css', 'resources/js/app.js'])
     @livewireStyles
-    @vite(['resources/js/app.js'])
+    <style>
+        [x-cloak] { display: none !important; }
+        .auth-hero {
+            background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 50%, #38bdf8 100%);
+            min-height: 100vh;
+        }
+        .auth-hero-overlay {
+            background: linear-gradient(to top, rgba(12, 74, 110, 0.8) 0%, transparent 100%);
+        }
+        .auth-check-icon {
+            color: #38bdf8;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+    </style>
 </head>
-
 <body>
-
-    <main class="auth-wrapper d-flex flex-wrap">
-        {{-- Left panel - decorative (hidden on mobile) --}}
-        <div class="auth-left d-none d-lg-flex col-lg-6 align-items-center justify-content-center text-white p-5">
-            <div class="text-center">
-                <h1 class="display-5 fw-bold mb-3">{{ config('app.name') }}</h1>
-                <p class="lead opacity-75">{{ __('Votre espace sécurisé') }}</p>
-            </div>
-        </div>
-
-        {{-- Right panel - form --}}
-        <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4 p-md-5" style="min-height:100vh;">
-            <div class="auth-form-card">
-                <div class="mb-4">
-                    <a href="{{ url('/') }}" class="d-inline-block mb-3">
-                        <img src="{{ asset('themes/gosass/img/logo.svg') }}" alt="{{ config('app.name') }}" style="height:40px;">
-                    </a>
+    <main>
+        <div class="container-fluid g-0">
+            <div class="row g-0">
+                <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center bg-white p-4 p-sm-5" style="min-height: 100vh;">
+                    <div class="w-100" style="max-width: 420px;">
+                        <a href="{{ url('/') }}" class="d-block mb-4">
+                            <img src="{{ asset('themes/gosass/img/logo.svg') }}" alt="{{ config('app.name') }}" style="height:40px;">
+                        </a>
+                        {{ $slot ?? '' }}
+                        @yield('content')
+                    </div>
                 </div>
-
-                {{ $slot ?? '' }}
-                @yield('content')
-
+                <div class="col-12 col-lg-6 position-relative d-none d-lg-flex align-items-end auth-hero p-4 p-lg-5 pb-lg-5">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 auth-hero-overlay"></div>
+                    <div class="position-relative w-100" style="max-width: 540px;">
+                        <h3 class="display-5 fw-bold text-white mb-4">{{ config('app.name') }}</h3>
+                        <ul class="list-unstyled row g-3">
+                            <li class="col-12 col-sm-6 d-flex align-items-center gap-2">
+                                <i data-lucide="check-circle" class="auth-check-icon" aria-hidden="true"></i>
+                                <span class="fs-5 fw-medium text-white">{{ __('Authentification sécurisée') }}</span>
+                            </li>
+                            <li class="col-12 col-sm-6 d-flex align-items-center gap-2">
+                                <i data-lucide="check-circle" class="auth-check-icon" aria-hidden="true"></i>
+                                <span class="fs-5 fw-medium text-white">{{ __('Gestion simplifiée') }}</span>
+                            </li>
+                            <li class="col-12 col-sm-6 d-flex align-items-center gap-2">
+                                <i data-lucide="check-circle" class="auth-check-icon" aria-hidden="true"></i>
+                                <span class="fs-5 fw-medium text-white">{{ __('Mises à jour en temps réel') }}</span>
+                            </li>
+                            <li class="col-12 col-sm-6 d-flex align-items-center gap-2">
+                                <i data-lucide="check-circle" class="auth-check-icon" aria-hidden="true"></i>
+                                <span class="fs-5 fw-medium text-white">{{ __('Support 24/7') }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
-
-    {{-- Bootstrap JS --}}
-    <script src="{{ asset('build/nobleui/plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('build/nobleui/plugins/lucide/lucide.min.js') }}"></script>
     @livewireScripts
     @stack('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+        });
+    </script>
 </body>
-
 </html>

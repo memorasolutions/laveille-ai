@@ -10,10 +10,10 @@
                 {{-- Progress bar --}}
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-1">
-                        <small class="text-secondary-light">{{ __('Étape') }} <span x-text="step"></span> / <span x-text="totalSteps"></span></small>
+                        <small class="text-muted">{{ __('Étape') }} <span x-text="step"></span> / <span x-text="totalSteps"></span></small>
                         <form action="{{ route('onboarding.skip') }}" method="POST" class="d-inline">
                             @csrf
-                            <button type="submit" class="btn btn-link btn-sm text-secondary-light p-0">{{ __('Passer') }}</button>
+                            <button type="submit" class="btn btn-link btn-sm text-muted p-0">{{ __('Passer') }}</button>
                         </form>
                     </div>
                     <div class="progress" style="height: 6px;">
@@ -23,7 +23,7 @@
 
                 @foreach($steps as $onboardingStep)
                 <div x-show="step === {{ $loop->iteration }}" x-cloak>
-                    <div class="card radius-12 border-0 shadow-sm">
+                    <div class="card rounded-3 border-0 shadow-sm">
                         <div class="card-body text-center py-5 px-4">
                             @if($onboardingStep->icon)
                             <div class="mb-3">
@@ -34,7 +34,7 @@
                             @endif
 
                             <h3 class="fw-bold mb-2">{{ $onboardingStep->title }}</h3>
-                            <p class="text-secondary-light mb-4">{{ $onboardingStep->description }}</p>
+                            <p class="text-muted mb-4">{{ $onboardingStep->description }}</p>
 
                             @if($onboardingStep->slug === 'profile')
                             <div class="text-start mx-auto" style="max-width: 400px;">

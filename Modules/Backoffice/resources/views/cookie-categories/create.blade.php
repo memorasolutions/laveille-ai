@@ -1,7 +1,7 @@
 @extends('backoffice::layouts.admin')
 @section('title', 'Créer catégorie cookie')
 @section('content')
-<div class="card radius-12">
+<div class="card">
     <div class="card-header">
         <h5 class="mb-0 fw-semibold">Créer une catégorie cookie</h5>
     </div>

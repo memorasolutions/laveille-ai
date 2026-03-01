@@ -1,6 +1,13 @@
 @extends('backoffice::themes.backend.layouts.admin')
 @section('title', 'Ajouter une question FAQ')
 @section('content')
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.faqs.index') }}">FAQ</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Ajouter</li>
+    </ol>
+</nav>
 <div class="page-content">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h4 class="mb-0">Ajouter une question</h4>

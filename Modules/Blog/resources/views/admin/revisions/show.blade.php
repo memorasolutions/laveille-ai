@@ -1,43 +1,43 @@
 @extends('backoffice::layouts.admin', ['title' => __('Révision').' #'.$revision->revision_number, 'subtitle' => $article->title])
 
 @section('content')
-<div class="card radius-12">
-    <div class="card-header border-bottom bg-base py-16 px-24">
-        <h6 class="mb-4 d-flex align-items-center gap-2">
-            <iconify-icon icon="solar:history-bold" class="icon text-xl"></iconify-icon>
+<div class="card">
+    <div class="card-header border-bottom py-3 px-4">
+        <h6 class="mb-1 d-flex align-items-center gap-2">
+            <i data-lucide="history"></i>
             {{ __('Révision') }} #{{ $revision->revision_number }}
         </h6>
-        <p class="text-secondary-light text-sm mb-0">
+        <p class="text-muted text-sm mb-0">
             {{ $revision->created_at->format('d/m/Y H:i') }} {{ __('par') }} {{ $revision->user->name ?? __('Système') }}
         </p>
     </div>
-    <div class="card-body p-24">
-        <div class="mb-16">
-            <label class="form-label fw-semibold text-secondary-light">{{ __('Titre') }}</label>
+    <div class="card-body p-4">
+        <div class="mb-3">
+            <label class="form-label fw-semibold text-muted">{{ __('Titre') }}</label>
             <p class="fw-medium">{{ $revision->title }}</p>
         </div>
 
         @if($revision->excerpt)
-        <div class="mb-16">
-            <label class="form-label fw-semibold text-secondary-light">{{ __('Extrait') }}</label>
-            <p class="text-secondary-light">{{ $revision->excerpt }}</p>
+        <div class="mb-3">
+            <label class="form-label fw-semibold text-muted">{{ __('Extrait') }}</label>
+            <p class="text-muted">{{ $revision->excerpt }}</p>
         </div>
         @endif
 
-        <div class="mb-16">
-            <label class="form-label fw-semibold text-secondary-light">{{ __('Contenu') }}</label>
-            <div class="border radius-8 p-16">{!! $revision->content !!}</div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold text-muted">{{ __('Contenu') }}</label>
+            <div class="border rounded-2 p-3">{!! $revision->content !!}</div>
         </div>
     </div>
-    <div class="card-footer bg-base py-16 px-24 d-flex justify-content-between align-items-center">
-        <a href="{{ route('admin.blog.articles.revisions', $article) }}" class="btn btn-outline-secondary-600 radius-8 d-flex align-items-center gap-2">
-            <iconify-icon icon="solar:arrow-left-outline" class="icon"></iconify-icon>
+    <div class="card-footer py-3 px-4 d-flex justify-content-between align-items-center">
+        <a href="{{ route('admin.blog.articles.revisions', $article) }}" class="btn btn-outline-secondary rounded-2 d-flex align-items-center gap-2">
+            <i data-lucide="arrow-left"></i>
             {{ __('Retour à l\'historique') }}
         </a>
         <form action="{{ route('admin.blog.articles.revisions.restore', [$article, $revision]) }}" method="POST">
             @csrf
-            <button type="submit" class="btn btn-warning-600 radius-8 d-flex align-items-center gap-2" onclick="return confirm('{{ __('Restaurer cette version ?') }}')">
-                <iconify-icon icon="solar:restart-outline" class="icon"></iconify-icon>
+            <button type="submit" class="btn btn-warning rounded-2 d-flex align-items-center gap-2" onclick="return confirm('{{ __('Restaurer cette version ?') }}')">
+                <i data-lucide="refresh-cw"></i>
                 {{ __('Restaurer cette révision') }}
             </button>
         </form>

@@ -32,7 +32,7 @@
         <p>{{ __('Le responsable du traitement de vos données personnelles est :') }}</p>
         <p>
             <strong>{{ config('app.name') }}</strong><br>
-            {{ __('Adresse') }} : [{{ __('Adresse de l\'entreprise') }}]<br>
+            {{ __('Adresse') }} : {{ Settings::get('legal.company_address') ?: __('Non renseignée') }}<br>
             {{ __('Courriel') }} : <a href="mailto:{{ config('mail.from.address', 'privacy@example.com') }}">{{ config('mail.from.address', 'privacy@example.com') }}</a><br>
             {{ __('Site web') }} : <a href="{{ config('app.url') }}">{{ config('app.url') }}</a>
         </p>

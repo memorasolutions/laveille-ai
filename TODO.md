@@ -1,6 +1,6 @@
 # TODO - Laravel SaaS Boilerplate
 
-**Dernière mise à jour** : 2026-02-27 (nettoyage thèmes + rapport complet)
+**Dernière mise à jour** : 2026-02-28
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croisé docs/code)
 
 ---
@@ -39,24 +39,32 @@
 - [x] Tests RBAC dédiés (11 tests, 57 assertions) - sidebar + route-level 403
 - [x] Nettoyage thèmes (wowdash/tabler supprimés, ~133 Mo libérés, 0 référence restante)
 - [x] Dashboard actions rapides protégées @can (manage_users, manage_backups, manage_settings)
-- [x] Layout auth guest réécrit NobleUI (login/register sans jQuery)
+- [x] Layout auth guest réécrit Authero (Tailwind CSS + Preline UI + Tabler icons)
 - [x] Layout auth user corrigé Jobick (dashboard utilisateur fonctionnel)
+- [x] Vues Livewire auth converties Bootstrap→Tailwind (login, register, forgot-password, reset-password)
 - [x] Fix 16 tests cassés post-nettoyage thèmes (assertions wowdash→backend)
 - [x] Fix @push('js')→@push('scripts') vue revenue (ApexCharts rendu)
+- [x] Fix Phase57 (bg-success→bg-green-500, Tailwind colors)
+- [x] jQuery supprimé des vues auth (vanilla JS)
+- [x] Tests WCAG Phase188 (h1, nav landmark, aria-labels layout admin)
+- [x] NobleUI SCSS compilation via Vite (54 fichiers source, 381 KB CSS)
+- [x] Audit 140+ vues admin (0 Tailwind/WowDash/FontAwesome restant)
+- [x] Settings dark mode fix (tabs, labels, TipTap toolbar)
+- [x] Migration user dashboard Jobick → NobleUI (app.blade.php + 16 vues)
+- [x] Lien "Mon espace" dans header admin (profil dropdown)
+- [x] Tests Phase162 + Phase86 corrigés (ai-chatbot, $unreadCount)
 
 ---
 
 ## Restant - Immédiat (trivial)
 
-- [ ] Commit des changements en attente (~100+ fichiers modifiés/supprimés)
-- [ ] Retirer packages npm @tabler/core et @tabler/icons-webfont du package.json
-- [ ] Corriger 4 tests WCAG Phase188 (h1, nav landmark, aria-labels layout admin)
-- [ ] Mettre à jour README.md (tests 2294, 30 modules, 1 thème)
+- [ ] Commit des changements en attente (~100+ fichiers modifiés)
+- [ ] Corriger 13 erreurs PHPStan (7 Blog scope, 3 env(), 3 Media)
+- [ ] Supprimer `public/assets/` Jobick (~45 Mo, plus utilisé après migration NobleUI)
 
 ## Restant - Technique (moyen terme)
 
 - [ ] Validation visuelle Playwright du RBAC (4 rôles x pages admin)
-- [ ] Corriger 4 erreurs PHPStan env() (trivial, décision utilisateur)
 - [ ] Tests E2E Playwright automatisés (suite complète)
 
 ## Restant - Nice-to-have WordPress
@@ -80,6 +88,6 @@
 
 | # | Question | Impact |
 |---|----------|--------|
-| 1 | Migration Modules/ vers plugins/ souhaitée ? | Risque élevé, 30 modules à adapter |
+| 1 | Migration Modules/ vers plugins/ souhaitée ? | Risque élevé, 28 modules à adapter |
 | 2 | Priorité Phases 154-158 ? | Planification prochaines sessions |
-| 3 | Corriger 4 erreurs PHPStan env() ? | PHPStan 0 erreurs mais perd flexibilité clone |
+| 3 | Corriger 13 erreurs PHPStan ? | 7 Blog scope, 3 env(), 3 Media image |

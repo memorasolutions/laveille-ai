@@ -13,7 +13,11 @@ class NewsletterServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
-        $this->loadViewsFrom(__DIR__.'/../../resources/views', 'newsletter');
+        $sourcePath = __DIR__.'/../../resources/views';
+        $theme = config('backoffice.theme', 'backend');
+        $themePath = __DIR__.'/../../resources/views/themes/'.$theme;
+        $paths = is_dir($themePath) ? [$themePath, $sourcePath] : [$sourcePath];
+        $this->loadViewsFrom($paths, 'newsletter');
         $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
     }
 }

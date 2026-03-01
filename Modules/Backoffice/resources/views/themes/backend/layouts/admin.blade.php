@@ -8,13 +8,7 @@
     <title>@yield('title', __('Administration')) - {{ $branding['site_name'] ?? config('app.name') }}</title>
 
     {{-- Dark mode: must run synchronously before render to avoid flash --}}
-    <script src="{{ asset('build/nobleui/assets/color-modes-CkunOepb.js') }}"></script>
-    <script>
-        (function() {
-            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-bs-theme', theme);
-        })();
-    </script>
+    @vite('resources/js/nobleui/color-modes.js')
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,23 +28,13 @@
     <link href="{{ asset('build/nobleui/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet">
     @stack('plugin-styles')
 
-    {{-- Main CSS (NobleUI Bootstrap 5.3.8 + theme) --}}
-    <link href="{{ asset('build/nobleui/assets/app-B-efjZPS.css') }}" rel="stylesheet">
-    <link href="{{ asset('build/nobleui/assets/custom-tn0RQdqM.css') }}" rel="stylesheet">
+    {{-- Main CSS: NobleUI SCSS compiled via Vite (Bootstrap 5.3.8 + theme + components + plugin overrides) --}}
+    @vite(['resources/sass/nobleui/app.scss', 'resources/css/nobleui-custom.css'])
 
     {{-- Dynamic branding --}}
     @php $primaryColor = $branding['primary_color'] ?? '#6571ff'; @endphp
     <style>
         :root { --bs-primary: {{ $primaryColor }}; --bs-primary-rgb: {{ implode(',', sscanf($primaryColor, '#%02x%02x%02x')) }}; }
-        /* Alpine.js x-cloak - hide until Alpine initializes */
-        [x-cloak] { display: none !important; }
-        /* Lucide icon sizing defaults - prevents giant SVGs */
-        [data-lucide] { width: 18px; height: 18px; }
-        .icon-sm [data-lucide], [data-lucide].icon-sm { width: 14px; height: 14px; }
-        .icon-md [data-lucide], [data-lucide].icon-md { width: 20px; height: 20px; }
-        .icon-lg [data-lucide], [data-lucide].icon-lg { width: 24px; height: 24px; }
-        .icon-xl [data-lucide], [data-lucide].icon-xl { width: 32px; height: 32px; }
-        .icon-xxl [data-lucide], [data-lucide].icon-xxl { width: 48px; height: 48px; }
     </style>
 
     @livewireStyles
@@ -63,7 +47,7 @@
 </head>
 <body class="sidebar-dark" data-base-url="{{ url('/') }}">
 
-    {{-- Splash screen (premier chargement seulement) --}}
+    {{-- Splash screen --}}
     <script>
         if (!sessionStorage.getItem('admin_loaded')) {
             var splash = document.createElement("div");
@@ -92,7 +76,6 @@
     </div>
 
     {{-- Base JS --}}
-    <script src="{{ asset('build/nobleui/assets/app-CAiCLEjY.js') }}"></script>
     <script src="{{ asset('build/nobleui/plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('build/nobleui/plugins/lucide/lucide.min.js') }}"></script>
     <script src="{{ asset('build/nobleui/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
@@ -100,21 +83,19 @@
     {{-- Plugin JS --}}
     @stack('plugin-scripts')
 
-    {{-- Template JS (sidebar toggle, navbar, etc.) --}}
-    <script src="{{ asset('build/nobleui/assets/template-B7IAR9tB.js') }}"></script>
+    {{-- NobleUI template JS (sidebar toggle, tooltips, scrollbar, clipboard, lucide) --}}
+    @vite('resources/js/nobleui/template.js')
 
-    {{-- Vite app bundle (TipTap editor, axios, Echo) - must load BEFORE Livewire/Alpine --}}
+    {{-- Vite app bundle (TipTap editor, Alpine, axios, Echo) --}}
     @vite('resources/js/app.js')
 
     @livewireScripts
     <script>
         document.addEventListener('livewire:init', () => {
-            // Re-render Lucide icons after Livewire DOM morph
             Livewire.hook('morph.updated', ({el}) => {
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             });
 
-            // Global wire:loading - disable buttons & show spinner during Livewire requests
             Livewire.hook('commit', ({component, commit, respond, succeed, fail}) => {
                 const el = component.el;
                 const btns = el.querySelectorAll('button[wire\\:click], button[type="submit"]');

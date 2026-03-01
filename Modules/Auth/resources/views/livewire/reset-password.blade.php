@@ -1,51 +1,57 @@
 <div>
-    <h4 class="mb-12">{{ __('Réinitialiser le mot de passe') }}</h4>
-    <p class="mb-32 text-secondary-light text-lg">{{ __('Choisissez un nouveau mot de passe pour votre compte.') }}</p>
-
-    <form wire:submit="resetPassword">
-        <div class="icon-field mb-16">
-            <span class="icon top-50 translate-middle-y">
-                <iconify-icon icon="mage:email"></iconify-icon>
-            </span>
-            <input wire:model="email" type="email" class="form-control h-56-px bg-neutral-50 radius-12 @error('email') is-invalid @enderror" required>
-        </div>
-        @error('email')<div class="text-danger-main text-sm mb-16">{{ $message }}</div>@enderror
-
-        <div class="position-relative mb-16">
-            <div class="icon-field">
-                <span class="icon top-50 translate-middle-y">
-                    <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
-                </span>
-                <input wire:model="password" type="password" class="form-control h-56-px bg-neutral-50 radius-12 @error('password') is-invalid @enderror" id="new-password" placeholder="{{ __('Nouveau mot de passe') }}" required>
+    <h2 class="h2 text-dark">{{ __('Réinitialiser le mot de passe') }}</h2>
+    <p class="mt-2 text-muted">{{ __('Choisissez un nouveau mot de passe pour votre compte.') }}</p>
+    <form wire:submit="resetPassword" class="mt-5">
+        <div class="mb-4">
+            <label class="form-label">{{ __('Courriel') }}</label>
+            <div class="input-group @error('email') is-invalid @enderror">
+                <span class="input-group-text"><i data-lucide="at-sign" aria-hidden="true"></i></span>
+                <input wire:model="email" type="email" class="form-control @error('email') is-invalid @enderror" required>
             </div>
-            <span class="toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light" data-toggle="#new-password"></span>
+            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
-        @error('password')<div class="text-danger-main text-sm mb-16">{{ $message }}</div>@enderror
-
-        <div class="icon-field mb-16">
-            <span class="icon top-50 translate-middle-y">
-                <iconify-icon icon="solar:lock-outline"></iconify-icon>
-            </span>
-            <input wire:model="password_confirmation" type="password" class="form-control h-56-px bg-neutral-50 radius-12" placeholder="{{ __('Confirmer le mot de passe') }}" required>
+        <div class="mb-4">
+            <label class="form-label">{{ __('Nouveau mot de passe') }}</label>
+            <div class="input-group @error('password') is-invalid @enderror">
+                <span class="input-group-text"><i data-lucide="key-round" aria-hidden="true"></i></span>
+                <input wire:model="password" type="password" class="form-control @error('password') is-invalid @enderror" id="new-password" placeholder="{{ __('Nouveau mot de passe') }}" required>
+                <button type="button" class="btn btn-outline-secondary toggle-password" data-toggle="#new-password" aria-label="{{ __('Afficher le mot de passe') }}">
+                    <i data-lucide="eye" class="toggle-password-icon"></i>
+                </button>
+            </div>
+            @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
-
-        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32">
+        <div class="mb-4">
+            <label class="form-label">{{ __('Confirmer le mot de passe') }}</label>
+            <div class="input-group">
+                <span class="input-group-text"><i data-lucide="lock" aria-hidden="true"></i></span>
+                <input wire:model="password_confirmation" type="password" class="form-control" placeholder="{{ __('Confirmer le mot de passe') }}" required>
+            </div>
+        </div>
+        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-100 py-3 mb-4">
             <span wire:loading.remove>{{ __('Réinitialiser') }}</span>
             <span wire:loading>{{ __('Réinitialisation...') }}</span>
         </button>
     </form>
-
     @push('scripts')
     <script>
         document.querySelectorAll('.toggle-password').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 var input = document.querySelector(this.getAttribute('data-toggle'));
-                if (input) {
-                    input.type = input.type === 'password' ? 'text' : 'password';
-                    this.classList.toggle('ri-eye-off-line');
+                var icon = this.querySelector('.toggle-password-icon');
+                if (input && icon) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.setAttribute('data-lucide', 'eye-off');
+                    } else {
+                        input.type = 'password';
+                        icon.setAttribute('data-lucide', 'eye');
+                    }
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
                 }
             });
         });
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     </script>
     @endpush
 </div>

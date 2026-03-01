@@ -104,6 +104,12 @@
                             </a>
                         </li>
                         <li>
+                            <a href="{{ route('user.dashboard') }}" class="dropdown-item py-2 text-body ms-0">
+                                <i class="me-2 icon-md" data-lucide="layout-dashboard"></i>
+                                <span>{{ __('Mon espace') }}</span>
+                            </a>
+                        </li>
+                        <li>
                             <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
                                 <button type="button" class="dropdown-item py-2 text-body ms-0" onclick="document.getElementById('logout-form').submit()">

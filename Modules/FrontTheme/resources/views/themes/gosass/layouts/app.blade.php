@@ -54,7 +54,7 @@
     </button>
 
     <script src="{{ asset('themes/gosass/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/backoffice/backend/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('build/nobleui/plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('themes/gosass/js/wow.min.js') }}"></script>
     <script src="{{ asset('themes/gosass/js/jquery.slick.min.js') }}"></script>
     <script src="{{ asset('themes/gosass/js/odometer.js') }}"></script>
