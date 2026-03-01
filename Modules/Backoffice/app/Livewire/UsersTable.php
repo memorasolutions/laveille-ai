@@ -13,7 +13,7 @@ use App\Models\User;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Modules\Backoffice\Livewire\Concerns\HasBulkActions;
+use Modules\Core\Traits\HasBulkActions;
 use Spatie\Permission\Models\Role;
 
 class UsersTable extends Component

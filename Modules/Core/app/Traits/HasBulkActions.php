@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Backoffice\Livewire\Concerns;
+namespace Modules\Core\Traits;
 
 trait HasBulkActions
 {

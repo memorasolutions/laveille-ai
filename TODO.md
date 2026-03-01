@@ -86,6 +86,8 @@
 - [x] Fix XSS Widget HTML (Purifier::clean) - 4dc4250
 - [x] Audit Playwright Widget/CustomFields/FormBuilder (breadcrumbs, layouts 2 colonnes, empty states) - 5a25e8d
 - [x] Module Import de données (CSV/Excel, OpenSpout, preview + mapping colonnes, 14 tests) - 4d661a6
+- [x] Attribution auteur MEMORA solutions (1072 fichiers PHP/Blade/JS/CSS) - fdbb19c
+- [x] Architecture audit Phase A : -25 EventServiceProvider vides, -20 master.blade.php morts, HasBulkActions→Core, scaffolder mis à jour
 
 ## Restant - Nouvelles fonctionnalités (priorité basse)
 

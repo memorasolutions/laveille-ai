@@ -12,7 +12,7 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Modules\Backoffice\Livewire\Concerns\HasBulkActions;
+use Modules\Core\Traits\HasBulkActions;
 use Modules\Blog\Models\Comment;
 use Modules\Blog\States\ApprovedCommentState;
 use Modules\Blog\States\PendingCommentState;

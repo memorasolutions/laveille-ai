@@ -49,7 +49,7 @@ class MakeModuleCommand extends Command
 
         $this->createServiceProvider($path, $name, $lower);
         $this->createRouteServiceProvider($path, $name);
-        $this->createEventServiceProvider($path, $name);
+        // EventServiceProvider removed: use Laravel Event Discovery instead
         $this->createConfigFile($path, $name);
         $this->createDatabaseSeeder($path, $name);
         $this->createWebRoutes($path);
@@ -108,7 +108,6 @@ class MakeModuleCommand extends Command
                 public function register(): void
                 {
                     \$this->app->register(RouteServiceProvider::class);
-                    \$this->app->register(EventServiceProvider::class);
                 }
 
                 private function registerConfig(): void
@@ -168,28 +167,6 @@ class MakeModuleCommand extends Command
             PHP;
 
         $this->writeFile("{$modulePath}/app/Providers/RouteServiceProvider.php", $this->dedentHeredoc($content));
-    }
-
-    private function createEventServiceProvider(string $modulePath, string $name): void
-    {
-        $content = <<<PHP
-            <?php
-
-            declare(strict_types=1);
-
-            namespace Modules\\{$name}\\Providers;
-
-            use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-
-            class EventServiceProvider extends ServiceProvider
-            {
-                /** @var array<class-string, list<class-string>> */
-                protected \$listen = [];
-            }
-
-            PHP;
-
-        $this->writeFile("{$modulePath}/app/Providers/EventServiceProvider.php", $this->dedentHeredoc($content));
     }
 
     private function createConfigFile(string $modulePath, string $name): void

@@ -83,7 +83,6 @@ class SettingsServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
         $this->app->singleton(SettingsService::class);
         AliasLoader::getInstance()->alias('Settings', Settings::class);
