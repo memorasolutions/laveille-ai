@@ -61,7 +61,7 @@
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 7 : Police --}}
-        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 24px 2px 6px;" @change="setFontFamily($event.target.value)" data-bs-toggle="tooltip" title="Police">
+        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 30px 2px 8px;" @change="setFontFamily($event.target.value)" data-bs-toggle="tooltip" title="Police">
             <option value="">Par défaut</option>
             <option value="Inter">Inter</option>
             <option value="Arial">Arial</option>
@@ -70,7 +70,7 @@
             <option value="Courier New">Courier New</option>
             <option value="Verdana">Verdana</option>
         </select>
-        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 24px 2px 6px;" @change="setFontSize($event.target.value)" data-bs-toggle="tooltip" title="Taille">
+        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 30px 2px 8px;" @change="setFontSize($event.target.value)" data-bs-toggle="tooltip" title="Taille">
             <option value="">Taille</option>
             <option value="12px">12</option>
             <option value="14px">14</option>
