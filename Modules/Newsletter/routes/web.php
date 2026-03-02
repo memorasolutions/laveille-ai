@@ -26,30 +26,38 @@ Route::prefix('admin/newsletter')
     ->name('admin.newsletter.')
     ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
     ->group(function () {
-        Route::get('/', [NewsletterAdminController::class, 'index'])->name('index');
-        Route::get('/export', [NewsletterAdminController::class, 'export'])->name('export');
-        Route::delete('/{subscriber}', [NewsletterAdminController::class, 'destroy'])->name('destroy');
+        Route::middleware('permission:manage_newsletter')->group(function () {
+            Route::get('/', [NewsletterAdminController::class, 'index'])->name('index');
+            Route::get('/export', [NewsletterAdminController::class, 'export'])->name('export');
+            Route::delete('/{subscriber}', [NewsletterAdminController::class, 'destroy'])->name('destroy');
+        });
         // Campagnes
-        Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
-        Route::get('/campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
-        Route::post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
-        Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send');
+        Route::middleware('permission:manage_campaigns')->group(function () {
+            Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
+            Route::get('/campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
+            Route::post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
+            Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send');
+        });
         // Templates marketing
-        Route::get('/templates', [MarketingTemplateController::class, 'index'])->name('templates.index');
-        Route::get('/templates/create', [MarketingTemplateController::class, 'create'])->name('templates.create');
-        Route::post('/templates', [MarketingTemplateController::class, 'store'])->name('templates.store');
-        Route::get('/templates/{template}/edit', [MarketingTemplateController::class, 'edit'])->name('templates.edit');
-        Route::put('/templates/{template}', [MarketingTemplateController::class, 'update'])->name('templates.update');
-        Route::delete('/templates/{template}', [MarketingTemplateController::class, 'destroy'])->name('templates.destroy');
-        Route::get('/templates/{template}/preview', [MarketingTemplateController::class, 'preview'])->name('templates.preview');
+        Route::middleware('permission:manage_campaigns')->group(function () {
+            Route::get('/templates', [MarketingTemplateController::class, 'index'])->name('templates.index');
+            Route::get('/templates/create', [MarketingTemplateController::class, 'create'])->name('templates.create');
+            Route::post('/templates', [MarketingTemplateController::class, 'store'])->name('templates.store');
+            Route::get('/templates/{template}/edit', [MarketingTemplateController::class, 'edit'])->name('templates.edit');
+            Route::put('/templates/{template}', [MarketingTemplateController::class, 'update'])->name('templates.update');
+            Route::delete('/templates/{template}', [MarketingTemplateController::class, 'destroy'])->name('templates.destroy');
+            Route::get('/templates/{template}/preview', [MarketingTemplateController::class, 'preview'])->name('templates.preview');
+        });
         // Workflows
-        Route::get('/workflows', [WorkflowController::class, 'index'])->name('workflows.index');
-        Route::get('/workflows/create', [WorkflowController::class, 'create'])->name('workflows.create');
-        Route::post('/workflows', [WorkflowController::class, 'store'])->name('workflows.store');
-        Route::get('/workflows/{workflow}', [WorkflowController::class, 'show'])->name('workflows.show');
-        Route::get('/workflows/{workflow}/edit', [WorkflowController::class, 'edit'])->name('workflows.edit');
-        Route::put('/workflows/{workflow}', [WorkflowController::class, 'update'])->name('workflows.update');
-        Route::delete('/workflows/{workflow}', [WorkflowController::class, 'destroy'])->name('workflows.destroy');
-        Route::post('/workflows/{workflow}/activate', [WorkflowController::class, 'activate'])->name('workflows.activate');
-        Route::post('/workflows/{workflow}/pause', [WorkflowController::class, 'pause'])->name('workflows.pause');
+        Route::middleware('permission:manage_workflows')->group(function () {
+            Route::get('/workflows', [WorkflowController::class, 'index'])->name('workflows.index');
+            Route::get('/workflows/create', [WorkflowController::class, 'create'])->name('workflows.create');
+            Route::post('/workflows', [WorkflowController::class, 'store'])->name('workflows.store');
+            Route::get('/workflows/{workflow}', [WorkflowController::class, 'show'])->name('workflows.show');
+            Route::get('/workflows/{workflow}/edit', [WorkflowController::class, 'edit'])->name('workflows.edit');
+            Route::put('/workflows/{workflow}', [WorkflowController::class, 'update'])->name('workflows.update');
+            Route::delete('/workflows/{workflow}', [WorkflowController::class, 'destroy'])->name('workflows.destroy');
+            Route::post('/workflows/{workflow}/activate', [WorkflowController::class, 'activate'])->name('workflows.activate');
+            Route::post('/workflows/{workflow}/pause', [WorkflowController::class, 'pause'])->name('workflows.pause');
+        });
     });

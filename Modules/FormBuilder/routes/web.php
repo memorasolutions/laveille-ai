@@ -17,7 +17,7 @@ use Modules\FormBuilder\Http\Controllers\PublicFormController;
 // Admin routes
 Route::prefix('admin/formbuilder')
     ->name('admin.formbuilder.')
-    ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
+    ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class, 'permission:manage_forms'])
     ->group(function () {
         Route::resource('forms', FormController::class)->except(['show']);
 

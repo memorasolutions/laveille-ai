@@ -91,6 +91,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_categories',
             'manage_media',
             'manage_pages',
+            'manage_menus',
+            'manage_faqs',
+            'manage_testimonials',
+            'manage_forms',
             'view_admin_panel',
             'view_dashboard',
         ]);

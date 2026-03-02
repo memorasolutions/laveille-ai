@@ -26,31 +26,35 @@ Route::prefix('admin/blog')
     ->name('admin.blog.')
     ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
     ->group(function () {
-        Route::resource('articles', ArticleController::class);
-        Route::get('articles/{article}/preview', [ArticleController::class, 'preview'])->name('articles.preview');
-        Route::post('articles/{article}/publish', [ArticleController::class, 'publish'])->name('articles.publish');
-        Route::post('articles/{article}/unpublish', [ArticleController::class, 'unpublish'])->name('articles.unpublish');
-        Route::post('articles/{article}/regenerate-seo', [ArticleController::class, 'regenerateSeo'])->name('articles.regenerate-seo');
-        Route::post('articles/{article}/translate', [ArticleController::class, 'translateArticle'])->name('articles.translate');
-        Route::post('articles/{article}/regenerate-summary', [ArticleController::class, 'regenerateSummary'])->name('articles.regenerate-summary');
-        Route::post('articles/{article}/analyze', [ArticleController::class, 'analyzeContent'])->name('articles.analyze');
+        Route::middleware('permission:manage_articles')->group(function () {
+            Route::resource('articles', ArticleController::class);
+            Route::get('articles/{article}/preview', [ArticleController::class, 'preview'])->name('articles.preview');
+            Route::post('articles/{article}/publish', [ArticleController::class, 'publish'])->name('articles.publish');
+            Route::post('articles/{article}/unpublish', [ArticleController::class, 'unpublish'])->name('articles.unpublish');
+            Route::post('articles/{article}/regenerate-seo', [ArticleController::class, 'regenerateSeo'])->name('articles.regenerate-seo');
+            Route::post('articles/{article}/translate', [ArticleController::class, 'translateArticle'])->name('articles.translate');
+            Route::post('articles/{article}/regenerate-summary', [ArticleController::class, 'regenerateSummary'])->name('articles.regenerate-summary');
+            Route::post('articles/{article}/analyze', [ArticleController::class, 'analyzeContent'])->name('articles.analyze');
 
-        // Révisions d'articles
-        Route::get('articles/{article}/revisions', [ArticleRevisionController::class, 'index'])->name('articles.revisions');
-        Route::get('articles/{article}/revisions/{revision}', [ArticleRevisionController::class, 'show'])->name('articles.revisions.show');
-        Route::get('articles/{article}/revisions/{revision}/diff', [ArticleRevisionController::class, 'diff'])->name('articles.revisions.diff');
-        Route::post('articles/{article}/revisions/{revision}/restore', [ArticleRevisionController::class, 'restore'])->name('articles.revisions.restore');
+            // Révisions d'articles
+            Route::get('articles/{article}/revisions', [ArticleRevisionController::class, 'index'])->name('articles.revisions');
+            Route::get('articles/{article}/revisions/{revision}', [ArticleRevisionController::class, 'show'])->name('articles.revisions.show');
+            Route::get('articles/{article}/revisions/{revision}/diff', [ArticleRevisionController::class, 'diff'])->name('articles.revisions.diff');
+            Route::post('articles/{article}/revisions/{revision}/restore', [ArticleRevisionController::class, 'restore'])->name('articles.revisions.restore');
 
-        Route::resource('categories', CategoryController::class)->except(['show']);
-        Route::post('categories/quick-create', [CategoryController::class, 'quickCreate'])->name('categories.quick-create');
+            Route::resource('categories', CategoryController::class)->except(['show']);
+            Route::post('categories/quick-create', [CategoryController::class, 'quickCreate'])->name('categories.quick-create');
 
-        Route::resource('tags', TagController::class)->except(['show']);
+            Route::resource('tags', TagController::class)->except(['show']);
+        });
 
         // Modération des commentaires
-        Route::get('comments', [CommentAdminController::class, 'index'])->name('comments.index');
-        Route::get('comments/{comment}/approve', [CommentAdminController::class, 'approve'])->name('comments.approve');
-        Route::get('comments/{comment}/spam', [CommentAdminController::class, 'spam'])->name('comments.spam');
-        Route::delete('comments/{comment}', [CommentAdminController::class, 'destroy'])->name('comments.destroy');
+        Route::middleware('permission:manage_comments')->group(function () {
+            Route::get('comments', [CommentAdminController::class, 'index'])->name('comments.index');
+            Route::get('comments/{comment}/approve', [CommentAdminController::class, 'approve'])->name('comments.approve');
+            Route::get('comments/{comment}/spam', [CommentAdminController::class, 'spam'])->name('comments.spam');
+            Route::delete('comments/{comment}', [CommentAdminController::class, 'destroy'])->name('comments.destroy');
+        });
     });
 
 // Routes publiques
