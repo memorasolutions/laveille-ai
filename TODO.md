@@ -2,7 +2,7 @@
 
 **Derniere mise a jour** : 2026-03-02
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croise docs/code)
-**Metriques verifiees** : 2459 tests pass (1 skip), 33 modules, 523 routes, 80 migrations, PHPStan 0 erreurs (478 fichiers)
+**Metriques verifiees** : 2463 tests pass (1 skip), 33 modules, 523 routes, 80 migrations, PHPStan 0 erreurs (478 fichiers)
 
 ---
 

@@ -2,10 +2,10 @@
 
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
-![Tests](https://img.shields.io/badge/tests-2423_passed-brightgreen?style=flat)
+![Tests](https://img.shields.io/badge/tests-2463_passed-brightgreen?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
-Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (34 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2423+ tests, 0 échec).
+Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (33 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2463+ tests, 0 échec).
 
 ## Table des matières
 
@@ -146,7 +146,7 @@ php artisan test tests/Feature/Phase46Test.php
 php artisan test --filter "Auth"
 ```
 
-Suite actuelle : **2407+ tests, 0 échec**. PHPStan niveau 6. Pint 100%.
+Suite actuelle : **2463+ tests, 0 échec**. PHPStan niveau 6 (478 fichiers, 0 erreurs). Pint 100%.
 
 ## Sécurité
 
@@ -155,13 +155,17 @@ Suite actuelle : **2407+ tests, 0 échec**. PHPStan niveau 6. Pint 100%.
 - SQL Injection : Eloquent ORM, requêtes paramétrées
 - Rate limiting : 5 tentatives/min sur login, throttle:api sur tous les endpoints
 - 2FA TOTP : code à usage unique via Google Authenticator
-- OAuth social : Google, GitHub, Facebook
+- OAuth social : Google, GitHub
 - Magic links : connexion sans mot de passe
 - Protection brute-force : blocage IP après tentatives échouées
 - SecurityHeaders middleware : HSTS, X-Frame-Options, X-Content-Type-Options, CSP
 - HTTPS forcé en production (`URL::forceScheme('https')`)
 - Sanctum : token API révocable par session
 - Policies et Gates : contrôle d'accès granulaire par ressource
+- RBAC : 39 permissions, 4 rôles (super_admin, admin, editor, user), sidebar @can directives
+- Password policy : complexité, HIBP breach check (k-Anonymity), historique anti-réutilisation
+- Session management : voir et révoquer les sessions actives depuis le profil admin
+- RGPD : export données personnelles (7 tables), suppression compte avec anonymisation, polices self-hosted (0 CDN externe)
 
 ## Commandes artisan custom
 
