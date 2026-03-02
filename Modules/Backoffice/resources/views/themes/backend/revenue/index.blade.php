@@ -179,6 +179,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('build/nobleui/plugins/apexcharts/apexcharts.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Donut Chart - Subscription Distribution
