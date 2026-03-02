@@ -2,7 +2,7 @@
 
 **Derniere mise a jour** : 2026-03-02
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croise docs/code)
-**Metriques** : 2463 tests, 34 modules, 534 routes, 86 migrations, PHPStan 0 erreurs (478 fichiers)
+**Metriques verifiees** : 2459 tests pass (1 skip), 33 modules, 523 routes, 80 migrations, PHPStan 0 erreurs (478 fichiers)
 
 ---
 
@@ -102,15 +102,24 @@
 - [x] Makefile : make e2e, make setup-hooks
 - [x] Dependabot config (.github/dependabot.yml - composer, npm, github-actions)
 
+## Completes - Zero CDN / RGPD (session 2026-03-02)
+
+- [x] Google Fonts Inter -> @fontsource/inter (auth guest layout, RGPD)
+- [x] Google Fonts Roboto -> @fontsource/roboto (admin + auth app layouts, RGPD)
+- [x] Tom Select CDN -> npm + viteStaticCopy (4 fichiers Blog)
+- [x] Sortable.js CDN -> npm + viteStaticCopy (4 fichiers admin)
+- [x] Auth guest CSS inline (400 lignes) -> resources/css/auth-guest.css via Vite
+- [x] 0 CDN externe dans les vues actives (sauf branding editor = fonctionnalite)
+
 ---
 
 ## Restant - Nouvelles fonctionnalites (decision utilisateur)
 
-- [ ] Phase 156 : multi-tenant avance
-- [ ] Phase 157 : marketing automation
-- [ ] Migration Modules/ vers plugins/
-- [ ] API v2 GraphQL
 - [ ] Team/organization management (comptes multi-utilisateurs) - P1 si B2B, effort eleve
+- [ ] Multi-tenant avance (isolation donnees, domaines custom) - module Tenancy de base existe
+- [ ] Marketing automation (workflows, drip campaigns) - module Newsletter existe
+- [ ] API v2 GraphQL - API REST v1 fonctionne
+- [ ] Migration Modules/ vers plugins/ - 33 modules + 2459 tests a risque
 
 ## Suggestions benchmark (features manquantes identifiees)
 
@@ -128,6 +137,7 @@
 
 | # | Question | Impact |
 |---|----------|--------|
-| 1 | Migration Modules/ vers plugins/ ? | 34 modules + 2463 tests a risque |
-| 2 | Priorite Phase 156 vs 157 ? | Multi-tenant ou marketing en premier |
-| 3 | Team/organization necessaire ? | Depend du marche cible (B2C vs B2B) |
+| 1 | Team/organization necessaire ? | Depend du marche cible (B2C vs B2B) |
+| 2 | Multi-tenant avance ou marketing automation en premier ? | Oriente le developpement |
+| 3 | Migration Modules/ vers plugins/ ? | 33 modules + 2459 tests a risque |
+| 4 | API GraphQL necessaire ? | Effort eleve, REST v1 fonctionne |
