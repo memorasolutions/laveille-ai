@@ -88,8 +88,8 @@
                 <thead>
                     <tr>
                         <th scope="col">Membre</th>
-                        <th scope="col">E-mail</th>
-                        <th scope="col" style="width:160px">Rôle</th>
+                        <th scope="col" class="d-none d-md-table-cell">E-mail</th>
+                        <th scope="col" class="d-none d-sm-table-cell" style="width:160px">Rôle</th>
                         <th scope="col" class="text-end" style="width:120px">Actions</th>
                     </tr>
                 </thead>
@@ -113,8 +113,8 @@
                                 @endif
                             </div>
                         </td>
-                        <td class="text-muted">{{ $member->email }}</td>
-                        <td>
+                        <td class="text-muted d-none d-md-table-cell">{{ $member->email }}</td>
+                        <td class="d-none d-sm-table-cell">
                             @if($isOwner)
                                 <span class="badge bg-warning text-dark">
                                     <i data-lucide="crown" style="width:12px;height:12px"></i> Propriétaire
@@ -192,9 +192,9 @@
                 <thead>
                     <tr>
                         <th scope="col">E-mail invité</th>
-                        <th scope="col" style="width:160px">Rôle proposé</th>
-                        <th scope="col" style="width:140px">Invitée le</th>
-                        <th scope="col" style="width:140px">Expire le</th>
+                        <th scope="col" class="d-none d-sm-table-cell" style="width:160px">Rôle proposé</th>
+                        <th scope="col" class="d-none d-md-table-cell" style="width:140px">Invitée le</th>
+                        <th scope="col" class="d-none d-md-table-cell" style="width:140px">Expire le</th>
                         <th scope="col" class="text-end" style="width:100px">Actions</th>
                     </tr>
                 </thead>
@@ -213,7 +213,7 @@
                                 @endif
                             </div>
                         </td>
-                        <td>
+                        <td class="d-none d-sm-table-cell">
                             @if($invitation->role === 'admin')
                                 <span class="badge bg-danger">
                                     <i data-lucide="shield" style="width:12px;height:12px"></i> Administrateur
@@ -224,10 +224,10 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="text-muted small">
+                        <td class="text-muted small d-none d-md-table-cell">
                             {{ $invitation->created_at->format('d/m/Y à H\hi') }}
                         </td>
-                        <td class="small {{ $expired ? 'text-danger fw-semibold' : 'text-muted' }}">
+                        <td class="small d-none d-md-table-cell {{ $expired ? 'text-danger fw-semibold' : 'text-muted' }}">
                             @if($invitation->expires_at)
                                 {{ $invitation->expires_at->format('d/m/Y à H\hi') }}
                             @else

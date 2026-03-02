@@ -62,7 +62,7 @@ class TeamService
 
     public static function acceptInvitation(string $token): Team
     {
-        return DB::transaction(function () use ($token) {
+        return DB::transaction(function () use ($token): Team {
             $invitation = TeamInvitation::where('token', $token)->firstOrFail();
 
             if ($invitation->isExpired()) {
@@ -75,7 +75,9 @@ class TeamService
 
             $user = User::where('email', $invitation->email)->firstOrFail();
 
-            $invitation->team->members()->attach($user->id, [
+            /** @var Team $team */
+            $team = $invitation->team;
+            $team->members()->attach($user->id, [
                 'role' => $invitation->role,
                 'invited_at' => $invitation->created_at,
                 'accepted_at' => now(),
@@ -87,7 +89,7 @@ class TeamService
                 $user->update(['current_team_id' => $invitation->team_id]);
             }
 
-            return $invitation->team;
+            return $team;
         });
     }
 

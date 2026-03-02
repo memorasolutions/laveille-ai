@@ -39,9 +39,9 @@
                 <thead>
                     <tr>
                         <th scope="col">Nom</th>
-                        <th scope="col">Propriétaire</th>
-                        <th scope="col" class="text-center" style="width:110px">Membres</th>
-                        <th scope="col" style="width:140px">Créée le</th>
+                        <th scope="col" class="d-none d-md-table-cell">Propriétaire</th>
+                        <th scope="col" class="text-center d-none d-lg-table-cell" style="width:110px">Membres</th>
+                        <th scope="col" class="d-none d-lg-table-cell" style="width:140px">Créée le</th>
                         <th scope="col" class="text-end" style="width:150px">Actions</th>
                     </tr>
                 </thead>
@@ -57,16 +57,16 @@
                                 <small class="text-muted d-block mt-1">{{ Str::limit($team->description, 80) }}</small>
                             @endif
                         </td>
-                        <td>
+                        <td class="d-none d-md-table-cell">
                             <div class="d-flex align-items-center gap-2">
                                 <i data-lucide="crown" class="text-warning" style="width:14px;height:14px"></i>
                                 <span>{{ $team->owner->name ?? '—' }}</span>
                             </div>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center d-none d-lg-table-cell">
                             <span class="badge bg-primary rounded-pill">{{ $team->members_count }}</span>
                         </td>
-                        <td class="text-muted">
+                        <td class="text-muted d-none d-lg-table-cell">
                             {{ $team->created_at->format('d/m/Y') }}
                         </td>
                         <td class="text-end">

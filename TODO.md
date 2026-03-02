@@ -2,7 +2,7 @@
 
 **Derniere mise a jour** : 2026-03-02
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croise docs/code)
-**Metriques verifiees** : 2463 tests pass (1 skip), 33 modules, 523 routes, 80 migrations, PHPStan 0 erreurs (478 fichiers)
+**Metriques verifiees** : 2486 tests pass (1 skip), 34 modules, ~500 routes, 84 migrations, PHPStan 0 erreurs (488 fichiers)
 
 ---
 
@@ -111,15 +111,25 @@
 - [x] Auth guest CSS inline (400 lignes) -> resources/css/auth-guest.css via Vite
 - [x] 0 CDN externe dans les vues actives (sauf branding editor = fonctionnalite)
 
+## Completes - Module Team (session 2026-03-02)
+
+- [x] Module Team complet (4 migrations, 3 modeles, TeamService, 2 controleurs, 4 vues NobleUI)
+- [x] Systeme invitations (token 64 chars, expiration 7j, notification mail, accept/decline)
+- [x] Trait HasTeams sur User (teams, currentTeam, switchTeam, belongsToTeam)
+- [x] Middleware EnsureTeamContext (auto-set team context)
+- [x] Permission manage_teams + sidebar integration
+- [x] 23 tests Pest (56 assertions) - TeamService, routes HTTP, permissions 403, modele, invitations
+- [x] PHPStan 0 erreurs (type hints corrigés)
+- [x] Production hardening (security.txt RFC 9116, .env.example, meta viewport fix, @stack custom-scripts)
+
 ---
 
 ## Restant - Nouvelles fonctionnalites (decision utilisateur)
 
-- [ ] Team/organization management (comptes multi-utilisateurs) - P1 si B2B, effort eleve
 - [ ] Multi-tenant avance (isolation donnees, domaines custom) - module Tenancy de base existe
 - [ ] Marketing automation (workflows, drip campaigns) - module Newsletter existe
 - [ ] API v2 GraphQL - API REST v1 fonctionne
-- [ ] Migration Modules/ vers plugins/ - 33 modules + 2459 tests a risque
+- [ ] Migration Modules/ vers plugins/ - 34 modules + 2486 tests a risque
 
 ## Suggestions benchmark (features manquantes identifiees)
 
@@ -137,7 +147,6 @@
 
 | # | Question | Impact |
 |---|----------|--------|
-| 1 | Team/organization necessaire ? | Depend du marche cible (B2C vs B2B) |
-| 2 | Multi-tenant avance ou marketing automation en premier ? | Oriente le developpement |
-| 3 | Migration Modules/ vers plugins/ ? | 33 modules + 2459 tests a risque |
+| 1 | Multi-tenant avance ou marketing automation en premier ? | Oriente le developpement |
+| 2 | Migration Modules/ vers plugins/ ? | 34 modules + 2486 tests a risque |
 | 4 | API GraphQL necessaire ? | Effort eleve, REST v1 fonctionne |

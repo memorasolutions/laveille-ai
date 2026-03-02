@@ -7,6 +7,7 @@ namespace Modules\Team\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Modules\Team\Models\Team;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTeamContext
@@ -18,6 +19,7 @@ class EnsureTeamContext
             $user = Auth::user();
 
             if ($user->current_team_id) {
+                /** @var Team|null $team */
                 $team = $user->currentTeam;
                 if ($team && $team->hasMember($user)) {
                     $request->attributes->set('team', $team);
@@ -27,6 +29,7 @@ class EnsureTeamContext
             }
 
             if (! $user->current_team_id && $user->teams()->exists()) {
+                /** @var Team|null $firstTeam */
                 $firstTeam = $user->teams()->orderBy('teams.id')->first();
                 if ($firstTeam) {
                     $user->update(['current_team_id' => $firstTeam->id]);

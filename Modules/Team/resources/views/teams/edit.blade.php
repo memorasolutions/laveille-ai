@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="col-md-4">
-                    <div class="card bg-light border-0">
+                    <div class="card border">
                         <div class="card-body">
                             <h6 class="fw-semibold mb-3">Informations</h6>
 
