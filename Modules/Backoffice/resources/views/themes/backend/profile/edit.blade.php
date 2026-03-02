@@ -5,19 +5,12 @@
 <nav class="page-breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Profil</li>
+        <li class="breadcrumb-item active" aria-current="page">Mon profil</li>
     </ol>
 </nav>
 @endsection
 
 @section('content')
-
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ __('Mon profil') }}</li>
-    </ol>
-</nav>
 
 @if(session('success'))
     <div class="alert alert-success d-flex align-items-center gap-2 mb-4">

@@ -13,14 +13,6 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.profile') }}">{{ __('Profil') }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ __('API Tokens') }}</li>
-    </ol>
-</nav>
-
 @if(session('token_value'))
 <div class="alert alert-success d-flex align-items-start gap-3 mb-4">
     <i data-lucide="key-round" class="text-success icon-md flex-shrink-0 mt-1"></i>

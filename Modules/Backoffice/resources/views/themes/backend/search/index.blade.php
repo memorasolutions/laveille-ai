@@ -12,13 +12,6 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ __('Recherche') }}</li>
-    </ol>
-</nav>
-
 {{-- Search Form --}}
 <div class="card mb-4">
     <div class="card-header py-3 px-4">

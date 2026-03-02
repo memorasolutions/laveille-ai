@@ -14,14 +14,6 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.blog.articles.index') }}">{{ __('Articles') }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ __('Modifier') }}</li>
-    </ol>
-</nav>
-
 @if($errors->any())
     <div class="alert alert-danger">
         <ul class="mb-0 ps-3">

@@ -7,20 +7,12 @@
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item">Blog</li>
         <li class="breadcrumb-item"><a href="{{ route('admin.blog.articles.index') }}">Articles</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Creer</li>
+        <li class="breadcrumb-item active" aria-current="page">Créer</li>
     </ol>
 </nav>
 @endsection
 
 @section('content')
-
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.blog.articles.index') }}">{{ __('Articles') }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ __('Ajouter') }}</li>
-    </ol>
-</nav>
 
 @if($errors->any())
     <div class="alert alert-danger">

@@ -5,7 +5,7 @@
 <nav class="page-breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Retention des donnees</li>
+        <li class="breadcrumb-item active" aria-current="page">Rétention des données</li>
     </ol>
 </nav>
 @endsection
@@ -16,13 +16,6 @@
     $totalRecords = collect($stats)->sum('total');
     $totalEligible = collect($stats)->sum('eligible');
 @endphp
-
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item active">{{ __('Rétention des données') }}</li>
-    </ol>
-</nav>
 
 <div class="row mb-4">
     <div class="col-sm-6 col-xl-4 mb-3">

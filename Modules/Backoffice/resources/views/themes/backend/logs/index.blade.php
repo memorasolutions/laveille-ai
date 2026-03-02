@@ -12,13 +12,6 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ __('Journaux') }}</li>
-    </ol>
-</nav>
-
 <div class="card">
     <div class="card-header py-3 px-4 border-bottom">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">

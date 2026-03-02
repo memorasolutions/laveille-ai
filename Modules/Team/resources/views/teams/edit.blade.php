@@ -5,22 +5,14 @@
 <nav class="page-breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">Equipes</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">Équipes</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.teams.show', $team) }}">{{ $team->name }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">Modifier</li>
     </ol>
 </nav>
 @endsection
 
 @section('content')
-
-<nav class="page-breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">Équipes</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.teams.show', $team) }}">{{ $team->name }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Modifier</li>
-    </ol>
-</nav>
 
 @if($errors->any())
     <div class="alert alert-danger mb-4" role="alert">
