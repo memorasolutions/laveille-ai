@@ -189,76 +189,62 @@
             </li>
             @endcanany
 
-            {{-- ===== MONÉTISATION ===== --}}
-            @can('manage_plans')
-            <li class="nav-item nav-category">{{ __('Monétisation') }}</li>
-            @if(Route::has('admin.plans.index'))
-            <li class="nav-item {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.plans.index') }}" class="nav-link">
-                    <i class="link-icon" data-lucide="credit-card"></i>
-                    <span class="link-title">{{ __('Plans') }}</span>
-                </a>
-            </li>
-            @endif
-            @if(Route::has('admin.revenue'))
-            <li class="nav-item {{ request()->routeIs('admin.revenue') ? 'active' : '' }}">
-                <a href="{{ route('admin.revenue') }}" class="nav-link">
-                    <i class="link-icon" data-lucide="dollar-sign"></i>
-                    <span class="link-title">{{ __('Revenus') }}</span>
-                </a>
-            </li>
-            @endif
-            @endcan
-
-            {{-- ===== INTELLIGENCE ARTIFICIELLE ===== --}}
-            @can('manage_ai')
-            <li class="nav-item nav-category">{{ __('Intelligence artificielle') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.ai.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#aiMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.ai.*') ? 'true' : 'false' }}">
-                    <i class="link-icon" data-lucide="brain"></i>
-                    <span class="link-title">{{ __('IA') }}</span>
+            {{-- ===== BUSINESS ===== --}}
+            @canany(['manage_plans', 'manage_ai'])
+            <li class="nav-item nav-category">{{ __('Business') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.plans.*', 'admin.revenue', 'admin.ai.conversations.*', 'admin.ai.agent.*', 'admin.ai.analytics') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#businessMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.plans.*', 'admin.revenue', 'admin.ai.conversations.*', 'admin.ai.agent.*', 'admin.ai.analytics') ? 'true' : 'false' }}">
+                    <i class="link-icon" data-lucide="briefcase"></i>
+                    <span class="link-title">{{ __('Business') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.ai.*') ? 'show' : '' }}" id="aiMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.plans.*', 'admin.revenue', 'admin.ai.conversations.*', 'admin.ai.agent.*', 'admin.ai.analytics') ? 'show' : '' }}" id="businessMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
+                        @if(Route::has('admin.plans.index'))
+                        @can('manage_plans')
+                        <li class="nav-item"><a href="{{ route('admin.plans.index') }}" class="nav-link {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}">{{ __('Plans') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.revenue'))
+                        @can('manage_plans')
+                        <li class="nav-item"><a href="{{ route('admin.revenue') }}" class="nav-link {{ request()->routeIs('admin.revenue') ? 'active' : '' }}">{{ __('Revenus') }}</a></li>
+                        @endcan
+                        @endif
                         @if(Route::has('admin.ai.conversations.index'))
-                        <li class="nav-item">
-                            <a href="{{ route('admin.ai.conversations.index') }}" class="nav-link {{ request()->routeIs('admin.ai.conversations.*') ? 'active' : '' }}">{{ __('Conversations') }}</a>
-                        </li>
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.conversations.index') }}" class="nav-link {{ request()->routeIs('admin.ai.conversations.*') ? 'active' : '' }}">{{ __('Conversations IA') }}</a></li>
+                        @endcan
                         @endif
                         @if(Route::has('admin.ai.agent.index'))
-                        <li class="nav-item">
-                            <a href="{{ route('admin.ai.agent.index') }}" class="nav-link {{ request()->routeIs('admin.ai.agent.*') ? 'active' : '' }}">
-                                {{ __('Agent dashboard') }}
-                                @php $waitingCount = class_exists(\Modules\AI\Models\AiConversation::class) ? \Modules\AI\Models\AiConversation::where('status', 'waiting_human')->count() : 0; @endphp
-                                @if($waitingCount > 0)
-                                <span class="badge bg-warning text-dark ms-1">{{ $waitingCount }}</span>
-                                @endif
-                            </a>
-                        </li>
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.agent.index') }}" class="nav-link {{ request()->routeIs('admin.ai.agent.*') ? 'active' : '' }}">{{ __('Agent dashboard') }}
+                            @php $waitingCount = class_exists(\Modules\AI\Models\AiConversation::class) ? \Modules\AI\Models\AiConversation::where('status', 'waiting_human')->count() : 0; @endphp
+                            @if($waitingCount > 0)<span class="badge bg-warning text-dark ms-1">{{ $waitingCount }}</span>@endif
+                        </a></li>
+                        @endcan
                         @endif
                         @if(Route::has('admin.ai.analytics'))
-                        <li class="nav-item">
-                            <a href="{{ route('admin.ai.analytics') }}" class="nav-link {{ request()->routeIs('admin.ai.analytics') ? 'active' : '' }}">{{ __('Analytics') }}</a>
-                        </li>
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.analytics') }}" class="nav-link {{ request()->routeIs('admin.ai.analytics') ? 'active' : '' }}">{{ __('Analytics IA') }}</a></li>
+                        @endcan
                         @endif
                     </ul>
                 </div>
             </li>
-            @endcan
+            @endcanany
 
             {{-- ===== CONFIGURATION ===== --}}
-            @canany(['manage_settings', 'manage_branding', 'manage_seo', 'manage_feature_flags', 'manage_translations', 'manage_system', 'manage_email_templates', 'manage_webhooks', 'manage_shortcodes', 'manage_cookies', 'manage_onboarding', 'manage_widgets', 'manage_settings'])
+            @canany(['manage_settings', 'manage_branding', 'manage_seo', 'manage_translations', 'manage_email_templates', 'manage_onboarding', 'manage_widgets'])
             <li class="nav-item nav-category">{{ __('Configuration') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*', 'admin.widgets.*', 'admin.custom-fields.*', 'admin.import.*', 'admin.experiments.*', 'admin.announcements.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.email-templates.*', 'admin.onboarding-steps.*', 'admin.widgets.*', 'admin.announcements.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#configMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*', 'admin.widgets.*', 'admin.custom-fields.*', 'admin.import.*', 'admin.experiments.*', 'admin.announcements.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.email-templates.*', 'admin.onboarding-steps.*', 'admin.widgets.*', 'admin.announcements.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="settings"></i>
                     <span class="link-title">{{ __('Configuration') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*', 'admin.widgets.*', 'admin.custom-fields.*', 'admin.import.*', 'admin.experiments.*', 'admin.announcements.*') ? 'show' : '' }}" id="configMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.email-templates.*', 'admin.onboarding-steps.*', 'admin.widgets.*', 'admin.announcements.*') ? 'show' : '' }}" id="configMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @can('manage_settings')
                         <li class="nav-item"><a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">{{ __('Paramètres') }}</a></li>
@@ -271,21 +257,55 @@
                         @can('manage_seo')
                         <li class="nav-item"><a href="{{ route('admin.seo.index') }}" class="nav-link {{ request()->routeIs('admin.seo.*') ? 'active' : '' }}">{{ __('SEO') }}</a></li>
                         @endcan
-                        @can('manage_feature_flags')
-                        <li class="nav-item"><a href="{{ route('admin.feature-flags.index') }}" class="nav-link {{ request()->routeIs('admin.feature-flags.*') ? 'active' : '' }}">{{ __('Feature Flags') }}</a></li>
-                        <li class="nav-item"><a href="{{ route('admin.experiments.index') }}" class="nav-link {{ request()->routeIs('admin.experiments.*') ? 'active' : '' }}">{{ __('Tests A/B') }}</a></li>
-                        @endcan
                         @can('manage_translations')
                         <li class="nav-item"><a href="{{ route('admin.translations.index') }}" class="nav-link {{ request()->routeIs('admin.translations.*') ? 'active' : '' }}">{{ __('Traductions') }}</a></li>
-                        @endcan
-                        @can('manage_system')
-                        <li class="nav-item"><a href="{{ route('admin.plugins.index') }}" class="nav-link {{ request()->routeIs('admin.plugins.*') ? 'active' : '' }}">{{ __('Plugins') }}</a></li>
                         @endcan
                         @if(Route::has('admin.email-templates.index'))
                         @can('manage_email_templates')
                         <li class="nav-item"><a href="{{ route('admin.email-templates.index') }}" class="nav-link {{ request()->routeIs('admin.email-templates.*') ? 'active' : '' }}">{{ __('Emails templates') }}</a></li>
                         @endcan
                         @endif
+                        @if(Route::has('admin.onboarding-steps.index'))
+                        @can('manage_onboarding')
+                        <li class="nav-item"><a href="{{ route('admin.onboarding-steps.index') }}" class="nav-link {{ request()->routeIs('admin.onboarding-steps.*') ? 'active' : '' }}">{{ __('Onboarding') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.widgets.index'))
+                        @can('manage_widgets')
+                        <li class="nav-item"><a href="{{ route('admin.widgets.index') }}" class="nav-link {{ request()->routeIs('admin.widgets.*') ? 'active' : '' }}">{{ __('Widgets') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.announcements.index'))
+                        @can('manage_settings')
+                        <li class="nav-item"><a href="{{ route('admin.announcements.index') }}" class="nav-link {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">{{ __('Annonces') }}</a></li>
+                        @endcan
+                        @endif
+                    </ul>
+                </div>
+            </li>
+            @endcanany
+
+            {{-- ===== AVANCÉ ===== --}}
+            @canany(['manage_feature_flags', 'manage_system', 'manage_webhooks', 'manage_shortcodes', 'manage_cookies', 'manage_settings'])
+            <li class="nav-item nav-category">{{ __('Avancé') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.feature-flags.*', 'admin.experiments.*', 'admin.plugins.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.custom-fields.*', 'admin.import.*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#advancedMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.feature-flags.*', 'admin.experiments.*', 'admin.plugins.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.custom-fields.*', 'admin.import.*') ? 'true' : 'false' }}">
+                    <i class="link-icon" data-lucide="code"></i>
+                    <span class="link-title">{{ __('Avancé') }}</span>
+                    <i class="link-arrow" data-lucide="chevron-down"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('admin.feature-flags.*', 'admin.experiments.*', 'admin.plugins.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.custom-fields.*', 'admin.import.*') ? 'show' : '' }}" id="advancedMenu" data-bs-parent="#sidebarNav">
+                    <ul class="nav sub-menu">
+                        @can('manage_feature_flags')
+                        <li class="nav-item"><a href="{{ route('admin.feature-flags.index') }}" class="nav-link {{ request()->routeIs('admin.feature-flags.*') ? 'active' : '' }}">{{ __('Feature Flags') }}</a></li>
+                        @endcan
+                        @can('manage_feature_flags')
+                        <li class="nav-item"><a href="{{ route('admin.experiments.index') }}" class="nav-link {{ request()->routeIs('admin.experiments.*') ? 'active' : '' }}">{{ __('Tests A/B') }}</a></li>
+                        @endcan
+                        @can('manage_system')
+                        <li class="nav-item"><a href="{{ route('admin.plugins.index') }}" class="nav-link {{ request()->routeIs('admin.plugins.*') ? 'active' : '' }}">{{ __('Plugins') }}</a></li>
+                        @endcan
                         @if(Route::has('admin.webhooks.index'))
                         @can('manage_webhooks')
                         <li class="nav-item"><a href="{{ route('admin.webhooks.index') }}" class="nav-link {{ request()->routeIs('admin.webhooks.*') ? 'active' : '' }}">{{ __('Webhooks') }}</a></li>
@@ -301,16 +321,6 @@
                         <li class="nav-item"><a href="{{ route('admin.cookie-categories.index') }}" class="nav-link {{ request()->routeIs('admin.cookie-categories.*') ? 'active' : '' }}">{{ __('Cookies GDPR') }}</a></li>
                         @endcan
                         @endif
-                        @if(Route::has('admin.onboarding-steps.index'))
-                        @can('manage_onboarding')
-                        <li class="nav-item"><a href="{{ route('admin.onboarding-steps.index') }}" class="nav-link {{ request()->routeIs('admin.onboarding-steps.*') ? 'active' : '' }}">{{ __('Onboarding') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.widgets.index'))
-                        @can('manage_widgets')
-                        <li class="nav-item"><a href="{{ route('admin.widgets.index') }}" class="nav-link {{ request()->routeIs('admin.widgets.*') ? 'active' : '' }}">{{ __('Widgets') }}</a></li>
-                        @endcan
-                        @endif
                         @if(Route::has('admin.custom-fields.index'))
                         @can('manage_settings')
                         <li class="nav-item"><a href="{{ route('admin.custom-fields.index') }}" class="nav-link {{ request()->routeIs('admin.custom-fields.*') ? 'active' : '' }}">{{ __('Champs perso.') }}</a></li>
@@ -319,11 +329,6 @@
                         @if(Route::has('admin.import.index'))
                         @can('manage_settings')
                         <li class="nav-item"><a href="{{ route('admin.import.index') }}" class="nav-link {{ request()->routeIs('admin.import.*') ? 'active' : '' }}">{{ __('Import') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.announcements.index'))
-                        @can('manage_settings')
-                        <li class="nav-item"><a href="{{ route('admin.announcements.index') }}" class="nav-link {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">{{ __('Annonces') }}</a></li>
                         @endcan
                         @endif
                     </ul>
@@ -352,16 +357,16 @@
             @endcan
 
             {{-- ===== OUTILS ===== --}}
-            @canany(['manage_backups', 'manage_activity_logs', 'view_logs', 'view_health', 'manage_trash', 'manage_system', 'manage_notifications'])
+            @canany(['manage_backups', 'manage_activity_logs', 'view_logs', 'manage_trash', 'manage_notifications'])
             <li class="nav-item nav-category">{{ __('Outils') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.backups.*', 'admin.activity-logs.*', 'admin.logs', 'admin.failed-jobs.*', 'admin.trash.*', 'admin.health', 'admin.scheduler', 'admin.mail-log', 'admin.cache', 'admin.system-info', 'admin.data-retention', 'admin.notifications.*', 'admin.push-notifications.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.backups.*', 'admin.activity-logs.*', 'admin.logs', 'admin.failed-jobs.*', 'admin.trash.*', 'admin.notifications.*', 'admin.push-notifications.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#toolsMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.backups.*', 'admin.activity-logs.*', 'admin.logs', 'admin.failed-jobs.*', 'admin.trash.*', 'admin.health', 'admin.scheduler', 'admin.mail-log', 'admin.cache', 'admin.system-info', 'admin.data-retention', 'admin.notifications.*', 'admin.push-notifications.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.backups.*', 'admin.activity-logs.*', 'admin.logs', 'admin.failed-jobs.*', 'admin.trash.*', 'admin.notifications.*', 'admin.push-notifications.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="wrench"></i>
                     <span class="link-title">{{ __('Outils') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.backups.*', 'admin.activity-logs.*', 'admin.logs', 'admin.failed-jobs.*', 'admin.trash.*', 'admin.health', 'admin.scheduler', 'admin.mail-log', 'admin.cache', 'admin.system-info', 'admin.data-retention', 'admin.notifications.*', 'admin.push-notifications.*') ? 'show' : '' }}" id="toolsMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.backups.*', 'admin.activity-logs.*', 'admin.logs', 'admin.failed-jobs.*', 'admin.trash.*', 'admin.notifications.*', 'admin.push-notifications.*') ? 'show' : '' }}" id="toolsMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @can('manage_backups')
                         <li class="nav-item"><a href="{{ route('admin.backups.index') }}" class="nav-link {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}">{{ __('Sauvegardes') }}</a></li>
@@ -378,6 +383,31 @@
                         @can('manage_trash')
                         <li class="nav-item"><a href="{{ route('admin.trash.index') }}" class="nav-link {{ request()->routeIs('admin.trash.*') ? 'active' : '' }}">{{ __('Corbeille') }}</a></li>
                         @endcan
+                        @can('manage_notifications')
+                        <li class="nav-item"><a href="{{ route('admin.notifications.index') }}" class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">{{ __('Notifications') }}</a></li>
+                        @endcan
+                        @if(Route::has('admin.push-notifications.index'))
+                        @can('manage_notifications')
+                        <li class="nav-item"><a href="{{ route('admin.push-notifications.index') }}" class="nav-link {{ request()->routeIs('admin.push-notifications.*') ? 'active' : '' }}">{{ __('Push notifications') }}</a></li>
+                        @endcan
+                        @endif
+                    </ul>
+                </div>
+            </li>
+            @endcanany
+
+            {{-- ===== SYSTÈME ===== --}}
+            @canany(['view_health', 'manage_system'])
+            <li class="nav-item nav-category">{{ __('Système') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.health', 'admin.scheduler', 'admin.mail-log', 'admin.cache', 'admin.system-info', 'admin.data-retention') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#systemMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.health', 'admin.scheduler', 'admin.mail-log', 'admin.cache', 'admin.system-info', 'admin.data-retention') ? 'true' : 'false' }}">
+                    <i class="link-icon" data-lucide="monitor"></i>
+                    <span class="link-title">{{ __('Système') }}</span>
+                    <i class="link-arrow" data-lucide="chevron-down"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('admin.health', 'admin.scheduler', 'admin.mail-log', 'admin.cache', 'admin.system-info', 'admin.data-retention') ? 'show' : '' }}" id="systemMenu" data-bs-parent="#sidebarNav">
+                    <ul class="nav sub-menu">
                         @can('view_health')
                         <li class="nav-item"><a href="{{ route('admin.health') }}" class="nav-link {{ request()->routeIs('admin.health') ? 'active' : '' }}">{{ __('Santé système') }}</a></li>
                         @endcan
@@ -394,14 +424,6 @@
                         @if(Route::has('admin.data-retention'))
                         @can('manage_system')
                         <li class="nav-item"><a href="{{ route('admin.data-retention') }}" class="nav-link {{ request()->routeIs('admin.data-retention') ? 'active' : '' }}">{{ __('Rétention données') }}</a></li>
-                        @endcan
-                        @endif
-                        @can('manage_notifications')
-                        <li class="nav-item"><a href="{{ route('admin.notifications.index') }}" class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">{{ __('Notifications') }}</a></li>
-                        @endcan
-                        @if(Route::has('admin.push-notifications.index'))
-                        @can('manage_notifications')
-                        <li class="nav-item"><a href="{{ route('admin.push-notifications.index') }}" class="nav-link {{ request()->routeIs('admin.push-notifications.*') ? 'active' : '' }}">{{ __('Push notifications') }}</a></li>
                         @endcan
                         @endif
                     </ul>
