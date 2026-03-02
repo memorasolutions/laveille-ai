@@ -27,8 +27,13 @@ class InlineEditController
             abort(404);
         }
 
-        $field = $request->input('field');
-        $value = $request->input('value');
+        $validated = $request->validate([
+            'field' => 'required|string',
+            'value' => 'present',
+        ]);
+
+        $field = $validated['field'];
+        $value = $validated['value'];
 
         if (! in_array($field, $this->allowedEntities[$entity]['fields'], true)) {
             abort(422, 'Champ non autorisé');

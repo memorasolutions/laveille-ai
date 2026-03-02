@@ -14,10 +14,7 @@
     {{-- Dark mode: must run synchronously before render to avoid flash --}}
     @vite('resources/js/nobleui/color-modes.js')
 
-    {{-- Fonts --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    {{-- Fonts: Roboto self-hosted via @fontsource in app.scss (RGPD compliant) --}}
 
     {{-- Favicon --}}
     @php

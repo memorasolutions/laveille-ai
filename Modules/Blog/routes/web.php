@@ -64,6 +64,6 @@ Route::prefix('blog')
             Route::get('/tag/{tag:slug}', [PublicTagController::class, 'show'])->name('tag');
             Route::get('/{article:slug}', [PublicArticleController::class, 'show'])->name('show');
         });
-        Route::post('/{article:slug}/comments', [CommentController::class, 'store'])->name('comments.store');
+        Route::post('/{article:slug}/comments', [CommentController::class, 'store'])->middleware('throttle:6,1')->name('comments.store');
         Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     });

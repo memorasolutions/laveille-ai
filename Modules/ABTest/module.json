@@ -1,0 +1,11 @@
+{
+    "name": "ABTest",
+    "alias": "abtest",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ABTest\\Providers\\ABTestServiceProvider"
+    ],
+    "files": []
+}

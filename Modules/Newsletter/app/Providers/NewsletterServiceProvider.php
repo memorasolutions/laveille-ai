@@ -17,6 +17,7 @@ class NewsletterServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->commands([\Modules\Newsletter\Console\DigestCommand::class]);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $sourcePath = __DIR__.'/../../resources/views';
         $theme = config('backoffice.theme', 'backend');

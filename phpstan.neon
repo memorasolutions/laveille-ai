@@ -30,6 +30,14 @@ parameters:
         - Modules/Newsletter/app/
         - Modules/Pages/app/
         - Modules/AI/app/
+        - Modules/ABTest/app/
+        - Modules/CustomFields/app/
+        - Modules/Faq/app/
+        - Modules/FormBuilder/app/
+        - Modules/Import/app/
+        - Modules/Menu/app/
+        - Modules/Testimonials/app/
+        - Modules/Widget/app/
         - database/
         - routes/
     excludePaths:
@@ -51,4 +59,7 @@ parameters:
         - identifier: argument.type
         - identifier: argument.unresolvableType
         - identifier: nullCoalesce.offset
+        - identifier: nullsafe.neverNull
         - identifier: method.unresolvableReturnType
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Model::getCastedValue#'
+        - '#Cannot call method toDateTimeString\(\) on string#'

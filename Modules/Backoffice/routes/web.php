@@ -73,6 +73,8 @@ Route::prefix('admin')
         Route::get('profile/tokens', [ApiTokenController::class, 'index'])->name('profile.tokens.index');
         Route::post('profile/tokens', [ApiTokenController::class, 'store'])->name('profile.tokens.store');
         Route::delete('profile/tokens/{id}', [ApiTokenController::class, 'destroy'])->name('profile.tokens.destroy');
+        Route::post('profile/sessions/{id}/revoke', [ProfileController::class, 'revokeSession'])->name('profile.sessions.revoke');
+        Route::post('profile/sessions/revoke-others', [ProfileController::class, 'revokeOtherSessions'])->name('profile.sessions.revoke-others');
 
         // ── Recherche globale (utilitaire, pas de permission spécifique) ──
         Route::get('search', [SearchController::class, 'index'])->name('search')->middleware('throttle:search');
@@ -220,6 +222,13 @@ Route::prefix('admin')
             Route::get('feature-flags', [FeatureFlagController::class, 'index'])->name('feature-flags.index');
             Route::post('feature-flags/{name}', [FeatureFlagController::class, 'toggle'])->name('feature-flags.toggle');
             Route::post('feature-flags/{name}/conditions', [FeatureFlagController::class, 'updateConditions'])->name('feature-flags.conditions');
+        });
+
+        // ── Tests A/B ──
+        Route::middleware('permission:manage_feature_flags')->group(function () {
+            Route::resource('experiments', \Modules\ABTest\Http\Controllers\ExperimentController::class)->except(['edit', 'update']);
+            Route::post('experiments/{experiment}/start', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'start'])->name('experiments.start');
+            Route::post('experiments/{experiment}/complete', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'complete'])->name('experiments.complete');
         });
 
         // ── Plugins & Modules (manage_roles car administration système) ──

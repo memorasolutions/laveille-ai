@@ -152,7 +152,7 @@
 @endpush
 
 @push('custom-scripts')
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script src="{{ asset('build/nobleui/plugins/sortablejs/Sortable.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     initSortable(document.getElementById('menu-items'));

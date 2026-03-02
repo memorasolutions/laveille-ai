@@ -6,6 +6,13 @@
 
 // Theme style for demo1 (Vertical Menu Layout)
 
+// Roboto font - self-hosted via @fontsource (RGPD compliant, no Google CDN)
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+@import '@fontsource/roboto/900.css';
+
 // Bootstrap functions
 @import "bootstrap/scss/functions";
 

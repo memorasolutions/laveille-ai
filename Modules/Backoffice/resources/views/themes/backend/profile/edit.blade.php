@@ -116,6 +116,96 @@
         </div>
     </div>
 
+    {{-- Sessions actives --}}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                <i data-lucide="monitor-smartphone" class="text-info icon-md"></i>
+                <h4 class="fw-bold mb-0">{{ __('Sessions actives') }}</h4>
+            </div>
+            <div class="card-body p-4">
+                @if($sessions->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('Appareil') }}</th>
+                                    <th>{{ __('Adresse IP') }}</th>
+                                    <th>{{ __('Dernière activité') }}</th>
+                                    <th class="text-end">{{ __('Action') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($sessions as $session)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i data-lucide="monitor" style="width:16px;height:16px;" class="text-muted"></i>
+                                                {{ $session->browser }} {{ __('sur') }} {{ $session->os }}
+                                            </div>
+                                        </td>
+                                        <td><code class="small">{{ $session->ip_address }}</code></td>
+                                        <td class="text-muted small">{{ $session->last_activity }}</td>
+                                        <td class="text-end">
+                                            @if($session->is_current)
+                                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 d-inline-flex align-items-center gap-1">
+                                                    <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
+                                                    {{ __('Session actuelle') }}
+                                                </span>
+                                            @else
+                                                <form method="POST" action="{{ route('admin.profile.sessions.revoke', $session->id) }}" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1">
+                                                        <i data-lucide="x-circle" style="width:14px;height:14px;"></i>
+                                                        {{ __('Révoquer') }}
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if($sessions->where('is_current', false)->count() > 0)
+                        <div class="card border border-danger border-opacity-25 mt-4 mb-0">
+                            <div class="card-body p-3">
+                                <h6 class="fw-semibold text-danger d-flex align-items-center gap-2 mb-2">
+                                    <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+                                    {{ __('Révoquer toutes les autres sessions') }}
+                                </h6>
+                                <p class="text-muted small mb-3">{{ __('Déconnectez tous les autres appareils. Confirmez avec votre mot de passe.') }}</p>
+                                <form method="POST" action="{{ route('admin.profile.sessions.revoke-others') }}">
+                                    @csrf
+                                    <div class="d-flex align-items-start gap-2 flex-wrap">
+                                        <div class="flex-grow-1" style="max-width:320px;">
+                                            <input type="password" name="current_password" required
+                                                   placeholder="{{ __('Votre mot de passe actuel') }}"
+                                                   class="form-control @error('current_password') is-invalid @enderror">
+                                            @error('current_password')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-1">
+                                            <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+                                            {{ __('Révoquer tout') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+                @else
+                    <div class="text-center py-5">
+                        <i data-lucide="monitor-smartphone" class="d-block mx-auto mb-2 text-muted" style="width:48px;height:48px;"></i>
+                        <p class="text-muted mb-0">{{ __('Aucune session active.') }}</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
     {{-- Double authentification (2FA) --}}
     <div class="col-12">
         <div class="card">

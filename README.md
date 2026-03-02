@@ -2,10 +2,10 @@
 
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
-![Tests](https://img.shields.io/badge/tests-2298_passed-brightgreen?style=flat)
+![Tests](https://img.shields.io/badge/tests-2423_passed-brightgreen?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
-Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (30 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2298+ tests, 0 échec).
+Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (34 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2423+ tests, 0 échec).
 
 ## Table des matières
 
@@ -64,15 +64,17 @@ Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/
 | Groupe | Modules |
 |--------|---------|
 | Fondation | `Core`, `Auth`, `RolesPermissions`, `Settings`, `Logging`, `Health`, `Storage` |
-| Contenu et médias | `Media`, `Blog`, `Newsletter`, `SEO`, `Editor`, `Pages`, `Faq`, `Menu`, `Testimonials` |
-| API et intégrations | `Api`, `Notifications`, `Webhooks` |
+| Contenu et médias | `Media`, `Blog`, `Newsletter`, `SEO`, `Editor`, `Pages`, `Faq`, `Menu`, `Testimonials`, `Widget` |
+| Formulaires et donnees | `FormBuilder`, `CustomFields`, `Import`, `Contact` |
+| API et integrations | `Api`, `Notifications`, `Webhooks` |
 | Backoffice | `Backoffice`, `SaaS`, `Tenancy`, `Backup`, `Translation`, `Export`, `Search` |
 | Frontend | `FrontTheme` |
 | Intelligence artificielle | `AI` |
+| Optimisation | `ABTest` |
 
 ## Fonctionnalités clés
 
-- Architecture modulaire (30 modules autonomes, nwidart/laravel-modules, plugin.json par module)
+- Architecture modulaire (33 modules autonomes, nwidart/laravel-modules, plugin.json par module)
 - Backoffice admin (thème Backend/NobleUI, Bootstrap 5.3.8, Lucide icons, dark mode)
 - Authentification complète : login/register Livewire, 2FA TOTP (Google Authenticator)
 - SaaS : plans, abonnements Stripe via Laravel Cashier, multi-tenant
@@ -144,7 +146,7 @@ php artisan test tests/Feature/Phase46Test.php
 php artisan test --filter "Auth"
 ```
 
-Suite actuelle : **2298+ tests, 0 échec**. PHPStan niveau 6. Pint 100%.
+Suite actuelle : **2407+ tests, 0 échec**. PHPStan niveau 6. Pint 100%.
 
 ## Sécurité
 
@@ -173,7 +175,8 @@ Suite actuelle : **2298+ tests, 0 échec**. PHPStan niveau 6. Pint 100%.
 | `php artisan app:check` | Validation pre-deploy (env, DB, PHPStan, tests, sécurité, config, storage). Flag `--quick` pour skip PHPStan/tests |
 | `php artisan app:make-module {Name}` | Scaffolder de module complet (16 fichiers : providers, routes, config, tests, plugin.json, module.json) |
 | `php artisan app:logs` | Tail des logs colorés avec filtrage par niveau. Flags `--level=error`, `--lines=50`, `--clear` |
-| `php artisan app:setup-hooks` | Installe le git pre-commit hook (Pint + PHPStan sur fichiers modifiés). Flag `--force` |
+| `php artisan app:setup-hooks` | Installe le git pre-commit hook (Pint + PHPStan sur fichiers modifies). Flag `--force` |
+| `php artisan app:docs` | Documentation technique auto-generee (modules, routes, permissions, commandes, config). Flags `--format=markdown`, `--output=FILE` |
 
 ### Commandes métier
 

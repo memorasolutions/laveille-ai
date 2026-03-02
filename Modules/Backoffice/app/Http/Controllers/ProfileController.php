@@ -9,11 +9,15 @@ declare(strict_types=1);
 
 namespace Modules\Backoffice\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Modules\Auth\Rules\PasswordHistoryRule;
+use Modules\Auth\Rules\PasswordNotCompromisedRule;
 use Modules\Auth\Rules\PasswordPolicyRule;
 use Modules\Auth\Services\TwoFactorService;
 
@@ -21,8 +25,26 @@ class ProfileController
 {
     public function edit(): View
     {
+        $sessions = DB::table('sessions')
+            ->where('user_id', auth()->id())
+            ->orderBy('last_activity', 'desc')
+            ->get()
+            ->map(function ($session) {
+                $parsed = $this->parseUserAgent($session->user_agent);
+
+                return (object) [
+                    'id' => $session->id,
+                    'ip_address' => $session->ip_address,
+                    'browser' => $parsed['browser'],
+                    'os' => $parsed['os'],
+                    'last_activity' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
+                    'is_current' => $session->id === session()->getId(),
+                ];
+            });
+
         return view('backoffice::profile.edit', [
             'user' => auth()->user(),
+            'sessions' => $sessions,
         ]);
     }
 
@@ -42,7 +64,7 @@ class ProfileController
     {
         $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', new PasswordPolicyRule],
+            'password' => ['required', 'confirmed', new PasswordPolicyRule, new PasswordNotCompromisedRule, new PasswordHistoryRule(auth()->id())],
         ]);
 
         auth()->user()->update([
@@ -86,5 +108,64 @@ class ProfileController
         session()->forget('auth.2fa_confirmed');
 
         return back()->with('success', 'Double authentification désactivée.');
+    }
+
+    public function revokeSession(string $id): RedirectResponse
+    {
+        DB::table('sessions')
+            ->where('id', $id)
+            ->where('user_id', auth()->id())
+            ->delete();
+
+        return back()->with('success', 'Session révoquée.');
+    }
+
+    public function revokeOtherSessions(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+        ]);
+
+        DB::table('sessions')
+            ->where('user_id', auth()->id())
+            ->where('id', '!=', session()->getId())
+            ->delete();
+
+        return back()->with('success', 'Toutes les autres sessions ont été révoquées.');
+    }
+
+    private function parseUserAgent(?string $ua): array
+    {
+        if (empty($ua)) {
+            return ['browser' => 'Inconnu', 'os' => 'Inconnu'];
+        }
+
+        $browser = 'Inconnu';
+        if (str_contains($ua, 'Edg') || str_contains($ua, 'Edge')) {
+            $browser = 'Edge';
+        } elseif (str_contains($ua, 'OPR') || str_contains($ua, 'Opera')) {
+            $browser = 'Opera';
+        } elseif (str_contains($ua, 'Chrome')) {
+            $browser = 'Chrome';
+        } elseif (str_contains($ua, 'Firefox')) {
+            $browser = 'Firefox';
+        } elseif (str_contains($ua, 'Safari')) {
+            $browser = 'Safari';
+        }
+
+        $os = 'Inconnu';
+        if (str_contains($ua, 'iPhone') || str_contains($ua, 'iPad')) {
+            $os = 'iOS';
+        } elseif (str_contains($ua, 'Android')) {
+            $os = 'Android';
+        } elseif (str_contains($ua, 'Windows')) {
+            $os = 'Windows';
+        } elseif (str_contains($ua, 'Mac')) {
+            $os = 'macOS';
+        } elseif (str_contains($ua, 'Linux')) {
+            $os = 'Linux';
+        }
+
+        return ['browser' => $browser, 'os' => $os];
     }
 }

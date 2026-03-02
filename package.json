@@ -1,18 +1,22 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
-    "author": "MEMORA solutions <info@memora.ca> (https://memora.solutions)",
+    "author": "",
     "type": "module",
     "scripts": {
         "build": "vite build",
         "dev": "vite"
     },
     "devDependencies": {
+        "@fontsource/inter": "^5.2.8",
+        "@fontsource/roboto": "^5.2.10",
         "@playwright/test": "^1.58.2",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0.0",
         "sass": "^1.97.3",
+        "sortablejs": "^1.15.7",
+        "tom-select": "^2.5.2",
         "vite": "^7.0.7",
         "vite-plugin-static-copy": "^3.2.0"
     },
@@ -60,6 +64,5 @@
         "test": "tests"
     },
     "keywords": [],
-    "author": "",
     "license": "ISC"
 }

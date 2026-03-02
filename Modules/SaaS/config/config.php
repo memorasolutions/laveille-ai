@@ -20,6 +20,16 @@ return [
 
     'trial_days' => (int) env('SAAS_TRIAL_DAYS', 14),
 
+    'rate_limits' => [
+        'default' => 60,       // Free / non-subscribed users
+        'subscribed' => 300,   // Subscribed users (fallback if price not mapped)
+        'plans' => [
+            // Map stripe_price_id => requests per minute
+            // Example: 'price_xxx_pro_monthly' => 300,
+            // Example: 'price_xxx_enterprise_monthly' => 1000,
+        ],
+    ],
+
     'plans' => [
         'free' => [
             'name' => 'Free',

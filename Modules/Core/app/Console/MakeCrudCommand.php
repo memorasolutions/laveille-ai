@@ -804,7 +804,7 @@ class {{MODEL}}Controller extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $data = {{MODEL}}::create($request->all());
+        $data = {{MODEL}}::create($request->validated());
         return (new {{MODEL}}Resource($data))->response()->setStatusCode(201);
     }
 
@@ -817,7 +817,7 @@ class {{MODEL}}Controller extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         ${{VAR}} = {{MODEL}}::findOrFail($id);
-        ${{VAR}}->update($request->all());
+        ${{VAR}}->update($request->validated());
         return (new {{MODEL}}Resource(${{VAR}}))->response();
     }
 

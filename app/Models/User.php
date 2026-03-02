@@ -85,6 +85,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail, UserInt
         'onboarding_step',
         'onboarding_completed_at',
         'notification_frequency',
+        'password_changed_at',
     ];
 
     /**
@@ -117,6 +118,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail, UserInt
             'locked_until' => 'datetime',
             'onboarding_step' => 'integer',
             'onboarding_completed_at' => 'datetime',
+            'password_changed_at' => 'datetime',
         ];
     }
 

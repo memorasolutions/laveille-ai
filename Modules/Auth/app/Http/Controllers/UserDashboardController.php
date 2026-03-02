@@ -106,30 +106,91 @@ class UserDashboardController extends Controller
         }
 
         $user = auth()->user();
+        $userId = $user->id;
+
+        // Log suppression avant déconnexion
+        activity()->performedOn($user)->log("Suppression de compte RGPD demandée par l'utilisateur {$user->email}");
 
         Auth::logout();
-        $user->tokens()->delete();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        // Anonymiser les données personnelles
+        $anonymized = 'utilisateur-supprime-'.$userId;
+
+        // Anonymiser les commentaires (user_id set null par FK, mais anonymiser guest_name/email aussi)
+        DB::table('blog_comments')
+            ->where('user_id', $userId)
+            ->update(['guest_name' => 'Utilisateur supprimé', 'guest_email' => null]);
+
+        // Supprimer sessions, tokens, login attempts, password histories
+        DB::table('sessions')->where('user_id', $userId)->delete();
+        DB::table('login_attempts')->where('user_id', $userId)->delete();
+        DB::table('password_histories')->where('user_id', $userId)->delete();
+        $user->tokens()->delete();
+
+        // Anonymiser le profil puis supprimer (cascade articles, AI, etc.)
+        $user->forceFill([
+            'name' => 'Utilisateur supprimé',
+            'email' => $anonymized.'@deleted.local',
+            'password' => '',
+            'phone' => null,
+            'bio' => null,
+            'avatar' => null,
+            'social_id' => null,
+            'social_provider' => null,
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'remember_token' => null,
+        ])->save();
+
         $user->delete();
 
-        return redirect('/')->with('success', 'Votre compte a été supprimé.');
+        return redirect('/')->with('success', 'Votre compte et vos données personnelles ont été supprimés.');
     }
 
     public function exportData(): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $user = auth()->user();
+        $userId = $user->id;
 
         $data = [
             'profile' => [
                 'name' => $user->name,
                 'email' => $user->email,
                 'bio' => $user->bio,
+                'phone' => $user->phone,
                 'avatar' => $user->avatar,
+                'email_verified_at' => $user->email_verified_at?->toDateTimeString(),
                 'created_at' => $user->created_at?->toDateTimeString(),
+                'password_changed_at' => $user->password_changed_at?->toDateTimeString(),
             ],
-            'articles' => Article::where('user_id', $user->id)
-                ->get(['id', 'title', 'status', 'created_at'])
+            'articles' => Article::where('user_id', $userId)
+                ->get(['title', 'slug', 'status', 'created_at', 'updated_at'])
+                ->toArray(),
+            'comments' => Comment::where('user_id', $userId)
+                ->get(['body', 'created_at'])
+                ->toArray(),
+            'sessions' => DB::table('sessions')
+                ->where('user_id', $userId)
+                ->get(['ip_address', 'user_agent', 'last_activity'])
+                ->map(fn ($s) => [
+                    'ip_address' => $s->ip_address,
+                    'user_agent' => $s->user_agent,
+                    'last_activity' => \Carbon\Carbon::createFromTimestamp($s->last_activity)->toDateTimeString(),
+                ])
+                ->toArray(),
+            'login_attempts' => DB::table('login_attempts')
+                ->where('user_id', $userId)
+                ->get(['ip_address', 'status', 'logged_in_at'])
+                ->toArray(),
+            'subscriptions' => DB::table('subscriptions')
+                ->where('user_id', $userId)
+                ->get(['type', 'stripe_status', 'created_at', 'ends_at'])
+                ->toArray(),
+            'ai_conversations' => DB::table('ai_conversations')
+                ->where('user_id', $userId)
+                ->get(['title', 'created_at'])
                 ->toArray(),
             'tokens' => $user->tokens()
                 ->get(['name', 'created_at', 'last_used_at'])

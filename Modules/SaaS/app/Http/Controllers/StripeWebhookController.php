@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierWebhookController;
 use Modules\SaaS\Notifications\PaymentFailedNotification;
+use Modules\SaaS\Notifications\PaymentSucceededNotification;
 use Modules\SaaS\Notifications\SubscriptionCancelledNotification;
 
 class StripeWebhookController extends CashierWebhookController
@@ -63,7 +64,16 @@ class StripeWebhookController extends CashierWebhookController
             'amount' => $payload['data']['object']['amount_paid'] ?? null,
         ]);
 
-        return parent::handleInvoicePaymentActionRequired($payload);
+        $stripeId = $payload['data']['object']['customer'] ?? null;
+        $invoiceId = $payload['data']['object']['id'] ?? 'unknown';
+        $amount = $payload['data']['object']['amount_paid'] ?? 0;
+
+        if ($stripeId) {
+            $user = User::where('stripe_id', $stripeId)->first();
+            $user?->notify(new PaymentSucceededNotification($invoiceId, (int) $amount));
+        }
+
+        return $this->successMethod();
     }
 
     protected function handleInvoicePaymentFailed(array $payload)

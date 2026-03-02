@@ -13,7 +13,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Modules\Auth\Rules\PasswordHistoryRule;
+use Modules\Auth\Rules\PasswordNotCompromisedRule;
+use Modules\Auth\Rules\PasswordPolicyRule;
 use Illuminate\View\View;
 
 class ForcePasswordChangeController extends Controller
@@ -26,7 +28,7 @@ class ForcePasswordChangeController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'password' => ['required', Password::defaults(), 'confirmed'],
+            'password' => ['required', 'confirmed', new PasswordPolicyRule, new PasswordNotCompromisedRule, new PasswordHistoryRule($request->user()->id)],
         ]);
 
         $request->user()->update([

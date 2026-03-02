@@ -9,6 +9,7 @@ export default defineConfig({
             input: [
                 'resources/sass/nobleui/app.scss',
                 'resources/css/nobleui-custom.css',
+                'resources/css/auth-guest.css',
                 'resources/js/app.js',
                 'resources/js/nobleui/template.js',
                 'resources/js/nobleui/color-modes.js',
@@ -32,6 +33,14 @@ export default defineConfig({
                 {
                     src: 'node_modules/flag-icons/flags/4x3',
                     dest: 'nobleui/plugins/flag-icons/flags',
+                },
+                {
+                    src: ['node_modules/tom-select/dist/js/tom-select.complete.min.js', 'node_modules/tom-select/dist/css/tom-select.bootstrap5.min.css'],
+                    dest: 'nobleui/plugins/tom-select',
+                },
+                {
+                    src: 'node_modules/sortablejs/Sortable.min.js',
+                    dest: 'nobleui/plugins/sortablejs',
                 },
             ],
         }),

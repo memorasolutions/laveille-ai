@@ -23,7 +23,7 @@ class UpdateUserRequest extends BaseFormRequest
         return [
             'name' => ['sometimes', ...$rules['name']],
             'email' => ['sometimes', ...$rules['email'], Rule::unique('users')->ignore($this->route('user'))],
-            'password' => ['sometimes', ...$this->passwordRules()],
+            'password' => ['sometimes', ...$this->passwordRules($this->route('user')?->id ?? $this->route('user'))],
             'roles' => $rules['roles'],
             'roles.*' => $rules['roles.*'],
         ];

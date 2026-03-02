@@ -93,6 +93,52 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
+  e2e:
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.event_name == 'pull_request'
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, pdo_sqlite, sqlite3, xml, ctype, json
+          coverage: none
+          tools: composer
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: npm ci
+      - run: npm run build
+      - run: cp .env.example .env
+      - run: php artisan key:generate
+      - run: php artisan migrate
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Seed E2E users
+        run: php tests/e2e/seed-e2e-users.php
+
+      - name: Start server
+        run: php artisan serve --port=8000 &
+
+      - name: Wait for server
+        run: sleep 3
+
+      - name: Run Playwright tests
+        run: npx playwright test tests/e2e/ --reporter=list
+        continue-on-error: true
+
   security:
     runs-on: ubuntu-latest
     steps:

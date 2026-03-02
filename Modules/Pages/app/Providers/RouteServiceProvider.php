@@ -9,29 +9,9 @@ declare(strict_types=1);
 
 namespace Modules\Pages\Providers;
 
-use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Route;
+use Modules\Core\Providers\BaseRouteServiceProvider;
 
-class RouteServiceProvider extends ServiceProvider
+class RouteServiceProvider extends BaseRouteServiceProvider
 {
-    protected string $moduleName = 'Pages';
-
-    protected string $moduleNamespace = 'Modules\\Pages\\Http\\Controllers';
-
-    public function boot(): void
-    {
-        parent::boot();
-    }
-
-    public function map(): void
-    {
-        $this->mapWebRoutes();
-    }
-
-    protected function mapWebRoutes(): void
-    {
-        Route::middleware('web')
-            ->namespace($this->moduleNamespace)
-            ->group(module_path($this->moduleName, '/routes/web.php'));
-    }
+    protected string $name = 'Pages';
 }

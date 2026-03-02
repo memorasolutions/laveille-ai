@@ -40,3 +40,6 @@ Schedule::command('app:block-suspicious-ips')->everyFiveMinutes();
 // Notification digests
 Schedule::command('notifications:send-digest --frequency=daily')->dailyAt('08:00');
 Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '08:00');
+
+// Newsletter digest (weekly, Monday 09:00)
+Schedule::command('newsletter:digest')->weeklyOn(1, '09:00');

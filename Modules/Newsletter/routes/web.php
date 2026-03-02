@@ -15,7 +15,7 @@ use Modules\Newsletter\Http\Controllers\Admin\NewsletterAdminController;
 use Modules\Newsletter\Http\Controllers\NewsletterController;
 
 Route::middleware('web')->group(function () {
-    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
     Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
     Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 });

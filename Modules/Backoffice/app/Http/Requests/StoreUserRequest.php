@@ -10,7 +10,8 @@ declare(strict_types=1);
 namespace Modules\Backoffice\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Password;
+use Modules\Auth\Rules\PasswordNotCompromisedRule;
+use Modules\Auth\Rules\PasswordPolicyRule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -24,7 +25,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users'],
-            'password' => ['nullable', Password::defaults(), 'confirmed'],
+            'password' => ['nullable', 'confirmed', new PasswordPolicyRule, new PasswordNotCompromisedRule],
             'phone' => ['nullable', 'string', 'max:20'],
             'must_change_password' => ['boolean'],
             'roles' => ['array'],

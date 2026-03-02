@@ -73,9 +73,21 @@ class AppServiceProvider extends ServiceProvider
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            return $request->user()
-                ? Limit::perMinute(120)->by($request->user()->id)
-                : Limit::perMinute(30)->by($request->ip());
+            if (! $request->user()) {
+                return Limit::perMinute(30)->by($request->ip());
+            }
+
+            $limit = (int) config('saas.rate_limits.default', 120);
+
+            if ($request->user()->subscribed('default')) {
+                $subscription = $request->user()->subscription('default');
+                $price = $subscription?->stripe_price;
+
+                $planLimits = config('saas.rate_limits.plans', []);
+                $limit = $planLimits[$price] ?? (int) config('saas.rate_limits.subscribed', 300);
+            }
+
+            return Limit::perMinute($limit)->by($request->user()->id);
         });
 
         RateLimiter::for('login', function (Request $request) {

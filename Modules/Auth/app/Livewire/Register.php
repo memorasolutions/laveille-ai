@@ -13,6 +13,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Modules\Auth\Rules\PasswordNotCompromisedRule;
 use Modules\Auth\Rules\PasswordPolicyRule;
 use Modules\Auth\Services\AuthService;
 
@@ -32,7 +33,7 @@ class Register extends Component
         $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'confirmed', new PasswordPolicyRule],
+            'password' => ['required', 'confirmed', new PasswordPolicyRule, new PasswordNotCompromisedRule],
         ]);
 
         $user = $authService->register([

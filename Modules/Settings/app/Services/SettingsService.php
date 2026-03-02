@@ -10,9 +10,10 @@ declare(strict_types=1);
 namespace Modules\Settings\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Contracts\SettingsReaderInterface;
 use Modules\Settings\Models\Setting;
 
-class SettingsService
+class SettingsService implements SettingsReaderInterface
 {
     public function get(string $key, mixed $default = null): mixed
     {

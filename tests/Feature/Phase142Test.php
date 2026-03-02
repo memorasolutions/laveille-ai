@@ -64,11 +64,11 @@ test('PUT profile/password with correct current_password updates password', func
 
     $this->putJson('/api/v1/profile/password', [
         'current_password' => 'oldpassword',
-        'password' => 'newpassword123',
-        'password_confirmation' => 'newpassword123',
+        'password' => 'NewPassword1!',
+        'password_confirmation' => 'NewPassword1!',
     ])->assertOk();
 
-    expect(Hash::check('newpassword123', $user->fresh()->password))->toBeTrue();
+    expect(Hash::check('NewPassword1!', $user->fresh()->password))->toBeTrue();
 });
 
 test('PUT profile/password with wrong current_password returns 422', function () {

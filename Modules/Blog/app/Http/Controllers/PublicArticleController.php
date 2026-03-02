@@ -41,7 +41,7 @@ class PublicArticleController extends Controller
             ->orderByDesc('articles_count')
             ->get();
 
-        $recentArticles = Article::published()->latest('published_at')->take(5)->get();
+        $recentArticles = Article::published()->with(['user', 'blogCategory'])->latest('published_at')->take(5)->get();
 
         $popularTags = Tag::whereHas('articles', fn ($q) => $q->published())
             ->withCount(['articles' => fn ($q) => $q->published()])
@@ -70,6 +70,7 @@ class PublicArticleController extends Controller
             ->get();
 
         $relatedArticles = Article::published()
+            ->with(['user', 'blogCategory'])
             ->where('id', '!=', $article->id)
             ->when($article->category_id, fn ($q) => $q->where('category_id', $article->category_id))
             ->latest('published_at')
@@ -77,6 +78,7 @@ class PublicArticleController extends Controller
             ->get();
 
         $recentArticles = Article::published()
+            ->with(['user', 'blogCategory'])
             ->where('id', '!=', $article->id)
             ->latest('published_at')
             ->take(5)

@@ -113,7 +113,7 @@ final class JsonLdService
 
         $json = json_encode(
             count($data) === 1 ? $data[0] : $data,
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP
         );
 
         return '<script type="application/ld+json">' . $json . '</script>';

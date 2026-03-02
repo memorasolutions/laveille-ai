@@ -1,4 +1,4 @@
-.PHONY: install dev test test-coverage lint lint-check analyse rector rector-fix seed migrate fresh cache cache-clear horizon telescope docker-up docker-down docker-build deploy ide-helper check check-quick logs
+.PHONY: install dev test test-coverage lint lint-check analyse rector rector-fix seed migrate fresh cache cache-clear horizon telescope docker-up docker-down docker-build deploy ide-helper check check-quick logs e2e setup-hooks
 
 install:
 	composer install
@@ -90,3 +90,9 @@ check-quick:
 
 logs:
 	php artisan app:logs
+
+e2e:
+	npx playwright test tests/e2e/
+
+setup-hooks:
+	php artisan app:setup-hooks

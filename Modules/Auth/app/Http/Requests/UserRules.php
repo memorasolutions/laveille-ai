@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Modules\Auth\Http\Requests;
 
+use Modules\Auth\Rules\PasswordHistoryRule;
+use Modules\Auth\Rules\PasswordNotCompromisedRule;
 use Modules\Auth\Rules\PasswordPolicyRule;
 
 trait UserRules
@@ -23,12 +25,19 @@ trait UserRules
         ];
     }
 
-    protected function passwordRules(): array
+    protected function passwordRules(?int $userId = null): array
     {
-        return [
+        $rules = [
             'string',
             'confirmed',
             new PasswordPolicyRule,
+            new PasswordNotCompromisedRule,
         ];
+
+        if ($userId !== null) {
+            $rules[] = new PasswordHistoryRule($userId);
+        }
+
+        return $rules;
     }
 }

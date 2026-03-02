@@ -1,0 +1,10 @@
+{
+    "name": "modules/abtest",
+    "autoload": {
+        "psr-4": {
+            "Modules\\ABTest\\": "app/",
+            "Modules\\ABTest\\Database\\": "database/",
+            "Modules\\ABTest\\Tests\\": "tests/"
+        }
+    }
+}

@@ -57,6 +57,8 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'security', 'key' => 'security.password_require_uppercase', 'value' => 'true', 'type' => 'boolean', 'description' => 'Exiger une majuscule dans le mot de passe'],
             ['group' => 'security', 'key' => 'security.password_require_number', 'value' => 'true', 'type' => 'boolean', 'description' => 'Exiger un chiffre dans le mot de passe'],
             ['group' => 'security', 'key' => 'security.password_require_special', 'value' => 'false', 'type' => 'boolean', 'description' => 'Exiger un caractère spécial dans le mot de passe'],
+            ['group' => 'security', 'key' => 'security.password_check_hibp', 'value' => 'false', 'type' => 'boolean', 'description' => 'Vérifier les mots de passe compromis via HaveIBeenPwned'],
+            ['group' => 'security', 'key' => 'security.password_history_count', 'value' => '5', 'type' => 'number', 'description' => 'Nombre de mots de passe antérieurs à conserver (anti-réutilisation)'],
             ['group' => 'security', 'key' => 'security.captcha_enabled', 'value' => 'false', 'type' => 'boolean', 'description' => 'Activer reCAPTCHA v3 sur les formulaires'],
             ['group' => 'security', 'key' => 'security.recaptcha_site_key', 'value' => '', 'type' => 'string', 'description' => 'Clé de site reCAPTCHA v3'],
             ['group' => 'security', 'key' => 'security.recaptcha_secret_key', 'value' => '', 'type' => 'string', 'description' => 'Clé secrète reCAPTCHA v3'],

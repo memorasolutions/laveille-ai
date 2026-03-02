@@ -76,7 +76,7 @@
 
 @push('custom-scripts')
 @if($faqs->count() > 1)
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script src="{{ asset('build/nobleui/plugins/sortablejs/Sortable.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const list = document.getElementById('faq-list');

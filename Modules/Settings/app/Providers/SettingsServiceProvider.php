@@ -17,6 +17,7 @@ use Modules\Settings\Facades\Settings;
 use Modules\Settings\Models\Setting;
 use Modules\Settings\Observers\SettingObserver;
 use Modules\Settings\Policies\SettingPolicy;
+use Modules\Core\Contracts\SettingsReaderInterface;
 use Modules\Settings\Services\SettingsService;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
@@ -85,6 +86,7 @@ class SettingsServiceProvider extends ServiceProvider
     {
         $this->app->register(RouteServiceProvider::class);
         $this->app->singleton(SettingsService::class);
+        $this->app->bind(SettingsReaderInterface::class, SettingsService::class);
         AliasLoader::getInstance()->alias('Settings', Settings::class);
     }
 

@@ -11,7 +11,9 @@ namespace Modules\Backoffice\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
+use Modules\Auth\Rules\PasswordHistoryRule;
+use Modules\Auth\Rules\PasswordNotCompromisedRule;
+use Modules\Auth\Rules\PasswordPolicyRule;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -25,7 +27,7 @@ class UpdateUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($this->route('user'))],
-            'password' => ['nullable', Password::defaults(), 'confirmed'],
+            'password' => ['nullable', 'confirmed', new PasswordPolicyRule, new PasswordNotCompromisedRule, new PasswordHistoryRule($this->route('user')?->id ?? $this->route('user'))],
             'phone' => ['nullable', 'string', 'max:20'],
             'must_change_password' => ['boolean'],
             'is_active' => ['boolean'],
