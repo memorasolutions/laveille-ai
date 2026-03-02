@@ -10,13 +10,15 @@ declare(strict_types=1);
 namespace Modules\SEO\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Modules\SEO\Database\Factories\UrlRedirectFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
 
 class UrlRedirect extends Model
 {
-    use BelongsToTenant;
+    use BelongsToTenant, HasFactory;
 
     protected $table = 'url_redirects';
 
@@ -75,5 +77,10 @@ class UrlRedirect extends Model
         }
 
         return null;
+    }
+
+    protected static function newFactory(): UrlRedirectFactory
+    {
+        return UrlRedirectFactory::new();
     }
 }

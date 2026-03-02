@@ -10,14 +10,16 @@ declare(strict_types=1);
 namespace Modules\FormBuilder\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Modules\FormBuilder\Database\Factories\FormFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Form extends Model
 {
-    use BelongsToTenant;
+    use BelongsToTenant, HasFactory;
 
     /** @var list<string> */
     protected $fillable = [
@@ -64,5 +66,10 @@ class Form extends Model
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('is_published', true);
+    }
+
+    protected static function newFactory(): FormFactory
+    {
+        return FormFactory::new();
     }
 }

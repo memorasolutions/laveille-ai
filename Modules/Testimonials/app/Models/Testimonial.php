@@ -10,12 +10,14 @@ declare(strict_types=1);
 namespace Modules\Testimonials\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Modules\Testimonials\Database\Factories\TestimonialFactory;
 
 class Testimonial extends Model
 {
-    use BelongsToTenant;
+    use BelongsToTenant, HasFactory;
 
     protected $table = 'testimonials';
 
@@ -55,5 +57,10 @@ class Testimonial extends Model
     public function safeContent(): string
     {
         return clean($this->content);
+    }
+
+    protected static function newFactory(): TestimonialFactory
+    {
+        return TestimonialFactory::new();
     }
 }

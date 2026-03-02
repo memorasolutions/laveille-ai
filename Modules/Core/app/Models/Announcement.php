@@ -10,13 +10,15 @@ declare(strict_types=1);
 namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Database\Factories\AnnouncementFactory;
 use Modules\Core\Traits\HasScheduledPublishing;
 use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Announcement extends Model
 {
-    use BelongsToTenant, HasScheduledPublishing;
+    use BelongsToTenant, HasFactory, HasScheduledPublishing;
 
     public const TYPES = ['feature', 'improvement', 'fix', 'announcement'];
 
@@ -76,5 +78,10 @@ class Announcement extends Model
             'fix' => 'bg-warning text-dark',
             default => 'bg-info',
         };
+    }
+
+    protected static function newFactory(): AnnouncementFactory
+    {
+        return AnnouncementFactory::new();
     }
 }

@@ -10,13 +10,15 @@ declare(strict_types=1);
 namespace Modules\Widget\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Modules\Widget\Database\Factories\WidgetFactory;
 
 class Widget extends Model
 {
-    use BelongsToTenant;
+    use BelongsToTenant, HasFactory;
 
     /** @var list<string> */
     public const ZONES = ['sidebar', 'footer', 'after_content'];
@@ -67,5 +69,10 @@ class Widget extends Model
     public function scopeForZone(Builder $query, string $zone): Builder
     {
         return $query->where('zone', $zone);
+    }
+
+    protected static function newFactory(): WidgetFactory
+    {
+        return WidgetFactory::new();
     }
 }

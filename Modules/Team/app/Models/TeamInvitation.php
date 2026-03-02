@@ -5,12 +5,15 @@
 namespace Modules\Team\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Modules\Team\Database\Factories\TeamInvitationFactory;
 
 class TeamInvitation extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'team_id',
         'email',
@@ -60,5 +63,10 @@ class TeamInvitation extends Model
     public function isPending(): bool
     {
         return ! $this->isExpired() && ! $this->isAccepted();
+    }
+
+    protected static function newFactory(): TeamInvitationFactory
+    {
+        return TeamInvitationFactory::new();
     }
 }

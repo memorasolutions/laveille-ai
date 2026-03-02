@@ -10,13 +10,16 @@ declare(strict_types=1);
 namespace Modules\Menu\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Modules\Menu\Database\Factories\MenuItemFactory;
 
 class MenuItem extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'menu_id',
         'parent_id',
@@ -84,5 +87,10 @@ class MenuItem extends Model
         }
 
         return request()->fullUrlIs(url($resolved) . '*');
+    }
+
+    protected static function newFactory(): MenuItemFactory
+    {
+        return MenuItemFactory::new();
     }
 }

@@ -9,11 +9,14 @@ declare(strict_types=1);
 
 namespace Modules\FormBuilder\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\FormBuilder\Database\Factories\FormFieldFactory;
 
 class FormField extends Model
 {
+    use HasFactory;
     /** @var list<string> */
     public const TYPES = [
         'text', 'email', 'textarea', 'select', 'checkbox',
@@ -43,5 +46,10 @@ class FormField extends Model
     public function form(): BelongsTo
     {
         return $this->belongsTo(Form::class);
+    }
+
+    protected static function newFactory(): FormFieldFactory
+    {
+        return FormFieldFactory::new();
     }
 }

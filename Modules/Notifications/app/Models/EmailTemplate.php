@@ -9,13 +9,15 @@ declare(strict_types=1);
 
 namespace Modules\Notifications\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Traits\HasRevisions;
+use Modules\Notifications\Database\Factories\EmailTemplateFactory;
 
 class EmailTemplate extends Model
 {
-    use HasRevisions;
+    use HasFactory, HasRevisions;
 
     /** @var list<string> */
     protected array $revisionable = ['name', 'subject', 'body_html', 'variables', 'json_content'];
@@ -56,5 +58,10 @@ class EmailTemplate extends Model
     public static function findBySlug(string $slug): ?self
     {
         return Cache::remember("email_template.{$slug}", 3600, fn () => static::active()->where('slug', $slug)->first());
+    }
+
+    protected static function newFactory(): EmailTemplateFactory
+    {
+        return EmailTemplateFactory::new();
     }
 }

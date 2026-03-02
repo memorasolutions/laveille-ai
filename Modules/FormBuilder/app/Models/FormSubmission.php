@@ -10,14 +10,16 @@ declare(strict_types=1);
 namespace Modules\FormBuilder\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Modules\FormBuilder\Database\Factories\FormSubmissionFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
 
 class FormSubmission extends Model
 {
-    use BelongsToTenant;
+    use BelongsToTenant, HasFactory;
 
     /** @var list<string> */
     protected $fillable = [
@@ -58,5 +60,10 @@ class FormSubmission extends Model
     public function isNew(): bool
     {
         return is_null($this->read_at);
+    }
+
+    protected static function newFactory(): FormSubmissionFactory
+    {
+        return FormSubmissionFactory::new();
     }
 }

@@ -10,13 +10,15 @@ declare(strict_types=1);
 namespace Modules\Faq\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Traits\HasScheduledPublishing;
+use Modules\Faq\Database\Factories\FaqFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Faq extends Model
 {
-    use BelongsToTenant, HasScheduledPublishing;
+    use BelongsToTenant, HasFactory, HasScheduledPublishing;
 
     protected string $publishedColumn = 'is_published';
 
@@ -49,5 +51,10 @@ class Faq extends Model
     public function safeAnswer(): string
     {
         return clean($this->answer);
+    }
+
+    protected static function newFactory(): FaqFactory
+    {
+        return FaqFactory::new();
     }
 }
