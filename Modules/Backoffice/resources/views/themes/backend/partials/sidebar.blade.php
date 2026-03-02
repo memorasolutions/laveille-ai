@@ -231,7 +231,7 @@
                         <li class="nav-item">
                             <a href="{{ route('admin.ai.agent.index') }}" class="nav-link {{ request()->routeIs('admin.ai.agent.*') ? 'active' : '' }}">
                                 {{ __('Agent dashboard') }}
-                                @php $waitingCount = \Modules\AI\Models\AiConversation::where('status', 'waiting_human')->count(); @endphp
+                                @php $waitingCount = class_exists(\Modules\AI\Models\AiConversation::class) ? \Modules\AI\Models\AiConversation::where('status', 'waiting_human')->count() : 0; @endphp
                                 @if($waitingCount > 0)
                                 <span class="badge bg-warning text-dark ms-1">{{ $waitingCount }}</span>
                                 @endif

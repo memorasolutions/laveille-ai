@@ -13,6 +13,7 @@
     @if($article->cover_image)
         <meta property="og:image" content="{{ Storage::url($article->cover_image) }}">
     @endif
+    @if(class_exists(\Modules\SEO\Services\JsonLdService::class))
     {!! \Modules\SEO\Services\JsonLdService::render(
         \Modules\SEO\Services\JsonLdService::article($article),
         \Modules\SEO\Services\JsonLdService::breadcrumbs([
@@ -21,6 +22,7 @@
             ['name' => $article->title],
         ])
     ) !!}
+    @endif
 @endsection
 
 @section('page_header')
@@ -34,6 +36,13 @@
 @endsection
 
 @section('blog_content')
+@if(!empty($isPreview))
+<div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#f59e0b;color:#000;text-align:center;padding:10px 16px;font-weight:600;font-size:14px;">
+    Apercu - Ce contenu n'est pas encore publie
+    <a href="{{ route('admin.blog.articles.edit', $article) }}" style="color:#000;text-decoration:underline;margin-left:16px;">Retour a l'edition</a>
+</div>
+<div style="height:44px;"></div>
+@endif
 <div class="cs_height_40 cs_height_lg_30"></div>
 <div class="container">
     <div class="row cs_gap_y_40">

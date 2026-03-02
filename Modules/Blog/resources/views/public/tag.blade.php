@@ -5,6 +5,7 @@
 
 @section('meta')
     <meta name="description" content="{{ $tag->description ?? 'Articles tagués ' . $tag->name }}">
+    @if(class_exists(\Modules\SEO\Services\JsonLdService::class))
     {!! \Modules\SEO\Services\JsonLdService::render(
         ['@type' => 'CollectionPage', 'name' => 'Tag : ' . $tag->name, 'url' => route('blog.tag', $tag), 'description' => $tag->description ?? ''],
         \Modules\SEO\Services\JsonLdService::breadcrumbs([
@@ -13,6 +14,7 @@
             ['name' => $tag->name],
         ])
     ) !!}
+    @endif
 @endsection
 
 @section('page_header')

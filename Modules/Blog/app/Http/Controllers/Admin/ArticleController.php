@@ -15,13 +15,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
-use Modules\AI\Services\AiService;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
 use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
 use Modules\Core\Shared\Traits\ParsesTags;
-use Modules\SEO\Models\MetaTag;
 
 class ArticleController extends Controller
 {
@@ -119,6 +117,20 @@ class ArticleController extends Controller
             ->with('success', 'Article supprimé.');
     }
 
+    public function preview(Article $article): View
+    {
+        $article->load(['blogCategory', 'user', 'tagsRelation']);
+
+        $comments = collect();
+        $relatedArticles = collect();
+        $recentArticles = collect();
+        $isPreview = true;
+
+        return view('blog::public.show', compact(
+            'article', 'comments', 'relatedArticles', 'recentArticles', 'isPreview'
+        ));
+    }
+
     public function publish(Article $article): RedirectResponse
     {
         $article->status->transitionTo(PublishedArticleState::class);
@@ -135,20 +147,28 @@ class ArticleController extends Controller
 
     public function regenerateSeo(Article $article): JsonResponse
     {
-        $service = app(AiService::class);
+        if (! class_exists(\Modules\AI\Services\AiService::class)) {
+            return response()->json(['success' => false, 'message' => __('Module IA non disponible')], 422);
+        }
+        $service = app(\Modules\AI\Services\AiService::class);
         $seoData = $service->generateSeoMeta($article->title, strip_tags($article->content));
 
-        MetaTag::updateOrCreate(
-            ['url_pattern' => '/blog/'.$article->slug],
-            array_merge($seoData, ['is_active' => true])
-        );
+        if (class_exists(\Modules\SEO\Models\MetaTag::class)) {
+            \Modules\SEO\Models\MetaTag::updateOrCreate(
+                ['url_pattern' => '/blog/'.$article->slug],
+                array_merge($seoData, ['is_active' => true])
+            );
+        }
 
         return response()->json(['success' => true, 'message' => __('SEO généré avec succès')]);
     }
 
     public function analyzeContent(Article $article): JsonResponse
     {
-        $service = app(AiService::class);
+        if (! class_exists(\Modules\AI\Services\AiService::class)) {
+            return response()->json(['success' => false, 'message' => __('Module IA non disponible')], 422);
+        }
+        $service = app(\Modules\AI\Services\AiService::class);
         $analysis = $service->analyzeContent($article->title, $article->content, app()->getLocale());
 
         return response()->json(['success' => true, 'message' => __('Analyse générée avec succès'), 'analysis' => $analysis]);
@@ -156,7 +176,10 @@ class ArticleController extends Controller
 
     public function regenerateSummary(Article $article): JsonResponse
     {
-        $service = app(AiService::class);
+        if (! class_exists(\Modules\AI\Services\AiService::class)) {
+            return response()->json(['success' => false, 'message' => __('Module IA non disponible')], 422);
+        }
+        $service = app(\Modules\AI\Services\AiService::class);
         $summary = $service->generateSummary($article->content, app()->getLocale());
 
         $article->setTranslation('excerpt', app()->getLocale(), $summary);
@@ -175,7 +198,10 @@ class ArticleController extends Controller
         $sourceLocale = $targetLocale === 'en' ? 'fr' : 'en';
 
         try {
-            $service = app(AiService::class);
+            if (! class_exists(\Modules\AI\Services\AiService::class)) {
+                return response()->json(['success' => false, 'message' => __('Module IA non disponible')], 422);
+            }
+            $service = app(\Modules\AI\Services\AiService::class);
 
             foreach (['title', 'content', 'excerpt'] as $field) {
                 $original = $article->getTranslation($field, $sourceLocale, false);

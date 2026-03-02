@@ -43,9 +43,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `app:audit` : audit complet du projet (sécurité, performances, qualité)
 - `make:crud {module} {model}` : générateur CRUD avec options `--fields=`, `--with-api`, `--force`
 
+**Polish CMS (P1-P8)**
+- Content versioning : trait `HasRevisions`, `ContentRevision` model, diff et restauration (max 50 par contenu)
+- Scheduled publishing : trait `HasScheduledPublishing`, champs `published_at`/`expired_at` sur Article, StaticPage, FAQ
+- URL redirections : modèle `UrlRedirect` dans SEO, exact + wildcard, compteur de hits, admin CRUD
+- Announcements/changelog : modèle `Announcement` dans Core, admin CRUD, page publique `/changelog`
+- Breadcrumbs dynamiques : `@yield('breadcrumbs')` dans admin layout, 14 vues enrichies
+- Media manager : métadonnées SEO (titre, alt_text, légende, description), dossiers, compression WebP (6 conversions), composant `<x-media::picture>`
+- Preview avant publication : aperçu articles et pages sans publier, bannière admin, bouton dans les formulaires d'édition
+
 ### Changed
-- Tests : 2463 → 2655+ tests (0 échec)
+- Tests : 2463 → 2734+ tests (0 échec)
 - Modules : 33 → 34 (ajout Team)
+- Permissions : 39 → 43
 - Feature flags enrichis dans `core:new-project` avec catégories de modules
 
 ## [1.0.0] - 2026-03-01

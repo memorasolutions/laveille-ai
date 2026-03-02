@@ -17,12 +17,15 @@
 - **PAS de Docker** - Docker et cPanel ne font pas bon menage
 - Toutes les configs (CI/CD, deploiement) doivent etre compatibles cPanel
 
-## Etat actuel (2026-03-02, apres chantiers 1-2-3 + polish P1-P7)
-- **2697+ test cases** - mode parallele obligatoire
+## Etat actuel (2026-03-02, CORE release-ready)
+- **2734 test cases** - mode parallele obligatoire
 - **PHPStan** : 0 erreurs niveau 6
-- **34 modules actifs**, 570+ routes, 95 migrations
+- **34 modules actifs**, 584 routes, 101 migrations, 47 permissions
 - **3 chantiers majeurs** : multi-tenant (65 tests), marketing automation (44 tests), API GraphQL (33 tests)
-- **Polish P1-P7** : content versioning, scheduled publishing, URL redirects, announcements, breadcrumbs
+- **Polish P1-P8** : content versioning, scheduled publishing, URL redirects, announcements, breadcrumbs, preview
+- **Media manager ameliore** (P5a/P5b/P5c) : metadonnees SEO, dossiers, WebP/compression
+- **Decouplage modules** : class_exists() wrappers dans 8 fichiers (AI/Blog/Newsletter/Import/Search/Sidebar)
+- **Audit release-readiness** : env, errors, indexes, queue, cache - tous OK
 - **API GraphQL** : Lighthouse v6, /graphql, schema complet (12 types, 9 queries, 7 mutations), securite prod
 - **0 CDN externe** dans les vues actives (polices @fontsource, libs npm local)
 - **1 theme backoffice** : backend (NobleUI Bootstrap 5.3.8 SCSS Vite) - wowdash/tabler supprimes
@@ -64,7 +67,11 @@
 - **P4 User impersonation** : deja existant (ImpersonationController + 7 tests Phase121Test)
 - **P6 Announcements/changelog** : Announcement model dans Core (HasScheduledPublishing + BelongsToTenant), admin CRUD, page publique /changelog (GoSass), typeLabel/typeBadgeClass/safeBody, sidebar dans Configuration, 14 tests
 - **P7 Breadcrumbs dynamiques** : @yield('breadcrumbs') dans admin layout, composant multi-level, 14 vues enrichies, 5 tests
-- **P5/P8** : reportes (media manager trop complexe, preview specifique par projet)
+- **P5a Metadonnees SEO medias** : title, alt_text, caption, description via Spatie custom_properties (0 migration), modal Livewire, badge ALT vert, alt_text auto-injecte dans TipTap setImage, API PATCH, 9 tests
+- **P5b Dossiers medias** : folder via custom_properties, filtre dropdown dynamique (DB-agnostic), badge dossier bleu, datalist autocompletion, 4 tests
+- **P5c Compression/WebP** : 6 conversions (3 standard + 3 WebP), .optimize() sur toutes, config media-library publiee, version_urls=true, composant Blade <x-media::picture> avec <picture>+fallback
+- **P5d Crop/focal point** : reporte (over-engineering pour CORE template)
+- **P8 Preview avant publication** : routes admin preview (Blog + Pages), methode preview() bypass published check, banniere jaune fixe, bouton Apercu dans 4 vues edit, 8 tests
 
 ## Session 2026-03-02 - Chantier 2 : Marketing automation
 - **5 migrations** : add_marketing_columns_to_email_templates, email_workflows, workflow_steps, workflow_enrollments, workflow_step_logs

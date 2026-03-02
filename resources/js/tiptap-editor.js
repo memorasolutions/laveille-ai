@@ -183,16 +183,16 @@ export function tiptapEditorComponent(config = {}) {
         },
 
         selectMedia(item) {
-            this.insertMediaImage(item.url)
+            this.insertMediaImage(item.url, item.alt_text || '')
         },
 
-        insertMediaImage(url) {
+        insertMediaImage(url, alt = '') {
             if (url && this.editor) {
                 // Use RAW (non-proxied) editor to avoid Alpine Proxy breaking
                 // ProseMirror's reference equality check (tr.doc === state.doc)
                 const rawEditor = this.$refs.editorContent?._tiptapEditor
                 if (rawEditor && !rawEditor.isDestroyed) {
-                    rawEditor.commands.setImage({ src: url })
+                    rawEditor.commands.setImage({ src: url, alt })
                 }
             }
             this.mediaPickerOpen = false

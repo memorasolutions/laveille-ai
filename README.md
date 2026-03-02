@@ -2,11 +2,11 @@
 
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
-![Tests](https://img.shields.io/badge/tests-2655_passed-brightgreen?style=flat)
+![Tests](https://img.shields.io/badge/tests-2734_passed-brightgreen?style=flat)
 ![Modules](https://img.shields.io/badge/modules-34-blueviolet?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
-Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (34 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2655+ tests, 0 échec).
+Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (34 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2734+ tests, 0 échec).
 
 ## Table des matières
 
@@ -84,7 +84,7 @@ Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/
 - Multi-tenant avancé : trait BelongsToTenant, 3 middlewares (identification, scope, isolation), domaines custom par tenant, admin centralisé
 - API REST v1 sécurisée : Sanctum, rate limiting, JSON resources
 - Blog : CRUD admin, commentaires (guest/user), RSS feed, Livewire SearchBar live
-- Médias : Spatie Media Library, upload et gestion de fichiers
+- Médias : Spatie Media Library, métadonnées SEO (titre, alt, légende), dossiers, compression WebP automatique, composant `<x-media::picture>`
 - Recherche : Laravel Scout full-text
 - Journalisation : Spatie Activity Log, toutes les actions tracées
 - Newsletter et marketing automation : campagnes, workflows drip, templates marketing, enrollments automatiques
@@ -99,7 +99,10 @@ Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/
 - Témoignages : CRUD admin, affichage frontend
 - Homepage configurable : page d'accueil = landing ou page statique (via admin)
 - Module IA : chatbot, générateur d'articles, modération, suggestions SEO, traduction automatique (OpenRouter)
-- Pages statiques : CRUD admin, éditeur TipTap
+- Pages statiques : CRUD admin, éditeur TipTap, preview avant publication
+- Content versioning : révisions avec diff et restauration (trait HasRevisions)
+- Scheduled publishing : publication et expiration programmées (published_at, expired_at)
+- URL redirections : 301/302 avec compteur de hits, exact et wildcard
 - PWA : service worker, manifest, notifications push
 - Feature flags : Laravel Pennant avec conditions avancées
 - Cookie consent : bannière RGPD, catégories configurables
@@ -174,7 +177,7 @@ php artisan test tests/Feature/Phase46Test.php
 php artisan test --filter "Auth"
 ```
 
-Suite actuelle : **2655+ tests, 0 échec**. PHPStan niveau 6, 0 erreurs. Pint 100%.
+Suite actuelle : **2734+ tests, 0 échec**. PHPStan niveau 6, 0 erreurs. Pint 100%.
 
 ## Sécurité
 
@@ -190,7 +193,7 @@ Suite actuelle : **2655+ tests, 0 échec**. PHPStan niveau 6, 0 erreurs. Pint 10
 - HTTPS forcé en production (`URL::forceScheme('https')`)
 - Sanctum : token API révocable par session
 - Policies et Gates : contrôle d'accès granulaire par ressource
-- RBAC : 39 permissions, 4 rôles (super_admin, admin, editor, user), sidebar @can directives
+- RBAC : 47 permissions, 4 rôles (super_admin, admin, editor, user), sidebar @can directives
 - Password policy : complexité, HIBP breach check (k-Anonymity), historique anti-réutilisation
 - Session management : voir et révoquer les sessions actives depuis le profil admin
 - RGPD : export données personnelles (7 tables), suppression compte avec anonymisation, polices self-hosted (0 CDN externe)

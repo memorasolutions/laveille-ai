@@ -27,6 +27,7 @@ Route::prefix('admin/blog')
     ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
     ->group(function () {
         Route::resource('articles', ArticleController::class);
+        Route::get('articles/{article}/preview', [ArticleController::class, 'preview'])->name('articles.preview');
         Route::post('articles/{article}/publish', [ArticleController::class, 'publish'])->name('articles.publish');
         Route::post('articles/{article}/unpublish', [ArticleController::class, 'unpublish'])->name('articles.unpublish');
         Route::post('articles/{article}/regenerate-seo', [ArticleController::class, 'regenerateSeo'])->name('articles.regenerate-seo');

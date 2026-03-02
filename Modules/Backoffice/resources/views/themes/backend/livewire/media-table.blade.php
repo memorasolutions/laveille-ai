@@ -69,6 +69,12 @@
             <option value="document">Documents</option>
             <option value="video">Vidéos</option>
         </select>
+        <select wire:model.live="filterFolder" class="form-select form-select-sm w-auto" aria-label="Filtrer par dossier">
+            <option value="">Tous les dossiers</option>
+            @foreach($folders as $folder)
+                <option value="{{ $folder }}">{{ $folder }}</option>
+            @endforeach
+        </select>
         <div class="input-group input-group-sm w-auto">
             <span class="input-group-text bg-white border-end-0">
                 <i data-lucide="search" class="icon-sm text-muted"></i>
@@ -78,7 +84,7 @@
                    placeholder="Rechercher un fichier..."
                    aria-label="Rechercher">
         </div>
-        @if($search !== '' || $filterType !== '')
+        @if($search !== '' || $filterType !== '' || $filterFolder !== '')
             <button wire:click="resetFilters"
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
                 <i data-lucide="refresh-cw" class="icon-sm"></i> Réinitialiser
@@ -142,6 +148,14 @@
                                class="text-primary fw-medium small">
                                 {{ $item->file_name }}
                             </a>
+                            @if($item->getCustomProperty('alt_text'))
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 ms-1" title="Alt: {{ $item->getCustomProperty('alt_text') }}">ALT</span>
+                            @endif
+                            @if($item->getCustomProperty('folder'))
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 ms-1">
+                                    <i data-lucide="folder" class="icon-sm me-1" style="width:12px;height:12px;"></i>{{ $item->getCustomProperty('folder') }}
+                                </span>
+                            @endif
                         </td>
                         <td>
                             <span class="badge bg-light text-muted border fw-medium">
@@ -167,6 +181,10 @@
                                 <div x-show="open" x-cloak
                                      class="dropdown-menu show position-absolute end-0 mt-1 shadow"
                                      style="z-index:50;min-width:140px;">
+                                    <button wire:click="editMedia({{ $item->id }})"
+                                            class="dropdown-item d-flex align-items-center gap-2">
+                                        <i data-lucide="pencil" class="icon-sm"></i> Métadonnées
+                                    </button>
                                     <button wire:click="deleteMedia({{ $item->id }})"
                                             wire:confirm="Supprimer ce fichier définitivement ?"
                                             class="dropdown-item d-flex align-items-center gap-2 text-danger">
@@ -190,5 +208,54 @@
 
     @if($media->hasPages())
         <div class="mt-3">{{ $media->links() }}</div>
+    @endif
+
+    {{-- Modal édition métadonnées --}}
+    @if($editingMediaId)
+        <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="z-index:1050;background:rgba(0,0,0,.5);">
+            <div class="card shadow-lg" style="width:100%;max-width:520px;">
+                <div class="card-header d-flex align-items-center justify-content-between py-3">
+                    <h6 class="mb-0 fw-semibold">Modifier les métadonnées</h6>
+                    <button type="button" wire:click="cancelEdit" class="btn-close btn-close-sm" aria-label="Fermer"></button>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="editTitle">Titre</label>
+                        <input type="text" id="editTitle" class="form-control" wire:model="editTitle" placeholder="Titre du média">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editAltText">Texte alternatif</label>
+                        <input type="text" id="editAltText" class="form-control" wire:model="editAltText" placeholder="Description de l'image">
+                        <div class="form-text">Décrit l'image pour l'accessibilité et le SEO.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editCaption">Légende</label>
+                        <input type="text" id="editCaption" class="form-control" wire:model="editCaption" placeholder="Légende visible sous l'image">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editFolder">Dossier</label>
+                        <input type="text" id="editFolder" class="form-control" wire:model="editFolder" placeholder="Ex: Photos, Logos, Documents..." list="folderSuggestions">
+                        <datalist id="folderSuggestions">
+                            @foreach($folders as $folder)
+                                <option value="{{ $folder }}">
+                            @endforeach
+                        </datalist>
+                        <div class="form-text">Classez vos médias par dossier pour mieux les organiser.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editDescription">Description</label>
+                        <textarea id="editDescription" class="form-control" rows="3" wire:model="editDescription" placeholder="Description détaillée (usage interne)"></textarea>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-end gap-2 py-3">
+                    <button type="button" class="btn btn-sm btn-light" wire:click="cancelEdit" wire:loading.attr="disabled">Annuler</button>
+                    <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2" wire:click="updateMedia" wire:loading.attr="disabled">
+                        <span wire:loading wire:target="updateMedia"><span class="spinner-border spinner-border-sm" role="status"></span></span>
+                        <span wire:loading.remove wire:target="updateMedia"><i data-lucide="check" class="icon-sm"></i></span>
+                        Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 </div>

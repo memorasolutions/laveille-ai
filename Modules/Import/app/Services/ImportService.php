@@ -12,8 +12,6 @@ namespace Modules\Import\Services;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Modules\Blog\Models\Article;
-use Modules\Pages\Models\StaticPage;
 use OpenSpout\Reader\CSV\Options as CSVOptions;
 use OpenSpout\Reader\CSV\Reader as CSVReader;
 use OpenSpout\Reader\XLSX\Reader as XLSXReader;
@@ -147,11 +145,32 @@ class ImportService
     private function resolveModelClass(string $modelType): string
     {
         return match (strtolower($modelType)) {
-            'article' => Article::class,
-            'page' => StaticPage::class,
+            'article' => class_exists(\Modules\Blog\Models\Article::class)
+                ? \Modules\Blog\Models\Article::class
+                : throw new \InvalidArgumentException("Module Blog non disponible"),
+            'page' => class_exists(\Modules\Pages\Models\StaticPage::class)
+                ? \Modules\Pages\Models\StaticPage::class
+                : throw new \InvalidArgumentException("Module Pages non disponible"),
             'user' => User::class,
             default => throw new \InvalidArgumentException("Type de modèle inconnu : {$modelType}"),
         };
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getAvailableModelTypes(): array
+    {
+        $types = ['user' => 'Utilisateurs'];
+
+        if (class_exists(\Modules\Blog\Models\Article::class)) {
+            $types['article'] = 'Articles';
+        }
+        if (class_exists(\Modules\Pages\Models\StaticPage::class)) {
+            $types['page'] = 'Pages';
+        }
+
+        return $types;
     }
 
     /**

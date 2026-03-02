@@ -41,16 +41,39 @@ trait HasMediaAttachments
 
     public function registerMediaConversions(?Media $media = null): void
     {
+        // Standard conversions (original format, optimized)
         $this->addMediaConversion('thumbnail')
             ->nonQueued()
+            ->optimize()
             ->fit(Fit::Crop, 150, 150);
 
         $this->addMediaConversion('medium')
             ->nonQueued()
+            ->optimize()
             ->fit(Fit::Contain, 600, 600);
 
         $this->addMediaConversion('large')
             ->nonQueued()
+            ->optimize()
+            ->fit(Fit::Contain, 1200, 1200);
+
+        // WebP conversions (modern format, smaller files)
+        $this->addMediaConversion('thumbnail-webp')
+            ->nonQueued()
+            ->optimize()
+            ->format('webp')
+            ->fit(Fit::Crop, 150, 150);
+
+        $this->addMediaConversion('medium-webp')
+            ->nonQueued()
+            ->optimize()
+            ->format('webp')
+            ->fit(Fit::Contain, 600, 600);
+
+        $this->addMediaConversion('large-webp')
+            ->nonQueued()
+            ->optimize()
+            ->format('webp')
             ->fit(Fit::Contain, 1200, 1200);
     }
 }

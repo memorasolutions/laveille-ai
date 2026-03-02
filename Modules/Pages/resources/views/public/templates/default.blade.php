@@ -17,6 +17,13 @@
 @endsection
 
 @section('content')
+@if(!empty($isPreview))
+<div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#f59e0b;color:#000;text-align:center;padding:10px 16px;font-weight:600;font-size:14px;">
+    Apercu - Ce contenu n'est pas encore publie
+    <a href="{{ route('admin.pages.edit', $page) }}" style="color:#000;text-decoration:underline;margin-left:16px;">Retour a l'edition</a>
+</div>
+<div style="height:44px;"></div>
+@endif
 <div class="cs_height_58 cs_height_lg_40"></div>
 <div class="container">
     <nav aria-label="breadcrumb" class="mb-4">

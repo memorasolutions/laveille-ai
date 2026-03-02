@@ -32,7 +32,12 @@
     </div>
 @endif
 
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-end gap-2 mb-3">
+    <a href="{{ route('admin.blog.articles.preview', $article) }}" target="_blank"
+       class="btn btn-outline-info d-flex align-items-center gap-2">
+        <i data-lucide="eye"></i>
+        {{ __('Apercu') }}
+    </a>
     <a href="{{ route('admin.blog.articles.revisions', $article) }}"
        class="btn btn-outline-secondary d-flex align-items-center gap-2">
         <i data-lucide="history"></i>

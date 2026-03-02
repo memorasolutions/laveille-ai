@@ -10,6 +10,14 @@
     </div>
 @endif
 
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ route('admin.pages.preview', $page) }}" target="_blank"
+       class="btn btn-sm btn-outline-info rounded-2 d-flex align-items-center gap-2">
+        <i data-lucide="eye"></i>
+        {{ __('Apercu') }}
+    </a>
+</div>
+
 <form action="{{ route('admin.pages.update', $page->slug) }}" method="POST">
     @csrf
     @method('PUT')

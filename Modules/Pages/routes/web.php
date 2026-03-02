@@ -20,6 +20,7 @@ Route::prefix('admin/pages')
         Route::get('/', [StaticPageController::class, 'index'])->name('index');
         Route::get('/create', [StaticPageController::class, 'create'])->name('create');
         Route::post('/', [StaticPageController::class, 'store'])->name('store');
+        Route::get('/{page}/preview', [StaticPageController::class, 'preview'])->name('preview');
         Route::get('/{page}/edit', [StaticPageController::class, 'edit'])->name('edit');
         Route::put('/{page}', [StaticPageController::class, 'update'])->name('update');
         Route::delete('/{page}', [StaticPageController::class, 'destroy'])->name('destroy');

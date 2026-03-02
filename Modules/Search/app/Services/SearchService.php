@@ -11,10 +11,6 @@ namespace Modules\Search\Services;
 
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Modules\Blog\Models\Article;
-use Modules\Blog\Models\Category;
-use Modules\Pages\Models\StaticPage;
-use Modules\SaaS\Models\Plan;
 use Modules\Settings\Models\Setting;
 
 class SearchService
@@ -50,26 +46,26 @@ class SearchService
             $results['users'] = User::search($query)->take($limit)->get();
         }
 
-        if ($type === 'all' || $type === 'articles') {
-            $results['articles'] = Article::search($query)
+        if (($type === 'all' || $type === 'articles') && class_exists(\Modules\Blog\Models\Article::class)) {
+            $results['articles'] = \Modules\Blog\Models\Article::search($query)
                 ->query(fn ($q) => $q->where('status', 'published'))
                 ->take($limit)
                 ->get();
         }
 
-        if ($type === 'all' || $type === 'pages') {
-            $results['pages'] = StaticPage::search($query)->take($limit)->get();
+        if (($type === 'all' || $type === 'pages') && class_exists(\Modules\Pages\Models\StaticPage::class)) {
+            $results['pages'] = \Modules\Pages\Models\StaticPage::search($query)->take($limit)->get();
         }
 
-        if ($type === 'all' || $type === 'plans') {
-            $results['plans'] = Plan::search($query)
+        if (($type === 'all' || $type === 'plans') && class_exists(\Modules\SaaS\Models\Plan::class)) {
+            $results['plans'] = \Modules\SaaS\Models\Plan::search($query)
                 ->query(fn ($q) => $q->where('is_active', true))
                 ->take($limit)
                 ->get();
         }
 
-        if ($type === 'all' || $type === 'categories') {
-            $results['categories'] = Category::search($query)->take($limit)->get();
+        if (($type === 'all' || $type === 'categories') && class_exists(\Modules\Blog\Models\Category::class)) {
+            $results['categories'] = \Modules\Blog\Models\Category::search($query)->take($limit)->get();
         }
 
         if ($type === 'all' || $type === 'settings') {
@@ -81,22 +77,33 @@ class SearchService
 
     public function searchNavbar(string $query, int $limit = 3): array
     {
-        return [
+        $results = [
             'users' => User::search($query)->take($limit)->get(),
-            'articles' => Article::search($query)->take($limit)->get(),
             'settings' => Setting::search($query)->take($limit)->get(),
         ];
+
+        if (class_exists(\Modules\Blog\Models\Article::class)) {
+            $results['articles'] = \Modules\Blog\Models\Article::search($query)->take($limit)->get();
+        } else {
+            $results['articles'] = collect();
+        }
+
+        return $results;
     }
 
     public function searchFront(string $query, int $perPage = 10): array
     {
-        $articles = Article::search($query)
-            ->query(fn ($q) => $q->where('status', 'published'))
-            ->paginate($perPage);
+        $articles = class_exists(\Modules\Blog\Models\Article::class)
+            ? \Modules\Blog\Models\Article::search($query)
+                ->query(fn ($q) => $q->where('status', 'published'))
+                ->paginate($perPage)
+            : new LengthAwarePaginator([], 0, $perPage);
 
-        $pages = StaticPage::search($query)
-            ->query(fn ($q) => $q->where('status', 'published'))
-            ->paginate($perPage);
+        $pages = class_exists(\Modules\Pages\Models\StaticPage::class)
+            ? \Modules\Pages\Models\StaticPage::search($query)
+                ->query(fn ($q) => $q->where('status', 'published'))
+                ->paginate($perPage)
+            : new LengthAwarePaginator([], 0, $perPage);
 
         return [
             'articles' => $articles,

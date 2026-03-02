@@ -48,6 +48,20 @@ class StaticPageController extends Controller
         return redirect()->route('admin.pages.index')->with('success', 'Page créée avec succès.');
     }
 
+    public function preview(StaticPage $page): View
+    {
+        $template = $page->template ?? 'default';
+        $viewName = "pages::public.templates.{$template}";
+
+        if (! view()->exists($viewName)) {
+            $viewName = 'pages::public.templates.default';
+        }
+
+        $isPreview = true;
+
+        return view($viewName, compact('page', 'isPreview'));
+    }
+
     public function edit(StaticPage $page): View
     {
         return view('pages::admin.pages.edit', compact('page'));

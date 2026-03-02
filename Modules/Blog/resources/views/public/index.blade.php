@@ -4,6 +4,7 @@
 @section('title', $currentCategory ? $currentCategory->name.' — Blog' : 'Blog')
 
 @section('meta')
+    @if(class_exists(\Modules\SEO\Services\JsonLdService::class))
     {!! \Modules\SEO\Services\JsonLdService::render(
         ['@type' => 'CollectionPage', 'name' => 'Blog', 'url' => route('blog.index'), 'description' => 'Articles, tutoriels et actualités.'],
         \Modules\SEO\Services\JsonLdService::breadcrumbs([
@@ -11,6 +12,7 @@
             ['name' => 'Blog'],
         ])
     ) !!}
+    @endif
 @endsection
 
 @section('page_header')

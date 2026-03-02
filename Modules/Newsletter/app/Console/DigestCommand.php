@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Modules\Newsletter\Console;
 
 use Illuminate\Console\Command;
-use Modules\Blog\Models\Article;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Notifications\DigestNotification;
 use Modules\Settings\Models\Setting;
@@ -29,7 +28,13 @@ class DigestCommand extends Command
             return self::SUCCESS;
         }
 
-        $articles = Article::published()
+        if (! class_exists(\Modules\Blog\Models\Article::class)) {
+            $this->components->info('Blog module is not installed. Digest requires articles.');
+
+            return self::SUCCESS;
+        }
+
+        $articles = \Modules\Blog\Models\Article::published()
             ->where('published_at', '>=', now()->subDays(7))
             ->latest('published_at')
             ->get();

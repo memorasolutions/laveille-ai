@@ -9,14 +9,14 @@ declare(strict_types=1);
 
 return [
     'name' => 'Search',
-    'models' => [
+    'models' => array_values(array_filter([
         \App\Models\User::class,
-        \Modules\Blog\Models\Article::class,
-        \Modules\SaaS\Models\Plan::class,
-        \Modules\Blog\Models\Category::class,
-        \Modules\Pages\Models\StaticPage::class,
+        class_exists(\Modules\Blog\Models\Article::class) ? \Modules\Blog\Models\Article::class : null,
+        class_exists(\Modules\SaaS\Models\Plan::class) ? \Modules\SaaS\Models\Plan::class : null,
+        class_exists(\Modules\Blog\Models\Category::class) ? \Modules\Blog\Models\Category::class : null,
+        class_exists(\Modules\Pages\Models\StaticPage::class) ? \Modules\Pages\Models\StaticPage::class : null,
         \Modules\Settings\Models\Setting::class,
-    ],
+    ])),
 
     'types' => [
         'users' => ['label' => 'Utilisateurs', 'icon' => 'solar:users-group-two-rounded-outline'],

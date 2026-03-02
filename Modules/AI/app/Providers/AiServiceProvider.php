@@ -45,8 +45,12 @@ class AiServiceProvider extends ServiceProvider
         Livewire::component('ai-content-assistant', AiContentAssistant::class);
         Livewire::component('ai-seo-assistant', AiSeoAssistant::class);
 
-        Comment::observe(CommentModerationObserver::class);
-        Article::observe(ArticleSeoObserver::class);
+        if (class_exists(Comment::class)) {
+            Comment::observe(CommentModerationObserver::class);
+        }
+        if (class_exists(Article::class)) {
+            Article::observe(ArticleSeoObserver::class);
+        }
     }
 
     public function register(): void

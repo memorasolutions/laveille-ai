@@ -26,9 +26,24 @@ class MediaTable extends Component
     #[Url]
     public string $filterType = '';
 
+    #[Url]
+    public string $filterFolder = '';
+
     public string $sortBy = 'created_at';
 
     public string $sortDirection = 'desc';
+
+    public ?int $editingMediaId = null;
+
+    public string $editTitle = '';
+
+    public string $editAltText = '';
+
+    public string $editCaption = '';
+
+    public string $editDescription = '';
+
+    public string $editFolder = '';
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -67,7 +82,51 @@ class MediaTable extends Component
     {
         $this->search = '';
         $this->filterType = '';
+        $this->filterFolder = '';
         $this->resetPage();
+    }
+
+    public function editMedia(int $id): void
+    {
+        $media = Media::findOrFail($id);
+        $this->editingMediaId = $id;
+        $this->editTitle = $media->getCustomProperty('title', '');
+        $this->editAltText = $media->getCustomProperty('alt_text', '');
+        $this->editCaption = $media->getCustomProperty('caption', '');
+        $this->editDescription = $media->getCustomProperty('description', '');
+        $this->editFolder = $media->getCustomProperty('folder', '');
+    }
+
+    public function updateMedia(): void
+    {
+        $this->validate([
+            'editTitle' => 'nullable|string|max:255',
+            'editAltText' => 'nullable|string|max:255',
+            'editCaption' => 'nullable|string|max:500',
+            'editDescription' => 'nullable|string|max:1000',
+            'editFolder' => 'nullable|string|max:100',
+        ]);
+
+        $media = Media::findOrFail($this->editingMediaId);
+        $media->setCustomProperty('title', $this->editTitle);
+        $media->setCustomProperty('alt_text', $this->editAltText);
+        $media->setCustomProperty('caption', $this->editCaption);
+        $media->setCustomProperty('description', $this->editDescription);
+        $media->setCustomProperty('folder', $this->editFolder);
+        $media->save();
+
+        $this->dispatch('toast', type: 'success', message: 'Métadonnées mises à jour.');
+        $this->cancelEdit();
+    }
+
+    public function cancelEdit(): void
+    {
+        $this->editingMediaId = null;
+        $this->editTitle = '';
+        $this->editAltText = '';
+        $this->editCaption = '';
+        $this->editDescription = '';
+        $this->editFolder = '';
     }
 
     public function deleteMedia(int $id): void
@@ -102,8 +161,22 @@ class MediaTable extends Component
             $query->where('mime_type', 'like', 'video/%');
         }
 
+        if ($this->filterFolder !== '') {
+            $query->where('custom_properties->folder', $this->filterFolder);
+        }
+
         $media = $query->orderBy($this->sortBy, $this->sortDirection)->paginate(20);
 
-        return view('backoffice::livewire.media-table', compact('media'));
+        // Get distinct folders for the filter dropdown (DB-agnostic, works with SQLite + MySQL)
+        $folders = Media::query()
+            ->whereNotNull('custom_properties->folder')
+            ->pluck('custom_properties')
+            ->map(fn ($props) => is_array($props) ? ($props['folder'] ?? '') : (json_decode((string) $props, true)['folder'] ?? ''))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('backoffice::livewire.media-table', compact('media', 'folders'));
     }
 }

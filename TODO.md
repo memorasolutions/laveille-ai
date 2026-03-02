@@ -2,7 +2,7 @@
 
 **Derniere mise a jour** : 2026-03-02
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croise docs/code)
-**Metriques verifiees** : 2700+ test cases (0 fail), 34 modules, 585 routes, 95 migrations, PHPStan 0 erreurs niveau 6
+**Metriques verifiees** : 2734 test cases (0 fail), 34 modules, 585+ routes, 101 migrations, PHPStan 0 erreurs niveau 6
 
 ---
 
@@ -17,7 +17,7 @@
 - [x] CI/CD GitHub Actions (concurrency, npm audit, coverage-text)
 - [x] VS Code config (extensions.json + settings.json)
 - [x] Google Fonts local RGPD (GoogleFontService, 3 themes, 23 fichiers bunny.net nettoyes)
-- [x] RBAC fonctionnel (39 permissions actives, Gate::before, middleware route, policies, 4 roles)
+- [x] RBAC fonctionnel (47 permissions actives, Gate::before, middleware route, policies, 4 roles)
 - [x] Fix tests paralleles (race condition MakeModuleCommandTest)
 
 ## Completes - Remplacement WordPress
@@ -188,11 +188,15 @@ Le CORE est fonctionnellement complet. Les gaps identifies (observabilite, data 
 
 ### Taches restantes (par priorite)
 - [x] Fix test Phase161Test (toHaveCount 11 → 18)
-- [x] Mise a jour README.md badges et metriques (2662+ tests, 34 modules, GraphQL v2, marketing, multi-tenant)
+- [x] Mise a jour README.md badges et metriques (2734+ tests, 34 modules, GraphQL v2, marketing, multi-tenant)
 - [x] Mise a jour CHANGELOG.md avec chantiers 1-3 (multi-tenant, marketing, GraphQL) → v1.1.0
 - [x] Enrichir core:new-project avec categories de modules (Core/Business/Avance, 20 feature flags)
 - [x] 7 tests NewProjectCommand (constantes, defaults, scenarios)
+- [x] Decouplage inter-modules (class_exists() wrappers : 8 fichiers, AI/Blog/Newsletter/Import/Search/Sidebar)
+- [x] Audit release-readiness (env, errors, indexes, queue, cache - tous OK)
 - [ ] Migration Modules/ vers plugins/ - REPORTE indefiniment (valeur = 0)
+- [ ] Support Paddle/Lemon Squeezy - REPORTE (over-engineering, Stripe domine 80%+ marche SaaS)
+- [ ] Roadmap public avec votes - REPORTE (outils externes Canny/Productboard font mieux)
 
 ## Completes - Polish CMS (session 2026-03-02)
 
@@ -202,5 +206,7 @@ Le CORE est fonctionnellement complet. Les gaps identifies (observabilite, data 
 - [x] P6 : Announcements/changelog (Announcement model dans Core, admin CRUD, page publique /changelog, sidebar, 14 tests)
 - [x] P7 : Breadcrumbs dynamiques (@yield dans layout, composant multi-level, 14 vues enrichies, 5 tests)
 - [x] P4 : User impersonation - existait deja (ImpersonationController + 7 tests)
-- [ ] P5 : Media manager ameliore - REPORTE (trop complexe pour CORE template)
-- [ ] P8 : Preview live avant publication - REPORTE (specifique par projet)
+- [x] P5a : Metadonnees SEO medias (titre, alt_text, legende, description via custom_properties, modal Livewire, 9 tests)
+- [x] P5b : Dossiers medias (folder via custom_properties, filtre dropdown DB-agnostic, badge bleu, 4 tests)
+- [x] P5c : Compression WebP (6 conversions, optimize, composant picture, version_urls)
+- [x] P8 : Preview avant publication (routes admin, methode preview(), banniere jaune, bouton Apercu, 8 tests)

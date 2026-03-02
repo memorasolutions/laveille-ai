@@ -8,8 +8,6 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Modules\Blog\Models\Article;
-use Modules\Pages\Models\StaticPage;
 use Modules\SEO\Services\SeoService;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
@@ -44,23 +42,27 @@ Route::middleware('web')->group(function () {
                 ->setPriority(0.3)
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_YEARLY));
 
-        Article::published()->each(function (Article $article) use ($sitemap) {
-            $sitemap->add(
-                Url::create(route('blog.show', $article->slug))
-                    ->setLastModificationDate($article->updated_at)
-                    ->setPriority(0.7)
-                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
-            );
-        });
+        if (class_exists(\Modules\Blog\Models\Article::class)) {
+            \Modules\Blog\Models\Article::published()->each(function (\Modules\Blog\Models\Article $article) use ($sitemap) {
+                $sitemap->add(
+                    Url::create(route('blog.show', $article->slug))
+                        ->setLastModificationDate($article->updated_at)
+                        ->setPriority(0.7)
+                        ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                );
+            });
+        }
 
-        StaticPage::published()->each(function (StaticPage $page) use ($sitemap) {
-            $sitemap->add(
-                Url::create(route('pages.show', $page->slug))
-                    ->setLastModificationDate($page->updated_at)
-                    ->setPriority(0.8)
-                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
-            );
-        });
+        if (class_exists(\Modules\Pages\Models\StaticPage::class)) {
+            \Modules\Pages\Models\StaticPage::published()->each(function (\Modules\Pages\Models\StaticPage $page) use ($sitemap) {
+                $sitemap->add(
+                    Url::create(route('pages.show', $page->slug))
+                        ->setLastModificationDate($page->updated_at)
+                        ->setPriority(0.8)
+                        ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                );
+            });
+        }
 
         return $sitemap->toResponse(request());
     })->name('sitemap');

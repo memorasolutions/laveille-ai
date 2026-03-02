@@ -133,6 +133,7 @@ Route::prefix('admin')
         Route::middleware('permission:manage_media')->group(function () {
             Route::get('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'index'])->name('media-api.index');
             Route::post('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'store'])->name('media-api.store');
+            Route::patch('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'update'])->name('media-api.update');
             Route::delete('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'destroy'])->name('media-api.destroy');
         });
 
