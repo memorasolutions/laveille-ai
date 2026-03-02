@@ -196,6 +196,44 @@
             @endif
             @endcan
 
+            {{-- ===== INTELLIGENCE ARTIFICIELLE ===== --}}
+            @can('manage_ai')
+            <li class="nav-item nav-category">{{ __('Intelligence artificielle') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.ai.*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#aiMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.ai.*') ? 'true' : 'false' }}">
+                    <i class="link-icon" data-lucide="brain"></i>
+                    <span class="link-title">{{ __('IA') }}</span>
+                    <i class="link-arrow" data-lucide="chevron-down"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('admin.ai.*') ? 'show' : '' }}" id="aiMenu" data-bs-parent="#sidebarNav">
+                    <ul class="nav sub-menu">
+                        @if(Route::has('admin.ai.conversations.index'))
+                        <li class="nav-item">
+                            <a href="{{ route('admin.ai.conversations.index') }}" class="nav-link {{ request()->routeIs('admin.ai.conversations.*') ? 'active' : '' }}">{{ __('Conversations') }}</a>
+                        </li>
+                        @endif
+                        @if(Route::has('admin.ai.agent.index'))
+                        <li class="nav-item">
+                            <a href="{{ route('admin.ai.agent.index') }}" class="nav-link {{ request()->routeIs('admin.ai.agent.*') ? 'active' : '' }}">
+                                {{ __('Agent dashboard') }}
+                                @php $waitingCount = \Modules\AI\Models\AiConversation::where('status', 'waiting_human')->count(); @endphp
+                                @if($waitingCount > 0)
+                                <span class="badge bg-warning text-dark ms-1">{{ $waitingCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        @endif
+                        @if(Route::has('admin.ai.analytics'))
+                        <li class="nav-item">
+                            <a href="{{ route('admin.ai.analytics') }}" class="nav-link {{ request()->routeIs('admin.ai.analytics') ? 'active' : '' }}">{{ __('Analytics') }}</a>
+                        </li>
+                        @endif
+                    </ul>
+                </div>
+            </li>
+            @endcan
+
             {{-- ===== CONFIGURATION ===== --}}
             @canany(['manage_settings', 'manage_branding', 'manage_seo', 'manage_feature_flags', 'manage_translations', 'manage_system', 'manage_email_templates', 'manage_webhooks', 'manage_shortcodes', 'manage_cookies', 'manage_onboarding', 'manage_widgets', 'manage_settings'])
             <li class="nav-item nav-category">{{ __('Configuration') }}</li>

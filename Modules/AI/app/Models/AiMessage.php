@@ -24,6 +24,8 @@ class AiMessage extends Model
         'tokens',
         'model',
         'metadata',
+        'feedback',
+        'feedback_comment',
     ];
 
     protected function casts(): array

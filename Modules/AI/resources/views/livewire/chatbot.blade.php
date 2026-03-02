@@ -109,6 +109,16 @@
         @endif
     </div>
 
+    {{-- Human request button --}}
+    @auth
+    <div class="ai-chatbot-human-btn-wrap">
+        <button wire:click="requestHuman" type="button" class="ai-chatbot-human-btn" @if($isLoading) disabled @endif>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/></svg>
+            {{ __('Parler à un humain') }}
+        </button>
+    </div>
+    @endauth
+
     {{-- Input area --}}
     <form wire:submit="sendMessage" class="ai-chatbot-input-area">
         <label for="ai-chatbot-input" class="visually-hidden">{{ __('Votre message') }}</label>
@@ -278,6 +288,34 @@
 @keyframes ai-chatbot-bounce {
     0%, 60%, 100% { transform: translateY(0); }
     30% { transform: translateY(-6px); }
+}
+
+.ai-chatbot-msg-agent .ai-chatbot-msg-content {
+    background: #d4edda;
+    color: #155724;
+    border-bottom-left-radius: 4px;
+}
+.ai-chatbot-human-btn-wrap {
+    padding: 4px 12px;
+    text-align: center;
+    border-top: 1px solid #e5e7eb;
+}
+.ai-chatbot-human-btn {
+    background: none;
+    border: 1px solid #6c757d;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #6c757d;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+}
+.ai-chatbot-human-btn:hover {
+    background: #6c757d;
+    color: #fff;
 }
 
 .ai-chatbot-error {

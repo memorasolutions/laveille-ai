@@ -14,6 +14,7 @@ use Modules\AI\Enums\ConversationStatus;
 use Modules\AI\Enums\MessageRole;
 use Modules\AI\Models\AiConversation;
 use Modules\AI\Models\AiMessage;
+use Modules\AI\Events\HumanTakeoverRequested;
 use Modules\AI\Services\AiService;
 use Modules\Settings\Models\Setting;
 
@@ -100,6 +101,22 @@ class ChatBot extends Component
         }
 
         $this->isLoading = false;
+    }
+
+    public function requestHuman(): void
+    {
+        if (! auth()->check() || ! $this->conversationId) {
+            $this->error = __('Vous devez être connecté pour contacter un agent.');
+
+            return;
+        }
+
+        $conversation = AiConversation::find($this->conversationId);
+        if ($conversation && $conversation->status === ConversationStatus::AiActive) {
+            $conversation->update(['status' => ConversationStatus::WaitingHuman]);
+            event(new HumanTakeoverRequested($conversation));
+            $this->messages[] = ['role' => 'assistant', 'content' => __('Un agent humain va vous répondre sous peu.')];
+        }
     }
 
     public function clearConversation(): void

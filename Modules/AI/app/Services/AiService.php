@@ -17,8 +17,32 @@ class AiService
 {
     private const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+    public function checkBudget(): bool
+    {
+        $budget = (float) Setting::get('ai.monthly_budget', '0');
+
+        if ($budget <= 0) {
+            return true;
+        }
+
+        $monthStart = now()->startOfMonth();
+        $spent = \Modules\AI\Models\AiMessage::where('created_at', '>=', $monthStart)
+            ->whereNotNull('tokens')
+            ->sum('tokens');
+
+        $estimatedCost = $spent * 0.000002;
+
+        return $estimatedCost < $budget;
+    }
+
     public function chat(string $prompt, ?string $systemPrompt = null, ?string $model = null): string
     {
+        if (! $this->checkBudget()) {
+            Log::warning('AI Service: Monthly budget exceeded');
+
+            return '';
+        }
+
         $apiKey = Setting::get('ai.openrouter_api_key');
 
         if (! $apiKey) {
@@ -335,6 +359,99 @@ class AiService
             'structure_tips' => (array) $result['structure_tips'],
             'improvements' => (array) $result['improvements'],
         ];
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    public function streamChat(array $messages, ?string $model = null): \Generator
+    {
+        $apiKey = Setting::get('ai.openrouter_api_key');
+
+        if (! $apiKey) {
+            yield '';
+
+            return;
+        }
+
+        $model ??= $this->getModelForTask('chatbot');
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer '.$apiKey,
+                'HTTP-Referer' => config('app.url'),
+            ])
+                ->withOptions(['stream' => true, 'timeout' => 120])
+                ->post(self::API_URL, [
+                    'model' => $model,
+                    'messages' => $messages,
+                    'stream' => true,
+                    'temperature' => (float) Setting::get('ai.temperature', '0.7'),
+                ]);
+
+            /** @var \Psr\Http\Message\StreamInterface $body */
+            $body = $response->toPsrResponse()->getBody();
+
+            while (! $body->eof()) {
+                $line = '';
+                /** @phpstan-ignore booleanNot.alwaysTrue */
+                while (! $body->eof()) {
+                    $char = $body->read(1);
+                    if ($char === "\n") {
+                        break;
+                    }
+                    $line .= $char;
+                }
+
+                $line = trim($line);
+
+                if ($line === '' || ! str_starts_with($line, 'data: ')) {
+                    continue;
+                }
+
+                $data = substr($line, 6);
+
+                if ($data === '[DONE]') {
+                    break;
+                }
+
+                $parsed = json_decode($data, true);
+                $content = $parsed['choices'][0]['delta']['content'] ?? '';
+
+                if ($content !== '') {
+                    yield $content;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('AI Stream error: '.$e->getMessage());
+            yield '';
+        }
+    }
+
+    public function rewriteContent(string $content, string $style = 'professional', string $locale = 'fr'): string
+    {
+        if (empty(trim($content))) {
+            return $content;
+        }
+
+        $systemPrompt = "Rewrite the following content in a {$style} style. The output should be in {$locale} locale. Maintain the original meaning but adapt the tone and phrasing. Return ONLY the rewritten text, nothing else.";
+
+        $result = $this->chat($content, $systemPrompt, $this->getModelForTask('content'));
+
+        return ! empty($result) ? trim($result) : $content;
+    }
+
+    public function improveContent(string $content, string $locale = 'fr'): string
+    {
+        if (empty(trim($content))) {
+            return $content;
+        }
+
+        $systemPrompt = "Improve the following content for better grammar, clarity, and flow. Fix any grammatical errors, awkward phrasing, or unclear sentences. The output should be in {$locale} locale. Return ONLY the improved text, nothing else.";
+
+        $result = $this->chat($content, $systemPrompt, $this->getModelForTask('content'));
+
+        return ! empty($result) ? trim($result) : $content;
     }
 
     public function estimateCost(int $inputTokens, int $outputTokens, string $model): float

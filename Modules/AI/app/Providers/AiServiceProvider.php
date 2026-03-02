@@ -9,13 +9,17 @@ declare(strict_types=1);
 
 namespace Modules\AI\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\AI\Livewire\AiArticleGenerator;
+use Modules\AI\Livewire\AiContentAssistant;
+use Modules\AI\Livewire\AiSeoAssistant;
 use Modules\AI\Livewire\ChatBot;
 use Modules\AI\Observers\ArticleSeoObserver;
 use Modules\AI\Observers\CommentModerationObserver;
 use Modules\AI\Services\AiService;
+use Modules\AI\Services\RagService;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Comment;
 use Nwidart\Modules\Traits\PathNamespace;
@@ -33,10 +37,13 @@ class AiServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+        $this->registerRoutes();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
         Livewire::component('ai-chatbot', ChatBot::class);
         Livewire::component('ai-article-generator', AiArticleGenerator::class);
+        Livewire::component('ai-content-assistant', AiContentAssistant::class);
+        Livewire::component('ai-seo-assistant', AiSeoAssistant::class);
 
         Comment::observe(CommentModerationObserver::class);
         Article::observe(ArticleSeoObserver::class);
@@ -45,6 +52,7 @@ class AiServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(AiService::class);
+        $this->app->singleton(RagService::class);
     }
 
     public function registerTranslations(): void
@@ -76,6 +84,12 @@ class AiServiceProvider extends ServiceProvider
 
         $this->publishes([$sourcePath => $viewPath], ['views', $this->nameLower.'-module-views']);
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
+    }
+
+    protected function registerRoutes(): void
+    {
+        Route::middleware('web')->group(module_path($this->name, 'routes/web.php'));
+        Route::middleware('api')->prefix('api')->name('api.')->group(module_path($this->name, 'routes/api.php'));
     }
 
     public function provides(): array

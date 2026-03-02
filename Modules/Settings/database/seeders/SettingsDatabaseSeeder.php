@@ -104,6 +104,13 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'ai', 'key' => 'ai.chatbot_enabled', 'value' => 'false', 'type' => 'boolean', 'description' => 'Activer le chatbot sur le site'],
             ['group' => 'ai', 'key' => 'ai.translation_model', 'value' => 'meta-llama/llama-3.3-70b-instruct:free', 'type' => 'string', 'description' => 'Modèle OpenRouter utilisé pour la traduction automatique'],
             ['group' => 'ai', 'key' => 'ai.chatbot_system_prompt', 'value' => 'Tu es un assistant utile et professionnel.', 'type' => 'string', 'description' => 'Prompt système du chatbot'],
+            ['group' => 'ai', 'key' => 'ai.monthly_budget', 'value' => '0', 'type' => 'number', 'description' => 'Budget mensuel IA en $ (0 = illimité)'],
+            ['group' => 'ai', 'key' => 'ai.auto_moderation_enabled', 'value' => 'false', 'type' => 'boolean', 'description' => 'Activer la modération automatique des commentaires'],
+            ['group' => 'ai', 'key' => 'ai.seo_auto_generate', 'value' => 'false', 'type' => 'boolean', 'description' => 'Générer automatiquement les méta SEO des articles'],
+            ['group' => 'ai', 'key' => 'ai.auto_summary', 'value' => 'false', 'type' => 'boolean', 'description' => 'Générer automatiquement les résumés d\'articles'],
+            ['group' => 'ai', 'key' => 'ai.moderation_threshold', 'value' => '0.7', 'type' => 'number', 'description' => 'Seuil de confiance pour la modération automatique (0-1)'],
+            ['group' => 'ai', 'key' => 'ai.rag_enabled', 'value' => 'true', 'type' => 'boolean', 'description' => 'Activer le RAG (contexte FAQ/Pages/Articles) pour le chatbot'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_welcome_message', 'value' => 'Bonjour ! Comment puis-je vous aider ?', 'type' => 'string', 'description' => 'Message d\'accueil du chatbot'],
         ];
 
         foreach ($defaults as $setting) {
