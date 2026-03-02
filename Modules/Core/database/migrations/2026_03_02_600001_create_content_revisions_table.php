@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('content_revisions', function (Blueprint $table) {
             $table->id();
             $table->morphs('revisionable');
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->json('data');
             $table->integer('revision_number')->default(1);
             $table->string('summary')->nullable();

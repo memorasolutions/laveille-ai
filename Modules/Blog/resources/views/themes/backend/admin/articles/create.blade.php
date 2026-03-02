@@ -6,7 +6,7 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item">Blog</li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.articles.index') }}">Articles</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.blog.articles.index') }}">Articles</a></li>
         <li class="breadcrumb-item active" aria-current="page">Creer</li>
     </ol>
 </nav>

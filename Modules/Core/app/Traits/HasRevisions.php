@@ -37,7 +37,7 @@ trait HasRevisions
                 }
             }
 
-            if ($hasChanges) {
+            if ($hasChanges && auth()->check()) {
                 $model->snapshotRevision();
             }
         });

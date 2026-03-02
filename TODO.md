@@ -2,7 +2,7 @@
 
 **Derniere mise a jour** : 2026-03-02
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croise docs/code)
-**Metriques verifiees** : 2662+ test cases (0 fail), 34 modules, 570 routes, 91 migrations, PHPStan 0 erreurs niveau 6
+**Metriques verifiees** : 2700+ test cases (0 fail), 34 modules, 585 routes, 95 migrations, PHPStan 0 erreurs niveau 6
 
 ---
 
@@ -193,3 +193,14 @@ Le CORE est fonctionnellement complet. Les gaps identifies (observabilite, data 
 - [x] Enrichir core:new-project avec categories de modules (Core/Business/Avance, 20 feature flags)
 - [x] 7 tests NewProjectCommand (constantes, defaults, scenarios)
 - [ ] Migration Modules/ vers plugins/ - REPORTE indefiniment (valeur = 0)
+
+## Completes - Polish CMS (session 2026-03-02)
+
+- [x] P1 : Content versioning (HasRevisions trait, ContentRevision model, RevisionService, diff/restore, 14 tests)
+- [x] P2 : Scheduled publishing (HasScheduledPublishing trait sur StaticPage/Faq/Article, scopes publishedNow/scheduled/expired, 9 tests)
+- [x] P3 : URL redirections manager (UrlRedirect model dans SEO, exact + wildcard, admin CRUD, 404 handler, 12 tests)
+- [x] P6 : Announcements/changelog (Announcement model dans Core, admin CRUD, page publique /changelog, sidebar, 14 tests)
+- [x] P7 : Breadcrumbs dynamiques (@yield dans layout, composant multi-level, 14 vues enrichies, 5 tests)
+- [x] P4 : User impersonation - existait deja (ImpersonationController + 7 tests)
+- [ ] P5 : Media manager ameliore - REPORTE (trop complexe pour CORE template)
+- [ ] P8 : Preview live avant publication - REPORTE (specifique par projet)

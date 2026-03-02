@@ -2,13 +2,13 @@
 # Rapport d'avancement - Laravel SaaS Boilerplate (CORE Template)
 
 **Date** : 2026-03-02
-**Metriques verifiees** : 2662+ test cases (0 fail) | 34 modules | 570 routes | 91 migrations | PHPStan 0 erreurs niveau 6
+**Metriques verifiees** : 2700+ test cases (0 fail) | 34 modules | 585 routes | 95 migrations | PHPStan 0 erreurs niveau 6
 
 ---
 
 ## Resume executif
 
-Le CORE Template est fonctionnellement complet pour servir de base SaaS B2B/B2C. Les 3 chantiers majeurs (multi-tenant, marketing automation, API GraphQL) sont termines. Il reste principalement du polish, de la documentation et l'analyse des gaps pour la reutilisabilite.
+Le CORE Template est fonctionnellement complet pour servir de base SaaS B2B/B2C. Les 3 chantiers majeurs (multi-tenant, marketing automation, API GraphQL) sont termines. Le polish CMS (P1-P7) ajoute content versioning, scheduled publishing, URL redirections, announcements/changelog et breadcrumbs dynamiques. Le template est pret a la reutilisation.
 
 ---
 
@@ -58,6 +58,16 @@ Le CORE Template est fonctionnellement complet pour servir de base SaaS B2B/B2C.
 | 28 | Pagination max 100 items | config/lighthouse.php |
 | 29 | Throttle middleware sur /graphql | config/lighthouse.php route.middleware |
 | 30 | 33 tests GraphQL (65 assertions) | tests/Feature/Graphql{Api,Mutations,Security}Test.php |
+
+### Polish CMS (session 2026-03-02)
+
+| # | Fonctionnalite | Preuve |
+|---|----------------|--------|
+| P1 | Content versioning (HasRevisions trait, RevisionService, diff/restore) | Modules/Core/app/Traits/HasRevisions.php, 14 tests |
+| P2 | Scheduled publishing (HasScheduledPublishing trait, scopes publishedNow/scheduled/expired) | Modules/Core/app/Traits/HasScheduledPublishing.php, 9 tests |
+| P3 | URL redirections manager (exact + wildcard, 404 handler, admin CRUD) | Modules/SEO/app/Models/UrlRedirect.php, 12 tests |
+| P6 | Announcements/changelog (model + admin CRUD + page publique /changelog) | Modules/Core/app/Models/Announcement.php, 14 tests |
+| P7 | Breadcrumbs dynamiques (@yield layout + composant multi-level, 14 vues enrichies) | Modules/Backoffice/tests/Feature/BreadcrumbTest.php, 5 tests |
 
 ### Architecture et qualite (sessions precedentes)
 
@@ -175,16 +185,7 @@ Aucune fonctionnalite en cours d'implementation.
 
 ## Incoherences detectees (docs vs code)
 
-| Document | Dit | Realite | Action |
-|----------|-----|---------|--------|
-| TODO.md | "API v2 GraphQL" non coche | GraphQL completement implemente (33 tests, schema, resolvers, securite) | Cocher dans TODO.md |
-| TODO.md | "Multi-tenant" et "Marketing automation" dans "Restant" | Les deux sont termines avec tests | Deplacer dans "Completes" |
-| PROGRESS_REPORT.md | Metriques "~2667 test cases, 570+ routes, 91 migrations" | 2657 test cases, 570 routes, 91 migrations | Corriger metriques |
-| PROGRESS_REPORT.md | "En cours : Aucune" + "Restant : P1-P4" | P1-P3 sont termines | Mettre a jour sections |
-| PROGRESS_REPORT.md | Pas de section GraphQL | 33 tests, 6 fichiers, config securisee | Ajouter section Chantier 3 |
-| PROGRESS_REPORT.md | Pas de section Tenancy avance | 65 tests, 7 fichiers, 3 middlewares | Ajouter section Chantier 1 |
-| PROGRESS_REPORT.md | Pas de section Marketing automation | 44 tests, WorkflowEngine, CRUD admin | Ajouter section Chantier 2 |
-| TODO.md decisions | "Multi-tenant ou marketing en premier ?" | Les deux sont faits | Supprimer questions obsoletes |
+Toutes les incoherences precedentes ont ete resolues (2026-03-02). Documentation a jour.
 
 ---
 

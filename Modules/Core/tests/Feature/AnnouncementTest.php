@@ -72,7 +72,7 @@ test('safeBody strips XSS', function () {
 
 // ── Admin CRUD tests ──
 
-function adminUser(): User
+function announcementAdminUser(): User
 {
     $user = User::factory()->create();
     $user->assignRole('super_admin');
@@ -83,14 +83,14 @@ function adminUser(): User
 test('admin can list announcements', function () {
     Announcement::create(['title' => 'Test Annonce', 'body' => 'Body', 'type' => 'feature', 'is_published' => true]);
 
-    $this->actingAs(adminUser())
+    $this->actingAs(announcementAdminUser())
         ->get(route('admin.announcements.index'))
         ->assertOk()
         ->assertSee('Test Annonce');
 });
 
 test('admin can create announcement', function () {
-    $this->actingAs(adminUser())
+    $this->actingAs(announcementAdminUser())
         ->post(route('admin.announcements.store'), [
             'title' => 'New Announcement',
             'body' => 'Content here',
@@ -111,7 +111,7 @@ test('admin can create announcement', function () {
 test('admin can update announcement', function () {
     $a = Announcement::create(['title' => 'Old', 'body' => 'b', 'type' => 'fix', 'is_published' => false]);
 
-    $this->actingAs(adminUser())
+    $this->actingAs(announcementAdminUser())
         ->put(route('admin.announcements.update', $a), [
             'title' => 'Updated',
             'body' => 'new body',
@@ -129,7 +129,7 @@ test('admin can update announcement', function () {
 test('admin can delete announcement', function () {
     $a = Announcement::create(['title' => 'To Delete', 'body' => 'b', 'type' => 'fix', 'is_published' => false]);
 
-    $this->actingAs(adminUser())
+    $this->actingAs(announcementAdminUser())
         ->delete(route('admin.announcements.destroy', $a))
         ->assertRedirect(route('admin.announcements.index'));
 
@@ -137,7 +137,7 @@ test('admin can delete announcement', function () {
 });
 
 test('store validates required fields', function () {
-    $this->actingAs(adminUser())
+    $this->actingAs(announcementAdminUser())
         ->post(route('admin.announcements.store'), [])
         ->assertSessionHasErrors(['title', 'body', 'type']);
 });
@@ -145,7 +145,7 @@ test('store validates required fields', function () {
 test('unpublishing clears published_at', function () {
     $a = Announcement::create(['title' => 'Pub', 'body' => 'b', 'type' => 'fix', 'is_published' => true, 'published_at' => now()]);
 
-    $this->actingAs(adminUser())
+    $this->actingAs(announcementAdminUser())
         ->put(route('admin.announcements.update', $a), [
             'title' => 'Pub',
             'body' => 'b',
