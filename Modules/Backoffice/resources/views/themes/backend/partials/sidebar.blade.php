@@ -121,16 +121,16 @@
             @endcanany
 
             {{-- ===== UTILISATEURS ===== --}}
-            @canany(['manage_users', 'manage_roles', 'manage_newsletter', 'manage_campaigns', 'manage_contacts'])
+            @canany(['manage_users', 'manage_roles', 'manage_teams', 'manage_newsletter', 'manage_campaigns', 'manage_contacts'])
             <li class="nav-item nav-category">{{ __('Utilisateurs') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.teams.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#usersMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.teams.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="users"></i>
                     <span class="link-title">{{ __('Utilisateurs') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'show' : '' }}" id="usersMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.teams.*', 'admin.newsletter.*', 'admin.contact-messages.*') ? 'show' : '' }}" id="usersMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @can('manage_users')
                         <li class="nav-item">
@@ -142,6 +142,13 @@
                             <a href="{{ route('admin.roles.index') }}" class="nav-link {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">{{ __('Rôles') }}</a>
                         </li>
                         @endcan
+                        @if(Route::has('admin.teams.index'))
+                        @can('manage_teams')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.teams.index') }}" class="nav-link {{ request()->routeIs('admin.teams.*') ? 'active' : '' }}">{{ __('Équipes') }}</a>
+                        </li>
+                        @endcan
+                        @endif
                         @if(Route::has('admin.newsletter.index'))
                         @can('manage_newsletter')
                         <li class="nav-item">

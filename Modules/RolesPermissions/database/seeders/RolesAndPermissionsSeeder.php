@@ -58,6 +58,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_cookies',
             'manage_onboarding',
             'manage_trash',
+            'manage_teams',
             // Accès en lecture
             'view_admin_panel',
             'view_dashboard',

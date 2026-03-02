@@ -27,6 +27,7 @@
     "Search": true,
     "Settings": true,
     "Storage": true,
+    "Team": true,
     "Tenancy": true,
     "Testimonials": true,
     "Translation": true,

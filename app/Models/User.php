@@ -19,6 +19,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 use Modules\Auth\Observers\UserObserver;
 use Modules\Core\Contracts\UserInterface;
+use Modules\Team\Traits\HasTeams;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -30,7 +31,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements HasMedia, MustVerifyEmail, UserInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Billable, HasApiTokens, HasFactory, HasPushSubscriptions, HasRoles, InteractsWithMedia, LogsActivity, Notifiable, Searchable;
+    use Billable, HasApiTokens, HasFactory, HasPushSubscriptions, HasRoles, HasTeams, InteractsWithMedia, LogsActivity, Notifiable, Searchable;
 
     /**
      * @return array<string>
