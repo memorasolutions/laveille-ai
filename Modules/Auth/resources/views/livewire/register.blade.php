@@ -37,7 +37,7 @@
                 <div class="auth-input-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>
                 </div>
-                <input wire:model="password" x-model="pwd" type="password" id="register-password" class="auth-input" style="padding-inline-end:3rem;" placeholder="{{ __('Mot de passe') }}" required>
+                <input wire:model="password" x-model="pwd" type="password" id="register-password" autocomplete="new-password" class="auth-input" style="padding-inline-end:3rem;" placeholder="{{ __('Mot de passe') }}" required>
                 <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('register-password')" aria-label="{{ __('Afficher le mot de passe') }}">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
@@ -65,7 +65,7 @@
                 <div class="auth-input-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
-                <input wire:model="password_confirmation" type="password" id="register-password-confirm" class="auth-input" placeholder="{{ __('Confirmer le mot de passe') }}" required>
+                <input wire:model="password_confirmation" type="password" id="register-password-confirm" autocomplete="new-password" class="auth-input" placeholder="{{ __('Confirmer le mot de passe') }}" required>
             </div>
         </div>
 
