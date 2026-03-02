@@ -1,0 +1,258 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+type Query {
+    "List published articles with pagination."
+    articles: [Article!]! @paginate(
+        defaultCount: 10
+        scopes: ["published"]
+    ) @orderBy(column: "published_at", direction: DESC)
+
+    "Find a single published article by slug."
+    article(slug: String!): Article @field(resolver: "App\\GraphQL\\Queries\\FindBySlugQuery@article")
+
+    "List published static pages."
+    pages: [StaticPage!]! @all(scopes: ["published"]) @orderBy(column: "title", direction: ASC)
+
+    "Find a single published page by slug."
+    page(slug: String!): StaticPage @field(resolver: "App\\GraphQL\\Queries\\FindBySlugQuery@page")
+
+    "List published FAQs, optionally filtered by category."
+    faqs(category: String @eq): [Faq!]! @all(scopes: ["published"]) @orderBy(column: "order", direction: ASC)
+
+    "List active subscription plans."
+    plans: [Plan!]! @all(scopes: ["active"]) @orderBy(column: "sort_order", direction: ASC)
+
+    "List approved testimonials."
+    testimonials: [Testimonial!]! @all(scopes: ["approved"]) @orderBy(column: "order", direction: ASC)
+
+    "List active blog categories."
+    categories: [BlogCategory!]! @all(scopes: ["active"]) @orderBy(column: "name", direction: ASC)
+
+    "Get the currently authenticated user."
+    me: User @auth @guard
+
+    "List teams of the authenticated user."
+    myTeams: [Team!]! @guard @field(resolver: "App\\GraphQL\\Queries\\MyTeamsQuery")
+}
+
+# ============================================================
+# PUBLIC TYPES
+# ============================================================
+
+"A blog article."
+type Article @model(class: "Modules\\Blog\\Models\\Article") {
+    id: ID!
+    title: String!
+    slug: String!
+    content: String!
+    excerpt: String
+    featured_image: String
+    status: String!
+    published_at: DateTime
+    created_at: DateTime!
+    updated_at: DateTime!
+    user: User! @belongsTo
+    blogCategory: BlogCategory @belongsTo
+    tagsRelation: [Tag!]! @belongsToMany
+    comments: [Comment!]! @hasMany(scopes: ["approved"])
+}
+
+"A blog category."
+type BlogCategory @model(class: "Modules\\Blog\\Models\\Category") {
+    id: ID!
+    name: String!
+    slug: String!
+    description: String
+    color: String
+    is_active: Boolean!
+    articles: [Article!]! @hasMany(scopes: ["published"])
+}
+
+"A blog tag."
+type Tag @model(class: "Modules\\Blog\\Models\\Tag") {
+    id: ID!
+    name: String!
+    slug: String!
+    description: String
+    color: String
+    articles: [Article!]! @belongsToMany
+}
+
+"A comment on an article."
+type Comment @model(class: "Modules\\Blog\\Models\\Comment") {
+    id: ID!
+    content: String!
+    status: String!
+    guest_name: String
+    created_at: DateTime!
+    author: User @belongsTo
+    replies: [Comment!]! @hasMany
+}
+
+"A static page."
+type StaticPage @model(class: "Modules\\Pages\\Models\\StaticPage") {
+    id: ID!
+    title: String!
+    slug: String!
+    content: String!
+    excerpt: String
+    template: String
+    meta_title: String
+    meta_description: String
+    status: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+"A frequently asked question."
+type Faq @model(class: "Modules\\Faq\\Models\\Faq") {
+    id: ID!
+    question: String!
+    answer: String!
+    category: String
+    order: Int!
+    is_published: Boolean!
+}
+
+"A subscription plan."
+type Plan @model(class: "Modules\\SaaS\\Models\\Plan") {
+    id: ID!
+    name: String!
+    slug: String!
+    description: String
+    price: Float!
+    currency: String!
+    interval: String!
+    trial_days: Int
+    features: [String!]
+    is_active: Boolean!
+    sort_order: Int!
+}
+
+"A customer testimonial."
+type Testimonial @model(class: "Modules\\Testimonials\\Models\\Testimonial") {
+    id: ID!
+    author_name: String!
+    author_title: String
+    author_avatar: String
+    content: String!
+    rating: Int!
+    is_approved: Boolean!
+    order: Int!
+}
+
+# ============================================================
+# PRIVATE TYPES (require authentication)
+# ============================================================
+
+"A registered user."
+type User {
+    id: ID!
+    name: String!
+    email: String! @guard
+    avatar: String
+    bio: String
+    is_active: Boolean!
+    email_verified_at: DateTime @guard
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+"A team (organization)."
+type Team @model(class: "Modules\\Team\\Models\\Team") @guard {
+    id: ID!
+    name: String!
+    slug: String!
+    description: String
+    logo: String
+    owner: User! @belongsTo
+    members: [User!]! @belongsToMany
+}
+
+# ============================================================
+# MUTATIONS
+# ============================================================
+
+type Mutation {
+    "Update the authenticated user's profile."
+    updateProfile(input: UpdateProfileInput! @spread): User!
+        @guard
+        @field(resolver: "App\\GraphQL\\Mutations\\ProfileMutation@updateProfile")
+
+    "Create a new blog article."
+    createArticle(input: CreateArticleInput! @spread): Article!
+        @guard
+        @can(ability: "create", model: "Modules\\Blog\\Models\\Article")
+        @field(resolver: "App\\GraphQL\\Mutations\\ArticleMutations@createArticle")
+
+    "Update an existing blog article."
+    updateArticle(input: UpdateArticleInput! @spread): Article!
+        @guard
+        @can(ability: "update", find: "id", model: "Modules\\Blog\\Models\\Article")
+        @field(resolver: "App\\GraphQL\\Mutations\\ArticleMutations@updateArticle")
+
+    "Delete a blog article."
+    deleteArticle(id: ID! @rules(apply: ["required"])): Article
+        @guard
+        @field(resolver: "App\\GraphQL\\Mutations\\ArticleMutations@deleteArticle")
+
+    "Create a new static page."
+    createPage(input: CreatePageInput! @spread): StaticPage!
+        @guard
+        @can(ability: "manage_pages")
+        @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@createPage")
+
+    "Update an existing static page."
+    updatePage(input: UpdatePageInput! @spread): StaticPage!
+        @guard
+        @can(ability: "manage_pages")
+        @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@updatePage")
+
+    "Delete a static page."
+    deletePage(id: ID! @rules(apply: ["required"])): StaticPage
+        @guard
+        @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@deletePage")
+}
+
+# ============================================================
+# INPUT TYPES
+# ============================================================
+
+input UpdateProfileInput {
+    name: String! @rules(apply: ["required", "string", "max:255"])
+    bio: String @rules(apply: ["nullable", "string", "max:1000"])
+}
+
+input CreateArticleInput {
+    title: String! @rules(apply: ["required", "string", "max:255"])
+    content: String! @rules(apply: ["required", "string"])
+    excerpt: String @rules(apply: ["nullable", "string", "max:500"])
+    status: String! @rules(apply: ["required", "in:draft,published"])
+    category_id: ID @rules(apply: ["nullable", "exists:blog_categories,id"])
+}
+
+input UpdateArticleInput {
+    id: ID! @rules(apply: ["required", "exists:articles,id"])
+    title: String @rules(apply: ["nullable", "string", "max:255"])
+    content: String @rules(apply: ["nullable", "string"])
+    excerpt: String @rules(apply: ["nullable", "string", "max:500"])
+    status: String @rules(apply: ["nullable", "in:draft,published"])
+}
+
+input CreatePageInput {
+    title: String! @rules(apply: ["required", "string", "max:255"])
+    content: String! @rules(apply: ["required", "string"])
+    excerpt: String @rules(apply: ["nullable", "string", "max:500"])
+    template: String! @rules(apply: ["required", "in:default,full-width,sidebar,landing"])
+    status: String! @rules(apply: ["required", "in:draft,published"])
+}
+
+input UpdatePageInput {
+    id: ID! @rules(apply: ["required", "exists:static_pages,id"])
+    title: String @rules(apply: ["nullable", "string", "max:255"])
+    content: String @rules(apply: ["nullable", "string"])
+    excerpt: String @rules(apply: ["nullable", "string", "max:500"])
+    template: String @rules(apply: ["nullable", "in:default,full-width,sidebar,landing"])
+    status: String @rules(apply: ["nullable", "in:draft,published"])
+}

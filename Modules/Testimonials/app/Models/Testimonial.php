@@ -11,9 +11,12 @@ namespace Modules\Testimonials\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Testimonial extends Model
 {
+    use BelongsToTenant;
+
     protected $table = 'testimonials';
 
     protected $fillable = [
@@ -24,6 +27,7 @@ class Testimonial extends Model
         'rating',
         'order',
         'is_approved',
+        'tenant_id',
     ];
 
     protected $attributes = [

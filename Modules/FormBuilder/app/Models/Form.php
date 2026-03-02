@@ -13,9 +13,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Form extends Model
 {
+    use BelongsToTenant;
+
     /** @var list<string> */
     protected $fillable = [
         'title',
@@ -23,6 +26,7 @@ class Form extends Model
         'description',
         'settings',
         'is_published',
+        'tenant_id',
     ];
 
     /** @var array<string, string> */

@@ -14,11 +14,12 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Newsletter\States\CampaignState;
 use Modules\Newsletter\States\DraftCampaignState;
 use Modules\Newsletter\States\SentCampaignState;
+use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\ModelStates\HasStates;
 
 class Campaign extends Model
 {
-    use HasFactory, HasStates;
+    use BelongsToTenant, HasFactory, HasStates;
 
     protected $table = 'newsletter_campaigns';
 
@@ -28,6 +29,7 @@ class Campaign extends Model
         'status',
         'sent_at',
         'recipient_count',
+        'tenant_id',
     ];
 
     protected $casts = [

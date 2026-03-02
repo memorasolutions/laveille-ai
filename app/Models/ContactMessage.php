@@ -11,10 +11,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class ContactMessage extends Model
 {
-    protected $fillable = ['name', 'email', 'subject', 'message', 'status', 'ip_address', 'read_at'];
+    use BelongsToTenant;
+
+    protected $fillable = ['name', 'email', 'subject', 'message', 'status', 'ip_address', 'read_at', 'tenant_id'];
 
     protected $casts = [
         'read_at' => 'datetime',

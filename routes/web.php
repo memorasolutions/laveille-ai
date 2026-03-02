@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CookieConsentController;
+use Modules\Core\Http\Controllers\PublicAnnouncementController;
 use Modules\Faq\Http\Controllers\PublicFaqController;
 use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,7 @@ Route::middleware('cacheResponse')->group(function () {
     })->name('home');
 
     Route::get('/faq', [PublicFaqController::class, 'show'])->name('faq.show');
+    Route::get('/changelog', [PublicAnnouncementController::class, 'index'])->name('announcements.index');
     Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
 
     Route::get('/pricing', function () {

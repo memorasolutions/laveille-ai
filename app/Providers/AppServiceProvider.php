@@ -45,15 +45,31 @@ class AppServiceProvider extends ServiceProvider
 
         Paginator::useBootstrapFive();
 
+        // Modules avancés (désactivés par défaut)
         Feature::define('module-saas', false);
         Feature::define('module-tenancy', false);
+        Feature::define('module-ai', false);
+        Feature::define('module-team', false);
+        Feature::define('module-abtest', false);
+        Feature::define('module-import', false);
+        Feature::define('module-sms', false);
+
+        // Modules business (activés par défaut)
+        Feature::define('module-blog', true);
+        Feature::define('module-newsletter', true);
+        Feature::define('module-faq', true);
+        Feature::define('module-testimonials', true);
+        Feature::define('module-widget', true);
+        Feature::define('module-formbuilder', true);
+        Feature::define('module-customfields', true);
+
+        // Modules infrastructure (activés par défaut)
         Feature::define('module-translation', true);
         Feature::define('module-search', true);
         Feature::define('module-export', true);
         Feature::define('module-webhooks', true);
         Feature::define('module-media', true);
         Feature::define('module-backup', true);
-        Feature::define('module-sms', false);
 
         $this->configureRateLimiting();
         $this->configureQueueFailureHandling();

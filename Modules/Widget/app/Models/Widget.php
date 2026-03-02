@@ -12,9 +12,12 @@ namespace Modules\Widget\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Widget extends Model
 {
+    use BelongsToTenant;
+
     /** @var list<string> */
     public const ZONES = ['sidebar', 'footer', 'after_content'];
 
@@ -40,7 +43,7 @@ class Widget extends Model
 
     /** @var list<string> */
     protected $fillable = [
-        'zone', 'type', 'title', 'content', 'settings', 'is_active', 'sort_order',
+        'zone', 'type', 'title', 'content', 'settings', 'is_active', 'sort_order', 'tenant_id',
     ];
 
     /** @var array<string, string> */

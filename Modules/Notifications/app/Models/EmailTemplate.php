@@ -11,21 +11,30 @@ namespace Modules\Notifications\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Traits\HasRevisions;
 
 class EmailTemplate extends Model
 {
+    use HasRevisions;
+
+    /** @var list<string> */
+    protected array $revisionable = ['name', 'subject', 'body_html', 'variables', 'json_content'];
     protected $fillable = [
         'name',
         'slug',
         'subject',
         'body_html',
         'variables',
+        'json_content',
+        'category',
         'is_active',
         'module',
+        'tenant_id',
     ];
 
     protected $casts = [
         'variables' => 'array',
+        'json_content' => 'array',
         'is_active' => 'boolean',
     ];
 

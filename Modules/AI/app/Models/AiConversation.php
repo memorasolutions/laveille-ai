@@ -15,9 +15,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Modules\AI\Enums\ConversationStatus;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class AiConversation extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = [
         'uuid',
         'user_id',
@@ -32,6 +35,7 @@ class AiConversation extends Model
         'tokens_used',
         'cost_estimate',
         'closed_at',
+        'tenant_id',
     ];
 
     protected function casts(): array

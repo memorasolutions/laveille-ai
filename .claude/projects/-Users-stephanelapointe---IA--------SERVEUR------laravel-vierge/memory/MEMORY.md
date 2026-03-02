@@ -12,16 +12,23 @@
 **PRIORITE MCP : 1min.ai (multi-ai-mcp) AVANT OpenRouter - l'utilisateur a beaucoup de credits 1min.ai.**
 **Sonnet = via multi-ai-mcp (claude-sonnet-4), PAS via Task natif. Task natif = dernier recours.**
 
-## Etat actuel (2026-03-02, verifie)
-- **2486 tests pass** (1 skip, 5016 assertions, 0 echec, mode parallele)
-- **PHPStan** : 0 erreurs niveau 6 (488 fichiers)
-- **34 modules actifs**, ~500 routes, 84 migrations
-- **73 fonctionnalites completees** (voir PROGRESS_REPORT.md)
+## Stack production (IMPORTANT)
+- **Serveur** : cPanel + AlmaLinux + MariaDB
+- **PAS de Docker** - Docker et cPanel ne font pas bon menage
+- Toutes les configs (CI/CD, deploiement) doivent etre compatibles cPanel
+
+## Etat actuel (2026-03-02, apres chantiers 1-2-3 + polish P1-P7)
+- **2697+ test cases** - mode parallele obligatoire
+- **PHPStan** : 0 erreurs niveau 6
+- **34 modules actifs**, 570+ routes, 95 migrations
+- **3 chantiers majeurs** : multi-tenant (65 tests), marketing automation (44 tests), API GraphQL (33 tests)
+- **Polish P1-P7** : content versioning, scheduled publishing, URL redirects, announcements, breadcrumbs
+- **API GraphQL** : Lighthouse v6, /graphql, schema complet (12 types, 9 queries, 7 mutations), securite prod
 - **0 CDN externe** dans les vues actives (polices @fontsource, libs npm local)
 - **1 theme backoffice** : backend (NobleUI Bootstrap 5.3.8 SCSS Vite) - wowdash/tabler supprimes
 - **Auth layouts** : guest = Authero (Vite + @fontsource/inter), user = NobleUI (@fontsource/roboto)
 - **Frontend** : GoSass
-- **40 permissions**, 4 roles (super_admin, admin, editor, user)
+- **43 permissions**, 4 roles (super_admin, admin, editor, user)
 - **RBAC** : Gate::before super_admin, middleware permission: sur routes, policies can()
 - **Securite** : XSS purifier, CSP+HSTS headers, rate limiting, CAPTCHA, honeypot, audit logging, HIBP
 - **GDPR** : export 7 tables, suppression compte + anonymisation, polices self-hosted
@@ -32,11 +39,15 @@
 - Laravel 12, PHP 8.4, MySQL, Pest PHP 3
 - 34 modules nwidart, BaseRouteServiceProvider dans Core (31 modules convertis)
 - SettingsReaderInterface dans Core (decouplage Core<->Settings)
-- API REST v1 Sanctum, Scramble docs
+- API REST v1 Sanctum + Scramble docs, API GraphQL v2 Lighthouse v6
 - SaaS : Stripe Cashier, plans, checkout, webhooks verifies
+- Feature flags : Laravel Pennant (8 flags modules dans AppServiceProvider, FeatureFlagSeeder)
+- Bootstrapping : core:new-project (interactif, modules optionnels, .env, feature flags)
+- Notifications : 13 classes, NotificationBell Livewire, Reverb temps reel, polling 30s
 - Blog, Newsletter, Pages, Editor TipTap, Search Scout
 - PWA, Reverb WebSocket, Push notifications
-- Module AI : OpenRouter (chat, articles, moderation, SEO, traduction)
+- Module AI enrichi : OpenRouter (chat, streaming SSE, articles, moderation batch Spatie States, SEO, traduction, RAG FAQ/Pages/Articles, human takeover Reverb, analytics 4 KPI, budget check mensuel, rewrite/improve, 2 Livewire assistants, feedback thumbs, 52 tests 5 fichiers)
+- Module Team : organisations multi-utilisateurs, invitations token 64 chars, trait HasTeams, middleware EnsureTeamContext, 23 tests
 - Onboarding wizard Livewire, impersonation admin, activity logging Spatie
 - Health monitoring /health endpoint, Pulse, Horizon
 
@@ -45,6 +56,32 @@
 - **FAQ** : CRUD admin + page publique GoSass + JSON-LD Schema.org + purifier XSS, 15 tests
 - **Contact messages** : stockage DB + admin UI (filtres, lu/non lu, detail), 12 tests
 - **Homepage configurable** : landing ou page statique via Settings, 7 tests
+
+## Session 2026-03-02 - Polish CMS (P1-P7)
+- **P1 Content versioning** : HasRevisions trait (morphMany), ContentRevision model, RevisionService (max 50, compare, restore), 14 tests
+- **P2 Scheduled publishing** : HasScheduledPublishing trait (configurable $publishedColumn/$publishedValue), scopes publishedNow/scheduled/expired, migration published_at/expired_at sur StaticPage/Faq/Article, 9 tests
+- **P3 URL redirections** : UrlRedirect model dans SEO, exact + wildcard (Str::is), recordHit, admin CRUD dans Backoffice, 404 exception handler dans bootstrap/app.php (pas middleware), 12 tests
+- **P4 User impersonation** : deja existant (ImpersonationController + 7 tests Phase121Test)
+- **P6 Announcements/changelog** : Announcement model dans Core (HasScheduledPublishing + BelongsToTenant), admin CRUD, page publique /changelog (GoSass), typeLabel/typeBadgeClass/safeBody, sidebar dans Configuration, 14 tests
+- **P7 Breadcrumbs dynamiques** : @yield('breadcrumbs') dans admin layout, composant multi-level, 14 vues enrichies, 5 tests
+- **P5/P8** : reportes (media manager trop complexe, preview specifique par projet)
+
+## Session 2026-03-02 - Chantier 2 : Marketing automation
+- **5 migrations** : add_marketing_columns_to_email_templates, email_workflows, workflow_steps, workflow_enrollments, workflow_step_logs
+- **4 modeles** : EmailWorkflow, WorkflowStep, WorkflowEnrollment, WorkflowStepLog (+ 4 factories)
+- **EmailTemplate existant** (Notifications) : enrichi (json_content, category, tenant_id), reutilise pour marketing via module='newsletter'
+- **WorkflowEngine service** : enroll, processStep, advance, cancel, processDueEnrollments, replaceVariables
+- **ProcessWorkflowStep job** : queue 'workflows', retry 3x, backoff 60s
+- **WorkflowTriggerListener** : ecoute Registered event, triggerWorkflows par type
+- **ProcessWorkflowsCommand** : newsletter:process-workflows (schedule 5min)
+- **MarketingTemplateController** : CRUD complet + preview avec variables dummy
+- **WorkflowController** : CRUD + activate/pause + analytics (stats enrollments/sent/failed)
+- **9 vues NobleUI** : templates (index/create/edit), workflows (index/create/edit/show)
+- **Step builder JS** : ajout dynamique d'etapes (send_email/delay/condition/action)
+- **Permission** : manage_workflows ajoutee au seeder
+- **Sidebar** : Templates marketing + Workflows dans section Utilisateurs
+- **72 tests Newsletter** (155 assertions) - tous passent
+- **PHPStan** : 0 erreurs
 
 ## Session 2026-03-02 - Module Team + production hardening
 - **Module Team** : 4 migrations, 3 modeles (Team, TeamInvitation, HasTeams trait), TeamService (7 methodes statiques), 2 controleurs, 4 vues NobleUI, middleware EnsureTeamContext

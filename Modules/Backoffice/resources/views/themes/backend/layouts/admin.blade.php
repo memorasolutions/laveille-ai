@@ -66,6 +66,7 @@
             @include('backoffice::themes.backend.partials.header')
             <div class="page-content container-xxl">
                 @include('backoffice::themes.backend.partials.toast')
+                @yield('breadcrumbs')
 
                 @yield('content')
             </div>

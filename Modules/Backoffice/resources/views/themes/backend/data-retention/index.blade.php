@@ -1,6 +1,15 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin', ['title' => 'Rétention des données', 'subtitle' => 'Tableau de bord'])
 
+@section('breadcrumbs')
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Retention des donnees</li>
+    </ol>
+</nav>
+@endsection
+
 @section('content')
 
 @php

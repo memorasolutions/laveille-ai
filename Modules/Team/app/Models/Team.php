@@ -22,6 +22,7 @@ class Team extends Model
         'slug',
         'description',
         'owner_id',
+        'tenant_id',
         'logo',
         'settings',
     ];
@@ -82,5 +83,10 @@ class Team extends Model
         $member = $this->members()->where('user_id', $user->id)->first();
 
         return $member?->pivot->role;
+    }
+
+    protected static function newFactory(): \Modules\Team\Database\Factories\TeamFactory
+    {
+        return \Modules\Team\Database\Factories\TeamFactory::new();
     }
 }

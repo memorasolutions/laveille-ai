@@ -84,6 +84,21 @@ return Application::configure(basePath: dirname(__DIR__))
                     'message' => 'Ressource introuvable.',
                 ], 404);
             }
+
+            // Check URL redirects before returning 404
+            $path = '/' . ltrim($request->path(), '/');
+            $redirect = \Illuminate\Support\Facades\Cache::remember(
+                "url_redirect:{$path}",
+                3600,
+                fn () => \Modules\SEO\Models\UrlRedirect::findRedirect($path),
+            );
+
+            if ($redirect) {
+                $redirect->recordHit();
+                \Illuminate\Support\Facades\Cache::forget("url_redirect:{$path}");
+
+                return redirect($redirect->to_url, $redirect->status_code);
+            }
         });
 
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, \Illuminate\Http\Request $request) {

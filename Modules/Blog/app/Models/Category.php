@@ -14,12 +14,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
+use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\ResponseCache\Facades\ResponseCache;
 use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
 {
-    use HasFactory, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasFactory, HasTranslations, Searchable, SoftDeletes;
 
     public function toSearchableArray(): array
     {
@@ -45,6 +46,7 @@ class Category extends Model
         'description',
         'color',
         'is_active',
+        'tenant_id',
     ];
 
     protected $casts = [

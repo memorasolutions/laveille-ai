@@ -2,7 +2,7 @@
 
 **Derniere mise a jour** : 2026-03-02
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croise docs/code)
-**Metriques verifiees** : 2486 tests pass (1 skip), 34 modules, ~500 routes, 84 migrations, PHPStan 0 erreurs (488 fichiers)
+**Metriques verifiees** : 2662+ test cases (0 fail), 34 modules, 570 routes, 91 migrations, PHPStan 0 erreurs niveau 6
 
 ---
 
@@ -122,14 +122,52 @@
 - [x] PHPStan 0 erreurs (type hints corrigés)
 - [x] Production hardening (security.txt RFC 9116, .env.example, meta viewport fix, @stack custom-scripts)
 
+## Completes - Systeme IA enrichi (session 2026-03-02)
+
+- [x] Admin conversations IA (liste paginee, filtres status/user/date, detail messages)
+- [x] Human takeover temps reel (claim, reply, close, release, Reverb broadcast)
+- [x] Chatbot SSE streaming reel (AiService streamChat + ChatStreamController)
+- [x] RAG service (FAQ + Pages + Articles injectes dans system prompt chatbot)
+- [x] Chatbot Livewire ameliore (SSE + markdown + bouton "parler a un humain")
+- [x] Feedback thumbs up/down (migration + API MessageFeedbackController)
+- [x] AiContentAssistant Livewire (rewrite, improve, summarize, translate)
+- [x] AiSeoAssistant Livewire (generation meta SEO)
+- [x] Moderation batch commentaires (Spatie ModelStates, approve/spam en lot)
+- [x] Dashboard analytics IA (4 KPI, activite/jour, usage par modele, feedback)
+- [x] Budget mensuel IA (checkBudget() avant chaque requete API)
+- [x] Permission manage_ai + sidebar section Intelligence artificielle
+- [x] 52 tests IA (5 fichiers PhaseAi*, 79 assertions, tous pass)
+- [x] PHPStan 0 erreurs (streamChat fix, channels.php fix)
+
 ---
 
-## Restant - Nouvelles fonctionnalites (decision utilisateur)
+## Completes - Multi-tenant avance (session 2026-03-02)
 
-- [ ] Multi-tenant avance (isolation donnees, domaines custom) - module Tenancy de base existe
-- [ ] Marketing automation (workflows, drip campaigns) - module Newsletter existe
-- [ ] API v2 GraphQL - API REST v1 fonctionne
-- [ ] Migration Modules/ vers plugins/ - 34 modules + 2486 tests a risque
+- [x] Trait BelongsToTenant + TenantScope (auto-set tenant_id, global scope filtrage, withoutTenancy, forTenant)
+- [x] Migration add_tenant_id a 15 tables (articles, faqs, teams, subscribers, campaigns, etc.)
+- [x] 3 middlewares (IdentifyTenant subdomain/header/session, EnsureTenantAccess 403, TenantDomainResolver FQDN)
+- [x] Admin CRUD Tenants (TenantController, 4 vues NobleUI, routes permission:manage_tenants)
+- [x] BelongsToTenant applique a 14 modeles (Article, Faq, Subscriber, Campaign, Team, etc.)
+- [x] 65 tests Tenancy (153 assertions), PHPStan 0 erreurs
+
+## Completes - Marketing automation (session 2026-03-02)
+
+- [x] 5 migrations (email_templates enrichi, email_workflows, workflow_steps, workflow_enrollments, workflow_step_logs)
+- [x] 4 modeles + 4 factories (EmailWorkflow, WorkflowStep, WorkflowEnrollment, WorkflowStepLog)
+- [x] WorkflowEngine service (enroll, processStep, advance, cancel, processDueEnrollments)
+- [x] ProcessWorkflowStep job (queue, retry 3x) + WorkflowTriggerListener (Registered event)
+- [x] ProcessWorkflowsCommand (newsletter:process-workflows schedule 5min)
+- [x] MarketingTemplateController CRUD (7 routes, 3 vues, preview variables)
+- [x] WorkflowController CRUD (9 routes, 4 vues, step builder JS, activate/pause, analytics)
+- [x] Permission manage_workflows + sidebar Templates marketing + Workflows
+- [x] 44 nouveaux tests (72 total Newsletter, 155 assertions), PHPStan 0 erreurs
+
+## Completes - 3 chantiers majeurs (session 2026-03-02)
+
+- [x] Multi-tenant avance (isolation donnees, domaines custom) - 65 tests, 3 middlewares, 15 tables
+- [x] Marketing automation (workflows, drip campaigns) - 44 tests, WorkflowEngine, CRUD admin
+- [x] API v2 GraphQL (Lighthouse v6, 33 tests, securite prod) - schema complet, mutations RBAC
+- [ ] Migration Modules/ vers plugins/ - REPORTE (34 modules + 2657 tests a risque, valeur = 0)
 
 ## Suggestions benchmark (features manquantes identifiees)
 
@@ -143,10 +181,15 @@
 
 ---
 
-## Decisions en attente (utilisateur)
+## Restant - CORE reutilisable
 
-| # | Question | Impact |
-|---|----------|--------|
-| 1 | Multi-tenant avance ou marketing automation en premier ? | Oriente le developpement |
-| 2 | Migration Modules/ vers plugins/ ? | 34 modules + 2486 tests a risque |
-| 4 | API GraphQL necessaire ? | Effort eleve, REST v1 fonctionne |
+### Analyse gaps (effectuee 2026-03-02)
+Le CORE est fonctionnellement complet. Les gaps identifies (observabilite, data residency, analytics self-service, real-time collab, IaC Docker) sont tous du over-engineering pour un template reutilisable. Les features critiques (Project Factory CLI, feature flags Pennant, notifications unifiees) EXISTENT DEJA.
+
+### Taches restantes (par priorite)
+- [x] Fix test Phase161Test (toHaveCount 11 → 18)
+- [x] Mise a jour README.md badges et metriques (2662+ tests, 34 modules, GraphQL v2, marketing, multi-tenant)
+- [x] Mise a jour CHANGELOG.md avec chantiers 1-3 (multi-tenant, marketing, GraphQL) → v1.1.0
+- [x] Enrichir core:new-project avec categories de modules (Core/Business/Avance, 20 feature flags)
+- [x] 7 tests NewProjectCommand (constantes, defaults, scenarios)
+- [ ] Migration Modules/ vers plugins/ - REPORTE indefiniment (valeur = 0)

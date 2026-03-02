@@ -9,7 +9,10 @@ declare(strict_types=1);
 
 namespace Modules\Newsletter\Providers;
 
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Modules\Newsletter\Listeners\WorkflowTriggerListener;
 
 class NewsletterServiceProvider extends ServiceProvider
 {
@@ -17,7 +20,12 @@ class NewsletterServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->commands([\Modules\Newsletter\Console\DigestCommand::class]);
+        $this->commands([
+            \Modules\Newsletter\Console\DigestCommand::class,
+            \Modules\Newsletter\Console\ProcessWorkflowsCommand::class,
+        ]);
+
+        Event::listen(Registered::class, [WorkflowTriggerListener::class, 'handleRegistered']);
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $sourcePath = __DIR__.'/../../resources/views';
         $theme = config('backoffice.theme', 'backend');

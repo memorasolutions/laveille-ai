@@ -14,10 +14,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Tag extends Model
 {
-    use HasFactory, SoftDeletes;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $table = 'tags';
 
@@ -26,6 +27,7 @@ class Tag extends Model
         'slug',
         'description',
         'color',
+        'tenant_id',
     ];
 
     protected $attributes = [

@@ -27,6 +27,7 @@ use Modules\Blog\States\PublishedArticleState;
 use Spatie\ModelStates\HasStates;
 use Spatie\ResponseCache\Facades\ResponseCache;
 use Modules\CustomFields\Traits\HasCustomFields;
+use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -34,7 +35,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class Article extends Model
 {
-    use HasCustomFields, HasFactory, HasStates, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasCustomFields, HasFactory, HasStates, HasTranslations, Searchable, SoftDeletes;
 
     public array $translatable = ['title', 'slug', 'content', 'excerpt'];
 
@@ -56,11 +57,14 @@ class Article extends Model
         'category_id',
         'tags',
         'meta',
+        'expired_at',
         'user_id',
+        'tenant_id',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
+        'expired_at' => 'datetime',
         'status' => ArticleState::class,
         'tags' => 'array',
         'meta' => 'array',

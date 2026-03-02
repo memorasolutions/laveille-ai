@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-02
+
+### Added
+
+**Multi-tenant avancé (module Tenancy)**
+- Trait `BelongsToTenant` pour scope automatique des modèles par tenant
+- 3 middlewares : identification tenant, scope global, isolation données
+- Domaines custom par tenant avec vérification DNS
+- Admin centralisé : gestion tenants, domaines, plans, statistiques
+- Migration `add_tenant_id_to_tables` pour les tables existantes
+
+**Marketing automation (module Newsletter)**
+- Workflows email automatisés (drip campaigns, séquences)
+- Modèles `EmailWorkflow`, `WorkflowStep`, `WorkflowEnrollment`, `WorkflowStepLog`
+- Templates marketing avec éditeur visuel
+- Enrollments automatiques basés sur événements (inscription, achat, etc.)
+- Commande `newsletter:process-workflows` pour traitement planifié
+- Admin : gestion workflows, templates, statistiques d'envoi
+
+**API GraphQL v2 (Lighthouse)**
+- Endpoint `/graphql` avec schema-first approach
+- Queries : articles, categories, pages, FAQ, subscribers
+- Mutations : CRUD articles, gestion newsletter, contact
+- Authentification Sanctum via directive `@guard`
+- Pagination relay cursor-based
+- Sécurité : query depth limiting, introspection désactivée en production
+
+**Module Team**
+- Organisations multi-utilisateurs avec invitations
+- Rôles par équipe (owner, admin, member)
+- Gestion des membres et permissions
+
+**Commandes**
+- `app:audit` : audit complet du projet (sécurité, performances, qualité)
+- `make:crud {module} {model}` : générateur CRUD avec options `--fields=`, `--with-api`, `--force`
+
+### Changed
+- Tests : 2463 → 2655+ tests (0 échec)
+- Modules : 33 → 34 (ajout Team)
+- Feature flags enrichis dans `core:new-project` avec catégories de modules
+
 ## [1.0.0] - 2026-03-01
 
 ### Added
@@ -58,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Developer experience**
 - PHPStan level 6, 0 errors
-- 2463 tests (Pest 3, parallel execution)
+- 2655+ tests (Pest 3, parallel execution)
 - Playwright E2E test suite
 - Docker Compose setup for local development
 - CI/CD pipeline (GitHub Actions): Pint, PHPStan, tests
@@ -74,5 +115,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Plugin manifest (`plugin.json`) per module for metadata and dependency declaration
 - Theme resolution in module ServiceProviders (theme-aware view loading)
 
-[Unreleased]: https://github.com/memora-solutions/laravel-saas/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/memora-solutions/laravel-saas/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/memora-solutions/laravel-saas/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/memora-solutions/laravel-saas/releases/tag/v1.0.0

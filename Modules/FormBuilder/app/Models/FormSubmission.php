@@ -13,9 +13,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class FormSubmission extends Model
 {
+    use BelongsToTenant;
+
     /** @var list<string> */
     protected $fillable = [
         'form_id',
@@ -23,6 +26,7 @@ class FormSubmission extends Model
         'status',
         'ip_address',
         'read_at',
+        'tenant_id',
     ];
 
     /** @var array<string, string> */

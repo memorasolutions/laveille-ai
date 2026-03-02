@@ -17,6 +17,15 @@ class FeatureFlagSeeder extends Seeder
     public function run(): void
     {
         $activeModules = [
+            // Business
+            'module-blog',
+            'module-newsletter',
+            'module-faq',
+            'module-testimonials',
+            'module-widget',
+            'module-formbuilder',
+            'module-customfields',
+            // Infrastructure
             'module-translation',
             'module-search',
             'module-export',
@@ -28,6 +37,10 @@ class FeatureFlagSeeder extends Seeder
         $inactiveModules = [
             'module-saas',
             'module-tenancy',
+            'module-ai',
+            'module-team',
+            'module-abtest',
+            'module-import',
             'module-sms',
         ];
 

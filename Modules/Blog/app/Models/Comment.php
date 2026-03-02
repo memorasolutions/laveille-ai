@@ -18,6 +18,7 @@ use Modules\Blog\Database\Factories\CommentFactory;
 use Modules\Blog\States\ApprovedCommentState;
 use Modules\Blog\States\CommentState;
 use Modules\Blog\States\PendingCommentState;
+use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\ModelStates\HasStates;
 use Spatie\ResponseCache\Facades\ResponseCache;
 
@@ -27,6 +28,7 @@ use Spatie\ResponseCache\Facades\ResponseCache;
  */
 class Comment extends Model
 {
+    use BelongsToTenant;
     use HasFactory;
     use HasStates;
     use SoftDeletes;
@@ -47,6 +49,7 @@ class Comment extends Model
         'content',
         'status',
         'parent_id',
+        'tenant_id',
     ];
 
     protected $casts = [

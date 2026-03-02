@@ -14,14 +14,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Modules\Newsletter\Database\Factories\SubscriberFactory;
+use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Subscriber extends Model
 {
-    use HasFactory, Notifiable;
+    use BelongsToTenant, HasFactory, Notifiable;
 
     protected $table = 'newsletter_subscribers';
 
-    protected $fillable = ['email', 'name', 'token', 'confirmed_at', 'unsubscribed_at'];
+    protected $fillable = ['email', 'name', 'token', 'confirmed_at', 'unsubscribed_at', 'tenant_id'];
 
     protected $casts = [
         'confirmed_at' => 'datetime',

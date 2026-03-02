@@ -1,6 +1,16 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin', ['title' => 'API Tokens', 'subtitle' => 'Profil'])
 
+@section('breadcrumbs')
+<nav class="page-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.profile') }}">Profil</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Jetons API</li>
+    </ol>
+</nav>
+@endsection
+
 @section('content')
 
 <nav class="page-breadcrumb">

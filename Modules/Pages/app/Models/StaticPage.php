@@ -20,11 +20,17 @@ use Mews\Purifier\Facades\Purifier;
 use Laravel\Scout\Searchable;
 use Modules\CustomFields\Traits\HasCustomFields;
 use Modules\Pages\Database\Factories\StaticPageFactory;
+use Modules\Core\Traits\HasRevisions;
+use Modules\Core\Traits\HasScheduledPublishing;
+use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\Translatable\HasTranslations;
 
 class StaticPage extends Model
 {
-    use HasCustomFields, HasFactory, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasCustomFields, HasFactory, HasRevisions, HasScheduledPublishing, HasTranslations, Searchable, SoftDeletes;
+
+    /** @var list<string> */
+    protected array $revisionable = ['title', 'content', 'excerpt', 'status', 'template', 'meta_title', 'meta_description'];
 
     public function toSearchableArray(): array
     {
@@ -52,7 +58,15 @@ class StaticPage extends Model
         'meta_title',
         'meta_description',
         'template',
+        'published_at',
+        'expired_at',
         'user_id',
+        'tenant_id',
+    ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+        'expired_at' => 'datetime',
     ];
 
     public const TEMPLATES = [

@@ -1,125 +1,158 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-# Rapport d'avancement - Laravel SaaS Boilerplate
+# Rapport d'avancement - Laravel SaaS Boilerplate (CORE Template)
 
 **Date** : 2026-03-02
-**Metriques verifiees** : 2459 tests pass (1 skip) | 33 modules | 523 routes | 80 migrations | PHPStan 0 erreurs (478 fichiers)
+**Metriques verifiees** : 2662+ test cases (0 fail) | 34 modules | 570 routes | 91 migrations | PHPStan 0 erreurs niveau 6
+
+---
+
+## Resume executif
+
+Le CORE Template est fonctionnellement complet pour servir de base SaaS B2B/B2C. Les 3 chantiers majeurs (multi-tenant, marketing automation, API GraphQL) sont termines. Il reste principalement du polish, de la documentation et l'analyse des gaps pour la reutilisabilite.
 
 ---
 
 ## Completé (preuve code)
 
-### Architecture et qualite
+### Chantier 1 : Multi-tenant avance (session 2026-03-02)
 
-| # | Fonctionnalite | Preuve (fichier/test) |
-|---|----------------|----------------------|
-| 1 | BaseRouteServiceProvider dans Core | Modules/Core/app/Providers/BaseRouteServiceProvider.php (31 modules extends) |
-| 2 | SettingsReaderInterface (decouplage Core/Settings) | Modules/Core/app/Contracts/SettingsReaderInterface.php |
-| 3 | PHPStan niveau 6, 0 erreurs, 478 fichiers | phpstan.neon (36 chemins) |
-| 4 | CI/CD GitHub Actions (quality + tests + E2E + security) | .github/workflows/ci.yml |
-| 5 | Dependabot (composer, npm, github-actions) | .github/dependabot.yml |
-| 6 | Fichiers projet standard | LICENSE, CONTRIBUTING.md, CHANGELOG.md, SECURITY.md |
-| 7 | Module ABTest (Experiment, ABTestService, CRUD admin) | Modules/ABTest/ + tests/Feature/ABTestTest.php |
-| 8 | Newsletter digest (commande + notification) | Modules/Newsletter/app/Console/DigestCommand.php + tests/Feature/NewsletterDigestTest.php |
-| 9 | Commande app:docs (documentation auto) | app/Console/Commands/DocsCommand.php + tests/Feature/DocsCommandTest.php |
-| 10 | Nettoyage Phase A (-25 EventServiceProvider, -20 master.blade.php, HasBulkActions dans Core) | commit 614247e |
-| 11 | Fix validation InlineEditController + suppression routes mortes Editor | Modules/Backoffice/app/Http/Controllers/InlineEditController.php |
-| 12 | Index FK manquants (ai_conversations.agent_id, articles.category_id) | database/migrations/2026_03_01_700001_add_missing_fk_indexes.php |
-| 13 | N+1 queries Blog (eager loading user+blogCategory) | Modules/Blog/app/Http/Controllers/PublicArticleController.php |
-| 14 | Rate limiting newsletter subscribe (throttle:5,1) | Modules/Newsletter/routes/web.php |
+| # | Fonctionnalite | Preuve |
+|---|----------------|--------|
+| 1 | Trait BelongsToTenant + TenantScope (auto-set, global scope, withoutTenancy, forTenant) | Modules/Tenancy/app/Traits/BelongsToTenant.php + Modules/Tenancy/app/Scopes/TenantScope.php |
+| 2 | Migration add_tenant_id a 15 tables | database/migrations/..._add_tenant_id_to_tables.php |
+| 3 | IdentifyTenant middleware (subdomain/header/session) | Modules/Tenancy/app/Http/Middleware/IdentifyTenant.php |
+| 4 | EnsureTenantAccess middleware (403) | Modules/Tenancy/app/Http/Middleware/EnsureTenantAccess.php |
+| 5 | TenantDomainResolver middleware (FQDN) | Modules/Tenancy/app/Http/Middleware/TenantDomainResolver.php |
+| 6 | Admin CRUD Tenants (4 vues NobleUI, permission:manage_tenants) | Modules/Tenancy/app/Http/Controllers/Admin/TenantController.php |
+| 7 | BelongsToTenant applique a 14 modeles | Article, Faq, Subscriber, Campaign, Team, etc. |
+| 8 | 65 tests (153 assertions) | Modules/Tenancy/tests/ (7 fichiers) |
+
+### Chantier 2 : Marketing automation (session 2026-03-02)
+
+| # | Fonctionnalite | Preuve |
+|---|----------------|--------|
+| 9 | 5 migrations (email_templates enrichi, workflows, steps, enrollments, step_logs) | Modules/Newsletter/database/migrations/ |
+| 10 | 4 modeles + factories (EmailWorkflow, WorkflowStep, WorkflowEnrollment, WorkflowStepLog) | Modules/Newsletter/app/Models/ |
+| 11 | WorkflowEngine service (enroll, processStep, advance, cancel) | Modules/Newsletter/app/Services/WorkflowEngine.php |
+| 12 | ProcessWorkflowStep job (queue, retry 3x) | Modules/Newsletter/app/Jobs/ProcessWorkflowStep.php |
+| 13 | WorkflowTriggerListener (Registered event) | Modules/Newsletter/app/Listeners/ |
+| 14 | ProcessWorkflowsCommand (schedule 5min) | Modules/Newsletter/app/Console/ |
+| 15 | MarketingTemplateController CRUD (7 routes, 3 vues, preview) | Modules/Newsletter/app/Http/Controllers/Admin/MarketingTemplateController.php |
+| 16 | WorkflowController CRUD (9 routes, 4 vues, step builder JS, analytics) | Modules/Newsletter/app/Http/Controllers/Admin/WorkflowController.php |
+| 17 | Permission manage_workflows + sidebar | Modules/RolesPermissions/database/seeders/ |
+| 18 | 44 tests workflows (72 total Newsletter, 155 assertions) | Modules/Newsletter/tests/ (3 fichiers workflow) |
+
+### Chantier 3 : API v2 GraphQL (session 2026-03-02)
+
+| # | Fonctionnalite | Preuve |
+|---|----------------|--------|
+| 19 | Lighthouse v6 installe et configure | config/lighthouse.php (guards sanctum, throttle, namespaces 8 modules) |
+| 20 | Schema complet (12 types, 9 queries, 7 mutations, 6 inputs) | graphql/schema.graphql |
+| 21 | Queries publiques (articles pagines, article/page par slug, faqs, plans, testimonials, categories) | graphql/schema.graphql + app/GraphQL/Queries/FindBySlugQuery.php |
+| 22 | Resolver slugs Spatie Translatable (JSON -> locale) | app/GraphQL/Queries/FindBySlugQuery.php |
+| 23 | Queries privees (me @guard, myTeams @guard) | app/GraphQL/Queries/MyTeamsQuery.php |
+| 24 | Mutations CRUD articles (create/update/delete + ArticlePolicy) | app/GraphQL/Mutations/ArticleMutations.php |
+| 25 | Mutations CRUD pages (create/update/delete + manage_pages) | app/GraphQL/Mutations/PageMutations.php |
+| 26 | Mutation updateProfile | app/GraphQL/Mutations/ProfileMutation.php |
+| 27 | Securite : depth 10, complexity 500, introspection off en prod, debug off en prod | config/lighthouse.php |
+| 28 | Pagination max 100 items | config/lighthouse.php |
+| 29 | Throttle middleware sur /graphql | config/lighthouse.php route.middleware |
+| 30 | 33 tests GraphQL (65 assertions) | tests/Feature/Graphql{Api,Mutations,Security}Test.php |
+
+### Architecture et qualite (sessions precedentes)
+
+| # | Fonctionnalite | Preuve |
+|---|----------------|--------|
+| 31 | BaseRouteServiceProvider Core (31 modules extends) | Modules/Core/app/Providers/BaseRouteServiceProvider.php |
+| 32 | SettingsReaderInterface (decouplage Core/Settings) | Modules/Core/app/Contracts/SettingsReaderInterface.php |
+| 33 | PHPStan niveau 6, 0 erreurs | phpstan.neon |
+| 34 | CI/CD GitHub Actions (quality + tests + E2E + security) | .github/workflows/ci.yml |
+| 35 | Dependabot (composer, npm, github-actions) | .github/dependabot.yml |
+| 36 | Fichiers projet standard | LICENSE, CONTRIBUTING.md, CHANGELOG.md, SECURITY.md |
 
 ### Securite et GDPR
 
 | # | Fonctionnalite | Preuve |
 |---|----------------|--------|
-| 15 | Password policy HIBP k-Anonymity + historique | Modules/Auth/app/Rules/PasswordNotCompromisedRule.php + PasswordHistoryRule.php |
-| 16 | Migration password_histories | database/migrations/2026_03_01_600001_create_password_histories_table.php |
-| 17 | Session management UI (voir/revoquer) | Modules/Auth/app/Http/Controllers/UserSessionController.php + views/sessions/index.blade.php |
-| 18 | GDPR data export (7 tables) | Modules/Auth/app/Http/Controllers/UserDashboardController.php:152 (exportData) |
-| 19 | GDPR account deletion + anonymisation | Modules/Auth/app/Http/Controllers/UserDashboardController.php:119 (anonymize) |
-| 20 | Audit securite OWASP (mass assignment, XSS, throttle) | tests/Feature/SecurityAuditTest.php |
-| 21 | Tests password policy | tests/Feature/PasswordPolicyEnhancementTest.php |
-| 22 | Tests session management | tests/Feature/SessionManagementTest.php |
-| 23 | Tests GDPR export | tests/Feature/GdprDataExportTest.php |
-| 24 | Tests GDPR deletion | tests/Feature/GdprAccountDeletionTest.php |
+| 37 | Password policy HIBP + historique | Modules/Auth/app/Rules/ |
+| 38 | Session management UI (voir/revoquer) | Modules/Auth/app/Http/Controllers/UserSessionController.php |
+| 39 | GDPR data export (7 tables JSON) | Modules/Auth/app/Http/Controllers/UserDashboardController.php |
+| 40 | GDPR account deletion + anonymisation | idem :119 |
+| 41 | Audit OWASP (mass assignment, XSS, throttle) | tests/Feature/SecurityAuditTest.php |
+| 42 | Zero CDN (RGPD) : @fontsource, npm local | package.json, vite.config.js |
 
 ### SaaS et abonnements
 
 | # | Fonctionnalite | Preuve |
 |---|----------------|--------|
-| 25 | Fix webhook handleInvoicePaymentSucceeded | Modules/SaaS/app/Http/Controllers/StripeWebhookController.php |
-| 26 | PaymentSucceededNotification | Modules/SaaS/app/Notifications/PaymentSucceededNotification.php |
-| 27 | 4 notifications cycle abonnement | PaymentFailed, SubscriptionCancelled, TrialEnding, PaymentSucceeded |
-| 28 | Rate limiting API per-plan Stripe | app/Providers/AppServiceProvider.php + Modules/SaaS/config/config.php |
-| 29 | Tests emails abonnement | tests/Feature/SubscriptionEmailsTest.php |
+| 43 | Stripe webhooks + 4 notifications cycle abo | Modules/SaaS/ |
+| 44 | Rate limiting API per-plan Stripe | app/Providers/AppServiceProvider.php |
 
-### Zero CDN (RGPD)
+### Modules fonctionnels (34 total)
 
-| # | Fonctionnalite | Preuve |
-|---|----------------|--------|
-| 30 | Google Fonts Inter -> @fontsource/inter | package.json + resources/css/auth-guest.css |
-| 31 | Google Fonts Roboto -> @fontsource/roboto | package.json + resources/sass/nobleui/app.scss |
-| 32 | Tom Select CDN -> npm local | vite.config.js (viteStaticCopy) + 4 blade files |
-| 33 | Sortable.js CDN -> npm local | vite.config.js (viteStaticCopy) + 4 blade files |
-| 34 | Auth guest CSS inline -> Vite bundle | resources/css/auth-guest.css + @vite dans guest.blade.php |
-
-### Remplacement WordPress (sessions precedentes)
-
-| # | Fonctionnalite | Preuve |
-|---|----------------|--------|
-| 35 | Menu dynamique (drag-and-drop SortableJS, cache) | Modules/Menu/ (commit 928a915) |
-| 36 | FAQ en base de donnees (CRUD admin, JSON-LD) | Modules/Faq/ (commit dc1fcd6) |
-| 37 | Stockage messages contact en DB | Modules/Notifications/ (commit 0aa8cae) |
-| 38 | Homepage configurable (landing ou page statique) | Settings homepage.type (commit bea7e03) |
-| 39 | Templates de pages (4 templates) | Modules/Pages/resources/views/public/templates/ |
-| 40 | Schema.org / JSON-LD | Modules/SEO/app/Services/JsonLdService.php |
-| 41 | Tags blog dedies | Modules/Blog/app/Models/Tag.php + admin CRUD |
-| 42 | Temoignages module | Modules/Testimonials/ |
-| 43 | Media picker TipTap | Modules/Media/app/Http/Controllers/MediaController.php |
+| Module | Fonctionnalite cle | Tests |
+|--------|-------------------|-------|
+| ABTest | Experiments A/B, service, CRUD admin | 12 |
+| AI | Chat SSE, RAG, moderation, analytics, human takeover, budget | 52 |
+| Api | REST v1 Sanctum + Scramble docs | existants |
+| Auth | Login/register, sessions, GDPR, password policy | 40+ |
+| Backoffice | Layout NobleUI, sidebar @can, dashboard | existants |
+| Backup | Spatie backup, CRUD admin | existants |
+| Blog | Articles, categories, comments, tags, media picker | 56 |
+| Core | BaseRouteServiceProvider, commandes DX (7), HasBulkActions | existants |
+| CustomFields | EAV polymorphe, 10 types, trait HasCustomFields | 14 |
+| Editor | TipTap + media picker Alpine | existants |
+| Export | Export CSV/PDF | existants |
+| Faq | CRUD admin, page publique, JSON-LD Schema.org | 15 |
+| FormBuilder | CRUD forms, drag-and-drop, soumissions, export CSV | 14 |
+| FrontTheme | GoSass layout, SEO, responsive | existants |
+| Health | Monitoring endpoints | existants |
+| Import | CSV/Excel OpenSpout, preview + mapping | 14 |
+| Logging | Log viewer admin | existants |
+| Media | Upload Spatie, browser, API | existants |
+| Menu | Drag-and-drop SortableJS, cache, Blade component | 14 |
+| Newsletter | Subscribe, campaigns, digest, workflows, templates | 72 |
+| Notifications | Contact messages DB, admin filtres lu/non lu | 12 |
+| Pages | Statiques, 4 templates, editeur TipTap | existants |
+| RolesPermissions | 43+ permissions, 4 roles, Gate::before, policies | 38 |
+| SaaS | Stripe Cashier, plans, checkout, webhooks, rate limiting | existants |
+| Search | Scout driver | existants |
+| SEO | JsonLdService, Schema.org, meta tags | existants |
+| Settings | Facade + Service + Cache, SettingsManager Livewire, onglets | existants |
+| Storage | File management | existants |
+| Team | Multi-user orgs, invitations, HasTeams trait, middleware | 23 |
+| Tenancy | Multi-tenant, BelongsToTenant, 3 middlewares, CRUD admin | 65 |
+| Testimonials | CRUD admin + affichage frontend | existants |
+| Translation | Spatie translatable | existants |
+| Webhooks | Gestion webhooks | existants |
+| Widget | 6 types, 3 zones, drag-and-drop reorder, cache | 13 |
 
 ### DX et commandes
 
-| # | Fonctionnalite | Preuve |
-|---|----------------|--------|
-| 44 | app:install | Modules/Core/app/Console/InstallCommand.php |
-| 45 | app:demo | Modules/Core/app/Console/DemoCommand.php |
-| 46 | app:status | Modules/Core/app/Console/StatusCommand.php |
-| 47 | app:check | Modules/Core/app/Console/CheckCommand.php |
-| 48 | app:make-module | Modules/Core/app/Console/MakeCrudCommand.php |
-| 49 | app:logs | Modules/Core/app/Console/LogsCommand.php |
-| 50 | app:setup-hooks | Modules/Core/app/Console/SetupHooksCommand.php |
-| 51 | app:docs | app/Console/Commands/DocsCommand.php |
-| 52 | Makefile (make test, make e2e, make check...) | Makefile |
+| Commande | Description | Preuve |
+|----------|-------------|--------|
+| app:install | Setup interactif (DB, admin, Stripe, .env) | Modules/Core/app/Console/InstallCommand.php |
+| app:demo | Donnees demo realistes | Modules/Core/app/Console/DemoCommand.php |
+| app:status | Dashboard sante | Modules/Core/app/Console/StatusCommand.php |
+| app:check | Validation pre-deploy | Modules/Core/app/Console/CheckCommand.php |
+| app:make-module | Scaffolder module complet | Modules/Core/app/Console/MakeCrudCommand.php |
+| app:logs | Tail colore avec filtrage | Modules/Core/app/Console/LogsCommand.php |
+| app:setup-hooks | Git pre-commit hook | Modules/Core/app/Console/SetupHooksCommand.php |
+| app:docs | Documentation auto-generee | app/Console/Commands/DocsCommand.php |
+| app:audit | Audit complet (securite, qualite) | Modules/Core/app/Console/AuditCommand.php |
+| make:crud | CRUD complet (modele, migration, controleur, vues, tests) | Modules/Core/app/Console/MakeCrudCommand.php |
+| core:new-project | Configuration nouveau projet avec choix modules par categorie | Modules/Core/app/Console/NewProjectCommand.php |
+| core:setup | Setup initial (migrations, seeds, cache, storage link) | Modules/Core/app/Console/CoreSetupCommand.php |
+| Makefile | make test, make e2e, make check... | Makefile |
 
-### UI et themes (sessions precedentes)
+### Feature flags (session 2026-03-02)
 
-| # | Fonctionnalite | Preuve |
-|---|----------------|--------|
-| 53 | NobleUI SCSS compilation Vite | resources/sass/nobleui/app.scss (54 fichiers source) |
-| 54 | Sidebar @can directives (RBAC) | Modules/Backoffice/resources/views/themes/backend/partials/sidebar.blade.php |
-| 55 | Nettoyage themes wowdash/tabler | 0 fichier restant dans themes/wowdash ou themes/tabler |
-| 56 | Auth guest Authero (Vite, @fontsource, 50/50 layout) | Modules/Auth/resources/views/layouts/guest.blade.php |
-| 57 | Auth app NobleUI | Modules/Auth/resources/views/layouts/app.blade.php |
-| 58 | Widgets configurables (6 types, 3 zones, drag-and-drop) | Modules/Widget/ |
-| 59 | Form builder dynamique (CRUD, drag-and-drop, export CSV) | Modules/FormBuilder/ |
-| 60 | Custom fields dynamiques (EAV polymorphe, 10 types) | Modules/CustomFields/ |
-| 61 | Module Import (CSV/Excel, OpenSpout, preview) | Modules/Import/ |
-
-### Modules core existants
-
-| # | Fonctionnalite | Preuve |
-|---|----------------|--------|
-| 62 | RBAC (39 permissions, 4 roles, Gate::before) | Modules/RolesPermissions/ |
-| 63 | Blog complet (articles, categories, comments, tags) | Modules/Blog/ |
-| 64 | Pages statiques (templates, editeur TipTap) | Modules/Pages/ |
-| 65 | Newsletter (subscribe, campaigns, digest) | Modules/Newsletter/ |
-| 66 | SaaS Stripe (plans, checkout, webhooks, notifications) | Modules/SaaS/ |
-| 67 | API REST v1 Sanctum + Scramble docs | Modules/Api/ |
-| 68 | Module AI (OpenRouter, chat, moderation, SEO) | Modules/AI/ |
-| 69 | Health monitoring | Modules/Health/ |
-| 70 | Backup | Modules/Backup/ |
-| 71 | Search Scout | Modules/Search/ |
-| 72 | Logging + Export | Modules/Logging/ + Modules/Export/ |
-| 73 | Tenancy de base | Modules/Tenancy/ |
+| # | Feature | Preuve |
+|---|---------|--------|
+| 45 | 20 feature flags Laravel Pennant (7 business, 7 avances, 6 infrastructure) | app/Providers/AppServiceProvider.php |
+| 46 | core:new-project enrichi avec 3 categories interactives (Core/Business/Avance) | Modules/Core/app/Console/NewProjectCommand.php |
+| 47 | FeatureFlagSeeder synchronise avec les 20 flags | database/seeders/FeatureFlagSeeder.php |
+| 48 | 7 tests NewProjectCommand (constantes, defaults, selections) | Modules/Core/tests/Feature/NewProjectCommandTest.php |
 
 ---
 
@@ -131,39 +164,36 @@ Aucune fonctionnalite en cours d'implementation.
 
 ## Restant (par priorite)
 
-| Priorite | Fonctionnalite | Dependances | Decision utilisateur |
-|----------|---------------|-------------|---------------------|
-| P1 | Team/organization management (comptes multi-utilisateurs) | Depend du marche cible B2C vs B2B | Oui |
-| P2 | Multi-tenant avance (isolation donnees, domaines custom) | Module Tenancy de base existe | Oui |
-| P3 | Marketing automation (workflows, drip campaigns) | Module Newsletter existe | Oui |
-| P4 | API v2 GraphQL | API REST v1 existe | Oui |
-| P5 | Migration Modules/ vers plugins/ | 33 modules + 2459 tests a risque | Oui |
+| Priorite | Fonctionnalite | Effort | Notes |
+|----------|---------------|--------|-------|
+| ~~P1~~ | ~~Analyse gaps CORE reutilisable~~ | FAIT | Feature flags + core:new-project enrichi (catégories modules) |
+| ~~P2~~ | ~~Mise a jour docs et metriques~~ | FAIT | README.md, CHANGELOG.md, PROGRESS_REPORT.md mis à jour |
+| ~~P3~~ | ~~Fix test Phase161Test~~ | FAIT | toHaveCount(11) → toHaveCount(18) |
+| REPORTE | Migration Modules/ vers plugins/ | 6-8 jours | 34 modules + 2657 tests a risque, valeur business = 0 |
 
 ---
 
-## Incoherences detectees
+## Incoherences detectees (docs vs code)
 
-| Document | Champ | Valeur documentee | Valeur reelle | Action |
-|----------|-------|-------------------|---------------|--------|
-| TODO.md | Modules | 34 | 33 | Corriger a 33 |
-| TODO.md | Routes | 534 | 523 | Corriger a 523 |
-| TODO.md | Migrations | 86 | 80 | Corriger a 80 |
-| TODO.md | Tests | 2463 | 2459 pass + 1 skip | Corriger a 2459 |
-| MEMORY.md | Modules | 34 | 33 | Corriger a 33 |
-| MEMORY.md | Routes | 534 | 523 | Corriger a 523 |
-| MEMORY.md | Migrations | 86 | 80 | Corriger a 80 |
-| README.md | Tests | 2423+ | 2459 | Corriger a 2459 |
-| TODO.md | Phase 156 | "multi-tenant avance" | Retention donnees (app:cleanup) | Corriger description |
-| TODO.md | Phase 157 | "marketing automation" | Notification digest (existant) | Corriger description |
-| MEMORY.md | Auth CDN warning | "cdn.tailwindcss.com en prod" | Elimine (@vite) | Retirer warning |
+| Document | Dit | Realite | Action |
+|----------|-----|---------|--------|
+| TODO.md | "API v2 GraphQL" non coche | GraphQL completement implemente (33 tests, schema, resolvers, securite) | Cocher dans TODO.md |
+| TODO.md | "Multi-tenant" et "Marketing automation" dans "Restant" | Les deux sont termines avec tests | Deplacer dans "Completes" |
+| PROGRESS_REPORT.md | Metriques "~2667 test cases, 570+ routes, 91 migrations" | 2657 test cases, 570 routes, 91 migrations | Corriger metriques |
+| PROGRESS_REPORT.md | "En cours : Aucune" + "Restant : P1-P4" | P1-P3 sont termines | Mettre a jour sections |
+| PROGRESS_REPORT.md | Pas de section GraphQL | 33 tests, 6 fichiers, config securisee | Ajouter section Chantier 3 |
+| PROGRESS_REPORT.md | Pas de section Tenancy avance | 65 tests, 7 fichiers, 3 middlewares | Ajouter section Chantier 1 |
+| PROGRESS_REPORT.md | Pas de section Marketing automation | 44 tests, WorkflowEngine, CRUD admin | Ajouter section Chantier 2 |
+| TODO.md decisions | "Multi-tenant ou marketing en premier ?" | Les deux sont faits | Supprimer questions obsoletes |
 
 ---
 
-## Bloquants (decision utilisateur requise)
+## Bloquants
 
-| # | Question | Impact |
-|---|----------|--------|
-| 1 | Team/organization management necessaire ? | Depend du marche cible (B2C vs B2B) |
-| 2 | Multi-tenant avance ou marketing automation en premier ? | Oriente le developpement |
-| 3 | Migration Modules/ vers plugins/ ? | 33 modules + 2459 tests a risque |
-| 4 | API GraphQL necessaire ? | Effort eleve, REST v1 fonctionne |
+Aucun bloquant technique. Toutes les decisions precedentes ont ete prises et executees.
+
+| # | Point ouvert | Impact | Action recommandee |
+|---|-------------|--------|-------------------|
+| ~~1~~ | ~~Gaps CORE reutilisable~~ | RESOLU | core:new-project enrichi + 20 feature flags |
+| ~~2~~ | ~~1 test fail (Phase161Test)~~ | RESOLU | Corrige (toHaveCount 18) |
+| 3 | Migration plugins/ | Reporte indefiniment | Ne pas faire sauf demande explicite |

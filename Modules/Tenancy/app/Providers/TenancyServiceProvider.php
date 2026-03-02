@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Modules\Tenancy\Providers;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
@@ -34,6 +35,12 @@ class TenancyServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        /** @var Router $router */
+        $router = $this->app->make(Router::class);
+        $router->aliasMiddleware('identify.tenant', \Modules\Tenancy\Http\Middleware\IdentifyTenant::class);
+        $router->aliasMiddleware('tenant.access', \Modules\Tenancy\Http\Middleware\EnsureTenantAccess::class);
+        $router->aliasMiddleware('tenant.domain', \Modules\Tenancy\Http\Middleware\TenantDomainResolver::class);
     }
 
     /**

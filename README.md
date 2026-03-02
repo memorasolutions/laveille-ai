@@ -2,10 +2,11 @@
 
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)
 ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php)
-![Tests](https://img.shields.io/badge/tests-2463_passed-brightgreen?style=flat)
+![Tests](https://img.shields.io/badge/tests-2655_passed-brightgreen?style=flat)
+![Modules](https://img.shields.io/badge/modules-34-blueviolet?style=flat)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
 
-Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (33 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2463+ tests, 0 échec).
+Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le développement d'applications web et SaaS sécurisées. Cette base intègre une architecture modulaire (34 modules), une suite complète de fonctionnalités d'entreprise et une couverture de tests étendue (2655+ tests, 0 échec).
 
 ## Table des matières
 
@@ -14,6 +15,7 @@ Un template modulaire et robuste pour Laravel 12, conçu pour accélérer le dé
 - [Structure des modules](#structure-des-modules)
 - [Fonctionnalités clés](#fonctionnalités-clés)
 - [API REST](#api-rest)
+- [API GraphQL v2](#api-graphql-v2)
 - [Tests](#tests)
 - [Sécurité](#sécurité)
 - [Commandes artisan custom](#commandes-artisan-custom)
@@ -68,22 +70,26 @@ Le projet utilise [nwidart/laravel-modules](https://nwidart.com/laravel-modules/
 | Formulaires et donnees | `FormBuilder`, `CustomFields`, `Import`, `Contact` |
 | API et integrations | `Api`, `Notifications`, `Webhooks` |
 | Backoffice | `Backoffice`, `SaaS`, `Tenancy`, `Backup`, `Translation`, `Export`, `Search` |
+| Équipes | `Team` |
 | Frontend | `FrontTheme` |
 | Intelligence artificielle | `AI` |
 | Optimisation | `ABTest` |
 
 ## Fonctionnalités clés
 
-- Architecture modulaire (33 modules autonomes, nwidart/laravel-modules, plugin.json par module)
+- Architecture modulaire (34 modules autonomes, nwidart/laravel-modules, plugin.json par module)
 - Backoffice admin (thème Backend/NobleUI, Bootstrap 5.3.8, Lucide icons, dark mode)
 - Authentification complète : login/register Livewire, 2FA TOTP (Google Authenticator)
-- SaaS : plans, abonnements Stripe via Laravel Cashier, multi-tenant
+- SaaS : plans, abonnements Stripe via Laravel Cashier
+- Multi-tenant avancé : trait BelongsToTenant, 3 middlewares (identification, scope, isolation), domaines custom par tenant, admin centralisé
 - API REST v1 sécurisée : Sanctum, rate limiting, JSON resources
 - Blog : CRUD admin, commentaires (guest/user), RSS feed, Livewire SearchBar live
 - Médias : Spatie Media Library, upload et gestion de fichiers
 - Recherche : Laravel Scout full-text
 - Journalisation : Spatie Activity Log, toutes les actions tracées
+- Newsletter et marketing automation : campagnes, workflows drip, templates marketing, enrollments automatiques
 - Notifications multi-drivers : mail, SMS, push
+- Équipes : organisations multi-utilisateurs, invitations, rôles par équipe
 - Export : Excel/CSV
 - Webhooks : envoi et réception
 - Internationalisation : Spatie Translatable, support multi-langue
@@ -130,6 +136,28 @@ Base URL : `/api/v1/`
 
 Header requis pour routes protégées : `Authorization: Bearer {token}`
 
+## API GraphQL v2
+
+En complément de l'API REST, le template fournit une API GraphQL v2 via [Lighthouse](https://lighthouse-php.com/).
+
+**Endpoint** : `POST /graphql`
+
+**Fonctionnalités** :
+- Schema-first (fichiers `.graphql` dans `graphql/`)
+- Queries : articles, categories, pages, FAQ, subscribers
+- Mutations : CRUD articles, gestion newsletter, contact
+- Authentification : guard Sanctum, directive `@guard`
+- Pagination : relay cursor-based et offset
+- Sécurité : query depth limiting, introspection désactivée en production
+- Playground : GraphQL Playground disponible en développement (`/graphql-playground`)
+
+```bash
+# Exemple de query
+curl -X POST /graphql -H "Content-Type: application/json" -d '{
+  "query": "{ articles(first: 10) { data { title slug } } }"
+}'
+```
+
 ## Tests
 
 ```bash
@@ -146,7 +174,7 @@ php artisan test tests/Feature/Phase46Test.php
 php artisan test --filter "Auth"
 ```
 
-Suite actuelle : **2463+ tests, 0 échec**. PHPStan niveau 6 (478 fichiers, 0 erreurs). Pint 100%.
+Suite actuelle : **2655+ tests, 0 échec**. PHPStan niveau 6, 0 erreurs. Pint 100%.
 
 ## Sécurité
 
@@ -186,10 +214,14 @@ Suite actuelle : **2463+ tests, 0 échec**. PHPStan niveau 6 (478 fichiers, 0 er
 
 | Commande | Description |
 |----------|-------------|
-| `php artisan core:setup` | Setup initial du projet |
-| `php artisan roles:sync` | Synchronise les permissions Spatie |
-| `php artisan make:crud {Model}` | Génère un CRUD complet (modèle, migration, contrôleur, vues, tests) |
-| `php artisan new:project` | Initialise un nouveau projet depuis ce template |
+| `php artisan core:new-project` | Configure interactivement un nouveau projet (nom, URL, DB, modules optionnels) |
+| `php artisan core:setup` | Setup initial du projet (migrations, seeds, cache, storage link). Flag `--fresh` |
+| `php artisan app:audit` | Audit complet du projet (sécurité, performances, qualité) |
+| `php artisan app:sync-permissions` | Synchronise les rôles et permissions Spatie depuis le seeder |
+| `php artisan make:crud {module} {model}` | Génère un CRUD complet (modèle, migration, contrôleur, vues, tests). Flags `--fields=`, `--with-api`, `--force` |
+| `php artisan newsletter:digest` | Envoi du digest newsletter. Flag `--force` |
+| `php artisan newsletter:process-workflows` | Traite les workflows marketing automation |
+| `php artisan auth:unlock-user {email}` | Déverrouille un utilisateur bloqué |
 
 ### Raccourcis Makefile
 

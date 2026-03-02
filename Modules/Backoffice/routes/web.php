@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Backoffice\Http\Controllers\ActivityLogController;
+use Modules\Backoffice\Http\Controllers\AnnouncementController;
 use Modules\Backoffice\Http\Controllers\AnalyticsController;
 use Modules\Backoffice\Http\Controllers\ApiTokenController;
 use Modules\Backoffice\Http\Controllers\BackofficeHealthController;
@@ -50,6 +51,7 @@ use Modules\Backoffice\Http\Controllers\StatsController;
 use Modules\Backoffice\Http\Controllers\SystemInfoController;
 use Modules\Backoffice\Http\Controllers\TranslationController;
 use Modules\Backoffice\Http\Controllers\TrashController;
+use Modules\Backoffice\Http\Controllers\UrlRedirectController;
 use Modules\Backoffice\Http\Controllers\UserController;
 use Modules\Backoffice\Http\Controllers\WebhookController;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
@@ -237,9 +239,15 @@ Route::prefix('admin')
             Route::post('plugins/{name}/toggle', [PluginController::class, 'toggle'])->name('plugins.toggle');
         });
 
+        // ── Annonces ──
+        Route::middleware('permission:manage_settings')->group(function () {
+            Route::resource('announcements', AnnouncementController::class)->except(['show']);
+        });
+
         // ── SEO ──
         Route::middleware('permission:manage_seo')->group(function () {
             Route::resource('seo', SeoController::class)->except(['show'])->parameters(['seo' => 'metaTag']);
+            Route::resource('redirects', UrlRedirectController::class)->except(['show', 'create', 'edit']);
         });
 
         // ── Médias ──
