@@ -2,6 +2,13 @@
 @extends('backoffice::themes.backend.layouts.admin')
 @section('title', 'Créer un menu')
 @section('content')
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.menus.index') }}">Menus</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Créer</li>
+    </ol>
+</nav>
 <div class="page-content">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h4 class="mb-0">Créer un menu</h4>

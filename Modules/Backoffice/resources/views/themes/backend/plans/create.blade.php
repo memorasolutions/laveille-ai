@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.plans.index') }}">{{ __('Plans') }}</a></li>
@@ -32,7 +32,7 @@
                     </label>
                     <input type="text"
                            class="form-control @error('name') is-invalid @enderror"
-                           name="name" value="{{ old('name') }}" required>
+                           id="name" name="name" value="{{ old('name') }}" required>
                     @error('name')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -45,7 +45,7 @@
                     </label>
                     <input type="text"
                            class="form-control @error('slug') is-invalid @enderror"
-                           name="slug" value="{{ old('slug') }}" placeholder="ex: pro-monthly">
+                           id="slug" name="slug" value="{{ old('slug') }}" placeholder="ex: pro-monthly">
                     @error('slug')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -139,3 +139,47 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+    let manualSlug = false;
+
+    if (!nameInput || !slugInput) return;
+
+    function slugify(text) {
+        return text
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+    }
+
+    nameInput.addEventListener('input', function() {
+        if (!manualSlug) {
+            slugInput.value = slugify(nameInput.value);
+        }
+    });
+
+    slugInput.addEventListener('input', function() {
+        if (slugInput.value.trim() === '') {
+            manualSlug = false;
+        } else {
+            manualSlug = true;
+        }
+    });
+
+    slugInput.addEventListener('blur', function() {
+        if (slugInput.value.trim() !== '') {
+            slugInput.value = slugify(slugInput.value);
+        }
+    });
+});
+</script>
+@endpush

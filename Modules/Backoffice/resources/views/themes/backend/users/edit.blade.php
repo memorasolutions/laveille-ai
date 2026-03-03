@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">{{ __('Utilisateurs') }}</a></li>
@@ -42,8 +42,8 @@
                             <label class="form-label fw-medium" for="name">
                                 {{ __('Nom') }} <span class="text-danger">*</span>
                             </label>
-                            <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required
-                                   class="form-control @error('name') is-invalid @enderror">
+                            <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required aria-required="true"
+                                   class="form-control @error('name') is-invalid @enderror" autocomplete="name">
                             @error('name')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -52,8 +52,8 @@
                             <label class="form-label fw-medium" for="email">
                                 {{ __('Courriel') }} <span class="text-danger">*</span>
                             </label>
-                            <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" required
-                                   class="form-control @error('email') is-invalid @enderror">
+                            <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" required aria-required="true"
+                                   class="form-control @error('email') is-invalid @enderror" autocomplete="email">
                             @error('email')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -64,7 +64,7 @@
                             </label>
                             <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
                                    class="form-control @error('phone') is-invalid @enderror"
-                                   placeholder="{{ __('+1 514 000-0000') }}" maxlength="20">
+                                   placeholder="{{ __('+1 514 000-0000') }}" maxlength="20" autocomplete="tel">
                             @error('phone')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -87,7 +87,7 @@
                                 <small class="text-muted fw-normal">({{ __('laisser vide pour ne pas changer') }})</small>
                             </label>
                             <input type="password" id="password" name="password"
-                                   class="form-control @error('password') is-invalid @enderror">
+                                   class="form-control @error('password') is-invalid @enderror" autocomplete="new-password">
                             @error('password')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -97,7 +97,7 @@
                                 {{ __('Confirmer le mot de passe') }}
                             </label>
                             <input type="password" id="password_confirmation" name="password_confirmation"
-                                   class="form-control">
+                                   class="form-control" autocomplete="new-password">
                         </div>
                         <div class="col-12">
                             <div class="border rounded p-3 d-flex align-items-center justify-content-between gap-3">

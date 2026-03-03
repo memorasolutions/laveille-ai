@@ -295,6 +295,32 @@
                                         <i data-lucide="user" style="width:16px;height:16px;"></i>
                                         {{ __('Profil') }}
                                     </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('user.notifications') }}">
+                                        <i data-lucide="bell" style="width:16px;height:16px;"></i>
+                                        {{ __('Notifications') }}
+                                        @if(($unreadCount ?? 0) > 0)
+                                            <span class="badge bg-danger rounded-pill ms-auto">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                                        @endif
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('user.subscription') }}">
+                                        <i data-lucide="credit-card" style="width:16px;height:16px;"></i>
+                                        {{ __('Abonnement') }}
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('user.sessions') }}">
+                                        <i data-lucide="monitor" style="width:16px;height:16px;"></i>
+                                        {{ __('Sessions') }}
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('user.activity') }}">
+                                        <i data-lucide="activity" style="width:16px;height:16px;"></i>
+                                        {{ __('Activité') }}
+                                    </a>
+                                    @if(auth()->user()->hasRole(['admin', 'super_admin']))
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('admin.dashboard') }}">
+                                            <i data-lucide="shield" style="width:16px;height:16px;"></i>
+                                            {{ __('Administration') }}
+                                        </a>
+                                    @endif
                                     <div class="dropdown-divider"></div>
                                     <form method="POST" action="{{ route('logout') }}" id="user-logout-form">
                                         @csrf

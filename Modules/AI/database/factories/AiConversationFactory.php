@@ -24,7 +24,7 @@ class AiConversationFactory extends Factory
             'user_id' => User::factory(),
             'session_id' => fake()->uuid(),
             'title' => fake()->sentence(3),
-            'status' => 'active',
+            'status' => \Modules\AI\Enums\ConversationStatus::AiActive,
             'model' => 'gpt-4o-mini',
             'system_prompt' => null,
             'context' => [],

@@ -2,7 +2,7 @@
 @extends('backoffice::themes.backend.layouts.admin')
 @section('title', 'Nouvelle experience')
 @section('content')
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.experiments.index') }}">Experiences A/B</a></li>
@@ -38,13 +38,48 @@
                     @enderror
                 </div>
 
-                <div class="mb-3">
-                    <label for="variants" class="form-label">Variantes <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('variants') is-invalid @enderror" id="variants" name="variants" value="{{ old('variants') }}" placeholder="control, variant_a, variant_b" required>
-                    <div class="form-text">Separez les variantes par des virgules.</div>
+                <div class="mb-3" x-data="{
+                    variants: {{ json_encode(old('variants', ['control', ''])) }},
+                    addVariant() {
+                        this.variants.push('');
+                        this.$nextTick(() => lucide.createIcons());
+                    },
+                    removeVariant(index) {
+                        if (this.variants.length > 2) {
+                            this.variants.splice(index, 1);
+                        }
+                    }
+                }">
+                    <label class="form-label">Variantes <span class="text-danger">*</span></label>
+
+                    <template x-for="(variant, index) in variants" :key="index">
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control"
+                                   :name="`variants[${index}]`"
+                                   x-model="variants[index]"
+                                   :placeholder="`Variante ${index + 1}`"
+                                   :aria-label="`Variante ${index + 1}`"
+                                   maxlength="100" required>
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                    @click="removeVariant(index)"
+                                    :disabled="variants.length <= 2"
+                                    :aria-label="`Supprimer la variante ${index + 1}`">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </div>
+                    </template>
+
                     @error('variants')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
+                    @error('variants.*')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                            @click="addVariant()" aria-label="Ajouter une variante">
+                        <i data-lucide="plus" class="me-1"></i> Ajouter une variante
+                    </button>
                 </div>
 
                 <button type="submit" class="btn btn-primary">

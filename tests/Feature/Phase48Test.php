@@ -46,7 +46,8 @@ it('scheduler admin page loads for admin', function () {
 it('scheduler controller returns tasks in view', function () {
     $this->actingAs($this->admin)
         ->get('/admin/scheduler')
-        ->assertViewHas('tasks');
+        ->assertViewHas('systemTasks')
+        ->assertViewHas('customTasks');
 });
 
 // --- Mail Log ---

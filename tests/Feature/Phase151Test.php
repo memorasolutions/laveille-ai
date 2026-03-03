@@ -93,38 +93,39 @@ it('search service returns searchable models from config', function () {
 
 // --- API Search endpoints ---
 
-it('search api is publicly accessible', function () {
-    $response = $this->getJson('/api/v1/search?q=test');
-    $response->assertOk();
+it('search api requires authentication', function () {
+    $this->getJson('/api/v1/search?q=test')->assertStatus(401);
 });
 
 it('search api validates query parameter', function () {
-    $response = $this->getJson('/api/v1/search');
-    $response->assertStatus(422);
+    $user = \App\Models\User::factory()->create();
+    $this->actingAs($user, 'sanctum')->getJson('/api/v1/search')->assertStatus(422);
 });
 
 it('search api validates minimum query length', function () {
-    $response = $this->getJson('/api/v1/search?q=a');
-    $response->assertStatus(422);
+    $user = \App\Models\User::factory()->create();
+    $this->actingAs($user, 'sanctum')->getJson('/api/v1/search?q=a')->assertStatus(422);
 });
 
 it('search api returns results for plans', function () {
+    $user = \App\Models\User::factory()->create();
     Plan::factory()->create(['name' => 'UniqueTestPlan', 'is_active' => true]);
 
-    $response = $this->getJson('/api/v1/search?q=UniqueTestPlan');
+    $response = $this->actingAs($user, 'sanctum')->getJson('/api/v1/search?q=UniqueTestPlan');
     $response->assertOk();
     $response->assertJsonFragment(['success' => true]);
 });
 
 it('search api filters by model', function () {
+    $user = \App\Models\User::factory()->create();
     Plan::factory()->create(['name' => 'FilterTestPlan', 'is_active' => true]);
 
-    $response = $this->getJson('/api/v1/search?q=FilterTestPlan&model=Plan');
+    $response = $this->actingAs($user, 'sanctum')->getJson('/api/v1/search?q=FilterTestPlan&model=Plan');
     $response->assertOk();
     $response->assertJsonFragment(['success' => true]);
 });
 
 it('search api rejects invalid model filter', function () {
-    $response = $this->getJson('/api/v1/search?q=test&model=InvalidModel');
-    $response->assertStatus(422);
+    $user = \App\Models\User::factory()->create();
+    $this->actingAs($user, 'sanctum')->getJson('/api/v1/search?q=test&model=InvalidModel')->assertStatus(422);
 });

@@ -42,18 +42,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                Contenu <span class="text-danger ms-1">*</span>
-                            </label>
-                            <textarea name="content" rows="12"
-                                      class="form-control @error('content') is-invalid @enderror"
-                                      style="resize:none;"
-                                      required
-                                      placeholder="Contenu de la campagne...">{{ old('content') }}</textarea>
+                            <x-editor::tiptap name="content" :value="old('content', '')" label="Contenu" />
                             @error('content')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
-                            <div class="form-text text-muted">Le contenu sera envoyé tel quel à tous les abonnés actifs.</div>
+                            <div class="form-text text-muted mt-2">Le contenu sera envoyé tel quel à tous les abonnés actifs.</div>
                         </div>
 
                         <div class="d-flex gap-2 pt-2">

@@ -2,7 +2,7 @@
 @extends('backoffice::themes.backend.layouts.admin', ['title' => $team->name, 'subtitle' => 'Équipes'])
 
 @section('breadcrumbs')
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">Équipes</a></li>

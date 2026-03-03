@@ -115,18 +115,24 @@ test('SearchService getSearchableModels lit la config', function () {
 // API /api/v1/search
 // ============================================================
 
+test('API search requiert authentification', function () {
+    $this->getJson('/api/v1/search?q=test')->assertStatus(401);
+});
+
 test('API search nécessite le paramètre q', function () {
-    $this->getJson('/api/v1/search')->assertStatus(422);
+    $user = User::factory()->create();
+    $this->actingAs($user, 'sanctum')->getJson('/api/v1/search')->assertStatus(422);
 });
 
 test('API search rejette q < 2 caractères', function () {
-    $this->getJson('/api/v1/search?q=a')->assertStatus(422);
+    $user = User::factory()->create();
+    $this->actingAs($user, 'sanctum')->getJson('/api/v1/search?q=a')->assertStatus(422);
 });
 
 test('API search retourne des résultats', function () {
-    User::factory()->create(['name' => 'Charlie Bravo']);
+    $user = User::factory()->create(['name' => 'Charlie Bravo']);
 
-    $this->getJson('/api/v1/search?q=Charlie')
+    $this->actingAs($user, 'sanctum')->getJson('/api/v1/search?q=Charlie')
         ->assertOk()
         ->assertJsonStructure(['success', 'data']);
 });

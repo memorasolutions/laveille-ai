@@ -43,3 +43,13 @@ Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '
 
 // Newsletter digest (weekly, Monday 09:00)
 Schedule::command('newsletter:digest')->weeklyOn(1, '09:00');
+
+// Custom scheduled tasks from database
+try {
+    foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
+        Schedule::command($task->command)->cron($task->cron_expression)
+            ->after(fn () => $task->markAsRun());
+    }
+} catch (\Throwable) {
+    // Table may not exist yet during migrations
+}

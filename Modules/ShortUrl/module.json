@@ -1,0 +1,11 @@
+{
+    "name": "ShortUrl",
+    "alias": "shorturl",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ShortUrl\\Providers\\ShortUrlServiceProvider"
+    ],
+    "files": []
+}

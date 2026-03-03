@@ -1,0 +1,10 @@
+{
+    "name": "modules/shorturl",
+    "autoload": {
+        "psr-4": {
+            "Modules\\ShortUrl\\": "app/",
+            "Modules\\ShortUrl\\Database\\": "database/",
+            "Modules\\ShortUrl\\Tests\\": "tests/"
+        }
+    }
+}

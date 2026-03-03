@@ -53,6 +53,7 @@ trait HasCustomFields
         $storedValue = match ($definition->type) {
             'checkbox' => $value ? '1' : '0',
             'date' => $value instanceof \DateTime ? $value->format('Y-m-d') : (string) $value,
+            'repeater' => is_array($value) ? json_encode($value, JSON_THROW_ON_ERROR) : (is_string($value) ? $value : '[]'),
             default => is_null($value) ? null : (string) $value,
         };
 

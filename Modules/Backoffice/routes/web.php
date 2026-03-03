@@ -170,6 +170,7 @@ Route::prefix('admin')
             Route::post('backups/run', [BackupController::class, 'run'])->name('backups.run');
             Route::get('backups/download', [BackupController::class, 'download'])->name('backups.download');
             Route::delete('backups/delete', [BackupController::class, 'delete'])->name('backups.delete');
+            Route::delete('backups/bulk-delete', [BackupController::class, 'bulkDelete'])->name('backups.bulk-delete');
         });
 
         // ── Export CSV ──
@@ -261,6 +262,8 @@ Route::prefix('admin')
         Route::middleware('permission:view_health')->group(function () {
             Route::get('health', [BackofficeHealthController::class, 'index'])->name('health');
             Route::post('health/refresh', [BackofficeHealthController::class, 'refresh'])->name('health.refresh');
+            Route::post('health/fix', [BackofficeHealthController::class, 'fix'])->name('health.fix');
+            Route::post('health/explain', [BackofficeHealthController::class, 'explain'])->name('health.explain');
         });
 
         // ── Journaux application ──
@@ -277,6 +280,12 @@ Route::prefix('admin')
             Route::delete('failed-jobs', [FailedJobController::class, 'destroyAll'])->name('failed-jobs.destroy-all');
             Route::post('maintenance/toggle', [MaintenanceController::class, 'toggle'])->name('maintenance.toggle');
             Route::get('scheduler', [SchedulerController::class, 'index'])->name('scheduler');
+            Route::get('scheduler/create', [SchedulerController::class, 'create'])->name('scheduler.create');
+            Route::post('scheduler', [SchedulerController::class, 'store'])->name('scheduler.store');
+            Route::get('scheduler/{scheduledTask}/edit', [SchedulerController::class, 'edit'])->name('scheduler.edit');
+            Route::put('scheduler/{scheduledTask}', [SchedulerController::class, 'update'])->name('scheduler.update');
+            Route::delete('scheduler/{scheduledTask}', [SchedulerController::class, 'destroy'])->name('scheduler.destroy');
+            Route::post('scheduler/{scheduledTask}/toggle', [SchedulerController::class, 'toggle'])->name('scheduler.toggle');
             Route::get('mail-log', [MailLogController::class, 'index'])->name('mail-log');
             Route::get('system-info', [SystemInfoController::class, 'index'])->name('system-info');
             Route::get('data-retention', [DataRetentionController::class, 'index'])->name('data-retention');

@@ -25,12 +25,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Contenu <span class="text-danger">*</span></label>
-                        <textarea name="content" rows="12"
-                                  class="form-control @error('content') is-invalid @enderror"
-                                  required
-                                  placeholder="Contenu de la campagne...">{{ old('content') }}</textarea>
-                        @error('content')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <x-editor::tiptap name="content" :value="old('content', '')" label="Contenu" />
+                        @error('content')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         <div class="form-text text-muted mt-2">Le contenu sera envoyé tel quel à tous les abonnés actifs.</div>
                     </div>
 

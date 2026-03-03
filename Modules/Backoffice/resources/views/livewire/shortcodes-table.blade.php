@@ -1,96 +1,160 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
+    {{-- Flash messages --}}
     @if(session('success'))
-        <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-gray-800 dark:text-green-400">
+        <div class="alert alert-success d-flex align-items-center gap-2" role="alert">
+            <i data-lucide="check-circle" class="icon-sm"></i>
             {{ session('success') }}
         </div>
     @endif
     @if(session('error'))
-        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-gray-800 dark:text-red-400">
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+            <i data-lucide="alert-triangle" class="icon-sm"></i>
             {{ session('error') }}
         </div>
     @endif
 
+    {{-- Bulk actions bar --}}
     @if(count($selected) > 0)
-        <div class="mb-4 flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
-            <select wire:model.live="bulkAction" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+            <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
+            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
                 <option value="">{{ __('Choisir une action') }}</option>
                 <option value="delete">{{ __('Supprimer') }}</option>
             </select>
-            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600">
-                {{ __('Exécuter') }}
+            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
+                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
             </button>
         </div>
     @endif
 
-    <div class="flex items-center gap-3 mb-4">
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Rechercher..." class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+    {{-- Search bar --}}
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <div class="input-group" style="width:220px">
+            <span class="input-group-text">
+                <i data-lucide="search" class="icon-sm"></i>
+            </span>
+            <input type="text" wire:model.live.debounce.300ms="search"
+                   class="form-control form-control-sm"
+                   placeholder="{{ __('Rechercher...') }}"
+                   aria-label="{{ __('Rechercher des shortcodes') }}">
+        </div>
         @if($search)
-            <button wire:click="resetFilters" class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400">Réinitialiser</button>
+            <button wire:click="resetFilters"
+                    class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
+                <i data-lucide="x-circle" class="icon-sm"></i> {{ __('Réinitialiser') }}
+            </button>
         @endif
     </div>
 
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-700 dark:text-gray-200">
-            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
-                <tr>
-                    <th class="px-6 py-3" style="width:40px">
-                        <input type="checkbox" wire:model.live="selectAll">
+    {{-- Table --}}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr class="border-bottom">
+                    <th style="width:40px">
+                        <input type="checkbox" wire:model.live="selectAll" class="form-check-input" style="cursor:pointer" aria-label="{{ __('Tout sélectionner') }}">
                     </th>
-                    <th wire:click="sort('tag')" class="px-6 py-3 cursor-pointer">
-                        <div class="flex items-center gap-1">
-                            Tag
-                            @if($sortField === 'tag')
-                                <span>{{ $sortDirection === 'asc' ? "\u2191" : "\u2193" }}</span>
-                            @endif
-                        </div>
+                    <th class="fw-medium" style="cursor:pointer" wire:click="sort('tag')">
+                        Tag
+                        @if($sortField === 'tag')
+                            <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
+                        @else
+                            <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
+                        @endif
                     </th>
-                    <th wire:click="sort('name')" class="px-6 py-3 cursor-pointer">
-                        <div class="flex items-center gap-1">
-                            Nom
-                            @if($sortField === 'name')
-                                <span>{{ $sortDirection === 'asc' ? "\u2191" : "\u2193" }}</span>
-                            @endif
-                        </div>
+                    <th class="fw-medium" style="cursor:pointer" wire:click="sort('name')">
+                        {{ __('Nom') }}
+                        @if($sortField === 'name')
+                            <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
+                        @else
+                            <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
+                        @endif
                     </th>
-                    <th class="px-6 py-3">Template</th>
-                    <th class="px-6 py-3">Statut</th>
-                    <th class="px-6 py-3">Actions</th>
+                    <th class="fw-medium">Template</th>
+                    <th class="fw-medium">{{ __('Paramètres') }}</th>
+                    <th class="fw-medium">{{ __('Statut') }}</th>
+                    <th class="fw-medium text-end" style="width:80px">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($shortcodes as $shortcode)
-                    <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td class="px-6 py-4">
-                            <input type="checkbox" wire:model.live="selected" value="{{ $shortcode->id }}">
+                    <tr>
+                        <td>
+                            <input type="checkbox" wire:model.live="selected" value="{{ $shortcode->id }}" class="form-check-input" style="cursor:pointer" aria-label="{{ __('Sélectionner') }}">
                         </td>
-                        <td class="px-6 py-4 font-mono text-indigo-600 dark:text-indigo-400">{{ $shortcode->tag }}</td>
-                        <td class="px-6 py-4">{{ $shortcode->name }}</td>
-                        <td class="px-6 py-4">
-                            <span class="font-mono text-xs text-gray-500 dark:text-gray-400">{{ Str::limit($shortcode->html_template, 50) }}</span>
+                        <td>
+                            <code class="bg-primary bg-opacity-10 text-primary px-2 py-1 rounded small">[{{ $shortcode->tag }}]</code>
                         </td>
-                        <td class="px-6 py-4">
-                            @if($shortcode->is_active)
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Actif</span>
-                            @else
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Inactif</span>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                {{ $shortcode->name }}
+                                @if($shortcode->has_content)
+                                    <i data-lucide="file-text" class="icon-sm text-info" title="{{ __('Accepte du contenu') }}" aria-label="{{ __('Accepte du contenu') }}"></i>
+                                @endif
+                            </div>
+                            @if($shortcode->description)
+                                <div class="small text-muted mt-1">{{ Str::limit($shortcode->description, 60) }}</div>
                             @endif
                         </td>
-                        <td class="px-6 py-4">
-                            <a href="{{ route('admin.shortcodes.edit', $shortcode) }}" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">Modifier</a>
+                        <td>
+                            <code class="small text-muted">{{ Str::limit($shortcode->html_template, 50) }}</code>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                @forelse($shortcode->parameters ?? [] as $param)
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ $param }}</span>
+                                @empty
+                                    <span class="text-muted small">{{ __('Aucun') }}</span>
+                                @endforelse
+                            </div>
+                        </td>
+                        <td>
+                            @if($shortcode->is_active)
+                                <span class="badge bg-success bg-opacity-10 text-success">{{ __('Actif') }}</span>
+                            @else
+                                <span class="badge bg-danger bg-opacity-10 text-danger">{{ __('Inactif') }}</span>
+                            @endif
+                        </td>
+                        <td class="text-end">
+                            <div class="dropdown" x-data="{ open: false }" @click.outside="open = false">
+                                <button @click="open = !open"
+                                        class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center"
+                                        style="width:32px;height:32px"
+                                        aria-label="{{ __('Actions pour') }} {{ $shortcode->name }}">
+                                    <i data-lucide="more-vertical" class="icon-sm"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" :class="{ show: open }" x-show="open" x-cloak style="min-width:140px">
+                                    <a href="{{ route('admin.shortcodes.edit', $shortcode) }}"
+                                       class="dropdown-item d-flex align-items-center gap-2">
+                                        <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
+                                    </a>
+                                    <hr class="dropdown-divider">
+                                    <form action="{{ route('admin.shortcodes.destroy', $shortcode) }}" method="POST"
+                                          onsubmit="return confirm('{{ __('Supprimer ce shortcode ?') }}')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                            <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucun shortcode trouvé.</td>
+                        <td colspan="7" class="py-5 text-center text-muted">
+                            <i data-lucide="code" class="d-block mx-auto mb-2" style="width:32px;height:32px"></i>
+                            {{ __('Aucun shortcode trouvé.') }}
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    <div class="mt-4">
-        {{ $shortcodes->links() }}
-    </div>
+    @if($shortcodes->hasPages())
+        <div class="mt-3">{{ $shortcodes->links() }}</div>
+    @endif
 </div>

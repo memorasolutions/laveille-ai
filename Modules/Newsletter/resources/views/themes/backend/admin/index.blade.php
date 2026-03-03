@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('Newsletter') }}</li>

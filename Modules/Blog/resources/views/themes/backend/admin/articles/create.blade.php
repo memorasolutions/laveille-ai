@@ -2,7 +2,7 @@
 @extends('backoffice::themes.backend.layouts.admin', ['title' => 'Nouvel article', 'subtitle' => 'Blog'])
 
 @section('breadcrumbs')
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item">Blog</li>
@@ -41,7 +41,7 @@
                         </label>
                         <input type="text" name="title"
                                class="form-control @error('title') is-invalid @enderror"
-                               value="{{ old('title') }}" required>
+                               value="{{ old('title') }}" required aria-required="true" autocomplete="off">
                         @error('title')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

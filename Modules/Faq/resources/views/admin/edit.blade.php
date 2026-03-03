@@ -2,7 +2,7 @@
 @extends('backoffice::themes.backend.layouts.admin')
 @section('title', 'Modifier la question FAQ')
 @section('content')
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.faqs.index') }}">FAQ</a></li>
@@ -40,11 +40,36 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    @php $currentCat = old('category', $faq->category); @endphp
+                    <div class="col-md-6 mb-3" x-data="{ showNewInput: {{ $currentCat && !$categories->contains($currentCat) ? 'true' : 'false' }} }">
                         <label for="category" class="form-label">Catégorie</label>
-                        <input type="text" class="form-control @error('category') is-invalid @enderror" id="category" name="category" value="{{ old('category', $faq->category) }}" maxlength="100" placeholder="Ex: Général, Facturation, Technique...">
+
+                        <select id="category" name="category"
+                                class="form-select @error('category') is-invalid @enderror"
+                                x-show="!showNewInput" :disabled="showNewInput"
+                                x-on:change="showNewInput = ($event.target.value === '__new__')">
+                            <option value="">Sans catégorie</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat }}" @selected($currentCat == $cat)>{{ $cat }}</option>
+                            @endforeach
+                            <option value="__new__">Nouvelle catégorie...</option>
+                        </select>
+
+                        <div x-show="showNewInput" x-transition>
+                            <div class="input-group">
+                                <input type="text" name="category"
+                                       class="form-control @error('category') is-invalid @enderror"
+                                       :disabled="!showNewInput"
+                                       value="{{ $currentCat && !$categories->contains($currentCat) ? $currentCat : '' }}"
+                                       placeholder="Nom de la nouvelle catégorie" maxlength="100">
+                                <button type="button" class="btn btn-outline-secondary"
+                                        x-on:click="showNewInput = false"
+                                        aria-label="Revenir aux catégories existantes">&times;</button>
+                            </div>
+                        </div>
+
                         @error('category')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">

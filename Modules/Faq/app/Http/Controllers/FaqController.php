@@ -27,7 +27,9 @@ class FaqController extends Controller
 
     public function create(): View
     {
-        return view('faq::admin.create');
+        $categories = Faq::whereNotNull('category')->distinct()->pluck('category')->sort()->values();
+
+        return view('faq::admin.create', compact('categories'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -40,6 +42,9 @@ class FaqController extends Controller
         ]);
 
         $validated['answer'] = clean($validated['answer']);
+        if (($validated['category'] ?? '') === '__new__') {
+            $validated['category'] = null;
+        }
         $validated['order'] = (int) Faq::max('order') + 1;
 
         Faq::create($validated);
@@ -50,7 +55,9 @@ class FaqController extends Controller
 
     public function edit(Faq $faq): View
     {
-        return view('faq::admin.edit', compact('faq'));
+        $categories = Faq::whereNotNull('category')->distinct()->pluck('category')->sort()->values();
+
+        return view('faq::admin.edit', compact('faq', 'categories'));
     }
 
     public function update(Request $request, Faq $faq): RedirectResponse
@@ -63,6 +70,9 @@ class FaqController extends Controller
         ]);
 
         $validated['answer'] = clean($validated['answer']);
+        if (($validated['category'] ?? '') === '__new__') {
+            $validated['category'] = null;
+        }
 
         $faq->update($validated);
 

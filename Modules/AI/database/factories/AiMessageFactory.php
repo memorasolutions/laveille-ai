@@ -21,7 +21,7 @@ class AiMessageFactory extends Factory
     {
         return [
             'conversation_id' => AiConversation::factory(),
-            'role' => fake()->randomElement(['user', 'assistant']),
+            'role' => fake()->randomElement([\Modules\AI\Enums\MessageRole::User, \Modules\AI\Enums\MessageRole::Assistant]),
             'content' => fake()->paragraph(),
             'tokens' => fake()->numberBetween(10, 500),
             'model' => 'gpt-4o-mini',

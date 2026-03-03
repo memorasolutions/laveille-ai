@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('Santé système') }}</li>
@@ -139,14 +139,17 @@
                                 default   => 'bg-secondary',
                             };
                             $instruction = null;
+                            $checkKey = null;
                             if (in_array($status, ['warning', 'failed', 'crashed'])) {
                                 foreach ($remediation as $key => $text) {
                                     if (str_contains($result->name, $key)) {
                                         $instruction = $text;
+                                        $checkKey = $key;
                                         break;
                                     }
                                 }
                             }
+                            $fixableChecks = ['OptimizedApp', 'DebugMode', 'Cache'];
                         @endphp
                         <tr>
                             <td class="py-3 px-4 fw-semibold text-body">{{ $result->name }}</td>
@@ -162,12 +165,28 @@
                                         <i data-lucide="check" class="icon-sm"></i>
                                         {{ __('Aucune action requise') }}
                                     </span>
-                                @elseif($instruction)
-                                    <div class="p-2 rounded small health-instruction {{ $status === 'warning' ? 'bg-warning bg-opacity-10 text-warning' : 'bg-danger bg-opacity-10 text-danger' }}" style="word-break:break-word;">
-                                        {!! $instruction !!}
-                                    </div>
                                 @else
-                                    <span class="text-muted">—</span>
+                                    @if($instruction)
+                                        <div class="p-2 rounded small health-instruction mb-2 {{ $status === 'warning' ? 'bg-warning bg-opacity-10 text-warning' : 'bg-danger bg-opacity-10 text-danger' }}" style="word-break:break-word;">
+                                            {!! $instruction !!}
+                                        </div>
+                                    @endif
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        @if($checkKey && in_array($checkKey, $fixableChecks))
+                                            <button type="button" class="btn btn-sm btn-warning d-inline-flex align-items-center gap-1"
+                                                    onclick="healthFix('{{ $checkKey }}', this)">
+                                                <i data-lucide="wrench" class="icon-sm"></i>
+                                                {{ __('Corriger') }}
+                                            </button>
+                                        @endif
+                                        @if($checkKey)
+                                            <button type="button" class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1"
+                                                    onclick="healthExplain('{{ $checkKey }}')">
+                                                <i data-lucide="info" class="icon-sm"></i>
+                                                {{ __('Expliquer') }}
+                                            </button>
+                                        @endif
+                                    </div>
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-muted small">
@@ -181,6 +200,86 @@
         @endif
     </div>
 </div>
+
+{{-- Modal explication --}}
+<div class="modal fade" id="healthExplainModal" tabindex="-1" aria-labelledby="healthExplainModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="healthExplainModalLabel">{{ __('Explication') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Fermer') }}"></button>
+            </div>
+            <div class="modal-body">
+                <div id="explainLoading" class="text-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{{ __('Chargement...') }}</span>
+                    </div>
+                </div>
+                <div id="explainContent">
+                    <div class="mb-3">
+                        <h6 class="text-muted small fw-semibold">{{ __('Description') }}</h6>
+                        <div id="explainText" class="p-3 bg-light rounded small"></div>
+                    </div>
+                    <div class="d-flex gap-3">
+                        <div>
+                            <span class="text-muted small fw-semibold">{{ __('Corrigeable automatiquement') }}</span>
+                            <span id="explainFixable" class="badge ms-1"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Fermer') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('custom-scripts')
+<script>
+function healthFix(check, btn) {
+    if (!confirm('{{ __("Lancer la correction automatique ?") }}')) return;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> {{ __("Correction...") }}';
+    fetch('{{ route("admin.health.fix") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        body: JSON.stringify({ check: check })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) { location.reload(); }
+        else { alert(data.message); btn.disabled = false; btn.innerHTML = '<i data-lucide="wrench" class="icon-sm"></i> {{ __("Corriger") }}'; lucide.createIcons(); }
+    })
+    .catch(() => { alert('{{ __("Erreur réseau") }}'); btn.disabled = false; });
+}
+function healthExplain(check) {
+    var modal = new bootstrap.Modal(document.getElementById('healthExplainModal'));
+    document.getElementById('explainLoading').classList.remove('d-none');
+    document.getElementById('explainContent').classList.add('d-none');
+    modal.show();
+    fetch('{{ route("admin.health.explain") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        body: JSON.stringify({ check: check })
+    })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('explainText').textContent = data.explanation || '{{ __("Aucune explication disponible.") }}';
+        var badge = document.getElementById('explainFixable');
+        badge.textContent = data.fixable ? '{{ __("Oui") }}' : '{{ __("Non") }}';
+        badge.className = 'badge ms-1 ' + (data.fixable ? 'bg-success' : 'bg-secondary');
+        document.getElementById('explainLoading').classList.add('d-none');
+        document.getElementById('explainContent').classList.remove('d-none');
+    })
+    .catch(() => {
+        document.getElementById('explainText').textContent = '{{ __("Erreur lors du chargement.") }}';
+        document.getElementById('explainLoading').classList.add('d-none');
+        document.getElementById('explainContent').classList.remove('d-none');
+    });
+}
+</script>
+@endpush
 
 @push('plugin-styles')
 <style>

@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.pages.index') }}">{{ __('Pages') }}</a></li>
@@ -46,7 +46,7 @@
                         </label>
                         <input type="text" name="title"
                                class="form-control @error('title') is-invalid @enderror"
-                               value="{{ old('title', $page->title) }}" required>
+                               value="{{ old('title', $page->title) }}" required aria-required="true" autocomplete="off">
                         @error('title')
                             <small class="text-danger">{{ $message }}</small>
                         @enderror
@@ -75,14 +75,14 @@
                 <div class="p-4">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Statut</label>
-                        <select name="status" class="form-control">
+                        <select name="status" class="form-control" aria-label="Statut de la page">
                             <option value="draft" {{ old('status', $page->status) === 'draft' ? 'selected' : '' }}>Brouillon</option>
                             <option value="published" {{ old('status', $page->status) === 'published' ? 'selected' : '' }}>Publié</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Template</label>
-                        <select name="template" class="form-control">
+                        <select name="template" class="form-control" aria-label="Template de la page">
                             @foreach(\Modules\Pages\Models\StaticPage::TEMPLATES as $key => $label)
                                 <option value="{{ $key }}" {{ old('template', $page->template) === $key ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach

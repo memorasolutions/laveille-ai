@@ -31,7 +31,7 @@
             {{-- Dark/Light mode toggle --}}
             <li class="theme-switcher-wrapper nav-item">
                 <input type="checkbox" value="" id="theme-switcher">
-                <label for="theme-switcher">
+                <label for="theme-switcher" aria-label="{{ __('Basculer mode clair/sombre') }}">
                     <div class="box">
                         <div class="ball"></div>
                         <div class="icons">
@@ -46,20 +46,20 @@
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     @if(app()->getLocale() === 'fr')
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/fr.svg') }}" class="w-20px" alt="fr">
+                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/fr.svg') }}" class="w-20px" alt="Drapeau français">
                         <span class="ms-2 d-none d-md-inline-block">Français</span>
                     @else
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/us.svg') }}" class="w-20px" alt="en">
+                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/us.svg') }}" class="w-20px" alt="American flag">
                         <span class="ms-2 d-none d-md-inline-block">English</span>
                     @endif
                 </a>
                 <div class="dropdown-menu" aria-labelledby="languageDropdown">
                     <a href="{{ route('locale.switch', 'fr') }}" class="dropdown-item py-2 d-flex">
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/fr.svg') }}" class="w-20px" alt="fr">
+                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/fr.svg') }}" class="w-20px" alt="Drapeau français">
                         <span class="ms-2">Français</span>
                     </a>
                     <a href="{{ route('locale.switch', 'en') }}" class="dropdown-item py-2 d-flex">
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/us.svg') }}" class="w-20px" alt="en">
+                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/us.svg') }}" class="w-20px" alt="American flag">
                         <span class="ms-2">English</span>
                     </a>
                 </div>
@@ -85,7 +85,7 @@
                     <div class="d-flex flex-column align-items-center border-bottom px-5 py-3">
                         <div class="mb-3">
                             @if(auth()->user()->avatar)
-                                <img class="w-80px h-80px rounded-circle" src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="">
+                                <img class="w-80px h-80px rounded-circle" src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ __('Avatar de') }} {{ auth()->user()->name }}">
                             @else
                                 <span class="w-80px h-80px rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="font-size: 24px; font-weight: 700;">
                                     {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 2)) }}

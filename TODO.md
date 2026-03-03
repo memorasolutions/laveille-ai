@@ -1,8 +1,8 @@
 # TODO - Laravel SaaS Boilerplate
 
-**Derniere mise a jour** : 2026-03-02
+**Derniere mise a jour** : 2026-03-03
 **Voir aussi** : PROGRESS_REPORT.md (rapport complet croise docs/code)
-**Metriques verifiees** : 2734 test cases (0 fail), 34 modules, 585+ routes, 101 migrations, PHPStan 0 erreurs niveau 6
+**Metriques verifiees** : 278 fichiers tests (0 fail), 35 modules, 598 routes, 99 migrations, PHPStan 0 erreurs niveau 6
 
 ---
 
@@ -181,22 +181,50 @@
 
 ---
 
+## Completes - Personnalisation admin (sessions 2026-03-02/03)
+
+- [x] Palette 9 couleurs avec preview temps reel (primary, secondary, success, warning, danger, info, sidebar_bg, header_bg, body_bg)
+- [x] Font picker 15 polices avec apercu dans sa propre police (Alpine.js dropdown)
+- [x] Typographie titre topbar (6 proprietes : police, taille, graisse, letter-spacing, word-spacing, text-transform)
+- [x] Mini-mockup apercu global (sidebar, header, badges couleurs)
+- [x] TipTap sur site_description et login_subtitle (composant x-editor::tiptap)
+- [x] Contour swatches couleur blancs (border Bootstrap)
+- [x] Deduplication page Parametres → redirect vers Personnalisation
+- [x] Fond blanc defaut (#ffffff au lieu de #f4f5f7/#f9fafb, SCSS + CSS variables)
+- [x] 13 tests branding (41 assertions)
+
+## Completes - Refonte UX/UI formulaires (session 2026-03-02)
+
+- [x] ABTest variants CSV → Alpine.js repeater
+- [x] FAQ category text → select avec "Nouvelle categorie"
+- [x] Plans slug auto-generation JS
+- [x] Newsletter textarea → TipTap editor
+- [x] Menu breadcrumbs sur create
+- [x] Tenancy help texts ameliores
+
+## Completes - Module ShortUrl (session 2026-03-02)
+
+- [x] URL shortener self-hosted (analytics, QR, expiration, password, UTM)
+- [x] 12 tests ShortUrl (22 assertions)
+
 ## Restant - CORE reutilisable
 
 ### Analyse gaps (effectuee 2026-03-02)
-Le CORE est fonctionnellement complet. Les gaps identifies (observabilite, data residency, analytics self-service, real-time collab, IaC Docker) sont tous du over-engineering pour un template reutilisable. Les features critiques (Project Factory CLI, feature flags Pennant, notifications unifiees) EXISTENT DEJA.
+Le CORE est fonctionnellement complet. Les gaps identifies (observabilite, data residency, analytics self-service, real-time collab, IaC Docker) sont tous du over-engineering pour un template reutilisable.
 
 ### Taches restantes (par priorite)
-- [x] Fix test Phase161Test (toHaveCount 11 → 18)
-- [x] Mise a jour README.md badges et metriques (2734+ tests, 34 modules, GraphQL v2, marketing, multi-tenant)
-- [x] Mise a jour CHANGELOG.md avec chantiers 1-3 (multi-tenant, marketing, GraphQL) → v1.1.0
-- [x] Enrichir core:new-project avec categories de modules (Core/Business/Avance, 20 feature flags)
-- [x] 7 tests NewProjectCommand (constantes, defaults, scenarios)
-- [x] Decouplage inter-modules (class_exists() wrappers : 8 fichiers, AI/Blog/Newsletter/Import/Search/Sidebar)
-- [x] Audit release-readiness (env, errors, indexes, queue, cache - tous OK)
+- [ ] Traductions i18n fr/en (~50 fichiers Blade a traiter, language switcher)
+- [ ] Client Echo/Reverb frontend (notifications temps reel)
+- [ ] Page recherche frontend /search
+- [ ] Interface admin Storage (stats disque, liste fichiers)
+- [ ] Resoudre cycle Blog <-> SEO (couplage faible, acceptable)
+- [ ] Tailwind CDN auth guest → build Vite (RGPD production)
 - [ ] Migration Modules/ vers plugins/ - REPORTE indefiniment (valeur = 0)
-- [ ] Support Paddle/Lemon Squeezy - REPORTE (over-engineering, Stripe domine 80%+ marche SaaS)
-- [ ] Roadmap public avec votes - REPORTE (outils externes Canny/Productboard font mieux)
+- [ ] Support Paddle/Lemon Squeezy - REPORTE (over-engineering)
+- [ ] Roadmap public avec votes - REPORTE (outils externes font mieux)
+
+### Taches completees (archive)
+- [x] Fix test Phase161Test, README.md, CHANGELOG.md, core:new-project, decouplage, audit release-readiness
 
 ## Completes - Polish CMS (session 2026-03-02)
 

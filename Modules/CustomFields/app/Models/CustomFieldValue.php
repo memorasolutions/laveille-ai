@@ -46,6 +46,7 @@ class CustomFieldValue extends Model
             'number' => (float) $this->value,
             'checkbox' => filter_var($this->value, FILTER_VALIDATE_BOOLEAN),
             'date' => Carbon::parse($this->value),
+            'repeater' => json_decode($this->value, true) ?? [],
             default => (string) $this->value,
         };
     }

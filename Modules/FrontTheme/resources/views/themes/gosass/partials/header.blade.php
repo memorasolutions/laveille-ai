@@ -53,15 +53,61 @@
                         </form>
                     </div>
                     @auth
-                        <a href="{{ route('user.dashboard') }}" class="cs_btn cs_style_1 cs_accent_bg cs_white_color cs_fs_16 cs_semibold cs_radius_30">
-                            <span>Mon espace</span>
-                        </a>
+                        <div class="dropdown">
+                            <button class="cs_btn cs_style_1 cs_accent_bg cs_white_color cs_fs_16 cs_semibold cs_radius_30 dropdown-toggle"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="d-flex align-items-center">
+                                    @if(auth()->user()->avatar)
+                                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}"
+                                             class="rounded-circle me-2" width="24" height="24">
+                                    @else
+                                        <span class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center me-2"
+                                              style="width:24px;height:24px;font-size:10px;font-weight:700;">
+                                            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                        </span>
+                                    @endif
+                                    <span>{{ auth()->user()->name }}</span>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:260px;">
+                                <li>
+                                    <div class="px-4 py-3">
+                                        <h6 class="mb-0">{{ auth()->user()->name }}</h6>
+                                        <p class="text-muted mb-0 small">{{ auth()->user()->email }}</p>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('user.dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>{{ __('Tableau de bord') }}</a></li>
+                                <li><a class="dropdown-item" href="{{ route('user.profile') }}"><i class="fas fa-user me-2"></i>{{ __('Profil') }}</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('user.notifications') }}">
+                                        <i class="fas fa-bell me-2"></i>{{ __('Notifications') }}
+                                        @if(($unreadCount ?? 0) > 0)
+                                            <span class="badge bg-danger rounded-pill float-end">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('user.subscription') }}"><i class="fas fa-credit-card me-2"></i>{{ __('Abonnement') }}</a></li>
+                                <li><a class="dropdown-item" href="{{ route('user.sessions') }}"><i class="fas fa-desktop me-2"></i>{{ __('Sessions') }}</a></li>
+                                @if(auth()->user()->hasRole(['admin', 'super_admin']))
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-warning" href="{{ route('admin.dashboard') }}"><i class="fas fa-shield-alt me-2"></i>{{ __('Administration') }}</a></li>
+                                @endif
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i>{{ __('Déconnexion') }}</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
                     @else
                         <a href="{{ route('login') }}" class="cs_btn cs_style_1 cs_heading_bg cs_white_color cs_fs_16 cs_semibold cs_radius_30 me-2">
-                            <span>Connexion</span>
+                            <span>{{ __('Connexion') }}</span>
                         </a>
                         <a href="{{ route('register') }}" class="cs_btn cs_style_1 cs_accent_bg cs_purple_hover cs_white_color cs_fs_16 cs_semibold cs_radius_30">
-                            <span>Inscription</span>
+                            <span>{{ __('Inscription') }}</span>
                         </a>
                     @endauth
                 </div>

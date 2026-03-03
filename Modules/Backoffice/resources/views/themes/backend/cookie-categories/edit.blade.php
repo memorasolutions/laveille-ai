@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.cookie-categories.index') }}">{{ __('Cookies GDPR') }}</a></li>
@@ -34,7 +34,7 @@
                     </label>
                     <input type="text" name="name" id="name"
                         class="form-control @error('name') is-invalid @enderror"
-                        value="{{ old('name', $category->name) }}" required>
+                        value="{{ old('name', $category->name) }}" required aria-required="true" autocomplete="off">
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -46,7 +46,7 @@
                     </label>
                     <input type="text" name="label" id="label"
                         class="form-control @error('label') is-invalid @enderror"
-                        value="{{ old('label', $category->label) }}" required>
+                        value="{{ old('label', $category->label) }}" required aria-required="true" autocomplete="off">
                     @error('label')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

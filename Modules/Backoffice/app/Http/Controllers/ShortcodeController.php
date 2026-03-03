@@ -61,9 +61,11 @@ class ShortcodeController
             'html_template' => 'required|string',
             'parameters' => 'nullable|string',
             'has_content' => 'boolean',
+            'is_active' => 'boolean',
         ]);
 
         $data = $validated;
+        $data['is_active'] = $request->boolean('is_active');
         if ($request->has('parameters') && $request->parameters !== null) {
             $data['parameters'] = json_decode($request->parameters, true);
         }

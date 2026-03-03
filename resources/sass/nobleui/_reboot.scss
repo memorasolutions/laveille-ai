@@ -46,10 +46,37 @@ textarea:visited {
   box-shadow: none;
 }
 
-select, 
+select,
 .form-check-input {
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+// WCAG 2.4.7 - Restore visible focus for keyboard users
+a,
+button,
+.btn,
+input,
+select,
+textarea,
+.form-control,
+.form-select,
+.form-check-input,
+.nav-link,
+.dropdown-item,
+.page-link {
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+  }
+}
+
+.form-control,
+.form-select,
+.form-check-input {
+  &:focus-visible {
+    box-shadow: var(--bs-box-shadow-inset), 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+  }
 }
 
 input:-webkit-autofill,

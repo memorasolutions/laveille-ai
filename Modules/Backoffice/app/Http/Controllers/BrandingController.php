@@ -43,6 +43,20 @@ class BrandingController
             'site_name' => ['required', 'string', 'max:255'],
             'site_description' => ['nullable', 'string', 'max:500'],
             'primary_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'secondary_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'success_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'warning_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'danger_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'info_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'sidebar_bg' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'header_bg' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'body_bg' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'topbar_font_family' => ['nullable', 'string', 'max:100'],
+            'topbar_font_size' => ['nullable', 'string', 'regex:/^\d+(\.\d+)?(rem|px|em)$/'],
+            'topbar_font_weight' => ['nullable', 'string', 'in:300,400,500,700,900'],
+            'topbar_letter_spacing' => ['nullable', 'string', 'regex:/^-?\d+(\.\d+)?px$/'],
+            'topbar_word_spacing' => ['nullable', 'string', 'regex:/^-?\d+(\.\d+)?px$/'],
+            'topbar_text_transform' => ['nullable', 'string', 'in:none,uppercase,capitalize'],
             'font_family' => ['required', 'string', 'max:100'],
             'font_url' => ['nullable', 'string', 'max:500'],
             'footer_text' => ['nullable', 'string', 'max:500'],
@@ -85,7 +99,11 @@ class BrandingController
 
         // Sauvegarder les champs texte branding
         $textFields = [
-            'primary_color', 'font_family', 'font_url',
+            'primary_color', 'secondary_color', 'success_color', 'warning_color',
+            'danger_color', 'info_color', 'sidebar_bg', 'header_bg', 'body_bg',
+            'topbar_font_family', 'topbar_font_size', 'topbar_font_weight',
+            'topbar_letter_spacing', 'topbar_word_spacing', 'topbar_text_transform',
+            'font_family', 'font_url',
             'footer_text', 'footer_right', 'login_title', 'login_subtitle',
         ];
         foreach ($textFields as $field) {

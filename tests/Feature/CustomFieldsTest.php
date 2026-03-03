@@ -252,3 +252,56 @@ it('allows setting and getting custom fields via trait', function () {
         'value' => 'bleu',
     ]);
 });
+
+it('stores repeater value as JSON via trait', function () {
+    $def = CustomFieldDefinition::create([
+        'name' => 'Contacts', 'key' => 'contacts_rep', 'type' => 'repeater',
+        'options' => ['Nom', 'Email'],
+        'model_type' => 'article', 'is_active' => true,
+    ]);
+
+    $article = Article::factory()->create();
+    $repeaterData = [
+        ['Nom' => 'John Doe', 'Email' => 'john@example.com'],
+        ['Nom' => 'Jane Smith', 'Email' => 'jane@example.com'],
+    ];
+
+    $article->setCustomField('contacts_rep', $repeaterData);
+
+    $this->assertDatabaseHas('custom_field_values', [
+        'custom_field_definition_id' => $def->id,
+        'fieldable_type' => Article::class,
+        'fieldable_id' => $article->id,
+    ]);
+
+    $stored = CustomFieldValue::where('custom_field_definition_id', $def->id)
+        ->where('fieldable_id', $article->id)->first();
+    expect(json_decode($stored->value, true))->toBe($repeaterData);
+});
+
+it('casts repeater value to array', function () {
+    $def = CustomFieldDefinition::create([
+        'name' => 'Liens', 'key' => 'liens_rep', 'type' => 'repeater',
+        'options' => ['Nom', 'URL'],
+        'model_type' => 'article', 'is_active' => true,
+    ]);
+
+    $data = [['Nom' => 'Google', 'URL' => 'https://google.com']];
+    $val = CustomFieldValue::create([
+        'custom_field_definition_id' => $def->id,
+        'fieldable_type' => Article::class,
+        'fieldable_id' => 1,
+        'value' => json_encode($data),
+    ]);
+
+    expect($val->getCastedValue())->toBeArray()->toBe($data);
+});
+
+it('validates repeater type as json', function () {
+    $def = CustomFieldDefinition::create([
+        'name' => 'Repeater', 'key' => 'rep_valid', 'type' => 'repeater',
+        'model_type' => 'article', 'is_active' => true,
+    ]);
+
+    expect($def->getValidationRule())->toContain('json');
+});

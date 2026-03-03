@@ -2,7 +2,7 @@
 @extends('backoffice::themes.backend.layouts.admin')
 @section('title', 'Modifier ' . $tenant->name)
 @section('content')
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.tenants.index') }}">Tenants</a></li>
@@ -26,7 +26,7 @@
                 <div class="mb-3">
                     <label for="slug" class="form-label">Identifiant (slug) <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('slug') is-invalid @enderror" id="slug" name="slug" value="{{ old('slug', $tenant->slug) }}" required maxlength="255">
-                    <div class="form-text">Identifiant unique (lettres, chiffres, tirets)</div>
+                    <div class="form-text">Identifiant unique dans l'URL (lettres, chiffres, tirets). Exemple : mon-entreprise</div>
                     @error('slug')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -34,7 +34,7 @@
                 <div class="mb-3">
                     <label for="domain" class="form-label">Domaine personnalisé</label>
                     <input type="text" class="form-control @error('domain') is-invalid @enderror" id="domain" name="domain" value="{{ old('domain', $tenant->domain) }}" maxlength="255">
-                    <div class="form-text">Domaine personnalisé (ex : app.monsite.com)</div>
+                    <div class="form-text">Optionnel. Permet un domaine personnalisé au lieu du sous-domaine par défaut. Exemple : app.monentreprise.com</div>
                     @error('domain')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

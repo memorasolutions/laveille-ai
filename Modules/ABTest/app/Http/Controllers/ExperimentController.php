@@ -35,16 +35,15 @@ class ExperimentController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'variants' => 'required|string',
+            'variants' => 'required|array|min:2',
+            'variants.*' => 'required|string|max:100',
         ]);
-
-        $variants = array_map('trim', explode(',', $validated['variants']));
 
         Experiment::create([
             'name' => $validated['name'],
             'slug' => Str::slug($validated['name']),
             'description' => $validated['description'] ?? null,
-            'variants' => $variants,
+            'variants' => array_values(array_filter($validated['variants'])),
         ]);
 
         return redirect()->route('admin.experiments.index')

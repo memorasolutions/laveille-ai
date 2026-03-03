@@ -47,6 +47,49 @@
                             <input type="checkbox" name="custom_fields[{{ $def->key }}]" id="cf_{{ $def->key }}" class="form-check-input" value="1" {{ $val ? 'checked' : '' }}>
                         </div>
                         @break
+                    @case('repeater')
+                        @php
+                            $subFields = is_array($def->options) ? $def->options : [];
+                            $repeaterVal = is_string($val) ? (json_decode($val, true) ?? []) : (is_array($val) ? $val : []);
+                        @endphp
+                        <div x-data="{
+                            rows: {{ Js::from($repeaterVal) }},
+                            subFields: {{ Js::from($subFields) }},
+                            addRow() {
+                                const newRow = {};
+                                this.subFields.forEach(f => newRow[f.trim()] = '');
+                                this.rows.push(newRow);
+                            },
+                            removeRow(index) { this.rows.splice(index, 1); }
+                        }">
+                            <template x-for="(row, index) in rows" :key="index">
+                                <div class="card mb-2">
+                                    <div class="card-body py-2 px-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="small text-muted fw-medium" x-text="'{{ __('Ligne') }} ' + (index + 1)"></span>
+                                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1" @click="removeRow(index)">
+                                                <i data-lucide="trash-2" class="icon-sm"></i>
+                                            </button>
+                                        </div>
+                                        <div class="row g-2">
+                                            <template x-for="field in subFields" :key="field">
+                                                <div class="col-md-4">
+                                                    <label class="form-label small" x-text="field.trim()"></label>
+                                                    <input type="text" class="form-control form-control-sm"
+                                                           x-model="rows[index][field.trim()]"
+                                                           :placeholder="field.trim()">
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" @click="addRow()">
+                                <i data-lucide="plus" class="icon-sm"></i> {{ __('Ajouter une ligne') }}
+                            </button>
+                            <input type="hidden" name="custom_fields[{{ $def->key }}]" :value="JSON.stringify(rows)">
+                        </div>
+                        @break
                     @case('color')
                         <input type="color" name="custom_fields[{{ $def->key }}]" id="cf_{{ $def->key }}" class="form-control form-control-color" value="{{ $val ?? '#000000' }}">
                         @break

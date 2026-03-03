@@ -232,6 +232,29 @@ export function tiptapEditorComponent(config = {}) {
         toggleFullscreen() {
             this.isFullscreen = !this.isFullscreen
         },
+        sourceMode: false,
+        toggleSourceCode() {
+            if (!this.sourceMode) {
+                this.sourceMode = true
+                const html = this.editor.getHTML()
+                this.$nextTick(() => { if (this.$refs.sourceTextarea) this.$refs.sourceTextarea.value = html })
+            } else {
+                this.sourceMode = false
+                const newHtml = this.$refs.sourceTextarea.value
+                this.editor.commands.setContent(newHtml)
+                this.editor.commands.focus()
+            }
+        },
+        indent() { this.cmd(() => this.editor.chain().focus().sinkListItem('listItem').run()) },
+        outdent() { this.cmd(() => this.editor.chain().focus().liftListItem('listItem').run()) },
+        unlinkSelection() { this.cmd(() => this.editor.chain().focus().unsetLink().run()) },
+        addTableRow() { this.cmd(() => this.editor.chain().focus().addRowAfter().run()) },
+        deleteTableRow() { this.cmd(() => this.editor.chain().focus().deleteRow().run()) },
+        addTableColumn() { this.cmd(() => this.editor.chain().focus().addColumnAfter().run()) },
+        deleteTableColumn() { this.cmd(() => this.editor.chain().focus().deleteColumn().run()) },
+        mergeCells() { this.cmd(() => this.editor.chain().focus().mergeCells().run()) },
+        splitCell() { this.cmd(() => this.editor.chain().focus().splitCell().run()) },
+        deleteTable() { this.cmd(() => this.editor.chain().focus().deleteTable().run()) },
         setFontFamily(family) {
             this.cmd(() => {
                 if (family) {

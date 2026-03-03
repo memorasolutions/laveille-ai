@@ -147,44 +147,22 @@ $helpTextsData = [
                             @endphp
                         @endif
 
-                        {{-- Sélecteur de thème (uniquement dans l'onglet Apparence) --}}
-                        @if($groupName === 'branding')
-                            @php
-                                $themesDir = module_path('Backoffice', 'resources/views/themes');
-                                $availableThemes = array_map('basename', array_filter(glob($themesDir . '/*'), 'is_dir'));
-                                $currentTheme = \Modules\Settings\Models\Setting::where('key', 'backoffice.theme')->value('value')
-                                    ?? config('backoffice.theme', 'backend');
-                                $themeLabels = [
-                                    'backend' => 'Backend',
-                                ];
-                            @endphp
-                            <div class="mb-4 pb-4 border-bottom">
-                                <label class="fw-semibold text-body mb-3 d-block">
-                                    Thème du panneau administration
-                                </label>
-                                <div class="d-flex flex-wrap gap-3">
-                                    @foreach($availableThemes as $themeName)
-                                        @php $isActive = $currentTheme === $themeName; @endphp
-                                        <div class="border rounded-3 {{ $isActive ? 'border-primary border-2 shadow-sm' : '' }}"
-                                             style="width:160px; cursor:pointer;"
-                                             role="button"
-                                             wire:click="saveTheme('{{ $themeName }}')">
-                                            <div class="text-center py-4 px-3">
-                                                <i data-lucide="palette" class="{{ $isActive ? 'text-primary' : 'text-muted' }} icon-md"></i>
-                                                <p class="mt-2 mb-0 fw-semibold {{ $isActive ? 'text-primary' : 'text-body' }}">
-                                                    {{ $themeLabels[$themeName] ?? ucfirst($themeName) }}
-                                                </p>
-                                                @if($isActive)
-                                                    <span class="badge bg-primary rounded-pill mt-2 d-inline-block">Actif</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <p class="small text-muted mt-2 mb-0">
-                                    Cliquez sur un thème pour l'appliquer immédiatement. La page sera rechargée.
+                        {{-- Onglets doublons : redirection vers la page Personnalisation --}}
+                        @if(in_array($groupName, ['branding', 'general']))
+                            <div class="text-center py-5">
+                                <i data-lucide="{{ $groupName === 'branding' ? 'palette' : 'type' }}" style="width:48px;height:48px;" class="text-primary mb-3"></i>
+                                <h5 class="fw-semibold mb-2">{{ $groupName === 'branding' ? 'Apparence' : 'Identité du site' }}</h5>
+                                <p class="text-muted mb-4">
+                                    {{ $groupName === 'branding'
+                                        ? 'Les couleurs, polices, logos et options d\'apparence sont gérés depuis la page de personnalisation.'
+                                        : 'Le nom du site et la description sont gérés depuis la page de personnalisation.' }}
                                 </p>
+                                <a href="{{ route('admin.branding.edit') }}" class="btn btn-primary">
+                                    <i data-lucide="settings" style="width:16px;height:16px;" class="me-1"></i>
+                                    Ouvrir la personnalisation
+                                </a>
                             </div>
+                            @php $settings = collect(); @endphp
                         @endif
 
                         @foreach($settings as $setting)

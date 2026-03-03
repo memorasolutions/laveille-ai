@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.shortcodes.index') }}">{{ __('Shortcodes') }}</a></li>
@@ -24,7 +24,19 @@
         </div>
     </div>
     <div class="card-body p-4">
-        <form method="POST" action="{{ route('admin.shortcodes.update', $shortcode) }}">
+        <form method="POST" action="{{ route('admin.shortcodes.update', $shortcode) }}" x-data="{
+            tag: {{ json_encode(old('tag', $shortcode->tag)) }},
+            tpl: {{ json_encode(old('html_template', $shortcode->html_template)) }},
+            params: {{ json_encode(old('parameters', $shortcode->parameters ? json_encode($shortcode->parameters) : '')) }},
+            hasContent: {{ old('has_content', $shortcode->has_content) ? 'true' : 'false' }},
+            get parsedParams() { try { return JSON.parse(this.params) || []; } catch { return []; } },
+            get usage() {
+                if (!this.tag) return '';
+                let p = Array.isArray(this.parsedParams) ? this.parsedParams.map(k => k + '=&quot;...&quot;').join(' ') : '';
+                let s = '[' + this.tag + (p ? ' ' + p : '') + ']';
+                return this.hasContent ? s + 'contenu[/' + this.tag + ']' : s;
+            }
+        }">
             @csrf
             @method('PUT')
 
@@ -34,9 +46,10 @@
                     <label for="tag" class="form-label fw-medium">
                         Tag <span class="text-danger">*</span>
                     </label>
-                    <input type="text" name="tag" id="tag"
+                    <input type="text" name="tag" id="tag" x-model="tag"
                         class="form-control font-monospace @error('tag') is-invalid @enderror"
-                        value="{{ old('tag', $shortcode->tag) }}" required pattern="[a-z][a-z0-9_]*">
+                        value="{{ old('tag', $shortcode->tag) }}" required pattern="[a-z][a-z0-9_]*"
+                        aria-required="true" autocomplete="off">
                     @error('tag')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -67,8 +80,9 @@
                     <label for="html_template" class="form-label fw-medium">
                         Template HTML <span class="text-danger">*</span>
                     </label>
-                    <textarea name="html_template" id="html_template" rows="4" required
-                        class="form-control font-monospace @error('html_template') is-invalid @enderror">{{ old('html_template', $shortcode->html_template) }}</textarea>
+                    <textarea name="html_template" id="html_template" rows="4" required x-model="tpl"
+                        class="form-control font-monospace @error('html_template') is-invalid @enderror"
+                        aria-required="true">{{ old('html_template', $shortcode->html_template) }}</textarea>
                     @error('html_template')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -76,7 +90,7 @@
 
                 <div class="col-12">
                     <label for="parameters" class="form-label fw-medium">Paramètres JSON</label>
-                    <textarea name="parameters" id="parameters" rows="2"
+                    <textarea name="parameters" id="parameters" rows="2" x-model="params"
                         class="form-control font-monospace @error('parameters') is-invalid @enderror">{{ old('parameters', $shortcode->parameters ? json_encode($shortcode->parameters) : '') }}</textarea>
                     @error('parameters')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -89,20 +103,60 @@
                             <div class="fw-medium small">Contient du contenu</div>
                             <div class="text-muted" style="font-size:0.8rem;">Le shortcode accepte du contenu entre les balises ouvrante et fermante</div>
                         </div>
-                        <input type="checkbox" name="has_content" value="1"
+                        <input type="checkbox" name="has_content" value="1" x-model="hasContent"
                             class="form-check-input"
                             {{ old('has_content', $shortcode->has_content) ? 'checked' : '' }}>
                     </div>
                 </div>
 
+                {{-- Toggle is_active --}}
+                <div class="col-12">
+                    <div class="border rounded p-3 d-flex align-items-center justify-content-between gap-3">
+                        <div>
+                            <div class="fw-medium small">{{ __('Actif') }}</div>
+                            <div class="text-muted" style="font-size:0.8rem;">{{ __('Désactiver le shortcode sans le supprimer') }}</div>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input type="hidden" name="is_active" value="0">
+                            <input type="checkbox" name="is_active" value="1" class="form-check-input" role="switch"
+                                {{ old('is_active', $shortcode->is_active) ? 'checked' : '' }}>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- Preview live --}}
+            <div class="card bg-body-tertiary mt-4" x-show="tag" x-cloak>
+                <div class="card-header d-flex align-items-center gap-2 py-2">
+                    <i data-lucide="eye" style="width:16px;height:16px;" class="text-primary"></i>
+                    <span class="fw-semibold small">{{ __('Aperçu') }}</span>
+                </div>
+                <div class="card-body py-3">
+                    <div class="mb-3">
+                        <div class="fw-medium small mb-1">{{ __('Utilisation') }}</div>
+                        <div class="bg-white rounded p-2 position-relative border">
+                            <code class="small" x-text="usage"></code>
+                            <button type="button" @click="navigator.clipboard.writeText(usage)"
+                                    class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-1" style="padding:2px 6px"
+                                    title="{{ __('Copier') }}" aria-label="{{ __('Copier la syntaxe') }}">
+                                <i data-lucide="copy" style="width:12px;height:12px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="fw-medium small mb-1">{{ __('Template HTML') }}</div>
+                        <pre class="bg-white rounded p-2 mb-0 border small"><code x-text="tpl"></code></pre>
+                    </div>
+                </div>
             </div>
 
             <div class="d-flex align-items-center gap-3 mt-4">
                 <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                     <i data-lucide="save" style="width:16px;height:16px;"></i>
-                    Mettre à jour
+                    {{ __('Mettre à jour') }}
                 </button>
-                <a href="{{ route('admin.shortcodes.index') }}" class="btn btn-light">Annuler</a>
+                <a href="{{ route('admin.shortcodes.index') }}" class="btn btn-light">{{ __('Annuler') }}</a>
             </div>
         </form>
 

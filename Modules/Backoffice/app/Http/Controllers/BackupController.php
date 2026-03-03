@@ -60,4 +60,21 @@ class BackupController extends Controller
 
         return back()->with('error', 'Erreur lors de la suppression.');
     }
+
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $paths = $request->validate([
+            'paths' => 'required|array|min:1',
+            'paths.*' => 'required|string',
+        ])['paths'];
+
+        $deleted = 0;
+        foreach ($paths as $path) {
+            if ($this->backupService->deleteBackup($path)) {
+                $deleted++;
+            }
+        }
+
+        return back()->with('success', "$deleted sauvegarde(s) supprimée(s).");
+    }
 }

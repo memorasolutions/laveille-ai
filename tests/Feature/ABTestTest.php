@@ -132,7 +132,7 @@ test('admin can create experiment', function () {
     $this->actingAs($user)
         ->post(route('admin.experiments.store'), [
             'name' => 'Homepage CTA Test',
-            'variants' => 'control, variant_a, variant_b',
+            'variants' => ['control', 'variant_a', 'variant_b'],
         ])
         ->assertRedirect();
 

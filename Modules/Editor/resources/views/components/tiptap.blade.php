@@ -10,49 +10,51 @@
         </label>
     @endif
 
-    <div class="tiptap-toolbar d-flex flex-wrap align-items-center gap-1 p-2 border rounded-top bg-body-tertiary">
+    <div class="tiptap-toolbar d-flex flex-wrap align-items-center gap-1 p-2 border rounded-top bg-body-tertiary" role="toolbar" aria-label="Barre d'outils de l'éditeur de texte">
         {{-- Groupe 1 : Historique --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().undo().run())" data-bs-toggle="tooltip" title="Annuler (Ctrl+Z)"><i data-lucide="undo-2" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().redo().run())" data-bs-toggle="tooltip" title="Rétablir (Ctrl+Y)"><i data-lucide="redo-2" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().undo().run())" data-bs-toggle="tooltip" title="Annuler (Ctrl+Z)" aria-label="Annuler"><i data-lucide="undo-2" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().redo().run())" data-bs-toggle="tooltip" title="Rétablir (Ctrl+Y)" aria-label="Rétablir"><i data-lucide="redo-2" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 2 : Mise en forme --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('bold')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBold().run())" data-bs-toggle="tooltip" title="Gras (Ctrl+B)"><i data-lucide="bold" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('italic')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleItalic().run())" data-bs-toggle="tooltip" title="Italique (Ctrl+I)"><i data-lucide="italic" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('underline')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleUnderline().run())" data-bs-toggle="tooltip" title="Souligné (Ctrl+U)"><i data-lucide="underline" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('strike')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleStrike().run())" data-bs-toggle="tooltip" title="Barré"><i data-lucide="strikethrough" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('bold')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBold().run())" data-bs-toggle="tooltip" title="Gras (Ctrl+B)" aria-label="Gras"><i data-lucide="bold" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('italic')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleItalic().run())" data-bs-toggle="tooltip" title="Italique (Ctrl+I)" aria-label="Italique"><i data-lucide="italic" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('underline')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleUnderline().run())" data-bs-toggle="tooltip" title="Souligné (Ctrl+U)" aria-label="Souligné"><i data-lucide="underline" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('strike')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleStrike().run())" data-bs-toggle="tooltip" title="Barré" aria-label="Barré"><i data-lucide="strikethrough" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 3 : Titres + Blockquote --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('heading', {level:1})}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:1}).run())" data-bs-toggle="tooltip" title="Titre 1"><i data-lucide="heading-1" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('heading', {level:2})}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:2}).run())" data-bs-toggle="tooltip" title="Titre 2"><i data-lucide="heading-2" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('heading', {level:3})}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:3}).run())" data-bs-toggle="tooltip" title="Titre 3"><i data-lucide="heading-3" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('blockquote')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBlockquote().run())" data-bs-toggle="tooltip" title="Citation"><i data-lucide="quote" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('heading', {level:1})}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:1}).run())" data-bs-toggle="tooltip" title="Titre 1" aria-label="Titre 1"><i data-lucide="heading-1" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('heading', {level:2})}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:2}).run())" data-bs-toggle="tooltip" title="Titre 2" aria-label="Titre 2"><i data-lucide="heading-2" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('heading', {level:3})}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:3}).run())" data-bs-toggle="tooltip" title="Titre 3" aria-label="Titre 3"><i data-lucide="heading-3" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('blockquote')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBlockquote().run())" data-bs-toggle="tooltip" title="Citation" aria-label="Citation"><i data-lucide="quote" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 4 : Listes --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('bulletList')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBulletList().run())" data-bs-toggle="tooltip" title="Liste à puces"><i data-lucide="list" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('orderedList')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleOrderedList().run())" data-bs-toggle="tooltip" title="Liste numérotée"><i data-lucide="list-ordered" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('taskList')}" @mousedown.prevent="toggleTaskList()" data-bs-toggle="tooltip" title="Liste de tâches"><i data-lucide="list-checks" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('bulletList')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBulletList().run())" data-bs-toggle="tooltip" title="Liste à puces" aria-label="Liste à puces"><i data-lucide="list" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('orderedList')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleOrderedList().run())" data-bs-toggle="tooltip" title="Liste numérotée" aria-label="Liste numérotée"><i data-lucide="list-ordered" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('taskList')}" @mousedown.prevent="toggleTaskList()" data-bs-toggle="tooltip" title="Liste de tâches" aria-label="Liste de tâches"><i data-lucide="list-checks" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="indent()" data-bs-toggle="tooltip" title="Augmenter le retrait" aria-label="Augmenter le retrait"><i data-lucide="indent-increase" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="outdent()" data-bs-toggle="tooltip" title="Diminuer le retrait" aria-label="Diminuer le retrait"><i data-lucide="indent-decrease" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 5 : Alignement --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'left'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('left').run())" data-bs-toggle="tooltip" title="Gauche"><i data-lucide="align-left" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'center'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('center').run())" data-bs-toggle="tooltip" title="Centrer"><i data-lucide="align-center" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'right'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('right').run())" data-bs-toggle="tooltip" title="Droite"><i data-lucide="align-right" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'justify'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('justify').run())" data-bs-toggle="tooltip" title="Justifier"><i data-lucide="align-justify" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'left'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('left').run())" data-bs-toggle="tooltip" title="Gauche" aria-label="Aligner à gauche"><i data-lucide="align-left" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'center'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('center').run())" data-bs-toggle="tooltip" title="Centrer" aria-label="Centrer"><i data-lucide="align-center" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'right'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('right').run())" data-bs-toggle="tooltip" title="Droite" aria-label="Aligner à droite"><i data-lucide="align-right" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive({textAlign:'justify'})}" @mousedown.prevent="cmd(() => editor.chain().focus().setTextAlign('justify').run())" data-bs-toggle="tooltip" title="Justifier" aria-label="Justifier"><i data-lucide="align-justify" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 6 : Couleurs --}}
         <div class="d-inline-flex align-items-center position-relative" data-bs-toggle="tooltip" title="Couleur du texte">
-            <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" @mousedown.prevent="$refs.colorInput.click()">
+            <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" aria-label="Couleur du texte" @mousedown.prevent="$refs.colorInput.click()">
                 <i data-lucide="palette" style="width:14px;height:14px;"></i>
                 <span class="d-block rounded" :style="'width:12px;height:4px;background:'+currentColor"></span>
             </button>
             <input type="color" x-ref="colorInput" class="visually-hidden" :value="currentColor" @input="setColor($event.target.value)">
         </div>
         <div class="d-inline-flex align-items-center position-relative" data-bs-toggle="tooltip" title="Couleur de surlignage">
-            <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" @mousedown.prevent="$refs.highlightInput.click()">
+            <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" aria-label="Couleur de surlignage" @mousedown.prevent="$refs.highlightInput.click()">
                 <i data-lucide="highlighter" style="width:14px;height:14px;"></i>
                 <span class="d-block rounded" :style="'width:12px;height:4px;background:'+currentHighlight"></span>
             </button>
@@ -61,7 +63,7 @@
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 7 : Police --}}
-        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 30px 2px 8px;" @change="setFontFamily($event.target.value)" data-bs-toggle="tooltip" title="Police">
+        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 30px 2px 8px;" @change="setFontFamily($event.target.value)" data-bs-toggle="tooltip" title="Police" aria-label="Choisir la police">
             <option value="">Par défaut</option>
             <option value="Inter">Inter</option>
             <option value="Arial">Arial</option>
@@ -70,7 +72,7 @@
             <option value="Courier New">Courier New</option>
             <option value="Verdana">Verdana</option>
         </select>
-        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 30px 2px 8px;" @change="setFontSize($event.target.value)" data-bs-toggle="tooltip" title="Taille">
+        <select class="form-select form-select-sm" style="width:auto;font-size:12px;padding:2px 30px 2px 8px;" @change="setFontSize($event.target.value)" data-bs-toggle="tooltip" title="Taille" aria-label="Choisir la taille">
             <option value="">Taille</option>
             <option value="12px">12</option>
             <option value="14px">14</option>
@@ -84,26 +86,43 @@
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 8 : Insertion --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('link')}" @mousedown.prevent="setLink()" data-bs-toggle="tooltip" title="Lien"><i data-lucide="link" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addImage()" data-bs-toggle="tooltip" title="Image"><i data-lucide="image-plus" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="insertTable()" data-bs-toggle="tooltip" title="Tableau"><i data-lucide="table" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addYoutube()" data-bs-toggle="tooltip" title="Vidéo YouTube"><i data-lucide="youtube" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().setHorizontalRule().run())" data-bs-toggle="tooltip" title="Ligne horizontale"><i data-lucide="minus" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('link')}" @mousedown.prevent="setLink()" data-bs-toggle="tooltip" title="Lien" aria-label="Insérer un lien"><i data-lucide="link" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" x-show="isActive('link')" x-cloak @mousedown.prevent="unlinkSelection()" data-bs-toggle="tooltip" title="Retirer le lien" aria-label="Retirer le lien"><i data-lucide="link-2-off" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addImage()" data-bs-toggle="tooltip" title="Image" aria-label="Insérer une image"><i data-lucide="image-plus" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="insertTable()" data-bs-toggle="tooltip" title="Tableau" aria-label="Insérer un tableau"><i data-lucide="table" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addYoutube()" data-bs-toggle="tooltip" title="Vidéo YouTube" aria-label="Insérer vidéo YouTube"><i data-lucide="youtube" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().setHorizontalRule().run())" data-bs-toggle="tooltip" title="Ligne horizontale" aria-label="Ligne horizontale"><i data-lucide="minus" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
+        {{-- Groupe 8b : Opérations tableau (visible uniquement dans un tableau) --}}
+        <template x-if="isActive('table')">
+            <div class="d-inline-flex align-items-center gap-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addTableRow()" data-bs-toggle="tooltip" title="Ajouter une ligne" aria-label="Ajouter une ligne au tableau"><i data-lucide="between-horizontal-start" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="deleteTableRow()" data-bs-toggle="tooltip" title="Supprimer la ligne" aria-label="Supprimer la ligne du tableau"><i data-lucide="rows-3" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addTableColumn()" data-bs-toggle="tooltip" title="Ajouter une colonne" aria-label="Ajouter une colonne au tableau"><i data-lucide="between-vertical-start" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="deleteTableColumn()" data-bs-toggle="tooltip" title="Supprimer la colonne" aria-label="Supprimer la colonne du tableau"><i data-lucide="columns-3" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="mergeCells()" data-bs-toggle="tooltip" title="Fusionner les cellules" aria-label="Fusionner les cellules"><i data-lucide="merge" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="splitCell()" data-bs-toggle="tooltip" title="Diviser la cellule" aria-label="Diviser la cellule"><i data-lucide="split" style="width:14px;height:14px;"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-danger" @mousedown.prevent="deleteTable()" data-bs-toggle="tooltip" title="Supprimer le tableau" aria-label="Supprimer le tableau"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                <span class="vr mx-1 align-self-stretch opacity-25"></span>
+            </div>
+        </template>
+
         {{-- Groupe 9 : Code + Exposant --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('code')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleCode().run())" data-bs-toggle="tooltip" title="Code inline"><i data-lucide="code" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('codeBlock')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleCodeBlock().run())" data-bs-toggle="tooltip" title="Bloc de code"><i data-lucide="square-code" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('superscript')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleSuperscript().run())" data-bs-toggle="tooltip" title="Exposant"><i data-lucide="superscript" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('subscript')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleSubscript().run())" data-bs-toggle="tooltip" title="Indice"><i data-lucide="subscript" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('code')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleCode().run())" data-bs-toggle="tooltip" title="Code inline" aria-label="Code inline"><i data-lucide="code" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('codeBlock')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleCodeBlock().run())" data-bs-toggle="tooltip" title="Bloc de code" aria-label="Bloc de code"><i data-lucide="square-code" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('superscript')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleSuperscript().run())" data-bs-toggle="tooltip" title="Exposant" aria-label="Exposant"><i data-lucide="superscript" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isActive('subscript')}" @mousedown.prevent="cmd(() => editor.chain().focus().toggleSubscript().run())" data-bs-toggle="tooltip" title="Indice" aria-label="Indice"><i data-lucide="subscript" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
         {{-- Groupe 10 : Outils --}}
-        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="clearFormatting()" data-bs-toggle="tooltip" title="Effacer la mise en forme"><i data-lucide="eraser" style="width:14px;height:14px;"></i></button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isFullscreen}" @mousedown.prevent="toggleFullscreen()" data-bs-toggle="tooltip" title="Plein écran"><i data-lucide="maximize-2" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="clearFormatting()" data-bs-toggle="tooltip" title="Effacer la mise en forme" aria-label="Effacer la mise en forme"><i data-lucide="eraser" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': isFullscreen}" @mousedown.prevent="toggleFullscreen()" data-bs-toggle="tooltip" title="Plein écran" aria-label="Plein écran"><i data-lucide="maximize-2" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" :class="{'is-active': sourceMode}" @mousedown.prevent="toggleSourceCode()" data-bs-toggle="tooltip" title="Code source HTML" aria-label="Code source HTML"><i data-lucide="file-code" style="width:14px;height:14px;"></i></button>
     </div>
 
-    <div x-ref="editorContent" class="tiptap-content border border-top-0" style="min-height:350px;outline:none;resize:vertical;overflow:auto;"></div>
+    <div x-show="!sourceMode" x-ref="editorContent" class="tiptap-content border border-top-0" style="min-height:350px;outline:none;resize:vertical;overflow:auto;"></div>
+    <textarea x-show="sourceMode" x-cloak x-ref="sourceTextarea" class="form-control border border-top-0 font-monospace" style="min-height:350px;resize:vertical;font-size:13px;border-radius:0;"></textarea>
     <div class="tiptap-statusbar d-flex align-items-center justify-content-end gap-3 px-3 py-1 border border-top-0 rounded-bottom bg-light">
         <small class="text-muted" x-text="wordCount + ' mots'"></small>
         <small class="text-muted" x-text="charCount + ' caractères'"></small>
@@ -206,7 +225,7 @@
 .tiptap-fullscreen .tiptap-content .ProseMirror { min-height:100%; }
 .tiptap-fullscreen .tiptap-statusbar { border-radius:0!important; flex-shrink:0; }
 .tiptap-toolbar .form-select { border-color:var(--bs-border-color); }
-.tiptap-toolbar .form-select:focus { border-color:rgba(var(--bs-primary-rgb),.4); box-shadow:none; }
+.tiptap-toolbar .form-select:focus-visible { border-color:rgba(var(--bs-primary-rgb),.4); outline:2px solid var(--bs-primary); outline-offset:2px; }
 </style>
 @endpush
 

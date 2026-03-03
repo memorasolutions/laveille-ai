@@ -30,9 +30,34 @@
     @vite(['resources/sass/nobleui/app.scss', 'resources/css/nobleui-custom.css'])
 
     {{-- Dynamic branding --}}
-    @php $primaryColor = $branding['primary_color'] ?? '#6571ff'; @endphp
+    @php
+        $cssColors = [
+            'primary'   => $branding['primary_color'] ?? '#6571ff',
+            'secondary' => $branding['secondary_color'] ?? '#7987a1',
+            'success'   => $branding['success_color'] ?? '#05a34a',
+            'warning'   => $branding['warning_color'] ?? '#fbbc06',
+            'danger'    => $branding['danger_color'] ?? '#ff3366',
+            'info'      => $branding['info_color'] ?? '#66d1d1',
+        ];
+        $primaryColor = $cssColors['primary'];
+    @endphp
     <style>
-        :root { --bs-primary: {{ $primaryColor }}; --bs-primary-rgb: {{ implode(',', sscanf($primaryColor, '#%02x%02x%02x')) }}; }
+        :root {
+            @foreach($cssColors as $name => $hex)
+                --bs-{{ $name }}: {{ $hex }};
+                --bs-{{ $name }}-rgb: {{ implode(',', sscanf($hex, '#%02x%02x%02x')) }};
+            @endforeach
+            --sidebar-bg: {{ $branding['sidebar_bg'] ?? '#0c1427' }};
+            --header-bg: {{ $branding['header_bg'] ?? '#ffffff' }};
+            --bs-body-bg: {{ $branding['body_bg'] ?? '#ffffff' }};
+            --bs-app-bg: {{ $branding['body_bg'] ?? '#ffffff' }};
+            --topbar-font-family: {{ $branding['topbar_font_family'] ?? 'Roboto' }}, sans-serif;
+            --topbar-font-size: {{ $branding['topbar_font_size'] ?? '1.25rem' }};
+            --topbar-font-weight: {{ $branding['topbar_font_weight'] ?? '700' }};
+            --topbar-letter-spacing: {{ $branding['topbar_letter_spacing'] ?? '0px' }};
+            --topbar-word-spacing: {{ $branding['topbar_word_spacing'] ?? '0px' }};
+            --topbar-text-transform: {{ $branding['topbar_text_transform'] ?? 'none' }};
+        }
     </style>
 
     @livewireStyles
@@ -44,6 +69,11 @@
     <meta name="theme-color" content="{{ $primaryColor }}">
 </head>
 <body class="sidebar-dark" data-base-url="{{ url('/') }}">
+
+    {{-- WCAG 2.4.1 - Skip to content --}}
+    <a href="#main-content" class="visually-hidden-focusable position-fixed top-0 start-0 bg-primary text-white px-3 py-2 z-3 rounded-end-bottom fw-semibold" style="z-index:10001">
+        {{ __('Aller au contenu') }}
+    </a>
 
     {{-- Splash screen --}}
     <script>
@@ -63,13 +93,15 @@
     <div class="main-wrapper" id="app">
         @include('backoffice::themes.backend.partials.sidebar')
         <div class="page-wrapper">
-            @include('backoffice::themes.backend.partials.header')
-            <div class="page-content container-xxl">
+            <header>
+                @include('backoffice::themes.backend.partials.header')
+            </header>
+            <main id="main-content" class="page-content container-xxl">
                 @include('backoffice::themes.backend.partials.toast')
                 @yield('breadcrumbs')
 
                 @yield('content')
-            </div>
+            </main>
             @include('backoffice::themes.backend.partials.footer')
         </div>
     </div>
@@ -118,6 +150,19 @@
                 succeed(restore);
                 fail(restore);
             });
+        });
+    </script>
+    {{-- WCAG 3.3.1 - Auto-link form errors with aria-describedby + aria-invalid --}}
+    <script>
+        document.querySelectorAll('.is-invalid').forEach(function(input) {
+            var feedback = input.nextElementSibling;
+            if (feedback && feedback.classList.contains('invalid-feedback')) {
+                var errorId = 'error-' + (input.name || input.id || 'field').replace(/[\[\]\s]+/g, '-');
+                feedback.id = errorId;
+                feedback.setAttribute('role', 'alert');
+                input.setAttribute('aria-describedby', errorId);
+                input.setAttribute('aria-invalid', 'true');
+            }
         });
     </script>
     @stack('custom-scripts')

@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 class CustomFieldDefinition extends Model
 {
     /** @var list<string> */
-    public const TYPES = ['text', 'textarea', 'number', 'date', 'select', 'checkbox', 'radio', 'color', 'url', 'email'];
+    public const TYPES = ['text', 'textarea', 'number', 'date', 'select', 'checkbox', 'radio', 'color', 'url', 'email', 'repeater'];
 
     /** @var array<string, string> */
     public const MODEL_TYPES = [
@@ -96,6 +96,9 @@ class CustomFieldDefinition extends Model
                 break;
             case 'checkbox':
                 $rules[] = 'boolean';
+                break;
+            case 'repeater':
+                $rules[] = 'json';
                 break;
             default:
                 $rules[] = 'string';

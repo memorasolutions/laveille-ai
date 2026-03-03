@@ -3,7 +3,7 @@
 @section('title', 'Nouveau champ personnalisé')
 
 @section('content')
-<nav class="page-breadcrumb">
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.custom-fields.index') }}">Champs personnalisés</a></li>
@@ -72,10 +72,11 @@
                         <input type="text" name="default_value" id="default_value" class="form-control" value="{{ old('default_value') }}">
                     </div>
 
-                    <div class="mb-3" x-show="['select','radio','checkbox'].includes(fieldType)" x-cloak>
+                    <div class="mb-3" x-show="['select','radio','checkbox','repeater'].includes(fieldType)" x-cloak>
                         <label for="options" class="form-label">Options</label>
                         <input type="text" name="options" id="options" class="form-control" value="{{ old('options') }}">
-                        <div class="form-text">Séparez les options par des virgules (ex: Rouge, Vert, Bleu).</div>
+                        <div class="form-text" x-show="fieldType !== 'repeater'">Séparez les options par des virgules (ex: Rouge, Vert, Bleu).</div>
+                        <div class="form-text" x-show="fieldType === 'repeater'" x-cloak>Noms des sous-champs séparés par des virgules (ex: Nom, Email, Téléphone).</div>
                     </div>
 
                     <div class="mb-3">
