@@ -55,6 +55,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_security',
             'manage_email_templates',
             'manage_shortcodes',
+            'manage_short_urls',
             'manage_cookies',
             'manage_onboarding',
             'manage_trash',
