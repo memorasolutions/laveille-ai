@@ -43,7 +43,26 @@ class CoreSetupCommand extends Command
         $this->call('db:seed');
         $this->newLine();
 
-        // 3. Clear caches
+        // 3. Sync permissions
+        $this->info('Synchronisation des permissions...');
+        $this->call('app:sync-permissions');
+        $this->newLine();
+
+        // 4. Feature flags
+        if (class_exists(\Laravel\Pennant\Feature::class)) {
+            $this->info('Purge des feature flags...');
+            $this->call('pennant:purge');
+            $this->newLine();
+        }
+
+        // 5. APP_KEY
+        if (empty(config('app.key'))) {
+            $this->info('Generation de la cle...');
+            $this->call('key:generate');
+            $this->newLine();
+        }
+
+        // 6. Clear caches
         $this->info('Clearing caches...');
         $this->call('config:clear');
         $this->call('cache:clear');
@@ -51,7 +70,7 @@ class CoreSetupCommand extends Command
         $this->call('view:clear');
         $this->newLine();
 
-        // 4. Storage link
+        // 7. Storage link
         if (! file_exists(public_path('storage'))) {
             $this->info('Creating storage link...');
             $this->call('storage:link');

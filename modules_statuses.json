@@ -6,6 +6,7 @@
     "Backoffice": true,
     "Backup": true,
     "Blog": true,
+    "Booking": true,
     "Core": true,
     "CustomFields": true,
     "Editor": true,
@@ -20,9 +21,10 @@
     "Newsletter": true,
     "Notifications": true,
     "Pages": true,
+    "Roadmap": true,
     "RolesPermissions": true,
-    "SEO": true,
     "SaaS": true,
+    "SEO": true,
     "Search": true,
     "Settings": true,
     "ShortUrl": true,
@@ -32,7 +34,5 @@
     "Testimonials": true,
     "Translation": true,
     "Webhooks": true,
-    "Widget": true,
-    "Booking": true,
-    "Roadmap": true
+    "Widget": true
 }

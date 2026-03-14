@@ -1,0 +1,10 @@
+{
+    "name": "Booking",
+    "description": "Systeme de reservation et calendrier",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 10
+}

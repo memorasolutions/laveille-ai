@@ -13,6 +13,7 @@ namespace Modules\Core\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Laravel\Pennant\Feature;
+use Nwidart\Modules\Facades\Module;
 
 class NewProjectCommand extends Command
 {
@@ -37,6 +38,28 @@ class NewProjectCommand extends Command
         'widget' => true,
         'formbuilder' => true,
         'customfields' => true,
+        'shorturl' => true,
+    ];
+
+    /** @var array<string, string> */
+    private const ALIAS_TO_MODULE = [
+        'blog' => 'Blog',
+        'newsletter' => 'Newsletter',
+        'faq' => 'Faq',
+        'testimonials' => 'Testimonials',
+        'widget' => 'Widget',
+        'formbuilder' => 'FormBuilder',
+        'customfields' => 'CustomFields',
+        'shorturl' => 'ShortUrl',
+        'ai' => 'AI',
+        'team' => 'Team',
+        'saas' => 'SaaS',
+        'tenancy' => 'Tenancy',
+        'abtest' => 'ABTest',
+        'import' => 'Import',
+        'api' => 'Api',
+        'booking' => 'Booking',
+        'roadmap' => 'Roadmap',
     ];
 
     /** @var array<string, bool> */
@@ -47,7 +70,9 @@ class NewProjectCommand extends Command
         'tenancy' => false,
         'abtest' => false,
         'import' => false,
-        'sms' => false,
+        'api' => false,
+        'booking' => false,
+        'roadmap' => false,
     ];
 
     public function handle(): int
@@ -104,7 +129,12 @@ class NewProjectCommand extends Command
             }
         }
 
-        // 6. Recapitulatif final
+        // 6. Activer/desactiver les modules nwidart
+        $this->newLine();
+        $this->info('Activation/desactivation des modules nwidart...');
+        $this->toggleNwidartModules($allSelected);
+
+        // 7. Recapitulatif final
         $this->newLine();
         $this->info('Recapitulatif :');
 
@@ -150,6 +180,22 @@ class NewProjectCommand extends Command
         }
 
         return $selected;
+    }
+
+    /**
+     * @param  list<string>  $allSelected
+     */
+    private function toggleNwidartModules(array $allSelected): void
+    {
+        foreach (self::ALIAS_TO_MODULE as $alias => $moduleName) {
+            if (in_array($alias, $allSelected, true)) {
+                Module::enable($moduleName);
+                $this->line("  + {$moduleName} active");
+            } else {
+                Module::disable($moduleName);
+                $this->line("  - {$moduleName} desactive");
+            }
+        }
     }
 
     private function updateEnv(string $key, string $value): void

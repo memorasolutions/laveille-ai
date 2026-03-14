@@ -1,0 +1,10 @@
+{
+    "name": "Roadmap",
+    "description": "Feuille de route publique et votes utilisateurs",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 10
+}

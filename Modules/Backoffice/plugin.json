@@ -6,11 +6,7 @@
     "dependencies": [
         "Core",
         "Auth",
-        "Settings",
-        "Blog",
-        "Newsletter",
-        "SaaS",
-        "SEO"
+        "Settings"
     ],
     "priority": 30
 }

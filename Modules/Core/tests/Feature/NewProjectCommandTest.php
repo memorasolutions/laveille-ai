@@ -16,16 +16,19 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 beforeEach(function () {
     $this->envPath = base_path('.env');
     $this->envBackup = file_get_contents($this->envPath);
+    $this->modulesPath = base_path('modules_statuses.json');
+    $this->modulesBackup = file_get_contents($this->modulesPath);
 });
 
 afterEach(function () {
     file_put_contents($this->envPath, $this->envBackup);
+    file_put_contents($this->modulesPath, $this->modulesBackup);
 });
 
 function buildCommand(\Illuminate\Testing\PendingCommand $command, array $businessAnswers = [], array $advancedAnswers = []): \Illuminate\Testing\PendingCommand
 {
-    $businessModules = ['blog', 'newsletter', 'faq', 'testimonials', 'widget', 'formbuilder', 'customfields'];
-    $advancedModules = ['ai', 'team', 'saas', 'tenancy', 'abtest', 'import', 'sms'];
+    $businessModules = ['blog', 'newsletter', 'faq', 'testimonials', 'widget', 'formbuilder', 'customfields', 'shorturl'];
+    $advancedModules = ['ai', 'team', 'saas', 'tenancy', 'abtest', 'import', 'api', 'booking', 'roadmap'];
 
     foreach ($businessModules as $module) {
         $answer = $businessAnswers[$module] ?? 'yes';
@@ -56,12 +59,12 @@ test('core:new-project has correct module constants', function () {
         ->toHaveCount(19);
 
     expect($business)->toBeArray()
-        ->toHaveKeys(['blog', 'newsletter', 'faq', 'testimonials', 'widget', 'formbuilder', 'customfields'])
-        ->toHaveCount(7);
+        ->toHaveKeys(['blog', 'newsletter', 'faq', 'testimonials', 'widget', 'formbuilder', 'customfields', 'shorturl'])
+        ->toHaveCount(8);
 
     expect($advanced)->toBeArray()
-        ->toHaveKeys(['ai', 'team', 'saas', 'tenancy', 'abtest', 'import', 'sms'])
-        ->toHaveCount(7);
+        ->toHaveKeys(['ai', 'team', 'saas', 'tenancy', 'abtest', 'import', 'api', 'booking', 'roadmap'])
+        ->toHaveCount(9);
 });
 
 test('core:new-project business modules default to true', function () {
@@ -122,7 +125,36 @@ test('core:new-project succeeds with business modules disabled', function () {
         'widget' => 'no',
         'formbuilder' => 'no',
         'customfields' => 'no',
+        'shorturl' => 'no',
     ]);
 
     $command->assertSuccessful();
+});
+
+test('core:new-project has toggleNwidartModules method', function () {
+    $reflection = new ReflectionClass(\Modules\Core\Console\NewProjectCommand::class);
+
+    expect($reflection->hasMethod('toggleNwidartModules'))->toBeTrue();
+
+    $method = $reflection->getMethod('toggleNwidartModules');
+    expect($method->isPrivate())->toBeTrue();
+
+    $params = $method->getParameters();
+    expect($params)->toHaveCount(1);
+    expect($params[0]->getName())->toBe('allSelected');
+});
+
+test('core:new-project has alias to module mapping for all optional modules', function () {
+    $reflection = new ReflectionClass(\Modules\Core\Console\NewProjectCommand::class);
+    $mapping = $reflection->getConstant('ALIAS_TO_MODULE');
+
+    $business = $reflection->getConstant('BUSINESS_MODULES');
+    $advanced = $reflection->getConstant('ADVANCED_MODULES');
+    $allOptional = array_merge(array_keys($business), array_keys($advanced));
+
+    foreach ($allOptional as $alias) {
+        expect($mapping)->toHaveKey($alias);
+    }
+
+    expect($mapping)->toHaveCount(count($allOptional));
 });
