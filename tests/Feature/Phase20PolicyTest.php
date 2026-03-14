@@ -65,12 +65,12 @@ test('UserPolicy delete requires different user ids', function () {
     expect($content)->toContain('$user->id !== $model->id');
 });
 
-test('UserPolicy create is restricted to super_admin', function () {
+test('UserPolicy create is restricted to create_users permission', function () {
     $content = file_get_contents(base_path('Modules/Auth/app/Policies/UserPolicy.php'));
-    expect($content)->toContain("hasRole('super_admin')");
+    expect($content)->toContain("can('create_users')");
 });
 
-test('UserPolicy update prevents admin editing super_admin', function () {
+test('UserPolicy update prevents non-superadmin editing superadmin', function () {
     $content = file_get_contents(base_path('Modules/Auth/app/Policies/UserPolicy.php'));
-    expect($content)->toContain("! \$model->hasRole('super_admin')");
+    expect($content)->toContain('isSuperAdmin()');
 });

@@ -60,16 +60,19 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Super admin - toutes les permissions
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
+        $superAdmin->update(['level' => 100]);
         $superAdmin->syncPermissions(Permission::all());
 
         // Admin - tout sauf create_roles, update_roles, delete_roles (peut voir les rôles)
         $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin->update(['level' => 80]);
         $admin->syncPermissions(
             Permission::whereNotIn('name', ['create_roles', 'update_roles', 'delete_roles'])->get()
         );
 
         // Éditeur - contenu uniquement
         $editor = Role::firstOrCreate(['name' => 'editor']);
+        $editor->update(['level' => 40]);
         $editor->syncPermissions([
             'view_articles', 'create_articles', 'update_articles',
             'view_comments', 'create_comments', 'update_comments', 'delete_comments',
@@ -88,6 +91,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Utilisateur - accès minimal
         $user = Role::firstOrCreate(['name' => 'user']);
+        $user->update(['level' => 10]);
         $user->syncPermissions(['view_dashboard']);
     }
 }

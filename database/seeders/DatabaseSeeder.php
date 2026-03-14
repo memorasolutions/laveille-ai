@@ -21,12 +21,12 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
         ]);
 
-        // 2. Superadmin principal (ID #1 - JAMAIS supprimer)
+        // 2. Superadmin principal - indestructible
         $superAdmin = User::updateOrCreate(
-            ['email' => config('app.admin_email')],
+            ['email' => config('app.superadmin_email')],
             [
-                'name' => config('app.admin_name'),
-                'password' => bcrypt(config('app.admin_password')),
+                'name' => config('app.admin_name', 'Super Admin'),
+                'password' => bcrypt(config('app.admin_password', 'Admin123!')),
                 'email_verified_at' => now(),
                 'is_active' => true,
             ]

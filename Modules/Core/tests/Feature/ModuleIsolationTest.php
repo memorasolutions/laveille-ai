@@ -33,6 +33,10 @@ dataset('optional_modules', [
 ]);
 
 test('route:list does not crash when an optional module is disabled', function (string $module) {
+    if (env('LARAVEL_PARALLEL_TESTING')) {
+        $this->markTestSkipped('Modifies shared modules_statuses.json — unsafe in parallel.');
+    }
+
     $statusPath = base_path('modules_statuses.json');
     $backup = file_get_contents($statusPath);
 

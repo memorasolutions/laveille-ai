@@ -155,4 +155,20 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
     {
         return $this->onboarding_completed_at !== null;
     }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->email === config('app.superadmin_email') && $this->hasRole('super_admin');
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user): bool {
+            if ($user->email === config('app.superadmin_email')) {
+                return false;
+            }
+
+            return true;
+        });
+    }
 }

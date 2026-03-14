@@ -447,7 +447,7 @@
     @stack('scripts')
 
     {{-- AI Chatbot --}}
-    @if(class_exists(\Modules\AI\Livewire\ChatBot::class))
+    @if(\Nwidart\Modules\Facades\Module::isEnabled('AI') && class_exists(\Modules\AI\Livewire\ChatBot::class))
         @livewire('ai-chatbot')
     @endif
 

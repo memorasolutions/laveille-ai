@@ -20,6 +20,7 @@ use Spatie\Permission\Models\Role;
 
 class RoleController
 {
+    use ChecksRoleElevation;
     private function permissionCategories(): array
     {
         return [
@@ -283,10 +284,16 @@ class RoleController
     {
         $validated = $request->validated();
 
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $this->ensureNoElevation($user, $validated['permissions'] ?? []);
+        $this->ensureNoLevelElevation($user, (int) ($validated['level'] ?? 10));
+
         DB::transaction(function () use ($validated) {
             $role = Role::create([
                 'name' => $validated['name'],
                 'guard_name' => 'web',
+                'level' => $validated['level'] ?? 10,
                 'requires_password' => $validated['requires_password'] ?? true,
             ]);
 
@@ -322,9 +329,15 @@ class RoleController
     {
         $validated = $request->validated();
 
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $this->ensureNoElevation($user, $validated['permissions'] ?? []);
+        $this->ensureNoLevelElevation($user, (int) ($validated['level'] ?? $role->level));
+
         DB::transaction(function () use ($validated, $role) {
             $role->update([
                 'name' => $validated['name'],
+                'level' => $validated['level'] ?? $role->level,
                 'requires_password' => $validated['requires_password'] ?? true,
             ]);
 

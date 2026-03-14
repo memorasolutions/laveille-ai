@@ -31,13 +31,16 @@ class UserPolicy
 
     public function update(User $user, User $model): bool
     {
-        return $user->can('update_users') && ! $model->hasRole('super_admin');
+        if ($model->isSuperAdmin() && ! $user->isSuperAdmin()) {
+            return false;
+        }
+
+        return $user->can('update_users');
     }
 
     public function delete(User $user, User $model): bool
     {
-        // Le superadmin #1 ne peut JAMAIS être supprimé
-        if ($model->id === 1) {
+        if ($model->isSuperAdmin()) {
             return false;
         }
 

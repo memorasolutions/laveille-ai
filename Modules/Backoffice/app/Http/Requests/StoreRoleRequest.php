@@ -23,6 +23,7 @@ class StoreRoleRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', 'unique:roles'],
+            'level' => ['integer', 'min:1', 'max:255'],
             'requires_password' => ['boolean'],
             'permissions' => ['array'],
             'permissions.*' => ['exists:permissions,id'],

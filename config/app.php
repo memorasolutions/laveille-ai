@@ -23,6 +23,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'superadmin_email' => env('SUPER_ADMIN_EMAIL', 'stephane@memora.ca'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
