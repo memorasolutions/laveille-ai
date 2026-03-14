@@ -31,12 +31,12 @@ test('.env.example contains all required keys', function () {
     expect($envExample)->toContain('SANCTUM_STATEFUL_DOMAINS=');
 });
 
-test('ci workflow exists with coverage', function () {
+test('ci workflow uses MySQL and runs quality checks', function () {
     $ci = file_get_contents(base_path('.github/workflows/ci.yml'));
 
-    expect($ci)->toContain('coverage: pcov');
-    expect($ci)->toContain('--coverage');
-    expect($ci)->toContain('--min=80');
+    expect($ci)->toContain('DB_CONNECTION: mysql');
+    expect($ci)->toContain('phpstan analyse');
+    expect($ci)->toContain('pint --test');
 });
 
 test('scripts/new-project.sh is executable', function () {
