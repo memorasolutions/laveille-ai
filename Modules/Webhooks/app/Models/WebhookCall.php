@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,7 +13,6 @@ namespace Modules\Webhooks\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Backoffice\Models\WebhookEndpoint;
 
 class WebhookCall extends Model
 {

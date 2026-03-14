@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Paramètres', 'subtitle' => 'Modifier'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Paramètres'), 'subtitle' => __('Modifier')])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.settings.index') }}">{{ __('Paramètres') }}</a></li>
@@ -34,16 +34,16 @@
 
                 {{-- Catégorie --}}
                 <div class="col-md-6">
-                    <label class="form-label fw-medium">Catégorie</label>
+                    <label class="form-label fw-medium">{{ __('Catégorie') }}</label>
                     <select name="group" x-model="selectedGroup"
                             class="form-select @error('group') is-invalid @enderror">
-                        <option value="general">Général</option>
-                        <option value="mail">Courriel</option>
-                        <option value="seo">SEO</option>
-                        <option value="branding">Marque</option>
-                        <option value="__custom">Autre...</option>
+                        <option value="general">{{ __('Général') }}</option>
+                        <option value="mail">{{ __('Courriel') }}</option>
+                        <option value="seo">{{ __('SEO') }}</option>
+                        <option value="branding">{{ __('Marque') }}</option>
+                        <option value="__custom">{{ __('Autre...') }}</option>
                     </select>
-                    <div class="form-text">Dans quel groupe ranger ce paramètre</div>
+                    <div class="form-text">{{ __('Dans quel groupe ranger ce paramètre') }}</div>
                     @error('group')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -51,23 +51,23 @@
 
                 {{-- Groupe personnalisé --}}
                 <div class="col-md-6" x-show="selectedGroup === '__custom'" x-cloak>
-                    <label class="form-label fw-medium">Nom du groupe</label>
+                    <label class="form-label fw-medium">{{ __('Nom du groupe') }}</label>
                     <input type="text" name="custom_group" x-model="customGroup"
-                           placeholder="ex: analytics, social"
+                           placeholder="{{ __('ex: analytics, social') }}"
                            class="form-control">
                 </div>
 
                 {{-- Identifiant unique --}}
                 <div class="col-md-6">
                     <label class="form-label fw-medium">
-                        Identifiant unique <span class="text-danger">*</span>
+                        {{ __('Identifiant unique') }} <span class="text-danger">*</span>
                     </label>
                     <input type="text" name="key" value="{{ old('key', $setting->key) }}" required
-                           placeholder="ex: site_name, contact_email"
+                           placeholder="{{ __('ex: site_name, contact_email') }}"
                            pattern="\S+"
-                           title="Pas d'espaces autorisés"
+                           title="{{ __('Pas d\'espaces autorisés') }}"
                            class="form-control @error('key') is-invalid @enderror">
-                    <div class="form-text">Nom technique du paramètre (sans espaces)</div>
+                    <div class="form-text">{{ __('Nom technique du paramètre (sans espaces)') }}</div>
                     @error('key')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -75,35 +75,35 @@
 
                 {{-- Type de valeur --}}
                 <div class="col-12">
-                    <label class="form-label fw-medium">Type de valeur</label>
+                    <label class="form-label fw-medium">{{ __('Type de valeur') }}</label>
                     <div class="d-flex flex-wrap gap-2">
                         <label class="d-inline-flex align-items-center gap-2 border rounded px-3 py-2"
                                style="cursor:pointer;"
                                :class="selectedType === 'string' ? 'border-primary bg-primary bg-opacity-10 text-primary' : 'border text-body'">
                             <input type="radio" name="type" value="string" x-model="selectedType" class="d-none">
                             <i data-lucide="type" style="width:16px;height:16px;"></i>
-                            Texte
+                            {{ __('Texte') }}
                         </label>
                         <label class="d-inline-flex align-items-center gap-2 border rounded px-3 py-2"
                                style="cursor:pointer;"
                                :class="selectedType === 'boolean' ? 'border-primary bg-primary bg-opacity-10 text-primary' : 'border text-body'">
                             <input type="radio" name="type" value="boolean" x-model="selectedType" class="d-none">
                             <i data-lucide="toggle-left" style="width:16px;height:16px;"></i>
-                            Oui/Non
+                            {{ __('Oui/Non') }}
                         </label>
                         <label class="d-inline-flex align-items-center gap-2 border rounded px-3 py-2"
                                style="cursor:pointer;"
                                :class="selectedType === 'integer' ? 'border-primary bg-primary bg-opacity-10 text-primary' : 'border text-body'">
                             <input type="radio" name="type" value="integer" x-model="selectedType" class="d-none">
                             <i data-lucide="hash" style="width:16px;height:16px;"></i>
-                            Nombre
+                            {{ __('Nombre') }}
                         </label>
                         <label class="d-inline-flex align-items-center gap-2 border rounded px-3 py-2"
                                style="cursor:pointer;"
                                :class="selectedType === 'json' ? 'border-primary bg-primary bg-opacity-10 text-primary' : 'border text-body'">
                             <input type="radio" name="type" value="json" x-model="selectedType" class="d-none">
                             <i data-lucide="braces" style="width:16px;height:16px;"></i>
-                            JSON
+                            {{ __('JSON') }}
                         </label>
                     </div>
                     @error('type')
@@ -113,12 +113,12 @@
 
                 {{-- Valeur - adapté au type --}}
                 <div class="col-12">
-                    <label class="form-label fw-medium">Valeur</label>
+                    <label class="form-label fw-medium">{{ __('Valeur') }}</label>
 
                     {{-- Texte --}}
                     <div x-show="selectedType === 'string'" x-cloak>
                         <input type="text" name="value" value="{{ old('value', $setting->value) }}"
-                               placeholder="Saisissez la valeur..."
+                               placeholder="{{ __('Saisissez la valeur...') }}"
                                class="form-control">
                     </div>
 
@@ -128,7 +128,7 @@
                             <input type="hidden" name="value" x-bind:value="selectedType === 'boolean' ? ($refs.boolToggle?.checked ? 'true' : 'false') : ''">
                             <input class="form-check-input" type="checkbox" role="switch"
                                    x-ref="boolToggle" {{ old('value', $setting->value) === 'true' ? 'checked' : '' }}>
-                            <label class="form-check-label" x-text="$refs.boolToggle?.checked ? 'Activé' : 'Désactivé'">Désactivé</label>
+                            <label class="form-check-label" x-text="$refs.boolToggle?.checked ? '{{ __('Activé') }}' : '{{ __('Désactivé') }}'">{{ __('Désactivé') }}</label>
                         </div>
                     </div>
 
@@ -153,11 +153,11 @@
 
                 {{-- Description --}}
                 <div class="col-12">
-                    <label class="form-label fw-medium">Description</label>
+                    <label class="form-label fw-medium">{{ __('Description') }}</label>
                     <input type="text" name="description" value="{{ old('description', $setting->description) }}"
-                           placeholder="Ex: Nom affiché du site web"
+                           placeholder="{{ __('Ex: Nom affiché du site web') }}"
                            class="form-control @error('description') is-invalid @enderror">
-                    <div class="form-text">Aide-mémoire pour comprendre ce paramètre</div>
+                    <div class="form-text">{{ __('Aide-mémoire pour comprendre ce paramètre') }}</div>
                     @error('description')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -167,8 +167,8 @@
                 <div class="col-12">
                     <div class="border rounded p-3 d-flex align-items-center justify-content-between gap-3">
                         <div>
-                            <span class="fw-medium">Visible publiquement</span>
-                            <p class="text-muted small mb-0 mt-1">Rend ce paramètre accessible sans authentification</p>
+                            <span class="fw-medium">{{ __('Visible publiquement') }}</span>
+                            <p class="text-muted small mb-0 mt-1">{{ __('Rend ce paramètre accessible sans authentification') }}</p>
                         </div>
                         <div class="form-check form-switch mb-0">
                             <input type="hidden" name="is_public" value="0">

@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\Core\Http\Middleware\ContentSecurityPolicy;
 use Modules\Core\Http\Middleware\ForceHttps;
@@ -94,12 +100,4 @@ test('honeypot middleware allows empty bot field', function () {
 
     $response = $middleware->handle($request, fn ($r) => new \Illuminate\Http\Response('OK'));
     expect($response->getStatusCode())->toBe(200);
-});
-
-test('contact route has honeypot middleware', function () {
-    $routes = collect(app('router')->getRoutes()->getRoutes());
-    $route = $routes->first(fn ($r) => $r->getName() === 'contact.send');
-
-    expect($route)->not->toBeNull();
-    expect($route->gatherMiddleware())->toContain('honeypot');
 });

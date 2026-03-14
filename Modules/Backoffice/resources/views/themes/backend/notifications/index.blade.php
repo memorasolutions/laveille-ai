@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Notifications', 'subtitle' => 'Liste'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Notifications'), 'subtitle' => __('Liste')])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active">{{ __('Notifications') }}</li>
@@ -12,6 +12,9 @@
 
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
     <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="bell" class="icon-md text-primary"></i>{{ __('Notifications') }}</h4>
+    <x-backoffice::help-modal id="helpNotificationsModal" :title="__('Notifications')" icon="bell" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.notifications._help')
+    </x-backoffice::help-modal>
 </div>
 
 {{-- Diffuser une alerte système --}}

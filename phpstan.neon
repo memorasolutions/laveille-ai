@@ -9,7 +9,6 @@ parameters:
         - Modules/Auth/app/
         - Modules/Backoffice/app/
         - Modules/Core/app/
-        - Modules/FrontTheme/app/
         - Modules/Health/app/
         - Modules/Logging/app/
         - Modules/Media/app/

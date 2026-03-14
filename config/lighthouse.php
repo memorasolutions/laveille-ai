@@ -1,4 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 
 return [
     /*
@@ -454,17 +462,17 @@ return [
             'echo' => [
                 'driver' => 'echo',
                 'connection' => env('LIGHTHOUSE_SUBSCRIPTION_REDIS_CONNECTION', 'default'),
-                'routes' => Nuwave\Lighthouse\Subscriptions\SubscriptionRouter::class . '@echoRoutes',
+                'routes' => Nuwave\Lighthouse\Subscriptions\SubscriptionRouter::class.'@echoRoutes',
             ],
             'pusher' => [
                 'driver' => 'pusher',
                 'connection' => 'pusher',
-                'routes' => Nuwave\Lighthouse\Subscriptions\SubscriptionRouter::class . '@pusher',
+                'routes' => Nuwave\Lighthouse\Subscriptions\SubscriptionRouter::class.'@pusher',
             ],
             'reverb' => [
                 'driver' => 'pusher',
                 'connection' => 'reverb',
-                'routes' => Nuwave\Lighthouse\Subscriptions\SubscriptionRouter::class . '@reverb',
+                'routes' => Nuwave\Lighthouse\Subscriptions\SubscriptionRouter::class.'@reverb',
             ],
         ],
 

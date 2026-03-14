@@ -1,11 +1,11 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => $team->name, 'subtitle' => 'Équipes'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => $team->name, 'subtitle' => __('Équipes')])
 
 @section('breadcrumbs')
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">Équipes</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">{{ __('Équipes') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ $team->name }}</li>
     </ol>
 </nav>
@@ -16,14 +16,14 @@
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Fermer') }}"></button>
     </div>
 @endif
 
 @if(session('error'))
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Fermer') }}"></button>
     </div>
 @endif
 
@@ -36,7 +36,7 @@
             <i data-lucide="users" class="me-2"></i>{{ $team->name }}
         </h5>
         <a href="{{ route('admin.teams.edit', $team) }}" class="btn btn-sm btn-outline-primary">
-            <i data-lucide="pencil" class="me-1"></i> Modifier
+            <i data-lucide="pencil" class="me-1"></i> {{ __('Modifier') }}
         </a>
     </div>
     <div class="card-body p-4">
@@ -45,12 +45,12 @@
                 @if($team->description)
                     <p class="text-muted mb-0">{{ $team->description }}</p>
                 @else
-                    <p class="text-muted fst-italic mb-0">Aucune description renseignée.</p>
+                    <p class="text-muted fst-italic mb-0">{{ __('Aucune description renseignée.') }}</p>
                 @endif
             </div>
             <div class="col-md-4">
                 <dl class="row mb-0">
-                    <dt class="col-5 text-muted fw-normal small">Propriétaire</dt>
+                    <dt class="col-5 text-muted fw-normal small">{{ __('Propriétaire') }}</dt>
                     <dd class="col-7">
                         <div class="d-flex align-items-center gap-1">
                             <i data-lucide="crown" class="text-warning" style="width:14px;height:14px"></i>
@@ -58,15 +58,15 @@
                         </div>
                     </dd>
 
-                    <dt class="col-5 text-muted fw-normal small">Membres</dt>
+                    <dt class="col-5 text-muted fw-normal small">{{ __('Membres') }}</dt>
                     <dd class="col-7">
                         <span class="badge bg-primary rounded-pill">{{ $team->members->count() }}</span>
                     </dd>
 
-                    <dt class="col-5 text-muted fw-normal small">Créée le</dt>
+                    <dt class="col-5 text-muted fw-normal small">{{ __('Créée le') }}</dt>
                     <dd class="col-7 text-muted small">{{ $team->created_at->format('d/m/Y') }}</dd>
 
-                    <dt class="col-5 text-muted fw-normal small">Modifiée le</dt>
+                    <dt class="col-5 text-muted fw-normal small">{{ __('Modifiée le') }}</dt>
                     <dd class="col-7 text-muted small">{{ $team->updated_at->format('d/m/Y') }}</dd>
                 </dl>
             </div>
@@ -80,19 +80,19 @@
 <div class="card mb-4">
     <div class="card-header py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
         <h5 class="fw-bold mb-0">
-            <i data-lucide="user" class="me-2"></i>Membres
+            <i data-lucide="user" class="me-2"></i>{{ __('Membres') }}
             <span class="badge bg-secondary ms-1 fw-normal" style="font-size:.75rem">{{ $team->members->count() }}</span>
         </h5>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0" aria-label="Membres de l'équipe {{ $team->name }}">
+            <table class="table table-hover mb-0" aria-label="{{ __('Membres de l\'équipe') }} {{ $team->name }}">
                 <thead>
                     <tr>
-                        <th scope="col">Membre</th>
-                        <th scope="col" class="d-none d-md-table-cell">E-mail</th>
-                        <th scope="col" class="d-none d-sm-table-cell" style="width:160px">Rôle</th>
-                        <th scope="col" class="text-end" style="width:120px">Actions</th>
+                        <th scope="col">{{ __('Membre') }}</th>
+                        <th scope="col" class="d-none d-md-table-cell">{{ __('E-mail') }}</th>
+                        <th scope="col" class="d-none d-sm-table-cell" style="width:160px">{{ __('Rôle') }}</th>
+                        <th scope="col" class="text-end" style="width:120px">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,13 +105,13 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 @if($isOwner)
-                                    <i data-lucide="crown" class="text-warning" style="width:15px;height:15px" title="Propriétaire"></i>
+                                    <i data-lucide="crown" class="text-warning" style="width:15px;height:15px" title="{{ __('Propriétaire') }}"></i>
                                 @else
                                     <i data-lucide="user" class="text-muted" style="width:15px;height:15px"></i>
                                 @endif
                                 <span class="fw-semibold">{{ $member->name }}</span>
                                 @if($isOwner)
-                                    <span class="badge bg-warning text-dark ms-1">Propriétaire</span>
+                                    <span class="badge bg-warning text-dark ms-1">{{ __('Propriétaire') }}</span>
                                 @endif
                             </div>
                         </td>
@@ -119,7 +119,7 @@
                         <td class="d-none d-sm-table-cell">
                             @if($isOwner)
                                 <span class="badge bg-warning text-dark">
-                                    <i data-lucide="crown" style="width:12px;height:12px"></i> Propriétaire
+                                    <i data-lucide="crown" style="width:12px;height:12px"></i> {{ __('Propriétaire') }}
                                 </span>
                             @else
                                 <form action="{{ route('admin.teams.members.role', [$team, $member]) }}"
@@ -129,13 +129,13 @@
                                     @method('PATCH')
                                     <select name="role"
                                             class="form-select form-select-sm"
-                                            aria-label="Rôle de {{ $member->name }}"
+                                            aria-label="{{ __('Rôle de') }} {{ $member->name }}"
                                             onchange="this.form.submit()">
                                         <option value="admin" @selected($memberRole === 'admin')>
-                                            Administrateur
+                                            {{ __('Administrateur') }}
                                         </option>
                                         <option value="member" @selected($memberRole === 'member')>
-                                            Membre
+                                            {{ __('Membre') }}
                                         </option>
                                     </select>
                                 </form>
@@ -150,9 +150,9 @@
                                     @method('DELETE')
                                     <button type="submit"
                                             class="btn btn-sm btn-outline-danger"
-                                            aria-label="Retirer {{ $member->name }} de l'équipe"
-                                            title="Retirer ce membre"
-                                            onclick="return confirm('Retirer {{ addslashes($member->name) }} de l\'équipe ?')">
+                                            aria-label="{{ __('Retirer') }} {{ $member->name }} {{ __('de l\'équipe') }}"
+                                            title="{{ __('Retirer ce membre') }}"
+                                            onclick="return confirm('{{ __('Retirer') }} {{ addslashes($member->name) }} {{ __('de l\'équipe ?') }}')">
                                         <i data-lucide="user-minus"></i>
                                     </button>
                                 </form>
@@ -164,7 +164,7 @@
                     @empty
                     <tr>
                         <td colspan="4" class="text-center text-muted py-4">
-                            Aucun membre dans cette équipe.
+                            {{ __('Aucun membre dans cette équipe.') }}
                         </td>
                     </tr>
                     @endforelse
@@ -180,7 +180,7 @@
 <div class="card mb-4">
     <div class="card-header py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
         <h5 class="fw-bold mb-0">
-            <i data-lucide="mail" class="me-2"></i>Invitations en attente
+            <i data-lucide="mail" class="me-2"></i>{{ __('Invitations en attente') }}
             @if($team->pendingInvitations->count() > 0)
                 <span class="badge bg-warning text-dark ms-1 fw-normal" style="font-size:.75rem">
                     {{ $team->pendingInvitations->count() }}
@@ -190,14 +190,14 @@
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0" aria-label="Invitations en attente">
+            <table class="table table-hover mb-0" aria-label="{{ __('Invitations en attente') }}">
                 <thead>
                     <tr>
-                        <th scope="col">E-mail invité</th>
-                        <th scope="col" class="d-none d-sm-table-cell" style="width:160px">Rôle proposé</th>
-                        <th scope="col" class="d-none d-md-table-cell" style="width:140px">Invitée le</th>
-                        <th scope="col" class="d-none d-md-table-cell" style="width:140px">Expire le</th>
-                        <th scope="col" class="text-end" style="width:100px">Actions</th>
+                        <th scope="col">{{ __('E-mail invité') }}</th>
+                        <th scope="col" class="d-none d-sm-table-cell" style="width:160px">{{ __('Rôle proposé') }}</th>
+                        <th scope="col" class="d-none d-md-table-cell" style="width:140px">{{ __('Invitée le') }}</th>
+                        <th scope="col" class="d-none d-md-table-cell" style="width:140px">{{ __('Expire le') }}</th>
+                        <th scope="col" class="text-end" style="width:100px">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -211,18 +211,18 @@
                                 <i data-lucide="mail" class="text-muted" style="width:15px;height:15px"></i>
                                 {{ $invitation->email }}
                                 @if($expired)
-                                    <span class="badge bg-warning text-dark ms-1">Expirée</span>
+                                    <span class="badge bg-warning text-dark ms-1">{{ __('Expirée') }}</span>
                                 @endif
                             </div>
                         </td>
                         <td class="d-none d-sm-table-cell">
                             @if($invitation->role === 'admin')
                                 <span class="badge bg-danger">
-                                    <i data-lucide="shield" style="width:12px;height:12px"></i> Administrateur
+                                    <i data-lucide="shield" style="width:12px;height:12px"></i> {{ __('Administrateur') }}
                                 </span>
                             @else
                                 <span class="badge bg-secondary">
-                                    <i data-lucide="user" style="width:12px;height:12px"></i> Membre
+                                    <i data-lucide="user" style="width:12px;height:12px"></i> {{ __('Membre') }}
                                 </span>
                             @endif
                         </td>
@@ -244,9 +244,9 @@
                                 @method('DELETE')
                                 <button type="submit"
                                         class="btn btn-sm btn-outline-danger"
-                                        aria-label="Annuler l'invitation pour {{ $invitation->email }}"
-                                        title="Annuler l'invitation"
-                                        onclick="return confirm('Annuler l\'invitation envoyée à {{ addslashes($invitation->email) }} ?')">
+                                        aria-label="{{ __('Annuler l\'invitation pour') }} {{ $invitation->email }}"
+                                        title="{{ __('Annuler l\'invitation') }}"
+                                        onclick="return confirm('{{ __('Annuler l\'invitation envoyée à') }} {{ addslashes($invitation->email) }} ?')">
                                     <i data-lucide="x"></i>
                                 </button>
                             </form>
@@ -256,7 +256,7 @@
                     <tr>
                         <td colspan="5" class="text-center text-muted py-4">
                             <i data-lucide="check-circle" class="me-1" style="width:16px;height:16px"></i>
-                            Aucune invitation en attente.
+                            {{ __('Aucune invitation en attente.') }}
                         </td>
                     </tr>
                     @endforelse
@@ -272,7 +272,7 @@
 <div class="card">
     <div class="card-header py-3 px-4 border-bottom">
         <h5 class="fw-bold mb-0">
-            <i data-lucide="user-plus" class="me-2"></i>Inviter un membre
+            <i data-lucide="user-plus" class="me-2"></i>{{ __('Inviter un membre') }}
         </h5>
     </div>
     <div class="card-body p-4">
@@ -291,7 +291,7 @@
             <div class="row g-3 align-items-end">
                 <div class="col-md-5">
                     <label for="invite_email" class="form-label fw-semibold">
-                        Adresse e-mail <span class="text-danger" aria-hidden="true">*</span>
+                        {{ __('Adresse e-mail') }} <span class="text-danger" aria-hidden="true">*</span>
                     </label>
                     <input type="email"
                            class="form-control @error('email') is-invalid @enderror"
@@ -299,7 +299,7 @@
                            name="email"
                            value="{{ old('email') }}"
                            required
-                           placeholder="prenom.nom@exemple.com"
+                           placeholder="{{ __('prenom.nom@exemple.com') }}"
                            aria-required="true"
                            autocomplete="off">
                     @error('email')
@@ -308,13 +308,13 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label for="invite_role" class="form-label fw-semibold">Rôle</label>
+                    <label for="invite_role" class="form-label fw-semibold">{{ __('Rôle') }}</label>
                     <select class="form-select @error('role') is-invalid @enderror"
                             id="invite_role"
                             name="role"
-                            aria-label="Rôle de l'invité">
-                        <option value="member" @selected(old('role', 'member') === 'member')>Membre</option>
-                        <option value="admin" @selected(old('role') === 'admin')>Administrateur</option>
+                            aria-label="{{ __('Rôle de l\'invité') }}">
+                        <option value="member" @selected(old('role', 'member') === 'member')>{{ __('Membre') }}</option>
+                        <option value="admin" @selected(old('role') === 'admin')>{{ __('Administrateur') }}</option>
                     </select>
                     @error('role')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -323,13 +323,13 @@
 
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i data-lucide="user-plus" class="me-1"></i> Envoyer l'invitation
+                        <i data-lucide="user-plus" class="me-1"></i> {{ __('Envoyer l\'invitation') }}
                     </button>
                 </div>
             </div>
             <div class="form-text mt-2">
                 <i data-lucide="info" style="width:13px;height:13px"></i>
-                Un e-mail d'invitation sera envoyé. Le lien expire après 7 jours.
+                {{ __('Un e-mail d\'invitation sera envoyé. Le lien expire après 7 jours.') }}
             </div>
         </form>
     </div>

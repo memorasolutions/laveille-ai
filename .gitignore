@@ -32,8 +32,10 @@ _ide_helper.php
 _ide_helper_models.php
 .phpstorm.meta.php
 
-# Screenshots d'audit (generees localement)
+# Screenshots et images d'audit (generees localement)
 /*.png
+/*.jpg
+/*.jpeg
 
 # Outils dev locaux
 storage/debugbar/

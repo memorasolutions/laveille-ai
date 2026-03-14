@@ -1,14 +1,21 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Informations système', 'subtitle' => 'Diagnostic'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Informations système'), 'subtitle' => __('Diagnostic')])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('Informations système') }}</li>
     </ol>
 </nav>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="server" class="icon-md text-primary"></i>{{ __('Informations système') }}</h4>
+    <x-backoffice::help-modal id="helpSystemInfoModal" :title="__('Informations système')" icon="server" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.system-info._help')
+    </x-backoffice::help-modal>
+</div>
 
 {{-- Stat cards --}}
 <div class="row mb-4">
@@ -48,7 +55,7 @@
                     <i data-lucide="globe" class="icon-md"></i>
                 </div>
                 <div>
-                    <p class="text-muted small mb-1">Environnement</p>
+                    <p class="text-muted small mb-1">{{ __('Environnement') }}</p>
                     <h4 class="fw-bold mb-0">{{ $laravel['environment'] }}</h4>
                 </div>
             </div>
@@ -62,7 +69,7 @@
                     <i data-lucide="layout-grid" class="icon-md"></i>
                 </div>
                 <div>
-                    <p class="text-muted small mb-1">Modules actifs</p>
+                    <p class="text-muted small mb-1">{{ __('Modules actifs') }}</p>
                     <h4 class="fw-bold mb-0">{{ count($modules) }}</h4>
                 </div>
             </div>
@@ -85,12 +92,12 @@
                     <table class="table mb-0">
                         <tbody>
                             @foreach([
-                                ['Version', $php['version']],
-                                ['SAPI', $php['sapi']],
-                                ['Memory limit', $php['memory_limit']],
-                                ['Max execution time', $php['max_execution_time'] . 's'],
-                                ['Upload max filesize', $php['upload_max_filesize']],
-                                ['Post max size', $php['post_max_size']],
+                                [__('Version'), $php['version']],
+                                [__('SAPI'), $php['sapi']],
+                                [__('Memory limit'), $php['memory_limit']],
+                                [__('Max execution time'), $php['max_execution_time'] . 's'],
+                                [__('Upload max filesize'), $php['upload_max_filesize']],
+                                [__('Post max size'), $php['post_max_size']],
                             ] as [$label, $value])
                             <tr>
                                 <td class="py-3 px-4 fw-semibold text-body w-50">{{ $label }}</td>
@@ -101,9 +108,9 @@
                                 <td class="py-3 px-4 fw-semibold text-body">OPcache</td>
                                 <td class="py-3 px-4">
                                     @if($php['opcache'])
-                                        <span class="badge bg-success bg-opacity-10 text-success">Activé</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success">{{ __('Activé') }}</span>
                                     @else
-                                        <span class="badge bg-danger bg-opacity-10 text-danger">Désactivé</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">{{ __('Désactivé') }}</span>
                                     @endif
                                 </td>
                             </tr>
@@ -127,13 +134,13 @@
                     <table class="table mb-0">
                         <tbody>
                             @foreach([
-                                ['Version', $laravel['version']],
-                                ['Environnement', $laravel['environment']],
-                                ['Timezone', $laravel['timezone']],
-                                ['Locale', $laravel['locale']],
-                                ['Cache', $laravel['cache_driver']],
-                                ['Session', $laravel['session_driver']],
-                                ['Queue', $laravel['queue_driver']],
+                                [__('Version'), $laravel['version']],
+                                [__('Environnement'), $laravel['environment']],
+                                [__('Timezone'), $laravel['timezone']],
+                                [__('Locale'), $laravel['locale']],
+                                [__('Cache'), $laravel['cache_driver']],
+                                [__('Session'), $laravel['session_driver']],
+                                [__('Queue'), $laravel['queue_driver']],
                             ] as [$label, $value])
                             <tr>
                                 <td class="py-3 px-4 fw-semibold text-body w-50">{{ $label }}</td>
@@ -144,9 +151,9 @@
                                 <td class="py-3 px-4 fw-semibold text-body">Debug</td>
                                 <td class="py-3 px-4">
                                     @if($laravel['debug'])
-                                        <span class="badge bg-danger bg-opacity-10 text-danger">Activé</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">{{ __('Activé') }}</span>
                                     @else
-                                        <span class="badge bg-success bg-opacity-10 text-success">Désactivé</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success">{{ __('Désactivé') }}</span>
                                     @endif
                                 </td>
                             </tr>
@@ -165,7 +172,7 @@
             <div class="card-header py-3 px-4 border-bottom">
                 <h4 class="fw-semibold mb-0 d-flex align-items-center gap-2">
                     <i data-lucide="hard-drive" class="icon-sm text-body-secondary"></i>
-                    Serveur
+                    {{ __('Serveur') }}
                 </h4>
             </div>
             <div class="card-body p-0">
@@ -181,7 +188,7 @@
                                 <td class="py-3 px-4 text-muted small">{{ $server['hostname'] }}</td>
                             </tr>
                             <tr>
-                                <td class="py-3 px-4 fw-semibold text-body">Disque</td>
+                                <td class="py-3 px-4 fw-semibold text-body">{{ __('Disque') }}</td>
                                 <td class="py-3 px-4">
                                     @php
                                         $free = number_format($server['disk_free'] / 1073741824, 1);
@@ -191,7 +198,7 @@
                                             : 0;
                                         $barColor = $usedPct > 90 ? 'bg-danger' : ($usedPct > 75 ? 'bg-warning' : 'bg-primary');
                                     @endphp
-                                    <p class="small text-muted mb-2">{{ $free }} Go libre / {{ $total }} Go total</p>
+                                    <p class="small text-muted mb-2">{{ $free }} {{ __('Go libre') }} / {{ $total }} {{ __('Go total') }}</p>
                                     <div class="progress mb-1" style="height:6px;">
                                         <div class="progress-bar {{ $barColor }}"
                                              role="progressbar"
@@ -200,7 +207,7 @@
                                              aria-valuemin="0"
                                              aria-valuemax="100"></div>
                                     </div>
-                                    <p class="text-muted small mb-0">{{ $usedPct }}% utilisé</p>
+                                    <p class="text-muted small mb-0">{{ $usedPct }}% {{ __('utilisé') }}</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -215,7 +222,7 @@
             <div class="card-header py-3 px-4 border-bottom">
                 <h4 class="fw-semibold mb-0 d-flex align-items-center gap-2">
                     <i data-lucide="layout-grid" class="icon-sm text-info"></i>
-                    Modules actifs ({{ count($modules) }})
+                    {{ __('Modules actifs') }} ({{ count($modules) }})
                 </h4>
             </div>
             <div class="card-body">
@@ -234,7 +241,7 @@
     <div class="card-header py-3 px-4 border-bottom">
         <h4 class="fw-semibold mb-0 d-flex align-items-center gap-2">
             <i data-lucide="zap" class="icon-sm text-body-secondary"></i>
-            Extensions PHP ({{ count($php['extensions']) }})
+            {{ __('Extensions PHP') }} ({{ count($php['extensions']) }})
         </h4>
     </div>
     <div class="card-body">

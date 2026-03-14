@@ -10,5 +10,12 @@
     </ol>
 </nav>
 
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="languages" class="icon-md text-primary"></i>{{ __('Traductions') }}</h4>
+    <x-backoffice::help-modal id="helpTranslationsModal" :title="__('Traductions')" icon="languages" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.translations._help')
+    </x-backoffice::help-modal>
+</div>
+
 @livewire('backoffice-translations-manager')
 @endsection

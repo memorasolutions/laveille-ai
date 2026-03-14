@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Blog\Models\Article;
@@ -70,11 +76,4 @@ it('unauthenticated user is redirected from dashboard', function () {
     auth()->logout();
     $this->get(route('user.dashboard'))
         ->assertRedirect(route('login'));
-});
-
-it('landing page loads with updated stats', function () {
-    $this->get(route('home'))
-        ->assertStatus(200)
-        ->assertSee('SaaS Laravel 12')
-        ->assertSee('24');
 });

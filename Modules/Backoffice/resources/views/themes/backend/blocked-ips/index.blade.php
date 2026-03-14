@@ -3,12 +3,19 @@
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('IPs bloquées') }}</li>
     </ol>
 </nav>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="shield-ban" class="icon-md text-primary"></i>{{ __('IPs bloquées') }}</h4>
+    <x-backoffice::help-modal id="helpBlockedIpsModal" :title="__('IPs bloquées')" icon="shield-ban" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.blocked-ips._help')
+    </x-backoffice::help-modal>
+</div>
 
 @if(session('success'))
     <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
@@ -78,11 +85,11 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">IP</th>
+                        <th class="ps-4">{{ __('IP') }}</th>
                         <th>{{ __('Raison') }}</th>
                         <th>{{ __('Type') }}</th>
                         <th>{{ __('Expire') }}</th>
-                        <th class="pe-4">Actions</th>
+                        <th class="pe-4">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -1,22 +1,25 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
-@section('title', 'Gestion des FAQ')
+@section('title', __('Gestion des FAQ'))
 @section('content')
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">FAQ</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('FAQ') }}</li>
     </ol>
 </nav>
 <div class="page-content">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 class="mb-0">FAQ</h4>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="help-circle" class="icon-md text-primary"></i>{{ __('FAQ') }}</h4>
         <div class="d-flex gap-2">
+            <x-backoffice::help-modal id="helpFaqModal" :title="__('Qu\'est-ce que la FAQ ?')" icon="help-circle" :buttonLabel="__('Aide')">
+                @include('faq::admin._help')
+            </x-backoffice::help-modal>
             <button type="button" class="btn btn-success d-none" id="btnSaveOrder" onclick="saveOrder()">
-                <i data-lucide="save"></i> Enregistrer l'ordre
+                <i data-lucide="save"></i> {{ __('Enregistrer l\'ordre') }}
             </button>
             <a href="{{ route('admin.faqs.create') }}" class="btn btn-primary">
-                <i data-lucide="plus"></i> Ajouter une question
+                <i data-lucide="plus"></i> {{ __('Ajouter une question') }}
             </a>
         </div>
     </div>
@@ -24,7 +27,7 @@
     <div class="card">
         <div class="card-body">
             @if($faqs->count() > 0)
-            <p class="text-muted small mb-3">Glissez-déposez pour réorganiser l'ordre d'affichage.</p>
+            <p class="text-muted small mb-3">{{ __('Glissez-déposez pour réorganiser l\'ordre d\'affichage.') }}</p>
             <div id="faq-list">
                 @foreach($faqs as $faq)
                 <div class="faq-item d-flex align-items-center gap-3 p-3 mb-2 border rounded" data-id="{{ $faq->id }}">
@@ -39,19 +42,19 @@
                     </div>
                     <div>
                         @if($faq->is_published)
-                            <span class="badge bg-success">Publié</span>
+                            <span class="badge bg-success">{{ __('Publié') }}</span>
                         @else
-                            <span class="badge bg-secondary">Brouillon</span>
+                            <span class="badge bg-secondary">{{ __('Brouillon') }}</span>
                         @endif
                     </div>
                     <div class="d-flex gap-1">
-                        <a href="{{ route('admin.faqs.edit', $faq) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                        <a href="{{ route('admin.faqs.edit', $faq) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
                             <i data-lucide="edit"></i>
                         </a>
-                        <form action="{{ route('admin.faqs.destroy', $faq) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette question ?');">
+                        <form action="{{ route('admin.faqs.destroy', $faq) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette question ?') }}');">
                             @csrf
                             @method('DELETE')
-                            <button type="button" class="btn btn-sm btn-outline-danger" title="Supprimer" onclick="if(confirm('Supprimer cette question ?')) this.closest('form').submit()">
+                            <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer cette question ?') }}')) this.closest('form').submit()">
                                 <i data-lucide="trash-2"></i>
                             </button>
                         </form>
@@ -62,10 +65,10 @@
             @else
             <div class="text-center py-5">
                 <i data-lucide="help-circle" class="icon-xl text-muted mb-3"></i>
-                <h5 class="text-muted">Aucune question FAQ</h5>
-                <p class="text-muted mb-4">Créez votre première question pour la page FAQ publique.</p>
+                <h5 class="text-muted">{{ __('Aucune question FAQ') }}</h5>
+                <p class="text-muted mb-4">{{ __('Créez votre première question pour la page FAQ publique.') }}</p>
                 <a href="{{ route('admin.faqs.create') }}" class="btn btn-primary">
-                    <i data-lucide="plus"></i> Ajouter une question
+                    <i data-lucide="plus"></i> {{ __('Ajouter une question') }}
                 </a>
             </div>
             @endif
@@ -94,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function saveOrder() {
     const btn = document.getElementById('btnSaveOrder');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enregistrement...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> {{ __("Enregistrement...") }}';
 
     const items = [...document.querySelectorAll('.faq-item')].map(el => parseInt(el.dataset.id));
 
@@ -110,21 +113,21 @@ function saveOrder() {
     .then(r => r.json())
     .then(data => {
         btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="save"></i> Enregistrer l\'ordre';
+        btn.innerHTML = '<i data-lucide="save"></i> {{ __("Enregistrer l\'ordre") }}';
         btn.classList.add('d-none');
         lucide.createIcons();
         if (data.success) {
             const toast = document.createElement('div');
             toast.className = 'toast align-items-center text-bg-success border-0 show';
             toast.setAttribute('style', 'position:fixed;top:1rem;right:1rem;z-index:9999');
-            toast.innerHTML = '<div class="d-flex"><div class="toast-body">Ordre enregistré.</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+            toast.innerHTML = '<div class="d-flex"><div class="toast-body">{{ __("Ordre enregistré.") }}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
     })
     .catch(() => {
         btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="save"></i> Enregistrer l\'ordre';
+        btn.innerHTML = '<i data-lucide="save"></i> {{ __("Enregistrer l\'ordre") }}';
         lucide.createIcons();
     });
 }

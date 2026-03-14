@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -230,9 +231,9 @@ class TranslationsManager extends Component
 
             if ($this->search !== '') {
                 $searchLower = mb_strtolower($this->search);
-                $keyMatch = str_contains(mb_strtolower($key), $searchLower);
-                $sourceMatch = str_contains(mb_strtolower($sourceValue), $searchLower);
-                $targetMatch = str_contains(mb_strtolower($targetValue), $searchLower);
+                $keyMatch = str_contains(mb_strtolower((string) $key), $searchLower);
+                $sourceMatch = str_contains(mb_strtolower((string) $sourceValue), $searchLower);
+                $targetMatch = str_contains(mb_strtolower((string) $targetValue), $searchLower);
 
                 if (! $keyMatch && ! $sourceMatch && ! $targetMatch) {
                     continue;

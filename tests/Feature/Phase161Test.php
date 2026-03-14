@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Modules\AI\Enums\ConversationStatus;
@@ -105,7 +111,7 @@ test('AI settings exist after seeding', function () {
     $this->seed(\Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class);
 
     $aiSettings = Setting::where('group', 'ai')->get();
-    expect($aiSettings)->toHaveCount(18);
+    expect($aiSettings)->toHaveCount(27);
 });
 
 test('AiService::chat makes HTTP call', function () {

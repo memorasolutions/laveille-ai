@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('core setup command exists', function () {
     $this->artisan('core:setup --help')
         ->assertSuccessful();
@@ -15,7 +20,7 @@ test('all modules are loaded', function () {
         'Core', 'Auth', 'RolesPermissions', 'Settings',
         'Logging', 'Health', 'Storage', 'Media',
         'Notifications', 'Webhooks', 'Api', 'SEO',
-        'Backoffice', 'FrontTheme', 'SaaS', 'Tenancy',
+        'Backoffice', 'SaaS', 'Tenancy',
         'Backup', 'Translation', 'Export', 'Search',
     ];
 

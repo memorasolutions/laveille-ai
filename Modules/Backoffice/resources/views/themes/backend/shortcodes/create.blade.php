@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Shortcodes', 'subtitle' => 'Nouveau'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Shortcodes'), 'subtitle' => __('Nouveau')])
 
 @section('content')
 
@@ -14,10 +14,10 @@
 <div class="card">
     <div class="card-header border-bottom py-3 px-4">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <h5 class="mb-0 fw-semibold">Nouveau shortcode</h5>
+            <h5 class="mb-0 fw-semibold">{{ __('Nouveau shortcode') }}</h5>
             <a href="{{ route('admin.shortcodes.index') }}" class="btn btn-sm btn-light d-inline-flex align-items-center gap-2">
                 <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
-                Retour
+                {{ __('Retour') }}
             </a>
         </div>
     </div>
@@ -51,13 +51,13 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                     <div class="form-text">
-                        Lettres minuscules, chiffres et underscores. Ex : <code>my_button</code>
+                        {{ __('Lettres minuscules, chiffres et underscores. Ex :') }} <code>my_button</code>
                     </div>
                 </div>
 
                 <div class="col-12 col-md-6">
                     <label for="name" class="form-label fw-medium">
-                        Nom <span class="text-danger">*</span>
+                        {{ __('Nom') }} <span class="text-danger">*</span>
                     </label>
                     <input type="text" name="name" id="name"
                         class="form-control @error('name') is-invalid @enderror"
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="col-12">
-                    <label for="description" class="form-label fw-medium">Description</label>
+                    <label for="description" class="form-label fw-medium">{{ __('Description') }}</label>
                     <textarea name="description" id="description" rows="2"
                         class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
                     @error('description')
@@ -78,7 +78,7 @@
 
                 <div class="col-12">
                     <label for="html_template" class="form-label fw-medium">
-                        Template HTML <span class="text-danger">*</span>
+                        {{ __('Template HTML') }} <span class="text-danger">*</span>
                     </label>
                     <textarea name="html_template" id="html_template" rows="4" required x-model="tpl"
                         class="form-control font-monospace @error('html_template') is-invalid @enderror"
@@ -89,21 +89,21 @@
                 </div>
 
                 <div class="col-12">
-                    <label for="parameters" class="form-label fw-medium">Paramètres JSON</label>
+                    <label for="parameters" class="form-label fw-medium">{{ __('Paramètres JSON') }}</label>
                     <textarea name="parameters" id="parameters" rows="2" x-model="params"
                         class="form-control font-monospace @error('parameters') is-invalid @enderror"
                         placeholder='["url", "color"]'>{{ old('parameters') }}</textarea>
                     @error('parameters')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    <div class="form-text">Liste JSON des noms de paramètres acceptés par ce shortcode.</div>
+                    <div class="form-text">{{ __('Liste JSON des noms de paramètres acceptés par ce shortcode.') }}</div>
                 </div>
 
                 <div class="col-12">
                     <div class="border rounded p-3 d-flex align-items-center justify-content-between gap-3">
                         <div>
-                            <div class="fw-medium small">Contient du contenu</div>
-                            <div class="text-muted" style="font-size:0.8rem;">Le shortcode accepte du contenu entre les balises ouvrante et fermante</div>
+                            <div class="fw-medium small">{{ __('Contient du contenu') }}</div>
+                            <div class="text-muted" style="font-size:0.8rem;">{{ __('Le shortcode accepte du contenu entre les balises ouvrante et fermante') }}</div>
                         </div>
                         <input type="checkbox" name="has_content" value="1" x-model="hasContent"
                             class="form-check-input"

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -31,7 +32,7 @@ it('github redirect route exists', function () {
 });
 
 it('invalid provider returns 404', function () {
-    $this->get('/auth/facebook/redirect')->assertStatus(404);
+    $this->get('/auth/discord/redirect')->assertStatus(404);
 });
 
 it('social callback creates new user', function () {
@@ -69,10 +70,22 @@ it('social callback logs in existing user', function () {
     $this->assertAuthenticatedAs($user);
 });
 
-it('social login button visible on login page', function () {
-    $this->get('/login')->assertSee('Google');
+it('social login button visible on login page when configured', function () {
+    config(['services.google.client_id' => 'test-id']);
+    config(['services.github.client_id' => 'test-id']);
+    $this->get('/login')->assertSee('Google')->assertSee('GitHub');
 });
 
-it('social login button github visible on login page', function () {
-    $this->get('/login')->assertSee('GitHub');
+it('social login buttons hidden when not configured', function () {
+    config(['services.google.client_id' => null]);
+    config(['services.github.client_id' => null]);
+    $this->get('/login')->assertDontSee('Ou continuer avec');
+});
+
+it('all 7 providers are supported', function () {
+    $allowed = ['google', 'github', 'microsoft', 'facebook', 'linkedin', 'x', 'apple'];
+    foreach ($allowed as $provider) {
+        $response = $this->get("/auth/{$provider}/redirect");
+        expect($response->status())->toBeIn([302, 200, 500], "Provider {$provider} should be allowed");
+    }
 });

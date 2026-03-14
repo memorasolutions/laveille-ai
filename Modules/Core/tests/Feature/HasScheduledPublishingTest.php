@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Modules\Pages\Models\StaticPage;
@@ -19,7 +25,7 @@ function createScheduledPage(array $attributes = []): StaticPage
     return StaticPage::create(array_merge([
         'user_id' => $user->id,
         'title' => 'Test Page',
-        'slug' => 'test-page-' . uniqid(),
+        'slug' => 'test-page-'.uniqid(),
         'content' => 'Test content',
         'status' => 'draft',
         'template' => 'default',

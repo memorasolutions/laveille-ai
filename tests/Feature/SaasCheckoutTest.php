@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\SaaS\Models\Plan;
@@ -53,20 +59,6 @@ test('checkout échoue si le plan n a pas de stripe_price_id', function () {
         ->post('/checkout', ['plan_id' => $planSansPrix->id])
         ->assertRedirect()
         ->assertSessionHas('error');
-});
-
-// --- Pages succès et annulation ---
-
-test('page de succès est accessible pour un utilisateur authentifié', function () {
-    $this->actingAs($this->user)
-        ->get('/checkout/success?session_id=test_session')
-        ->assertOk();
-});
-
-test('page d annulation est accessible pour un utilisateur authentifié', function () {
-    $this->actingAs($this->user)
-        ->get('/checkout/cancel')
-        ->assertOk();
 });
 
 // --- Webhook ---

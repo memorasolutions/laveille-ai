@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -19,6 +20,7 @@ use Modules\Core\Database\Factories\ContentRevisionFactory;
 class ContentRevision extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'revisionable_type',
         'revisionable_id',

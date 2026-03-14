@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -34,7 +35,6 @@ class SaaSServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerCommands();
-        $this->registerCommandSchedules();
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
@@ -54,6 +54,8 @@ class SaaSServiceProvider extends ServiceProvider
 
         $this->app->singleton(\Modules\SaaS\Services\BillingService::class);
         $this->app->singleton(\Modules\SaaS\Services\SaasMetricsService::class);
+        $this->app->singleton(\Modules\SaaS\Services\MeteringService::class);
+        $this->app->singleton(\Modules\SaaS\Services\ReferralService::class);
 
         // Désactiver les routes par défaut de Cashier pour utiliser notre webhook personnalisé
         Cashier::ignoreRoutes();
@@ -67,17 +69,6 @@ class SaaSServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\SaaS\Console\SendTrialExpiryNotifications::class,
         ]);
-    }
-
-    /**
-     * Register command Schedules.
-     */
-    protected function registerCommandSchedules(): void
-    {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
     }
 
     /**

@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('core:new-project command is registered', function () {
     expect(class_exists(\Modules\Core\Console\NewProjectCommand::class))->toBeTrue();
 

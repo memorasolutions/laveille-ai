@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -60,7 +66,7 @@ it('admin peut envoyer une campagne', function () {
     Notification::fake();
 
     $admin = User::factory()->create();
-    $admin->assignRole(Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']));
+    $admin->assignRole(Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']));
 
     Subscriber::factory()->confirmed()->count(2)->create();
     $campaign = Campaign::factory()->create();
@@ -77,7 +83,7 @@ it('admin peut envoyer une campagne', function () {
 
 it('envoyer campagne déjà envoyée redirige avec erreur', function () {
     $admin = User::factory()->create();
-    $admin->assignRole(Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']));
+    $admin->assignRole(Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']));
 
     $campaign = Campaign::factory()->sent()->create();
 

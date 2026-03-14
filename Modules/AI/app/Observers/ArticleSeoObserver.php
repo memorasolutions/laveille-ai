@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,7 +13,6 @@ namespace Modules\AI\Observers;
 use Illuminate\Support\Facades\Log;
 use Modules\AI\Services\AiService;
 use Modules\Blog\Models\Article;
-use Modules\SEO\Models\MetaTag;
 use Modules\Settings\Models\Setting;
 
 class ArticleSeoObserver
@@ -40,10 +40,12 @@ class ArticleSeoObserver
                 $service = app(AiService::class);
                 $seoData = $service->generateSeoMeta($article->title, strip_tags($article->content));
 
-                MetaTag::updateOrCreate(
-                    ['url_pattern' => '/blog/'.$article->slug],
-                    array_merge($seoData, ['is_active' => true])
-                );
+                if (class_exists(\Modules\SEO\Models\MetaTag::class)) {
+                    \Modules\SEO\Models\MetaTag::updateOrCreate(
+                        ['url_pattern' => '/blog/'.$article->slug],
+                        array_merge($seoData, ['is_active' => true])
+                    );
+                }
             } catch (\Exception $e) {
                 Log::warning('AI SEO generation failed for article #'.$article->id.': '.$e->getMessage());
             }

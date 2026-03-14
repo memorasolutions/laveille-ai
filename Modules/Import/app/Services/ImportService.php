@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -79,7 +80,7 @@ class ImportService
         array $columnMapping,
         ?callable $validator = null
     ): ImportResult {
-        $result = new ImportResult();
+        $result = new ImportResult;
 
         if (! file_exists($filePath)) {
             return $result;
@@ -129,7 +130,7 @@ class ImportService
     {
         return match (strtolower($format)) {
             'csv' => $this->createCsvReader(),
-            'xlsx' => new XLSXReader(),
+            'xlsx' => new XLSXReader,
             default => throw new \InvalidArgumentException("Format non supporté : {$format}"),
         };
     }
@@ -147,10 +148,10 @@ class ImportService
         return match (strtolower($modelType)) {
             'article' => class_exists(\Modules\Blog\Models\Article::class)
                 ? \Modules\Blog\Models\Article::class
-                : throw new \InvalidArgumentException("Module Blog non disponible"),
+                : throw new \InvalidArgumentException('Module Blog non disponible'),
             'page' => class_exists(\Modules\Pages\Models\StaticPage::class)
                 ? \Modules\Pages\Models\StaticPage::class
-                : throw new \InvalidArgumentException("Module Pages non disponible"),
+                : throw new \InvalidArgumentException('Module Pages non disponible'),
             'user' => User::class,
             default => throw new \InvalidArgumentException("Type de modèle inconnu : {$modelType}"),
         };

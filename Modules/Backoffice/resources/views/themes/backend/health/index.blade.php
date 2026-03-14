@@ -3,7 +3,7 @@
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('Santé système') }}</li>
@@ -16,6 +16,13 @@
     $warningCount = $results ? $results->storedCheckResults->where('status', 'warning')->count() : 0;
     $failedCount = $results ? $results->storedCheckResults->whereIn('status', ['failed', 'crashed'])->count() : 0;
 @endphp
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="heart-pulse" class="icon-md text-primary"></i>{{ __('Santé du système') }}</h4>
+    <x-backoffice::help-modal id="helpHealthModal" :title="__('Santé du système')" icon="heart-pulse" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.health._help')
+    </x-backoffice::help-modal>
+</div>
 
 {{-- Stats cards --}}
 <div class="row mb-4">

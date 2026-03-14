@@ -1,13 +1,13 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Modifier l\'équipe', 'subtitle' => 'Équipes'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Modifier l\'équipe'), 'subtitle' => __('Équipes')])
 
 @section('breadcrumbs')
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">Équipes</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.teams.index') }}">{{ __('Équipes') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.teams.show', $team) }}">{{ $team->name }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Modifier') }}</li>
     </ol>
 </nav>
 @endsection
@@ -27,7 +27,7 @@
 <div class="card">
     <div class="card-header py-3 px-4 border-bottom">
         <h5 class="fw-bold mb-0">
-            <i data-lucide="pencil" class="me-2"></i>Modifier : {{ $team->name }}
+            <i data-lucide="pencil" class="me-2"></i>{{ __('Modifier :') }} {{ $team->name }}
         </h5>
     </div>
     <div class="card-body p-4">
@@ -39,7 +39,7 @@
                 <div class="col-md-8">
                     <div class="mb-3">
                         <label for="name" class="form-label fw-semibold">
-                            Nom de l'équipe <span class="text-danger" aria-hidden="true">*</span>
+                            {{ __('Nom de l\'équipe') }} <span class="text-danger" aria-hidden="true">*</span>
                         </label>
                         <input type="text"
                                class="form-control @error('name') is-invalid @enderror"
@@ -56,7 +56,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <label for="description" class="form-label fw-semibold">{{ __('Description') }}</label>
                         <textarea class="form-control @error('description') is-invalid @enderror"
                                   id="description"
                                   name="description"
@@ -65,17 +65,17 @@
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
-                        <div class="form-text">Maximum 1 000 caractères.</div>
+                        <div class="form-text">{{ __('Maximum 1 000 caractères.') }}</div>
                     </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="card border">
                         <div class="card-body">
-                            <h6 class="fw-semibold mb-3">Informations</h6>
+                            <h6 class="fw-semibold mb-3">{{ __('Informations') }}</h6>
 
                             <div class="mb-2">
-                                <small class="text-muted d-block">Propriétaire</small>
+                                <small class="text-muted d-block">{{ __('Propriétaire') }}</small>
                                 <div class="d-flex align-items-center gap-1 mt-1">
                                     <i data-lucide="crown" class="text-warning" style="width:14px;height:14px"></i>
                                     <span class="fw-semibold">{{ $team->owner->name ?? '—' }}</span>
@@ -83,12 +83,12 @@
                             </div>
 
                             <div class="mb-2">
-                                <small class="text-muted d-block">Membres</small>
+                                <small class="text-muted d-block">{{ __('Membres') }}</small>
                                 <span class="badge bg-primary rounded-pill mt-1">{{ $team->members->count() }}</span>
                             </div>
 
                             <div class="mb-0">
-                                <small class="text-muted d-block">Créée le</small>
+                                <small class="text-muted d-block">{{ __('Créée le') }}</small>
                                 <span class="mt-1 d-block">{{ $team->created_at->format('d/m/Y à H\hi') }}</span>
                             </div>
                         </div>
@@ -98,10 +98,10 @@
 
             <div class="d-flex gap-2 mt-2">
                 <button type="submit" class="btn btn-primary">
-                    <i data-lucide="check" class="me-1"></i> Enregistrer les modifications
+                    <i data-lucide="check" class="me-1"></i> {{ __('Enregistrer les modifications') }}
                 </button>
                 <a href="{{ route('admin.teams.show', $team) }}" class="btn btn-outline-secondary">
-                    Annuler
+                    {{ __('Annuler') }}
                 </a>
             </div>
         </form>

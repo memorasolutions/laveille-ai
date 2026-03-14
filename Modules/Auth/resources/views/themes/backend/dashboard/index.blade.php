@@ -119,9 +119,9 @@
         <i data-lucide="plus-circle" class="icon-sm"></i>
         {{ __('Nouvel article') }}
     </a>
-    <a href="{{ route('blog.index') }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2">
+    <a href="{{ route('admin.blog.articles.index') }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2">
         <i data-lucide="globe" class="icon-sm"></i>
-        {{ __('Voir le blog') }}
+        {{ __('Articles du blog') }}
     </a>
     <a href="{{ route('user.profile') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2">
         <i data-lucide="user" class="icon-sm"></i>
@@ -146,7 +146,7 @@
     <div class="p-0 overflow-x-auto">
         @if($recentArticles->isEmpty())
             <div class="py-5 text-center text-muted">
-                <i data-lucide="file-text" class="icon-sm mb-3 d-block" style="font-size:2rem;"></i>
+                <i data-lucide="file-text" class="mb-3 mx-auto d-block" style="width:2rem;height:2rem;"></i>
                 <p class="mb-3">{{ __('Aucun article pour le moment.') }}</p>
                 <a href="{{ route('user.articles.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
                     {{ __('Rédiger mon premier article') }}

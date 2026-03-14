@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -10,7 +11,6 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
-use Modules\AI\Enums\ConversationStatus;
 use Modules\AI\Events\HumanTakeoverRequested;
 use Modules\AI\Livewire\ChatBot;
 use Modules\AI\Models\AiConversation;

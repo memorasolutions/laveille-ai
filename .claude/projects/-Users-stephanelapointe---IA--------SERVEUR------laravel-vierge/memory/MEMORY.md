@@ -17,10 +17,12 @@
 - **PAS de Docker** - Docker et cPanel ne font pas bon menage
 - Toutes les configs (CI/CD, deploiement) doivent etre compatibles cPanel
 
-## Etat actuel (2026-03-02, CORE release-ready)
-- **2734 test cases** - mode parallele obligatoire
+## Etat actuel (2026-03-13)
+- **3128+ tests**, 6465 assertions, 0 fail
 - **PHPStan** : 0 erreurs niveau 6
-- **34 modules actifs**, 584 routes, 101 migrations, 47 permissions
+- **36 modules actifs**, 47+ permissions
+- **32 feature flags** Laravel Pennant (sync FeatureFlagsTable complete)
+- **Auteur** : MEMORA solutions - header DocBlock standardise partout
 - **3 chantiers majeurs** : multi-tenant (65 tests), marketing automation (44 tests), API GraphQL (33 tests)
 - **Polish P1-P8** : content versioning, scheduled publishing, URL redirects, announcements, breadcrumbs, preview
 - **Media manager ameliore** (P5a/P5b/P5c) : metadonnees SEO, dossiers, WebP/compression
@@ -31,20 +33,22 @@
 - **1 theme backoffice** : backend (NobleUI Bootstrap 5.3.8 SCSS Vite) - wowdash/tabler supprimes
 - **Auth layouts** : guest = Authero (Vite + @fontsource/inter), user = NobleUI (@fontsource/roboto)
 - **Frontend** : GoSass
-- **43 permissions**, 4 roles (super_admin, admin, editor, user)
-- **RBAC** : Gate::before super_admin, middleware permission: sur routes, policies can()
-- **Securite** : XSS purifier, CSP+HSTS headers, rate limiting, CAPTCHA, honeypot, audit logging, HIBP
+- **129 permissions granulaires** (view/create/update/delete pour contenu, view/manage pour opérationnel), 4 rôles
+- **RBAC granulaire** : Gate::before super_admin, middleware permission: par action CRUD sur routes, policies can(), UI rôles 100% paramétrable (checkboxes par catégorie)
+- **PWA** : vite-plugin-pwa v1.2.0 + Workbox (injectManifest, 329 precache), manifest dynamique multi-tenant, Background Sync, install/update prompts, config/pwa.php, pwa:status command
+- **Passkeys/WebAuthn** : spatie/laravel-passkeys (dev-support-laravel-13), @simplewebauthn/browser, bouton login, page profil gestion, 11 tests
+- **Securite** : XSS purifier, CSP+HSTS headers, rate limiting, CAPTCHA, honeypot, audit logging, HIBP, Passkeys WebAuthn
 - **GDPR** : export 7 tables, suppression compte + anonymisation, polices self-hosted
 - **CI/CD** : GitHub Actions (quality + tests + E2E + security), Dependabot, Makefile
 - Superadmin : stephane@memora.ca / Admin123!
 
 ## Architecture
-- Laravel 12, PHP 8.4, MySQL, Pest PHP 3
+- Laravel 12, PHP 8.4, Livewire 4.1 (PAS Filament), MySQL, Pest PHP 3
 - 34 modules nwidart, BaseRouteServiceProvider dans Core (31 modules convertis)
 - SettingsReaderInterface dans Core (decouplage Core<->Settings)
 - API REST v1 Sanctum + Scramble docs, API GraphQL v2 Lighthouse v6
 - SaaS : Stripe Cashier, plans, checkout, webhooks verifies
-- Feature flags : Laravel Pennant (8 flags modules dans AppServiceProvider, FeatureFlagSeeder)
+- Feature flags : Laravel Pennant (32 flags dans AppServiceProvider, FeatureFlagSeeder, FeatureFlagsTable sync)
 - Bootstrapping : core:new-project (interactif, modules optionnels, .env, feature flags)
 - Notifications : 13 classes, NotificationBell Livewire, Reverb temps reel, polling 30s
 - Blog, Newsletter, Pages, Editor TipTap, Search Scout
@@ -53,6 +57,20 @@
 - Module Team : organisations multi-utilisateurs, invitations token 64 chars, trait HasTeams, middleware EnsureTeamContext, 23 tests
 - Onboarding wizard Livewire, impersonation admin, activity logging Spatie
 - Health monitoring /health endpoint, Pulse, Horizon
+- Module Roadmap : product feedback/roadmap tool (inspiré Votlie), 33 tests
+
+## Module Roadmap (session 2026-03-12)
+- **Tables** : boards, ideas (SoftDeletes), votes (unique user+idea), idea_comments (is_official), roadmap_changelogs
+- **Enum** : IdeaStatus (under_review, planned, in_progress, completed, declined) avec label() fr + color() Bootstrap
+- **Services** : VotingService (toggle + hasVoted), IdeaService (create + updateStatus + merge), RoadmapAiService (categorize AI optionnel + detectDuplicates)
+- **Admin** : BoardController CRUD, IdeaController (CRUD + status + merge + vote + comments), RoadmapAnalyticsController (KPIs + top ideas + par statut)
+- **Frontend public** : PublicBoardController, layout Bootstrap 5.3 CDN autonome (facile à remplacer), boards index/show/kanban, vote AJAX, submit idée
+- **Notifications** : IdeaStatusChanged (email queue) — envoyé à l'auteur quand statut change
+- **Changelog** : Changelog model, historique dans admin idea show, log automatique sur updateStatus + merge
+- **Permissions** : view_roadmap + manage_roadmap (Pattern B seeder)
+- **Sidebar** : section Roadmap (Tableaux, Idées, Statistiques) avec @canany
+- **AI optionnel** : RoadmapAiService utilise class_exists(\Modules\AI\Services\AiService) — fonctionne sans module AI
+- **33 tests** : 4 fichiers (Admin 12, Public 9, Changelog 5, Phase5 7)
 
 ## Modules WordPress (session 2026-02-27)
 - **Menu** : drag-and-drop SortableJS, cache, Blade component frontend, 14 tests
@@ -149,6 +167,7 @@
 - **User #1 (stephane@memora.ca) = superadmin principal - JAMAIS le supprimer**
 - **JAMAIS migrate:fresh** - ne jamais supprimer la base de donnees
 - **Tout personnalisable via admin** - Settings (cle/valeur en DB)
+- **DRY strict** : jamais de code repete. Si un code apparait plus d'une fois → module reutilisable ou plugin Laravel
 
 ## Routage MCP - lecons apprises
 - deepseek-chat : excellent code, toujours nettoyer style (strict_types, Pint, docblocks)

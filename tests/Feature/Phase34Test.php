@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('tiptap packages are installed', function () {
     $pkg = json_decode(file_get_contents(base_path('package.json')), true);
     $all = array_merge($pkg['dependencies'] ?? [], $pkg['devDependencies'] ?? []);

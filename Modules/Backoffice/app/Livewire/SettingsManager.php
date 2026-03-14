@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -57,7 +58,7 @@ class SettingsManager extends Component
     public function saveTheme(string $theme): void
     {
         $themesDir = module_path('Backoffice', 'resources/views/themes');
-        $available = array_map('basename', array_filter(glob($themesDir . '/*'), 'is_dir'));
+        $available = array_map('basename', array_filter(glob($themesDir.'/*'), 'is_dir'));
 
         if (! in_array($theme, $available)) {
             $this->dispatch('toast', type: 'error', message: 'Thème invalide.');
@@ -68,11 +69,11 @@ class SettingsManager extends Component
         Setting::updateOrCreate(
             ['key' => 'backoffice.theme'],
             [
-                'group'       => 'branding',
-                'value'       => $theme,
-                'type'        => 'string',
+                'group' => 'branding',
+                'value' => $theme,
+                'type' => 'string',
                 'description' => 'Thème du panneau administration',
-                'is_public'   => false,
+                'is_public' => false,
             ]
         );
 
@@ -83,7 +84,7 @@ class SettingsManager extends Component
         Cache::forget('setting.backoffice.theme');
         Artisan::call('view:clear');
 
-        $this->js('window.location.href = "' . request()->url() . '?tab=apparence"');
+        $this->js('window.location.href = "'.request()->url().'?tab=apparence"');
     }
 
     public function toggleBoolean(int $id): void

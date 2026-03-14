@@ -5,19 +5,19 @@
         <div class="position-relative">
             <input type="text" wire:model.live="search"
                    class="form-control form-control-sm ps-4"
-                   placeholder="Rechercher URL ou titre..."
-                   aria-label="Rechercher">
+                   placeholder="{{ __('Rechercher URL ou titre...') }}"
+                   aria-label="{{ __('Rechercher') }}">
             <i data-lucide="search" class="position-absolute" style="left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#9ca3af;"></i>
         </div>
-        <select wire:model.live="filterActive" class="form-select form-select-sm w-auto" aria-label="Filtrer par statut">
-            <option value="">Tous les statuts</option>
-            <option value="1">Actif</option>
-            <option value="0">Inactif</option>
+        <select wire:model.live="filterActive" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par statut') }}">
+            <option value="">{{ __('Tous les statuts') }}</option>
+            <option value="1">{{ __('Actif') }}</option>
+            <option value="0">{{ __('Inactif') }}</option>
         </select>
         @if($search || $filterActive !== '')
             <button wire:click="resetFilters"
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
-                <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Réinitialiser
+                <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> {{ __('Réinitialiser') }}
             </button>
         @endif
     </div>
@@ -29,7 +29,7 @@
                 <tr class="border-bottom">
                     <th class="fw-medium user-select-none" style="cursor:pointer;"
                         wire:click="sort('url_pattern')">
-                        URL Pattern
+                        {{ __('URL Pattern') }}
                         @if($sortBy === 'url_pattern')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'arrow-up' : 'arrow-down' }}" class="ms-1 text-primary" style="width:13px;height:13px;"></i>
                         @else
@@ -38,16 +38,16 @@
                     </th>
                     <th class="fw-medium user-select-none" style="cursor:pointer;"
                         wire:click="sort('title')">
-                        Titre
+                        {{ __('Titre') }}
                         @if($sortBy === 'title')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'arrow-up' : 'arrow-down' }}" class="ms-1 text-primary" style="width:13px;height:13px;"></i>
                         @else
                             <i data-lucide="arrow-up-down" class="ms-1 text-muted" style="width:13px;height:13px;opacity:.4;"></i>
                         @endif
                     </th>
-                    <th class="fw-medium">Robots</th>
-                    <th class="fw-medium">Statut</th>
-                    <th class="fw-medium text-end">Actions</th>
+                    <th class="fw-medium">{{ __('Robots') }}</th>
+                    <th class="fw-medium">{{ __('Statut') }}</th>
+                    <th class="fw-medium text-end">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -69,7 +69,7 @@
                                 <input class="form-check-input" type="checkbox" role="switch"
                                        wire:click="toggleActive({{ $tag->id }})"
                                        @checked($tag->is_active)
-                                       title="{{ $tag->is_active ? 'Désactiver' : 'Activer' }}">
+                                       title="{{ $tag->is_active ? __('Désactiver') : __('Activer') }}">
                             </div>
                         </td>
                         <td class="text-end">
@@ -84,14 +84,14 @@
                                      style="top:100%;margin-top:4px;min-width:140px;z-index:50;">
                                     <a href="{{ route('admin.seo.edit', $tag) }}"
                                        class="d-flex align-items-center gap-2 px-3 py-2 small text-body text-decoration-none">
-                                        <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> Modifier
+                                        <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
                                     </a>
                                     <form action="{{ route('admin.seo.destroy', $tag) }}" method="POST"
-                                          onsubmit="return confirm('Supprimer ce tag SEO ?')">
+                                          onsubmit="return confirm('{{ __('Supprimer ce tag SEO ?') }}')">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                                 class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">
-                                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Supprimer
+                                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
                                         </button>
                                     </form>
                                 </div>
@@ -102,7 +102,7 @@
                     <tr>
                         <td colspan="5" class="py-5 text-center text-muted small">
                             <i data-lucide="tag" class="d-block mx-auto mb-2 text-muted" style="width:32px;height:32px;opacity:.4;"></i>
-                            Aucun tag SEO configuré
+                            {{ __('Aucun tag SEO configuré') }}
                         </td>
                     </tr>
                 @endforelse

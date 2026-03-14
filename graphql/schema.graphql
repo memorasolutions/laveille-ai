@@ -1,3 +1,4 @@
+# Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 "A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
 scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
 
@@ -200,13 +201,11 @@ type Mutation {
     "Create a new static page."
     createPage(input: CreatePageInput! @spread): StaticPage!
         @guard
-        @can(ability: "manage_pages")
         @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@createPage")
 
     "Update an existing static page."
     updatePage(input: UpdatePageInput! @spread): StaticPage!
         @guard
-        @can(ability: "manage_pages")
         @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@updatePage")
 
     "Delete a static page."

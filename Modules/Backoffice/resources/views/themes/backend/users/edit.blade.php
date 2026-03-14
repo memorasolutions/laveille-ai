@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Utilisateurs', 'subtitle' => 'Modifier'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Utilisateurs'), 'subtitle' => __('Modifier')])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">{{ __('Utilisateurs') }}</a></li>
@@ -166,10 +166,10 @@
                 <div class="card-body p-4">
                     @php
                         $roleLabels = [
-                            'super_admin' => ['label' => 'Super administrateur', 'desc' => 'Accès total, toutes permissions.', 'color' => 'danger'],
-                            'admin' => ['label' => 'Administrateur', 'desc' => 'Gestion complète du backoffice.', 'color' => 'primary'],
-                            'editor' => ['label' => 'Éditeur', 'desc' => 'Gestion du contenu et du blog.', 'color' => 'info'],
-                            'user' => ['label' => 'Utilisateur', 'desc' => 'Accès basique au compte.', 'color' => 'secondary'],
+                            'super_admin' => ['label' => __('Super administrateur'), 'desc' => __('Accès total, toutes permissions.'), 'color' => 'danger'],
+                            'admin' => ['label' => __('Administrateur'), 'desc' => __('Gestion complète du backoffice.'), 'color' => 'primary'],
+                            'editor' => ['label' => __('Éditeur'), 'desc' => __('Gestion du contenu et du blog.'), 'color' => 'info'],
+                            'user' => ['label' => __('Utilisateur'), 'desc' => __('Accès basique au compte.'), 'color' => 'secondary'],
                         ];
                         $userRoleIds = $user->roles->pluck('id')->toArray();
                     @endphp

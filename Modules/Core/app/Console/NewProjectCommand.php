@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -22,7 +23,7 @@ class NewProjectCommand extends Command
     /** @var list<string> */
     private const CORE_MODULES = [
         'Auth', 'Core', 'Settings', 'RolesPermissions', 'Backoffice',
-        'Notifications', 'Pages', 'Menu', 'FrontTheme', 'Editor',
+        'Notifications', 'Pages', 'Menu', 'Editor',
         'Health', 'Logging', 'SEO', 'Storage', 'Media',
         'Search', 'Translation', 'Export', 'Webhooks', 'Backup',
     ];

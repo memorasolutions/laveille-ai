@@ -189,7 +189,7 @@
 
 @push('styles')
 <style>
-.tiptap-toolbar .btn { font-size:13px; padding:3px 8px; line-height:1.5; }
+.tiptap-toolbar .btn { font-size:13px; padding:3px 8px; line-height:1.5; background-color:var(--bs-body-bg, #fff); }
 .tiptap-toolbar .btn.is-active { background-color:rgba(var(--bs-primary-rgb),.12); color:var(--bs-primary); border-color:rgba(var(--bs-primary-rgb),.4); }
 .tiptap-toolbar .btn:not(.is-active):hover { background-color:rgba(var(--bs-primary-rgb),.05); }
 .tiptap-content .ProseMirror { outline:none; min-height:310px; padding:1rem; }

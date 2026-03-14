@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('telescope gate uses permission-based access', function () {
     $content = file_get_contents(base_path('Modules/Core/app/Providers/TelescopeServiceProvider.php'));
     expect($content)->toContain("can('view_telescope')");

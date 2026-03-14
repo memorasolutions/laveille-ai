@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -264,7 +265,7 @@ class MakeModuleCommand extends Command
             'files' => [],
         ];
 
-        $this->writeFile("{$modulePath}/module.json", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        $this->writeFile("{$modulePath}/module.json", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
     }
 
     private function createPluginJson(string $modulePath, string $name): void
@@ -278,13 +279,13 @@ class MakeModuleCommand extends Command
             'priority' => 10,
         ];
 
-        $this->writeFile("{$modulePath}/plugin.json", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        $this->writeFile("{$modulePath}/plugin.json", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
     }
 
     private function createComposerJson(string $modulePath, string $name): void
     {
         $data = [
-            'name' => 'modules/' . Str::lower($name),
+            'name' => 'modules/'.Str::lower($name),
             'autoload' => [
                 'psr-4' => [
                     "Modules\\{$name}\\" => 'app/',
@@ -294,7 +295,7 @@ class MakeModuleCommand extends Command
             ],
         ];
 
-        $this->writeFile("{$modulePath}/composer.json", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        $this->writeFile("{$modulePath}/composer.json", json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
     }
 
     private function createGitkeepFiles(string $modulePath): void
@@ -322,7 +323,7 @@ class MakeModuleCommand extends Command
         $statuses[$name] = true;
         ksort($statuses);
 
-        File::put($statusesPath, json_encode($statuses, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        File::put($statusesPath, json_encode($statuses, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
     }
 
     private function dedentHeredoc(string $content): string

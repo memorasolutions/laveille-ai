@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('force json response middleware exists', function () {
     expect(class_exists(Modules\Core\Http\Middleware\ForceJsonResponse::class))->toBeTrue();
 });

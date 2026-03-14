@@ -5,7 +5,7 @@
             type="text"
             wire:model.live.debounce.300ms="query"
             @focus="open = true"
-            placeholder="Rechercher..."
+            placeholder="{{ __('Rechercher...') }}"
             aria-label="Rechercher"
             class="form-control border rounded ps-5 pe-3 py-1 focus-ring"
             style="width:220px;padding-left:2.25rem;"
@@ -23,7 +23,7 @@
 
                 @if($users->isNotEmpty())
                 <div class="px-3 py-2">
-                    <p class="small fw-semibold text-muted text-uppercase mb-2">Utilisateurs</p>
+                    <p class="small fw-semibold text-muted text-uppercase mb-2">{{ __('Utilisateurs') }}</p>
                     @foreach($users as $user)
                     <a href="{{ route('admin.users.show', $user) }}"
                        class="d-flex align-items-center gap-3 px-2 py-2 rounded text-body text-decoration-none mb-1">
@@ -42,7 +42,7 @@
 
                 @if($articles->isNotEmpty())
                 <div class="border-top px-3 py-2">
-                    <p class="small fw-semibold text-muted text-uppercase mb-2">Articles</p>
+                    <p class="small fw-semibold text-muted text-uppercase mb-2">{{ __('Articles') }}</p>
                     @foreach($articles as $article)
                     <a href="{{ route('blog.show', $article->slug) }}"
                        class="d-flex align-items-center gap-3 px-2 py-2 rounded text-body text-decoration-none mb-1">
@@ -55,7 +55,7 @@
 
                 @if($settings->isNotEmpty())
                 <div class="border-top px-3 py-2">
-                    <p class="small fw-semibold text-muted text-uppercase mb-2">Paramètres</p>
+                    <p class="small fw-semibold text-muted text-uppercase mb-2">{{ __('Paramètres') }}</p>
                     @foreach($settings as $setting)
                     <a href="{{ route('admin.settings.index') }}"
                        class="d-flex align-items-center gap-3 px-2 py-2 rounded text-body text-decoration-none mb-1">
@@ -69,7 +69,7 @@
             </div>
         @else
             <div class="px-3 py-4 text-center">
-                <p class="small text-muted">Aucun résultat pour "{{ $query }}"</p>
+                <p class="small text-muted">{{ __('Aucun résultat pour') }} "{{ $query }}"</p>
             </div>
         @endif
     </div>

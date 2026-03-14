@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -27,7 +28,7 @@ class MediaController extends Controller
         $query = Media::query()->where('collection_name', 'images');
 
         if ($request->filled('search')) {
-            $query->where('file_name', 'LIKE', '%' . $request->query('search') . '%');
+            $query->where('file_name', 'LIKE', '%'.$request->query('search').'%');
         }
 
         if ($request->filled('folder')) {

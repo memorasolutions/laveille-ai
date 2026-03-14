@@ -7,7 +7,7 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="small fw-medium text-muted mb-1">Total inscrits</p>
+                            <p class="small fw-medium text-muted mb-1">{{ __('Total inscrits') }}</p>
                             <h6 class="fs-4 fw-bold text-body mb-0">{{ $totalCount }}</h6>
                         </div>
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary" style="width:48px;height:48px;flex-shrink:0;">
@@ -22,7 +22,7 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="small fw-medium text-muted mb-1">Actifs (confirmés)</p>
+                            <p class="small fw-medium text-muted mb-1">{{ __('Actifs (confirmés)') }}</p>
                             <h6 class="fs-4 fw-bold text-body mb-0">{{ $activeCount }}</h6>
                         </div>
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success" style="width:48px;height:48px;flex-shrink:0;">
@@ -37,7 +37,7 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="small fw-medium text-muted mb-1">En attente</p>
+                            <p class="small fw-medium text-muted mb-1">{{ __('En attente') }}</p>
                             <h6 class="fs-4 fw-bold text-body mb-0">{{ $pendingCount }}</h6>
                         </div>
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning" style="width:48px;height:48px;flex-shrink:0;">
@@ -52,7 +52,7 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="small fw-medium text-muted mb-1">Désabonnés</p>
+                            <p class="small fw-medium text-muted mb-1">{{ __('Désabonnés') }}</p>
                             <h6 class="fs-4 fw-bold text-body mb-0">{{ $unsubscribedCount }}</h6>
                         </div>
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 text-danger" style="width:48px;height:48px;flex-shrink:0;">
@@ -96,19 +96,19 @@
         <div class="position-relative">
             <input type="text" wire:model.live.debounce.300ms="search"
                    class="form-control form-control-sm ps-4"
-                   placeholder="Rechercher par email ou nom..."
-                   aria-label="Rechercher">
+                   placeholder="{{ __('Rechercher par email ou nom...') }}"
+                   aria-label="{{ __('Rechercher') }}">
             <i data-lucide="search" class="position-absolute" style="left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#9ca3af;"></i>
         </div>
-        <select wire:model.live="filterStatus" class="form-select form-select-sm w-auto" aria-label="Filtrer par statut">
-            <option value="">Tous les statuts</option>
-            <option value="active">Actif</option>
-            <option value="pending">En attente</option>
-            <option value="unsubscribed">Désabonné</option>
+        <select wire:model.live="filterStatus" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par statut') }}">
+            <option value="">{{ __('Tous les statuts') }}</option>
+            <option value="active">{{ __('Actif') }}</option>
+            <option value="pending">{{ __('En attente') }}</option>
+            <option value="unsubscribed">{{ __('Désabonné') }}</option>
         </select>
         <button wire:click="resetFilters"
                 class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
-            <i data-lucide="x-circle" style="width:14px;height:14px;"></i> Réinitialiser
+            <i data-lucide="x-circle" style="width:14px;height:14px;"></i> {{ __('Réinitialiser') }}
         </button>
     </div>
 
@@ -120,12 +120,12 @@
                     <th style="width:40px;">
                         <input type="checkbox" wire:model.live="selectAll" class="form-check-input cursor-pointer" style="width:16px;height:16px;" aria-label="Tout sélectionner">
                     </th>
-                    <th class="fw-medium">Email</th>
-                    <th class="fw-medium">Nom</th>
-                    <th class="fw-medium">Statut</th>
-                    <th class="fw-medium">Confirmé le</th>
-                    <th class="fw-medium">Inscrit le</th>
-                    <th class="fw-medium">Actions</th>
+                    <th class="fw-medium">{{ __('Email') }}</th>
+                    <th class="fw-medium">{{ __('Nom') }}</th>
+                    <th class="fw-medium">{{ __('Statut') }}</th>
+                    <th class="fw-medium">{{ __('Confirmé le') }}</th>
+                    <th class="fw-medium">{{ __('Inscrit le') }}</th>
+                    <th class="fw-medium">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -138,11 +138,11 @@
                     <td class="small text-muted">{{ $sub->name ?? '–' }}</td>
                     <td>
                         @if($sub->isActive())
-                            <span class="badge rounded py-1 px-2 fw-medium small bg-success bg-opacity-10 text-success border border-success border-opacity-25">Actif</span>
+                            <span class="badge rounded py-1 px-2 fw-medium small bg-success bg-opacity-10 text-success border border-success border-opacity-25">{{ __('Actif') }}</span>
                         @elseif($sub->unsubscribed_at)
-                            <span class="badge rounded py-1 px-2 fw-medium small bg-light text-muted border">Désabonné</span>
+                            <span class="badge rounded py-1 px-2 fw-medium small bg-light text-muted border">{{ __('Désabonné') }}</span>
                         @else
-                            <span class="badge rounded py-1 px-2 fw-medium small bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">En attente</span>
+                            <span class="badge rounded py-1 px-2 fw-medium small bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">{{ __('En attente') }}</span>
                         @endif
                     </td>
                     <td class="text-muted small">{{ $sub->confirmed_at?->format('d/m/Y') ?? '–' }}</td>
@@ -158,9 +158,9 @@
                                  class="position-absolute end-0 bg-white border rounded shadow py-1"
                                  style="top:100%;margin-top:4px;min-width:140px;z-index:50;">
                                 <button wire:click="delete({{ $sub->id }})"
-                                        wire:confirm="Supprimer cet abonné ?"
+                                        wire:confirm="{{ __('Supprimer cet abonné ?') }}"
                                         class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">
-                                    <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Supprimer
+                                    <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
                                 </button>
                             </div>
                         </div>
@@ -170,7 +170,7 @@
                 <tr>
                     <td colspan="7" class="py-5 text-center text-muted small">
                         <i data-lucide="mail" class="d-block mx-auto mb-2 text-muted" style="width:32px;height:32px;opacity:.4;"></i>
-                        Aucun abonné
+                        {{ __('Aucun abonné') }}
                     </td>
                 </tr>
                 @endforelse
@@ -179,7 +179,7 @@
     </div>
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-3 border-top">
-        <span class="text-muted small">{{ $subscribers->total() }} abonné(s)</span>
+        <span class="text-muted small">{{ $subscribers->total() }} {{ __('abonné(s)') }}</span>
         {{ $subscribers->links() }}
     </div>
 </div>

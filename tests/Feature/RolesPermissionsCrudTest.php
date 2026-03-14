@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -63,7 +69,7 @@ it('affiche le formulaire d édition d un rôle', function () {
 // --- Création ---
 
 it('permet de créer un rôle avec des permissions', function () {
-    $permission = Permission::findByName('manage_users', 'web');
+    $permission = Permission::findByName('view_users', 'web');
 
     $this->actingAs($this->admin)->post('/admin/roles', [
         'name' => 'nouveau_role',
@@ -71,7 +77,7 @@ it('permet de créer un rôle avec des permissions', function () {
     ])->assertRedirect();
 
     $this->assertDatabaseHas('roles', ['name' => 'nouveau_role']);
-    expect(Role::findByName('nouveau_role', 'web')->hasPermissionTo('manage_users'))->toBeTrue();
+    expect(Role::findByName('nouveau_role', 'web')->hasPermissionTo('view_users'))->toBeTrue();
 });
 
 it('valide que le nom de rôle est requis', function () {
@@ -90,7 +96,7 @@ it('valide que le nom de rôle est unique', function () {
 
 it('permet de modifier un rôle et synchroniser ses permissions', function () {
     $role = Role::create(['name' => 'test_edit', 'guard_name' => 'web']);
-    $permission = Permission::findByName('manage_users', 'web');
+    $permission = Permission::findByName('view_users', 'web');
 
     $this->actingAs($this->admin)->put("/admin/roles/{$role->id}", [
         'name' => 'test_edit_renamed',
@@ -98,7 +104,7 @@ it('permet de modifier un rôle et synchroniser ses permissions', function () {
     ])->assertRedirect();
 
     expect($role->fresh()->name)->toBe('test_edit_renamed')
-        ->and($role->fresh()->hasPermissionTo('manage_users'))->toBeTrue();
+        ->and($role->fresh()->hasPermissionTo('view_users'))->toBeTrue();
 });
 
 it('valide l unicité du nom lors de la modification', function () {

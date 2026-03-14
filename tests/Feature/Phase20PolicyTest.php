@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Modules\Auth\Http\Requests\StoreUserRequest;
 use Modules\Auth\Http\Requests\UpdateUserRequest;
 use Modules\Auth\Policies\UserPolicy;

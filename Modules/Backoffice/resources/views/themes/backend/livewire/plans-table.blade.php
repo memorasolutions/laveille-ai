@@ -37,24 +37,24 @@
             </span>
             <input type="text" wire:model.live="search"
                    class="form-control form-control-sm border-start-0"
-                   placeholder="Rechercher..."
-                   aria-label="Rechercher">
+                   placeholder="{{ __('Rechercher...') }}"
+                   aria-label="{{ __('Rechercher') }}">
         </div>
-        <select wire:model.live="filterInterval" class="form-select form-select-sm w-auto" aria-label="Filtrer par intervalle">
-            <option value="">Tous les intervalles</option>
-            <option value="monthly">Mensuel</option>
-            <option value="yearly">Annuel</option>
-            <option value="one_time">Paiement unique</option>
+        <select wire:model.live="filterInterval" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par intervalle') }}">
+            <option value="">{{ __('Tous les intervalles') }}</option>
+            <option value="monthly">{{ __('Mensuel') }}</option>
+            <option value="yearly">{{ __('Annuel') }}</option>
+            <option value="one_time">{{ __('Paiement unique') }}</option>
         </select>
-        <select wire:model.live="filterActive" class="form-select form-select-sm w-auto" aria-label="Filtrer par statut">
-            <option value="">Tous les statuts</option>
-            <option value="1">Actif</option>
-            <option value="0">Inactif</option>
+        <select wire:model.live="filterActive" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par statut') }}">
+            <option value="">{{ __('Tous les statuts') }}</option>
+            <option value="1">{{ __('Actif') }}</option>
+            <option value="0">{{ __('Inactif') }}</option>
         </select>
         @if($search || $filterInterval || $filterActive !== '')
             <button wire:click="resetFilters"
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
-                <i data-lucide="refresh-cw" class="icon-sm"></i> Réinitialiser
+                <i data-lucide="refresh-cw" class="icon-sm"></i> {{ __('Réinitialiser') }}
             </button>
         @endif
     </div>
@@ -68,7 +68,7 @@
                         <input type="checkbox" wire:model.live="selectAll" class="form-check-input" style="width:16px;height:16px;" aria-label="Tout sélectionner">
                     </th>
                     <th class="fw-medium user-select-none" role="button" wire:click="sort('name')">
-                        Nom
+                        {{ __('Nom') }}
                         @if($sortBy === 'name')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
@@ -76,17 +76,17 @@
                         @endif
                     </th>
                     <th class="fw-medium user-select-none" role="button" wire:click="sort('price')">
-                        Prix
+                        {{ __('Prix') }}
                         @if($sortBy === 'price')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
                             <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
                         @endif
                     </th>
-                    <th class="fw-medium">Intervalle</th>
-                    <th class="fw-medium">Essai</th>
-                    <th class="fw-medium">Statut</th>
-                    <th class="fw-medium text-end">Actions</th>
+                    <th class="fw-medium">{{ __('Intervalle') }}</th>
+                    <th class="fw-medium">{{ __('Essai') }}</th>
+                    <th class="fw-medium">{{ __('Statut') }}</th>
+                    <th class="fw-medium text-end">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -108,13 +108,13 @@
                         <td>
                             @switch($plan->interval)
                                 @case('monthly')
-                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 fw-medium">Mensuel</span>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 fw-medium">{{ __('Mensuel') }}</span>
                                 @break
                                 @case('yearly')
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 fw-medium">Annuel</span>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 fw-medium">{{ __('Annuel') }}</span>
                                 @break
                                 @case('one_time')
-                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 fw-medium">Unique</span>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 fw-medium">{{ __('Unique') }}</span>
                                 @break
                             @endswitch
                         </td>
@@ -129,9 +129,9 @@
                             <button type="button"
                                     wire:click="toggleActive({{ $plan->id }})"
                                     class="badge {{ $plan->is_active ? 'bg-success' : 'bg-danger' }} border-0 px-2 py-1 fw-semibold"
-                                    title="{{ $plan->is_active ? 'Cliquer pour désactiver' : 'Cliquer pour activer' }}"
+                                    title="{{ $plan->is_active ? __('Cliquer pour désactiver') : __('Cliquer pour activer') }}"
                                     style="cursor:pointer;font-size:0.75rem;">
-                                {{ $plan->is_active ? 'Actif' : 'Inactif' }}
+                                {{ $plan->is_active ? __('Actif') : __('Inactif') }}
                             </button>
                         </td>
                         <td class="text-end">
@@ -146,14 +146,14 @@
                                      style="z-index:50;min-width:140px;">
                                     <a href="{{ route('admin.plans.edit', $plan) }}"
                                        class="dropdown-item d-flex align-items-center gap-2 text-body">
-                                        <i data-lucide="pencil" class="icon-sm text-success"></i> Modifier
+                                        <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                     </a>
                                     <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
-                                          onsubmit="return confirm('Supprimer ce plan ?')">
+                                          onsubmit="return confirm('{{ __('Supprimer ce plan ?') }}')">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                                 class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                            <i data-lucide="trash-2" class="icon-sm"></i> Supprimer
+                                            <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
                                         </button>
                                     </form>
                                 </div>
@@ -164,7 +164,7 @@
                     <tr>
                         <td colspan="7" class="py-5 text-center text-muted">
                             <i data-lucide="tag" class="d-block mx-auto mb-2 text-muted" style="width:32px;height:32px;opacity:.4;"></i>
-                            Aucun plan trouvé
+                            {{ __('Aucun plan trouvé') }}
                         </td>
                     </tr>
                 @endforelse

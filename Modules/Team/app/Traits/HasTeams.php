@@ -1,13 +1,19 @@
 <?php
 
-// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
+declare(strict_types=1);
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 
 namespace Modules\Team\Traits;
 
-use Modules\Team\Models\Team;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Team\Models\Team;
 
 trait HasTeams
 {

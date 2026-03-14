@@ -2,19 +2,25 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Modules\Backoffice\Livewire\MetaTagsTable;
+use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 use Modules\SEO\Models\MetaTag;
-use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
     $this->admin = User::factory()->create();
-    Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    $this->admin->assignRole('admin');
+    $this->admin->assignRole('super_admin');
     $this->actingAs($this->admin);
 });
 

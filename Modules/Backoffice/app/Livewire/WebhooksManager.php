@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -11,7 +12,7 @@ namespace Modules\Backoffice\Livewire;
 
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Modules\Backoffice\Models\WebhookEndpoint;
+use Modules\Webhooks\Models\WebhookEndpoint;
 
 class WebhooksManager extends Component
 {

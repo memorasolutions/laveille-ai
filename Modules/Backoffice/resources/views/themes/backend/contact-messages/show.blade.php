@@ -1,19 +1,19 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
-@section('title', 'Message de ' . $contactMessage->name)
+@section('title', __('Message de') . ' ' . $contactMessage->name)
 @section('content')
 <nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.contact-messages.index') }}">Messages</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.contact-messages.index') }}">{{ __('Messages') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ $contactMessage->name }}</li>
     </ol>
 </nav>
 <div class="page-content">
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 class="mb-0">Message de contact</h4>
+        <h4 class="mb-0">{{ __('Message de contact') }}</h4>
         <a href="{{ route('admin.contact-messages.index') }}" class="btn btn-secondary">
-            <i data-lucide="arrow-left"></i> Retour
+            <i data-lucide="arrow-left"></i> {{ __('Retour') }}
         </a>
     </div>
 
@@ -31,46 +31,46 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Informations</h5>
+                    <h5 class="card-title mb-0">{{ __('Informations') }}</h5>
                 </div>
                 <div class="card-body">
                     <dl class="mb-0">
-                        <dt class="small text-muted">Nom</dt>
+                        <dt class="small text-muted">{{ __('Nom') }}</dt>
                         <dd>{{ $contactMessage->name }}</dd>
 
-                        <dt class="small text-muted">Email</dt>
+                        <dt class="small text-muted">{{ __('Email') }}</dt>
                         <dd>
                             <a href="mailto:{{ $contactMessage->email }}">{{ $contactMessage->email }}</a>
                         </dd>
 
-                        <dt class="small text-muted">Date</dt>
+                        <dt class="small text-muted">{{ __('Date') }}</dt>
                         <dd>{{ $contactMessage->created_at->format('d/m/Y à H:i') }}</dd>
 
-                        <dt class="small text-muted">Statut</dt>
+                        <dt class="small text-muted">{{ __('Statut') }}</dt>
                         <dd>
                             @if($contactMessage->isNew())
-                                <span class="badge bg-primary">Non lu</span>
+                                <span class="badge bg-primary">{{ __('Non lu') }}</span>
                             @else
-                                <span class="badge bg-secondary">Lu</span>
+                                <span class="badge bg-secondary">{{ __('Lu') }}</span>
                                 <small class="text-muted d-block">{{ $contactMessage->read_at?->diffForHumans() }}</small>
                             @endif
                         </dd>
 
                         @if($contactMessage->ip_address)
-                        <dt class="small text-muted">Adresse IP</dt>
+                        <dt class="small text-muted">{{ __('Adresse IP') }}</dt>
                         <dd class="text-muted small">{{ $contactMessage->ip_address }}</dd>
                         @endif
                     </dl>
                 </div>
                 <div class="card-footer">
                     <a href="mailto:{{ $contactMessage->email }}?subject=Re: {{ urlencode($contactMessage->subject) }}" class="btn btn-primary btn-sm w-100 mb-2">
-                        <i data-lucide="reply"></i> Répondre par email
+                        <i data-lucide="reply"></i> {{ __('Répondre par email') }}
                     </a>
-                    <form action="{{ route('admin.contact-messages.destroy', $contactMessage) }}" method="POST" onsubmit="return confirm('Supprimer ce message ?');">
+                    <form action="{{ route('admin.contact-messages.destroy', $contactMessage) }}" method="POST" onsubmit="return confirm('{{ __('Supprimer ce message ?') }}');">
                         @csrf
                         @method('DELETE')
-                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="if(confirm('Supprimer ce message ?')) this.closest('form').submit()">
-                            <i data-lucide="trash-2"></i> Supprimer
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="if(confirm('{{ __('Supprimer ce message ?') }}')) this.closest('form').submit()">
+                            <i data-lucide="trash-2"></i> {{ __('Supprimer') }}
                         </button>
                     </form>
                 </div>

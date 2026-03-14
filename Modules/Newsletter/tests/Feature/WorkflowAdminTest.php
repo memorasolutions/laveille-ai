@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -48,7 +49,7 @@ test('create workflow page loads', function () {
 test('store creates workflow with steps', function () {
     $template = EmailTemplate::create([
         'name' => 'Test Template',
-        'slug' => 'test-wf-' . uniqid(),
+        'slug' => 'test-wf-'.uniqid(),
         'subject' => 'Test',
         'body_html' => '<p>Test</p>',
         'variables' => [],

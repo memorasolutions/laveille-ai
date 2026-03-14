@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -13,11 +14,11 @@ use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Modules\Core\Contracts\SettingsReaderInterface;
 use Modules\Settings\Facades\Settings;
 use Modules\Settings\Models\Setting;
 use Modules\Settings\Observers\SettingObserver;
 use Modules\Settings\Policies\SettingPolicy;
-use Modules\Core\Contracts\SettingsReaderInterface;
 use Modules\Settings\Services\SettingsService;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
@@ -36,8 +37,6 @@ class SettingsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerCommands();
-        $this->registerCommandSchedules();
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
@@ -88,25 +87,6 @@ class SettingsServiceProvider extends ServiceProvider
         $this->app->singleton(SettingsService::class);
         $this->app->bind(SettingsReaderInterface::class, SettingsService::class);
         AliasLoader::getInstance()->alias('Settings', Settings::class);
-    }
-
-    /**
-     * Register commands in the format of Command::class
-     */
-    protected function registerCommands(): void
-    {
-        // $this->commands([]);
-    }
-
-    /**
-     * Register command Schedules.
-     */
-    protected function registerCommandSchedules(): void
-    {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
     }
 
     /**

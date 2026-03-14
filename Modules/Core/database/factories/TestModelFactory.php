@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
 namespace Modules\Core\Database\Factories;
 
-use Modules\Core\Models\TestModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\TestModel;
 
 class TestModelFactory extends Factory
 {

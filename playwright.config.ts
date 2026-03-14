@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({

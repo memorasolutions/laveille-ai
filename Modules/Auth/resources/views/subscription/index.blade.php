@@ -141,7 +141,7 @@ $currentSlug = strtolower($planName);
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('pricing') }}" class="btn {{ $isPopular ? 'btn-primary' : 'btn-outline-primary' }} rounded-2 w-100">
+                    <a href="{{ route('user.subscription') }}" class="btn {{ $isPopular ? 'btn-primary' : 'btn-outline-primary' }} rounded-2 w-100">
                         {{ __('Choisir') }} {{ $name }}
                     </a>
                 @endif

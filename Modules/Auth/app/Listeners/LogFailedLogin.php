@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,6 +13,7 @@ namespace Modules\Auth\Listeners;
 use App\Models\User;
 use Illuminate\Auth\Events\Failed;
 use Modules\Auth\Models\LoginAttempt;
+use Modules\Auth\Notifications\AccountLockedNotification;
 use Modules\Settings\Facades\Settings;
 
 class LogFailedLogin
@@ -48,6 +50,7 @@ class LogFailedLogin
 
         if ($user->fresh()->failed_login_count >= $maxAttempts) {
             $user->update(['locked_until' => now()->addMinutes($lockoutMinutes)]);
+            $user->notify(new AccountLockedNotification($lockoutMinutes, request()->ip() ?? '0.0.0.0'));
         }
     }
 }

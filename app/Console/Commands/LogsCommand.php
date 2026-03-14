@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -82,7 +83,7 @@ class LogsCommand extends Command
     }
 
     /**
-     * @param list<string> $lines
+     * @param  list<string>  $lines
      * @return list<string>
      */
     private function filterByLevel(array $lines): array

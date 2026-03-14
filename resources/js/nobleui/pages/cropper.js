@@ -17,7 +17,6 @@
   // on change show image with crop options
   upload.addEventListener('change', function (e) {
     if (e.target.files.length) {
-      console.log(e.target.files[0]);
       const fileType = e.target.files[0].type;
       if (fileType === 'image/gif' || fileType === 'image/jpeg' || fileType === 'image/png') {
         // start file reader

@@ -1,6 +1,12 @@
 <?php
 
-// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
+declare(strict_types=1);
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 
 namespace Modules\Team\Models;
 
@@ -38,7 +44,7 @@ class Team extends Model
         static::creating(function (Team $team): void {
             if (empty($team->slug)) {
                 $slug = Str::slug($team->name);
-                $count = static::withTrashed()->where('slug', 'like', $slug . '%')->count();
+                $count = static::withTrashed()->where('slug', 'like', $slug.'%')->count();
                 $team->slug = $count ? "{$slug}-{$count}" : $slug;
             }
         });

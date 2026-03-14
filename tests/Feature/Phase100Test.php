@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
@@ -30,7 +36,7 @@ it('les utilisateurs non admin obtiennent 403', function () {
 });
 
 it('la page affiche le titre Journaux', function () {
-    $this->actingAs($this->admin)->get('/admin/logs')->assertSee("Journaux", false);
+    $this->actingAs($this->admin)->get('/admin/logs')->assertSee('Journaux', false);
 });
 
 it('la page affiche le bouton Vider les journaux', function () {

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -11,7 +12,6 @@ namespace Modules\Testimonials\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
-use Modules\SEO\Services\JsonLdService;
 use Modules\Testimonials\Models\Testimonial;
 
 class PublicTestimonialController extends Controller

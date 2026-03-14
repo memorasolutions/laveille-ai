@@ -2,18 +2,24 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Newsletter\Models\Campaign;
 use Modules\Newsletter\Models\Subscriber;
-use Spatie\Permission\Models\Role;
+use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
     $this->admin = User::factory()->create();
-    Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    $this->admin->assignRole('admin');
+    $this->admin->assignRole('super_admin');
     $this->actingAs($this->admin);
 });
 

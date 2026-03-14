@@ -122,7 +122,7 @@ function showSwal(type) {
       }
     }).then((result) => {
       if (result.dismiss === Swal.DismissReason.timer) {
-        console.log('I was closed by the timer');
+        // Timer auto-close
       }
     });
   } else if (type === 'message-with-custom-image') {

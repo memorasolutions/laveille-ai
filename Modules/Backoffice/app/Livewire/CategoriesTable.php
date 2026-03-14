@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,8 +13,8 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Modules\Core\Traits\HasBulkActions;
 use Modules\Blog\Models\Category;
+use Modules\Core\Traits\HasBulkActions;
 
 class CategoriesTable extends Component
 {

@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Testimonials\Models\Testimonial;
@@ -132,28 +138,4 @@ it('la validation rejette un témoignage sans nom', function () {
     $this->actingAs($admin)
         ->post(route('admin.testimonials.store'), ['content' => 'Contenu seul'])
         ->assertSessionHasErrors('author_name');
-});
-
-// --- Page publique ---
-
-it('la page publique affiche les témoignages approuvés', function () {
-    Testimonial::create(['author_name' => 'Approuvé', 'content' => 'Super', 'is_approved' => true]);
-    Testimonial::create(['author_name' => 'Masqué', 'content' => 'Non visible', 'is_approved' => false]);
-
-    $this->get(route('testimonials.show'))
-        ->assertOk()
-        ->assertSee('Approuvé')
-        ->assertDontSee('Masqué');
-});
-
-it('la page publique contient du JSON-LD WebPage', function () {
-    $this->get(route('testimonials.show'))
-        ->assertOk()
-        ->assertSee('"@type": "WebPage"', false);
-});
-
-it('la page publique affiche un message si aucun témoignage', function () {
-    $this->get(route('testimonials.show'))
-        ->assertOk()
-        ->assertSee('Aucun témoignage');
 });

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -36,7 +37,7 @@ class PublicFormController extends Controller
         }
 
         // Rate limiting : 5 soumissions/minute par IP
-        $key = 'form_submit_' . $form->id . '_' . $request->ip();
+        $key = 'form_submit_'.$form->id.'_'.$request->ip();
         $attempts = (int) Cache::get($key, 0);
 
         if ($attempts >= 5) {
@@ -68,7 +69,7 @@ class PublicFormController extends Controller
                 $fieldRules[] = $field->validation_rules;
             }
 
-            $rules['fields.' . $field->name] = implode('|', $fieldRules);
+            $rules['fields.'.$field->name] = implode('|', $fieldRules);
         }
 
         $validated = $request->validate($rules);

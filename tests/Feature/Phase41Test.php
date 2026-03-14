@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Blog\Models\Article;
@@ -40,14 +46,6 @@ it('newsletter link in sidebar for admin', function () {
 
     $this->actingAs($admin)->get('/admin')
         ->assertSee('Newsletter');
-});
-
-it('blog show page has newsletter subscribe form', function () {
-    $article = Article::factory()->published()->create();
-
-    $this->get('/blog/'.$article->slug)
-        ->assertSee('/newsletter/subscribe', false)
-        ->assertSee('abonner', false);
 });
 
 it('newsletter admin page accessible', function () {

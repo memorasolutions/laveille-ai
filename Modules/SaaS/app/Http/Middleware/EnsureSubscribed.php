@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -35,6 +36,6 @@ class EnsureSubscribed
             return $next($request);
         }
 
-        return redirect()->route('pricing')->with('error', 'Un abonnement actif est requis.');
+        return redirect()->route('user.subscription')->with('error', 'Un abonnement actif est requis.');
     }
 }

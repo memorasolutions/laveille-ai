@@ -14,8 +14,8 @@
     @else
         <div class="text-center py-5">
             <i data-lucide="bar-chart-2" class="d-block mx-auto mb-3 text-muted" style="width:48px;height:48px;opacity:.4;"></i>
-            <h6 class="fw-semibold text-body mb-2">Aucun rapport configuré</h6>
-            <p class="small text-muted mb-4">Configurez votre rapport Google Looker Studio en 3 étapes simples :</p>
+            <h6 class="fw-semibold text-body mb-2">{{ __('Aucun rapport configuré') }}</h6>
+            <p class="small text-muted mb-4">{{ __('Configurez votre rapport Google Looker Studio en 3 étapes simples :') }}</p>
 
             <div class="row g-3 justify-content-center mb-4" style="max-width:672px;margin-left:auto;margin-right:auto;">
                 <div class="col-12 col-md-4">
@@ -23,10 +23,10 @@
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary mx-auto mb-3" style="width:48px;height:48px;">
                             <span class="fw-bold">1</span>
                         </div>
-                        <h6 class="small fw-semibold text-body mb-2">Créer un rapport</h6>
+                        <h6 class="small fw-semibold text-body mb-2">{{ __('Créer un rapport') }}</h6>
                         <p class="text-muted" style="font-size:.75rem;">
-                            Rendez-vous sur <a href="https://lookerstudio.google.com" target="_blank" rel="noopener"
-                            class="text-primary">lookerstudio.google.com</a> et créez votre rapport avec Google Analytics ou d'autres sources.
+                            {{ __('Rendez-vous sur') }} <a href="https://lookerstudio.google.com" target="_blank" rel="noopener"
+                            class="text-primary">lookerstudio.google.com</a> {{ __('et créez votre rapport avec Google Analytics ou d\'autres sources.') }}
                         </p>
                     </div>
                 </div>
@@ -35,9 +35,9 @@
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 text-success mx-auto mb-3" style="width:48px;height:48px;">
                             <span class="fw-bold">2</span>
                         </div>
-                        <h6 class="small fw-semibold text-body mb-2">Copier le lien embed</h6>
+                        <h6 class="small fw-semibold text-body mb-2">{{ __('Copier le lien embed') }}</h6>
                         <p class="text-muted" style="font-size:.75rem;">
-                            Dans Looker Studio, cliquez <strong>Fichier &rarr; Intégrer le rapport</strong> et copiez l'URL (commence par <code class="text-primary">https://lookerstudio.google.com/embed/</code>).
+                            {{ __('Dans Looker Studio, cliquez') }} <strong>{{ __('Fichier') }} &rarr; {{ __('Intégrer le rapport') }}</strong> {{ __('et copiez l\'URL (commence par') }} <code class="text-primary">https://lookerstudio.google.com/embed/</code>).
                         </p>
                     </div>
                 </div>
@@ -46,9 +46,9 @@
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 text-warning mx-auto mb-3" style="width:48px;height:48px;">
                             <span class="fw-bold">3</span>
                         </div>
-                        <h6 class="small fw-semibold text-body mb-2">Coller dans les paramètres</h6>
+                        <h6 class="small fw-semibold text-body mb-2">{{ __('Coller dans les paramètres') }}</h6>
                         <p class="text-muted" style="font-size:.75rem;">
-                            Allez dans <a href="{{ route('admin.settings.index') }}" class="text-primary">Paramètres &rarr; SEO</a> et collez l'URL dans le champ « URL Looker Studio ».
+                            {{ __('Allez dans') }} <a href="{{ route('admin.settings.index') }}" class="text-primary">{{ __('Paramètres') }} &rarr; SEO</a> {{ __('et collez l\'URL dans le champ « URL Looker Studio ».') }}
                         </p>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
             <a href="{{ route('admin.settings.index') }}"
                class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2">
                 <i data-lucide="settings" style="width:14px;height:14px;"></i>
-                Configurer maintenant
+                {{ __('Configurer maintenant') }}
             </a>
         </div>
     @endif

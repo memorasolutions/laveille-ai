@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -23,7 +24,7 @@ class FormSubmissionController extends Controller
     {
         $submissions = $form->submissions()
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
-            ->when($request->filled('search'), fn ($q) => $q->where('data', 'like', '%' . $request->search . '%'))
+            ->when($request->filled('search'), fn ($q) => $q->where('data', 'like', '%'.$request->search.'%'))
             ->latest()
             ->paginate(20);
 
@@ -48,7 +49,7 @@ class FormSubmissionController extends Controller
     {
         $submissions = $form->submissions()->get();
         $fields = $form->fields()->orderBy('sort_order')->get();
-        $fileName = 'form_' . $form->slug . '_' . now()->format('Y-m-d_H-i') . '.csv';
+        $fileName = 'form_'.$form->slug.'_'.now()->format('Y-m-d_H-i').'.csv';
 
         $callback = function () use ($submissions, $fields): void {
             $file = fopen('php://output', 'w');
@@ -78,7 +79,7 @@ class FormSubmissionController extends Controller
 
         return response()->stream($callback, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Content-Disposition' => 'attachment; filename="'.$fileName.'"',
         ]);
     }
 }

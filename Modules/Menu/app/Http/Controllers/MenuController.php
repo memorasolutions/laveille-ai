@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -67,7 +68,7 @@ class MenuController extends Controller
     public function update(Request $request, Menu $menu): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:menus,name,' . $menu->id,
+            'name' => 'required|string|max:255|unique:menus,name,'.$menu->id,
             'location' => 'nullable|string|max:50',
             'is_active' => 'boolean',
         ]);

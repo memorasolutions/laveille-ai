@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('user resource exists and returns correct structure', function () {
     expect(class_exists(Modules\Auth\Http\Resources\UserResource::class))->toBeTrue();
     $reflection = new ReflectionClass(Modules\Auth\Http\Resources\UserResource::class);

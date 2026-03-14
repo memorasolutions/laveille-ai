@@ -108,9 +108,9 @@
         <i data-lucide="plus-circle"></i>
         {{ __('Nouvel article') }}
     </a>
-    <a href="{{ route('blog.index') }}" class="btn btn-outline-primary rounded-2">
+    <a href="{{ route('admin.blog.articles.index') }}" class="btn btn-outline-primary rounded-2">
         <i data-lucide="globe"></i>
-        {{ __('Voir le blog') }}
+        {{ __('Articles du blog') }}
     </a>
     <a href="{{ route('user.profile') }}" class="btn btn-outline-secondary rounded-2">
         <i data-lucide="user-circle"></i>

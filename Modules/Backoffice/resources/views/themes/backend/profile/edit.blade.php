@@ -1,16 +1,23 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Mon profil', 'subtitle' => 'Modifier'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Mon profil'), 'subtitle' => __('Modifier')])
 
 @section('breadcrumbs')
 <nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Mon profil</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Mon profil') }}</li>
     </ol>
 </nav>
 @endsection
 
 @section('content')
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="user" class="icon-md text-primary"></i>{{ __('Mon profil') }}</h4>
+    <x-backoffice::help-modal id="helpProfileModal" :title="__('Mon profil')" icon="user" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.profile._help')
+    </x-backoffice::help-modal>
+</div>
 
 @if(session('success'))
     <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
@@ -35,7 +42,7 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-medium">
-                            Nom <span class="text-danger">*</span>
+                            {{ __('Nom') }} <span class="text-danger">*</span>
                         </label>
                         <input type="text" name="name"
                                class="form-control @error('name') is-invalid @enderror"
@@ -47,7 +54,7 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-medium">
-                            Courriel <span class="text-danger">*</span>
+                            {{ __('Courriel') }} <span class="text-danger">*</span>
                         </label>
                         <input type="email" name="email"
                                class="form-control @error('email') is-invalid @enderror"
@@ -58,7 +65,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                        <button type="submit" class="btn btn-primary">{{ __('Mettre à jour') }}</button>
                     </div>
                 </form>
             </div>
@@ -79,7 +86,7 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-medium">
-                            Mot de passe actuel <span class="text-danger">*</span>
+                            {{ __('Mot de passe actuel') }} <span class="text-danger">*</span>
                         </label>
                         <input type="password" name="current_password"
                                class="form-control @error('current_password') is-invalid @enderror"
@@ -91,7 +98,7 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-medium">
-                            Nouveau mot de passe <span class="text-danger">*</span>
+                            {{ __('Nouveau mot de passe') }} <span class="text-danger">*</span>
                         </label>
                         <input type="password" name="password"
                                class="form-control @error('password') is-invalid @enderror"
@@ -103,7 +110,7 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-medium">
-                            Confirmer le nouveau mot de passe <span class="text-danger">*</span>
+                            {{ __('Confirmer le nouveau mot de passe') }} <span class="text-danger">*</span>
                         </label>
                         <input type="password" name="password_confirmation"
                                class="form-control"
@@ -111,7 +118,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
+                        <button type="submit" class="btn btn-primary">{{ __('Changer le mot de passe') }}</button>
                     </div>
                 </form>
             </div>
@@ -222,8 +229,8 @@
                     <div class="alert alert-info d-flex align-items-start gap-2 mb-4">
                         <i data-lucide="info" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;"></i>
                         <div>
-                            <strong>Configurez votre application d'authentification</strong><br>
-                            Scannez ce QR code avec Google Authenticator, Authy ou une application TOTP compatible.
+                            <strong>{{ __('Configurez votre application d\'authentification') }}</strong><br>
+                            {{ __('Scannez ce QR code avec Google Authenticator, Authy ou une application TOTP compatible.') }}
                         </div>
                     </div>
 
@@ -236,8 +243,8 @@
                             <div class="alert alert-warning d-flex align-items-start gap-2 mb-4">
                                 <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;"></i>
                                 <div>
-                                    <strong>Codes de récupération</strong> - Conservez-les en lieu sûr.<br>
-                                    <small>Chaque code ne peut être utilisé qu'une seule fois.</small>
+                                    <strong>{{ __('Codes de récupération') }}</strong> - {{ __('Conservez-les en lieu sûr.') }}<br>
+                                    <small>{{ __('Chaque code ne peut être utilisé qu\'une seule fois.') }}</small>
                                 </div>
                             </div>
                             <div class="row g-2 mb-4">
@@ -251,7 +258,7 @@
                             <form action="{{ route('admin.profile.2fa.confirm') }}" method="POST">
                                 @csrf
                                 <div class="mb-4">
-                                    <label class="form-label fw-medium">Code OTP de confirmation</label>
+                                    <label class="form-label fw-medium">{{ __('Code OTP de confirmation') }}</label>
                                     <input type="text" name="code" maxlength="6" inputmode="numeric"
                                            placeholder="000000"
                                            class="form-control font-monospace text-center @error('code') is-invalid @enderror"
@@ -262,7 +269,7 @@
                                 </div>
                                 <button type="submit" class="btn btn-success d-inline-flex align-items-center gap-2">
                                     <i data-lucide="shield-check" style="width:16px;height:16px;"></i>
-                                    Confirmer et activer le 2FA
+                                    {{ __('Confirmer et activer le 2FA') }}
                                 </button>
                             </form>
                         </div>
@@ -273,15 +280,15 @@
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 d-inline-flex align-items-center gap-1">
                             <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
-                            Activé
+                            {{ __('Activé') }}
                         </span>
-                        <span class="text-muted small">Votre compte est protégé par la double authentification.</span>
+                        <span class="text-muted small">{{ __('Votre compte est protégé par la double authentification.') }}</span>
                     </div>
                     <form action="{{ route('admin.profile.2fa.disable') }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <div class="mb-4">
-                            <label class="form-label fw-medium">Confirmez votre mot de passe pour désactiver</label>
+                            <label class="form-label fw-medium">{{ __('Confirmez votre mot de passe pour désactiver') }}</label>
                             <input type="password" name="password"
                                    class="form-control @error('password') is-invalid @enderror"
                                    style="max-width:320px;" required>
@@ -291,7 +298,7 @@
                         </div>
                         <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-2">
                             <i data-lucide="x-circle" style="width:16px;height:16px;"></i>
-                            Désactiver le 2FA
+                            {{ __('Désactiver le 2FA') }}
                         </button>
                     </form>
 
@@ -300,15 +307,15 @@
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 d-inline-flex align-items-center gap-1">
                             <i data-lucide="x" style="width:14px;height:14px;"></i>
-                            Désactivé
+                            {{ __('Désactivé') }}
                         </span>
-                        <span class="text-muted small">Ajoutez une couche de sécurité supplémentaire à votre compte.</span>
+                        <span class="text-muted small">{{ __('Ajoutez une couche de sécurité supplémentaire à votre compte.') }}</span>
                     </div>
                     <form action="{{ route('admin.profile.2fa.enable') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
                             <i data-lucide="key" style="width:16px;height:16px;"></i>
-                            Activer la double authentification
+                            {{ __('Activer la double authentification') }}
                         </button>
                     </form>
                 @endif

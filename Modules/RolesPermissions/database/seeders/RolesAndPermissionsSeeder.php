@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -19,89 +20,74 @@ class RolesAndPermissionsSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permissionNames = [
-            // Gestion des entités
-            'manage_users',
-            'manage_roles',
-            'manage_articles',
-            'manage_comments',
-            'manage_categories',
-            'manage_pages',
-            'manage_media',
-            'manage_menus',
-            'manage_faqs',
-            'manage_testimonials',
-            'manage_contacts',
-            'manage_forms',
-            'manage_widgets',
-            'manage_settings',
-            'manage_plans',
-            'manage_seo',
-            'manage_newsletter',
-            'manage_campaigns',
-            'manage_webhooks',
-            'manage_notifications',
-            'manage_translations',
-            'manage_themes',
-            'manage_branding',
-            'manage_feature_flags',
-            'manage_activity_logs',
-            'manage_backups',
-            'manage_exports',
-            'manage_imports',
-            'manage_api',
-            // Gestion système et sécurité
-            'manage_system',
-            'manage_security',
-            'manage_email_templates',
-            'manage_shortcodes',
-            'manage_short_urls',
-            'manage_cookies',
-            'manage_onboarding',
-            'manage_trash',
-            'manage_teams',
-            'manage_tenants',
-            'manage_workflows',
-            'manage_ai',
-            // Accès en lecture
-            'view_admin_panel',
-            'view_dashboard',
-            'view_health',
-            'view_horizon',
-            'view_logs',
-            'view_telescope',
+        // Pattern A - CRUD complet (20 entités × 4 = 80 permissions)
+        // contacts retiré → Pattern B (view+manage uniquement, messages entrants non éditables)
+        $patternAEntities = [
+            'users', 'roles', 'articles', 'comments', 'categories', 'pages', 'media', 'menus',
+            'faqs', 'testimonials', 'forms', 'widgets', 'plans', 'seo', 'newsletter',
+            'campaigns', 'short_urls', 'teams', 'tenants', 'workflows',
         ];
 
-        foreach ($permissionNames as $name) {
-            Permission::firstOrCreate(['name' => $name]);
+        foreach ($patternAEntities as $entity) {
+            Permission::firstOrCreate(['name' => 'view_'.$entity]);
+            Permission::firstOrCreate(['name' => 'create_'.$entity]);
+            Permission::firstOrCreate(['name' => 'update_'.$entity]);
+            Permission::firstOrCreate(['name' => 'delete_'.$entity]);
         }
+
+        // Pattern B - Opérationnel (21 entités × 2 = 42 permissions)
+        // contacts ajouté ici : messages entrants, lecture + gestion sans CRUD complet
+        $patternBEntities = [
+            'backups', 'exports', 'imports', 'system', 'security', 'email_templates', 'shortcodes',
+            'cookies', 'onboarding', 'trash', 'notifications', 'webhooks', 'ai', 'api',
+            'activity_logs', 'feature_flags', 'branding', 'themes', 'translations', 'settings',
+            'contacts', 'storage', 'usage', 'referrals', 'incidents', 'documentation',
+            'booking', 'roadmap',
+        ];
+
+        foreach ($patternBEntities as $entity) {
+            Permission::firstOrCreate(['name' => 'view_'.$entity]);
+            Permission::firstOrCreate(['name' => 'manage_'.$entity]);
+        }
+
+        // Permissions système (6)
+        Permission::firstOrCreate(['name' => 'view_admin_panel']);
+        Permission::firstOrCreate(['name' => 'view_dashboard']);
+        Permission::firstOrCreate(['name' => 'view_health']);
+        Permission::firstOrCreate(['name' => 'view_horizon']);
+        Permission::firstOrCreate(['name' => 'view_logs']);
+        Permission::firstOrCreate(['name' => 'view_telescope']);
 
         // Super admin - toutes les permissions
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+        $superAdmin->syncPermissions(Permission::all());
 
-        // Admin - tout sauf gestion des rôles
+        // Admin - tout sauf create_roles, update_roles, delete_roles (peut voir les rôles)
         $admin = Role::firstOrCreate(['name' => 'admin']);
-        $admin->givePermissionTo(Permission::where('name', '!=', 'manage_roles')->get());
+        $admin->syncPermissions(
+            Permission::whereNotIn('name', ['create_roles', 'update_roles', 'delete_roles'])->get()
+        );
 
         // Éditeur - contenu uniquement
         $editor = Role::firstOrCreate(['name' => 'editor']);
-        $editor->givePermissionTo([
-            'manage_articles',
-            'manage_comments',
-            'manage_categories',
-            'manage_media',
-            'manage_pages',
-            'manage_menus',
-            'manage_faqs',
-            'manage_testimonials',
-            'manage_forms',
+        $editor->syncPermissions([
+            'view_articles', 'create_articles', 'update_articles',
+            'view_comments', 'create_comments', 'update_comments', 'delete_comments',
+            'view_categories', 'create_categories', 'update_categories',
+            'view_pages', 'create_pages', 'update_pages',
+            'view_media', 'create_media', 'update_media', 'delete_media',
+            'view_menus', 'create_menus', 'update_menus',
+            'view_faqs', 'create_faqs', 'update_faqs',
+            'view_testimonials', 'create_testimonials', 'update_testimonials',
+            'view_forms', 'create_forms', 'update_forms',
+            'view_widgets',
+            'view_contacts',
             'view_admin_panel',
             'view_dashboard',
         ]);
 
         // Utilisateur - accès minimal
         $user = Role::firstOrCreate(['name' => 'user']);
-        $user->givePermissionTo('view_dashboard');
+        $user->syncPermissions(['view_dashboard']);
     }
 }

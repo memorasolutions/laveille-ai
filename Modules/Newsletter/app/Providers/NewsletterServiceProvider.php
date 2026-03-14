@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -16,7 +17,10 @@ use Modules\Newsletter\Listeners\WorkflowTriggerListener;
 
 class NewsletterServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->register(RouteServiceProvider::class);
+    }
 
     public function boot(): void
     {
@@ -32,6 +36,5 @@ class NewsletterServiceProvider extends ServiceProvider
         $themePath = __DIR__.'/../../resources/views/themes/'.$theme;
         $paths = is_dir($themePath) ? [$themePath, $sourcePath] : [$sourcePath];
         $this->loadViewsFrom($paths, 'newsletter');
-        $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
     }
 }

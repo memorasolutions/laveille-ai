@@ -1,17 +1,17 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
-@section('title', 'Nouveau widget')
+@section('title', __('Nouveau widget'))
 
 @section('content')
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.widgets.index') }}">Widgets</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Nouveau widget</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.widgets.index') }}">{{ __('Widgets') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Nouveau widget') }}</li>
     </ol>
 </nav>
 <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
-    <h4 class="mb-3 mb-md-0">Nouveau widget</h4>
+    <h4 class="mb-3 mb-md-0">{{ __('Nouveau widget') }}</h4>
 </div>
 
 <form action="{{ route('admin.widgets.store') }}" method="POST" x-data="widgetForm('{{ old('type', '') }}')">
@@ -22,9 +22,9 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="zone" class="form-label">Zone <span class="text-danger">*</span></label>
+                            <label for="zone" class="form-label">{{ __('Zone') }} <span class="text-danger">*</span></label>
                             <select name="zone" id="zone" class="form-select @error('zone') is-invalid @enderror" required>
-                                <option value="">Choisir...</option>
+                                <option value="">{{ __('Choisir...') }}</option>
                                 @foreach(\Modules\Widget\Models\Widget::ZONE_LABELS as $key => $label)
                                     <option value="{{ $key }}" {{ old('zone') === $key ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
@@ -32,9 +32,9 @@
                             @error('zone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="type" class="form-label">Type <span class="text-danger">*</span></label>
+                            <label for="type" class="form-label">{{ __('Type') }} <span class="text-danger">*</span></label>
                             <select name="type" id="type" class="form-select @error('type') is-invalid @enderror" required x-model="widgetType">
-                                <option value="">Choisir...</option>
+                                <option value="">{{ __('Choisir...') }}</option>
                                 @foreach(\Modules\Widget\Models\Widget::TYPE_LABELS as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
                                 @endforeach
@@ -44,20 +44,20 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="title" class="form-label">Titre <span class="text-danger">*</span></label>
+                        <label for="title" class="form-label">{{ __('Titre') }} <span class="text-danger">*</span></label>
                         <input type="text" name="title" id="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" required>
                         @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-3" x-show="['html','custom_text'].includes(widgetType)" x-cloak>
-                        <label for="content" class="form-label">Contenu</label>
+                        <label for="content" class="form-label">{{ __('Contenu') }}</label>
                         <textarea name="content" id="content" class="form-control" rows="5">{{ old('content') }}</textarea>
                     </div>
 
                     {{-- Articles récents --}}
                     <div x-show="widgetType === 'recent_posts'" x-cloak>
                         <div class="mb-3">
-                            <label class="form-label">Nombre d'articles</label>
+                            <label class="form-label">{{ __('Nombre d\'articles') }}</label>
                             <input type="number" name="settings[post_count]" class="form-control" value="{{ old('settings.post_count', 5) }}" min="1" max="20">
                         </div>
                     </div>
@@ -66,19 +66,19 @@
                     <div x-show="widgetType === 'cta_button'" x-cloak>
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Texte</label>
-                                <input type="text" name="settings[button_text]" class="form-control" value="{{ old('settings.button_text', 'Découvrir') }}">
+                                <label class="form-label">{{ __('Texte') }}</label>
+                                <input type="text" name="settings[button_text]" class="form-control" value="{{ old('settings.button_text', __('Découvrir')) }}">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">URL</label>
+                                <label class="form-label">{{ __('URL') }}</label>
                                 <input type="url" name="settings[button_url]" class="form-control" value="{{ old('settings.button_url') }}">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Style</label>
+                                <label class="form-label">{{ __('Style') }}</label>
                                 <select name="settings[button_style]" class="form-select">
-                                    <option value="primary">Primaire</option>
-                                    <option value="secondary">Secondaire</option>
-                                    <option value="success">Succès</option>
+                                    <option value="primary">{{ __('Primaire') }}</option>
+                                    <option value="secondary">{{ __('Secondaire') }}</option>
+                                    <option value="success">{{ __('Succès') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -89,11 +89,11 @@
                         <template x-for="(link, i) in socialLinks" :key="i">
                             <div class="row align-items-end mb-2">
                                 <div class="col-md-4">
-                                    <label class="form-label" x-show="i === 0">Nom</label>
+                                    <label class="form-label" x-show="i === 0">{{ __('Nom') }}</label>
                                     <input type="text" :name="'settings[social_links]['+i+'][name]'" class="form-control form-control-sm" x-model="link.name" placeholder="Facebook">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label" x-show="i === 0">URL</label>
+                                    <label class="form-label" x-show="i === 0">{{ __('URL') }}</label>
                                     <input type="url" :name="'settings[social_links]['+i+'][url]'" class="form-control form-control-sm" x-model="link.url" placeholder="https://...">
                                 </div>
                                 <div class="col-md-2">
@@ -104,7 +104,7 @@
                             </div>
                         </template>
                         <button type="button" class="btn btn-sm btn-outline-primary mt-1" @click="socialLinks.push({name:'',url:''})">
-                            <i data-lucide="plus" style="width:14px;height:14px;"></i> Ajouter
+                            <i data-lucide="plus" style="width:14px;height:14px;"></i> {{ __('Ajouter') }}
                         </button>
                     </div>
                 </div>
@@ -116,11 +116,11 @@
                 <div class="card-body">
                     <div class="form-check form-switch mb-3">
                         <input type="checkbox" class="form-check-input" name="is_active" id="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }}>
-                        <label class="form-check-label" for="is_active">Actif</label>
+                        <label class="form-check-label" for="is_active">{{ __('Actif') }}</label>
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Créer</button>
-                        <a href="{{ route('admin.widgets.index') }}" class="btn btn-outline-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">{{ __('Créer') }}</button>
+                        <a href="{{ route('admin.widgets.index') }}" class="btn btn-outline-secondary">{{ __('Annuler') }}</a>
                     </div>
                 </div>
             </div>

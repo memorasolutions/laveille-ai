@@ -1,16 +1,23 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Recherche', 'subtitle' => 'Administration'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Recherche'), 'subtitle' => __('Administration')])
 
 @section('breadcrumbs')
 <nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Recherche</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Recherche') }}</li>
     </ol>
 </nav>
 @endsection
 
 @section('content')
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="search" class="icon-md text-primary"></i>{{ __('Recherche globale') }}</h4>
+    <x-backoffice::help-modal id="helpSearchModal" :title="__('Recherche globale')" icon="search" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.search._help')
+    </x-backoffice::help-modal>
+</div>
 
 {{-- Search Form --}}
 <div class="card mb-4">

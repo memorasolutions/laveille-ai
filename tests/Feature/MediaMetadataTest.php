@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -82,7 +83,7 @@ test('metadata validation rejects too long title', function () {
         ->postJson('/admin/media-api', ['file' => UploadedFile::fake()->image('photo.jpg')]);
 
     $this->actingAs($user)
-        ->patchJson('/admin/media-api/' . $upload->json('id'), [
+        ->patchJson('/admin/media-api/'.$upload->json('id'), [
             'title' => str_repeat('x', 256),
         ])
         ->assertUnprocessable()
@@ -195,7 +196,7 @@ test('can assign folder to media via PATCH', function () {
     $upload = $this->actingAs($user)
         ->postJson('/admin/media-api', ['file' => UploadedFile::fake()->image('photo.jpg')]);
 
-    $this->actingAs($user)->patchJson('/admin/media-api/' . $upload->json('id'), [
+    $this->actingAs($user)->patchJson('/admin/media-api/'.$upload->json('id'), [
         'folder' => 'Logos',
     ])->assertOk()->assertJsonPath('folder', 'Logos');
 

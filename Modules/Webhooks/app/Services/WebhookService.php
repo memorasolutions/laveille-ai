@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -9,10 +10,10 @@ declare(strict_types=1);
 
 namespace Modules\Webhooks\Services;
 
-use Modules\Backoffice\Models\WebhookEndpoint;
 use Modules\Webhooks\Enums\WebhookEvent;
 use Modules\Webhooks\Jobs\DispatchWebhookJob;
 use Modules\Webhooks\Models\WebhookCall;
+use Modules\Webhooks\Models\WebhookEndpoint;
 
 class WebhookService
 {

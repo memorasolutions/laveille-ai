@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -14,11 +15,12 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Modules\Core\Traits\HasTableSorting;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaTable extends Component
 {
-    use WithFileUploads, WithPagination;
+    use HasTableSorting, WithFileUploads, WithPagination;
 
     #[Url]
     public string $search = '';
@@ -65,17 +67,6 @@ class MediaTable extends Component
         $this->file = null;
         $this->dispatch('toast', type: 'success', message: 'Fichier uploadé avec succès.');
         $this->dispatch('$refresh');
-    }
-
-    public function sort(string $field): void
-    {
-        if ($this->sortBy === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $field;
-            $this->sortDirection = 'asc';
-        }
-        $this->resetPage();
     }
 
     public function resetFilters(): void

@@ -17,29 +17,29 @@
     {{-- Bulk Actions Bar --}}
     @if(count($selected) > 0)
         <div class="d-flex flex-wrap align-items-center gap-3 mb-3 px-3 py-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
-            <span class="fw-medium text-body">{{ count($selected) }} sélectionné(s)</span>
-            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
-                <option value="">Choisir une action</option>
-                <option value="activate">Activer</option>
-                <option value="deactivate">Désactiver</option>
-                <option value="delete">Supprimer</option>
+            <span class="fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
+            <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="{{ __('Action groupée') }}">
+                <option value="">{{ __('Choisir une action') }}</option>
+                <option value="activate">{{ __('Activer') }}</option>
+                <option value="deactivate">{{ __('Désactiver') }}</option>
+                <option value="delete">{{ __('Supprimer') }}</option>
             </select>
-            <button wire:click="executeBulkAction" wire:confirm="Confirmer l'action en masse ?"
+            <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
                     class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
-                <i data-lucide="play-circle" class="icon-sm"></i> Exécuter
+                <i data-lucide="play-circle" class="icon-sm"></i> {{ __('Exécuter') }}
             </button>
         </div>
     @endif
 
     {{-- Filtres --}}
     <div class="d-flex flex-wrap gap-3 mb-3">
-        <select wire:model.live="filterStatus" class="form-select form-select-sm w-auto" aria-label="Filtrer par statut">
-            <option value="">Tous les statuts</option>
-            <option value="active">Actifs</option>
-            <option value="inactive">Inactifs</option>
+        <select wire:model.live="filterStatus" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par statut') }}">
+            <option value="">{{ __('Tous les statuts') }}</option>
+            <option value="active">{{ __('Actifs') }}</option>
+            <option value="inactive">{{ __('Inactifs') }}</option>
         </select>
-        <select wire:model.live="filterRole" class="form-select form-select-sm w-auto" aria-label="Filtrer par rôle">
-            <option value="">Tous les rôles</option>
+        <select wire:model.live="filterRole" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par rôle') }}">
+            <option value="">{{ __('Tous les rôles') }}</option>
             @foreach($roles as $role)
                 <option value="{{ $role->name }}">{{ $role->name }}</option>
             @endforeach
@@ -47,7 +47,7 @@
         @if($filterStatus || $filterRole || $search)
             <button wire:click="resetFilters"
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
-                <i data-lucide="x-circle" class="icon-sm"></i> Réinitialiser
+                <i data-lucide="x-circle" class="icon-sm"></i> {{ __('Réinitialiser') }}
             </button>
         @endif
     </div>
@@ -60,8 +60,8 @@
             </span>
             <input type="text" wire:model.live.debounce.300ms="search"
                    class="form-control form-control-sm"
-                   placeholder="Rechercher un utilisateur..."
-                   aria-label="Rechercher">
+                   placeholder="{{ __('Rechercher un utilisateur...') }}"
+                   aria-label="{{ __('Rechercher') }}">
         </div>
         <select wire:model.live="perPage" class="form-select form-select-sm w-auto" aria-label="Éléments par page">
             <option value="10">10 / page</option>
@@ -79,7 +79,7 @@
                         <input type="checkbox" wire:model.live="selectAll" class="form-check-input" style="cursor:pointer" aria-label="Tout sélectionner">
                     </th>
                     <th class="fw-medium" style="cursor:pointer" wire:click="sort('name')">
-                        Nom
+                        {{ __('Nom') }}
                         @if($sortBy === 'name')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
@@ -87,16 +87,16 @@
                         @endif
                     </th>
                     <th class="fw-medium" style="cursor:pointer" wire:click="sort('email')">
-                        Courriel
+                        {{ __('Courriel') }}
                         @if($sortBy === 'email')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
                             <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
                         @endif
                     </th>
-                    <th class="fw-medium">Statut</th>
-                    <th class="fw-medium">Rôles</th>
-                    <th class="fw-medium text-center">Actions</th>
+                    <th class="fw-medium">{{ __('Statut') }}</th>
+                    <th class="fw-medium">{{ __('Rôles') }}</th>
+                    <th class="fw-medium text-center">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -133,7 +133,7 @@
                                 <input type="checkbox" class="form-check-input" role="switch"
                                        wire:click="toggleActive({{ $user->id }})"
                                        @checked($user->is_active)
-                                       title="{{ $user->is_active ? 'Désactiver' : 'Activer' }}">
+                                       title="{{ $user->is_active ? __('Désactiver') : __('Activer') }}">
                             </div>
                         </td>
                         <td>
@@ -157,29 +157,29 @@
                                      style="min-width:140px">
                                     <a href="{{ route('admin.users.show', $user) }}"
                                        class="dropdown-item d-flex align-items-center gap-2">
-                                        <i data-lucide="eye" class="icon-sm text-info"></i> Voir
+                                        <i data-lucide="eye" class="icon-sm text-info"></i> {{ __('Voir') }}
                                     </a>
                                     <a href="{{ route('admin.users.edit', $user) }}"
                                        class="dropdown-item d-flex align-items-center gap-2">
-                                        <i data-lucide="pencil" class="icon-sm text-success"></i> Modifier
+                                        <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                     </a>
                                     @if($user->id !== auth()->id())
                                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                              onsubmit="return confirm('Confirmer la suppression ?')">
+                                              onsubmit="return confirm('{{ __('Confirmer la suppression ?') }}')">
                                             @csrf @method('DELETE')
                                             <button type="submit"
                                                     class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                                <i data-lucide="trash-2" class="icon-sm"></i> Supprimer
+                                                <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
                                             </button>
                                         </form>
                                     @endif
                                     @if(auth()->user()->hasRole('super_admin') && !$user->hasRole('super_admin') && $user->id !== auth()->id())
                                         <form action="{{ route('admin.users.impersonate', $user) }}" method="POST"
-                                              onsubmit="return confirm('Impersoner {{ $user->name }} ?')">
+                                              onsubmit="return confirm('{{ __('Impersoner') }} {{ $user->name }} ?')">
                                             @csrf
                                             <button type="submit"
                                                     class="dropdown-item d-flex align-items-center gap-2 text-body">
-                                                <i data-lucide="user-check" class="icon-sm text-muted"></i> Impersoner
+                                                <i data-lucide="user-check" class="icon-sm text-muted"></i> {{ __('Impersoner') }}
                                             </button>
                                         </form>
                                     @endif
@@ -191,7 +191,7 @@
                     <tr>
                         <td colspan="6" class="py-5 text-center text-muted">
                             <i data-lucide="user" class="d-block mx-auto mb-2" style="width:32px;height:32px"></i>
-                            Aucun utilisateur trouvé
+                            {{ __('Aucun utilisateur trouvé') }}
                         </td>
                     </tr>
                 @endforelse

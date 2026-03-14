@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 
@@ -14,8 +20,8 @@ $tempStatusesPath = null;
 beforeEach(function () use (&$tempModulesPath, &$tempStatusesPath) {
     // Create an isolated temp directory for the test module
     // This prevents nwidart/modules from scanning TestModule in the real Modules/ folder
-    $tempModulesPath = sys_get_temp_dir() . '/laravel_test_modules_' . getmypid();
-    $tempStatusesPath = $tempModulesPath . '/modules_statuses.json';
+    $tempModulesPath = sys_get_temp_dir().'/laravel_test_modules_'.getmypid();
+    $tempStatusesPath = $tempModulesPath.'/modules_statuses.json';
 
     File::ensureDirectoryExists($tempModulesPath);
 

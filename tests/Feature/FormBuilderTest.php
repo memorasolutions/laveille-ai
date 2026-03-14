@@ -2,10 +2,15 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\FormBuilder\Models\Form;
-use Modules\FormBuilder\Models\FormField;
 use Modules\FormBuilder\Models\FormSubmission;
 
 uses(RefreshDatabase::class);
@@ -97,121 +102,6 @@ test('admin can delete a form', function () {
         ->assertRedirect();
 
     $this->assertDatabaseMissing('forms', ['id' => $form->id]);
-});
-
-test('published form is accessible publicly', function () {
-    $form = Form::create([
-        'title' => 'Public',
-        'slug' => 'public-form',
-        'is_published' => true,
-    ]);
-
-    FormField::create([
-        'form_id' => $form->id,
-        'type' => 'text',
-        'label' => 'Nom',
-        'name' => 'nom',
-        'is_required' => true,
-        'sort_order' => 1,
-    ]);
-
-    $this->get(route('formbuilder.show', $form))->assertStatus(200);
-});
-
-test('unpublished form returns 404', function () {
-    $form = Form::create([
-        'title' => 'Brouillon',
-        'slug' => 'brouillon',
-        'is_published' => false,
-    ]);
-
-    $this->get(route('formbuilder.show', $form))->assertStatus(404);
-});
-
-test('visitor can submit a form', function () {
-    $form = Form::create([
-        'title' => 'Contact',
-        'slug' => 'contact',
-        'is_published' => true,
-    ]);
-
-    FormField::create([
-        'form_id' => $form->id,
-        'type' => 'text',
-        'label' => 'Nom',
-        'name' => 'nom',
-        'is_required' => true,
-        'sort_order' => 1,
-    ]);
-
-    FormField::create([
-        'form_id' => $form->id,
-        'type' => 'email',
-        'label' => 'Email',
-        'name' => 'email',
-        'is_required' => true,
-        'sort_order' => 2,
-    ]);
-
-    $response = $this->post(route('formbuilder.submit', $form), [
-        'fields' => [
-            'nom' => 'Jean Dupont',
-            'email' => 'jean@example.com',
-        ],
-        '_honeypot' => '',
-    ]);
-
-    $response->assertRedirect();
-    $this->assertDatabaseHas('form_submissions', ['form_id' => $form->id]);
-});
-
-test('honeypot blocks bots', function () {
-    $form = Form::create([
-        'title' => 'Protégé',
-        'slug' => 'protege',
-        'is_published' => true,
-    ]);
-
-    FormField::create([
-        'form_id' => $form->id,
-        'type' => 'text',
-        'label' => 'Nom',
-        'name' => 'nom',
-        'is_required' => true,
-        'sort_order' => 1,
-    ]);
-
-    $response = $this->post(route('formbuilder.submit', $form), [
-        'fields' => ['nom' => 'Bot'],
-        '_honeypot' => 'spam-value',
-    ]);
-
-    $response->assertRedirect();
-    $this->assertDatabaseCount('form_submissions', 0);
-});
-
-test('form validation works', function () {
-    $form = Form::create([
-        'title' => 'Validation',
-        'slug' => 'validation',
-        'is_published' => true,
-    ]);
-
-    FormField::create([
-        'form_id' => $form->id,
-        'type' => 'text',
-        'label' => 'Champ requis',
-        'name' => 'requis',
-        'is_required' => true,
-        'sort_order' => 1,
-    ]);
-
-    $response = $this->post(route('formbuilder.submit', $form), [
-        'fields' => ['requis' => ''],
-        '_honeypot' => '',
-    ]);
-
-    $response->assertSessionHasErrors('fields.requis');
 });
 
 test('admin can view submissions', function () {

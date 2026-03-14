@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,11 +13,12 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Core\Traits\HasTableSorting;
 use Modules\Settings\Models\Setting;
 
 class SettingsTable extends Component
 {
-    use WithPagination;
+    use HasTableSorting, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -45,16 +47,6 @@ class SettingsTable extends Component
         $this->search = '';
         $this->filterGroup = '';
         $this->resetPage();
-    }
-
-    public function sort(string $column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
     }
 
     public function render(): \Illuminate\View\View

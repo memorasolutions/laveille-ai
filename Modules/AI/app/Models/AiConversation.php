@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -72,6 +73,16 @@ class AiConversation extends Model
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(ConversationAssignment::class, 'conversation_id');
+    }
+
+    public function internalNotes(): HasMany
+    {
+        return $this->hasMany(InternalNote::class, 'conversation_id');
     }
 
     public function scopeActive($query)

@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div>
-    <h1 class="auth-title">{{ __('Double authentification') }}</h1>
-    <p class="auth-subtitle">
+    <h1 class="text-3xl font-bold leading-tight text-black mt-2">{{ __('Double authentification') }}</h1>
+    <p class="mt-2 text-base text-gray-600">
         @if ($usingRecoveryCode)
             {{ __('Entrez l\'un de vos codes de récupération.') }}
         @else
@@ -9,37 +9,48 @@
         @endif
     </p>
 
-    @if (! $usingRecoveryCode)
-        <div style="margin-bottom:1.25rem;">
-            <label for="code" class="auth-label">{{ __('Code OTP') }}</label>
-            <div class="auth-input-group">
-                <div class="auth-input-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+    <div class="mt-8 space-y-5">
+        @if (! $usingRecoveryCode)
+            <div>
+                <label for="code" class="text-base font-medium text-gray-900">{{ __('Code OTP') }}</label>
+                <div class="mt-2 relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <i class="ti ti-shield-check text-gray-400 text-xl"></i>
+                    </div>
+                    <input wire:model="code" type="text" id="code"
+                           inputmode="numeric" maxlength="6" autocomplete="one-time-code" autofocus
+                           placeholder="000000"
+                           class="block w-full py-4 ps-10 pe-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-sky-600 focus:bg-white caret-sky-600 text-center font-bold text-2xl tracking-widest font-mono">
                 </div>
-                <input wire:model="code" type="text" id="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" autofocus placeholder="000000" class="auth-input" style="text-align:center;font-weight:700;font-size:1.5rem;letter-spacing:0.4em;font-family:monospace;">
+                @error('code')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
-            @error('code')<p class="auth-error">{{ $message }}</p>@enderror
-        </div>
-    @else
-        <div style="margin-bottom:1.25rem;">
-            <label for="recoveryCode" class="auth-label">{{ __('Code de récupération') }}</label>
-            <div class="auth-input-group">
-                <div class="auth-input-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        @else
+            <div>
+                <label for="recoveryCode" class="text-base font-medium text-gray-900">{{ __('Code de récupération') }}</label>
+                <div class="mt-2 relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <i class="ti ti-lock text-gray-400 text-xl"></i>
+                    </div>
+                    <input wire:model="recoveryCode" type="text" id="recoveryCode" autofocus
+                           placeholder="XXXXXXXX-XXXXXXXX"
+                           class="block w-full py-4 ps-10 pe-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:border-sky-600 focus:bg-white caret-sky-600 font-mono">
                 </div>
-                <input wire:model="recoveryCode" type="text" id="recoveryCode" autofocus placeholder="XXXXXXXX-XXXXXXXX" class="auth-input" style="font-family:monospace;">
+                @error('recoveryCode')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
-            @error('recoveryCode')<p class="auth-error">{{ $message }}</p>@enderror
+        @endif
+
+        <div>
+            <button wire:click="authenticate" wire:loading.attr="disabled" type="button"
+                    class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0284c7">
+                <span wire:loading.remove>{{ __('Vérifier') }}</span>
+                <span wire:loading>{{ __('Vérification en cours...') }}</span>
+            </button>
         </div>
-    @endif
+    </div>
 
-    <button wire:click="authenticate" wire:loading.attr="disabled" type="button" class="auth-btn">
-        <span wire:loading.remove>{{ __('Vérifier') }}</span>
-        <span wire:loading>{{ __('Vérification en cours...') }}</span>
-    </button>
-
-    <div style="text-align:center;margin-top:1.5rem;">
-        <button wire:click="toggleRecoveryMode" type="button" class="auth-link" style="background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;">
+    <div class="mt-6 text-center">
+        <button wire:click="toggleRecoveryMode" type="button"
+                class="font-medium text-sky-600 transition-all duration-200 hover:text-sky-700 focus:text-sky-700 hover:underline bg-transparent border-none cursor-pointer p-0">
             @if ($usingRecoveryCode)
                 {{ __('Utiliser le code OTP') }}
             @else

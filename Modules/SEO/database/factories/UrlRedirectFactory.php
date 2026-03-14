@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -19,8 +20,8 @@ class UrlRedirectFactory extends Factory
     public function definition(): array
     {
         return [
-            'from_url' => '/old/' . fake()->unique()->slug(2),
-            'to_url' => '/new/' . fake()->slug(2),
+            'from_url' => '/old/'.fake()->unique()->slug(2),
+            'to_url' => '/new/'.fake()->slug(2),
             'status_code' => 301,
             'is_active' => true,
             'note' => fake()->optional()->sentence(),

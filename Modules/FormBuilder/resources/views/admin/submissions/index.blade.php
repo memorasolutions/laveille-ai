@@ -2,20 +2,24 @@
 @extends('backoffice::themes.backend.layouts.admin', ['title' => 'Soumissions : ' . $form->title])
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
-    <div>
-        <h4 class="mb-3 mb-md-0">Soumissions : {{ $form->title }}</h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.formbuilder.forms.index') }}">Formulaires</a></li>
-                <li class="breadcrumb-item active">Soumissions</li>
-            </ol>
-        </nav>
-    </div>
-    <div>
+<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.formbuilder.forms.index') }}">{{ __('Formulaires') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('Soumissions') }}</li>
+    </ol>
+</nav>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2">
+        <i data-lucide="inbox" class="icon-md text-primary"></i>
+        {{ __('Soumissions') }} : {{ $form->title }}
+    </h4>
+    <div class="d-flex align-items-center gap-2">
+        <x-backoffice::help-modal id="helpFormBuilderSubmissionsModal" :title="__('Soumissions de formulaire')" icon="inbox" :buttonLabel="__('Aide')">
+            @include('formbuilder::admin.submissions._help')
+        </x-backoffice::help-modal>
         <a href="{{ route('admin.formbuilder.forms.submissions.export', $form) }}" class="btn btn-outline-success btn-icon-text">
             <i class="btn-icon-prepend" data-lucide="download"></i>
-            Exporter CSV
+            {{ __('Exporter CSV') }}
         </a>
     </div>
 </div>

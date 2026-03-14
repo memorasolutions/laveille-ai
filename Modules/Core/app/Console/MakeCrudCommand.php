@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -527,7 +528,7 @@ BLADE;
         $formFields = collect($fields)->map(function ($type, $name) use ($var) {
             $label = Str::headline($name);
             $inputName = $name;
-            $required = in_array($type, ['string', 'text', 'integer', 'decimal']) ? " <span class=\"text-danger\">*</span>" : '';
+            $required = in_array($type, ['string', 'text', 'integer', 'decimal']) ? ' <span class="text-danger">*</span>' : '';
             $oldValue = "old('{$inputName}', isset(\${$var}) ? \${$var}->{$inputName} : '')";
 
             $input = match ($type) {

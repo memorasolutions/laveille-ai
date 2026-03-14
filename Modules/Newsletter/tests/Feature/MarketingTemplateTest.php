@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -24,7 +25,7 @@ function createMarketingTemplate(array $overrides = []): EmailTemplate
 {
     return EmailTemplate::create(array_merge([
         'name' => 'Welcome Series',
-        'slug' => 'welcome-series-' . uniqid(),
+        'slug' => 'welcome-series-'.uniqid(),
         'subject' => 'Welcome aboard!',
         'body_html' => '<p>Hello {{subscriber.name}}</p>',
         'variables' => ['subscriber.name'],

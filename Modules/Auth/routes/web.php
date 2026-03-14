@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -22,6 +23,8 @@ use Modules\Auth\Http\Controllers\UserDashboardController;
 use Modules\Auth\Http\Controllers\UserNotificationsController;
 use Modules\Auth\Http\Controllers\UserSessionController;
 use Modules\Auth\Http\Controllers\UserSubscriptionController;
+use Modules\Auth\Http\Controllers\NotificationPreferenceController;
+use Modules\Auth\Http\Controllers\PrivacyCenterController;
 use Modules\Auth\Livewire\ForgotPassword;
 use Modules\Auth\Livewire\Login;
 use Modules\Auth\Livewire\Register;
@@ -106,6 +109,10 @@ Route::middleware(['auth', SetBackofficeTheme::class])->group(function () {
     Route::delete('/user/notifications/{id}', [UserNotificationsController::class, 'destroy'])->name('user.notifications.destroy');
     Route::put('/user/notifications/frequency', [UserNotificationsController::class, 'updateFrequency'])->name('user.notifications.updateFrequency');
 
+    // Préférences de notification par type/canal
+    Route::get('/user/notification-preferences', [NotificationPreferenceController::class, 'index'])->name('user.notification-preferences');
+    Route::put('/user/notification-preferences', [NotificationPreferenceController::class, 'update'])->name('user.notification-preferences.update');
+
     // Abonnement SaaS
     Route::get('/user/subscription', [UserSubscriptionController::class, 'index'])->name('user.subscription');
     Route::post('/user/subscription/cancel', [UserSubscriptionController::class, 'cancel'])->name('user.subscription.cancel');
@@ -114,6 +121,9 @@ Route::middleware(['auth', SetBackofficeTheme::class])->group(function () {
     Route::get('/user/invoices', [UserSubscriptionController::class, 'invoices'])->name('user.invoices');
     Route::get('/user/invoices/{invoice}', [UserSubscriptionController::class, 'downloadInvoice'])->name('user.invoices.download');
 
+    // Centre de confidentialité RGPD
+    Route::get('/user/privacy', [PrivacyCenterController::class, 'index'])->name('user.privacy');
+
     // Suppression compte + export RGPD
     Route::delete('/user/account', [UserDashboardController::class, 'deleteAccount'])->name('user.account.delete');
     Route::get('/user/export-data', [UserDashboardController::class, 'exportData'])->name('user.export-data')->middleware('throttle:export');
@@ -121,6 +131,9 @@ Route::middleware(['auth', SetBackofficeTheme::class])->group(function () {
     // Confirmation mot de passe (middleware password.confirm)
     Route::get('/confirm-password', [PasswordConfirmationController::class, 'show'])->name('password.confirm');
     Route::post('/confirm-password', [PasswordConfirmationController::class, 'confirm'])->name('password.confirm.post');
+
+    // Passkeys (clés d'accès WebAuthn)
+    Route::get('/user/passkeys', fn () => view('auth::themes.backend.profile.passkeys'))->name('user.passkeys');
 
     // 2FA gestion profil
     Route::get('/user/two-factor/setup', [TwoFactorProfileController::class, 'setup'])->name('user.two-factor.setup');

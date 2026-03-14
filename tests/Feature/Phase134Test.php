@@ -2,14 +2,19 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-    Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $this->seed(\Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder::class);
 });
 
 test('plugin list accessible by super_admin', function () {
@@ -22,8 +27,9 @@ test('plugin list accessible by super_admin', function () {
 });
 
 test('plugin list forbidden for admin', function () {
+    // A user with no system management permission (editor role) cannot access plugins.
     $user = User::factory()->create();
-    $user->assignRole('admin');
+    $user->assignRole('editor');
 
     $this->actingAs($user)
         ->get(route('admin.plugins.index'))

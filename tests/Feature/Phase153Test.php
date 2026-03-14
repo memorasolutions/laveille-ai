@@ -2,13 +2,19 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Backoffice\Models\WebhookEndpoint;
 use Modules\Backoffice\Services\AnalyticsService;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
 use Modules\Webhooks\Models\WebhookCall;
+use Modules\Webhooks\Models\WebhookEndpoint;
 
 uses(RefreshDatabase::class);
 

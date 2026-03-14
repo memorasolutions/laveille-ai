@@ -16,8 +16,8 @@
 
     {{-- Filtres --}}
     <div class="d-flex flex-wrap gap-2 mb-3">
-        <select wire:model.live="filterGroup" class="form-select form-select-sm w-auto" aria-label="Filtrer par groupe">
-            <option value="">Tous les groupes</option>
+        <select wire:model.live="filterGroup" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par groupe') }}">
+            <option value="">{{ __('Tous les groupes') }}</option>
             @foreach($groups as $group)
                 <option value="{{ $group }}">{{ $group }}</option>
             @endforeach
@@ -25,7 +25,7 @@
         @if($filterGroup || $search)
             <button wire:click="resetFilters"
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
-                <i data-lucide="x-circle" style="width:14px;height:14px;"></i> Réinitialiser
+                <i data-lucide="x-circle" style="width:14px;height:14px;"></i> {{ __('Réinitialiser') }}
             </button>
         @endif
     </div>
@@ -36,8 +36,8 @@
             <input type="text" wire:model.live.debounce.300ms="search"
                    class="form-control form-control-sm ps-4"
                    style="width:260px;"
-                   placeholder="Rechercher une clé ou valeur..."
-                   aria-label="Rechercher">
+                   placeholder="{{ __('Rechercher une clé ou valeur...') }}"
+                   aria-label="{{ __('Rechercher') }}">
             <i data-lucide="search" class="position-absolute" style="left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#9ca3af;"></i>
         </div>
     </div>
@@ -49,16 +49,16 @@
                 <tr class="border-bottom">
                     <th class="fw-medium user-select-none" style="cursor:pointer;"
                         wire:click="sort('key')">
-                        Clé
+                        {{ __('Clé') }}
                         @if($sortBy === 'key')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'arrow-up' : 'arrow-down' }}" class="ms-1 text-primary" style="width:13px;height:13px;"></i>
                         @else
                             <i data-lucide="arrow-up-down" class="ms-1 text-muted" style="width:13px;height:13px;opacity:.4;"></i>
                         @endif
                     </th>
-                    <th class="fw-medium">Valeur</th>
-                    <th class="fw-medium">Groupe</th>
-                    <th class="fw-medium text-center">Actions</th>
+                    <th class="fw-medium">{{ __('Valeur') }}</th>
+                    <th class="fw-medium">{{ __('Groupe') }}</th>
+                    <th class="fw-medium text-center">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,14 +87,14 @@
                                      style="top:100%;margin-top:4px;min-width:140px;z-index:50;">
                                     <a href="{{ route('admin.settings.edit', $setting) }}"
                                        class="d-flex align-items-center gap-2 px-3 py-2 small text-body text-decoration-none">
-                                        <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> Modifier
+                                        <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
                                     </a>
                                     <form action="{{ route('admin.settings.destroy', $setting) }}" method="POST">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                                 class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start"
-                                                onclick="return confirm('Confirmer la suppression ?')">
-                                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Supprimer
+                                                onclick="return confirm('{{ __('Confirmer la suppression ?') }}')">
+                                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
                                         </button>
                                     </form>
                                 </div>
@@ -105,7 +105,7 @@
                     <tr>
                         <td colspan="4" class="py-5 text-center text-muted small">
                             <i data-lucide="settings" class="d-block mx-auto mb-2 text-muted" style="width:32px;height:32px;opacity:.4;"></i>
-                            Aucun paramètre trouvé
+                            {{ __('Aucun paramètre trouvé') }}
                         </td>
                     </tr>
                 @endforelse

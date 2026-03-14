@@ -20,12 +20,17 @@
                 <i data-lucide="history" class="flex-shrink-0"></i>
                 <span class="text-truncate">{{ __('Révisions de') }} "{{ $article->title }}"</span>
             </h4>
-            <a href="{{ route('admin.blog.articles.edit', $article) }}"
-               class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2 flex-shrink-0">
-                <i data-lucide="arrow-left" class="icon-sm"></i>
-                <span class="d-none d-sm-inline">{{ __('Retour à l\'article') }}</span>
-                <span class="d-sm-none">{{ __('Retour') }}</span>
-            </a>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <x-backoffice::help-modal id="helpRevisionsModal" :title="__('Historique des révisions')" icon="history" :buttonLabel="__('Aide')">
+                    @include('blog::themes.backend.admin.revisions._help')
+                </x-backoffice::help-modal>
+                <a href="{{ route('admin.blog.articles.edit', $article) }}"
+                   class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2">
+                    <i data-lucide="arrow-left" class="icon-sm"></i>
+                    <span class="d-none d-sm-inline">{{ __('Retour à l\'article') }}</span>
+                    <span class="d-sm-none">{{ __('Retour') }}</span>
+                </a>
+            </div>
         </div>
     </div>
     <div class="card-body p-4">

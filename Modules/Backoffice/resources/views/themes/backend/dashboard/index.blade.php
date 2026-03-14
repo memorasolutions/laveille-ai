@@ -2,18 +2,38 @@
 @extends('backoffice::themes.backend.layouts.admin', ['title' => __('Tableau de bord')])
 
 @section('content')
+<x-backoffice::driver-tour
+    storage-key="driver_tour_dashboard_{{ auth()->id() }}"
+    :steps="[
+        ['element' => '#dashboard-stats', 'popover' => ['title' => __('Statistiques clés'), 'description' => __('Vue rapide des métriques importantes : utilisateurs, articles, pages et modules actifs.'), 'side' => 'bottom']],
+        ['element' => '#usersRegistrationChart', 'popover' => ['title' => __('Graphique d\'inscription'), 'description' => __('Évolution des inscriptions utilisateurs sur les 12 derniers mois.'), 'side' => 'bottom']],
+        ['element' => '#dashboard-activity', 'popover' => ['title' => __('Activité récente'), 'description' => __('Consultez les dernières actions effectuées sur la plateforme.'), 'side' => 'bottom']],
+        ['element' => '#dashboard-quick-actions', 'popover' => ['title' => __('Actions rapides'), 'description' => __('Raccourcis vers les opérations les plus fréquentes.'), 'side' => 'left']],
+        ['element' => '#dashboard-system-info', 'popover' => ['title' => __('Informations système'), 'description' => __('Version Laravel, PHP, environnement et modules actifs.'), 'side' => 'top']],
+        ['element' => 'nav.sidebar', 'popover' => ['title' => __('Menu principal'), 'description' => __('Naviguez entre les différents modules via la barre latérale.'), 'side' => 'right']],
+    ]"
+/>
+
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
     <h1 class="fw-semibold fs-5 mb-0">{{ __('Tableau de bord') }}</h1>
-    <nav aria-label="Fil d'Ariane">
-        <ol class="breadcrumb mb-0 small">
-            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ __('Tableau de bord') }}</li>
-        </ol>
-    </nav>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <button id="restartTour" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" title="{{ __('Visite guidée') }}">
+            <i data-lucide="compass" class="icon-sm"></i> {{ __('Visite guidée') }}
+        </button>
+        <x-backoffice::help-modal id="helpDashboardModal" :title="__('Tableau de bord')" icon="layout-dashboard" :buttonLabel="__('Aide')">
+            @include('backoffice::themes.backend.dashboard._help')
+        </x-backoffice::help-modal>
+        <nav aria-label="Fil d'Ariane">
+            <ol class="breadcrumb mb-0 small">
+                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('Tableau de bord') }}</li>
+            </ol>
+        </nav>
+    </div>
 </div>
 
 {{-- Stat cards --}}
-<div class="row">
+<div class="row" id="dashboard-stats">
     {{-- Users --}}
     <div class="col-md-6 col-xl-3 grid-margin stretch-card">
         <div class="card">
@@ -136,7 +156,7 @@
 
 {{-- Recent activity + Quick actions --}}
 <div class="row">
-    <div class="col-lg-7 col-xl-8 grid-margin stretch-card">
+    <div class="col-lg-7 col-xl-8 grid-margin stretch-card" id="dashboard-activity">
         <div class="card">
             <div class="card-header py-3 px-4 border-bottom d-flex align-items-center gap-2">
                 <i data-lucide="activity" class="text-primary icon-md"></i>
@@ -170,7 +190,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-5 col-xl-4 grid-margin stretch-card">
+    <div class="col-lg-5 col-xl-4 grid-margin stretch-card" id="dashboard-quick-actions">
         <div class="card">
             <div class="card-header py-3 px-4 border-bottom d-flex align-items-center gap-2">
                 <i data-lucide="zap" class="text-warning icon-md"></i>
@@ -178,7 +198,7 @@
             </div>
             <div class="card-body p-4">
                 <div class="d-grid gap-2">
-                    @can('manage_users')
+                    @can('create_users')
                     <a href="{{ route('admin.users.create') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="user-plus" class="icon-sm"></i> {{ __('Nouvel utilisateur') }}
                     </a>
@@ -193,15 +213,17 @@
                         <i data-lucide="layout" class="icon-sm"></i> {{ __('Nouvelle page') }}
                     </a>
                     @endif
-                    @can('manage_settings')
+                    @can('view_settings')
                     <a href="{{ route('admin.settings.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="settings" class="icon-sm"></i> {{ __('Paramètres') }}
                     </a>
                     @endcan
-                    @can('manage_backups')
+                    @can('view_health')
                     <a href="{{ route('admin.health') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="activity" class="icon-sm"></i> {{ __('Santé système') }}
                     </a>
+                    @endcan
+                    @can('view_backups')
                     @if(Route::has('admin.backups.index'))
                     <a href="{{ route('admin.backups.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                         <i data-lucide="hard-drive" class="icon-sm"></i> {{ __('Sauvegardes') }}
@@ -216,7 +238,7 @@
 
 {{-- System info --}}
 <div class="row">
-    <div class="col-12">
+    <div class="col-12" id="dashboard-system-info">
         <div class="card">
             <div class="card-header py-3 px-4 border-bottom d-flex align-items-center gap-2">
                 <i data-lucide="server" class="text-secondary icon-md"></i>
@@ -250,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!chartData.length) return;
 
     var options = {
-        series: [{ name: 'Inscriptions', data: chartData.map(function(i) { return i.count; }) }],
+        series: [{ name: @json(__('Inscriptions')), data: chartData.map(function(i) { return i.count; }) }],
         chart: { height: 300, type: 'area', toolbar: { show: false }, fontFamily: 'Roboto, sans-serif' },
         colors: ['var(--bs-primary, #6571ff)'],
         dataLabels: { enabled: false },

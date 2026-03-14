@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,8 +13,6 @@ namespace Modules\AI\Observers;
 use Illuminate\Support\Facades\Log;
 use Modules\AI\Services\AiService;
 use Modules\Blog\Models\Comment;
-use Modules\Blog\States\ApprovedCommentState;
-use Modules\Blog\States\SpamCommentState;
 use Modules\Settings\Models\Setting;
 
 class CommentModerationObserver
@@ -35,10 +34,10 @@ class CommentModerationObserver
                 return;
             }
 
-            if ($result['verdict'] === 'approve') {
-                $comment->status->transitionTo(ApprovedCommentState::class);
-            } elseif ($result['verdict'] === 'spam') {
-                $comment->status->transitionTo(SpamCommentState::class);
+            if ($result['verdict'] === 'approve' && class_exists(\Modules\Blog\States\ApprovedCommentState::class)) {
+                $comment->status->transitionTo(\Modules\Blog\States\ApprovedCommentState::class);
+            } elseif ($result['verdict'] === 'spam' && class_exists(\Modules\Blog\States\SpamCommentState::class)) {
+                $comment->status->transitionTo(\Modules\Blog\States\SpamCommentState::class);
             }
             // 'flag' → stays pending for manual review
         } catch (\Exception $e) {

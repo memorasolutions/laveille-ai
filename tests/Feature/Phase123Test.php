@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 
@@ -39,10 +45,10 @@ it('unauthenticated user can switch locale', function () {
     expect(session('locale'))->toBe('en');
 });
 
-it('switching to en then visiting home returns 200', function () {
+it('switching to en then visiting home returns redirect', function () {
     $this->post(route('locale.switch', 'en'));
 
-    $this->get('/')->assertOk();
+    $this->get('/')->assertRedirect();
 });
 
 it('locale session persists across requests', function () {
@@ -50,7 +56,7 @@ it('locale session persists across requests', function () {
 
     $this->withSession(['locale' => 'en'])
         ->get('/')
-        ->assertOk();
+        ->assertRedirect();
 
     expect(session('locale'))->toBe('en');
 });

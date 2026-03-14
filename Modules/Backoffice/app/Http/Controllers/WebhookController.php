@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -11,7 +12,7 @@ namespace Modules\Backoffice\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Backoffice\Models\WebhookEndpoint;
+use Modules\Webhooks\Models\WebhookEndpoint;
 
 class WebhookController extends Controller
 {

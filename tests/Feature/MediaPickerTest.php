@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -90,7 +96,7 @@ it('la recherche filtre par nom de fichier', function () {
 // --- Modèle MediaUpload ---
 
 it('le modèle MediaUpload implémente HasMedia', function () {
-    $upload = new MediaUpload();
+    $upload = new MediaUpload;
     expect($upload)->toBeInstanceOf(\Spatie\MediaLibrary\HasMedia::class);
 });
 

@@ -22,8 +22,8 @@
             </span>
             <input type="text" wire:model.live.debounce.300ms="search"
                    class="form-control form-control-sm"
-                   placeholder="Rechercher un rôle..."
-                   aria-label="Rechercher">
+                   placeholder="{{ __('Rechercher un rôle...') }}"
+                   aria-label="{{ __('Rechercher') }}">
         </div>
         <select wire:model.live="perPage" class="form-select form-select-sm w-auto" aria-label="Éléments par page">
             <option value="10">10 / page</option>
@@ -38,17 +38,17 @@
             <thead>
                 <tr class="border-bottom">
                     <th class="fw-medium user-select-none" style="cursor:pointer" wire:click="sort('name')">
-                        Nom
+                        {{ __('Nom') }}
                         @if($sortBy === 'name')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
                             <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
                         @endif
                     </th>
-                    <th class="fw-medium">Permissions</th>
-                    <th class="fw-medium">Utilisateurs</th>
-                    <th class="fw-medium">Guard</th>
-                    <th class="fw-medium text-center">Actions</th>
+                    <th class="fw-medium">{{ __('Permissions') }}</th>
+                    <th class="fw-medium">{{ __('Utilisateurs') }}</th>
+                    <th class="fw-medium">{{ __('Guard') }}</th>
+                    <th class="fw-medium text-center">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -78,19 +78,19 @@
                                      style="min-width:140px">
                                     <a href="{{ route('admin.roles.show', $role) }}"
                                        class="dropdown-item d-flex align-items-center gap-2">
-                                        <i data-lucide="eye" class="icon-sm text-info"></i> Voir
+                                        <i data-lucide="eye" class="icon-sm text-info"></i> {{ __('Voir') }}
                                     </a>
                                     <a href="{{ route('admin.roles.edit', $role) }}"
                                        class="dropdown-item d-flex align-items-center gap-2">
-                                        <i data-lucide="pencil" class="icon-sm text-success"></i> Modifier
+                                        <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                     </a>
                                     @unless(in_array($role->name, ['super_admin', 'admin']))
                                         <form action="{{ route('admin.roles.destroy', $role) }}" method="POST"
-                                              onsubmit="return confirm('Confirmer la suppression ?')">
+                                              onsubmit="return confirm('{{ __('Confirmer la suppression ?') }}')">
                                             @csrf @method('DELETE')
                                             <button type="submit"
                                                     class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                                <i data-lucide="trash-2" class="icon-sm"></i> Supprimer
+                                                <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
                                             </button>
                                         </form>
                                     @endunless
@@ -102,7 +102,7 @@
                     <tr>
                         <td colspan="5" class="py-5 text-center text-muted">
                             <i data-lucide="shield" class="d-block mx-auto mb-2" style="width:32px;height:32px"></i>
-                            Aucun rôle trouvé
+                            {{ __('Aucun rôle trouvé') }}
                         </td>
                     </tr>
                 @endforelse

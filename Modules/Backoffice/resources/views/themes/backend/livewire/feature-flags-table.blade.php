@@ -8,7 +8,7 @@
             </span>
             <input type="text" wire:model.live.debounce.300ms="search"
                    class="form-control"
-                   placeholder="Rechercher une feature..."
+                   placeholder="{{ __('Rechercher une feature...') }}"
                    aria-label="Rechercher">
         </div>
     </div>
@@ -24,7 +24,7 @@
             <div class="card-header border-bottom border-dashed py-2 px-3">
                 <h6 class="text-muted d-flex align-items-center gap-2 fw-medium mb-0 small">
                     <i data-lucide="flag" class="icon-sm"></i>
-                    Features connues (non activées)
+                    {{ __('Features connues (non activées)') }}
                 </h6>
             </div>
             <div class="card-body py-2 px-3">
@@ -49,9 +49,9 @@
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
-                    <th class="fw-medium py-2 px-2">Nom</th>
-                    <th class="fw-medium py-2 px-2">Conditions</th>
-                    <th class="fw-medium py-2 px-2">Statut</th>
+                    <th class="fw-medium py-2 px-2">{{ __('Nom') }}</th>
+                    <th class="fw-medium py-2 px-2">{{ __('Conditions') }}</th>
+                    <th class="fw-medium py-2 px-2">{{ __('Statut') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,12 +87,12 @@
                                     @if($conditionType === 'always')
                                         <small class="text-muted d-flex align-items-center gap-1">
                                             <i data-lucide="info" class="icon-sm"></i>
-                                            Toujours actif quand activé
+                                            {{ __('Toujours actif quand activé') }}
                                         </small>
                                     @elseif($conditionType === 'percentage')
                                         <div>
                                             <label class="small text-muted d-block mb-1">
-                                                Déploiement : <strong>{{ $conditionConfig['percentage'] ?? 0 }}%</strong>
+                                                {{ __('Déploiement') }} : <strong>{{ $conditionConfig['percentage'] ?? 0 }}%</strong>
                                             </label>
                                             <input type="range" class="form-range" min="0" max="100" step="5"
                                                    wire:model.live="conditionConfig.percentage"
@@ -125,13 +125,13 @@
                                     @elseif($conditionType === 'schedule')
                                         <div class="row g-2">
                                             <div class="col">
-                                                <label class="small text-muted d-block mb-1">Début</label>
+                                                <label class="small text-muted d-block mb-1">{{ __('Début') }}</label>
                                                 <input type="date" class="form-control form-control-sm"
                                                        wire:model="conditionConfig.start_date"
                                                        aria-label="Date de début">
                                             </div>
                                             <div class="col">
-                                                <label class="small text-muted d-block mb-1">Fin</label>
+                                                <label class="small text-muted d-block mb-1">{{ __('Fin') }}</label>
                                                 <input type="date" class="form-control form-control-sm"
                                                        wire:model="conditionConfig.end_date"
                                                        aria-label="Date de fin">
@@ -143,12 +143,12 @@
                                         <button type="button"
                                                 class="btn btn-sm btn-success d-inline-flex align-items-center gap-1"
                                                 wire:click="saveCondition">
-                                            <i data-lucide="check" class="icon-sm"></i> Enregistrer
+                                            <i data-lucide="check" class="icon-sm"></i> {{ __('Enregistrer') }}
                                         </button>
                                         <button type="button"
                                                 class="btn btn-sm btn-light text-muted"
                                                 wire:click="cancelEdit">
-                                            Annuler
+                                            {{ __('Annuler') }}
                                         </button>
                                     </div>
                                 </div>
@@ -169,13 +169,13 @@
                                             @endif
                                         </span>
                                     @else
-                                        <span class="text-muted">Aucune condition</span>
+                                        <span class="text-muted">{{ __('Aucune condition') }}</span>
                                     @endif
                                     <button type="button"
                                             class="btn btn-sm btn-light d-inline-flex align-items-center justify-content-center p-0 text-muted"
                                             style="width:24px;height:24px;"
                                             wire:click="editCondition('{{ $feature->name }}')"
-                                            title="Modifier les conditions">
+                                            title="{{ __('Modifier les conditions') }}">
                                         <i data-lucide="pencil" class="icon-sm"></i>
                                     </button>
                                 </div>
@@ -185,9 +185,9 @@
                             <form action="{{ route('admin.feature-flags.toggle', ['name' => $feature->name]) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="badge {{ $isActive ? 'bg-success' : 'bg-danger' }} border-0 px-2 py-1 fw-semibold"
-                                        title="{{ $isActive ? 'Cliquer pour désactiver' : 'Cliquer pour activer' }}"
+                                        title="{{ $isActive ? __('Cliquer pour désactiver') : __('Cliquer pour activer') }}"
                                         style="cursor:pointer;">
-                                    {{ $isActive ? 'Actif' : 'Inactif' }}
+                                    {{ $isActive ? __('Actif') : __('Inactif') }}
                                 </button>
                             </form>
                         </td>
@@ -196,7 +196,7 @@
                     <tr>
                         <td colspan="3" class="py-5 text-center text-muted">
                             <i data-lucide="flag" class="d-block mb-2 mx-auto text-muted" style="width:36px;height:36px;"></i>
-                            Aucune feature flag configurée
+                            {{ __('Aucune feature flag configurée') }}
                         </td>
                     </tr>
                 @endforelse

@@ -42,17 +42,17 @@ $helpTextsData = [
             'ai'        => 'sparkles',
         ];
         $labels = [
-            'general'   => 'Général',
-            'homepage'  => 'Accueil',
-            'mail'      => 'Courriel',
+            'general'   => __('Général'),
+            'homepage'  => __('Accueil'),
+            'mail'      => __('Courriel'),
             'seo'       => 'SEO',
             'sms'       => 'SMS',
-            'branding'  => 'Apparence',
-            'security'  => 'Sécurité',
+            'branding'  => __('Apparence'),
+            'security'  => __('Sécurité'),
             'push'      => 'Push',
             'blog'      => 'Blog',
-            'retention' => 'Rétention',
-            'legal'     => 'Légal',
+            'retention' => __('Rétention'),
+            'legal'     => __('Légal'),
             'ai'        => 'IA',
         ];
     @endphp
@@ -102,33 +102,33 @@ $helpTextsData = [
                             @endphp
                             <div class="mb-4 pb-4 border-bottom">
                                 <label class="fw-semibold text-body mb-3 d-block">
-                                    <i data-lucide="home" class="icon-sm me-1"></i> Page d'accueil du site
+                                    <i data-lucide="home" class="icon-sm me-1"></i> {{ __("Page d'accueil du site") }}
                                 </label>
-                                <p class="small text-muted mb-3">Choisissez ce qui s'affiche quand un visiteur arrive sur votre site.</p>
+                                <p class="small text-muted mb-3">{{ __("Choisissez ce qui s'affiche quand un visiteur arrive sur votre site.") }}</p>
 
                                 @if($homepageTypeSetting)
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label small">Type d'accueil</label>
+                                        <label class="form-label small">{{ __("Type d'accueil") }}</label>
                                         <select wire:model="values.{{ $homepageTypeSetting->id }}"
                                                 class="form-select"
-                                                aria-label="Type de page d'accueil">
-                                            <option value="landing">Landing page (par défaut)</option>
-                                            <option value="page">Page statique</option>
+                                                aria-label="{{ __('Type de page d\'accueil') }}">
+                                            <option value="landing">{{ __('Landing page (par défaut)') }}</option>
+                                            <option value="page">{{ __('Page statique') }}</option>
                                         </select>
                                     </div>
                                     @if($homepagePageSetting)
                                     <div class="col-md-6">
-                                        <label class="form-label small">Page statique</label>
+                                        <label class="form-label small">{{ __('Page statique') }}</label>
                                         <select wire:model="values.{{ $homepagePageSetting->id }}"
                                                 class="form-select"
-                                                aria-label="Page statique comme accueil">
-                                            <option value="">-- Sélectionner une page --</option>
+                                                aria-label="{{ __('Page statique comme accueil') }}">
+                                            <option value="">{{ __('-- Sélectionner une page --') }}</option>
                                             @foreach($publishedPages as $pg)
                                                 <option value="{{ $pg->id }}">{{ $pg->title }}</option>
                                             @endforeach
                                         </select>
-                                        <small class="text-muted">Visible uniquement si le type est "Page statique".</small>
+                                        <small class="text-muted">{{ __('Visible uniquement si le type est "Page statique".') }}</small>
                                     </div>
                                     @endif
                                 </div>
@@ -138,7 +138,7 @@ $helpTextsData = [
                                     <button wire:click="saveGroup('homepage')"
                                             class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
                                         <i data-lucide="check" class="icon-sm"></i>
-                                        Sauvegarder
+                                        {{ __('Sauvegarder') }}
                                     </button>
                                 </div>
                             </div>
@@ -151,15 +151,15 @@ $helpTextsData = [
                         @if(in_array($groupName, ['branding', 'general']))
                             <div class="text-center py-5">
                                 <i data-lucide="{{ $groupName === 'branding' ? 'palette' : 'type' }}" style="width:48px;height:48px;" class="text-primary mb-3"></i>
-                                <h5 class="fw-semibold mb-2">{{ $groupName === 'branding' ? 'Apparence' : 'Identité du site' }}</h5>
+                                <h5 class="fw-semibold mb-2">{{ $groupName === 'branding' ? __('Apparence') : __('Identité du site') }}</h5>
                                 <p class="text-muted mb-4">
                                     {{ $groupName === 'branding'
-                                        ? 'Les couleurs, polices, logos et options d\'apparence sont gérés depuis la page de personnalisation.'
-                                        : 'Le nom du site et la description sont gérés depuis la page de personnalisation.' }}
+                                        ? __('Les couleurs, polices, logos et options d\'apparence sont gérés depuis la page de personnalisation.')
+                                        : __('Le nom du site et la description sont gérés depuis la page de personnalisation.') }}
                                 </p>
                                 <a href="{{ route('admin.branding.edit') }}" class="btn btn-primary">
                                     <i data-lucide="settings" style="width:16px;height:16px;" class="me-1"></i>
-                                    Ouvrir la personnalisation
+                                    {{ __('Ouvrir la personnalisation') }}
                                 </a>
                             </div>
                             @php $settings = collect(); @endphp
@@ -197,7 +197,7 @@ $helpTextsData = [
                                                        aria-label="{{ ucwords(str_replace(['branding.', '_', '.'], ['', ' ', ' '], $setting->key)) }}">
                                             </div>
                                             <span class="text-muted">
-                                                {{ filter_var($setting->value, FILTER_VALIDATE_BOOLEAN) ? 'Activé' : 'Désactivé' }}
+                                                {{ filter_var($setting->value, FILTER_VALIDATE_BOOLEAN) ? __('Activé') : __('Désactivé') }}
                                             </span>
                                         </div>
                                     @elseif(str_contains($setting->key, 'color'))
@@ -257,9 +257,9 @@ $helpTextsData = [
                                         <select wire:model="values.{{ $setting->id }}"
                                                 class="form-select" style="width:160px;"
                                                 aria-label="Chiffrement mail">
-                                            <option value="tls">TLS (recommandé)</option>
+                                            <option value="tls">{{ __('TLS (recommandé)') }}</option>
                                             <option value="ssl">SSL</option>
-                                            <option value="">Aucun</option>
+                                            <option value="">{{ __('Aucun') }}</option>
                                         </select>
                                     @elseif(str_contains($setting->key, '_model') && str_starts_with($setting->key, 'ai.'))
                                         <select wire:model="values.{{ $setting->id }}"
@@ -267,20 +267,20 @@ $helpTextsData = [
                                                 aria-label="Modèle IA {{ ucwords(str_replace(['ai.', '_'], ['', ' '], $setting->key)) }}">
                                             @php
                                                 $aiModels = [
-                                                    'meta-llama/llama-3.3-70b-instruct:free' => 'Llama 3.3 70B (gratuit, polyvalent)',
-                                                    'qwen/qwen3-coder:free'                  => 'Qwen 3 Coder (gratuit, code)',
-                                                    'deepseek/deepseek-r1-0528:free'         => 'DeepSeek R1 (gratuit, raisonnement)',
-                                                    'google/gemma-3-27b-it:free'             => 'Gemma 3 27B (gratuit, vision)',
-                                                    'arcee-ai/trinity-large-preview:free'    => 'Trinity Large (gratuit, fiable)',
-                                                    'qwen/qwen3-coder-next'                  => 'Qwen 3 Coder Next (0.12$/M, excellent)',
-                                                    'deepseek/deepseek-v3.2-20251201'        => 'DeepSeek V3.2 (0.25$/M, fiable)',
+                                                    'meta-llama/llama-3.3-70b-instruct:free' => __('Llama 3.3 70B (gratuit, polyvalent)'),
+                                                    'qwen/qwen3-coder:free'                  => __('Qwen 3 Coder (gratuit, code)'),
+                                                    'deepseek/deepseek-r1-0528:free'         => __('DeepSeek R1 (gratuit, raisonnement)'),
+                                                    'google/gemma-3-27b-it:free'             => __('Gemma 3 27B (gratuit, vision)'),
+                                                    'arcee-ai/trinity-large-preview:free'    => __('Trinity Large (gratuit, fiable)'),
+                                                    'qwen/qwen3-coder-next'                  => __('Qwen 3 Coder Next (0.12$/M, excellent)'),
+                                                    'deepseek/deepseek-v3.2-20251201'        => __('DeepSeek V3.2 (0.25$/M, fiable)'),
                                                 ];
                                             @endphp
                                             @foreach($aiModels as $modelId => $modelLabel)
                                                 <option value="{{ $modelId }}">{{ $modelLabel }}</option>
                                             @endforeach
                                             @if(!array_key_exists($setting->value ?? '', $aiModels) && !empty($setting->value))
-                                                <option value="{{ $setting->value }}">{{ $setting->value }} (personnalisé)</option>
+                                                <option value="{{ $setting->value }}">{{ $setting->value }} {{ __('(personnalisé)') }}</option>
                                             @endif
                                         </select>
                                     @else
@@ -299,7 +299,7 @@ $helpTextsData = [
                                 <button wire:click="saveGroup('{{ $groupName }}')"
                                         class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
                                     <i data-lucide="check" class="icon-sm"></i>
-                                    Sauvegarder
+                                    {{ __('Sauvegarder') }}
                                 </button>
                             </div>
                         @endif

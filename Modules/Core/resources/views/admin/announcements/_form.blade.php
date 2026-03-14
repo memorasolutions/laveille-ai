@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @php $a = $announcement ?? null; @endphp
 
 <div class="mb-3">

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,11 +13,12 @@ namespace Modules\Pages\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Core\Traits\HasTableSorting;
 use Modules\Pages\Models\StaticPage;
 
 class StaticPagesTable extends Component
 {
-    use WithPagination;
+    use HasTableSorting, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -38,16 +40,6 @@ class StaticPagesTable extends Component
     public function updatingFilterStatus(): void
     {
         $this->resetPage();
-    }
-
-    public function sort(string $column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
     }
 
     public function resetFilters(): void

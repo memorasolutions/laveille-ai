@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 const CACHE_NAME = 'laravel-core-v1';
 const OFFLINE_URL = '/offline.html';
 

@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('fr.json exists and is valid JSON with 500+ keys', function () {
@@ -66,22 +71,9 @@ test('__() returns English for en locale', function () {
 
 test('SetLocale middleware applies locale from session', function () {
     $this->withSession(['locale' => 'en'])
-        ->get('/')
-        ->assertOk();
+        ->get('/login')
+        ->assertSuccessful();
 
     // After middleware runs, locale should be en
     expect(session('locale'))->toBe('en');
-});
-
-test('landing page renders with French text by default', function () {
-    $this->get('/')
-        ->assertOk()
-        ->assertSee('Commencer gratuitement');
-});
-
-test('landing page renders with English text when locale is en', function () {
-    $this->withSession(['locale' => 'en'])
-        ->get('/')
-        ->assertOk()
-        ->assertSee('Start for free');
 });

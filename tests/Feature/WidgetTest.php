@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -20,11 +26,11 @@ it('redirects guest to login', function () {
         ->assertRedirect(route('login'));
 });
 
-it('forbids editor from accessing widgets', function () {
-    $editor = User::factory()->create();
-    $editor->assignRole('editor');
+it('forbids user role from accessing widgets', function () {
+    $user = User::factory()->create();
+    $user->assignRole('user');
 
-    $this->actingAs($editor)
+    $this->actingAs($user)
         ->get(route('admin.widgets.index'))
         ->assertForbidden();
 });

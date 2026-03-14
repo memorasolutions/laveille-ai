@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -58,13 +59,13 @@ class FormController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|unique:forms,slug,' . $form->id,
+            'slug' => 'required|string|unique:forms,slug,'.$form->id,
             'description' => 'nullable|string',
             'is_published' => 'boolean',
             'fields' => 'nullable|array',
             'fields.*.label' => 'required|string|max:255',
             'fields.*.name' => 'required|string|max:255',
-            'fields.*.type' => 'required|string|in:' . implode(',', FormField::TYPES),
+            'fields.*.type' => 'required|string|in:'.implode(',', FormField::TYPES),
             'fields.*.is_required' => 'nullable|boolean',
             'fields.*.sort_order' => 'nullable|integer|min:0',
             'fields.*.options' => 'nullable|string',

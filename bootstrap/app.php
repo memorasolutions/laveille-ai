@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -36,10 +42,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ];
-
-        if (class_exists(\Modules\FrontTheme\Http\Middleware\ThemeMiddleware::class)) {
-            $aliases['theme'] = \Modules\FrontTheme\Http\Middleware\ThemeMiddleware::class;
-        }
 
         $middleware->alias($aliases);
 

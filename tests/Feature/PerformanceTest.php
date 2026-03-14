@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('horizon package is installed', function () {
     expect(class_exists(\Laravel\Horizon\Horizon::class))->toBeTrue();
 });

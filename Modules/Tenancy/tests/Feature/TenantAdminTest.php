@@ -2,25 +2,26 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
 declare(strict_types=1);
 
 use App\Models\User;
+use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 use Modules\Tenancy\Models\Tenant;
-use Spatie\Permission\Models\Permission;
 
 uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
-    Permission::firstOrCreate(['name' => 'manage_tenants', 'guard_name' => 'web']);
+    $this->seed(RolesAndPermissionsSeeder::class);
 });
 
 function tenantAdminUser(): User
 {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_tenants');
+    $user->assignRole('super_admin');
 
     return $user;
 }

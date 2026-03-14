@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -18,7 +21,7 @@ final class ArticleMutations
         $user = auth()->user();
         $locale = app()->getLocale();
 
-        $article = new Article();
+        $article = new Article;
         $article->user_id = $user->id;
         $article->status = $args['status'];
         $article->category_id = $args['category_id'] ?? null;

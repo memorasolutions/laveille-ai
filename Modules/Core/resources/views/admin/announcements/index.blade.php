@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
 
 @section('breadcrumbs')
@@ -13,10 +14,15 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Annonces et changelog</h1>
-        <a href="{{ route('admin.announcements.create') }}" class="btn btn-primary">
-            <i data-lucide="plus" class="icon-sm me-1"></i> Ajouter
-        </a>
+        <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="megaphone" class="icon-md text-primary"></i>{{ __('Annonces et changelog') }}</h4>
+        <div class="d-flex align-items-center gap-2">
+            <x-backoffice::help-modal id="helpAnnouncementsModal" :title="__('Annonces et bannières backoffice')" icon="megaphone" :buttonLabel="__('Aide')">
+                @include('core::admin.announcements._help')
+            </x-backoffice::help-modal>
+            <a href="{{ route('admin.announcements.create') }}" class="btn btn-primary">
+                <i data-lucide="plus" class="icon-sm me-1"></i> {{ __('Ajouter') }}
+            </a>
+        </div>
     </div>
 
     @if(session('success'))

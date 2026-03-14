@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -16,9 +19,14 @@ final class PageMutations
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
+
+        if (! $user->can('create_pages')) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('This action is unauthorized.');
+        }
+
         $locale = app()->getLocale();
 
-        $page = new StaticPage();
+        $page = new StaticPage;
         $page->user_id = $user->id;
         $page->template = $args['template'];
         $page->status = $args['status'];
@@ -37,6 +45,13 @@ final class PageMutations
 
     public function updatePage(mixed $root, array $args): StaticPage
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        if (! $user->can('update_pages')) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('This action is unauthorized.');
+        }
+
         /** @var StaticPage $page */
         $page = StaticPage::findOrFail($args['id']);
         $locale = app()->getLocale();
@@ -72,7 +87,7 @@ final class PageMutations
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
-        if (! $user->can('manage_pages')) {
+        if (! $user->can('delete_pages')) {
             throw new \Illuminate\Auth\Access\AuthorizationException('This action is unauthorized.');
         }
 

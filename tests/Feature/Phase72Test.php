@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -167,13 +173,13 @@ test('feature flags - toggle désactive une feature déjà active (value devient
 
 // === FEATURE FLAGS TABLE LIVEWIRE ===
 
-test('feature flags table - knownFeatures contient les 10 features attendues', function () {
+test('feature flags table - knownFeatures contient tous les flags définis', function () {
     $component = Livewire::test(FeatureFlagsTable::class);
 
     $component->assertSet('knownFeatures', function ($value) {
-        return count($value) === 10
+        return count($value) >= 30
             && in_array('module-blog', $value)
-            && in_array('two-factor-auth', $value)
-            && in_array('export-csv', $value);
+            && in_array('dark-mode-frontend', $value)
+            && in_array('social-login', $value);
     });
 });

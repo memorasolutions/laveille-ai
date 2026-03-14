@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -162,9 +163,9 @@ class DocsCommand extends Command
         $modules = $this->getModules();
         $enabled = count(array_filter($modules, fn ($m) => $m['enabled']));
         $md .= "## 1. Modules\n\n";
-        $md .= "- **Total:** ".count($modules)."\n";
+        $md .= '- **Total:** '.count($modules)."\n";
         $md .= "- **Enabled:** {$enabled}\n";
-        $md .= "- **Disabled:** ".(count($modules) - $enabled)."\n\n";
+        $md .= '- **Disabled:** '.(count($modules) - $enabled)."\n\n";
         $md .= "| Module | Status |\n|--------|--------|\n";
         foreach ($modules as $m) {
             $status = $m['enabled'] ? 'Enabled' : 'Disabled';

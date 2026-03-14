@@ -2,28 +2,18 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Modules\Blog\Livewire\BlogSearch;
 use Modules\Blog\Models\Article;
 
 uses(RefreshDatabase::class);
-
-it('la page blog retourne 200', function () {
-    $this->get('/blog')->assertStatus(200);
-});
-
-it('recherche retourne des articles pertinents', function () {
-    Article::factory()->create([
-        'title' => 'Laravel Guide',
-        'status' => 'published',
-        'published_at' => now(),
-    ]);
-
-    Livewire::test(BlogSearch::class)
-        ->set('search', 'Laravel')
-        ->assertSee('Laravel Guide');
-});
 
 it('recherche vide ne retourne aucun résultat', function () {
     Article::factory()->create([

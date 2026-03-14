@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('error page 503 exists', function () {
     expect(file_exists(resource_path('views/errors/503.blade.php')))->toBeTrue();
 });

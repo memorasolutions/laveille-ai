@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
 
 @section('title', __('Conversations IA'))
@@ -10,6 +11,13 @@
         <li class="breadcrumb-item active" aria-current="page">{{ __('Conversations') }}</li>
     </ol>
 </nav>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="bot" class="icon-md text-primary"></i>{{ __('Conversations IA') }}</h4>
+    <x-backoffice::help-modal id="helpAiConversationsModal" :title="__('Conversations avec l\'assistant IA')" icon="bot" :buttonLabel="__('Aide')">
+        @include('ai::admin.conversations._help')
+    </x-backoffice::help-modal>
+</div>
 
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show" role="alert">

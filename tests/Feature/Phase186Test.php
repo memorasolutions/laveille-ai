@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Search\Services\SearchService;
@@ -172,25 +178,6 @@ test('admin search filtre par type users', function () {
 
     $this->actingAs($admin)
         ->get(route('admin.search', ['q' => 'test', 'type' => 'users']))
-        ->assertOk();
-});
-
-// ============================================================
-// FRONT /search
-// ============================================================
-
-test('page front /search est accessible publiquement', function () {
-    $this->get(route('search.front'))->assertOk();
-});
-
-test('page front /search affiche le formulaire', function () {
-    $this->get(route('search.front'))
-        ->assertOk()
-        ->assertSee('name="q"', false);
-});
-
-test('page front /search avec paramètre q fonctionne', function () {
-    $this->get(route('search.front', ['q' => 'test']))
         ->assertOk();
 });
 

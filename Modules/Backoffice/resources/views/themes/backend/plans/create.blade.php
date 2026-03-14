@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Créer un plan', 'subtitle' => 'SaaS'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Créer un plan'), 'subtitle' => __('SaaS')])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.plans.index') }}">{{ __('Plans') }}</a></li>
@@ -28,7 +28,7 @@
                 {{-- Nom --}}
                 <div class="col-md-6">
                     <label class="form-label fw-medium">
-                        Nom <span class="text-danger">*</span>
+                        {{ __('Nom') }} <span class="text-danger">*</span>
                     </label>
                     <input type="text"
                            class="form-control @error('name') is-invalid @enderror"
@@ -41,7 +41,7 @@
                 {{-- Slug --}}
                 <div class="col-md-6">
                     <label class="form-label fw-medium">
-                        Slug <span class="text-danger">*</span>
+                        {{ __('Slug') }} <span class="text-danger">*</span>
                     </label>
                     <input type="text"
                            class="form-control @error('slug') is-invalid @enderror"
@@ -53,7 +53,7 @@
 
                 {{-- Description --}}
                 <div class="col-12">
-                    <label class="form-label fw-medium">Description</label>
+                    <label class="form-label fw-medium">{{ __('Description') }}</label>
                     <textarea class="form-control"
                               name="description" rows="3">{{ old('description') }}</textarea>
                 </div>
@@ -61,7 +61,7 @@
                 {{-- Prix --}}
                 <div class="col-md-6">
                     <label class="form-label fw-medium">
-                        Prix <span class="text-danger">*</span>
+                        {{ __('Prix') }} <span class="text-danger">*</span>
                     </label>
                     <input type="number" step="0.01" min="0"
                            class="form-control @error('price') is-invalid @enderror"
@@ -73,26 +73,26 @@
 
                 {{-- Devise --}}
                 <div class="col-md-6">
-                    <label class="form-label fw-medium">Devise</label>
+                    <label class="form-label fw-medium">{{ __('Devise') }}</label>
                     <select class="form-select" name="currency">
-                        <option value="CAD" @selected(old('currency', 'CAD') === 'CAD')>CAD - Dollar canadien</option>
-                        <option value="USD" @selected(old('currency', 'CAD') === 'USD')>USD - Dollar américain</option>
-                        <option value="EUR" @selected(old('currency', 'CAD') === 'EUR')>EUR - Euro</option>
-                        <option value="GBP" @selected(old('currency', 'CAD') === 'GBP')>GBP - Livre sterling</option>
-                        <option value="CHF" @selected(old('currency', 'CAD') === 'CHF')>CHF - Franc suisse</option>
+                        <option value="CAD" @selected(old('currency', 'CAD') === 'CAD')>{{ __('CAD - Dollar canadien') }}</option>
+                        <option value="USD" @selected(old('currency', 'CAD') === 'USD')>{{ __('USD - Dollar américain') }}</option>
+                        <option value="EUR" @selected(old('currency', 'CAD') === 'EUR')>{{ __('EUR - Euro') }}</option>
+                        <option value="GBP" @selected(old('currency', 'CAD') === 'GBP')>{{ __('GBP - Livre sterling') }}</option>
+                        <option value="CHF" @selected(old('currency', 'CAD') === 'CHF')>{{ __('CHF - Franc suisse') }}</option>
                     </select>
                 </div>
 
                 {{-- Intervalle --}}
                 <div class="col-md-6">
                     <label class="form-label fw-medium">
-                        Intervalle <span class="text-danger">*</span>
+                        {{ __('Intervalle') }} <span class="text-danger">*</span>
                     </label>
                     <select class="form-select @error('interval') is-invalid @enderror"
                             name="interval" required>
-                        <option value="monthly" {{ old('interval') === 'monthly' ? 'selected' : '' }}>Mensuel</option>
-                        <option value="yearly"  {{ old('interval') === 'yearly'  ? 'selected' : '' }}>Annuel</option>
-                        <option value="one_time" {{ old('interval') === 'one_time' ? 'selected' : '' }}>Paiement unique</option>
+                        <option value="monthly" {{ old('interval') === 'monthly' ? 'selected' : '' }}>{{ __('Mensuel') }}</option>
+                        <option value="yearly"  {{ old('interval') === 'yearly'  ? 'selected' : '' }}>{{ __('Annuel') }}</option>
+                        <option value="one_time" {{ old('interval') === 'one_time' ? 'selected' : '' }}>{{ __('Paiement unique') }}</option>
                     </select>
                     @error('interval')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -101,7 +101,7 @@
 
                 {{-- Jours d'essai --}}
                 <div class="col-md-6">
-                    <label class="form-label fw-medium">Jours d'essai</label>
+                    <label class="form-label fw-medium">{{ __('Jours d\'essai') }}</label>
                     <input type="number" min="0"
                            class="form-control"
                            name="trial_days" value="{{ old('trial_days', 0) }}">
@@ -109,7 +109,7 @@
 
                 {{-- Ordre --}}
                 <div class="col-md-6">
-                    <label class="form-label fw-medium">Ordre</label>
+                    <label class="form-label fw-medium">{{ __('Ordre') }}</label>
                     <input type="number"
                            class="form-control"
                            name="sort_order" value="{{ old('sort_order', 0) }}">
@@ -120,7 +120,7 @@
                     <div class="form-check form-switch d-flex align-items-center gap-3">
                         <input class="form-check-input" type="checkbox" role="switch"
                                name="is_active" value="1" id="is_active" checked>
-                        <label class="form-check-label" for="is_active">Plan actif</label>
+                        <label class="form-check-label" for="is_active">{{ __('Plan actif') }}</label>
                     </div>
                 </div>
 
@@ -128,10 +128,10 @@
 
             <div class="d-flex align-items-center gap-3 mt-4">
                 <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
-                    <i data-lucide="plus"></i> Créer le plan
+                    <i data-lucide="plus"></i> {{ __('Créer le plan') }}
                 </button>
                 <a href="{{ route('admin.plans.index') }}" class="btn btn-sm btn-light d-inline-flex align-items-center gap-2">
-                    <i data-lucide="arrow-left"></i> Retour
+                    <i data-lucide="arrow-left"></i> {{ __('Retour') }}
                 </a>
             </div>
         </form>

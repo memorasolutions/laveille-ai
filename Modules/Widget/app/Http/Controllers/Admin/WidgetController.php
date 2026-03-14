@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -37,8 +38,8 @@ class WidgetController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'zone' => 'required|in:' . implode(',', Widget::ZONES),
-            'type' => 'required|in:' . implode(',', Widget::TYPES),
+            'zone' => 'required|in:'.implode(',', Widget::ZONES),
+            'type' => 'required|in:'.implode(',', Widget::TYPES),
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'settings' => 'nullable|array',
@@ -64,8 +65,8 @@ class WidgetController extends Controller
         $oldZone = $widget->zone;
 
         $validated = $request->validate([
-            'zone' => 'required|in:' . implode(',', Widget::ZONES),
-            'type' => 'required|in:' . implode(',', Widget::TYPES),
+            'zone' => 'required|in:'.implode(',', Widget::ZONES),
+            'type' => 'required|in:'.implode(',', Widget::TYPES),
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'settings' => 'nullable|array',
@@ -95,7 +96,7 @@ class WidgetController extends Controller
     public function reorder(Request $request): JsonResponse
     {
         $request->validate([
-            'zone' => 'required|in:' . implode(',', Widget::ZONES),
+            'zone' => 'required|in:'.implode(',', Widget::ZONES),
             'order' => 'required|array',
             'order.*' => 'integer|exists:widgets,id',
         ]);

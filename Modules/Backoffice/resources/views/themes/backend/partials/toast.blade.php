@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 {{-- Toast container (top-right, auto-dismiss) --}}
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1090;" id="toast-container">
-    @foreach(['success' => ['bg-success', 'check-circle', 'Succès'], 'error' => ['bg-danger', 'alert-circle', 'Erreur'], 'warning' => ['bg-warning', 'alert-triangle', 'Attention'], 'info' => ['bg-info', 'info', 'Information']] as $type => [$bg, $icon, $label])
+    @foreach(['success' => ['bg-success', 'check-circle', __('Succès')], 'error' => ['bg-danger', 'alert-circle', __('Erreur')], 'warning' => ['bg-warning', 'alert-triangle', __('Attention')], 'info' => ['bg-info', 'info', __('Information')]] as $type => [$bg, $icon, $label])
         @if(session($type))
             <div class="toast align-items-center text-white {{ $bg }} border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="4000">
                 <div class="d-flex">
@@ -9,7 +9,7 @@
                         <i data-lucide="{{ $icon }}" class="icon-sm flex-shrink-0"></i>
                         <span>{{ session($type) }}</span>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="{{ __('Fermer') }}"></button>
                 </div>
             </div>
         @endif

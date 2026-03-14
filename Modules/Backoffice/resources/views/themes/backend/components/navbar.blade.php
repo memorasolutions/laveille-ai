@@ -4,7 +4,7 @@
         <nav class="navbar navbar-expand">
             <div class="navbar-collapse d-flex justify-content-between">
                 <div class="header-left">
-                    <div class="dashboard_bar">{{ $title ?? 'Tableau de bord' }}</div>
+                    <div class="dashboard_bar">{{ $title ?? __('Tableau de bord') }}</div>
                     <!-- Livewire search -->
                     @livewire('backoffice-global-search')
                 </div>

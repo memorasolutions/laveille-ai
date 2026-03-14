@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -91,7 +92,7 @@ class CustomFieldDefinition extends Model
             case 'select':
             case 'radio':
                 if (! empty($this->options) && is_array($this->options)) {
-                    $rules[] = 'in:' . implode(',', $this->options);
+                    $rules[] = 'in:'.implode(',', $this->options);
                 }
                 break;
             case 'checkbox':

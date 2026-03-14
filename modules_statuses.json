@@ -12,7 +12,6 @@
     "Export": true,
     "Faq": true,
     "FormBuilder": true,
-    "FrontTheme": true,
     "Health": true,
     "Import": true,
     "Logging": true,
@@ -33,5 +32,7 @@
     "Testimonials": true,
     "Translation": true,
     "Webhooks": true,
-    "Widget": true
+    "Widget": true,
+    "Booking": true,
+    "Roadmap": true
 }

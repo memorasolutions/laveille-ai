@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
@@ -67,17 +73,6 @@ test('digest sends to active subscribers only', function () {
     Notification::assertSentTo($active1, DigestNotification::class);
     Notification::assertSentTo($active2, DigestNotification::class);
     Notification::assertNotSentTo($unsubscribed, DigestNotification::class);
-});
-
-test('digest notification contains article info', function () {
-    $article = Article::factory()->create(['status' => 'published', 'published_at' => now()]);
-    $subscriber = Subscriber::factory()->confirmed()->create();
-
-    $notification = new DigestNotification(collect([$article]));
-    $mail = $notification->toMail($subscriber);
-
-    expect($mail->subject)->toContain('Nouveaux articles');
-    expect($mail->actionUrl)->not->toBeEmpty();
 });
 
 test('digest is scheduled', function () {

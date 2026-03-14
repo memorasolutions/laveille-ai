@@ -2,26 +2,33 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 // --- Static PWA files ---
 
-it('manifest.json exists and is valid JSON', function () {
-    $path = public_path('manifest.json');
-    expect(file_exists($path))->toBeTrue();
+it('manifest.webmanifest route returns valid JSON', function () {
+    $response = $this->get('/manifest.webmanifest');
+    $response->assertStatus(200);
 
-    $json = json_decode(file_get_contents($path), true);
+    $json = json_decode($response->content(), true);
     expect($json)->toBeArray();
 });
 
-it('manifest.json contains required PWA fields', function () {
-    $json = json_decode(file_get_contents(public_path('manifest.json')), true);
+it('manifest.webmanifest contains required PWA fields', function () {
+    $response = $this->get('/manifest.webmanifest');
+    $json = json_decode($response->content(), true);
 
     expect($json)->toHaveKeys(['name', 'short_name', 'start_url', 'display', 'icons'])
         ->and($json['display'])->toBe('standalone')
-        ->and($json['icons'])->toHaveCount(2);
+        ->and(count($json['icons']))->toBeGreaterThanOrEqual(2);
 });
 
 it('offline.html exists', function () {
@@ -46,24 +53,4 @@ it('service-worker.js contains cache and fetch logic', function () {
 it('PWA icons exist', function () {
     expect(file_exists(public_path('icons/icon-192x192.png')))->toBeTrue()
         ->and(file_exists(public_path('icons/icon-512x512.png')))->toBeTrue();
-});
-
-// --- PWA meta tags in layouts ---
-
-it('landing page contains PWA manifest link', function () {
-    $this->get('/')
-        ->assertOk()
-        ->assertSee('rel="manifest"', false);
-});
-
-it('landing page contains theme-color meta', function () {
-    $this->get('/')
-        ->assertOk()
-        ->assertSee('name="theme-color"', false);
-});
-
-it('landing page contains service worker registration', function () {
-    $this->get('/')
-        ->assertOk()
-        ->assertSee('serviceWorker.register', false);
 });

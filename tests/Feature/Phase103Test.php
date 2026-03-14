@@ -2,8 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Modules\Backoffice\Livewire\CommentsTable;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Comment;
 use Spatie\Permission\Models\Role;
@@ -55,7 +63,8 @@ it('le filtre search retourne le bon commentaire', function () {
     Comment::factory()->create(['article_id' => $article->id, 'content' => 'Commentaire rouge unique']);
     Comment::factory()->create(['article_id' => $article->id, 'content' => 'Commentaire bleu unique']);
 
-    $this->actingAs($this->admin)->get('/admin/blog/comments?search=rouge')
+    Livewire::actingAs($this->admin)->test(CommentsTable::class)
+        ->set('search', 'rouge')
         ->assertSee('Commentaire rouge unique')
         ->assertDontSee('Commentaire bleu unique');
 });
@@ -65,7 +74,8 @@ it('le filtre filterStatus fonctionne', function () {
     Comment::factory()->create(['article_id' => $article->id, 'content' => 'Approuve visible', 'status' => 'approved']);
     Comment::factory()->create(['article_id' => $article->id, 'content' => 'Brouillon masque', 'status' => 'pending']);
 
-    $this->actingAs($this->admin)->get('/admin/blog/comments?filterStatus=approved')
+    Livewire::actingAs($this->admin)->test(CommentsTable::class)
+        ->set('filterStatus', 'approved')
         ->assertSee('Approuve visible')
         ->assertDontSee('Brouillon masque');
 });

@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Modules\Core\Models\Announcement;
 
@@ -156,19 +162,6 @@ test('unpublishing clears published_at', function () {
 
     expect($a->fresh()->is_published)->toBeFalse()
         ->and($a->fresh()->published_at)->toBeNull();
-});
-
-// ── Public page test ──
-
-test('public changelog route resolves correctly', function () {
-    Announcement::create(['title' => 'Visible', 'body' => 'Content', 'type' => 'feature', 'is_published' => true, 'published_at' => now()->subDay()]);
-    Announcement::create(['title' => 'Draft Hidden', 'body' => 'Content', 'type' => 'fix', 'is_published' => false]);
-
-    $published = Announcement::published()->get();
-
-    expect($published)->toHaveCount(1)
-        ->and($published->first()->title)->toBe('Visible')
-        ->and(route('announcements.index'))->toEndWith('/changelog');
 });
 
 test('user without permission cannot access admin announcements', function () {

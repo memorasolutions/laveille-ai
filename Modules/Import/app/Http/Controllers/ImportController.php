@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -38,16 +39,16 @@ class ImportController extends Controller
         ]);
 
         $file = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
+        $fileName = time().'_'.$file->getClientOriginalName();
         $file->storeAs('imports', $fileName, 'local');
 
         $format = str_contains($file->getClientOriginalExtension(), 'xls') ? 'xlsx' : 'csv';
-        $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path('imports/' . $fileName);
+        $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path('imports/'.$fileName);
 
         $preview = $this->importService->preview($fullPath, $format);
         $modelType = $request->input('model_type');
         $availableFields = ImportService::FIELD_MAPS[$modelType] ?? [];
-        $filePath = 'imports/' . $fileName;
+        $filePath = 'imports/'.$fileName;
 
         return view('import::admin.preview', compact('preview', 'modelType', 'availableFields', 'filePath', 'format'));
     }

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -23,9 +24,9 @@ class EmailTemplateFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . fake()->unique()->randomNumber(4),
+            'slug' => Str::slug($name).'-'.fake()->unique()->randomNumber(4),
             'subject' => fake()->sentence(),
-            'body_html' => '<p>' . fake()->paragraph() . '</p>',
+            'body_html' => '<p>'.fake()->paragraph().'</p>',
             'variables' => ['user.name', 'user.email', 'app.name'],
             'is_active' => true,
         ];

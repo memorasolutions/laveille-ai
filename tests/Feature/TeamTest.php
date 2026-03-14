@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 // Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 
 declare(strict_types=1);
@@ -7,6 +13,7 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 use Modules\Team\Models\Team;
 use Modules\Team\Models\TeamInvitation;
 use Modules\Team\Services\TeamService;
@@ -15,6 +22,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    $this->seed(RolesAndPermissionsSeeder::class);
     Notification::fake();
 });
 
@@ -23,8 +31,7 @@ beforeEach(function () {
 function makeTeamAdmin(): User
 {
     $user = User::factory()->create();
-    $user->assignRole('admin');
-    $user->givePermissionTo('manage_teams');
+    $user->assignRole('super_admin');
 
     return $user;
 }
@@ -94,9 +101,9 @@ test('TeamService::acceptInvitation rejette les tokens expirés', function () {
     $team = TeamService::create($owner, ['name' => 'Équipe Delta']);
 
     $invitation = TeamInvitation::create([
-        'team_id'    => $team->id,
-        'email'      => 'expired@example.com',
-        'role'       => 'member',
+        'team_id' => $team->id,
+        'email' => 'expired@example.com',
+        'role' => 'member',
         'invited_by' => $owner->id,
         'expires_at' => now()->subDay(),
     ]);
@@ -150,7 +157,7 @@ test('admin peut créer une équipe', function () {
 
     $this->actingAs($admin)
         ->post(route('admin.teams.store'), [
-            'name'        => 'Nouvelle Équipe',
+            'name' => 'Nouvelle Équipe',
             'description' => 'Description test',
         ])
         ->assertRedirect(route('admin.teams.index'))
@@ -175,7 +182,7 @@ test('admin peut modifier une équipe', function () {
 
     $this->actingAs($admin)
         ->put(route('admin.teams.update', $team), [
-            'name'        => 'Équipe Modifiée',
+            'name' => 'Équipe Modifiée',
             'description' => 'Nouvelle description',
         ])
         ->assertRedirect(route('admin.teams.index'))
@@ -203,14 +210,14 @@ test('admin peut inviter un membre', function () {
     $this->actingAs($admin)
         ->post(route('admin.teams.invite', $team), [
             'email' => 'invite@example.com',
-            'role'  => 'member',
+            'role' => 'member',
         ])
         ->assertRedirect()
         ->assertSessionHas('success');
 
     $this->assertDatabaseHas('team_invitations', [
         'team_id' => $team->id,
-        'email'   => 'invite@example.com',
+        'email' => 'invite@example.com',
     ]);
 });
 
@@ -305,9 +312,9 @@ test('invitation expirée retourne isExpired true', function () {
     $team = TeamService::create($owner, ['name' => 'Équipe Expiry']);
 
     $invitation = TeamInvitation::create([
-        'team_id'    => $team->id,
-        'email'      => 'expired@example.com',
-        'role'       => 'member',
+        'team_id' => $team->id,
+        'email' => 'expired@example.com',
+        'role' => 'member',
         'invited_by' => $owner->id,
         'expires_at' => now()->subDay(),
     ]);

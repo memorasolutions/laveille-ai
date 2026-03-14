@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -14,6 +15,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Modules\Auth\Listeners\LogFailedLogin;
 use Modules\Auth\Listeners\LogLoginAttempt;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         Failed::class => [
             LogFailedLogin::class,
+        ],
+        SocialiteWasCalled::class => [
+            \SocialiteProviders\Microsoft\MicrosoftExtendSocialite::class,
+            \SocialiteProviders\Apple\AppleExtendSocialite::class,
+            \SocialiteProviders\LinkedIn\LinkedInExtendSocialite::class,
         ],
     ];
 

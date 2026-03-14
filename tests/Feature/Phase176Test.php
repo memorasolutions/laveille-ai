@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Blog\Models\Article;
@@ -102,7 +108,7 @@ test('empty search shows search form only', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.search'))
         ->assertOk()
-        ->assertDontSee('résultats', false);
+        ->assertDontSee('Résultats pour', false);
 });
 
 test('search returns pages results', function () {

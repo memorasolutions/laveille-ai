@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
 
 @section('title', __('Agent dashboard'))
@@ -10,6 +11,13 @@
         <li class="breadcrumb-item active" aria-current="page">{{ __('Agent dashboard') }}</li>
     </ol>
 </nav>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="headphones" class="icon-md text-primary"></i>{{ __('Dashboard agent') }}</h4>
+    <x-backoffice::help-modal id="helpAgentModal" :title="__('Dashboard agent')" icon="headphones" :buttonLabel="__('Aide')">
+        @include('ai::admin.agent._help')
+    </x-backoffice::help-modal>
+</div>
 
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -39,7 +47,10 @@
                     <small class="text-muted">{{ $conv->created_at->diffForHumans() }}</small>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">{{ $conv->messages->count() }} {{ __('messages') }}</small>
+                    <div>
+                        <small class="text-muted">{{ $conv->messages->count() }} {{ __('messages') }}</small>
+                        <a href="{{ route('admin.ai.agent.show', $conv) }}" class="btn btn-outline-primary btn-sm ms-2"><i data-lucide="eye" style="width:14px;height:14px;"></i></a>
+                    </div>
                     <form action="{{ route('admin.ai.agent.claim', $conv) }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-primary btn-sm">
@@ -71,6 +82,9 @@
                     <small class="text-muted">{{ $conv->updated_at->diffForHumans() }}</small>
                 </div>
 
+                <div class="text-end mb-2">
+                    <a href="{{ route('admin.ai.agent.show', $conv) }}" class="btn btn-outline-primary btn-sm"><i data-lucide="maximize-2" style="width:14px;height:14px;"></i> {{ __('Détail') }}</a>
+                </div>
                 {{-- Last messages preview --}}
                 <div class="bg-light rounded p-2 mb-2" style="max-height:120px;overflow-y:auto;font-size:0.85rem;">
                     @foreach($conv->messages->sortByDesc('created_at')->take(5)->reverse() as $msg)

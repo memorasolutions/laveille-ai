@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 test('HasApiResponse trait exists in Core module', function () {
     expect(trait_exists(Modules\Core\Traits\HasApiResponse::class))->toBeTrue();
 });

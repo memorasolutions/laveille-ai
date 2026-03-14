@@ -1,5 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+declare(strict_types=1);
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 
 // Define your web routes here

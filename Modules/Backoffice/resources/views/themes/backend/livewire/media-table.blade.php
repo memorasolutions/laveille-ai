@@ -11,7 +11,7 @@
     <div class="border rounded-3 mb-4">
         <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
             <i data-lucide="upload-cloud" class="icon-sm text-muted"></i>
-            <h6 class="fw-medium mb-0">Uploader un fichier</h6>
+            <h6 class="fw-medium mb-0">{{ __('Uploader un fichier') }}</h6>
         </div>
         <div class="p-3">
             <div x-data="{ dragover: false }"
@@ -30,14 +30,14 @@
                        class="d-none">
 
                 <i data-lucide="upload-cloud" class="mb-2 text-muted" style="width:40px;height:40px;opacity:.4;"></i>
-                <p class="fw-medium mb-1">Glisser-déposer un fichier ici</p>
-                <p class="small text-muted mb-0">ou cliquer pour parcourir</p>
-                <p class="small text-muted mt-1 mb-0">Images, PDF, Word, Excel, CSV, vidéo. Max 10 Mo.</p>
+                <p class="fw-medium mb-1">{{ __('Glisser-déposer un fichier ici') }}</p>
+                <p class="small text-muted mb-0">{{ __('ou cliquer pour parcourir') }}</p>
+                <p class="small text-muted mt-1 mb-0">{{ __('Images, PDF, Word, Excel, CSV, vidéo. Max 10 Mo.') }}</p>
 
                 <div wire:loading wire:target="file" class="mt-3">
                     <div class="d-flex align-items-center gap-2 text-muted small">
                         <div class="spinner-border spinner-border-sm" role="status"></div>
-                        Chargement du fichier...
+                        {{ __('Chargement du fichier...') }}
                     </div>
                 </div>
 
@@ -55,7 +55,7 @@
                         <span class="spinner-border spinner-border-sm" role="status"></span>
                     </span>
                     <i data-lucide="upload-cloud" class="icon-sm" wire:loading.remove wire:target="upload"></i>
-                    Uploader
+                    {{ __('Uploader') }}
                 </button>
             </div>
         </div>
@@ -64,13 +64,13 @@
     {{-- Filtres --}}
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
         <select wire:model.live="filterType" class="form-select form-select-sm w-auto" aria-label="Filtrer par type">
-            <option value="">Tous les types</option>
-            <option value="image">Images</option>
-            <option value="document">Documents</option>
-            <option value="video">Vidéos</option>
+            <option value="">{{ __('Tous les types') }}</option>
+            <option value="image">{{ __('Images') }}</option>
+            <option value="document">{{ __('Documents') }}</option>
+            <option value="video">{{ __('Vidéos') }}</option>
         </select>
         <select wire:model.live="filterFolder" class="form-select form-select-sm w-auto" aria-label="Filtrer par dossier">
-            <option value="">Tous les dossiers</option>
+            <option value="">{{ __('Tous les dossiers') }}</option>
             @foreach($folders as $folder)
                 <option value="{{ $folder }}">{{ $folder }}</option>
             @endforeach
@@ -81,13 +81,13 @@
             </span>
             <input type="text" wire:model.live.debounce.300ms="search"
                    class="form-control form-control-sm border-start-0"
-                   placeholder="Rechercher un fichier..."
+                   placeholder="{{ __('Rechercher un fichier...') }}"
                    aria-label="Rechercher">
         </div>
         @if($search !== '' || $filterType !== '' || $filterFolder !== '')
             <button wire:click="resetFilters"
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
-                <i data-lucide="refresh-cw" class="icon-sm"></i> Réinitialiser
+                <i data-lucide="refresh-cw" class="icon-sm"></i> {{ __('Réinitialiser') }}
             </button>
         @endif
     </div>
@@ -97,19 +97,19 @@
         <table class="table table-hover">
             <thead>
                 <tr class="border-bottom">
-                    <th class="fw-medium">Aperçu</th>
+                    <th class="fw-medium">{{ __('Aperçu') }}</th>
                     <th class="fw-medium user-select-none" role="button" wire:click="sort('file_name')">
-                        Nom du fichier
+                        {{ __('Nom du fichier') }}
                         @if($sortBy === 'file_name')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
                             <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
                         @endif
                     </th>
-                    <th class="fw-medium">Collection</th>
-                    <th class="fw-medium">Type MIME</th>
+                    <th class="fw-medium">{{ __('Collection') }}</th>
+                    <th class="fw-medium">{{ __('Type MIME') }}</th>
                     <th class="fw-medium user-select-none" role="button" wire:click="sort('size')">
-                        Taille
+                        {{ __('Taille') }}
                         @if($sortBy === 'size')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
@@ -117,14 +117,14 @@
                         @endif
                     </th>
                     <th class="fw-medium user-select-none" role="button" wire:click="sort('created_at')">
-                        Date
+                        {{ __('Date') }}
                         @if($sortBy === 'created_at')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
                             <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
                         @endif
                     </th>
-                    <th class="fw-medium text-center">Actions</th>
+                    <th class="fw-medium text-center">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -183,12 +183,12 @@
                                      style="z-index:50;min-width:140px;">
                                     <button wire:click="editMedia({{ $item->id }})"
                                             class="dropdown-item d-flex align-items-center gap-2">
-                                        <i data-lucide="pencil" class="icon-sm"></i> Métadonnées
+                                        <i data-lucide="pencil" class="icon-sm"></i> {{ __('Métadonnées') }}
                                     </button>
                                     <button wire:click="deleteMedia({{ $item->id }})"
-                                            wire:confirm="Supprimer ce fichier définitivement ?"
+                                            wire:confirm="{{ __('Supprimer ce fichier définitivement ?') }}"
                                             class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                        <i data-lucide="trash-2" class="icon-sm"></i> Supprimer
+                                        <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
                                     </button>
                                 </div>
                             </div>
@@ -198,7 +198,7 @@
                     <tr>
                         <td colspan="7" class="py-5 text-center text-muted">
                             <i data-lucide="image" class="d-block mx-auto mb-2 text-muted" style="width:32px;height:32px;opacity:.4;"></i>
-                            Aucun média dans la bibliothèque
+                            {{ __('Aucun média dans la bibliothèque') }}
                         </td>
                     </tr>
                 @endforelse
@@ -215,44 +215,44 @@
         <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="z-index:1050;background:rgba(0,0,0,.5);">
             <div class="card shadow-lg" style="width:100%;max-width:520px;">
                 <div class="card-header d-flex align-items-center justify-content-between py-3">
-                    <h6 class="mb-0 fw-semibold">Modifier les métadonnées</h6>
+                    <h6 class="mb-0 fw-semibold">{{ __('Modifier les métadonnées') }}</h6>
                     <button type="button" wire:click="cancelEdit" class="btn-close btn-close-sm" aria-label="Fermer"></button>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label" for="editTitle">Titre</label>
-                        <input type="text" id="editTitle" class="form-control" wire:model="editTitle" placeholder="Titre du média">
+                        <label class="form-label" for="editTitle">{{ __('Titre') }}</label>
+                        <input type="text" id="editTitle" class="form-control" wire:model="editTitle" placeholder="{{ __('Titre du média') }}">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" for="editAltText">Texte alternatif</label>
-                        <input type="text" id="editAltText" class="form-control" wire:model="editAltText" placeholder="Description de l'image">
-                        <div class="form-text">Décrit l'image pour l'accessibilité et le SEO.</div>
+                        <label class="form-label" for="editAltText">{{ __('Texte alternatif') }}</label>
+                        <input type="text" id="editAltText" class="form-control" wire:model="editAltText" placeholder="{{ __('Description de l\'image') }}">
+                        <div class="form-text">{{ __('Décrit l\'image pour l\'accessibilité et le SEO.') }}</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" for="editCaption">Légende</label>
-                        <input type="text" id="editCaption" class="form-control" wire:model="editCaption" placeholder="Légende visible sous l'image">
+                        <label class="form-label" for="editCaption">{{ __('Légende') }}</label>
+                        <input type="text" id="editCaption" class="form-control" wire:model="editCaption" placeholder="{{ __('Légende visible sous l\'image') }}">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" for="editFolder">Dossier</label>
-                        <input type="text" id="editFolder" class="form-control" wire:model="editFolder" placeholder="Ex: Photos, Logos, Documents..." list="folderSuggestions">
+                        <label class="form-label" for="editFolder">{{ __('Dossier') }}</label>
+                        <input type="text" id="editFolder" class="form-control" wire:model="editFolder" placeholder="{{ __('Ex: Photos, Logos, Documents...') }}" list="folderSuggestions">
                         <datalist id="folderSuggestions">
                             @foreach($folders as $folder)
                                 <option value="{{ $folder }}">
                             @endforeach
                         </datalist>
-                        <div class="form-text">Classez vos médias par dossier pour mieux les organiser.</div>
+                        <div class="form-text">{{ __('Classez vos médias par dossier pour mieux les organiser.') }}</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" for="editDescription">Description</label>
-                        <textarea id="editDescription" class="form-control" rows="3" wire:model="editDescription" placeholder="Description détaillée (usage interne)"></textarea>
+                        <label class="form-label" for="editDescription">{{ __('Description') }}</label>
+                        <textarea id="editDescription" class="form-control" rows="3" wire:model="editDescription" placeholder="{{ __('Description détaillée (usage interne)') }}"></textarea>
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-end gap-2 py-3">
-                    <button type="button" class="btn btn-sm btn-light" wire:click="cancelEdit" wire:loading.attr="disabled">Annuler</button>
+                    <button type="button" class="btn btn-sm btn-light" wire:click="cancelEdit" wire:loading.attr="disabled">{{ __('Annuler') }}</button>
                     <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2" wire:click="updateMedia" wire:loading.attr="disabled">
                         <span wire:loading wire:target="updateMedia"><span class="spinner-border spinner-border-sm" role="status"></span></span>
                         <span wire:loading.remove wire:target="updateMedia"><i data-lucide="check" class="icon-sm"></i></span>
-                        Enregistrer
+                        {{ __('Enregistrer') }}
                     </button>
                 </div>
             </div>

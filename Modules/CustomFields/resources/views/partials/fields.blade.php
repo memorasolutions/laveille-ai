@@ -10,7 +10,7 @@
 @if($definitions->isNotEmpty())
 <div class="card grid-margin">
     <div class="card-header">
-        <h6 class="card-title mb-0">Champs personnalisés</h6>
+        <h6 class="card-title mb-0">{{ __('Champs personnalisés') }}</h6>
     </div>
     <div class="card-body">
         @foreach($definitions as $def)
@@ -27,7 +27,7 @@
                         @break
                     @case('select')
                         <select name="custom_fields[{{ $def->key }}]" id="cf_{{ $def->key }}" class="form-select" {{ $def->is_required ? 'required' : '' }}>
-                            <option value="">Choisir...</option>
+                            <option value="">{{ __('Choisir...') }}</option>
                             @foreach(($def->options ?? []) as $opt)
                                 <option value="{{ $opt }}" {{ $val == $opt ? 'selected' : '' }}>{{ $opt }}</option>
                             @endforeach

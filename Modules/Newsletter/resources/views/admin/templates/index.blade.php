@@ -2,13 +2,19 @@
 @extends('backoffice::layouts.admin', ['title' => 'Templates marketing', 'subtitle' => 'Newsletter'])
 
 @section('content')
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="file-text" class="icon-md text-primary"></i>{{ __('Templates newsletter') }}</h4>
+    <x-backoffice::help-modal id="helpNewsletterTemplatesModal" :title="__('Templates newsletter')" icon="file-text" :buttonLabel="__('Aide')">
+        @include('newsletter::admin.templates._help')
+    </x-backoffice::help-modal>
+</div>
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <h6 class="mb-0">Templates marketing</h6>
+                <h6 class="mb-0">{{ __('Templates marketing') }}</h6>
                 <a href="{{ route('admin.newsletter.templates.create') }}" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
-                    <i data-lucide="plus"></i> Nouveau template
+                    <i data-lucide="plus"></i> {{ __('Nouveau template') }}
                 </a>
             </div>
             <div class="card-body">

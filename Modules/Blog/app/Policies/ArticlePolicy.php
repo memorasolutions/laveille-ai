@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -16,31 +17,31 @@ class ArticlePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('manage_articles');
+        return $user->can('view_articles');
     }
 
     public function view(User $user, Article $article): bool
     {
-        return $user->can('manage_articles') || $user->id === $article->user_id;
+        return $user->can('view_articles') || $user->id === $article->user_id;
     }
 
     public function create(User $user): bool
     {
-        return $user->can('manage_articles');
+        return $user->can('create_articles');
     }
 
     public function update(User $user, Article $article): bool
     {
-        return $user->can('manage_articles') || $user->id === $article->user_id;
+        return $user->can('update_articles') || $user->id === $article->user_id;
     }
 
     public function delete(User $user, Article $article): bool
     {
-        return $user->can('manage_articles') || $user->id === $article->user_id;
+        return $user->can('delete_articles') || $user->id === $article->user_id;
     }
 
     public function publish(User $user, Article $article): bool
     {
-        return $user->can('manage_articles');
+        return $user->can('update_articles');
     }
 }

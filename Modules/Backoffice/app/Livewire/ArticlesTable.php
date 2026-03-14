@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,17 +13,18 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Modules\Core\Traits\HasBulkActions;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
 use Modules\Blog\States\ArchivedArticleState;
 use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
+use Modules\Core\Traits\HasBulkActions;
+use Modules\Core\Traits\HasTableSorting;
 use Spatie\ModelStates\Exceptions\CouldNotPerformTransition;
 
 class ArticlesTable extends Component
 {
-    use HasBulkActions, WithPagination;
+    use HasBulkActions, HasTableSorting, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -81,16 +83,6 @@ class ArticlesTable extends Component
             $this->dispatch('toast', type: 'success', message: "Article « {$article->title} » → {$status}.");
         } catch (CouldNotPerformTransition) {
             $this->dispatch('toast', type: 'error', message: "Transition vers « {$status} » non autorisée.");
-        }
-    }
-
-    public function sort(string $column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
         }
     }
 

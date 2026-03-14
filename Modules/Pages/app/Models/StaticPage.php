@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -10,18 +11,18 @@ declare(strict_types=1);
 namespace Modules\Pages\Models;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Mews\Purifier\Facades\Purifier;
 use Laravel\Scout\Searchable;
-use Modules\CustomFields\Traits\HasCustomFields;
-use Modules\Pages\Database\Factories\StaticPageFactory;
+use Mews\Purifier\Facades\Purifier;
 use Modules\Core\Traits\HasRevisions;
 use Modules\Core\Traits\HasScheduledPublishing;
+use Modules\CustomFields\Traits\HasCustomFields;
+use Modules\Pages\Database\Factories\StaticPageFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\Translatable\HasTranslations;
 
@@ -70,10 +71,10 @@ class StaticPage extends Model
     ];
 
     public const TEMPLATES = [
-        'default'    => 'Standard',
+        'default' => 'Standard',
         'full-width' => 'Pleine largeur',
-        'sidebar'    => 'Avec barre latérale',
-        'landing'    => 'Page d\'atterrissage',
+        'sidebar' => 'Avec barre latérale',
+        'landing' => 'Page d\'atterrissage',
     ];
 
     public const STATUS_DRAFT = 'draft';

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -55,7 +56,7 @@ test('updateProfile updates name and bio', function () {
 // Article mutations
 // ============================================================
 
-test('createArticle requires auth and manage_articles permission', function () {
+test('createArticle requires auth and create_articles permission', function () {
     // Without auth
     $response = $this->graphQL('
         mutation {
@@ -76,7 +77,7 @@ test('createArticle requires auth and manage_articles permission', function () {
 
 test('createArticle creates article successfully', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_articles');
+    $user->givePermissionTo('create_articles');
 
     $response = $this->actingAs($user, 'sanctum')->graphQL('
         mutation {
@@ -100,7 +101,7 @@ test('createArticle creates article successfully', function () {
 
 test('updateArticle updates article title', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_articles');
+    $user->givePermissionTo('update_articles');
 
     $article = Article::factory()->published()->for($user, 'user')->create();
 
@@ -118,7 +119,7 @@ test('updateArticle updates article title', function () {
 
 test('deleteArticle soft-deletes article', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_articles');
+    $user->givePermissionTo('delete_articles');
 
     $article = Article::factory()->for($user, 'user')->create();
 
@@ -136,7 +137,7 @@ test('deleteArticle soft-deletes article', function () {
 // Page mutations
 // ============================================================
 
-test('createPage requires manage_pages permission', function () {
+test('createPage requires create_pages permission', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user, 'sanctum')->graphQL('
@@ -152,7 +153,7 @@ test('createPage requires manage_pages permission', function () {
 
 test('createPage creates page successfully', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_pages');
+    $user->givePermissionTo('create_pages');
 
     $response = $this->actingAs($user, 'sanctum')->graphQL('
         mutation {
@@ -176,7 +177,7 @@ test('createPage creates page successfully', function () {
 
 test('updatePage updates page title', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_pages');
+    $user->givePermissionTo('update_pages');
 
     $page = StaticPage::factory()->published()->for($user, 'user')->create();
 
@@ -194,7 +195,7 @@ test('updatePage updates page title', function () {
 
 test('deletePage soft-deletes page', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_pages');
+    $user->givePermissionTo('delete_pages');
 
     $page = StaticPage::factory()->for($user, 'user')->create();
 
@@ -214,7 +215,7 @@ test('deletePage soft-deletes page', function () {
 
 test('createArticle fails validation with empty title', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('manage_articles');
+    $user->givePermissionTo('create_articles');
 
     $response = $this->actingAs($user, 'sanctum')->graphQL('
         mutation {

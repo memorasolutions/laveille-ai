@@ -1,12 +1,12 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'API Tokens', 'subtitle' => 'Profil'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Jetons API'), 'subtitle' => __('Profil')])
 
 @section('breadcrumbs')
 <nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.profile') }}">Profil</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Jetons API</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.profile') }}">{{ __('Profil') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Jetons API') }}</li>
     </ol>
 </nav>
 @endsection

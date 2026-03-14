@@ -1,3 +1,4 @@
+# Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 .PHONY: install dev test test-coverage lint lint-check analyse rector rector-fix seed migrate fresh cache cache-clear horizon telescope docker-up docker-down docker-build deploy ide-helper check check-quick logs e2e setup-hooks
 
 install:

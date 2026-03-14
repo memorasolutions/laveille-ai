@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Revenus', 'subtitle' => 'Tableau de bord SaaS'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Revenus'), 'subtitle' => __('Tableau de bord SaaS')])
 
 @section('content')
 
@@ -9,6 +9,13 @@
         <li class="breadcrumb-item active" aria-current="page">{{ __('Revenus') }}</li>
     </ol>
 </nav>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="trending-up" class="icon-md text-primary"></i>{{ __('Revenus') }}</h4>
+    <x-backoffice::help-modal id="helpRevenueModal" :title="__('Revenus & abonnements')" icon="trending-up" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.revenue._help')
+    </x-backoffice::help-modal>
+</div>
 
 {{-- KPI Cards --}}
 <div class="row mb-4">

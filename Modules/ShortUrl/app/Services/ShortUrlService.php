@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 declare(strict_types=1);
 
 namespace Modules\ShortUrl\Services;
@@ -73,13 +79,13 @@ class ShortUrlService
 
         ShortUrlClick::create([
             'short_url_id' => $shortUrl->id,
-            'ip_address'   => $request->ip(),
-            'referrer'     => $request->header('referer'),
-            'user_agent'   => $userAgent,
-            'device_type'  => $deviceType,
-            'browser'      => $browser,
-            'os'           => $os,
-            'clicked_at'   => now(),
+            'ip_address' => $request->ip(),
+            'referrer' => $request->header('referer'),
+            'user_agent' => $userAgent,
+            'device_type' => $deviceType,
+            'browser' => $browser,
+            'os' => $os,
+            'clicked_at' => now(),
         ]);
 
         $shortUrl->incrementClicks();
@@ -93,7 +99,7 @@ class ShortUrlService
         $dateThreshold = now()->subDays($days);
 
         return [
-            'total_clicks'  => $shortUrl->clicks_count,
+            'total_clicks' => $shortUrl->clicks_count,
             'clicks_by_day' => (clone $baseQuery)
                 ->where('clicked_at', '>=', $dateThreshold)
                 ->selectRaw('DATE(clicked_at) as date, COUNT(*) as count')
@@ -109,19 +115,19 @@ class ShortUrlService
                 ->limit(10)
                 ->get()
                 ->toArray(),
-            'devices'       => (clone $baseQuery)
+            'devices' => (clone $baseQuery)
                 ->selectRaw('device_type, COUNT(*) as count')
                 ->groupBy('device_type')
                 ->get()
                 ->toArray(),
-            'browsers'      => (clone $baseQuery)
+            'browsers' => (clone $baseQuery)
                 ->selectRaw('browser, COUNT(*) as count')
                 ->groupBy('browser')
                 ->orderByDesc('count')
                 ->limit(10)
                 ->get()
                 ->toArray(),
-            'countries'     => (clone $baseQuery)
+            'countries' => (clone $baseQuery)
                 ->selectRaw('country_code, COUNT(*) as count')
                 ->groupBy('country_code')
                 ->orderByDesc('count')

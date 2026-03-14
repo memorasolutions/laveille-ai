@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 import { test, expect, Page } from '@playwright/test';
 
 const E2E_PASSWORD = 'e2e-test-password';

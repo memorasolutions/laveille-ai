@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -23,15 +24,17 @@ use Modules\Team\Traits\HasTeams;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
+use Spatie\LaravelPasskeys\Models\Concerns\InteractsWithPasskeys;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
 #[ObservedBy(UserObserver::class)]
-class User extends Authenticatable implements HasMedia, MustVerifyEmail, UserInterface
+class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyEmail, UserInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Billable, HasApiTokens, HasFactory, HasPushSubscriptions, HasRoles, HasTeams, InteractsWithMedia, LogsActivity, Notifiable, Searchable;
+    use Billable, HasApiTokens, HasFactory, HasPushSubscriptions, HasRoles, HasTeams, InteractsWithMedia, InteractsWithPasskeys, LogsActivity, Notifiable, Searchable;
 
     /**
      * @return array<string>

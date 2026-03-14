@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -35,3 +36,11 @@ Route::get('/health', function () {
 Route::middleware(['force-json', 'throttle:api'])
     ->prefix('v1')
     ->group(base_path('routes/api/v1.php'));
+
+// Privacy & consent API (no auth required)
+Route::middleware(['throttle:60,1'])->prefix('privacy')->group(function () {
+    Route::post('/consent', [\App\Http\Controllers\Api\ConsentController::class, 'store']);
+    Route::get('/consent/{token}', [\App\Http\Controllers\Api\ConsentController::class, 'show']);
+    Route::get('/cookie-list', [\App\Http\Controllers\Api\ConsentController::class, 'cookieList']);
+    Route::post('/rights-request', [\App\Http\Controllers\Api\RightsRequestController::class, 'store']);
+});

@@ -1,25 +1,30 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
-@section('title', 'Widgets')
+@section('title', __('Widgets'))
 
 @section('content')
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Widgets</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Widgets') }}</li>
     </ol>
 </nav>
-<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
-    <h4 class="mb-3 mb-md-0">Widgets</h4>
-    <a href="{{ route('admin.widgets.create') }}" class="btn btn-primary btn-icon-text">
-        <i class="btn-icon-prepend" data-lucide="plus"></i> Nouveau widget
-    </a>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="layout-grid" class="icon-md text-primary"></i>{{ __('Widgets') }}</h4>
+    <div class="d-flex gap-2">
+        <x-backoffice::help-modal id="helpWidgetsModal" :title="__('Qu\'est-ce qu\'un widget ?')" icon="layout-grid" :buttonLabel="__('Aide')">
+            @include('widget::admin._help')
+        </x-backoffice::help-modal>
+        <a href="{{ route('admin.widgets.create') }}" class="btn btn-primary btn-icon-text">
+            <i class="btn-icon-prepend" data-lucide="plus"></i> {{ __('Nouveau widget') }}
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Fermer') }}"></button>
     </div>
 @endif
 
@@ -35,7 +40,7 @@
                     @if($widgets->isEmpty())
                         <div class="text-center py-4 text-muted">
                             <i data-lucide="layout" style="width:32px;height:32px;" class="mb-2 d-block mx-auto"></i>
-                            Aucun widget
+                            {{ __('Aucun widget') }}
                         </div>
                     @else
                         <ul class="list-group list-group-flush sortable-zone" id="zone-{{ $zone }}">
@@ -49,12 +54,12 @@
                                         </div>
                                     </div>
                                     <div class="d-flex gap-1">
-                                        <a href="{{ route('admin.widgets.edit', $widget) }}" class="btn btn-sm btn-outline-warning p-1" title="Modifier">
+                                        <a href="{{ route('admin.widgets.edit', $widget) }}" class="btn btn-sm btn-outline-warning p-1" title="{{ __('Modifier') }}">
                                             <i data-lucide="edit" style="width:14px;height:14px;"></i>
                                         </a>
                                         <form action="{{ route('admin.widgets.destroy', $widget) }}" method="POST" class="d-inline">
                                             @csrf @method('DELETE')
-                                            <button type="button" class="btn btn-sm btn-outline-danger p-1" onclick="if(confirm('Supprimer ce widget ?')) this.form.submit()" title="Supprimer">
+                                            <button type="button" class="btn btn-sm btn-outline-danger p-1" onclick="if(confirm('{{ __("Supprimer ce widget ?") }}')) this.form.submit()" title="{{ __('Supprimer') }}">
                                                 <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
                                             </button>
                                         </form>

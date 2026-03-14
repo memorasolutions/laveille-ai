@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * E2E test user seeder - run via: php artisan tinker tests/e2e/seed-e2e-users.php
  * Or: php tests/e2e/seed-e2e-users.php (with Laravel bootstrap)
@@ -7,8 +9,14 @@
  * Creates/updates 4 test users with known passwords for Playwright E2E tests.
  */
 
-require __DIR__ . '/../../vendor/autoload.php';
-$app = require __DIR__ . '/../../bootstrap/app.php';
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
+require __DIR__.'/../../vendor/autoload.php';
+$app = require __DIR__.'/../../bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 use App\Models\User;

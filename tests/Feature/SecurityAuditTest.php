@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Models\User;
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Blog\Models\Article;
 use Modules\SEO\Services\JsonLdService;
 
 uses(RefreshDatabase::class);
@@ -55,25 +59,6 @@ test('json-ld service produces valid json', function () {
     $decoded = json_decode($jsonString);
     expect($decoded)->not->toBeNull()
         ->and($decoded->headline)->toContain('Test Article');
-});
-
-test('blog comment route is rate limited', function () {
-    $user = User::factory()->create();
-    $article = Article::factory()->published()->create();
-
-    $this->actingAs($user);
-
-    for ($i = 0; $i < 6; $i++) {
-        $this->post(route('blog.comments.store', ['article' => $article->slug]), [
-            'content' => 'Test comment ' . $i,
-        ]);
-    }
-
-    $response = $this->post(route('blog.comments.store', ['article' => $article->slug]), [
-        'content' => 'Test comment overflow',
-    ]);
-
-    $response->assertStatus(429);
 });
 
 test('crud command stub uses validated not all', function () {

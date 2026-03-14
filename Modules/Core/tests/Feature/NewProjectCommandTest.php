@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
@@ -47,7 +53,7 @@ test('core:new-project has correct module constants', function () {
 
     expect($core)->toBeArray()
         ->toContain('Auth', 'Core', 'Settings', 'RolesPermissions', 'Backoffice')
-        ->toHaveCount(20);
+        ->toHaveCount(19);
 
     expect($business)->toBeArray()
         ->toHaveKeys(['blog', 'newsletter', 'faq', 'testimonials', 'widget', 'formbuilder', 'customfields'])

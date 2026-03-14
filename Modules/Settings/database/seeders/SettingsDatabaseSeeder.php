@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -111,6 +112,19 @@ class SettingsDatabaseSeeder extends Seeder
             ['group' => 'ai', 'key' => 'ai.moderation_threshold', 'value' => '0.7', 'type' => 'number', 'description' => 'Seuil de confiance pour la modération automatique (0-1)'],
             ['group' => 'ai', 'key' => 'ai.rag_enabled', 'value' => 'true', 'type' => 'boolean', 'description' => 'Activer le RAG (contexte FAQ/Pages/Articles) pour le chatbot'],
             ['group' => 'ai', 'key' => 'ai.chatbot_welcome_message', 'value' => 'Bonjour ! Comment puis-je vous aider ?', 'type' => 'string', 'description' => 'Message d\'accueil du chatbot'],
+
+            // Chatbot - branding
+            ['group' => 'ai', 'key' => 'ai.chatbot_name', 'value' => 'Assistant IA', 'type' => 'string', 'description' => 'Nom affiché du chatbot'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_avatar_url', 'value' => '', 'type' => 'string', 'description' => 'URL de l\'avatar du chatbot (laisser vide pour icône par défaut)'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_primary_color', 'value' => '#487FFF', 'type' => 'string', 'description' => 'Couleur principale du widget chatbot'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_position', 'value' => 'bottom-right', 'type' => 'string', 'description' => 'Position du widget (bottom-right, bottom-left)'],
+
+            // Chatbot - fonctionnalités
+            ['group' => 'ai', 'key' => 'ai.chatbot_lead_capture_enabled', 'value' => 'true', 'type' => 'boolean', 'description' => 'Activer la capture de leads dans le chatbot'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_agent_handoff_enabled', 'value' => 'false', 'type' => 'boolean', 'description' => 'Permettre le transfert vers un agent humain'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_attachments_enabled', 'value' => 'false', 'type' => 'boolean', 'description' => 'Permettre l\'envoi de fichiers dans le chat'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_canned_replies_enabled', 'value' => 'false', 'type' => 'boolean', 'description' => 'Activer les réponses prédéfinies pour les agents'],
+            ['group' => 'ai', 'key' => 'ai.chatbot_presence_enabled', 'value' => 'false', 'type' => 'boolean', 'description' => 'Afficher les indicateurs de frappe et accusés de lecture'],
         ];
 
         foreach ($defaults as $setting) {

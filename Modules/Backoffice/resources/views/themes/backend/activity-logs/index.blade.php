@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => "Journaux d'activité", 'subtitle' => 'Liste'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __("Journaux d'activité"), 'subtitle' => __('Liste')])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __("Journal d'activité") }}</li>
@@ -14,6 +14,9 @@
     <div class="card-header py-3 px-4 border-bottom">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="scroll-text" class="icon-md text-primary"></i>{{ __("Journaux d'activité") }}</h4>
+            <x-backoffice::help-modal id="helpActivityLogsModal" :title="__('Journal d\'activité')" icon="scroll-text" :buttonLabel="__('Aide')">
+                @include('backoffice::themes.backend.activity-logs._help')
+            </x-backoffice::help-modal>
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <a href="{{ route('admin.activity-logs.export') }}"
                    class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-2">

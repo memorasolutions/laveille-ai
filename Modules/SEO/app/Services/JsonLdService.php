@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -17,7 +18,7 @@ final class JsonLdService
             '@type' => 'Organization',
             'name' => config('app.name'),
             'url' => config('app.url'),
-            'logo' => config('app.url') . '/logo.png',
+            'logo' => config('app.url').'/logo.png',
         ];
     }
 
@@ -29,7 +30,7 @@ final class JsonLdService
             'url' => config('app.url'),
             'potentialAction' => [
                 '@type' => 'SearchAction',
-                'target' => config('app.url') . '/search?q={search_term_string}',
+                'target' => config('app.url').'/search?q={search_term_string}',
                 'query-input' => 'required name=search_term_string',
             ],
         ];
@@ -116,6 +117,6 @@ final class JsonLdService
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP
         );
 
-        return '<script type="application/ld+json">' . $json . '</script>';
+        return '<script type="application/ld+json">'.$json.'</script>';
     }
 }

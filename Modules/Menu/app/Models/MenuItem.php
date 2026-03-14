@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -20,6 +21,7 @@ use Modules\Menu\Database\Factories\MenuItemFactory;
 class MenuItem extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'menu_id',
         'parent_id',
@@ -86,7 +88,7 @@ class MenuItem extends Model
             return $this->children->contains(fn (self $child) => $child->isActive());
         }
 
-        return request()->fullUrlIs(url($resolved) . '*');
+        return request()->fullUrlIs(url($resolved).'*');
     }
 
     protected static function newFactory(): MenuItemFactory

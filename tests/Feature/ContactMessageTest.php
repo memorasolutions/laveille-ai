@@ -2,53 +2,21 @@
 
 declare(strict_types=1);
 
-use App\Mail\ContactMail;
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\ContactMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->admin = User::factory()->create();
     $this->admin->assignRole('super_admin');
-});
-
-// ── Persistance en DB ──
-
-it('stocke le message en base lors de la soumission du formulaire', function () {
-    Mail::fake();
-
-    $this->post('/contact', [
-        'name' => 'Marie Dupont',
-        'email' => 'marie@example.com',
-        'subject' => 'Demande info',
-        'message' => 'Bonjour, je voudrais plus de détails sur vos services.',
-    ])->assertSessionHas('success');
-
-    $this->assertDatabaseHas('contact_messages', [
-        'name' => 'Marie Dupont',
-        'email' => 'marie@example.com',
-        'subject' => 'Demande info',
-        'status' => 'new',
-    ]);
-
-    Mail::assertQueued(ContactMail::class);
-});
-
-it('enregistre l\'adresse IP du visiteur', function () {
-    Mail::fake();
-
-    $this->post('/contact', [
-        'name' => 'Test IP',
-        'email' => 'ip@example.com',
-        'subject' => 'Test IP',
-        'message' => 'Message pour tester la capture IP du visiteur.',
-    ]);
-
-    $msg = ContactMessage::where('email', 'ip@example.com')->first();
-    expect($msg->ip_address)->not->toBeNull();
 });
 
 // ── Admin : index ──

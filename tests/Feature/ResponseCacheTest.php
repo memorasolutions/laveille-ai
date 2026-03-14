@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
 use Modules\Blog\Models\Comment;
@@ -47,18 +53,4 @@ test('response cache middleware is registered', function () {
     $middlewareAliases = app(\Illuminate\Routing\Router::class)->getMiddleware();
     expect($middlewareAliases)->toHaveKey('cacheResponse');
     expect($middlewareAliases)->toHaveKey('doNotCacheResponse');
-});
-
-test('cache response middleware applied to home route', function () {
-    $route = app('router')->getRoutes()->getByName('home');
-    expect($route)->not->toBeNull();
-    $middleware = $route->gatherMiddleware();
-    expect($middleware)->toContain('cacheResponse');
-});
-
-test('cache response middleware applied to blog index', function () {
-    $route = app('router')->getRoutes()->getByName('blog.index');
-    expect($route)->not->toBeNull();
-    $middleware = $route->gatherMiddleware();
-    expect($middleware)->toContain('cacheResponse');
 });

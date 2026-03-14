@@ -135,7 +135,7 @@
             <h5 class="fw-semibold mb-2">{{ __('Choisissez votre plan') }}</h5>
             <p class="text-muted mb-4">{{ __('Sélectionnez l\'abonnement adapté à vos besoins.') }}</p>
             <div class="d-flex justify-content-center gap-2">
-                <a href="{{ route('pricing') }}" class="btn btn-primary rounded-2 px-3">
+                <a href="{{ route('user.subscription') }}" class="btn btn-primary rounded-2 px-3">
                     {{ __('Voir les tarifs') }}
                 </a>
                 <button wire:click="complete" type="button" class="btn btn-outline-primary rounded-2 px-3">

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -21,6 +22,7 @@ class EmailTemplate extends Model
 
     /** @var list<string> */
     protected array $revisionable = ['name', 'subject', 'body_html', 'variables', 'json_content'];
+
     protected $fillable = [
         'name',
         'slug',

@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Rôles', 'subtitle' => $role->name])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Rôles'), 'subtitle' => $role->name])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.roles.index') }}">{{ __('Rôles') }}</a></li>
@@ -53,11 +53,13 @@
                 @if($role->permissions->count())
                     @php
                         $permCategories = [
-                            'contenu' => ['label' => 'Contenu', 'icon' => 'file-text', 'prefixes' => ['manage_articles', 'manage_comments', 'manage_categories', 'manage_pages', 'manage_media', 'manage_seo']],
-                            'utilisateurs' => ['label' => 'Utilisateurs', 'icon' => 'users', 'prefixes' => ['manage_users', 'manage_roles', 'manage_newsletter', 'manage_campaigns', 'manage_notifications']],
-                            'configuration' => ['label' => 'Configuration', 'icon' => 'settings', 'prefixes' => ['manage_settings', 'manage_branding', 'manage_themes', 'manage_translations', 'manage_feature_flags', 'manage_plans', 'manage_webhooks']],
-                            'outils' => ['label' => 'Outils', 'icon' => 'wrench', 'prefixes' => ['manage_backups', 'manage_activity_logs', 'manage_exports', 'manage_imports', 'manage_api']],
-                            'acces' => ['label' => 'Accès', 'icon' => 'eye', 'prefixes' => ['view_admin_panel', 'view_dashboard', 'view_health', 'view_logs', 'view_horizon', 'view_telescope']],
+                            'contenu' => ['label' => __('Contenu'), 'icon' => 'file-text', 'entities' => ['articles', 'comments', 'categories', 'pages', 'media', 'menus', 'faqs', 'testimonials', 'forms', 'widgets']],
+                            'utilisateurs' => ['label' => __('Utilisateurs'), 'icon' => 'users', 'entities' => ['users', 'roles', 'teams', 'tenants', 'contacts']],
+                            'marketing' => ['label' => __('Marketing'), 'icon' => 'megaphone', 'entities' => ['newsletter', 'campaigns', 'workflows', 'short_urls', 'notifications']],
+                            'configuration' => ['label' => __('Configuration'), 'icon' => 'settings', 'entities' => ['settings', 'branding', 'themes', 'translations', 'email_templates', 'shortcodes', 'cookies', 'onboarding', 'feature_flags', 'seo', 'plans']],
+                            'systeme' => ['label' => __('Système'), 'icon' => 'server', 'entities' => ['system', 'security', 'backups', 'activity_logs', 'trash', 'ai', 'api', 'webhooks']],
+                            'import_export' => ['label' => __('Import / Export'), 'icon' => 'upload', 'entities' => ['exports', 'imports']],
+                            'acces' => ['label' => __('Accès'), 'icon' => 'eye', 'entities' => ['admin_panel', 'dashboard', 'health', 'horizon', 'logs', 'telescope']],
                         ];
                         $rolePermNames = $role->permissions->pluck('name')->toArray();
                     @endphp
@@ -65,7 +67,12 @@
                     <div class="d-flex flex-column gap-3">
                         @foreach($permCategories as $catKey => $cat)
                             @php
-                                $matchedPerms = array_intersect($cat['prefixes'], $rolePermNames);
+                                $matchedPerms = array_filter($rolePermNames, function ($perm) use ($cat) {
+                                    foreach ($cat['entities'] as $entity) {
+                                        if (str_ends_with($perm, '_' . $entity)) return true;
+                                    }
+                                    return false;
+                                });
                             @endphp
                             @if(count($matchedPerms) > 0)
                             <div class="border rounded">

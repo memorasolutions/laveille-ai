@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -31,8 +37,8 @@ it('service worker contains push event handler', function () {
     expect($sw)->toContain("addEventListener('push'");
 });
 
-it('manifest.json exists', function () {
-    expect(file_exists(public_path('manifest.json')))->toBeTrue();
+it('manifest.webmanifest route exists', function () {
+    $this->get('/manifest.webmanifest')->assertStatus(200);
 });
 
 it('User model uses HasPushSubscriptions trait', function () {

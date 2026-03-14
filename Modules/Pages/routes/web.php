@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -11,24 +12,16 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 use Modules\Pages\Http\Controllers\Admin\StaticPageController;
-use Modules\Pages\Http\Controllers\PublicPageController;
 
 Route::prefix('admin/pages')
     ->name('admin.pages.')
     ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
     ->group(function () {
-        Route::get('/', [StaticPageController::class, 'index'])->name('index');
-        Route::get('/create', [StaticPageController::class, 'create'])->name('create');
-        Route::post('/', [StaticPageController::class, 'store'])->name('store');
-        Route::get('/{page}/preview', [StaticPageController::class, 'preview'])->name('preview');
-        Route::get('/{page}/edit', [StaticPageController::class, 'edit'])->name('edit');
-        Route::put('/{page}', [StaticPageController::class, 'update'])->name('update');
-        Route::delete('/{page}', [StaticPageController::class, 'destroy'])->name('destroy');
-    });
-
-Route::prefix('pages')
-    ->name('pages.')
-    ->middleware(['web'])
-    ->group(function () {
-        Route::get('/{slug}', [PublicPageController::class, 'show'])->name('show');
+        Route::get('/', [StaticPageController::class, 'index'])->name('index')->middleware('permission:view_pages');
+        Route::get('/{page}/preview', [StaticPageController::class, 'preview'])->name('preview')->middleware('permission:view_pages');
+        Route::get('/create', [StaticPageController::class, 'create'])->name('create')->middleware('permission:create_pages');
+        Route::post('/', [StaticPageController::class, 'store'])->name('store')->middleware('permission:create_pages');
+        Route::get('/{page}/edit', [StaticPageController::class, 'edit'])->name('edit')->middleware('permission:update_pages');
+        Route::put('/{page}', [StaticPageController::class, 'update'])->name('update')->middleware('permission:update_pages');
+        Route::delete('/{page}', [StaticPageController::class, 'destroy'])->name('destroy')->middleware('permission:delete_pages');
     });

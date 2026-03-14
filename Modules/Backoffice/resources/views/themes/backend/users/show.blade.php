@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Utilisateurs', 'subtitle' => $user->name])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Utilisateurs'), 'subtitle' => $user->name])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item"><a href="{{ route('admin.users.index') }}">{{ __('Utilisateurs') }}</a></li>
@@ -43,7 +43,7 @@
                     @endforeach
                     @if($user->roles->isEmpty())
                         <span class="badge bg-secondary bg-opacity-10 text-secondary fw-medium">
-                            Aucun rôle
+                            {{ __('Aucun rôle') }}
                         </span>
                     @endif
                 </div>
@@ -55,47 +55,47 @@
     <div class="col-lg-8">
         <div class="card h-100">
             <div class="card-header d-flex align-items-center justify-content-between py-3">
-                <h5 class="fw-semibold mb-0">Informations</h5>
+                <h5 class="fw-semibold mb-0">{{ __('Informations') }}</h5>
             </div>
             <div class="card-body">
                 <div class="row g-4">
 
                     <div class="col-sm-6">
-                        <p class="text-muted small text-uppercase fw-medium mb-1">Nom</p>
+                        <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Nom') }}</p>
                         <p class="fw-semibold mb-0">{{ $user->name }}</p>
                     </div>
 
                     <div class="col-sm-6">
-                        <p class="text-muted small text-uppercase fw-medium mb-1">Courriel</p>
+                        <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Courriel') }}</p>
                         <p class="fw-semibold mb-0">{{ $user->email }}</p>
                     </div>
 
                     <div class="col-sm-6">
-                        <p class="text-muted small text-uppercase fw-medium mb-1">Courriel vérifié</p>
+                        <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Courriel vérifié') }}</p>
                         @if($user->email_verified_at)
                             <span class="badge bg-success bg-opacity-10 text-success fw-medium">
                                 {{ $user->email_verified_at->format('d/m/Y H:i') }}
                             </span>
                         @else
                             <span class="badge bg-warning bg-opacity-10 text-warning fw-medium">
-                                Non vérifié
+                                {{ __('Non vérifié') }}
                             </span>
                         @endif
                     </div>
 
                     <div class="col-sm-6">
-                        <p class="text-muted small text-uppercase fw-medium mb-1">Inscrit le</p>
+                        <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Inscrit le') }}</p>
                         <p class="fw-semibold mb-0">{{ $user->created_at->format('d/m/Y H:i') }}</p>
                     </div>
 
                     <div class="col-sm-6">
-                        <p class="text-muted small text-uppercase fw-medium mb-1">Dernière modification</p>
+                        <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Dernière modification') }}</p>
                         <p class="fw-semibold mb-0">{{ $user->updated_at->format('d/m/Y H:i') }}</p>
                     </div>
 
                     <div class="col-sm-6">
-                        <p class="text-muted small text-uppercase fw-medium mb-1">Permissions</p>
-                        <p class="fw-semibold mb-0">{{ $user->getAllPermissions()->count() }} permissions</p>
+                        <p class="text-muted small text-uppercase fw-medium mb-1">{{ __('Permissions') }}</p>
+                        <p class="fw-semibold mb-0">{{ $user->getAllPermissions()->count() }} {{ __('permissions') }}</p>
                     </div>
 
                 </div>

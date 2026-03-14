@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Étapes onboarding', 'subtitle' => 'Modifier'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Étapes onboarding'), 'subtitle' => __('Modifier')])
 
 @section('content')
 

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -44,6 +45,7 @@ class DemoSeederCommand extends Command
             $this->createPages();
             $this->createActivityLogs();
             $this->createSubscribers();
+            $this->seedKnowledgeBase();
         });
 
         $this->showSummary();
@@ -197,6 +199,19 @@ class DemoSeederCommand extends Command
             foreach ($subscribers as $data) {
                 Subscriber::create($data);
             }
+
+            return true;
+        });
+    }
+
+    private function seedKnowledgeBase(): void
+    {
+        if (! class_exists(\Modules\AI\Database\Seeders\KnowledgeBaseSeeder::class)) {
+            return;
+        }
+
+        $this->components->task('Seeding AI knowledge base', function () {
+            $this->callSilent('db:seed', ['--class' => \Modules\AI\Database\Seeders\KnowledgeBaseSeeder::class]);
 
             return true;
         });

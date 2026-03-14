@@ -313,20 +313,26 @@
             </div>
         </div>
 
-        {{-- Export données RGPD --}}
+        {{-- Centre de confidentialité RGPD --}}
         <div class="card mb-3">
             <div class="card-header py-2">
                 <h5 class="card-title fw-semibold mb-0 d-flex align-items-center gap-2" style="font-size:0.9rem;">
-                    <i data-lucide="download" class="text-primary"></i>
-                    {{ __('Exporter mes données') }}
+                    <i data-lucide="shield" class="text-primary"></i>
+                    {{ __('Confidentialité et données') }}
                 </h5>
             </div>
             <div class="card-body py-3">
-                <p class="text-muted mb-2" style="font-size:0.85rem;">{{ __('Téléchargez une copie de vos données personnelles (profil, articles, tokens) au format JSON.') }}</p>
-                <a href="{{ route('user.export-data') }}" class="btn btn-outline-primary rounded-2">
-                    <i data-lucide="file-down" class="me-1"></i>
-                    {{ __('Exporter mes données (JSON)') }}
-                </a>
+                <p class="text-muted mb-2" style="font-size:0.85rem;">{{ __('Consultez, exportez ou supprimez vos données personnelles.') }}</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('user.privacy') }}" class="btn btn-outline-primary rounded-2">
+                        <i data-lucide="eye" class="me-1"></i>
+                        {{ __('Centre de confidentialité') }}
+                    </a>
+                    <a href="{{ route('user.export-data') }}" class="btn btn-outline-secondary rounded-2">
+                        <i data-lucide="file-down" class="me-1"></i>
+                        {{ __('Exporter (JSON)') }}
+                    </a>
+                </div>
             </div>
         </div>
 

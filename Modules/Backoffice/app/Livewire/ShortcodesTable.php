@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -13,11 +14,12 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
+use Modules\Core\Traits\HasTableSorting;
 use Modules\Editor\Models\Shortcode;
 
 class ShortcodesTable extends Component
 {
-    use HasBulkActions, WithPagination;
+    use HasBulkActions, HasTableSorting, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -25,7 +27,7 @@ class ShortcodesTable extends Component
     public string $search = '';
 
     #[Url]
-    public string $sortField = 'tag';
+    public string $sortBy = 'tag';
 
     #[Url]
     public string $sortDirection = 'asc';
@@ -33,16 +35,6 @@ class ShortcodesTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
-    }
-
-    public function sort(string $field): void
-    {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortField = $field;
-            $this->sortDirection = 'asc';
-        }
     }
 
     public function resetFilters(): void
@@ -73,7 +65,7 @@ class ShortcodesTable extends Component
                 $q->where('tag', 'like', "%{$this->search}%")
                     ->orWhere('name', 'like', "%{$this->search}%");
             })
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(15)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
@@ -87,7 +79,7 @@ class ShortcodesTable extends Component
                 $q->where('tag', 'like', "%{$this->search}%")
                     ->orWhere('name', 'like', "%{$this->search}%");
             })
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(15);
 
         return view('backoffice::livewire.shortcodes-table', ['shortcodes' => $shortcodes]);

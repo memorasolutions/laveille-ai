@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
@@ -371,13 +377,6 @@ it('AiService chatWithHistory sends multi-turn messages', function () {
 });
 
 // --- Layout inclusion ---
-
-it('includes chatbot in GoSaaS frontend layout', function () {
-    $layoutPath = module_path('FrontTheme', 'resources/views/themes/gosass/layouts/app.blade.php');
-    $content = file_get_contents($layoutPath);
-
-    expect($content)->toContain("@livewire('ai-chatbot')");
-});
 
 it('includes chatbot in user dashboard layout', function () {
     $layoutPath = module_path('Auth', 'resources/views/layouts/app.blade.php');

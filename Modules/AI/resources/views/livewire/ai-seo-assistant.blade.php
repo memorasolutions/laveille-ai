@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="card shadow-sm">
     <div class="card-header">
         <h5 class="mb-0"><i data-lucide="search" class="me-2"></i>Assistant SEO</h5>

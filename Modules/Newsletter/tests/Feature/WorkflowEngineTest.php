@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -27,7 +28,7 @@ function createActiveWorkflowWithSteps(): array
 {
     $template = EmailTemplate::create([
         'name' => 'Welcome Email',
-        'slug' => 'welcome-wf-' . uniqid(),
+        'slug' => 'welcome-wf-'.uniqid(),
         'subject' => 'Welcome!',
         'body_html' => '<p>Hello {{subscriber.name}}</p>',
         'variables' => ['name'],
@@ -136,7 +137,7 @@ test('process step completes enrollment at end', function () {
 
     $template = EmailTemplate::create([
         'name' => 'Single',
-        'slug' => 'single-' . uniqid(),
+        'slug' => 'single-'.uniqid(),
         'subject' => 'Hi',
         'body_html' => '<p>Hello</p>',
         'variables' => [],
@@ -203,7 +204,7 @@ test('process due enrollments batch processes', function () {
 
     $template = EmailTemplate::create([
         'name' => 'Batch',
-        'slug' => 'batch-' . uniqid(),
+        'slug' => 'batch-'.uniqid(),
         'subject' => 'Hi',
         'body_html' => '<p>Hi</p>',
         'variables' => [],

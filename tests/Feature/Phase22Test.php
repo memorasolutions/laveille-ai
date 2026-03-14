@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
@@ -136,7 +142,7 @@ test('scramble docs route is registered', function () {
 // --- Module API Routes Cleanup ---
 
 test('module api routes are cleaned (no stubs)', function () {
-    $modules = ['Auth', 'Core', 'Backoffice', 'FrontTheme', 'Health', 'Logging', 'Media', 'Notifications', 'RolesPermissions', 'SEO', 'Settings', 'Storage', 'Webhooks'];
+    $modules = ['Auth', 'Core', 'Backoffice', 'Health', 'Logging', 'Media', 'Notifications', 'RolesPermissions', 'SEO', 'Settings', 'Storage', 'Webhooks'];
 
     foreach ($modules as $module) {
         $content = file_get_contents(base_path("Modules/{$module}/routes/api.php"));

@@ -2,61 +2,17 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\SaaS\Models\Plan;
 
 uses(RefreshDatabase::class);
-
-// Pricing page
-it('pricing page loads successfully', function () {
-    $response = $this->get('/pricing');
-    $response->assertStatus(200);
-    $response->assertSee('simples et transparentes');
-});
-
-it('pricing page shows plan names from database', function () {
-    Plan::factory()->create(['name' => 'Free', 'slug' => 'free', 'price' => 0, 'is_active' => true]);
-    Plan::factory()->create(['name' => 'Pro', 'slug' => 'pro', 'price' => 29.99, 'is_active' => true]);
-    Plan::factory()->create(['name' => 'Enterprise', 'slug' => 'enterprise', 'price' => 99.99, 'is_active' => true]);
-
-    $response = $this->get('/pricing');
-    $response->assertStatus(200)
-        ->assertSee('Free')
-        ->assertSee('Pro')
-        ->assertSee('Enterprise');
-});
-
-it('pricing page shows feature labels in french', function () {
-    Plan::factory()->create([
-        'name' => 'Pro',
-        'slug' => 'pro',
-        'price' => 29.99,
-        'features' => ['10_users', 'priority_support', 'api_access'],
-        'is_active' => true,
-    ]);
-
-    $response = $this->get('/pricing');
-    $response->assertStatus(200)
-        ->assertSee('10 utilisateurs')
-        ->assertSee('Support prioritaire')
-        ->assertSee('Accès API complet');
-});
-
-it('pricing page shows trial days', function () {
-    Plan::factory()->create([
-        'name' => 'Pro',
-        'slug' => 'pro',
-        'price' => 29.99,
-        'trial_days' => 14,
-        'is_active' => true,
-    ]);
-
-    $response = $this->get('/pricing');
-    $response->assertStatus(200)
-        ->assertSee('14 jours', false)
-        ->assertSee('essai gratuit', false);
-});
 
 // Sitemap
 it('sitemap route returns xml content', function () {
@@ -124,9 +80,8 @@ it('checkout redirects back when plan has no stripe_price_id', function () {
     ]);
 
     $response = $this->actingAs($user)
-        ->from('/pricing')
         ->post('/checkout', ['plan_id' => $plan->id]);
 
-    $response->assertRedirect('/pricing');
+    $response->assertRedirect();
     $response->assertSessionHas('error');
 });

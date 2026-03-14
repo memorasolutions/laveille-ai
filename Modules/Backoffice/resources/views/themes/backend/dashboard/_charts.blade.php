@@ -35,7 +35,7 @@ window.addEventListener('load', function () {
     const articlesLabels = @json(array_column($articlesByMonth, 'label'));
 
     new ApexCharts(document.querySelector("#chart-users-monthly"), {
-        series: [{ name: "Inscriptions", data: usersData }],
+        series: [{ name: @json(__('Inscriptions')), data: usersData }],
         chart: { type: 'area', height: 250, toolbar: { show: false }, sparkline: { enabled: false } },
         xaxis: { categories: usersLabels, labels: { style: { fontSize: '12px' } } },
         yaxis: { labels: { formatter: (v) => Math.round(v) } },
@@ -44,12 +44,12 @@ window.addEventListener('load', function () {
         fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] } },
         dataLabels: { enabled: false },
         grid: { borderColor: '#f1f1f1', strokeDashArray: 4 },
-        tooltip: { theme: 'light', y: { formatter: (v) => v + ' utilisateurs' } },
+        tooltip: { theme: 'light', y: { formatter: (v) => v + ' ' + @json(__('utilisateurs')) } },
         markers: { size: 3 },
     }).render();
 
     new ApexCharts(document.querySelector("#chart-articles-monthly"), {
-        series: [{ name: "Articles", data: articlesData }],
+        series: [{ name: @json(__('Articles')), data: articlesData }],
         chart: { type: 'bar', height: 250, toolbar: { show: false } },
         xaxis: { categories: articlesLabels, labels: { style: { fontSize: '12px' } } },
         yaxis: { labels: { formatter: (v) => Math.round(v) } },
@@ -57,7 +57,7 @@ window.addEventListener('load', function () {
         plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
         dataLabels: { enabled: false },
         grid: { borderColor: '#f1f1f1', strokeDashArray: 4 },
-        tooltip: { theme: 'light', y: { formatter: (v) => v + ' articles' } },
+        tooltip: { theme: 'light', y: { formatter: (v) => v + ' ' + @json(__('articles')) } },
     }).render();
 });
 </script>

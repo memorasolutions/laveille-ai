@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -73,8 +79,8 @@ it('admin sees everything except Rôles link', function () {
     $response->assertSee('Sécurité');
     $response->assertSee('Sauvegardes');
 
-    // Should NOT see the Rôles management link (check via route URL)
-    $response->assertDontSee(route('admin.roles.index'));
+    // Admin can VIEW roles (view_roles) but should not see create/edit actions
+    $response->assertSee(route('admin.roles.index'));
 });
 
 it('editor sees only content items and dashboard', function () {
@@ -172,11 +178,17 @@ it('admin can access backups and settings', function () {
         ->assertStatus(200);
 });
 
-it('admin cannot access roles management', function () {
+it('admin can view roles but cannot create them', function () {
     $user = User::factory()->create();
     $user->assignRole('admin');
 
+    // Admin can VIEW roles (has view_roles)
     $this->actingAs($user)
         ->get(route('admin.roles.index'))
+        ->assertStatus(200);
+
+    // Admin CANNOT create roles (no create_roles)
+    $this->actingAs($user)
+        ->get(route('admin.roles.create'))
         ->assertStatus(403);
 });

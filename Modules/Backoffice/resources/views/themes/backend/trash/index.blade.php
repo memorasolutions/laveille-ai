@@ -10,29 +10,36 @@
     </ol>
 </nav>
 
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="trash-2" class="icon-md text-primary"></i>{{ __('Corbeille') }}</h4>
+    <x-backoffice::help-modal id="helpTrashModal" :title="__('Corbeille')" icon="trash-2" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.trash._help')
+    </x-backoffice::help-modal>
+</div>
+
 {{-- Articles supprimés --}}
 <div class="card mb-4">
     <div class="card-header py-3 px-4 border-bottom">
         <h4 class="fw-bold mb-0 d-flex align-items-center gap-2">
             <i data-lucide="file-text" class="icon-md text-muted"></i>
-            Articles supprimés ({{ $trashedArticles->count() }})
+            {{ __('Articles supprimés') }} ({{ $trashedArticles->count() }})
         </h4>
     </div>
     <div class="card-body p-4">
         @if($trashedArticles->isEmpty())
             <div class="text-center py-5">
                 <i data-lucide="file-text" class="d-block mx-auto mb-3 text-muted" style="width:48px;height:48px;opacity:.3;"></i>
-                <p class="text-muted small">Aucun article dans la corbeille.</p>
+                <p class="text-muted small">{{ __('Aucun article dans la corbeille.') }}</p>
             </div>
         @else
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="py-3 px-4 fw-semibold text-body">Titre</th>
-                            <th class="py-3 px-4 fw-semibold text-body">Statut</th>
-                            <th class="py-3 px-4 fw-semibold text-body">Supprimé le</th>
-                            <th class="py-3 px-4 fw-semibold text-body">Actions</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Titre') }}</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Statut') }}</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Supprimé le') }}</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -61,7 +68,7 @@
                                                 @csrf
                                                 <button type="submit" class="dropdown-item d-flex align-items-center gap-2">
                                                     <i data-lucide="rotate-ccw" class="icon-sm"></i>
-                                                    Restaurer
+                                                    {{ __('Restaurer') }}
                                                 </button>
                                             </form>
                                         </li>
@@ -70,10 +77,10 @@
                                             <form action="{{ route('admin.trash.force-delete-article', $article->id) }}" method="POST">
                                                 @csrf @method('DELETE')
                                                 <button type="submit"
-                                                        onclick="return confirm('Supprimer définitivement ?')"
+                                                        onclick="return confirm('{{ __('Supprimer définitivement ?') }}')"
                                                         class="dropdown-item text-danger d-flex align-items-center gap-2">
                                                     <i data-lucide="trash-2" class="icon-sm"></i>
-                                                    Supprimer
+                                                    {{ __('Supprimer') }}
                                                 </button>
                                             </form>
                                         </li>
@@ -94,24 +101,24 @@
     <div class="card-header py-3 px-4 border-bottom">
         <h4 class="fw-bold mb-0 d-flex align-items-center gap-2">
             <i data-lucide="message-circle" class="icon-md text-muted"></i>
-            Commentaires supprimés ({{ $trashedComments->count() }})
+            {{ __('Commentaires supprimés') }} ({{ $trashedComments->count() }})
         </h4>
     </div>
     <div class="card-body p-4">
         @if($trashedComments->isEmpty())
             <div class="text-center py-5">
                 <i data-lucide="message-circle" class="d-block mx-auto mb-3 text-muted" style="width:48px;height:48px;opacity:.3;"></i>
-                <p class="text-muted small">Aucun commentaire dans la corbeille.</p>
+                <p class="text-muted small">{{ __('Aucun commentaire dans la corbeille.') }}</p>
             </div>
         @else
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="py-3 px-4 fw-semibold text-body">Contenu</th>
-                            <th class="py-3 px-4 fw-semibold text-body">Article</th>
-                            <th class="py-3 px-4 fw-semibold text-body">Supprimé le</th>
-                            <th class="py-3 px-4 fw-semibold text-body">Actions</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Contenu') }}</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Article') }}</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Supprimé le') }}</th>
+                            <th class="py-3 px-4 fw-semibold text-body">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -140,7 +147,7 @@
                                                 @csrf
                                                 <button type="submit" class="dropdown-item d-flex align-items-center gap-2">
                                                     <i data-lucide="rotate-ccw" class="icon-sm"></i>
-                                                    Restaurer
+                                                    {{ __('Restaurer') }}
                                                 </button>
                                             </form>
                                         </li>
@@ -149,10 +156,10 @@
                                             <form action="{{ route('admin.trash.force-delete-comment', $comment->id) }}" method="POST">
                                                 @csrf @method('DELETE')
                                                 <button type="submit"
-                                                        onclick="return confirm('Supprimer définitivement ?')"
+                                                        onclick="return confirm('{{ __('Supprimer définitivement ?') }}')"
                                                         class="dropdown-item text-danger d-flex align-items-center gap-2">
                                                     <i data-lucide="trash-2" class="icon-sm"></i>
-                                                    Supprimer
+                                                    {{ __('Supprimer') }}
                                                 </button>
                                             </form>
                                         </li>

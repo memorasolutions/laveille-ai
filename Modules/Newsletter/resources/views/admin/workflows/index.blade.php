@@ -2,13 +2,19 @@
 @extends('backoffice::layouts.admin', ['title' => 'Workflows', 'subtitle' => 'Marketing'])
 
 @section('content')
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="git-branch" class="icon-md text-primary"></i>{{ __('Workflows email') }}</h4>
+    <x-backoffice::help-modal id="helpNewsletterWorkflowsModal" :title="__('Workflows email')" icon="git-branch" :buttonLabel="__('Aide')">
+        @include('newsletter::admin.workflows._help')
+    </x-backoffice::help-modal>
+</div>
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <h6 class="mb-0">Workflows email</h6>
+                <h6 class="mb-0">{{ __('Workflows email') }}</h6>
                 <a href="{{ route('admin.newsletter.workflows.create') }}" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
-                    <i data-lucide="plus"></i> Nouveau workflow
+                    <i data-lucide="plus"></i> {{ __('Nouveau workflow') }}
                 </a>
             </div>
             <div class="card-body">

@@ -1,16 +1,23 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Rétention des données', 'subtitle' => 'Tableau de bord'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Rétention des données'), 'subtitle' => __('Tableau de bord')])
 
 @section('breadcrumbs')
 <nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Rétention des données</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Rétention des données') }}</li>
     </ol>
 </nav>
 @endsection
 
 @section('content')
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="timer" class="icon-md text-primary"></i>{{ __('Rétention des données') }}</h4>
+    <x-backoffice::help-modal id="helpDataRetentionModal" :title="__('Rétention des données')" icon="timer" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.data-retention._help')
+    </x-backoffice::help-modal>
+</div>
 
 @php
     $totalRecords = collect($stats)->sum('total');
@@ -24,7 +31,7 @@
                 <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width:56px;height:56px;">
                     <i data-lucide="database" class="icon-lg text-primary"></i>
                 </div>
-                <p class="text-muted small mb-1">Total enregistrements</p>
+                <p class="text-muted small mb-1">{{ __('Total enregistrements') }}</p>
                 <h4 class="fw-bold mb-0 text-primary">{{ number_format($totalRecords) }}</h4>
             </div>
         </div>
@@ -35,7 +42,7 @@
                 <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width:56px;height:56px;">
                     <i data-lucide="trash-2" class="icon-lg text-warning"></i>
                 </div>
-                <p class="text-muted small mb-1">Éligibles au nettoyage</p>
+                <p class="text-muted small mb-1">{{ __('Éligibles au nettoyage') }}</p>
                 <h4 class="fw-bold mb-0 text-warning">{{ number_format($totalEligible) }}</h4>
             </div>
         </div>
@@ -46,7 +53,7 @@
                 <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3" style="width:56px;height:56px;">
                     <i data-lucide="shield-check" class="icon-lg text-success"></i>
                 </div>
-                <p class="text-muted small mb-1">Tables surveillées</p>
+                <p class="text-muted small mb-1">{{ __('Tables surveillées') }}</p>
                 <h4 class="fw-bold mb-0 text-success">{{ count($stats) }}</h4>
             </div>
         </div>
@@ -58,12 +65,12 @@
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <h4 class="fw-bold mb-0 d-flex align-items-center gap-2">
                 <i data-lucide="clock" class="icon-md text-primary"></i>
-                Détail par table
+                {{ __('Détail par table') }}
             </h4>
             <a href="{{ route('admin.settings.index') }}"
                class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2">
                 <i data-lucide="settings" class="icon-sm"></i>
-                Paramètres rétention
+                {{ __('Paramètres rétention') }}
             </a>
         </div>
     </div>
@@ -72,11 +79,11 @@
             <table class="table table-hover mb-0">
                 <thead>
                     <tr>
-                        <th class="py-3 px-4 fw-semibold text-body">Table</th>
-                        <th class="py-3 px-4 fw-semibold text-body text-center">Rétention (jours)</th>
-                        <th class="py-3 px-4 fw-semibold text-body text-center">Total</th>
-                        <th class="py-3 px-4 fw-semibold text-body text-center">Éligibles</th>
-                        <th class="py-3 px-4 fw-semibold text-body text-center">Statut</th>
+                        <th class="py-3 px-4 fw-semibold text-body">{{ __('Table') }}</th>
+                        <th class="py-3 px-4 fw-semibold text-body text-center">{{ __('Rétention (jours)') }}</th>
+                        <th class="py-3 px-4 fw-semibold text-body text-center">{{ __('Total') }}</th>
+                        <th class="py-3 px-4 fw-semibold text-body text-center">{{ __('Éligibles') }}</th>
+                        <th class="py-3 px-4 fw-semibold text-body text-center">{{ __('Statut') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,7 +101,7 @@
                                     </span>
                                 @else
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary">
-                                        Expiration auto
+                                        {{ __('Expiration auto') }}
                                     </span>
                                 @endif
                             </td>
@@ -112,9 +119,9 @@
                                 @if($stat['eligible'] === 0)
                                     <span class="badge bg-success bg-opacity-10 text-success">OK</span>
                                 @elseif($stat['eligible'] > 100)
-                                    <span class="badge bg-danger bg-opacity-10 text-danger">Nettoyage requis</span>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger">{{ __('Nettoyage requis') }}</span>
                                 @else
-                                    <span class="badge bg-warning bg-opacity-10 text-warning">À surveiller</span>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning">{{ __('À surveiller') }}</span>
                                 @endif
                             </td>
                         </tr>
@@ -124,8 +131,8 @@
         </div>
         <div class="mt-3 pt-3 border-top">
             <p class="text-muted small mb-0">
-                Commande de nettoyage : <code>php artisan app:cleanup</code>
-                &mdash; Simulation : <code>php artisan app:cleanup --dry-run</code>
+                {{ __('Commande de nettoyage') }} : <code>php artisan app:cleanup</code>
+                &mdash; {{ __('Simulation') }} : <code>php artisan app:cleanup --dry-run</code>
             </p>
         </div>
     </div>

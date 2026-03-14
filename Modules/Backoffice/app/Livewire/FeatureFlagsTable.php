@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -33,16 +34,40 @@ class FeatureFlagsTable extends Component
     public array $conditionConfig = [];
 
     public array $knownFeatures = [
-        'module-blog',
-        'module-newsletter',
+        // Modules avancés (désactivés par défaut)
         'module-saas',
         'module-tenancy',
-        'module-webhooks',
+        'module-ai',
+        'module-team',
+        'module-abtest',
+        'module-import',
+        'module-sms',
+        // Modules business (activés par défaut)
+        'module-blog',
+        'module-newsletter',
+        'module-faq',
+        'module-testimonials',
+        'module-widget',
+        'module-formbuilder',
+        'module-customfields',
+        // Fonctionnalités optionnelles (désactivées par défaut)
+        'social-login',
+        'realtime-notifications',
+        'locale-es',
+        'usage-billing',
+        'referral-program',
+        'email-preview',
+        'status-page',
+        'storage-admin',
+        'dark-mode-frontend',
+        'user-documentation',
+        // Modules infrastructure (activés par défaut)
+        'module-translation',
         'module-search',
-        'dark-mode',
-        'two-factor-auth',
-        'api-access',
-        'export-csv',
+        'module-export',
+        'module-webhooks',
+        'module-media',
+        'module-backup',
     ];
 
     public function updatingSearch(): void

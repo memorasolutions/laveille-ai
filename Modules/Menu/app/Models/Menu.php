@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -18,6 +19,7 @@ use Modules\Menu\Database\Factories\MenuFactory;
 class Menu extends Model
 {
     use HasFactory;
+
     protected $fillable = ['name', 'location', 'is_active'];
 
     protected $casts = [

@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 // Task 1: Scheduler
 test('scheduler has backup:run command', function () {
     $schedule = app(\Illuminate\Console\Scheduling\Schedule::class);

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -10,24 +11,24 @@ declare(strict_types=1);
 namespace Modules\Blog\Models;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Mews\Purifier\Facades\Purifier;
 use Laravel\Scout\Searchable;
+use Mews\Purifier\Facades\Purifier;
 use Modules\Blog\Database\Factories\ArticleFactory;
 use Modules\Blog\States\ArticleState;
 use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
-use Spatie\ModelStates\HasStates;
-use Spatie\ResponseCache\Facades\ResponseCache;
 use Modules\CustomFields\Traits\HasCustomFields;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Spatie\ModelStates\HasStates;
+use Spatie\ResponseCache\Facades\ResponseCache;
 use Spatie\Translatable\HasTranslations;
 
 /**

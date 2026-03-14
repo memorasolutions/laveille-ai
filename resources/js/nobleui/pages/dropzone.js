@@ -24,29 +24,11 @@
         self.options.addRemoveLinks = true;
         self.options.dictRemoveFile = "Delete";
         
-        //New file added
-        self.on("addedfile", function (file) {
-          console.log('new file added: ', file);
-        });
-
-        // Send file starts
-        self.on("sending", function (file) {
-          console.log('upload started', file);
-        });
-        
-        // File upload Progress
-        self.on("totaluploadprogress", function (progress) {
-          console.log("progress ", progress);
-        });
-
-        self.on("queuecomplete", function (progress) {
-          console.log('que completed');
-        });
-        
-        // On removing file
-        self.on("removedfile", function (file) {
-          console.log('file removed: ', file);
-        });
+        self.on("addedfile", function (file) {});
+        self.on("sending", function (file) {});
+        self.on("totaluploadprogress", function (progress) {});
+        self.on("queuecomplete", function (progress) {});
+        self.on("removedfile", function (file) {});
       }
 
   });

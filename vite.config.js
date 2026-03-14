@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
     plugins: [
@@ -9,7 +10,6 @@ export default defineConfig({
             input: [
                 'resources/sass/nobleui/app.scss',
                 'resources/css/nobleui-custom.css',
-                'resources/css/auth-guest.css',
                 'resources/js/app.js',
                 'resources/js/nobleui/template.js',
                 'resources/js/nobleui/color-modes.js',
@@ -19,7 +19,7 @@ export default defineConfig({
         viteStaticCopy({
             targets: [
                 {
-                    src: 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js',
+                    src: ['node_modules/bootstrap/dist/js/bootstrap.bundle.min.js', 'node_modules/bootstrap/dist/css/bootstrap.min.css'],
                     dest: 'nobleui/plugins/bootstrap',
                 },
                 {
@@ -44,13 +44,33 @@ export default defineConfig({
                 },
             ],
         }),
+        VitePWA({
+            strategies: 'injectManifest',
+            srcDir: 'resources/js',
+            filename: 'sw-source.js',
+            registerType: 'prompt',
+            manifest: false,
+            injectManifest: {
+                globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+            },
+            devOptions: {
+                enabled: false,
+            },
+        }),
     ],
     build: {
         cssMinify: true,
         minify: 'esbuild',
         rollupOptions: {
             output: {
-                manualChunks: undefined,
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        if (id.includes('@tiptap') || id.includes('prosemirror')) {
+                            return 'editor';
+                        }
+                        return 'vendor';
+                    }
+                },
             },
         },
     },

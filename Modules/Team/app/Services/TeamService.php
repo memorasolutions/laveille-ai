@@ -1,13 +1,18 @@
 <?php
 
-// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
+declare(strict_types=1);
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
 
 namespace Modules\Team\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 use Modules\Team\Models\Team;
 use Modules\Team\Models\TeamInvitation;
 use Modules\Team\Notifications\InviteMemberNotification;

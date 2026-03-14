@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -19,7 +20,7 @@ use Spatie\Permission\Models\Role;
 
 class SocialAuthController extends Controller
 {
-    private const ALLOWED_PROVIDERS = ['google', 'github'];
+    private const ALLOWED_PROVIDERS = ['google', 'github', 'microsoft', 'facebook', 'linkedin', 'x', 'apple'];
 
     public function redirect(string $provider): \Symfony\Component\HttpFoundation\RedirectResponse
     {
@@ -27,7 +28,29 @@ class SocialAuthController extends Controller
             abort(404);
         }
 
-        return Socialite::driver($provider)->redirect();
+        $scopes = $this->getScopes($provider);
+
+        if (empty($scopes)) {
+            return Socialite::driver($provider)->redirect();
+        }
+
+        /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+        $driver = Socialite::driver($provider);
+
+        return $driver->scopes($scopes)->redirect();
+    }
+
+    private function getScopes(string $provider): array
+    {
+        return match ($provider) {
+            'google' => ['openid', 'profile', 'email'],
+            'github' => ['user:email'],
+            'microsoft' => ['openid', 'profile', 'email', 'User.Read'],
+            'facebook' => ['email', 'public_profile'],
+            'linkedin' => ['openid', 'profile', 'email'],
+            'apple' => ['name', 'email'],
+            default => [],
+        };
     }
 
     public function callback(string $provider): RedirectResponse

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -14,11 +15,12 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
+use Modules\Core\Traits\HasTableSorting;
 use Spatie\Permission\Models\Role;
 
 class UsersTable extends Component
 {
-    use HasBulkActions, WithPagination;
+    use HasBulkActions, HasTableSorting, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -56,16 +58,6 @@ class UsersTable extends Component
         $this->filterRole = '';
         $this->search = '';
         $this->resetPage();
-    }
-
-    public function sort(string $column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
     }
 
     protected function getBulkActions(): array

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -17,6 +18,7 @@ use Modules\ABTest\Database\Factories\ABParticipationFactory;
 class ABParticipation extends Model
 {
     use HasFactory;
+
     protected $table = 'ab_participations';
 
     protected $fillable = [

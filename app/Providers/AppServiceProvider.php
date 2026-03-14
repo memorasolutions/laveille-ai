@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -62,6 +63,18 @@ class AppServiceProvider extends ServiceProvider
         Feature::define('module-widget', true);
         Feature::define('module-formbuilder', true);
         Feature::define('module-customfields', true);
+
+        // Fonctionnalités optionnelles (désactivées par défaut)
+        Feature::define('social-login', false);
+        Feature::define('realtime-notifications', false);
+        Feature::define('locale-es', false);
+        Feature::define('usage-billing', false);
+        Feature::define('referral-program', false);
+        Feature::define('email-preview', false);
+        Feature::define('status-page', false);
+        Feature::define('storage-admin', false);
+        Feature::define('dark-mode-frontend', false);
+        Feature::define('user-documentation', false);
 
         // Modules infrastructure (activés par défaut)
         Feature::define('module-translation', true);

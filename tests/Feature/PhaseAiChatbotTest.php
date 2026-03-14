@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -21,12 +22,12 @@ beforeEach(function () {
 });
 
 it('RagService returns empty string when no content matches', function () {
-    $rag = new RagService();
+    $rag = app(RagService::class);
     expect($rag->getRelevantContext('xyznonexistent'))->toBe('');
 });
 
 it('RagService buildSystemPrompt returns base when no context', function () {
-    $rag = new RagService();
+    $rag = app(RagService::class);
     expect($rag->buildSystemPrompt('Base prompt', 'xyznonexistent'))->toBe('Base prompt');
 });
 
@@ -38,7 +39,7 @@ it('RagService buildSystemPrompt appends context when found', function () {
         'order' => 1,
     ]);
 
-    $rag = new RagService();
+    $rag = app(RagService::class);
     $result = $rag->buildSystemPrompt('Base', 'pricing');
 
     expect($result)->toContain('Base')
@@ -95,11 +96,11 @@ it('feedback API prevents accessing others messages', function () {
 });
 
 it('AiService has streamChat method', function () {
-    expect(method_exists(new AiService(), 'streamChat'))->toBeTrue();
+    expect(method_exists(new AiService, 'streamChat'))->toBeTrue();
 });
 
 it('AiMessage has feedback in fillable', function () {
-    $msg = new AiMessage();
+    $msg = new AiMessage;
     expect($msg->getFillable())->toContain('feedback')
         ->toContain('feedback_comment');
 });

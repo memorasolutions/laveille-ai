@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
-    "author": "",
+    "author": "MEMORA solutions <info@memora.ca> (https://memora.solutions)",
     "type": "module",
     "scripts": {
         "build": "vite build",
@@ -18,11 +18,14 @@
         "sortablejs": "^1.15.7",
         "tom-select": "^2.5.2",
         "vite": "^7.0.7",
+        "vite-plugin-pwa": "^1.2.0",
         "vite-plugin-static-copy": "^3.2.0"
     },
     "dependencies": {
         "@mdi/font": "^7.4.47",
         "@popperjs/core": "^2.11.8",
+        "@simplewebauthn/browser": "^13.3.0",
+        "@tabler/icons-webfont": "^2.47.0",
         "@tiptap/core": "^3.19.0",
         "@tiptap/extension-character-count": "^3.20.0",
         "@tiptap/extension-code-block-lowlight": "^3.19.0",
@@ -54,7 +57,6 @@
         "lowlight": "^3.3.0",
         "lucide": "^0.575.0",
         "perfect-scrollbar": "^1.5.6",
-        "playwright": "^1.58.2",
         "pusher-js": "^8.4.0"
     },
     "name": "laravel_vierge",

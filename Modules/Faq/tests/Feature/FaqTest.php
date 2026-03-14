@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -98,25 +99,6 @@ it('réordonne les FAQ via JSON', function () {
 
     expect(Faq::find($faq2->id)->order)->toBe(0);
     expect(Faq::find($faq1->id)->order)->toBe(1);
-});
-
-it('affiche la page FAQ publique', function () {
-    Faq::create(['question' => 'Visible ?', 'answer' => 'Oui.', 'order' => 0, 'is_published' => true]);
-    Faq::create(['question' => 'Cachée ?', 'answer' => 'Non.', 'order' => 1, 'is_published' => false]);
-
-    $response = $this->get(route('faq.show'));
-    $response->assertOk();
-    $response->assertSee('Visible ?');
-    $response->assertDontSee('Cachée ?');
-});
-
-it('inclut le JSON-LD Schema.org dans la page publique', function () {
-    Faq::create(['question' => 'JSON-LD test ?', 'answer' => 'Réponse.', 'order' => 0]);
-
-    $response = $this->get(route('faq.show'));
-    $response->assertOk();
-    $response->assertSee('application/ld+json', false);
-    $response->assertSee('FAQPage', false);
 });
 
 it('filtre par catégorie via le scope', function () {

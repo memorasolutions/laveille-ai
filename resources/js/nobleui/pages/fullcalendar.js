@@ -211,7 +211,6 @@
         info.draggedEl.parentNode.removeChild(info.draggedEl);
     },
     eventClick: function(info) {
-      console.log(info);
       const eventObj = info.event;
       document.querySelector('#modalTitle1').innerHTML = eventObj.title;
       document.querySelector('#modalBody1').innerHTML = eventObj._def.extendedProps.description || '{ no description }';
@@ -219,7 +218,6 @@
       fullCalModal.show();
     },
     dateClick: function(info) {
-      console.log(info);
       const createEventModal = new bootstrap.Modal('#createEventModal');
       createEventModal.show();
     },

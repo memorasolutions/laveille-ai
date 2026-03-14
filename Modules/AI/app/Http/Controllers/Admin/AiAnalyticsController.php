@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -13,6 +14,9 @@ use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\AI\Models\AiConversation;
 use Modules\AI\Models\AiMessage;
+use Modules\AI\Models\ChannelMessage;
+use Modules\AI\Models\CsatSurvey;
+use Modules\AI\Models\Ticket;
 
 class AiAnalyticsController extends Controller
 {
@@ -40,6 +44,26 @@ class AiAnalyticsController extends Controller
             ->groupBy('feedback')
             ->get();
 
+        // Helpdesk stats
+        $totalTickets = Ticket::count();
+        $openTickets = Ticket::where('status', 'open')->count();
+        $resolvedTickets = Ticket::where('status', 'resolved')->count();
+        $ticketsByPriority = Ticket::selectRaw('priority, COUNT(*) as count')
+            ->groupBy('priority')
+            ->get();
+
+        // CSAT stats
+        $csatAvg = CsatSurvey::averageScore();
+        $csatTotal = CsatSurvey::count();
+        $csatTrend = CsatSurvey::where('created_at', '>=', now()->subDays(30))
+            ->selectRaw('DATE(created_at) as date, AVG(score) as avg_score, COUNT(*) as count')
+            ->groupByRaw('DATE(created_at)')
+            ->orderByRaw('DATE(created_at)')
+            ->get();
+
+        // Channel stats
+        $channelMessages = ChannelMessage::where('created_at', '>=', now()->subDays(30))->count();
+
         return view('ai::admin.analytics.index', compact(
             'totalConversations',
             'activeConversations',
@@ -47,7 +71,15 @@ class AiAnalyticsController extends Controller
             'avgMessagesPerConversation',
             'dailyActivity',
             'modelUsage',
-            'feedbackStats'
+            'feedbackStats',
+            'totalTickets',
+            'openTickets',
+            'resolvedTickets',
+            'ticketsByPriority',
+            'csatAvg',
+            'csatTotal',
+            'csatTrend',
+            'channelMessages'
         ));
     }
 }

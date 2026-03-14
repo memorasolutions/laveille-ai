@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -40,19 +41,19 @@ test('role service createRole creates role without permissions', function () {
 });
 
 test('role service createRole creates role with permissions', function () {
-    $role = $this->service->createRole('moderator', ['manage_users']);
+    $role = $this->service->createRole('moderator', ['view_users']);
 
     expect($role->name)->toBe('moderator');
-    expect($role->hasPermissionTo('manage_users'))->toBeTrue();
+    expect($role->hasPermissionTo('view_users'))->toBeTrue();
 });
 
 test('role service updateRole updates name and permissions', function () {
     $role = $this->service->createRole('temp');
-    $updated = $this->service->updateRole($role, 'updated', ['manage_users', 'manage_media']);
+    $updated = $this->service->updateRole($role, 'updated', ['view_users', 'view_media']);
 
     expect($updated->name)->toBe('updated');
-    expect($updated->hasPermissionTo('manage_users'))->toBeTrue();
-    expect($updated->hasPermissionTo('manage_media'))->toBeTrue();
+    expect($updated->hasPermissionTo('view_users'))->toBeTrue();
+    expect($updated->hasPermissionTo('view_media'))->toBeTrue();
 });
 
 test('role service deleteRole prevents deleting protected roles', function () {

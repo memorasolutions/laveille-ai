@@ -1,16 +1,23 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Journaux', 'subtitle' => 'Application'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Journaux'), 'subtitle' => __('Application')])
 
 @section('breadcrumbs')
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Journaux</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Journaux') }}</li>
     </ol>
 </nav>
 @endsection
 
 @section('content')
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="file-text" class="icon-md text-primary"></i>{{ __('Journaux système') }}</h4>
+    <x-backoffice::help-modal id="helpLogsModal" :title="__('Journaux système')" icon="file-text" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.logs._help')
+    </x-backoffice::help-modal>
+</div>
 
 <div class="card">
     <div class="card-header py-3 px-4 border-bottom">

@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Médias', 'subtitle' => 'Bibliothèque'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Médias'), 'subtitle' => __('Bibliothèque')])
 
 @section('content')
 
@@ -9,6 +9,13 @@
         <li class="breadcrumb-item active" aria-current="page">{{ __('Médias') }}</li>
     </ol>
 </nav>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="image" class="icon-md text-primary"></i>{{ __('Médiathèque') }}</h4>
+    <x-backoffice::help-modal id="helpMediaModal" :title="__('Médiathèque')" icon="image" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.media._help')
+    </x-backoffice::help-modal>
+</div>
 
 <div class="card">
     <div class="p-4">

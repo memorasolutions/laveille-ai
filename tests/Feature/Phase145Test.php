@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\CookieCategory;
 use App\Models\User;
 use Database\Seeders\CookieCategorySeeder;
@@ -36,54 +42,6 @@ it('isRequired returns true for essential category', function () {
 
     $analytics = CookieCategory::where('name', 'analytics')->first();
     expect($analytics->isRequired())->toBeFalse();
-});
-
-it('returns 200 for cookie preferences page', function () {
-    $this->get('/cookie-preferences')->assertOk();
-});
-
-it('cookie preferences page shows category labels from database', function () {
-    $this->get('/cookie-preferences')
-        ->assertOk()
-        ->assertSee('Cookies essentiels')
-        ->assertSee('Cookies analytiques')
-        ->assertSee('Cookies marketing')
-        ->assertSee('Cookies fonctionnels');
-});
-
-it('accept sets all categories to true in cookie', function () {
-    $response = $this->post(route('cookie.accept'));
-    $response->assertRedirect();
-    $cookie = $response->getCookie('cookie_consent');
-    $data = json_decode($cookie->getValue(), true);
-
-    expect($data['essential'])->toBeTrue();
-    expect($data['functional'])->toBeTrue();
-    expect($data['analytics'])->toBeTrue();
-    expect($data['marketing'])->toBeTrue();
-});
-
-it('decline sets only required categories to true', function () {
-    $response = $this->post(route('cookie.decline'));
-    $response->assertRedirect();
-    $cookie = $response->getCookie('cookie_consent');
-    $data = json_decode($cookie->getValue(), true);
-
-    expect($data['essential'])->toBeTrue();
-    expect($data['functional'])->toBeFalse();
-    expect($data['analytics'])->toBeFalse();
-    expect($data['marketing'])->toBeFalse();
-});
-
-it('customize with analytics=1 sets analytics true and marketing false', function () {
-    $response = $this->post(route('cookie.customize'), ['analytics' => '1']);
-    $response->assertRedirect();
-    $cookie = $response->getCookie('cookie_consent');
-    $data = json_decode($cookie->getValue(), true);
-
-    expect($data['essential'])->toBeTrue();
-    expect($data['analytics'])->toBeTrue();
-    expect($data['marketing'])->toBeFalse();
 });
 
 it('admin can access cookie categories index', function () {
@@ -144,10 +102,4 @@ it('non-admin cannot access cookie categories admin', function () {
     $this->actingAs($user)
         ->get(route('admin.cookie-categories.index'))
         ->assertForbidden();
-});
-
-it('cookie banner shows dynamic categories', function () {
-    $this->get('/')
-        ->assertOk()
-        ->assertSee('Cookies essentiels');
 });

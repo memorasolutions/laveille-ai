@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -17,7 +18,10 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Modules\Auth\Notifications\LockoutContactNotification;
 use Modules\Auth\Services\AuthService;
+use Modules\Settings\Facades\Settings;
+use Illuminate\Support\Facades\Notification;
 
 #[Layout('auth::layouts.guest')]
 class Login extends Component
@@ -30,6 +34,30 @@ class Login extends Component
 
     public bool $remember = false;
 
+    public bool $isLocked = false;
+
+    public int $lockoutMinutes = 0;
+
+    public string $contactMessage = '';
+
+    public bool $contactSent = false;
+
+    public function contactAdmin(): void
+    {
+        $this->validate(['contactMessage' => 'required|min:10|max:1000']);
+
+        $admins = User::permission('manage_users')->get();
+
+        Notification::send($admins, new LockoutContactNotification(
+            $this->email,
+            $this->contactMessage,
+            request()->ip() ?? '0.0.0.0'
+        ));
+
+        $this->contactSent = true;
+        $this->contactMessage = '';
+    }
+
     public function authenticate(AuthService $authService): void
     {
         $this->validate();
@@ -38,9 +66,10 @@ class Login extends Component
         // Vérifier si le compte est verrouillé
         $user = User::where('email', $this->email)->first();
         if ($user && $user->isLocked()) {
-            throw ValidationException::withMessages([
-                'email' => __('Votre compte est temporairement verrouillé. Réessayez plus tard.'),
-            ]);
+            $this->isLocked = true;
+            $this->lockoutMinutes = max(1, (int) ceil(now()->diffInMinutes($user->locked_until, false)));
+
+            return;
         }
 
         // Vérifier si le rôle de l'utilisateur nécessite un mot de passe
@@ -52,7 +81,20 @@ class Login extends Component
 
         if (! $authService->authenticate($this->email, $this->password, $this->remember)) {
             RateLimiter::hit($this->throttleKey());
-            throw ValidationException::withMessages(['email' => __('auth.failed')]);
+            $freshUser = $user ? $user->fresh() : null;
+
+            if ($freshUser && $freshUser->isLocked()) {
+                $this->isLocked = true;
+                $this->lockoutMinutes = (int) Settings::get('security.lockout_duration', 30);
+
+                return;
+            }
+
+            $maxAttempts = (int) Settings::get('security.max_login_attempts', 5);
+            $remainingAttempts = max(0, $maxAttempts - ($freshUser->failed_login_count ?? 0));
+            throw ValidationException::withMessages([
+                'email' => __('Ces identifiants ne correspondent pas. Il vous reste :attempts tentative(s) avant le verrouillage de votre compte.', ['attempts' => $remainingAttempts]),
+            ]);
         }
 
         RateLimiter::clear($this->throttleKey());

@@ -44,7 +44,7 @@
                 </span>
                 <div class="header-info2">
                     <h6 class="text-sm font-medium">{{ auth()->user()->name }}</h6>
-                    <p class="small text-muted mb-0">{{ auth()->user()->roles->first()?->name ?? 'Utilisateur' }}</p>
+                    <p class="small text-muted mb-0">{{ auth()->user()->roles->first()?->name ?? __('Utilisateur') }}</p>
                 </div>
             </a>
             <div x-show="open"
@@ -54,13 +54,13 @@
                  style="display:none;">
                 <a href="{{ route('admin.profile') }}" class="dropdown-item ai-icon">
                     <i class="fa fa-user-circle text-primary me-2"></i>
-                    <span class="ms-2">Profil</span>
+                    <span class="ms-2">{{ __('Profil') }}</span>
                 </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="dropdown-item ai-icon">
                         <i class="fa fa-sign-out-alt text-danger me-2"></i>
-                        <span class="ms-2">Déconnexion</span>
+                        <span class="ms-2">{{ __('Déconnexion') }}</span>
                     </button>
                 </form>
             </div>
@@ -74,198 +74,198 @@
             <li class="{{ request()->routeIs('admin.dashboard') ? 'mm-active' : '' }}">
                 <a href="{{ route('admin.dashboard') }}" aria-expanded="false">
                     <i class="flaticon-025-dashboard"></i>
-                    <span class="nav-text">Tableau de bord</span>
+                    <span class="nav-text">{{ __('Tableau de bord') }}</span>
                 </a>
             </li>
 
             <li class="{{ request()->routeIs('admin.stats') ? 'mm-active' : '' }}">
                 <a href="{{ route('admin.stats') }}" aria-expanded="false">
                     <i class="fa fa-chart-bar"></i>
-                    <span class="nav-text">Statistiques</span>
+                    <span class="nav-text">{{ __('Statistiques') }}</span>
                 </a>
             </li>
 
             {{-- ===== CONTENU ===== --}}
-            <li class="nav-label">Contenu</li>
+            <li class="nav-label">{{ __('Contenu') }}</li>
 
             <li class="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*') ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa fa-layer-group"></i>
-                    <span class="nav-text">Contenu</span>
+                    <span class="nav-text">{{ __('Contenu') }}</span>
                 </a>
                 <ul aria-expanded="false">
                     <li class="{{ request()->routeIs('admin.blog.articles.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.blog.articles.index') }}">Articles</a>
+                        <a href="{{ route('admin.blog.articles.index') }}">{{ __('Articles') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.blog.comments.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.blog.comments.index') }}">Commentaires</a>
+                        <a href="{{ route('admin.blog.comments.index') }}">{{ __('Commentaires') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.blog.categories.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.blog.categories.index') }}">Catégories</a>
+                        <a href="{{ route('admin.blog.categories.index') }}">{{ __('Catégories') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.pages.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.pages.index') }}">Pages</a>
+                        <a href="{{ route('admin.pages.index') }}">{{ __('Pages') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.media.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.media.index') }}">Médias</a>
+                        <a href="{{ route('admin.media.index') }}">{{ __('Médias') }}</a>
                     </li>
                 </ul>
             </li>
 
             {{-- ===== UTILISATEURS ===== --}}
-            <li class="nav-label">Utilisateurs</li>
+            <li class="nav-label">{{ __('Utilisateurs') }}</li>
 
             <li class="{{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.newsletter.*') ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa fa-users"></i>
-                    <span class="nav-text">Utilisateurs</span>
+                    <span class="nav-text">{{ __('Utilisateurs') }}</span>
                 </a>
                 <ul aria-expanded="false">
                     <li class="{{ request()->routeIs('admin.users.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.users.index') }}">Membres</a>
+                        <a href="{{ route('admin.users.index') }}">{{ __('Membres') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.roles.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.roles.index') }}">Rôles</a>
+                        <a href="{{ route('admin.roles.index') }}">{{ __('Rôles') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.newsletter.index') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.newsletter.index') }}">Newsletter</a>
+                        <a href="{{ route('admin.newsletter.index') }}">{{ __('Newsletter') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.newsletter.campaigns.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.newsletter.campaigns.index') }}">Campagnes</a>
+                        <a href="{{ route('admin.newsletter.campaigns.index') }}">{{ __('Campagnes') }}</a>
                     </li>
                 </ul>
             </li>
 
             {{-- ===== MONÉTISATION ===== --}}
-            <li class="nav-label">Monétisation</li>
+            <li class="nav-label">{{ __('Monétisation') }}</li>
 
             <li class="{{ request()->routeIs('admin.plans.*') ? 'mm-active' : '' }}">
                 <a href="{{ route('admin.plans.index') }}" aria-expanded="false">
                     <i class="fa fa-tags"></i>
-                    <span class="nav-text">Plans</span>
+                    <span class="nav-text">{{ __('Plans') }}</span>
                 </a>
             </li>
 
             <li class="{{ request()->routeIs('admin.revenue') ? 'mm-active' : '' }}">
                 <a href="{{ route('admin.revenue') }}" aria-expanded="false">
                     <i class="fa fa-dollar-sign"></i>
-                    <span class="nav-text">Revenus</span>
+                    <span class="nav-text">{{ __('Revenus') }}</span>
                 </a>
             </li>
 
             {{-- ===== CONFIGURATION ===== --}}
-            <li class="nav-label">Configuration</li>
+            <li class="nav-label">{{ __('Configuration') }}</li>
 
             <li class="{{ request()->routeIs('admin.settings.*', 'admin.branding.*', 'admin.seo.*', 'admin.feature-flags.*', 'admin.translations.*', 'admin.plugins.*', 'admin.email-templates.*', 'admin.webhooks.*', 'admin.shortcodes.*', 'admin.cookie-categories.*', 'admin.onboarding-steps.*') ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa fa-cog"></i>
-                    <span class="nav-text">Configuration</span>
+                    <span class="nav-text">{{ __('Configuration') }}</span>
                 </a>
                 <ul aria-expanded="false">
                     <li class="{{ request()->routeIs('admin.settings.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.settings.index') }}">Paramètres</a>
+                        <a href="{{ route('admin.settings.index') }}">{{ __('Paramètres') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.branding.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.branding.edit') }}">Personnalisation</a>
+                        <a href="{{ route('admin.branding.edit') }}">{{ __('Personnalisation') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.seo.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.seo.index') }}">SEO</a>
+                        <a href="{{ route('admin.seo.index') }}">{{ __('SEO') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.feature-flags.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.feature-flags.index') }}">Feature Flags</a>
+                        <a href="{{ route('admin.feature-flags.index') }}">{{ __('Feature Flags') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.translations.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.translations.index') }}">Traductions</a>
+                        <a href="{{ route('admin.translations.index') }}">{{ __('Traductions') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.plugins.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.plugins.index') }}">Plugins</a>
+                        <a href="{{ route('admin.plugins.index') }}">{{ __('Plugins') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.email-templates.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.email-templates.index') }}">Emails templates</a>
+                        <a href="{{ route('admin.email-templates.index') }}">{{ __('Emails templates') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.webhooks.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.webhooks.index') }}">Webhooks</a>
+                        <a href="{{ route('admin.webhooks.index') }}">{{ __('Webhooks') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.shortcodes.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.shortcodes.index') }}">Shortcodes</a>
+                        <a href="{{ route('admin.shortcodes.index') }}">{{ __('Shortcodes') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.cookie-categories.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.cookie-categories.index') }}">Cookies GDPR</a>
+                        <a href="{{ route('admin.cookie-categories.index') }}">{{ __('Cookies GDPR') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.onboarding-steps.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.onboarding-steps.index') }}">Onboarding</a>
+                        <a href="{{ route('admin.onboarding-steps.index') }}">{{ __('Onboarding') }}</a>
                     </li>
                 </ul>
             </li>
 
             {{-- ===== SÉCURITÉ ===== --}}
-            <li class="nav-label">Sécurité</li>
+            <li class="nav-label">{{ __('Sécurité') }}</li>
 
             <li class="{{ request()->routeIs('admin.security', 'admin.blocked-ips.*', 'admin.login-history') ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa fa-shield-alt"></i>
-                    <span class="nav-text">Sécurité</span>
+                    <span class="nav-text">{{ __('Sécurité') }}</span>
                 </a>
                 <ul aria-expanded="false">
                     <li class="{{ request()->routeIs('admin.security') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.security') }}">Tableau de bord</a>
+                        <a href="{{ route('admin.security') }}">{{ __('Tableau de bord') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.blocked-ips.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.blocked-ips.index') }}">IPs bloquées</a>
+                        <a href="{{ route('admin.blocked-ips.index') }}">{{ __('IPs bloquées') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.login-history') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.login-history') }}">Connexions</a>
+                        <a href="{{ route('admin.login-history') }}">{{ __('Connexions') }}</a>
                     </li>
                 </ul>
             </li>
 
             {{-- ===== OUTILS ===== --}}
-            <li class="nav-label">Outils</li>
+            <li class="nav-label">{{ __('Outils') }}</li>
 
             <li class="{{ request()->routeIs('admin.backups.*', 'admin.activity-logs.*', 'admin.logs', 'admin.failed-jobs.*', 'admin.trash.*', 'admin.health', 'admin.scheduler', 'admin.mail-log', 'admin.cache', 'admin.system-info', 'admin.data-retention', 'admin.notifications.*', 'admin.push-notifications.*') ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa fa-tools"></i>
-                    <span class="nav-text">Outils</span>
+                    <span class="nav-text">{{ __('Outils') }}</span>
                 </a>
                 <ul aria-expanded="false">
                     <li class="{{ request()->routeIs('admin.backups.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.backups.index') }}">Sauvegardes</a>
+                        <a href="{{ route('admin.backups.index') }}">{{ __('Sauvegardes') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.activity-logs.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.activity-logs.index') }}">Journaux d'activité</a>
+                        <a href="{{ route('admin.activity-logs.index') }}">{{ __('Journaux d\'activité') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.logs') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.logs') }}">Journaux app</a>
+                        <a href="{{ route('admin.logs') }}">{{ __('Journaux app') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.failed-jobs.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.failed-jobs.index') }}">Jobs échoués</a>
+                        <a href="{{ route('admin.failed-jobs.index') }}">{{ __('Jobs échoués') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.trash.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.trash.index') }}">Corbeille</a>
+                        <a href="{{ route('admin.trash.index') }}">{{ __('Corbeille') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.health') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.health') }}">Santé système</a>
+                        <a href="{{ route('admin.health') }}">{{ __('Santé système') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.scheduler') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.scheduler') }}">Scheduler</a>
+                        <a href="{{ route('admin.scheduler') }}">{{ __('Scheduler') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.mail-log') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.mail-log') }}">Emails envoyés</a>
+                        <a href="{{ route('admin.mail-log') }}">{{ __('Emails envoyés') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.cache') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.cache') }}">Cache</a>
+                        <a href="{{ route('admin.cache') }}">{{ __('Cache') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.system-info') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.system-info') }}">Infos système</a>
+                        <a href="{{ route('admin.system-info') }}">{{ __('Infos système') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.data-retention') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.data-retention') }}">Rétention données</a>
+                        <a href="{{ route('admin.data-retention') }}">{{ __('Rétention données') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.notifications.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.notifications.index') }}">Notifications</a>
+                        <a href="{{ route('admin.notifications.index') }}">{{ __('Notifications') }}</a>
                     </li>
                     <li class="{{ request()->routeIs('admin.push-notifications.*') ? 'mm-active' : '' }}">
-                        <a href="{{ route('admin.push-notifications.index') }}">Push notifications</a>
+                        <a href="{{ route('admin.push-notifications.index') }}">{{ __('Push notifications') }}</a>
                     </li>
                     <li>
                         <a href="/horizon" target="_blank" rel="noopener noreferrer">Horizon ↗</a>

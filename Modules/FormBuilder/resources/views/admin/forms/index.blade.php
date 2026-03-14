@@ -5,16 +5,21 @@
 @section('content')
 <nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Formulaires</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Formulaires') }}</li>
     </ol>
 </nav>
-<div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
-    <h4 class="mb-3 mb-md-0">Formulaires</h4>
-    <a href="{{ route('admin.formbuilder.forms.create') }}" class="btn btn-primary btn-icon-text">
-        <i class="btn-icon-prepend" data-lucide="plus"></i>
-        Nouveau formulaire
-    </a>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="clipboard-list" class="icon-md text-primary"></i>{{ __('Formulaires') }}</h4>
+    <div class="d-flex align-items-center gap-2">
+        <x-backoffice::help-modal id="helpFormBuilderFormsModal" :title="__('Formulaires personnalisés')" icon="clipboard-list" :buttonLabel="__('Aide')">
+            @include('formbuilder::admin.forms._help')
+        </x-backoffice::help-modal>
+        <a href="{{ route('admin.formbuilder.forms.create') }}" class="btn btn-primary btn-icon-text">
+            <i class="btn-icon-prepend" data-lucide="plus"></i>
+            {{ __('Nouveau formulaire') }}
+        </a>
+    </div>
 </div>
 
 @if(session('success'))

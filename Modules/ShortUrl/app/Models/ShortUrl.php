@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 declare(strict_types=1);
 
 namespace Modules\ShortUrl\Models;
@@ -77,7 +83,7 @@ class ShortUrl extends Model
     {
         $query->where(function (Builder $q) {
             $q->whereNull('expires_at')
-              ->orWhere('expires_at', '>', now());
+                ->orWhere('expires_at', '>', now());
         });
     }
 
@@ -104,7 +110,7 @@ class ShortUrl extends Model
             return "{$scheme}://{$this->domain->domain}/{$this->slug}";
         }
 
-        return url('/s/' . $this->slug);
+        return url('/s/'.$this->slug);
     }
 
     public function incrementClicks(): void

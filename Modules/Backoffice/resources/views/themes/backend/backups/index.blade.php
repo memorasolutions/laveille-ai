@@ -1,9 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Sauvegardes', 'subtitle' => 'Gestion'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Sauvegardes'), 'subtitle' => __('Gestion')])
 
 @section('content')
 
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('Sauvegardes') }}</li>
@@ -24,6 +24,9 @@
                 <span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal fs-6">{{ $totalMB }} MB · {{ count($backups) }} {{ __('fichier(s)') }}</span>
             @endif
         </h4>
+        <x-backoffice::help-modal id="helpBackupsModal" :title="__('Sauvegardes')" icon="hard-drive-download" :buttonLabel="__('Aide')">
+            @include('backoffice::themes.backend.backups._help')
+        </x-backoffice::help-modal>
         <form action="{{ route('admin.backups.run') }}" method="POST">
             @csrf
             <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2">

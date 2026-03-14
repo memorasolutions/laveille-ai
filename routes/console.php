@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -43,6 +44,9 @@ Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '
 
 // Newsletter digest (weekly, Monday 09:00)
 Schedule::command('newsletter:digest')->weeklyOn(1, '09:00');
+
+// AI knowledge base - scrape URLs needing refresh
+Schedule::command('ai:scrape-urls --all')->dailyAt('05:00');
 
 // Custom scheduled tasks from database
 try {

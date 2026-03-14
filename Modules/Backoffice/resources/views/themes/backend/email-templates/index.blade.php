@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Templates email', 'subtitle' => 'Liste'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Templates email'), 'subtitle' => __('Liste')])
 
 @section('content')
 
@@ -16,6 +16,13 @@
         {{ session('success') }}
     </div>
 @endif
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="mail-check" class="icon-md text-primary"></i>{{ __('Modèles d\'emails') }}</h4>
+    <x-backoffice::help-modal id="helpEmailTemplatesModal" :title="__('Modèles d\'emails automatiques')" icon="mail-check" :buttonLabel="__('Aide')">
+        @include('backoffice::themes.backend.email-templates._help')
+    </x-backoffice::help-modal>
+</div>
 
 <div class="card">
     <div class="card-header py-3 px-4 border-bottom">

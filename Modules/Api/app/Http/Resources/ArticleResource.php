@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -34,7 +35,7 @@ final class ArticleResource extends JsonResource
                 'name' => $this->user?->name,
             ]),
             'comments_count' => $this->whenCounted('comments'),
-            'url' => route('blog.show', $this->slug),
+            'url' => url('/api/v1/articles/'.$this->slug),
         ];
     }
 }

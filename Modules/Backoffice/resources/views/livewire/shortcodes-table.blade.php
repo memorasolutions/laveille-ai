@@ -58,7 +58,7 @@
                     </th>
                     <th class="fw-medium" style="cursor:pointer" wire:click="sort('tag')">
                         Tag
-                        @if($sortField === 'tag')
+                        @if($sortBy === 'tag')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
                             <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
@@ -66,7 +66,7 @@
                     </th>
                     <th class="fw-medium" style="cursor:pointer" wire:click="sort('name')">
                         {{ __('Nom') }}
-                        @if($sortField === 'name')
+                        @if($sortBy === 'name')
                             <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                         @else
                             <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>

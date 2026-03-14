@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -55,9 +56,9 @@ class BackofficeHealthController extends Controller
 
         $explanations = [
             'OptimizedApp' => ['explanation' => "L'application n'est pas optimisée. Les caches de configuration, routes et vues ne sont pas activés. Cela ralentit chaque requête.", 'fixable' => true],
-            'DebugMode' => ['explanation' => "Le mode debug est activé. Les erreurs détaillées sont visibles par tous les visiteurs, ce qui expose des informations sensibles.", 'fixable' => true],
+            'DebugMode' => ['explanation' => 'Le mode debug est activé. Les erreurs détaillées sont visibles par tous les visiteurs, ce qui expose des informations sensibles.', 'fixable' => true],
             'Cache' => ['explanation' => "Le système de cache ne fonctionne pas correctement. Les données temporaires ne peuvent pas être stockées, ce qui ralentit l'application.", 'fixable' => true],
-            'Schedule' => ['explanation' => "Le planificateur de tâches ne fonctionne pas. Les sauvegardes automatiques, nettoyages et envois programmés sont suspendus.", 'fixable' => false],
+            'Schedule' => ['explanation' => 'Le planificateur de tâches ne fonctionne pas. Les sauvegardes automatiques, nettoyages et envois programmés sont suspendus.', 'fixable' => false],
             'Database' => ['explanation' => "La connexion à la base de données a échoué. L'application ne peut pas lire ni écrire de données.", 'fixable' => false],
             'UsedDiskSpace' => ['explanation' => "L'espace disque est insuffisant. Les uploads, sauvegardes et logs pourraient échouer.", 'fixable' => false],
             'Environment' => ['explanation' => "L'environnement n'est pas configuré en production. Certaines optimisations et protections sont désactivées.", 'fixable' => false],
@@ -73,7 +74,7 @@ class BackofficeHealthController extends Controller
 
             return response()->json(['success' => true, 'message' => $successMessage]);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Erreur : '.$e->getMessage()]);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -37,8 +38,8 @@ class CustomFieldDefinitionController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'key' => 'nullable|string|max:100|unique:custom_field_definitions,key',
-            'type' => 'required|in:' . implode(',', CustomFieldDefinition::TYPES),
-            'model_type' => 'required|in:' . implode(',', array_keys(CustomFieldDefinition::MODEL_TYPES)),
+            'type' => 'required|in:'.implode(',', CustomFieldDefinition::TYPES),
+            'model_type' => 'required|in:'.implode(',', array_keys(CustomFieldDefinition::MODEL_TYPES)),
             'options' => 'nullable|string',
             'validation_rules' => 'nullable|string|max:255',
             'default_value' => 'nullable|string|max:255',
@@ -73,9 +74,9 @@ class CustomFieldDefinitionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'key' => 'nullable|string|max:100|unique:custom_field_definitions,key,' . $custom_field->id,
-            'type' => 'required|in:' . implode(',', CustomFieldDefinition::TYPES),
-            'model_type' => 'required|in:' . implode(',', array_keys(CustomFieldDefinition::MODEL_TYPES)),
+            'key' => 'nullable|string|max:100|unique:custom_field_definitions,key,'.$custom_field->id,
+            'type' => 'required|in:'.implode(',', CustomFieldDefinition::TYPES),
+            'model_type' => 'required|in:'.implode(',', array_keys(CustomFieldDefinition::MODEL_TYPES)),
             'options' => 'nullable|string',
             'validation_rules' => 'nullable|string|max:255',
             'default_value' => 'nullable|string|max:255',

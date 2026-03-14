@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 import { test, expect } from '@playwright/test';
 
 test.describe('Authentication pages', () => {

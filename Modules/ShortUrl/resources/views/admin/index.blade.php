@@ -12,11 +12,16 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0 fw-semibold">Liens courts</h4>
-    <a href="{{ route('admin.short-urls.create') }}" class="btn btn-primary">
-        <i data-lucide="plus" style="width:16px;height:16px;" class="me-1"></i>
-        Créer un lien
-    </a>
+    <h4 class="mb-0 fw-bold d-flex align-items-center gap-2"><i data-lucide="link" class="icon-md text-primary"></i>{{ __('Liens courts') }}</h4>
+    <div class="d-flex align-items-center gap-2">
+        <x-backoffice::help-modal id="helpShortUrlModal" :title="__('Liens courts – comment ça marche ?')" icon="link" :buttonLabel="__('Aide')">
+            @include('shorturl::admin._help')
+        </x-backoffice::help-modal>
+        <a href="{{ route('admin.short-urls.create') }}" class="btn btn-primary">
+            <i data-lucide="plus" style="width:16px;height:16px;" class="me-1"></i>
+            {{ __('Créer un lien') }}
+        </a>
+    </div>
 </div>
 
 <div class="card">

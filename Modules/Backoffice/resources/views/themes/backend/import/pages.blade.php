@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Import CSV', 'subtitle' => 'Pages'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Import CSV'), 'subtitle' => __('Pages')])
 
 @section('content')
 

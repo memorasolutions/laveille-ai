@@ -13,17 +13,17 @@
             <div class="border rounded-3">
                 <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom">
                     <i data-lucide="link" class="icon-sm text-muted"></i>
-                    <h6 class="fw-medium mb-0 text-body">Ajouter un endpoint</h6>
+                    <h6 class="fw-medium mb-0 text-body">{{ __('Ajouter un endpoint') }}</h6>
                 </div>
                 <div class="p-3">
                     <form wire:submit="store">
                         <div class="mb-3">
                             <label class="form-label fw-medium">
-                                Nom <span class="text-danger">*</span>
+                                {{ __('Nom') }} <span class="text-danger">*</span>
                             </label>
                             <input type="text" wire:model="name"
                                    class="form-control form-control-sm @error('name') is-invalid @enderror"
-                                   placeholder="Ex: Notifications Slack">
+                                   placeholder="{{ __('Ex: Notifications Slack') }}">
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -41,14 +41,14 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-medium">
-                                Secret <span class="text-muted fw-normal">(optionnel)</span>
+                                {{ __('Secret') }} <span class="text-muted fw-normal">({{ __('optionnel') }})</span>
                             </label>
                             <input type="text" wire:model="secret"
                                    class="form-control form-control-sm"
-                                   placeholder="Clé secrète HMAC">
+                                   placeholder="{{ __('Clé secrète HMAC') }}">
                         </div>
                         <button type="submit" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
-                            <i data-lucide="plus" class="icon-sm"></i> Ajouter
+                            <i data-lucide="plus" class="icon-sm"></i> {{ __('Ajouter') }}
                         </button>
                     </form>
                 </div>
@@ -67,18 +67,18 @@
                 @if($webhooks->isEmpty())
                     <div class="px-3 py-5 text-center">
                         <i data-lucide="link" class="icon-lg text-muted mb-2 d-block mx-auto"></i>
-                        <p class="text-muted mb-0 small">Aucun webhook configuré.</p>
+                        <p class="text-muted mb-0 small">{{ __('Aucun webhook configuré.') }}</p>
                     </div>
                 @else
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr class="border-bottom">
-                                    <th class="py-3 px-3 fw-medium">Nom</th>
+                                    <th class="py-3 px-3 fw-medium">{{ __('Nom') }}</th>
                                     <th class="py-3 px-3 fw-medium">URL</th>
-                                    <th class="py-3 px-3 fw-medium">Statut</th>
-                                    <th class="py-3 px-3 fw-medium">Créé le</th>
-                                    <th class="py-3 px-3 fw-medium">Actions</th>
+                                    <th class="py-3 px-3 fw-medium">{{ __('Statut') }}</th>
+                                    <th class="py-3 px-3 fw-medium">{{ __('Créé le') }}</th>
+                                    <th class="py-3 px-3 fw-medium">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -92,9 +92,9 @@
                                     </td>
                                     <td class="py-3 px-3">
                                         @if($webhook->is_active)
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 fw-semibold">Actif</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 fw-semibold">{{ __('Actif') }}</span>
                                         @else
-                                            <span class="badge bg-light text-muted border fw-semibold">Inactif</span>
+                                            <span class="badge bg-light text-muted border fw-semibold">{{ __('Inactif') }}</span>
                                         @endif
                                     </td>
                                     <td class="py-3 px-3 text-muted small">{{ $webhook->created_at->diffForHumans() }}</td>
@@ -109,9 +109,9 @@
                                                  class="position-absolute end-0 mt-1 bg-white border rounded shadow"
                                                  style="z-index:50;min-width:140px;top:100%;">
                                                 <button wire:click="delete({{ $webhook->id }})"
-                                                        wire:confirm="Supprimer ce webhook ?"
+                                                        wire:confirm="{{ __('Supprimer ce webhook ?') }}"
                                                         class="btn btn-sm btn-link text-danger d-flex align-items-center gap-2 w-100 px-3 py-2 text-decoration-none">
-                                                    <i data-lucide="trash-2" class="icon-sm"></i> Supprimer
+                                                    <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
                                                 </button>
                                             </div>
                                         </div>

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -19,7 +20,7 @@ class HandleUrlRedirects
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $path = '/' . ltrim($request->path(), '/');
+        $path = '/'.ltrim($request->path(), '/');
 
         $redirect = Cache::remember(
             "url_redirect:{$path}",

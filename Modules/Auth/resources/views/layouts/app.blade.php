@@ -43,8 +43,14 @@
     @stack('styles')
 
     {{-- PWA --}}
-    <link rel="manifest" href="/manifest.json">
+    @if(config('pwa.enabled'))
+    <link rel="manifest" href="{{ route('pwa.manifest') }}">
     <meta name="theme-color" content="{{ $primaryColor }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ config('pwa.short_name') }}">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.png">
+    @endif
 </head>
 <body class="sidebar-dark" data-base-url="{{ url('/') }}">
 
@@ -442,5 +448,11 @@
 
     {{-- AI Chatbot --}}
     @livewire('ai-chatbot')
+
+    {{-- PWA prompts --}}
+    @if(config('pwa.enabled'))
+        <x-pwa-install-prompt />
+        <x-pwa-update-prompt />
+    @endif
 </body>
 </html>

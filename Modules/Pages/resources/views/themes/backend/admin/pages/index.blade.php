@@ -10,13 +10,20 @@
     </ol>
 </nav>
 
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="file" class="icon-md text-primary"></i>{{ __('Pages statiques') }}</h4>
+    <x-backoffice::help-modal id="helpPagesModal" :title="__('Pages statiques')" icon="file" :buttonLabel="__('Aide')">
+        @include('pages::admin.pages._help')
+    </x-backoffice::help-modal>
+</div>
+
 <div class="card">
     <div class="card-header d-block py-3 px-4 border-bottom">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <h4 class="fw-bold mb-0 fs-5">Pages statiques</h4>
+            <h4 class="fw-bold mb-0 fs-5">{{ __('Pages statiques') }}</h4>
             <a href="{{ route('admin.pages.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
                 <i data-lucide="plus" class="icon-sm"></i>
-                Nouvelle page
+                {{ __('Nouvelle page') }}
             </a>
         </div>
     </div>

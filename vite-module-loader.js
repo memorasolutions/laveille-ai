@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 import fs from 'fs/promises';
 import path from 'path';
 import { pathToFileURL } from 'url';

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -34,7 +35,7 @@ class StaticPageController extends Controller
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
             'status' => 'nullable|in:draft,published',
-            'template' => 'nullable|in:' . implode(',', array_keys(StaticPage::TEMPLATES)),
+            'template' => 'nullable|in:'.implode(',', array_keys(StaticPage::TEMPLATES)),
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
         ]);
@@ -74,7 +75,7 @@ class StaticPageController extends Controller
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
             'status' => 'nullable|in:draft,published',
-            'template' => 'nullable|in:' . implode(',', array_keys(StaticPage::TEMPLATES)),
+            'template' => 'nullable|in:'.implode(',', array_keys(StaticPage::TEMPLATES)),
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
         ]);

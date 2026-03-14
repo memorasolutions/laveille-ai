@@ -1,19 +1,19 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
-@section('title', 'Nouvelle experience')
+@section('title', __('Nouvelle experience'))
 @section('content')
-<nav class="page-breadcrumb" aria-label="Fil d'Ariane">
+<nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.experiments.index') }}">Experiences A/B</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Nouvelle</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.experiments.index') }}">{{ __('Experiences A/B') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Nouvelle') }}</li>
     </ol>
 </nav>
 <div class="page-content">
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 class="mb-0">Nouvelle experience</h4>
+        <h4 class="mb-0">{{ __('Nouvelle experience') }}</h4>
         <a href="{{ route('admin.experiments.index') }}" class="btn btn-secondary">
-            <i data-lucide="arrow-left"></i> Retour
+            <i data-lucide="arrow-left"></i> {{ __('Retour') }}
         </a>
     </div>
 
@@ -23,7 +23,7 @@
                 @csrf
 
                 <div class="mb-3">
-                    <label for="name" class="form-label">Nom <span class="text-danger">*</span></label>
+                    <label for="name" class="form-label">{{ __('Nom') }} <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required maxlength="255">
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
+                    <label for="description" class="form-label">{{ __('Description') }}</label>
                     <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3">{{ old('description') }}</textarea>
                     @error('description')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -50,7 +50,7 @@
                         }
                     }
                 }">
-                    <label class="form-label">Variantes <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('Variantes') }} <span class="text-danger">*</span></label>
 
                     <template x-for="(variant, index) in variants" :key="index">
                         <div class="input-group mb-2">
@@ -77,13 +77,13 @@
                     @enderror
 
                     <button type="button" class="btn btn-outline-primary btn-sm mt-2"
-                            @click="addVariant()" aria-label="Ajouter une variante">
-                        <i data-lucide="plus" class="me-1"></i> Ajouter une variante
+                            @click="addVariant()" aria-label="{{ __('Ajouter une variante') }}">
+                        <i data-lucide="plus" class="me-1"></i> {{ __('Ajouter une variante') }}
                     </button>
                 </div>
 
                 <button type="submit" class="btn btn-primary">
-                    <i data-lucide="save"></i> Creer l'experience
+                    <i data-lucide="save"></i> {{ __('Creer l\'experience') }}
                 </button>
             </form>
         </div>

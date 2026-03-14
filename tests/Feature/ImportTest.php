@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -97,7 +103,7 @@ it('redirects for invalid template type', function () {
 });
 
 it('creates ImportResult with correct defaults', function () {
-    $result = new ImportResult();
+    $result = new ImportResult;
 
     expect($result->total)->toBe(0)
         ->and($result->imported)->toBe(0)
@@ -108,7 +114,7 @@ it('creates ImportResult with correct defaults', function () {
 });
 
 it('calculates ImportResult success rate', function () {
-    $result = new ImportResult();
+    $result = new ImportResult;
     $result->total = 10;
     $result->imported = 8;
     $result->skipped = 2;
@@ -126,7 +132,7 @@ it('resolves available fields for each model type', function () {
 });
 
 it('previews file with correct structure', function () {
-    $service = new ImportService();
+    $service = new ImportService;
 
     $csvContent = "title,content\nTest,Contenu test\nTest2,Contenu 2";
     $path = \Illuminate\Support\Facades\Storage::disk('local')->path('imports/test_preview.csv');
@@ -159,7 +165,7 @@ it('imports articles from CSV', function () {
     }
     file_put_contents($path, $csvContent);
 
-    $service = new ImportService();
+    $service = new ImportService;
     $result = $service->import($path, 'csv', 'article', [
         0 => 'title',
         1 => 'content',
@@ -181,7 +187,7 @@ it('skips invalid rows and collects errors', function () {
     $admin->assignRole('super_admin');
     $this->actingAs($admin);
 
-    $service = new ImportService();
+    $service = new ImportService;
     $result = $service->import(
         \Illuminate\Support\Facades\Storage::disk('local')->path('imports/nonexistent.csv'),
         'csv',

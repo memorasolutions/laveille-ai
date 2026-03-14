@@ -4,10 +4,15 @@
 @section('content')
 <div class="page-content">
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 class="mb-0">Menus</h4>
-        <a href="{{ route('admin.menus.create') }}" class="btn btn-primary">
-            <i data-lucide="plus"></i> Créer un menu
-        </a>
+        <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="menu" class="icon-md text-primary"></i>{{ __('Menus') }}</h4>
+        <div class="d-flex align-items-center gap-2">
+            <x-backoffice::help-modal id="helpMenuModal" :title="__('Gestion des menus de navigation')" icon="menu" :buttonLabel="__('Aide')">
+                @include('menu::admin._help')
+            </x-backoffice::help-modal>
+            <a href="{{ route('admin.menus.create') }}" class="btn btn-primary">
+                <i data-lucide="plus"></i> {{ __('Créer un menu') }}
+            </a>
+        </div>
     </div>
 
     <div class="card">

@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -12,11 +13,12 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Core\Traits\HasTableSorting;
 use Spatie\Permission\Models\Role;
 
 class RolesTable extends Component
 {
-    use WithPagination;
+    use HasTableSorting, WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
 
@@ -30,16 +32,6 @@ class RolesTable extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
-    }
-
-    public function sort(string $column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
     }
 
     public function render(): \Illuminate\View\View

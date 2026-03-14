@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -72,7 +73,7 @@ class UrlRedirectController extends Controller
     {
         $uniqueRule = 'unique:url_redirects,from_url';
         if ($redirect) {
-            $uniqueRule .= ',' . $redirect->id;
+            $uniqueRule .= ','.$redirect->id;
         }
 
         return [

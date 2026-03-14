@@ -38,17 +38,17 @@
                 </span>
                 <input type="text" wire:model.live.debounce.300ms="search"
                        class="form-control form-control-sm border-start-0"
-                       placeholder="Rechercher une catégorie..."
+                       placeholder="{{ __('Rechercher une catégorie...') }}"
                        aria-label="Rechercher">
             </div>
             <select wire:model.live="filterActive" class="form-select form-select-sm w-auto" aria-label="Filtrer par statut">
-                <option value="">Tous les statuts</option>
-                <option value="1">Actif</option>
-                <option value="0">Inactif</option>
+                <option value="">{{ __('Tous les statuts') }}</option>
+                <option value="1">{{ __('Actif') }}</option>
+                <option value="0">{{ __('Inactif') }}</option>
             </select>
             <button wire:click="resetFilters"
                     class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
-                <i data-lucide="refresh-cw" class="icon-sm"></i> Réinitialiser
+                <i data-lucide="refresh-cw" class="icon-sm"></i> {{ __('Réinitialiser') }}
             </button>
         </div>
     </div>
@@ -60,11 +60,11 @@
                     <th style="width:40px;">
                         <input type="checkbox" wire:model.live="selectAll" class="form-check-input" style="width:16px;height:16px;" aria-label="Tout sélectionner">
                     </th>
-                    <th class="fw-medium">Nom</th>
-                    <th class="fw-medium">Couleur</th>
-                    <th class="fw-medium">Articles</th>
-                    <th class="fw-medium">Statut</th>
-                    <th class="fw-medium">Actions</th>
+                    <th class="fw-medium">{{ __('Nom') }}</th>
+                    <th class="fw-medium">{{ __('Couleur') }}</th>
+                    <th class="fw-medium">{{ __('Articles') }}</th>
+                    <th class="fw-medium">{{ __('Statut') }}</th>
+                    <th class="fw-medium">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -96,7 +96,7 @@
                             <input class="form-check-input" type="checkbox" role="switch"
                                    wire:click="toggleActive({{ $category->id }})"
                                    @checked($category->is_active)
-                                   title="{{ $category->is_active ? 'Désactiver' : 'Activer' }}">
+                                   title="{{ $category->is_active ? __('Désactiver') : __('Activer') }}">
                         </div>
                     </td>
                     <td>
@@ -111,14 +111,14 @@
                                  style="z-index:50;min-width:140px;">
                                 <a href="{{ route('admin.blog.categories.edit', $category) }}"
                                    class="dropdown-item d-flex align-items-center gap-2 text-body">
-                                    <i data-lucide="pencil" class="icon-sm text-success"></i> Modifier
+                                    <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                 </a>
                                 <form action="{{ route('admin.blog.categories.destroy', $category) }}" method="POST"
-                                      onsubmit="return confirm('Supprimer cette catégorie ?')">
+                                      onsubmit="return confirm('{{ __('Supprimer cette catégorie ?') }}')">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                             class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                        <i data-lucide="trash-2" class="icon-sm"></i> Supprimer
+                                        <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
                                     </button>
                                 </form>
                             </div>
@@ -129,7 +129,7 @@
                 <tr>
                     <td colspan="6" class="py-5 text-center text-muted">
                         <i data-lucide="tag" class="d-block mx-auto mb-2 text-muted" style="width:32px;height:32px;opacity:.4;"></i>
-                        Aucune catégorie
+                        {{ __('Aucune catégorie') }}
                     </td>
                 </tr>
                 @endforelse
@@ -138,7 +138,7 @@
     </div>
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-3 border-top">
-        <span class="text-muted small">{{ $categories->total() }} catégorie(s)</span>
+        <span class="text-muted small">{{ $categories->total() }} {{ __('catégorie(s)') }}</span>
         {{ $categories->links() }}
     </div>
 </div>

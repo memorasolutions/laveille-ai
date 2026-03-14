@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Pages\Models\StaticPage;
@@ -52,20 +58,6 @@ test('can delete static page', function () {
         ->assertRedirect(route('admin.pages.index'));
 
     $this->assertSoftDeleted('static_pages', ['id' => $page->id]);
-});
-
-// 5. published page visible public
-test('published page visible on public route', function () {
-    $page = StaticPage::factory()->published()->create(['title' => 'Page Publique']);
-    $this->get('/pages/'.$page->slug)
-        ->assertStatus(200)
-        ->assertSee('Page Publique');
-});
-
-// 6. draft page not accessible public
-test('draft page returns 404 on public route', function () {
-    $page = StaticPage::factory()->draft()->create();
-    $this->get('/pages/'.$page->slug)->assertStatus(404);
 });
 
 // 7. non-admin cannot access admin pages

@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Plugins & Modules', 'subtitle' => 'Gestion des modules'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Plugins & Modules'), 'subtitle' => __('Gestion des modules')])
 
 @section('content')
 

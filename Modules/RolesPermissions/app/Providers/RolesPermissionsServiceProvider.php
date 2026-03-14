@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -30,7 +31,6 @@ class RolesPermissionsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerCommands();
-        $this->registerCommandSchedules();
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
@@ -56,17 +56,6 @@ class RolesPermissionsServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\RolesPermissions\Console\SyncPermissionsCommand::class,
         ]);
-    }
-
-    /**
-     * Register command Schedules.
-     */
-    protected function registerCommandSchedules(): void
-    {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
     }
 
     /**

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <x-mail::layout>
 {{-- Header --}}
 <x-slot:header>

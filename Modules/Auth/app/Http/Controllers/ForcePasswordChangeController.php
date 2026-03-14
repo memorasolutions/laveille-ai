@@ -2,6 +2,7 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -13,10 +14,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 use Modules\Auth\Rules\PasswordHistoryRule;
 use Modules\Auth\Rules\PasswordNotCompromisedRule;
 use Modules\Auth\Rules\PasswordPolicyRule;
-use Illuminate\View\View;
 
 class ForcePasswordChangeController extends Controller
 {

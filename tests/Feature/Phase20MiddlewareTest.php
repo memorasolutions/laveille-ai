@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Core\Http\Middleware\ContentSecurityPolicy;

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
 
 @section('breadcrumbs')
@@ -10,10 +11,15 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Redirections URL</h1>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#redirectModal">
-            <i data-lucide="plus" class="icon-sm me-1"></i> Ajouter
-        </button>
+        <h4 class="fw-bold mb-0 d-flex align-items-center gap-2"><i data-lucide="arrow-right-left" class="icon-md text-primary"></i>{{ __('Redirections URL') }}</h4>
+        <div class="d-flex align-items-center gap-2">
+            <x-backoffice::help-modal id="helpRedirectsModal" :title="__('Redirections d\'URL – évitez les 404')" icon="arrow-right-left" :buttonLabel="__('Aide')">
+                @include('seo::admin.redirects._help')
+            </x-backoffice::help-modal>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#redirectModal">
+                <i data-lucide="plus" class="icon-sm me-1"></i> {{ __('Ajouter') }}
+            </button>
+        </div>
     </div>
 
     @if(session('success'))
