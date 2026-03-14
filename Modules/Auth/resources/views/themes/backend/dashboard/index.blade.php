@@ -115,14 +115,16 @@
 
 {{-- Actions rapides --}}
 <div class="d-flex flex-wrap gap-3 mb-4">
-    <a href="{{ route('user.articles.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
-        <i data-lucide="plus-circle" class="icon-sm"></i>
-        {{ __('Nouvel article') }}
-    </a>
-    <a href="{{ route('admin.blog.articles.index') }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2">
-        <i data-lucide="globe" class="icon-sm"></i>
-        {{ __('Articles du blog') }}
-    </a>
+    @if(Route::has('admin.blog.articles.index'))
+        <a href="{{ route('user.articles.create') }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+            <i data-lucide="plus-circle" class="icon-sm"></i>
+            {{ __('Nouvel article') }}
+        </a>
+        <a href="{{ route('admin.blog.articles.index') }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2">
+            <i data-lucide="globe" class="icon-sm"></i>
+            {{ __('Articles du blog') }}
+        </a>
+    @endif
     <a href="{{ route('user.profile') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2">
         <i data-lucide="user" class="icon-sm"></i>
         {{ __('Mon profil') }}

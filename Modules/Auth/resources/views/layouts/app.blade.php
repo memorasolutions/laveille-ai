@@ -447,7 +447,9 @@
     @stack('scripts')
 
     {{-- AI Chatbot --}}
-    @livewire('ai-chatbot')
+    @if(class_exists(\Modules\AI\Livewire\ChatBot::class))
+        @livewire('ai-chatbot')
+    @endif
 
     {{-- PWA prompts --}}
     @if(config('pwa.enabled'))
