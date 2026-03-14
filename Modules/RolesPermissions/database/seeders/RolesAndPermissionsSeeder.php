@@ -26,6 +26,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'users', 'roles', 'articles', 'comments', 'categories', 'pages', 'media', 'menus',
             'faqs', 'testimonials', 'forms', 'widgets', 'plans', 'seo', 'newsletter',
             'campaigns', 'short_urls', 'teams', 'tenants', 'workflows',
+            'products', 'ecommerce_orders', 'coupons',
         ];
 
         foreach ($patternAEntities as $entity) {
@@ -42,7 +43,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'cookies', 'onboarding', 'trash', 'notifications', 'webhooks', 'ai', 'api',
             'activity_logs', 'feature_flags', 'branding', 'themes', 'translations', 'settings',
             'contacts', 'storage', 'usage', 'referrals', 'incidents', 'documentation',
-            'booking', 'roadmap',
+            'booking', 'roadmap', 'ecommerce',
         ];
 
         foreach ($patternBEntities as $entity) {

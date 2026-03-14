@@ -30,6 +30,7 @@ dataset('optional_modules', [
     'Api',
     'Booking',
     'Roadmap',
+    'Ecommerce',
 ]);
 
 test('route:list does not crash when an optional module is disabled', function (string $module) {
@@ -50,10 +51,10 @@ test('route:list does not crash when an optional module is disabled', function (
     }
 })->with('optional_modules');
 
-test('all 36 modules have a valid plugin.json file', function () {
+test('all 37 modules have a valid plugin.json file', function () {
     $modules = Module::all();
 
-    expect($modules)->toHaveCount(36);
+    expect($modules)->toHaveCount(37);
 
     foreach ($modules as $module) {
         $pluginPath = $module->getPath().'/plugin.json';
