@@ -108,7 +108,7 @@ class AppServiceProvider extends ServiceProvider
 
             $limit = (int) config('saas.rate_limits.default', 120);
 
-            if ($request->user()->subscribed('default')) {
+            if (\Nwidart\Modules\Facades\Module::isEnabled('SaaS') && $request->user()->subscribed('default')) {
                 $subscription = $request->user()->subscription('default');
                 $price = $subscription?->stripe_price;
 

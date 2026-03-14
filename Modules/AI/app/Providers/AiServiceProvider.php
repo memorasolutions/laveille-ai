@@ -37,8 +37,6 @@ use Modules\AI\Services\RagService;
 use Modules\AI\Services\SentimentService;
 use Modules\AI\Services\SmartReplyService;
 use Modules\AI\Services\WebScraperService;
-use Modules\Blog\Models\Article;
-use Modules\Blog\Models\Comment;
 use Nwidart\Modules\Traits\PathNamespace;
 
 class AiServiceProvider extends ServiceProvider
@@ -61,12 +59,12 @@ class AiServiceProvider extends ServiceProvider
         Livewire::component('ai-content-assistant', AiContentAssistant::class);
         Livewire::component('ai-seo-assistant', AiSeoAssistant::class);
 
-        if (class_exists(Comment::class)) {
-            Comment::observe(CommentModerationObserver::class);
+        if (class_exists('Modules\Blog\Models\Comment')) {
+            \Modules\Blog\Models\Comment::observe(CommentModerationObserver::class);
         }
-        if (class_exists(Article::class)) {
-            Article::observe(ArticleSeoObserver::class);
-            Article::observe(KnowledgeSourceObserver::class);
+        if (class_exists('Modules\Blog\Models\Article')) {
+            \Modules\Blog\Models\Article::observe(ArticleSeoObserver::class);
+            \Modules\Blog\Models\Article::observe(KnowledgeSourceObserver::class);
         }
 
         // KB auto-sync observers
