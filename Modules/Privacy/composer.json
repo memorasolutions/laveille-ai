@@ -1,0 +1,10 @@
+{
+    "name": "modules/privacy",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Privacy\\": "app/",
+            "Modules\\Privacy\\Database\\": "database/",
+            "Modules\\Privacy\\Tests\\": "tests/"
+        }
+    }
+}

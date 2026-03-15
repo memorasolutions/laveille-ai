@@ -48,8 +48,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: ['stripe/webhook']);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\DetectPrivacyJurisdiction::class,
-            \App\Http\Middleware\ResolveCookiePreferences::class,
+            \Modules\Privacy\Http\Middleware\DetectPrivacyJurisdiction::class,
+            \Modules\Privacy\Http\Middleware\ResolveCookiePreferences::class,
             \Modules\Core\Http\Middleware\SetBackofficeTheme::class,
         ]);
     })

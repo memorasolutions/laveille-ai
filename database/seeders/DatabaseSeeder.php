@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
             \Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class,
             \Modules\SEO\Database\Seeders\SEODatabaseSeeder::class,
             \Modules\SaaS\Database\Seeders\SaaSDatabaseSeeder::class,
-            CookieCategorySeeder::class,
+            \Modules\Privacy\Database\Seeders\CookieCategorySeeder::class,
             OnboardingStepSeeder::class,
         ];
 

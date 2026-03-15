@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Modules\Backoffice\Http\Controllers;
 
-use App\Models\CookieCategory;
+use Modules\Privacy\Models\CookieCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

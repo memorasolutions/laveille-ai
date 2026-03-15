@@ -29,9 +29,4 @@ Route::get('/offline', [\App\Http\Controllers\PwaController::class, 'offline'])-
 // Language switcher
 Route::post('/locale/{locale}', LocaleController::class)->name('locale.switch');
 
-// Legal pages (public, no auth required)
-Route::controller(\App\Http\Controllers\LegalController::class)->group(function () {
-    Route::get('/privacy-policy', 'privacyPolicy')->name('legal.privacy');
-    Route::get('/terms-of-use', 'termsOfUse')->name('legal.terms');
-    Route::get('/cookie-policy', 'cookiePolicy')->name('legal.cookies');
-});
+// Legal pages moved to Modules/Privacy

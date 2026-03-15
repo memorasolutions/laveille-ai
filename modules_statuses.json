@@ -35,5 +35,6 @@
     "Testimonials": true,
     "Translation": true,
     "Webhooks": true,
-    "Widget": true
+    "Widget": true,
+    "Privacy": true
 }

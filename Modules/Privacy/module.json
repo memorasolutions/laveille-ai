@@ -1,0 +1,9 @@
+{
+    "name": "Privacy",
+    "alias": "privacy",
+    "description": "Privacy compliance module (RGPD, Loi 25, LPRPDE, ePrivacy)",
+    "keywords": ["privacy", "gdpr", "consent", "cookies"],
+    "priority": 0,
+    "providers": ["Modules\\Privacy\\Providers\\PrivacyServiceProvider"],
+    "files": []
+}

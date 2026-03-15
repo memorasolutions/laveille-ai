@@ -39,6 +39,7 @@
             <directory>Modules/Tenancy/app</directory>
             <directory>Modules/Translation/app</directory>
             <directory>Modules/Webhooks/app</directory>
+            <directory>Modules/Privacy/app</directory>
         </include>
         <exclude>
             <directory suffix=".php">Modules/*/app/Livewire</directory>

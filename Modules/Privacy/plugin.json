@@ -1,0 +1,10 @@
+{
+    "name": "Privacy",
+    "description": "Module Privacy — conformité RGPD, Loi 25, LPRPDE, ePrivacy",
+    "version": "1.0.0",
+    "type": "plugin",
+    "dependencies": [
+        "Core"
+    ],
+    "priority": 10
+}
