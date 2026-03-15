@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 {{-- Bottom tab bar mobile - visible uniquement < 992px --}}
 <div class="admin-bottom-bar d-lg-none" id="bottomBar">
     <div class="d-flex h-100 align-items-stretch">

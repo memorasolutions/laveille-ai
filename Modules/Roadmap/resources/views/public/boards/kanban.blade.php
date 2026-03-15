@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('roadmap::layouts.public')
 @section('title', $board->name . ' — Kanban')
 

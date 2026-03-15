@@ -17,10 +17,10 @@
 - **PAS de Docker** - Docker et cPanel ne font pas bon menage
 - Toutes les configs (CI/CD, deploiement) doivent etre compatibles cPanel
 
-## Etat actuel (2026-03-13)
-- **3128+ tests**, 6465 assertions, 0 fail
+## Etat actuel (2026-03-15)
+- **3202 tests**, 6738 assertions, 0 fail (--parallel obligatoire)
 - **PHPStan** : 0 erreurs niveau 6
-- **36 modules actifs**, 47+ permissions
+- **37 modules actifs**, 129+ permissions
 - **32 feature flags** Laravel Pennant (sync FeatureFlagsTable complete)
 - **Auteur** : MEMORA solutions - header DocBlock standardise partout
 - **3 chantiers majeurs** : multi-tenant (65 tests), marketing automation (44 tests), API GraphQL (33 tests)
@@ -44,7 +44,7 @@
 
 ## Architecture
 - Laravel 12, PHP 8.4, Livewire 4.1 (PAS Filament), MySQL, Pest PHP 3
-- 34 modules nwidart, BaseRouteServiceProvider dans Core (31 modules convertis)
+- 37 modules nwidart, BaseModuleServiceProvider + BaseRouteServiceProvider dans Core (36/36 convertis)
 - SettingsReaderInterface dans Core (decouplage Core<->Settings)
 - API REST v1 Sanctum + Scramble docs, API GraphQL v2 Lighthouse v6
 - SaaS : Stripe Cashier, plans, checkout, webhooks verifies
@@ -159,7 +159,7 @@
 - **0 Tailwind CSS** dans themes/backend/ - Bootstrap 5.3.8 uniquement
 
 ## Bugs pre-existants connus
-- OOM sur suite complete tests sequentielle (~512M) -> mode parallele obligatoire
+- OOM sur suite complete tests sequentielle (~512M) -> `php artisan test --parallel` obligatoire (16 processes, 3202 tests OK)
 - `view:cache` echoue sur `emails/welcome.blade.php` (compose corrige, utilise @component)
 
 ## REGLES ABSOLUES

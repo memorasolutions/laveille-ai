@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 {{-- Driver.js 1.4.0 interactive onboarding tour --}}
 @props(['steps' => [], 'storageKey' => 'driver_tour_default'])
 
