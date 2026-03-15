@@ -12,29 +12,29 @@ namespace Modules\Newsletter\Providers;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use Modules\Core\Providers\BaseModuleServiceProvider;
 use Modules\Newsletter\Listeners\WorkflowTriggerListener;
 
-class NewsletterServiceProvider extends ServiceProvider
+class NewsletterServiceProvider extends BaseModuleServiceProvider
 {
-    public function register(): void
-    {
-        $this->app->register(RouteServiceProvider::class);
-    }
+    protected string $name = 'Newsletter';
+
+    protected string $nameLower = 'newsletter';
 
     public function boot(): void
     {
+        $this->bootModule();
+
         $this->commands([
             \Modules\Newsletter\Console\DigestCommand::class,
             \Modules\Newsletter\Console\ProcessWorkflowsCommand::class,
         ]);
 
         Event::listen(Registered::class, [WorkflowTriggerListener::class, 'handleRegistered']);
-        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
-        $sourcePath = __DIR__.'/../../resources/views';
-        $theme = config('backoffice.theme', 'backend');
-        $themePath = __DIR__.'/../../resources/views/themes/'.$theme;
-        $paths = is_dir($themePath) ? [$themePath, $sourcePath] : [$sourcePath];
-        $this->loadViewsFrom($paths, 'newsletter');
+    }
+
+    public function register(): void
+    {
+        $this->app->register(RouteServiceProvider::class);
     }
 }

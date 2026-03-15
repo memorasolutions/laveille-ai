@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Modules\AI\Providers;
 
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\AI\Adapters\EmailChannelAdapter;
 use Modules\AI\Console\CheckSlaCommand;
@@ -37,22 +36,17 @@ use Modules\AI\Services\RagService;
 use Modules\AI\Services\SentimentService;
 use Modules\AI\Services\SmartReplyService;
 use Modules\AI\Services\WebScraperService;
-use Nwidart\Modules\Traits\PathNamespace;
+use Modules\Core\Providers\BaseModuleServiceProvider;
 
-class AiServiceProvider extends ServiceProvider
+class AiServiceProvider extends BaseModuleServiceProvider
 {
-    use PathNamespace;
-
     protected string $name = 'AI';
 
     protected string $nameLower = 'ai';
 
     public function boot(): void
     {
-        $this->registerTranslations();
-        $this->registerConfig();
-        $this->registerViews();
-        $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+        $this->bootModule();
 
         Livewire::component('ai-chatbot', ChatBot::class);
         Livewire::component('ai-article-generator', AiArticleGenerator::class);
@@ -103,51 +97,8 @@ class AiServiceProvider extends ServiceProvider
         });
     }
 
-    public function registerTranslations(): void
-    {
-        $langPath = resource_path('lang/modules/'.$this->nameLower);
-
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $this->nameLower);
-            $this->loadJsonTranslationsFrom($langPath);
-        } else {
-            $this->loadTranslationsFrom(module_path($this->name, 'lang'), $this->nameLower);
-            $this->loadJsonTranslationsFrom(module_path($this->name, 'lang'));
-        }
-    }
-
-    protected function registerConfig(): void
-    {
-        $this->publishes([
-            module_path($this->name, 'config/config.php') => config_path($this->nameLower.'.php'),
-        ], 'config');
-
-        $this->mergeConfigFrom(module_path($this->name, 'config/config.php'), $this->nameLower);
-    }
-
-    public function registerViews(): void
-    {
-        $viewPath = resource_path('views/modules/'.$this->nameLower);
-        $sourcePath = module_path($this->name, 'resources/views');
-
-        $this->publishes([$sourcePath => $viewPath], ['views', $this->nameLower.'-module-views']);
-        $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
-    }
-
     public function provides(): array
     {
         return [AiService::class];
-    }
-
-    private function getPublishableViewPaths(): array
-    {
-        $paths = [];
-        foreach (config('view.paths') as $path) {
-            if (is_dir($path.'/modules/'.$this->nameLower)) {
-                $paths[] = $path.'/modules/'.$this->nameLower;
-            }
-        }
-
-        return $paths;
     }
 }

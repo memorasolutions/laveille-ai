@@ -10,38 +10,21 @@ declare(strict_types=1);
 
 namespace Modules\Team\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Nwidart\Modules\Traits\PathNamespace;
+use Modules\Core\Providers\BaseModuleServiceProvider;
 
-class TeamServiceProvider extends ServiceProvider
+class TeamServiceProvider extends BaseModuleServiceProvider
 {
-    use PathNamespace;
-
     protected string $name = 'Team';
 
     protected string $nameLower = 'team';
 
     public function boot(): void
     {
-        $this->registerConfig();
-        $this->registerViews();
-        $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+        $this->bootModule();
     }
 
     public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
-    }
-
-    private function registerConfig(): void
-    {
-        $path = module_path($this->name, 'config/config.php');
-        $this->mergeConfigFrom($path, "modules.{$this->nameLower}");
-    }
-
-    private function registerViews(): void
-    {
-        $sourcePath = module_path($this->name, 'resources/views');
-        $this->loadViewsFrom($sourcePath, $this->nameLower);
     }
 }

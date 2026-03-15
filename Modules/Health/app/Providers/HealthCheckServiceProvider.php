@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace Modules\Health\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Modules\Core\Providers\BaseModuleServiceProvider;
 use Spatie\Health\Checks\Checks\CacheCheck;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
@@ -20,10 +20,16 @@ use Spatie\Health\Checks\Checks\ScheduleCheck;
 use Spatie\Health\Checks\Checks\UsedDiskSpaceCheck;
 use Spatie\Health\Facades\Health;
 
-class HealthCheckServiceProvider extends ServiceProvider
+class HealthCheckServiceProvider extends BaseModuleServiceProvider
 {
+    protected string $name = 'Health';
+
+    protected string $nameLower = 'health';
+
     public function boot(): void
     {
+        $this->bootModule();
+
         Health::checks([
             DatabaseCheck::new(),
             UsedDiskSpaceCheck::new()->warnWhenUsedSpaceIsAbovePercentage(70)->failWhenUsedSpaceIsAbovePercentage(90),
