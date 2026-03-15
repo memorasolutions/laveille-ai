@@ -3,7 +3,7 @@
 @props(['steps' => [], 'storageKey' => 'driver_tour_default'])
 
 @push('plugin-styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.css">
+<link rel="stylesheet" href="{{ asset('build/nobleui/plugins/driver/driver.css') }}">
 <style>
     .driver-popover {
         border-radius: 8px;
@@ -30,7 +30,7 @@
 @endpush
 
 @push('plugin-scripts')
-<script src="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.js.iife.js"></script>
+<script src="{{ asset('build/nobleui/plugins/driver/driver.js.iife.js') }}"></script>
 @endpush
 
 @push('custom-scripts')

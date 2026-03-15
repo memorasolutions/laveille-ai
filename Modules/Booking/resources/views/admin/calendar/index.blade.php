@@ -32,7 +32,7 @@
 @endsection
 
 @push('plugin-scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.17/index.global.min.js"></script>
+<script src="{{ asset('build/nobleui/plugins/fullcalendar/index.global.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('bookingCalendar');

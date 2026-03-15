@@ -42,6 +42,18 @@ export default defineConfig({
                     src: 'node_modules/sortablejs/Sortable.min.js',
                     dest: 'nobleui/plugins/sortablejs',
                 },
+                {
+                    src: 'node_modules/fullcalendar/index.global.min.js',
+                    dest: 'nobleui/plugins/fullcalendar',
+                },
+                {
+                    src: ['node_modules/driver.js/dist/driver.js.iife.js', 'node_modules/driver.js/dist/driver.css'],
+                    dest: 'nobleui/plugins/driver',
+                },
+                {
+                    src: ['node_modules/bootstrap-icons/font/bootstrap-icons.min.css', 'node_modules/bootstrap-icons/font/fonts'],
+                    dest: 'nobleui/plugins/bootstrap-icons',
+                },
             ],
         }),
         VitePWA({

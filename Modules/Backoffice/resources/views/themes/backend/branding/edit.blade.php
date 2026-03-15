@@ -480,7 +480,8 @@
 
 @push('styles')
 <style>
-    /* Charger les polices Google pour l'aperçu du font picker */
+    /* Google Fonts CDN — acceptable ici (page admin authentifiée, preview only).
+       Le site public utilise @fontsource (self-hosted) pour la police active. */
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Open+Sans:wght@400;500&family=Poppins:wght@400;500&family=Nunito:wght@400;500&family=Lato:wght@400;700&family=Montserrat:wght@400;500&family=Source+Sans+3:wght@400;500&family=DM+Sans:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500&family=Raleway:wght@400;500&family=Work+Sans:wght@400;500&family=Outfit:wght@400;500&family=Manrope:wght@400;500&family=Figtree:wght@400;500&display=swap');
 </style>
 @endpush
