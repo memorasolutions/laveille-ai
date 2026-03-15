@@ -113,7 +113,7 @@ it('sidebar contains AI section for admin', function () {
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSee('Conversations IA');
+        ->assertSee('Support IA');
 });
 
 it('sidebar hides AI section for editor', function () {
