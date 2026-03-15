@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le <strong>{{ __('centre de notifications') }}</strong> vous permet d'envoyer des alertes
-        et messages à vos utilisateurs, et de consulter l'historique de toutes les notifications
-        générées par l'application.
+        {!! __('Le <strong>centre de notifications</strong> vous permet d\'envoyer des alertes et messages à vos utilisateurs, et de consulter l\'historique de toutes les notifications générées par l\'application.') !!}
     </p>
 </div>
 
@@ -41,9 +39,9 @@
         {{ __('Comment diffuser une alerte ?') }}
     </h6>
     <ol class="text-muted small ps-3 mb-0">
-        <li class="mb-1">{{ __('Choisissez le') }} <strong>{{ __('niveau') }}</strong> {{ __('(Information, Avertissement ou Critique).') }}</li>
-        <li class="mb-1">{{ __('Rédigez votre') }} <strong>{{ __('message') }}</strong> {{ __('dans le champ prévu.') }}</li>
-        <li class="mb-1">{{ __('Cliquez sur') }} <strong>{{ __('Diffuser') }}</strong> {{ __('pour envoyer à tous les utilisateurs connectés.') }}</li>
+        <li class="mb-1">{!! __('Choisissez le <strong>niveau</strong> (Information, Avertissement ou Critique).') !!}</li>
+        <li class="mb-1">{!! __('Rédigez votre <strong>message</strong> dans le champ prévu.') !!}</li>
+        <li class="mb-1">{!! __('Cliquez sur <strong>Diffuser</strong> pour envoyer à tous les utilisateurs connectés.') !!}</li>
         <li>{{ __('La notification apparaît instantanément dans la cloche en haut de l\'interface.') }}</li>
     </ol>
 </div>
@@ -55,9 +53,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        {{ __('Les') }} <strong>{{ __('notifications push') }}</strong>
-        {{ __('(vers le navigateur ou mobile) nécessitent que l\'utilisateur ait préalablement') }}
-        <strong>{{ __('accepté les notifications') }}</strong>
-        {{ __('dans son navigateur. Les notifications intégrées à l\'application fonctionnent sans autorisation.') }}
+        {!! __('Les <strong>notifications push</strong> (vers le navigateur ou mobile) nécessitent que l\'utilisateur ait préalablement <strong>accepté les notifications</strong> dans son navigateur. Les notifications intégrées à l\'application fonctionnent sans autorisation.') !!}
     </p>
 </div>

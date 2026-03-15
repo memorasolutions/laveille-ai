@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La page <strong>Utilisateurs</strong> centralise la gestion de tous les <strong>comptes de votre application</strong> :
-        création, modification, désactivation et attribution des rôles.
+        {!! __('La page <strong>Utilisateurs</strong> centralise la gestion de tous les <strong>comptes de votre application</strong> : création, modification, désactivation et attribution des rôles.') !!}
     </p>
 </div>
 
@@ -44,10 +43,7 @@
         {{ __('Informations visibles') }}
     </h6>
     <p class="text-muted small mb-0">
-        Pour chaque utilisateur : <strong>{{ __('nom') }}</strong>, <strong>{{ __('email') }}</strong>,
-        <strong>{{ __('rôle') }}</strong>, <strong>{{ __('date d\'inscription') }}</strong>
-        et <strong>{{ __('dernière connexion') }}</strong>.
-        Filtrez et recherchez facilement dans la liste.
+        {!! __('Pour chaque utilisateur : <strong>nom</strong>, <strong>email</strong>, <strong>rôle</strong>, <strong>date d\'inscription</strong> et <strong>dernière connexion</strong>. Filtrez et recherchez facilement dans la liste.') !!}
     </p>
 </div>
 
@@ -58,8 +54,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        <strong>{{ __('Désactiver un compte est préférable à le supprimer') }}</strong> :
-        cela conserve l'historique des actions et permet la réactivation ultérieure.
-        La suppression efface définitivement toutes les données associées.
+        {!! __('<strong>Désactiver un compte est préférable à le supprimer</strong> : cela conserve l\'historique des actions et permet la réactivation ultérieure. La suppression efface définitivement toutes les données associées.') !!}
     </p>
 </div>

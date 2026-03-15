@@ -1,27 +1,27 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
 
-@section('title', 'Calendrier des réservations')
+@section('title', __('Calendrier des réservations'))
 
 @section('content')
 <div class="container-fluid">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.booking.appointments.index') }}">Réservations</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Calendrier</li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.booking.appointments.index') }}">{{ __('Réservations') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('Calendrier') }}</li>
         </ol>
     </nav>
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Calendrier interactif</h5>
+            <h5 class="mb-0">{{ __('Calendrier interactif') }}</h5>
             <div class="d-flex gap-2 flex-wrap">
-                <span class="badge" style="background-color:#ffc107;color:#000;">En attente</span>
-                <span class="badge" style="background-color:#198754;">Confirmé</span>
-                <span class="badge" style="background-color:#dc3545;">Annulé</span>
-                <span class="badge" style="background-color:#0dcaf0;color:#000;">Terminé</span>
-                <span class="badge" style="background-color:#6c757d;">Approbation</span>
-                <span class="badge" style="background-color:#212529;">No-show</span>
+                <span class="badge" style="background-color:#ffc107;color:#000;">{{ __('En attente') }}</span>
+                <span class="badge" style="background-color:#198754;">{{ __('Confirmé') }}</span>
+                <span class="badge" style="background-color:#dc3545;">{{ __('Annulé') }}</span>
+                <span class="badge" style="background-color:#0dcaf0;color:#000;">{{ __('Terminé') }}</span>
+                <span class="badge" style="background-color:#6c757d;">{{ __('Approbation') }}</span>
+                <span class="badge" style="background-color:#212529;">{{ __('No-show') }}</span>
             </div>
         </div>
         <div class="card-body">

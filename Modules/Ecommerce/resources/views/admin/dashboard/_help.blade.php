@@ -6,7 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Suivez vos <strong>KPIs</strong> : chiffre d'affaires, commandes, produits et stocks faibles en un coup d'œil.
+        {!! __('Suivez vos <strong>KPIs</strong> : chiffre d\'affaires, commandes, produits et stocks faibles en un coup d\'œil.') !!}
     </p>
 </div>
 
@@ -17,9 +17,7 @@
         {{ __('KPIs essentiels') }}
     </h6>
     <p class="text-muted small mb-0">
-        Visualisez votre <strong>chiffre d'affaires</strong>, nombre de <strong>commandes</strong>,
-        <strong>produits</strong> actifs et alertes de <strong>stocks faibles</strong>.<br>
-        Données mises à jour en temps réel.
+        {!! __('Visualisez votre <strong>chiffre d\'affaires</strong>, nombre de <strong>commandes</strong>, <strong>produits</strong> actifs et alertes de <strong>stocks faibles</strong>.<br>Données mises à jour en temps réel.') !!}
     </p>
 </div>
 

@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>rôles</strong> définissent <strong>qui peut faire quoi</strong> dans
-        l'administration. Chaque utilisateur hérite des permissions associées à son rôle,
-        ce qui simplifie la gestion des accès à grande échelle.
+        {!! __('Les <strong>rôles</strong> définissent <strong>qui peut faire quoi</strong> dans l\'administration. Chaque utilisateur hérite des permissions associées à son rôle, ce qui simplifie la gestion des accès à grande échelle.') !!}
     </p>
 </div>
 
@@ -19,11 +17,7 @@
         {{ __('Rôles par défaut') }}
     </h6>
     <p class="text-muted small mb-0">
-        L'application inclut quatre rôles préconfigurés :<br>
-        <strong>Super admin</strong> - accès total à tout sans restriction.<br>
-        <strong>Admin</strong> - accès complet sauf la gestion des rôles.<br>
-        <strong>Éditeur</strong> - gestion du contenu uniquement (articles, pages, FAQ).<br>
-        <strong>Utilisateur</strong> - accès limité à son propre profil.
+        {!! __('L\'application inclut quatre rôles préconfigurés :<br><strong>Super admin</strong> - accès total à tout sans restriction.<br><strong>Admin</strong> - accès complet sauf la gestion des rôles.<br><strong>Éditeur</strong> - gestion du contenu uniquement (articles, pages, FAQ).<br><strong>Utilisateur</strong> - accès limité à son propre profil.') !!}
     </p>
 </div>
 

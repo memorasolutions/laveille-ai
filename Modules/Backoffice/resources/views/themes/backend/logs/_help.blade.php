@@ -6,10 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>{{ __('journaux système') }}</strong> sont les enregistrements techniques de tout ce
-        qui se passe dans votre application : <strong>{{ __('erreurs') }}</strong>,
-        <strong>{{ __('avertissements') }}</strong> et <strong>{{ __('informations') }}</strong> générés
-        automatiquement par Laravel et vos modules.
+        {!! __('Les <strong>journaux système</strong> sont les enregistrements techniques de tout ce qui se passe dans votre application : <strong>erreurs</strong>, <strong>avertissements</strong> et <strong>informations</strong> générés automatiquement par Laravel et vos modules.') !!}
     </p>
 </div>
 
@@ -50,10 +47,10 @@
         {{ __('Quand consulter les journaux ?') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1">{{ __('Après une') }} <strong>{{ __('erreur 500') }}</strong> {{ __('signalée par un utilisateur') }}</li>
-        <li class="mb-1">{{ __('Quand un') }} <strong>{{ __('comportement inattendu') }}</strong> {{ __('se produit') }}</li>
-        <li class="mb-1">{{ __('Pour vérifier si un') }} <strong>{{ __('job planifié') }}</strong> {{ __('s\'est exécuté correctement') }}</li>
-        <li>{{ __('Pour diagnostiquer une') }} <strong>{{ __('lenteur ou un timeout') }}</strong></li>
+        <li class="mb-1">{!! __('Après une <strong>erreur 500</strong> signalée par un utilisateur') !!}</li>
+        <li class="mb-1">{!! __('Quand un <strong>comportement inattendu</strong> se produit') !!}</li>
+        <li class="mb-1">{!! __('Pour vérifier si un <strong>job planifié</strong> s\'est exécuté correctement') !!}</li>
+        <li>{!! __('Pour diagnostiquer une <strong>lenteur ou un timeout</strong>') !!}</li>
     </ul>
 </div>
 
@@ -65,8 +62,7 @@
     </h6>
     <p class="text-muted small mb-0">
         {{ __('Utilisez les filtres par niveau pour trouver rapidement les erreurs critiques.') }}
-        {{ __('Commencez toujours par') }} <strong>{{ __('Error') }}</strong> {{ __('et') }} <strong>{{ __('Warning') }}</strong>
-        {{ __('avant d\'explorer les niveaux inférieurs.') }}
+        {!! __('Commencez toujours par <strong>Error</strong> et <strong>Warning</strong> avant d\'explorer les niveaux inférieurs.') !!}
         {{ __('Le bouton « Vider les journaux » efface définitivement tous les enregistrements.') }}
     </p>
 </div>

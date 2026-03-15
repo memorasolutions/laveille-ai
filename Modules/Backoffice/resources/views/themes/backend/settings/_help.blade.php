@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>Paramètres</strong> centralisent toute la <strong>configuration générale</strong> de votre application :
-        informations du site, emails, réseaux sociaux, intégrations tierces et options avancées.
+        {!! __('Les <strong>Paramètres</strong> centralisent toute la <strong>configuration générale</strong> de votre application : informations du site, emails, réseaux sociaux, intégrations tierces et options avancées.') !!}
     </p>
 </div>
 
@@ -48,8 +47,7 @@
         {{ __('Comment ça marche ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        Chaque paramètre prend effet <strong>{{ __('immédiatement') }}</strong> après la sauvegarde.
-        Les valeurs sont stockées en base de données et mises en cache automatiquement pour les performances.
+        {!! __('Chaque paramètre prend effet <strong>immédiatement</strong> après la sauvegarde. Les valeurs sont stockées en base de données et mises en cache automatiquement pour les performances.') !!}
     </p>
 </div>
 
@@ -60,7 +58,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        Certains paramètres nécessitent de <strong>{{ __('vider le cache') }}</strong> pour que les changements soient visibles.
-        Utilisez la page <em>Cache</em> du menu Système si vous ne voyez pas l'effet escompté.
+        {!! __('Certains paramètres nécessitent de <strong>vider le cache</strong> pour que les changements soient visibles. Utilisez la page <em>Cache</em> du menu Système si vous ne voyez pas l\'effet escompté.') !!}
     </p>
 </div>

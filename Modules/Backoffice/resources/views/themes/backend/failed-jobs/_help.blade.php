@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>tâches échouées</strong> (failed jobs) sont des opérations en arrière-plan qui n'ont pas
-        pu s'exécuter correctement. Elles sont conservées ici pour que vous puissiez les analyser et les relancer.
+        {!! __('Les <strong>tâches échouées</strong> (failed jobs) sont des opérations en arrière-plan qui n\'ont pas pu s\'exécuter correctement. Elles sont conservées ici pour que vous puissiez les analyser et les relancer.') !!}
     </p>
 </div>
 
@@ -41,8 +40,8 @@
     </h6>
     <ol class="text-muted small ps-3 mb-0">
         <li class="mb-1">{{ __('Lisez le message d\'exception pour comprendre la cause de l\'échec.') }}</li>
-        <li class="mb-1">{{ __('Cliquez sur') }} <strong>{{ __('Réessayer') }}</strong> {{ __('pour relancer la tâche une fois le problème corrigé.') }}</li>
-        <li class="mb-1">{{ __('Cliquez sur') }} <strong>{{ __('Supprimer') }}</strong> {{ __('si la tâche n\'est plus pertinente.') }}</li>
+        <li class="mb-1">{!! __('Cliquez sur <strong>Réessayer</strong> pour relancer la tâche une fois le problème corrigé.') !!}</li>
+        <li class="mb-1">{!! __('Cliquez sur <strong>Supprimer</strong> si la tâche n\'est plus pertinente.') !!}</li>
         <li>{{ __('Consultez les logs pour obtenir plus de détails sur l\'erreur.') }}</li>
     </ol>
 </div>

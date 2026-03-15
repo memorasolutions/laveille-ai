@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le <strong>SEO</strong> (Search Engine Optimization) regroupe les techniques d'<strong>optimisation pour les moteurs de recherche</strong>
-        comme Google et Bing. Ici, vous gérez les méta-titres, descriptions et balises Open Graph de chaque page.
+        {!! __('Le <strong>SEO</strong> (Search Engine Optimization) regroupe les techniques d\'<strong>optimisation pour les moteurs de recherche</strong> comme Google et Bing. Ici, vous gérez les méta-titres, descriptions et balises Open Graph de chaque page.') !!}
     </p>
 </div>
 
@@ -44,8 +43,7 @@
         {{ __('Pourquoi c\'est important ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        Un bon SEO génère des <strong>visiteurs naturels (organiques)</strong> sans payer de publicité.
-        Plus vos pages sont bien optimisées, plus elles apparaissent en haut des résultats de recherche.
+        {!! __('Un bon SEO génère des <strong>visiteurs naturels (organiques)</strong> sans payer de publicité. Plus vos pages sont bien optimisées, plus elles apparaissent en haut des résultats de recherche.') !!}
     </p>
 </div>
 

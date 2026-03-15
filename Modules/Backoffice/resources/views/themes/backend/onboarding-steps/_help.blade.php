@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>{{ __('étapes d\'accueil') }}</strong> (onboarding) constituent un guide pas à pas
-        qui aide les <strong>{{ __('nouveaux utilisateurs') }}</strong> à découvrir votre application
-        et à effectuer les actions essentielles dès leur première connexion.
+        {!! __('Les <strong>étapes d\'accueil</strong> (onboarding) constituent un guide pas à pas qui aide les <strong>nouveaux utilisateurs</strong> à découvrir votre application et à effectuer les actions essentielles dès leur première connexion.') !!}
     </p>
 </div>
 
@@ -19,8 +17,7 @@
         {{ __('Comment ça marche ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        {{ __('Chaque étape représente une') }} <strong>{{ __('action que l\'utilisateur doit accomplir') }}</strong>
-        {{ __('(compléter son profil, créer son premier article, etc.).') }}
+        {!! __('Chaque étape représente une <strong>action que l\'utilisateur doit accomplir</strong> (compléter son profil, créer son premier article, etc.).') !!}
         {{ __('L\'ordre d\'affichage, le contenu et les conditions de complétion sont entièrement configurables.') }}
         {{ __('Une étape désactivée est masquée sans être supprimée.') }}
     </p>
@@ -64,8 +61,7 @@
         {{ __('Astuce') }}
     </h6>
     <p class="text-muted small mb-0">
-        {{ __('Un bon onboarding') }} <strong>{{ __('réduit significativement les demandes de support') }}</strong>
-        {{ __('et améliore le taux d\'activation des nouveaux utilisateurs.') }}
+        {!! __('Un bon onboarding <strong>réduit significativement les demandes de support</strong> et améliore le taux d\'activation des nouveaux utilisateurs.') !!}
         {{ __('Limitez le nombre d\'étapes à') }} <strong>3-5 maximum</strong>
         {{ __('pour ne pas décourager les nouveaux arrivants.') }}
     </p>

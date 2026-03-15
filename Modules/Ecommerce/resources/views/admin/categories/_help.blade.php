@@ -6,7 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Organisez vos produits avec une <strong>structure hiérarchique</strong> parent/enfant flexible.
+        {!! __('Organisez vos produits avec une <strong>structure hiérarchique</strong> parent/enfant flexible.') !!}
     </p>
 </div>
 
@@ -17,8 +17,7 @@
         {{ __('Hiérarchie flexible') }}
     </h6>
     <p class="text-muted small mb-0">
-        Créez des <strong>catégories imbriquées</strong> à plusieurs niveaux.<br>
-        Définissez la <strong>position</strong> pour contrôler l'ordre d'affichage.
+        {!! __('Créez des <strong>catégories imbriquées</strong> à plusieurs niveaux.<br>Définissez la <strong>position</strong> pour contrôler l\'ordre d\'affichage.') !!}
     </p>
 </div>
 

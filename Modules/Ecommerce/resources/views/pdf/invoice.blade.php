@@ -3,7 +3,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Facture {{ $invoice_prefix }}{{ $order->order_number }}</title>
+    <title>{{ __('Facture') }} {{ $invoice_prefix }}{{ $order->order_number }}</title>
     <style type="text/css">
         @page { margin: 28px; }
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; color: #1f2937; line-height: 1.4; }
@@ -36,12 +36,12 @@
     <tr>
         <td style="width: 60%;">
             <p class="title">{{ config('app.name') }}</p>
-            <p class="subtitle muted">Facture</p>
+            <p class="subtitle muted">{{ __('Facture') }}</p>
         </td>
         <td style="width: 40%;" class="text-right">
             <table>
-                <tr><td class="muted small">N° Facture</td><td class="small" style="font-weight:700;">{{ $invoice_prefix }}{{ $order->order_number }}</td></tr>
-                <tr><td class="muted small">Date</td><td class="small">{{ $dateFormatted }}</td></tr>
+                <tr><td class="muted small">{{ __('N° Facture') }}</td><td class="small" style="font-weight:700;">{{ $invoice_prefix }}{{ $order->order_number }}</td></tr>
+                <tr><td class="muted small">{{ __('Date') }}</td><td class="small">{{ $dateFormatted }}</td></tr>
             </table>
         </td>
     </tr>
@@ -53,7 +53,7 @@
     <tr>
         <td style="width: 50%; padding-right: 10px;">
             <div class="card">
-                <p class="section-title">Client</p>
+                <p class="section-title">{{ __('Client') }}</p>
                 <div class="small">
                     <div style="font-weight: 700;">{{ $order->user->name ?? '' }}</div>
                     <div class="muted">{{ $order->user->email ?? '' }}</div>
@@ -62,7 +62,7 @@
         </td>
         <td style="width: 50%; padding-left: 10px;">
             <div class="card">
-                <p class="section-title">Adresse de livraison</p>
+                <p class="section-title">{{ __('Adresse de livraison') }}</p>
                 <div class="small">
                     @if($ship)
                         <div>{{ $ship->name }}</div>
@@ -84,11 +84,11 @@
 <table class="items-table">
     <thead>
         <tr>
-            <th style="width:40%;">Produit</th>
-            <th style="width:18%;">Variante</th>
-            <th style="width:10%;" class="text-right">Qté</th>
-            <th style="width:16%;" class="text-right">Prix</th>
-            <th style="width:16%;" class="text-right">Total</th>
+            <th style="width:40%;">{{ __('Produit') }}</th>
+            <th style="width:18%;">{{ __('Variante') }}</th>
+            <th style="width:10%;" class="text-right">{{ __('Qté') }}</th>
+            <th style="width:16%;" class="text-right">{{ __('Prix') }}</th>
+            <th style="width:16%;" class="text-right">{{ __('Total') }}</th>
         </tr>
     </thead>
     <tbody>
@@ -111,19 +111,19 @@
         <td style="width: 60%;"></td>
         <td style="width: 40%;">
             <table class="totals-table">
-                <tr><td class="small">Sous-total</td><td class="text-right small">{{ number_format((float) $order->subtotal, 2) }} {{ $currency }}</td></tr>
-                <tr><td class="small">Livraison</td><td class="text-right small">{{ number_format((float) $order->shipping_cost, 2) }} {{ $currency }}</td></tr>
-                <tr><td class="small">Taxes</td><td class="text-right small">{{ number_format((float) $order->tax_amount, 2) }} {{ $currency }}</td></tr>
+                <tr><td class="small">{{ __('Sous-total') }}</td><td class="text-right small">{{ number_format((float) $order->subtotal, 2) }} {{ $currency }}</td></tr>
+                <tr><td class="small">{{ __('Livraison') }}</td><td class="text-right small">{{ number_format((float) $order->shipping_cost, 2) }} {{ $currency }}</td></tr>
+                <tr><td class="small">{{ __('Taxes') }}</td><td class="text-right small">{{ number_format((float) $order->tax_amount, 2) }} {{ $currency }}</td></tr>
                 @if((float) $order->discount_amount > 0)
-                    <tr><td class="small">Remise</td><td class="text-right small">-{{ number_format((float) $order->discount_amount, 2) }} {{ $currency }}</td></tr>
+                    <tr><td class="small">{{ __('Remise') }}</td><td class="text-right small">-{{ number_format((float) $order->discount_amount, 2) }} {{ $currency }}</td></tr>
                 @endif
-                <tr class="grand"><td>Total</td><td class="text-right">{{ number_format((float) $order->total, 2) }} {{ $currency }}</td></tr>
+                <tr class="grand"><td>{{ __('Total') }}</td><td class="text-right">{{ number_format((float) $order->total, 2) }} {{ $currency }}</td></tr>
             </table>
         </td>
     </tr>
 </table>
 
-<div class="footer">Merci de votre achat</div>
+<div class="footer">{{ __('Merci de votre achat') }}</div>
 
 </body>
 </html>

@@ -6,7 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Suivez vos <strong>commandes</strong> de la réception au paiement, avec <strong>factures PDF</strong> et notifications automatiques.
+        {!! __('Suivez vos <strong>commandes</strong> de la réception au paiement, avec <strong>factures PDF</strong> et notifications automatiques.') !!}
     </p>
 </div>
 
@@ -17,8 +17,7 @@
         {{ __('Cycle de commande') }}
     </h6>
     <p class="text-muted small mb-0">
-        <strong>En attente</strong> → <strong>En traitement</strong> → <strong>Expédiée</strong> → <strong>Terminée</strong><br>
-        Statuts alternatifs : <strong>Annulée</strong> ou <strong>Remboursée</strong>.
+        {!! __('<strong>En attente</strong> → <strong>En traitement</strong> → <strong>Expédiée</strong> → <strong>Terminée</strong><br>Statuts alternatifs : <strong>Annulée</strong> ou <strong>Remboursée</strong>.') !!}
     </p>
 </div>
 

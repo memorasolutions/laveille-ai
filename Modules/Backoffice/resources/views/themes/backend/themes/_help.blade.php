@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La page <strong>Thèmes</strong> gère l'<strong>apparence visuelle</strong> de votre backoffice.
-        Choisissez et activez le thème qui correspond à vos préférences ou à votre charte graphique.
+        {!! __('La page <strong>Thèmes</strong> gère l\'<strong>apparence visuelle</strong> de votre backoffice. Choisissez et activez le thème qui correspond à vos préférences ou à votre charte graphique.') !!}
     </p>
 </div>
 
@@ -40,9 +39,7 @@
         {{ __('Comment ça marche ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        Activez un thème et il s'applique <strong>{{ __('immédiatement') }}</strong> à toutes les pages du backoffice.
-        Le thème actif est indiqué par un badge vert. Pour une personnalisation plus fine (couleurs, polices, logos),
-        utilisez la page <em>{{ __('Identité visuelle') }}</em>.
+        {!! __('Activez un thème et il s\'applique <strong>immédiatement</strong> à toutes les pages du backoffice. Le thème actif est indiqué par un badge vert. Pour une personnalisation plus fine (couleurs, polices, logos), utilisez la page <em>Identité visuelle</em>.') !!}
     </p>
 </div>
 
@@ -53,8 +50,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        Un <strong>{{ __('seul thème peut être actif') }}</strong> à la fois.
-        Le thème actuel est <strong>Backend (NobleUI)</strong>, basé sur Bootstrap 5.3.8
-        avec une sidebar sombre et les icônes Lucide.
+        {!! __('Un <strong>seul thème peut être actif</strong> à la fois. Le thème actuel est <strong>Backend (NobleUI)</strong>, basé sur Bootstrap 5.3.8 avec une sidebar sombre et les icônes Lucide.') !!}
     </p>
 </div>

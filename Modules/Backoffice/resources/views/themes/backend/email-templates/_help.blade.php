@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>modèles d\'emails</strong> permettent de personnaliser le contenu des emails automatiques
-        envoyés par votre application : apparence, texte, variables dynamiques, tout est configurable.
+        {!! __('Les <strong>modèles d\'emails</strong> permettent de personnaliser le contenu des emails automatiques envoyés par votre application : apparence, texte, variables dynamiques, tout est configurable.') !!}
     </p>
 </div>
 
@@ -55,9 +54,9 @@
         {{ __('Comment modifier un modèle ?') }}
     </h6>
     <ol class="text-muted small ps-3 mb-0">
-        <li class="mb-1">{{ __('Cliquez sur') }} <strong>{{ __('Modifier') }}</strong> {{ __('à côté du template souhaité.') }}</li>
+        <li class="mb-1">{!! __('Cliquez sur <strong>Modifier</strong> à côté du template souhaité.') !!}</li>
         <li class="mb-1">{{ __('Editez le sujet et le corps de l\'email dans l\'éditeur.') }}</li>
-        <li class="mb-1">{{ __('Enregistrez puis') }} <strong>{{ __('envoyez-vous un email de test') }}</strong> {{ __('pour vérifier le résultat.') }}</li>
+        <li class="mb-1">{!! __('Enregistrez puis <strong>envoyez-vous un email de test</strong> pour vérifier le résultat.') !!}</li>
         <li>{{ __('Activez ou désactivez un template via le champ Statut.') }}</li>
     </ol>
 </div>
@@ -69,8 +68,8 @@
         {{ __('Bon à savoir') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('Testez') }}</strong> {{ __('toujours vos modifications avant de les mettre en production.') }}</li>
-        <li class="mb-1"><strong>{{ __('Template inactif') }}</strong> {{ __('l\'application utilisera le template par défaut du code.') }}</li>
-        <li><strong>{{ __('Slug') }}</strong> {{ __('est l\'identifiant technique, ne le modifiez pas sans connaître l\'impact.') }}</li>
+        <li class="mb-1">{!! __('<strong>Testez</strong> toujours vos modifications avant de les mettre en production.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Template inactif</strong> : l\'application utilisera le template par défaut du code.') !!}</li>
+        <li>{!! __('<strong>Slug</strong> est l\'identifiant technique, ne le modifiez pas sans connaître l\'impact.') !!}</li>
     </ul>
 </div>

@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le tableau de bord <strong>Sécurité</strong> surveille les <strong>tentatives de connexion</strong>
-        et les <strong>IPs suspectes</strong> en temps réel. Il vous permet de détecter rapidement
-        des activités anormales et de réagir avant qu'un problème survienne.
+        {!! __('Le tableau de bord <strong>Sécurité</strong> surveille les <strong>tentatives de connexion</strong> et les <strong>IPs suspectes</strong> en temps réel. Il vous permet de détecter rapidement des activités anormales et de réagir avant qu\'un problème survienne.') !!}
     </p>
 </div>
 
@@ -19,9 +17,7 @@
         {{ __('Ce que vous surveillez') }}
     </h6>
     <p class="text-muted small mb-0">
-        Le tableau affiche les statistiques des <strong>24 dernières heures</strong> :
-        nombre total de connexions, connexions réussies, connexions échouées et IPs actuellement
-        bloquées. Les tentatives suspectes sont celles qui ont échoué plusieurs fois de suite.
+        {!! __('Le tableau affiche les statistiques des <strong>24 dernières heures</strong> : nombre total de connexions, connexions réussies, connexions échouées et IPs actuellement bloquées. Les tentatives suspectes sont celles qui ont échoué plusieurs fois de suite.') !!}
     </p>
 </div>
 

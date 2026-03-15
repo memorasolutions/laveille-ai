@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le tableau de bord <strong>Revenus</strong> centralise vos <strong>métriques financières
-        d'abonnements</strong> en temps réel. Les données proviennent directement de
-        <strong>Stripe</strong> - aucune saisie manuelle.
+        {!! __('Le tableau de bord <strong>Revenus</strong> centralise vos <strong>métriques financières d\'abonnements</strong> en temps réel. Les données proviennent directement de <strong>Stripe</strong> - aucune saisie manuelle.') !!}
     </p>
 </div>
 
@@ -19,10 +17,7 @@
         {{ __('Métriques clés') }}
     </h6>
     <p class="text-muted small mb-0">
-        <strong>MRR</strong> (Monthly Recurring Revenue) : revenu mensuel récurrent -
-        la somme de tous les abonnements actifs ramenée sur un mois.<br>
-        <strong>ARR</strong> (Annual Recurring Revenue) : MRR × 12.<br>
-        <strong>Churn</strong> : pourcentage d'abonnés perdus ce mois par rapport au mois précédent.
+        {!! __('<strong>MRR</strong> (Monthly Recurring Revenue) : revenu mensuel récurrent - la somme de tous les abonnements actifs ramenée sur un mois.<br><strong>ARR</strong> (Annual Recurring Revenue) : MRR × 12.<br><strong>Churn</strong> : pourcentage d\'abonnés perdus ce mois par rapport au mois précédent.') !!}
     </p>
 </div>
 

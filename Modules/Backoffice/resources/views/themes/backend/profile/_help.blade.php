@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La page <strong>Profil</strong> vous permet de gérer vos <strong>informations personnelles</strong>
-        et les paramètres de sécurité de votre compte administrateur.
+        {!! __('La page <strong>Profil</strong> vous permet de gérer vos <strong>informations personnelles</strong> et les paramètres de sécurité de votre compte administrateur.') !!}
     </p>
 </div>
 
@@ -20,19 +19,19 @@
     <div class="d-flex flex-column gap-2">
         <div class="d-flex align-items-start gap-2">
             <i data-lucide="check" class="text-success flex-shrink-0" style="width:14px;height:14px;margin-top:2px;"></i>
-            <p class="text-muted small mb-0"><strong>{{ __('Informations personnelles') }}</strong> – {{ __('nom, adresse email') }}</p>
+            <p class="text-muted small mb-0">{!! __('<strong>Informations personnelles</strong> – nom, adresse email') !!}</p>
         </div>
         <div class="d-flex align-items-start gap-2">
             <i data-lucide="check" class="text-success flex-shrink-0" style="width:14px;height:14px;margin-top:2px;"></i>
-            <p class="text-muted small mb-0"><strong>{{ __('Mot de passe') }}</strong> – {{ __('changer votre mot de passe actuel') }}</p>
+            <p class="text-muted small mb-0">{!! __('<strong>Mot de passe</strong> – changer votre mot de passe actuel') !!}</p>
         </div>
         <div class="d-flex align-items-start gap-2">
             <i data-lucide="check" class="text-success flex-shrink-0" style="width:14px;height:14px;margin-top:2px;"></i>
-            <p class="text-muted small mb-0"><strong>{{ __('Sessions actives') }}</strong> – {{ __('voir et révoquer les connexions en cours') }}</p>
+            <p class="text-muted small mb-0">{!! __('<strong>Sessions actives</strong> – voir et révoquer les connexions en cours') !!}</p>
         </div>
         <div class="d-flex align-items-start gap-2">
             <i data-lucide="check" class="text-success flex-shrink-0" style="width:14px;height:14px;margin-top:2px;"></i>
-            <p class="text-muted small mb-0"><strong>{{ __('Double authentification (2FA)') }}</strong> – {{ __('sécurité renforcée') }}</p>
+            <p class="text-muted small mb-0">{!! __('<strong>Double authentification (2FA)</strong> – sécurité renforcée') !!}</p>
         </div>
     </div>
 </div>
@@ -44,8 +43,7 @@
         {{ __('Sécurité') }}
     </h6>
     <p class="text-muted small mb-0">
-        Activez l'<strong>{{ __('authentification à deux facteurs (2FA)') }}</strong> pour protéger votre compte
-        même si votre mot de passe est compromis. Utilisez Google Authenticator, Authy ou toute application TOTP.
+        {!! __('Activez l\'<strong>authentification à deux facteurs (2FA)</strong> pour protéger votre compte même si votre mot de passe est compromis. Utilisez Google Authenticator, Authy ou toute application TOTP.') !!}
     </p>
 </div>
 
@@ -56,8 +54,7 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        Votre <strong>{{ __('email sert aussi d\'identifiant de connexion') }}</strong>.
-        Si vous le modifiez, pensez à retenir la nouvelle adresse pour vos prochaines connexions.
-        Un mot de passe fort contient au moins 12 caractères avec des majuscules, chiffres et symboles.
+        {!! __('Votre <strong>email sert aussi d\'identifiant de connexion</strong>. Si vous le modifiez, pensez à retenir la nouvelle adresse pour vos prochaines connexions.') !!}
+        {{ __('Un mot de passe fort contient au moins 12 caractères avec des majuscules, chiffres et symboles.') }}
     </p>
 </div>

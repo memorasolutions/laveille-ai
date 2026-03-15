@@ -6,7 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Gérez vos <strong>produits</strong>, leurs <strong>variantes</strong> (SKU, prix, stock) et assignez-les à des <strong>catégories</strong>.
+        {!! __('Gérez vos <strong>produits</strong>, leurs <strong>variantes</strong> (SKU, prix, stock) et assignez-les à des <strong>catégories</strong>.') !!}
     </p>
 </div>
 
@@ -17,8 +17,7 @@
         {{ __('Structure produit') }}
     </h6>
     <p class="text-muted small mb-0">
-        Chaque produit peut avoir <strong>plusieurs variantes</strong> (taille, couleur) avec leur propre SKU, prix et stock.<br>
-        Organisez-les par <strong>catégories hiérarchiques</strong>.
+        {!! __('Chaque produit peut avoir <strong>plusieurs variantes</strong> (taille, couleur) avec leur propre SKU, prix et stock.<br>Organisez-les par <strong>catégories hiérarchiques</strong>.') !!}
     </p>
 </div>
 

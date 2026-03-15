@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La <strong>Corbeille</strong> est un espace de sécurité où vont les éléments supprimés
-        avant leur <strong>suppression définitive</strong>. Vous pouvez les récupérer tant qu'ils n'ont pas été purgés.
+        {!! __('La <strong>Corbeille</strong> est un espace de sécurité où vont les éléments supprimés avant leur <strong>suppression définitive</strong>. Vous pouvez les récupérer tant qu\'ils n\'ont pas été purgés.') !!}
     </p>
 </div>
 
@@ -50,8 +49,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        La corbeille protège contre les <strong>{{ __('suppressions accidentelles') }}</strong>.
-        Avant de vider la corbeille, vérifiez que vous n'avez pas besoin de récupérer certains éléments.
-        La suppression définitive est <strong>{{ __('irréversible') }}</strong>.
+        {!! __('La corbeille protège contre les <strong>suppressions accidentelles</strong>. Avant de vider la corbeille, vérifiez que vous n\'avez pas besoin de récupérer certains éléments. La suppression définitive est <strong>irréversible</strong>.') !!}
     </p>
 </div>

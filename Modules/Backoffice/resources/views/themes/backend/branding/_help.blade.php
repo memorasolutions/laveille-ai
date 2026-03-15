@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La page <strong>Identité visuelle</strong> vous permet de <strong>personnaliser l'apparence</strong> de votre administration :
-        couleurs, polices, logos et pied de page, pour une expérience à votre image.
+        {!! __('La page <strong>Identité visuelle</strong> vous permet de <strong>personnaliser l\'apparence</strong> de votre administration : couleurs, polices, logos et pied de page, pour une expérience à votre image.') !!}
     </p>
 </div>
 
@@ -44,8 +43,7 @@
         {{ __('Comment ça marche ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        Les changements se reflètent <strong>{{ __('immédiatement dans le backoffice') }}</strong> après sauvegarde.
-        La colonne de droite affiche un <strong>{{ __('aperçu en temps réel') }}</strong> pendant que vous modifiez.
+        {!! __('Les changements se reflètent <strong>immédiatement dans le backoffice</strong> après sauvegarde. La colonne de droite affiche un <strong>aperçu en temps réel</strong> pendant que vous modifiez.') !!}
     </p>
 </div>
 
@@ -56,8 +54,6 @@
         {{ __('Astuce') }}
     </h6>
     <p class="text-muted small mb-0">
-        Utilisez l'<strong>{{ __('aperçu en direct') }}</strong> (colonne de droite) pour voir vos changements
-        avant de sauvegarder. Le bouton <em>Réinitialiser</em> sur l'onglet Couleurs restaure
-        la palette par défaut en un clic.
+        {!! __('Utilisez l\'<strong>aperçu en direct</strong> (colonne de droite) pour voir vos changements avant de sauvegarder. Le bouton <em>Réinitialiser</em> sur l\'onglet Couleurs restaure la palette par défaut en un clic.') !!}
     </p>
 </div>

@@ -6,7 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Créez des <strong>codes promo</strong> : pourcentage, montant fixe ou livraison gratuite.
+        {!! __('Créez des <strong>codes promo</strong> : pourcentage, montant fixe ou livraison gratuite.') !!}
     </p>
 </div>
 
@@ -17,9 +17,7 @@
         {{ __('Types de coupons') }}
     </h6>
     <p class="text-muted small mb-0">
-        <strong>Pourcentage</strong> - réduction en % du panier.<br>
-        <strong>Montant fixe</strong> - réduction d'un montant précis.<br>
-        <strong>Livraison gratuite</strong> - frais de port offerts.
+        {!! __('<strong>Pourcentage</strong> - réduction en % du panier.<br><strong>Montant fixe</strong> - réduction d\'un montant précis.<br><strong>Livraison gratuite</strong> - frais de port offerts.') !!}
     </p>
 </div>
 

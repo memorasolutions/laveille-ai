@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La page <strong>Statistiques</strong> vous offre une vue d'ensemble détaillée de l'activité de votre application :
-        visiteurs, inscriptions, contenu créé et <strong>tendances dans le temps</strong>.
+        {!! __('La page <strong>Statistiques</strong> vous offre une vue d\'ensemble détaillée de l\'activité de votre application : visiteurs, inscriptions, contenu créé et <strong>tendances dans le temps</strong>.') !!}
     </p>
 </div>
 
@@ -44,8 +43,7 @@
         {{ __('Périodes et graphiques') }}
     </h6>
     <p class="text-muted small mb-0">
-        Filtrez les données sur <strong>7 jours</strong>, <strong>30 jours</strong> ou <strong>90 jours</strong>.
-        Les graphiques montrent les tendances quotidiennes pour détecter les pics d'activité et les anomalies.
+        {!! __('Filtrez les données sur <strong>7 jours</strong>, <strong>30 jours</strong> ou <strong>90 jours</strong>. Les graphiques montrent les tendances quotidiennes pour détecter les pics d\'activité et les anomalies.') !!}
     </p>
 </div>
 
@@ -56,7 +54,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        Les statistiques sont calculées <strong>{{ __('en temps réel') }}</strong> depuis la base de données.
-        Pour des analyses plus poussées, connectez un outil comme Google Analytics ou Plausible.
+        {!! __('Les statistiques sont calculées <strong>en temps réel</strong> depuis la base de données. Pour des analyses plus poussées, connectez un outil comme Google Analytics ou Plausible.') !!}
     </p>
 </div>

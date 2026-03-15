@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La page <strong>Informations système</strong> affiche tous les détails techniques de votre environnement serveur :
-        versions, extensions, ressources disponibles et état de la configuration.
+        {!! __('La page <strong>Informations système</strong> affiche tous les détails techniques de votre environnement serveur : versions, extensions, ressources disponibles et état de la configuration.') !!}
     </p>
 </div>
 
@@ -44,9 +43,7 @@
         {{ __('Pourquoi c\'est utile ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        Cette page permet de <strong>{{ __('diagnostiquer des problèmes') }}</strong> : extension PHP manquante,
-        limite mémoire trop basse, espace disque insuffisant. Elle aide aussi à vérifier
-        la <strong>{{ __('compatibilité') }}</strong> avant une mise à jour.
+        {!! __('Cette page permet de <strong>diagnostiquer des problèmes</strong> : extension PHP manquante, limite mémoire trop basse, espace disque insuffisant. Elle aide aussi à vérifier la <strong>compatibilité</strong> avant une mise à jour.') !!}
     </p>
 </div>
 
@@ -57,8 +54,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        En cas de problème, <strong>{{ __('partagez cette page avec le support technique') }}</strong>.
-        Elle contient toutes les informations nécessaires pour un diagnostic rapide,
-        sans avoir à accéder au serveur directement.
+        {!! __('En cas de problème, <strong>partagez cette page avec le support technique</strong>. Elle contient toutes les informations nécessaires pour un diagnostic rapide, sans avoir à accéder au serveur directement.') !!}
     </p>
 </div>

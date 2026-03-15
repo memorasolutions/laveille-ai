@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>Champs personnalisés</strong> vous permettent d'<strong>ajouter des champs supplémentaires à n'importe quel formulaire</strong>
-        de l'application (articles, pages, utilisateurs...) sans modifier le code.
+        {!! __('Les <strong>Champs personnalisés</strong> vous permettent d\'<strong>ajouter des champs supplémentaires à n\'importe quel formulaire</strong> de l\'application (articles, pages, utilisateurs...) sans modifier le code.') !!}
     </p>
 </div>
 

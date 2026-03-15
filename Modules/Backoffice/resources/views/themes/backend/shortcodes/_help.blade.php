@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>Shortcodes</strong> sont des codes courts réutilisables que vous insérez dans vos contenus.
-        Ils sont automatiquement <strong>remplacés par du contenu dynamique</strong> à l'affichage.
+        {!! __('Les <strong>Shortcodes</strong> sont des codes courts réutilisables que vous insérez dans vos contenus. Ils sont automatiquement <strong>remplacés par du contenu dynamique</strong> à l\'affichage.') !!}
     </p>
 </div>
 
@@ -42,7 +41,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        Les shortcodes sont <strong>{{ __('interprétés à l\'affichage') }}</strong>, pas à l'édition.
-        Vous pouvez donc modifier le contenu d'un shortcode et toutes les pages l'utilisant seront mises à jour instantanément.
+        {!! __('Les shortcodes sont <strong>interprétés à l\'affichage</strong>, pas à l\'édition. Vous pouvez donc modifier le contenu d\'un shortcode et toutes les pages l\'utilisant seront mises à jour instantanément.') !!}
     </p>
 </div>

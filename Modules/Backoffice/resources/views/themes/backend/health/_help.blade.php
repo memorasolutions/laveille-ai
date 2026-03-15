@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La <strong>santé système</strong> vérifie en temps réel l'état de tous les composants critiques
-        de votre application et vous alerte immédiatement en cas de problème.
+        {!! __('La <strong>santé système</strong> vérifie en temps réel l\'état de tous les composants critiques de votre application et vous alerte immédiatement en cas de problème.') !!}
     </p>
 </div>
 
@@ -66,9 +65,9 @@
         {{ __('Comment l\'utiliser ?') }}
     </h6>
     <ol class="text-muted small ps-3 mb-0">
-        <li class="mb-1">{{ __('Cliquez sur') }} <strong>{{ __('Lancer les vérifications') }}</strong> {{ __('pour obtenir un état en temps réel.') }}</li>
-        <li class="mb-1">{{ __('Pour chaque problème, une') }} <strong>{{ __('instruction de correction') }}</strong> {{ __('est fournie.') }}</li>
-        <li class="mb-1">{{ __('Certains problèmes peuvent être') }} <strong>{{ __('corrigés automatiquement') }}</strong> {{ __('via le bouton Corriger.') }}</li>
+        <li class="mb-1">{!! __('Cliquez sur <strong>Lancer les vérifications</strong> pour obtenir un état en temps réel.') !!}</li>
+        <li class="mb-1">{!! __('Pour chaque problème, une <strong>instruction de correction</strong> est fournie.') !!}</li>
+        <li class="mb-1">{!! __('Certains problèmes peuvent être <strong>corrigés automatiquement</strong> via le bouton Corriger.') !!}</li>
         <li>{{ __('Utilisez le bouton Expliquer pour comprendre la nature du problème.') }}</li>
     </ol>
 </div>
@@ -80,8 +79,8 @@
         {{ __('Que faire si rouge ?') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('Consultez') }}</strong> {{ __('les logs de l\'application pour les détails de l\'erreur.') }}</li>
-        <li class="mb-1"><strong>{{ __('Suivez') }}</strong> {{ __('les instructions de correction affichées dans le tableau.') }}</li>
-        <li><strong>{{ __('Contactez') }}</strong> {{ __('votre administrateur système si le problème persiste.') }}</li>
+        <li class="mb-1">{!! __('<strong>Consultez</strong> les logs de l\'application pour les détails de l\'erreur.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Suivez</strong> les instructions de correction affichées dans le tableau.') !!}</li>
+        <li>{!! __('<strong>Contactez</strong> votre administrateur système si le problème persiste.') !!}</li>
     </ul>
 </div>

@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La <strong>FAQ</strong> (Foire Aux Questions) regroupe les <strong>questions fréquentes affichées sur votre site</strong>.
-        C'est un outil essentiel pour réduire les demandes de support et guider vos visiteurs.
+        {!! __('La <strong>FAQ</strong> (Foire Aux Questions) regroupe les <strong>questions fréquentes affichées sur votre site</strong>. C\'est un outil essentiel pour réduire les demandes de support et guider vos visiteurs.') !!}
     </p>
 </div>
 

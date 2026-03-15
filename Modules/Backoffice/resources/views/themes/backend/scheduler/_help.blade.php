@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le <strong>planificateur de tâches</strong> automatise des opérations récurrentes
-        sans intervention manuelle. Les tâches s'<strong>exécutent en arrière-plan</strong>
-        selon un calendrier que vous définissez.
+        {!! __('Le <strong>planificateur de tâches</strong> automatise des opérations récurrentes sans intervention manuelle. Les tâches s\'<strong>exécutent en arrière-plan</strong> selon un calendrier que vous définissez.') !!}
     </p>
 </div>
 
@@ -19,10 +17,7 @@
         {{ __('Fréquences disponibles') }}
     </h6>
     <p class="text-muted small mb-0">
-        Vous pouvez planifier une tâche à la fréquence de votre choix :
-        <strong>chaque minute</strong>, toutes les <strong>heures</strong>, chaque
-        <strong>jour</strong>, chaque <strong>semaine</strong>, chaque <strong>mois</strong>,
-        ou via une <strong>expression cron personnalisée</strong> pour une précision totale.
+        {!! __('Vous pouvez planifier une tâche à la fréquence de votre choix : <strong>chaque minute</strong>, toutes les <strong>heures</strong>, chaque <strong>jour</strong>, chaque <strong>semaine</strong>, chaque <strong>mois</strong>, ou via une <strong>expression cron personnalisée</strong> pour une précision totale.') !!}
     </p>
 </div>
 

@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le module <strong>Traductions</strong> gère le <strong>multilinguisme</strong> de votre application.
-        Ajoutez des langues, traduisez les textes et proposez une expérience localisée à vos visiteurs.
+        {!! __('Le module <strong>Traductions</strong> gère le <strong>multilinguisme</strong> de votre application. Ajoutez des langues, traduisez les textes et proposez une expérience localisée à vos visiteurs.') !!}
     </p>
 </div>
 
@@ -40,9 +39,7 @@
         {{ __('Comment ça marche ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        Chaque texte de l'application possède une <strong>{{ __('clé de traduction') }}</strong>.
-        Pour chaque langue active, vous associez une valeur à cette clé.
-        Laravel choisit automatiquement la bonne traduction selon la langue de l'utilisateur.
+        {!! __('Chaque texte de l\'application possède une <strong>clé de traduction</strong>. Pour chaque langue active, vous associez une valeur à cette clé. Laravel choisit automatiquement la bonne traduction selon la langue de l\'utilisateur.') !!}
     </p>
 </div>
 
@@ -53,7 +50,6 @@
         {{ __('Astuce') }}
     </h6>
     <p class="text-muted small mb-0">
-        <strong>{{ __('Exportez vos traductions') }}</strong> pour les faire relire par un traducteur avant publication.
-        Vous pouvez ensuite réimporter le fichier corrigé sans ressaisir manuellement chaque texte.
+        {!! __('<strong>Exportez vos traductions</strong> pour les faire relire par un traducteur avant publication. Vous pouvez ensuite réimporter le fichier corrigé sans ressaisir manuellement chaque texte.') !!}
     </p>
 </div>

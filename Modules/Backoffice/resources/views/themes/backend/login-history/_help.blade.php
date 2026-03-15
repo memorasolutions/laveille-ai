@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        L\'<strong>historique de connexion</strong> enregistre toutes les tentatives d'accès à l'administration :
-        succès, échecs, adresses IP et navigateurs utilisés. Un outil essentiel pour détecter les intrusions.
+        {!! __('L\'<strong>historique de connexion</strong> enregistre toutes les tentatives d\'accès à l\'administration : succès, échecs, adresses IP et navigateurs utilisés. Un outil essentiel pour détecter les intrusions.') !!}
     </p>
 </div>
 
@@ -44,10 +43,10 @@
         {{ __('Pourquoi c\'est utile ?') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('Détection') }}</strong> {{ __('de connexions depuis des adresses IP inconnues ou étrangères.') }}</li>
-        <li class="mb-1"><strong>{{ __('Alerte') }}</strong> {{ __('en cas de nombreuses tentatives échouées sur un même compte (force brute).') }}</li>
-        <li class="mb-1"><strong>{{ __('Audit') }}</strong> {{ __('de conformité : traçabilité des accès à l\'administration.') }}</li>
-        <li><strong>{{ __('Forensique') }}</strong> {{ __('en cas d\'incident de sécurité.') }}</li>
+        <li class="mb-1">{!! __('<strong>Détection</strong> de connexions depuis des adresses IP inconnues ou étrangères.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Alerte</strong> en cas de nombreuses tentatives échouées sur un même compte (force brute).') !!}</li>
+        <li class="mb-1">{!! __('<strong>Audit</strong> de conformité : traçabilité des accès à l\'administration.') !!}</li>
+        <li>{!! __('<strong>Forensique</strong> en cas d\'incident de sécurité.') !!}</li>
     </ul>
 </div>
 
@@ -80,8 +79,8 @@
         {{ __('Bon à savoir') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('Les échecs') }}</strong> {{ __('sont aussi enregistrés, même si le compte n\'existe pas.') }}</li>
-        <li class="mb-1"><strong>{{ __('IPs suspectes') }}</strong> {{ __('peuvent être bloquées depuis la page IPs bloquées.') }}</li>
-        <li><strong>{{ __('Durée de conservation') }}</strong> {{ __('configurée dans les paramètres de rétention des données.') }}</li>
+        <li class="mb-1">{!! __('<strong>Les échecs</strong> sont aussi enregistrés, même si le compte n\'existe pas.') !!}</li>
+        <li class="mb-1">{!! __('<strong>IPs suspectes</strong> peuvent être bloquées depuis la page IPs bloquées.') !!}</li>
+        <li>{!! __('<strong>Durée de conservation</strong> configurée dans les paramètres de rétention des données.') !!}</li>
     </ul>
 </div>

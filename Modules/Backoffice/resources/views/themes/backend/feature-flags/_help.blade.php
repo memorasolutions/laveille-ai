@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Un <strong>Feature Flag</strong> (ou « drapeau de fonctionnalité ») est un interrupteur ON/OFF
-        qui vous permet d'<strong>activer ou désactiver une fonctionnalité</strong> de votre application
-        sans toucher au code et sans redéployer.
+        {!! __('Un <strong>Feature Flag</strong> (ou « drapeau de fonctionnalité ») est un interrupteur ON/OFF qui vous permet d\'<strong>activer ou désactiver une fonctionnalité</strong> de votre application sans toucher au code et sans redéployer.') !!}
     </p>
 </div>
 
@@ -19,9 +17,7 @@
         {{ __('Pensez-y comme un interrupteur de lumière') }}
     </h6>
     <p class="text-muted small mb-0">
-        Imaginez votre maison : chaque pièce a un interrupteur. Vous pouvez allumer le salon
-        sans toucher à la cuisine. Les Feature Flags fonctionnent pareil : chaque fonctionnalité
-        a son propre interrupteur.
+        {{ __('Imaginez votre maison : chaque pièce a un interrupteur. Vous pouvez allumer le salon sans toucher à la cuisine. Les Feature Flags fonctionnent pareil : chaque fonctionnalité a son propre interrupteur.') }}
     </p>
 </div>
 
@@ -64,8 +60,8 @@
     </h6>
     <ol class="text-muted small ps-3 mb-0">
         <li class="mb-1">{{ __('Trouvez le flag que vous voulez modifier dans la liste ci-dessous.') }}</li>
-        <li class="mb-1">{{ __('Cliquez sur le') }} <strong>{{ __('bouton toggle') }}</strong> {{ __('(interrupteur) pour l\'activer ou le désactiver.') }}</li>
-        <li class="mb-1">{{ __('Le changement prend effet') }} <strong>{{ __('immédiatement') }}</strong>, {{ __('sans besoin de redémarrer quoi que ce soit.') }}</li>
+        <li class="mb-1">{!! __('Cliquez sur le <strong>bouton toggle</strong> (interrupteur) pour l\'activer ou le désactiver.') !!}</li>
+        <li class="mb-1">{!! __('Le changement prend effet <strong>immédiatement</strong>, sans besoin de redémarrer quoi que ce soit.') !!}</li>
         <li>{{ __('Pour revenir en arrière, cliquez simplement à nouveau sur le toggle.') }}</li>
     </ol>
 </div>
@@ -77,9 +73,9 @@
         {{ __('Pourquoi c\'est utile ?') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('Tester') }}</strong> {{ __('une nouvelle fonctionnalité sans risque.') }}</li>
-        <li class="mb-1"><strong>{{ __('Désactiver') }}</strong> {{ __('rapidement quelque chose qui pose problème.') }}</li>
-        <li class="mb-1"><strong>{{ __('Lancer') }}</strong> {{ __('progressivement une fonctionnalité.') }}</li>
-        <li><strong>{{ __('Personnaliser') }}</strong> {{ __("l'expérience selon vos besoins du moment.") }}</li>
+        <li class="mb-1">{!! __('<strong>Tester</strong> une nouvelle fonctionnalité sans risque.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Désactiver</strong> rapidement quelque chose qui pose problème.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Lancer</strong> progressivement une fonctionnalité.') !!}</li>
+        <li>{!! __('<strong>Personnaliser</strong> l\'expérience selon vos besoins du moment.') !!}</li>
     </ul>
 </div>

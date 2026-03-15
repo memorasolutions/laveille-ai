@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>catégories de cookies</strong> organisent les traceurs de votre site par type afin de
-        permettre un <strong>consentement éclairé</strong> de vos visiteurs, comme l'exige le RGPD.
+        {!! __('Les <strong>catégories de cookies</strong> organisent les traceurs de votre site par type afin de permettre un <strong>consentement éclairé</strong> de vos visiteurs, comme l\'exige le RGPD.') !!}
     </p>
 </div>
 
@@ -45,8 +44,8 @@
     </h6>
     <ol class="text-muted small ps-3 mb-0">
         <li class="mb-1">{{ __('Créez vos catégories de cookies avec un nom technique et un label affiché au visiteur.') }}</li>
-        <li class="mb-1">{{ __('Marquez les catégories') }} <strong>{{ __('obligatoires') }}</strong> {{ __('(Nécessaires) pour qu\'elles ne puissent pas être refusées.') }}</li>
-        <li class="mb-1">{{ __('Les catégories actives apparaissent dans la') }} <strong>{{ __('bannière de consentement') }}</strong> {{ __('de votre site.') }}</li>
+        <li class="mb-1">{!! __('Marquez les catégories <strong>obligatoires</strong> (Nécessaires) pour qu\'elles ne puissent pas être refusées.') !!}</li>
+        <li class="mb-1">{!! __('Les catégories actives apparaissent dans la <strong>bannière de consentement</strong> de votre site.') !!}</li>
         <li>{{ __('L\'ordre d\'affichage est contrôlé par le champ Ordre de chaque catégorie.') }}</li>
     </ol>
 </div>
@@ -58,9 +57,9 @@
         {{ __('Pourquoi c\'est obligatoire ?') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('RGPD') }}</strong> {{ __('exige un consentement explicite, séparé par catégorie.') }}</li>
-        <li class="mb-1"><strong>{{ __('Transparence') }}</strong> {{ __('les visiteurs doivent savoir à quoi sert chaque cookie.') }}</li>
-        <li class="mb-1"><strong>{{ __('Amende') }}</strong> {{ __('jusqu\'à 4 % du chiffre d\'affaires mondial en cas de non-conformité.') }}</li>
-        <li><strong>{{ __('Données anonymisées') }}</strong> {{ __('ne sont pas concernées par ces règles.') }}</li>
+        <li class="mb-1">{!! __('<strong>RGPD</strong> exige un consentement explicite, séparé par catégorie.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Transparence</strong> : les visiteurs doivent savoir à quoi sert chaque cookie.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Amende</strong> jusqu\'à 4 % du chiffre d\'affaires mondial en cas de non-conformité.') !!}</li>
+        <li>{!! __('<strong>Données anonymisées</strong> ne sont pas concernées par ces règles.') !!}</li>
     </ul>
 </div>

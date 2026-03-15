@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le module <strong>Équipes</strong> gère les <strong>organisations et équipes multi-utilisateurs</strong>.
-        Il permet de regrouper des utilisateurs dans des espaces de travail distincts avec des rôles dédiés.
+        {!! __('Le module <strong>Équipes</strong> gère les <strong>organisations et équipes multi-utilisateurs</strong>. Il permet de regrouper des utilisateurs dans des espaces de travail distincts avec des rôles dédiés.') !!}
     </p>
 </div>
 

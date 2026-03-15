@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>Widgets</strong> sont des <strong>blocs de contenu réutilisables</strong> que vous pouvez placer
-        dans différentes zones de votre site (sidebar, pied de page, bannière, etc.).
+        {!! __('Les <strong>Widgets</strong> sont des <strong>blocs de contenu réutilisables</strong> que vous pouvez placer dans différentes zones de votre site (sidebar, pied de page, bannière, etc.).') !!}
     </p>
 </div>
 

@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Le <strong>{{ __('journal des emails') }}</strong> est l'historique complet de tous les emails
-        envoyés par votre application : confirmations de compte, réinitialisations de mot de passe,
-        notifications, newsletters, etc.
+        {!! __('Le <strong>journal des emails</strong> est l\'historique complet de tous les emails envoyés par votre application : confirmations de compte, réinitialisations de mot de passe, notifications, newsletters, etc.') !!}
     </p>
 </div>
 
@@ -43,10 +41,10 @@
         {{ __('Pourquoi c\'est utile ?') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1">{{ __('Vérifier qu\'un') }} <strong>{{ __('email de confirmation') }}</strong> {{ __('a bien été envoyé à un utilisateur') }}</li>
-        <li class="mb-1">{{ __('Diagnostiquer pourquoi un utilisateur') }} <strong>{{ __('n\'a pas reçu') }}</strong> {{ __('son email') }}</li>
-        <li class="mb-1">{{ __('Prouver l\'envoi pour') }} <strong>{{ __('audit ou conformité') }}</strong></li>
-        <li>{{ __('Identifier des patterns d\'') }}<strong>{{ __('échec répétitif') }}</strong></li>
+        <li class="mb-1">{!! __('Vérifier qu\'un <strong>email de confirmation</strong> a bien été envoyé à un utilisateur') !!}</li>
+        <li class="mb-1">{!! __('Diagnostiquer pourquoi un utilisateur <strong>n\'a pas reçu</strong> son email') !!}</li>
+        <li class="mb-1">{!! __('Prouver l\'envoi pour <strong>audit ou conformité</strong>') !!}</li>
+        <li>{!! __('Identifier des patterns d\'<strong>échec répétitif</strong>') !!}</li>
     </ul>
 </div>
 
@@ -57,8 +55,7 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        {{ __('Pour des raisons de confidentialité, le') }} <strong>{{ __('corps complet des emails') }}</strong>
-        {{ __('n\'est pas conservé dans ce journal - seulement les métadonnées (destinataire, sujet, statut).') }}
+        {!! __('Pour des raisons de confidentialité, le <strong>corps complet des emails</strong> n\'est pas conservé dans ce journal - seulement les métadonnées (destinataire, sujet, statut).') !!}
         {{ __('Ce journal est conservé à des fins d\'audit et ne se vide pas automatiquement.') }}
     </p>
 </div>

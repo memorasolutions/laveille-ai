@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La <strong>{{ __('médiathèque') }}</strong> est la bibliothèque centralisée de tous vos fichiers :
-        images, documents et vidéos. Tout fichier uploadé depuis n'importe quel module de l'application
-        est stocké ici et peut être réutilisé.
+        {!! __('La <strong>médiathèque</strong> est la bibliothèque centralisée de tous vos fichiers : images, documents et vidéos. Tout fichier uploadé depuis n\'importe quel module de l\'application est stocké ici et peut être réutilisé.') !!}
     </p>
 </div>
 
@@ -41,10 +39,10 @@
         {{ __('Fonctionnalités') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('Upload') }}</strong> {{ __('- glisser-déposer ou sélection de fichiers') }}</li>
-        <li class="mb-1"><strong>{{ __('Recherche') }}</strong> {{ __('- retrouvez un fichier par son nom') }}</li>
-        <li class="mb-1"><strong>{{ __('Aperçu') }}</strong> {{ __('- prévisualisation intégrée pour les images') }}</li>
-        <li><strong>{{ __('Suppression') }}</strong> {{ __('- libère l\'espace disque immédiatement') }}</li>
+        <li class="mb-1">{!! __('<strong>Upload</strong> - glisser-déposer ou sélection de fichiers') !!}</li>
+        <li class="mb-1">{!! __('<strong>Recherche</strong> - retrouvez un fichier par son nom') !!}</li>
+        <li class="mb-1">{!! __('<strong>Aperçu</strong> - prévisualisation intégrée pour les images') !!}</li>
+        <li>{!! __('<strong>Suppression</strong> - libère l\'espace disque immédiatement') !!}</li>
     </ul>
 </div>
 
@@ -55,9 +53,7 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        {{ __('Avant de supprimer un fichier, assurez-vous qu\'il n\'est') }} <strong>{{ __('pas utilisé') }}</strong>
-        {{ __('dans un article, une page ou un composant.') }}
-        {{ __('La suppression est') }} <strong>{{ __('définitive') }}</strong>
-        {{ __('et libère immédiatement l\'espace disque correspondant.') }}
+        {!! __('Avant de supprimer un fichier, assurez-vous qu\'il n\'est <strong>pas utilisé</strong> dans un article, une page ou un composant.') !!}
+        {!! __('La suppression est <strong>définitive</strong> et libère immédiatement l\'espace disque correspondant.') !!}
     </p>
 </div>

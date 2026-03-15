@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>notifications push</strong> vous permettent d'<strong>envoyer des messages directement
-        sur le navigateur ou le téléphone</strong> de vos utilisateurs, même quand ils ne sont pas
-        sur votre site.
+        {!! __('Les <strong>notifications push</strong> vous permettent d\'<strong>envoyer des messages directement sur le navigateur ou le téléphone</strong> de vos utilisateurs, même quand ils ne sont pas sur votre site.') !!}
     </p>
 </div>
 
@@ -19,9 +17,7 @@
         {{ __('Prérequis') }}
     </h6>
     <p class="text-muted small mb-0">
-        Pour recevoir une notification push, l'utilisateur doit d'abord avoir
-        <strong>accepté les notifications</strong> dans son navigateur. Une fois abonné,
-        il apparaît dans le compteur d'abonnements actifs.
+        {!! __('Pour recevoir une notification push, l\'utilisateur doit d\'abord avoir <strong>accepté les notifications</strong> dans son navigateur. Une fois abonné, il apparaît dans le compteur d\'abonnements actifs.') !!}
     </p>
 </div>
 
@@ -63,10 +59,10 @@
         {{ __('Comment envoyer ?') }}
     </h6>
     <ol class="text-muted small ps-3 mb-0">
-        <li class="mb-1">{{ __('Saisissez un') }} <strong>{{ __('titre') }}</strong> {{ __('et un') }} <strong>{{ __('message') }}</strong> {{ __('(500 caractères max).') }}</li>
-        <li class="mb-1">{{ __('Ajoutez un') }} <strong>{{ __('lien') }}</strong> {{ __('optionnel vers une page de votre site.') }}</li>
-        <li class="mb-1">{{ __('Choisissez les') }} <strong>{{ __('destinataires') }}</strong> {{ __('(tous les utilisateurs ou un rôle spécifique).') }}</li>
-        <li>{{ __('Cliquez sur') }} <strong>{{ __('Envoyer') }}</strong> {{ __('- la notification est distribuée immédiatement.') }}</li>
+        <li class="mb-1">{!! __('Saisissez un <strong>titre</strong> et un <strong>message</strong> (500 caractères max).') !!}</li>
+        <li class="mb-1">{!! __('Ajoutez un <strong>lien</strong> optionnel vers une page de votre site.') !!}</li>
+        <li class="mb-1">{!! __('Choisissez les <strong>destinataires</strong> (tous les utilisateurs ou un rôle spécifique).') !!}</li>
+        <li>{!! __('Cliquez sur <strong>Envoyer</strong> - la notification est distribuée immédiatement.') !!}</li>
     </ol>
 </div>
 
@@ -77,8 +73,8 @@
         {{ __('Bon à savoir') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1"><strong>{{ __('N\'abusez pas') }}</strong> {{ __('- trop de notifications pousse les utilisateurs à se désabonner.') }}</li>
-        <li class="mb-1"><strong>{{ __('Soyez concis') }}</strong> {{ __('- un titre accrocheur et un message court sont plus efficaces.') }}</li>
-        <li><strong>{{ __('Ciblage') }}</strong> {{ __('- filtrez par rôle pour envoyer des messages pertinents à chaque groupe.') }}</li>
+        <li class="mb-1">{!! __('<strong>N\'abusez pas</strong> - trop de notifications pousse les utilisateurs à se désabonner.') !!}</li>
+        <li class="mb-1">{!! __('<strong>Soyez concis</strong> - un titre accrocheur et un message court sont plus efficaces.') !!}</li>
+        <li>{!! __('<strong>Ciblage</strong> - filtrez par rôle pour envoyer des messages pertinents à chaque groupe.') !!}</li>
     </ul>
 </div>

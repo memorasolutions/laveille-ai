@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>Webhooks</strong> sont des <strong>notifications automatiques</strong> envoyées à des services externes
-        quand un événement survient dans votre application. C'est le moyen de connecter votre app au reste du monde.
+        {!! __('Les <strong>Webhooks</strong> sont des <strong>notifications automatiques</strong> envoyées à des services externes quand un événement survient dans votre application. C\'est le moyen de connecter votre app au reste du monde.') !!}
     </p>
 </div>
 
@@ -53,8 +52,6 @@
         {{ __('Bon à savoir') }}
     </h6>
     <p class="text-muted small mb-0">
-        Vérifiez que l'<strong>{{ __('URL de destination est accessible') }}</strong> et répond avec un code HTTP 200.
-        Les webhooks en échec sont consignés dans les logs.
-        Consultez la page <em>Statistiques</em> pour voir le taux de succès.
+        {!! __('Vérifiez que l\'<strong>URL de destination est accessible</strong> et répond avec un code HTTP 200. Les webhooks en échec sont consignés dans les logs. Consultez la page <em>Statistiques</em> pour voir le taux de succès.') !!}
     </p>
 </div>

@@ -6,9 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La <strong>recherche globale</strong> interroge simultanément toutes les ressources
-        de votre administration - utilisateurs, articles, paramètres, pages, plans et catégories -
-        en une seule requête.
+        {!! __('La <strong>recherche globale</strong> interroge simultanément toutes les ressources de votre administration - utilisateurs, articles, paramètres, pages, plans et catégories - en une seule requête.') !!}
     </p>
 </div>
 
@@ -19,10 +17,7 @@
         {{ __('Comment ça marche ?') }}
     </h6>
     <p class="text-muted small mb-0">
-        Tapez un terme dans le champ de recherche. L'application interroge
-        <strong>simultanément</strong> tous les types de contenus et affiche les résultats
-        regroupés par catégorie. Utilisez le filtre <strong>Type</strong> pour cibler
-        une ressource spécifique.
+        {!! __('Tapez un terme dans le champ de recherche. L\'application interroge <strong>simultanément</strong> tous les types de contenus et affiche les résultats regroupés par catégorie. Utilisez le filtre <strong>Type</strong> pour cibler une ressource spécifique.') !!}
     </p>
 </div>
 

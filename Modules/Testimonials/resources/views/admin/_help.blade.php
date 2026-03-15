@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        Les <strong>Témoignages</strong> permettent de collecter et d'afficher les <strong>avis et témoignages de vos clients</strong>
-        sur votre site public pour renforcer la confiance et la crédibilité.
+        {!! __('Les <strong>Témoignages</strong> permettent de collecter et d\'afficher les <strong>avis et témoignages de vos clients</strong> sur votre site public pour renforcer la confiance et la crédibilité.') !!}
     </p>
 </div>
 

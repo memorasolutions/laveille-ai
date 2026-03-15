@@ -6,8 +6,7 @@
         {{ __('En un mot') }}
     </h6>
     <p class="text-muted small">
-        La <strong>rétention des données</strong> définit combien de temps chaque type de donnée personnelle
-        est conservé dans votre application. Le RGPD interdit de conserver les données <strong>indéfiniment</strong>.
+        {!! __('La <strong>rétention des données</strong> définit combien de temps chaque type de donnée personnelle est conservé dans votre application. Le RGPD interdit de conserver les données <strong>indéfiniment</strong>.') !!}
     </p>
 </div>
 
@@ -31,7 +30,7 @@
     </h6>
     <ol class="text-muted small ps-3 mb-0">
         <li class="mb-1">{{ __('Consultez le tableau pour voir les tables surveillées et leur durée de rétention configurée.') }}</li>
-        <li class="mb-1">{{ __('La colonne') }} <strong>{{ __('Éligibles') }}</strong> {{ __('indique le nombre d\'enregistrements à supprimer.') }}</li>
+        <li class="mb-1">{!! __('La colonne <strong>Éligibles</strong> indique le nombre d\'enregistrements à supprimer.') !!}</li>
         <li class="mb-1">{{ __('Lancez la purge avec la commande') }} <code>php artisan app:cleanup</code>.</li>
         <li>{{ __('Utilisez') }} <code>--dry-run</code> {{ __('pour simuler sans supprimer.') }}</li>
     </ol>

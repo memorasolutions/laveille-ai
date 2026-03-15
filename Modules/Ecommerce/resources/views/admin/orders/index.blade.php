@@ -1,26 +1,26 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('backoffice::themes.backend.layouts.admin', ['title' => 'Commandes', 'subtitle' => 'Boutique'])
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Commandes'), 'subtitle' => __('Boutique')])
 
 @section('content')
 
 <nav class="page-breadcrumb" aria-label="Fil d'Ariane">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Administration</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.ecommerce.dashboard') }}">Boutique</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Commandes</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.ecommerce.dashboard') }}">{{ __('Boutique') }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ __('Commandes') }}</li>
     </ol>
 </nav>
 
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
     <h4 class="fw-bold mb-0 d-flex align-items-center gap-2">
-        <i data-lucide="shopping-cart" class="icon-md text-primary"></i> Commandes
+        <i data-lucide="shopping-cart" class="icon-md text-primary"></i> {{ __('Commandes') }}
     </h4>
 </div>
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('Fermer') }}"></button>
     </div>
 @endif
 
@@ -29,15 +29,22 @@
         <div class="row align-items-center">
             <div class="col-md-4">
                 <form action="{{ route('admin.ecommerce.orders.index') }}" method="GET" class="d-flex gap-2">
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Rechercher par n° commande..." value="{{ request('search') }}" style="width: 200px;">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="{{ __('Rechercher par n° commande...') }}" value="{{ request('search') }}" style="width: 200px;">
                     <button type="submit" class="btn btn-sm btn-outline-primary"><i data-lucide="search" class="icon-sm"></i></button>
                 </form>
             </div>
             <div class="col-md-3">
                 <form action="{{ route('admin.ecommerce.orders.index') }}" method="GET">
                     <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">Tous les statuts</option>
-                        @foreach(['pending' => 'En attente', 'processing' => 'En traitement', 'shipped' => 'Expédié', 'completed' => 'Complété', 'cancelled' => 'Annulé', 'refunded' => 'Remboursé'] as $val => $label)
+                        <option value="">{{ __('Tous les statuts') }}</option>
+                        @foreach([
+                            'pending' => __('En attente'),
+                            'processing' => __('En traitement'),
+                            'shipped' => __('Expédié'),
+                            'completed' => __('Complété'),
+                            'cancelled' => __('Annulé'),
+                            'refunded' => __('Remboursé')
+                        ] as $val => $label)
                             <option value="{{ $val }}" {{ request('status') === $val ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
@@ -50,11 +57,11 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th class="ps-4"># Commande</th>
-                        <th>Client</th>
-                        <th>Date</th>
-                        <th>Statut</th>
-                        <th class="text-end">Total</th>
+                        <th class="ps-4">{{ __('# Commande') }}</th>
+                        <th>{{ __('Client') }}</th>
+                        <th>{{ __('Date') }}</th>
+                        <th>{{ __('Statut') }}</th>
+                        <th class="text-end">{{ __('Total') }}</th>
                         <th class="text-end pe-4"></th>
                     </tr>
                 </thead>
@@ -64,7 +71,7 @@
                         <td class="ps-4">
                             <a href="{{ route('admin.ecommerce.orders.show', $order) }}" class="fw-semibold">#{{ $order->order_number }}</a>
                         </td>
-                        <td>{{ $order->user?->name ?? 'Invité' }}</td>
+                        <td>{{ $order->user?->name ?? __('Invité') }}</td>
                         <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                         <td>
                             @php
@@ -85,7 +92,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center text-muted py-4">Aucune commande.</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted py-4">{{ __('Aucune commande.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
