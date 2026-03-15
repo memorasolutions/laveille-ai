@@ -40,23 +40,18 @@ it('super_admin sees all sidebar sections', function () {
     // Utilisateurs
     $response->assertSee('Membres');
     $response->assertSee('Rôles');
+    // Marketing
     $response->assertSee('Newsletter');
-    // Monétisation
-    $response->assertSee('Plans');
-    $response->assertSee('Revenus');
     // Configuration
     $response->assertSee('Configuration');
     $response->assertSee('SEO');
     $response->assertSee('Feature Flags');
     $response->assertSee('Traductions');
-    $response->assertSee('Plugins');
-    // Sécurité
+    // Système
     $response->assertSee('Sécurité');
-    $response->assertSee('IPs bloquées');
-    // Outils
+    $response->assertSee('IP bloquées');
     $response->assertSee('Sauvegardes');
-    $response->assertSee('Santé système');
-    $response->assertSee('Notifications');
+    $response->assertSee('Santé');
 });
 
 it('admin sees everything except Rôles link', function () {
@@ -73,7 +68,6 @@ it('admin sees everything except Rôles link', function () {
     $response->assertSee('Articles');
     $response->assertSee('Commentaires');
     $response->assertSee('Membres');
-    $response->assertSee('Plans');
     $response->assertSee('Configuration');
     $response->assertSee('SEO');
     $response->assertSee('Sécurité');

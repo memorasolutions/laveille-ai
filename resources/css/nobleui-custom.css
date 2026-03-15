@@ -41,3 +41,36 @@
 [data-bs-theme="dark"] .tiptap-editor {
     color: var(--bs-body-color);
 }
+
+/* WCAG 2.2 - Nav link min-height 48px */
+.sidebar .nav-link { min-height: 48px; }
+
+/* Tablet sidebar rail: collapsed 64px, expand on hover */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    .sidebar:not(:hover) {
+        width: 64px;
+        overflow: hidden;
+    }
+    .sidebar:not(:hover) .link-title,
+    .sidebar:not(:hover) .link-arrow,
+    .sidebar:not(:hover) .nav-category,
+    .sidebar:not(:hover) .sub-menu {
+        display: none !important;
+    }
+    .sidebar:not(:hover) .sidebar-brand {
+        font-size: 0 !important;
+    }
+    .sidebar:not(:hover) .link-icon {
+        margin: 0 auto;
+    }
+    .sidebar {
+        width: 240px;
+        transition: width .25s ease;
+    }
+    .page-wrapper {
+        transition: margin-left .25s ease;
+    }
+}
+
+/* Safe area padding for notched devices */
+.page-wrapper { padding-bottom: env(safe-area-inset-bottom); }

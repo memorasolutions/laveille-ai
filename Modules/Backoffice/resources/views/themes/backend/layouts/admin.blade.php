@@ -60,10 +60,10 @@
         }
     </style>
 
-    {{-- WCAG 2.5.8 : cibles tactiles min 44px + padding --}}
+    {{-- WCAG 2.5.8 : cibles tactiles min 48px (WCAG 2.2) --}}
     <style>
-        .sidebar .nav-link { min-height: 44px; padding-top: 10px; padding-bottom: 10px; display: flex; align-items: center; }
-        .sidebar .sub-menu .nav-link { min-height: 40px; padding-top: 8px; padding-bottom: 8px; }
+        .sidebar .nav-link { min-height: 48px; padding-top: 10px; padding-bottom: 10px; display: flex; align-items: center; }
+        .sidebar .sub-menu .nav-link { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
     </style>
 
     @livewireStyles
