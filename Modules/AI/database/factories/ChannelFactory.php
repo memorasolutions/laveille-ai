@@ -24,7 +24,7 @@ class ChannelFactory extends Factory
 
         return [
             'type' => $type,
-            'name' => fake()->company() . ' ' . $type,
+            'name' => fake()->company().' '.$type,
             'credentials' => [],
             'settings' => [],
             'is_active' => true,

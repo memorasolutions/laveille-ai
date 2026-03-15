@@ -12,6 +12,7 @@ namespace Modules\Auth\Livewire;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +22,6 @@ use Livewire\Component;
 use Modules\Auth\Notifications\LockoutContactNotification;
 use Modules\Auth\Services\AuthService;
 use Modules\Settings\Facades\Settings;
-use Illuminate\Support\Facades\Notification;
 
 #[Layout('auth::layouts.guest')]
 class Login extends Component

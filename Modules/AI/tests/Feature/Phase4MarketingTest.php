@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 // Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 use App\Models\User;
-use Modules\AI\Models\ProactiveTrigger;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\AI\Models\CsatSurvey;
+use Modules\AI\Models\ProactiveTrigger;
 use Modules\AI\Models\Ticket;
+use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 

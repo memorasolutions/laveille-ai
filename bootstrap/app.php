@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project memora/laravel-saas-boilerplate
  */
 
@@ -88,7 +88,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             // Check URL redirects before returning 404
-            $path = '/' . ltrim($request->path(), '/');
+            $path = '/'.ltrim($request->path(), '/');
             $redirect = \Illuminate\Support\Facades\Cache::remember(
                 "url_redirect:{$path}",
                 3600,

@@ -43,7 +43,7 @@ class ShortUrlController
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'original_url' => ['required', 'url', 'max:2048'],
+            'original_url' => ['required', 'url:http,https', 'max:2048'],
             'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug'],
             'title' => ['nullable', 'string', 'max:255'],
             'domain_id' => ['nullable', 'exists:short_url_domains,id'],
@@ -91,7 +91,7 @@ class ShortUrlController
     public function update(Request $request, ShortUrl $shortUrl): RedirectResponse
     {
         $validated = $request->validate([
-            'original_url' => ['required', 'url', 'max:2048'],
+            'original_url' => ['required', 'url:http,https', 'max:2048'],
             'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug,'.$shortUrl->id],
             'title' => ['nullable', 'string', 'max:255'],
             'domain_id' => ['nullable', 'exists:short_url_domains,id'],

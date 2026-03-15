@@ -20,7 +20,6 @@ use Modules\AI\Events\AgentMessageReceived;
 use Modules\AI\Models\AiConversation;
 use Modules\AI\Models\AiMessage;
 use Modules\AI\Models\CannedReply;
-use Modules\AI\Models\InternalNote;
 
 class AgentDashboardController extends Controller
 {

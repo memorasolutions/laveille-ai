@@ -30,10 +30,10 @@ class TicketAssignedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(__('Ticket assigné : ') . $this->ticket->title)
+            ->subject(__('Ticket assigné : ').$this->ticket->title)
             ->line(__('Un ticket vous a été assigné.'))
-            ->line(__('Titre : ') . $this->ticket->title)
-            ->line(__('Priorité : ') . __($this->ticket->priority->value))
+            ->line(__('Titre : ').$this->ticket->title)
+            ->line(__('Priorité : ').__($this->ticket->priority->value))
             ->action(__('Voir le ticket'), route('admin.ai.tickets.show', $this->ticket));
     }
 

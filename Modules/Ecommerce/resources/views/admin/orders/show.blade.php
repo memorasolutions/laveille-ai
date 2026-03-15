@@ -30,7 +30,10 @@
                         'cancelled' => 'bg-danger', 'refunded' => 'bg-secondary',
                     ];
                 @endphp
-                <span class="badge {{ $badges[$order->status] ?? 'bg-secondary' }}">{{ ucfirst($order->status) }}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge {{ $badges[$order->status] ?? 'bg-secondary' }}">{{ ucfirst($order->status) }}</span>
+                    <a href="{{ route('admin.ecommerce.orders.invoice', $order) }}" class="btn btn-sm btn-outline-primary"><i data-lucide="file-text" class="me-1"></i>Facture PDF</a>
+                </div>
             </div>
             <div class="card-body p-0">
                 <table class="table align-middle mb-0">

@@ -60,6 +60,12 @@
         }
     </style>
 
+    {{-- WCAG 2.5.8 : cibles tactiles min 44px + padding --}}
+    <style>
+        .sidebar .nav-link { min-height: 44px; padding-top: 10px; padding-bottom: 10px; display: flex; align-items: center; }
+        .sidebar .sub-menu .nav-link { min-height: 40px; padding-top: 8px; padding-bottom: 8px; }
+    </style>
+
     @livewireStyles
     @stack('style')
     @stack('styles')
@@ -113,6 +119,7 @@
             @include('backoffice::themes.backend.partials.footer')
         </div>
     </div>
+    @include('backoffice::themes.backend.partials.bottom-bar')
 
     {{-- Base JS --}}
     <script src="{{ asset('build/nobleui/plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>

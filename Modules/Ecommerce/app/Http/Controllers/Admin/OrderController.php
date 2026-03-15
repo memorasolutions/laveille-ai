@@ -6,8 +6,10 @@ namespace Modules\Ecommerce\Http\Controllers\Admin;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Modules\Ecommerce\Models\Order;
+use Modules\Ecommerce\Services\InvoiceService;
 
 class OrderController
 {
@@ -43,8 +45,20 @@ class OrderController
 
         $order->update(['status' => $validated['status']]);
 
+        if ($validated['status'] === 'shipped') {
+            \Modules\Ecommerce\Events\OrderShipped::dispatch($order);
+            /** @var \App\Models\User $user */
+            $user = $order->user;
+            $user->notify(new \Modules\Ecommerce\Notifications\OrderShippedNotification($order));
+        }
+
         session()->flash('success', 'Statut de la commande mis à jour avec succès.');
 
         return redirect()->route('admin.ecommerce.orders.show', $order);
+    }
+
+    public function invoice(Order $order, InvoiceService $invoiceService): Response
+    {
+        return $invoiceService->downloadResponse($order);
     }
 }

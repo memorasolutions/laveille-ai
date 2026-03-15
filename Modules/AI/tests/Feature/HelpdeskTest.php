@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 // Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 
-use Modules\AI\Models\Ticket;
-use Modules\AI\Models\SlaPolicy;
+use App\Models\User;
+use Modules\AI\Enums\MessageRole;
+use Modules\AI\Enums\TicketPriority;
+use Modules\AI\Enums\TicketStatus;
 use Modules\AI\Models\AiConversation;
 use Modules\AI\Models\AiMessage;
-use Modules\AI\Enums\TicketStatus;
-use Modules\AI\Enums\TicketPriority;
-use Modules\AI\Enums\MessageRole;
+use Modules\AI\Models\SlaPolicy;
+use Modules\AI\Models\Ticket;
 use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
-use App\Models\User;
 
 uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 

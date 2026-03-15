@@ -68,6 +68,10 @@ Route::prefix('admin/ecommerce')
             ->name('orders.update-status')
             ->middleware('permission:update_ecommerce_orders');
 
+        Route::get('orders/{order}/invoice', [OrderController::class, 'invoice'])
+            ->name('orders.invoice')
+            ->middleware('permission:view_ecommerce_orders');
+
         // Coupons
         Route::middleware('permission:view_coupons')->group(function () {
             Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');

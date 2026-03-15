@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 // Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\AI\Models\Ticket;
 use Modules\AI\Services\AiService;
-use Modules\AI\Services\SmartReplyService;
 use Modules\AI\Services\SentimentService;
+use Modules\AI\Services\SmartReplyService;
+use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 

@@ -83,6 +83,8 @@ class CheckoutService
                 $coupon->increment('used_count');
             }
 
+            \Modules\Ecommerce\Events\OrderCreated::dispatch($order);
+
             return $order;
         });
     }
@@ -152,6 +154,12 @@ class CheckoutService
                     'stripe_payment_intent' => $session->payment_intent,
                     'paid_at' => now(),
                 ]);
+
+                /** @var \App\Models\User $user */
+                $user = $order->user;
+                $user->notify(new \Modules\Ecommerce\Notifications\OrderConfirmationNotification($order));
+
+                \Modules\Ecommerce\Events\OrderPaid::dispatch($order);
             }
         }
     }

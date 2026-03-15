@@ -46,6 +46,7 @@ class DemoSeederCommand extends Command
             $this->createActivityLogs();
             $this->createSubscribers();
             $this->seedKnowledgeBase();
+            $this->seedEcommerce();
         });
 
         $this->showSummary();
@@ -217,18 +218,38 @@ class DemoSeederCommand extends Command
         });
     }
 
+    private function seedEcommerce(): void
+    {
+        if (! class_exists(\Modules\Ecommerce\Database\Seeders\EcommerceDatabaseSeeder::class)) {
+            return;
+        }
+
+        $this->components->task('Seeding ecommerce demo data', function () {
+            $this->callSilent('db:seed', ['--class' => \Modules\Ecommerce\Database\Seeders\EcommerceDatabaseSeeder::class]);
+
+            return true;
+        });
+    }
+
     private function showSummary(): void
     {
         $this->newLine();
         $this->components->info('Demo data generated successfully!');
 
-        $this->table(['Data', 'Count'], [
+        $rows = [
             ['Users', User::where('email', 'like', '%@demo.test')->count()],
             ['Articles', Article::whereIn('user_id', User::where('email', 'like', '%@demo.test')->pluck('id'))->count()],
             ['Comments', Comment::whereIn('user_id', User::where('email', 'like', '%@demo.test')->pluck('id'))->count()],
             ['Pages', StaticPage::whereIn('slug', ['about-demo', 'terms-demo', 'privacy-demo'])->count()],
             ['Subscribers', Subscriber::where('email', 'like', '%@demo.test')->count()],
-        ]);
+        ];
+
+        if (class_exists(\Modules\Ecommerce\Models\Product::class)) {
+            $rows[] = ['Products', \Modules\Ecommerce\Models\Product::count()];
+            $rows[] = ['Coupons', \Modules\Ecommerce\Models\Coupon::count()];
+        }
+
+        $this->table(['Data', 'Count'], $rows);
 
         $this->components->bulletList([
             'Login as editor: editor@demo.test / password',

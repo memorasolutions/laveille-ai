@@ -16,14 +16,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+use Modules\AI\Enums\MessageRole;
 use Modules\AI\Enums\TicketPriority;
 use Modules\AI\Enums\TicketStatus;
+use Modules\AI\Models\AiConversation;
 use Modules\AI\Models\SlaPolicy;
 use Modules\AI\Models\Ticket;
 use Modules\AI\Models\TicketReply;
 use Modules\AI\Models\TicketTag;
-use Modules\AI\Enums\MessageRole;
-use Modules\AI\Models\AiConversation;
 
 class TicketController extends Controller
 {
@@ -73,7 +73,7 @@ class TicketController extends Controller
             'tags.*' => 'exists:ticket_tags,id',
         ]);
 
-        $ticket = new Ticket();
+        $ticket = new Ticket;
         $ticket->fill($data);
         $ticket->user_id = auth()->id();
 
@@ -170,7 +170,7 @@ class TicketController extends Controller
             ->implode("\n\n");
 
         $ticket = Ticket::create([
-            'title' => $conversation->title ?: __('Ticket depuis conversation') . " #{$conversation->id}",
+            'title' => $conversation->title ?: __('Ticket depuis conversation')." #{$conversation->id}",
             'description' => $userMessages ?: __('Aucun message utilisateur.'),
             'user_id' => $conversation->user_id,
             'conversation_id' => $conversation->id,

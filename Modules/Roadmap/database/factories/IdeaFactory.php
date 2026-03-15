@@ -23,7 +23,7 @@ class IdeaFactory extends Factory
             'board_id' => Board::factory(),
             'user_id' => User::factory(),
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(1, 9999),
+            'slug' => Str::slug($title).'-'.$this->faker->unique()->numberBetween(1, 9999),
             'description' => $this->faker->paragraph(),
             'status' => $this->faker->randomElement(IdeaStatus::cases()),
             'category' => $this->faker->randomElement(['feature', 'bug', 'improvement', 'ux']),

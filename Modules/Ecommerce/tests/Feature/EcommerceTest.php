@@ -124,3 +124,114 @@ test('unauthorized user gets 403', function () {
     $user = User::create(['name' => 'User', 'email' => 'user@test.com', 'password' => bcrypt('password')]);
     $this->actingAs($user)->get(route('admin.ecommerce.dashboard'))->assertForbidden();
 });
+
+// --- API Public ---
+
+test('api products index returns active products', function () {
+    Product::create(['name' => 'Active', 'slug' => 'active', 'price' => 10, 'is_active' => true]);
+    Product::create(['name' => 'Inactive', 'slug' => 'inactive', 'price' => 10, 'is_active' => false]);
+
+    $this->getJson('/api/ecommerce/products')
+        ->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonCount(1, 'data.data');
+});
+
+test('api products show returns product by slug', function () {
+    Product::create(['name' => 'Mon produit', 'slug' => 'mon-produit', 'price' => 25, 'is_active' => true]);
+
+    $this->getJson('/api/ecommerce/products/mon-produit')
+        ->assertOk()
+        ->assertJsonPath('data.slug', 'mon-produit');
+});
+
+test('api products show returns 404 for missing slug', function () {
+    $this->getJson('/api/ecommerce/products/inexistant')->assertNotFound();
+});
+
+// --- API Cart (authenticated) ---
+
+test('api cart requires authentication', function () {
+    $this->getJson('/api/ecommerce/cart')->assertUnauthorized();
+});
+
+test('api cart add and list items', function () {
+    $product = Product::create(['name' => 'Test', 'slug' => 'test', 'price' => 50]);
+    $variant = ProductVariant::create(['product_id' => $product->id, 'sku' => 'API-001', 'price' => 50, 'stock' => 10, 'is_active' => true]);
+
+    $this->actingAs($this->admin)
+        ->postJson('/api/ecommerce/cart/items', ['variant_id' => $variant->id, 'quantity' => 3])
+        ->assertStatus(201);
+
+    $this->actingAs($this->admin)
+        ->getJson('/api/ecommerce/cart')
+        ->assertOk()
+        ->assertJsonPath('data.item_count', 3)
+        ->assertJsonPath('data.total', 150);
+});
+
+test('api cart clear empties cart', function () {
+    $product = Product::create(['name' => 'Test', 'slug' => 'test2', 'price' => 30]);
+    $variant = ProductVariant::create(['product_id' => $product->id, 'sku' => 'API-002', 'price' => 30, 'stock' => 5, 'is_active' => true]);
+
+    $this->actingAs($this->admin)->postJson('/api/ecommerce/cart/items', ['variant_id' => $variant->id, 'quantity' => 1]);
+    $this->actingAs($this->admin)->deleteJson('/api/ecommerce/cart')->assertOk();
+    $this->actingAs($this->admin)->getJson('/api/ecommerce/cart')->assertJsonPath('data.item_count', 0);
+});
+
+// --- API Orders ---
+
+test('api orders requires authentication', function () {
+    $this->getJson('/api/ecommerce/orders')->assertUnauthorized();
+});
+
+test('api orders index returns user orders', function () {
+    $this->actingAs($this->admin)->getJson('/api/ecommerce/orders')
+        ->assertOk()
+        ->assertJsonPath('success', true);
+});
+
+// --- API Wishlist ---
+
+test('api wishlist requires authentication', function () {
+    $this->getJson('/api/ecommerce/wishlist')->assertUnauthorized();
+});
+
+test('api wishlist add and list', function () {
+    $product = Product::create(['name' => 'Fav', 'slug' => 'fav', 'price' => 20, 'is_active' => true]);
+
+    $this->actingAs($this->admin)
+        ->postJson('/api/ecommerce/wishlist', ['product_id' => $product->id])
+        ->assertStatus(201);
+
+    $this->actingAs($this->admin)
+        ->getJson('/api/ecommerce/wishlist')
+        ->assertOk()
+        ->assertJsonCount(1, 'data.data');
+});
+
+test('api wishlist prevents duplicates', function () {
+    $product = Product::create(['name' => 'Dup', 'slug' => 'dup', 'price' => 15, 'is_active' => true]);
+
+    $this->actingAs($this->admin)->postJson('/api/ecommerce/wishlist', ['product_id' => $product->id]);
+    $this->actingAs($this->admin)->postJson('/api/ecommerce/wishlist', ['product_id' => $product->id]);
+
+    $this->actingAs($this->admin)->getJson('/api/ecommerce/wishlist')
+        ->assertJsonCount(1, 'data.data');
+});
+
+test('api wishlist remove item', function () {
+    $product = Product::create(['name' => 'Del', 'slug' => 'del', 'price' => 10, 'is_active' => true]);
+
+    $response = $this->actingAs($this->admin)
+        ->postJson('/api/ecommerce/wishlist', ['product_id' => $product->id]);
+
+    $wishlistId = $response->json('data.id');
+
+    $this->actingAs($this->admin)
+        ->deleteJson('/api/ecommerce/wishlist/'.$wishlistId)
+        ->assertOk();
+
+    $this->actingAs($this->admin)->getJson('/api/ecommerce/wishlist')
+        ->assertJsonCount(0, 'data.data');
+});

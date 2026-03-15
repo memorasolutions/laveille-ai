@@ -30,9 +30,9 @@ class TicketSlaWarningNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(__('Alerte SLA : ') . $this->ticket->title)
-            ->line(__('Ticket : ') . $this->ticket->title)
-            ->line(__('Échéance : ') . $this->ticket->due_at?->format('d/m/Y H:i'))
+            ->subject(__('Alerte SLA : ').$this->ticket->title)
+            ->line(__('Ticket : ').$this->ticket->title)
+            ->line(__('Échéance : ').$this->ticket->due_at?->format('d/m/Y H:i'))
             ->action(__('Voir le ticket'), route('admin.ai.tickets.show', $this->ticket));
     }
 

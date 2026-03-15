@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 // Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\AI\Adapters\EmailChannelAdapter;
 use Modules\AI\Models\Channel;
@@ -9,7 +12,6 @@ use Modules\AI\Models\ChannelMessage;
 use Modules\AI\Models\Ticket;
 use Modules\AI\Services\ChannelRegistry;
 use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
-use App\Models\User;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 

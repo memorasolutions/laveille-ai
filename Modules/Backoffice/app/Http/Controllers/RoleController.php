@@ -21,6 +21,7 @@ use Spatie\Permission\Models\Role;
 class RoleController
 {
     use ChecksRoleElevation;
+
     private function permissionCategories(): array
     {
         return [
