@@ -50,15 +50,10 @@ fresh:
 	php artisan migrate:fresh --seed
 
 cache:
-	php artisan config:cache
-	php artisan route:cache
-	php artisan view:cache
+	php artisan optimize
 
 cache-clear:
-	php artisan config:clear
-	php artisan route:clear
-	php artisan view:clear
-	php artisan cache:clear
+	php artisan optimize:clear
 
 horizon:
 	php artisan horizon
@@ -76,7 +71,12 @@ docker-build:
 	docker compose build --no-cache
 
 deploy:
-	bash scripts/deploy.sh
+	composer install --no-dev --optimize-autoloader --classmap-authoritative
+	npm ci --production
+	npm run build
+	php artisan migrate --force
+	php artisan optimize
+	php artisan storage:link
 
 ide-helper:
 	php artisan ide-helper:generate
