@@ -50,8 +50,12 @@ class ArticleController extends Controller
             'category_id' => 'nullable|integer|exists:blog_categories,id',
             'tags_input' => 'nullable|string',
             'published_at' => 'nullable|date',
+            'format' => 'nullable|in:standard,video,gallery,audio,quote,link',
+            'is_featured' => 'nullable',
+            'content_password' => 'nullable|string|max:100',
         ]);
 
+        $validated['is_featured'] = $request->boolean('is_featured');
         $validated['user_id'] = auth()->id();
         $validated['status'] = $validated['status'] ?? 'draft';
         $validated['tags'] = $this->parseTagsInput($validated['tags_input'] ?? '');
@@ -92,8 +96,12 @@ class ArticleController extends Controller
             'category_id' => 'nullable|integer|exists:blog_categories,id',
             'tags_input' => 'nullable|string',
             'published_at' => 'nullable|date',
+            'format' => 'nullable|in:standard,video,gallery,audio,quote,link',
+            'is_featured' => 'nullable',
+            'content_password' => 'nullable|string|max:100',
         ]);
 
+        $validated['is_featured'] = $request->boolean('is_featured');
         $validated['tags'] = $this->parseTagsInput($validated['tags_input'] ?? '');
         unset($validated['tags_input']);
 

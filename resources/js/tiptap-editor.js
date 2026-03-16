@@ -212,6 +212,12 @@ export function tiptapEditorComponent(config = {}) {
             const url = prompt('URL YouTube :')
             if (url) this.cmd(() => this.editor.commands.setYoutubeVideo({ src: url }))
         },
+        addEmbed() {
+            const url = prompt('URL à intégrer (Vimeo, Spotify, X/Twitter, CodePen, SoundCloud...) :')
+            if (!url) return
+            const html = `<div data-embed-url="${url.replace(/"/g, '&quot;')}" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1em 0;border-radius:8px"><iframe src="${url.replace(/"/g, '&quot;')}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy"></iframe></div>`
+            this.cmd(() => this.editor.chain().focus().insertContent(html).run())
+        },
         toggleTaskList() {
             this.cmd(() => this.editor.chain().focus().toggleTaskList().run())
         },

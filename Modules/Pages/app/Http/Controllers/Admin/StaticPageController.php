@@ -38,6 +38,7 @@ class StaticPageController extends Controller
             'template' => 'nullable|in:'.implode(',', array_keys(StaticPage::TEMPLATES)),
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
+            'content_password' => 'nullable|string|max:100',
         ]);
 
         $validated['user_id'] = auth()->id();
@@ -78,6 +79,7 @@ class StaticPageController extends Controller
             'template' => 'nullable|in:'.implode(',', array_keys(StaticPage::TEMPLATES)),
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
+            'content_password' => 'nullable|string|max:100',
         ]);
 
         $page->update($validated);

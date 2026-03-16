@@ -63,6 +63,7 @@ class StaticPage extends Model
         'expired_at',
         'user_id',
         'tenant_id',
+        'content_password',
     ];
 
     protected $casts = [
@@ -94,6 +95,11 @@ class StaticPage extends Model
     public function scopePublished($query)
     {
         return $query->where('status', self::STATUS_PUBLISHED);
+    }
+
+    public function isPasswordProtected(): bool
+    {
+        return ! empty($this->content_password);
     }
 
     protected function safeContent(): Attribute

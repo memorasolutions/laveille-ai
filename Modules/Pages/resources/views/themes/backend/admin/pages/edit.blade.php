@@ -102,6 +102,21 @@
                 </div>
             </div>
 
+            {{-- Protection par mot de passe --}}
+            <div class="card mb-3">
+                <div class="card-header py-3 px-4 border-bottom">
+                    <h5 class="fw-semibold mb-0">Protection</h5>
+                </div>
+                <div class="p-4">
+                    <div class="mb-0">
+                        <label for="content_password" class="form-label fw-medium d-flex align-items-center gap-2">
+                            <i data-lucide="lock" style="width:16px;height:16px;"></i> Mot de passe
+                        </label>
+                        <input type="text" class="form-control" id="content_password" name="content_password" value="{{ old('content_password', $page->content_password ?? '') }}" placeholder="Laisser vide pour accès libre">
+                    </div>
+                </div>
+            </div>
+
             {{-- SEO --}}
             <div class="card mb-3">
                 <div class="card-header py-3 px-4 border-bottom">

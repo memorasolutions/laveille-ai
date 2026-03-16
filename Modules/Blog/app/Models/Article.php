@@ -61,6 +61,9 @@ class Article extends Model
         'expired_at',
         'user_id',
         'tenant_id',
+        'is_featured',
+        'content_password',
+        'format',
     ];
 
     protected $casts = [
@@ -69,6 +72,7 @@ class Article extends Model
         'status' => ArticleState::class,
         'tags' => 'array',
         'meta' => 'array',
+        'is_featured' => 'boolean',
     ];
 
     protected static function boot(): void
@@ -91,6 +95,21 @@ class Article extends Model
     public function scopeDraft($query)
     {
         return $query->whereState('status', DraftArticleState::class);
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    public function scopeByFormat($query, string $format)
+    {
+        return $query->where('format', $format);
+    }
+
+    public function isPasswordProtected(): bool
+    {
+        return ! empty($this->content_password);
     }
 
     /**

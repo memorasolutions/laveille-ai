@@ -129,6 +129,41 @@
                 </div>
             </div>
 
+            {{-- Options WordPress --}}
+            <div class="card mb-3">
+                <div class="card-header py-3 px-4 border-bottom">
+                    <h5 class="fw-semibold mb-0">Options</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label for="format" class="form-label fw-medium d-flex align-items-center gap-2">
+                            <i data-lucide="layout-template" style="width:16px;height:16px;"></i> Format
+                        </label>
+                        <select name="format" id="format" class="form-select @error('format') is-invalid @enderror">
+                            @foreach(\Modules\Blog\Enums\ArticleFormat::cases() as $case)
+                                <option value="{{ $case->value }}" {{ old('format', 'standard') === $case->value ? 'selected' : '' }}>{{ $case->label() }}</option>
+                            @endforeach
+                        </select>
+                        @error('format')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}>
+                            <label class="form-check-label d-flex align-items-center gap-2" for="is_featured">
+                                <i data-lucide="star" style="width:16px;height:16px;"></i> Article mis en avant
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label for="content_password" class="form-label fw-medium d-flex align-items-center gap-2">
+                            <i data-lucide="lock" style="width:16px;height:16px;"></i> Mot de passe
+                        </label>
+                        <input type="text" class="form-control @error('content_password') is-invalid @enderror" id="content_password" name="content_password" value="{{ old('content_password', '') }}" placeholder="Laisser vide pour accès libre">
+                        @error('content_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+            </div>
+
             {{-- Image mise en avant --}}
             <div class="card" x-data="{
                 isDragging: false,

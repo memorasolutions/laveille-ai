@@ -91,6 +91,7 @@
         <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addImage()" data-bs-toggle="tooltip" title="Image" aria-label="Insérer une image"><i data-lucide="image-plus" style="width:14px;height:14px;"></i></button>
         <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="insertTable()" data-bs-toggle="tooltip" title="Tableau" aria-label="Insérer un tableau"><i data-lucide="table" style="width:14px;height:14px;"></i></button>
         <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addYoutube()" data-bs-toggle="tooltip" title="Vidéo YouTube" aria-label="Insérer vidéo YouTube"><i data-lucide="youtube" style="width:14px;height:14px;"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="addEmbed()" data-bs-toggle="tooltip" title="Embed (Vimeo, Spotify, X...)" aria-label="Insérer un embed"><i data-lucide="code-2" style="width:14px;height:14px;"></i></button>
         <button type="button" class="btn btn-sm btn-outline-secondary" @mousedown.prevent="cmd(() => editor.chain().focus().setHorizontalRule().run())" data-bs-toggle="tooltip" title="Ligne horizontale" aria-label="Ligne horizontale"><i data-lucide="minus" style="width:14px;height:14px;"></i></button>
         <span class="vr mx-1 align-self-stretch opacity-25"></span>
 
