@@ -104,6 +104,7 @@ class IdeaController extends Controller
     {
         $validated = $request->validate([
             'content' => 'required',
+            'is_internal' => 'sometimes|boolean',
         ]);
 
         IdeaComment::create([
@@ -111,11 +112,14 @@ class IdeaController extends Controller
             'user_id' => auth()->id(),
             'content' => $validated['content'],
             'is_official' => true,
+            'is_internal' => $validated['is_internal'] ?? false,
         ]);
 
-        $idea->increment('comment_count');
+        if (empty($validated['is_internal'])) {
+            $idea->increment('comment_count');
+        }
 
-        return redirect()->back()->with('success', __('Official comment added.'));
+        return redirect()->back()->with('success', __('Comment added.'));
     }
 
     public function addComment(Request $request, Idea $idea)

@@ -35,6 +35,7 @@ class Idea extends Model
         'comment_count',
         'pinned',
         'merged_into_id',
+        'category_id',
     ];
 
     protected $casts = [
@@ -47,6 +48,11 @@ class Idea extends Model
     public function board(): BelongsTo
     {
         return $this->belongsTo(Board::class);
+    }
+
+    public function roadmapCategory(): BelongsTo
+    {
+        return $this->belongsTo(RoadmapCategory::class, 'category_id');
     }
 
     public function user(): BelongsTo

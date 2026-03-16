@@ -25,11 +25,18 @@ class IdeaComment extends Model
         'user_id',
         'content',
         'is_official',
+        'is_internal',
     ];
 
     protected $casts = [
         'is_official' => 'boolean',
+        'is_internal' => 'boolean',
     ];
+
+    public function scopePublic($query)
+    {
+        return $query->where('is_internal', false);
+    }
 
     public function idea(): BelongsTo
     {

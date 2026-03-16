@@ -37,7 +37,7 @@ class PublicBoardController extends Controller
 
         $query = $board->ideas()
             ->with('user')
-            ->withCount('comments');
+            ->withCount(['comments' => fn ($q) => $q->where('is_internal', false)]);
 
         if ($request->filled('status')) {
             $query->byStatus(IdeaStatus::from($request->status));

@@ -26,11 +26,13 @@ class Board extends Model
         'is_public',
         'color',
         'sort_order',
+        'hide_votes_before_voting',
     ];
 
     protected $casts = [
         'is_public' => 'boolean',
         'sort_order' => 'integer',
+        'hide_votes_before_voting' => 'boolean',
     ];
 
     public function ideas(): HasMany

@@ -31,9 +31,14 @@
                         <div class="d-flex gap-3">
                             <div class="text-center">
                                 <button class="btn btn-outline-primary vote-btn d-flex flex-column align-items-center px-3 py-2"
-                                        data-idea-id="{{ $idea->id }}">
+                                        data-idea-id="{{ $idea->id }}"
+                                        aria-label="{{ __('Voter pour') }} {{ $idea->title }}">
                                     <small>&#9650;</small>
-                                    <span class="vote-count fw-bold">{{ $idea->vote_count }}</span>
+                                    @if($board->hide_votes_before_voting)
+                                        <span class="vote-count fw-bold" data-hidden="true">—</span>
+                                    @else
+                                        <span class="vote-count fw-bold">{{ $idea->vote_count }}</span>
+                                    @endif
                                 </button>
                             </div>
                             <div class="flex-grow-1">
@@ -122,6 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(r => r.json())
             .then(data => {
                 countEl.textContent = data.vote_count;
+                countEl.removeAttribute('data-hidden');
                 btn.classList.toggle('btn-primary', data.voted);
                 btn.classList.toggle('btn-outline-primary', !data.voted);
             });

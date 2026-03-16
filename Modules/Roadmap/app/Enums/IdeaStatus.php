@@ -21,22 +21,33 @@ enum IdeaStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::UnderReview => 'En révision',
-            self::Planned => 'Planifié',
-            self::InProgress => 'En cours',
-            self::Completed => 'Complété',
-            self::Declined => 'Décliné',
+            self::UnderReview => __('En révision'),
+            self::Planned => __('Planifié'),
+            self::InProgress => __('En cours'),
+            self::Completed => __('Complété'),
+            self::Declined => __('Décliné'),
         };
     }
 
     public function color(): string
     {
         return match ($this) {
-            self::UnderReview => 'primary',
-            self::Planned => 'info',
-            self::InProgress => 'warning',
-            self::Completed => 'success',
-            self::Declined => 'secondary',
+            self::UnderReview => '#6366f1',
+            self::Planned => '#0ea5e9',
+            self::InProgress => '#f59e0b',
+            self::Completed => '#22c55e',
+            self::Declined => '#6b7280',
+        };
+    }
+
+    public function column(): string
+    {
+        return match ($this) {
+            self::UnderReview => 'now',
+            self::Planned => 'next',
+            self::InProgress => 'now',
+            self::Completed => 'later',
+            self::Declined => 'later',
         };
     }
 }
