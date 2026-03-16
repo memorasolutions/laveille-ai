@@ -40,6 +40,7 @@ $helpTextsData = [
             'retention' => 'clock',
             'legal'     => 'scale',
             'ai'        => 'sparkles',
+            'permalinks' => 'link',
         ];
         $labels = [
             'general'   => __('Général'),
@@ -54,6 +55,7 @@ $helpTextsData = [
             'retention' => __('Rétention'),
             'legal'     => __('Légal'),
             'ai'        => 'IA',
+            'permalinks' => __('Permaliens'),
         ];
     @endphp
 

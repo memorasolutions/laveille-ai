@@ -125,6 +125,64 @@
         </div>
     </div>
 
+    {{-- Liens sociaux --}}
+    <div class="col-12 col-xl-6">
+        <div class="card h-100">
+            <div class="card-header border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                <i data-lucide="globe" class="text-primary icon-md"></i>
+                <h4 class="fw-bold mb-0">{{ __('Liens sociaux') }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ route('admin.profile.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="_section" value="social">
+
+                    <div class="mb-3">
+                        <label for="social_twitter" class="form-label fw-medium">Twitter / X</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i data-lucide="at-sign" style="width:16px;height:16px;"></i></span>
+                            <input type="url" name="social_links[twitter]" id="social_twitter" class="form-control"
+                                   placeholder="https://x.com/username"
+                                   value="{{ old('social_links.twitter', $user->social_links['twitter'] ?? '') }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="social_linkedin" class="form-label fw-medium">LinkedIn</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i data-lucide="briefcase" style="width:16px;height:16px;"></i></span>
+                            <input type="url" name="social_links[linkedin]" id="social_linkedin" class="form-control"
+                                   placeholder="https://linkedin.com/in/username"
+                                   value="{{ old('social_links.linkedin', $user->social_links['linkedin'] ?? '') }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="social_github" class="form-label fw-medium">GitHub</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i data-lucide="code-2" style="width:16px;height:16px;"></i></span>
+                            <input type="url" name="social_links[github]" id="social_github" class="form-control"
+                                   placeholder="https://github.com/username"
+                                   value="{{ old('social_links.github', $user->social_links['github'] ?? '') }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="social_website" class="form-label fw-medium">{{ __('Site web') }}</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i data-lucide="link" style="width:16px;height:16px;"></i></span>
+                            <input type="url" name="social_links[website]" id="social_website" class="form-control"
+                                   placeholder="https://example.com"
+                                   value="{{ old('social_links.website', $user->social_links['website'] ?? '') }}">
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">{{ __('Enregistrer les liens') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- Sessions actives --}}
     <div class="col-12">
         <div class="card">

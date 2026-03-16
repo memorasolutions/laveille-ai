@@ -91,6 +91,7 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
         'onboarding_completed_at',
         'notification_frequency',
         'password_changed_at',
+        'social_links',
     ];
 
     /**
@@ -124,6 +125,7 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
             'onboarding_step' => 'integer',
             'onboarding_completed_at' => 'datetime',
             'password_changed_at' => 'datetime',
+            'social_links' => 'array',
         ];
     }
 

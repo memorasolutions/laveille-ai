@@ -87,6 +87,29 @@
                 </div>
             </div>
 
+            {{-- Attributs de page --}}
+            <div class="card mb-3">
+                <div class="card-header py-3 px-4 border-bottom">
+                    <h5 class="fw-semibold mb-0 d-flex align-items-center gap-2"><i data-lucide="git-branch" style="width:16px;height:16px;"></i> {{ __('Attributs de page') }}</h5>
+                </div>
+                <div class="p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">{{ __('Page parente') }}</label>
+                        <select name="parent_id" class="form-control" aria-label="{{ __('Page parente') }}">
+                            <option value="">{{ __('(Aucune — page racine)') }}</option>
+                            @foreach($parentPages as $p)
+                                <option value="{{ $p->id }}" {{ old('parent_id') == $p->id ? 'selected' : '' }}>{{ $p->title }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text text-muted">{{ __('Les sous-pages héritent de la hiérarchie URL.') }}</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-medium">{{ __('Ordre d\'affichage') }}</label>
+                        <input type="number" name="sort_order" class="form-control" value="{{ old('sort_order', 0) }}" min="0" step="1">
+                    </div>
+                </div>
+            </div>
+
             {{-- Protection par mot de passe --}}
             <div class="card mb-3">
                 <div class="card-header py-3 px-4 border-bottom">

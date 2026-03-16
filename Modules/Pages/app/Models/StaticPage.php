@@ -15,7 +15,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Mews\Purifier\Facades\Purifier;
@@ -64,6 +66,8 @@ class StaticPage extends Model
         'user_id',
         'tenant_id',
         'content_password',
+        'parent_id',
+        'sort_order',
     ];
 
     protected $casts = [
@@ -121,6 +125,57 @@ class StaticPage extends Model
         }
 
         return $this->where($field, $value)->first();
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(static::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(static::class, 'parent_id')->orderBy('sort_order');
+    }
+
+    public function ancestors(): Collection
+    {
+        $ancestors = collect();
+        $parent = $this->parent;
+
+        while ($parent instanceof static) {
+            $ancestors->push($parent);
+            $parent = $parent->parent;
+        }
+
+        return $ancestors->reverse()->values();
+    }
+
+    public function depth(): int
+    {
+        $depth = 0;
+        $parent = $this->parent;
+
+        while ($parent instanceof static) {
+            $depth++;
+            $parent = $parent->parent;
+        }
+
+        return $depth;
+    }
+
+    public function scopeRoots($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('sort_order');
+    }
+
+    public function breadcrumb(): array
+    {
+        return $this->ancestors()->push($this)->all();
     }
 
     public function user(): BelongsTo

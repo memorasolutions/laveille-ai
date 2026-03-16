@@ -25,7 +25,9 @@ class StaticPageController extends Controller
 
     public function create(): View
     {
-        return view('pages::admin.pages.create');
+        $parentPages = StaticPage::roots()->ordered()->get(['id', 'title']);
+
+        return view('pages::admin.pages.create', compact('parentPages'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -39,11 +41,14 @@ class StaticPageController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'content_password' => 'nullable|string|max:100',
+            'parent_id' => 'nullable|exists:static_pages,id',
+            'sort_order' => 'nullable|integer|min:0',
         ]);
 
         $validated['user_id'] = auth()->id();
         $validated['status'] = $validated['status'] ?? 'draft';
         $validated['template'] = $validated['template'] ?? 'default';
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
         StaticPage::create($validated);
 
@@ -66,7 +71,9 @@ class StaticPageController extends Controller
 
     public function edit(StaticPage $page): View
     {
-        return view('pages::admin.pages.edit', compact('page'));
+        $parentPages = StaticPage::where('id', '!=', $page->id)->roots()->ordered()->get(['id', 'title']);
+
+        return view('pages::admin.pages.edit', compact('page', 'parentPages'));
     }
 
     public function update(Request $request, StaticPage $page): RedirectResponse
@@ -80,6 +87,8 @@ class StaticPageController extends Controller
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'content_password' => 'nullable|string|max:100',
+            'parent_id' => 'nullable|exists:static_pages,id',
+            'sort_order' => 'nullable|integer|min:0',
         ]);
 
         $page->update($validated);

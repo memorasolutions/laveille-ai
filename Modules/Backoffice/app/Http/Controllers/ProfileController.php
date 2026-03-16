@@ -51,6 +51,19 @@ class ProfileController
 
     public function update(Request $request): RedirectResponse
     {
+        if ($request->input('_section') === 'social') {
+            $validated = $request->validate([
+                'social_links' => ['nullable', 'array'],
+                'social_links.*' => ['nullable', 'url', 'max:255'],
+            ]);
+
+            auth()->user()->update([
+                'social_links' => array_filter($validated['social_links'] ?? []),
+            ]);
+
+            return back()->with('success', __('Liens sociaux mis à jour.'));
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore(auth()->id())],
@@ -58,7 +71,7 @@ class ProfileController
 
         auth()->user()->update($validated);
 
-        return back()->with('success', 'Profil mis à jour.');
+        return back()->with('success', __('Profil mis à jour.'));
     }
 
     public function updatePassword(Request $request): RedirectResponse
