@@ -185,6 +185,12 @@
                                             class="dropdown-item d-flex align-items-center gap-2">
                                         <i data-lucide="pencil" class="icon-sm"></i> {{ __('Métadonnées') }}
                                     </button>
+                                    @if(str_starts_with($item->mime_type, 'image/'))
+                                        <button @click="open=false; window.dispatchEvent(new CustomEvent('open-image-editor', {detail:{id:{{ $item->id }},url:'{{ $item->getUrl() }}',cropUrl:'{{ route('admin.media-api.crop', $item->id) }}'}}))"
+                                                class="dropdown-item d-flex align-items-center gap-2">
+                                            <i data-lucide="crop" class="icon-sm"></i> {{ __('Recadrer') }}
+                                        </button>
+                                    @endif
                                     <button wire:click="deleteMedia({{ $item->id }})"
                                             wire:confirm="{{ __('Supprimer ce fichier définitivement ?') }}"
                                             class="dropdown-item d-flex align-items-center gap-2 text-danger">
@@ -257,5 +263,10 @@
                 </div>
             </div>
         </div>
+    @endif
+
+    {{-- Image Editor (Cropper.js) --}}
+    @if(class_exists(\Modules\Media\Providers\MediaServiceProvider::class))
+        @include('media::components.image-editor')
     @endif
 </div>

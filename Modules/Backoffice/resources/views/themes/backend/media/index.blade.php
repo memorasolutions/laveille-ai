@@ -24,3 +24,11 @@
 </div>
 
 @endsection
+
+@push('plugin-styles')
+<link href="{{ asset('build/nobleui/plugins/cropperjs/cropper.css') }}" rel="stylesheet">
+@endpush
+
+@push('custom-scripts')
+<script src="{{ asset('build/nobleui/plugins/cropperjs/cropper.min.js') }}"></script>
+@endpush

@@ -233,4 +233,29 @@ class ArticleController extends Controller
             return response()->json(['success' => false, 'message' => __('Échec de la traduction.')], 500);
         }
     }
+
+    public function autosave(Request $request, Article $article): JsonResponse
+    {
+        $validated = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'content' => 'nullable|string',
+            'excerpt' => 'nullable|string|max:500',
+        ]);
+
+        $article->fill(array_filter($validated, fn ($v) => $v !== null));
+
+        if ($article->isDirty()) {
+            $article->saveQuietly();
+
+            return response()->json([
+                'success' => true,
+                'saved_at' => now()->toDateTimeString(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'saved_at' => null,
+        ]);
+    }
 }

@@ -180,6 +180,7 @@ Route::prefix('admin')
             Route::post('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'store'])->name('media-api.store');
             Route::patch('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'update'])->name('media-api.update');
             Route::delete('media-api/{id}', [\Modules\Media\Http\Controllers\MediaController::class, 'destroy'])->name('media-api.destroy');
+            Route::post('media-api/{id}/crop', [\Modules\Media\Http\Controllers\MediaController::class, 'crop'])->name('media-api.crop');
         });
 
         // ── Paramètres ──

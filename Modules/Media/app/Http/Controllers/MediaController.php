@@ -131,6 +131,34 @@ class MediaController extends Controller
         return response()->json(null, 204);
     }
 
+    public function crop(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'image_data' => 'required|string',
+        ]);
+
+        $media = Media::findOrFail($id);
+        $decoded = base64_decode(explode(',', $request->input('image_data'))[1]);
+        $originalName = $media->file_name;
+        $tempPath = sys_get_temp_dir().'/'.uniqid().'_'.$originalName;
+        file_put_contents($tempPath, $decoded);
+
+        $model = $media->model;
+        $media->delete();
+
+        $newMedia = $model->addMedia($tempPath)
+            ->usingFileName($originalName)
+            ->toMediaCollection('images');
+
+        @unlink($tempPath);
+
+        return response()->json([
+            'id' => $newMedia->id,
+            'url' => $newMedia->getUrl(),
+            'file_name' => $newMedia->file_name,
+        ]);
+    }
+
     private function getThumbnailUrl(Media $media): string
     {
         return $this->getConversionUrl($media, 'thumbnail');

@@ -54,6 +54,7 @@ Route::prefix('admin/blog')
             Route::post('articles/{article}/translate', [ArticleController::class, 'translateArticle'])->name('articles.translate');
             Route::post('articles/{article}/regenerate-summary', [ArticleController::class, 'regenerateSummary'])->name('articles.regenerate-summary');
             Route::post('articles/{article}/analyze', [ArticleController::class, 'analyzeContent'])->name('articles.analyze');
+            Route::patch('articles/{article}/autosave', [ArticleController::class, 'autosave'])->name('articles.autosave');
             Route::post('articles/{article}/revisions/{revision}/restore', [ArticleRevisionController::class, 'restore'])->name('articles.revisions.restore');
         });
 

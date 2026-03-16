@@ -108,6 +108,9 @@
                         <button type="submit" class="btn btn-primary flex-fill">Enregistrer</button>
                         <a href="{{ route('admin.blog.articles.index') }}" class="btn btn-outline-secondary flex-fill text-center">Annuler</a>
                     </div>
+                    <div class="mt-2 text-end">
+                        <small id="autosave-status" class="text-muted" style="transition:opacity .5s"></small>
+                    </div>
                     @if($article->status === 'published')
                         <form action="{{ route('admin.blog.articles.unpublish', $article->id) }}" method="POST" class="mt-2">
                             @csrf
@@ -266,6 +269,50 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('tags-input').value = values.join(',');
         }
     });
+});
+
+    // Autosave (every 60s)
+    (function() {
+        var url = '{{ route("admin.blog.articles.autosave", $article) }}';
+        var token = document.querySelector('meta[name="csrf-token"]').content;
+        var status = document.getElementById('autosave-status');
+        var last = { title: '', content: '', excerpt: '' };
+
+        function snap() {
+            var t = document.querySelector('input[name="title"]');
+            var c = document.querySelector('input[name="content"]');
+            var e = document.querySelector('textarea[name="excerpt"]');
+            return { title: t ? t.value : '', content: c ? c.value : '', excerpt: e ? e.value : '' };
+        }
+
+        last = snap();
+
+        setInterval(function() {
+            var cur = snap();
+            if (JSON.stringify(cur) === JSON.stringify(last)) return;
+            fetch(url, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+                body: JSON.stringify(cur)
+            }).then(function(r) {
+                if (r.ok) {
+                    last = cur;
+                    var t = new Date();
+                    status.textContent = 'Sauvegardé à ' + t.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+                    status.style.opacity = '1';
+                    setTimeout(function() { status.style.opacity = '0'; }, 3000);
+                } else {
+                    status.textContent = 'Erreur de sauvegarde';
+                    status.style.color = 'red';
+                    status.style.opacity = '1';
+                }
+            }).catch(function() {
+                status.textContent = 'Erreur de sauvegarde';
+                status.style.color = 'red';
+                status.style.opacity = '1';
+            });
+        }, 60000);
+    })();
 });
 </script>
 @endpush
