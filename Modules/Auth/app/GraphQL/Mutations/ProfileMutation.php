@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
-namespace App\GraphQL\Mutations;
+namespace Modules\Auth\GraphQL\Mutations;
 
 use App\Models\User;
 

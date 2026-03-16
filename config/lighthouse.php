@@ -203,8 +203,8 @@ return [
 
     'namespaces' => [
         'models' => ['App\\Models', 'Modules\\Blog\\Models', 'Modules\\Pages\\Models', 'Modules\\Faq\\Models', 'Modules\\SaaS\\Models', 'Modules\\Testimonials\\Models', 'Modules\\Newsletter\\Models', 'Modules\\Team\\Models'],
-        'queries' => 'App\\GraphQL\\Queries',
-        'mutations' => 'App\\GraphQL\\Mutations',
+        'queries' => ['App\\GraphQL\\Queries', 'Modules\\Blog\\GraphQL\\Queries', 'Modules\\Pages\\GraphQL\\Queries', 'Modules\\Team\\GraphQL\\Queries'],
+        'mutations' => ['App\\GraphQL\\Mutations', 'Modules\\Blog\\GraphQL\\Mutations', 'Modules\\Pages\\GraphQL\\Mutations', 'Modules\\Auth\\GraphQL\\Mutations'],
         'subscriptions' => 'App\\GraphQL\\Subscriptions',
         'types' => 'App\\GraphQL\\Types',
         'interfaces' => 'App\\GraphQL\\Interfaces',

@@ -10,13 +10,13 @@ type Query {
     ) @orderBy(column: "published_at", direction: DESC)
 
     "Find a single published article by slug."
-    article(slug: String!): Article @field(resolver: "App\\GraphQL\\Queries\\FindBySlugQuery@article")
+    article(slug: String!): Article @field(resolver: "Modules\\Blog\\GraphQL\\Queries\\ArticleBySlugQuery")
 
     "List published static pages."
     pages: [StaticPage!]! @all(scopes: ["published"]) @orderBy(column: "title", direction: ASC)
 
     "Find a single published page by slug."
-    page(slug: String!): StaticPage @field(resolver: "App\\GraphQL\\Queries\\FindBySlugQuery@page")
+    page(slug: String!): StaticPage @field(resolver: "Modules\\Pages\\GraphQL\\Queries\\PageBySlugQuery")
 
     "List published FAQs, optionally filtered by category."
     faqs(category: String @eq): [Faq!]! @all(scopes: ["published"]) @orderBy(column: "order", direction: ASC)
@@ -34,7 +34,7 @@ type Query {
     me: User @auth @guard
 
     "List teams of the authenticated user."
-    myTeams: [Team!]! @guard @field(resolver: "App\\GraphQL\\Queries\\MyTeamsQuery")
+    myTeams: [Team!]! @guard @field(resolver: "Modules\\Team\\GraphQL\\Queries\\MyTeamsQuery")
 }
 
 # ============================================================
@@ -179,39 +179,39 @@ type Mutation {
     "Update the authenticated user's profile."
     updateProfile(input: UpdateProfileInput! @spread): User!
         @guard
-        @field(resolver: "App\\GraphQL\\Mutations\\ProfileMutation@updateProfile")
+        @field(resolver: "Modules\\Auth\\GraphQL\\Mutations\\ProfileMutation@updateProfile")
 
     "Create a new blog article."
     createArticle(input: CreateArticleInput! @spread): Article!
         @guard
         @can(ability: "create", model: "Modules\\Blog\\Models\\Article")
-        @field(resolver: "App\\GraphQL\\Mutations\\ArticleMutations@createArticle")
+        @field(resolver: "Modules\\Blog\\GraphQL\\Mutations\\ArticleMutations@createArticle")
 
     "Update an existing blog article."
     updateArticle(input: UpdateArticleInput! @spread): Article!
         @guard
         @can(ability: "update", find: "id", model: "Modules\\Blog\\Models\\Article")
-        @field(resolver: "App\\GraphQL\\Mutations\\ArticleMutations@updateArticle")
+        @field(resolver: "Modules\\Blog\\GraphQL\\Mutations\\ArticleMutations@updateArticle")
 
     "Delete a blog article."
     deleteArticle(id: ID! @rules(apply: ["required"])): Article
         @guard
-        @field(resolver: "App\\GraphQL\\Mutations\\ArticleMutations@deleteArticle")
+        @field(resolver: "Modules\\Blog\\GraphQL\\Mutations\\ArticleMutations@deleteArticle")
 
     "Create a new static page."
     createPage(input: CreatePageInput! @spread): StaticPage!
         @guard
-        @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@createPage")
+        @field(resolver: "Modules\\Pages\\GraphQL\\Mutations\\PageMutations@createPage")
 
     "Update an existing static page."
     updatePage(input: UpdatePageInput! @spread): StaticPage!
         @guard
-        @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@updatePage")
+        @field(resolver: "Modules\\Pages\\GraphQL\\Mutations\\PageMutations@updatePage")
 
     "Delete a static page."
     deletePage(id: ID! @rules(apply: ["required"])): StaticPage
         @guard
-        @field(resolver: "App\\GraphQL\\Mutations\\PageMutations@deletePage")
+        @field(resolver: "Modules\\Pages\\GraphQL\\Mutations\\PageMutations@deletePage")
 }
 
 # ============================================================

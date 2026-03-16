@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
-namespace App\GraphQL\Mutations;
+namespace Modules\Pages\GraphQL\Mutations;
 
 use Illuminate\Support\Str;
 use Modules\Pages\Models\StaticPage;

@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
-namespace App\GraphQL\Queries;
+namespace Modules\Team\GraphQL\Queries;
 
 use Illuminate\Database\Eloquent\Collection;
 
