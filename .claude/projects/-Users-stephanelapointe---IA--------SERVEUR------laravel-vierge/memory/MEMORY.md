@@ -18,15 +18,16 @@
 - Toutes les configs (CI/CD, deploiement) doivent etre compatibles cPanel
 
 ## Etat actuel (2026-03-15)
-- **3202 tests**, 6738 assertions, 0 fail (--parallel obligatoire)
+- **3198 tests**, 6725 assertions, 0 fail (--parallel obligatoire)
 - **PHPStan** : 0 erreurs niveau 6
-- **37 modules actifs**, 129+ permissions
+- **38 modules actifs** (Privacy ajouté), 129+ permissions
 - **32 feature flags** Laravel Pennant (sync FeatureFlagsTable complete)
 - **Auteur** : MEMORA solutions - header DocBlock standardise partout
 - **3 chantiers majeurs** : multi-tenant (65 tests), marketing automation (44 tests), API GraphQL (33 tests)
 - **Polish P1-P8** : content versioning, scheduled publishing, URL redirects, announcements, breadcrumbs, preview
 - **Media manager ameliore** (P5a/P5b/P5c) : metadonnees SEO, dossiers, WebP/compression
 - **Decouplage modules** : class_exists() wrappers dans 8 fichiers (AI/Blog/Newsletter/Import/Search/Sidebar)
+- **Module Privacy** : RGPD + Loi 25 + LPRPDE + ePrivacy (consent banner, legal pages, rights-request form, EFVP, cookie expiration par juridiction, re-prompt)
 - **Audit release-readiness** : env, errors, indexes, queue, cache - tous OK
 - **API GraphQL** : Lighthouse v6, /graphql, schema complet (12 types, 9 queries, 7 mutations), securite prod
 - **0 CDN externe** dans les vues actives (polices @fontsource, libs npm local)

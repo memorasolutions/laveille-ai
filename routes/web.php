@@ -8,7 +8,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 
 // Sitemap dynamique
@@ -22,11 +21,11 @@ Route::get('/', function () {
 // Passkeys (spatie/laravel-passkeys)
 Route::passkeys();
 
-// PWA : manifest dynamique + page hors ligne
-Route::get('/manifest.webmanifest', [\App\Http\Controllers\PwaController::class, 'manifest'])->name('pwa.manifest');
-Route::get('/offline', [\App\Http\Controllers\PwaController::class, 'offline'])->name('pwa.offline');
+// PWA : manifest dynamique + page hors ligne (module Core)
+Route::get('/manifest.webmanifest', [\Modules\Core\Http\Controllers\PwaController::class, 'manifest'])->name('pwa.manifest');
+Route::get('/offline', [\Modules\Core\Http\Controllers\PwaController::class, 'offline'])->name('pwa.offline');
 
-// Language switcher
-Route::post('/locale/{locale}', LocaleController::class)->name('locale.switch');
+// Language switcher (module Translation)
+Route::post('/locale/{locale}', \Modules\Translation\Http\Controllers\LocaleController::class)->name('locale.switch');
 
 // Legal pages moved to Modules/Privacy

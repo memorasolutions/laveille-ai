@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace Modules\Translation\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 
@@ -16,7 +16,8 @@ class LocaleController
 {
     public function __invoke(string $locale): RedirectResponse
     {
-        if (! in_array($locale, ['fr', 'en'], true)) {
+        $supported = config('app.supported_locales', ['fr', 'en']);
+        if (! in_array($locale, $supported, true)) {
             abort(400);
         }
 

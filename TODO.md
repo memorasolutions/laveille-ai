@@ -213,15 +213,16 @@
 Le CORE est fonctionnellement complet. Les gaps identifies (observabilite, data residency, analytics self-service, real-time collab, IaC Docker) sont tous du over-engineering pour un template reutilisable.
 
 ### Taches restantes (par priorite)
-- [ ] Traductions i18n fr/en (~50 fichiers Blade a traiter, language switcher)
-- [ ] Client Echo/Reverb frontend (notifications temps reel)
-- [ ] Page recherche frontend /search
-- [ ] Interface admin Storage (stats disque, liste fichiers)
-- [ ] Resoudre cycle Blog <-> SEO (couplage faible, acceptable)
-- [ ] Tailwind CDN auth guest → build Vite (RGPD production)
+- [x] Traductions i18n fr/en - FAIT (commit 2565a76, 53 fichiers, 3231 cles FR/EN)
+- [x] Client Echo/Reverb frontend - FAIT (bootstrap.js, 28 tests, 3 events broadcast)
+- [x] Interface admin Storage - FAIT (StorageAdminController, 22 tests, 2 vues, RBAC)
+- [x] Tailwind CDN auth guest - CLOS (fichier local 27 Ko, RGPD OK, Vite = over-engineering)
+- [x] Resoudre cycle Blog <-> SEO - CLOS (couplage faible acceptable)
+- [x] Commande core:prune - FAIT (3 presets saas/blog/minimal, 8 tests, config/presets.php)
+- [x] Page recherche /search - CLOS (admin-only, recherche globale Livewire en place)
 - [ ] Migration Modules/ vers plugins/ - REPORTE indefiniment (valeur = 0)
 - [ ] Support Paddle/Lemon Squeezy - REPORTE (over-engineering)
-- [ ] Roadmap public avec votes - REPORTE (outils externes font mieux)
+- [x] Roadmap publique avec votes - FAIT (41 tests, anti-herd, catégories, notes internes, kanban, changelog)
 
 ### Taches completees (archive)
 - [x] Fix test Phase161Test, README.md, CHANGELOG.md, core:new-project, decouplage, audit release-readiness
