@@ -21,6 +21,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Mews\Purifier\Facades\Purifier;
+use Modules\Core\Traits\HasPreviewToken;
 use Modules\Core\Traits\HasRevisions;
 use Modules\Core\Traits\HasScheduledPublishing;
 use Modules\CustomFields\Traits\HasCustomFields;
@@ -30,7 +31,7 @@ use Spatie\Translatable\HasTranslations;
 
 class StaticPage extends Model
 {
-    use BelongsToTenant, HasCustomFields, HasFactory, HasRevisions, HasScheduledPublishing, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasRevisions, HasScheduledPublishing, HasTranslations, Searchable, SoftDeletes;
 
     /** @var list<string> */
     protected array $revisionable = ['title', 'content', 'excerpt', 'status', 'template', 'meta_title', 'meta_description'];
@@ -66,6 +67,7 @@ class StaticPage extends Model
         'user_id',
         'tenant_id',
         'content_password',
+        'preview_token',
         'parent_id',
         'sort_order',
     ];

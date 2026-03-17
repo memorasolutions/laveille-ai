@@ -20,8 +20,10 @@ abstract class ArticleState extends State
     {
         return parent::config()
             ->default(DraftArticleState::class)
-            ->allowTransition(DraftArticleState::class, PublishedArticleState::class, PublishTransition::class)
+            ->allowTransition(DraftArticleState::class, PendingReviewArticleState::class)
+            ->allowTransition(PendingReviewArticleState::class, PublishedArticleState::class, PublishTransition::class)
+            ->allowTransition(PendingReviewArticleState::class, DraftArticleState::class)
             ->allowTransition(PublishedArticleState::class, DraftArticleState::class)
-            ->allowTransition([DraftArticleState::class, PublishedArticleState::class], ArchivedArticleState::class);
+            ->allowTransition([DraftArticleState::class, PublishedArticleState::class, PendingReviewArticleState::class], ArchivedArticleState::class);
     }
 }

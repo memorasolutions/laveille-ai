@@ -30,6 +30,13 @@
         <i data-lucide="eye"></i>
         {{ __('Apercu') }}
     </a>
+    @if($article->preview_token)
+        <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2"
+                onclick="navigator.clipboard.writeText('{{ route('preview.show', $article->preview_token) }}').then(() => this.querySelector('span').textContent = '{{ __('Copié !') }}')">
+            <i data-lucide="share-2"></i>
+            <span>{{ __('Lien de prévisualisation') }}</span>
+        </button>
+    @endif
     <a href="{{ route('admin.blog.articles.revisions', $article) }}"
        class="btn btn-outline-secondary d-flex align-items-center gap-2">
         <i data-lucide="history"></i>
@@ -87,6 +94,10 @@
                             <input type="radio" class="btn-check" name="status" value="draft" id="status-draft" autocomplete="off" {{ old('status', (string) $article->status) === 'draft' ? 'checked' : '' }}>
                             <label class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-1" for="status-draft">
                                 <i data-lucide="file-edit" class="icon-sm"></i> Brouillon
+                            </label>
+                            <input type="radio" class="btn-check" name="status" value="pending_review" id="status-pending" autocomplete="off" {{ old('status', (string) $article->status) === 'pending_review' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-info d-inline-flex align-items-center justify-content-center gap-1" for="status-pending">
+                                <i data-lucide="eye" class="icon-sm"></i> {{ __('En révision') }}
                             </label>
                             <input type="radio" class="btn-check" name="status" value="published" id="status-published" autocomplete="off" {{ old('status', (string) $article->status) === 'published' ? 'checked' : '' }}>
                             <label class="btn btn-outline-success d-inline-flex align-items-center justify-content-center gap-1" for="status-published">

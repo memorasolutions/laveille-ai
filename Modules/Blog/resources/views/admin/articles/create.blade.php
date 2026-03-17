@@ -50,6 +50,8 @@
                         <div class="btn-group w-100" role="group" aria-label="Statut de publication">
                             <input type="radio" class="btn-check" name="status" value="draft" id="status-draft" autocomplete="off" {{ old('status', 'draft') === 'draft' ? 'checked' : '' }}>
                             <label class="btn btn-outline-secondary" for="status-draft">Brouillon</label>
+                            <input type="radio" class="btn-check" name="status" value="pending_review" id="status-pending" autocomplete="off" {{ old('status') === 'pending_review' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-info" for="status-pending">{{ __('En révision') }}</label>
                             <input type="radio" class="btn-check" name="status" value="published" id="status-published" autocomplete="off" {{ old('status') === 'published' ? 'checked' : '' }}>
                             <label class="btn btn-outline-success" for="status-published">Publié</label>
                             <input type="radio" class="btn-check" name="status" value="archived" id="status-archived" autocomplete="off" {{ old('status') === 'archived' ? 'checked' : '' }}>

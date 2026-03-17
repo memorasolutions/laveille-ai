@@ -74,6 +74,10 @@
                             <label class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-1" for="status-draft">
                                 <i data-lucide="file-edit" class="icon-sm"></i> Brouillon
                             </label>
+                            <input type="radio" class="btn-check" name="status" value="pending_review" id="status-pending" autocomplete="off" {{ old('status') === 'pending_review' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-info d-inline-flex align-items-center justify-content-center gap-1" for="status-pending">
+                                <i data-lucide="eye" class="icon-sm"></i> {{ __('En révision') }}
+                            </label>
                             <input type="radio" class="btn-check" name="status" value="published" id="status-published" autocomplete="off" {{ old('status') === 'published' ? 'checked' : '' }}>
                             <label class="btn btn-outline-success d-inline-flex align-items-center justify-content-center gap-1" for="status-published">
                                 <i data-lucide="globe" class="icon-sm"></i> Publié

@@ -25,6 +25,7 @@ use Modules\Blog\Database\Factories\ArticleFactory;
 use Modules\Blog\States\ArticleState;
 use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
+use Modules\Core\Traits\HasPreviewToken;
 use Modules\CustomFields\Traits\HasCustomFields;
 use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\ModelStates\HasStates;
@@ -36,7 +37,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class Article extends Model
 {
-    use BelongsToTenant, HasCustomFields, HasFactory, HasStates, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasStates, HasTranslations, Searchable, SoftDeletes;
 
     public array $translatable = ['title', 'slug', 'content', 'excerpt'];
 
@@ -64,6 +65,7 @@ class Article extends Model
         'is_featured',
         'content_password',
         'format',
+        'preview_token',
     ];
 
     protected $casts = [

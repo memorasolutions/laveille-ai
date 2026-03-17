@@ -8,4 +8,10 @@
 
 declare(strict_types=1);
 
-// Core module - no web routes needed
+use Illuminate\Support\Facades\Route;
+use Modules\Core\Http\Controllers\PreviewController;
+
+Route::get('preview/{token}', PreviewController::class)
+    ->middleware('web')
+    ->name('preview.show')
+    ->where('token', '[a-zA-Z0-9]{64}');
