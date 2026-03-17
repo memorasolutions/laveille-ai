@@ -16,6 +16,7 @@ use Modules\Ecommerce\Http\Controllers\Admin\CouponController;
 use Modules\Ecommerce\Http\Controllers\Admin\DashboardController;
 use Modules\Ecommerce\Http\Controllers\Admin\OrderController;
 use Modules\Ecommerce\Http\Controllers\Admin\ProductController;
+use Modules\Ecommerce\Http\Controllers\Admin\PromotionController;
 
 Route::prefix('admin/ecommerce')
     ->name('admin.ecommerce.')
@@ -95,5 +96,24 @@ Route::prefix('admin/ecommerce')
 
         Route::delete('coupons/{coupon}', [CouponController::class, 'destroy'])
             ->name('coupons.destroy')
+            ->middleware('permission:delete_coupons');
+
+        // Promotions
+        Route::middleware('permission:view_coupons')->group(function () {
+            Route::get('promotions', [PromotionController::class, 'index'])->name('promotions.index');
+        });
+
+        Route::middleware('permission:create_coupons')->group(function () {
+            Route::get('promotions/create', [PromotionController::class, 'create'])->name('promotions.create');
+            Route::post('promotions', [PromotionController::class, 'store'])->name('promotions.store');
+        });
+
+        Route::middleware('permission:update_coupons')->group(function () {
+            Route::get('promotions/{promotion}/edit', [PromotionController::class, 'edit'])->name('promotions.edit');
+            Route::put('promotions/{promotion}', [PromotionController::class, 'update'])->name('promotions.update');
+        });
+
+        Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy'])
+            ->name('promotions.destroy')
             ->middleware('permission:delete_coupons');
     });

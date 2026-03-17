@@ -126,6 +126,58 @@ test('admin can access orders index', fn () => $this->actingAs($this->admin)->ge
 
 test('admin can access coupons index', fn () => $this->actingAs($this->admin)->get(route('admin.ecommerce.coupons.index'))->assertOk());
 
+// --- Admin Promotions CRUD ---
+
+test('admin can access promotions index', fn () => $this->actingAs($this->admin)->get(route('admin.ecommerce.promotions.index'))->assertOk());
+
+test('admin can access promotions create', fn () => $this->actingAs($this->admin)->get(route('admin.ecommerce.promotions.create'))->assertOk());
+
+test('admin can store a promotion', function () {
+    $this->actingAs($this->admin)->post(route('admin.ecommerce.promotions.store'), [
+        'name' => 'Test Promo',
+        'type' => 'percentage_off',
+        'value' => 10,
+        'applies_to' => 'all',
+        'priority' => 5,
+        'is_active' => 1,
+        'is_automatic' => 1,
+    ])->assertRedirect(route('admin.ecommerce.promotions.index'));
+
+    expect(\Modules\Ecommerce\Models\Promotion::where('name', 'Test Promo')->exists())->toBeTrue();
+});
+
+test('admin can edit a promotion', function () {
+    $promo = \Modules\Ecommerce\Models\Promotion::factory()->create();
+
+    $this->actingAs($this->admin)->get(route('admin.ecommerce.promotions.edit', $promo))->assertOk();
+});
+
+test('admin can update a promotion', function () {
+    $promo = \Modules\Ecommerce\Models\Promotion::factory()->create();
+
+    $this->actingAs($this->admin)->put(route('admin.ecommerce.promotions.update', $promo), [
+        'name' => 'Updated Promo',
+        'type' => 'fixed_off',
+        'value' => 25,
+        'applies_to' => 'all',
+        'priority' => 10,
+        'is_active' => 1,
+        'is_automatic' => 0,
+    ])->assertRedirect(route('admin.ecommerce.promotions.index'));
+
+    expect($promo->fresh()->name)->toBe('Updated Promo')
+        ->and($promo->fresh()->type)->toBe('fixed_off');
+});
+
+test('admin can delete a promotion', function () {
+    $promo = \Modules\Ecommerce\Models\Promotion::factory()->create();
+
+    $this->actingAs($this->admin)->delete(route('admin.ecommerce.promotions.destroy', $promo))
+        ->assertRedirect(route('admin.ecommerce.promotions.index'));
+
+    expect(\Modules\Ecommerce\Models\Promotion::find($promo->id))->toBeNull();
+});
+
 test('unauthorized user gets 403', function () {
     $user = User::create(['name' => 'User', 'email' => 'user@test.com', 'password' => bcrypt('password')]);
     $this->actingAs($user)->get(route('admin.ecommerce.dashboard'))->assertForbidden();
