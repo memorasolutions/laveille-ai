@@ -12,8 +12,10 @@ namespace Modules\Ecommerce\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Modules\Core\Providers\BaseModuleServiceProvider;
+use Modules\Ecommerce\Contracts\TaxCalculatorInterface;
 use Modules\Ecommerce\Events\LowStockDetected;
 use Modules\Ecommerce\Listeners\NotifyAdminsLowStock;
+use Modules\Ecommerce\Services\Tax\CanadaTaxCalculator;
 
 class EcommerceServiceProvider extends BaseModuleServiceProvider
 {
@@ -31,6 +33,8 @@ class EcommerceServiceProvider extends BaseModuleServiceProvider
     public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->bind(TaxCalculatorInterface::class, CanadaTaxCalculator::class);
     }
 
     /**
