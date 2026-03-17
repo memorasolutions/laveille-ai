@@ -28,6 +28,7 @@ class CheckoutService
         private CartService $cartService,
         private ShippingService $shippingService,
         private TaxService $taxService,
+        private PromotionService $promotionService,
     ) {}
 
     public function createOrder(
@@ -45,7 +46,18 @@ class CheckoutService
             $subtotal = $this->cartService->getTotal($cart);
             $shippingCost = $this->shippingService->calculateShipping($cart, $shippingMethod);
             $taxAmount = $this->taxService->calculateTax($subtotal);
-            $discountAmount = $coupon ? $this->calculateDiscount($coupon, $subtotal) : 0.0;
+            $couponDiscount = $coupon ? $this->calculateDiscount($coupon, $subtotal) : 0.0;
+            $promoDiscount = $this->promotionService->applyToCart($cart);
+            $discountAmount = round($couponDiscount + $promoDiscount, 2);
+
+            $freeShipping = $this->promotionService->grantsFreeShipping($cart);
+            if (! $freeShipping && $coupon) {
+                $freeShipping = $this->couponGrantsFreeShipping($coupon, $subtotal);
+            }
+            if ($freeShipping) {
+                $shippingCost = 0.0;
+            }
+
             $total = round($subtotal + $shippingCost + $taxAmount - $discountAmount, 2);
 
             $order = Order::create([
@@ -176,11 +188,27 @@ class CheckoutService
             return 0.0;
         }
 
+        if ($coupon->min_order_amount && $subtotal < (float) $coupon->min_order_amount) {
+            return 0.0;
+        }
+
         return match ($coupon->type) {
-            'percent' => round($subtotal * $coupon->value / 100, 2),
-            'fixed' => min($coupon->value, $subtotal),
-            'free_shipping' => 0.0,
+            'percent' => round($subtotal * (float) $coupon->value / 100, 2),
+            'fixed' => round(min((float) $coupon->value, $subtotal), 2),
             default => 0.0,
         };
+    }
+
+    private function couponGrantsFreeShipping(Coupon $coupon, float $subtotal): bool
+    {
+        if (! $coupon->isValid() || $coupon->type !== 'free_shipping') {
+            return false;
+        }
+
+        if ($coupon->min_order_amount && $subtotal < (float) $coupon->min_order_amount) {
+            return false;
+        }
+
+        return true;
     }
 }
