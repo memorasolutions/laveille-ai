@@ -46,7 +46,7 @@ class CheckoutService
 
             $subtotal = $this->cartService->getTotal($cart);
             $shippingCost = $this->shippingService->calculateShipping($cart, $shippingMethod);
-            $taxAmount = $this->taxService->calculateTax($subtotal);
+            $taxAmount = $this->taxService->calculateTax($subtotal, $shippingAddress->province);
             $couponDiscount = $coupon ? $this->calculateDiscount($coupon, $subtotal) : 0.0;
             $promoDiscount = $this->promotionService->applyToCart($cart);
             $discountAmount = round($couponDiscount + $promoDiscount, 2);

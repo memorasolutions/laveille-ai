@@ -438,6 +438,55 @@
             @endif
             @endif
 
+            {{-- Boutique --}}
+            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
+            @canany(['view_ecommerce', 'view_products', 'view_ecommerce_orders', 'view_coupons'])
+            <li class="nav-item nav-category">{{ __('Boutique') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.ecommerce.*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#ecommerceMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.ecommerce.*') ? 'true' : 'false' }}" aria-controls="ecommerceMenu">
+                    <i class="link-icon" data-lucide="shopping-cart"></i>
+                    <span class="link-title">{{ __('Boutique') }}</span>
+                    <i class="link-arrow" data-lucide="chevron-down"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('admin.ecommerce.*') ? 'show' : '' }}" id="ecommerceMenu" data-bs-parent="#sidebarNav">
+                    <ul class="nav sub-menu">
+                        @if(Route::has('admin.ecommerce.dashboard'))
+                        @can('view_ecommerce')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.dashboard') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.dashboard') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.dashboard') ? 'aria-current=page' : '' }}>{{ __('Tableau de bord') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.products.index'))
+                        @can('view_products')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.products.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.products.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.products.*') ? 'aria-current=page' : '' }}>{{ __('Produits') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.categories.index'))
+                        @can('view_products')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.categories.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.categories.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.categories.*') ? 'aria-current=page' : '' }}>{{ __('Catégories') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.orders.index'))
+                        @can('view_ecommerce_orders')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.orders.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.orders.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.orders.*') ? 'aria-current=page' : '' }}>{{ __('Commandes') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.coupons.index'))
+                        @can('view_coupons')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.coupons.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.coupons.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.coupons.*') ? 'aria-current=page' : '' }}>{{ __('Coupons') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.promotions.index'))
+                        @can('view_coupons')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.promotions.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'aria-current=page' : '' }}>{{ __('Promotions') }}</a></li>
+                        @endcan
+                        @endif
+                    </ul>
+                </div>
+            </li>
+            @endcanany
+            @endif
+
             {{-- SaaS --}}
             @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('SaaS') && \Nwidart\Modules\Facades\Module::isEnabled('SaaS'))
             @canany(['view_plans', 'view_tenants', 'view_onboarding'])
