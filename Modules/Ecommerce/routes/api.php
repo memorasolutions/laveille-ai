@@ -13,12 +13,16 @@ use Modules\Ecommerce\Http\Controllers\Api\CartApiController;
 use Modules\Ecommerce\Http\Controllers\Api\CheckoutApiController;
 use Modules\Ecommerce\Http\Controllers\Api\OrderApiController;
 use Modules\Ecommerce\Http\Controllers\Api\ProductApiController;
+use Modules\Ecommerce\Http\Controllers\Api\ReviewApiController;
 use Modules\Ecommerce\Http\Controllers\Api\WishlistApiController;
 
 // Public
 Route::prefix('ecommerce')->group(function () {
     Route::get('/products', [ProductApiController::class, 'index']);
     Route::get('/products/{slug}', [ProductApiController::class, 'show']);
+
+    // Reviews (public: read)
+    Route::get('/products/{product}/reviews', [ReviewApiController::class, 'index']);
 });
 
 // Authenticated
@@ -41,6 +45,9 @@ Route::prefix('ecommerce')->middleware('auth:sanctum')->group(function () {
     Route::get('/wishlist', [WishlistApiController::class, 'index']);
     Route::post('/wishlist', [WishlistApiController::class, 'store']);
     Route::delete('/wishlist/{wishlist}', [WishlistApiController::class, 'destroy']);
+
+    // Reviews (auth: write)
+    Route::post('/products/{product}/reviews', [ReviewApiController::class, 'store']);
 });
 
 // Stripe webhook (no auth, verified by signature)

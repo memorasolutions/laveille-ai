@@ -17,6 +17,7 @@ use Modules\Ecommerce\Http\Controllers\Admin\DashboardController;
 use Modules\Ecommerce\Http\Controllers\Admin\OrderController;
 use Modules\Ecommerce\Http\Controllers\Admin\ProductController;
 use Modules\Ecommerce\Http\Controllers\Admin\PromotionController;
+use Modules\Ecommerce\Http\Controllers\Admin\ReviewController;
 
 Route::prefix('admin/ecommerce')
     ->name('admin.ecommerce.')
@@ -116,4 +117,11 @@ Route::prefix('admin/ecommerce')
         Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy'])
             ->name('promotions.destroy')
             ->middleware('permission:delete_coupons');
+
+        // Reviews
+        Route::middleware('permission:view_ecommerce')->group(function () {
+            Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+            Route::patch('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
+            Route::delete('reviews/{review}', [ReviewController::class, 'reject'])->name('reviews.reject');
+        });
     });

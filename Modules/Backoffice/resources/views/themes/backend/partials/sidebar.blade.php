@@ -481,6 +481,11 @@
                         <li class="nav-item"><a href="{{ route('admin.ecommerce.promotions.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'aria-current=page' : '' }}>{{ __('Promotions') }}</a></li>
                         @endcan
                         @endif
+                        @if(Route::has('admin.ecommerce.reviews.index'))
+                        @can('view_ecommerce')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.reviews.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'aria-current=page' : '' }}>{{ __('Avis') }}</a></li>
+                        @endcan
+                        @endif
                     </ul>
                 </div>
             </li>
