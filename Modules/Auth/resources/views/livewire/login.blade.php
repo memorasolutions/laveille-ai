@@ -76,7 +76,7 @@
     </form>
 
     {{-- Passkey login --}}
-    <div x-data="{ supported: typeof window.browserSupportsWebAuthn === 'function' && window.browserSupportsWebAuthn() }" x-show="supported" x-cloak @if($isLocked) style="display:none" @endif>
+    <div x-data="{ supported: typeof window.browserSupportsWebAuthn === 'function' && window.browserSupportsWebAuthn() }" x-show="supported" x-cloak x-bind:inert="!supported" @if($isLocked) style="display:none" @endif>
         <div class="relative my-6">
             <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
             <div class="relative flex justify-center text-sm"><span class="px-4 bg-white text-gray-500">{{ __('ou') }}</span></div>
