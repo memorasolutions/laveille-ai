@@ -17,6 +17,9 @@ use Modules\Ecommerce\Models\ProductVariant;
 
 class CartService
 {
+    public function __construct(
+        private InventoryService $inventoryService,
+    ) {}
     public function getOrCreateCart(?User $user = null): Cart
     {
         if ($user) {
@@ -28,7 +31,7 @@ class CartService
 
     public function addItem(Cart $cart, ProductVariant $variant, int $qty = 1): CartItem
     {
-        if (config('modules.ecommerce.stock.track_inventory') && $variant->stock < $qty) {
+        if (! $this->inventoryService->canFulfill($variant, $qty)) {
             throw new \RuntimeException('Stock insuffisant.');
         }
 
@@ -51,7 +54,7 @@ class CartService
 
     public function updateItemQuantity(CartItem $item, int $qty): CartItem
     {
-        if (config('modules.ecommerce.stock.track_inventory') && $item->variant->stock < $qty) {
+        if (! $this->inventoryService->canFulfill($item->variant, $qty)) {
             throw new \RuntimeException('Stock insuffisant.');
         }
 

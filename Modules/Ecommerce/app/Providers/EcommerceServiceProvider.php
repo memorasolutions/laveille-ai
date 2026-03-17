@@ -10,7 +10,10 @@ declare(strict_types=1);
 
 namespace Modules\Ecommerce\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Modules\Core\Providers\BaseModuleServiceProvider;
+use Modules\Ecommerce\Events\LowStockDetected;
+use Modules\Ecommerce\Listeners\NotifyAdminsLowStock;
 
 class EcommerceServiceProvider extends BaseModuleServiceProvider
 {
@@ -21,6 +24,8 @@ class EcommerceServiceProvider extends BaseModuleServiceProvider
     public function boot(): void
     {
         $this->bootModule();
+
+        Event::listen(LowStockDetected::class, NotifyAdminsLowStock::class);
     }
 
     public function register(): void

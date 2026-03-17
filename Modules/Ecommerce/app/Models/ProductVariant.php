@@ -25,13 +25,14 @@ class ProductVariant extends Model
 
     protected $fillable = [
         'product_id', 'sku', 'price', 'compare_price', 'stock',
-        'low_stock_threshold', 'weight', 'is_active',
+        'low_stock_threshold', 'allow_backorder', 'weight', 'is_active',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'compare_price' => 'decimal:2',
         'is_active' => 'boolean',
+        'allow_backorder' => 'boolean',
         'weight' => 'decimal:2',
     ];
 

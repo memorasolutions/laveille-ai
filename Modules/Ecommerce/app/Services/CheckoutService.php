@@ -29,6 +29,7 @@ class CheckoutService
         private ShippingService $shippingService,
         private TaxService $taxService,
         private PromotionService $promotionService,
+        private InventoryService $inventoryService,
     ) {}
 
     public function createOrder(
@@ -90,9 +91,11 @@ class CheckoutService
                     'total' => round($unitPrice * $item->quantity, 2),
                 ]);
 
-                if (config('modules.ecommerce.stock.track_inventory')) {
-                    $variant->decrement('stock', $item->quantity);
+                if (! $this->inventoryService->canFulfill($variant, $item->quantity)) {
+                    throw new \RuntimeException("Stock insuffisant pour {$variant->sku}.");
                 }
+
+                $this->inventoryService->deductStock($variant, $item->quantity);
             }
 
             $this->cartService->clear($cart);
