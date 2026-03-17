@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:wp="http://wordpress.org/export/1.2/"
+  xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/">
+<channel>
+  <title>Test WP Site</title>
+
+  <wp:category><wp:term_id>1</wp:term_id><wp:category_nicename><![CDATA[tech]]></wp:category_nicename><wp:cat_name><![CDATA[Technology]]></wp:cat_name></wp:category>
+  <wp:category><wp:term_id>2</wp:term_id><wp:category_nicename><![CDATA[news]]></wp:category_nicename><wp:cat_name><![CDATA[News]]></wp:cat_name></wp:category>
+
+  <wp:tag><wp:term_id>10</wp:term_id><wp:tag_slug><![CDATA[laravel]]></wp:tag_slug><wp:tag_name><![CDATA[Laravel]]></wp:tag_name></wp:tag>
+
+  <item>
+    <title>Published Article</title>
+    <dc:creator><![CDATA[admin]]></dc:creator>
+    <content:encoded><![CDATA[<p>This is the published content.</p>]]></content:encoded>
+    <excerpt:encoded><![CDATA[Short excerpt]]></excerpt:encoded>
+    <wp:post_id>100</wp:post_id>
+    <wp:post_type><![CDATA[post]]></wp:post_type>
+    <wp:status><![CDATA[publish]]></wp:status>
+  </item>
+
+  <item>
+    <title>Draft Article</title>
+    <dc:creator><![CDATA[admin]]></dc:creator>
+    <content:encoded><![CDATA[Draft content here.]]></content:encoded>
+    <excerpt:encoded><![CDATA[]]></excerpt:encoded>
+    <wp:post_id>101</wp:post_id>
+    <wp:post_type><![CDATA[post]]></wp:post_type>
+    <wp:status><![CDATA[draft]]></wp:status>
+  </item>
+
+  <item>
+    <title>Pending Article</title>
+    <dc:creator><![CDATA[admin]]></dc:creator>
+    <content:encoded><![CDATA[Pending review content.]]></content:encoded>
+    <excerpt:encoded><![CDATA[]]></excerpt:encoded>
+    <wp:post_id>102</wp:post_id>
+    <wp:post_type><![CDATA[post]]></wp:post_type>
+    <wp:status><![CDATA[pending]]></wp:status>
+  </item>
+
+  <item>
+    <title>About Us</title>
+    <dc:creator><![CDATA[admin]]></dc:creator>
+    <content:encoded><![CDATA[<h1>About our company</h1>]]></content:encoded>
+    <excerpt:encoded><![CDATA[]]></excerpt:encoded>
+    <wp:post_id>200</wp:post_id>
+    <wp:post_type><![CDATA[page]]></wp:post_type>
+    <wp:status><![CDATA[publish]]></wp:status>
+  </item>
+
+  <item>
+    <title>Shortcode Article</title>
+    <dc:creator><![CDATA[admin]]></dc:creator>
+    <content:encoded><![CDATA[Before [gallery ids="1,2,3"] middle [caption]photo[/caption] after.]]></content:encoded>
+    <excerpt:encoded><![CDATA[]]></excerpt:encoded>
+    <wp:post_id>103</wp:post_id>
+    <wp:post_type><![CDATA[post]]></wp:post_type>
+    <wp:status><![CDATA[publish]]></wp:status>
+  </item>
+
+</channel>
+</rss>
