@@ -36,7 +36,7 @@
 @if(!empty($metricWidgets))
 <div class="mb-4">
     <h6 class="d-flex align-items-center gap-2 text-muted mb-3">
-        <i data-lucide="bar-chart-2" class="icon-sm"></i> {{ __('Metriques modules') }}
+        <i data-lucide="bar-chart-2" class="icon-sm"></i> {{ __('Métriques modules') }}
     </h6>
     <div class="row g-3">
         @foreach($metricWidgets as $widget)

@@ -28,7 +28,7 @@ class Subscriber extends Model
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Abonne {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => "Abonné {$eventName}");
     }
 
     protected $table = 'newsletter_subscribers';

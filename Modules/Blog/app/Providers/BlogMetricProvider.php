@@ -30,9 +30,9 @@ class BlogMetricProvider implements MetricProviderInterface
         $metrics = $this->getMetrics(now()->startOfMonth(), now()->endOfMonth());
 
         return [
-            new MetricWidget(name: 'Articles publies', value: (string) $metrics['articles_published'], type: 'number', icon: 'file-text'),
+            new MetricWidget(name: 'Articles publiés', value: (string) $metrics['articles_published'], type: 'number', icon: 'file-text'),
             new MetricWidget(name: 'Commentaires', value: (string) $metrics['comments'], type: 'number', icon: 'message-square'),
-            new MetricWidget(name: 'Categories', value: (string) $metrics['categories'], type: 'number', icon: 'folder'),
+            new MetricWidget(name: 'Catégories', value: (string) $metrics['categories'], type: 'number', icon: 'folder'),
         ];
     }
 

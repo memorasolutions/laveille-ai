@@ -30,7 +30,7 @@ class BookingMetricProvider implements MetricProviderInterface
 
         return [
             new MetricWidget(name: 'Rendez-vous ce mois', value: (string) $metrics['appointments'], type: 'number', icon: 'calendar'),
-            new MetricWidget(name: 'Revenu confirme', value: $metrics['revenue'].' CAD', type: 'currency', icon: 'dollar-sign'),
+            new MetricWidget(name: 'Revenu confirmé', value: $metrics['revenue'].' CAD', type: 'currency', icon: 'dollar-sign'),
             new MetricWidget(name: 'Taux no-show', value: $metrics['no_show_rate'].'%', type: 'percent', icon: 'user-x'),
         ];
     }

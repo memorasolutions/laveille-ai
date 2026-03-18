@@ -30,7 +30,7 @@ class Team extends Model
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->setDescriptionForEvent(fn (string $eventName): string => "Equipe {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => "Équipe {$eventName}");
     }
 
     protected $fillable = [

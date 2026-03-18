@@ -29,7 +29,7 @@ class Setting extends Model
             ->logFillable()
             ->logOnlyDirty()
             ->useLogName('settings')
-            ->setDescriptionForEvent(fn (string $eventName): string => "Parametre {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => "Paramètre {$eventName}");
     }
 
     protected static function booted(): void

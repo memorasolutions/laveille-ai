@@ -30,7 +30,7 @@ class SaasMetricProvider implements MetricProviderInterface
 
         return [
             new MetricWidget(name: 'MRR', value: $metrics['mrr'].' CAD', type: 'currency', icon: 'dollar-sign'),
-            new MetricWidget(name: 'Abonnes actifs', value: (string) $metrics['active'], type: 'number', icon: 'users'),
+            new MetricWidget(name: 'Abonnés actifs', value: (string) $metrics['active'], type: 'number', icon: 'users'),
             new MetricWidget(name: 'Taux churn', value: $metrics['churn_rate'].'%', type: 'percent', icon: 'user-minus'),
             new MetricWidget(name: 'Nouveaux ce mois', value: (string) $metrics['new_this_month'], type: 'number', icon: 'user-plus'),
         ];

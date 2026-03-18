@@ -31,7 +31,7 @@ class Category extends Model
             ->logFillable()
             ->logOnlyDirty()
             ->useLogName('blog')
-            ->setDescriptionForEvent(fn (string $eventName): string => "Categorie blog {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName): string => "Catégorie blog {$eventName}");
     }
 
     public function toSearchableArray(): array
