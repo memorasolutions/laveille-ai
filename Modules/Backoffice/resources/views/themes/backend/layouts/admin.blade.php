@@ -91,17 +91,24 @@
 
     {{-- Splash screen --}}
     <script>
-        if (!sessionStorage.getItem('admin_loaded')) {
+        (function() {
+            function markLoaded() {
+                document.body.classList.add("loaded");
+                sessionStorage.setItem('admin_loaded', '1');
+            }
+            if (sessionStorage.getItem('admin_loaded')) {
+                markLoaded();
+                return;
+            }
             var splash = document.createElement("div");
             splash.innerHTML = '<div class="splash-screen"><div class="logo"></div><div class="spinner"></div></div>';
             document.body.insertBefore(splash, document.body.firstChild);
-            document.addEventListener("DOMContentLoaded", function() {
-                document.body.classList.add("loaded");
-                sessionStorage.setItem('admin_loaded', '1');
-            });
-        } else {
-            document.body.classList.add("loaded");
-        }
+            if (document.readyState === 'loading') {
+                document.addEventListener("DOMContentLoaded", markLoaded);
+            } else {
+                markLoaded();
+            }
+        })();
     </script>
 
     <div class="main-wrapper" id="app">
