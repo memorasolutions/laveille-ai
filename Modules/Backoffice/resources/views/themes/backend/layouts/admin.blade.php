@@ -190,6 +190,11 @@
     @stack('custom-scripts')
     @stack('scripts')
 
+    {{-- AI Chatbot (activable via Settings > IA > ai.chatbot_enabled) --}}
+    @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('AI') && \Nwidart\Modules\Facades\Module::isEnabled('AI') && class_exists(\Modules\AI\Livewire\ChatBot::class))
+        @livewire('ai-chatbot')
+    @endif
+
     {{-- PWA prompts (production only - hidden in dev to avoid confusion) --}}
     @if(config('pwa.enabled') && app()->isProduction())
         <x-pwa-install-prompt />
