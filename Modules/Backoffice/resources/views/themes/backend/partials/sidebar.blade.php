@@ -12,8 +12,8 @@
     <div class="sidebar-body">
         <ul class="nav" id="sidebarNav">
 
-            {{-- ===== 1. PRINCIPAL ===== --}}
-            <li class="nav-item nav-category">{{ __('Principal') }}</li>
+            {{-- ===== 1. ACCUEIL ===== --}}
+            <li class="nav-item nav-category">{{ __('Accueil') }}</li>
             @can('view_dashboard')
             <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <a href="{{ route('admin.dashboard') }}" class="nav-link" {{ request()->routeIs('admin.dashboard') ? 'aria-current=page' : '' }}>
@@ -33,17 +33,17 @@
             @endcan
             @endif
 
-            {{-- ===== 2. CONTENU ===== --}}
-            @canany(['view_articles', 'view_pages', 'view_categories', 'view_media', 'view_faqs', 'view_menus', 'view_comments', 'view_testimonials', 'view_widgets', 'view_shortcodes', 'view_forms'])
+            {{-- ===== 2. CONTENU (Contenu + Marketing) ===== --}}
+            @canany(['view_articles', 'view_pages', 'view_categories', 'view_media', 'view_faqs', 'view_menus', 'view_comments', 'view_testimonials', 'view_widgets', 'view_shortcodes', 'view_forms', 'view_newsletter', 'view_workflows'])
             <li class="nav-item nav-category">{{ __('Contenu') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#contentMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="file-text"></i>
                     <span class="link-title">{{ __('Contenu') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.blog.articles.index'))
                         @can('view_articles')
@@ -60,14 +60,14 @@
                         <li class="nav-item"><a href="{{ route('admin.blog.categories.index') }}" class="nav-link {{ request()->routeIs('admin.blog.categories.*') ? 'active' : '' }}" {{ request()->routeIs('admin.blog.categories.*') ? 'aria-current=page' : '' }}>{{ __('Catégories') }}</a></li>
                         @endcan
                         @endif
-                        @if(Route::has('admin.media.index'))
-                        @can('view_media')
-                        <li class="nav-item"><a href="{{ route('admin.media.index') }}" class="nav-link {{ request()->routeIs('admin.media.*') ? 'active' : '' }}" {{ request()->routeIs('admin.media.*') ? 'aria-current=page' : '' }}>{{ __('Médias') }}</a></li>
-                        @endcan
-                        @endif
                         @if(Route::has('admin.faqs.index'))
                         @can('view_faqs')
                         <li class="nav-item"><a href="{{ route('admin.faqs.index') }}" class="nav-link {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}" {{ request()->routeIs('admin.faqs.*') ? 'aria-current=page' : '' }}>{{ __('FAQ') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.media.index'))
+                        @can('view_media')
+                        <li class="nav-item"><a href="{{ route('admin.media.index') }}" class="nav-link {{ request()->routeIs('admin.media.*') ? 'active' : '' }}" {{ request()->routeIs('admin.media.*') ? 'aria-current=page' : '' }}>{{ __('Médias') }}</a></li>
                         @endcan
                         @endif
                         @if(Route::has('admin.menus.index'))
@@ -75,7 +75,7 @@
                         <li class="nav-item"><a href="{{ route('admin.menus.index') }}" class="nav-link {{ request()->routeIs('admin.menus.*') ? 'active' : '' }}" {{ request()->routeIs('admin.menus.*') ? 'aria-current=page' : '' }}>{{ __('Menus') }}</a></li>
                         @endcan
                         @endif
-                        {{-- Plus... --}}
+                        {{-- Plus... (Contenu) --}}
                         <li class="nav-item">
                             <a class="nav-link text-muted" data-bs-toggle="collapse" href="#contentMore" role="button" aria-expanded="false">
                                 <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i> {{ __('Plus...') }}
@@ -112,6 +112,37 @@
                                     <li class="nav-item"><a href="{{ route('admin.custom-fields.index') }}" class="nav-link {{ request()->routeIs('admin.custom-fields.*') ? 'active' : '' }}" {{ request()->routeIs('admin.custom-fields.*') ? 'aria-current=page' : '' }}>{{ __('Champs personnalisés') }}</a></li>
                                     @endcan
                                     @endif
+                                    {{-- Marketing --}}
+                                    @if(Route::has('admin.newsletter.index'))
+                                    @can('view_newsletter')
+                                    <li class="nav-item"><a href="{{ route('admin.newsletter.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.index') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.index') ? 'aria-current=page' : '' }}>{{ __('Newsletter') }}</a></li>
+                                    @endcan
+                                    @endif
+                                    @if(Route::has('admin.newsletter.campaigns.index'))
+                                    @can('view_campaigns')
+                                    <li class="nav-item"><a href="{{ route('admin.newsletter.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'aria-current=page' : '' }}>{{ __('Campagnes') }}</a></li>
+                                    @endcan
+                                    @endif
+                                    @if(Route::has('admin.newsletter.workflows.index'))
+                                    @can('view_workflows')
+                                    <li class="nav-item"><a href="{{ route('admin.newsletter.workflows.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.workflows.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.workflows.*') ? 'aria-current=page' : '' }}>{{ __('Workflows') }}</a></li>
+                                    @endcan
+                                    @endif
+                                    @if(Route::has('admin.newsletter.templates.index'))
+                                    @can('view_newsletter')
+                                    <li class="nav-item"><a href="{{ route('admin.newsletter.templates.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.templates.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.templates.*') ? 'aria-current=page' : '' }}>{{ __('Templates') }}</a></li>
+                                    @endcan
+                                    @endif
+                                    @if(Route::has('admin.newsletter.index'))
+                                    @can('view_newsletter')
+                                    <li class="nav-item"><a href="{{ route('admin.newsletter.index') }}?tab=subscribers" class="nav-link {{ request()->is('*/newsletter*') && request()->get('tab') === 'subscribers' ? 'active' : '' }}">{{ __('Abonnés') }}</a></li>
+                                    @endcan
+                                    @endif
+                                    @if(Route::has('admin.formbuilder.forms.index'))
+                                    @can('view_forms')
+                                    <li class="nav-item"><a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.formbuilder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.formbuilder.*') ? 'aria-current=page' : '' }}>{{ __('Formulaires') }}</a></li>
+                                    @endcan
+                                    @endif
                                 </ul>
                             </div>
                         </li>
@@ -120,52 +151,150 @@
             </li>
             @endcanany
 
-            {{-- ===== 3. MARKETING ===== --}}
-            @canany(['view_newsletter', 'view_workflows', 'view_forms'])
-            <li class="nav-item nav-category">{{ __('Marketing') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.newsletter.*', 'admin.formbuilder.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#marketingMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.newsletter.*', 'admin.formbuilder.*') ? 'true' : 'false' }}">
-                    <i class="link-icon" data-lucide="mail"></i>
-                    <span class="link-title">{{ __('Marketing') }}</span>
+            {{-- ===== 3. VENTES (Boutique + SaaS + Réservations) ===== --}}
+            @php
+                $salesModuleActive = class_exists(\Nwidart\Modules\Facades\Module::class) && (
+                    (\Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce')) ||
+                    (\Nwidart\Modules\Facades\Module::has('SaaS') && \Nwidart\Modules\Facades\Module::isEnabled('SaaS')) ||
+                    (\Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking'))
+                );
+            @endphp
+            @if($salesModuleActive)
+            @canany(['view_ecommerce', 'view_products', 'view_ecommerce_orders', 'view_coupons', 'view_plans', 'view_tenants', 'view_onboarding', 'view_booking', 'manage_booking'])
+            <li class="nav-item nav-category">{{ __('Ventes') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#salesMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'true' : 'false' }}" aria-controls="salesMenu">
+                    <i class="link-icon" data-lucide="shopping-cart"></i>
+                    <span class="link-title">{{ __('Ventes') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.newsletter.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="marketingMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'show' : '' }}" id="salesMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
-                        @if(Route::has('admin.newsletter.index'))
-                        @can('view_newsletter')
-                        <li class="nav-item"><a href="{{ route('admin.newsletter.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.index') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.index') ? 'aria-current=page' : '' }}>{{ __('Newsletter') }}</a></li>
+                        {{-- Boutique --}}
+                        @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
+                        @if(Route::has('admin.ecommerce.dashboard'))
+                        @can('view_ecommerce')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.dashboard') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.dashboard') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.dashboard') ? 'aria-current=page' : '' }}>{{ __('Tableau de bord') }}</a></li>
                         @endcan
                         @endif
-                        @if(Route::has('admin.newsletter.campaigns.index'))
-                        @can('view_campaigns')
-                        <li class="nav-item"><a href="{{ route('admin.newsletter.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'aria-current=page' : '' }}>{{ __('Campagnes') }}</a></li>
+                        @if(Route::has('admin.ecommerce.products.index'))
+                        @can('view_products')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.products.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.products.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.products.*') ? 'aria-current=page' : '' }}>{{ __('Produits') }}</a></li>
                         @endcan
                         @endif
-                        @if(Route::has('admin.newsletter.workflows.index'))
-                        @can('view_workflows')
-                        <li class="nav-item"><a href="{{ route('admin.newsletter.workflows.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.workflows.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.workflows.*') ? 'aria-current=page' : '' }}>{{ __('Workflows') }}</a></li>
+                        @if(Route::has('admin.ecommerce.categories.index'))
+                        @can('view_products')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.categories.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.categories.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.categories.*') ? 'aria-current=page' : '' }}>{{ __('Catégories') }}</a></li>
                         @endcan
                         @endif
-                        @if(Route::has('admin.newsletter.templates.index'))
-                        @can('view_newsletter')
-                        <li class="nav-item"><a href="{{ route('admin.newsletter.templates.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.templates.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.templates.*') ? 'aria-current=page' : '' }}>{{ __('Templates') }}</a></li>
+                        @if(Route::has('admin.ecommerce.orders.index'))
+                        @can('view_ecommerce_orders')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.orders.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.orders.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.orders.*') ? 'aria-current=page' : '' }}>{{ __('Commandes') }}</a></li>
                         @endcan
                         @endif
-                        @if(Route::has('admin.newsletter.index'))
-                        @can('view_newsletter')
-                        <li class="nav-item"><a href="{{ route('admin.newsletter.index') }}?tab=subscribers" class="nav-link {{ request()->is('*/newsletter*') && request()->get('tab') === 'subscribers' ? 'active' : '' }}">{{ __('Abonnés') }}</a></li>
+                        @if(Route::has('admin.ecommerce.coupons.index'))
+                        @can('view_coupons')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.coupons.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.coupons.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.coupons.*') ? 'aria-current=page' : '' }}>{{ __('Coupons') }}</a></li>
                         @endcan
                         @endif
-                        @if(Route::has('admin.formbuilder.forms.index'))
-                        @can('view_forms')
-                        <li class="nav-item"><a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.formbuilder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.formbuilder.*') ? 'aria-current=page' : '' }}>{{ __('Formulaires') }}</a></li>
+                        @if(Route::has('admin.ecommerce.promotions.index'))
+                        @can('view_coupons')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.promotions.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'aria-current=page' : '' }}>{{ __('Promotions') }}</a></li>
                         @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.reviews.index'))
+                        @can('view_ecommerce')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.reviews.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'aria-current=page' : '' }}>{{ __('Avis') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.refunds.index'))
+                        @can('view_ecommerce_orders')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.refunds.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.refunds.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.refunds.*') ? 'aria-current=page' : '' }}>{{ __('Remboursements') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.import-export.index'))
+                        @can('view_products')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.import-export.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.import-export.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.import-export.*') ? 'aria-current=page' : '' }}>{{ __('Import/Export') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.shipping-zones.index'))
+                        @can('manage_settings')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.shipping-zones.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'aria-current=page' : '' }}>{{ __('Livraison') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ecommerce.analytics'))
+                        @can('view_ecommerce')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.analytics') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.analytics') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.analytics') ? 'aria-current=page' : '' }}>{{ __('Analytique') }}</a></li>
+                        @endcan
+                        @endif
+                        @endif
+                        {{-- SaaS --}}
+                        @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('SaaS') && \Nwidart\Modules\Facades\Module::isEnabled('SaaS'))
+                        @if(Route::has('admin.plans.index'))
+                        @can('view_plans')
+                        <li class="nav-item"><a href="{{ route('admin.plans.index') }}" class="nav-link {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}" {{ request()->routeIs('admin.plans.*') ? 'aria-current=page' : '' }}>{{ __('Plans') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.revenue'))
+                        @can('view_plans')
+                        <li class="nav-item"><a href="{{ route('admin.revenue') }}" class="nav-link {{ request()->routeIs('admin.revenue') ? 'active' : '' }}" {{ request()->routeIs('admin.revenue') ? 'aria-current=page' : '' }}>{{ __('Revenus') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.tenants.index'))
+                        @can('view_tenants')
+                        <li class="nav-item"><a href="{{ route('admin.tenants.index') }}" class="nav-link {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}" {{ request()->routeIs('admin.tenants.*') ? 'aria-current=page' : '' }}>{{ __('Tenants') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.onboarding-steps.index'))
+                        @can('view_onboarding')
+                        <li class="nav-item"><a href="{{ route('admin.onboarding-steps.index') }}" class="nav-link {{ request()->routeIs('admin.onboarding-steps.*') ? 'active' : '' }}" {{ request()->routeIs('admin.onboarding-steps.*') ? 'aria-current=page' : '' }}>{{ __('Onboarding') }}</a></li>
+                        @endcan
+                        @endif
+                        @endif
+                        {{-- Réservations --}}
+                        @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking'))
+                        @if(Route::has('admin.booking.dashboard'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.dashboard') }}" class="nav-link {{ request()->routeIs('admin.booking.dashboard') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.dashboard') ? 'aria-current=page' : '' }}>{{ __('Réservations') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.appointments.index'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.appointments.index') }}" class="nav-link {{ request()->routeIs('admin.booking.appointments.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.appointments.*') ? 'aria-current=page' : '' }}>{{ __('Rendez-vous') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.calendar.index'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.calendar.index') }}" class="nav-link {{ request()->routeIs('admin.booking.calendar.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.calendar.*') ? 'aria-current=page' : '' }}>{{ __('Calendrier') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.services.index'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.services.index') }}" class="nav-link {{ request()->routeIs('admin.booking.services.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.services.*') ? 'aria-current=page' : '' }}>{{ __('Services') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.packages.index'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.packages.index') }}" class="nav-link {{ request()->routeIs('admin.booking.packages.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.packages.*') ? 'aria-current=page' : '' }}>{{ __('Forfaits') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.customers.index'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.customers.index') }}" class="nav-link {{ request()->routeIs('admin.booking.customers.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.customers.*') ? 'aria-current=page' : '' }}>{{ __('Clients') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.settings.edit'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.settings.edit') }}" class="nav-link {{ request()->routeIs('admin.booking.settings.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.settings.*') ? 'aria-current=page' : '' }}>{{ __('Paramètres réservations') }}</a></li>
+                        @endcan
+                        @endif
                         @endif
                     </ul>
                 </div>
             </li>
             @endcanany
+            @endif
 
             {{-- ===== 4. UTILISATEURS ===== --}}
             @canany(['view_users', 'view_roles', 'view_teams', 'view_contacts'])
@@ -271,17 +400,17 @@
             </li>
             @endcanany
 
-            {{-- ===== 6. SYSTÈME ===== --}}
+            {{-- ===== 6. SYSTÈME (+ Recherche + Documentation) ===== --}}
             @canany(['view_health', 'view_security', 'view_backups', 'view_logs', 'manage_system', 'view_activity_logs', 'view_notifications', 'view_trash'])
             <li class="nav-item nav-category">{{ __('Système') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info', 'admin.search', 'admin.documentation') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#systemMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info', 'admin.search', 'admin.documentation') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="shield"></i>
                     <span class="link-title">{{ __('Système') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info') ? 'show' : '' }}" id="systemMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info', 'admin.search', 'admin.documentation') ? 'show' : '' }}" id="systemMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
                         @can('view_health')
                         <li class="nav-item"><a href="{{ route('admin.health') }}" class="nav-link {{ request()->routeIs('admin.health') ? 'active' : '' }}" {{ request()->routeIs('admin.health') ? 'aria-current=page' : '' }}>{{ __('Santé système') }}</a></li>
@@ -347,6 +476,18 @@
                                     <li class="nav-item"><a href="{{ route('admin.webhooks.index') }}" class="nav-link {{ request()->routeIs('admin.webhooks.*') ? 'active' : '' }}" {{ request()->routeIs('admin.webhooks.*') ? 'aria-current=page' : '' }}>{{ __('Webhooks') }}</a></li>
                                     @endcan
                                     @endif
+                                    {{-- Recherche (déplacé des liens autonomes) --}}
+                                    @if(Route::has('admin.search'))
+                                    @can('manage_system')
+                                    <li class="nav-item"><a href="{{ route('admin.search') }}" class="nav-link {{ request()->routeIs('admin.search') ? 'active' : '' }}" {{ request()->routeIs('admin.search') ? 'aria-current=page' : '' }}>{{ __('Recherche') }}</a></li>
+                                    @endcan
+                                    @endif
+                                    {{-- Documentation (déplacé des liens autonomes) --}}
+                                    @if(Route::has('admin.documentation'))
+                                    @can('view_documentation')
+                                    <li class="nav-item"><a href="{{ route('admin.documentation') }}" class="nav-link {{ request()->routeIs('admin.documentation') ? 'active' : '' }}" {{ request()->routeIs('admin.documentation') ? 'aria-current=page' : '' }}>{{ __('Documentation') }}</a></li>
+                                    @endcan
+                                    @endif
                                 </ul>
                             </div>
                         </li>
@@ -355,21 +496,27 @@
             </li>
             @endcanany
 
-            {{-- ===== MODULES CONDITIONNELS ===== --}}
-
-            {{-- Support IA --}}
-            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('AI') && \Nwidart\Modules\Facades\Module::isEnabled('AI'))
-            @canany(['view_ai', 'manage_ai'])
-            <li class="nav-item nav-category">{{ __('Support IA') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.ai.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#aiMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.ai.*') ? 'true' : 'false' }}">
-                    <i class="link-icon" data-lucide="bot"></i>
-                    <span class="link-title">{{ __('Support IA') }}</span>
+            {{-- ===== 7. OUTILS (Support IA + Roadmap) ===== --}}
+            @php
+                $toolsModuleActive = class_exists(\Nwidart\Modules\Facades\Module::class) && (
+                    (\Nwidart\Modules\Facades\Module::has('AI') && \Nwidart\Modules\Facades\Module::isEnabled('AI')) ||
+                    (\Nwidart\Modules\Facades\Module::has('Roadmap') && \Nwidart\Modules\Facades\Module::isEnabled('Roadmap'))
+                );
+            @endphp
+            @if($toolsModuleActive)
+            @canany(['view_ai', 'manage_ai', 'view_roadmap', 'manage_roadmap'])
+            <li class="nav-item nav-category">{{ __('Outils') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.ai.*', 'admin.roadmap.*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#toolsMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.ai.*', 'admin.roadmap.*') ? 'true' : 'false' }}" aria-controls="toolsMenu">
+                    <i class="link-icon" data-lucide="sparkles"></i>
+                    <span class="link-title">{{ __('Outils') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.ai.*') ? 'show' : '' }}" id="aiMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.ai.*', 'admin.roadmap.*') ? 'show' : '' }}" id="toolsMenu" data-bs-parent="#sidebarNav">
                     <ul class="nav sub-menu">
+                        {{-- Support IA --}}
+                        @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('AI') && \Nwidart\Modules\Facades\Module::isEnabled('AI'))
                         @if(Route::has('admin.ai.conversations.index'))
                         @can('view_ai')
                         <li class="nav-item"><a href="{{ route('admin.ai.conversations.index') }}" class="nav-link {{ request()->routeIs('admin.ai.conversations.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.conversations.*') ? 'aria-current=page' : '' }}>{{ __('Conversations') }}</a></li>
@@ -398,29 +545,14 @@
                         <li class="nav-item"><a href="{{ route('admin.ai.urls.index') }}" class="nav-link {{ request()->routeIs('admin.ai.urls.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.urls.*') ? 'aria-current=page' : '' }}>{{ __('URLs') }}</a></li>
                         @endcan
                         @endif
-                    </ul>
-                </div>
-            </li>
-            @endcanany
-            @endif
-
-            {{-- Roadmap --}}
-            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Roadmap') && \Nwidart\Modules\Facades\Module::isEnabled('Roadmap'))
-            @if(Route::has('admin.roadmap.boards.index'))
-            @canany(['view_roadmap', 'manage_roadmap'])
-            <li class="nav-item nav-category">{{ __('Roadmap') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.roadmap.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#roadmapMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.roadmap.*') ? 'true' : 'false' }}">
-                    <i class="link-icon" data-lucide="map"></i>
-                    <span class="link-title">{{ __('Roadmap') }}</span>
-                    <i class="link-arrow" data-lucide="chevron-down"></i>
-                </a>
-                <div class="collapse {{ request()->routeIs('admin.roadmap.*') ? 'show' : '' }}" id="roadmapMenu" data-bs-parent="#sidebarNav">
-                    <ul class="nav sub-menu">
+                        @endif
+                        {{-- Roadmap --}}
+                        @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Roadmap') && \Nwidart\Modules\Facades\Module::isEnabled('Roadmap'))
+                        @if(Route::has('admin.roadmap.boards.index'))
                         @can('view_roadmap')
                         <li class="nav-item"><a href="{{ route('admin.roadmap.boards.index') }}" class="nav-link {{ request()->routeIs('admin.roadmap.boards.*') ? 'active' : '' }}" {{ request()->routeIs('admin.roadmap.boards.*') ? 'aria-current=page' : '' }}>{{ __('Tableaux') }}</a></li>
                         @endcan
+                        @endif
                         @if(Route::has('admin.roadmap.ideas.index'))
                         @can('view_roadmap')
                         <li class="nav-item"><a href="{{ route('admin.roadmap.ideas.index') }}" class="nav-link {{ request()->routeIs('admin.roadmap.ideas.*') ? 'active' : '' }}" {{ request()->routeIs('admin.roadmap.ideas.*') ? 'aria-current=page' : '' }}>{{ __('Idées') }}</a></li>
@@ -431,227 +563,11 @@
                         <li class="nav-item"><a href="{{ route('admin.roadmap.analytics') }}" class="nav-link {{ request()->routeIs('admin.roadmap.analytics') ? 'active' : '' }}" {{ request()->routeIs('admin.roadmap.analytics') ? 'aria-current=page' : '' }}>{{ __('Statistiques') }}</a></li>
                         @endcan
                         @endif
-                    </ul>
-                </div>
-            </li>
-            @endcanany
-            @endif
-            @endif
-
-            {{-- Boutique --}}
-            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
-            @canany(['view_ecommerce', 'view_products', 'view_ecommerce_orders', 'view_coupons'])
-            <li class="nav-item nav-category">{{ __('Boutique') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.ecommerce.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#ecommerceMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.ecommerce.*') ? 'true' : 'false' }}" aria-controls="ecommerceMenu">
-                    <i class="link-icon" data-lucide="shopping-cart"></i>
-                    <span class="link-title">{{ __('Boutique') }}</span>
-                    <i class="link-arrow" data-lucide="chevron-down"></i>
-                </a>
-                <div class="collapse {{ request()->routeIs('admin.ecommerce.*') ? 'show' : '' }}" id="ecommerceMenu" data-bs-parent="#sidebarNav">
-                    <ul class="nav sub-menu">
-                        @if(Route::has('admin.ecommerce.dashboard'))
-                        @can('view_ecommerce')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.dashboard') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.dashboard') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.dashboard') ? 'aria-current=page' : '' }}>{{ __('Tableau de bord') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.products.index'))
-                        @can('view_products')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.products.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.products.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.products.*') ? 'aria-current=page' : '' }}>{{ __('Produits') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.categories.index'))
-                        @can('view_products')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.categories.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.categories.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.categories.*') ? 'aria-current=page' : '' }}>{{ __('Catégories') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.orders.index'))
-                        @can('view_ecommerce_orders')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.orders.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.orders.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.orders.*') ? 'aria-current=page' : '' }}>{{ __('Commandes') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.coupons.index'))
-                        @can('view_coupons')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.coupons.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.coupons.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.coupons.*') ? 'aria-current=page' : '' }}>{{ __('Coupons') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.promotions.index'))
-                        @can('view_coupons')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.promotions.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.promotions.*') ? 'aria-current=page' : '' }}>{{ __('Promotions') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.reviews.index'))
-                        @can('view_ecommerce')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.reviews.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'aria-current=page' : '' }}>{{ __('Avis') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.refunds.index'))
-                        @can('view_ecommerce_orders')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.refunds.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.refunds.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.refunds.*') ? 'aria-current=page' : '' }}>{{ __('Remboursements') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.import-export.index'))
-                        @can('view_products')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.import-export.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.import-export.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.import-export.*') ? 'aria-current=page' : '' }}>{{ __('Import/Export') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.shipping-zones.index'))
-                        @can('manage_settings')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.shipping-zones.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'aria-current=page' : '' }}>{{ __('Livraison') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.ecommerce.analytics'))
-                        @can('view_ecommerce')
-                        <li class="nav-item"><a href="{{ route('admin.ecommerce.analytics') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.analytics') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.analytics') ? 'aria-current=page' : '' }}>{{ __('Analytique') }}</a></li>
-                        @endcan
                         @endif
                     </ul>
                 </div>
             </li>
             @endcanany
-            @endif
-
-            {{-- Mon compte (portail client) --}}
-            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
-            @if(Route::has('customer.dashboard'))
-            <li class="nav-item nav-category">{{ __('Mon compte') }}</li>
-            <li class="nav-item {{ request()->routeIs('customer.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#customerMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('customer.*') ? 'true' : 'false' }}" aria-controls="customerMenu">
-                    <i class="link-icon" data-lucide="user"></i>
-                    <span class="link-title">{{ __('Mon compte') }}</span>
-                    <i class="link-arrow" data-lucide="chevron-down"></i>
-                </a>
-                <div class="collapse {{ request()->routeIs('customer.*') ? 'show' : '' }}" id="customerMenu" data-bs-parent="#sidebarNav">
-                    <ul class="nav sub-menu">
-                        <li class="nav-item"><a href="{{ route('customer.dashboard') }}" class="nav-link {{ request()->routeIs('customer.dashboard') ? 'active' : '' }}" {{ request()->routeIs('customer.dashboard') ? 'aria-current=page' : '' }}>{{ __('Tableau de bord') }}</a></li>
-                        <li class="nav-item"><a href="{{ route('customer.orders') }}" class="nav-link {{ request()->routeIs('customer.orders*') ? 'active' : '' }}" {{ request()->routeIs('customer.orders*') ? 'aria-current=page' : '' }}>{{ __('Mes commandes') }}</a></li>
-                        @if(Route::has('customer.downloads'))
-                        <li class="nav-item"><a href="{{ route('customer.downloads') }}" class="nav-link {{ request()->routeIs('customer.downloads') ? 'active' : '' }}" {{ request()->routeIs('customer.downloads') ? 'aria-current=page' : '' }}>{{ __('Mes téléchargements') }}</a></li>
-                        @endif
-                        <li class="nav-item"><a href="{{ route('customer.addresses') }}" class="nav-link {{ request()->routeIs('customer.addresses*') ? 'active' : '' }}" {{ request()->routeIs('customer.addresses*') ? 'aria-current=page' : '' }}>{{ __('Mes adresses') }}</a></li>
-                    </ul>
-                </div>
-            </li>
-            @endif
-            @endif
-
-            {{-- SaaS --}}
-            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('SaaS') && \Nwidart\Modules\Facades\Module::isEnabled('SaaS'))
-            @canany(['view_plans', 'view_tenants', 'view_onboarding'])
-            <li class="nav-item nav-category">{{ __('SaaS') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#saasMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*') ? 'true' : 'false' }}">
-                    <i class="link-icon" data-lucide="credit-card"></i>
-                    <span class="link-title">{{ __('SaaS') }}</span>
-                    <i class="link-arrow" data-lucide="chevron-down"></i>
-                </a>
-                <div class="collapse {{ request()->routeIs('admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*') ? 'show' : '' }}" id="saasMenu" data-bs-parent="#sidebarNav">
-                    <ul class="nav sub-menu">
-                        @if(Route::has('admin.plans.index'))
-                        @can('view_plans')
-                        <li class="nav-item"><a href="{{ route('admin.plans.index') }}" class="nav-link {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}" {{ request()->routeIs('admin.plans.*') ? 'aria-current=page' : '' }}>{{ __('Plans') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.revenue'))
-                        @can('view_plans')
-                        <li class="nav-item"><a href="{{ route('admin.revenue') }}" class="nav-link {{ request()->routeIs('admin.revenue') ? 'active' : '' }}" {{ request()->routeIs('admin.revenue') ? 'aria-current=page' : '' }}>{{ __('Revenus') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.tenants.index'))
-                        @can('view_tenants')
-                        <li class="nav-item"><a href="{{ route('admin.tenants.index') }}" class="nav-link {{ request()->routeIs('admin.tenants.*') ? 'active' : '' }}" {{ request()->routeIs('admin.tenants.*') ? 'aria-current=page' : '' }}>{{ __('Tenants') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.onboarding-steps.index'))
-                        @can('view_onboarding')
-                        <li class="nav-item"><a href="{{ route('admin.onboarding-steps.index') }}" class="nav-link {{ request()->routeIs('admin.onboarding-steps.*') ? 'active' : '' }}" {{ request()->routeIs('admin.onboarding-steps.*') ? 'aria-current=page' : '' }}>{{ __('Onboarding') }}</a></li>
-                        @endcan
-                        @endif
-                    </ul>
-                </div>
-            </li>
-            @endcanany
-            @endif
-
-            {{-- Réservations --}}
-            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking'))
-            @if(Route::has('admin.booking.dashboard'))
-            @canany(['view_booking', 'manage_booking'])
-            <li class="nav-item nav-category">{{ __('Réservations') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.booking.*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#bookingMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.booking.*') ? 'true' : 'false' }}">
-                    <i class="link-icon" data-lucide="calendar-check"></i>
-                    <span class="link-title">{{ __('Réservations') }}</span>
-                    <i class="link-arrow" data-lucide="chevron-down"></i>
-                </a>
-                <div class="collapse {{ request()->routeIs('admin.booking.*') ? 'show' : '' }}" id="bookingMenu" data-bs-parent="#sidebarNav">
-                    <ul class="nav sub-menu">
-                        @can('manage_booking')
-                        <li class="nav-item"><a href="{{ route('admin.booking.dashboard') }}" class="nav-link {{ request()->routeIs('admin.booking.dashboard') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.dashboard') ? 'aria-current=page' : '' }}>{{ __('Tableau de bord') }}</a></li>
-                        @endcan
-                        @if(Route::has('admin.booking.appointments.index'))
-                        @can('manage_booking')
-                        <li class="nav-item"><a href="{{ route('admin.booking.appointments.index') }}" class="nav-link {{ request()->routeIs('admin.booking.appointments.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.appointments.*') ? 'aria-current=page' : '' }}>{{ __('Rendez-vous') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.booking.calendar.index'))
-                        @can('manage_booking')
-                        <li class="nav-item"><a href="{{ route('admin.booking.calendar.index') }}" class="nav-link {{ request()->routeIs('admin.booking.calendar.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.calendar.*') ? 'aria-current=page' : '' }}>{{ __('Calendrier') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.booking.services.index'))
-                        @can('manage_booking')
-                        <li class="nav-item"><a href="{{ route('admin.booking.services.index') }}" class="nav-link {{ request()->routeIs('admin.booking.services.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.services.*') ? 'aria-current=page' : '' }}>{{ __('Services') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.booking.packages.index'))
-                        @can('manage_booking')
-                        <li class="nav-item"><a href="{{ route('admin.booking.packages.index') }}" class="nav-link {{ request()->routeIs('admin.booking.packages.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.packages.*') ? 'aria-current=page' : '' }}>{{ __('Forfaits') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.booking.customers.index'))
-                        @can('manage_booking')
-                        <li class="nav-item"><a href="{{ route('admin.booking.customers.index') }}" class="nav-link {{ request()->routeIs('admin.booking.customers.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.customers.*') ? 'aria-current=page' : '' }}>{{ __('Clients') }}</a></li>
-                        @endcan
-                        @endif
-                        @if(Route::has('admin.booking.settings.edit'))
-                        @can('manage_booking')
-                        <li class="nav-item"><a href="{{ route('admin.booking.settings.edit') }}" class="nav-link {{ request()->routeIs('admin.booking.settings.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.settings.*') ? 'aria-current=page' : '' }}>{{ __('Paramètres') }}</a></li>
-                        @endcan
-                        @endif
-                    </ul>
-                </div>
-            </li>
-            @endcanany
-            @endif
-            @endif
-
-            {{-- Recherche --}}
-            @if(Route::has('admin.search'))
-            @can('manage_system')
-            <li class="nav-item">
-                <a href="{{ route('admin.search') }}" class="nav-link {{ request()->routeIs('admin.search') ? 'active' : '' }}" {{ request()->routeIs('admin.search') ? 'aria-current=page' : '' }}>
-                    <i class="link-icon" data-lucide="search"></i>
-                    <span class="link-title">{{ __('Recherche') }}</span>
-                </a>
-            </li>
-            @endcan
-            @endif
-
-            {{-- Documentation --}}
-            @if(Route::has('admin.documentation'))
-            @can('view_documentation')
-            <li class="nav-item">
-                <a href="{{ route('admin.documentation') }}" class="nav-link {{ request()->routeIs('admin.documentation') ? 'active' : '' }}" {{ request()->routeIs('admin.documentation') ? 'aria-current=page' : '' }}>
-                    <i class="link-icon" data-lucide="book"></i>
-                    <span class="link-title">{{ __('Documentation') }}</span>
-                </a>
-            </li>
-            @endcan
             @endif
 
         </ul>

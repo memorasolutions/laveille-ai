@@ -1,52 +1,53 @@
-# Carte navigation admin - Post-refonte
+# Navigation map — 2026-03-18
 
-Date : 2026-03-15
-Fichier : `Modules/Backoffice/resources/views/themes/backend/partials/sidebar.blade.php`
+## Avant → Apres
 
----
+| Avant (14 categories) | Apres (7 categories) |
+|----------------------|---------------------|
+| Principal | **Accueil** |
+| Contenu + Marketing | **Contenu** |
+| Boutique + SaaS + Reservations | **Ventes** |
+| Utilisateurs | **Utilisateurs** |
+| Configuration | **Configuration** |
+| Systeme + Recherche + Documentation | **Systeme** |
+| Support IA + Roadmap | **Outils** |
+| Mon compte | Supprime (doublon topbar) |
 
-## Structure (7+2 catégories, Priority+ pattern)
+## Desktop sidebar (7 categories, 2 niveaux max)
 
-| # | Catégorie | Icône | Items principaux | Priority+ ("Plus...") |
-|---|---|---|---|---|
-| 1 | Principal | home, bar-chart-2 | Dashboard, Statistiques | - |
-| 2 | Contenu | file-text | Articles, Pages, Médias, Catégories, FAQ, Témoignages, Formulaires (7) | Commentaires, Tags |
-| 3 | Utilisateurs | users | Membres, Rôles, Équipes, Newsletter, Campagnes, Workflows, Messages (7) | - |
-| 4 | Ventes | shopping-cart | Boutique, Produits, Commandes, Coupons, Plans, Revenus (6) | - |
-| 5 | Réservations* | calendar-check | Dashboard, RDV, Calendrier, Services, Forfaits, Clients, Paramètres (7) | Coupons, Cartes-cadeaux, Disponibilités, Stats, Webhooks |
-| 6 | Configuration | settings | Personnalisation, SEO, Traductions, Emails, Menus, Widgets, Annonces (7) | - |
-| 7 | Système | shield | Santé, Sécurité, Sauvegardes, Journaux, Cache, Notifications, Corbeille (7) | 23 items (Feature Flags, Plugins, Webhooks, etc.) |
-| 8 | Support IA* | bot | Boîte réception, Tickets, Conversations, Agent, KB, Analytics (6) | Sources URLs, Réponses prédéfinies, SLA, Canaux, Déclencheurs, CSAT |
-| 9 | Roadmap* | map | Tableaux, Idées, Stats (3) | - |
-| - | Documentation | book-open | Lien direct | - |
+### Accueil
+- Tableau de bord (home)
+- Statistiques (bar-chart-2)
 
-\* = conditionnel (affiché si module actif)
+### Contenu (file-text)
+- Articles, Pages, Categories, FAQ, Medias, Menus
+- Commentaires, Temoignages, Widgets, Shortcodes, Champs personnalises
+- Newsletter, Campagnes, Workflows, Templates, Abonnes, Formulaires
 
-## Bottom tab bar mobile (d-lg-none)
+### Ventes (shopping-cart)
+- Boutique : Produits, Categories, Commandes, Coupons, Avis, Livraison, Remboursements, Import/Export, Analytique, Promotions
+- SaaS : Plans, Abonnements, Revenus
+- Reservations : Rendez-vous, Services, Packages, Cartes-cadeaux, Clients
 
-| Icône | Label | Cible |
-|---|---|---|
-| home | Accueil | admin.dashboard |
-| file-text | Contenu | admin.blog.articles.index |
-| shopping-cart | Ventes | admin.ecommerce.dashboard |
-| bell | Notifs | admin.notifications.index |
-| menu | Plus | Ouvre sidebar complète |
+### Utilisateurs (users)
+- Membres, Roles, Equipes, Messages
 
-## Améliorations WCAG appliquées
+### Configuration (settings)
+- Parametres, Branding, SEO, Traductions, Courriel, Templates email, URLs courtes, Cookies
 
-- Cibles tactiles sidebar : min-height 44px + padding = 48px effective
-- Bottom bar items : min-height 48px
-- aria-current="page" sur items actifs
-- aria-label sur tous les boutons bottom bar
-- safe-area-inset-bottom pour iPhone
-- Hide-on-scroll-down / show-on-scroll-up
+### Systeme (shield)
+- Sauvegardes, Securite, Journal d'activite, Sante, Taches planifiees
+- Recherche, Documentation
 
-## Avant / Après
+### Outils (sparkles)
+- Support IA : Conversations, Tickets, Base de connaissances, Chatbot, Analytique IA
+- Roadmap : Tableaux, Idees, Changelog, Categories
 
-| Métrique | Avant | Après | Gain |
-|---|---|---|---|
-| Catégories | 12 | 7 (+2 conditionnels) | -42% |
-| Items visibles (7 max/dropdown) | illimité (14 max) | 7 max | Miller 7±2 |
-| Cibles tactiles | 32px | 44-48px | WCAG conforme |
-| Bottom tab bar | Absente | 5 icônes | Mobile first |
-| Clics mobile (top feature) | 3-4 | 1 (via bottom bar) | -75% |
+## Mobile bottom tab bar (5 items)
+Accueil | Contenu | Equipe | Config | Plus
+
+## Patterns
+- Desktop : sidebar collapsible, dropdown par categorie
+- Mobile : bottom tab bar + hamburger pour sidebar complete
+- Priority+ : items secondaires dans collapse
+- WCAG : aria-labels, aria-current, cibles 44px min
