@@ -78,4 +78,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);
 
     Route::apiResource('users', UserController::class);
+
+    // Usage metering (SaaS)
+    if (class_exists(\Modules\SaaS\Http\Controllers\UsageApiController::class)) {
+        Route::get('/usage/current', [\Modules\SaaS\Http\Controllers\UsageApiController::class, 'current']);
+        Route::get('/usage/summary', [\Modules\SaaS\Http\Controllers\UsageApiController::class, 'summary']);
+        Route::get('/usage/daily', [\Modules\SaaS\Http\Controllers\UsageApiController::class, 'daily']);
+        Route::post('/usage/record', [\Modules\SaaS\Http\Controllers\UsageApiController::class, 'record']);
+    }
 });
