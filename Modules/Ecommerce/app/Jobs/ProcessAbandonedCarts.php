@@ -57,7 +57,8 @@ class ProcessAbandonedCarts implements ShouldQueue
                         continue;
                     }
 
-                    $cart->user->notify(new AbandonedCartNotification($cart, $reminderNumber));
+                    // Notification handled by SendAbandonedCartReminder listener
+                    \Modules\Ecommerce\Events\CartAbandoned::dispatch($cart, $reminderNumber);
 
                     AbandonedCartReminder::create([
                         'cart_id' => $cart->id,

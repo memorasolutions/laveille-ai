@@ -52,10 +52,8 @@ class OrderController
         $order->update(['status' => $validated['status']]);
 
         if ($validated['status'] === 'shipped') {
+            // Notification handled by SendOrderShippedNotification listener
             \Modules\Ecommerce\Events\OrderShipped::dispatch($order);
-            /** @var \App\Models\User $user */
-            $user = $order->user;
-            $user->notify(new \Modules\Ecommerce\Notifications\OrderShippedNotification($order));
         }
 
         session()->flash('success', 'Statut de la commande mis à jour avec succès.');

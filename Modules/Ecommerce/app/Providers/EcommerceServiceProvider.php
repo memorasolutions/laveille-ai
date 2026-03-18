@@ -19,8 +19,12 @@ use Modules\Ecommerce\Events\LowStockDetected;
 use Modules\Ecommerce\Events\OrderCreated;
 use Modules\Ecommerce\Events\OrderPaid;
 use Modules\Ecommerce\Events\OrderShipped;
+use Modules\Ecommerce\Events\CartAbandoned;
 use Modules\Ecommerce\Listeners\DispatchEcommerceWebhooks;
 use Modules\Ecommerce\Listeners\NotifyAdminsLowStock;
+use Modules\Ecommerce\Listeners\SendAbandonedCartReminder;
+use Modules\Ecommerce\Listeners\SendOrderConfirmation;
+use Modules\Ecommerce\Listeners\SendOrderShippedNotification;
 use Modules\Ecommerce\Services\Tax\CanadaTaxCalculator;
 
 class EcommerceServiceProvider extends BaseModuleServiceProvider
@@ -40,6 +44,11 @@ class EcommerceServiceProvider extends BaseModuleServiceProvider
         Event::listen(OrderPaid::class, DispatchEcommerceWebhooks::class);
         Event::listen(OrderShipped::class, DispatchEcommerceWebhooks::class);
         Event::listen(LowStockDetected::class, DispatchEcommerceWebhooks::class);
+
+        // Notification listeners (event-driven, not direct notify())
+        Event::listen(OrderPaid::class, SendOrderConfirmation::class);
+        Event::listen(OrderShipped::class, SendOrderShippedNotification::class);
+        Event::listen(CartAbandoned::class, SendAbandonedCartReminder::class);
 
         if (config('modules.ecommerce.abandoned_cart.enabled', false)) {
             $this->app->booted(function () {

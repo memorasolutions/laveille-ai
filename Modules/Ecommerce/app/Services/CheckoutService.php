@@ -176,10 +176,7 @@ class CheckoutService
                     'paid_at' => now(),
                 ]);
 
-                /** @var \App\Models\User $user */
-                $user = $order->user;
-                $user->notify(new \Modules\Ecommerce\Notifications\OrderConfirmationNotification($order));
-
+                // Notification handled by SendOrderConfirmation listener
                 \Modules\Ecommerce\Events\OrderPaid::dispatch($order);
             }
         }
