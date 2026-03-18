@@ -9,22 +9,21 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\SaaS\Models\UsageRecord;
-use Modules\SaaS\Services\UsageMeteringService;
+use Modules\SaaS\Services\MeteringService;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
-function meteringService(): UsageMeteringService
+function usageService(): MeteringService
 {
-    return app(UsageMeteringService::class);
+    return app(MeteringService::class);
 }
 
 test('record creates usage record in database', function () {
     $user = User::factory()->create();
 
-    $record = meteringService()->record($user->id, 'api_calls', 5);
+    $record = usageService()->record($user, 'api_calls', 5);
 
     expect($record)->toBeInstanceOf(UsageRecord::class);
     $this->assertDatabaseHas('usage_records', [
@@ -36,10 +35,10 @@ test('record creates usage record in database', function () {
 
 test('getCurrentUsage sums current month records', function () {
     $user = User::factory()->create();
-    $service = meteringService();
+    $service = usageService();
 
-    $service->record($user->id, 'api_calls', 2);
-    $service->record($user->id, 'api_calls', 3);
+    $service->record($user, 'api_calls', 2);
+    $service->record($user, 'api_calls', 3);
 
     expect($service->getCurrentUsage($user->id, 'api_calls'))->toBe(5);
 });
@@ -47,7 +46,6 @@ test('getCurrentUsage sums current month records', function () {
 test('getCurrentUsage ignores other months', function () {
     $user = User::factory()->create();
 
-    // Last month record (manual insert to bypass service cache)
     UsageRecord::create([
         'user_id' => $user->id,
         'metric' => 'api_calls',
@@ -55,41 +53,40 @@ test('getCurrentUsage ignores other months', function () {
         'recorded_at' => now()->subMonth(),
     ]);
 
-    // This month via service
-    meteringService()->record($user->id, 'api_calls', 3);
+    usageService()->record($user, 'api_calls', 3);
 
-    expect(meteringService()->getCurrentUsage($user->id, 'api_calls'))->toBe(3);
+    expect(usageService()->getCurrentUsage($user->id, 'api_calls'))->toBe(3);
 });
 
 test('checkLimit returns true when under limit', function () {
     $user = User::factory()->create();
-    meteringService()->record($user->id, 'api_calls', 5);
+    usageService()->record($user, 'api_calls', 5);
 
-    expect(meteringService()->checkLimit($user->id, 'api_calls', 10))->toBeTrue();
+    expect(usageService()->checkLimit($user, 'api_calls', 10))->toBeTrue();
 });
 
 test('checkLimit returns false when at or over limit', function () {
     $user = User::factory()->create();
-    meteringService()->record($user->id, 'api_calls', 10);
+    usageService()->record($user, 'api_calls', 10);
 
-    expect(meteringService()->checkLimit($user->id, 'api_calls', 10))->toBeFalse();
+    expect(usageService()->checkLimit($user, 'api_calls', 10))->toBeFalse();
 });
 
 test('getRemainingQuota calculates correctly', function () {
     $user = User::factory()->create();
-    meteringService()->record($user->id, 'api_calls', 3);
+    usageService()->record($user, 'api_calls', 3);
 
-    expect(meteringService()->getRemainingQuota($user->id, 'api_calls', 10))->toBe(7);
-    expect(meteringService()->getRemainingQuota($user->id, 'api_calls', 2))->toBe(0);
+    expect(usageService()->getRemainingQuota($user->id, 'api_calls', 10))->toBe(7);
+    expect(usageService()->getRemainingQuota($user->id, 'api_calls', 2))->toBe(0);
 });
 
 test('getUsageSummary groups by metric', function () {
     $user = User::factory()->create();
-    $service = meteringService();
+    $service = usageService();
 
-    $service->record($user->id, 'api_calls', 1);
-    $service->record($user->id, 'api_calls', 2);
-    $service->record($user->id, 'storage', 50);
+    $service->record($user, 'api_calls', 1);
+    $service->record($user, 'api_calls', 2);
+    $service->record($user, 'storage', 50);
 
     $summary = $service->getUsageSummary($user->id);
 
@@ -113,7 +110,7 @@ test('getUsageByDay returns daily breakdown with zero-filled days', function () 
         'recorded_at' => now(),
     ]);
 
-    $byDay = meteringService()->getUsageByDay($user->id, 'api_calls', 5);
+    $byDay = usageService()->getUsageByDay($user->id, 'api_calls', 5);
 
     expect($byDay)->toHaveCount(5);
     expect($byDay[now()->subDays(2)->format('Y-m-d')])->toBe(5);
