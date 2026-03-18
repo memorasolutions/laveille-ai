@@ -8,7 +8,7 @@
     :steps="[
         ['element' => '.page-content', 'popover' => ['title' => __('Gestion des articles'), 'description' => __('Gérez votre blog : articles, catégories et commentaires.'), 'side' => 'bottom']],
         ['element' => 'table.table', 'popover' => ['title' => __('Liste des articles'), 'description' => __('Tous les articles avec statut, catégorie et auteur.'), 'side' => 'bottom']],
-        ['element' => 'a[href*=\"articles/create\"]', 'popover' => ['title' => __('Nouvel article'), 'description' => __('Rédigez un nouvel article avec l\'éditeur TipTap.'), 'side' => 'left']],
+        ['element' => '.btn-primary', 'popover' => ['title' => __('Nouvel article'), 'description' => __('Rédigez un nouvel article avec l\'éditeur TipTap.'), 'side' => 'left']],
     ]"
 />
 

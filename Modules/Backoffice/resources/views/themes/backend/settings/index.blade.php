@@ -7,7 +7,7 @@
     storage-key="driver_tour_settings_{{ auth()->id() }}"
     :steps="[
         ['element' => '.page-content', 'popover' => ['title' => __('Paramètres'), 'description' => __('Configurez votre application : général, SEO, courriel, IA.'), 'side' => 'bottom']],
-        ['element' => '.btn[role=\"tab\"]:first-child', 'popover' => ['title' => __('Onglets'), 'description' => __('Naviguez entre les groupes de paramètres.'), 'side' => 'bottom']],
+        ['element' => '.nav-tabs', 'popover' => ['title' => __('Onglets'), 'description' => __('Naviguez entre les groupes de paramètres.'), 'side' => 'bottom']],
     ]"
 />
 

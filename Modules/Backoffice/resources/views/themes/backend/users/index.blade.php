@@ -8,7 +8,7 @@
     :steps="[
         ['element' => '.page-content', 'popover' => ['title' => __('Gestion des utilisateurs'), 'description' => __('Gérez les comptes, rôles et accès de votre plateforme.'), 'side' => 'bottom']],
         ['element' => 'table.table', 'popover' => ['title' => __('Liste des utilisateurs'), 'description' => __('Tous les utilisateurs avec rôle, statut et actions.'), 'side' => 'bottom']],
-        ['element' => 'a[href*=\"users/create\"]', 'popover' => ['title' => __('Nouvel utilisateur'), 'description' => __('Créez un compte utilisateur avec rôle et permissions.'), 'side' => 'left']],
+        ['element' => '.btn-primary', 'popover' => ['title' => __('Nouvel utilisateur'), 'description' => __('Créez un compte utilisateur avec rôle et permissions.'), 'side' => 'left']],
     ]"
 />
 
