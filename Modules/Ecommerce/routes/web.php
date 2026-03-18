@@ -18,6 +18,7 @@ use Modules\Ecommerce\Http\Controllers\Admin\OrderController;
 use Modules\Ecommerce\Http\Controllers\Admin\ProductController;
 use Modules\Ecommerce\Http\Controllers\Admin\PromotionController;
 use Modules\Ecommerce\Http\Controllers\Admin\ReviewController;
+use Modules\Ecommerce\Http\Controllers\Admin\RefundController;
 use Modules\Ecommerce\Http\Controllers\Admin\ShippingZoneController;
 
 Route::prefix('admin/ecommerce')
@@ -124,6 +125,13 @@ Route::prefix('admin/ecommerce')
             Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
             Route::patch('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
             Route::delete('reviews/{review}', [ReviewController::class, 'reject'])->name('reviews.reject');
+        });
+
+        // Refunds
+        Route::middleware('permission:view_ecommerce_orders')->group(function () {
+            Route::get('refunds', [RefundController::class, 'index'])->name('refunds.index');
+            Route::patch('refunds/{refund}/approve', [RefundController::class, 'approve'])->name('refunds.approve');
+            Route::patch('refunds/{refund}/reject', [RefundController::class, 'reject'])->name('refunds.reject');
         });
 
         // Shipping zones

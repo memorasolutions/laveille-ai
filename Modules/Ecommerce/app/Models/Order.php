@@ -68,6 +68,11 @@ class Order extends Model
         return $this->belongsTo(Address::class, 'billing_address_id');
     }
 
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
     public function scopeByStatus(Builder $query, string $status): Builder
     {
         return $query->where('status', $status);
