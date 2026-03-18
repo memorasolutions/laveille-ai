@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -37,6 +38,7 @@ class CheckCommand extends Command
             'Security' => fn () => $this->checkSecurity(),
             'Config' => fn () => $this->checkConfig(),
             'Storage symlink' => fn () => $this->checkStorageSymlink(),
+            'Super admin' => fn () => $this->checkSuperAdmin(),
         ];
 
         if ($this->option('quick')) {
@@ -182,6 +184,33 @@ class CheckCommand extends Command
 
             return false;
         }
+    }
+
+    private function checkSuperAdmin(): bool
+    {
+        $email = (string) config('app.superadmin_email');
+
+        if (empty($email)) {
+            $this->failedChecks[] = 'SUPER_ADMIN_EMAIL not configured';
+
+            return false;
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if (! $user) {
+            $this->failedChecks[] = "Super admin {$email} not found (run php artisan app:ensure-superadmin)";
+
+            return false;
+        }
+
+        if (! $user->hasRole('super_admin')) {
+            $this->failedChecks[] = "User {$email} missing super_admin role";
+
+            return false;
+        }
+
+        return true;
     }
 
     private function checkStorageSymlink(): bool
