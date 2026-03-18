@@ -12,6 +12,9 @@
 **PRIORITE MCP : 1min.ai (multi-ai-mcp) AVANT OpenRouter - l'utilisateur a beaucoup de credits 1min.ai.**
 **Sonnet = via multi-ai-mcp (claude-sonnet-4), PAS via Task natif. Task natif = dernier recours.**
 
+## REGLE #0 - NE JAMAIS MODIFIER LE CORE ORIGINAL
+**Le dossier `laravel_vierge` (CORE) ne doit JAMAIS etre modifie sauf demande explicite de l'utilisateur.**
+
 ## Stack production (IMPORTANT)
 - **Serveur** : cPanel + AlmaLinux + MariaDB
 - **PAS de Docker** - Docker et cPanel ne font pas bon menage
@@ -20,7 +23,7 @@
 ## Etat actuel (2026-03-15)
 - **3198 tests**, 6725 assertions, 0 fail (--parallel obligatoire)
 - **PHPStan** : 0 erreurs niveau 6
-- **38 modules actifs** (Privacy ajouté), 129+ permissions
+- **39 modules actifs** (Ecommerce ajouté), 129+ permissions
 - **32 feature flags** Laravel Pennant (sync FeatureFlagsTable complete)
 - **Auteur** : MEMORA solutions - header DocBlock standardise partout
 - **3 chantiers majeurs** : multi-tenant (65 tests), marketing automation (44 tests), API GraphQL (33 tests)
@@ -72,6 +75,32 @@
 - **Sidebar** : section Roadmap (Tableaux, Idées, Statistiques) avec @canany
 - **AI optionnel** : RoadmapAiService utilise class_exists(\Modules\AI\Services\AiService) — fonctionne sans module AI
 - **33 tests** : 4 fichiers (Admin 12, Public 9, Changelog 5, Phase5 7)
+
+## Module Ecommerce (sessions 2026-03-14 à 2026-03-17)
+- **182 tests, 351 assertions** (EcommerceTest 35, PromotionTest 20, InventoryTest 11, TaxTest 12, ReviewTest 10, AbandonedCartTest 7, ShippingZoneTest 12, RefundTest 8, ImportExportTest 8, DigitalProductTest 10, CustomerPortalTest 14, SalesAnalyticsTest 8, RelatedProductsTest 6, ProductImageGalleryTest 6, ProductApiFiltersTest 9, WebhookIntegrationTest 6)
+- **Models** : Product, ProductVariant, Category, Cart, CartItem, Order, OrderItem, Coupon, Address, Wishlist, Promotion, Review, AbandonedCartReminder, ShippingZone, ShippingMethod, Refund, DigitalAsset, DigitalAssetDownload + pivot ecommerce_related_products
+- **Services** : CartService, CheckoutService (Stripe), TaxService (multi-juridiction), ShippingService (zones + fallback config), InvoiceService (dompdf), InventoryService, PromotionService, RefundService, ProductImportExportService, DigitalDownloadService, SalesAnalyticsService
+- **Tax** : TaxCalculatorInterface + CanadaTaxCalculator (13 provinces GST/HST/PST/QST) + TaxResult value object
+- **Inventory** : allow_backorder, LowStockDetected event, LowStockNotification (mail+DB), race condition fixée au checkout
+- **Promotions** : 5 types (percentage_off, fixed_off, bogo, free_shipping, tiered_pricing), stackable, automatic, conditions
+- **Reviews** : avis produits, verified_purchase detection, admin approve/reject, API public/auth
+- **Abandoned cart** : ProcessAbandonedCarts job (hourly), 3 reminders séquentiels (1h/24h/72h), configurable
+- **Shipping zones** : zones par province, 4 types (flat_rate, free, per_weight, percentage), admin CRUD, fallback config
+- **Refunds** : request/approve/reject workflow, stock restoration via InventoryService, admin UI
+- **Import/Export** : CSV export/import produits+variantes, create/update detection, validation erreurs
+- **Digital products** : DigitalAsset + DigitalAssetDownload, signed URL downloads (24h), download limit, API
+- **Customer portal** : /account/ (dashboard, orders, order detail, downloads, addresses CRUD), auth middleware (no admin)
+- **Sales analytics** : SalesAnalyticsService (summary, revenue by day, top products, orders by status), admin page ApexCharts
+- **Related products** : cross-sell + up-sell pivot table, BelongsToMany relations, API endpoint, sort_order
+- **Product image gallery** : Spatie MediaLibrary (gallery + featured_image collections), 3 conversions (thumb/medium/large), upload admin, remove gallery
+- **API filtres produits** : min_price, max_price, is_featured, sort_by (5 modes), per_page (max 100), search, category_id
+- **Webhooks ecommerce** : 5 events (order.created/paid/shipped/refunded, inventory.low_stock), listener portabilité class_exists()
+- **Admin** : Dashboard, CRUD produits/catégories/commandes/coupons/promotions/zones, avis, remboursements, import/export, facture PDF, analytique
+- **API REST** : 18 endpoints (3 publics produits+related avec filtres avancés, 5 panier, 1 checkout, 2 commandes, 3 wishlist, 1 webhook Stripe, 2 reviews, 1 digital downloads)
+- **Sidebar** : section Boutique (11 items + Analytique), section Mon compte (4 items : Dashboard, Commandes, Téléchargements, Adresses)
+- **Events** : OrderCreated, OrderPaid, OrderShipped, LowStockDetected
+- **Config** : config/modules/ecommerce.php (currency CAD, tax QC 14.975%, stock tracking, invoices, abandoned_cart)
+- **Bug fix** : Eloquent update() overwrites explicit updated_at → use DB::table() in tests
 
 ## Modules WordPress (session 2026-02-27)
 - **Menu** : drag-and-drop SortableJS, cache, Blade component frontend, 14 tests

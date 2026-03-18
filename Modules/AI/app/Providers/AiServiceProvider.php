@@ -87,6 +87,9 @@ class AiServiceProvider extends BaseModuleServiceProvider
         $this->app->singleton(WebScraperService::class);
         $this->app->singleton(RagService::class);
         $this->app->singleton(SmartReplyService::class);
+
+        $this->app->singleton(AIMetricProvider::class);
+        $this->app->tag([AIMetricProvider::class], 'metric_providers');
         $this->app->singleton(SentimentService::class);
 
         $this->app->singleton(ChannelRegistry::class, function () {
