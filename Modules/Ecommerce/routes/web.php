@@ -20,7 +20,10 @@ use Modules\Ecommerce\Http\Controllers\Admin\PromotionController;
 use Modules\Ecommerce\Http\Controllers\Admin\ReviewController;
 use Modules\Ecommerce\Http\Controllers\Admin\ProductImportExportController;
 use Modules\Ecommerce\Http\Controllers\Admin\RefundController;
+use Modules\Ecommerce\Http\Controllers\Admin\SalesAnalyticsController;
 use Modules\Ecommerce\Http\Controllers\Admin\ShippingZoneController;
+use Modules\Ecommerce\Http\Controllers\Customer\CustomerAddressController;
+use Modules\Ecommerce\Http\Controllers\Customer\CustomerPortalController;
 
 Route::prefix('admin/ecommerce')
     ->name('admin.ecommerce.')
@@ -142,8 +145,30 @@ Route::prefix('admin/ecommerce')
             Route::post('import-export/import', [ProductImportExportController::class, 'import'])->name('import-export.import');
         });
 
+        // Analytics
+        Route::get('analytics', [SalesAnalyticsController::class, 'index'])
+            ->name('analytics')
+            ->middleware('permission:view_ecommerce');
+
         // Shipping zones
         Route::middleware('permission:manage_settings')->group(function () {
             Route::resource('shipping-zones', ShippingZoneController::class)->except(['show']);
         });
+    });
+
+// Customer portal (authenticated users, no admin required)
+Route::prefix('account')
+    ->name('customer.')
+    ->middleware(['web', 'auth'])
+    ->group(function () {
+        Route::get('/', [CustomerPortalController::class, 'dashboard'])->name('dashboard');
+        Route::get('/orders', [CustomerPortalController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [CustomerPortalController::class, 'orderShow'])->name('orders.show');
+        Route::get('/downloads', [CustomerPortalController::class, 'downloads'])->name('downloads');
+
+        // Addresses
+        Route::get('/addresses', [CustomerAddressController::class, 'index'])->name('addresses');
+        Route::post('/addresses', [CustomerAddressController::class, 'store'])->name('addresses.store');
+        Route::put('/addresses/{address}', [CustomerAddressController::class, 'update'])->name('addresses.update');
+        Route::delete('/addresses/{address}', [CustomerAddressController::class, 'destroy'])->name('addresses.destroy');
     });

@@ -62,6 +62,10 @@ class EmailTemplateController extends Controller
             'alert_message' => 'Ceci est un message d\'alerte de test.',
             'token' => '123456',
             'expire_minutes' => '15',
+            'order' => ['number' => 'CMD-2026-0001', 'total' => '149.99', 'date' => now()->format('d/m/Y'), 'url' => config('app.url').'/account/orders/1', 'tracking' => 'CA123456789'],
+            'refund' => ['amount' => '49.99'],
+            'currency' => 'CAD',
+            'cart' => ['items' => 'T-shirt classique, Jeans slim, Ecouteurs', 'item_count' => '3', 'total' => '259.97', 'url' => config('app.url').'/cart'],
         ];
 
         $rendered = $service->renderTemplate($emailTemplate, $dummyData);
@@ -71,8 +75,14 @@ class EmailTemplateController extends Controller
 
     public function resetToDefault(EmailTemplate $emailTemplate)
     {
-        $defaults = collect(EmailTemplateSeeder::defaults())
-            ->firstWhere('slug', $emailTemplate->slug);
+        $allDefaults = collect(EmailTemplateSeeder::defaults());
+
+        // Merge ecommerce email template defaults if module is active
+        if (class_exists(\Modules\Ecommerce\Database\Seeders\EcommerceEmailTemplateSeeder::class)) {
+            $allDefaults = $allDefaults->merge(\Modules\Ecommerce\Database\Seeders\EcommerceEmailTemplateSeeder::defaults());
+        }
+
+        $defaults = $allDefaults->firstWhere('slug', $emailTemplate->slug);
 
         if ($defaults) {
             $emailTemplate->update($defaults);

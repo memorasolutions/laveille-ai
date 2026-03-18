@@ -501,10 +501,40 @@
                         <li class="nav-item"><a href="{{ route('admin.ecommerce.shipping-zones.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'aria-current=page' : '' }}>{{ __('Livraison') }}</a></li>
                         @endcan
                         @endif
+                        @if(Route::has('admin.ecommerce.analytics'))
+                        @can('view_ecommerce')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.analytics') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.analytics') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.analytics') ? 'aria-current=page' : '' }}>{{ __('Analytique') }}</a></li>
+                        @endcan
+                        @endif
                     </ul>
                 </div>
             </li>
             @endcanany
+            @endif
+
+            {{-- Mon compte (portail client) --}}
+            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
+            @if(Route::has('customer.dashboard'))
+            <li class="nav-item nav-category">{{ __('Mon compte') }}</li>
+            <li class="nav-item {{ request()->routeIs('customer.*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#customerMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('customer.*') ? 'true' : 'false' }}" aria-controls="customerMenu">
+                    <i class="link-icon" data-lucide="user"></i>
+                    <span class="link-title">{{ __('Mon compte') }}</span>
+                    <i class="link-arrow" data-lucide="chevron-down"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('customer.*') ? 'show' : '' }}" id="customerMenu" data-bs-parent="#sidebarNav">
+                    <ul class="nav sub-menu">
+                        <li class="nav-item"><a href="{{ route('customer.dashboard') }}" class="nav-link {{ request()->routeIs('customer.dashboard') ? 'active' : '' }}" {{ request()->routeIs('customer.dashboard') ? 'aria-current=page' : '' }}>{{ __('Tableau de bord') }}</a></li>
+                        <li class="nav-item"><a href="{{ route('customer.orders') }}" class="nav-link {{ request()->routeIs('customer.orders*') ? 'active' : '' }}" {{ request()->routeIs('customer.orders*') ? 'aria-current=page' : '' }}>{{ __('Mes commandes') }}</a></li>
+                        @if(Route::has('customer.downloads'))
+                        <li class="nav-item"><a href="{{ route('customer.downloads') }}" class="nav-link {{ request()->routeIs('customer.downloads') ? 'active' : '' }}" {{ request()->routeIs('customer.downloads') ? 'aria-current=page' : '' }}>{{ __('Mes téléchargements') }}</a></li>
+                        @endif
+                        <li class="nav-item"><a href="{{ route('customer.addresses') }}" class="nav-link {{ request()->routeIs('customer.addresses*') ? 'active' : '' }}" {{ request()->routeIs('customer.addresses*') ? 'aria-current=page' : '' }}>{{ __('Mes adresses') }}</a></li>
+                    </ul>
+                </div>
+            </li>
+            @endif
             @endif
 
             {{-- SaaS --}}

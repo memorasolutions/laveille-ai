@@ -16,6 +16,10 @@ use Modules\Core\Providers\BaseModuleServiceProvider;
 use Modules\Ecommerce\Jobs\ProcessAbandonedCarts;
 use Modules\Ecommerce\Contracts\TaxCalculatorInterface;
 use Modules\Ecommerce\Events\LowStockDetected;
+use Modules\Ecommerce\Events\OrderCreated;
+use Modules\Ecommerce\Events\OrderPaid;
+use Modules\Ecommerce\Events\OrderShipped;
+use Modules\Ecommerce\Listeners\DispatchEcommerceWebhooks;
 use Modules\Ecommerce\Listeners\NotifyAdminsLowStock;
 use Modules\Ecommerce\Services\Tax\CanadaTaxCalculator;
 
@@ -30,6 +34,12 @@ class EcommerceServiceProvider extends BaseModuleServiceProvider
         $this->bootModule();
 
         Event::listen(LowStockDetected::class, NotifyAdminsLowStock::class);
+
+        // Webhooks integration (portabilité : fonctionne sans module Webhooks)
+        Event::listen(OrderCreated::class, DispatchEcommerceWebhooks::class);
+        Event::listen(OrderPaid::class, DispatchEcommerceWebhooks::class);
+        Event::listen(OrderShipped::class, DispatchEcommerceWebhooks::class);
+        Event::listen(LowStockDetected::class, DispatchEcommerceWebhooks::class);
 
         if (config('modules.ecommerce.abandoned_cart.enabled', false)) {
             $this->app->booted(function () {

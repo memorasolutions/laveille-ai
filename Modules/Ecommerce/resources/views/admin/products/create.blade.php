@@ -18,7 +18,7 @@
     </h4>
 </div>
 
-<form action="{{ route('admin.ecommerce.products.store') }}" method="POST">
+<form action="{{ route('admin.ecommerce.products.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
     <div class="row">
         <div class="col-lg-8">
@@ -93,6 +93,28 @@
                             <label class="form-check-label" for="cat{{ $cat->id }}">{{ $cat->name }}</label>
                         </div>
                         @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Images --}}
+            <div class="card mb-3">
+                <div class="card-header py-3 border-bottom">
+                    <h6 class="mb-0"><i data-lucide="image" class="icon-sm me-1"></i> {{ __('Images') }}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ __('Image principale') }}</label>
+                        <input type="file" name="featured_image" class="form-control @error('featured_image') is-invalid @enderror" accept="image/*">
+                        @error('featured_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <small class="text-muted">{{ __('JPG, PNG ou WebP. Max 5 Mo.') }}</small>
+                    </div>
+                    <hr>
+                    <div>
+                        <label class="form-label fw-semibold">{{ __('Galerie') }}</label>
+                        <input type="file" name="gallery[]" class="form-control @error('gallery.*') is-invalid @enderror" multiple accept="image/*">
+                        @error('gallery.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                        <small class="text-muted">{{ __('Sélectionnez plusieurs fichiers pour ajouter à la galerie.') }}</small>
                     </div>
                 </div>
             </div>

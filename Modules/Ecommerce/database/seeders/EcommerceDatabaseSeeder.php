@@ -26,6 +26,7 @@ class EcommerceDatabaseSeeder extends Seeder
         $this->seedAttributes();
         $this->seedProducts();
         $this->seedCoupons();
+        $this->call(EcommerceEmailTemplateSeeder::class);
     }
 
     private function seedCategories(): void

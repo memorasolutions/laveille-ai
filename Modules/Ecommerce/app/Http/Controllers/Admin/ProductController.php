@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Modules\Ecommerce\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,7 @@ use Illuminate\View\View;
 use Modules\Ecommerce\Models\Category;
 use Modules\Ecommerce\Models\Product;
 
-class ProductController
+class ProductController extends Controller
 {
     public function index(Request $request): View
     {
@@ -61,6 +62,9 @@ class ProductController
             'is_featured' => 'boolean',
             'categories' => 'array',
             'categories.*' => 'exists:ecommerce_categories,id',
+            'featured_image' => 'nullable|image|max:5120',
+            'gallery' => 'nullable|array|max:20',
+            'gallery.*' => 'image|max:5120',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
@@ -68,6 +72,16 @@ class ProductController
 
         $product = Product::create($validated);
         $product->categories()->sync($request->input('categories', []));
+
+        if ($request->hasFile('featured_image')) {
+            $product->addMediaFromRequest('featured_image')->toMediaCollection('featured_image');
+        }
+
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $file) {
+                $product->addMedia($file)->toMediaCollection('gallery');
+            }
+        }
 
         session()->flash('success', 'Produit créé avec succès.');
 
@@ -94,6 +108,11 @@ class ProductController
             'is_featured' => 'boolean',
             'categories' => 'array',
             'categories.*' => 'exists:ecommerce_categories,id',
+            'featured_image' => 'nullable|image|max:5120',
+            'gallery' => 'nullable|array|max:20',
+            'gallery.*' => 'image|max:5120',
+            'remove_gallery' => 'nullable|array',
+            'remove_gallery.*' => 'integer',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
@@ -101,6 +120,23 @@ class ProductController
 
         $product->update($validated);
         $product->categories()->sync($request->input('categories', []));
+
+        if ($request->filled('remove_gallery')) {
+            $product->media()
+                ->whereIn('id', $request->input('remove_gallery'))
+                ->get()
+                ->each->delete();
+        }
+
+        if ($request->hasFile('featured_image')) {
+            $product->addMediaFromRequest('featured_image')->toMediaCollection('featured_image');
+        }
+
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $file) {
+                $product->addMedia($file)->toMediaCollection('gallery');
+            }
+        }
 
         session()->flash('success', 'Produit mis à jour avec succès.');
 

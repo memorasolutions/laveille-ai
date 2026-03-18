@@ -17,11 +17,14 @@ use Illuminate\Notifications\Notification;
 use Modules\Ecommerce\Models\Order;
 use Modules\Notifications\Services\EmailTemplateService;
 
-class OrderShippedNotification extends Notification implements ShouldQueue
+class OrderRefundedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Order $order) {}
+    public function __construct(
+        public Order $order,
+        public float $amount,
+    ) {}
 
     /** @return list<string> */
     public function via(object $notifiable): array
@@ -33,14 +36,15 @@ class OrderShippedNotification extends Notification implements ShouldQueue
     {
         if (class_exists(EmailTemplateService::class)) {
             $service = app(EmailTemplateService::class);
-            $rendered = $service->render('ecommerce_order_shipped', [
+            $rendered = $service->render('ecommerce_order_refunded', [
                 'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
                 'app' => ['name' => config('app.name'), 'url' => config('app.url')],
                 'order' => [
                     'number' => $this->order->order_number,
-                    'tracking' => $this->order->tracking_number ?? '',
                     'url' => config('app.url').'/account/orders/'.$this->order->id,
                 ],
+                'refund' => ['amount' => number_format($this->amount, 2)],
+                'currency' => (string) config('modules.ecommerce.currency', 'CAD'),
             ]);
 
             if ($rendered) {
@@ -51,19 +55,15 @@ class OrderShippedNotification extends Notification implements ShouldQueue
         }
 
         $url = config('app.url').'/account/orders/'.$this->order->id;
+        $currency = (string) config('modules.ecommerce.currency', 'CAD');
 
-        $mail = (new MailMessage)
-            ->subject('Votre commande a ete expediee')
+        return (new MailMessage)
+            ->subject('Remboursement commande #'.$this->order->order_number)
             ->greeting('Bonjour '.$notifiable->name.',')
-            ->line('Bonne nouvelle! Votre commande #'.$this->order->order_number.' a ete expediee.');
-
-        if ($this->order->tracking_number) {
-            $mail->line('Numero de suivi : '.$this->order->tracking_number);
-        }
-
-        return $mail
-            ->action('Suivre ma commande', $url)
-            ->line('Merci de votre confiance.');
+            ->line('Votre remboursement de '.number_format($this->amount, 2).' '.$currency.' pour la commande #'.$this->order->order_number.' a ete traite.')
+            ->line('Le montant sera credite sur votre compte dans un delai de 5 a 10 jours ouvrables.')
+            ->action('Voir ma commande', $url)
+            ->line('Merci de votre patience.');
     }
 
     /** @return array<string, mixed> */
@@ -72,7 +72,7 @@ class OrderShippedNotification extends Notification implements ShouldQueue
         return [
             'order_id' => $this->order->id,
             'order_number' => $this->order->order_number,
-            'tracking_number' => $this->order->tracking_number,
+            'refund_amount' => $this->amount,
         ];
     }
 }

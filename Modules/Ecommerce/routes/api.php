@@ -21,6 +21,7 @@ use Modules\Ecommerce\Http\Controllers\Api\WishlistApiController;
 Route::prefix('ecommerce')->group(function () {
     Route::get('/products', [ProductApiController::class, 'index']);
     Route::get('/products/{slug}', [ProductApiController::class, 'show']);
+    Route::get('/products/{product}/related', [ProductApiController::class, 'related']);
 
     // Reviews (public: read)
     Route::get('/products/{product}/reviews', [ReviewApiController::class, 'index']);

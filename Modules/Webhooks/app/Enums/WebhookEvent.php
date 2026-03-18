@@ -21,6 +21,11 @@ enum WebhookEvent: string
     case PlanUpdated = 'plan.updated';
     case CommentCreated = 'comment.created';
     case CommentApproved = 'comment.approved';
+    case OrderCreated = 'order.created';
+    case OrderPaid = 'order.paid';
+    case OrderShipped = 'order.shipped';
+    case OrderRefunded = 'order.refunded';
+    case LowStockDetected = 'inventory.low_stock';
 
     public function label(): string
     {
@@ -34,6 +39,11 @@ enum WebhookEvent: string
             self::PlanUpdated => 'Plan mis à jour',
             self::CommentCreated => 'Commentaire créé',
             self::CommentApproved => 'Commentaire approuvé',
+            self::OrderCreated => 'Commande créée',
+            self::OrderPaid => 'Commande payée',
+            self::OrderShipped => 'Commande expédiée',
+            self::OrderRefunded => 'Commande remboursée',
+            self::LowStockDetected => 'Stock bas détecté',
         };
     }
 

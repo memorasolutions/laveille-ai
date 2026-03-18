@@ -16,6 +16,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Ecommerce\Models\Cart;
 use Modules\Ecommerce\Models\CartItem;
+use Modules\Notifications\Services\EmailTemplateService;
 
 class AbandonedCartNotification extends Notification implements ShouldQueue
 {
@@ -34,16 +35,47 @@ class AbandonedCartNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $itemNames = $this->cart->items->take(3)->map(
+            fn (CartItem $item) => $item->variant->product->name ?? 'Article'
+        )->implode(', ');
+
+        $cartTotal = $this->cart->items->sum(
+            fn (CartItem $i) => (float) $i->variant->price * $i->quantity
+        );
+
+        $recoverUrl = url((string) config('modules.ecommerce.abandoned_cart.recover_url', '/cart'));
+
+        if (class_exists(EmailTemplateService::class)) {
+            $service = app(EmailTemplateService::class);
+            $rendered = $service->render('ecommerce_abandoned_cart', [
+                'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+                'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+                'cart' => [
+                    'items' => $itemNames,
+                    'item_count' => (string) $this->cart->items->count(),
+                    'total' => number_format($cartTotal, 2),
+                    'url' => $recoverUrl,
+                ],
+                'currency' => (string) config('modules.ecommerce.currency', 'CAD'),
+            ]);
+
+            if ($rendered) {
+                return (new MailMessage)
+                    ->subject($rendered['subject'])
+                    ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
+            }
+        }
+
         $subjects = [
-            1 => __('Vous avez oublié quelque chose !'),
+            1 => __('Vous avez oublie quelque chose !'),
             2 => __('Votre panier vous attend'),
-            3 => __('Dernière chance — 10% de réduction'),
+            3 => __('Derniere chance - 10% de reduction'),
         ];
 
         $mail = (new MailMessage)
-            ->subject($subjects[$this->reminderNumber] ?? __('Votre panier abandonné'))
+            ->subject($subjects[$this->reminderNumber] ?? __('Votre panier abandonne'))
             ->greeting(__('Bonjour :name,', ['name' => $notifiable->name]))
-            ->line(__('Vous avez laissé des articles dans votre panier.'));
+            ->line(__('Vous avez laisse des articles dans votre panier.'));
 
         foreach ($this->cart->items->take(3) as $item) {
             /** @var CartItem $item */
@@ -56,10 +88,8 @@ class AbandonedCartNotification extends Notification implements ShouldQueue
             $mail->line(__('... et :count autres articles.', ['count' => $remaining]));
         }
 
-        $recoverUrl = config('modules.ecommerce.abandoned_cart.recover_url', '/cart');
-
         return $mail
-            ->action(__('Reprendre mes achats'), url($recoverUrl))
+            ->action(__('Reprendre mes achats'), $recoverUrl)
             ->line(__('Merci de votre confiance !'));
     }
 
