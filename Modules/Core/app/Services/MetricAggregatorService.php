@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Core\Services;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Modules\Core\Contracts\MetricProviderInterface;
 use Modules\Core\DataTransferObjects\MetricWidget;
 
@@ -31,7 +32,11 @@ class MetricAggregatorService
     {
         $widgets = [];
         foreach ($this->getProviders() as $provider) {
-            $widgets = [...$widgets, ...$provider->getWidgets()];
+            try {
+                $widgets = [...$widgets, ...$provider->getWidgets()];
+            } catch (\Throwable $e) {
+                Log::warning("MetricProvider {$provider->getMetricName()} failed: {$e->getMessage()}");
+            }
         }
 
         return $widgets;
@@ -42,7 +47,13 @@ class MetricAggregatorService
     {
         foreach ($this->getProviders() as $provider) {
             if ($provider->getMetricName() === $providerName) {
-                return $provider->getMetrics($from, $to);
+                try {
+                    return $provider->getMetrics($from, $to);
+                } catch (\Throwable $e) {
+                    Log::warning("MetricProvider {$providerName} metrics failed: {$e->getMessage()}");
+
+                    return [];
+                }
             }
         }
 
