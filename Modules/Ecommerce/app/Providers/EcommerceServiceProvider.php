@@ -54,6 +54,9 @@ class EcommerceServiceProvider extends BaseModuleServiceProvider
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->bind(TaxCalculatorInterface::class, CanadaTaxCalculator::class);
+
+        $this->app->singleton(EcommerceMetricProvider::class);
+        $this->app->tag([EcommerceMetricProvider::class], 'metric_providers');
     }
 
     /**
