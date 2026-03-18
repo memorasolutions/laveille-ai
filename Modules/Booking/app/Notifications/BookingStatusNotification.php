@@ -17,15 +17,15 @@ use Modules\Core\Notifications\TemplatedNotification;
 class BookingStatusNotification extends TemplatedNotification
 {
     private const SUBJECTS = [
-        'approved' => 'Rendez-vous confirme',
-        'rejected' => 'Rendez-vous refuse',
-        'cancelled' => 'Rendez-vous annule',
+        'approved' => 'Rendez-vous confirmé',
+        'rejected' => 'Rendez-vous refusé',
+        'cancelled' => 'Rendez-vous annulé',
     ];
 
     private const MESSAGES = [
-        'approved' => 'Votre rendez-vous a ete confirme.',
-        'rejected' => 'Votre rendez-vous a ete refuse.',
-        'cancelled' => 'Votre rendez-vous a ete annule.',
+        'approved' => 'Votre rendez-vous a été confirmé.',
+        'rejected' => 'Votre rendez-vous a été refusé.',
+        'cancelled' => 'Votre rendez-vous a été annulé.',
     ];
 
     public function __construct(
@@ -60,8 +60,8 @@ class BookingStatusNotification extends TemplatedNotification
 
     protected function getFallbackMail(object $notifiable): MailMessage
     {
-        $subject = self::SUBJECTS[$this->newStatus] ?? 'Mise a jour de votre rendez-vous';
-        $message = self::MESSAGES[$this->newStatus] ?? 'Le statut de votre rendez-vous a ete modifie.';
+        $subject = self::SUBJECTS[$this->newStatus] ?? 'Mise à jour de votre rendez-vous';
+        $message = self::MESSAGES[$this->newStatus] ?? 'Le statut de votre rendez-vous a été modifié.';
 
         return (new MailMessage)
             ->subject($subject)

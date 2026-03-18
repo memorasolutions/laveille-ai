@@ -52,7 +52,7 @@ class NewBookingAdminNotification extends TemplatedNotification
             ->action('Voir le rendez-vous', route('admin.booking.appointments.show', $this->appointmentId));
     }
 
-    public function toArray(object $notifiable): array
+    public function toArray(mixed $notifiable): array
     {
         return [
             'type' => 'new_booking',
