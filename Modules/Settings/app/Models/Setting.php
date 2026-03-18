@@ -15,11 +15,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Scout\Searchable;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\ResponseCache\Facades\ResponseCache;
 
 class Setting extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory, LogsActivity, Searchable;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('settings')
+            ->setDescriptionForEvent(fn (string $eventName): string => "Parametre {$eventName}");
+    }
 
     protected static function booted(): void
     {

@@ -16,10 +16,20 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Traits\HasScheduledPublishing;
 use Modules\Faq\Database\Factories\FaqFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Faq extends Model
 {
-    use BelongsToTenant, HasFactory, HasScheduledPublishing;
+    use BelongsToTenant, HasFactory, HasScheduledPublishing, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "FAQ {$eventName}");
+    }
 
     protected string $publishedColumn = 'is_published';
 

@@ -22,10 +22,20 @@ use Modules\AI\Database\Factories\TicketFactory;
 use Modules\AI\Enums\TicketPriority;
 use Modules\AI\Enums\TicketStatus;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Ticket extends Model
 {
-    use BelongsToTenant, HasFactory, SoftDeletes;
+    use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Ticket {$eventName}");
+    }
 
     protected $fillable = [
         'uuid', 'title', 'description', 'status', 'priority',

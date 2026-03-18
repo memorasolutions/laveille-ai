@@ -15,14 +15,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Booking\Database\Factories\AppointmentFactory;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Appointment extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected static function newFactory(): AppointmentFactory
     {
         return AppointmentFactory::new();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Rendez-vous {$eventName}");
     }
 
     protected $table = 'booking_appointments';

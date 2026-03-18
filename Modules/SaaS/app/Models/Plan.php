@@ -14,11 +14,21 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\ResponseCache\Facades\ResponseCache;
 
 class Plan extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory, LogsActivity, Searchable;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Plan {$eventName}");
+    }
 
     public function toSearchableArray(): array
     {

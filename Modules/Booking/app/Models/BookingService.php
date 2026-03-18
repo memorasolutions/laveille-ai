@@ -14,14 +14,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Booking\Database\Factories\BookingServiceFactory;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class BookingService extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected static function newFactory(): BookingServiceFactory
     {
         return BookingServiceFactory::new();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Service {$eventName}");
     }
 
     protected $table = 'booking_services';

@@ -17,11 +17,22 @@ use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Modules\Tenancy\Traits\BelongsToTenant;
 use Spatie\ResponseCache\Facades\ResponseCache;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
 {
-    use BelongsToTenant, HasFactory, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasFactory, HasTranslations, LogsActivity, Searchable, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->useLogName('blog')
+            ->setDescriptionForEvent(fn (string $eventName): string => "Categorie blog {$eventName}");
+    }
 
     public function toSearchableArray(): array
     {

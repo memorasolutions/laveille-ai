@@ -15,10 +15,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Traits\HasRevisions;
 use Modules\Notifications\Database\Factories\EmailTemplateFactory;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class EmailTemplate extends Model
 {
-    use HasFactory, HasRevisions;
+    use HasFactory, HasRevisions, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Template email {$eventName}");
+    }
 
     /** @var list<string> */
     protected array $revisionable = ['name', 'subject', 'body_html', 'variables', 'json_content'];

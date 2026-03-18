@@ -16,13 +16,23 @@ use Modules\Newsletter\States\CampaignState;
 use Modules\Newsletter\States\DraftCampaignState;
 use Modules\Newsletter\States\SentCampaignState;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\ModelStates\HasStates;
 
 class Campaign extends Model
 {
-    use BelongsToTenant, HasFactory, HasStates;
+    use BelongsToTenant, HasFactory, HasStates, LogsActivity;
 
     protected $table = 'newsletter_campaigns';
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Campagne {$eventName}");
+    }
 
     protected $fillable = [
         'subject',

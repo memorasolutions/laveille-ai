@@ -28,6 +28,8 @@ use Modules\Blog\States\PublishedArticleState;
 use Modules\Core\Traits\HasPreviewToken;
 use Modules\CustomFields\Traits\HasCustomFields;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\ModelStates\HasStates;
 use Spatie\ResponseCache\Facades\ResponseCache;
 use Spatie\Translatable\HasTranslations;
@@ -37,9 +39,17 @@ use Spatie\Translatable\HasTranslations;
  */
 class Article extends Model
 {
-    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasStates, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasStates, HasTranslations, LogsActivity, Searchable, SoftDeletes;
 
     public array $translatable = ['title', 'slug', 'content', 'excerpt'];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Article {$eventName}");
+    }
 
     protected static function booted(): void
     {

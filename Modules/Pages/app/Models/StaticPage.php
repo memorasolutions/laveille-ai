@@ -27,11 +27,21 @@ use Modules\Core\Traits\HasScheduledPublishing;
 use Modules\CustomFields\Traits\HasCustomFields;
 use Modules\Pages\Database\Factories\StaticPageFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 class StaticPage extends Model
 {
-    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasRevisions, HasScheduledPublishing, HasTranslations, Searchable, SoftDeletes;
+    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasRevisions, HasScheduledPublishing, HasTranslations, LogsActivity, Searchable, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Page {$eventName}");
+    }
 
     /** @var list<string> */
     protected array $revisionable = ['title', 'content', 'excerpt', 'status', 'template', 'meta_title', 'meta_description'];

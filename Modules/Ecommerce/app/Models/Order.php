@@ -17,10 +17,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $table = 'ecommerce_orders';
 
@@ -31,6 +33,15 @@ class Order extends Model
         'shipping_method', 'tracking_number', 'notes',
         'paid_at', 'shipped_at', 'delivered_at',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->logExcept(['stripe_session_id', 'stripe_payment_intent'])
+            ->setDescriptionForEvent(fn (string $eventName): string => "Commande {$eventName}");
+    }
 
     protected $casts = [
         'subtotal' => 'decimal:2',

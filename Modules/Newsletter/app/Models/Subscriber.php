@@ -16,10 +16,20 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Modules\Newsletter\Database\Factories\SubscriberFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Subscriber extends Model
 {
-    use BelongsToTenant, HasFactory, Notifiable;
+    use BelongsToTenant, HasFactory, LogsActivity, Notifiable;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName): string => "Abonne {$eventName}");
+    }
 
     protected $table = 'newsletter_subscribers';
 
