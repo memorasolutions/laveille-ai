@@ -289,6 +289,21 @@
                         <li class="nav-item"><a href="{{ route('admin.booking.settings.edit') }}" class="nav-link {{ request()->routeIs('admin.booking.settings.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.settings.*') ? 'aria-current=page' : '' }}>{{ __('Paramètres réservations') }}</a></li>
                         @endcan
                         @endif
+                        @if(Route::has('admin.booking.coupons.index'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.coupons.index') }}" class="nav-link {{ request()->routeIs('admin.booking.coupons.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.coupons.*') ? 'aria-current=page' : '' }}>{{ __('Coupons réservations') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.gift-cards.index'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.gift-cards.index') }}" class="nav-link {{ request()->routeIs('admin.booking.gift-cards.*') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.gift-cards.*') ? 'aria-current=page' : '' }}>{{ __('Cartes-cadeaux') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.booking.analytics'))
+                        @can('manage_booking')
+                        <li class="nav-item"><a href="{{ route('admin.booking.analytics') }}" class="nav-link {{ request()->routeIs('admin.booking.analytics') ? 'active' : '' }}" {{ request()->routeIs('admin.booking.analytics') ? 'aria-current=page' : '' }}>{{ __('Analytique réservations') }}</a></li>
+                        @endcan
+                        @endif
                         @endif
                     </ul>
                 </div>
@@ -543,6 +558,36 @@
                         @if(Route::has('admin.ai.urls.index'))
                         @can('view_ai')
                         <li class="nav-item"><a href="{{ route('admin.ai.urls.index') }}" class="nav-link {{ request()->routeIs('admin.ai.urls.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.urls.*') ? 'aria-current=page' : '' }}>{{ __('URLs') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ai.tickets.index'))
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.tickets.index') }}" class="nav-link {{ request()->routeIs('admin.ai.tickets.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.tickets.*') ? 'aria-current=page' : '' }}>{{ __('Tickets') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ai.inbox.index'))
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.inbox.index') }}" class="nav-link {{ request()->routeIs('admin.ai.inbox.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.inbox.*') ? 'aria-current=page' : '' }}>{{ __('Boîte de réception') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ai.channels.index'))
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.channels.index') }}" class="nav-link {{ request()->routeIs('admin.ai.channels.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.channels.*') ? 'aria-current=page' : '' }}>{{ __('Canaux') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ai.canned-replies.index'))
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.canned-replies.index') }}" class="nav-link {{ request()->routeIs('admin.ai.canned-replies.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.canned-replies.*') ? 'aria-current=page' : '' }}>{{ __('Réponses rapides') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ai.sla.index'))
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.sla.index') }}" class="nav-link {{ request()->routeIs('admin.ai.sla.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.sla.*') ? 'aria-current=page' : '' }}>{{ __('SLA') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.ai.csat.index'))
+                        @can('manage_ai')
+                        <li class="nav-item"><a href="{{ route('admin.ai.csat.index') }}" class="nav-link {{ request()->routeIs('admin.ai.csat.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ai.csat.*') ? 'aria-current=page' : '' }}>{{ __('Satisfaction (CSAT)') }}</a></li>
                         @endcan
                         @endif
                         @endif

@@ -186,6 +186,48 @@
                         </a>
                     </li>
 
+                    {{-- Ecommerce (si module actif) --}}
+                    @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
+                    <li class="nav-item nav-category">{{ __('Boutique') }}</li>
+                    @if(Route::has('customer.orders'))
+                    <li class="nav-item {{ request()->routeIs('customer.orders*') ? 'active' : '' }}">
+                        <a href="{{ route('customer.orders') }}" class="nav-link">
+                            <i class="link-icon" data-lucide="shopping-bag"></i>
+                            <span class="link-title">{{ __('Mes commandes') }}</span>
+                        </a>
+                    </li>
+                    @endif
+                    @if(Route::has('customer.addresses'))
+                    <li class="nav-item {{ request()->routeIs('customer.addresses*') ? 'active' : '' }}">
+                        <a href="{{ route('customer.addresses') }}" class="nav-link">
+                            <i class="link-icon" data-lucide="map-pin"></i>
+                            <span class="link-title">{{ __('Mes adresses') }}</span>
+                        </a>
+                    </li>
+                    @endif
+                    @if(Route::has('customer.downloads'))
+                    <li class="nav-item {{ request()->routeIs('customer.downloads') ? 'active' : '' }}">
+                        <a href="{{ route('customer.downloads') }}" class="nav-link">
+                            <i class="link-icon" data-lucide="download"></i>
+                            <span class="link-title">{{ __('Téléchargements') }}</span>
+                        </a>
+                    </li>
+                    @endif
+                    @endif
+
+                    {{-- Réservations (si module actif) --}}
+                    @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking'))
+                    @if(Route::has('user.bookings.index'))
+                    <li class="nav-item nav-category">{{ __('Réservations') }}</li>
+                    <li class="nav-item {{ request()->routeIs('user.bookings*') ? 'active' : '' }}">
+                        <a href="{{ route('user.bookings.index') }}" class="nav-link">
+                            <i class="link-icon" data-lucide="calendar"></i>
+                            <span class="link-title">{{ __('Mes rendez-vous') }}</span>
+                        </a>
+                    </li>
+                    @endif
+                    @endif
+
                     {{-- Administration (admin/super_admin only) --}}
                     @if(auth()->user()->hasAnyRole(['admin', 'super_admin']))
                         <li class="nav-item nav-category">{{ __('Administration') }}</li>
