@@ -451,8 +451,8 @@
         @livewire('ai-chatbot')
     @endif
 
-    {{-- PWA prompts --}}
-    @if(config('pwa.enabled'))
+    {{-- PWA prompts (production only) --}}
+    @if(config('pwa.enabled') && app()->isProduction())
         <x-pwa-install-prompt />
         <x-pwa-update-prompt />
     @endif
