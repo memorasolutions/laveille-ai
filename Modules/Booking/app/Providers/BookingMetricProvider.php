@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Booking\Providers;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Modules\Booking\Models\Appointment;
 use Modules\Core\Contracts\MetricProviderInterface;
 use Modules\Core\DataTransferObjects\MetricWidget;
@@ -39,9 +40,11 @@ class BookingMetricProvider implements MetricProviderInterface
     {
         $total = Appointment::whereBetween('created_at', [$from, $to])->count();
 
-        $revenue = (float) Appointment::whereIn('status', ['confirmed', 'completed'])
-            ->whereBetween('created_at', [$from, $to])
-            ->sum('price');
+        $revenue = (float) DB::table('booking_appointments')
+            ->join('booking_services', 'booking_appointments.service_id', '=', 'booking_services.id')
+            ->whereIn('booking_appointments.status', ['confirmed', 'completed'])
+            ->whereBetween('booking_appointments.created_at', [$from, $to])
+            ->sum('booking_services.price');
 
         $noShows = Appointment::where('status', 'no_show')
             ->whereBetween('created_at', [$from, $to])

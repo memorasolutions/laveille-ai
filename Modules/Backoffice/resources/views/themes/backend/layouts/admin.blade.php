@@ -190,8 +190,8 @@
     @stack('custom-scripts')
     @stack('scripts')
 
-    {{-- PWA prompts --}}
-    @if(config('pwa.enabled'))
+    {{-- PWA prompts (production only - hidden in dev to avoid confusion) --}}
+    @if(config('pwa.enabled') && app()->isProduction())
         <x-pwa-install-prompt />
         <x-pwa-update-prompt />
     @endif
