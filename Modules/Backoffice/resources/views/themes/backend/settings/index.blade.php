@@ -3,6 +3,14 @@
 
 @section('content')
 
+<x-backoffice::driver-tour
+    storage-key="driver_tour_settings_{{ auth()->id() }}"
+    :steps="[
+        ['element' => '.page-content', 'popover' => ['title' => __('Paramètres'), 'description' => __('Configurez votre application : général, SEO, courriel, IA.'), 'side' => 'bottom']],
+        ['element' => '.btn[role=\"tab\"]:first-child', 'popover' => ['title' => __('Onglets'), 'description' => __('Naviguez entre les groupes de paramètres.'), 'side' => 'bottom']],
+    ]"
+/>
+
 <nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>

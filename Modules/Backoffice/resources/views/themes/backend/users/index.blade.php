@@ -3,6 +3,15 @@
 
 @section('content')
 
+<x-backoffice::driver-tour
+    storage-key="driver_tour_users_{{ auth()->id() }}"
+    :steps="[
+        ['element' => '.page-content', 'popover' => ['title' => __('Gestion des utilisateurs'), 'description' => __('Gérez les comptes, rôles et accès de votre plateforme.'), 'side' => 'bottom']],
+        ['element' => 'table.table', 'popover' => ['title' => __('Liste des utilisateurs'), 'description' => __('Tous les utilisateurs avec rôle, statut et actions.'), 'side' => 'bottom']],
+        ['element' => 'a[href*=\"users/create\"]', 'popover' => ['title' => __('Nouvel utilisateur'), 'description' => __('Créez un compte utilisateur avec rôle et permissions.'), 'side' => 'left']],
+    ]"
+/>
+
 <nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
