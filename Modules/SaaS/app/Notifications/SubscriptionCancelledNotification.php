@@ -10,33 +10,43 @@ declare(strict_types=1);
 
 namespace Modules\SaaS\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class SubscriptionCancelledNotification extends Notification implements ShouldQueue
+class SubscriptionCancelledNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(private readonly ?string $endsAt) {}
 
     /** @return list<string> */
-    public function via(mixed $notifiable): array
+    public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail(mixed $notifiable): MailMessage
+    protected function getTemplateSlug(): string
     {
-        $message = (new MailMessage)
+        return 'saas_subscription_cancelled';
+    }
+
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'subscription' => ['ends_at' => $this->endsAt ?? ''],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
+        $mail = (new MailMessage)
             ->subject('Abonnement annulé')
             ->line('Votre abonnement a été annulé.');
 
         if ($this->endsAt) {
-            $message->line("Il restera actif jusqu'au {$this->endsAt}.");
+            $mail->line("Il restera actif jusqu'au {$this->endsAt}.");
         }
 
-        return $message->action('Réactiver mon abonnement', url('/user/subscription'));
+        return $mail->action('Réactiver mon abonnement', url('/user/subscription'));
     }
 }

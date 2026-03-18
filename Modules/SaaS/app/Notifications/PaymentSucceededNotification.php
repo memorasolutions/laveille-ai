@@ -10,43 +10,52 @@ declare(strict_types=1);
 
 namespace Modules\SaaS\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class PaymentSucceededNotification extends Notification implements ShouldQueue
+class PaymentSucceededNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(
         private readonly string $invoiceId,
         private readonly int $amountCents = 0,
     ) {}
 
     /** @return list<string> */
-    public function via(mixed $notifiable): array
+    public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail(mixed $notifiable): MailMessage
+    protected function getTemplateSlug(): string
     {
-        $amount = $this->amountCents > 0
-            ? number_format($this->amountCents / 100, 2).' $'
-            : '';
+        return 'saas_payment_succeeded';
+    }
 
-        $message = (new MailMessage)
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'invoice' => ['id' => $this->invoiceId],
+            'amount' => $this->amountCents > 0 ? number_format($this->amountCents / 100, 2).' $' : '',
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
+        $amount = $this->amountCents > 0 ? number_format($this->amountCents / 100, 2).' $' : '';
+
+        $mail = (new MailMessage)
             ->subject('Paiement confirmé')
             ->line('Votre paiement a été traité avec succès.');
 
         if ($amount) {
-            $message->line("Montant : {$amount} (facture #{$this->invoiceId}).");
+            $mail->line("Montant : {$amount} (facture #{$this->invoiceId}).");
         } else {
-            $message->line("Facture : #{$this->invoiceId}.");
+            $mail->line("Facture : #{$this->invoiceId}.");
         }
 
-        return $message
+        return $mail
             ->line('Merci pour votre confiance.')
             ->action('Voir mon abonnement', url('/user/subscription'));
     }
