@@ -13,6 +13,7 @@ namespace Modules\Backoffice\Http\Controllers;
 use App\Models\User;
 use Illuminate\View\View;
 use Modules\Blog\Models\Article;
+use Modules\Core\Services\MetricAggregatorService;
 use Modules\Newsletter\Models\Subscriber;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
@@ -62,6 +63,7 @@ class DashboardController
             'usersByMonth' => $usersByMonth,
             'articlesByMonth' => $articlesByMonth,
             'isMaintenanceMode' => app()->isDownForMaintenance(),
+            'metricWidgets' => app(MetricAggregatorService::class)->getAllWidgets(),
         ]);
     }
 }

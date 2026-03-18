@@ -32,6 +32,45 @@
     </div>
 </div>
 
+{{-- Module metrics --}}
+@if(!empty($metricWidgets))
+<div class="mb-4">
+    <h6 class="d-flex align-items-center gap-2 text-muted mb-3">
+        <i data-lucide="bar-chart-2" class="icon-sm"></i> {{ __('Metriques modules') }}
+    </h6>
+    <div class="row g-3">
+        @foreach($metricWidgets as $widget)
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            @if($widget->route)
+            <a href="{{ $widget->route }}" class="card shadow-none border p-3 text-decoration-none h-100">
+            @else
+            <div class="card shadow-none border p-3 h-100">
+            @endif
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        @if($widget->icon)
+                        <i data-lucide="{{ $widget->icon }}" class="text-primary" style="width:32px;height:32px;"></i>
+                        @endif
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{ $widget->name }}</div>
+                        <div class="fw-bold fs-5">{{ $widget->value }}</div>
+                        @if($widget->change)
+                        <span class="badge {{ str_starts_with($widget->change, '+') ? 'bg-success' : 'bg-danger' }} bg-opacity-10 {{ str_starts_with($widget->change, '+') ? 'text-success' : 'text-danger' }} small">{{ $widget->change }}</span>
+                        @endif
+                    </div>
+                </div>
+            @if($widget->route)
+            </a>
+            @else
+            </div>
+            @endif
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- Stat cards --}}
 <div class="row" id="dashboard-stats">
     {{-- Users --}}
