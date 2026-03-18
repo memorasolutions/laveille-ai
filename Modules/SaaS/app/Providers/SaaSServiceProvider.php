@@ -46,6 +46,8 @@ class SaaSServiceProvider extends BaseModuleServiceProvider
         $this->app->singleton(\Modules\SaaS\Services\BillingService::class);
         $this->app->singleton(\Modules\SaaS\Services\SaasMetricsService::class);
         $this->app->singleton(\Modules\SaaS\Services\MeteringService::class);
+        $this->app->singleton(SaasMetricProvider::class);
+        $this->app->tag([SaasMetricProvider::class], 'metric_providers');
         $this->app->singleton(\Modules\SaaS\Services\ReferralService::class);
 
         // Désactiver les routes par défaut de Cashier pour utiliser notre webhook personnalisé

@@ -39,5 +39,8 @@ class BlogServiceProvider extends BaseModuleServiceProvider
     public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(BlogMetricProvider::class);
+        $this->app->tag([BlogMetricProvider::class], 'metric_providers');
     }
 }

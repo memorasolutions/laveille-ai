@@ -38,6 +38,9 @@ class BookingServiceProvider extends BaseModuleServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(BookingMetricProvider::class);
+        $this->app->tag([BookingMetricProvider::class], 'metric_providers');
     }
 
     /**
