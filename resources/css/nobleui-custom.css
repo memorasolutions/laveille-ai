@@ -72,5 +72,35 @@
     }
 }
 
+/* Sidebar sub-menu: fix bullet alignment */
+.sidebar .nav.sub-menu {
+    list-style: none !important;
+    padding-left: 43px !important;
+}
+.sidebar .nav.sub-menu .nav-item {
+    position: relative;
+}
+.sidebar .nav.sub-menu .nav-item .nav-link {
+    padding-left: 5px !important;
+    min-height: 36px;
+}
+.sidebar .nav.sub-menu .nav-item .nav-link::before {
+    left: -15px !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+}
+
+/* WCAG: active menu item — higher contrast (not just violet on dark) */
+.sidebar .nav-link.active,
+.sidebar .nav-item.active > .nav-link {
+    color: #fff !important;
+    background-color: rgba(124, 142, 255, .15);
+    border-radius: 6px;
+}
+.sidebar .sub-menu .nav-link.active {
+    color: #fff !important;
+    font-weight: 600;
+}
+
 /* Safe area padding for notched devices */
 .page-wrapper { padding-bottom: env(safe-area-inset-bottom); }
