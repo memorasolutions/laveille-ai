@@ -65,6 +65,13 @@
                 </div>
             </li>
 
+            {{-- Guided tour restart --}}
+            <li class="nav-item">
+                <button type="button" id="restartTour" class="nav-link btn btn-link border-0" title="{{ __('Visite guidee') }}" aria-label="{{ __('Relancer la visite guidee') }}">
+                    <i data-lucide="compass" class="link-icon"></i>
+                </button>
+            </li>
+
             {{-- Notifications --}}
             <li class="nav-item dropdown">
                 @livewire('backoffice-notification-bell')

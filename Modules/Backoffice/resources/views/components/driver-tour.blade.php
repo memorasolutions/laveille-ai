@@ -60,14 +60,13 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() { driverObj.drive(); }, 800);
     }
 
-    var restartBtn = document.getElementById('restartTour');
-    if (restartBtn) {
-        restartBtn.addEventListener('click', function(e) {
+    document.querySelectorAll('#restartTour, .restart-tour').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
             localStorage.removeItem(storageKey);
             driverObj.drive();
         });
-    }
+    });
 });
 </script>
 @endpush
