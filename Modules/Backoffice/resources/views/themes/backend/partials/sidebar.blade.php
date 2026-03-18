@@ -486,6 +486,11 @@
                         <li class="nav-item"><a href="{{ route('admin.ecommerce.reviews.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.reviews.*') ? 'aria-current=page' : '' }}>{{ __('Avis') }}</a></li>
                         @endcan
                         @endif
+                        @if(Route::has('admin.ecommerce.shipping-zones.index'))
+                        @can('manage_settings')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.shipping-zones.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'aria-current=page' : '' }}>{{ __('Livraison') }}</a></li>
+                        @endcan
+                        @endif
                     </ul>
                 </div>
             </li>

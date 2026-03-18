@@ -18,6 +18,7 @@ use Modules\Ecommerce\Http\Controllers\Admin\OrderController;
 use Modules\Ecommerce\Http\Controllers\Admin\ProductController;
 use Modules\Ecommerce\Http\Controllers\Admin\PromotionController;
 use Modules\Ecommerce\Http\Controllers\Admin\ReviewController;
+use Modules\Ecommerce\Http\Controllers\Admin\ShippingZoneController;
 
 Route::prefix('admin/ecommerce')
     ->name('admin.ecommerce.')
@@ -123,5 +124,10 @@ Route::prefix('admin/ecommerce')
             Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
             Route::patch('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
             Route::delete('reviews/{review}', [ReviewController::class, 'reject'])->name('reviews.reject');
+        });
+
+        // Shipping zones
+        Route::middleware('permission:manage_settings')->group(function () {
+            Route::resource('shipping-zones', ShippingZoneController::class)->except(['show']);
         });
     });
