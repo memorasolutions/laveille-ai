@@ -43,7 +43,7 @@
                     <span class="link-title">{{ __('Contenu') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.blog.articles.index'))
                         @can('view_articles')
@@ -169,7 +169,7 @@
                     <span class="link-title">{{ __('Ventes') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'show' : '' }}" id="salesMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'show' : '' }}" id="salesMenu">
                     <ul class="nav sub-menu">
                         {{-- Boutique --}}
                         @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
@@ -306,7 +306,7 @@
                     <span class="link-title">{{ __('Utilisateurs') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.teams.*', 'admin.contact-messages.*') ? 'show' : '' }}" id="usersMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.users.*', 'admin.roles.*', 'admin.teams.*', 'admin.contact-messages.*') ? 'show' : '' }}" id="usersMenu">
                     <ul class="nav sub-menu">
                         @can('view_users')
                         <li class="nav-item"><a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" {{ request()->routeIs('admin.users.*') ? 'aria-current=page' : '' }}>{{ __('Membres') }}</a></li>
@@ -339,7 +339,7 @@
                     <span class="link-title">{{ __('Configuration') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.feature-flags.*', 'admin.email-templates.*', 'admin.announcements.*', 'admin.themes.*', 'admin.cookie-categories.*', 'admin.redirects.*', 'admin.settings.*') ? 'show' : '' }}" id="configMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.feature-flags.*', 'admin.email-templates.*', 'admin.announcements.*', 'admin.themes.*', 'admin.cookie-categories.*', 'admin.redirects.*', 'admin.settings.*') ? 'show' : '' }}" id="configMenu">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.branding.edit'))
                         @can('view_branding')
@@ -410,7 +410,7 @@
                     <span class="link-title">{{ __('Système') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info', 'admin.search', 'admin.documentation') ? 'show' : '' }}" id="systemMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.health', 'admin.health.*', 'admin.security', 'admin.backups.*', 'admin.logs', 'admin.cache', 'admin.push-notifications.*', 'admin.scheduler', 'admin.scheduler.*', 'admin.failed-jobs.*', 'admin.login-history', 'admin.mail-log', 'admin.blocked-ips.*', 'admin.activity-logs.*', 'admin.trash.*', 'admin.data-retention', 'admin.system-info', 'admin.search', 'admin.documentation') ? 'show' : '' }}" id="systemMenu">
                     <ul class="nav sub-menu">
                         @can('view_health')
                         <li class="nav-item"><a href="{{ route('admin.health') }}" class="nav-link {{ request()->routeIs('admin.health') ? 'active' : '' }}" {{ request()->routeIs('admin.health') ? 'aria-current=page' : '' }}>{{ __('Santé système') }}</a></li>
@@ -513,7 +513,7 @@
                     <span class="link-title">{{ __('Outils') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.ai.*', 'admin.roadmap.*') ? 'show' : '' }}" id="toolsMenu" data-bs-parent="#sidebarNav">
+                <div class="collapse {{ request()->routeIs('admin.ai.*', 'admin.roadmap.*') ? 'show' : '' }}" id="toolsMenu">
                     <ul class="nav sub-menu">
                         {{-- Support IA --}}
                         @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('AI') && \Nwidart\Modules\Facades\Module::isEnabled('AI'))
