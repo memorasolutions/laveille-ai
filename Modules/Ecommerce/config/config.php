@@ -32,6 +32,12 @@ return [
         'stripe_enabled' => true,
     ],
 
+    'abandoned_cart' => [
+        'enabled' => true,
+        'schedule' => [1 => 1, 24 => 2, 72 => 3], // hours => reminder_number
+        'recover_url' => '/cart',
+    ],
+
     'invoices' => [
         'prefix' => 'INV-',
         'company_name' => '',

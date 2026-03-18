@@ -39,6 +39,11 @@ class Cart extends Model
         return $this->belongsTo(Coupon::class);
     }
 
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(AbandonedCartReminder::class);
+    }
+
     public function total(): float
     {
         return (float) $this->items->sum(fn ($item) => $item->subtotal);

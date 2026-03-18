@@ -10,8 +10,10 @@ declare(strict_types=1);
 
 namespace Modules\Ecommerce\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Modules\Core\Providers\BaseModuleServiceProvider;
+use Modules\Ecommerce\Jobs\ProcessAbandonedCarts;
 use Modules\Ecommerce\Contracts\TaxCalculatorInterface;
 use Modules\Ecommerce\Events\LowStockDetected;
 use Modules\Ecommerce\Listeners\NotifyAdminsLowStock;
@@ -28,6 +30,13 @@ class EcommerceServiceProvider extends BaseModuleServiceProvider
         $this->bootModule();
 
         Event::listen(LowStockDetected::class, NotifyAdminsLowStock::class);
+
+        if (config('modules.ecommerce.abandoned_cart.enabled', false)) {
+            $this->app->booted(function () {
+                $schedule = $this->app->make(Schedule::class);
+                $schedule->job(new ProcessAbandonedCarts)->hourly();
+            });
+        }
     }
 
     public function register(): void
