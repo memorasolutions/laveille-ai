@@ -61,7 +61,7 @@
             {{-- Submit --}}
             <div>
                 <button type="submit"
-                        class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0284c7"
+                        class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0369a1"
                         wire:loading.attr="disabled">
                     <span wire:loading.remove>{{ __('Réinitialiser') }}</span>
                     <span wire:loading>{{ __('Réinitialisation...') }}</span>

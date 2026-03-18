@@ -18,7 +18,7 @@
 <form method="POST" action="{{ route('verification.send') }}" class="mt-8">
     @csrf
     <button type="submit"
-            class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0284c7">
+            class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0369a1">
         {{ __('Renvoyer le courriel') }}
     </button>
 </form>
@@ -27,7 +27,7 @@
     <form method="POST" action="{{ route('logout') }}" class="inline">
         @csrf
         <button type="button" onclick="this.closest('form').submit()"
-                class="font-medium text-sky-600 transition-all duration-200 hover:text-sky-700 focus:text-sky-700 hover:underline bg-transparent border-none cursor-pointer p-0">
+                class="font-medium text-sky-700 transition-all duration-200 hover:text-sky-700 focus:text-sky-700 hover:underline bg-transparent border-none cursor-pointer p-0">
             {{ __('Déconnexion') }}
         </button>
     </form>

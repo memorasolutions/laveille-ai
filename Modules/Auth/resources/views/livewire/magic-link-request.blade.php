@@ -10,7 +10,7 @@
     <div class="bg-green-50 border border-green-200 text-green-800 p-3 rounded-md text-sm mt-4 flex flex-col gap-1" role="alert">
         <div>{{ session('status') }}</div>
         <a href="{{ route('magic-link.verify') }}?email={{ urlencode(old('email', '')) }}"
-           class="font-semibold text-sky-600 transition-all duration-200 hover:text-sky-700 hover:underline">
+           class="font-semibold text-sky-700 transition-all duration-200 hover:text-sky-700 hover:underline">
             {{ __('Saisir mon code') }} &rarr;
         </a>
     </div>
@@ -45,14 +45,14 @@
 
         <div>
             <button type="submit"
-                    class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0284c7">
+                    class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0369a1">
                 {{ __('Envoyer le code') }}
             </button>
         </div>
     </div>
 
     <div class="mt-6 text-center">
-        <a href="{{ route('login') }}" class="font-medium text-sky-600 transition-all duration-200 hover:text-sky-700 focus:text-sky-700 hover:underline">
+        <a href="{{ route('login') }}" class="font-medium text-sky-700 transition-all duration-200 hover:text-sky-700 focus:text-sky-700 hover:underline">
             {{ __('Retour à la connexion') }}
         </a>
     </div>

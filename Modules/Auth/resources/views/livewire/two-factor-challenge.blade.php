@@ -41,7 +41,7 @@
 
         <div>
             <button wire:click="authenticate" wire:loading.attr="disabled" type="button"
-                    class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0284c7">
+                    class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0369a1">
                 <span wire:loading.remove>{{ __('Vérifier') }}</span>
                 <span wire:loading>{{ __('Vérification en cours...') }}</span>
             </button>
@@ -50,7 +50,7 @@
 
     <div class="mt-6 text-center">
         <button wire:click="toggleRecoveryMode" type="button"
-                class="font-medium text-sky-600 transition-all duration-200 hover:text-sky-700 focus:text-sky-700 hover:underline bg-transparent border-none cursor-pointer p-0">
+                class="font-medium text-sky-700 transition-all duration-200 hover:text-sky-700 focus:text-sky-700 hover:underline bg-transparent border-none cursor-pointer p-0">
             @if ($usingRecoveryCode)
                 {{ __('Utiliser le code OTP') }}
             @else

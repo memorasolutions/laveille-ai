@@ -38,7 +38,7 @@
         @error('token')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
     </div>
 
-    <button type="submit" class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0284c7">{{ __('Se connecter') }}</button>
+    <button type="submit" class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-white transition-all duration-200 border border-transparent rounded-md focus:outline-none hover:opacity-80 focus:opacity-80" style="background-color:#0369a1">{{ __('Se connecter') }}</button>
 
     @if($hasPhone ?? false)
         <div class="border-t border-gray-200 mt-6 pt-6"
@@ -47,21 +47,21 @@
             <p class="text-gray-600 text-center text-sm mb-3">{{ __('Vous n\'avez pas reçu le code ?') }}</p>
             <div x-show="!ready" class="text-center">
                 <span class="text-gray-600 text-sm">
-                    {{ __('SMS disponible dans') }} <span x-text="countdown" class="font-bold text-sky-600"></span> {{ __('secondes') }}
+                    {{ __('SMS disponible dans') }} <span x-text="countdown" class="font-bold text-sky-700"></span> {{ __('secondes') }}
                 </span>
             </div>
             <div x-show="ready" x-cloak>
                 <form action="{{ route('magic-link.sms') }}" method="POST">
                     @csrf
                     <input type="hidden" name="email" value="{{ old('email', $email) }}">
-                    <button type="submit" class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-sky-600 transition-all duration-200 border-2 border-gray-200 rounded-md bg-transparent hover:opacity-80 focus:opacity-80">{{ __('Recevoir par SMS') }}</button>
+                    <button type="submit" class="inline-flex items-center justify-center w-full px-4 py-4 text-base font-semibold text-sky-700 transition-all duration-200 border-2 border-gray-200 rounded-md bg-transparent hover:opacity-80 focus:opacity-80">{{ __('Recevoir par SMS') }}</button>
                 </form>
             </div>
         </div>
     @endif
 
     <div class="text-center mt-6">
-        <a href="{{ route('magic-link.request') }}" class="font-medium text-sky-600 transition-all duration-200 hover:text-sky-700 hover:underline">{{ __('Demander un nouveau code') }}</a>
+        <a href="{{ route('magic-link.request') }}" class="font-medium text-sky-700 transition-all duration-200 hover:text-sky-700 hover:underline">{{ __('Demander un nouveau code') }}</a>
     </div>
 </form>
 @endsection

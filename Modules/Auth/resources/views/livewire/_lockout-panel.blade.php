@@ -12,7 +12,7 @@
                 </p>
                 <div class="mt-3 flex flex-col gap-2">
                     <a href="{{ route('password.request') }}"
-                       class="inline-flex items-center text-sm font-medium text-sky-600 hover:text-sky-700 hover:underline">
+                       class="inline-flex items-center text-sm font-medium text-sky-700 hover:text-sky-700 hover:underline">
                         <i class="ti ti-key mr-1.5"></i>
                         {{ __('Réinitialiser mon mot de passe') }}
                     </a>
@@ -45,7 +45,7 @@
             @enderror
             <button type="button" wire:click="contactAdmin" wire:loading.attr="disabled"
                     class="mt-3 inline-flex items-center px-4 py-2 text-sm font-semibold text-white rounded-md transition-all duration-200 hover:opacity-80 focus:outline-none disabled:opacity-50"
-                    style="background-color:#0284c7">
+                    style="background-color:#0369a1">
                 <span wire:loading.remove wire:target="contactAdmin">
                     <i class="ti ti-send mr-1.5"></i>{{ __('Envoyer') }}
                 </span>
