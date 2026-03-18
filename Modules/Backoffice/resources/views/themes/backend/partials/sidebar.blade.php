@@ -491,6 +491,11 @@
                         <li class="nav-item"><a href="{{ route('admin.ecommerce.refunds.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.refunds.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.refunds.*') ? 'aria-current=page' : '' }}>{{ __('Remboursements') }}</a></li>
                         @endcan
                         @endif
+                        @if(Route::has('admin.ecommerce.import-export.index'))
+                        @can('view_products')
+                        <li class="nav-item"><a href="{{ route('admin.ecommerce.import-export.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.import-export.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.import-export.*') ? 'aria-current=page' : '' }}>{{ __('Import/Export') }}</a></li>
+                        @endcan
+                        @endif
                         @if(Route::has('admin.ecommerce.shipping-zones.index'))
                         @can('manage_settings')
                         <li class="nav-item"><a href="{{ route('admin.ecommerce.shipping-zones.index') }}" class="nav-link {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'active' : '' }}" {{ request()->routeIs('admin.ecommerce.shipping-zones.*') ? 'aria-current=page' : '' }}>{{ __('Livraison') }}</a></li>
