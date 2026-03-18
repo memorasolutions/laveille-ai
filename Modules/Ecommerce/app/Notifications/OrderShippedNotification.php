@@ -10,59 +10,45 @@ declare(strict_types=1);
 
 namespace Modules\Ecommerce\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 use Modules\Ecommerce\Models\Order;
-use Modules\Notifications\Services\EmailTemplateService;
 
-class OrderShippedNotification extends Notification implements ShouldQueue
+class OrderShippedNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(public Order $order) {}
 
-    /** @return list<string> */
-    public function via(object $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'ecommerce_order_shipped';
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
     {
-        if (class_exists(EmailTemplateService::class)) {
-            $service = app(EmailTemplateService::class);
-            $rendered = $service->render('ecommerce_order_shipped', [
-                'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
-                'app' => ['name' => config('app.name'), 'url' => config('app.url')],
-                'order' => [
-                    'number' => $this->order->order_number,
-                    'tracking' => $this->order->tracking_number ?? '',
-                    'url' => config('app.url').'/account/orders/'.$this->order->id,
-                ],
-            ]);
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'order' => [
+                'number' => $this->order->order_number,
+                'tracking' => $this->order->tracking_number ?? '',
+                'url' => config('app.url').'/account/orders/'.$this->order->id,
+            ],
+        ];
+    }
 
-            if ($rendered) {
-                return (new MailMessage)
-                    ->subject($rendered['subject'])
-                    ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
-            }
-        }
-
-        $url = config('app.url').'/account/orders/'.$this->order->id;
-
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
         $mail = (new MailMessage)
-            ->subject('Votre commande a ete expediee')
+            ->subject('Votre commande a été expédiée')
             ->greeting('Bonjour '.$notifiable->name.',')
-            ->line('Bonne nouvelle! Votre commande #'.$this->order->order_number.' a ete expediee.');
+            ->line('Bonne nouvelle! Votre commande #'.$this->order->order_number.' a été expédiée.');
 
         if ($this->order->tracking_number) {
-            $mail->line('Numero de suivi : '.$this->order->tracking_number);
+            $mail->line('Numéro de suivi : '.$this->order->tracking_number);
         }
 
         return $mail
-            ->action('Suivre ma commande', $url)
+            ->action('Suivre ma commande', config('app.url').'/account/orders/'.$this->order->id)
             ->line('Merci de votre confiance.');
     }
 

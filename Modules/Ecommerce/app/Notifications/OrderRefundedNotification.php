@@ -10,59 +10,46 @@ declare(strict_types=1);
 
 namespace Modules\Ecommerce\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 use Modules\Ecommerce\Models\Order;
-use Modules\Notifications\Services\EmailTemplateService;
 
-class OrderRefundedNotification extends Notification implements ShouldQueue
+class OrderRefundedNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(
         public Order $order,
         public float $amount,
     ) {}
 
-    /** @return list<string> */
-    public function via(object $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'ecommerce_order_refunded';
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
     {
-        if (class_exists(EmailTemplateService::class)) {
-            $service = app(EmailTemplateService::class);
-            $rendered = $service->render('ecommerce_order_refunded', [
-                'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
-                'app' => ['name' => config('app.name'), 'url' => config('app.url')],
-                'order' => [
-                    'number' => $this->order->order_number,
-                    'url' => config('app.url').'/account/orders/'.$this->order->id,
-                ],
-                'refund' => ['amount' => number_format($this->amount, 2)],
-                'currency' => (string) config('modules.ecommerce.currency', 'CAD'),
-            ]);
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'order' => [
+                'number' => $this->order->order_number,
+                'url' => config('app.url').'/account/orders/'.$this->order->id,
+            ],
+            'refund' => ['amount' => number_format($this->amount, 2)],
+            'currency' => (string) config('modules.ecommerce.currency', 'CAD'),
+        ];
+    }
 
-            if ($rendered) {
-                return (new MailMessage)
-                    ->subject($rendered['subject'])
-                    ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
-            }
-        }
-
-        $url = config('app.url').'/account/orders/'.$this->order->id;
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
         $currency = (string) config('modules.ecommerce.currency', 'CAD');
 
         return (new MailMessage)
             ->subject('Remboursement commande #'.$this->order->order_number)
             ->greeting('Bonjour '.$notifiable->name.',')
-            ->line('Votre remboursement de '.number_format($this->amount, 2).' '.$currency.' pour la commande #'.$this->order->order_number.' a ete traite.')
-            ->line('Le montant sera credite sur votre compte dans un delai de 5 a 10 jours ouvrables.')
-            ->action('Voir ma commande', $url)
+            ->line('Votre remboursement de '.number_format($this->amount, 2).' '.$currency.' pour la commande #'.$this->order->order_number.' a été traité.')
+            ->line('Le montant sera crédité sur votre compte dans un délai de 5 à 10 jours ouvrables.')
+            ->action('Voir ma commande', config('app.url').'/account/orders/'.$this->order->id)
             ->line('Merci de votre patience.');
     }
 

@@ -10,30 +10,24 @@ declare(strict_types=1);
 
 namespace Modules\Ecommerce\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 use Modules\Ecommerce\Models\Cart;
 use Modules\Ecommerce\Models\CartItem;
-use Modules\Notifications\Services\EmailTemplateService;
 
-class AbandonedCartNotification extends Notification implements ShouldQueue
+class AbandonedCartNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(
         public Cart $cart,
         public int $reminderNumber,
     ) {}
 
-    /** @return array<int, string> */
-    public function via(object $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'ecommerce_abandoned_cart';
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
     {
         $itemNames = $this->cart->items->take(3)->map(
             fn (CartItem $item) => $item->variant->product->name ?? 'Article'
@@ -43,49 +37,38 @@ class AbandonedCartNotification extends Notification implements ShouldQueue
             fn (CartItem $i) => (float) $i->variant->price * $i->quantity
         );
 
-        $recoverUrl = url((string) config('modules.ecommerce.abandoned_cart.recover_url', '/cart'));
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'cart' => [
+                'items' => $itemNames,
+                'item_count' => (string) $this->cart->items->count(),
+                'total' => number_format($cartTotal, 2),
+                'url' => url((string) config('modules.ecommerce.abandoned_cart.recover_url', '/cart')),
+            ],
+            'currency' => (string) config('modules.ecommerce.currency', 'CAD'),
+        ];
+    }
 
-        if (class_exists(EmailTemplateService::class)) {
-            $service = app(EmailTemplateService::class);
-            $rendered = $service->render('ecommerce_abandoned_cart', [
-                'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
-                'app' => ['name' => config('app.name'), 'url' => config('app.url')],
-                'cart' => [
-                    'items' => $itemNames,
-                    'item_count' => (string) $this->cart->items->count(),
-                    'total' => number_format($cartTotal, 2),
-                    'url' => $recoverUrl,
-                ],
-                'currency' => (string) config('modules.ecommerce.currency', 'CAD'),
-            ]);
-
-            if ($rendered) {
-                return (new MailMessage)
-                    ->subject($rendered['subject'])
-                    ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
-            }
-        }
-
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
         $subjects = [
-            1 => __('Vous avez oublie quelque chose !'),
+            1 => __('Vous avez oublié quelque chose !'),
             2 => __('Votre panier vous attend'),
-            3 => __('Derniere chance - 10% de reduction'),
+            3 => __('Dernière chance - 10% de réduction'),
         ];
 
+        $recoverUrl = url((string) config('modules.ecommerce.abandoned_cart.recover_url', '/cart'));
+
         $mail = (new MailMessage)
-            ->subject($subjects[$this->reminderNumber] ?? __('Votre panier abandonne'))
+            ->subject($subjects[$this->reminderNumber] ?? __('Votre panier abandonné'))
             ->greeting(__('Bonjour :name,', ['name' => $notifiable->name]))
-            ->line(__('Vous avez laisse des articles dans votre panier.'));
+            ->line(__('Vous avez laissé des articles dans votre panier.'));
 
         foreach ($this->cart->items->take(3) as $item) {
             /** @var CartItem $item */
             $name = $item->variant->product->name ?? 'Article';
             $mail->line("- {$name} (x{$item->quantity})");
-        }
-
-        if ($this->cart->items->count() > 3) {
-            $remaining = $this->cart->items->count() - 3;
-            $mail->line(__('... et :count autres articles.', ['count' => $remaining]));
         }
 
         return $mail
