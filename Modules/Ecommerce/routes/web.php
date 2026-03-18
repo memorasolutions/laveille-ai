@@ -18,6 +18,7 @@ use Modules\Ecommerce\Http\Controllers\Admin\OrderController;
 use Modules\Ecommerce\Http\Controllers\Admin\ProductController;
 use Modules\Ecommerce\Http\Controllers\Admin\PromotionController;
 use Modules\Ecommerce\Http\Controllers\Admin\ReviewController;
+use Modules\Ecommerce\Http\Controllers\Admin\ProductImportExportController;
 use Modules\Ecommerce\Http\Controllers\Admin\RefundController;
 use Modules\Ecommerce\Http\Controllers\Admin\ShippingZoneController;
 
@@ -132,6 +133,13 @@ Route::prefix('admin/ecommerce')
             Route::get('refunds', [RefundController::class, 'index'])->name('refunds.index');
             Route::patch('refunds/{refund}/approve', [RefundController::class, 'approve'])->name('refunds.approve');
             Route::patch('refunds/{refund}/reject', [RefundController::class, 'reject'])->name('refunds.reject');
+        });
+
+        // Import/Export
+        Route::middleware('permission:view_products')->group(function () {
+            Route::get('import-export', [ProductImportExportController::class, 'index'])->name('import-export.index');
+            Route::get('import-export/export', [ProductImportExportController::class, 'export'])->name('import-export.export');
+            Route::post('import-export/import', [ProductImportExportController::class, 'import'])->name('import-export.import');
         });
 
         // Shipping zones
