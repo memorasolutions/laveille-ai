@@ -14,6 +14,7 @@ use Modules\Ecommerce\Http\Controllers\Api\CheckoutApiController;
 use Modules\Ecommerce\Http\Controllers\Api\OrderApiController;
 use Modules\Ecommerce\Http\Controllers\Api\ProductApiController;
 use Modules\Ecommerce\Http\Controllers\Api\ReviewApiController;
+use Modules\Ecommerce\Http\Controllers\Api\DigitalDownloadController;
 use Modules\Ecommerce\Http\Controllers\Api\WishlistApiController;
 
 // Public
@@ -48,7 +49,14 @@ Route::prefix('ecommerce')->middleware('auth:sanctum')->group(function () {
 
     // Reviews (auth: write)
     Route::post('/products/{product}/reviews', [ReviewApiController::class, 'store']);
+
+    // Digital downloads
+    Route::get('/orders/{order}/downloads', [DigitalDownloadController::class, 'links']);
 });
+
+// Digital download (signed URL, no auth needed)
+Route::get('/ecommerce/download/{asset}/{order}', [DigitalDownloadController::class, 'download'])
+    ->name('ecommerce.download');
 
 // Stripe webhook (no auth, verified by signature)
 Route::post('/ecommerce/webhook/stripe', function () {
