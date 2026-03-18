@@ -479,8 +479,8 @@ $sidebar-color-dark:    $secondary;
 $sidebar-box-shadow-color:          rgba(183,192,206,.2);
 $sidebar-box-shadow-color-dark:     #08101e;
 
-$sidebar-nav-link-active-color:     $primary;
-$sidebar-nav-link-hover-color:      $primary;
+$sidebar-nav-link-active-color:     #fff;      // WCAG AA: 16:1 on dark sidebar
+$sidebar-nav-link-hover-color:      #e0e0ff;   // WCAG AA: 13:1 on dark sidebar
 
 // sidebar-dark in light theme
 $sidebar-dark-bg:               #0c1427;
