@@ -48,32 +48,33 @@
                 @csrf
                 @method('PUT')
 
-                <div class="mb-3">
-                    <label for="title" class="form-label">{{ __('Titre') }} <span class="text-danger">*</span></label>
-                    <input type="text"
-                           class="form-control @error('title') is-invalid @enderror"
-                           id="title"
-                           name="title"
-                           value="{{ old('title', $document->title) }}"
-                           required
-                           maxlength="255">
-                    @error('title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label for="source_type" class="form-label">{{ __('Type de source') }} <span class="text-danger">*</span></label>
-                    <select class="form-select @error('source_type') is-invalid @enderror" id="source_type" name="source_type" required>
-                        <option value="manual"  @selected(old('source_type', $document->source_type) === 'manual')>{{ __('Manuel') }}</option>
-                        <option value="faq"     @selected(old('source_type', $document->source_type) === 'faq')>{{ __('FAQ') }}</option>
-                        <option value="page"    @selected(old('source_type', $document->source_type) === 'page')>{{ __('Page') }}</option>
-                        <option value="article" @selected(old('source_type', $document->source_type) === 'article')>{{ __('Article') }}</option>
-                        <option value="service" @selected(old('source_type', $document->source_type) === 'service')>{{ __('Service') }}</option>
-                    </select>
-                    @error('source_type')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="title" class="form-label">{{ __('Titre') }} <span class="text-danger">*</span></label>
+                        <input type="text"
+                               class="form-control @error('title') is-invalid @enderror"
+                               id="title"
+                               name="title"
+                               value="{{ old('title', $document->title) }}"
+                               required
+                               maxlength="255">
+                        @error('title')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="source_type" class="form-label">{{ __('Type de source') }} <span class="text-danger">*</span></label>
+                        <select class="form-select @error('source_type') is-invalid @enderror" id="source_type" name="source_type" required>
+                            <option value="manual"  @selected(old('source_type', $document->source_type) === 'manual')>{{ __('Manuel') }}</option>
+                            <option value="faq"     @selected(old('source_type', $document->source_type) === 'faq')>{{ __('FAQ') }}</option>
+                            <option value="page"    @selected(old('source_type', $document->source_type) === 'page')>{{ __('Page') }}</option>
+                            <option value="article" @selected(old('source_type', $document->source_type) === 'article')>{{ __('Article') }}</option>
+                            <option value="service" @selected(old('source_type', $document->source_type) === 'service')>{{ __('Service') }}</option>
+                        </select>
+                        @error('source_type')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mb-3">

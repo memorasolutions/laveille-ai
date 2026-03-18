@@ -18,15 +18,17 @@
             <div class="card-body">
                 <form action="{{ route('admin.ecommerce.categories.store') }}" method="POST">
                     @csrf
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('Nom') }}</label>
-                        <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
-                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('Slug') }}</label>
-                        <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug') }}">
-                        <small class="text-muted">{{ __('Laissez vide pour générer automatiquement.') }}</small>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Nom') }}</label>
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
+                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Slug') }}</label>
+                            <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug') }}">
+                            <small class="text-muted">{{ __('Laissez vide pour générer automatiquement.') }}</small>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">

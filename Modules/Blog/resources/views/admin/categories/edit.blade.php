@@ -11,11 +11,19 @@
             @csrf
             @method('PUT')
 
-            <div class="mb-3">
-                <label for="name" class="form-label">Nom <span class="text-danger">*</span></label>
-                <input type="text" class="form-control @error('name') is-invalid @enderror"
-                       id="name" name="name" value="{{ old('name', $category->name) }}" required maxlength="100">
-                @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Nom <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                           id="name" name="name" value="{{ old('name', $category->name) }}" required maxlength="100">
+                    @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="color" class="form-label">Couleur <span class="text-danger">*</span></label>
+                    <input type="color" class="form-control form-control-color @error('color') is-invalid @enderror"
+                           id="color" name="color" value="{{ old('color', $category->color) }}" required>
+                    @error('color')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
             </div>
 
             <div class="mb-3">
@@ -23,13 +31,6 @@
                 <textarea class="form-control @error('description') is-invalid @enderror"
                           id="description" name="description" rows="3">{{ old('description', $category->description) }}</textarea>
                 @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            </div>
-
-            <div class="mb-3">
-                <label for="color" class="form-label">Couleur <span class="text-danger">*</span></label>
-                <input type="color" class="form-control form-control-color @error('color') is-invalid @enderror"
-                       id="color" name="color" value="{{ old('color', $category->color) }}" required>
-                @error('color')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             <div class="mb-3">

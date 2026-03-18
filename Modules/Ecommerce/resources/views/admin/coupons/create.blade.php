@@ -33,12 +33,12 @@
                             </select>
                         </div>
                     </div>
-                    <div class="mb-3" id="valueGroup">
-                        <label class="form-label">{{ __('Valeur') }}</label>
-                        <input type="number" step="0.01" name="value" class="form-control @error('value') is-invalid @enderror" value="{{ old('value', 0) }}">
-                        @error('value') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
                     <div class="row">
+                        <div class="col-md-6 mb-3" id="valueGroup">
+                            <label class="form-label">{{ __('Valeur') }}</label>
+                            <input type="number" step="0.01" name="value" class="form-control @error('value') is-invalid @enderror" value="{{ old('value', 0) }}">
+                            @error('value') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('Montant minimum de commande') }}</label>
                             <div class="input-group">
@@ -46,9 +46,18 @@
                                 <input type="number" step="0.01" name="min_order_amount" class="form-control" value="{{ old('min_order_amount') }}">
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __("Nombre max d'utilisations") }}</label>
                             <input type="number" name="max_uses" class="form-control" value="{{ old('max_uses') }}" placeholder="{{ __('Illimité') }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="isActive">{{ __('Actif') }}</label>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -60,10 +69,6 @@
                             <label class="form-label">{{ __("Date d'expiration") }}</label>
                             <input type="date" name="expires_at" class="form-control" value="{{ old('expires_at') }}">
                         </div>
-                    </div>
-                    <div class="mb-3 form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="is_active" id="isActive" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="isActive">{{ __('Actif') }}</label>
                     </div>
                     <button type="submit" class="btn btn-primary">{{ __('Créer le coupon') }}</button>
                     <a href="{{ route('admin.ecommerce.coupons.index') }}" class="btn btn-secondary">{{ __('Annuler') }}</a>
