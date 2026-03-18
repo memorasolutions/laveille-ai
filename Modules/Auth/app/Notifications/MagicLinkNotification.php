@@ -10,38 +10,36 @@ declare(strict_types=1);
 
 namespace Modules\Auth\Notifications;
 
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-use Modules\Notifications\Services\EmailTemplateService;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class MagicLinkNotification extends Notification
+class MagicLinkNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(private readonly string $token) {}
 
+    /** @return array<int, string> */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateSlug(): string
     {
-        $service = app(EmailTemplateService::class);
-        $rendered = $service->render('magic_link', [
+        return 'magic_link';
+    }
+
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
             'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
             'app' => ['name' => config('app.name'), 'url' => config('app.url')],
             'token' => $this->token,
             'expire_minutes' => '15',
-        ]);
+        ];
+    }
 
-        if ($rendered) {
-            return (new MailMessage)
-                ->subject($rendered['subject'])
-                ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
-        }
-
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
         return (new MailMessage)
             ->subject('Votre code de connexion')
             ->greeting('Bonjour !')

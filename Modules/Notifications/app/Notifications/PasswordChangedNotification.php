@@ -10,38 +10,27 @@ declare(strict_types=1);
 
 namespace Modules\Notifications\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-use Modules\Notifications\Services\EmailTemplateService;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class PasswordChangedNotification extends Notification implements ShouldQueue
+class PasswordChangedNotification extends TemplatedNotification
 {
-    use Queueable;
-
-    public function __construct() {}
-
-    public function via(object $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'password_changed';
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
     {
-        $service = app(EmailTemplateService::class);
-        $rendered = $service->render('password_changed', [
+        return [
             'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
             'app' => ['name' => config('app.name'), 'url' => config('app.url')],
             'changed_at' => now()->format('Y-m-d H:i'),
-        ]);
+        ];
+    }
 
-        if ($rendered) {
-            return (new MailMessage)
-                ->subject($rendered['subject'])
-                ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
-        }
-
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
         return (new MailMessage)
             ->subject('Mot de passe modifié')
             ->greeting('Bonjour '.$notifiable->name.' !')
@@ -50,6 +39,7 @@ class PasswordChangedNotification extends Notification implements ShouldQueue
             ->line('Pour des raisons de sécurité, ne partagez jamais votre mot de passe.');
     }
 
+    /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
         return [

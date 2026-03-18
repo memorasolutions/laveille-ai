@@ -10,37 +10,26 @@ declare(strict_types=1);
 
 namespace Modules\Notifications\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-use Modules\Notifications\Services\EmailTemplateService;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class WelcomeNotification extends Notification implements ShouldQueue
+class WelcomeNotification extends TemplatedNotification
 {
-    use Queueable;
-
-    public function __construct() {}
-
-    public function via($notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'welcome';
     }
 
-    public function toMail($notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
     {
-        $service = app(EmailTemplateService::class);
-        $rendered = $service->render('welcome', [
+        return [
             'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
             'app' => ['name' => config('app.name'), 'url' => config('app.url')],
-        ]);
+        ];
+    }
 
-        if ($rendered) {
-            return (new MailMessage)
-                ->subject($rendered['subject'])
-                ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
-        }
-
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
         return (new MailMessage)
             ->subject('Bienvenue')
             ->greeting('Bonjour '.$notifiable->name.' !')
@@ -49,7 +38,8 @@ class WelcomeNotification extends Notification implements ShouldQueue
             ->line('Merci!');
     }
 
-    public function toArray($notifiable): array
+    /** @return array<string, mixed> */
+    public function toArray(object $notifiable): array
     {
         return [
             'type' => 'welcome',

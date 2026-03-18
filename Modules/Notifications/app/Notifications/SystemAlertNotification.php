@@ -10,22 +10,18 @@ declare(strict_types=1);
 
 namespace Modules\Notifications\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
-use Modules\Notifications\Services\EmailTemplateService;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class SystemAlertNotification extends Notification implements ShouldQueue
+class SystemAlertNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(
         public string $level,
-        public string $message
+        public string $message,
     ) {}
 
+    /** @return array<int, string> */
     public function via(object $notifiable): array
     {
         return ['mail', 'database', 'broadcast'];
@@ -40,21 +36,22 @@ class SystemAlertNotification extends Notification implements ShouldQueue
         ]);
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateSlug(): string
     {
-        $service = app(EmailTemplateService::class);
-        $rendered = $service->render('system_alert', [
+        return 'system_alert';
+    }
+
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
             'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
             'app' => ['name' => config('app.name'), 'url' => config('app.url')],
             'alert_message' => $this->message,
-        ]);
+        ];
+    }
 
-        if ($rendered) {
-            return (new MailMessage)
-                ->subject($rendered['subject'])
-                ->view('notifications::email.html-wrapper', ['content' => $rendered['body_html']]);
-        }
-
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
         $greeting = match ($this->level) {
             'info' => 'Information système',
             'warning' => 'Avertissement système',
@@ -69,6 +66,7 @@ class SystemAlertNotification extends Notification implements ShouldQueue
             ->action('Accéder à votre espace', url('/admin'));
     }
 
+    /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
         return [
