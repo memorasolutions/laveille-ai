@@ -109,7 +109,7 @@
                             <i class="link-arrow" data-lucide="chevron-down"></i>
                         </a>
                         <div class="collapse {{ request()->routeIs('user.articles.*') ? 'show' : '' }}"
-                             id="articlesMenu" data-bs-parent="#sidebarNav">
+                             id="articlesMenu">
                             <ul class="nav sub-menu">
                                 <li class="nav-item">
                                     <a href="{{ route('user.articles.index') }}"
@@ -140,49 +140,24 @@
                         </a>
                     </li>
 
-                    <li class="nav-item {{ request()->routeIs('user.profile', 'user.sessions', 'user.activity') ? 'active' : '' }}">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#profileMenu" role="button"
-                           aria-expanded="{{ request()->routeIs('user.profile', 'user.sessions', 'user.activity') ? 'true' : 'false' }}">
+                    <li class="nav-item {{ request()->routeIs('user.profile') ? 'active' : '' }}">
+                        <a href="{{ route('user.profile') }}" class="nav-link">
                             <i class="link-icon" data-lucide="user"></i>
                             <span class="link-title">{{ __('Mon profil') }}</span>
-                            <i class="link-arrow" data-lucide="chevron-down"></i>
                         </a>
-                        <div class="collapse {{ request()->routeIs('user.profile', 'user.sessions', 'user.activity') ? 'show' : '' }}"
-                             id="profileMenu" data-bs-parent="#sidebarNav">
-                            <ul class="nav sub-menu">
-                                <li class="nav-item">
-                                    <a href="{{ route('user.profile') }}"
-                                       class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }}">
-                                        {{ __('Informations') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('user.sessions') }}"
-                                       class="nav-link {{ request()->routeIs('user.sessions') ? 'active' : '' }}">
-                                        {{ __('Sessions') }}
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('user.activity') }}"
-                                       class="nav-link {{ request()->routeIs('user.activity') ? 'active' : '' }}">
-                                        {{ __('Journal d\'activité') }}
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    </li>
+
+                    <li class="nav-item {{ request()->routeIs('user.sessions') ? 'active' : '' }}">
+                        <a href="{{ route('user.sessions') }}" class="nav-link">
+                            <i class="link-icon" data-lucide="monitor"></i>
+                            <span class="link-title">{{ __('Sessions') }}</span>
+                        </a>
                     </li>
 
                     <li class="nav-item {{ request()->routeIs('user.subscription', 'user.invoices') ? 'active' : '' }}">
                         <a href="{{ route('user.subscription') }}" class="nav-link">
                             <i class="link-icon" data-lucide="credit-card"></i>
                             <span class="link-title">{{ __('Abonnement') }}</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item {{ request()->routeIs('user.api-tokens') ? 'active' : '' }}">
-                        <a href="{{ route('user.api-tokens') }}" class="nav-link">
-                            <i class="link-icon" data-lucide="key"></i>
-                            <span class="link-title">{{ __('Tokens API') }}</span>
                         </a>
                     </li>
 
