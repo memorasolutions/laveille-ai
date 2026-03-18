@@ -10,29 +10,37 @@ declare(strict_types=1);
 
 namespace Modules\AI\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Modules\AI\Models\Ticket;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class TicketSlaWarningNotification extends Notification implements ShouldQueue
+class TicketSlaWarningNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(public Ticket $ticket) {}
 
-    public function via(object $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'ai_ticket_sla_warning';
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'ticket' => [
+                'title' => $this->ticket->title,
+                'due_at' => $this->ticket->due_at?->format('d/m/Y H:i'),
+            ],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject(__('Alerte SLA : ').$this->ticket->title)
             ->line(__('Ticket : ').$this->ticket->title)
-            ->line(__('Échéance : ').$this->ticket->due_at?->format('d/m/Y H:i'))
+            ->line(__('Echeance : ').$this->ticket->due_at?->format('d/m/Y H:i'))
             ->action(__('Voir le ticket'), route('admin.ai.tickets.show', $this->ticket));
     }
 

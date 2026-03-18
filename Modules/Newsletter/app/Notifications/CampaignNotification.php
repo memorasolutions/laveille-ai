@@ -10,32 +10,50 @@ declare(strict_types=1);
 
 namespace Modules\Newsletter\Notifications;
 
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 use Modules\Newsletter\Models\Campaign;
 use Modules\Newsletter\Models\Subscriber;
 
-class CampaignNotification extends Notification
+class CampaignNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(
         protected Campaign $campaign,
         protected Subscriber $subscriber
     ) {}
 
+    /** @return array<int, string> */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateSlug(): string
+    {
+        return 'newsletter_campaign';
+    }
+
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name ?? '', 'email' => $notifiable->email ?? ''],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'campaign' => [
+                'subject' => $this->campaign->subject,
+                'content' => $this->campaign->content,
+            ],
+            'subscriber' => [
+                'token' => $this->subscriber->token,
+            ],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject($this->campaign->subject)
             ->greeting('Bonjour !')
             ->line($this->campaign->content)
-            ->action('Se désabonner', route('newsletter.unsubscribe', $this->subscriber->token));
+            ->action('Se desabonner', route('newsletter.unsubscribe', $this->subscriber->token));
     }
 }

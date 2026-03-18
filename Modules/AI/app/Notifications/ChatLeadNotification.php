@@ -11,26 +11,35 @@ declare(strict_types=1);
 namespace Modules\AI\Notifications;
 
 use App\Models\ContactMessage;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class ChatLeadNotification extends Notification implements ShouldQueue
+class ChatLeadNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(
         protected ContactMessage $contactMessage
     ) {}
 
-    /** @return array<int, string> */
-    public function via(object $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'ai_chat_lead';
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'contact' => [
+                'name' => $this->contactMessage->name,
+                'email' => $this->contactMessage->email,
+                'subject' => $this->contactMessage->subject,
+                'message' => $this->contactMessage->message,
+            ],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject('Nouveau lead via le chatbot')
@@ -40,7 +49,7 @@ class ChatLeadNotification extends Notification implements ShouldQueue
             ->line('**Sujet :** '.$this->contactMessage->subject)
             ->line('**Message :** '.$this->contactMessage->message)
             ->action('Voir dans le backoffice', url('/admin/contact-messages'))
-            ->salutation('L\'équipe MEMORA');
+            ->salutation('L\'equipe MEMORA');
     }
 
     /** @return array<string, mixed> */

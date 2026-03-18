@@ -10,24 +10,46 @@ declare(strict_types=1);
 
 namespace Modules\Newsletter\Notifications;
 
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class DigestNotification extends Notification
+class DigestNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(private readonly Collection $articles) {}
 
     /** @return list<string> */
-    public function via(mixed $notifiable): array
+    public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    public function toMail(mixed $notifiable): MailMessage
+    protected function getTemplateSlug(): string
+    {
+        return 'newsletter_digest';
+    }
+
+    protected function getTemplateData(object $notifiable): array
+    {
+        $locale = app()->getLocale();
+
+        return [
+            'user' => ['name' => $notifiable->name ?? '', 'email' => $notifiable->email ?? ''],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'digest' => [
+                'count' => $this->articles->count(),
+                'articles' => $this->articles->take(5)->map(fn ($article) => [
+                    'title' => $article->getTranslation('title', $locale),
+                    'url' => route('blog.show', $article->getTranslation('slug', $locale)),
+                ])->toArray(),
+            ],
+            'subscriber' => [
+                'token' => $notifiable->token ?? '',
+            ],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
     {
         $count = $this->articles->count();
         $appName = config('app.name');

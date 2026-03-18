@@ -1,24 +1,20 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  *
  * @project memora/laravel-saas-boilerplate
  */
 
+declare(strict_types=1);
+
 namespace Modules\Booking\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class NewBookingAdminNotification extends Notification implements ShouldQueue
+class NewBookingAdminNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(
         public readonly int $appointmentId,
         public readonly string $serviceName,
@@ -26,23 +22,37 @@ class NewBookingAdminNotification extends Notification implements ShouldQueue
         public readonly string $dateTime,
     ) {}
 
-    public function via(mixed $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'booking_new_admin';
     }
 
-    public function toMail(mixed $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'booking' => [
+                'appointment_id' => $this->appointmentId,
+                'service_name' => $this->serviceName,
+                'customer_name' => $this->customerName,
+                'date' => $this->dateTime,
+            ],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject('Nouveau rendez-vous')
-            ->line('Un nouveau rendez-vous a été réservé.')
+            ->line('Un nouveau rendez-vous a ete reserve.')
             ->line('**Service :** '.$this->serviceName)
             ->line('**Client :** '.$this->customerName)
             ->line('**Date :** '.$this->dateTime)
             ->action('Voir le rendez-vous', route('admin.booking.appointments.show', $this->appointmentId));
     }
 
-    public function toArray(mixed $notifiable): array
+    public function toArray(object $notifiable): array
     {
         return [
             'type' => 'new_booking',

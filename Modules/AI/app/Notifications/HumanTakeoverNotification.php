@@ -10,31 +10,38 @@ declare(strict_types=1);
 
 namespace Modules\AI\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Modules\AI\Models\AiConversation;
+use Modules\Core\Notifications\TemplatedNotification;
 
-class HumanTakeoverNotification extends Notification implements ShouldQueue
+class HumanTakeoverNotification extends TemplatedNotification
 {
-    use Queueable;
-
     public function __construct(public AiConversation $conversation) {}
 
-    /** @return array<int, string> */
-    public function via(object $notifiable): array
+    protected function getTemplateSlug(): string
     {
-        return ['mail', 'database'];
+        return 'ai_human_takeover';
     }
 
-    public function toMail(object $notifiable): MailMessage
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'conversation' => [
+                'title' => $this->conversation->title,
+                'user_name' => $this->conversation->user?->name ?? __('Visiteur'),
+            ],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
     {
         $userName = $this->conversation->user?->name ?? __('Visiteur');
 
         return (new MailMessage)
             ->subject(__("Nouvelle demande d'agent"))
-            ->line(__(':user a demandé une prise en charge humaine pour la conversation : :title', [
+            ->line(__(':user a demande une prise en charge humaine pour la conversation : :title', [
                 'user' => $userName,
                 'title' => $this->conversation->title,
             ]))
