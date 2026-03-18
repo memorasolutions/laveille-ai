@@ -36,5 +36,8 @@ class NewsletterServiceProvider extends BaseModuleServiceProvider
     public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(NewsletterMetricProvider::class);
+        $this->app->tag([NewsletterMetricProvider::class], 'metric_providers');
     }
 }
