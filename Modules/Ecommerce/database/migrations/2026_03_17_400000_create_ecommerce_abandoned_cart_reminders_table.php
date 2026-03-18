@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamp('recovered_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['cart_id', 'reminder_number']);
+            $table->unique(['cart_id', 'reminder_number'], 'ecom_cart_reminder_unique');
         });
     }
 

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('sort_order')->default(0);
             $table->timestamps();
 
-            $table->unique(['product_id', 'related_product_id', 'type']);
+            $table->unique(['product_id', 'related_product_id', 'type'], 'ecom_related_prod_unique');
         });
     }
 
