@@ -98,7 +98,7 @@
                                 </div>
                                 <div class="header-right-menu-wrap">
                                     <button class="right-menu-close"><i class="ti-close"></i></button>
-                                    <div class="logo"><img src="{{ asset('images/logo.webp') }}" alt=""></div>
+                                    <div class="logo"><img src="{{ fronttheme_asset('images/logo2.png') }}" alt="{{ config('app.name') }}"></div>
                                     <div class="header-right-sec">
                                         <div class="project-widget widget">
                                             <h3>{{ __('Derniers articles') }}</h3>
@@ -108,7 +108,7 @@
                                                         <div class="post">
                                                             <div class="img-holder">
                                                                 @if($article->featured_image)
-                                                                    <img src="{{ $article->featured_image }}" alt="{{ $article->title }}">
+                                                                    <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}">
                                                                 @else
                                                                     <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="">
                                                                 @endif
