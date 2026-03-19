@@ -12,6 +12,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Nwidart\Modules\Facades\Module;
 
 class DatabaseSeeder extends Seeder
 {
@@ -47,20 +48,22 @@ class DatabaseSeeder extends Seeder
         // 3. Feature flags Pennant
         $this->call(FeatureFlagSeeder::class);
 
-        // 4. Seeders des modules actifs
+        // 4. Seeders des modules actifs (module => seeder)
         $moduleSeeders = [
-            \Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class,
-            \Modules\SEO\Database\Seeders\SEODatabaseSeeder::class,
-            \Modules\SaaS\Database\Seeders\SaaSDatabaseSeeder::class,
-            \Modules\Privacy\Database\Seeders\CookieCategorySeeder::class,
-            OnboardingStepSeeder::class,
+            'Settings' => \Modules\Settings\Database\Seeders\SettingsDatabaseSeeder::class,
+            'SEO' => \Modules\SEO\Database\Seeders\SEODatabaseSeeder::class,
+            'SaaS' => \Modules\SaaS\Database\Seeders\SaaSDatabaseSeeder::class,
+            'Privacy' => \Modules\Privacy\Database\Seeders\CookieCategorySeeder::class,
         ];
 
-        foreach ($moduleSeeders as $seeder) {
-            if (class_exists($seeder)) {
+        foreach ($moduleSeeders as $moduleName => $seeder) {
+            $module = Module::find($moduleName);
+            if ($module && $module->isEnabled() && class_exists($seeder)) {
                 $this->call($seeder);
             }
         }
+
+        $this->call(OnboardingStepSeeder::class);
 
         // 5. Données de démo (hors production)
         if (! app()->isProduction()) {

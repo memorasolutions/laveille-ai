@@ -21,6 +21,15 @@ use Modules\Core\Http\Middleware\SetBackofficeTheme;
 // oEmbed endpoint (public, no auth)
 Route::get('oembed', OEmbedController::class)->middleware('web')->name('oembed');
 
+// Routes publiques blog (nécessite FrontTheme)
+if (\Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
+    Route::middleware(['web', \Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class])->group(function () {
+        Route::get('/blog', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'index'])->name('blog.index');
+        Route::get('/blog/{slug}', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'show'])->name('blog.show');
+        Route::get('/categorie/{slug}', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'category'])->name('blog.category');
+    });
+}
+
 // Routes admin
 Route::prefix('admin/blog')
     ->name('admin.blog.')

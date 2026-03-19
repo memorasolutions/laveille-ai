@@ -23,7 +23,11 @@ return new class extends Migration
             $table->string('trigger_type', 50)->index();
             $table->json('trigger_config')->nullable();
             $table->string('status', 20)->default('draft')->index();
-            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->nullOnDelete();
+            if (Schema::hasTable('tenants')) {
+                $table->foreignId('tenant_id')->nullable()->constrained('tenants')->nullOnDelete();
+            } else {
+                $table->unsignedBigInteger('tenant_id')->nullable();
+            }
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });

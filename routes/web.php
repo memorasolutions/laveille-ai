@@ -13,10 +13,12 @@ use Illuminate\Support\Facades\Route;
 // Sitemap dynamique
 Route::get('/sitemap.xml', [\Modules\SEO\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
-// Pas de frontend - redirection vers login
-Route::get('/', function () {
-    return redirect()->route('login');
-})->name('home');
+// Page d'accueil : gérée par le module FrontTheme si actif, sinon fallback login
+if (! \Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
+    Route::get('/', function () {
+        return redirect()->route('login');
+    })->name('home');
+}
 
 // Passkeys (spatie/laravel-passkeys)
 Route::passkeys();
