@@ -34,6 +34,10 @@
     <link href="{{ fronttheme_asset('css/component.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('sass/style.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/responsive.css') }}" rel="stylesheet">
+    <style>
+        .wpo-breadcumb-area { background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%) !important; }
+        .navbar-brand img { max-height: 50px; width: auto; }
+    </style>
     @stack('styles')
 </head>
 

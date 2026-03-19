@@ -59,9 +59,23 @@
             </ul>
         </div>
     @endisset
-    <div class="wpo-contact-widget widget">
-        <h2>{{ __('Comment nous aider ?') }}</h2>
-        <p>{{ __('Contactez-nous pour toute question ou suggestion.') }}</p>
-        <a href="{{ route('contact') }}">{{ __('Contactez-nous') }}</a>
-    </div>
+    @if(Route::has('newsletter.subscribe'))
+        <div class="wpo-contact-widget widget">
+            <h2>{{ __('Restez informé') }}</h2>
+            <p>{{ __('Inscrivez-vous pour recevoir nos derniers articles.') }}</p>
+            <form action="{{ route('newsletter.subscribe') }}" method="POST">
+                @csrf
+                <div style="margin-bottom: 10px;">
+                    <input type="email" name="email" class="form-control" placeholder="{{ __('Votre courriel') }}" required style="border-radius: 4px;">
+                </div>
+                <button type="submit" class="theme-btn" style="width: 100%; border: none; padding: 10px;">{{ __('S\'inscrire') }}</button>
+            </form>
+        </div>
+    @else
+        <div class="wpo-contact-widget widget">
+            <h2>{{ __('Comment nous aider ?') }}</h2>
+            <p>{{ __('Contactez-nous pour toute question ou suggestion.') }}</p>
+            <a href="{{ route('contact') }}">{{ __('Contactez-nous') }}</a>
+        </div>
+    @endif
 </div>

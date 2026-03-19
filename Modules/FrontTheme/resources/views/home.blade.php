@@ -4,33 +4,42 @@
 
 @section('content')
 
-    <!-- hero slider -->
-    <section class="wpo-hero-slider">
-        <div class="swiper-container">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <div class="slide-inner slide-bg-image" data-background="{{ fronttheme_asset('images/slider/slide-1.jpg') }}">
-                        <div class="gradient-overlay"></div>
-                        <div class="container">
-                            <div class="slide-content">
-                                <div data-swiper-parallax="300" class="slide-title">
-                                    <h2>{{ __('Bienvenue sur') }} {{ config('app.name') }}</h2>
-                                </div>
-                                <div data-swiper-parallax="400" class="slide-text">
-                                    <p>{{ __('Découvrez nos derniers articles, actualités et conseils.') }}</p>
-                                </div>
-                                <div class="clearfix"></div>
-                                <div data-swiper-parallax="500" class="slide-btns">
-                                    <a href="{{ route('blog.index') }}" class="theme-btn">{{ __('Lire le blog') }}</a>
+    <!-- hero dynamique - dernier article -->
+    @php $heroArticle = $latestArticle ?? $articles->first(); @endphp
+    @if($heroArticle)
+        <section class="wpo-hero-slider">
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="slide-inner slide-bg-image"
+                             @if($heroArticle->featured_image)
+                                 data-background="{{ asset($heroArticle->featured_image) }}"
+                             @else
+                                 style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%);"
+                             @endif
+                        >
+                            <div class="gradient-overlay"></div>
+                            <div class="container">
+                                <div class="slide-content">
+                                    <div data-swiper-parallax="300" class="slide-title">
+                                        <h2>{{ $heroArticle->title }}</h2>
+                                    </div>
+                                    <div data-swiper-parallax="400" class="slide-text">
+                                        <p>{{ Str::limit($heroArticle->excerpt ?? strip_tags($heroArticle->content), 160) }}</p>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                    <div data-swiper-parallax="500" class="slide-btns">
+                                        <a href="{{ route('blog.show', $heroArticle->slug) }}" class="theme-btn">{{ __('Lire l\'article') }}</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-    <!-- end hero slider -->
+        </section>
+    @endif
+    <!-- end hero -->
 
     <!-- start wpo-blog-section -->
     <section class="wpo-blog-section section-padding">
