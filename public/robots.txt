@@ -1,7 +1,8 @@
 User-agent: *
-Disallow:
-
+Allow: /
 Disallow: /admin/
 Disallow: /api/
+Disallow: /login
+Disallow: /register
 
-Sitemap: /sitemap.xml
+Sitemap: https://laveilledestef.com/sitemap.xml

@@ -1,10 +1,10 @@
 <div class="blog-sidebar">
     <div class="widget about-widget">
         <div class="img-holder">
-            <img src="{{ fronttheme_asset('images/blog/about-widget.jpg') }}" alt="">
+            <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="border-radius: 50%; max-width: 150px;">
         </div>
         <h4>{{ config('app.name') }}</h4>
-        <p>{{ __('Bienvenue sur notre blog. Restez informé des dernières actualités technologiques.') }}</p>
+        <p>{{ __('Votre veille sur l\'IA, les technologies et la transformation numérique au Québec.') }}</p>
         <div class="aw-shape">
             <img src="{{ fronttheme_asset('images/blog/ab.png') }}" alt="">
         </div>
