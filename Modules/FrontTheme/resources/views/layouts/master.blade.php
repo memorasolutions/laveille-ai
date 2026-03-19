@@ -35,39 +35,11 @@
     <link href="{{ fronttheme_asset('sass/style.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/responsive.css') }}" rel="stylesheet">
     <style>
-        .wpo-breadcumb-area { background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%) !important; }
         .navbar-brand img { max-height: 50px; width: auto; }
-        /* Fix liens bleu Bootstrap - appliquer les couleurs du thème Bloggar */
-        .wpo-blog-section .post h3 a,
-        .wpo-blog-section .entry-details h3 a { color: #232F5F; text-decoration: none; }
-        .wpo-blog-section .post h3 a:hover,
-        .wpo-blog-section .entry-details h3 a:hover { color: #3756f7; }
-        .wpo-blog-section .entry-meta ul li,
-        .wpo-blog-section .entry-meta ul li a { color: #636893; text-decoration: none; }
-        .wpo-blog-section .entry-details .read-more { color: #3756f7; text-decoration: none; text-transform: uppercase; font-weight: 600; font-size: 14px; }
-        .wpo-blog-section .entry-details .read-more:hover { text-decoration: underline; }
-        .wpo-blog-section .entry-details p { color: #444; }
-        .wpo-blog-section .post { margin-bottom: 30px; }
-        .wpo-blog-section .entry-media img { width: 100%; height: auto; }
-        .wpo-blog-section .entry-meta { margin-bottom: 10px; }
-        .wpo-blog-section .entry-meta ul { list-style: disc; padding-left: 20px; }
-        .wpo-blog-section .entry-meta ul li { font-size: 14px; }
-        /* Fix liens blog listing + catégorie (même problème Bootstrap) */
-        .wpo-blog-pg-section .entry-details h3 a { color: #232F5F; text-decoration: none; }
-        .wpo-blog-pg-section .entry-details h3 a:hover { color: #3756f7; }
-        .wpo-blog-pg-section .entry-meta ul li a { color: #636893; text-decoration: none; }
-        .wpo-blog-pg-section .entry-details .read-more { color: #3756f7; text-decoration: none; text-transform: uppercase; font-weight: 600; font-size: 14px; }
-        .wpo-blog-pg-section .entry-details .read-more:hover { text-decoration: underline; }
-        /* Fix liens blog single */
-        .wpo-blog-single-section .entry-meta ul li a { color: #636893; text-decoration: none; }
-        /* Fix liens globaux dans le contenu des articles */
-        .wpo-blog-content a { color: #3756f7; }
-        .wpo-blog-content a:hover { color: #232F5F; }
-        /* Fix sidebar liens */
-        .blog-sidebar .category-widget ul li a { color: #444; text-decoration: none; }
-        .blog-sidebar .category-widget ul li a:hover { color: #3756f7; }
-        .blog-sidebar .recent-post-widget .post h4 a { color: #232F5F; text-decoration: none; }
-        .blog-sidebar .recent-post-widget .post h4 a:hover { color: #3756f7; }
+        .wpo-breadcumb-area { background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%) !important; }
+        /* Fix SVG/icônes sans taille dans le contenu importé */
+        .wpo-blog-content svg, .entry-details svg { max-width: 24px; max-height: 24px; }
+        .wpo-blog-content img:not([width]) { max-width: 100%; height: auto; }
     </style>
     @stack('styles')
 </head>

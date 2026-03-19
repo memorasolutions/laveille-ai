@@ -19,7 +19,7 @@ class HomeController extends Controller
 {
     public function index(): View
     {
-        $articles = new LengthAwarePaginator([], 0, 9);
+        $articles = collect();
 
         $articleClass = 'Modules\\Blog\\Models\\Article';
 
@@ -28,7 +28,8 @@ class HomeController extends Controller
                 ->published()
                 ->with(['user', 'blogCategory'])
                 ->latest('published_at')
-                ->paginate(9);
+                ->take(12)
+                ->get();
         }
 
         return view('fronttheme::home', compact('articles'));
