@@ -36,6 +36,7 @@
     <link href="{{ fronttheme_asset('css/responsive.css') }}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
     <link href="{{ asset('css/charte.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/components.css') }}" rel="stylesheet">
     <style>
         /* Tailles spécifiques au layout */
         .navbar-brand img { max-height: 50px; width: auto; }

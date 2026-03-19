@@ -1,0 +1,315 @@
+/* ═══════════════════════════════════════════════════
+   COMPOSANTS VISUELS — LA VEILLE DE STEF
+   Callouts, Timeline, Tableaux, Citations
+   Chargé APRÈS charte.css
+   ═══════════════════════════════════════════════════ */
+
+/* ── 1. CALLOUTS (10 types) ── */
+
+.custom-callout {
+    border-radius: var(--r-base);
+    margin: 1.5rem 0;
+    overflow: hidden;
+    border-left: 4px solid;
+}
+
+.custom-callout .callout-header {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    font-weight: 700;
+    font-family: var(--f-heading);
+    font-size: 0.95rem;
+}
+
+.custom-callout .callout-icon {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.custom-callout .callout-title {
+    font-weight: 700;
+}
+
+.custom-callout .callout-content {
+    padding: 0 1.25rem 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.custom-callout .callout-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Types */
+.callout-conseil     { border-left-color: #0B7285; background: rgba(11, 114, 133, 0.06); }
+.callout-conseil .callout-header { color: #064E5C; }
+
+.callout-retenir     { border-left-color: #E67E22; background: rgba(230, 126, 34, 0.06); }
+.callout-retenir .callout-header { color: #B4591C; }
+
+.callout-vulgarisateur { border-left-color: #059669; background: rgba(5, 150, 105, 0.06); }
+.callout-vulgarisateur .callout-header { color: #047857; }
+
+.callout-exemple     { border-left-color: #0284C7; background: rgba(2, 132, 199, 0.06); }
+.callout-exemple .callout-header { color: #0369A1; }
+
+.callout-savoir      { border-left-color: #7C3AED; background: rgba(124, 58, 237, 0.06); }
+.callout-savoir .callout-header { color: #6D28D9; }
+
+.callout-attention   { border-left-color: #DC2626; background: rgba(220, 38, 38, 0.06); }
+.callout-attention .callout-header { color: #B91C1C; }
+
+.callout-chiffre     { border-left-color: #4F46E5; background: rgba(79, 70, 229, 0.06); }
+.callout-chiffre .callout-header { color: #4338CA; }
+
+.callout-avantage    { border-left-color: #047857; background: rgba(4, 120, 87, 0.06); }
+.callout-avantage .callout-header { color: #065F46; }
+
+.callout-citation    { border-left-color: #555B6A; background: rgba(85, 91, 106, 0.06); }
+.callout-citation .callout-header { color: #3F4451; }
+
+.callout-inconvenient { border-left-color: #B91C1C; background: rgba(185, 28, 28, 0.06); }
+.callout-inconvenient .callout-header { color: #991B1B; }
+
+.callout-perso       { border-left-color: #0B7285; background: rgba(11, 114, 133, 0.06); }
+.callout-perso .callout-header { color: #064E5C; }
+
+/* ── 2. TIMELINE ── */
+
+.simple-timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 2rem auto;
+}
+
+.simple-timeline .timeline-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-family: var(--f-heading);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--c-dark);
+}
+
+.simple-timeline .timeline-line {
+    position: relative;
+}
+
+.simple-timeline .timeline-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 3px;
+    height: 100%;
+    background: #D5D9E0;
+    transform: translateX(-50%);
+}
+
+.simple-timeline .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.simple-timeline .timeline-point {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 0.9rem;
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.simple-timeline .timeline-box {
+    background: #fff;
+    padding: 1.25rem;
+    border-radius: var(--r-base);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    margin-left: 1rem;
+    flex: 1;
+}
+
+.simple-timeline .timeline-date {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.25rem;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: var(--f-heading);
+    margin-bottom: 0.5rem;
+}
+
+.simple-timeline .timeline-heading {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--c-dark);
+    margin-bottom: 0.5rem;
+}
+
+.simple-timeline .timeline-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #555B6A;
+}
+
+@media (max-width: 768px) {
+    .simple-timeline .timeline-line::before { left: 18px; }
+}
+
+/* ── 3. TABLEAUX ── */
+
+.tableau-wrapper {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #fff;
+    border-radius: var(--r-base);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tableau-titre {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--c-primary);
+    padding: 1rem 1.25rem 0.5rem;
+}
+
+.tableau-article {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableau-article th,
+.tableau-article td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ECEEF2;
+}
+
+.tableau-article thead th {
+    background: var(--c-primary);
+    color: #fff;
+    font-family: var(--f-heading);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.tableau-article thead th:first-child { border-radius: var(--r-base) 0 0 0; }
+.tableau-article thead th:last-child { border-radius: 0 var(--r-base) 0 0; }
+
+.tableau-zebra tbody tr:nth-child(even) { background: #F6F7F9; }
+.tableau-hover tbody tr:hover { background: rgba(11, 114, 133, 0.04); }
+
+/* ── 4. CITATIONS WP ── */
+
+.wp-block-quote {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-left: 4px solid var(--c-accent);
+    background: rgba(230, 126, 34, 0.05);
+    border-radius: 0 var(--r-base) var(--r-base) 0;
+    font-style: italic;
+    color: #555B6A;
+}
+
+.wp-block-quote p:last-child { margin-bottom: 0; }
+
+.wp-block-quote cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--c-dark);
+    font-size: 0.9rem;
+}
+
+/* ── 5. CODE ── */
+
+.wp-block-code {
+    background: var(--c-dark);
+    color: #F6F7F9;
+    padding: 1.25rem;
+    border-radius: var(--r-base);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.wp-block-code code,
+.wp-block-code pre {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* ── 6. TABLES WP ── */
+
+.wp-block-table {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+}
+
+.wp-block-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.wp-block-table th,
+.wp-block-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ECEEF2;
+}
+
+.wp-block-table thead th {
+    background: var(--c-primary);
+    color: #fff;
+    font-family: var(--f-heading);
+    font-weight: 700;
+}
+
+.wp-block-table tbody tr:nth-child(even) { background: #F6F7F9; }
+.wp-block-table tbody tr:hover { background: rgba(11, 114, 133, 0.04); }
+
+/* ── 7. BADGES & HIGHLIGHTS ── */
+
+.thought-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: var(--f-heading);
+    color: var(--c-primary);
+    background: rgba(11, 114, 133, 0.1);
+    border-radius: 0.375rem;
+    vertical-align: middle;
+}
+
+.highlight-diff-selection {
+    background: #FEF3C7;
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+}
+
+/* ── 8. HEADINGS WP ── */
+
+.wp-block-heading {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    color: var(--c-dark);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
