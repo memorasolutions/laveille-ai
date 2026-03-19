@@ -8,7 +8,7 @@
                         <div class="logo widget-title">
                             <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}">
                         </div>
-                        <p>{{ __('Votre source d\'information sur les technologies et l\'intelligence artificielle.') }}</p>
+                        <p>{{ __('Votre plateforme d\'information dédiée à l\'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.') }}</p>
                     </div>
                 </div>
                 <div class="col col-lg-3 col-md-6 col-sm-12 col-12">
@@ -23,14 +23,12 @@
                 </div>
                 <div class="col col-lg-4 col-md-6 col-sm-12 col-12">
                     <div class="widget tag-widget">
-                        <div class="widget-title"><h3>{{ __('Tags populaires') }}</h3></div>
+                        <div class="widget-title"><h3>{{ __('Catégories') }}</h3></div>
                         <ul>
-                            @isset($tags)
-                                @forelse($tags as $tag)
-                                    <li><a href="{{ route('blog.index', ['tag' => $tag->slug ?? $tag]) }}">{{ $tag->name ?? $tag }}</a></li>
-                                @empty
-                                    <li>{{ __('Aucun tag disponible') }}</li>
-                                @endforelse
+                            @isset($categories)
+                                @foreach($categories as $category)
+                                    <li><a href="{{ route('blog.category', $category->slug) }}">{{ $category->name }}</a></li>
+                                @endforeach
                             @endisset
                         </ul>
                     </div>
@@ -39,10 +37,8 @@
                     <div class="widget social-widget">
                         <div class="widget-title"><h3>{{ __('Réseaux sociaux') }}</h3></div>
                         <ul>
-                            <li><a href="#"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt=""></i> Facebook</a></li>
-                            <li><a href="#"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt=""></i> Twitter</a></li>
-                            <li><a href="#"><i><img src="{{ fronttheme_asset('images/ft-icon/3.png') }}" alt=""></i> Instagram</a></li>
-                            <li><a href="#"><i><img src="{{ fronttheme_asset('images/ft-icon/4.png') }}" alt=""></i> Youtube</a></li>
+                            <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt=""></i> Facebook</a></li>
+                            <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt=""></i> Messenger</a></li>
                         </ul>
                     </div>
                 </div>
