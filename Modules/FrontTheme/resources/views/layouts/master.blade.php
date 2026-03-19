@@ -52,9 +52,22 @@
         .wpo-blog-section .entry-meta { margin-bottom: 10px; }
         .wpo-blog-section .entry-meta ul { list-style: disc; padding-left: 20px; }
         .wpo-blog-section .entry-meta ul li { font-size: 14px; }
+        /* Fix liens blog listing + catégorie (même problème Bootstrap) */
+        .wpo-blog-pg-section .entry-details h3 a { color: #232F5F; text-decoration: none; }
+        .wpo-blog-pg-section .entry-details h3 a:hover { color: #3756f7; }
+        .wpo-blog-pg-section .entry-meta ul li a { color: #636893; text-decoration: none; }
+        .wpo-blog-pg-section .entry-details .read-more { color: #3756f7; text-decoration: none; text-transform: uppercase; font-weight: 600; font-size: 14px; }
+        .wpo-blog-pg-section .entry-details .read-more:hover { text-decoration: underline; }
+        /* Fix liens blog single */
+        .wpo-blog-single-section .entry-meta ul li a { color: #636893; text-decoration: none; }
         /* Fix liens globaux dans le contenu des articles */
         .wpo-blog-content a { color: #3756f7; }
         .wpo-blog-content a:hover { color: #232F5F; }
+        /* Fix sidebar liens */
+        .blog-sidebar .category-widget ul li a { color: #444; text-decoration: none; }
+        .blog-sidebar .category-widget ul li a:hover { color: #3756f7; }
+        .blog-sidebar .recent-post-widget .post h4 a { color: #232F5F; text-decoration: none; }
+        .blog-sidebar .recent-post-widget .post h4 a:hover { color: #3756f7; }
     </style>
     @stack('styles')
 </head>
