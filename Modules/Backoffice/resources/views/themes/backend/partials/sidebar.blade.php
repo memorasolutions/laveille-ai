@@ -344,6 +344,16 @@
             </li>
             @endcanany
 
+            {{-- ===== PUBLICITÉS ===== --}}
+            @if(Route::has('admin.ads.index'))
+            <li class="nav-item {{ request()->routeIs('admin.ads.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.ads.index') }}" class="nav-link" {{ request()->routeIs('admin.ads.*') ? 'aria-current=page' : '' }}>
+                    <i class="link-icon" data-lucide="megaphone"></i>
+                    <span class="link-title">{{ __('Publicités') }}</span>
+                </a>
+            </li>
+            @endif
+
             {{-- ===== 5. CONFIGURATION ===== --}}
             @canany(['view_branding', 'view_seo', 'view_translations', 'view_feature_flags', 'view_email_templates', 'view_settings', 'view_themes'])
             <li class="nav-item nav-category">{{ __('Configuration') }}</li>

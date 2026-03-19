@@ -35,6 +35,9 @@
                                     <a href="{{ route('blog.show', $article->slug) }}" class="read-more">{{ __('LIRE LA SUITE...') }}</a>
                                 </div>
                             </div>
+                            @if($loop->iteration === 3 && class_exists(\Modules\Ads\Services\AdsRenderer::class))
+                                {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('between-posts') !!}
+                            @endif
                         @empty
                             <div class="alert alert-info">{{ __('Aucun article trouvé.') }}</div>
                         @endforelse
