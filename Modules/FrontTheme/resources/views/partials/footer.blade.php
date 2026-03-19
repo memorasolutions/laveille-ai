@@ -17,6 +17,9 @@
                         <ul>
                             <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
                             <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
+                            @if(Route::has('page.show'))
+                                <li><a href="{{ route('page.show', 'a-propos') }}">{{ __('À propos') }}</a></li>
+                            @endif
                             <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
                             @if(Route::has('legal.privacy'))
                                 <li><a href="{{ route('legal.privacy') }}">{{ __('Politique de confidentialité') }}</a></li>

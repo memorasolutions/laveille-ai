@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 use Modules\Pages\Http\Controllers\Admin\StaticPageController;
+use Modules\Pages\Http\Controllers\PublicPageController;
+
+// Route publique pages statiques (nécessite FrontTheme)
+if (\Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
+    Route::middleware(['web', \Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class])->group(function () {
+        Route::get('/page/{slug}', [PublicPageController::class, 'show'])->name('page.show');
+    });
+}
 
 Route::prefix('admin/pages')
     ->name('admin.pages.')
