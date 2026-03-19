@@ -8,4 +8,11 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
-// Define your web routes here
+use Modules\Faq\Http\Controllers\PublicFaqController;
+
+// Route publique FAQ (nécessite FrontTheme)
+if (\Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
+    Route::middleware(['web', \Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class])->group(function () {
+        Route::get('/faq', [PublicFaqController::class, 'index'])->name('faq.index');
+    });
+}

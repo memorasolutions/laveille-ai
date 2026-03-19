@@ -20,6 +20,9 @@
                             @if(Route::has('page.show'))
                                 <li><a href="{{ route('page.show', 'a-propos') }}">{{ __('À propos') }}</a></li>
                             @endif
+                            @if(Route::has('faq.index'))
+                                <li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>
+                            @endif
                             <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
                             @if(Route::has('legal.privacy'))
                                 <li><a href="{{ route('legal.privacy') }}">{{ __('Politique de confidentialité') }}</a></li>
