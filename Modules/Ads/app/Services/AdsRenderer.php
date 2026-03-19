@@ -25,6 +25,32 @@ class AdsRenderer
         }, $content);
     }
 
+    public function injectAfterParagraph(string $content, string $adKey, int $afterParagraph = 3): string
+    {
+        $ad = $this->render($adKey);
+        if (! $ad) {
+            return $content;
+        }
+
+        $paragraphs = preg_split('/(<\/p>)/i', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $result = '';
+        $pCount = 0;
+        $injected = false;
+
+        for ($i = 0; $i < count($paragraphs); $i++) {
+            $result .= $paragraphs[$i];
+            if ($paragraphs[$i] === '</p>') {
+                $pCount++;
+                if ($pCount === $afterParagraph && ! $injected) {
+                    $result .= "\n".$ad."\n";
+                    $injected = true;
+                }
+            }
+        }
+
+        return $result;
+    }
+
     public function clearCache(?string $key = null): void
     {
         if ($key) {

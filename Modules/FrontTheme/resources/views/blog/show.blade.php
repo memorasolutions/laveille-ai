@@ -38,11 +38,15 @@
                             </div>
                             <h2>{{ $article->title }}</h2>
                             <div class="entry-details">
-                                @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
-                                    {!! app(\Modules\Ads\Services\AdsRenderer::class)->renderShortcodes($article->content) !!}
-                                @else
-                                    {!! $article->content !!}
-                                @endif
+                                @php
+                                    $articleContent = $article->content;
+                                    if (class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
+                                        $adsRenderer = app(\Modules\Ads\Services\AdsRenderer::class);
+                                        $articleContent = $adsRenderer->renderShortcodes($articleContent);
+                                        $articleContent = $adsRenderer->injectAfterParagraph($articleContent, 'article-inline', 3);
+                                    }
+                                @endphp
+                                {!! $articleContent !!}
                             </div>
                         </div>
 
