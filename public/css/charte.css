@@ -54,11 +54,29 @@ a:hover { color: var(--c-primary); }
 /* ── 3. HEADER & TOPBAR ── */
 
 .topbar {
-    background-color: var(--c-dark);
+    background-color: var(--c-primary);
+    border-bottom: none;
+}
+
+.topbar .contact-intro ul li {
+    color: #fff;
 }
 
 .topbar .contact-intro ul li.update span {
     background: var(--c-accent);
+    color: #fff;
+    font-family: var(--f-heading);
+    font-weight: 700;
+    border-radius: var(--r-btn);
+    padding: 4px 12px;
+}
+
+.topbar .contact-info ul li a {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.topbar .contact-info ul li a:hover {
+    color: #fff;
 }
 
 .wpo-site-header .navigation .navbar-nav > li > a {
