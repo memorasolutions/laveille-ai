@@ -46,10 +46,25 @@
                         <ul class="nav navbar-nav mb-2 mb-lg-0">
                             <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
                             <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
+                            @isset($categories)
+                            <li class="menu-item-has-children">
+                                <a href="#">{{ __('Catégories') }}</a>
+                                <ul class="sub-menu">
+                                    @foreach($categories as $cat)
+                                        <li><a href="{{ route('blog.category', $cat->slug) }}">{{ $cat->name }}</a></li>
+                                    @endforeach
+                                </ul>
+                            </li>
+                            @endisset
                             <li class="menu-item-has-children">
                                 <a href="#">{{ __('Pages') }}</a>
                                 <ul class="sub-menu">
-                                    <li><a href="{{ route('blog.index') }}">{{ __('Archives') }}</a></li>
+                                    @if(Route::has('page.show'))
+                                        <li><a href="{{ route('page.show', 'a-propos') }}">{{ __('À propos') }}</a></li>
+                                    @endif
+                                    @if(Route::has('faq.index'))
+                                        <li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>
+                                    @endif
                                     <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
                                 </ul>
                             </li>
