@@ -14,7 +14,21 @@ class AdsRenderer
         return Cache::remember("ad_placement:{$key}", 600, function () use ($key) {
             $ad = AdPlacement::active()->byKey($key)->first();
 
-            return $ad?->ad_code;
+            if (! $ad) {
+                return null;
+            }
+
+            $html = $ad->ad_code;
+
+            // Pubs internes : ajouter le label "Publicité" (les externes comme Google le gèrent elles-mêmes)
+            if (! $ad->is_external) {
+                $html = '<div class="ad-wrapper ad-internal">'
+                    .'<span class="ad-label">Publicité</span>'
+                    .$html
+                    .'</div>';
+            }
+
+            return $html;
         });
     }
 

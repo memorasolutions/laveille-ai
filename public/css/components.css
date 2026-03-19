@@ -304,7 +304,26 @@
     border-radius: 2px;
 }
 
-/* ── 8. HEADINGS WP ── */
+/* ── 8. PUBLICITÉS ── */
+
+.ad-wrapper {
+    position: relative;
+    margin: 2rem 0;
+}
+
+.ad-wrapper .ad-label {
+    display: block;
+    font-family: var(--f-body);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #939AAB;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+    text-align: right;
+}
+
+/* ── 9. HEADINGS WP ── */
 
 .wp-block-heading {
     font-family: var(--f-heading);

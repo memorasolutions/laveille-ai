@@ -11,9 +11,9 @@ class AdPlacement extends Model
 {
     protected $table = 'ads_placements';
 
-    protected $fillable = ['key', 'name', 'description', 'ad_code', 'is_active', 'sort_order'];
+    protected $fillable = ['key', 'name', 'description', 'ad_code', 'is_active', 'is_external', 'sort_order'];
 
-    protected $casts = ['is_active' => 'boolean'];
+    protected $casts = ['is_active' => 'boolean', 'is_external' => 'boolean'];
 
     public function scopeActive(Builder $query): Builder
     {
