@@ -49,7 +49,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="col col-lg-4">
+                <div class="col col-lg-4 d-none d-lg-block">
                     @include('fronttheme::partials.sidebar')
                 </div>
             </div>

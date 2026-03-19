@@ -82,16 +82,9 @@
                             </div>
                         </div>
 
-                        <!-- comments placeholder -->
-                        <div class="comments-area">
-                            <div class="comments-section">
-                                <h3 class="comments-title">{{ __('Commentaires') }}</h3>
-                                <p>{{ __('Les commentaires seront bientôt disponibles.') }}</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
-                <div class="col col-lg-4">
+                <div class="col col-lg-4 d-none d-lg-block">
                     @include('fronttheme::partials.sidebar')
                 </div>
             </div>
