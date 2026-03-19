@@ -28,25 +28,25 @@
     :root {
         --cc-bg: #ffffff;
         --cc-text: #1f2937;
-        --cc-btn-primary: #111827;
+        --cc-btn-primary: #0B7285;
         --cc-btn-primary-text: #ffffff;
-        --cc-btn-secondary: #e5e7eb;
-        --cc-btn-secondary-text: #1f2937;
-        --cc-border: #e5e7eb;
+        --cc-btn-secondary: #ECEEF2;
+        --cc-btn-secondary-text: #1A1D23;
+        --cc-border: #D5D9E0;
         --cc-overlay: rgba(0, 0, 0, 0.5);
-        --cc-toggle-bg: #d1d5db;
-        --cc-toggle-active: #10b981;
+        --cc-toggle-bg: #B8BDC9;
+        --cc-toggle-active: #0B7285;
     }
     @media (prefers-color-scheme: dark) {
         :root {
-            --cc-bg: #1f2937;
-            --cc-text: #f3f4f6;
-            --cc-btn-primary: #f3f4f6;
-            --cc-btn-primary-text: #1f2937;
-            --cc-btn-secondary: #374151;
-            --cc-btn-secondary-text: #f3f4f6;
-            --cc-border: #374151;
-            --cc-toggle-bg: #4b5563;
+            --cc-bg: #1A1D23;
+            --cc-text: #F6F7F9;
+            --cc-btn-primary: #0B7285;
+            --cc-btn-primary-text: #ffffff;
+            --cc-btn-secondary: #2D3039;
+            --cc-btn-secondary-text: #F6F7F9;
+            --cc-border: #3F4451;
+            --cc-toggle-bg: #555B6A;
         }
     }
     #cc-host { font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; }

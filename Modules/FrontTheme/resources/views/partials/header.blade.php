@@ -6,7 +6,7 @@
                 <div class="col col-lg-7 col-md-9 col-sm-12 col-12">
                     <div class="contact-intro">
                         <ul>
-                            <li class="update"><span>New Update</span></li>
+                            <li class="update"><span>{{ __('Nouveau') }}</span></li>
                             <li>{{ $latestArticle->title ?? __('Bienvenue sur le blog') }}</li>
                         </ul>
                     </div>

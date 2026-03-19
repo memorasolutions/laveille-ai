@@ -382,3 +382,46 @@ select:focus {
     background: var(--c-primary);
     color: #fff;
 }
+
+/* ── 18. OVERRIDES COMPLETS - Toutes les occurrences #3756f7 restantes ── */
+
+/* Sidebar */
+.blog-sidebar .widget h3:before { background: var(--c-primary); }
+.blog-sidebar .about-widget a:hover { color: var(--c-primary); }
+.blog-sidebar .category-widget ul a:hover,
+.blog-sidebar .category-widget ul li:hover:before { color: var(--c-primary); }
+
+/* Blog listing */
+.wpo-blog-pg-section .post h3 a:hover { color: var(--c-primary); }
+.wpo-blog-pg-section .post a.read-more:hover { color: var(--c-primary); }
+.wpo-blog-pg-section .entry-meta ul li a:hover { color: var(--c-primary); }
+.wpo-blog-pg-section .format-video .video-holder:before { background: var(--c-primary); }
+.wpo-blog-pg-section .format-gallery .owl-nav [class*=owl-]:hover { background: var(--c-primary); }
+
+/* Social links */
+.social-links li a:hover { background: var(--c-primary); }
+
+/* Header side panel */
+.wpo-site-header .header-right .header-right-menu-wrapper .header-right-menu-wrap .project-widget .post h4 a:hover { color: var(--c-primary); }
+.wpo-site-header #navbar > ul li a:focus { color: var(--c-primary); }
+
+/* Footer */
+.wpo-site-footer .link-widget ul li a:hover { color: var(--c-accent); }
+.wpo-site-footer .social-widget ul li a:hover { background: var(--c-primary); color: #fff; }
+
+/* Newsletter widget */
+.wpo-newsletter-widget .form button { background: var(--c-primary); }
+.wpo-newsletter-widget span a:hover { color: var(--c-primary); }
+
+/* Contact form focus */
+.wpo-contact-pg-section form select:focus,
+.wpo-contact-pg-section form textarea:focus { border-color: var(--c-primary); box-shadow: 0 0 0 0.2rem rgba(11, 114, 133, 0.15); }
+
+/* Blog features */
+.wpo-blog-features-section .wpo-blog-features-item .wpo-blog-features-text h2 a:hover { color: var(--c-primary); }
+.wpo-blog-highlights-section .wpo-blog-highlights-wrap .wpo-blog-item .wpo-blog-content ul li a:hover { color: var(--c-primary); }
+
+/* Fonds bleu clair du thème → charte */
+.wpo-blog-hero-area .wpo-blog-content .thumb,
+.wpo-blog-highlights-section .wpo-blog-item .thumb,
+.wpo-blog-sponsored-section .wpo-blog-item .thumb { background: var(--c-accent); color: #fff; }
