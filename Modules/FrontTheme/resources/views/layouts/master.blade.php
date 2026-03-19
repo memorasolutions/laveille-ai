@@ -89,9 +89,23 @@
 
         @include('fronttheme::partials.header')
 
+        @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
+            @php $adLeaderboard = app(\Modules\Ads\Services\AdsRenderer::class)->render('header-leaderboard'); @endphp
+            @if($adLeaderboard)
+                <div class="container" style="padding:1rem 0;">{!! $adLeaderboard !!}</div>
+            @endif
+        @endif
+
         @yield('breadcrumb')
 
         @yield('content')
+
+        @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
+            @php $adFooter = app(\Modules\Ads\Services\AdsRenderer::class)->render('footer-banner'); @endphp
+            @if($adFooter)
+                <div class="container" style="padding:1rem 0;">{!! $adFooter !!}</div>
+            @endif
+        @endif
 
         @include('fronttheme::partials.footer')
     </div>

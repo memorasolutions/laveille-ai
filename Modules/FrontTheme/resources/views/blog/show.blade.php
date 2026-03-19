@@ -37,6 +37,11 @@
                                 </ul>
                             </div>
                             <h2>{{ $article->title }}</h2>
+
+                            @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
+                                {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-top') !!}
+                            @endif
+
                             <div class="entry-details">
                                 @php
                                     $articleContent = $article->content;
@@ -49,6 +54,10 @@
                                 {!! $articleContent !!}
                             </div>
                         </div>
+
+                        @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
+                            {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-bottom') !!}
+                        @endif
 
                         @if($article->tagsRelation->isNotEmpty())
                             <div class="tag-share clearfix">

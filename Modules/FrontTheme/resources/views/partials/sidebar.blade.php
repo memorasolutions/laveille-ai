@@ -59,6 +59,12 @@
             </ul>
         </div>
     @endisset
+    @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
+        @php $adSidebar = app(\Modules\Ads\Services\AdsRenderer::class)->render('sidebar-rectangle'); @endphp
+        @if($adSidebar)
+            <div class="widget">{!! $adSidebar !!}</div>
+        @endif
+    @endif
     @if(Route::has('newsletter.subscribe'))
         <div class="wpo-contact-widget widget">
             <h2>{{ __('Restez informé') }}</h2>
