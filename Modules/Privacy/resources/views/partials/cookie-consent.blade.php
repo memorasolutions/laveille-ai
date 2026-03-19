@@ -75,7 +75,7 @@
     input:checked + .cc-slider { background-color: var(--cc-toggle-active); }
     input:checked + .cc-slider::before { transform: translateX(20px); }
     input:disabled + .cc-slider { opacity: 0.5; cursor: not-allowed; }
-    .cc-fab { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--cc-btn-primary); color: var(--cc-btn-primary-text); border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; z-index: 9990; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .cc-fab { position: fixed; bottom: 20px; left: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--cc-btn-primary); color: var(--cc-btn-primary-text); border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; z-index: 9990; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
     .cc-fab:hover { transform: scale(1.1); }
     .cc-fab:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
     .cc-fab svg { width: 22px; height: 22px; fill: currentColor; }
@@ -90,7 +90,7 @@
 <div id="cc-host">
     {{-- FAB (visible seulement si consentement deja donne) --}}
     <button id="cc-fab" class="cc-fab {{ $hasCookie ? '' : 'cc-hidden' }}" type="button" aria-label="{{ $text['fab_label'] }}">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.95 10.99c-1.79-.03-3.7-1.95-2.68-4.22-2.97 1-5.78-1.59-5.19-4.56C7.11.74 2 6.41 2 12c0 5.52 4.48 10 10 10 5.89 0 10.54-5.08 9.95-11.01zM8.5 15c-.83 0-1.5-.67-1.5-1.5S7.67 12 8.5 12s1.5.67 1.5 1.5S9.33 15 8.5 15zm2-5C9.67 10 9 9.33 9 8.5S9.67 7 10.5 7s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 6c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>
     </button>
 
     {{-- Backdrop --}}
