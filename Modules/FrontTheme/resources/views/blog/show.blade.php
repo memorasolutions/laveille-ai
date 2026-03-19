@@ -1,6 +1,11 @@
 @extends(fronttheme_layout())
 
-@section('title', $article->title)
+@section('title', $article->title . ' - ' . config('app.name'))
+@section('meta_description', Str::limit($article->excerpt ?? strip_tags($article->content), 160))
+@section('og_type', 'article')
+@if($article->featured_image)
+    @section('og_image', asset($article->featured_image))
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

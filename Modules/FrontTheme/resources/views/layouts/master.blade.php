@@ -8,6 +8,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" type="image/png" href="{{ fronttheme_asset('images/favicon.png') }}">
     <title>@yield('title', config('app.name'))</title>
+    <meta name="description" content="@yield('meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.')">
+    <meta property="og:title" content="@yield('title', config('app.name'))">
+    <meta property="og:description" content="@yield('meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.')">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    @hasSection('og_image')
+        <meta property="og:image" content="@yield('og_image')">
+    @endif
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="{{ url()->current() }}">
     <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/bootstrap.min.css') }}" rel="stylesheet">
@@ -53,6 +64,10 @@
         @include('fronttheme::partials.footer')
     </div>
     <!-- end of page-wrapper -->
+
+    @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::find('Privacy')?->isEnabled())
+        @include('privacy::partials.cookie-consent')
+    @endif
 
     <!-- All JavaScript files -->
     <script src="{{ fronttheme_asset('js/jquery.min.js') }}"></script>
