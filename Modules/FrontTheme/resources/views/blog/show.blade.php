@@ -74,7 +74,7 @@
 
                         <div class="author-box">
                             <div class="author-avatar">
-                                <img src="{{ fronttheme_asset('images/blog-details/author.jpg') }}" alt="{{ $article->user->name ?? 'Auteur' }}">
+                                <img src="{{ asset('images/logo.webp') }}" alt="{{ $article->user->name ?? 'Auteur' }}" style="border-radius:50%;width:120px;height:120px;object-fit:cover;">
                             </div>
                             <div class="author-content">
                                 <a href="#" class="author-name">{{ $article->user->name ?? 'Auteur' }}</a>
