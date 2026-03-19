@@ -7,7 +7,7 @@
     $policyUrl = config('privacy.documents.privacy_policy.url', '/privacy-policy');
     $locale = app()->getLocale();
     $isFr = str_starts_with($locale, 'fr');
-    $hasCookie = request()->cookie($cookieName);
+    $hasCookie = false; // Toujours false côté serveur — le JS gère l'état via le cookie client
 
     $text = [
         'title' => $isFr ? 'Parametres de confidentialite' : 'Privacy Settings',
@@ -341,6 +341,8 @@
         var existing = raw.choices || raw;
 
         if (!needsReprompt) {
+            // Cookie valide : fermer le banner et montrer le FAB
+            closeBanner();
             // Pre-remplir les toggles
             for (var k in existing) {
                 var inp = els.form.querySelector('input[name="' + k + '"]');
