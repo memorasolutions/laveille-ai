@@ -45,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias($aliases);
 
+        $middleware->encryptCookies(except: ['consent_v1']);
         $middleware->validateCsrfTokens(except: ['stripe/webhook']);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
