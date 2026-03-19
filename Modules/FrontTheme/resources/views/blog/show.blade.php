@@ -19,7 +19,7 @@
     <section class="wpo-blog-single-section section-padding">
         <div class="container">
             <div class="row">
-                <div class="col col-lg-8">
+                <div class="col col-lg-8 col-12">
                     <div class="wpo-blog-content">
                         <div class="post format-standard-image">
                             @if($article->featured_image)
@@ -84,7 +84,7 @@
 
                     </div>
                 </div>
-                <div class="col col-lg-4 d-none d-lg-block">
+                <div class="col col-lg-4 col-12 d-none d-lg-block">
                     @include('fronttheme::partials.sidebar')
                 </div>
             </div>

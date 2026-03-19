@@ -348,7 +348,18 @@ select:focus {
     box-shadow: 0 0 0 0.2rem rgba(11, 114, 133, 0.15);
 }
 
-/* ── 14. PRELOADER ── */
+/* ── 14. LAYOUT 2 COLONNES (article + sidebar) ── */
+
+@media (min-width: 992px) {
+    .wpo-blog-single-section > .container > .row,
+    .wpo-blog-pg-section > .container > .row { flex-wrap: nowrap; }
+    .wpo-blog-single-section .col.col-lg-8,
+    .wpo-blog-pg-section .col.col-lg-8 { flex: 0 0 66.666%; max-width: 66.666%; min-width: 0; overflow: hidden; }
+    .wpo-blog-single-section .col.col-lg-4,
+    .wpo-blog-pg-section .col.col-lg-4 { flex: 0 0 33.333%; max-width: 33.333%; }
+}
+
+/* ── 15. PRELOADER ── */
 
 .preloader {
     background: var(--c-primary);
