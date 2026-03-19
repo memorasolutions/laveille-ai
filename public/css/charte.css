@@ -1,0 +1,360 @@
+/* ═══════════════════════════════════════════════════
+   CHARTE GRAPHIQUE — LA VEILLE DE STEF
+   Override CSS chargé APRÈS le thème Bloggar
+   Version 2.0 — Mars 2026
+   ═══════════════════════════════════════════════════ */
+
+:root {
+    --c-primary: #0B7285;
+    --c-primary-hover: #064E5C;
+    --c-primary-light: #F0FAFB;
+    --c-primary-badge: #DDF4F8;
+    --c-accent: #E67E22;
+    --c-accent-hover: #D46A1F;
+    --c-accent-light: #FDF5ED;
+    --c-dark: #1A1D23;
+    --c-text-secondary: #555B6A;
+    --c-text-muted: #6E7687;
+    --f-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --f-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+    --r-base: 0.75rem;
+    --r-btn: 0.5rem;
+}
+
+/* ── 1. TYPOGRAPHIE GLOBALE ── */
+
+body {
+    font-family: var(--f-body);
+    color: var(--c-text-secondary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--f-heading);
+    color: var(--c-dark);
+    font-weight: 700;
+}
+
+a { transition: color 0.25s ease; }
+a:hover { color: var(--c-primary); }
+
+/* ── 2. BOUTONS ── */
+
+.theme-btn, .theme-btn-s3, .theme-btn-s4, .view-cart-btn {
+    background-color: var(--c-primary);
+    border-color: var(--c-primary);
+    font-family: var(--f-heading);
+    font-weight: 700;
+}
+
+.theme-btn:hover, .theme-btn-s3:hover, .theme-btn-s4:hover {
+    background-color: var(--c-primary-hover);
+    border-color: var(--c-primary-hover);
+}
+
+/* ── 3. HEADER & TOPBAR ── */
+
+.topbar {
+    background-color: var(--c-dark);
+}
+
+.topbar .contact-intro ul li.update span {
+    background: var(--c-accent);
+}
+
+.wpo-site-header .navigation .navbar-nav > li > a {
+    font-family: var(--f-heading);
+    font-weight: 600;
+}
+
+.wpo-site-header .navigation .navbar-nav > li > a:hover,
+.wpo-site-header .navigation .navbar-nav > li > a.active {
+    color: var(--c-primary);
+}
+
+.wpo-site-header .navigation .navbar-nav > li .sub-menu {
+    border-top: 3px solid var(--c-primary);
+}
+
+.wpo-site-header .navigation .navbar-nav > li .sub-menu li a:hover {
+    color: var(--c-primary);
+}
+
+/* ── 4. HERO GRID ── */
+
+.wpo-blog-hero-area .wpo-blog-content .thumb {
+    background: var(--c-accent);
+    color: #fff;
+    font-family: var(--f-heading);
+    font-weight: 700;
+}
+
+.wpo-blog-hero-area .wpo-blog-content h2 a {
+    font-family: var(--f-heading);
+    font-weight: 800;
+}
+
+.wpo-blog-hero-area .wpo-blog-content h2 a:hover {
+    color: var(--c-accent);
+}
+
+/* ── 5. BREAKING NEWS ── */
+
+.wpo-breacking-news .b-title span {
+    background: var(--c-accent);
+    color: #fff;
+    font-family: var(--f-heading);
+    font-weight: 700;
+}
+
+.wpo-breacking-news .wpo-breacking-text h3 a:hover {
+    color: var(--c-primary);
+}
+
+/* ── 6. HIGHLIGHTS & SECTIONS ── */
+
+.wpo-section-title h2 {
+    font-family: var(--f-heading);
+    font-weight: 800;
+    color: var(--c-dark);
+}
+
+.wpo-section-title h2::after {
+    background-color: var(--c-primary);
+}
+
+.wpo-blog-highlights-section .wpo-blog-item .thumb,
+.wpo-blog-sponsored-section .wpo-blog-item .thumb {
+    background: var(--c-accent);
+    color: #fff;
+    font-family: var(--f-heading);
+    font-weight: 700;
+}
+
+.wpo-blog-highlights-section .wpo-blog-content h2 a,
+.wpo-blog-sponsored-section .wpo-blog-content h2 a {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    color: var(--c-dark);
+}
+
+.wpo-blog-highlights-section .wpo-blog-content h2 a:hover,
+.wpo-blog-sponsored-section .wpo-blog-content h2 a:hover {
+    color: var(--c-primary);
+}
+
+/* ── 7. SIDEBAR ── */
+
+.blog-sidebar .widget h3 {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    color: var(--c-dark);
+}
+
+.blog-sidebar .category-widget ul li a:hover {
+    color: var(--c-primary);
+}
+
+.blog-sidebar .recent-post-widget .post h4 a {
+    font-family: var(--f-heading);
+    color: var(--c-dark);
+}
+
+.blog-sidebar .recent-post-widget .post h4 a:hover {
+    color: var(--c-primary);
+}
+
+.blog-sidebar .wpo-contact-widget {
+    background: var(--c-primary);
+}
+
+.blog-sidebar .wpo-contact-widget a {
+    background: var(--c-accent);
+    color: #fff;
+}
+
+.blog-sidebar .wpo-contact-widget a:hover {
+    background: var(--c-accent-hover);
+}
+
+.blog-sidebar .about-widget .social ul li a:hover {
+    color: var(--c-primary);
+}
+
+.blog-sidebar .tag-widget ul li a:hover {
+    background: var(--c-primary);
+    color: #fff;
+}
+
+/* ── 8. BREADCRUMB ── */
+
+.wpo-breadcumb-area {
+    background: linear-gradient(135deg, var(--c-dark) 0%, #2D3039 50%, #3F4451 100%) !important;
+}
+
+.wpo-breadcumb-area .wpo-breadcumb-wrap h2 {
+    font-family: var(--f-heading);
+    font-weight: 800;
+}
+
+.wpo-breadcumb-area .wpo-breadcumb-wrap ul li a:hover {
+    color: var(--c-accent);
+}
+
+.wpo-breadcumb-area .wpo-breadcumb-wrap ul li:last-child span {
+    color: var(--c-accent);
+}
+
+/* ── 9. BLOG LISTING ── */
+
+.wpo-blog-pg-section .entry-details h3 a,
+.wpo-blog-section .entry-details h3 a {
+    font-family: var(--f-heading);
+    font-weight: 700;
+    color: var(--c-dark);
+}
+
+.wpo-blog-pg-section .entry-details h3 a:hover,
+.wpo-blog-section .entry-details h3 a:hover {
+    color: var(--c-primary);
+}
+
+.wpo-blog-pg-section .entry-meta ul li,
+.wpo-blog-pg-section .entry-meta ul li a {
+    color: var(--c-text-muted);
+}
+
+.wpo-blog-pg-section .entry-meta ul li a:hover {
+    color: var(--c-primary);
+}
+
+.wpo-blog-pg-section .entry-meta ul li i,
+.wpo-blog-section .entry-meta ul li i {
+    color: var(--c-accent);
+}
+
+.read-more {
+    color: var(--c-primary);
+    font-family: var(--f-heading);
+    font-weight: 700;
+}
+
+.read-more:hover {
+    color: var(--c-accent);
+}
+
+/* ── 10. BLOG SINGLE ── */
+
+.wpo-blog-single-section .entry-meta ul li a {
+    color: var(--c-text-muted);
+}
+
+.wpo-blog-single-section .entry-meta ul li a:hover {
+    color: var(--c-primary);
+}
+
+.wpo-blog-single-section .entry-details h2 {
+    font-family: var(--f-heading);
+    font-weight: 800;
+}
+
+.tag-share .tag ul li a {
+    color: var(--c-primary);
+}
+
+.tag-share .tag ul li a:hover {
+    background: var(--c-primary);
+    color: #fff;
+}
+
+.author-box {
+    background: var(--c-primary-light);
+}
+
+.author-box .author-content .author-name {
+    color: var(--c-primary);
+    font-family: var(--f-heading);
+}
+
+/* ── 11. NEWSLETTER ── */
+
+.wpo-subscribe-section {
+    background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-hover) 100%);
+}
+
+.wpo-subscribe-section .subscribe-text h3 {
+    font-family: var(--f-heading);
+    font-weight: 800;
+}
+
+.wpo-subscribe-section .subscribe-form button {
+    background: var(--c-accent);
+}
+
+.wpo-subscribe-section .subscribe-form button:hover {
+    background: var(--c-accent-hover);
+}
+
+/* ── 12. FOOTER ── */
+
+.wpo-site-footer {
+    background-color: var(--c-dark);
+}
+
+.wpo-site-footer .widget-title h3 {
+    font-family: var(--f-heading);
+    font-weight: 700;
+}
+
+.wpo-site-footer a:hover {
+    color: var(--c-accent);
+}
+
+.wpo-site-footer .tag-widget ul li a:hover {
+    background: var(--c-accent);
+    color: #fff;
+}
+
+/* ── 13. FORMS ── */
+
+.form-control:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 0.2rem rgba(11, 114, 133, 0.15);
+}
+
+/* ── 14. PRELOADER ── */
+
+.preloader {
+    background: var(--c-primary);
+}
+
+/* ── 15. BACK TO TOP ── */
+
+.back-to-top {
+    background: var(--c-primary);
+}
+
+.back-to-top:hover {
+    background: var(--c-primary-hover);
+}
+
+/* ── 16. CONTACT PAGE ── */
+
+.wpo-contact-pg-section .office-info-icon .icon {
+    color: var(--c-primary);
+}
+
+.wpo-contact-pg-section .wpo-contact-title h2 {
+    font-family: var(--f-heading);
+    font-weight: 800;
+}
+
+/* ── 17. PAGINATION ── */
+
+.pg-pagination li.active a,
+.pg-pagination li a:hover {
+    background: var(--c-primary);
+    color: #fff;
+}
