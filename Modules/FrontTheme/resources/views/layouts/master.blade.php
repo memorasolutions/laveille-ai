@@ -122,6 +122,7 @@
     <script src="{{ fronttheme_asset('js/jquery.dlmenu.js') }}"></script>
     <script src="{{ fronttheme_asset('js/jquery-plugin-collection.js') }}"></script>
     <script src="{{ fronttheme_asset('js/script.js') }}"></script>
+    <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
 </body>
 
