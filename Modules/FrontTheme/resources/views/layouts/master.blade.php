@@ -52,6 +52,18 @@
         .header-right-menu-wrap .logo img { max-width: 150px; height: auto; }
         /* Sidebar about-widget logo */
         .blog-sidebar .about-widget .img-holder img { max-width: 150px; height: auto; border-radius: 50%; }
+        /* Hero grid : forcer les proportions comme le thème original */
+        .wpo-blog-hero-area .wpo-blog-grids .grid:first-child .img-holder { height: 530px; overflow: hidden; position: relative; }
+        .wpo-blog-hero-area .wpo-blog-grids .grid:first-child .img-holder img { width: 100%; height: 100%; object-fit: cover; }
+        .wpo-blog-hero-area .wpo-blog-grids .grid:nth-child(2) .img-holder { height: 250px; overflow: hidden; }
+        .wpo-blog-hero-area .wpo-blog-grids .grid:nth-child(2) .img-holder img { width: 100%; height: 100%; object-fit: cover; }
+        .wpo-blog-hero-area .wpo-blog-grids .grid.s2 .img-holder { height: 250px; overflow: hidden; }
+        .wpo-blog-hero-area .wpo-blog-grids .grid.s2 .img-holder img { width: 100%; height: 100%; object-fit: cover; }
+        @media (max-width: 1200px) {
+            .wpo-blog-hero-area .wpo-blog-grids .grid:first-child .img-holder,
+            .wpo-blog-hero-area .wpo-blog-grids .grid:nth-child(2) .img-holder,
+            .wpo-blog-hero-area .wpo-blog-grids .grid.s2 .img-holder { height: auto; }
+        }
         /* Images articles : object-fit cover pour taille uniforme */
         .wpo-blog-img img { width: 100%; height: 220px; object-fit: cover; }
         .wpo-breacking-img img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
