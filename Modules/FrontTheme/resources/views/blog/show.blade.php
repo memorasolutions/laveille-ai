@@ -38,7 +38,11 @@
                             </div>
                             <h2>{{ $article->title }}</h2>
                             <div class="entry-details">
-                                {!! $article->content !!}
+                                @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
+                                    {!! app(\Modules\Ads\Services\AdsRenderer::class)->renderShortcodes($article->content) !!}
+                                @else
+                                    {!! $article->content !!}
+                                @endif
                             </div>
                         </div>
 
