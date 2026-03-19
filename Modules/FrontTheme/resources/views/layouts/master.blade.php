@@ -35,11 +35,29 @@
     <link href="{{ fronttheme_asset('sass/style.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/responsive.css') }}" rel="stylesheet">
     <style>
+        /* Logo navbar */
         .navbar-brand img { max-height: 50px; width: auto; }
+        /* Breadcrumb dégradé */
         .wpo-breadcumb-area { background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%) !important; }
-        /* Fix SVG/icônes sans taille dans le contenu importé */
-        .wpo-blog-content svg, .entry-details svg { max-width: 24px; max-height: 24px; }
-        .wpo-blog-content img:not([width]) { max-width: 100%; height: auto; }
+        /* SVG et images sans dimension - empêcher le gigantisme */
+        svg:not([width]):not([class*="cc-"]) { max-width: 24px; max-height: 24px; }
+        img:not([width]):not([class*="img"]):not(.img-responsive) { max-width: 100%; height: auto; }
+        .entry-details svg, .wpo-blog-content svg { max-width: 24px; max-height: 24px; }
+        /* Hero grid : titres ne débordent pas */
+        .wpo-blog-hero-area .wpo-blog-content h2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .wpo-blog-hero-area .grid.s2 .wpo-blog-content h2 { -webkit-line-clamp: 2; font-size: 16px; }
+        .wpo-blog-hero-area .wpo-blog-content p { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        /* Footer + panneau latéral logo */
+        .wpo-site-footer .about-widget .logo img { max-width: 120px; height: auto; }
+        .header-right-menu-wrap .logo img { max-width: 150px; height: auto; }
+        /* Sidebar about-widget logo */
+        .blog-sidebar .about-widget .img-holder img { max-width: 150px; height: auto; border-radius: 50%; }
+        /* Images articles : object-fit cover pour taille uniforme */
+        .wpo-blog-hero-area .img-holder img { width: 100%; height: 100%; object-fit: cover; }
+        .wpo-blog-img img { width: 100%; height: 220px; object-fit: cover; }
+        .wpo-breacking-img img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+        .wpo-blog-pg-section .entry-media img { width: 100%; height: auto; object-fit: cover; }
+        .wpo-blog-sponsored-section .wpo-blog-img img { height: 180px; }
     </style>
     @stack('styles')
 </head>
