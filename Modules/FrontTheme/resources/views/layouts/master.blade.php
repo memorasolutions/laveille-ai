@@ -53,7 +53,6 @@
         /* Sidebar about-widget logo */
         .blog-sidebar .about-widget .img-holder img { max-width: 150px; height: auto; border-radius: 50%; }
         /* Images articles : object-fit cover pour taille uniforme */
-        .wpo-blog-hero-area .img-holder img { width: 100%; height: 100%; object-fit: cover; }
         .wpo-blog-img img { width: 100%; height: 220px; object-fit: cover; }
         .wpo-breacking-img img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
         .wpo-blog-pg-section .entry-media img { width: 100%; height: auto; object-fit: cover; }
