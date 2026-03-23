@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 return [
     'exception_message' => '예외 메시지: :message',
     'exception_trace' => '예외 추적: :trace',

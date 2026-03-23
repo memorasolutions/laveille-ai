@@ -32,7 +32,9 @@
             <div class="card">
                 <div class="card-header py-3 px-4 border-bottom d-flex align-items-center justify-content-between">
                     <h5 class="fw-semibold mb-0">Contenu</h5>
-                    @livewire('ai-article-generator')
+                    @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::find('AI')?->isEnabled())
+                        @livewire('ai-article-generator')
+                    @endif
                 </div>
                 <div class="card-body p-4">
                     <div class="mb-3">

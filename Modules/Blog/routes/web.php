@@ -118,4 +118,37 @@ Route::prefix('admin/blog')
             Route::get('comments/{comment}/spam', [CommentAdminController::class, 'spam'])->name('comments.spam');
         });
         Route::delete('comments/{comment}', [CommentAdminController::class, 'destroy'])->name('comments.destroy')->middleware('permission:delete_comments');
+
+        // Soumissions d'articles (admin review)
+        Route::get('submissions', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'index'])->name('submissions.index');
+        Route::post('submissions/{article}/approve', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'approve'])->name('submissions.approve');
+        Route::post('submissions/{article}/reject', [\Modules\Blog\Http\Controllers\Admin\SubmissionController::class, 'reject'])->name('submissions.reject');
     });
+
+// Soumission d'articles par les membres (authentifié)
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/proposer-article', [\Modules\Blog\Http\Controllers\ArticleSubmissionController::class, 'create'])->name('blog.submissions.create');
+    Route::post('/proposer-article', [\Modules\Blog\Http\Controllers\ArticleSubmissionController::class, 'store'])->name('blog.submissions.store');
+    Route::get('/mes-articles', [\Modules\Blog\Http\Controllers\ArticleSubmissionController::class, 'mySubmissions'])->name('blog.submissions.mine');
+
+    // Bookmarks
+    Route::post('/bookmark/toggle', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate([
+            'type' => 'required|string',
+            'id' => 'required|integer',
+        ]);
+        if (class_exists(\Modules\Core\Models\Bookmark::class)) {
+            $added = \Modules\Core\Models\Bookmark::toggle(auth()->id(), $validated['type'], $validated['id']);
+            return response()->json(['bookmarked' => $added]);
+        }
+        abort(404);
+    })->name('bookmark.toggle');
+
+    Route::get('/mes-favoris', function () {
+        $bookmarks = \Modules\Core\Models\Bookmark::where('user_id', auth()->id())
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy('bookmarkable_type');
+        return view('blog::submissions.bookmarks', compact('bookmarks'));
+    })->name('bookmarks.index');
+});

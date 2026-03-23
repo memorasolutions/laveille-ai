@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 return [
     'exception_message' => 'Қате туралы хабарлама: :message',
     'exception_trace' => 'Қате туралы мәліметтер: :trace',

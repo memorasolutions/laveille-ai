@@ -1,0 +1,322 @@
+/**
+ * Styles pour le module ExportOptions
+ * Aligné avec le style des transformations
+ * Keep it simple - Styles modulaires
+ */
+
+/* Container principal des options - Style aligné avec transforms-grid */
+.export-options-container {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: var(--space-3) 0;
+}
+
+.export-options-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #6b7280);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* Grille d'options - Style compact comme transforms-grid */
+.export-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-2);
+    padding: 0;
+    margin-top: var(--space-2);
+}
+
+/* Option individuelle - Style aligné avec transform-btn */
+.export-option {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: all var(--transition-fast);
+    min-height: 80px;
+    position: relative;
+}
+
+.export-option:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Label de l'option - Style compact */
+.export-option-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.option-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+/* Description */
+.export-option-description {
+    display: block;
+    margin-top: var(--space-1, 0.25rem);
+    font-size: 0.75rem;
+    color: var(--color-text-light, #9ca3af);
+}
+
+/* Select - Aligné avec link-input */
+.export-option-select {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.875rem;
+    font-family: inherit;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    outline: none;
+}
+
+.export-option-select:hover {
+    border-color: var(--color-primary-light);
+    background: white;
+}
+
+.export-option-select:focus {
+    border-color: var(--color-primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Toggle (2 boutons) - Aligné avec transform-btn */
+.export-option-toggle {
+    display: flex;
+    gap: 0;
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    height: 36px;
+    transition: all var(--transition-fast);
+}
+
+.export-option-toggle:hover {
+    border-color: var(--color-primary-light);
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    color: var(--color-text);
+}
+
+.toggle-btn:not(:last-child) {
+    border-right: 2px solid var(--color-border);
+}
+
+.toggle-btn:hover {
+    background: var(--color-bg-secondary);
+}
+
+.toggle-btn.active {
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+}
+
+/* Checkbox - Style moderne */
+.export-option-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.export-option-checkbox input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+    border: 2px solid var(--color-border);
+    border-radius: calc(var(--radius) * 0.5);
+    transition: all var(--transition-fast);
+}
+
+.export-option-checkbox input[type="checkbox"]:hover {
+    transform: scale(1.1);
+}
+
+/* Text input - Aligné avec link-input */
+.export-option-text,
+.export-option-range input {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.875rem;
+    font-family: inherit;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: all var(--transition-base);
+    outline: none;
+}
+
+.export-option-text:hover,
+.export-option-range input:hover {
+    border-color: var(--color-primary-light);
+    background: white;
+}
+
+.export-option-text:focus,
+.export-option-range input:focus {
+    border-color: var(--color-primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Preset buttons - Style cohérent avec transform-btn */
+.export-option-preset {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.preset-btn {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.preset-btn:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.preset-btn.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Bouton afficher plus d'options */
+.export-options-toggle {
+    margin-top: var(--space-3, 0.75rem);
+    padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+    font-size: 0.875rem;
+    background: transparent;
+    border: 1px dashed var(--color-border, #e5e7eb);
+    border-radius: var(--radius, 0.5rem);
+    color: var(--color-text-muted, #6b7280);
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2, 0.5rem);
+}
+
+.export-options-toggle:hover {
+    border-color: var(--color-primary, #0ea5e9);
+    color: var(--color-primary, #0ea5e9);
+    background: var(--color-bg-secondary, #f9fafb);
+}
+
+/* Options avancées (cachées par défaut) */
+.export-option[data-priority="3"],
+.export-option[data-priority="4"] {
+    display: none;
+}
+
+.export-options-container.show-advanced .export-option[data-priority="3"],
+.export-options-container.show-advanced .export-option[data-priority="4"] {
+    display: block;
+}
+
+/* Responsive mobile */
+@media (max-width: 640px) {
+    .export-options-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .export-option-preset {
+        flex-direction: column;
+    }
+    
+    .preset-btn {
+        width: 100%;
+    }
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.export-option {
+    animation: fadeIn 0.3s ease;
+}
+
+/* États de chargement */
+.export-options-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.export-options-container.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid var(--color-primary, #0ea5e9);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

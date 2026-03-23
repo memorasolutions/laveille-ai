@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 return [
     'exception_message' => 'Cu excepția mesajului: :message',
     'exception_trace' => 'Urmă excepţie: :trace',

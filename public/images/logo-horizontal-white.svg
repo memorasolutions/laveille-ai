@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 56" width="230" height="56">
+  <defs>
+    <style>
+      @font-face {
+        font-family: 'PJS';
+        font-weight: 800;
+        src: url('data:font/woff2;base64,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') format('woff2');
+      }
+      @font-face {
+        font-family: 'PJS';
+        font-weight: 600;
+        src: url('data:font/woff2;base64,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') format('woff2');
+      }
+    </style>
+  </defs>
+
+  <!-- Icon: Geometric eye — version fond sombre -->
+  <g transform="translate(4, 6)">
+    <path d="M0 22 Q22 0 44 22 Q22 44 0 22 Z" fill="#FFFFFF" opacity="0.1"/>
+    <path d="M0 22 Q22 0 44 22 Q22 44 0 22 Z" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>
+    <circle cx="22" cy="22" r="9" fill="#FFFFFF"/>
+    <circle cx="25" cy="19" r="3.2" fill="#E67E22"/>
+  </g>
+
+  <!-- Wordmark with embedded font -->
+  <text x="56" y="27" font-family="PJS, system-ui, sans-serif" font-weight="800" font-size="24" fill="#FFFFFF" letter-spacing="-0.5" textLength="100" lengthAdjust="spacingAndGlyphs">laveille</text>
+  <circle cx="159" cy="24" r="3" fill="#E67E22"/>
+  <text x="165" y="27" font-family="PJS, system-ui, sans-serif" font-weight="600" font-size="24" fill="#5CB8C9" letter-spacing="-0.3" textLength="22" lengthAdjust="spacingAndGlyphs">ai</text>
+
+  <!-- Tagline -->
+  <text x="56" y="47" font-family="PJS, system-ui, sans-serif" font-weight="600" font-size="12" fill="rgba(255,255,255,0.85)" letter-spacing="3" textLength="132" lengthAdjust="spacingAndGlyphs">IA &amp; TECHNO</text>
+</svg>

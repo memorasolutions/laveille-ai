@@ -1,0 +1,196 @@
+/**
+ * Styles pour la grille de transformations compacte
+ * Interface optimisée pour maximiser l'utilisation de l'espace
+ */
+
+/* Grille compacte sans catégories */
+.transforms-grid.compact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-2);
+    padding: 0;
+    margin-top: var(--space-3);
+}
+
+/* Boutons compacts */
+.transform-btn.compact {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+    min-height: 44px;
+    position: relative;
+}
+
+.transform-btn.compact:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.transform-btn.compact:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Icônes des boutons */
+.transform-btn.compact .btn-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.transform-btn.compact .btn-text {
+    flex: 1;
+    text-align: left;
+    line-height: 1.2;
+}
+
+/* Styles par catégorie (couleurs subtiles) */
+.transform-btn.cat-view {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+}
+
+.transform-btn.cat-export {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.transform-btn.cat-edit {
+    background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+}
+
+.transform-btn.cat-share {
+    background: linear-gradient(135deg, #fce7f3 0%, #ffffff 100%);
+}
+
+.transform-btn.cat-download {
+    background: linear-gradient(135deg, #ede9fe 0%, #ffffff 100%);
+}
+
+/* Boutons populaires */
+.transform-btn.compact.popular {
+    border-color: var(--color-primary-light, #93c5fd);
+    background: linear-gradient(135deg, white 0%, #eff6ff 100%);
+    font-weight: 600;
+}
+
+/* Bouton Plus d'options */
+.transform-btn.more-options {
+    background: var(--color-bg-secondary);
+    border-style: dashed;
+    opacity: 0.9;
+}
+
+.transform-btn.more-options:hover {
+    opacity: 1;
+    border-style: solid;
+    background: white;
+}
+
+/* Options avancées */
+.transform-btn.advanced {
+    opacity: 0.8;
+    font-size: 0.8125rem;
+}
+
+/* Styles originaux */
+.transform-btn.popular {
+    border-color: var(--color-primary);
+    font-weight: 600;
+}
+
+.transform-btn.popular::after {
+    content: '⭐';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 0.75rem;
+    opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .transforms-grid.compact-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--space-1);
+    }
+    
+    .transform-btn.compact {
+        padding: var(--space-2);
+        font-size: 0.8125rem;
+    }
+    
+    .transform-btn.compact .btn-icon {
+        font-size: 1.125rem;
+    }
+    
+    .transform-btn.compact .btn-text {
+        font-size: 0.75rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .transforms-grid.compact-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+/* Animation d'apparition */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.transforms-grid.compact-grid .transform-btn {
+    animation: fadeInScale 0.3s ease forwards;
+}
+
+.transforms-grid.compact-grid .transform-btn:nth-child(1) { animation-delay: 0.02s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(2) { animation-delay: 0.04s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(3) { animation-delay: 0.06s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(4) { animation-delay: 0.08s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(5) { animation-delay: 0.10s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(6) { animation-delay: 0.12s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(7) { animation-delay: 0.14s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(8) { animation-delay: 0.16s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(9) { animation-delay: 0.18s; }
+.transforms-grid.compact-grid .transform-btn:nth-child(10) { animation-delay: 0.20s; }
+
+/* Masquer les anciennes catégories si présentes */
+.transform-category {
+    display: none !important;
+}
+
+/* Section transformations optimisée */
+.transformations-section {
+    margin-top: var(--space-4);
+}
+
+.transformations-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+}
+
+.transformations-section .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}

@@ -76,6 +76,8 @@ class Article extends Model
         'content_password',
         'format',
         'preview_token',
+        'submitted_by',
+        'submission_status',
     ];
 
     protected $casts = [
@@ -167,6 +169,30 @@ class Article extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function submittedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
+    }
+
+    public function isGuestPost(): bool
+    {
+        return $this->submitted_by !== null;
+    }
+
+    public function getAuthorName(): string
+    {
+        if ($this->isGuestPost() && $this->submittedByUser) {
+            return $this->submittedByUser->name;
+        }
+
+        return $this->user->name ?? 'Admin';
+    }
+
+    public function scopePendingSubmissions($query)
+    {
+        return $query->where('submission_status', 'pending');
     }
 
     public function blogCategory(): BelongsTo

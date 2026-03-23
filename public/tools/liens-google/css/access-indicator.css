@@ -1,0 +1,263 @@
+/**
+ * Styles pour les indicateurs d'accès aux documents
+ */
+
+/* Indicateur d'accès */
+.access-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: var(--space-2) 0;
+    transition: all var(--transition-fast);
+}
+
+/* États d'accès */
+.access-indicator.access-public {
+    background: linear-gradient(135deg, #d4f4dd 0%, #e8f5e9 100%);
+    color: #2e7d32;
+    border: 1px solid #81c784;
+}
+
+.access-indicator.access-link {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3f9ff 100%);
+    color: #1565c0;
+    border: 1px solid #64b5f6;
+}
+
+.access-indicator.access-private {
+    background: linear-gradient(135deg, #ffebee 0%, #fff5f5 100%);
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.access-indicator.access-unknown {
+    background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+    color: #616161;
+    border: 1px solid #bdbdbd;
+}
+
+/* Indicateur avec avertissement */
+.access-indicator.warning {
+    animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 2px 8px rgba(198, 40, 40, 0.2);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(198, 40, 40, 0.2);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+    }
+}
+
+/* Icône d'accès */
+.access-icon {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+/* Message d'accès */
+.access-message {
+    line-height: 1.2;
+}
+
+/* Intégration dans la section de détection */
+.detection-info {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    margin: var(--space-3) 0;
+}
+
+.detection-info .access-indicator {
+    margin-top: var(--space-3);
+}
+
+/* Badge d'accès dans les boutons de transformation */
+.transform-btn .access-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.transform-btn .access-badge.public {
+    background: #4caf50;
+}
+
+.transform-btn .access-badge.link {
+    background: #2196f3;
+}
+
+.transform-btn .access-badge.private {
+    background: #f44336;
+    animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Message d'avertissement principal */
+.access-warning {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border: 2px solid #ffb74d;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin: var(--space-4) 0;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.access-warning-icon {
+    font-size: 1.5rem;
+    color: #f57c00;
+}
+
+.access-warning-content {
+    flex: 1;
+}
+
+.access-warning-title {
+    font-weight: 600;
+    color: #e65100;
+    margin-bottom: var(--space-1);
+}
+
+.access-warning-message {
+    color: #bf360c;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+/* Boîte d'information sur l'accès */
+.access-info-box {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3f9ff 100%);
+    border: 1px solid #90caf9;
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    margin-top: var(--space-2);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #0d47a1;
+}
+
+.access-info-content {
+    white-space: pre-line;
+}
+
+/* Container avec avertissement */
+.access-container.has-warning .access-indicator {
+    margin-bottom: var(--space-3);
+}
+
+/* Details/Summary pour informations d'accès */
+details.access-details {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+    border: 1px solid #ffc107;
+    border-radius: var(--radius-lg);
+    margin: var(--space-2) 0;
+    overflow: hidden;
+    transition: all var(--transition);
+}
+
+details.access-details[open] {
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+}
+
+details.access-details summary {
+    cursor: pointer;
+    padding: var(--space-2) var(--space-3);
+    font-weight: 600;
+    color: #f57c00;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+details.access-details summary:hover {
+    background: rgba(255, 193, 7, 0.1);
+}
+
+details.access-details summary::-webkit-details-marker {
+    display: none;
+}
+
+details.access-details summary::before {
+    content: '▶';
+    display: inline-block;
+    font-size: 0.75rem;
+    transition: transform var(--transition-fast);
+}
+
+details.access-details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+details.access-details .details-content {
+    padding: 0 var(--space-2) var(--space-2) var(--space-2);
+    animation: slideDown var(--transition-fast) ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Styles inline pour le contenu */
+details.access-details .details-content p {
+    margin: 0 0 12px 0;
+}
+
+details.access-details .details-content ol,
+details.access-details .details-content ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .access-indicator {
+        font-size: 0.8125rem;
+        padding: var(--space-1) var(--space-2);
+    }
+    
+    .access-warning {
+        padding: var(--space-3);
+    }
+    
+    .access-info-box {
+        font-size: 0.8125rem;
+        padding: var(--space-2);
+    }
+    
+    details.access-details summary {
+        padding: var(--space-2) var(--space-3);
+        font-size: 0.875rem;
+    }
+    
+    details.access-details .details-content {
+        padding: 0 var(--space-3) var(--space-3) var(--space-3);
+    }
+}

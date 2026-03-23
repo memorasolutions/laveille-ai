@@ -1,5 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('errors.layout')
-@section('code', '500')
-@section('title', __('Erreur serveur'))
-@section('message', __('Une erreur interne est survenue. Notre équipe a été notifiée.'))
+@section('code', '🤖💥')
+@section('title', __('Erreur système'))
+@section('message', __('Même les robots ont des mauvaises journées. Nos ingénieurs (humains) sont sur le coup. Réessayez dans un instant.'))

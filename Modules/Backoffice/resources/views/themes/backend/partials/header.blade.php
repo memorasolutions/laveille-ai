@@ -42,28 +42,12 @@
                 </label>
             </li>
 
-            {{-- Language switcher --}}
+            {{-- Language switcher — désactivé temporairement (site FR uniquement) --}}
+            {{-- @if(config('app.available_locales', ['fr']) !== ['fr'])
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    @if(app()->getLocale() === 'fr')
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/fr.svg') }}" class="w-20px" alt="{{ __('Drapeau français') }}">
-                        <span class="ms-2 d-none d-md-inline-block">{{ __('Français') }}</span>
-                    @else
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/us.svg') }}" class="w-20px" alt="American flag">
-                        <span class="ms-2 d-none d-md-inline-block">English</span>
-                    @endif
-                </a>
-                <div class="dropdown-menu" aria-labelledby="languageDropdown">
-                    <a href="{{ route('locale.switch', 'fr') }}" class="dropdown-item py-2 d-flex">
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/fr.svg') }}" class="w-20px" alt="{{ __('Drapeau français') }}">
-                        <span class="ms-2">{{ __('Français') }}</span>
-                    </a>
-                    <a href="{{ route('locale.switch', 'en') }}" class="dropdown-item py-2 d-flex">
-                        <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/us.svg') }}" class="w-20px" alt="American flag">
-                        <span class="ms-2">English</span>
-                    </a>
-                </div>
+                ...
             </li>
+            @endif --}}
 
             {{-- Guided tour restart --}}
             <li class="nav-item">

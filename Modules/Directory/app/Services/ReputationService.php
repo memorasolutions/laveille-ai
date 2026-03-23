@@ -1,0 +1,199 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Directory\Services;
+
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
+class ReputationService
+{
+    // Points
+    public const REVIEW_APPROVED = 10;
+    public const DISCUSSION_APPROVED = 5;
+    public const RESOURCE_APPROVED = 8;
+    public const REPLY_APPROVED = 3;
+    public const LIKE_RECEIVED = 1;
+    public const REPORT_CONFIRMED = 5;
+    public const CONTENT_REJECTED = -10;
+
+    // Niveaux
+    public const LEVEL_NOUVEAU = 0;
+    public const LEVEL_CONTRIBUTEUR = 1;
+    public const LEVEL_VERIFIE = 2;
+    public const LEVEL_EXPERT = 3;
+
+    // Seuils
+    private const THRESHOLD_CONTRIBUTEUR = 15;
+    private const THRESHOLD_VERIFIE = 50;
+    private const THRESHOLD_EXPERT = 150;
+
+    // Multiplicateurs par niveau
+    private const MULTIPLIERS = [
+        self::LEVEL_NOUVEAU => 1.0,
+        self::LEVEL_CONTRIBUTEUR => 1.25,
+        self::LEVEL_VERIFIE => 1.5,
+        self::LEVEL_EXPERT => 2.0,
+    ];
+
+    public function addPoints(User $user, int $points, string $reason = ''): void
+    {
+        $finalPoints = $points;
+        if ($points > 0) {
+            $finalPoints = (int) round($points * $this->getMultiplier($user->trust_level));
+        }
+
+        $user->reputation_points = max(0, $user->reputation_points + $finalPoints);
+        $user->save();
+
+        $this->checkLevelUp($user);
+        $this->checkBadges($user);
+    }
+
+    public function getMultiplier(int $level): float
+    {
+        return self::MULTIPLIERS[$level] ?? 1.0;
+    }
+
+    public function checkLevelUp(User $user): void
+    {
+        $pts = $user->reputation_points;
+        $newLevel = match (true) {
+            $pts >= self::THRESHOLD_EXPERT => self::LEVEL_EXPERT,
+            $pts >= self::THRESHOLD_VERIFIE => self::LEVEL_VERIFIE,
+            $pts >= self::THRESHOLD_CONTRIBUTEUR => self::LEVEL_CONTRIBUTEUR,
+            default => self::LEVEL_NOUVEAU,
+        };
+
+        if ($newLevel !== $user->trust_level) {
+            $user->trust_level = $newLevel;
+            $user->save();
+        }
+    }
+
+    public function shouldAutoApprove(User $user, string $type): bool
+    {
+        return match ($user->trust_level) {
+            self::LEVEL_EXPERT => true,
+            self::LEVEL_VERIFIE => in_array($type, ['discussion', 'review', 'resource']),
+            self::LEVEL_CONTRIBUTEUR => $type === 'discussion',
+            default => false,
+        };
+    }
+
+    public function canVoteRoadmap(User $user): bool
+    {
+        return $user->trust_level >= self::LEVEL_VERIFIE;
+    }
+
+    public function canModerateContent(User $user): bool
+    {
+        return $user->trust_level >= self::LEVEL_EXPERT;
+    }
+
+    public function isFeaturedContributor(User $user): bool
+    {
+        return $user->trust_level >= self::LEVEL_VERIFIE;
+    }
+
+    public function checkBadges(User $user): void
+    {
+        $uid = $user->id;
+        $badges = [];
+
+        $reviews = DB::table('directory_reviews')->where('user_id', $uid)->where('is_approved', true)->count();
+        $resources = DB::table('directory_resources')->where('user_id', $uid)->where('is_approved', true)->count();
+        $discussions = DB::table('directory_discussions')->where('user_id', $uid)->where('is_approved', true)->whereNull('parent_id')->count();
+        $replies = DB::table('directory_discussions')->where('user_id', $uid)->where('is_approved', true)->whereNotNull('parent_id')->count();
+
+        // Likes reçus = sum des upvotes sur tout le contenu de l'utilisateur
+        $likesOnReviews = (int) DB::table('directory_reviews')->where('user_id', $uid)->sum('upvotes');
+        $likesOnDiscussions = (int) DB::table('directory_discussions')->where('user_id', $uid)->sum('upvotes');
+        $likesOnResources = (int) DB::table('directory_resources')->where('user_id', $uid)->sum('upvotes');
+        $totalLikes = $likesOnReviews + $likesOnDiscussions + $likesOnResources;
+
+        if (($reviews + $resources + $discussions) >= 1) {
+            $badges[] = 'first_contribution';
+        }
+        if ($reviews >= 5) {
+            $badges[] = 'critic';
+        }
+        if ($resources >= 5) {
+            $badges[] = 'curator';
+        }
+        if (($discussions + $replies) >= 10) {
+            $badges[] = 'animator';
+        }
+        if ($totalLikes >= 20) {
+            $badges[] = 'popular';
+        }
+        if ($user->trust_level >= self::LEVEL_EXPERT) {
+            $badges[] = 'expert';
+        }
+
+        // Badge auteur publié (si module Blog actif)
+        if (class_exists('Modules\\Blog\\Models\\Article')) {
+            $publishedArticles = DB::table('articles')
+                ->where('submitted_by', $uid)
+                ->where('submission_status', 'approved')
+                ->count();
+            if ($publishedArticles >= 1) {
+                $badges[] = 'published_author';
+            }
+        }
+
+        $now = now();
+        foreach ($badges as $badge) {
+            DB::table('user_badges')->insertOrIgnore([
+                'user_id' => $uid,
+                'badge_key' => $badge,
+                'earned_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+    }
+
+    public function getUserBadges(User $user): array
+    {
+        return DB::table('user_badges')->where('user_id', $user->id)->pluck('badge_key')->toArray();
+    }
+
+    public static function getLevelInfo(int $level): array
+    {
+        return match ($level) {
+            self::LEVEL_NOUVEAU => [
+                'name' => 'Nouveau', 'emoji' => '🌱', 'next_threshold' => self::THRESHOLD_CONTRIBUTEUR, 'multiplier' => 'x1',
+                'privileges' => ['Soumettre du contenu (modéré)', 'Participer aux discussions'],
+            ],
+            self::LEVEL_CONTRIBUTEUR => [
+                'name' => 'Contributeur', 'emoji' => '🌿', 'next_threshold' => self::THRESHOLD_VERIFIE, 'multiplier' => 'x1.25',
+                'privileges' => ['Auto-approbation des discussions', 'Badge Contributeur visible', 'Points x1.25'],
+            ],
+            self::LEVEL_VERIFIE => [
+                'name' => 'Membre vérifié', 'emoji' => '🌳', 'next_threshold' => self::THRESHOLD_EXPERT, 'multiplier' => 'x1.5',
+                'privileges' => ['Auto-approbation avis et ressources', 'Badge Vérifié visible', 'Voter sur la roadmap', 'Contributeur mis en avant', 'Points x1.5'],
+            ],
+            self::LEVEL_EXPERT => [
+                'name' => 'Expert', 'emoji' => '⭐', 'next_threshold' => null, 'multiplier' => 'x2',
+                'privileges' => ['Auto-approbation de tout contenu', 'Badge Expert doré', 'Modérer le contenu signalé', 'Nom mis en avant', 'Points x2'],
+            ],
+            default => ['name' => 'Inconnu', 'emoji' => '❓', 'next_threshold' => null, 'multiplier' => 'x1', 'privileges' => []],
+        };
+    }
+
+    public static function getBadgeInfo(string $key): array
+    {
+        return match ($key) {
+            'first_contribution' => ['name' => 'Premier pas', 'emoji' => '🎉', 'description' => 'Première contribution approuvée'],
+            'critic' => ['name' => 'Critique', 'emoji' => '⭐', 'description' => '5 avis approuvés'],
+            'curator' => ['name' => 'Curateur', 'emoji' => '📚', 'description' => '5 ressources approuvées'],
+            'animator' => ['name' => 'Animateur', 'emoji' => '💬', 'description' => '10 discussions créées'],
+            'popular' => ['name' => 'Populaire', 'emoji' => '❤️', 'description' => '20 likes reçus'],
+            'expert' => ['name' => 'Expert', 'emoji' => '🏆', 'description' => 'Niveau expert atteint'],
+            'published_author' => ['name' => 'Auteur publié', 'emoji' => '✍️', 'description' => 'Premier article publié sur le blog'],
+            default => ['name' => $key, 'emoji' => '🏅', 'description' => ''],
+        };
+    }
+}

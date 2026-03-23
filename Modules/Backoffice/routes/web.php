@@ -161,18 +161,20 @@ Route::prefix('admin')
         Route::get('faqs/{faq}', [\Modules\Faq\Http\Controllers\FaqController::class, 'show'])->name('faqs.show')->middleware('permission:view_faqs');
         Route::delete('faqs/{faq}', [\Modules\Faq\Http\Controllers\FaqController::class, 'destroy'])->name('faqs.destroy')->middleware('permission:delete_faqs');
 
-        // ── Témoignages ──
-        Route::get('testimonials', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'index'])->name('testimonials.index')->middleware('permission:view_testimonials');
-        Route::middleware('permission:create_testimonials')->group(function () {
-            Route::get('testimonials/create', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'create'])->name('testimonials.create');
-            Route::post('testimonials', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'store'])->name('testimonials.store');
-            Route::post('testimonials/reorder', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'reorder'])->name('testimonials.reorder');
-        });
-        Route::middleware('permission:update_testimonials')->group(function () {
-            Route::get('testimonials/{testimonial}/edit', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'edit'])->name('testimonials.edit');
-            Route::put('testimonials/{testimonial}', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'update'])->name('testimonials.update');
-        });
-        Route::delete('testimonials/{testimonial}', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'destroy'])->name('testimonials.destroy')->middleware('permission:delete_testimonials');
+        // ── Témoignages (module Testimonials requis) ──
+        if (\Nwidart\Modules\Facades\Module::find('Testimonials')?->isEnabled()) {
+            Route::get('testimonials', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'index'])->name('testimonials.index')->middleware('permission:view_testimonials');
+            Route::middleware('permission:create_testimonials')->group(function () {
+                Route::get('testimonials/create', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'create'])->name('testimonials.create');
+                Route::post('testimonials', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'store'])->name('testimonials.store');
+                Route::post('testimonials/reorder', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'reorder'])->name('testimonials.reorder');
+            });
+            Route::middleware('permission:update_testimonials')->group(function () {
+                Route::get('testimonials/{testimonial}/edit', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'edit'])->name('testimonials.edit');
+                Route::put('testimonials/{testimonial}', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'update'])->name('testimonials.update');
+            });
+            Route::delete('testimonials/{testimonial}', [\Modules\Testimonials\Http\Controllers\TestimonialController::class, 'destroy'])->name('testimonials.destroy')->middleware('permission:delete_testimonials');
+        }
 
         // ── Media API (pour TipTap editor) ──
         Route::get('media-api', [\Modules\Media\Http\Controllers\MediaController::class, 'index'])->name('media-api.index')->middleware('permission:view_media');
@@ -265,21 +267,23 @@ Route::prefix('admin')
             Route::delete('webhooks/{webhook}', [WebhookController::class, 'destroy'])->name('webhooks.destroy');
         });
 
-        // ── Plans SaaS ──
-        Route::middleware('permission:view_plans')->group(function () {
-            Route::get('plans', [PlanController::class, 'index'])->name('plans.index');
-            Route::get('revenue', [RevenueController::class, 'index'])->name('revenue');
-            Route::get('revenue/metrics', [RevenueController::class, 'metrics'])->name('revenue.metrics');
-        });
-        Route::middleware('permission:create_plans')->group(function () {
-            Route::get('plans/create', [PlanController::class, 'create'])->name('plans.create');
-            Route::post('plans', [PlanController::class, 'store'])->name('plans.store');
-        });
-        Route::middleware('permission:update_plans')->group(function () {
-            Route::get('plans/{plan}/edit', [PlanController::class, 'edit'])->name('plans.edit');
-            Route::put('plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
-        });
-        Route::delete('plans/{plan}', [PlanController::class, 'destroy'])->name('plans.destroy')->middleware('permission:delete_plans');
+        // ── Plans SaaS (module SaaS requis) ──
+        if (\Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+            Route::middleware('permission:view_plans')->group(function () {
+                Route::get('plans', [PlanController::class, 'index'])->name('plans.index');
+                Route::get('revenue', [RevenueController::class, 'index'])->name('revenue');
+                Route::get('revenue/metrics', [RevenueController::class, 'metrics'])->name('revenue.metrics');
+            });
+            Route::middleware('permission:create_plans')->group(function () {
+                Route::get('plans/create', [PlanController::class, 'create'])->name('plans.create');
+                Route::post('plans', [PlanController::class, 'store'])->name('plans.store');
+            });
+            Route::middleware('permission:update_plans')->group(function () {
+                Route::get('plans/{plan}/edit', [PlanController::class, 'edit'])->name('plans.edit');
+                Route::put('plans/{plan}', [PlanController::class, 'update'])->name('plans.update');
+            });
+            Route::delete('plans/{plan}', [PlanController::class, 'destroy'])->name('plans.destroy')->middleware('permission:delete_plans');
+        }
 
         // ── Feature Flags ──
         Route::get('feature-flags', [FeatureFlagController::class, 'index'])->name('feature-flags.index')->middleware('permission:view_feature_flags');
@@ -288,20 +292,22 @@ Route::prefix('admin')
             Route::post('feature-flags/{name}/conditions', [FeatureFlagController::class, 'updateConditions'])->name('feature-flags.conditions');
         });
 
-        // ── Tests A/B ──
-        Route::middleware('permission:view_feature_flags')->group(function () {
-            Route::get('experiments', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'index'])->name('experiments.index');
-            Route::get('experiments/{experiment}', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'show'])->name('experiments.show');
-        });
-        Route::middleware('permission:create_feature_flags')->group(function () {
-            Route::get('experiments/create', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'create'])->name('experiments.create');
-            Route::post('experiments', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'store'])->name('experiments.store');
-        });
-        Route::middleware('permission:manage_feature_flags')->group(function () {
-            Route::post('experiments/{experiment}/start', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'start'])->name('experiments.start');
-            Route::post('experiments/{experiment}/complete', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'complete'])->name('experiments.complete');
-            Route::delete('experiments/{experiment}', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'destroy'])->name('experiments.destroy');
-        });
+        // ── Tests A/B (module ABTest requis) ──
+        if (\Nwidart\Modules\Facades\Module::find('ABTest')?->isEnabled()) {
+            Route::middleware('permission:view_feature_flags')->group(function () {
+                Route::get('experiments', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'index'])->name('experiments.index');
+                Route::get('experiments/{experiment}', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'show'])->name('experiments.show');
+            });
+            Route::middleware('permission:create_feature_flags')->group(function () {
+                Route::get('experiments/create', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'create'])->name('experiments.create');
+                Route::post('experiments', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'store'])->name('experiments.store');
+            });
+            Route::middleware('permission:manage_feature_flags')->group(function () {
+                Route::post('experiments/{experiment}/start', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'start'])->name('experiments.start');
+                Route::post('experiments/{experiment}/complete', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'complete'])->name('experiments.complete');
+                Route::delete('experiments/{experiment}', [\Modules\ABTest\Http\Controllers\ExperimentController::class, 'destroy'])->name('experiments.destroy');
+            });
+        }
 
         // ── Plugins & Modules ──
         Route::middleware('permission:manage_system')->group(function () {

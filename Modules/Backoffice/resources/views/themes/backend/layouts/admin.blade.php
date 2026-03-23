@@ -29,6 +29,9 @@
     {{-- Main CSS: NobleUI SCSS compiled via Vite (Bootstrap 5.3.8 + theme + components + plugin overrides) --}}
     @vite(['resources/sass/nobleui/app.scss', 'resources/css/nobleui-custom.css'])
 
+    {{-- Sidebar collapse sub-menu: remove duplicate bullets --}}
+    <style>.sidebar-body .collapse .sub-menu .nav-link::before { display: none !important; } .sidebar-body .collapse .sub-menu .nav-link { padding-left: 25px !important; }</style>
+
     {{-- Dynamic branding --}}
     @php
         $cssColors = [

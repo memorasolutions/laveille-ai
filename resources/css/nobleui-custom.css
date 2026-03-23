@@ -4,6 +4,10 @@
  * Compiled via Vite alongside NobleUI SCSS source
  */
 
+/* Sidebar sub-menu: remove bullets */
+.sidebar-body .nav .sub-menu { list-style: none; padding-left: 0; }
+.sidebar-body .nav .sub-menu .nav-item { list-style: none; }
+
 /* Alpine.js x-cloak - hide until Alpine initializes */
 [x-cloak] { display: none !important; }
 

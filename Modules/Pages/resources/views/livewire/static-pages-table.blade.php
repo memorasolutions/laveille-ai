@@ -75,7 +75,7 @@
                         <td class="text-muted">{{ $page->created_at->format('d/m/Y') }}</td>
                         <td>
                             <div class="d-flex align-items-center justify-content-center gap-2">
-                                <a href="{{ route('pages.show', $page->slug) }}" target="_blank"
+                                <a href="{{ route('page.show', $page->slug) }}" target="_blank"
                                    class="btn btn-sm btn-outline-secondary rounded-circle p-1"
                                    title="Voir public" style="width:30px;height:30px;">
                                     <i data-lucide="eye"></i>

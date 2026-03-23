@@ -1,0 +1,241 @@
+/**
+ * 💡 TIP POPUP - Simple modal pour sélection pourboire
+ * Style cohérent avec clean-layout.css
+ */
+
+/* ===============================================
+   🪟 MODAL OVERLAY
+   =============================================== */
+.tip-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+}
+
+.tip-modal-overlay.show {
+    display: flex;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* ===============================================
+   📦 MODAL CONTENT
+   =============================================== */
+.tip-modal {
+    background: white;
+    border-radius: var(--radius-lg, 12px);
+    padding: var(--clean-space-xl, 20px);
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    animation: modalAppear 0.2s ease-out forwards;
+}
+
+@keyframes modalAppear {
+    to {
+        transform: scale(1);
+    }
+}
+
+/* ===============================================
+   📝 MODAL HEADER
+   =============================================== */
+.tip-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--clean-space-lg, 16px);
+    padding-bottom: var(--clean-space-md, 12px);
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.tip-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.tip-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.tip-modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+/* ===============================================
+   🎯 TIP SELECTION BUTTONS
+   =============================================== */
+.tip-modal-presets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--clean-space-md, 12px);
+    margin-bottom: var(--clean-space-lg, 16px);
+}
+
+.tip-modal-button {
+    padding: var(--clean-space-lg, 16px);
+    border: 2px solid #e0e0e0;
+    border-radius: var(--radius-md, 8px);
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.tip-modal-button:hover {
+    border-color: var(--color-primary, #A47864);
+    background: rgba(164, 120, 100, 0.05);
+}
+
+.tip-modal-button.selected {
+    border-color: var(--color-primary, #A47864);
+    background: var(--color-primary, #A47864);
+    color: white;
+}
+
+/* ===============================================
+   📝 CUSTOM TIP INPUT
+   =============================================== */
+.tip-modal-custom {
+    margin-bottom: var(--clean-space-lg, 16px);
+}
+
+.tip-modal-custom label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: var(--clean-space-sm, 8px);
+}
+
+.tip-modal-custom input {
+    width: 100%;
+    padding: var(--clean-space-md, 12px);
+    border: 2px solid #e0e0e0;
+    border-radius: var(--radius-md, 8px);
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.tip-modal-custom input:focus {
+    outline: none;
+    border-color: var(--color-primary, #A47864);
+    box-shadow: 0 0 0 3px rgba(164, 120, 100, 0.1);
+}
+
+/* ===============================================
+   🎬 MODAL ACTIONS
+   =============================================== */
+.tip-modal-actions {
+    display: flex;
+    gap: var(--clean-space-md, 12px);
+    margin-top: var(--clean-space-xl, 20px);
+}
+
+.tip-modal-btn {
+    flex: 1;
+    padding: var(--clean-space-md, 12px) var(--clean-space-lg, 16px);
+    border: none;
+    border-radius: var(--radius-md, 8px);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tip-modal-btn-primary {
+    background: var(--color-primary, #A47864);
+    color: white;
+}
+
+.tip-modal-btn-primary:hover {
+    background: #935a47;
+    transform: translateY(-1px);
+}
+
+.tip-modal-btn-secondary {
+    background: #f8f9fa;
+    color: #666;
+    border: 2px solid #e0e0e0;
+}
+
+.tip-modal-btn-secondary:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+/* ===============================================
+   📱 RESPONSIVE
+   =============================================== */
+@media (max-width: 480px) {
+    .tip-modal {
+        width: 95%;
+        padding: var(--clean-space-lg, 16px);
+    }
+    
+    .tip-modal-presets {
+        grid-template-columns: 1fr;
+    }
+    
+    .tip-modal-actions {
+        flex-direction: column;
+    }
+}
+
+/* ===============================================
+   ✨ ANIMATIONS
+   =============================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.tip-modal-overlay.hiding {
+    animation: fadeOut 0.2s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+/* Améliorer la visibilité focus */
+.tip-modal-button:focus,
+.tip-modal-btn:focus {
+    box-shadow: 0 0 0 3px rgba(164, 120, 100, 0.2);
+    outline: none;
+}
+
+/* États disabled */
+.tip-modal-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}

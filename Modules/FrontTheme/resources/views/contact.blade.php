@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
 @section('title', __('Contact'))

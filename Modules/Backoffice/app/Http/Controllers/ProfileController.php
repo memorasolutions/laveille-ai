@@ -51,6 +51,24 @@ class ProfileController
 
     public function update(Request $request): RedirectResponse
     {
+        if ($request->input('_section') === 'bio') {
+            $request->validate([
+                'bio' => ['nullable', 'string', 'max:500'],
+                'avatar' => ['nullable', 'image', 'max:2048'],
+            ]);
+
+            $data = ['bio' => $request->input('bio')];
+
+            if ($request->hasFile('avatar')) {
+                $path = $request->file('avatar')->store('avatars', 'public');
+                $data['avatar'] = 'storage/' . $path;
+            }
+
+            auth()->user()->update($data);
+
+            return back()->with('success', __('Bio et photo mises à jour.'));
+        }
+
         if ($request->input('_section') === 'social') {
             $validated = $request->validate([
                 'social_links' => ['nullable', 'array'],

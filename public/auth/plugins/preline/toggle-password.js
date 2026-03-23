@@ -1,3 +1,4 @@
+// Author: MEMORA solutions, https://memora.solutions ; info@memora.ca
 !function(t,e){if("object"==typeof exports&&"object"==typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n=e();for(var o in n)("object"==typeof exports?exports:t)[o]=n[o]}}(self,(()=>(()=>{"use strict";var t={737:(t,e)=>{
 /*
  * HSBasePlugin

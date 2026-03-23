@@ -182,4 +182,16 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
             return true;
         });
     }
+
+    /**
+     * Get user's reputation level info (emoji + name).
+     */
+    public function getLevelBadge(): string
+    {
+        if (class_exists(\Modules\Directory\Services\ReputationService::class)) {
+            $info = \Modules\Directory\Services\ReputationService::getLevelInfo($this->trust_level ?? 0);
+            return $info['emoji'] . ' ' . $info['name'];
+        }
+        return '';
+    }
 }

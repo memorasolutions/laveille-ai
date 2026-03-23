@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 return [
     'exception_message' => 'এক্সসেপশন বার্তা: :message',
     'exception_trace' => 'এক্সসেপশন ট্রেস: :trace',

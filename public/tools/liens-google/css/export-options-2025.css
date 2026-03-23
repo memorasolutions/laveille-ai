@@ -1,0 +1,456 @@
+/**
+ * Export Options - Design 2025 tendances
+ * Espacement généreux, design en cartes, minimalisme audacieux
+ * Keep it simple - Suivre les tendances UX 2025
+ */
+
+/* Container principal - Espacement généreux selon tendances 2025 */
+.export-options-container {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: var(--space-6) 0; /* Espacement généreux */
+}
+
+/* Titre moderne - Hiérarchie visuelle claire */
+.export-options-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    position: relative;
+}
+
+.export-options-title::before {
+    content: '';
+    position: absolute;
+    left: -var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 16px;
+    background: var(--color-primary);
+    border-radius: 2px;
+}
+
+/* Grille ultra-aérée */
+.export-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-6); /* Espacement très généreux */
+    padding: var(--space-4);
+}
+
+/* Carte ultra-aérée */
+.export-option {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5); /* Plus d'espace entre les éléments */
+    padding: var(--space-6); /* Padding généreux */
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: 16px; /* Coins très arrondis */
+    min-height: 120px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet hover moderne avec micro-animations */
+.export-option:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    /* transform: translateY(-2px); */ /* Désactivé pour éviter le reflow */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.export-option:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+    transform: scaleX(1);
+    transition: transform 0.3s ease;
+}
+
+.export-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+/* Label moderne avec hiérarchie visuelle */
+.export-option-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+    line-height: 1.4;
+    white-space: nowrap;  /* Empêche le retour à la ligne */
+}
+
+.option-icon {
+    font-size: 1.125rem;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+}
+
+.export-option:hover .option-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Description visible et utile */
+.export-option-description {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+    margin: 0;
+    margin-top: var(--space-1);
+}
+
+/* Contrôles modernes alignés avec la charte */
+
+/* Select ultra-aéré */
+.export-option-select {
+    width: 100%;
+    padding: var(--space-4) var(--space-5); /* Padding très généreux */
+    font-size: 1rem; /* Texte plus lisible */
+    font-family: inherit;
+    font-weight: 500;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: 12px; /* Coins arrondis */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right var(--space-4) center;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    padding-right: var(--space-8); /* Plus d'espace pour l'icône */
+    min-height: 48px; /* Hauteur confortable */
+    line-height: 1.4;
+}
+
+.export-option-select:hover {
+    border-color: var(--color-primary);
+    background-color: white;
+}
+
+.export-option-select:focus {
+    border-color: var(--color-primary);
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+/* Toggle ultra-aéré - Reste dans la carte */
+.export-option-toggle {
+    display: flex;
+    flex-direction: column; /* Par défaut, empiler verticalement */
+    gap: var(--space-2);
+    width: 100%; /* S'assure qu'ils restent dans la carte */
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* Pour les toggles avec exactement 2 options courtes */
+.export-option-toggle.has-2-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.toggle-btn {
+    padding: var(--space-3) var(--space-2); /* Padding ajusté pour tenir */
+    font-size: 0.9375rem;
+    font-weight: 500;
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-text-muted);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+}
+
+.toggle-btn:hover {
+    color: var(--color-text);
+}
+
+.toggle-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+    transform: translateY(-1px);
+}
+
+.toggle-btn.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+    font-weight: 600;
+}
+
+/* Switch slider moderne - Remplace les checkboxes */
+.export-option-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+/* Masquer la vraie checkbox */
+.export-option-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+/* Slider switch moderne */
+.export-option-checkbox label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+    user-select: none;
+    gap: var(--space-3);
+}
+
+.checkbox-content {
+    flex: 1;
+}
+
+/* Switch slider */
+.export-option-checkbox label::after {
+    content: '';
+    width: 50px;
+    height: 26px;
+    background: var(--color-border);
+    border-radius: 13px;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.export-option-checkbox label::before {
+    content: '';
+    position: absolute;
+    right: 26px;  /* Positionné à partir de la droite pour rester dans le switch */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+/* État activé */
+.export-option-checkbox input[type="checkbox"]:checked + label::after {
+    background: var(--color-primary);
+}
+
+.export-option-checkbox input[type="checkbox"]:checked + label::before {
+    right: 2px;  /* Se déplace à droite quand activé */
+    transform: translateY(-50%);
+}
+
+/* Hover effect */
+.export-option-checkbox label:hover::before {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Text input ultra-aéré */
+.export-option-text {
+    width: 100%;
+    padding: var(--space-4) var(--space-5); /* Padding très généreux */
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    outline: none;
+    min-height: 48px; /* Hauteur confortable */
+    line-height: 1.4;
+}
+
+/* Input range spécial pour "Plage de cellules" */
+.export-option-range {
+    position: relative;
+}
+
+.export-range-input {
+    width: 100%;
+    padding: var(--space-4) var(--space-5);
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    background: white;
+    border: 2px solid var(--color-primary-light);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    outline: none;
+    min-height: 48px;
+    line-height: 1.4;
+}
+
+.export-range-input:hover {
+    border-color: var(--color-primary);
+    background-color: white;
+}
+
+.export-range-input:focus {
+    border-color: var(--color-primary);
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+}
+
+.export-option-text:hover {
+    border-color: var(--color-primary);
+    background-color: white;
+}
+
+.export-option-text:focus {
+    border-color: var(--color-primary);
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+/* Preset buttons ultra-aérés - Restent dans la carte */
+.export-option-preset {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes par défaut */
+    gap: var(--space-2);
+    width: 100%; /* S'assure qu'ils restent dans la carte */
+}
+
+/* Si 4 options exactement, faire une grille 2x2 */
+.export-option-preset.has-4-options {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* Si plus de 4 options, faire une seule colonne */
+.export-option-preset.has-many-options {
+    grid-template-columns: 1fr;
+}
+
+.preset-btn {
+    padding: var(--space-2) var(--space-3); /* Padding plus compact pour tenir */
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-text-muted);
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+}
+
+.preset-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+    transform: translateY(-1px);
+}
+
+.preset-btn.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* Responsive moderne */
+@media (max-width: 768px) {
+    .export-options-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+    
+    .export-option {
+        padding: var(--space-3);
+    }
+}
+
+/* Styles pour les groupes d'options */
+.export-group-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.export-option.in-group {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: var(--space-2) 0;
+    margin: 0;
+    min-height: auto;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.export-option.in-group:last-child {
+    border-bottom: none;
+}
+
+.export-option.in-group:hover {
+    background: var(--color-bg-secondary);
+    border-radius: 8px;
+    transform: none;
+    /* Pas de changement de padding pour éviter le reflow */
+    /* padding: var(--space-2) var(--space-3); */
+}
+
+/* Animation d'entrée moderne */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.export-option {
+    animation: fadeInUp 0.3s ease-out forwards;
+}
+
+.export-option:nth-child(2) { animation-delay: 0.05s; }
+.export-option:nth-child(3) { animation-delay: 0.1s; }
+.export-option:nth-child(4) { animation-delay: 0.15s; }

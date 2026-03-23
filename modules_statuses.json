@@ -37,5 +37,11 @@
     "Translation": true,
     "Webhooks": false,
     "Widget": true,
-    "FrontTheme": true
+    "FrontTheme": true,
+    "Ads": true,
+    "Tools": true,
+    "Dictionary": true,
+    "Directory": true,
+    "Community": true,
+    "Acronyms": true
 }

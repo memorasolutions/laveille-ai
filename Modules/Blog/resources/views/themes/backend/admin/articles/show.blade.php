@@ -33,7 +33,7 @@
         <div class="row g-3">
             <div class="col-xl-8">
                 @if($article->featured_image)
-                    <img src="{{ Storage::url($article->featured_image) }}"
+                    <img src="{{ asset($article->featured_image) }}"
                          class="w-100 rounded-3 mb-3" style="max-height:18rem;object-fit:cover;"
                          alt="{{ $article->title }}">
                 @endif

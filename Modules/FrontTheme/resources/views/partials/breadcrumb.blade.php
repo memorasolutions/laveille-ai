@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <!-- start of breadcumb-section -->
 <div class="wpo-breadcumb-area">
     <div class="container">
@@ -8,8 +9,26 @@
                     <ul>
                         <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
                         @isset($breadcrumbItems)
-                            @foreach($breadcrumbItems as $item)
-                                <li><span>{{ $item }}</span></li>
+                            @foreach($breadcrumbItems as $index => $item)
+                                @if(!$loop->last)
+                                    @php
+                                        $breadcrumbRoutes = [
+                                            __('Outils') => Route::has('tools.index') ? route('tools.index') : null,
+                                            __('Blog') => Route::has('blog.index') ? route('blog.index') : null,
+                                            __('Glossaire IA') => Route::has('dictionary.index') ? route('dictionary.index') : null,
+                                            __('Répertoire techno') => Route::has('directory.index') ? route('directory.index') : null,
+                                            __('FAQ') => Route::has('faq.index') ? route('faq.index') : null,
+                                        ];
+                                        $url = $breadcrumbRoutes[$item] ?? null;
+                                    @endphp
+                                    @if($url)
+                                        <li><a href="{{ $url }}">{{ $item }}</a></li>
+                                    @else
+                                        <li><span>{{ $item }}</span></li>
+                                    @endif
+                                @else
+                                    <li><span>{{ $item }}</span></li>
+                                @endif
                             @endforeach
                         @else
                             <li><span>{{ $breadcrumbTitle ?? '' }}</span></li>

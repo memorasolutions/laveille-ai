@@ -1,0 +1,11 @@
+{
+    "name": "Dictionary",
+    "alias": "dictionary",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Dictionary\\Providers\\DictionaryServiceProvider"
+    ],
+    "files": []
+}

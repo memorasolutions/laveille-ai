@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @props(['activeKey' => ''])
 
 <div style="width:100%;max-width:400px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;font-family:system-ui,sans-serif;overflow:hidden;">

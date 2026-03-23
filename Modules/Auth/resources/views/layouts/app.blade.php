@@ -248,26 +248,7 @@
                             </div>
                         </li>
 
-                        {{-- Language switcher --}}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                @php $currentLocale = app()->getLocale(); @endphp
-                                <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/' . ($currentLocale === 'fr' ? 'fr' : 'us') . '.svg') }}"
-                                     class="w-20px" alt="">
-                                <span class="d-none d-md-inline-block ms-1">{{ strtoupper($currentLocale) }}</span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('locale.switch', 'fr') }}">
-                                    <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/fr.svg') }}" class="w-20px" alt="">
-                                    Français
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('locale.switch', 'en') }}">
-                                    <img src="{{ asset('build/nobleui/plugins/flag-icons/flags/4x3/us.svg') }}" class="w-20px" alt="">
-                                    English
-                                </a>
-                            </div>
-                        </li>
+                        {{-- Language switcher — désactivé temporairement (site FR uniquement) --}}
 
                         {{-- Notifications --}}
                         <li class="nav-item">

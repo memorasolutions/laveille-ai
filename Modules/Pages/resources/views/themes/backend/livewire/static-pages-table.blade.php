@@ -83,7 +83,7 @@
                         <td class="py-3 px-4 text-muted">{{ $page->created_at->format('d/m/Y') }}</td>
                         <td class="py-3 px-4">
                             <div class="d-flex align-items-center justify-content-center gap-2">
-                                <a href="{{ route('pages.show', $page->slug) }}" target="_blank"
+                                <a href="{{ route('page.show', $page->slug) }}" target="_blank"
                                    class="btn btn-sm btn-outline-secondary"
                                    title="Voir public">
                                     <i data-lucide="eye" class="icon-sm"></i>

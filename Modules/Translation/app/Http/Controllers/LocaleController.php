@@ -16,12 +16,13 @@ class LocaleController
 {
     public function __invoke(string $locale): RedirectResponse
     {
+        $localeMap = ['fr' => 'fr_CA', 'en' => 'en'];
         $supported = config('app.supported_locales', ['fr', 'en']);
         if (! in_array($locale, $supported, true)) {
             abort(400);
         }
 
-        session(['locale' => $locale]);
+        session(['locale' => $localeMap[$locale] ?? $locale]);
 
         return back();
     }

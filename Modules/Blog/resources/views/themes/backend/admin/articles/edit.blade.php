@@ -210,7 +210,7 @@
                 </div>
                 <div class="card-body p-4">
                     @if($article->featured_image)
-                        <img src="{{ Storage::url($article->featured_image) }}"
+                        <img src="{{ asset($article->featured_image) }}"
                              class="w-100 rounded-3 mb-3" style="max-height:9rem;object-fit:cover;">
                     @endif
                     <input type="file" name="featured_image"

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <x-fronttheme::layouts.master>
     <h1>Hello World</h1>
 

@@ -57,7 +57,7 @@ Route::middleware('web')->group(function () {
         if (class_exists(\Modules\Pages\Models\StaticPage::class)) {
             \Modules\Pages\Models\StaticPage::published()->each(function (\Modules\Pages\Models\StaticPage $page) use ($sitemap) {
                 $sitemap->add(
-                    Url::create(route('pages.show', $page->slug))
+                    Url::create(route('page.show', $page->slug))
                         ->setLastModificationDate($page->updated_at)
                         ->setPriority(0.8)
                         ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)

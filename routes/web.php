@@ -28,6 +28,6 @@ Route::get('/manifest.webmanifest', [\Modules\Core\Http\Controllers\PwaControlle
 Route::get('/offline', [\Modules\Core\Http\Controllers\PwaController::class, 'offline'])->name('pwa.offline');
 
 // Language switcher (module Translation)
-Route::post('/locale/{locale}', \Modules\Translation\Http\Controllers\LocaleController::class)->name('locale.switch');
+Route::match(['get', 'post'], '/locale/{locale}', \Modules\Translation\Http\Controllers\LocaleController::class)->name('locale.switch');
 
 // Legal pages moved to Modules/Privacy

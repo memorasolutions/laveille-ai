@@ -1,0 +1,2982 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e11]:
+      - generic [ref=e14]:
+        - list [ref=e17]:
+          - listitem [ref=e18]:
+            - generic [ref=e19]: Nouveau
+          - listitem [ref=e20]: C’est quoi le MCP ? Le guide simplifié de la révolution IA au Québec
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Facebook" [ref=e24] [cursor=pointer]:
+              - /url: https://www.facebook.com/LaVeilleDeStef
+              - generic [ref=e25]: 
+          - listitem [ref=e26]:
+            - link "Messenger" [ref=e27] [cursor=pointer]:
+              - /url: https://m.me/LaVeilleDeStef
+              - generic [ref=e28]: 
+      - navigation [ref=e29]:
+        - generic [ref=e31]:
+          - link "La veille" [ref=e34] [cursor=pointer]:
+            - /url: http://127.0.0.1:8765
+            - img "La veille" [ref=e35]
+          - generic [ref=e37]:
+            - text: 
+            - list [ref=e38]:
+              - listitem [ref=e39]:
+                - link "Accueil" [ref=e40] [cursor=pointer]:
+                  - /url: http://127.0.0.1:8765
+              - listitem [ref=e41]:
+                - link "Blog" [ref=e42] [cursor=pointer]:
+                  - /url: http://127.0.0.1:8765/blog
+              - listitem [ref=e43]:
+                - link "Catégories" [ref=e44] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=e45]:
+                - link "Ressources" [ref=e46] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=e47]:
+                - link "Pages" [ref=e48] [cursor=pointer]:
+                  - /url: "#"
+          - button "" [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]: 
+    - generic [ref=e65]:
+      - heading "Acronymes éducation" [level=2] [ref=e66]
+      - list [ref=e67]:
+        - listitem [ref=e68]:
+          - link "Accueil" [ref=e69] [cursor=pointer]:
+            - /url: http://127.0.0.1:8765
+          - text: /
+        - listitem [ref=e70]: Acronymes éducation
+    - main [ref=e71]:
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - heading "🎓 Acronymes de l'éducation au Québec" [level=1] [ref=e75]
+          - paragraph [ref=e76]: Le glossaire complet pour naviguer dans le jargon du système éducatif québécois
+          - generic [ref=e77]: 307 acronymes répertoriés
+        - generic [ref=e79]:
+          - button "✱" [ref=e80] [cursor=pointer]
+          - button "A" [ref=e81] [cursor=pointer]
+          - button "B" [ref=e82] [cursor=pointer]
+          - button "C" [ref=e83] [cursor=pointer]
+          - button "D" [ref=e84] [cursor=pointer]
+          - button "E" [ref=e85] [cursor=pointer]
+          - button "F" [ref=e86] [cursor=pointer]
+          - button "G" [ref=e87] [cursor=pointer]
+          - button "H" [ref=e88] [cursor=pointer]
+          - button "I" [ref=e89] [cursor=pointer]
+          - button "J" [ref=e90] [cursor=pointer]
+          - button "K" [ref=e91] [cursor=pointer]
+          - button "L" [ref=e92] [cursor=pointer]
+          - button "M" [ref=e93] [cursor=pointer]
+          - button "N" [ref=e94] [cursor=pointer]
+          - button "O" [ref=e95] [cursor=pointer]
+          - button "P" [ref=e96] [cursor=pointer]
+          - button "Q" [ref=e97] [cursor=pointer]
+          - button "R" [ref=e98] [cursor=pointer]
+          - button "S" [ref=e99] [cursor=pointer]
+          - button "T" [ref=e100] [cursor=pointer]
+          - button "U" [ref=e101] [cursor=pointer]
+          - button "V" [ref=e102] [cursor=pointer]
+          - button "W" [ref=e103] [cursor=pointer]
+          - button "X" [ref=e104] [cursor=pointer]
+          - button "Y" [ref=e105] [cursor=pointer]
+          - button "Z" [ref=e106] [cursor=pointer]
+        - textbox "Rechercher un acronyme, un organisme ou un terme..." [ref=e110]
+        - generic [ref=e111]:
+          - button "Tous" [ref=e112] [cursor=pointer]
+          - button "🏛️ Ministères et organismes gouvernementaux" [ref=e113] [cursor=pointer]
+          - button "🤝 Associations et organismes professionnels" [ref=e114] [cursor=pointer]
+          - button "🔧 Formation professionnelle et technique" [ref=e115] [cursor=pointer]
+          - button "🎓 Formation générale et diplômes" [ref=e116] [cursor=pointer]
+          - button "💻 Technologies éducatives et numérique" [ref=e117] [cursor=pointer]
+          - button "🫶 Services aux élèves et adaptation" [ref=e118] [cursor=pointer]
+          - button "🏫 Centres de services scolaires" [ref=e119] [cursor=pointer]
+          - button "📋 Gestion et administration scolaire" [ref=e120] [cursor=pointer]
+        - generic [ref=e121]: 307 résultat(s)
+        - generic [ref=e122]:
+          - link "AAESQ AAESQ Association of Administrators of English School boards of Quebec Centres de services scolaires Voir la fiche →" [ref=e124] [cursor=pointer]:
+            - /url: /acronymes-education/aaesq
+            - generic [ref=e125]:
+              - img "AAESQ" [ref=e127]
+              - heading "AAESQ" [level=3] [ref=e128]
+            - generic [ref=e129]: Association of Administrators of English School boards of Quebec
+            - generic [ref=e130]:
+              - generic [ref=e131]: Centres de services scolaires
+              - generic [ref=e132]: Voir la fiche →
+          - link "ACCC ACCC Association des Collèges Communautaires du Canada Associations et organismes professionnels Voir la fiche →" [ref=e134] [cursor=pointer]:
+            - /url: /acronymes-education/accc
+            - generic [ref=e135]:
+              - img "ACCC" [ref=e137]
+              - heading "ACCC" [level=3] [ref=e138]
+            - generic [ref=e139]: Association des Collèges Communautaires du Canada
+            - generic [ref=e140]:
+              - generic [ref=e141]: Associations et organismes professionnels
+              - generic [ref=e142]: Voir la fiche →
+          - link "ACCPQ ACCPQ Association des Conseillères et des Conseillers Pédagogiques du Québec Formation générale et diplômes Voir la fiche →" [ref=e144] [cursor=pointer]:
+            - /url: /acronymes-education/accpq
+            - generic [ref=e145]:
+              - img "ACCPQ" [ref=e147]
+              - heading "ACCPQ" [level=3] [ref=e148]
+            - generic [ref=e149]: Association des Conseillères et des Conseillers Pédagogiques du Québec
+            - generic [ref=e150]:
+              - generic [ref=e151]: Formation générale et diplômes
+              - generic [ref=e152]: Voir la fiche →
+          - link "ACDEC ACDEC Association Canadienne De l'Enseignement Coopératif Associations et organismes professionnels Voir la fiche →" [ref=e154] [cursor=pointer]:
+            - /url: /acronymes-education/acdec
+            - generic [ref=e155]:
+              - img "ACDEC" [ref=e157]
+              - heading "ACDEC" [level=3] [ref=e158]
+            - generic [ref=e159]: Association Canadienne De l'Enseignement Coopératif
+            - generic [ref=e160]:
+              - generic [ref=e161]: Associations et organismes professionnels
+              - generic [ref=e162]: Voir la fiche →
+          - link "ACES ACES Administrators of Complementary Services Technologies éducatives et numérique Voir la fiche →" [ref=e164] [cursor=pointer]:
+            - /url: /acronymes-education/aces
+            - generic [ref=e165]:
+              - img "ACES" [ref=e167]
+              - heading "ACES" [level=3] [ref=e168]
+            - generic [ref=e169]: Administrators of Complementary Services
+            - generic [ref=e170]:
+              - generic [ref=e171]: Technologies éducatives et numérique
+              - generic [ref=e172]: Voir la fiche →
+          - link "ACFAS ACFAS L'Association Canadienne-Française pour l'Avancement des Sciences Associations et organismes professionnels Voir la fiche →" [ref=e174] [cursor=pointer]:
+            - /url: /acronymes-education/acfas
+            - generic [ref=e175]:
+              - img "ACFAS" [ref=e177]
+              - heading "ACFAS" [level=3] [ref=e178]
+            - generic [ref=e179]: L'Association Canadienne-Française pour l'Avancement des Sciences
+            - generic [ref=e180]:
+              - generic [ref=e181]: Associations et organismes professionnels
+              - generic [ref=e182]: Voir la fiche →
+          - link "ACSQ ACSQ Association des Cadres Scolaire du Québec Associations et organismes professionnels Voir la fiche →" [ref=e184] [cursor=pointer]:
+            - /url: /acronymes-education/acsq
+            - generic [ref=e185]:
+              - img "ACSQ" [ref=e187]
+              - heading "ACSQ" [level=3] [ref=e188]
+            - generic [ref=e189]: Association des Cadres Scolaire du Québec
+            - generic [ref=e190]:
+              - generic [ref=e191]: Associations et organismes professionnels
+              - generic [ref=e192]: Voir la fiche →
+          - link "ADGESBQ ADGESBQ Association of Directors General of the English School Boards of Quebec Centres de services scolaires Voir la fiche →" [ref=e194] [cursor=pointer]:
+            - /url: /acronymes-education/adgesbq
+            - generic [ref=e195]:
+              - img "ADGESBQ" [ref=e197]
+              - heading "ADGESBQ" [level=3] [ref=e198]
+            - generic [ref=e199]: Association of Directors General of the English School Boards of Quebec
+            - generic [ref=e200]:
+              - generic [ref=e201]: Centres de services scolaires
+              - generic [ref=e202]: Voir la fiche →
+          - link "ADGSQ ADGSQ Association des directions générales scolaires du Québec Associations et organismes professionnels Voir la fiche →" [ref=e204] [cursor=pointer]:
+            - /url: /acronymes-education/adgsq
+            - generic [ref=e205]:
+              - img "ADGSQ" [ref=e207]
+              - heading "ADGSQ" [level=3] [ref=e208]
+            - generic [ref=e209]: Association des directions générales scolaires du Québec
+            - generic [ref=e210]:
+              - generic [ref=e211]: Associations et organismes professionnels
+              - generic [ref=e212]: Voir la fiche →
+          - link "ADIGECS ADIGECS Association des DIrecteurs GÉnéraux des Commissions Scolaire Ministères et organismes gouvernementaux Voir la fiche →" [ref=e214] [cursor=pointer]:
+            - /url: /acronymes-education/adigecs
+            - generic [ref=e215]:
+              - img "ADIGECS" [ref=e217]
+              - heading "ADIGECS" [level=3] [ref=e218]
+            - generic [ref=e219]: Association des DIrecteurs GÉnéraux des Commissions Scolaire
+            - generic [ref=e220]:
+              - generic [ref=e221]: Ministères et organismes gouvernementaux
+              - generic [ref=e222]: Voir la fiche →
+          - link "ADL ADL Agents De Liaison Ministères et organismes gouvernementaux Voir la fiche →" [ref=e224] [cursor=pointer]:
+            - /url: /acronymes-education/adl
+            - generic [ref=e225]:
+              - img "ADL" [ref=e227]
+              - heading "ADL" [level=3] [ref=e228]
+            - generic [ref=e229]: Agents De Liaison
+            - generic [ref=e230]:
+              - generic [ref=e231]: Ministères et organismes gouvernementaux
+              - generic [ref=e232]: Voir la fiche →
+          - link "ÀDMPES ÀDMPES À Distance, Mais Présent en Enseignement au Secondaire Formation générale et diplômes Voir la fiche →" [ref=e234] [cursor=pointer]:
+            - /url: /acronymes-education/admpes
+            - generic [ref=e235]:
+              - img "ÀDMPES" [ref=e237]
+              - heading "ÀDMPES" [level=3] [ref=e238]
+            - generic [ref=e239]: À Distance, Mais Présent en Enseignement au Secondaire
+            - generic [ref=e240]:
+              - generic [ref=e241]: Formation générale et diplômes
+              - generic [ref=e242]: Voir la fiche →
+          - link "AEC AEC Attestation d'études collégiales Formation professionnelle et technique Voir la fiche →" [ref=e244] [cursor=pointer]:
+            - /url: /acronymes-education/aec
+            - generic [ref=e245]:
+              - img "AEC" [ref=e247]
+              - heading "AEC" [level=3] [ref=e248]
+            - generic [ref=e249]: Attestation d'études collégiales
+            - generic [ref=e250]:
+              - generic [ref=e251]: Formation professionnelle et technique
+              - generic [ref=e252]: Voir la fiche →
+          - link "AENS AENS Attestation d’Équivalence de Niveau de Scolarité Formation professionnelle et technique Voir la fiche →" [ref=e254] [cursor=pointer]:
+            - /url: /acronymes-education/aens
+            - generic [ref=e255]:
+              - img "AENS" [ref=e257]
+              - heading "AENS" [level=3] [ref=e258]
+            - generic [ref=e259]: Attestation d’Équivalence de Niveau de Scolarité
+            - generic [ref=e260]:
+              - generic [ref=e261]: Formation professionnelle et technique
+              - generic [ref=e262]: Voir la fiche →
+          - link "AEP AEP Attestation d’Études Professionnelles Formation professionnelle et technique Voir la fiche →" [ref=e264] [cursor=pointer]:
+            - /url: /acronymes-education/aep
+            - generic [ref=e265]:
+              - img "AEP" [ref=e267]
+              - heading "AEP" [level=3] [ref=e268]
+            - generic [ref=e269]: Attestation d’Études Professionnelles
+            - generic [ref=e270]:
+              - generic [ref=e271]: Formation professionnelle et technique
+              - generic [ref=e272]: Voir la fiche →
+          - link "AÉPQ AÉPQ Association d’Éducation Préscolaire du Québec Associations et organismes professionnels Voir la fiche →" [ref=e274] [cursor=pointer]:
+            - /url: /acronymes-education/aepq
+            - generic [ref=e275]:
+              - img "AÉPQ" [ref=e277]
+              - heading "AÉPQ" [level=3] [ref=e278]
+            - generic [ref=e279]: Association d’Éducation Préscolaire du Québec
+            - generic [ref=e280]:
+              - generic [ref=e281]: Associations et organismes professionnels
+              - generic [ref=e282]: Voir la fiche →
+          - link "AESTQ AESTQ Association de l'Enseignement de la Science et de la Technologie au Québec Associations et organismes professionnels Voir la fiche →" [ref=e284] [cursor=pointer]:
+            - /url: /acronymes-education/aestq
+            - generic [ref=e285]:
+              - img "AESTQ" [ref=e287]
+              - heading "AESTQ" [level=3] [ref=e288]
+            - generic [ref=e289]: Association de l'Enseignement de la Science et de la Technologie au Québec
+            - generic [ref=e290]:
+              - generic [ref=e291]: Associations et organismes professionnels
+              - generic [ref=e292]: Voir la fiche →
+          - link "AF AF Autres Fonctions Formation générale et diplômes Voir la fiche →" [ref=e294] [cursor=pointer]:
+            - /url: /acronymes-education/af
+            - generic [ref=e295]:
+              - img "AF" [ref=e297]
+              - heading "AF" [level=3] [ref=e298]
+            - generic [ref=e299]: Autres Fonctions
+            - generic [ref=e300]:
+              - generic [ref=e301]: Formation générale et diplômes
+              - generic [ref=e302]: Voir la fiche →
+          - link "AFCE AFCE Adéquation Formation-Compétences-Emploi Formation professionnelle et technique Voir la fiche →" [ref=e304] [cursor=pointer]:
+            - /url: /acronymes-education/afce
+            - generic [ref=e305]:
+              - img "AFCE" [ref=e307]
+              - heading "AFCE" [level=3] [ref=e308]
+            - generic [ref=e309]: Adéquation Formation-Compétences-Emploi
+            - generic [ref=e310]:
+              - generic [ref=e311]: Formation professionnelle et technique
+              - generic [ref=e312]: Voir la fiche →
+          - link "AFP AFP Attestation de Formation Professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e314] [cursor=pointer]:
+            - /url: /acronymes-education/afp
+            - generic [ref=e315]:
+              - img "AFP" [ref=e317]
+              - heading "AFP" [level=3] [ref=e318]
+            - generic [ref=e319]: Attestation de Formation Professionnelle
+            - generic [ref=e320]:
+              - generic [ref=e321]: Formation professionnelle et technique
+              - generic [ref=e322]: Voir la fiche →
+          - link "AGA AGA Assemblée Générale Annuelle Gestion et administration scolaire Voir la fiche →" [ref=e324] [cursor=pointer]:
+            - /url: /acronymes-education/aga
+            - generic [ref=e325]:
+              - img "AGA" [ref=e327]
+              - heading "AGA" [level=3] [ref=e328]
+            - generic [ref=e329]: Assemblée Générale Annuelle
+            - generic [ref=e330]:
+              - generic [ref=e331]: Gestion et administration scolaire
+              - generic [ref=e332]: Voir la fiche →
+          - link "AI AI Artificial Intelligence Technologies éducatives et numérique Voir la fiche →" [ref=e334] [cursor=pointer]:
+            - /url: /acronymes-education/ai
+            - generic [ref=e335]:
+              - img "AI" [ref=e337]
+              - heading "AI" [level=3] [ref=e338]
+            - generic [ref=e339]: Artificial Intelligence
+            - generic [ref=e340]:
+              - generic [ref=e341]: Technologies éducatives et numérique
+              - generic [ref=e342]: Voir la fiche →
+          - link "ALDI ALDI Advancing Learning in Differentiation and Inclusion Technologies éducatives et numérique Voir la fiche →" [ref=e344] [cursor=pointer]:
+            - /url: /acronymes-education/aldi
+            - generic [ref=e345]:
+              - img "ALDI" [ref=e347]
+              - heading "ALDI" [level=3] [ref=e348]
+            - generic [ref=e349]: Advancing Learning in Differentiation and Inclusion
+            - generic [ref=e350]:
+              - generic [ref=e351]: Technologies éducatives et numérique
+              - generic [ref=e352]: Voir la fiche →
+          - link "ALÉNA ALÉNA Accord de Libre-Échange Nord-Américain Technologies éducatives et numérique Voir la fiche →" [ref=e354] [cursor=pointer]:
+            - /url: /acronymes-education/alena
+            - generic [ref=e355]:
+              - img "ALÉNA" [ref=e357]
+              - heading "ALÉNA" [level=3] [ref=e358]
+            - generic [ref=e359]: Accord de Libre-Échange Nord-Américain
+            - generic [ref=e360]:
+              - generic [ref=e361]: Technologies éducatives et numérique
+              - generic [ref=e362]: Voir la fiche →
+          - link "AP AP Activités Professionnelles Formation générale et diplômes Voir la fiche →" [ref=e364] [cursor=pointer]:
+            - /url: /acronymes-education/ap
+            - generic [ref=e365]:
+              - img "AP" [ref=e367]
+              - heading "AP" [level=3] [ref=e368]
+            - generic [ref=e369]: Activités Professionnelles
+            - generic [ref=e370]:
+              - generic [ref=e371]: Formation générale et diplômes
+              - generic [ref=e372]: Voir la fiche →
+          - link "APEC APEC Association Professionnelle des Enseignant.e.s en Commerce Formation générale et diplômes Voir la fiche →" [ref=e374] [cursor=pointer]:
+            - /url: /acronymes-education/apec
+            - generic [ref=e375]:
+              - img "APEC" [ref=e377]
+              - heading "APEC" [level=3] [ref=e378]
+            - generic [ref=e379]: Association Professionnelle des Enseignant.e.s en Commerce
+            - generic [ref=e380]:
+              - generic [ref=e381]: Formation générale et diplômes
+              - generic [ref=e382]: Voir la fiche →
+          - link "APED APED Assistance à la Personne en Établissement et à Domicile Associations et organismes professionnels Voir la fiche →" [ref=e384] [cursor=pointer]:
+            - /url: /acronymes-education/aped
+            - generic [ref=e385]:
+              - img "APED" [ref=e387]
+              - heading "APED" [level=3] [ref=e388]
+            - generic [ref=e389]: Assistance à la Personne en Établissement et à Domicile
+            - generic [ref=e390]:
+              - generic [ref=e391]: Associations et organismes professionnels
+              - generic [ref=e392]: Voir la fiche →
+          - link "APEMIQ APEMIQ Association Pour les Enseignants des Métiers Industriels du Québec Associations et organismes professionnels Voir la fiche →" [ref=e394] [cursor=pointer]:
+            - /url: /acronymes-education/apemiq
+            - generic [ref=e395]:
+              - img "APEMIQ" [ref=e397]
+              - heading "APEMIQ" [level=3] [ref=e398]
+            - generic [ref=e399]: Association Pour les Enseignants des Métiers Industriels du Québec
+            - generic [ref=e400]:
+              - generic [ref=e401]: Associations et organismes professionnels
+              - generic [ref=e402]: Voir la fiche →
+          - link "APOP APOP Association pour les applications Pédagogiques de l'Ordinateur au Postsecondaire Formation générale et diplômes Voir la fiche →" [ref=e404] [cursor=pointer]:
+            - /url: /acronymes-education/apop
+            - generic [ref=e405]:
+              - img "APOP" [ref=e407]
+              - heading "APOP" [level=3] [ref=e408]
+            - generic [ref=e409]: Association pour les applications Pédagogiques de l'Ordinateur au Postsecondaire
+            - generic [ref=e410]:
+              - generic [ref=e411]: Formation générale et diplômes
+              - generic [ref=e412]: Voir la fiche →
+          - link "A AQAET Association Québécoise de l'Alternance Études-Travail Associations et organismes professionnels Voir la fiche →" [ref=e414] [cursor=pointer]:
+            - /url: /acronymes-education/aqaet
+            - generic [ref=e415]:
+              - generic [ref=e418]: A
+              - heading "AQAET" [level=3] [ref=e419]
+            - generic [ref=e420]: Association Québécoise de l'Alternance Études-Travail
+            - generic [ref=e421]:
+              - generic [ref=e422]: Associations et organismes professionnels
+              - generic [ref=e423]: Voir la fiche →
+          - link "AQEFLS AQEFLS Association Québécoise pour l'Enseignement du Français, Langue Seconde Associations et organismes professionnels Voir la fiche →" [ref=e425] [cursor=pointer]:
+            - /url: /acronymes-education/aqefls
+            - generic [ref=e426]:
+              - img "AQEFLS" [ref=e428]
+              - heading "AQEFLS" [level=3] [ref=e429]
+            - generic [ref=e430]: Association Québécoise pour l'Enseignement du Français, Langue Seconde
+            - generic [ref=e431]:
+              - generic [ref=e432]: Associations et organismes professionnels
+              - generic [ref=e433]: Voir la fiche →
+          - link "AQEP AQEP L’Association Québécoise des Enseignants.es du Primaire Associations et organismes professionnels Voir la fiche →" [ref=e435] [cursor=pointer]:
+            - /url: /acronymes-education/aqep
+            - generic [ref=e436]:
+              - img "AQEP" [ref=e438]
+              - heading "AQEP" [level=3] [ref=e439]
+            - generic [ref=e440]: L’Association Québécoise des Enseignants.es du Primaire
+            - generic [ref=e441]:
+              - generic [ref=e442]: Associations et organismes professionnels
+              - generic [ref=e443]: Voir la fiche →
+          - link "AQERS AQERS Association Québécoise des Enseignants Responsables de Stages Associations et organismes professionnels Voir la fiche →" [ref=e445] [cursor=pointer]:
+            - /url: /acronymes-education/aqers
+            - generic [ref=e446]:
+              - img "AQERS" [ref=e448]
+              - heading "AQERS" [level=3] [ref=e449]
+            - generic [ref=e450]: Association Québécoise des Enseignants Responsables de Stages
+            - generic [ref=e451]:
+              - generic [ref=e452]: Associations et organismes professionnels
+              - generic [ref=e453]: Voir la fiche →
+          - link "AQETA AQETA Association Québécoise des Troubles D'apprentissage Associations et organismes professionnels Voir la fiche →" [ref=e455] [cursor=pointer]:
+            - /url: /acronymes-education/aqeta
+            - generic [ref=e456]:
+              - img "AQETA" [ref=e458]
+              - heading "AQETA" [level=3] [ref=e459]
+            - generic [ref=e460]: Association Québécoise des Troubles D'apprentissage
+            - generic [ref=e461]:
+              - generic [ref=e462]: Associations et organismes professionnels
+              - generic [ref=e463]: Voir la fiche →
+          - link "AQIFGA AQIFGA Association Québécoise des Intervenant.e.s en Formation Générale des Adultes Associations et organismes professionnels Voir la fiche →" [ref=e465] [cursor=pointer]:
+            - /url: /acronymes-education/aqifga
+            - generic [ref=e466]:
+              - img "AQIFGA" [ref=e468]
+              - heading "AQIFGA" [level=3] [ref=e469]
+            - generic [ref=e470]: Association Québécoise des Intervenant.e.s en Formation Générale des Adultes
+            - generic [ref=e471]:
+              - generic [ref=e472]: Associations et organismes professionnels
+              - generic [ref=e473]: Voir la fiche →
+          - link "AQPF AQPF Association Québécoise des Professeur.e.s de Français Formation générale et diplômes Voir la fiche →" [ref=e475] [cursor=pointer]:
+            - /url: /acronymes-education/aqpf
+            - generic [ref=e476]:
+              - img "AQPF" [ref=e478]
+              - heading "AQPF" [level=3] [ref=e479]
+            - generic [ref=e480]: Association Québécoise des Professeur.e.s de Français
+            - generic [ref=e481]:
+              - generic [ref=e482]: Formation générale et diplômes
+              - generic [ref=e483]: Voir la fiche →
+          - link "AQPS AQPS Colloque de l’Association Québécoise des Professeurs de Santé Associations et organismes professionnels Voir la fiche →" [ref=e485] [cursor=pointer]:
+            - /url: /acronymes-education/aqps
+            - generic [ref=e486]:
+              - img "AQPS" [ref=e488]
+              - heading "AQPS" [level=3] [ref=e489]
+            - generic [ref=e490]: Colloque de l’Association Québécoise des Professeurs de Santé
+            - generic [ref=e491]:
+              - generic [ref=e492]: Associations et organismes professionnels
+              - generic [ref=e493]: Voir la fiche →
+          - link "AQUOPS AQUOPS Association Québécoise des Utilisateurs d’Outils technologiques à des fins Pédagogiques et Sociales! Associations et organismes professionnels Voir la fiche →" [ref=e495] [cursor=pointer]:
+            - /url: /acronymes-education/aquops
+            - generic [ref=e496]:
+              - img "AQUOPS" [ref=e498]
+              - heading "AQUOPS" [level=3] [ref=e499]
+            - generic [ref=e500]: Association Québécoise des Utilisateurs d’Outils technologiques à des fins Pédagogiques et Sociales!
+            - generic [ref=e501]:
+              - generic [ref=e502]: Associations et organismes professionnels
+              - generic [ref=e503]: Voir la fiche →
+          - link "ASD ASD Assistance Soins Dentaire Gestion et administration scolaire Voir la fiche →" [ref=e505] [cursor=pointer]:
+            - /url: /acronymes-education/asd
+            - generic [ref=e506]:
+              - img "ASD" [ref=e508]
+              - heading "ASD" [level=3] [ref=e509]
+            - generic [ref=e510]: Assistance Soins Dentaire
+            - generic [ref=e511]:
+              - generic [ref=e512]: Gestion et administration scolaire
+              - generic [ref=e513]: Voir la fiche →
+          - link "ASP ASP Attestation de Spécialisation Professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e515] [cursor=pointer]:
+            - /url: /acronymes-education/asp
+            - generic [ref=e516]:
+              - img "ASP" [ref=e518]
+              - heading "ASP" [level=3] [ref=e519]
+            - generic [ref=e520]: Attestation de Spécialisation Professionnelle
+            - generic [ref=e521]:
+              - generic [ref=e522]: Formation professionnelle et technique
+              - generic [ref=e523]: Voir la fiche →
+          - link "ASPID ASPID Adoption, Substitution, Progrès, Innovation, Détérioration Technologies éducatives et numérique Voir la fiche →" [ref=e525] [cursor=pointer]:
+            - /url: /acronymes-education/aspid
+            - generic [ref=e526]:
+              - img "ASPID" [ref=e528]
+              - heading "ASPID" [level=3] [ref=e529]
+            - generic [ref=e530]: Adoption, Substitution, Progrès, Innovation, Détérioration
+            - generic [ref=e531]:
+              - generic [ref=e532]: Technologies éducatives et numérique
+              - generic [ref=e533]: Voir la fiche →
+          - link "ATE ATE Alternance Travail-Études Formation professionnelle et technique Voir la fiche →" [ref=e535] [cursor=pointer]:
+            - /url: /acronymes-education/ate
+            - generic [ref=e536]:
+              - img "ATE" [ref=e538]
+              - heading "ATE" [level=3] [ref=e539]
+            - generic [ref=e540]: Alternance Travail-Études
+            - generic [ref=e541]:
+              - generic [ref=e542]: Formation professionnelle et technique
+              - generic [ref=e543]: Voir la fiche →
+          - link "ATEQ ATEQ Association Théâtre Éducation du Québec Associations et organismes professionnels Voir la fiche →" [ref=e545] [cursor=pointer]:
+            - /url: /acronymes-education/ateq
+            - generic [ref=e546]:
+              - img "ATEQ" [ref=e548]
+              - heading "ATEQ" [level=3] [ref=e549]
+            - generic [ref=e550]: Association Théâtre Éducation du Québec
+            - generic [ref=e551]:
+              - generic [ref=e552]: Associations et organismes professionnels
+              - generic [ref=e553]: Voir la fiche →
+          - link "ATN ATN Académie de la Transformation Numérique Technologies éducatives et numérique Voir la fiche →" [ref=e555] [cursor=pointer]:
+            - /url: /acronymes-education/atn
+            - generic [ref=e556]:
+              - img "ATN" [ref=e558]
+              - heading "ATN" [level=3] [ref=e559]
+            - generic [ref=e560]: Académie de la Transformation Numérique
+            - generic [ref=e561]:
+              - generic [ref=e562]: Technologies éducatives et numérique
+              - generic [ref=e563]: Voir la fiche →
+          - link "ATP ATP Autres tâches professionnelles Formation générale et diplômes Voir la fiche →" [ref=e565] [cursor=pointer]:
+            - /url: /acronymes-education/atp
+            - generic [ref=e566]:
+              - img "ATP" [ref=e568]
+              - heading "ATP" [level=3] [ref=e569]
+            - generic [ref=e570]: Autres tâches professionnelles
+            - generic [ref=e571]:
+              - generic [ref=e572]: Formation générale et diplômes
+              - generic [ref=e573]: Voir la fiche →
+          - link "AVS AVS Attestation of Vocational Spécialization Formation professionnelle et technique Voir la fiche →" [ref=e575] [cursor=pointer]:
+            - /url: /acronymes-education/avs
+            - generic [ref=e576]:
+              - img "AVS" [ref=e578]
+              - heading "AVS" [level=3] [ref=e579]
+            - generic [ref=e580]: Attestation of Vocational Spécialization
+            - generic [ref=e581]:
+              - generic [ref=e582]: Formation professionnelle et technique
+              - generic [ref=e583]: Voir la fiche →
+          - link "BIM BIM Banque d’Instruments de Mesure Formation générale et diplômes Voir la fiche →" [ref=e585] [cursor=pointer]:
+            - /url: /acronymes-education/bim
+            - generic [ref=e586]:
+              - img "BIM" [ref=e588]
+              - heading "BIM" [level=3] [ref=e589]
+            - generic [ref=e590]: Banque d’Instruments de Mesure
+            - generic [ref=e591]:
+              - generic [ref=e592]: Formation générale et diplômes
+              - generic [ref=e593]: Voir la fiche →
+          - link "BIQ BIQ Bureau d'Immigration du Québec Ministères et organismes gouvernementaux Voir la fiche →" [ref=e595] [cursor=pointer]:
+            - /url: /acronymes-education/biq
+            - generic [ref=e596]:
+              - img "BIQ" [ref=e598]
+              - heading "BIQ" [level=3] [ref=e599]
+            - generic [ref=e600]: Bureau d'Immigration du Québec
+            - generic [ref=e601]:
+              - generic [ref=e602]: Ministères et organismes gouvernementaux
+              - generic [ref=e603]: Voir la fiche →
+          - link "BMOPAN BMOPAN Bureau de la Mise en Oeuvre du Plan d’Action Numérique Technologies éducatives et numérique Voir la fiche →" [ref=e605] [cursor=pointer]:
+            - /url: /acronymes-education/bmopan
+            - generic [ref=e606]:
+              - img "BMOPAN" [ref=e608]
+              - heading "BMOPAN" [level=3] [ref=e609]
+            - generic [ref=e610]: Bureau de la Mise en Oeuvre du Plan d’Action Numérique
+            - generic [ref=e611]:
+              - generic [ref=e612]: Technologies éducatives et numérique
+              - generic [ref=e613]: Voir la fiche →
+          - link "CABIIA CABIIA Communauté andragogique bilingue pour l’intégration de l’intelligence artificielle Associations et organismes professionnels Voir la fiche →" [ref=e615] [cursor=pointer]:
+            - /url: /acronymes-education/cabiia
+            - generic [ref=e616]:
+              - img "CABIIA" [ref=e618]
+              - heading "CABIIA" [level=3] [ref=e619]
+            - generic [ref=e620]: Communauté andragogique bilingue pour l’intégration de l’intelligence artificielle
+            - generic [ref=e621]:
+              - generic [ref=e622]: Associations et organismes professionnels
+              - generic [ref=e623]: Voir la fiche →
+          - link "CAG CAG Centre d'Acquisitions Gouvernementales Ministères et organismes gouvernementaux Voir la fiche →" [ref=e625] [cursor=pointer]:
+            - /url: /acronymes-education/cag
+            - generic [ref=e626]:
+              - img "CAG" [ref=e628]
+              - heading "CAG" [level=3] [ref=e629]
+            - generic [ref=e630]: Centre d'Acquisitions Gouvernementales
+            - generic [ref=e631]:
+              - generic [ref=e632]: Ministères et organismes gouvernementaux
+              - generic [ref=e633]: Voir la fiche →
+          - link "CAP CAP Communauté d’Apprentissage Professionnelle Formation générale et diplômes Voir la fiche →" [ref=e635] [cursor=pointer]:
+            - /url: /acronymes-education/cap
+            - generic [ref=e636]:
+              - img "CAP" [ref=e638]
+              - heading "CAP" [level=3] [ref=e639]
+            - generic [ref=e640]: Communauté d’Apprentissage Professionnelle
+            - generic [ref=e641]:
+              - generic [ref=e642]: Formation générale et diplômes
+              - generic [ref=e643]: Voir la fiche →
+          - link "CAPFE CAPFE Comité d’Agrément des Programmes de Formation à l’Enseignement Formation générale et diplômes Voir la fiche →" [ref=e645] [cursor=pointer]:
+            - /url: /acronymes-education/capfe
+            - generic [ref=e646]:
+              - img "CAPFE" [ref=e648]
+              - heading "CAPFE" [level=3] [ref=e649]
+            - generic [ref=e650]: Comité d’Agrément des Programmes de Formation à l’Enseignement
+            - generic [ref=e651]:
+              - generic [ref=e652]: Formation générale et diplômes
+              - generic [ref=e653]: Voir la fiche →
+          - link "CARRA CARRA Commission Administrative des Régimes de Retraite et d’Assurances Ministères et organismes gouvernementaux Voir la fiche →" [ref=e655] [cursor=pointer]:
+            - /url: /acronymes-education/carra
+            - generic [ref=e656]:
+              - img "CARRA" [ref=e658]
+              - heading "CARRA" [level=3] [ref=e659]
+            - generic [ref=e660]: Commission Administrative des Régimes de Retraite et d’Assurances
+            - generic [ref=e661]:
+              - generic [ref=e662]: Ministères et organismes gouvernementaux
+              - generic [ref=e663]: Voir la fiche →
+          - link "CCCPFPT CCCPFPT Corporation des Conseillers pédagogiques en formation professionnelle et technique Associations et organismes professionnels Voir la fiche →" [ref=e665] [cursor=pointer]:
+            - /url: /acronymes-education/cccpfpt
+            - generic [ref=e666]:
+              - img "CCCPFPT" [ref=e668]
+              - heading "CCCPFPT" [level=3] [ref=e669]
+            - generic [ref=e670]: Corporation des Conseillers pédagogiques en formation professionnelle et technique
+            - generic [ref=e671]:
+              - generic [ref=e672]: Associations et organismes professionnels
+              - generic [ref=e673]: Voir la fiche →
+          - link "CCG CCG Comité Consultatif de Gestion Gestion et administration scolaire Voir la fiche →" [ref=e675] [cursor=pointer]:
+            - /url: /acronymes-education/ccg
+            - generic [ref=e676]:
+              - img "CCG" [ref=e678]
+              - heading "CCG" [level=3] [ref=e679]
+            - generic [ref=e680]: Comité Consultatif de Gestion
+            - generic [ref=e681]:
+              - generic [ref=e682]: Gestion et administration scolaire
+              - generic [ref=e683]: Voir la fiche →
+          - link "CCTT CCTT Centres Collégiaux de Transfert de Technologies Technologies éducatives et numérique Voir la fiche →" [ref=e685] [cursor=pointer]:
+            - /url: /acronymes-education/cctt
+            - generic [ref=e686]:
+              - img "CCTT" [ref=e688]
+              - heading "CCTT" [level=3] [ref=e689]
+            - generic [ref=e690]: Centres Collégiaux de Transfert de Technologies
+            - generic [ref=e691]:
+              - generic [ref=e692]: Technologies éducatives et numérique
+              - generic [ref=e693]: Voir la fiche →
+          - link "CDÉACF CDÉACF Centre de Documentation sur l’Éducation des Adultes et la Condition Féminine Formation générale et diplômes Voir la fiche →" [ref=e695] [cursor=pointer]:
+            - /url: /acronymes-education/cdeacf
+            - generic [ref=e696]:
+              - img "CDÉACF" [ref=e698]
+              - heading "CDÉACF" [level=3] [ref=e699]
+            - generic [ref=e700]: Centre de Documentation sur l’Éducation des Adultes et la Condition Féminine
+            - generic [ref=e701]:
+              - generic [ref=e702]: Formation générale et diplômes
+              - generic [ref=e703]: Voir la fiche →
+          - link "CDL CDL Comité De Liaison du RÉCIT Technologies éducatives et numérique Voir la fiche →" [ref=e705] [cursor=pointer]:
+            - /url: /acronymes-education/cdl
+            - generic [ref=e706]:
+              - img "CDL" [ref=e708]
+              - heading "CDL" [level=3] [ref=e709]
+            - generic [ref=e710]: Comité De Liaison du RÉCIT
+            - generic [ref=e711]:
+              - generic [ref=e712]: Technologies éducatives et numérique
+              - generic [ref=e713]: Voir la fiche →
+          - link "CDSI CDSI Chef Délégué de la Sécurité de l’Information Ministères et organismes gouvernementaux Voir la fiche →" [ref=e715] [cursor=pointer]:
+            - /url: /acronymes-education/cdsi
+            - generic [ref=e716]:
+              - img "CDSI" [ref=e718]
+              - heading "CDSI" [level=3] [ref=e719]
+            - generic [ref=e720]: Chef Délégué de la Sécurité de l’Information
+            - generic [ref=e721]:
+              - generic [ref=e722]: Ministères et organismes gouvernementaux
+              - generic [ref=e723]: Voir la fiche →
+          - link "CEA CEA Centre d'Éducation des Adultes Formation générale et diplômes Voir la fiche →" [ref=e725] [cursor=pointer]:
+            - /url: /acronymes-education/cea
+            - generic [ref=e726]:
+              - img "CEA" [ref=e728]
+              - heading "CEA" [level=3] [ref=e729]
+            - generic [ref=e730]: Centre d'Éducation des Adultes
+            - generic [ref=e731]:
+              - generic [ref=e732]: Formation générale et diplômes
+              - generic [ref=e733]: Voir la fiche →
+          - link "CEBM CEBM Centre of Excellence for Behaviour Management Technologies éducatives et numérique Voir la fiche →" [ref=e735] [cursor=pointer]:
+            - /url: /acronymes-education/cebm
+            - generic [ref=e736]:
+              - img "CEBM" [ref=e738]
+              - heading "CEBM" [level=3] [ref=e739]
+            - generic [ref=e740]: Centre of Excellence for Behaviour Management
+            - generic [ref=e741]:
+              - generic [ref=e742]: Technologies éducatives et numérique
+              - generic [ref=e743]: Voir la fiche →
+          - link "CEES CEES Certificat d'Équivalence d'Études Secondaires Formation professionnelle et technique Voir la fiche →" [ref=e745] [cursor=pointer]:
+            - /url: /acronymes-education/cees
+            - generic [ref=e746]:
+              - img "CEES" [ref=e748]
+              - heading "CEES" [level=3] [ref=e749]
+            - generic [ref=e750]: Certificat d'Équivalence d'Études Secondaires
+            - generic [ref=e751]:
+              - generic [ref=e752]: Formation professionnelle et technique
+              - generic [ref=e753]: Voir la fiche →
+          - link "CEHDAA CEHDAA Comité consultatif d’Enseignantes et d’enseignants pour les élèves Handicapés ou en Difficulté d’Adaptation ou d’Apprentissage Services aux élèves et adaptation Voir la fiche →" [ref=e755] [cursor=pointer]:
+            - /url: /acronymes-education/cehdaa
+            - generic [ref=e756]:
+              - img "CEHDAA" [ref=e758]
+              - heading "CEHDAA" [level=3] [ref=e759]
+            - generic [ref=e760]: Comité consultatif d’Enseignantes et d’enseignants pour les élèves Handicapés ou en Difficulté d’Adaptation ou d’Apprentissage
+            - generic [ref=e761]:
+              - generic [ref=e762]: Services aux élèves et adaptation
+              - generic [ref=e763]: Voir la fiche →
+          - link "CEMEQ CEMEQ Centre d’Élaboration des Moyens d’Enseignement du Québec Formation générale et diplômes Voir la fiche →" [ref=e765] [cursor=pointer]:
+            - /url: /acronymes-education/cemeq
+            - generic [ref=e766]:
+              - img "CEMEQ" [ref=e768]
+              - heading "CEMEQ" [level=3] [ref=e769]
+            - generic [ref=e770]: Centre d’Élaboration des Moyens d’Enseignement du Québec
+            - generic [ref=e771]:
+              - generic [ref=e772]: Formation générale et diplômes
+              - generic [ref=e773]: Voir la fiche →
+          - link "CEMH CEMH Centre of Excellence for Mental Health Technologies éducatives et numérique Voir la fiche →" [ref=e775] [cursor=pointer]:
+            - /url: /acronymes-education/cemh
+            - generic [ref=e776]:
+              - img "CEMH" [ref=e778]
+              - heading "CEMH" [level=3] [ref=e779]
+            - generic [ref=e780]: Centre of Excellence for Mental Health
+            - generic [ref=e781]:
+              - generic [ref=e782]: Technologies éducatives et numérique
+              - generic [ref=e783]: Voir la fiche →
+          - link "CEMIS CEMIS Centres d'Enrichissement en Micro-Informatique Scolaire Technologies éducatives et numérique Voir la fiche →" [ref=e785] [cursor=pointer]:
+            - /url: /acronymes-education/cemis
+            - generic [ref=e786]:
+              - img "CEMIS" [ref=e788]
+              - heading "CEMIS" [level=3] [ref=e789]
+            - generic [ref=e790]: Centres d'Enrichissement en Micro-Informatique Scolaire
+            - generic [ref=e791]:
+              - generic [ref=e792]: Technologies éducatives et numérique
+              - generic [ref=e793]: Voir la fiche →
+          - link "CERAC FP CERAC FP Centre d'Expertise en Reconnaissance des Acquis des Compétences en Formation Professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e795] [cursor=pointer]:
+            - /url: /acronymes-education/cerac-fp
+            - generic [ref=e796]:
+              - img "CERAC FP" [ref=e798]
+              - heading "CERAC FP" [level=3] [ref=e799]
+            - generic [ref=e800]: Centre d'Expertise en Reconnaissance des Acquis des Compétences en Formation Professionnelle
+            - generic [ref=e801]:
+              - generic [ref=e802]: Formation professionnelle et technique
+              - generic [ref=e803]: Voir la fiche →
+          - link "CFGA CFGA Centre de Formation Générale des Adultes Formation générale et diplômes Voir la fiche →" [ref=e805] [cursor=pointer]:
+            - /url: /acronymes-education/cfga
+            - generic [ref=e806]:
+              - img "CFGA" [ref=e808]
+              - heading "CFGA" [level=3] [ref=e809]
+            - generic [ref=e810]: Centre de Formation Générale des Adultes
+            - generic [ref=e811]:
+              - generic [ref=e812]: Formation générale et diplômes
+              - generic [ref=e813]: Voir la fiche →
+          - link "CFISA CFISA Certificat de Formation en Insertion Socioprofessionnelle des Adultes Formation professionnelle et technique Voir la fiche →" [ref=e815] [cursor=pointer]:
+            - /url: /acronymes-education/cfisa
+            - generic [ref=e816]:
+              - img "CFISA" [ref=e818]
+              - heading "CFISA" [level=3] [ref=e819]
+            - generic [ref=e820]: Certificat de Formation en Insertion Socioprofessionnelle des Adultes
+            - generic [ref=e821]:
+              - generic [ref=e822]: Formation professionnelle et technique
+              - generic [ref=e823]: Voir la fiche →
+          - link "CFMS CFMS Certificat de Formation à un Métier Semi-spécialisé Centres de services scolaires Voir la fiche →" [ref=e825] [cursor=pointer]:
+            - /url: /acronymes-education/cfms
+            - generic [ref=e826]:
+              - img "CFMS" [ref=e828]
+              - heading "CFMS" [level=3] [ref=e829]
+            - generic [ref=e830]: Certificat de Formation à un Métier Semi-spécialisé
+            - generic [ref=e831]:
+              - generic [ref=e832]: Centres de services scolaires
+              - generic [ref=e833]: Voir la fiche →
+          - link "CFPT CFPT Certificat en Formation Préparatoire au Travail Formation générale et diplômes Voir la fiche →" [ref=e835] [cursor=pointer]:
+            - /url: /acronymes-education/cfpt
+            - generic [ref=e836]:
+              - img "CFPT" [ref=e838]
+              - heading "CFPT" [level=3] [ref=e839]
+            - generic [ref=e840]: Certificat en Formation Préparatoire au Travail
+            - generic [ref=e841]:
+              - generic [ref=e842]: Formation générale et diplômes
+              - generic [ref=e843]: Voir la fiche →
+          - link "CGRI CGRI Comité de Gouvernance en Ressources Informationnelles Ministères et organismes gouvernementaux Voir la fiche →" [ref=e845] [cursor=pointer]:
+            - /url: /acronymes-education/cgri
+            - generic [ref=e846]:
+              - img "CGRI" [ref=e848]
+              - heading "CGRI" [level=3] [ref=e849]
+            - generic [ref=e850]: Comité de Gouvernance en Ressources Informationnelles
+            - generic [ref=e851]:
+              - generic [ref=e852]: Ministères et organismes gouvernementaux
+              - generic [ref=e853]: Voir la fiche →
+          - link "CGSI CGSI Chef Gouvernemental de la Sécurité de l’Information Ministères et organismes gouvernementaux Voir la fiche →" [ref=e855] [cursor=pointer]:
+            - /url: /acronymes-education/cgsi
+            - generic [ref=e856]:
+              - img "CGSI" [ref=e858]
+              - heading "CGSI" [level=3] [ref=e859]
+            - generic [ref=e860]: Chef Gouvernemental de la Sécurité de l’Information
+            - generic [ref=e861]:
+              - generic [ref=e862]: Ministères et organismes gouvernementaux
+              - generic [ref=e863]: Voir la fiche →
+          - link "CIFIT CIFIT Centre Intégré de Formation et d'Innovation Technologique Technologies éducatives et numérique Voir la fiche →" [ref=e865] [cursor=pointer]:
+            - /url: /acronymes-education/cifit
+            - generic [ref=e866]:
+              - img "CIFIT" [ref=e868]
+              - heading "CIFIT" [level=3] [ref=e869]
+            - generic [ref=e870]: Centre Intégré de Formation et d'Innovation Technologique
+            - generic [ref=e871]:
+              - generic [ref=e872]: Technologies éducatives et numérique
+              - generic [ref=e873]: Voir la fiche →
+          - link "CITNUM CITNUM Citoyenneté Numérique Technologies éducatives et numérique Voir la fiche →" [ref=e875] [cursor=pointer]:
+            - /url: /acronymes-education/citnum
+            - generic [ref=e876]:
+              - img "CITNUM" [ref=e878]
+              - heading "CITNUM" [level=3] [ref=e879]
+            - generic [ref=e880]: Citoyenneté Numérique
+            - generic [ref=e881]:
+              - generic [ref=e882]: Technologies éducatives et numérique
+              - generic [ref=e883]: Voir la fiche →
+          - link "CIUSSS CIUSSS Centre Intégré Universitaire de Santé et de Services Sociaux Associations et organismes professionnels Voir la fiche →" [ref=e885] [cursor=pointer]:
+            - /url: /acronymes-education/ciusss
+            - generic [ref=e886]:
+              - img "CIUSSS" [ref=e888]
+              - heading "CIUSSS" [level=3] [ref=e889]
+            - generic [ref=e890]: Centre Intégré Universitaire de Santé et de Services Sociaux
+            - generic [ref=e891]:
+              - generic [ref=e892]: Associations et organismes professionnels
+              - generic [ref=e893]: Voir la fiche →
+          - link "CJE CJE Carrefour Jeunesse-Emploi Associations et organismes professionnels Voir la fiche →" [ref=e895] [cursor=pointer]:
+            - /url: /acronymes-education/cje
+            - generic [ref=e896]:
+              - img "CJE" [ref=e898]
+              - heading "CJE" [level=3] [ref=e899]
+            - generic [ref=e900]: Carrefour Jeunesse-Emploi
+            - generic [ref=e901]:
+              - generic [ref=e902]: Associations et organismes professionnels
+              - generic [ref=e903]: Voir la fiche →
+          - link "CLC CLC Community Learning Centre Technologies éducatives et numérique Voir la fiche →" [ref=e905] [cursor=pointer]:
+            - /url: /acronymes-education/clc
+            - generic [ref=e906]:
+              - img "CLC" [ref=e908]
+              - heading "CLC" [level=3] [ref=e909]
+            - generic [ref=e910]: Community Learning Centre
+            - generic [ref=e911]:
+              - generic [ref=e912]: Technologies éducatives et numérique
+              - generic [ref=e913]: Voir la fiche →
+          - link "CLD CLD Centre Local de Développement Gestion et administration scolaire Voir la fiche →" [ref=e915] [cursor=pointer]:
+            - /url: /acronymes-education/cld
+            - generic [ref=e916]:
+              - img "CLD" [ref=e918]
+              - heading "CLD" [level=3] [ref=e919]
+            - generic [ref=e920]: Centre Local de Développement
+            - generic [ref=e921]:
+              - generic [ref=e922]: Gestion et administration scolaire
+              - generic [ref=e923]: Voir la fiche →
+          - link "CLE CLE Centre Local Emploi Gestion et administration scolaire Voir la fiche →" [ref=e925] [cursor=pointer]:
+            - /url: /acronymes-education/cle
+            - generic [ref=e926]:
+              - img "CLE" [ref=e928]
+              - heading "CLE" [level=3] [ref=e929]
+            - generic [ref=e930]: Centre Local Emploi
+            - generic [ref=e931]:
+              - generic [ref=e932]: Gestion et administration scolaire
+              - generic [ref=e933]: Voir la fiche →
+          - link "CLIFAD CLIFAD Comité de Liaison Interordres en Formation À Distance Formation générale et diplômes Voir la fiche →" [ref=e935] [cursor=pointer]:
+            - /url: /acronymes-education/clifad
+            - generic [ref=e936]:
+              - img "CLIFAD" [ref=e938]
+              - heading "CLIFAD" [level=3] [ref=e939]
+            - generic [ref=e940]: Comité de Liaison Interordres en Formation À Distance
+            - generic [ref=e941]:
+              - generic [ref=e942]: Formation générale et diplômes
+              - generic [ref=e943]: Voir la fiche →
+          - link "CMS CMS content Management System Technologies éducatives et numérique Voir la fiche →" [ref=e945] [cursor=pointer]:
+            - /url: /acronymes-education/cms
+            - generic [ref=e946]:
+              - img "CMS" [ref=e948]
+              - heading "CMS" [level=3] [ref=e949]
+            - generic [ref=e950]: content Management System
+            - generic [ref=e951]:
+              - generic [ref=e952]: Technologies éducatives et numérique
+              - generic [ref=e953]: Voir la fiche →
+          - link "CNESST CNESST Commission des Normes, de l’Équité, de la Santé et de la Sécurité du Travail Ministères et organismes gouvernementaux Voir la fiche →" [ref=e955] [cursor=pointer]:
+            - /url: /acronymes-education/cnesst
+            - generic [ref=e956]:
+              - img "CNESST" [ref=e958]
+              - heading "CNESST" [level=3] [ref=e959]
+            - generic [ref=e960]: Commission des Normes, de l’Équité, de la Santé et de la Sécurité du Travail
+            - generic [ref=e961]:
+              - generic [ref=e962]: Ministères et organismes gouvernementaux
+              - generic [ref=e963]: Voir la fiche →
+          - link "CNIPE CNIPE Carrefour National de l’Insertion Professionnelle en Enseignement Associations et organismes professionnels Voir la fiche →" [ref=e965] [cursor=pointer]:
+            - /url: /acronymes-education/cnipe
+            - generic [ref=e966]:
+              - img "CNIPE" [ref=e968]
+              - heading "CNIPE" [level=3] [ref=e969]
+            - generic [ref=e970]: Carrefour National de l’Insertion Professionnelle en Enseignement
+            - generic [ref=e971]:
+              - generic [ref=e972]: Associations et organismes professionnels
+              - generic [ref=e973]: Voir la fiche →
+          - link "CNPEPT CNPEPT Comité National des Programmes d’Études Professionnelles et Techniques Technologies éducatives et numérique Voir la fiche →" [ref=e975] [cursor=pointer]:
+            - /url: /acronymes-education/cnpept
+            - generic [ref=e976]:
+              - img "CNPEPT" [ref=e978]
+              - heading "CNPEPT" [level=3] [ref=e979]
+            - generic [ref=e980]: Comité National des Programmes d’Études Professionnelles et Techniques
+            - generic [ref=e981]:
+              - generic [ref=e982]: Technologies éducatives et numérique
+              - generic [ref=e983]: Voir la fiche →
+          - link "CO CO Conseiller en Orientation Services aux élèves et adaptation Voir la fiche →" [ref=e985] [cursor=pointer]:
+            - /url: /acronymes-education/co
+            - generic [ref=e986]:
+              - img "CO" [ref=e988]
+              - heading "CO" [level=3] [ref=e989]
+            - generic [ref=e990]: Conseiller en Orientation
+            - generic [ref=e991]:
+              - generic [ref=e992]: Services aux élèves et adaptation
+              - generic [ref=e993]: Voir la fiche →
+          - link "COCD COCD Centre Opérationnel de CyberDéfense Technologies éducatives et numérique Voir la fiche →" [ref=e995] [cursor=pointer]:
+            - /url: /acronymes-education/cocd
+            - generic [ref=e996]:
+              - img "COCD" [ref=e998]
+              - heading "COCD" [level=3] [ref=e999]
+            - generic [ref=e1000]: Centre Opérationnel de CyberDéfense
+            - generic [ref=e1001]:
+              - generic [ref=e1002]: Technologies éducatives et numérique
+              - generic [ref=e1003]: Voir la fiche →
+          - link "COEASD COEASD Centre of Excellence for Autism Spectrum Disorder Technologies éducatives et numérique Voir la fiche →" [ref=e1005] [cursor=pointer]:
+            - /url: /acronymes-education/coeasd
+            - generic [ref=e1006]:
+              - img "COEASD" [ref=e1008]
+              - heading "COEASD" [level=3] [ref=e1009]
+            - generic [ref=e1010]: Centre of Excellence for Autism Spectrum Disorder
+            - generic [ref=e1011]:
+              - generic [ref=e1012]: Technologies éducatives et numérique
+              - generic [ref=e1013]: Voir la fiche →
+          - link "COEPIM COEPIM Centre of Excellence for the Phisically, Intellectually and Multi-Challenged Technologies éducatives et numérique Voir la fiche →" [ref=e1015] [cursor=pointer]:
+            - /url: /acronymes-education/coepim
+            - generic [ref=e1016]:
+              - img "COEPIM" [ref=e1018]
+              - heading "COEPIM" [level=3] [ref=e1019]
+            - generic [ref=e1020]: Centre of Excellence for the Phisically, Intellectually and Multi-Challenged
+            - generic [ref=e1021]:
+              - generic [ref=e1022]: Technologies éducatives et numérique
+              - generic [ref=e1023]: Voir la fiche →
+          - link "COESLD COESLD Centre of Excellence for Speech and Language Development Technologies éducatives et numérique Voir la fiche →" [ref=e1025] [cursor=pointer]:
+            - /url: /acronymes-education/coesld
+            - generic [ref=e1026]:
+              - img "COESLD" [ref=e1028]
+              - heading "COESLD" [level=3] [ref=e1029]
+            - generic [ref=e1030]: Centre of Excellence for Speech and Language Development
+            - generic [ref=e1031]:
+              - generic [ref=e1032]: Technologies éducatives et numérique
+              - generic [ref=e1033]: Voir la fiche →
+          - link "CoP CoP Communautés de Pratique Formation générale et diplômes Voir la fiche →" [ref=e1035] [cursor=pointer]:
+            - /url: /acronymes-education/cop
+            - generic [ref=e1036]:
+              - img "CoP" [ref=e1038]
+              - heading "CoP" [level=3] [ref=e1039]
+            - generic [ref=e1040]: Communautés de Pratique
+            - generic [ref=e1041]:
+              - generic [ref=e1042]: Formation générale et diplômes
+              - generic [ref=e1043]: Voir la fiche →
+          - link "COSP COSP Contenus en Orientation Scolaire et Professionnelle Associations et organismes professionnels Voir la fiche →" [ref=e1045] [cursor=pointer]:
+            - /url: /acronymes-education/cosp
+            - generic [ref=e1046]:
+              - img "COSP" [ref=e1048]
+              - heading "COSP" [level=3] [ref=e1049]
+            - generic [ref=e1050]: Contenus en Orientation Scolaire et Professionnelle
+            - generic [ref=e1051]:
+              - generic [ref=e1052]: Associations et organismes professionnels
+              - generic [ref=e1053]: Voir la fiche →
+          - link "COUD COUD Formations de courte durée Formation professionnelle et technique Voir la fiche →" [ref=e1055] [cursor=pointer]:
+            - /url: /acronymes-education/coud
+            - generic [ref=e1056]:
+              - img "COUD" [ref=e1058]
+              - heading "COUD" [level=3] [ref=e1059]
+            - generic [ref=e1060]: Formations de courte durée
+            - generic [ref=e1061]:
+              - generic [ref=e1062]: Formation professionnelle et technique
+              - generic [ref=e1063]: Voir la fiche →
+          - link "CP CP Conseiller pédagogique Formation générale et diplômes Voir la fiche →" [ref=e1065] [cursor=pointer]:
+            - /url: /acronymes-education/cp
+            - generic [ref=e1066]:
+              - img "CP" [ref=e1068]
+              - heading "CP" [level=3] [ref=e1069]
+            - generic [ref=e1070]: Conseiller pédagogique
+            - generic [ref=e1071]:
+              - generic [ref=e1072]: Formation générale et diplômes
+              - generic [ref=e1073]: Voir la fiche →
+          - link "CPE CPE Comité de Planification et d’Évaluation Formation générale et diplômes Voir la fiche →" [ref=e1075] [cursor=pointer]:
+            - /url: /acronymes-education/cpe
+            - generic [ref=e1076]:
+              - img "CPE" [ref=e1078]
+              - heading "CPE" [level=3] [ref=e1079]
+            - generic [ref=e1080]: Comité de Planification et d’Évaluation
+            - generic [ref=e1081]:
+              - generic [ref=e1082]: Formation générale et diplômes
+              - generic [ref=e1083]: Voir la fiche →
+          - link "CPEE CPEE Comité de Participation des Enseignantes et des Enseignants de l’école Technologies éducatives et numérique Voir la fiche →" [ref=e1085] [cursor=pointer]:
+            - /url: /acronymes-education/cpee
+            - generic [ref=e1086]:
+              - img "CPEE" [ref=e1088]
+              - heading "CPEE" [level=3] [ref=e1089]
+            - generic [ref=e1090]: Comité de Participation des Enseignantes et des Enseignants de l’école
+            - generic [ref=e1091]:
+              - generic [ref=e1092]: Technologies éducatives et numérique
+              - generic [ref=e1093]: Voir la fiche →
+          - link "CPGID CPGID Communauté de Pratique sur la Gestion Intégrée de Documents Associations et organismes professionnels Voir la fiche →" [ref=e1095] [cursor=pointer]:
+            - /url: /acronymes-education/cpgid
+            - generic [ref=e1096]:
+              - img "CPGID" [ref=e1098]
+              - heading "CPGID" [level=3] [ref=e1099]
+            - generic [ref=e1100]: Communauté de Pratique sur la Gestion Intégrée de Documents
+            - generic [ref=e1101]:
+              - generic [ref=e1102]: Associations et organismes professionnels
+              - generic [ref=e1103]: Voir la fiche →
+          - link "CPGTIE CPGTIE Communauté de pratique pour la gestion des technologies de l’information en éducation Associations et organismes professionnels Voir la fiche →" [ref=e1105] [cursor=pointer]:
+            - /url: /acronymes-education/cpgtie
+            - generic [ref=e1106]:
+              - img "CPGTIE" [ref=e1108]
+              - heading "CPGTIE" [level=3] [ref=e1109]
+            - generic [ref=e1110]: Communauté de pratique pour la gestion des technologies de l’information en éducation
+            - generic [ref=e1111]:
+              - generic [ref=e1112]: Associations et organismes professionnels
+              - generic [ref=e1113]: Voir la fiche →
+          - link "CPIQ CPIQ Conseil Pédagogique Interdisciplinaire du Québec Formation générale et diplômes Voir la fiche →" [ref=e1115] [cursor=pointer]:
+            - /url: /acronymes-education/cpiq
+            - generic [ref=e1116]:
+              - img "CPIQ" [ref=e1118]
+              - heading "CPIQ" [level=3] [ref=e1119]
+            - generic [ref=e1120]: Conseil Pédagogique Interdisciplinaire du Québec
+            - generic [ref=e1121]:
+              - generic [ref=e1122]: Formation générale et diplômes
+              - generic [ref=e1123]: Voir la fiche →
+          - link "CPMT CPMT Commission des Partenaires du Marché du Travail Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1125] [cursor=pointer]:
+            - /url: /acronymes-education/cpmt
+            - generic [ref=e1126]:
+              - img "CPMT" [ref=e1128]
+              - heading "CPMT" [level=3] [ref=e1129]
+            - generic [ref=e1130]: Commission des Partenaires du Marché du Travail
+            - generic [ref=e1131]:
+              - generic [ref=e1132]: Ministères et organismes gouvernementaux
+              - generic [ref=e1133]: Voir la fiche →
+          - link "CPPEE CPPEE Comité Paritaire de Perfectionnement des Enseignantes et des Enseignants Gestion et administration scolaire Voir la fiche →" [ref=e1135] [cursor=pointer]:
+            - /url: /acronymes-education/cppee
+            - generic [ref=e1136]:
+              - img "CPPEE" [ref=e1138]
+              - heading "CPPEE" [level=3] [ref=e1139]
+            - generic [ref=e1140]: Comité Paritaire de Perfectionnement des Enseignantes et des Enseignants
+            - generic [ref=e1141]:
+              - generic [ref=e1142]: Gestion et administration scolaire
+              - generic [ref=e1143]: Voir la fiche →
+          - link "CQSB CQSB Central Québec School Board Centres de services scolaires Voir la fiche →" [ref=e1145] [cursor=pointer]:
+            - /url: /acronymes-education/cqsb
+            - generic [ref=e1146]:
+              - img "CQSB" [ref=e1148]
+              - heading "CQSB" [level=3] [ref=e1149]
+            - generic [ref=e1150]: Central Québec School Board
+            - generic [ref=e1151]:
+              - generic [ref=e1152]: Centres de services scolaires
+              - generic [ref=e1153]: Voir la fiche →
+          - link "CRAIE CRAIE Centre de Recherche Appliquée en Instrumentation de l'Enseignement Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1155] [cursor=pointer]:
+            - /url: /acronymes-education/craie
+            - generic [ref=e1156]:
+              - img "CRAIE" [ref=e1158]
+              - heading "CRAIE" [level=3] [ref=e1159]
+            - generic [ref=e1160]: Centre de Recherche Appliquée en Instrumentation de l'Enseignement
+            - generic [ref=e1161]:
+              - generic [ref=e1162]: Ministères et organismes gouvernementaux
+              - generic [ref=e1163]: Voir la fiche →
+          - link "CRDI CRDI Centre de Réadaptation en Déficience Intellectuelle Services aux élèves et adaptation Voir la fiche →" [ref=e1165] [cursor=pointer]:
+            - /url: /acronymes-education/crdi
+            - generic [ref=e1166]:
+              - img "CRDI" [ref=e1168]
+              - heading "CRDI" [level=3] [ref=e1169]
+            - generic [ref=e1170]: Centre de Réadaptation en Déficience Intellectuelle
+            - generic [ref=e1171]:
+              - generic [ref=e1172]: Services aux élèves et adaptation
+              - generic [ref=e1173]: Voir la fiche →
+          - link "CRDP CRDP Centre de Réadaptation en Déficience Physique Services aux élèves et adaptation Voir la fiche →" [ref=e1175] [cursor=pointer]:
+            - /url: /acronymes-education/crdp
+            - generic [ref=e1176]:
+              - img "CRDP" [ref=e1178]
+              - heading "CRDP" [level=3] [ref=e1179]
+            - generic [ref=e1180]: Centre de Réadaptation en Déficience Physique
+            - generic [ref=e1181]:
+              - generic [ref=e1182]: Services aux élèves et adaptation
+              - generic [ref=e1183]: Voir la fiche →
+          - link "CRFP CRFP Comité Régional de la Formation Professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e1185] [cursor=pointer]:
+            - /url: /acronymes-education/crfp
+            - generic [ref=e1186]:
+              - img "CRFP" [ref=e1188]
+              - heading "CRFP" [level=3] [ref=e1189]
+            - generic [ref=e1190]: Comité Régional de la Formation Professionnelle
+            - generic [ref=e1191]:
+              - generic [ref=e1192]: Formation professionnelle et technique
+              - generic [ref=e1193]: Voir la fiche →
+          - link "CRR CRR Comité de Répartition des Ressources Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1195] [cursor=pointer]:
+            - /url: /acronymes-education/crr
+            - generic [ref=e1196]:
+              - img "CRR" [ref=e1198]
+              - heading "CRR" [level=3] [ref=e1199]
+            - generic [ref=e1200]: Comité de Répartition des Ressources
+            - generic [ref=e1201]:
+              - generic [ref=e1202]: Ministères et organismes gouvernementaux
+              - generic [ref=e1203]: Voir la fiche →
+          - link "CS CS Commission scolaire Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1205] [cursor=pointer]:
+            - /url: /acronymes-education/cs
+            - generic [ref=e1206]:
+              - img "CS" [ref=e1208]
+              - heading "CS" [level=3] [ref=e1209]
+            - generic [ref=e1210]: Commission scolaire
+            - generic [ref=e1211]:
+              - generic [ref=e1212]: Ministères et organismes gouvernementaux
+              - generic [ref=e1213]: Voir la fiche →
+          - link "CSE CSE Conseil Supérieur de l'Éducation Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1215] [cursor=pointer]:
+            - /url: /acronymes-education/cse
+            - generic [ref=e1216]:
+              - img "CSE" [ref=e1218]
+              - heading "CSE" [level=3] [ref=e1219]
+            - generic [ref=e1220]: Conseil Supérieur de l'Éducation
+            - generic [ref=e1221]:
+              - generic [ref=e1222]: Ministères et organismes gouvernementaux
+              - generic [ref=e1223]: Voir la fiche →
+          - link "CSIO CSIO Chef de la Sécurité de l’Information Organisationnelle Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1225] [cursor=pointer]:
+            - /url: /acronymes-education/csio
+            - generic [ref=e1226]:
+              - img "CSIO" [ref=e1228]
+              - heading "CSIO" [level=3] [ref=e1229]
+            - generic [ref=e1230]: Chef de la Sécurité de l’Information Organisationnelle
+            - generic [ref=e1231]:
+              - generic [ref=e1232]: Ministères et organismes gouvernementaux
+              - generic [ref=e1233]: Voir la fiche →
+          - link "CSMO CSMO Comité Sectoriel de la Main-d’Oeuvre Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1235] [cursor=pointer]:
+            - /url: /acronymes-education/csmo
+            - generic [ref=e1236]:
+              - img "CSMO" [ref=e1238]
+              - heading "CSMO" [level=3] [ref=e1239]
+            - generic [ref=e1240]: Comité Sectoriel de la Main-d’Oeuvre
+            - generic [ref=e1241]:
+              - generic [ref=e1242]: Ministères et organismes gouvernementaux
+              - generic [ref=e1243]: Voir la fiche →
+          - link "CSQC CSQC Environnement centralisé de partage pédagogique et technologique pour les centres de services scolaires et les commissions scolaires du Québec Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1245] [cursor=pointer]:
+            - /url: /acronymes-education/csqc
+            - generic [ref=e1246]:
+              - img "CSQC" [ref=e1248]
+              - heading "CSQC" [level=3] [ref=e1249]
+            - generic [ref=e1250]: Environnement centralisé de partage pédagogique et technologique pour les centres de services scolaires et les commissions scolaires du Québec
+            - generic [ref=e1251]:
+              - generic [ref=e1252]: Ministères et organismes gouvernementaux
+              - generic [ref=e1253]: Voir la fiche →
+          - link "CSS CSS Centre de Services Scolaire Centres de services scolaires Voir la fiche →" [ref=e1255] [cursor=pointer]:
+            - /url: /acronymes-education/css
+            - generic [ref=e1256]:
+              - img "CSS" [ref=e1258]
+              - heading "CSS" [level=3] [ref=e1259]
+            - generic [ref=e1260]: Centre de Services Scolaire
+            - generic [ref=e1261]:
+              - generic [ref=e1262]: Centres de services scolaires
+              - generic [ref=e1263]: Voir la fiche →
+          - link "CSSBE CSSBE Centre de Services Scolaire de la Beauce-Etchemin Centres de services scolaires Voir la fiche →" [ref=e1265] [cursor=pointer]:
+            - /url: /acronymes-education/cssbe
+            - generic [ref=e1266]:
+              - img "CSSBE" [ref=e1268]
+              - heading "CSSBE" [level=3] [ref=e1269]
+            - generic [ref=e1270]: Centre de Services Scolaire de la Beauce-Etchemin
+            - generic [ref=e1271]:
+              - generic [ref=e1272]: Centres de services scolaires
+              - generic [ref=e1273]: Voir la fiche →
+          - link "C CSSC Centre de Services scolaire de la Capitale Centres de services scolaires Voir la fiche →" [ref=e1275] [cursor=pointer]:
+            - /url: /acronymes-education/cssc
+            - generic [ref=e1276]:
+              - generic [ref=e1279]: C
+              - heading "CSSC" [level=3] [ref=e1280]
+            - generic [ref=e1281]: Centre de Services scolaire de la Capitale
+            - generic [ref=e1282]:
+              - generic [ref=e1283]: Centres de services scolaires
+              - generic [ref=e1284]: Voir la fiche →
+          - link "CSSDD CSSDD Centre de Services scolaire Des Découvreurs Centres de services scolaires Voir la fiche →" [ref=e1286] [cursor=pointer]:
+            - /url: /acronymes-education/cssdd
+            - generic [ref=e1287]:
+              - img "CSSDD" [ref=e1289]
+              - heading "CSSDD" [level=3] [ref=e1290]
+            - generic [ref=e1291]: Centre de Services scolaire Des Découvreurs
+            - generic [ref=e1292]:
+              - generic [ref=e1293]: Centres de services scolaires
+              - generic [ref=e1294]: Voir la fiche →
+          - link "CSSDN CSSDN Centre de Services scolaire Des Navigateurs Centres de services scolaires Voir la fiche →" [ref=e1296] [cursor=pointer]:
+            - /url: /acronymes-education/cssdn
+            - generic [ref=e1297]:
+              - img "CSSDN" [ref=e1299]
+              - heading "CSSDN" [level=3] [ref=e1300]
+            - generic [ref=e1301]: Centre de Services scolaire Des Navigateurs
+            - generic [ref=e1302]:
+              - generic [ref=e1303]: Centres de services scolaires
+              - generic [ref=e1304]: Voir la fiche →
+          - link "CSSMI CSSMI Centre de services scolaire des Mille-Îles Centres de services scolaires Voir la fiche →" [ref=e1306] [cursor=pointer]:
+            - /url: /acronymes-education/cssmi
+            - generic [ref=e1307]:
+              - img "CSSMI" [ref=e1309]
+              - heading "CSSMI" [level=3] [ref=e1310]
+            - generic [ref=e1311]: Centre de services scolaire des Mille-Îles
+            - generic [ref=e1312]:
+              - generic [ref=e1313]: Centres de services scolaires
+              - generic [ref=e1314]: Voir la fiche →
+          - link "CTREQ CTREQ Centre de Transfert pour la Réussite Éducative du Québec Formation générale et diplômes Voir la fiche →" [ref=e1316] [cursor=pointer]:
+            - /url: /acronymes-education/ctreq
+            - generic [ref=e1317]:
+              - img "CTREQ" [ref=e1319]
+              - heading "CTREQ" [level=3] [ref=e1320]
+            - generic [ref=e1321]: Centre de Transfert pour la Réussite Éducative du Québec
+            - generic [ref=e1322]:
+              - generic [ref=e1323]: Formation générale et diplômes
+              - generic [ref=e1324]: Voir la fiche →
+          - link "CUA CUA Conception Universelle de l’Apprentissage Formation générale et diplômes Voir la fiche →" [ref=e1326] [cursor=pointer]:
+            - /url: /acronymes-education/cua
+            - generic [ref=e1327]:
+              - img "CUA" [ref=e1329]
+              - heading "CUA" [level=3] [ref=e1330]
+            - generic [ref=e1331]: Conception Universelle de l’Apprentissage
+            - generic [ref=e1332]:
+              - generic [ref=e1333]: Formation générale et diplômes
+              - generic [ref=e1334]: Voir la fiche →
+          - link "DAIP DAIP Direction de l’accès à l’information et des plaintes (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1336] [cursor=pointer]:
+            - /url: /acronymes-education/daip
+            - generic [ref=e1337]:
+              - img "DAIP" [ref=e1339]
+              - heading "DAIP" [level=3] [ref=e1340]
+            - generic [ref=e1341]: Direction de l’accès à l’information et des plaintes (MEQ)
+            - generic [ref=e1342]:
+              - generic [ref=e1343]: Ministères et organismes gouvernementaux
+              - generic [ref=e1344]: Voir la fiche →
+          - link "DASI DASI Direction de l’architecture et de la sécurité de l’information (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1346] [cursor=pointer]:
+            - /url: /acronymes-education/dasi
+            - generic [ref=e1347]:
+              - img "DASI" [ref=e1349]
+              - heading "DASI" [level=3] [ref=e1350]
+            - generic [ref=e1351]: Direction de l’architecture et de la sécurité de l’information (MEQ)
+            - generic [ref=e1352]:
+              - generic [ref=e1353]: Ministères et organismes gouvernementaux
+              - generic [ref=e1354]: Voir la fiche →
+          - link "DDCN DDCN Direction du Développement de la Culture Numérique Technologies éducatives et numérique Voir la fiche →" [ref=e1356] [cursor=pointer]:
+            - /url: /acronymes-education/ddcn
+            - generic [ref=e1357]:
+              - img "DDCN" [ref=e1359]
+              - heading "DDCN" [level=3] [ref=e1360]
+            - generic [ref=e1361]: Direction du Développement de la Culture Numérique
+            - generic [ref=e1362]:
+              - generic [ref=e1363]: Technologies éducatives et numérique
+              - generic [ref=e1364]: Voir la fiche →
+          - link "DEAAC DEAAC Direction de l’Éducation des Adultes et de l’Action Communautaire (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1366] [cursor=pointer]:
+            - /url: /acronymes-education/deaac
+            - generic [ref=e1367]:
+              - img "DEAAC" [ref=e1369]
+              - heading "DEAAC" [level=3] [ref=e1370]
+            - generic [ref=e1371]: Direction de l’Éducation des Adultes et de l’Action Communautaire (MEQ)
+            - generic [ref=e1372]:
+              - generic [ref=e1373]: Ministères et organismes gouvernementaux
+              - generic [ref=e1374]: Voir la fiche →
+          - link "DEAFCP DEAFCP Direction de l’Éducation des Adultes et de la Formation Professionnelle (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1376] [cursor=pointer]:
+            - /url: /acronymes-education/deafcp
+            - generic [ref=e1377]:
+              - img "DEAFCP" [ref=e1379]
+              - heading "DEAFCP" [level=3] [ref=e1380]
+            - generic [ref=e1381]: Direction de l’Éducation des Adultes et de la Formation Professionnelle (MEQ)
+            - generic [ref=e1382]:
+              - generic [ref=e1383]: Ministères et organismes gouvernementaux
+              - generic [ref=e1384]: Voir la fiche →
+          - link "DEAFP DEAFP Direction de l’éducation des adultes et de la formation professionnelle (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1386] [cursor=pointer]:
+            - /url: /acronymes-education/deafp
+            - generic [ref=e1387]:
+              - img "DEAFP" [ref=e1389]
+              - heading "DEAFP" [level=3] [ref=e1390]
+            - generic [ref=e1391]: Direction de l’éducation des adultes et de la formation professionnelle (MEQ)
+            - generic [ref=e1392]:
+              - generic [ref=e1393]: Ministères et organismes gouvernementaux
+              - generic [ref=e1394]: Voir la fiche →
+          - link "DEC DEC Diplôme d'études collégiales Formation générale et diplômes Voir la fiche →" [ref=e1396] [cursor=pointer]:
+            - /url: /acronymes-education/dec
+            - generic [ref=e1397]:
+              - img "DEC" [ref=e1399]
+              - heading "DEC" [level=3] [ref=e1400]
+            - generic [ref=e1401]: Diplôme d'études collégiales
+            - generic [ref=e1402]:
+              - generic [ref=e1403]: Formation générale et diplômes
+              - generic [ref=e1404]: Voir la fiche →
+          - link "DEEN DEEN The Directors of English Education Network Gestion et administration scolaire Voir la fiche →" [ref=e1406] [cursor=pointer]:
+            - /url: /acronymes-education/deen
+            - generic [ref=e1407]:
+              - img "DEEN" [ref=e1409]
+              - heading "DEEN" [level=3] [ref=e1410]
+            - generic [ref=e1411]: The Directors of English Education Network
+            - generic [ref=e1412]:
+              - generic [ref=e1413]: Gestion et administration scolaire
+              - generic [ref=e1414]: Voir la fiche →
+          - link "DEFIS DEFIS Démarche Éducative Favorisant l’Intégration Sociale Formation générale et diplômes Voir la fiche →" [ref=e1416] [cursor=pointer]:
+            - /url: /acronymes-education/defis
+            - generic [ref=e1417]:
+              - img "DEFIS" [ref=e1419]
+              - heading "DEFIS" [level=3] [ref=e1420]
+            - generic [ref=e1421]: Démarche Éducative Favorisant l’Intégration Sociale
+            - generic [ref=e1422]:
+              - generic [ref=e1423]: Formation générale et diplômes
+              - generic [ref=e1424]: Voir la fiche →
+          - link "DEP DEP Diplôme d'Études Professionnelles Formation professionnelle et technique Voir la fiche →" [ref=e1426] [cursor=pointer]:
+            - /url: /acronymes-education/dep
+            - generic [ref=e1427]:
+              - img "DEP" [ref=e1429]
+              - heading "DEP" [level=3] [ref=e1430]
+            - generic [ref=e1431]: Diplôme d'Études Professionnelles
+            - generic [ref=e1432]:
+              - generic [ref=e1433]: Formation professionnelle et technique
+              - generic [ref=e1434]: Voir la fiche →
+          - link "DES DES Diplôme d'études secondaires Formation générale et diplômes Voir la fiche →" [ref=e1436] [cursor=pointer]:
+            - /url: /acronymes-education/des
+            - generic [ref=e1437]:
+              - img "DES" [ref=e1439]
+              - heading "DES" [level=3] [ref=e1440]
+            - generic [ref=e1441]: Diplôme d'études secondaires
+            - generic [ref=e1442]:
+              - generic [ref=e1443]: Formation générale et diplômes
+              - generic [ref=e1444]: Voir la fiche →
+          - link "DESS DESS Diplôme d'études supérieures spécialisées Formation générale et diplômes Voir la fiche →" [ref=e1446] [cursor=pointer]:
+            - /url: /acronymes-education/dess
+            - generic [ref=e1447]:
+              - img "DESS" [ref=e1449]
+              - heading "DESS" [level=3] [ref=e1450]
+            - generic [ref=e1451]: Diplôme d'études supérieures spécialisées
+            - generic [ref=e1452]:
+              - generic [ref=e1453]: Formation générale et diplômes
+              - generic [ref=e1454]: Voir la fiche →
+          - link "DFGA DFGA Direction de la Formation Générale aux Adultes (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1456] [cursor=pointer]:
+            - /url: /acronymes-education/dfga
+            - generic [ref=e1457]:
+              - img "DFGA" [ref=e1459]
+              - heading "DFGA" [level=3] [ref=e1460]
+            - generic [ref=e1461]: Direction de la Formation Générale aux Adultes (MEQ)
+            - generic [ref=e1462]:
+              - generic [ref=e1463]: Ministères et organismes gouvernementaux
+              - generic [ref=e1464]: Voir la fiche →
+          - link "DG DG Direction Générale Gestion et administration scolaire Voir la fiche →" [ref=e1466] [cursor=pointer]:
+            - /url: /acronymes-education/dg
+            - generic [ref=e1467]:
+              - img "DG" [ref=e1469]
+              - heading "DG" [level=3] [ref=e1470]
+            - generic [ref=e1471]: Direction Générale
+            - generic [ref=e1472]:
+              - generic [ref=e1473]: Gestion et administration scolaire
+              - generic [ref=e1474]: Voir la fiche →
+          - link "DGA DGA Direction Générale Adjointe Gestion et administration scolaire Voir la fiche →" [ref=e1476] [cursor=pointer]:
+            - /url: /acronymes-education/dga
+            - generic [ref=e1477]:
+              - img "DGA" [ref=e1479]
+              - heading "DGA" [level=3] [ref=e1480]
+            - generic [ref=e1481]: Direction Générale Adjointe
+            - generic [ref=e1482]:
+              - generic [ref=e1483]: Gestion et administration scolaire
+              - generic [ref=e1484]: Voir la fiche →
+          - link "DPJ DPJ Direction de la Protection de la Jeunesse Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1486] [cursor=pointer]:
+            - /url: /acronymes-education/dpj
+            - generic [ref=e1487]:
+              - img "DPJ" [ref=e1489]
+              - heading "DPJ" [level=3] [ref=e1490]
+            - generic [ref=e1491]: Direction de la Protection de la Jeunesse
+            - generic [ref=e1492]:
+              - generic [ref=e1493]: Ministères et organismes gouvernementaux
+              - generic [ref=e1494]: Voir la fiche →
+          - link "DR DR Direction Régionale Gestion et administration scolaire Voir la fiche →" [ref=e1496] [cursor=pointer]:
+            - /url: /acronymes-education/dr
+            - generic [ref=e1497]:
+              - img "DR" [ref=e1499]
+              - heading "DR" [level=3] [ref=e1500]
+            - generic [ref=e1501]: Direction Régionale
+            - generic [ref=e1502]:
+              - generic [ref=e1503]: Gestion et administration scolaire
+              - generic [ref=e1504]: Voir la fiche →
+          - link "DRD DRD Direction des Ressources Didactiques (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1506] [cursor=pointer]:
+            - /url: /acronymes-education/drd
+            - generic [ref=e1507]:
+              - img "DRD" [ref=e1509]
+              - heading "DRD" [level=3] [ref=e1510]
+            - generic [ref=e1511]: Direction des Ressources Didactiques (MEQ)
+            - generic [ref=e1512]:
+              - generic [ref=e1513]: Ministères et organismes gouvernementaux
+              - generic [ref=e1514]: Voir la fiche →
+          - link "DRDP DRDP Direction des ressources didactiques pédagonumériques (MEQ) Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1516] [cursor=pointer]:
+            - /url: /acronymes-education/drdp
+            - generic [ref=e1517]:
+              - img "DRDP" [ref=e1519]
+              - heading "DRDP" [level=3] [ref=e1520]
+            - generic [ref=e1521]: Direction des ressources didactiques pédagonumériques (MEQ)
+            - generic [ref=e1522]:
+              - generic [ref=e1523]: Ministères et organismes gouvernementaux
+              - generic [ref=e1524]: Voir la fiche →
+          - link "DRPNIN DRPNIN Direction des relations avec les Premières Nations et les Inuit et de la nordicité Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1526] [cursor=pointer]:
+            - /url: /acronymes-education/drpnin
+            - generic [ref=e1527]:
+              - img "DRPNIN" [ref=e1529]
+              - heading "DRPNIN" [level=3] [ref=e1530]
+            - generic [ref=e1531]: Direction des relations avec les Premières Nations et les Inuit et de la nordicité
+            - generic [ref=e1532]:
+              - generic [ref=e1533]: Ministères et organismes gouvernementaux
+              - generic [ref=e1534]: Voir la fiche →
+          - link "DVS DVS Diploma of Vocational Studies Formation professionnelle et technique Voir la fiche →" [ref=e1536] [cursor=pointer]:
+            - /url: /acronymes-education/dvs
+            - generic [ref=e1537]:
+              - img "DVS" [ref=e1539]
+              - heading "DVS" [level=3] [ref=e1540]
+            - generic [ref=e1541]: Diploma of Vocational Studies
+            - generic [ref=e1542]:
+              - generic [ref=e1543]: Formation professionnelle et technique
+              - generic [ref=e1544]: Voir la fiche →
+          - link "EBP EBP Élèves ayant des Besoins Particuliers Technologies éducatives et numérique Voir la fiche →" [ref=e1546] [cursor=pointer]:
+            - /url: /acronymes-education/ebp
+            - generic [ref=e1547]:
+              - img "EBP" [ref=e1549]
+              - heading "EBP" [level=3] [ref=e1550]
+            - generic [ref=e1551]: Élèves ayant des Besoins Particuliers
+            - generic [ref=e1552]:
+              - generic [ref=e1553]: Technologies éducatives et numérique
+              - generic [ref=e1554]: Voir la fiche →
+          - link "EDA EDA Éducation Des Adultes (synonyme de FGA) Formation générale et diplômes Voir la fiche →" [ref=e1556] [cursor=pointer]:
+            - /url: /acronymes-education/eda
+            - generic [ref=e1557]:
+              - img "EDA" [ref=e1559]
+              - heading "EDA" [level=3] [ref=e1560]
+            - generic [ref=e1561]: Éducation Des Adultes (synonyme de FGA)
+            - generic [ref=e1562]:
+              - generic [ref=e1563]: Formation générale et diplômes
+              - generic [ref=e1564]: Voir la fiche →
+          - link "EEAA EEAA Environnement d’Enseignement et d’Apprentissage Accessible Formation générale et diplômes Voir la fiche →" [ref=e1566] [cursor=pointer]:
+            - /url: /acronymes-education/eeaa
+            - generic [ref=e1567]:
+              - img "EEAA" [ref=e1569]
+              - heading "EEAA" [level=3] [ref=e1570]
+            - generic [ref=e1571]: Environnement d’Enseignement et d’Apprentissage Accessible
+            - generic [ref=e1572]:
+              - generic [ref=e1573]: Formation générale et diplômes
+              - generic [ref=e1574]: Voir la fiche →
+          - link "ÉER ÉER École En Réseau Technologies éducatives et numérique Voir la fiche →" [ref=e1576] [cursor=pointer]:
+            - /url: /acronymes-education/eer
+            - generic [ref=e1577]:
+              - img "ÉER" [ref=e1579]
+              - heading "ÉER" [level=3] [ref=e1580]
+            - generic [ref=e1581]: École En Réseau
+            - generic [ref=e1582]:
+              - generic [ref=e1583]: Technologies éducatives et numérique
+              - generic [ref=e1584]: Voir la fiche →
+          - link "EHDAA EHDAA Élèves Handicapés ou en Difficulté d'Adaptation ou d'Apprentissage, Services aux élèves et adaptation Voir la fiche →" [ref=e1586] [cursor=pointer]:
+            - /url: /acronymes-education/ehdaa
+            - generic [ref=e1587]:
+              - img "EHDAA" [ref=e1589]
+              - heading "EHDAA" [level=3] [ref=e1590]
+            - generic [ref=e1591]: Élèves Handicapés ou en Difficulté d'Adaptation ou d'Apprentissage,
+            - generic [ref=e1592]:
+              - generic [ref=e1593]: Services aux élèves et adaptation
+              - generic [ref=e1594]: Voir la fiche →
+          - link "EI EI Enseignement Individualisé Formation professionnelle et technique Voir la fiche →" [ref=e1596] [cursor=pointer]:
+            - /url: /acronymes-education/ei
+            - generic [ref=e1597]:
+              - img "EI" [ref=e1599]
+              - heading "EI" [level=3] [ref=e1600]
+            - generic [ref=e1601]: Enseignement Individualisé
+            - generic [ref=e1602]:
+              - generic [ref=e1603]: Formation professionnelle et technique
+              - generic [ref=e1604]: Voir la fiche →
+          - link "EIALS EIALS Enseignement Intensif de l’Anglais, Langue Seconde Formation générale et diplômes Voir la fiche →" [ref=e1606] [cursor=pointer]:
+            - /url: /acronymes-education/eials
+            - generic [ref=e1607]:
+              - img "EIALS" [ref=e1609]
+              - heading "EIALS" [level=3] [ref=e1610]
+            - generic [ref=e1611]: Enseignement Intensif de l’Anglais, Langue Seconde
+            - generic [ref=e1612]:
+              - generic [ref=e1613]: Formation générale et diplômes
+              - generic [ref=e1614]: Voir la fiche →
+          - link "EIMSIG EIMSIG Équipe Intégrée sur les Menaces à la Sécurité de l’Information Gouvernementale Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1616] [cursor=pointer]:
+            - /url: /acronymes-education/eimsig
+            - generic [ref=e1617]:
+              - img "EIMSIG" [ref=e1619]
+              - heading "EIMSIG" [level=3] [ref=e1620]
+            - generic [ref=e1621]: Équipe Intégrée sur les Menaces à la Sécurité de l’Information Gouvernementale
+            - generic [ref=e1622]:
+              - generic [ref=e1623]: Ministères et organismes gouvernementaux
+              - generic [ref=e1624]: Voir la fiche →
+          - link "ENA ENA Environnement Numérique d'Apprentissage Technologies éducatives et numérique Voir la fiche →" [ref=e1626] [cursor=pointer]:
+            - /url: /acronymes-education/ena
+            - generic [ref=e1627]:
+              - img "ENA" [ref=e1629]
+              - heading "ENA" [level=3] [ref=e1630]
+            - generic [ref=e1631]: Environnement Numérique d'Apprentissage
+            - generic [ref=e1632]:
+              - generic [ref=e1633]: Technologies éducatives et numérique
+              - generic [ref=e1634]: Voir la fiche →
+          - link "EPI EPI Écran Plat Interactif Technologies éducatives et numérique Voir la fiche →" [ref=e1636] [cursor=pointer]:
+            - /url: /acronymes-education/epi
+            - generic [ref=e1637]:
+              - img "EPI" [ref=e1639]
+              - heading "EPI" [level=3] [ref=e1640]
+            - generic [ref=e1641]: Écran Plat Interactif
+            - generic [ref=e1642]:
+              - generic [ref=e1643]: Technologies éducatives et numérique
+              - generic [ref=e1644]: Voir la fiche →
+          - link "EPSV EPSV Entrées Progressives, Sorties Variables Formation générale et diplômes Voir la fiche →" [ref=e1646] [cursor=pointer]:
+            - /url: /acronymes-education/epsv
+            - generic [ref=e1647]:
+              - img "EPSV" [ref=e1649]
+              - heading "EPSV" [level=3] [ref=e1650]
+            - generic [ref=e1651]: Entrées Progressives, Sorties Variables
+            - generic [ref=e1652]:
+              - generic [ref=e1653]: Formation générale et diplômes
+              - generic [ref=e1654]: Voir la fiche →
+          - link "ÉRO-FP ÉRO-FP Équipe de Recherche affiliée à l’Observatoire de la Formation Professionnelle du Québec Technologies éducatives et numérique Voir la fiche →" [ref=e1656] [cursor=pointer]:
+            - /url: /acronymes-education/ero-fp
+            - generic [ref=e1657]:
+              - img "ÉRO-FP" [ref=e1659]
+              - heading "ÉRO-FP" [level=3] [ref=e1660]
+            - generic [ref=e1661]: Équipe de Recherche affiliée à l’Observatoire de la Formation Professionnelle du Québec
+            - generic [ref=e1662]:
+              - generic [ref=e1663]: Technologies éducatives et numérique
+              - generic [ref=e1664]: Voir la fiche →
+          - link "ETP ETP Équivalent Temps Plein Gestion et administration scolaire Voir la fiche →" [ref=e1666] [cursor=pointer]:
+            - /url: /acronymes-education/etp
+            - generic [ref=e1667]:
+              - img "ETP" [ref=e1669]
+              - heading "ETP" [level=3] [ref=e1670]
+            - generic [ref=e1671]: Équivalent Temps Plein
+            - generic [ref=e1672]:
+              - generic [ref=e1673]: Gestion et administration scolaire
+              - generic [ref=e1674]: Voir la fiche →
+          - link "EVR EVR Engagement Vers sa Réussite Formation générale et diplômes Voir la fiche →" [ref=e1676] [cursor=pointer]:
+            - /url: /acronymes-education/evr
+            - generic [ref=e1677]:
+              - img "EVR" [ref=e1679]
+              - heading "EVR" [level=3] [ref=e1680]
+            - generic [ref=e1681]: Engagement Vers sa Réussite
+            - generic [ref=e1682]:
+              - generic [ref=e1683]: Formation générale et diplômes
+              - generic [ref=e1684]: Voir la fiche →
+          - link "FAD FAD Formation À Distance Formation générale et diplômes Voir la fiche →" [ref=e1686] [cursor=pointer]:
+            - /url: /acronymes-education/fad
+            - generic [ref=e1687]:
+              - img "FAD" [ref=e1689]
+              - heading "FAD" [level=3] [ref=e1690]
+            - generic [ref=e1691]: Formation À Distance
+            - generic [ref=e1692]:
+              - generic [ref=e1693]: Formation générale et diplômes
+              - generic [ref=e1694]: Voir la fiche →
+          - link "FADIO FADIO Formation À Distance InterOrdre Technologies éducatives et numérique Voir la fiche →" [ref=e1696] [cursor=pointer]:
+            - /url: /acronymes-education/fadio
+            - generic [ref=e1697]:
+              - img "FADIO" [ref=e1699]
+              - heading "FADIO" [level=3] [ref=e1700]
+            - generic [ref=e1701]: Formation À Distance InterOrdre
+            - generic [ref=e1702]:
+              - generic [ref=e1703]: Technologies éducatives et numérique
+              - generic [ref=e1704]: Voir la fiche →
+          - link "FBC FBC Formation de Base Commune Formation générale et diplômes Voir la fiche →" [ref=e1706] [cursor=pointer]:
+            - /url: /acronymes-education/fbc
+            - generic [ref=e1707]:
+              - img "FBC" [ref=e1709]
+              - heading "FBC" [level=3] [ref=e1710]
+            - generic [ref=e1711]: Formation de Base Commune
+            - generic [ref=e1712]:
+              - generic [ref=e1713]: Formation générale et diplômes
+              - generic [ref=e1714]: Voir la fiche →
+          - link "FBD FBD Formation de base diversifiée Formation générale et diplômes Voir la fiche →" [ref=e1716] [cursor=pointer]:
+            - /url: /acronymes-education/fbd
+            - generic [ref=e1717]:
+              - img "FBD" [ref=e1719]
+              - heading "FBD" [level=3] [ref=e1720]
+            - generic [ref=e1721]: Formation de base diversifiée
+            - generic [ref=e1722]:
+              - generic [ref=e1723]: Formation générale et diplômes
+              - generic [ref=e1724]: Voir la fiche →
+          - link "FCC FCC Formation Conjointe et Collaborative (RÉCIT) Technologies éducatives et numérique Voir la fiche →" [ref=e1726] [cursor=pointer]:
+            - /url: /acronymes-education/fcc
+            - generic [ref=e1727]:
+              - img "FCC" [ref=e1729]
+              - heading "FCC" [level=3] [ref=e1730]
+            - generic [ref=e1731]: Formation Conjointe et Collaborative (RÉCIT)
+            - generic [ref=e1732]:
+              - generic [ref=e1733]: Technologies éducatives et numérique
+              - generic [ref=e1734]: Voir la fiche →
+          - link "FCPQ FCPQ Fédération des Comités de Parents du Québec Associations et organismes professionnels Voir la fiche →" [ref=e1736] [cursor=pointer]:
+            - /url: /acronymes-education/fcpq
+            - generic [ref=e1737]:
+              - img "FCPQ" [ref=e1739]
+              - heading "FCPQ" [level=3] [ref=e1740]
+            - generic [ref=e1741]: Fédération des Comités de Parents du Québec
+            - generic [ref=e1742]:
+              - generic [ref=e1743]: Associations et organismes professionnels
+              - generic [ref=e1744]: Voir la fiche →
+          - link "FCSSQ FCSSQ Fédération des Centres de Services Scolaires du Québec Centres de services scolaires Voir la fiche →" [ref=e1746] [cursor=pointer]:
+            - /url: /acronymes-education/fcssq
+            - generic [ref=e1747]:
+              - img "FCSSQ" [ref=e1749]
+              - heading "FCSSQ" [level=3] [ref=e1750]
+            - generic [ref=e1751]: Fédération des Centres de Services Scolaires du Québec
+            - generic [ref=e1752]:
+              - generic [ref=e1753]: Centres de services scolaires
+              - generic [ref=e1754]: Voir la fiche →
+          - link "FEL FEL Formation en ligne Formation générale et diplômes Voir la fiche →" [ref=e1756] [cursor=pointer]:
+            - /url: /acronymes-education/fel
+            - generic [ref=e1757]:
+              - img "FEL" [ref=e1759]
+              - heading "FEL" [level=3] [ref=e1760]
+            - generic [ref=e1761]: Formation en ligne
+            - generic [ref=e1762]:
+              - generic [ref=e1763]: Formation générale et diplômes
+              - generic [ref=e1764]: Voir la fiche →
+          - link "FGA FGA Formation Générale aux Adultes Formation générale et diplômes Voir la fiche →" [ref=e1766] [cursor=pointer]:
+            - /url: /acronymes-education/fga
+            - generic [ref=e1767]:
+              - img "FGA" [ref=e1769]
+              - heading "FGA" [level=3] [ref=e1770]
+            - generic [ref=e1771]: Formation Générale aux Adultes
+            - generic [ref=e1772]:
+              - generic [ref=e1773]: Formation générale et diplômes
+              - generic [ref=e1774]: Voir la fiche →
+          - link "FGJ FGJ Formation Générale des Jeunes (primaire et secondaire) Formation générale et diplômes Voir la fiche →" [ref=e1776] [cursor=pointer]:
+            - /url: /acronymes-education/fgj
+            - generic [ref=e1777]:
+              - img "FGJ" [ref=e1779]
+              - heading "FGJ" [level=3] [ref=e1780]
+            - generic [ref=e1781]: Formation Générale des Jeunes (primaire et secondaire)
+            - generic [ref=e1782]:
+              - generic [ref=e1783]: Formation générale et diplômes
+              - generic [ref=e1784]: Voir la fiche →
+          - link "FME FME Formation sur MEsure Formation générale et diplômes Voir la fiche →" [ref=e1786] [cursor=pointer]:
+            - /url: /acronymes-education/fme
+            - generic [ref=e1787]:
+              - img "FME" [ref=e1789]
+              - heading "FME" [level=3] [ref=e1790]
+            - generic [ref=e1791]: Formation sur MEsure
+            - generic [ref=e1792]:
+              - generic [ref=e1793]: Formation générale et diplômes
+              - generic [ref=e1794]: Voir la fiche →
+          - link "FMS FMS Formation à un Métier Semi-spécialisé Technologies éducatives et numérique Voir la fiche →" [ref=e1796] [cursor=pointer]:
+            - /url: /acronymes-education/fms
+            - generic [ref=e1797]:
+              - img "FMS" [ref=e1799]
+              - heading "FMS" [level=3] [ref=e1800]
+            - generic [ref=e1801]: Formation à un Métier Semi-spécialisé
+            - generic [ref=e1802]:
+              - generic [ref=e1803]: Technologies éducatives et numérique
+              - generic [ref=e1804]: Voir la fiche →
+          - link "FNFMO FNFMO Fonds National de la Formation de la Main-d'Oeuvre Formation professionnelle et technique Voir la fiche →" [ref=e1806] [cursor=pointer]:
+            - /url: /acronymes-education/fnfmo
+            - generic [ref=e1807]:
+              - img "FNFMO" [ref=e1809]
+              - heading "FNFMO" [level=3] [ref=e1810]
+            - generic [ref=e1811]: Fonds National de la Formation de la Main-d'Oeuvre
+            - generic [ref=e1812]:
+              - generic [ref=e1813]: Formation professionnelle et technique
+              - generic [ref=e1814]: Voir la fiche →
+          - link "FP FP Formation Professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e1816] [cursor=pointer]:
+            - /url: /acronymes-education/fp
+            - generic [ref=e1817]:
+              - img "FP" [ref=e1819]
+              - heading "FP" [level=3] [ref=e1820]
+            - generic [ref=e1821]: Formation Professionnelle
+            - generic [ref=e1822]:
+              - generic [ref=e1823]: Formation professionnelle et technique
+              - generic [ref=e1824]: Voir la fiche →
+          - link "FPEA FPEA Formation Professionnelle et Éducation des Adultes Formation professionnelle et technique Voir la fiche →" [ref=e1826] [cursor=pointer]:
+            - /url: /acronymes-education/fpea
+            - generic [ref=e1827]:
+              - img "FPEA" [ref=e1829]
+              - heading "FPEA" [level=3] [ref=e1830]
+            - generic [ref=e1831]: Formation Professionnelle et Éducation des Adultes
+            - generic [ref=e1832]:
+              - generic [ref=e1833]: Formation professionnelle et technique
+              - generic [ref=e1834]: Voir la fiche →
+          - link "FPEAE FPEAE Formation Professionnelle, Éducation des Adultes et aux Entreprises Formation professionnelle et technique Voir la fiche →" [ref=e1836] [cursor=pointer]:
+            - /url: /acronymes-education/fpeae
+            - generic [ref=e1837]:
+              - img "FPEAE" [ref=e1839]
+              - heading "FPEAE" [level=3] [ref=e1840]
+            - generic [ref=e1841]: Formation Professionnelle, Éducation des Adultes et aux Entreprises
+            - generic [ref=e1842]:
+              - generic [ref=e1843]: Formation professionnelle et technique
+              - generic [ref=e1844]: Voir la fiche →
+          - link "FPPE FPPE Fédération des Professionnelles et Professionnels de l'Éducation Associations et organismes professionnels Voir la fiche →" [ref=e1846] [cursor=pointer]:
+            - /url: /acronymes-education/fppe
+            - generic [ref=e1847]:
+              - img "FPPE" [ref=e1849]
+              - heading "FPPE" [level=3] [ref=e1850]
+            - generic [ref=e1851]: Fédération des Professionnelles et Professionnels de l'Éducation
+            - generic [ref=e1852]:
+              - generic [ref=e1853]: Associations et organismes professionnels
+              - generic [ref=e1854]: Voir la fiche →
+          - link "FPT FPT Formation Professionnelle et Technique Formation professionnelle et technique Voir la fiche →" [ref=e1856] [cursor=pointer]:
+            - /url: /acronymes-education/fpt
+            - generic [ref=e1857]:
+              - img "FPT" [ref=e1859]
+              - heading "FPT" [level=3] [ref=e1860]
+            - generic [ref=e1861]: Formation Professionnelle et Technique
+            - generic [ref=e1862]:
+              - generic [ref=e1863]: Formation professionnelle et technique
+              - generic [ref=e1864]: Voir la fiche →
+          - link "FQR FQR Formation Québec en Réseau Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1866] [cursor=pointer]:
+            - /url: /acronymes-education/fqr
+            - generic [ref=e1867]:
+              - img "FQR" [ref=e1869]
+              - heading "FQR" [level=3] [ref=e1870]
+            - generic [ref=e1871]: Formation Québec en Réseau
+            - generic [ref=e1872]:
+              - generic [ref=e1873]: Ministères et organismes gouvernementaux
+              - generic [ref=e1874]: Voir la fiche →
+          - link "GDUNO GDUNO Gestion des Données UNiques des Organismes Formation générale et diplômes Voir la fiche →" [ref=e1876] [cursor=pointer]:
+            - /url: /acronymes-education/gduno
+            - generic [ref=e1877]:
+              - img "GDUNO" [ref=e1879]
+              - heading "GDUNO" [level=3] [ref=e1880]
+            - generic [ref=e1881]: Gestion des Données UNiques des Organismes
+            - generic [ref=e1882]:
+              - generic [ref=e1883]: Formation générale et diplômes
+              - generic [ref=e1884]: Voir la fiche →
+          - link "GEG Québec GEG Québec Groupe Éducation Google du Québec Technologies éducatives et numérique Voir la fiche →" [ref=e1886] [cursor=pointer]:
+            - /url: /acronymes-education/geg-quebec
+            - generic [ref=e1887]:
+              - img "GEG Québec" [ref=e1889]
+              - heading "GEG Québec" [level=3] [ref=e1890]
+            - generic [ref=e1891]: Groupe Éducation Google du Québec
+            - generic [ref=e1892]:
+              - generic [ref=e1893]: Technologies éducatives et numérique
+              - generic [ref=e1894]: Voir la fiche →
+          - link "GRICS GRICS Société de Gestion du Réseau Informatique des Commissions Scolaires Ministères et organismes gouvernementaux Voir la fiche →" [ref=e1896] [cursor=pointer]:
+            - /url: /acronymes-education/grics
+            - generic [ref=e1897]:
+              - img "GRICS" [ref=e1899]
+              - heading "GRICS" [level=3] [ref=e1900]
+            - generic [ref=e1901]: Société de Gestion du Réseau Informatique des Commissions Scolaires
+            - generic [ref=e1902]:
+              - generic [ref=e1903]: Ministères et organismes gouvernementaux
+              - generic [ref=e1904]: Voir la fiche →
+          - link "GRMS GRMS Groupe des Responsables des Mathématiques au Secondaire Associations et organismes professionnels Voir la fiche →" [ref=e1906] [cursor=pointer]:
+            - /url: /acronymes-education/grms
+            - generic [ref=e1907]:
+              - img "GRMS" [ref=e1909]
+              - heading "GRMS" [level=3] [ref=e1910]
+            - generic [ref=e1911]: Groupe des Responsables des Mathématiques au Secondaire
+            - generic [ref=e1912]:
+              - generic [ref=e1913]: Associations et organismes professionnels
+              - generic [ref=e1914]: Voir la fiche →
+          - link "IA IA Intelligence Artificielle Technologies éducatives et numérique Voir la fiche →" [ref=e1916] [cursor=pointer]:
+            - /url: /acronymes-education/ia
+            - generic [ref=e1917]:
+              - img "IA" [ref=e1919]
+              - heading "IA" [level=3] [ref=e1920]
+            - generic [ref=e1921]: Intelligence Artificielle
+            - generic [ref=e1922]:
+              - generic [ref=e1923]: Technologies éducatives et numérique
+              - generic [ref=e1924]: Voir la fiche →
+          - link "ICÉA ICÉA Institut de Coopération pour l’Éducation aux Adultes Formation générale et diplômes Voir la fiche →" [ref=e1926] [cursor=pointer]:
+            - /url: /acronymes-education/icea
+            - generic [ref=e1927]:
+              - img "ICÉA" [ref=e1929]
+              - heading "ICÉA" [level=3] [ref=e1930]
+            - generic [ref=e1931]: Institut de Coopération pour l’Éducation aux Adultes
+            - generic [ref=e1932]:
+              - generic [ref=e1933]: Formation générale et diplômes
+              - generic [ref=e1934]: Voir la fiche →
+          - link "ICT ICT Information and Communications Technologies. Technologies éducatives et numérique Voir la fiche →" [ref=e1936] [cursor=pointer]:
+            - /url: /acronymes-education/ict
+            - generic [ref=e1937]:
+              - img "ICT" [ref=e1939]
+              - heading "ICT" [level=3] [ref=e1940]
+            - generic [ref=e1941]: Information and Communications Technologies.
+            - generic [ref=e1942]:
+              - generic [ref=e1943]: Technologies éducatives et numérique
+              - generic [ref=e1944]: Voir la fiche →
+          - link "IDC IDC Implementatiion Design Committee Gestion et administration scolaire Voir la fiche →" [ref=e1946] [cursor=pointer]:
+            - /url: /acronymes-education/idc
+            - generic [ref=e1947]:
+              - img "IDC" [ref=e1949]
+              - heading "IDC" [level=3] [ref=e1950]
+            - generic [ref=e1951]: Implementatiion Design Committee
+            - generic [ref=e1952]:
+              - generic [ref=e1953]: Gestion et administration scolaire
+              - generic [ref=e1954]: Voir la fiche →
+          - link "IES IES Inclusive Education Services Technologies éducatives et numérique Voir la fiche →" [ref=e1956] [cursor=pointer]:
+            - /url: /acronymes-education/ies
+            - generic [ref=e1957]:
+              - img "IES" [ref=e1959]
+              - heading "IES" [level=3] [ref=e1960]
+            - generic [ref=e1961]: Inclusive Education Services
+            - generic [ref=e1962]:
+              - generic [ref=e1963]: Technologies éducatives et numérique
+              - generic [ref=e1964]: Voir la fiche →
+          - link "IFPCA IFPCA Initiatives Fédérales Provinciales Conjointes en matière d'Alphabétisation Formation professionnelle et technique Voir la fiche →" [ref=e1966] [cursor=pointer]:
+            - /url: /acronymes-education/ifpca
+            - generic [ref=e1967]:
+              - img "IFPCA" [ref=e1969]
+              - heading "IFPCA" [level=3] [ref=e1970]
+            - generic [ref=e1971]: Initiatives Fédérales Provinciales Conjointes en matière d'Alphabétisation
+            - generic [ref=e1972]:
+              - generic [ref=e1973]: Formation professionnelle et technique
+              - generic [ref=e1974]: Voir la fiche →
+          - link "IFPT IFPT L'inforoute de la Formation Professionnelle et Technique Formation professionnelle et technique Voir la fiche →" [ref=e1976] [cursor=pointer]:
+            - /url: /acronymes-education/ifpt
+            - generic [ref=e1977]:
+              - img "IFPT" [ref=e1979]
+              - heading "IFPT" [level=3] [ref=e1980]
+            - generic [ref=e1981]: L'inforoute de la Formation Professionnelle et Technique
+            - generic [ref=e1982]:
+              - generic [ref=e1983]: Formation professionnelle et technique
+              - generic [ref=e1984]: Voir la fiche →
+          - link "IJAT IJAT Intervention Juste À Temps Services aux élèves et adaptation Voir la fiche →" [ref=e1986] [cursor=pointer]:
+            - /url: /acronymes-education/ijat
+            - generic [ref=e1987]:
+              - img "IJAT" [ref=e1989]
+              - heading "IJAT" [level=3] [ref=e1990]
+            - generic [ref=e1991]: Intervention Juste À Temps
+            - generic [ref=e1992]:
+              - generic [ref=e1993]: Services aux élèves et adaptation
+              - generic [ref=e1994]: Voir la fiche →
+          - link "InforouteFPT InforouteFPT L'inforoute de la Formation Professionnelle et Technique Formation professionnelle et technique Voir la fiche →" [ref=e1996] [cursor=pointer]:
+            - /url: /acronymes-education/inforoutefpt
+            - generic [ref=e1997]:
+              - img "InforouteFPT" [ref=e1999]
+              - heading "InforouteFPT" [level=3] [ref=e2000]
+            - generic [ref=e2001]: L'inforoute de la Formation Professionnelle et Technique
+            - generic [ref=e2002]:
+              - generic [ref=e2003]: Formation professionnelle et technique
+              - generic [ref=e2004]: Voir la fiche →
+          - link "IS IS Intégration Sociale Formation générale et diplômes Voir la fiche →" [ref=e2006] [cursor=pointer]:
+            - /url: /acronymes-education/is
+            - generic [ref=e2007]:
+              - img "IS" [ref=e2009]
+              - heading "IS" [level=3] [ref=e2010]
+            - generic [ref=e2011]: Intégration Sociale
+            - generic [ref=e2012]:
+              - generic [ref=e2013]: Formation générale et diplômes
+              - generic [ref=e2014]: Voir la fiche →
+          - link "ISN ISN Inclusive Schools Network Technologies éducatives et numérique Voir la fiche →" [ref=e2016] [cursor=pointer]:
+            - /url: /acronymes-education/isn
+            - generic [ref=e2017]:
+              - img "ISN" [ref=e2019]
+              - heading "ISN" [level=3] [ref=e2020]
+            - generic [ref=e2021]: Inclusive Schools Network
+            - generic [ref=e2022]:
+              - generic [ref=e2023]: Technologies éducatives et numérique
+              - generic [ref=e2024]: Voir la fiche →
+          - link "ISP ISP Intégration SocioProfessionnelle Formation générale et diplômes Voir la fiche →" [ref=e2026] [cursor=pointer]:
+            - /url: /acronymes-education/isp
+            - generic [ref=e2027]:
+              - img "ISP" [ref=e2029]
+              - heading "ISP" [level=3] [ref=e2030]
+            - generic [ref=e2031]: Intégration SocioProfessionnelle
+            - generic [ref=e2032]:
+              - generic [ref=e2033]: Formation générale et diplômes
+              - generic [ref=e2034]: Voir la fiche →
+          - link "ISPJ ISPJ Insertion Sociale et Professionnelle des Jeunes Services aux élèves et adaptation Voir la fiche →" [ref=e2036] [cursor=pointer]:
+            - /url: /acronymes-education/ispj
+            - generic [ref=e2037]:
+              - img "ISPJ" [ref=e2039]
+              - heading "ISPJ" [level=3] [ref=e2040]
+            - generic [ref=e2041]: Insertion Sociale et Professionnelle des Jeunes
+            - generic [ref=e2042]:
+              - generic [ref=e2043]: Services aux élèves et adaptation
+              - generic [ref=e2044]: Voir la fiche →
+          - link "JNÉ JNÉ Journée du numérique en éducation Technologies éducatives et numérique Voir la fiche →" [ref=e2046] [cursor=pointer]:
+            - /url: /acronymes-education/jne
+            - generic [ref=e2047]:
+              - img "JNÉ" [ref=e2049]
+              - heading "JNÉ" [level=3] [ref=e2050]
+            - generic [ref=e2051]: Journée du numérique en éducation
+            - generic [ref=e2052]:
+              - generic [ref=e2053]: Technologies éducatives et numérique
+              - generic [ref=e2054]: Voir la fiche →
+          - link "JPNFP JPNFP Journée pédagogique nationale en formation professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e2056] [cursor=pointer]:
+            - /url: /acronymes-education/jpnfp
+            - generic [ref=e2057]:
+              - img "JPNFP" [ref=e2059]
+              - heading "JPNFP" [level=3] [ref=e2060]
+            - generic [ref=e2061]: Journée pédagogique nationale en formation professionnelle
+            - generic [ref=e2062]:
+              - generic [ref=e2063]: Formation professionnelle et technique
+              - generic [ref=e2064]: Voir la fiche →
+          - link "LCEEQ LCEEQ Leadership Committee for English Education in Québec Gestion et administration scolaire Voir la fiche →" [ref=e2066] [cursor=pointer]:
+            - /url: /acronymes-education/lceeq
+            - generic [ref=e2067]:
+              - img "LCEEQ" [ref=e2069]
+              - heading "LCEEQ" [level=3] [ref=e2070]
+            - generic [ref=e2071]: Leadership Committee for English Education in Québec
+            - generic [ref=e2072]:
+              - generic [ref=e2073]: Gestion et administration scolaire
+              - generic [ref=e2074]: Voir la fiche →
+          - link "LEARN LEARN Leading English Education and Resource Network Centres de services scolaires Voir la fiche →" [ref=e2076] [cursor=pointer]:
+            - /url: /acronymes-education/learn
+            - generic [ref=e2077]:
+              - img "LEARN" [ref=e2079]
+              - heading "LEARN" [level=3] [ref=e2080]
+            - generic [ref=e2081]: Leading English Education and Resource Network
+            - generic [ref=e2082]:
+              - generic [ref=e2083]: Centres de services scolaires
+              - generic [ref=e2084]: Voir la fiche →
+          - link "LEP LEP Loi sur l’Instruction Privé Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2086] [cursor=pointer]:
+            - /url: /acronymes-education/lep
+            - generic [ref=e2087]:
+              - img "LEP" [ref=e2089]
+              - heading "LEP" [level=3] [ref=e2090]
+            - generic [ref=e2091]: Loi sur l’Instruction Privé
+            - generic [ref=e2092]:
+              - generic [ref=e2093]: Ministères et organismes gouvernementaux
+              - generic [ref=e2094]: Voir la fiche →
+          - link "LIP LIP Loi sur l’Instruction Publique Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2096] [cursor=pointer]:
+            - /url: /acronymes-education/lip
+            - generic [ref=e2097]:
+              - img "LIP" [ref=e2099]
+              - heading "LIP" [level=3] [ref=e2100]
+            - generic [ref=e2101]: Loi sur l’Instruction Publique
+            - generic [ref=e2102]:
+              - generic [ref=e2103]: Ministères et organismes gouvernementaux
+              - generic [ref=e2104]: Voir la fiche →
+          - link "LLio LLio Laboratoire en innovation ouverte Technologies éducatives et numérique Voir la fiche →" [ref=e2106] [cursor=pointer]:
+            - /url: /acronymes-education/llio
+            - generic [ref=e2107]:
+              - img "LLio" [ref=e2109]
+              - heading "LLio" [level=3] [ref=e2110]
+            - generic [ref=e2111]: Laboratoire en innovation ouverte
+            - generic [ref=e2112]:
+              - generic [ref=e2113]: Technologies éducatives et numérique
+              - generic [ref=e2114]: Voir la fiche →
+          - link "LMS LMS Learning Management System Technologies éducatives et numérique Voir la fiche →" [ref=e2116] [cursor=pointer]:
+            - /url: /acronymes-education/lms
+            - generic [ref=e2117]:
+              - img "LMS" [ref=e2119]
+              - heading "LMS" [level=3] [ref=e2120]
+            - generic [ref=e2121]: Learning Management System
+            - generic [ref=e2122]:
+              - generic [ref=e2123]: Technologies éducatives et numérique
+              - generic [ref=e2124]: Voir la fiche →
+          - link "LNT LNT Loi sur les Normes du Travail Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2126] [cursor=pointer]:
+            - /url: /acronymes-education/lnt
+            - generic [ref=e2127]:
+              - img "LNT" [ref=e2129]
+              - heading "LNT" [level=3] [ref=e2130]
+            - generic [ref=e2131]: Loi sur les Normes du Travail
+            - generic [ref=e2132]:
+              - generic [ref=e2133]: Ministères et organismes gouvernementaux
+              - generic [ref=e2134]: Voir la fiche →
+          - link "MCN MCN Ministère de la Cybersécurité et du Numérique Technologies éducatives et numérique Voir la fiche →" [ref=e2136] [cursor=pointer]:
+            - /url: /acronymes-education/mcn
+            - generic [ref=e2137]:
+              - img "MCN" [ref=e2139]
+              - heading "MCN" [level=3] [ref=e2140]
+            - generic [ref=e2141]: Ministère de la Cybersécurité et du Numérique
+            - generic [ref=e2142]:
+              - generic [ref=e2143]: Technologies éducatives et numérique
+              - generic [ref=e2144]: Voir la fiche →
+          - link "MEES MEES Ministère de l'Enseignement Supérieur Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2146] [cursor=pointer]:
+            - /url: /acronymes-education/mees
+            - generic [ref=e2147]:
+              - img "MEES" [ref=e2149]
+              - heading "MEES" [level=3] [ref=e2150]
+            - generic [ref=e2151]: Ministère de l'Enseignement Supérieur
+            - generic [ref=e2152]:
+              - generic [ref=e2153]: Ministères et organismes gouvernementaux
+              - generic [ref=e2154]: Voir la fiche →
+          - link "MEESR MEESR Ministère de l'Éducation et de l'Enseignement Supérieur et de la Recherche Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2156] [cursor=pointer]:
+            - /url: /acronymes-education/meesr
+            - generic [ref=e2157]:
+              - img "MEESR" [ref=e2159]
+              - heading "MEESR" [level=3] [ref=e2160]
+            - generic [ref=e2161]: Ministère de l'Éducation et de l'Enseignement Supérieur et de la Recherche
+            - generic [ref=e2162]:
+              - generic [ref=e2163]: Ministères et organismes gouvernementaux
+              - generic [ref=e2164]: Voir la fiche →
+          - link "MEQ MEQ Ministère de l’Éducation du Québec Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2166] [cursor=pointer]:
+            - /url: /acronymes-education/meq
+            - generic [ref=e2167]:
+              - img "MEQ" [ref=e2169]
+              - heading "MEQ" [level=3] [ref=e2170]
+            - generic [ref=e2171]: Ministère de l’Éducation du Québec
+            - generic [ref=e2172]:
+              - generic [ref=e2173]: Ministères et organismes gouvernementaux
+              - generic [ref=e2174]: Voir la fiche →
+          - link "MES MES Ministère de l'Enseignement Supérieur Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2176] [cursor=pointer]:
+            - /url: /acronymes-education/mes
+            - generic [ref=e2177]:
+              - img "MES" [ref=e2179]
+              - heading "MES" [level=3] [ref=e2180]
+            - generic [ref=e2181]: Ministère de l'Enseignement Supérieur
+            - generic [ref=e2182]:
+              - generic [ref=e2183]: Ministères et organismes gouvernementaux
+              - generic [ref=e2184]: Voir la fiche →
+          - link "MESRST MESRST Ministère de l'Enseignement Supérieur, de la Recherche, de la Science et de la Technologie Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2186] [cursor=pointer]:
+            - /url: /acronymes-education/mesrst
+            - generic [ref=e2187]:
+              - img "MESRST" [ref=e2189]
+              - heading "MESRST" [level=3] [ref=e2190]
+            - generic [ref=e2191]: Ministère de l'Enseignement Supérieur, de la Recherche, de la Science et de la Technologie
+            - generic [ref=e2192]:
+              - generic [ref=e2193]: Ministères et organismes gouvernementaux
+              - generic [ref=e2194]: Voir la fiche →
+          - link "MILLE MILLE Modèle d’Infrasctructure de Logiciel Libre en Éducation Technologies éducatives et numérique Voir la fiche →" [ref=e2196] [cursor=pointer]:
+            - /url: /acronymes-education/mille
+            - generic [ref=e2197]:
+              - img "MILLE" [ref=e2199]
+              - heading "MILLE" [level=3] [ref=e2200]
+            - generic [ref=e2201]: Modèle d’Infrasctructure de Logiciel Libre en Éducation
+            - generic [ref=e2202]:
+              - generic [ref=e2203]: Technologies éducatives et numérique
+              - generic [ref=e2204]: Voir la fiche →
+          - link "MOOC MOOC Massive Open Online Course Technologies éducatives et numérique Voir la fiche →" [ref=e2206] [cursor=pointer]:
+            - /url: /acronymes-education/mooc
+            - generic [ref=e2207]:
+              - img "MOOC" [ref=e2209]
+              - heading "MOOC" [level=3] [ref=e2210]
+            - generic [ref=e2211]: Massive Open Online Course
+            - generic [ref=e2212]:
+              - generic [ref=e2213]: Technologies éducatives et numérique
+              - generic [ref=e2214]: Voir la fiche →
+          - link "MOODLE MOODLE Modular Object-Oriented Dynamic Learning Environment Technologies éducatives et numérique Voir la fiche →" [ref=e2216] [cursor=pointer]:
+            - /url: /acronymes-education/moodle
+            - generic [ref=e2217]:
+              - img "MOODLE" [ref=e2219]
+              - heading "MOODLE" [level=3] [ref=e2220]
+            - generic [ref=e2221]: Modular Object-Oriented Dynamic Learning Environment
+            - generic [ref=e2222]:
+              - generic [ref=e2223]: Technologies éducatives et numérique
+              - generic [ref=e2224]: Voir la fiche →
+          - link "MST MST Mathématiques, Sciences et Technologies Technologies éducatives et numérique Voir la fiche →" [ref=e2226] [cursor=pointer]:
+            - /url: /acronymes-education/mst
+            - generic [ref=e2227]:
+              - img "MST" [ref=e2229]
+              - heading "MST" [level=3] [ref=e2230]
+            - generic [ref=e2231]: Mathématiques, Sciences et Technologies
+            - generic [ref=e2232]:
+              - generic [ref=e2233]: Technologies éducatives et numérique
+              - generic [ref=e2234]: Voir la fiche →
+          - link "MTESS MTESS Ministère de l'Emploi et de la Solidarité Sociale Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2236] [cursor=pointer]:
+            - /url: /acronymes-education/mtess
+            - generic [ref=e2237]:
+              - img "MTESS" [ref=e2239]
+              - heading "MTESS" [level=3] [ref=e2240]
+            - generic [ref=e2241]: Ministère de l'Emploi et de la Solidarité Sociale
+            - generic [ref=e2242]:
+              - generic [ref=e2243]: Ministères et organismes gouvernementaux
+              - generic [ref=e2244]: Voir la fiche →
+          - link "MVLEL MVLEL Mécanique de Véhicules de Loisir et d’Équipement Léger Formation professionnelle et technique Voir la fiche →" [ref=e2246] [cursor=pointer]:
+            - /url: /acronymes-education/mvlel
+            - generic [ref=e2247]:
+              - img "MVLEL" [ref=e2249]
+              - heading "MVLEL" [level=3] [ref=e2250]
+            - generic [ref=e2251]: Mécanique de Véhicules de Loisir et d’Équipement Léger
+            - generic [ref=e2252]:
+              - generic [ref=e2253]: Formation professionnelle et technique
+              - generic [ref=e2254]: Voir la fiche →
+          - link "NTIC NTIC Nouvelles Technologies de l'Information et de la Communication Technologies éducatives et numérique Voir la fiche →" [ref=e2256] [cursor=pointer]:
+            - /url: /acronymes-education/ntic
+            - generic [ref=e2257]:
+              - img "NTIC" [ref=e2259]
+              - heading "NTIC" [level=3] [ref=e2260]
+            - generic [ref=e2261]: Nouvelles Technologies de l'Information et de la Communication
+            - generic [ref=e2262]:
+              - generic [ref=e2263]: Technologies éducatives et numérique
+              - generic [ref=e2264]: Voir la fiche →
+          - link "ODJ ODJ Ordre Du Jour Gestion et administration scolaire Voir la fiche →" [ref=e2266] [cursor=pointer]:
+            - /url: /acronymes-education/odj
+            - generic [ref=e2267]:
+              - img "ODJ" [ref=e2269]
+              - heading "ODJ" [level=3] [ref=e2270]
+            - generic [ref=e2271]: Ordre Du Jour
+            - generic [ref=e2272]:
+              - generic [ref=e2273]: Gestion et administration scolaire
+              - generic [ref=e2274]: Voir la fiche →
+          - link "OFP OFP Observatoire de la Formation Professionnelle du Quebec Formation professionnelle et technique Voir la fiche →" [ref=e2276] [cursor=pointer]:
+            - /url: /acronymes-education/ofp
+            - generic [ref=e2277]:
+              - img "OFP" [ref=e2279]
+              - heading "OFP" [level=3] [ref=e2280]
+            - generic [ref=e2281]: Observatoire de la Formation Professionnelle du Quebec
+            - generic [ref=e2282]:
+              - generic [ref=e2283]: Formation professionnelle et technique
+              - generic [ref=e2284]: Voir la fiche →
+          - link "OFPQ OFPQ Observatoire de la Formation Professionnelle du Quebec Formation professionnelle et technique Voir la fiche →" [ref=e2286] [cursor=pointer]:
+            - /url: /acronymes-education/ofpq
+            - generic [ref=e2287]:
+              - img "OFPQ" [ref=e2289]
+              - heading "OFPQ" [level=3] [ref=e2290]
+            - generic [ref=e2291]: Observatoire de la Formation Professionnelle du Quebec
+            - generic [ref=e2292]:
+              - generic [ref=e2293]: Formation professionnelle et technique
+              - generic [ref=e2294]: Voir la fiche →
+          - link "OIIAQ OIIAQ Ordre des Infirmières Infirmiers Auxiliaires du Québec Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2296] [cursor=pointer]:
+            - /url: /acronymes-education/oiiaq
+            - generic [ref=e2297]:
+              - img "OIIAQ" [ref=e2299]
+              - heading "OIIAQ" [level=3] [ref=e2300]
+            - generic [ref=e2301]: Ordre des Infirmières Infirmiers Auxiliaires du Québec
+            - generic [ref=e2302]:
+              - generic [ref=e2303]: Ministères et organismes gouvernementaux
+              - generic [ref=e2304]: Voir la fiche →
+          - link "OPHQ OPHQ Office pour les Personnes Handicapées du Québec Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2306] [cursor=pointer]:
+            - /url: /acronymes-education/ophq
+            - generic [ref=e2307]:
+              - img "OPHQ" [ref=e2309]
+              - heading "OPHQ" [level=3] [ref=e2310]
+            - generic [ref=e2311]: Office pour les Personnes Handicapées du Québec
+            - generic [ref=e2312]:
+              - generic [ref=e2313]: Ministères et organismes gouvernementaux
+              - generic [ref=e2314]: Voir la fiche →
+          - link "PAAMT PAAMT Projets d'Apprentissage Accru en Milieu de Travail Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2316] [cursor=pointer]:
+            - /url: /acronymes-education/paamt
+            - generic [ref=e2317]:
+              - img "PAAMT" [ref=e2319]
+              - heading "PAAMT" [level=3] [ref=e2320]
+            - generic [ref=e2321]: Projets d'Apprentissage Accru en Milieu de Travail
+            - generic [ref=e2322]:
+              - generic [ref=e2323]: Ministères et organismes gouvernementaux
+              - generic [ref=e2324]: Voir la fiche →
+          - link "PAE PAE Programme d’Aide aux Employés Gestion et administration scolaire Voir la fiche →" [ref=e2326] [cursor=pointer]:
+            - /url: /acronymes-education/pae
+            - generic [ref=e2327]:
+              - img "PAE" [ref=e2329]
+              - heading "PAE" [level=3] [ref=e2330]
+            - generic [ref=e2331]: Programme d’Aide aux Employés
+            - generic [ref=e2332]:
+              - generic [ref=e2333]: Gestion et administration scolaire
+              - generic [ref=e2334]: Voir la fiche →
+          - link "PAFE PAFE Programme d’Accompagnement et de Formation des Enseignants Formation générale et diplômes Voir la fiche →" [ref=e2336] [cursor=pointer]:
+            - /url: /acronymes-education/pafe
+            - generic [ref=e2337]:
+              - img "PAFE" [ref=e2339]
+              - heading "PAFE" [level=3] [ref=e2340]
+            - generic [ref=e2341]: Programme d’Accompagnement et de Formation des Enseignants
+            - generic [ref=e2342]:
+              - generic [ref=e2343]: Formation générale et diplômes
+              - generic [ref=e2344]: Voir la fiche →
+          - link "P PALEE Plan d'Action Local d'Économie de d'Emploi Gestion et administration scolaire Voir la fiche →" [ref=e2346] [cursor=pointer]:
+            - /url: /acronymes-education/palee
+            - generic [ref=e2347]:
+              - generic [ref=e2350]: P
+              - heading "PALEE" [level=3] [ref=e2351]
+            - generic [ref=e2352]: Plan d'Action Local d'Économie de d'Emploi
+            - generic [ref=e2353]:
+              - generic [ref=e2354]: Gestion et administration scolaire
+              - generic [ref=e2355]: Voir la fiche →
+          - link "PAN PAN Plan d'Action Numérique Technologies éducatives et numérique Voir la fiche →" [ref=e2357] [cursor=pointer]:
+            - /url: /acronymes-education/pan
+            - generic [ref=e2358]:
+              - img "PAN" [ref=e2360]
+              - heading "PAN" [level=3] [ref=e2361]
+            - generic [ref=e2362]: Plan d'Action Numérique
+            - generic [ref=e2363]:
+              - generic [ref=e2364]: Technologies éducatives et numérique
+              - generic [ref=e2365]: Voir la fiche →
+          - link "PAS PAS Processus d'Amélioration Structurée Gestion et administration scolaire Voir la fiche →" [ref=e2367] [cursor=pointer]:
+            - /url: /acronymes-education/pas
+            - generic [ref=e2368]:
+              - img "PAS" [ref=e2370]
+              - heading "PAS" [level=3] [ref=e2371]
+            - generic [ref=e2372]: Processus d'Amélioration Structurée
+            - generic [ref=e2373]:
+              - generic [ref=e2374]: Gestion et administration scolaire
+              - generic [ref=e2375]: Voir la fiche →
+          - link "PÉPEP PÉPEP Processus d'Élaboration de Programmes d'Études professionnelles Technologies éducatives et numérique Voir la fiche →" [ref=e2377] [cursor=pointer]:
+            - /url: /acronymes-education/pepep
+            - generic [ref=e2378]:
+              - img "PÉPEP" [ref=e2380]
+              - heading "PÉPEP" [level=3] [ref=e2381]
+            - generic [ref=e2382]: Processus d'Élaboration de Programmes d'Études professionnelles
+            - generic [ref=e2383]:
+              - generic [ref=e2384]: Technologies éducatives et numérique
+              - generic [ref=e2385]: Voir la fiche →
+          - link "PEVR PEVR Plan d'Engagement Vers sa Réussite Formation générale et diplômes Voir la fiche →" [ref=e2387] [cursor=pointer]:
+            - /url: /acronymes-education/pevr
+            - generic [ref=e2388]:
+              - img "PEVR" [ref=e2390]
+              - heading "PEVR" [level=3] [ref=e2391]
+            - generic [ref=e2392]: Plan d'Engagement Vers sa Réussite
+            - generic [ref=e2393]:
+              - generic [ref=e2394]: Formation générale et diplômes
+              - generic [ref=e2395]: Voir la fiche →
+          - link "PFAE PFAE Parcours de Formation Axée sur l’Emploi Formation professionnelle et technique Voir la fiche →" [ref=e2397] [cursor=pointer]:
+            - /url: /acronymes-education/pfae
+            - generic [ref=e2398]:
+              - img "PFAE" [ref=e2400]
+              - heading "PFAE" [level=3] [ref=e2401]
+            - generic [ref=e2402]: Parcours de Formation Axée sur l’Emploi
+            - generic [ref=e2403]:
+              - generic [ref=e2404]: Formation professionnelle et technique
+              - generic [ref=e2405]: Voir la fiche →
+          - link "PFPROF PFPROF Préparation à la Formation PROFessionnelle Formation professionnelle et technique Voir la fiche →" [ref=e2407] [cursor=pointer]:
+            - /url: /acronymes-education/pfprof
+            - generic [ref=e2408]:
+              - img "PFPROF" [ref=e2410]
+              - heading "PFPROF" [level=3] [ref=e2411]
+            - generic [ref=e2412]: Préparation à la Formation PROFessionnelle
+            - generic [ref=e2413]:
+              - generic [ref=e2414]: Formation professionnelle et technique
+              - generic [ref=e2415]: Voir la fiche →
+          - link "PHD PHD Philosophiæ doctor (Ph. D.) Technologies éducatives et numérique Voir la fiche →" [ref=e2417] [cursor=pointer]:
+            - /url: /acronymes-education/phd
+            - generic [ref=e2418]:
+              - img "PHD" [ref=e2420]
+              - heading "PHD" [level=3] [ref=e2421]
+            - generic [ref=e2422]: Philosophiæ doctor (Ph. D.)
+            - generic [ref=e2423]:
+              - generic [ref=e2424]: Technologies éducatives et numérique
+              - generic [ref=e2425]: Voir la fiche →
+          - link "POL POL Progression Of Learning Formation générale et diplômes Voir la fiche →" [ref=e2427] [cursor=pointer]:
+            - /url: /acronymes-education/pol
+            - generic [ref=e2428]:
+              - img "POL" [ref=e2430]
+              - heading "POL" [level=3] [ref=e2431]
+            - generic [ref=e2432]: Progression Of Learning
+            - generic [ref=e2433]:
+              - generic [ref=e2434]: Formation générale et diplômes
+              - generic [ref=e2435]: Voir la fiche →
+          - link "PROCEDE PROCEDE Provincial Organisation of Continuing Education Directors, English Quebec Associations et organismes professionnels Voir la fiche →" [ref=e2437] [cursor=pointer]:
+            - /url: /acronymes-education/procede
+            - generic [ref=e2438]:
+              - img "PROCEDE" [ref=e2440]
+              - heading "PROCEDE" [level=3] [ref=e2441]
+            - generic [ref=e2442]: Provincial Organisation of Continuing Education Directors, English Quebec
+            - generic [ref=e2443]:
+              - generic [ref=e2444]: Associations et organismes professionnels
+              - generic [ref=e2445]: Voir la fiche →
+          - link "PS PS Participation Sociale Formation générale et diplômes Voir la fiche →" [ref=e2447] [cursor=pointer]:
+            - /url: /acronymes-education/ps
+            - generic [ref=e2448]:
+              - img "PS" [ref=e2450]
+              - heading "PS" [level=3] [ref=e2451]
+            - generic [ref=e2452]: Participation Sociale
+            - generic [ref=e2453]:
+              - generic [ref=e2454]: Formation générale et diplômes
+              - generic [ref=e2455]: Voir la fiche →
+          - link "QACVE QACVE Colloque FP anglophone, enseignant(e)s, CP et directions Associations et organismes professionnels Voir la fiche →" [ref=e2457] [cursor=pointer]:
+            - /url: /acronymes-education/qacve
+            - generic [ref=e2458]:
+              - img "QACVE" [ref=e2460]
+              - heading "QACVE" [level=3] [ref=e2461]
+            - generic [ref=e2462]: Colloque FP anglophone, enseignant(e)s, CP et directions
+            - generic [ref=e2463]:
+              - generic [ref=e2464]: Associations et organismes professionnels
+              - generic [ref=e2465]: Voir la fiche →
+          - link "QELA QELA Quebec English Literacy Alliance Associations et organismes professionnels Voir la fiche →" [ref=e2467] [cursor=pointer]:
+            - /url: /acronymes-education/qela
+            - generic [ref=e2468]:
+              - img "QELA" [ref=e2470]
+              - heading "QELA" [level=3] [ref=e2471]
+            - generic [ref=e2472]: Quebec English Literacy Alliance
+            - generic [ref=e2473]:
+              - generic [ref=e2474]: Associations et organismes professionnels
+              - generic [ref=e2475]: Voir la fiche →
+          - link "QEP QEP Québec Education Program Technologies éducatives et numérique Voir la fiche →" [ref=e2477] [cursor=pointer]:
+            - /url: /acronymes-education/qep
+            - generic [ref=e2478]:
+              - img "QEP" [ref=e2480]
+              - heading "QEP" [level=3] [ref=e2481]
+            - generic [ref=e2482]: Québec Education Program
+            - generic [ref=e2483]:
+              - generic [ref=e2484]: Technologies éducatives et numérique
+              - generic [ref=e2485]: Voir la fiche →
+          - link "QESBA QESBA Quebec English School Board Association Centres de services scolaires Voir la fiche →" [ref=e2487] [cursor=pointer]:
+            - /url: /acronymes-education/qesba
+            - generic [ref=e2488]:
+              - img "QESBA" [ref=e2490]
+              - heading "QESBA" [level=3] [ref=e2491]
+            - generic [ref=e2492]: Quebec English School Board Association
+            - generic [ref=e2493]:
+              - generic [ref=e2494]: Centres de services scolaires
+              - generic [ref=e2495]: Voir la fiche →
+          - link "QLWG QLWG Quebec Literacy Working Group Associations et organismes professionnels Voir la fiche →" [ref=e2497] [cursor=pointer]:
+            - /url: /acronymes-education/qlwg
+            - generic [ref=e2498]:
+              - img "QLWG" [ref=e2500]
+              - heading "QLWG" [level=3] [ref=e2501]
+            - generic [ref=e2502]: Quebec Literacy Working Group
+            - generic [ref=e2503]:
+              - generic [ref=e2504]: Associations et organismes professionnels
+              - generic [ref=e2505]: Voir la fiche →
+          - link "QPAT QPAT Quebec Pronvincial Association of Teachers Associations et organismes professionnels Voir la fiche →" [ref=e2507] [cursor=pointer]:
+            - /url: /acronymes-education/qpat
+            - generic [ref=e2508]:
+              - img "QPAT" [ref=e2510]
+              - heading "QPAT" [level=3] [ref=e2511]
+            - generic [ref=e2512]: Quebec Pronvincial Association of Teachers
+            - generic [ref=e2513]:
+              - generic [ref=e2514]: Associations et organismes professionnels
+              - generic [ref=e2515]: Voir la fiche →
+          - link "RAC RAC Reconnaissance des Acquis et des Compétences Formation professionnelle et technique Voir la fiche →" [ref=e2517] [cursor=pointer]:
+            - /url: /acronymes-education/rac
+            - generic [ref=e2518]:
+              - img "RAC" [ref=e2520]
+              - heading "RAC" [level=3] [ref=e2521]
+            - generic [ref=e2522]: Reconnaissance des Acquis et des Compétences
+            - generic [ref=e2523]:
+              - generic [ref=e2524]: Formation professionnelle et technique
+              - generic [ref=e2525]: Voir la fiche →
+          - link "RAI RAI Réponse À l'Intervention Formation générale et diplômes Voir la fiche →" [ref=e2527] [cursor=pointer]:
+            - /url: /acronymes-education/rai
+            - generic [ref=e2528]:
+              - img "RAI" [ref=e2530]
+              - heading "RAI" [level=3] [ref=e2531]
+            - generic [ref=e2532]: Réponse À l'Intervention
+            - generic [ref=e2533]:
+              - generic [ref=e2534]: Formation générale et diplômes
+              - generic [ref=e2535]: Voir la fiche →
+          - link "RDP RDP Rencontre Des Partenaires Technologies éducatives et numérique Voir la fiche →" [ref=e2537] [cursor=pointer]:
+            - /url: /acronymes-education/rdp
+            - generic [ref=e2538]:
+              - img "RDP" [ref=e2540]
+              - heading "RDP" [level=3] [ref=e2541]
+            - generic [ref=e2542]: Rencontre Des Partenaires
+            - generic [ref=e2543]:
+              - generic [ref=e2544]: Technologies éducatives et numérique
+              - generic [ref=e2545]: Voir la fiche →
+          - link "RÉCIT RÉCIT Réseau Éducation Collaboration Innovation Technologie Technologies éducatives et numérique Voir la fiche →" [ref=e2547] [cursor=pointer]:
+            - /url: /acronymes-education/recit
+            - generic [ref=e2548]:
+              - img "RÉCIT" [ref=e2550]
+              - heading "RÉCIT" [level=3] [ref=e2551]
+            - generic [ref=e2552]: Réseau Éducation Collaboration Innovation Technologie
+            - generic [ref=e2553]:
+              - generic [ref=e2554]: Technologies éducatives et numérique
+              - generic [ref=e2555]: Voir la fiche →
+          - link "RÉCIT CN RÉCIT CN RÉCIT Capitale Nationale Technologies éducatives et numérique Voir la fiche →" [ref=e2557] [cursor=pointer]:
+            - /url: /acronymes-education/recit-cn
+            - generic [ref=e2558]:
+              - img "RÉCIT CN" [ref=e2560]
+              - heading "RÉCIT CN" [level=3] [ref=e2561]
+            - generic [ref=e2562]: RÉCIT Capitale Nationale
+            - generic [ref=e2563]:
+              - generic [ref=e2564]: Technologies éducatives et numérique
+              - generic [ref=e2565]: Voir la fiche →
+          - link "RÉCIT DDL RÉCIT DDL RÉCIT Domaine Des Langues Technologies éducatives et numérique Voir la fiche →" [ref=e2567] [cursor=pointer]:
+            - /url: /acronymes-education/recit-ddl
+            - generic [ref=e2568]:
+              - img "RÉCIT DDL" [ref=e2570]
+              - heading "RÉCIT DDL" [level=3] [ref=e2571]
+            - generic [ref=e2572]: RÉCIT Domaine Des Langues
+            - generic [ref=e2573]:
+              - generic [ref=e2574]: Technologies éducatives et numérique
+              - generic [ref=e2575]: Voir la fiche →
+          - link "RÉCIT DP RÉCIT DP RÉCIT Développement de la Personne Technologies éducatives et numérique Voir la fiche →" [ref=e2577] [cursor=pointer]:
+            - /url: /acronymes-education/recit-dp
+            - generic [ref=e2578]:
+              - img "RÉCIT DP" [ref=e2580]
+              - heading "RÉCIT DP" [level=3] [ref=e2581]
+            - generic [ref=e2582]: RÉCIT Développement de la Personne
+            - generic [ref=e2583]:
+              - generic [ref=e2584]: Technologies éducatives et numérique
+              - generic [ref=e2585]: Voir la fiche →
+          - link "RÉCIT FAD RÉCIT FAD RÉCIT Formation À Distance Technologies éducatives et numérique Voir la fiche →" [ref=e2587] [cursor=pointer]:
+            - /url: /acronymes-education/recit-fad
+            - generic [ref=e2588]:
+              - img "RÉCIT FAD" [ref=e2590]
+              - heading "RÉCIT FAD" [level=3] [ref=e2591]
+            - generic [ref=e2592]: RÉCIT Formation À Distance
+            - generic [ref=e2593]:
+              - generic [ref=e2594]: Technologies éducatives et numérique
+              - generic [ref=e2595]: Voir la fiche →
+          - link "RÉCIT FGA RÉCIT FGA RÉCIT Formation Général des Adultes Technologies éducatives et numérique Voir la fiche →" [ref=e2597] [cursor=pointer]:
+            - /url: /acronymes-education/recit-fga
+            - generic [ref=e2598]:
+              - img "RÉCIT FGA" [ref=e2600]
+              - heading "RÉCIT FGA" [level=3] [ref=e2601]
+            - generic [ref=e2602]: RÉCIT Formation Général des Adultes
+            - generic [ref=e2603]:
+              - generic [ref=e2604]: Technologies éducatives et numérique
+              - generic [ref=e2605]: Voir la fiche →
+          - link "RÉCIT FP RÉCIT FP RÉCIT Formation Professionnelle Technologies éducatives et numérique Voir la fiche →" [ref=e2607] [cursor=pointer]:
+            - /url: /acronymes-education/recit-fp
+            - generic [ref=e2608]:
+              - img "RÉCIT FP" [ref=e2610]
+              - heading "RÉCIT FP" [level=3] [ref=e2611]
+            - generic [ref=e2612]: RÉCIT Formation Professionnelle
+            - generic [ref=e2613]:
+              - generic [ref=e2614]: Technologies éducatives et numérique
+              - generic [ref=e2615]: Voir la fiche →
+          - link "RÉCIT GS RÉCIT GS RÉCIT Gestionnaires Scolaires Technologies éducatives et numérique Voir la fiche →" [ref=e2617] [cursor=pointer]:
+            - /url: /acronymes-education/recit-gs
+            - generic [ref=e2618]:
+              - img "RÉCIT GS" [ref=e2620]
+              - heading "RÉCIT GS" [level=3] [ref=e2621]
+            - generic [ref=e2622]: RÉCIT Gestionnaires Scolaires
+            - generic [ref=e2623]:
+              - generic [ref=e2624]: Technologies éducatives et numérique
+              - generic [ref=e2625]: Voir la fiche →
+          - link "RÉCIT IAS RÉCIT IAS RÉCIT Inclusion et Adaptation Scolaire Technologies éducatives et numérique Voir la fiche →" [ref=e2627] [cursor=pointer]:
+            - /url: /acronymes-education/recit-ias
+            - generic [ref=e2628]:
+              - img "RÉCIT IAS" [ref=e2630]
+              - heading "RÉCIT IAS" [level=3] [ref=e2631]
+            - generic [ref=e2632]: RÉCIT Inclusion et Adaptation Scolaire
+            - generic [ref=e2633]:
+              - generic [ref=e2634]: Technologies éducatives et numérique
+              - generic [ref=e2635]: Voir la fiche →
+          - link "RÉCIT MST RÉCIT MST RÉCIT domaine de la Mathématique, de la Science et Technologie Technologies éducatives et numérique Voir la fiche →" [ref=e2637] [cursor=pointer]:
+            - /url: /acronymes-education/recit-mst
+            - generic [ref=e2638]:
+              - img "RÉCIT MST" [ref=e2640]
+              - heading "RÉCIT MST" [level=3] [ref=e2641]
+            - generic [ref=e2642]: RÉCIT domaine de la Mathématique, de la Science et Technologie
+            - generic [ref=e2643]:
+              - generic [ref=e2644]: Technologies éducatives et numérique
+              - generic [ref=e2645]: Voir la fiche →
+          - link "RÉCIT SED RÉCIT SED RÉCIT des Services Éducatifs à Distance Technologies éducatives et numérique Voir la fiche →" [ref=e2647] [cursor=pointer]:
+            - /url: /acronymes-education/recit-sed
+            - generic [ref=e2648]:
+              - img "RÉCIT SED" [ref=e2650]
+              - heading "RÉCIT SED" [level=3] [ref=e2651]
+            - generic [ref=e2652]: RÉCIT des Services Éducatifs à Distance
+            - generic [ref=e2653]:
+              - generic [ref=e2654]: Technologies éducatives et numérique
+              - generic [ref=e2655]: Voir la fiche →
+          - link "RÉCIT VT RÉCIT VT RÉCIT for Vocational Training Technologies éducatives et numérique Voir la fiche →" [ref=e2657] [cursor=pointer]:
+            - /url: /acronymes-education/recit-vt
+            - generic [ref=e2658]:
+              - img "RÉCIT VT" [ref=e2660]
+              - heading "RÉCIT VT" [level=3] [ref=e2661]
+            - generic [ref=e2662]: RÉCIT for Vocational Training
+            - generic [ref=e2663]:
+              - generic [ref=e2664]: Technologies éducatives et numérique
+              - generic [ref=e2665]: Voir la fiche →
+          - link "REFAD REFAD Réseau d'Enseignement Francophone A Distance du Canada Formation générale et diplômes Voir la fiche →" [ref=e2667] [cursor=pointer]:
+            - /url: /acronymes-education/refad
+            - generic [ref=e2668]:
+              - img "REFAD" [ref=e2670]
+              - heading "REFAD" [level=3] [ref=e2671]
+            - generic [ref=e2672]: Réseau d'Enseignement Francophone A Distance du Canada
+            - generic [ref=e2673]:
+              - generic [ref=e2674]: Formation générale et diplômes
+              - generic [ref=e2675]: Voir la fiche →
+          - link "REN REN Ressources Éducatives Numériques Formation générale et diplômes Voir la fiche →" [ref=e2677] [cursor=pointer]:
+            - /url: /acronymes-education/ren
+            - generic [ref=e2678]:
+              - img "REN" [ref=e2680]
+              - heading "REN" [level=3] [ref=e2681]
+            - generic [ref=e2682]: Ressources Éducatives Numériques
+            - generic [ref=e2683]:
+              - generic [ref=e2684]: Formation générale et diplômes
+              - generic [ref=e2685]: Voir la fiche →
+          - link "RGCD RGCD Responsable Gouvernemental de CyberDéfense Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2687] [cursor=pointer]:
+            - /url: /acronymes-education/rgcd
+            - generic [ref=e2688]:
+              - img "RGCD" [ref=e2690]
+              - heading "RGCD" [level=3] [ref=e2691]
+            - generic [ref=e2692]: Responsable Gouvernemental de CyberDéfense
+            - generic [ref=e2693]:
+              - generic [ref=e2694]: Ministères et organismes gouvernementaux
+              - generic [ref=e2695]: Voir la fiche →
+          - link "ROCD ROCD Responsable Opérationnel de CyberDéfense Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2697] [cursor=pointer]:
+            - /url: /acronymes-education/rocd
+            - generic [ref=e2698]:
+              - img "ROCD" [ref=e2700]
+              - heading "ROCD" [level=3] [ref=e2701]
+            - generic [ref=e2702]: Responsable Opérationnel de CyberDéfense
+            - generic [ref=e2703]:
+              - generic [ref=e2704]: Ministères et organismes gouvernementaux
+              - generic [ref=e2705]: Voir la fiche →
+          - link "RQAP RQAP Régime Québécois d’Assurance Parentale Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2707] [cursor=pointer]:
+            - /url: /acronymes-education/rqap
+            - generic [ref=e2708]:
+              - img "RQAP" [ref=e2710]
+              - heading "RQAP" [level=3] [ref=e2711]
+            - generic [ref=e2712]: Régime Québécois d’Assurance Parentale
+            - generic [ref=e2713]:
+              - generic [ref=e2714]: Ministères et organismes gouvernementaux
+              - generic [ref=e2715]: Voir la fiche →
+          - link "RREGOP RREGOP Régime de retraite des employés du gouvernement et des organismes publics Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2717] [cursor=pointer]:
+            - /url: /acronymes-education/rregop
+            - generic [ref=e2718]:
+              - img "RREGOP" [ref=e2720]
+              - heading "RREGOP" [level=3] [ref=e2721]
+            - generic [ref=e2722]: Régime de retraite des employés du gouvernement et des organismes publics
+            - generic [ref=e2723]:
+              - generic [ref=e2724]: Ministères et organismes gouvernementaux
+              - generic [ref=e2725]: Voir la fiche →
+          - link "RRQ RRQ Régie des Rentes du Québec Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2727] [cursor=pointer]:
+            - /url: /acronymes-education/rrq
+            - generic [ref=e2728]:
+              - img "RRQ" [ref=e2730]
+              - heading "RRQ" [level=3] [ref=e2731]
+            - generic [ref=e2732]: Régie des Rentes du Québec
+            - generic [ref=e2733]:
+              - generic [ref=e2734]: Ministères et organismes gouvernementaux
+              - generic [ref=e2735]: Voir la fiche →
+          - link "RRSP RRSP Réseau des Responsables du Soutien Pédagogique Associations et organismes professionnels Voir la fiche →" [ref=e2737] [cursor=pointer]:
+            - /url: /acronymes-education/rrsp
+            - generic [ref=e2738]:
+              - img "RRSP" [ref=e2740]
+              - heading "RRSP" [level=3] [ref=e2741]
+            - generic [ref=e2742]: Réseau des Responsables du Soutien Pédagogique
+            - generic [ref=e2743]:
+              - generic [ref=e2744]: Associations et organismes professionnels
+              - generic [ref=e2745]: Voir la fiche →
+          - link "RSF RSF Responsable de Secteur de Formation Associations et organismes professionnels Voir la fiche →" [ref=e2747] [cursor=pointer]:
+            - /url: /acronymes-education/rsf
+            - generic [ref=e2748]:
+              - img "RSF" [ref=e2750]
+              - heading "RSF" [level=3] [ref=e2751]
+            - generic [ref=e2752]: Responsable de Secteur de Formation
+            - generic [ref=e2753]:
+              - generic [ref=e2754]: Associations et organismes professionnels
+              - generic [ref=e2755]: Voir la fiche →
+          - link "RTSQ RTSQ Réseau de Télématique Scolaire Québécois Associations et organismes professionnels Voir la fiche →" [ref=e2757] [cursor=pointer]:
+            - /url: /acronymes-education/rtsq
+            - generic [ref=e2758]:
+              - img "RTSQ" [ref=e2760]
+              - heading "RTSQ" [level=3] [ref=e2761]
+            - generic [ref=e2762]: Réseau de Télématique Scolaire Québécois
+            - generic [ref=e2763]:
+              - generic [ref=e2764]: Associations et organismes professionnels
+              - generic [ref=e2765]: Voir la fiche →
+          - link "SAE SAE Situations d’Apprentissage et d’Évaluation Formation générale et diplômes Voir la fiche →" [ref=e2767] [cursor=pointer]:
+            - /url: /acronymes-education/sae
+            - generic [ref=e2768]:
+              - img "SAE" [ref=e2770]
+              - heading "SAE" [level=3] [ref=e2771]
+            - generic [ref=e2772]: Situations d’Apprentissage et d’Évaluation
+            - generic [ref=e2773]:
+              - generic [ref=e2774]: Formation générale et diplômes
+              - generic [ref=e2775]: Voir la fiche →
+          - link "SAÉA SAÉA Situation d'Apprentissage et d'Évaluation en Apprentissage Formation générale et diplômes Voir la fiche →" [ref=e2777] [cursor=pointer]:
+            - /url: /acronymes-education/saea
+            - generic [ref=e2778]:
+              - img "SAÉA" [ref=e2780]
+              - heading "SAÉA" [level=3] [ref=e2781]
+            - generic [ref=e2782]: Situation d'Apprentissage et d'Évaluation en Apprentissage
+            - generic [ref=e2783]:
+              - generic [ref=e2784]: Formation générale et diplômes
+              - generic [ref=e2785]: Voir la fiche →
+          - link "SAMR SAMR Substitution Augmentation Modification Redéfinition Formation générale et diplômes Voir la fiche →" [ref=e2787] [cursor=pointer]:
+            - /url: /acronymes-education/samr
+            - generic [ref=e2788]:
+              - img "SAMR" [ref=e2790]
+              - heading "SAMR" [level=3] [ref=e2791]
+            - generic [ref=e2792]: Substitution Augmentation Modification Redéfinition
+            - generic [ref=e2793]:
+              - generic [ref=e2794]: Formation générale et diplômes
+              - generic [ref=e2795]: Voir la fiche →
+          - link "SARCA SARCA Services d'Accueil, de Référence, de Conseil et d'Accompagnement Services aux élèves et adaptation Voir la fiche →" [ref=e2797] [cursor=pointer]:
+            - /url: /acronymes-education/sarca
+            - generic [ref=e2798]:
+              - img "SARCA" [ref=e2800]
+              - heading "SARCA" [level=3] [ref=e2801]
+            - generic [ref=e2802]: Services d'Accueil, de Référence, de Conseil et d'Accompagnement
+            - generic [ref=e2803]:
+              - generic [ref=e2804]: Services aux élèves et adaptation
+              - generic [ref=e2805]: Voir la fiche →
+          - link "SASI SASI Santé, Assistance et Soins Infirmiers Technologies éducatives et numérique Voir la fiche →" [ref=e2807] [cursor=pointer]:
+            - /url: /acronymes-education/sasi
+            - generic [ref=e2808]:
+              - img "SASI" [ref=e2810]
+              - heading "SASI" [level=3] [ref=e2811]
+            - generic [ref=e2812]: Santé, Assistance et Soins Infirmiers
+            - generic [ref=e2813]:
+              - generic [ref=e2814]: Technologies éducatives et numérique
+              - generic [ref=e2815]: Voir la fiche →
+          - link "SCA-DPP SCA-DPP Service à la Communauté Anglophone – Direction des Politiques et Projets Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2817] [cursor=pointer]:
+            - /url: /acronymes-education/sca-dpp
+            - generic [ref=e2818]:
+              - img "SCA-DPP" [ref=e2820]
+              - heading "SCA-DPP" [level=3] [ref=e2821]
+            - generic [ref=e2822]: Service à la Communauté Anglophone – Direction des Politiques et Projets
+            - generic [ref=e2823]:
+              - generic [ref=e2824]: Ministères et organismes gouvernementaux
+              - generic [ref=e2825]: Voir la fiche →
+          - link "SÉAFP SÉAFP Service de l’Éducation des Adultes et de la Formation Professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e2827] [cursor=pointer]:
+            - /url: /acronymes-education/seafp
+            - generic [ref=e2828]:
+              - img "SÉAFP" [ref=e2830]
+              - heading "SÉAFP" [level=3] [ref=e2831]
+            - generic [ref=e2832]: Service de l’Éducation des Adultes et de la Formation Professionnelle
+            - generic [ref=e2833]:
+              - generic [ref=e2834]: Formation professionnelle et technique
+              - generic [ref=e2835]: Voir la fiche →
+          - link "SEC SEC Services Éducatifs Complémentaires Associations et organismes professionnels Voir la fiche →" [ref=e2837] [cursor=pointer]:
+            - /url: /acronymes-education/sec
+            - generic [ref=e2838]:
+              - img "SEC" [ref=e2840]
+              - heading "SEC" [level=3] [ref=e2841]
+            - generic [ref=e2842]: Services Éducatifs Complémentaires
+            - generic [ref=e2843]:
+              - generic [ref=e2844]: Associations et organismes professionnels
+              - generic [ref=e2845]: Voir la fiche →
+          - link "SEP SEP Sentiment d'Efficacité Personnelle Formation générale et diplômes Voir la fiche →" [ref=e2847] [cursor=pointer]:
+            - /url: /acronymes-education/sep
+            - generic [ref=e2848]:
+              - img "SEP" [ref=e2850]
+              - heading "SEP" [level=3] [ref=e2851]
+            - generic [ref=e2852]: Sentiment d'Efficacité Personnelle
+            - generic [ref=e2853]:
+              - generic [ref=e2854]: Formation générale et diplômes
+              - generic [ref=e2855]: Voir la fiche →
+          - link "SGA SGA Système de Gestion de l'Apprentissage Technologies éducatives et numérique Voir la fiche →" [ref=e2857] [cursor=pointer]:
+            - /url: /acronymes-education/sga
+            - generic [ref=e2858]:
+              - img "SGA" [ref=e2860]
+              - heading "SGA" [level=3] [ref=e2861]
+            - generic [ref=e2862]: Système de Gestion de l'Apprentissage
+            - generic [ref=e2863]:
+              - generic [ref=e2864]: Technologies éducatives et numérique
+              - generic [ref=e2865]: Voir la fiche →
+          - link "SN SN Service National du RÉCIT Technologies éducatives et numérique Voir la fiche →" [ref=e2867] [cursor=pointer]:
+            - /url: /acronymes-education/sn
+            - generic [ref=e2868]:
+              - img "SN" [ref=e2870]
+              - heading "SN" [level=3] [ref=e2871]
+            - generic [ref=e2872]: Service National du RÉCIT
+            - generic [ref=e2873]:
+              - generic [ref=e2874]: Technologies éducatives et numérique
+              - generic [ref=e2875]: Voir la fiche →
+          - link "SOFAD SOFAD SOciété de Formation À Distance des commissions scolaires du Québec Ministères et organismes gouvernementaux Voir la fiche →" [ref=e2877] [cursor=pointer]:
+            - /url: /acronymes-education/sofad
+            - generic [ref=e2878]:
+              - img "SOFAD" [ref=e2880]
+              - heading "SOFAD" [level=3] [ref=e2881]
+            - generic [ref=e2882]: SOciété de Formation À Distance des commissions scolaires du Québec
+            - generic [ref=e2883]:
+              - generic [ref=e2884]: Ministères et organismes gouvernementaux
+              - generic [ref=e2885]: Voir la fiche →
+          - link "SPECS SPECS SPÉCifications aux fins de la Sanction Formation générale et diplômes Voir la fiche →" [ref=e2887] [cursor=pointer]:
+            - /url: /acronymes-education/specs
+            - generic [ref=e2888]:
+              - img "SPECS" [ref=e2890]
+              - heading "SPECS" [level=3] [ref=e2891]
+            - generic [ref=e2892]: SPÉCifications aux fins de la Sanction
+            - generic [ref=e2893]:
+              - generic [ref=e2894]: Formation générale et diplômes
+              - generic [ref=e2895]: Voir la fiche →
+          - link "SR SR Service Régional du RÉCIT Technologies éducatives et numérique Voir la fiche →" [ref=e2897] [cursor=pointer]:
+            - /url: /acronymes-education/sr
+            - generic [ref=e2898]:
+              - img "SR" [ref=e2900]
+              - heading "SR" [level=3] [ref=e2901]
+            - generic [ref=e2902]: Service Régional du RÉCIT
+            - generic [ref=e2903]:
+              - generic [ref=e2904]: Technologies éducatives et numérique
+              - generic [ref=e2905]: Voir la fiche →
+          - link "SRAFP SRAFP Service Régional d'admission en Formation Professionnelle Formation professionnelle et technique Voir la fiche →" [ref=e2907] [cursor=pointer]:
+            - /url: /acronymes-education/srafp
+            - generic [ref=e2908]:
+              - img "SRAFP" [ref=e2910]
+              - heading "SRAFP" [level=3] [ref=e2911]
+            - generic [ref=e2912]: Service Régional d'admission en Formation Professionnelle
+            - generic [ref=e2913]:
+              - generic [ref=e2914]: Formation professionnelle et technique
+              - generic [ref=e2915]: Voir la fiche →
+          - link "SRHU SRHU Service de Ressources Humaines et Utilisateurs Gestion et administration scolaire Voir la fiche →" [ref=e2917] [cursor=pointer]:
+            - /url: /acronymes-education/srhu
+            - generic [ref=e2918]:
+              - img "SRHU" [ref=e2920]
+              - heading "SRHU" [level=3] [ref=e2921]
+            - generic [ref=e2922]: Service de Ressources Humaines et Utilisateurs
+            - generic [ref=e2923]:
+              - generic [ref=e2924]: Gestion et administration scolaire
+              - generic [ref=e2925]: Voir la fiche →
+          - link "STC STC Skills Training Certificate Formation professionnelle et technique Voir la fiche →" [ref=e2927] [cursor=pointer]:
+            - /url: /acronymes-education/stc
+            - generic [ref=e2928]:
+              - img "STC" [ref=e2930]
+              - heading "STC" [level=3] [ref=e2931]
+            - generic [ref=e2932]: Skills Training Certificate
+            - generic [ref=e2933]:
+              - generic [ref=e2934]: Formation professionnelle et technique
+              - generic [ref=e2935]: Voir la fiche →
+          - link "TAP TAP Tableau d'Analyse et de Planification Gestion et administration scolaire Voir la fiche →" [ref=e2937] [cursor=pointer]:
+            - /url: /acronymes-education/tap
+            - generic [ref=e2938]:
+              - img "TAP" [ref=e2940]
+              - heading "TAP" [level=3] [ref=e2941]
+            - generic [ref=e2942]: Tableau d'Analyse et de Planification
+            - generic [ref=e2943]:
+              - generic [ref=e2944]: Gestion et administration scolaire
+              - generic [ref=e2945]: Voir la fiche →
+          - link "TAS TAS Tableaux d’Analyse et de Spécifications Formation générale et diplômes Voir la fiche →" [ref=e2947] [cursor=pointer]:
+            - /url: /acronymes-education/tas
+            - generic [ref=e2948]:
+              - img "TAS" [ref=e2950]
+              - heading "TAS" [level=3] [ref=e2951]
+            - generic [ref=e2952]: Tableaux d’Analyse et de Spécifications
+            - generic [ref=e2953]:
+              - generic [ref=e2954]: Formation générale et diplômes
+              - generic [ref=e2955]: Voir la fiche →
+          - link "TC TC Tâche Complémentaire Formation générale et diplômes Voir la fiche →" [ref=e2957] [cursor=pointer]:
+            - /url: /acronymes-education/tc
+            - generic [ref=e2958]:
+              - img "TC" [ref=e2960]
+              - heading "TC" [level=3] [ref=e2961]
+            - generic [ref=e2962]: Tâche Complémentaire
+            - generic [ref=e2963]:
+              - generic [ref=e2964]: Formation générale et diplômes
+              - generic [ref=e2965]: Voir la fiche →
+          - link "TDAH TDAH Trouble Déficitaire de l’Attention avec ou sans Hyperactivité Services aux élèves et adaptation Voir la fiche →" [ref=e2967] [cursor=pointer]:
+            - /url: /acronymes-education/tdah
+            - generic [ref=e2968]:
+              - img "TDAH" [ref=e2970]
+              - heading "TDAH" [level=3] [ref=e2971]
+            - generic [ref=e2972]: Trouble Déficitaire de l’Attention avec ou sans Hyperactivité
+            - generic [ref=e2973]:
+              - generic [ref=e2974]: Services aux élèves et adaptation
+              - generic [ref=e2975]: Voir la fiche →
+          - link "TDG TDG Test de Développement Général Formation professionnelle et technique Voir la fiche →" [ref=e2977] [cursor=pointer]:
+            - /url: /acronymes-education/tdg
+            - generic [ref=e2978]:
+              - img "TDG" [ref=e2980]
+              - heading "TDG" [level=3] [ref=e2981]
+            - generic [ref=e2982]: Test de Développement Général
+            - generic [ref=e2983]:
+              - generic [ref=e2984]: Formation professionnelle et technique
+              - generic [ref=e2985]: Voir la fiche →
+          - link "TE TE Tâche Éducative Formation générale et diplômes Voir la fiche →" [ref=e2987] [cursor=pointer]:
+            - /url: /acronymes-education/te
+            - generic [ref=e2988]:
+              - img "TE" [ref=e2990]
+              - heading "TE" [level=3] [ref=e2991]
+            - generic [ref=e2992]: Tâche Éducative
+            - generic [ref=e2993]:
+              - generic [ref=e2994]: Formation générale et diplômes
+              - generic [ref=e2995]: Voir la fiche →
+          - link "TEACCH TEACCH Treatment and Education of Autistic and Communication related handicapped CHildren Services aux élèves et adaptation Voir la fiche →" [ref=e2997] [cursor=pointer]:
+            - /url: /acronymes-education/teacch
+            - generic [ref=e2998]:
+              - img "TEACCH" [ref=e3000]
+              - heading "TEACCH" [level=3] [ref=e3001]
+            - generic [ref=e3002]: Treatment and Education of Autistic and Communication related handicapped CHildren
+            - generic [ref=e3003]:
+              - generic [ref=e3004]: Services aux élèves et adaptation
+              - generic [ref=e3005]: Voir la fiche →
+          - link "TENS TENS Test d'Équivalence de Niveau Secondaire Formation professionnelle et technique Voir la fiche →" [ref=e3007] [cursor=pointer]:
+            - /url: /acronymes-education/tens
+            - generic [ref=e3008]:
+              - img "TENS" [ref=e3010]
+              - heading "TENS" [level=3] [ref=e3011]
+            - generic [ref=e3012]: Test d'Équivalence de Niveau Secondaire
+            - generic [ref=e3013]:
+              - generic [ref=e3014]: Formation professionnelle et technique
+              - generic [ref=e3015]: Voir la fiche →
+          - link "TES TES Technicienne ou technicien en Éducation Spécialisée Services aux élèves et adaptation Voir la fiche →" [ref=e3017] [cursor=pointer]:
+            - /url: /acronymes-education/tes
+            - generic [ref=e3018]:
+              - img "TES" [ref=e3020]
+              - heading "TES" [level=3] [ref=e3021]
+            - generic [ref=e3022]: Technicienne ou technicien en Éducation Spécialisée
+            - generic [ref=e3023]:
+              - generic [ref=e3024]: Services aux élèves et adaptation
+              - generic [ref=e3025]: Voir la fiche →
+          - link "TEVA TEVA Transition École / Vie Active Formation générale et diplômes Voir la fiche →" [ref=e3027] [cursor=pointer]:
+            - /url: /acronymes-education/teva
+            - generic [ref=e3028]:
+              - img "TEVA" [ref=e3030]
+              - heading "TEVA" [level=3] [ref=e3031]
+            - generic [ref=e3032]: Transition École / Vie Active
+            - generic [ref=e3033]:
+              - generic [ref=e3034]: Formation générale et diplômes
+              - generic [ref=e3035]: Voir la fiche →
+          - link "TGC TGC Troubles Graves du Comportement Services aux élèves et adaptation Voir la fiche →" [ref=e3037] [cursor=pointer]:
+            - /url: /acronymes-education/tgc
+            - generic [ref=e3038]:
+              - img "TGC" [ref=e3040]
+              - heading "TGC" [level=3] [ref=e3041]
+            - generic [ref=e3042]: Troubles Graves du Comportement
+            - generic [ref=e3043]:
+              - generic [ref=e3044]: Services aux élèves et adaptation
+              - generic [ref=e3045]: Voir la fiche →
+          - link "TIC TIC Technologie de l’Information et de la Communication Technologies éducatives et numérique Voir la fiche →" [ref=e3047] [cursor=pointer]:
+            - /url: /acronymes-education/tic
+            - generic [ref=e3048]:
+              - img "TIC" [ref=e3050]
+              - heading "TIC" [level=3] [ref=e3051]
+            - generic [ref=e3052]: Technologie de l’Information et de la Communication
+            - generic [ref=e3053]:
+              - generic [ref=e3054]: Technologies éducatives et numérique
+              - generic [ref=e3055]: Voir la fiche →
+          - link "TICE TICE Technologies de l'Information et de la Communication en Éducation Technologies éducatives et numérique Voir la fiche →" [ref=e3057] [cursor=pointer]:
+            - /url: /acronymes-education/tice
+            - generic [ref=e3058]:
+              - img "TICE" [ref=e3060]
+              - heading "TICE" [level=3] [ref=e3061]
+            - generic [ref=e3062]: Technologies de l'Information et de la Communication en Éducation
+            - generic [ref=e3063]:
+              - generic [ref=e3064]: Technologies éducatives et numérique
+              - generic [ref=e3065]: Voir la fiche →
+          - link "TNC TNC Table Nationale de Concertations Associations et organismes professionnels Voir la fiche →" [ref=e3067] [cursor=pointer]:
+            - /url: /acronymes-education/tnc
+            - generic [ref=e3068]:
+              - img "TNC" [ref=e3070]
+              - heading "TNC" [level=3] [ref=e3071]
+            - generic [ref=e3072]: Table Nationale de Concertations
+            - generic [ref=e3073]:
+              - generic [ref=e3074]: Associations et organismes professionnels
+              - generic [ref=e3075]: Voir la fiche →
+          - link "TNCC TNCC Table nationale de concertation et de collaboration Associations et organismes professionnels Voir la fiche →" [ref=e3077] [cursor=pointer]:
+            - /url: /acronymes-education/tncc
+            - generic [ref=e3078]:
+              - img "TNCC" [ref=e3080]
+              - heading "TNCC" [level=3] [ref=e3081]
+            - generic [ref=e3082]: Table nationale de concertation et de collaboration
+            - generic [ref=e3083]:
+              - generic [ref=e3084]: Associations et organismes professionnels
+              - generic [ref=e3085]: Voir la fiche →
+          - link "TNI TNI Tableau Numérique Interactif Technologies éducatives et numérique Voir la fiche →" [ref=e3087] [cursor=pointer]:
+            - /url: /acronymes-education/tni
+            - generic [ref=e3088]:
+              - img "TNI" [ref=e3090]
+              - heading "TNI" [level=3] [ref=e3091]
+            - generic [ref=e3092]: Tableau Numérique Interactif
+            - generic [ref=e3093]:
+              - generic [ref=e3094]: Technologies éducatives et numérique
+              - generic [ref=e3095]: Voir la fiche →
+          - link "TNP TNP Travail de Nature Personnel Formation générale et diplômes Voir la fiche →" [ref=e3097] [cursor=pointer]:
+            - /url: /acronymes-education/tnp
+            - generic [ref=e3098]:
+              - img "TNP" [ref=e3100]
+              - heading "TNP" [level=3] [ref=e3101]
+            - generic [ref=e3102]: Travail de Nature Personnel
+            - generic [ref=e3103]:
+              - generic [ref=e3104]: Formation générale et diplômes
+              - generic [ref=e3105]: Voir la fiche →
+          - link "TOS TOS Technicien en Organisation Scolaire (commande examen, etc.) Gestion et administration scolaire Voir la fiche →" [ref=e3107] [cursor=pointer]:
+            - /url: /acronymes-education/tos
+            - generic [ref=e3108]:
+              - img "TOS" [ref=e3110]
+              - heading "TOS" [level=3] [ref=e3111]
+            - generic [ref=e3112]: Technicien en Organisation Scolaire (commande examen, etc.)
+            - generic [ref=e3113]:
+              - generic [ref=e3114]: Gestion et administration scolaire
+              - generic [ref=e3115]: Voir la fiche →
+          - link "TPM TPM Trusted Platform Module Technologies éducatives et numérique Voir la fiche →" [ref=e3117] [cursor=pointer]:
+            - /url: /acronymes-education/tpm
+            - generic [ref=e3118]:
+              - img "TPM" [ref=e3120]
+              - heading "TPM" [level=3] [ref=e3121]
+            - generic [ref=e3122]: Trusted Platform Module
+            - generic [ref=e3123]:
+              - generic [ref=e3124]: Technologies éducatives et numérique
+              - generic [ref=e3125]: Voir la fiche →
+          - link "TRÉAQ TRÉAQ Table des Responsables de l'Éducation des Adultes du Québec Formation générale et diplômes Voir la fiche →" [ref=e3127] [cursor=pointer]:
+            - /url: /acronymes-education/treaq
+            - generic [ref=e3128]:
+              - img "TRÉAQ" [ref=e3130]
+              - heading "TRÉAQ" [level=3] [ref=e3131]
+            - generic [ref=e3132]: Table des Responsables de l'Éducation des Adultes du Québec
+            - generic [ref=e3133]:
+              - generic [ref=e3134]: Formation générale et diplômes
+              - generic [ref=e3135]: Voir la fiche →
+          - link "TRN TRN Technologies et Ressources Numériques Technologies éducatives et numérique Voir la fiche →" [ref=e3137] [cursor=pointer]:
+            - /url: /acronymes-education/trn
+            - generic [ref=e3138]:
+              - img "TRN" [ref=e3140]
+              - heading "TRN" [level=3] [ref=e3141]
+            - generic [ref=e3142]: Technologies et Ressources Numériques
+            - generic [ref=e3143]:
+              - generic [ref=e3144]: Technologies éducatives et numérique
+              - generic [ref=e3145]: Voir la fiche →
+          - link "TS TS Technicien ou technicienne en Travail Social Services aux élèves et adaptation Voir la fiche →" [ref=e3147] [cursor=pointer]:
+            - /url: /acronymes-education/ts
+            - generic [ref=e3148]:
+              - img "TS" [ref=e3150]
+              - heading "TS" [level=3] [ref=e3151]
+            - generic [ref=e3152]: Technicien ou technicienne en Travail Social
+            - generic [ref=e3153]:
+              - generic [ref=e3154]: Services aux élèves et adaptation
+              - generic [ref=e3155]: Voir la fiche →
+          - link "TSA TSA Troubles du spectre de l’autisme Services aux élèves et adaptation Voir la fiche →" [ref=e3157] [cursor=pointer]:
+            - /url: /acronymes-education/tsa
+            - generic [ref=e3158]:
+              - img "TSA" [ref=e3160]
+              - heading "TSA" [level=3] [ref=e3161]
+            - generic [ref=e3162]: Troubles du spectre de l’autisme
+            - generic [ref=e3163]:
+              - generic [ref=e3164]: Services aux élèves et adaptation
+              - generic [ref=e3165]: Voir la fiche →
+          - link "UNESCO UNESCO United Nations Educational, Scientific and Cultural Organization Technologies éducatives et numérique Voir la fiche →" [ref=e3167] [cursor=pointer]:
+            - /url: /acronymes-education/unesco
+            - generic [ref=e3168]:
+              - img "UNESCO" [ref=e3170]
+              - heading "UNESCO" [level=3] [ref=e3171]
+            - generic [ref=e3172]: United Nations Educational, Scientific and Cultural Organization
+            - generic [ref=e3173]:
+              - generic [ref=e3174]: Technologies éducatives et numérique
+              - generic [ref=e3175]: Voir la fiche →
+          - link "VT VT Vocational Training Formation professionnelle et technique Voir la fiche →" [ref=e3177] [cursor=pointer]:
+            - /url: /acronymes-education/vt
+            - generic [ref=e3178]:
+              - img "VT" [ref=e3180]
+              - heading "VT" [level=3] [ref=e3181]
+            - generic [ref=e3182]: Vocational Training
+            - generic [ref=e3183]:
+              - generic [ref=e3184]: Formation professionnelle et technique
+              - generic [ref=e3185]: Voir la fiche →
+          - link "WOTP WOTP Work-Oriented Training Path Technologies éducatives et numérique Voir la fiche →" [ref=e3187] [cursor=pointer]:
+            - /url: /acronymes-education/wotp
+            - generic [ref=e3188]:
+              - img "WOTP" [ref=e3190]
+              - heading "WOTP" [level=3] [ref=e3191]
+            - generic [ref=e3192]: Work-Oriented Training Path
+            - generic [ref=e3193]:
+              - generic [ref=e3194]: Technologies éducatives et numérique
+              - generic [ref=e3195]: Voir la fiche →
+    - contentinfo [ref=e3196]:
+      - generic [ref=e3199]:
+        - generic [ref=e3201]:
+          - img "La veille" [ref=e3203]
+          - paragraph [ref=e3204]: Votre plateforme d'information dédiée à l'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.
+        - generic [ref=e3206]:
+          - heading "Liens importants" [level=3] [ref=e3208]
+          - list [ref=e3209]:
+            - listitem [ref=e3210]:
+              - link "Accueil" [ref=e3211] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765
+            - listitem [ref=e3212]:
+              - link "Blog" [ref=e3213] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/blog
+            - listitem [ref=e3214]:
+              - link "Outils gratuits" [ref=e3215] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/outils
+            - listitem [ref=e3216]:
+              - link "Glossaire IA" [ref=e3217] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/glossaire
+            - listitem [ref=e3218]:
+              - link "Répertoire techno" [ref=e3219] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/annuaire
+            - listitem [ref=e3220]:
+              - link "🏆 Classement" [ref=e3221] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/annuaire/classement
+            - listitem [ref=e3222]:
+              - link "🗺️ Roadmap" [ref=e3223] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/roadmap
+            - listitem [ref=e3224]:
+              - link "À propos" [ref=e3225] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/page/a-propos
+            - listitem [ref=e3226]:
+              - link "FAQ" [ref=e3227] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/faq
+            - listitem [ref=e3228]:
+              - link "Contact" [ref=e3229] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/contact
+            - listitem [ref=e3230]:
+              - link "Politique de confidentialité" [ref=e3231] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/privacy-policy
+            - listitem [ref=e3232]:
+              - link "Politique de cookies" [ref=e3233] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/cookie-policy
+        - generic [ref=e3235]:
+          - heading "Catégories" [level=3] [ref=e3237]
+          - list [ref=e3238]:
+            - listitem [ref=e3239]:
+              - link "ACTUALITÉS TECHNO" [ref=e3240] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/actualites-techno
+            - listitem [ref=e3241]:
+              - link "Divers" [ref=e3242] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/divers
+            - listitem [ref=e3243]:
+              - link "FRÉQUENCE NUMÉRIQUE (PODCAST)" [ref=e3244] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/frequence-numerique
+            - listitem [ref=e3245]:
+              - link "GUIDES & TUTORIELS" [ref=e3246] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/guides-tutoriels
+            - listitem [ref=e3247]:
+              - link "INTELLIGENCE ARTIFICIELLE" [ref=e3248] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/intelligence-artificielle
+            - listitem [ref=e3249]:
+              - link "LE CONCENTRÉ" [ref=e3250] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/le-concentre
+            - listitem [ref=e3251]:
+              - link "OUTILS & RESSOURCES" [ref=e3252] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/outils-ressources
+            - listitem [ref=e3253]:
+              - link "PÉDAGOGIE NUMÉRIQUE" [ref=e3254] [cursor=pointer]:
+                - /url: http://127.0.0.1:8765/categorie/pedagogie-numerique
+        - generic [ref=e3256]:
+          - heading "Réseaux sociaux" [level=3] [ref=e3258]
+          - list [ref=e3259]:
+            - listitem [ref=e3260]:
+              - link "Facebook" [ref=e3261] [cursor=pointer]:
+                - /url: https://www.facebook.com/LaVeilleDeStef
+                - text: Facebook
+            - listitem [ref=e3263]:
+              - link "Messenger" [ref=e3264] [cursor=pointer]:
+                - /url: https://m.me/LaVeilleDeStef
+                - text: Messenger
+      - paragraph [ref=e3270]: Copyright © 2026 La veille. Tous droits réservés.
+  - dialog "Parametres de confidentialite" [ref=e3272]:
+    - heading "Parametres de confidentialite" [level=2] [ref=e3273]
+    - paragraph [ref=e3274]:
+      - text: Nous utilisons des temoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gerer vos preferences ci-dessous.
+      - link "Politique de confidentialite" [ref=e3275] [cursor=pointer]:
+        - /url: /privacy-policy
+    - generic [ref=e3276]:
+      - button "Tout refuser" [active] [ref=e3277] [cursor=pointer]
+      - button "Personnaliser" [ref=e3278] [cursor=pointer]
+      - button "Tout accepter" [ref=e3279] [cursor=pointer]
+  - text: 
+  - generic [ref=e3282]:
+    - generic [ref=e3284]:
+      - generic [ref=e3285] [cursor=pointer]:
+        - generic: Request
+      - generic [ref=e3286] [cursor=pointer]:
+        - generic: Timeline
+      - generic [ref=e3287] [cursor=pointer]:
+        - generic: Views
+        - generic [ref=e3288]: "7"
+      - generic [ref=e3289] [cursor=pointer]:
+        - generic: Queries
+        - generic [ref=e3290]: "12"
+      - generic [ref=e3291] [cursor=pointer]:
+        - generic: Models
+        - generic [ref=e3292]: "327"
+      - generic [ref=e3293] [cursor=pointer]:
+        - generic: Cache
+        - generic [ref=e3294]: "13"
+      - generic [ref=e3295] [cursor=pointer]:
+        - generic: Pennant
+    - generic [ref=e3296]:
+      - generic [ref=e3304] [cursor=pointer]: GET /acronymes-education
+      - generic [ref=e3305] [cursor=pointer]:
+        - generic: 193ms
+      - generic [ref=e3307] [cursor=pointer]:
+        - generic: 50MB
+      - generic [ref=e3309] [cursor=pointer]:
+        - generic: 12.x

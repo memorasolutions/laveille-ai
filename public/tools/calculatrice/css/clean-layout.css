@@ -1,0 +1,526 @@
+/**
+ * 🎨 CLEAN LAYOUT - Interface propre avec marges optimisées
+ * Basé sur l'interface fonctionnelle mais avec espacement réduit et esthétique
+ */
+
+/* ===============================================
+   🎯 VARIABLES OPTIMISÉES
+   =============================================== */
+:root {
+    /* Espacements réduits mais harmonieux */
+    --clean-space-xs: 0.375rem;    /* 6px */
+    --clean-space-sm: 0.5rem;      /* 8px */
+    --clean-space-md: 0.75rem;     /* 12px */
+    --clean-space-lg: 1rem;        /* 16px */
+    --clean-space-xl: 1.25rem;     /* 20px */
+    --clean-space-2xl: 1.5rem;     /* 24px */
+    
+    /* Largeurs optimales */
+    --clean-max-width: 680px;
+    --clean-card-padding: var(--clean-space-xl);
+    
+    /* Hauteurs d'éléments */
+    --clean-input-height: 48px;
+    --clean-button-height: 44px;
+}
+
+/* ===============================================
+   📱 LAYOUT PRINCIPAL COMPACT
+   =============================================== */
+.calculator-app {
+    max-width: var(--clean-max-width) !important;
+    margin: 0 auto;
+    padding: var(--clean-space-md) !important;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header plus compact */
+.app-header {
+    text-align: center;
+    padding: var(--clean-space-lg) 0 var(--clean-space-xl) 0 !important;
+    margin-bottom: var(--clean-space-lg) !important;
+}
+
+.app-header h1 {
+    font-size: 1.75rem !important;
+    margin: 0 !important;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* ===============================================
+   📋 SECTIONS ET CARTES COMPACTES
+   =============================================== */
+.card {
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-lg);
+    padding: var(--clean-card-padding) !important;
+    margin-bottom: var(--clean-space-lg) !important;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Section principale */
+.main-calculator {
+    margin-bottom: var(--clean-space-xl) !important;
+}
+
+/* Sections intégrées dans la carte principale */
+.main-calculator .tip-section,
+.main-calculator .split-section,
+.main-calculator .actions-section {
+    margin-top: var(--clean-space-xl);
+    margin-bottom: 0;
+}
+
+/* Dividers visuels pour séparer les sections */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+    margin: var(--clean-space-xl) 0;
+}
+
+/* Titres de sections intégrées */
+.main-calculator .split-section h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 var(--clean-space-lg) 0;
+}
+
+/* ===============================================
+   📝 FORMULAIRES OPTIMISÉS
+   =============================================== */
+.form-group {
+    margin-bottom: var(--clean-space-lg) !important;
+}
+
+.form-group:last-child {
+    margin-bottom: 0 !important;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--clean-space-sm) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===============================================
+   🔢 INPUTS ET SELECTS
+   =============================================== */
+input[type="number"],
+input[type="text"],
+select,
+.province-select {
+    width: 100%;
+    height: var(--clean-input-height) !important;
+    padding: var(--clean-space-md) !important;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--color-input-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    transition: var(--transition);
+}
+
+/* Inputs avec symbole monétaire */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper input {
+    padding-left: 2.5rem !important;
+}
+
+.currency-symbol {
+    position: absolute;
+    left: var(--clean-space-md);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* États des inputs */
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(164, 120, 100, 0.1);
+}
+
+input:hover,
+select:hover {
+    border-color: var(--color-primary-light);
+}
+
+.readonly-input {
+    background: var(--color-input-readonly) !important;
+    cursor: not-allowed;
+    color: var(--color-text-muted);
+}
+
+.total-amount {
+    font-weight: 700;
+    background: rgba(164, 120, 100, 0.05) !important;
+    border-color: var(--color-primary-light);
+}
+
+/* ===============================================
+   📊 GRILLE DE CALCUL
+   =============================================== */
+.calculator-grid {
+    display: grid;
+    gap: var(--clean-space-lg);
+    margin-top: var(--clean-space-md);
+}
+
+.tax-display-group {
+    display: flex;
+    gap: var(--clean-space-md);
+    margin: var(--clean-space-lg) 0;
+    align-items: flex-end; /* Alignement par le bas pour cohérence */
+}
+
+.tax-display-group .form-group {
+    flex: 1;
+    margin-bottom: 0 !important; /* CORRECTION: Surpasser !important général pour alignement parfait */
+    min-width: 0; /* Éviter débordement flex */
+}
+
+/* Assurer hauteur identique des inputs dans tax-display-group */
+.tax-display-group .input-wrapper {
+    height: var(--clean-input-height);
+}
+
+.tax-display-group input {
+    height: var(--clean-input-height) !important;
+}
+
+/* ===============================================
+   🎯 BOUTONS OPTIMISÉS
+   =============================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--clean-space-sm);
+    padding: var(--clean-space-md) var(--clean-space-xl);
+    height: var(--clean-button-height);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--color-input-bg);
+    color: var(--color-text);
+    border: 2px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+    background: var(--color-border);
+    border-color: var(--color-primary-light);
+}
+
+/* Placeholder pour la sélection de province */
+.tax-placeholder {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+    font-size: 1rem;
+    font-style: italic;
+}
+
+.tax-placeholder p {
+    margin: 0;
+}
+
+/* Boutons de pourboire */
+.tip-presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--clean-space-sm);
+    margin-bottom: var(--clean-space-lg);
+}
+
+.tip-button {
+    height: var(--clean-button-height);
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: var(--color-input-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.tip-button:hover {
+    border-color: var(--color-primary);
+    background: rgba(164, 120, 100, 0.05);
+}
+
+.tip-button.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    font-weight: 700;
+}
+
+/* ===============================================
+   📊 RÉSULTATS
+   =============================================== */
+.tip-result,
+.split-result {
+    background: var(--color-surface);
+    border: 2px solid var(--color-primary-light);
+    border-radius: var(--radius-md);
+    padding: var(--clean-space-lg);
+    margin-top: var(--clean-space-lg);
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--clean-space-xs) 0;
+    font-size: 0.9375rem;
+}
+
+.total-row {
+    font-weight: 700;
+    font-size: 1.125rem;
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--clean-space-sm);
+    padding-top: var(--clean-space-md);
+    color: var(--color-primary);
+}
+
+/* Pourboire popup trigger */
+.tip-popup-trigger {
+    text-align: center;
+    margin-bottom: var(--clean-space-lg);
+}
+
+.tip-actions {
+    display: flex;
+    gap: var(--clean-space-sm);
+    justify-content: center;
+    margin-top: var(--clean-space-md);
+}
+
+/* Division par personnes */
+.range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--clean-space-lg);
+}
+
+#people {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--color-input-bg);
+    border-radius: 3px;
+    outline: none;
+}
+
+#people::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.range-value {
+    min-width: 32px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--color-primary);
+}
+
+.per-person {
+    text-align: center;
+}
+
+.per-person span:first-child {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--clean-space-xs);
+}
+
+.per-person-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* ===============================================
+   🎬 ACTIONS ET FOOTER
+   =============================================== */
+.actions-section {
+    display: flex;
+    gap: var(--clean-space-md);
+    justify-content: center;
+    padding: var(--clean-space-xl) 0;
+    margin-top: auto;
+}
+
+.app-footer {
+    padding: var(--clean-space-lg) 0 !important;
+    margin-top: var(--clean-space-lg) !important;
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border);
+}
+
+.app-footer a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ===============================================
+   📱 RESPONSIVE CLEAN
+   =============================================== */
+@media (max-width: 768px) {
+    :root {
+        --clean-card-padding: var(--clean-space-lg);
+    }
+    
+    .calculator-app {
+        padding: var(--clean-space-sm) !important;
+    }
+    
+    .app-header {
+        padding: var(--clean-space-md) 0 var(--clean-space-lg) 0 !important;
+        margin-bottom: var(--clean-space-md) !important;
+    }
+    
+    .app-header h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    .tip-presets {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--clean-space-md);
+    }
+    
+    .actions-section {
+        flex-direction: column;
+    }
+    
+    .actions-section .btn {
+        width: 100%;
+    }
+}
+
+@media (min-width: 769px) {
+    .calculator-app {
+        padding: var(--clean-space-xl) !important;
+    }
+    
+    /* Layout deux colonnes pour desktop si souhaité */
+    .calculator-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--clean-space-xl);
+        align-items: start;
+    }
+    
+    .tax-display-group {
+        grid-column: 1 / -1;
+    }
+}
+
+/* ===============================================
+   ✨ ANIMATIONS SUBTILES
+   =============================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tip-section[style*="block"],
+.split-section[style*="block"] {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.tip-result[style*="block"],
+.split-result[style*="block"] {
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* États visuels pour les interactions */
+.calculating {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.calculating * {
+    cursor: wait !important;
+}
+
+/* Amélioration des focus states */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+    box-shadow: 0 0 0 3px rgba(164, 120, 100, 0.2);
+}
+
+/* Smooth scrolling pour les appareils qui le supportent */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}

@@ -17,7 +17,9 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">Contenu</h6>
-                    @livewire('ai-article-generator')
+                    @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::find('AI')?->isEnabled())
+                        @livewire('ai-article-generator')
+                    @endif
                 </div>
                 <div class="card-body">
                     <div class="mb-3">

@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "year": 2025,
+    "province": "QC",
+    "lastUpdated": "2025-01-01",
+    "source": "ARC / Revenu Québec",
+    "adminEmail": "info@laveille.ai"
+  },
+  "federal": {
+    "personalAmount": 16129,
+    "abatementQC": 0.165,
+    "brackets": [
+      {"min": 0, "max": 57375, "rate": 0.145},
+      {"min": 57375, "max": 114750, "rate": 0.205},
+      {"min": 114750, "max": 177882, "rate": 0.26},
+      {"min": 177882, "max": 253414, "rate": 0.29},
+      {"min": 253414, "max": null, "rate": 0.33}
+    ]
+  },
+  "provincial": {
+    "personalAmount": 18056,
+    "brackets": [
+      {"min": 0, "max": 53255, "rate": 0.14},
+      {"min": 53255, "max": 106495, "rate": 0.19},
+      {"min": 106495, "max": 129590, "rate": 0.24},
+      {"min": 129590, "max": null, "rate": 0.2575}
+    ]
+  },
+  "rrsp": {
+    "maxRate": 0.18,
+    "maxAmount": 32490
+  },
+  "qpp": {
+    "maxPensionableEarnings": 68500,
+    "basicExemption": 3500,
+    "employeeRate": 0.064,
+    "selfEmployedRate": 0.128,
+    "maxEmployeeContribution": 4160,
+    "maxSelfEmployedContribution": 8320
+  },
+  "ei": {
+    "maxInsurableEarnings": 65700,
+    "rateQC": 0.0131,
+    "maxPremiumQC": 861
+  },
+  "qpip": {
+    "maxInsurableEarnings": 98000,
+    "employeeRate": 0.00494,
+    "selfEmployedRate": 0.00878,
+    "maxEmployeePremium": 484,
+    "maxSelfEmployedPremium": 860
+  },
+  "fss": {
+    "rate": 0.01,
+    "threshold": 15000
+  },
+  "ui": {
+    "defaultIncome": 60000,
+    "maxSliderIncome": 300000,
+    "incomeStep": 1000,
+    "rrspStep": 500,
+    "overtimeStep": 500
+  },
+  "colors": {
+    "provBrackets": ["#d1fae5", "#86efac", "#fbbf24", "#fb923c", "#ef4444"],
+    "fedBrackets": ["#dbeafe", "#bfdbfe", "#93c5fd", "#60a5fa", "#3b82f6"],
+    "provBorderFirst": "#059669",
+    "fedBorderFirst": "#3b82f6"
+  },
+  "texts": {
+    "disclaimer": {
+      "title": "Avertissement — à titre informatif et éducatif seulement",
+      "body": "Ce simulateur est un outil pédagogique fourni gratuitement. Les calculs sont des estimations simplifiées basées sur les taux {year} et ne constituent pas des conseils fiscaux, financiers ou juridiques. Pour toute décision financière, consultez un comptable agréé ou un fiscaliste.",
+      "showButton": "Afficher l'avertissement"
+    },
+    "reerModal": {
+      "title": "Comprendre le REER",
+      "sections": [
+        {
+          "title": "Qu'est-ce que le REER ?",
+          "body": "Le régime enregistré d'épargne-retraite (REER) est un compte d'épargne avec avantages fiscaux. Les cotisations réduisent votre revenu imposable, ce qui diminue votre impôt à payer pour l'année courante.",
+          "color": "#059669",
+          "bg": "#f0fdf4"
+        },
+        {
+          "title": "Plafond de cotisation {year}",
+          "body": "Le maximum est le moindre de 18 % de votre revenu gagné de l'année précédente ou de {rrspMax} $ (plafond annuel fixé par l'ARC). Les droits inutilisés s'accumulent.",
+          "color": "#3b82f6",
+          "bg": "#eff6ff"
+        },
+        {
+          "title": "Impact sur vos impôts",
+          "body": "Chaque dollar cotisé au REER réduit votre revenu imposable. L'économie dépend de votre taux marginal. Par exemple, avec un taux combiné de 37 %, une cotisation de 10 000 $ vous fait économiser environ 3 700 $ d'impôt.",
+          "color": "#d97706",
+          "bg": "#fef3c7"
+        },
+        {
+          "title": "Points importants",
+          "body": "Les retraits du REER sont imposables (sauf RAP et REEP). La date limite de cotisation est habituellement le 1er mars de l'année suivante. Le CELI est une alternative sans déduction, mais sans imposition au retrait.",
+          "color": "#7c3aed",
+          "bg": "#faf5ff"
+        }
+      ]
+    },
+    "helpModal": {
+      "title": "Comment utiliser ce simulateur"
+    },
+    "labels": {
+      "parameters": "Paramètres",
+      "employee": "Salarié",
+      "selfEmployed": "Autonome",
+      "grossIncome": "Revenu brut",
+      "rrsp": "REER",
+      "overtime": "Temps supp.",
+      "qpp": "RRQ",
+      "ei": "AE",
+      "qpip": "RQAP",
+      "results": "Résultats",
+      "marginalRate": "Taux marginal",
+      "federal": "Fédéral",
+      "provincial": "Provincial",
+      "netIncome": "Revenu net",
+      "deductions": "Déductions",
+      "federalTax": "Impôt fédéral",
+      "federalTaxSuffix": "abatt. QC",
+      "provincialTax": "Impôt provincial",
+      "qppLabel": "RRQ (QPP)",
+      "qppLabelDouble": "RRQ (QPP) x2",
+      "eiLabel": "AE (assurance-emploi)",
+      "qpipLabel": "RQAP",
+      "qpipLabelSelf": "RQAP (autonome)",
+      "fssLabel": "FSS (fonds santé)",
+      "totalDeductions": "Total déductions",
+      "perMonth": "Par mois",
+      "biweekly": "Aux 2 semaines",
+      "perWeek": "Par semaine",
+      "effectiveRate": "Taux effectif",
+      "totalProvincial": "Total provincial",
+      "totalFederal": "Total fédéral",
+      "taxRate": "Taux",
+      "bracket": "Tranche",
+      "taxable": "Imposable",
+      "tax": "Impôt",
+      "amount": "Montant",
+      "understood": "Compris !"
+    },
+    "bracketLabels": ["Non imposé", "Bas", "Moyen", "Élevé", "Maximum"],
+    "tooltip": "Survolez la barre pour voir les détails de chaque palier.",
+    "noteFooter": "Estimation {year} (Québec). Inclut l'abattement fédéral du Québec (16,5 %), RRQ, AE/RQAP, FSS et montants personnels de base. Ne tient pas compte des crédits d'impôt additionnels ou situations particulières.",
+    "concepts": [
+      {
+        "title": "Système progressif",
+        "body": "Plus vous gagnez, plus le taux augmente, mais seulement sur la partie qui dépasse chaque palier. Vous ne perdez jamais d'argent en gagnant plus.",
+        "color": "#059669",
+        "bg": "#f0fdf4"
+      },
+      {
+        "title": "Taux effectif vs marginal",
+        "body": "Le taux effectif est votre impôt total divisé par votre revenu. Le taux marginal est le taux sur votre prochain dollar gagné.",
+        "color": "#3b82f6",
+        "bg": "#eff6ff"
+      },
+      {
+        "title": "Mythe du temps supplémentaire",
+        "body": "Vous gardez toujours au moins 47 % de chaque dollar additionnel, même au taux le plus élevé. Votre salaire de base n'est jamais affecté par le temps supp.",
+        "color": "#d97706",
+        "bg": "#fef3c7"
+      },
+      {
+        "title": "Abattement du Québec",
+        "body": "Les résidents du Québec bénéficient d'une réduction de 16,5 % sur l'impôt fédéral car le Québec administre ses propres programmes sociaux.",
+        "color": "#7c3aed",
+        "bg": "#faf5ff"
+      }
+    ],
+    "selfEmployedNote": {
+      "title": "Note — travailleur autonome",
+      "items": [
+        "Le RRQ est doublé (part employeur + employé). La moitié est déductible.",
+        "Pas d'assurance-emploi (AE), mais le RQAP au taux autonome ({qpipSelfRate} %).",
+        "Le FSS (fonds des services de santé) s'applique sur le revenu net d'entreprise.",
+        "Les dépenses d'entreprise (bureau, véhicule, équipement) ne sont pas incluses ici."
+      ]
+    }
+  }
+}

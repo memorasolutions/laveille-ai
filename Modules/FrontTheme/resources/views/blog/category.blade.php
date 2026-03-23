@@ -1,4 +1,6 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
+@include('fronttheme::partials.pagination-seo', ['paginator' => $articles])
 
 @section('title', $category->name)
 
@@ -27,7 +29,7 @@
                                 </div>
                                 <div class="entry-meta">
                                     <ul>
-                                        <li><i class="fi flaticon-user"></i> {{ __('Par') }} <a href="#">{{ $article->user->name ?? 'Admin' }}</a></li>
+                                        <li><i class="fi flaticon-user"></i> {{ __('Par') }} <a href="#">{{ $article->getAuthorName() }}</a></li>
                                         <li><i class="fi flaticon-comment-white-oval-bubble"></i> {{ $article->comments_count ?? 0 }} {{ __('commentaires') }}</li>
                                         <li><i class="fi flaticon-calendar"></i> {{ $article->published_at?->format('d M Y') }}</li>
                                     </ul>

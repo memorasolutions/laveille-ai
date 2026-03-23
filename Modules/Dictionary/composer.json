@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/dictionary",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Dictionary\\": "app/",
+            "Modules\\Dictionary\\Database\\Factories\\": "database/factories/",
+            "Modules\\Dictionary\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Dictionary\\Tests\\": "tests/"
+        }
+    }
+}

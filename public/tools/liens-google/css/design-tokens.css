@@ -1,0 +1,249 @@
+/**
+ * Design Tokens 2025 - Variables CSS centralisées
+ * Réutilisable dans tous les composants et projets
+ */
+
+:root {
+  /* === COLORS PROFESSIONNELLES === */
+  
+  /* Primary Professional Blues */
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;  /* Professional blue */
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+  
+  /* Neutral Professional Grays */
+  --color-neutral-0: #ffffff;
+  --color-neutral-25: #fdfdfd;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+  
+  /* Semantic Colors */
+  --color-success-50: #f0fdf4;
+  --color-success-500: #10b981;
+  --color-success-700: #047857;
+  
+  --color-warning-50: #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-700: #b45309;
+  
+  --color-error-50: #fef2f2;
+  --color-error-500: #ef4444;
+  --color-error-700: #b91c1c;
+  
+  /* === TYPOGRAPHY 2025 === */
+  
+  /* Font Families */
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  
+  /* Font Sizes (Fluid Scale) */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* === SPACING 2025 === */
+  
+  /* Spacing Scale (8pt grid) */
+  --space-0: 0;
+  --space-1: 0.25rem;      /* 4px */
+  --space-2: 0.5rem;       /* 8px */
+  --space-3: 0.75rem;      /* 12px */
+  --space-4: 1rem;         /* 16px */
+  --space-5: 1.25rem;      /* 20px */
+  --space-6: 1.5rem;       /* 24px */
+  --space-8: 2rem;         /* 32px */
+  --space-10: 2.5rem;      /* 40px */
+  --space-12: 3rem;        /* 48px */
+  --space-16: 4rem;        /* 64px */
+  --space-20: 5rem;        /* 80px */
+  --space-24: 6rem;        /* 96px */
+  
+  /* === BORDERS & RADIUS === */
+  
+  /* Border Widths */
+  --border-0: 0;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-4: 4px;
+  
+  /* Border Radius */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;    /* 4px */
+  --radius-base: 0.5rem;   /* 8px */
+  --radius-md: 0.75rem;    /* 12px */
+  --radius-lg: 1rem;       /* 16px */
+  --radius-xl: 1.5rem;     /* 24px */
+  --radius-full: 9999px;   /* Circle */
+  
+  /* === SHADOWS 2025 === */
+  
+  /* Elevation System */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-base: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  
+  /* Colored Shadows */
+  --shadow-primary: 0 4px 14px 0 rgb(59 130 246 / 0.25);
+  --shadow-success: 0 4px 14px 0 rgb(16 185 129 / 0.25);
+  --shadow-warning: 0 4px 14px 0 rgb(245 158 11 / 0.25);
+  --shadow-error: 0 4px 14px 0 rgb(239 68 68 / 0.25);
+  
+  /* === ANIMATIONS 2025 === */
+  
+  /* Durations */
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+  
+  /* Easing Functions */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* === Z-INDEX LAYERS === */
+  
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal: 1040;
+  --z-popover: 1050;
+  --z-tooltip: 1060;
+  
+  /* === BREAKPOINTS === */
+  
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* === DARK THEME OVERRIDES === */
+
+[data-theme="dark"] {
+  /* Dark mode colors */
+  --color-bg-primary: var(--color-neutral-900);
+  --color-bg-secondary: var(--color-neutral-800);
+  --color-bg-tertiary: var(--color-neutral-700);
+  
+  --color-text-primary: var(--color-neutral-0);
+  --color-text-secondary: var(--color-neutral-300);
+  --color-text-tertiary: var(--color-neutral-400);
+  
+  --color-border: var(--color-neutral-600);
+  --color-border-light: var(--color-neutral-700);
+}
+
+/* === LIGHT THEME (DEFAULT) === */
+
+[data-theme="light"], :root {
+  /* Professional Light Theme */
+  --color-bg-primary: var(--color-neutral-0);
+  --color-bg-secondary: var(--color-neutral-25);
+  --color-bg-tertiary: var(--color-neutral-50);
+  --color-bg-accent: var(--color-primary-50);
+  
+  --color-text-primary: var(--color-neutral-800);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-muted: var(--color-neutral-400);
+  
+  --color-border: var(--color-neutral-200);
+  --color-border-light: var(--color-neutral-100);
+  --color-border-strong: var(--color-neutral-300);
+}
+
+/* === COMPONENT TOKENS === */
+
+/* Button Variants */
+:root {
+  --button-height-sm: 2rem;
+  --button-height-base: 2.5rem;
+  --button-height-lg: 3rem;
+  
+  --button-padding-x-sm: var(--space-3);
+  --button-padding-x-base: var(--space-4);
+  --button-padding-x-lg: var(--space-6);
+}
+
+/* Input Components */
+:root {
+  --input-height: var(--button-height-base);
+  --input-padding-x: var(--space-3);
+  --input-border-width: var(--border-1);
+  --input-border-radius: var(--radius-base);
+}
+
+/* Card Components */
+:root {
+  --card-padding: var(--space-6);
+  --card-border-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-sm);
+}
+
+/* === ACCESSIBILITY === */
+
+/* Focus indicators */
+:root {
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: var(--color-primary-500);
+  --focus-ring: var(--focus-ring-width) solid var(--focus-ring-color);
+  --focus-ring-offset-shadow: 0 0 0 var(--focus-ring-offset) var(--color-bg-primary);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-75: 0ms;
+    --duration-100: 0ms;
+    --duration-150: 0ms;
+    --duration-200: 0ms;
+    --duration-300: 0ms;
+    --duration-500: 0ms;
+    --duration-700: 0ms;
+    --duration-1000: 0ms;
+  }
+}

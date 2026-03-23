@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/acronyms",
+    "description": "Lexique d'acronymes par domaine",
+    "authors": [
+        {
+            "name": "MEMORA solutions",
+            "email": "info@memora.ca"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Acronyms\\": "app/",
+            "Modules\\Acronyms\\Database\\Factories\\": "database/factories/",
+            "Modules\\Acronyms\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Acronyms\\Tests\\": "tests/"
+        }
+    }
+}

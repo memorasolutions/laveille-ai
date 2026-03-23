@@ -28,6 +28,53 @@
 
 <div class="row g-4">
 
+    {{-- Bio et photo de profil --}}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                <i data-lucide="pen-line" class="text-primary icon-md"></i>
+                <h4 class="fw-bold mb-0">{{ __('Bio et photo de profil') }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ route('admin.profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="_section" value="bio">
+
+                    <div class="row">
+                        <div class="col-md-3 text-center mb-3">
+                            <img src="{{ $user->avatar_url }}" alt="{{ __('Avatar') }}"
+                                 class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+                            <div>
+                                <label for="avatar" class="form-label fw-medium d-block">{{ __('Photo de profil') }}</label>
+                                <input type="file" name="avatar" id="avatar" accept="image/*" class="form-control form-control-sm @error('avatar') is-invalid @enderror">
+                                <small class="form-text text-muted">{{ __('Max 2 Mo. JPG, PNG ou WebP.') }}</small>
+                                @error('avatar')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <label for="bio" class="form-label fw-medium">{{ __('Biographie') }}</label>
+                            <textarea name="bio" id="bio" rows="5"
+                                      placeholder="{{ __('Décrivez-vous en quelques phrases. Cette bio apparait en bas de vos articles.') }}"
+                                      class="form-control @error('bio') is-invalid @enderror"
+                                      maxlength="500">{{ old('bio', $user->bio) }}</textarea>
+                            <small id="bio-counter" class="form-text text-muted"></small>
+                            @error('bio')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">{{ __('Mettre à jour') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- Informations du profil --}}
     <div class="col-12 col-xl-6">
         <div class="card h-100">
@@ -385,3 +432,17 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var bio = document.getElementById('bio');
+        var counter = document.getElementById('bio-counter');
+        if (bio && counter) {
+            function updateCounter() { counter.textContent = bio.value.length + '/500'; }
+            bio.addEventListener('input', updateCounter);
+            updateCounter();
+        }
+    });
+</script>
+@endpush

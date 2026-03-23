@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
+declare(strict_types=1);
+
+namespace Modules\Tools\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Tool extends Model
+{
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'icon',
+        'featured_image',
+        'is_active',
+        'sort_order',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('sort_order');
+    }
+}

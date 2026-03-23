@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
 	$to = "themexshapermarketing@gmail.com"; // this is your Email address
 	$from  = $_POST['email']; // this is the sender's Email address
 	$sender_name = $_POST['name'];

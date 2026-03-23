@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -6,7 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="shortcut icon" type="image/png" href="{{ fronttheme_asset('images/favicon.png') }}">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}">
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.')">
     <meta property="og:title" content="@yield('title', config('app.name'))">
@@ -15,10 +18,16 @@
     <meta property="og:url" content="{{ url()->current() }}">
     @hasSection('og_image')
         <meta property="og:image" content="@yield('og_image')">
+    @else
+        <meta property="og:image" content="{{ asset('images/og-image.png') }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
     @endif
     <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:locale" content="fr_CA">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="canonical" href="{{ url()->current() }}">
+    @stack('head')
     <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/bootstrap.min.css') }}" rel="stylesheet">
@@ -34,7 +43,9 @@
     <link href="{{ fronttheme_asset('css/component.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('sass/style.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/responsive.css') }}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <link rel="preload" href="/fonts/dm-sans/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/plus-jakarta-sans/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <link href="{{ asset('css/charte.css') }}?v={{ filemtime(public_path('css/charte.css')) }}" rel="stylesheet">
     <link href="{{ asset('css/components.css') }}?v={{ filemtime(public_path('css/components.css')) }}" rel="stylesheet">
     <style>
@@ -98,7 +109,9 @@
 
         @yield('breadcrumb')
 
+        <main id="main-content">
         @yield('content')
+        </main>
 
         @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
             @php $adFooter = app(\Modules\Ads\Services\AdsRenderer::class)->render('footer-banner'); @endphp
@@ -108,6 +121,8 @@
         @endif
 
         @include('fronttheme::partials.footer')
+
+        @include('fronttheme::partials.newsletter-modal')
     </div>
     <!-- end of page-wrapper -->
 
@@ -122,6 +137,7 @@
     <script src="{{ fronttheme_asset('js/jquery.dlmenu.js') }}"></script>
     <script src="{{ fronttheme_asset('js/jquery-plugin-collection.js') }}"></script>
     <script src="{{ fronttheme_asset('js/script.js') }}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
 </body>

@@ -1,0 +1,11 @@
+{
+    "name": "Acronyms",
+    "alias": "acronyms",
+    "description": "Lexique d'acronymes par domaine (education au Quebec, etc.)",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Acronyms\\Providers\\AcronymsServiceProvider"
+    ],
+    "files": []
+}

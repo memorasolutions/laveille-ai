@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <div class="blog-sidebar">
     <div class="widget about-widget">
         <div class="img-holder">

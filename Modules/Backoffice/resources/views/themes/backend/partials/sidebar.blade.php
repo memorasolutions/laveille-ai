@@ -50,6 +50,9 @@
                         <li class="nav-item"><a href="{{ route('admin.blog.articles.index') }}" class="nav-link {{ request()->routeIs('admin.blog.articles.*') ? 'active' : '' }}" {{ request()->routeIs('admin.blog.articles.*') ? 'aria-current=page' : '' }}>{{ __('Articles') }}</a></li>
                         @endcan
                         @endif
+                        @if(Route::has('admin.blog.submissions.index'))
+                        <li class="nav-item"><a href="{{ route('admin.blog.submissions.index') }}" class="nav-link {{ request()->routeIs('admin.blog.submissions.*') ? 'active' : '' }}">{{ __('Soumissions') }}</a></li>
+                        @endif
                         @if(Route::has('admin.pages.index'))
                         @can('view_pages')
                         <li class="nav-item"><a href="{{ route('admin.pages.index') }}" class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}" {{ request()->routeIs('admin.pages.*') ? 'aria-current=page' : '' }}>{{ __('Pages') }}</a></li>
@@ -77,7 +80,7 @@
                         @endif
                         {{-- Plus... (Contenu) --}}
                         <li class="nav-item">
-                            <a class="nav-link text-muted" data-bs-toggle="collapse" href="#contentMore" role="button" aria-expanded="false">
+                            <a class="nav-link" style="color: #9CA3AF;" data-bs-toggle="collapse" href="#contentMore" role="button" aria-expanded="false">
                                 <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i> {{ __('Plus...') }}
                             </a>
                             <div class="collapse" id="contentMore">
@@ -150,6 +153,39 @@
                 </div>
             </li>
             @endcanany
+
+            {{-- ===== RESSOURCES (Glossaire, Répertoire, Acronymes, Modération) ===== --}}
+            @php
+                $resourcesActive = Route::has('admin.dictionary.index') || Route::has('admin.directory.index') || Route::has('admin.acronyms.index') || Route::has('admin.moderation.reviews');
+            @endphp
+            @if($resourcesActive)
+            <li class="nav-item nav-category">{{ __('Ressources') }}</li>
+            <li class="nav-item {{ request()->routeIs('admin.dictionary.*', 'admin.directory.*', 'admin.acronyms.*', 'admin.moderation.*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#resourcesMenu" role="button"
+                   aria-expanded="{{ request()->routeIs('admin.dictionary.*', 'admin.directory.*', 'admin.acronyms.*', 'admin.moderation.*') ? 'true' : 'false' }}"
+                   aria-controls="resourcesMenu">
+                    <i class="link-icon" data-lucide="library"></i>
+                    <span class="link-title">{{ __('Ressources') }}</span>
+                    <i class="link-arrow" data-feather="chevron-down"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('admin.dictionary.*', 'admin.directory.*', 'admin.acronyms.*', 'admin.moderation.*') ? 'show' : '' }}" id="resourcesMenu">
+                    <ul class="nav sub-menu">
+                        @if(Route::has('admin.dictionary.index'))
+                        <li class="nav-item"><a href="{{ route('admin.dictionary.index') }}" class="nav-link {{ request()->routeIs('admin.dictionary.*') ? 'active' : '' }}">{{ __('Glossaire IA') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.directory.index'))
+                        <li class="nav-item"><a href="{{ route('admin.directory.index') }}" class="nav-link {{ request()->routeIs('admin.directory.*') ? 'active' : '' }}">{{ __('Répertoire techno') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.acronyms.index'))
+                        <li class="nav-item"><a href="{{ route('admin.acronyms.index') }}" class="nav-link {{ request()->routeIs('admin.acronyms.*') ? 'active' : '' }}">{{ __('Acronymes éducation') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.moderation.reviews'))
+                        <li class="nav-item"><a href="{{ route('admin.moderation.reviews') }}" class="nav-link {{ request()->routeIs('admin.moderation.*') ? 'active' : '' }}">{{ __('Modération') }}</a></li>
+                        @endif
+                    </ul>
+                </div>
+            </li>
+            @endif
 
             {{-- ===== 3. VENTES (Boutique + SaaS + Réservations) ===== --}}
             @php
@@ -394,7 +430,7 @@
                         @endif
                         {{-- Plus... --}}
                         <li class="nav-item">
-                            <a class="nav-link text-muted" data-bs-toggle="collapse" href="#configMore" role="button" aria-expanded="false">
+                            <a class="nav-link" style="color: #9CA3AF;" data-bs-toggle="collapse" href="#configMore" role="button" aria-expanded="false">
                                 <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i> {{ __('Plus...') }}
                             </a>
                             <div class="collapse" id="configMore">
@@ -454,7 +490,7 @@
                         @endcan
                         {{-- Plus... --}}
                         <li class="nav-item">
-                            <a class="nav-link text-muted" data-bs-toggle="collapse" href="#systemMore" role="button" aria-expanded="false">
+                            <a class="nav-link" style="color: #9CA3AF;" data-bs-toggle="collapse" href="#systemMore" role="button" aria-expanded="false">
                                 <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i> {{ __('Plus...') }}
                             </a>
                             <div class="collapse" id="systemMore">

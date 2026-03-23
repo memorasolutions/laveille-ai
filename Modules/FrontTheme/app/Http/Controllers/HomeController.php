@@ -2,8 +2,6 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
- *
- * @project memora/laravel-saas-boilerplate
  */
 
 declare(strict_types=1);
@@ -11,7 +9,6 @@ declare(strict_types=1);
 namespace Modules\FrontTheme\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 use Nwidart\Modules\Facades\Module;
 
@@ -19,19 +16,73 @@ class HomeController extends Controller
 {
     public function index(): View
     {
+        $locale = app()->getLocale();
+
+        // Articles blog
         $articles = collect();
-
         $articleClass = 'Modules\\Blog\\Models\\Article';
-
         if (Module::has('Blog') && Module::find('Blog')?->isEnabled() && class_exists($articleClass)) {
             $articles = $articleClass::query()
                 ->published()
-                ->with(['user', 'blogCategory'])
+                ->with(['user', 'submittedByUser', 'blogCategory'])
                 ->latest('published_at')
                 ->take(12)
                 ->get();
         }
 
-        return view('fronttheme::home', compact('articles'));
+        // Outils IA populaires (répertoire techno)
+        $popularTools = collect();
+        $toolClass = 'Modules\\Directory\\Models\\Tool';
+        if (Module::has('Directory') && Module::find('Directory')?->isEnabled() && class_exists($toolClass)) {
+            $popularTools = $toolClass::query()
+                ->published()
+                ->with('categories')
+                ->orderBy("name->{$locale}")
+                ->take(4)
+                ->get();
+        }
+
+        // Termes IA à découvrir (glossaire)
+        $featuredTerms = collect();
+        $termClass = 'Modules\\Dictionary\\Models\\Term';
+        if (Module::has('Dictionary') && Module::find('Dictionary')?->isEnabled() && class_exists($termClass)) {
+            $featuredTerms = $termClass::query()
+                ->published()
+                ->with('category')
+                ->inRandomOrder()
+                ->take(5)
+                ->get();
+        }
+
+        // Acronymes éducation à la une
+        $featuredAcronyms = collect();
+        $acronymClass = 'Modules\\Acronyms\\Models\\Acronym';
+        if (Module::has('Acronyms') && Module::find('Acronyms')?->isEnabled() && class_exists($acronymClass)) {
+            $featuredAcronyms = $acronymClass::query()
+                ->published()
+                ->with('category')
+                ->inRandomOrder()
+                ->take(5)
+                ->get();
+        }
+
+        // Outils interactifs gratuits
+        $interactiveTools = collect();
+        $iToolClass = 'Modules\\Tools\\Models\\Tool';
+        if (Module::has('Tools') && Module::find('Tools')?->isEnabled() && class_exists($iToolClass)) {
+            $interactiveTools = $iToolClass::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->take(4)
+                ->get();
+        }
+
+        return view('fronttheme::home', compact(
+            'articles',
+            'popularTools',
+            'featuredTerms',
+            'featuredAcronyms',
+            'interactiveTools'
+        ));
     }
 }

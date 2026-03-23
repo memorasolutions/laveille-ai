@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
 @section('title', config('app.name'))
@@ -22,7 +23,7 @@
                                             <p>{{ Str::limit($hero1->excerpt ?? strip_tags($hero1->content), 120) }}</p>
                                             <ul>
                                                 <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;"></li>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->user->name ?? 'Admin' }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->getAuthorName() }}</a></li>
                                                 <li>{{ $hero1->published_at?->format('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -38,7 +39,7 @@
                                             <div class="thumb">{{ $hero2->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->title }}</a></h2>
                                             <ul>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->user->name ?? 'Admin' }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->getAuthorName() }}</a></li>
                                                 <li>{{ $hero2->published_at?->format('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -54,7 +55,7 @@
                                             <div class="thumb">{{ $hero3->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->title }}</a></h2>
                                             <ul>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->user->name ?? 'Admin' }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->getAuthorName() }}</a></li>
                                                 <li>{{ $hero3->published_at?->format('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -67,7 +68,7 @@
                                             <div class="thumb">{{ $hero4->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->title }}</a></h2>
                                             <ul>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->user->name ?? 'Admin' }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->getAuthorName() }}</a></li>
                                                 <li>{{ $hero4->published_at?->format('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -129,7 +130,7 @@
                                                 <h2><a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->title }}</a></h2>
                                                 <ul>
                                                     <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;"></li>
-                                                    <li>{{ __('Par') }} <a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->user->name ?? 'Admin' }}</a></li>
+                                                    <li>{{ __('Par') }} <a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->getAuthorName() }}</a></li>
                                                     <li>{{ $highlight->published_at?->format('d M Y') }}</li>
                                                 </ul>
                                                 <p>{{ Str::limit($highlight->excerpt ?? strip_tags($highlight->content), 100) }}</p>
@@ -200,7 +201,7 @@
                                             <h2><a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->title }}</a></h2>
                                             <ul>
                                                 <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;"></li>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->user->name ?? 'Admin' }}</a></li>
+                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->getAuthorName() }}</a></li>
                                                 <li>{{ $sponsored->published_at?->format('d M Y') }}</li>
                                             </ul>
                                         </div>
@@ -215,6 +216,148 @@
         </section>
         <!-- end wpo-blog-sponsored-section -->
 
+        <!-- Sections dynamiques des ressources -->
+        @push('styles')
+        <style>
+            .hp-section { padding: 40px 0; }
+            .hp-section-alt { background: #F8FAFB; }
+            .hp-header { margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+            .hp-title { font-family: var(--f-heading); color: var(--c-dark); margin: 0; font-size: 1.5rem; font-weight: 700; }
+            .hp-subtitle { color: #6B7280; font-size: 13px; margin-top: 4px; }
+            .hp-link-all { color: var(--c-primary); font-weight: 600; font-size: 14px; text-decoration: none; padding: 6px 12px; min-height: 24px; display: inline-flex; align-items: center; }
+            .hp-link-all:hover { text-decoration: underline; color: var(--c-primary); }
+            .hp-card { display: block; background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 20px; text-decoration: none !important; color: var(--c-dark); transition: transform 0.2s, box-shadow 0.2s; height: 100%; margin-bottom: 20px; }
+            .hp-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); color: var(--c-dark); border-color: var(--c-primary); }
+            .hp-card h3 { margin: 0 0 8px; font-size: 1rem; font-weight: 700; font-family: var(--f-heading); color: var(--c-dark); }
+            .hp-card p { color: #6B7280; font-size: 13px; line-height: 1.5; margin: 0; }
+            .hp-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+            .hp-row-flex { display: flex; flex-wrap: wrap; }
+            .hp-row-flex > [class*='col-'] { display: flex; flex-direction: column; }
+        </style>
+        @endpush
+
+        {{-- Section 1: Outils IA populaires --}}
+        @if($popularTools->isNotEmpty())
+        <section class="hp-section">
+            <div class="container">
+                <div class="hp-header">
+                    <div>
+                        <h2 class="hp-title">🔍 {{ __('Outils IA populaires') }}</h2>
+                        <div class="hp-subtitle">{{ __('Les solutions les plus utilisées par la communauté') }}</div>
+                    </div>
+                    <a href="{{ route('directory.index') }}" class="hp-link-all">{{ __('Voir tout') }} →</a>
+                </div>
+                <div class="row hp-row-flex">
+                    @foreach($popularTools as $tool)
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <a href="{{ route('directory.show', $tool->slug) }}" class="hp-card">
+                            @if($tool->categories->isNotEmpty())
+                                <span class="hp-badge" style="background: {{ $tool->categories->first()->color ?? 'var(--c-primary)' }};">{{ $tool->categories->first()->name }}</span>
+                            @endif
+                            <h3>{{ $tool->name }}</h3>
+                            <p>{{ Str::limit($tool->short_description, 80) }}</p>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+        @endif
+
+        {{-- Section 2: Termes IA à découvrir --}}
+        @if($featuredTerms->isNotEmpty())
+        <section class="hp-section hp-section-alt">
+            <div class="container">
+                <div class="hp-header">
+                    <div>
+                        <h2 class="hp-title">📚 {{ __('Termes IA à découvrir') }}</h2>
+                        <div class="hp-subtitle">{{ __('Enrichissez votre vocabulaire technique') }}</div>
+                    </div>
+                    <a href="{{ route('dictionary.index') }}" class="hp-link-all">{{ __('Voir tout') }} →</a>
+                </div>
+                <div class="row hp-row-flex">
+                    @foreach($featuredTerms as $term)
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <a href="{{ route('dictionary.show', $term->slug) }}" class="hp-card">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                <span style="font-size: 1.5rem;">{{ $term->icon ?? '📄' }}</span>
+                                @php
+                                    $diffColor = match($term->difficulty ?? 'beginner') { 'beginner' => '#059669', 'intermediate' => '#B45309', 'advanced' => '#B91C1C', default => '#6B7280' };
+                                    $diffLabel = match($term->difficulty ?? 'beginner') { 'beginner' => __('Débutant'), 'intermediate' => __('Intermédiaire'), 'advanced' => __('Avancé'), default => __('Débutant') };
+                                @endphp
+                                <span class="hp-badge" style="background: {{ $diffColor }};">{{ $diffLabel }}</span>
+                            </div>
+                            <h3>{{ $term->name }}</h3>
+                            <p>{{ Str::limit(strip_tags($term->definition), 80) }}</p>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+        @endif
+
+        {{-- Section 3: Acronymes éducation --}}
+        @if($featuredAcronyms->isNotEmpty())
+        <section class="hp-section">
+            <div class="container">
+                <div class="hp-header">
+                    <div>
+                        <h2 class="hp-title">🎓 {{ __('Acronymes éducation au Québec') }}</h2>
+                        <div class="hp-subtitle">{{ __('Comprendre le jargon du milieu éducatif québécois') }}</div>
+                    </div>
+                    <a href="{{ route('acronyms.index') }}" class="hp-link-all">{{ __('Voir tout') }} →</a>
+                </div>
+                <div class="row hp-row-flex">
+                    @foreach($featuredAcronyms as $acronym)
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <a href="{{ route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())) }}" class="hp-card">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                @if($acronym->logo_url)
+                                    <img src="{{ $acronym->logo_url }}" alt="{{ $acronym->acronym }}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 50%; background: #F3F4F6;" loading="lazy">
+                                @else
+                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: {{ $acronym->category?->color ?? '#6B7280' }}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">{{ substr($acronym->acronym, 0, 1) }}</div>
+                                @endif
+                                <h3 style="margin: 0; font-size: 1rem;">{{ $acronym->acronym }}</h3>
+                            </div>
+                            <p style="font-weight: 500; margin-bottom: 8px;">{{ Str::limit($acronym->full_name, 60) }}</p>
+                            @if($acronym->category)
+                                <span class="hp-badge" style="background: {{ $acronym->category->color ?? '#6B7280' }};">{{ $acronym->category->name }}</span>
+                            @endif
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+        @endif
+
+        {{-- Section 4: Outils gratuits --}}
+        @if($interactiveTools->isNotEmpty())
+        <section class="hp-section hp-section-alt">
+            <div class="container">
+                <div class="hp-header">
+                    <div>
+                        <h2 class="hp-title">🛠️ {{ __('Outils gratuits') }}</h2>
+                        <div class="hp-subtitle">{{ __('Des utilitaires interactifs à votre disposition') }}</div>
+                    </div>
+                    <a href="{{ route('tools.index') }}" class="hp-link-all">{{ __('Voir tout') }} →</a>
+                </div>
+                <div class="row hp-row-flex">
+                    @foreach($interactiveTools as $tool)
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <a href="{{ route('tools.show', $tool->slug) }}" class="hp-card" style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 12px;">{{ $tool->icon ?? '⚡' }}</div>
+                            <h3>{{ $tool->name }}</h3>
+                            <p>{{ Str::limit($tool->description, 60) }}</p>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+        @endif
+
         <!-- start wpo-subscribe-section -->
         <section class="wpo-subscribe-section section-padding">
             <div class="container">
@@ -227,7 +370,7 @@
                         <form action="{{ Route::has('newsletter.subscribe') ? route('newsletter.subscribe') : '#' }}" method="POST">
                             @csrf
                             <div class="input-field">
-                                <input type="email" name="email" placeholder="{{ __('Entrez votre courriel') }}" required>
+                                <input type="email" name="email" placeholder="{{ __('Entrez votre courriel') }}" required autocomplete="email" aria-label="{{ __('Adresse courriel pour l\'infolettre') }}">
                                 <button type="submit"><i class="fi flaticon-send"></i> {{ __('S\'inscrire') }}</button>
                             </div>
                         </form>

@@ -1,3 +1,4 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
 @section('title', $article->title . ' - ' . config('app.name'))
@@ -29,14 +30,17 @@
                             @endif
                             <div class="entry-meta">
                                 <ul>
-                                    <li><i class="fi flaticon-user"></i> {{ __('Par') }} <a href="#">{{ $article->user->name ?? 'Admin' }}</a></li>
+                                    <li><i class="fi flaticon-user"></i> {{ __('Par') }} <a href="{{ $article->isGuestPost() && $article->submitted_by ? route('directory.profile', $article->submitted_by) : '#' }}">{{ $article->getAuthorName() }}</a>@if($article->isGuestPost()) <span style="background: var(--c-primary); color: #fff; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 4px;">{{ __('Auteur invité') }}</span>@endif</li>
                                     <li><i class="fi flaticon-calendar"></i> {{ $article->published_at?->format('d M Y') }}</li>
                                     @if($article->blogCategory)
                                         <li><i class="fi flaticon-tag"></i> <a href="{{ route('blog.category', $article->blogCategory->slug) }}">{{ $article->blogCategory->name }}</a></li>
                                     @endif
                                 </ul>
                             </div>
-                            <h2>{{ $article->title }}</h2>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h2 style="margin: 0;">{{ $article->title }}</h2>
+                                @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Blog\\Models\\Article', 'id' => $article->id])
+                            </div>
 
                             @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
                                 {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-top') !!}
@@ -49,6 +53,15 @@
                                         $adsRenderer = app(\Modules\Ads\Services\AdsRenderer::class);
                                         $articleContent = $adsRenderer->renderShortcodes($articleContent);
                                         $articleContent = $adsRenderer->injectAfterParagraph($articleContent, 'article-inline', 3);
+                                    }
+                                    $articleContent = preg_replace(
+                                        '/(<(?:h[2-4]|p)[^>]*>(?:<(?:strong|b|em)>)?(?:[^<]*(?:sources?\s*:?|références?\s*:?))(?:<\/(?:strong|b|em)>)?[^<]*<\/(?:h[2-4]|p)>)/i',
+                                        '</div><div class="sources-section">$1',
+                                        $articleContent,
+                                        1
+                                    );
+                                    if (function_exists('render_shortcodes')) {
+                                        $articleContent = render_shortcodes($articleContent);
                                     }
                                 @endphp
                                 {!! $articleContent !!}
@@ -72,15 +85,41 @@
                             </div>
                         @endif
 
-                        <div class="author-box">
+                        @php $author = $article->isGuestPost() ? $article->submittedByUser : $article->user; @endphp
+                        <div class="author-box" itemscope itemtype="https://schema.org/Person">
                             <div class="author-avatar">
-                                <img src="{{ asset('images/logo.webp') }}" alt="{{ $article->user->name ?? 'Auteur' }}" style="border-radius:50%;width:120px;height:120px;object-fit:cover;">
+                                <img src="{{ $author?->avatar ? asset($author->avatar) : asset('images/logo.webp') }}"
+                                     alt="{{ $author->name ?? __('Auteur') }}"
+                                     itemprop="image"
+                                     style="border-radius:50%;width:120px;height:120px;object-fit:cover;">
                             </div>
                             <div class="author-content">
-                                <a href="#" class="author-name">{{ $article->user->name ?? 'Auteur' }}</a>
-                                <p>{{ $article->user->bio ?? __('Merci de lire nos articles.') }}</p>
+                                <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
+                                <p itemprop="description">{{ $author->bio ?? __('Merci de lire nos articles.') }}</p>
+                                @if($author?->social_links)
+                                    <div class="author-social" style="margin-top:8px;">
+                                        @foreach($author->social_links as $platform => $url)
+                                            @if($url)
+                                                <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" itemprop="sameAs" title="{{ ucfirst($platform) }}" style="margin-right:10px;color:var(--c-primary);">
+                                                    @if($platform === 'twitter') <i class="fi flaticon-twitter"></i>
+                                                    @elseif($platform === 'linkedin') <i class="fi flaticon-linkedin"></i>
+                                                    @elseif($platform === 'github') <i class="ti-github"></i>
+                                                    @elseif($platform === 'website') <i class="fi flaticon-link"></i>
+                                                    @else <i class="fi flaticon-link"></i>
+                                                    @endif
+                                                </a>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
                         </div>
+
+                        @if(class_exists(\Modules\Community\Livewire\CommentsThread::class))
+                            <div class="mt-4 pt-4 border-top">
+                                @livewire('community-comments-thread', ['commentableType' => \Modules\Blog\Models\Article::class, 'commentableId' => $article->id])
+                            </div>
+                        @endif
 
                     </div>
                 </div>
@@ -91,4 +130,25 @@
         </div>
     </section>
     <!-- end wpo-blog-single-section -->
+
+@push('scripts')
+@php
+$blogPostingJsonLd = json_encode([
+    chr(64).'context' => 'https://schema.org',
+    '@type' => 'BlogPosting',
+    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => route('blog.show', $article->slug)],
+    'headline' => $article->title,
+    'description' => Str::limit($article->excerpt ?? strip_tags($article->content), 160),
+    'image' => $article->featured_image ? asset($article->featured_image) : asset('images/og-image.png'),
+    'datePublished' => $article->published_at?->toIso8601String(),
+    'dateModified' => $article->updated_at?->toIso8601String(),
+    'author' => ['@type' => 'Person', 'name' => $article->getAuthorName()],
+    'publisher' => ['@type' => 'Organization', 'name' => config('app.name'), 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/og-image.png')]],
+    'articleSection' => $article->blogCategory?->name,
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+@endphp
+<script type="application/ld+json">
+{!! $blogPostingJsonLd !!}
+</script>
+@endpush
 @endsection

@@ -1,3 +1,6 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
+<!-- Skip navigation (WCAG 2.4.1) -->
+<a href="#main-content" class="sr-only sr-only-focusable" style="position: absolute; top: -40px; left: 0; background: var(--c-primary); color: #fff; padding: 8px 16px; z-index: 10000; transition: top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">{{ __('Aller au contenu principal') }}</a>
 <!-- Start header -->
 <header id="header" class="wpo-site-header">
     <div class="topbar">
@@ -14,8 +17,8 @@
                 <div class="col col-lg-5 col-md-3 col-sm-12 col-12">
                     <div class="contact-info">
                         <ul>
-                            <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i class="ti-facebook"></i></a></li>
-                            <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i class="ti-comment"></i></a></li>
+                            <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener" aria-label="Facebook"><i class="ti-facebook"></i></a></li>
+                            <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener" aria-label="Messenger"><i class="ti-comment"></i></a></li>
                         </ul>
                     </div>
                 </div>
@@ -37,7 +40,7 @@
                 </div>
                 <div class="col-lg-2 col-md-6 col-6">
                     <div class="navbar-header">
-                        <a class="navbar-brand" href="{{ route('home') }}"><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" ></a>
+                        <a class="navbar-brand" href="{{ route('home') }}"><img src="{{ asset('images/logo-horizontal.svg') }}?v=8" alt="{{ config('app.name') }}" style="max-height: 56px; width: auto; max-width: 200px;"></a>
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-1 col-1">
@@ -57,6 +60,23 @@
                             </li>
                             @endisset
                             <li class="menu-item-has-children">
+                                <a href="#">{{ __('Ressources') }}</a>
+                                <ul class="sub-menu">
+                                    @if(Route::has('tools.index'))
+                                        <li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>
+                                    @endif
+                                    @if(Route::has('dictionary.index'))
+                                        <li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>
+                                    @endif
+                                    @if(Route::has('directory.index'))
+                                        <li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>
+                                    @endif
+                                    @if(Route::has('acronyms.index'))
+                                        <li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>
+                                    @endif
+                                </ul>
+                            </li>
+                            <li class="menu-item-has-children">
                                 <a href="#">{{ __('Pages') }}</a>
                                 <ul class="sub-menu">
                                     @if(Route::has('page.show'))
@@ -66,6 +86,9 @@
                                         <li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>
                                     @endif
                                     <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
+                                    @if(Route::has('blog.submissions.create'))
+                                        <li><a href="{{ route('blog.submissions.create') }}">✍️ {{ __('Proposer un article') }}</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         </ul>
@@ -98,7 +121,7 @@
                                 </div>
                                 <div class="header-right-menu-wrap">
                                     <button class="right-menu-close"><i class="ti-close"></i></button>
-                                    <div class="logo"><img src="{{ fronttheme_asset('images/logo2.png') }}" alt="{{ config('app.name') }}"></div>
+                                    <div class="logo"><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}"></div>
                                     <div class="header-right-sec">
                                         <div class="project-widget widget">
                                             <h3>{{ __('Derniers articles') }}</h3>
@@ -123,6 +146,25 @@
                                                     @endforelse
                                                 @endisset
                                             </div>
+                                        </div>
+                                        <div class="widget link-widget">
+                                            <div class="widget-title">
+                                                <h3>{{ __('Ressources') }}</h3>
+                                            </div>
+                                            <ul>
+                                                @if(Route::has('tools.index'))
+                                                    <li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>
+                                                @endif
+                                                @if(Route::has('dictionary.index'))
+                                                    <li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>
+                                                @endif
+                                                @if(Route::has('directory.index'))
+                                                    <li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>
+                                                @endif
+                                                @if(Route::has('acronyms.index'))
+                                                    <li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>
+                                                @endif
+                                            </ul>
                                         </div>
                                         <div class="widget wpo-contact-widget">
                                             <div class="widget-title">

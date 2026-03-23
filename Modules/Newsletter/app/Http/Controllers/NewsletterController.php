@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Newsletter\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -19,7 +20,7 @@ use Modules\Newsletter\Notifications\WelcomeNewsletterNotification;
 
 class NewsletterController extends Controller
 {
-    public function subscribe(Request $request): RedirectResponse
+    public function subscribe(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'email' => 'required|email|max:255',
@@ -32,12 +33,17 @@ class NewsletterController extends Controller
         );
 
         if (! $subscriber->isConfirmed()) {
-            // Send confirmation email
             \Illuminate\Support\Facades\Notification::route('mail', $subscriber->email)
                 ->notify(new WelcomeNewsletterNotification($subscriber));
         }
 
-        return back()->with('newsletter_success', 'Vérifiez votre courriel pour confirmer votre abonnement !');
+        $message = __('Vérifiez votre courriel pour confirmer votre abonnement !');
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return back()->with('newsletter_success', $message);
     }
 
     public function confirm(string $token): RedirectResponse

@@ -1,0 +1,325 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
+@extends(fronttheme_layout())
+@section('title', $tool->name)
+@section('meta_description', 'Calculatrice de taxes canadienne. TPS, TVQ, TVP, TVH pour toutes les provinces. Pourboire et division de facture inclus.')
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
+@endsection
+
+@push('styles')
+<link href="{{ asset('tools/calculatrice/css/app.css') }}" rel="stylesheet">
+<link href="{{ asset('tools/calculatrice/css/clean-layout.css') }}" rel="stylesheet">
+<link href="{{ asset('tools/calculatrice/css/tip-popup.css') }}" rel="stylesheet">
+<style>
+    .calculator-app { max-width: 100%; }
+    .calculator-app .app-header, .calculator-app .app-footer { display: none; }
+    .calculator-app .card { box-shadow: none; border: none; }
+    .calculator-app .province-select { padding-right: 2.5rem !important; background-position: right 1rem center !important; }
+    .calculator-app .calculator-grid { display: flex !important; flex-direction: column !important; gap: 1rem; }
+    .calculator-app .tax-display-group { display: flex !important; gap: 1rem; flex-wrap: wrap; background: #f8f9fa; border-radius: 8px; padding: 1rem; }
+    .calculator-app .tax-display-group .form-group { flex: 1; min-width: 120px; }
+    .calculator-app .tax-placeholder { display: none !important; }
+    .calculator-app .input-wrapper { display: flex; align-items: center; gap: 0.5rem; }
+    .calculator-app .amount-input, .calculator-app .readonly-input { width: 100% !important; min-width: 0; }
+    .calculator-app label { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; color: #555; margin-bottom: 0.3rem; display: block; }
+    .calculator-app .province-select { width: 100% !important; }
+    .calculator-app .main-calculator { padding: 0 !important; }
+    .calculator-app .form-group { margin-bottom: 0.5rem !important; }
+    .calculator-app .calculator-grid { gap: 0.5rem !important; }
+    .calculator-app .tax-display-group { padding: 0.75rem !important; margin: 0 !important; }
+    .calculator-app .section-divider { margin: 0.5rem 0 !important; }
+    .calculator-app .tip-section, .calculator-app .split-section, .calculator-app .actions-section { margin-top: 0 !important; padding-top: 0 !important; }
+    .calculator-app .split-section h3 { margin-top: 0; font-size: 1rem; }
+    .calculator-app .card-body { padding: 1.5rem !important; }
+    @media (max-width: 576px) {
+        .calculator-app .tax-display-group { flex-direction: row !important; }
+        .calculator-app .tax-display-group .form-group { min-width: 0; flex: 1; }
+        .calculator-app .card-body { padding: 1rem !important; }
+        .quick-amounts { justify-content: center; gap: 0.25rem !important; margin-bottom: 0.5rem !important; }
+        .quick-amounts span { display: none !important; }
+        .quick-amt-btn { padding: 3px 10px !important; font-size: 0.8rem !important; }
+    }
+</style>
+@endpush
+
+@section('content')
+<section class="wpo-blog-single-section section-padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-12">
+                <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
+                            <div class="d-flex gap-1">
+                                @include('tools::partials.fullscreen-btn')
+                            </div>
+                        </div>
+                        <p class="text-muted mb-4">{{ __('Calculez les taxes de vente (TPS, TVQ, TVP, TVH) pour toutes les provinces et territoires du Canada. Inclut pourboire et division de facture.') }}</p>
+
+                        {{-- Embedded calculator from original tool --}}
+                        <div class="calculator-app">
+                            <main>
+                                <section class="main-calculator card">
+                                    <div class="form-group">
+                                        <label for="province">{{ __('Province / Territoire') }}</label>
+                                        <select id="province" aria-label="Province" class="province-select">
+                                            <option value="">{{ __('Sélectionnez une province') }}</option>
+                                            <option value="QC" data-gst="5" data-pst="0" data-qst="9.975" data-hst="0" selected>Québec (14,975 %)</option>
+                                            <option value="ON" data-gst="0" data-pst="0" data-qst="0" data-hst="13">Ontario (13 %)</option>
+                                            <option value="AB" data-gst="5" data-pst="0" data-qst="0" data-hst="0">Alberta (5 %)</option>
+                                            <option value="BC" data-gst="5" data-pst="7" data-qst="0" data-hst="0">Colombie-Britannique (12 %)</option>
+                                            <option value="MB" data-gst="5" data-pst="7" data-qst="0" data-hst="0">Manitoba (12 %)</option>
+                                            <option value="NB" data-gst="0" data-pst="0" data-qst="0" data-hst="15">Nouveau-Brunswick (15 %)</option>
+                                            <option value="NL" data-gst="0" data-pst="0" data-qst="0" data-hst="15">Terre-Neuve-et-Labrador (15 %)</option>
+                                            <option value="NS" data-gst="0" data-pst="0" data-qst="0" data-hst="14">Nouvelle-Écosse (14 %)</option>
+                                            <option value="PE" data-gst="0" data-pst="0" data-qst="0" data-hst="15">Île-du-Prince-Édouard (15 %)</option>
+                                            <option value="SK" data-gst="5" data-pst="6" data-qst="0" data-hst="0">Saskatchewan (11 %)</option>
+                                            <option value="NT" data-gst="5" data-pst="0" data-qst="0" data-hst="0">Territoires du Nord-Ouest (5 %)</option>
+                                            <option value="NU" data-gst="5" data-pst="0" data-qst="0" data-hst="0">Nunavut (5 %)</option>
+                                            <option value="YT" data-gst="5" data-pst="0" data-qst="0" data-hst="0">Yukon (5 %)</option>
+                                        </select>
+                                    </div>
+
+                                    {{-- Montants rapides --}}
+                    <div class="quick-amounts" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <span style="font-size: 0.85rem; color: #777; align-self: center;">{{ __('Montants rapides :') }}</span>
+                        <button type="button" class="quick-amt-btn" data-amount="10" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">10 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="25" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">25 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="50" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">50 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="100" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">100 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="500" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">500 $</button>
+                    </div>
+
+                    <div class="calculator-grid">
+                                        <div class="form-group">
+                                            <label for="amount-before-tax">{{ __('Montant avant taxes') }}</label>
+                                            <div class="input-wrapper">
+                                                <span class="currency-symbol">$</span>
+                                                <input type="number" id="amount-before-tax" aria-label="Montant avant taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input">
+                                            </div>
+                                        </div>
+
+                                        <div class="tax-display-group">
+                                            <div class="tax-placeholder" id="tax-placeholder" style="display:none;">
+                                                <p>{{ __('Choisir votre province') }}</p>
+                                            </div>
+                                            <div class="form-group" id="tax1-group">
+                                                <label id="tax1-label">TPS (5 %)</label>
+                                                <div class="input-wrapper">
+                                                    <span class="currency-symbol">$</span>
+                                                    <input type="text" id="tax1-amount" readonly class="readonly-input" value="0.00">
+                                                </div>
+                                            </div>
+                                            <div class="form-group" id="tax2-group">
+                                                <label id="tax2-label">TVQ (9,975 %)</label>
+                                                <div class="input-wrapper">
+                                                    <span class="currency-symbol">$</span>
+                                                    <input type="text" id="tax2-amount" readonly class="readonly-input" value="0.00">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="amount-after-tax">{{ __('Montant avec taxes') }}</label>
+                                            <div class="input-wrapper">
+                                                <span class="currency-symbol">$</span>
+                                                <input type="number" id="amount-after-tax" aria-label="Montant après taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input total-amount">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="section-divider" id="tip-divider" style="display: none;"></div>
+
+                                    <div class="tip-section" id="tip-section" style="display: none;">
+                                        <div class="tip-popup-trigger">
+                                            <button type="button" id="tip-popup-btn" class="btn btn-secondary">{{ __('Ajouter un pourboire') }}</button>
+                                        </div>
+                                        <div class="tip-result" id="tip-display" style="display: none;">
+                                            <div class="result-row">
+                                                <span>{{ __('Pourboire') }} (<span id="tip-percentage">0</span>%)</span>
+                                                <span class="tip-amount">$0.00</span>
+                                            </div>
+                                            <div class="result-row total-row">
+                                                <span>{{ __('Total avec pourboire') }}</span>
+                                                <span class="total-with-tip">$0.00</span>
+                                            </div>
+                                            <div class="tip-actions">
+                                                <button type="button" id="tip-modify-btn" class="btn btn-secondary">{{ __('Modifier') }}</button>
+                                                <button type="button" id="tip-remove-btn" class="btn btn-secondary">{{ __('Supprimer') }}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="section-divider" id="split-divider" style="display: none;"></div>
+
+                                    <div class="split-section" id="split-section" style="display: none;">
+                                        <h3>{{ __('Diviser la facture') }}</h3>
+                                        <div class="form-group">
+                                            <label for="people">{{ __('Nombre de personnes') }}</label>
+                                            <div class="range-wrapper">
+                                                <input type="range" id="people" aria-label="Nombre de personnes" min="1" max="20" value="1">
+                                                <span class="range-value">1</span>
+                                            </div>
+                                        </div>
+                                        <div class="split-result" style="display: none;">
+                                            <div class="per-person" data-people="1">
+                                                <span>{{ __('Par personne') }}</span>
+                                                <span class="per-person-amount">$0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="section-divider" id="actions-divider" style="display: none;"></div>
+
+                                    <div class="actions-section" id="actions-section" style="display: none;">
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <button id="reset-btn" class="btn btn-secondary" style="display: none;">{{ __('Nouveau calcul') }}</button>
+                                            <button id="copy-result-btn" class="btn btn-secondary" style="display: none;">{{ __('Copier le résultat') }}</button>
+                                            <button id="save-history-btn" class="btn btn-secondary" style="display: none;">💾 {{ __('Sauvegarder') }}</button>
+                                        </div>
+                                    </div>
+
+                                    {{-- Historique --}}
+                                    <div id="tax-history-section" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700;">{{ __('Historique récent') }}</h4>
+                                            <button id="clear-history-btn" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.8rem;">{{ __('Effacer') }}</button>
+                                        </div>
+                                        <div id="tax-history-list"></div>
+                                    </div>
+                                </section>
+                            </main>
+                        </div>
+
+                        <p class="text-muted mt-3 mb-0" style="font-size: 0.8rem;">{{ __('Taux mis à jour en 2025. TVQ calculée sur le montant avant taxes. Cet outil est fourni à titre indicatif.') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@endsection
+
+@push('scripts')
+<script>
+    window.taxConfig = {
+        tax_rates: {
+            AB: {name: 'Alberta', gst: 5, pst: 0, total: 5},
+            BC: {name: 'Colombie-Britannique', gst: 5, pst: 7, total: 12},
+            MB: {name: 'Manitoba', gst: 5, pst: 7, total: 12},
+            NB: {name: 'Nouveau-Brunswick', hst: 15, total: 15},
+            NL: {name: 'Terre-Neuve-et-Labrador', hst: 15, total: 15},
+            NS: {name: 'Nouvelle-Écosse', hst: 14, total: 14},
+            NT: {name: 'Territoires du Nord-Ouest', gst: 5, pst: 0, total: 5},
+            NU: {name: 'Nunavut', gst: 5, pst: 0, total: 5},
+            ON: {name: 'Ontario', hst: 13, total: 13},
+            PE: {name: 'Île-du-Prince-Édouard', hst: 15, total: 15},
+            QC: {name: 'Québec', gst: 5, qst: 9.975, total: 14.975},
+            SK: {name: 'Saskatchewan', gst: 5, pst: 6, total: 11},
+            YT: {name: 'Yukon', gst: 5, pst: 0, total: 5}
+        },
+        app_settings: {
+            title: 'Calculatrice de Taxes Canada',
+            default_tip_percentages: [10, 15, 18, 20],
+            max_people_split: 20,
+            currency_symbol: '$',
+            decimal_places: 2
+        }
+    };
+</script>
+<script src="{{ asset('tools/calculatrice/js/tip-popup.js') }}"></script>
+<script src="{{ asset('tools/calculatrice/js/calculator-simple.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('province');
+    if (sel && sel.value) { sel.dispatchEvent(new Event('change', {bubbles: true})); }
+
+    // Montants rapides
+    document.querySelectorAll('.quick-amt-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var amt = this.getAttribute('data-amount');
+            var input = document.getElementById('amount-before-tax');
+            if (input) { input.value = amt; input.dispatchEvent(new Event('input', {bubbles: true})); }
+            document.querySelectorAll('.quick-amt-btn').forEach(function(b) { b.style.background = '#fff'; b.style.color = '#333'; });
+            this.style.background = '#0B7285'; this.style.color = '#fff';
+        });
+    });
+
+    // Copier résultat
+    var copyBtn = document.getElementById('copy-result-btn');
+    if (copyBtn) {
+        copyBtn.style.display = '';
+        copyBtn.addEventListener('click', function() {
+            var province = document.getElementById('province');
+            var before = document.getElementById('amount-before-tax');
+            var tax1 = document.getElementById('tax1-amount');
+            var tax2 = document.getElementById('tax2-amount');
+            var after = document.getElementById('amount-after-tax');
+            var t1Label = document.getElementById('tax1-label');
+            var t2Label = document.getElementById('tax2-label');
+            var lines = [];
+            if (province) lines.push('Province: ' + province.options[province.selectedIndex].text);
+            if (before && before.value) lines.push('Avant taxes: ' + before.value + ' $');
+            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value);
+            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value);
+            if (after && after.value) lines.push('Total: ' + after.value + ' $');
+            navigator.clipboard.writeText(lines.join('\n'));
+            this.textContent = '{{ __("Copié !") }}';
+            var self = this;
+            setTimeout(function() { self.textContent = '{{ __("Copier le résultat") }}'; }, 2000);
+        });
+    }
+
+    // Historique localStorage
+    var historyKey = 'tax_calc_history';
+    var saveBtn = document.getElementById('save-history-btn');
+    var histSection = document.getElementById('tax-history-section');
+    var histList = document.getElementById('tax-history-list');
+    var clearBtn = document.getElementById('clear-history-btn');
+
+    function loadHistory() {
+        var h = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        if (h.length === 0) { histSection.style.display = 'none'; return; }
+        histSection.style.display = '';
+        histList.innerHTML = h.map(function(item) {
+            return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:0.85rem;">' +
+                '<span>' + item.province + ': ' + item.before + ' $ → ' + item.after + ' $</span>' +
+                '<small style="color:#999;">' + item.date + '</small></div>';
+        }).join('');
+    }
+
+    if (saveBtn) {
+        saveBtn.style.display = '';
+        saveBtn.addEventListener('click', function() {
+            var h = JSON.parse(localStorage.getItem(historyKey) || '[]');
+            var province = document.getElementById('province');
+            var before = document.getElementById('amount-before-tax');
+            var after = document.getElementById('amount-after-tax');
+            if (!before || !before.value) return;
+            h.unshift({
+                province: province ? province.options[province.selectedIndex].text.split('(')[0].trim() : '',
+                before: before.value,
+                after: after ? after.value : '',
+                date: new Date().toLocaleDateString('fr-CA')
+            });
+            if (h.length > 10) h = h.slice(0, 10);
+            localStorage.setItem(historyKey, JSON.stringify(h));
+            loadHistory();
+            this.textContent = '✅ {{ __("Sauvegardé") }}';
+            var self = this;
+            setTimeout(function() { self.textContent = '💾 {{ __("Sauvegarder") }}'; }, 1500);
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            localStorage.removeItem(historyKey);
+            loadHistory();
+        });
+    }
+
+    loadHistory();
+});
+</script>
+@endpush
