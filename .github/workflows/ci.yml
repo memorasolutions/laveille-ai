@@ -80,7 +80,7 @@ jobs:
           coverage: none
           tools: composer
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -159,7 +159,7 @@ jobs:
           coverage: none
           tools: composer
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -198,7 +198,7 @@ jobs:
           tools: composer
           coverage: none
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
