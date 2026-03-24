@@ -40,7 +40,7 @@
                 {{ __('Votre article sera examiné par notre équipe éditoriale. Si approuvé, il sera publié sous votre nom dans le blog. Vous serez notifié par courriel.') }}
             </div>
 
-            <form action="{{ route('blog.submissions.store') }}" method="POST">
+            <form action="{{ route('blog.submissions.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <label class="sub-label" for="title">{{ __('Titre') }} <span style="color: #DC2626;">*</span></label>
@@ -59,6 +59,42 @@
                 <label class="sub-label" for="excerpt">{{ __('Résumé') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('optionnel') }})</small></label>
                 <textarea name="excerpt" id="excerpt" class="sub-textarea" rows="3" maxlength="500" placeholder="{{ __('Résumé de votre article en 1-2 phrases') }}" aria-label="{{ __('Résumé') }}">{{ old('excerpt') }}</textarea>
                 @error('excerpt') <p class="sub-error">{{ $message }}</p> @enderror
+
+                {{-- Bio auteur --}}
+                <label class="sub-label" for="author_bio">{{ __('Votre bio') }} <span style="color: #DC2626;">*</span></label>
+                <textarea name="author_bio" id="author_bio" class="sub-textarea" rows="4" required placeholder="{{ __('Présentez-vous en quelques lignes (100-150 mots). Cette bio sera affichée avec votre article.') }}" aria-label="{{ __('Bio auteur') }}">{{ old('author_bio') }}</textarea>
+                @error('author_bio') <p class="sub-error">{{ $message }}</p> @enderror
+
+                {{-- URL site auteur --}}
+                <label class="sub-label" for="author_url">{{ __('Votre site web ou profil') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('optionnel') }})</small></label>
+                <input type="url" name="author_url" id="author_url" class="sub-input" value="{{ old('author_url') }}" placeholder="https://votresite.com" aria-label="{{ __('URL site auteur') }}">
+                @error('author_url') <p class="sub-error">{{ $message }}</p> @enderror
+
+                {{-- Upload fichier --}}
+                <label class="sub-label">{{ __('Document joint') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('optionnel — MD, Word ou PDF, max 5 Mo') }})</small></label>
+                <div x-data="{ fileName: '' }" style="margin-bottom: 16px;">
+                    <div @dragover.prevent @drop.prevent="fileName = $event.dataTransfer.files[0]?.name; $refs.fileInput.files = $event.dataTransfer.files"
+                         style="border: 2px dashed #D1D5DB; border-radius: var(--r-base); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; position: relative;"
+                         @click="$refs.fileInput.click()"
+                         onmouseover="this.style.borderColor='var(--c-primary)'" onmouseout="this.style.borderColor='#D1D5DB'">
+                        <div style="font-size: 28px; margin-bottom: 6px;">📎</div>
+                        <p style="color: #6B7280; margin: 0; font-size: 14px;">{{ __('Glissez votre fichier ici ou cliquez pour parcourir') }}</p>
+                        <p style="color: #9CA3AF; font-size: 12px; margin: 4px 0 0;">{{ __('.md, .doc, .docx, .pdf — max 5 Mo') }}</p>
+                        <p x-show="fileName" x-cloak style="margin-top: 10px; color: var(--c-primary); font-weight: 600; font-size: 14px;" x-text="'📄 ' + fileName"></p>
+                        <input type="file" name="article_file" x-ref="fileInput" accept=".md,.doc,.docx,.pdf" @change="fileName = $el.files[0]?.name" style="display: none;">
+                    </div>
+                </div>
+                @error('article_file') <p class="sub-error">{{ $message }}</p> @enderror
+
+                {{-- Info box sources obligatoires --}}
+                <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 14px 18px; margin-bottom: 20px; font-size: 14px; color: #92400E; border-radius: 0 var(--r-base) var(--r-base) 0;">
+                    <strong>{{ __('Important :') }}</strong> {{ __('L\'auteur doit obligatoirement citer ses sources en lien avec son article dans le contenu ou le champ ci-dessous.') }}
+                </div>
+
+                {{-- Sources/citations --}}
+                <label class="sub-label" for="sources">{{ __('Sources et citations') }} <span style="color: #DC2626;">*</span></label>
+                <textarea name="sources" id="sources" class="sub-textarea" rows="4" required placeholder="{{ __('Listez vos sources avec les liens (ex: https://example.com/article)') }}" aria-label="{{ __('Sources et citations') }}">{{ old('sources') }}</textarea>
+                @error('sources') <p class="sub-error">{{ $message }}</p> @enderror
 
                 <label class="sub-label" for="content">{{ __('Contenu de l\'article') }} <span style="color: #DC2626;">*</span></label>
                 <textarea name="content" id="content" class="sub-textarea" rows="15" required placeholder="{{ __('Écrivez votre article ici... Minimum 200 caractères.') }}" aria-label="{{ __('Contenu de l\'article') }}">{{ old('content') }}</textarea>
