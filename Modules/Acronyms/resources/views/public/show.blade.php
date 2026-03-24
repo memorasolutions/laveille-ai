@@ -117,7 +117,7 @@
                     <header class="acr-show-header">
                         <div class="acr-show-logo">
                             @if($acronym->logo_url)
-                                <img src="{{ $acronym->logo_url }}" alt="{{ __('Logo') }} {{ $acronym->acronym }}" width="80" height="80" loading="lazy">
+                                <img src="{{ str_starts_with($acronym->logo_url, 'http') ? $acronym->logo_url : asset($acronym->logo_url) }}" alt="{{ __('Logo') }} {{ $acronym->acronym }}" width="80" height="80" loading="lazy">
                             @else
                                 <div class="acr-show-logo-fallback">🎓</div>
                             @endif

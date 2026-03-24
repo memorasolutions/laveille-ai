@@ -48,7 +48,7 @@ class PublicAcronymController extends Controller
                 'acronym' => $a->acronym,
                 'full_name' => $a->full_name,
                 'slug' => $a->getTranslation('slug', $locale),
-                'logo_url' => $a->logo_url,
+                'logo_url' => $a->logo_url ? (str_starts_with($a->logo_url, 'http') ? $a->logo_url : asset($a->logo_url)) : null,
                 'cat_id' => $a->acronym_category_id,
                 'cat_name' => $a->category ? $a->category->name : __('Général'),
                 'cat_color' => $a->category ? $a->category->color : '#6B7280',
