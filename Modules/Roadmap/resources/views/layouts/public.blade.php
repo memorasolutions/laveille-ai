@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Roadmap') — {{ config('app.name') }}</title>
+    <title>@yield('title', __('Idées et votes')) — {{ config('app.name') }}</title>
     <link href="{{ asset('build/nobleui/plugins/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     @stack('styles')
 </head>
@@ -14,7 +14,7 @@
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url('/') }}">{{ config('app.name') }}</a>
             <div class="d-flex align-items-center gap-3">
-                <a class="nav-link" href="{{ route('roadmap.boards.index') }}">Roadmap</a>
+                <a class="nav-link" href="{{ route('roadmap.boards.index') }}">{{ __('Idées et votes') }}</a>
                 @auth
                     <span class="text-muted small">{{ auth()->user()->name }}</span>
                     <form method="POST" action="{{ route('logout') }}" class="d-inline">

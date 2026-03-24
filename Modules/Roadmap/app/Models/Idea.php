@@ -23,6 +23,8 @@ class Idea extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'roadmap_ideas';
+
     protected $fillable = [
         'board_id',
         'user_id',

@@ -1,13 +1,13 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
 
-@section('title', __('Idées Roadmap'))
+@section('title', __('Idées et votes'))
 
 @section('content')
     @include('backoffice::themes.backend.components.breadcrumb', [
-        'title' => __('Idées Roadmap'),
+        'title' => __('Idées et votes'),
         'items' => [
-            ['label' => 'Roadmap'],
+            ['label' => 'Idées et votes'],
             ['label' => __('Idées')],
         ],
     ])

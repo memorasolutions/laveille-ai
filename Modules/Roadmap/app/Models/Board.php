@@ -19,6 +19,8 @@ class Board extends Model
 {
     use HasFactory;
 
+    protected $table = 'roadmap_boards';
+
     protected $fillable = [
         'name',
         'slug',

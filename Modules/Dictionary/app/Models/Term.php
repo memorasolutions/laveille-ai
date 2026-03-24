@@ -24,6 +24,7 @@ class Term extends Model
 
     protected $fillable = [
         'name',
+        'acronym_full',
         'slug',
         'definition',
         'analogy',
@@ -31,6 +32,7 @@ class Term extends Model
         'did_you_know',
         'difficulty',
         'icon',
+        'hero_image',
         'type',
         'dictionary_category_id',
         'is_published',

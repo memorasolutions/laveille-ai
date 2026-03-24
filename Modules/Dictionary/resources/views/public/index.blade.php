@@ -15,6 +15,7 @@
             'name' => $term->name,
             'slug' => $term->slug,
             'icon' => $term->icon,
+            'acronymFull' => $term->acronym_full,
             'definition' => \Illuminate\Support\Str::limit(strip_tags($term->definition), 120),
             'fullDef' => strip_tags($term->definition),
             'analogy' => $term->analogy,
@@ -38,6 +39,8 @@
             'categorySlug' => $term->category ? \Illuminate\Support\Str::slug($term->category->name) : '',
             'firstLetter' => strtoupper(\Illuminate\Support\Str::substr($term->name, 0, 1)),
             'url' => route('dictionary.show', $term->slug),
+            'heroImage' => $term->hero_image ? asset(str_replace('.png', '.webp', $term->hero_image)) : null,
+            'heroImageFallback' => $term->hero_image ? asset($term->hero_image) : null,
         ];
     })->values();
 
@@ -377,13 +380,27 @@
             <template x-for="term in filteredTerms" :key="term.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="gl-card" :class="'border-' + term.type">
+                        {{-- Hero image or icon --}}
+                        <template x-if="term.heroImage">
+                            <a :href="term.url" style="display: block; margin: -16px -18px 12px; overflow: hidden; border-radius: 8px 8px 0 0;">
+                                <picture>
+                                    <source :srcset="term.heroImage" type="image/webp">
+                                    <img :src="term.heroImageFallback" :alt="term.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
+                                </picture>
+                            </a>
+                        </template>
                         <div class="gl-card-top">
                             <h3 class="gl-term-name">
-                                <span x-text="term.icon" style="margin-right: 4px;"></span>
+                                <template x-if="!term.heroImage">
+                                    <span x-text="term.icon" style="margin-right: 4px;"></span>
+                                </template>
                                 <a :href="term.url" x-text="term.name"></a>
                             </h3>
                             <span class="gl-badge" :class="'badge-' + term.type" x-text="term.typeName"></span>
                         </div>
+                        <template x-if="term.acronymFull">
+                            <p style="color: #9CA3AF; font-size: 0.8rem; font-style: italic; margin: -6px 0 8px; line-height: 1.3;" x-text="term.acronymFull"></p>
+                        </template>
 
                         {{-- Badges catégorie + difficulté --}}
                         <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -424,6 +441,103 @@
             </div>
         </div>
     </div>
+
+    {{-- CTA Proposer un terme --}}
+    @if(class_exists(\Modules\Roadmap\Models\Board::class))
+    <div x-data="{ showForm: false, submitted: false }" style="margin-top: 40px;">
+        <div style="background: linear-gradient(135deg, var(--c-primary) 0%, #1a5276 100%); border-radius: var(--r-base); padding: 40px 30px; color: #fff; text-align: center;">
+            <h2 style="font-family: var(--f-heading); font-size: 24px; font-weight: 700; margin: 0 0 8px;">
+                {{ __('Vous ne trouvez pas un terme ?') }}
+            </h2>
+            <p style="font-size: 16px; opacity: 0.9; margin-bottom: 20px;">
+                {{ __('Proposez un nouveau terme pour le glossaire et la communaute votera !') }}
+            </p>
+
+            @auth
+                <button type="button" @click="showForm = !showForm" x-show="!submitted"
+                    style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 15px; transition: all 0.2s;"
+                    onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">
+                    <span x-text="showForm ? '{{ __('Fermer') }}' : '{{ __('Proposer un terme') }}'"></span>
+                </button>
+            @else
+                <a href="{{ route('login') }}" style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); text-decoration: none; display: inline-block; font-size: 15px;">
+                    {{ __('Connectez-vous pour proposer un terme') }}
+                </a>
+            @endauth
+
+            {{-- Success message --}}
+            <div x-show="submitted" x-cloak style="background: rgba(255,255,255,0.15); border-radius: var(--r-base); padding: 20px; margin-top: 20px;">
+                <div style="font-size: 32px; margin-bottom: 8px;">&#10003;</div>
+                <p style="font-weight: 600; font-size: 16px;">{{ __('Merci ! Votre proposition a ete soumise. La communaute pourra voter dessus dans les idees et votes.') }}</p>
+            </div>
+        </div>
+
+        @auth
+        <div x-show="showForm && !submitted" x-cloak x-transition
+             style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 30px;">
+            <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 20px; font-size: 18px;">
+                {{ __('Soumettre une proposition de terme') }}
+            </h3>
+            <form method="POST" action="{{ route('roadmap.ideas.store', ['board' => 'glossaire-communautaire']) }}"
+                  @submit.prevent="
+                    fetch($el.action, { method: 'POST', body: new FormData($el) })
+                    .then(r => { if(r.ok || r.redirected) { submitted = true; showForm = false; } })
+                    .catch(() => { $el.submit(); })
+                  ">
+                @csrf
+                <input type="hidden" name="source" value="glossaire">
+
+                <div style="margin-bottom: 16px;">
+                    <label for="gl-term-name" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
+                        {{ __('Nom du terme') }} <span style="color: #E74C3C;">*</span>
+                    </label>
+                    <input type="text" id="gl-term-name" name="title" required placeholder="{{ __('Ex: Apprentissage par transfert, XAI, Tokenisation...') }}"
+                        style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none;"
+                        onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label for="gl-term-def" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
+                        {{ __('Definition courte') }} <span style="color: #E74C3C;">*</span>
+                    </label>
+                    <textarea id="gl-term-def" name="description" rows="3" required placeholder="{{ __('Decrivez ce terme en 2-3 phrases simples...') }}"
+                        style="width: 100%; padding: 10px 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none; resize: vertical;"
+                        onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6" style="margin-bottom: 16px;">
+                        <label for="gl-term-cat" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
+                            {{ __('Categorie') }}
+                        </label>
+                        <select id="gl-term-cat" name="category"
+                            style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff;">
+                            <option value="Concepts fondamentaux">{{ __('Concepts fondamentaux') }}</option>
+                            <option value="Acronymes et sigles">{{ __('Acronymes et sigles') }}</option>
+                            <option value="Securite et ethique">{{ __('Securite et ethique') }}</option>
+                            <option value="Outils et techniques">{{ __('Outils et techniques') }}</option>
+                            <option value="Donnees et traitement">{{ __('Donnees et traitement') }}</option>
+                            <option value="Tendances 2026">{{ __('Tendances 2026') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" style="margin-bottom: 16px; display: flex; align-items: flex-end;">
+                        <button type="submit"
+                            style="width: 100%; height: 44px; background: var(--c-primary); color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 15px; transition: all 0.2s;"
+                            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            {{ __('Soumettre ma proposition') }}
+                        </button>
+                    </div>
+                </div>
+
+                <p style="font-size: 12px; color: #9CA3AF; margin: 0;">
+                    {{ __('Votre proposition apparaitra dans la section Idees et votes ou la communaute pourra voter. Les termes les plus populaires seront ajoutes au glossaire.') }}
+                </p>
+            </form>
+        </div>
+        @endauth
+    </div>
+    @endif
+
 </section>
 @endsection
 

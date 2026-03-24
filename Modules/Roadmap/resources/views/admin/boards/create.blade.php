@@ -7,7 +7,7 @@
     @include('backoffice::themes.backend.components.breadcrumb', [
         'title' => __('Nouveau tableau'),
         'items' => [
-            ['label' => 'Roadmap'],
+            ['label' => 'Idées et votes'],
             ['label' => __('Tableaux'), 'url' => route('admin.roadmap.boards.index')],
             ['label' => __('Nouveau')],
         ],

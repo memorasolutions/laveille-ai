@@ -23,7 +23,7 @@
     "Notifications": true,
     "Pages": true,
     "Privacy": true,
-    "Roadmap": false,
+    "Roadmap": true,
     "RolesPermissions": true,
     "SaaS": false,
     "SEO": true,

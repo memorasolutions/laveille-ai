@@ -57,12 +57,21 @@ class PublicBoardController extends Controller
         $validated = $request->validate([
             'title' => 'required|max:255',
             'description' => 'required',
-            'category' => 'nullable|in:feature,bug,improvement,ux',
+            'category' => 'nullable|string|max:100',
+            'source' => 'nullable|string|max:50',
         ]);
 
         $service->create($board, $validated, auth()->id());
 
-        return redirect()->back()->with('success', __('Idea submitted successfully.'));
+        $message = ($request->input('source') === 'glossaire')
+            ? __('Merci ! Votre proposition de terme a ete soumise. La communaute pourra voter dessus.')
+            : __('Idea submitted successfully.');
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function vote(Idea $idea, VotingService $service)

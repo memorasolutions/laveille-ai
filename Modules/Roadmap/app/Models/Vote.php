@@ -20,6 +20,8 @@ class Vote extends Model
 {
     use HasFactory;
 
+    protected $table = 'roadmap_votes';
+
     protected $fillable = [
         'idea_id',
         'user_id',

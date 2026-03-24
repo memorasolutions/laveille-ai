@@ -1,11 +1,11 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('roadmap::layouts.public')
-@section('title', 'Roadmap')
+@section('title', __('Idées et votes'))
 
 @section('content')
     <div class="mb-4">
-        <h2>Roadmap</h2>
-        <p class="text-muted">{{ __('Votez pour les fonctionnalités que vous souhaitez') }}</p>
+        <h2>{{ __('Idées et votes') }}</h2>
+        <p class="text-muted">{{ __('Proposez vos idées et votez pour vos priorités') }}</p>
     </div>
 
     <div class="row">

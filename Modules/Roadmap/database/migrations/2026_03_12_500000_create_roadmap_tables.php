@@ -16,7 +16,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('boards', function (Blueprint $table) {
+        Schema::create('roadmap_boards', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
             $table->string('slug', 255)->unique();
@@ -27,9 +27,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('ideas', function (Blueprint $table) {
+        Schema::create('roadmap_ideas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('board_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('board_id')->constrained('roadmap_boards')->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title', 255);
             $table->string('slug', 255);
@@ -39,26 +39,25 @@ return new class extends Migration
             $table->unsignedInteger('vote_count')->default(0);
             $table->unsignedInteger('comment_count')->default(0);
             $table->boolean('pinned')->default(false);
-            $table->foreignId('merged_into_id')->nullable()->constrained('ideas')->nullOnDelete();
-            $table->foreignId('tenant_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('merged_into_id')->nullable()->constrained('roadmap_ideas')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
 
             $table->unique(['board_id', 'slug']);
         });
 
-        Schema::create('votes', function (Blueprint $table) {
+        Schema::create('roadmap_votes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idea_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('idea_id')->constrained('roadmap_ideas')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
 
             $table->unique(['idea_id', 'user_id']);
         });
 
-        Schema::create('idea_comments', function (Blueprint $table) {
+        Schema::create('roadmap_idea_comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idea_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('idea_id')->constrained('roadmap_ideas')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('content');
             $table->boolean('is_official')->default(false);
@@ -68,9 +67,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('idea_comments');
-        Schema::dropIfExists('votes');
-        Schema::dropIfExists('ideas');
-        Schema::dropIfExists('boards');
+        Schema::dropIfExists('roadmap_idea_comments');
+        Schema::dropIfExists('roadmap_votes');
+        Schema::dropIfExists('roadmap_ideas');
+        Schema::dropIfExists('roadmap_boards');
     }
 };

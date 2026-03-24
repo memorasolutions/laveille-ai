@@ -23,35 +23,35 @@ return new class extends Migration
             $table->string('color', 7)->default('#6366f1');
             $table->text('description')->nullable();
             $table->integer('sort_order')->default(0);
-            $table->foreignId('tenant_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('board_id')->nullable()->constrained('roadmap_boards')->nullOnDelete();
             $table->timestamps();
         });
 
-        Schema::table('idea_comments', function (Blueprint $table) {
+        Schema::table('roadmap_idea_comments', function (Blueprint $table) {
             $table->boolean('is_internal')->default(false)->after('is_official');
         });
 
-        Schema::table('ideas', function (Blueprint $table) {
+        Schema::table('roadmap_ideas', function (Blueprint $table) {
             $table->foreignId('category_id')->nullable()->constrained('roadmap_categories')->nullOnDelete()->after('category');
         });
 
-        Schema::table('boards', function (Blueprint $table) {
+        Schema::table('roadmap_boards', function (Blueprint $table) {
             $table->boolean('hide_votes_before_voting')->default(false)->after('color');
         });
     }
 
     public function down(): void
     {
-        Schema::table('ideas', function (Blueprint $table) {
+        Schema::table('roadmap_ideas', function (Blueprint $table) {
             $table->dropForeign(['category_id']);
             $table->dropColumn('category_id');
         });
 
-        Schema::table('idea_comments', function (Blueprint $table) {
+        Schema::table('roadmap_idea_comments', function (Blueprint $table) {
             $table->dropColumn('is_internal');
         });
 
-        Schema::table('boards', function (Blueprint $table) {
+        Schema::table('roadmap_boards', function (Blueprint $table) {
             $table->dropColumn('hide_votes_before_voting');
         });
 

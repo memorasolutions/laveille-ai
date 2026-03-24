@@ -20,6 +20,8 @@ class IdeaComment extends Model
 {
     use HasFactory;
 
+    protected $table = 'roadmap_idea_comments';
+
     protected $fillable = [
         'idea_id',
         'user_id',

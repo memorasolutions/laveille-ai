@@ -6,8 +6,8 @@
             <div class="row">
                 <div class="col col-lg-4 col-md-6 col-sm-12 col-12">
                     <div class="widget about-widget">
-                        <div class="logo widget-title">
-                            <img src="{{ asset('images/logo-horizontal-white.svg') }}?v=10" alt="{{ config('app.name') }}" style="width: 100%; height: auto;">
+                        <div class="logo widget-title" style="max-width: none;">
+                            <img src="{{ asset('images/logo-horizontal-white.svg') }}?v=10" alt="{{ config('app.name') }}" style="width: 230px !important; max-width: 230px !important; height: auto !important; margin-bottom: 16px;">
                         </div>
                         <p>{{ __('Votre plateforme d\'information dédiée à l\'intelligence artificielle, aux technologies innovantes et à la transformation numérique. Profitez de nos outils gratuits et recevez des analyses, actualités et ressources exclusives.') }}</p>
                     </div>
@@ -60,7 +60,7 @@
                                 <li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>
                             @endif
                             @if(Route::has('directory.roadmap'))
-                                <li><a href="{{ route('directory.roadmap') }}">🗺️ {{ __('Roadmap') }}</a></li>
+                                <li><a href="{{ route('directory.roadmap') }}">💡 {{ __('Idées et votes') }}</a></li>
                             @endif
                             <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook"></i> Facebook</a></li>
                             <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger"></i> Messenger</a></li>
@@ -85,6 +85,7 @@
 .wpo-site-footer .wpo-upper-footer .widget ul li a { color: rgba(255,255,255,0.85) !important; }
 .wpo-site-footer .wpo-upper-footer .widget ul li a:hover { color: #fff !important; }
 .wpo-site-footer .wpo-upper-footer .about-widget p { color: rgba(255,255,255,0.75) !important; }
+.wpo-site-footer .wpo-upper-footer .about-widget .logo.widget-title img { width: 240px !important; max-width: 100% !important; height: auto !important; }
 </style>
 @endpush
 <!-- end of wpo-site-footer-section -->

@@ -9,7 +9,7 @@
     @include('backoffice::themes.backend.components.breadcrumb', [
         'title' => $idea->title,
         'items' => [
-            ['label' => 'Roadmap'],
+            ['label' => 'Idées et votes'],
             ['label' => __('Idées'), 'url' => route('admin.roadmap.ideas.index')],
             ['label' => __('Détail')],
         ],

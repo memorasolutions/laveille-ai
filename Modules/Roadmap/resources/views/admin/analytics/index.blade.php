@@ -3,13 +3,13 @@
 
 @extends('backoffice::themes.backend.layouts.admin')
 
-@section('title', __('Statistiques Roadmap'))
+@section('title', __('Statistiques Idées et votes'))
 
 @section('content')
     @include('backoffice::themes.backend.components.breadcrumb', [
-        'title' => __('Statistiques Roadmap'),
+        'title' => __('Statistiques Idées et votes'),
         'items' => [
-            ['label' => 'Roadmap'],
+            ['label' => 'Idées et votes'],
             ['label' => __('Statistiques')],
         ],
     ])

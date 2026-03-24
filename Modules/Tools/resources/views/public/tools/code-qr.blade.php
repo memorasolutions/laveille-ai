@@ -236,7 +236,7 @@
                             <label class="form-label fw-medium">{{ __('Page ou profil Facebook') }}</label>
                             <div class="input-group">
                                 <span class="input-group-addon" style="line-height: 34px; padding: 0 10px; background: #f8f9fa;">facebook.com/</span>
-                                <input type="text" class="form-control" x-model="socialUser" @input="renderQR()" placeholder="LaVeilleDeStef" aria-label="{{ __('Page Facebook') }}">
+                                <input type="text" class="form-control" x-model="socialUser" @input="renderQR()" placeholder="laveille.ai" aria-label="{{ __('Page Facebook') }}">
                             </div>
                         </div>
                         <div x-show="type === 'linkedin'" class="form-group mb-3">

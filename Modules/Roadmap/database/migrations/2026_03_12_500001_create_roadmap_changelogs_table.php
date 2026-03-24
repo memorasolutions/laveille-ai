@@ -18,7 +18,7 @@ return new class extends Migration
     {
         Schema::create('roadmap_changelogs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idea_id')->constrained('ideas')->cascadeOnDelete();
+            $table->foreignId('idea_id')->constrained('roadmap_ideas')->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('field', 50);
             $table->string('old_value', 100)->nullable();
