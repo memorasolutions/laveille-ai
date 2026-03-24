@@ -45,6 +45,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     })->name('acronyms.suggestions.store');
 });
 
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::post('/api/scrape-meta', \Modules\Acronyms\Http\Controllers\Api\ScrapeMetaController::class)->name('api.scrape-meta');
+});
+
 Route::middleware(['web', 'auth'])->prefix('admin/acronyms')->name('admin.acronyms.')->group(function () {
     Route::get('/', [AcronymAdminController::class, 'index'])->name('index');
     Route::get('/create', [AcronymAdminController::class, 'create'])->name('create');

@@ -76,6 +76,8 @@
     .acr-empty { text-align: center; padding: 60px 20px; color: #6B7280; }
     .acr-counter { text-align: center; color: #9CA3AF; font-size: 13px; margin-bottom: 16px; }
 
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .row-flex { display: flex; flex-wrap: wrap; }
     .row-flex > [class*='col-'] { display: flex; flex-direction: column; margin-bottom: 20px; }
 </style>
@@ -86,7 +88,27 @@
     <div class="container" x-data="acronymApp()">
 
         {{-- Hero + 2-step wizard wrapper --}}
-        <div x-data="{ step: 0, submitted: false, acronym: '', fullname: '' }">
+        <div x-data="{
+            step: 0, submitted: false, acronym: '', fullname: '',
+            website_url: '', logo_url: '', descriptionText: '', scraping: false, scrapeError: '',
+            async scrapeUrl() {
+                if (!this.website_url || this.scraping) return;
+                this.scraping = true;
+                this.scrapeError = '';
+                try {
+                    const res = await fetch('/api/scrape-meta', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                        body: JSON.stringify({ url: this.website_url })
+                    });
+                    if (!res.ok) throw new Error();
+                    const d = await res.json();
+                    if (!this.descriptionText) this.descriptionText = (this.fullname ? this.fullname + ' (' + this.acronym + ') — ' : '') + (d.og_description || d.description || '');
+                    if (!this.logo_url) this.logo_url = d.og_image || d.favicon || '';
+                } catch { this.scrapeError = '{{ __('Impossible de récupérer les informations automatiquement.') }}'; }
+                finally { this.scraping = false; }
+            }
+        }">
             <div class="acr-hero">
                 <h1>🎓 {{ __('Acronymes de l\'éducation au Québec') }}</h1>
                 <p>{{ __('Le glossaire complet pour naviguer dans le jargon du système éducatif québécois') }}</p>
@@ -120,7 +142,7 @@
                             style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: #fff; color: var(--c-dark); outline: none;">
                         <input type="text" x-model="fullname" placeholder="{{ __('Nom complet') }}"
                             style="flex: 1; min-width: 180px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark); outline: none;">
-                        <button type="button" @click="if(acronym.trim() && fullname.trim()) step = 2"
+                        <button type="button" @click="if(acronym.trim() && fullname.trim()) { descriptionText = fullname + ' (' + acronym + ') — '; step = 2; }"
                             :style="(!acronym.trim() || !fullname.trim()) ? 'opacity:0.5;cursor:not-allowed' : ''"
                             style="height: 42px; padding: 0 20px; background: #fff; color: var(--c-primary); font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; white-space: nowrap;">
                             {{ __('Continuer') }} →
@@ -170,23 +192,42 @@
                     <div class="row">
                         <div class="col-md-6" style="margin-bottom: 14px;">
                             <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Site web officiel') }}</label>
-                            <input type="url" name="website_url" placeholder="https://exemple.qc.ca"
-                                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
-                                onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
+                            <div style="display: flex; gap: 6px;">
+                                <input type="url" name="website_url" x-model="website_url" placeholder="https://exemple.qc.ca"
+                                    @blur="scrapeUrl()"
+                                    style="flex: 1; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
+                                    onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
+                                <button type="button" @click="scrapeUrl()" :disabled="scraping || !website_url"
+                                    :style="(!website_url || scraping) ? 'opacity:0.5;cursor:not-allowed' : ''"
+                                    style="height: 40px; padding: 0 12px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: var(--r-base); cursor: pointer; font-size: 12px; font-weight: 600; color: var(--c-dark); white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                                    <svg x-show="scraping" x-cloak width="14" height="14" viewBox="0 0 24 24" style="animation: spin 0.8s linear infinite;">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" opacity="0.25"></circle>
+                                        <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"></path>
+                                    </svg>
+                                    <span x-text="scraping ? '' : '{{ __('Auto-remplir') }}'"></span>
+                                </button>
+                            </div>
+                            <p x-show="scrapeError" x-cloak x-text="scrapeError" style="color: #E74C3C; font-size: 11px; margin: 4px 0 0;"></p>
                         </div>
                         <div class="col-md-6" style="margin-bottom: 14px;">
-                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('URL du logo') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('optionnel') }})</small></label>
-                            <input type="url" name="logo_url" placeholder="https://exemple.qc.ca/logo.png"
-                                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
-                                onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
+                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('URL du logo') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('auto-détecté') }})</small></label>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="url" name="logo_url" x-model="logo_url" placeholder="https://exemple.qc.ca/logo.png"
+                                    style="flex: 1; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
+                                    onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
+                                <template x-if="logo_url">
+                                    <img :src="logo_url" style="width: 32px; height: 32px; border-radius: 4px; object-fit: contain; border: 1px solid #E5E7EB;" alt="Logo">
+                                </template>
+                            </div>
                         </div>
                     </div>
 
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Description courte') }} <span style="color: #E74C3C;">*</span></label>
-                        <textarea name="description" required rows="3" :placeholder="'{{ __('Decrivez') }} ' + acronym + ' {{ __('en 2-3 phrases : mission, role, public cible...') }}'"
+                        <textarea name="description" required rows="3" x-model="descriptionText"
+                            :placeholder="'{{ __('Decrivez') }} ' + acronym + ' {{ __('en 2-3 phrases : mission, role, public cible...') }}'"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical;"
-                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"><template x-if="fullname" x-text="fullname + ' (' + acronym + ') '"></template></textarea>
+                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"></textarea>
                     </div>
 
                     <div class="row">

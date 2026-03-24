@@ -273,6 +273,16 @@
     }
     .gl-empty h3 { font-family: var(--f-heading); color: var(--c-dark); }
 
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .gl-hero {
+        background: linear-gradient(135deg, var(--c-primary) 0%, #1a365d 100%);
+        color: #fff; padding: 40px 0; text-align: center; margin-bottom: 24px; border-radius: var(--r-base);
+    }
+    .gl-hero h1 { font-family: var(--f-heading); font-weight: 800; font-size: 2rem; color: #fff; margin: 0 0 8px; }
+    .gl-hero p { font-size: 1.05rem; color: rgba(255,255,255,0.95); margin: 0 0 12px; }
+    .gl-stats-badge { background: rgba(255,255,255,0.25); color: #fff; padding: 4px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+
     [x-cloak] { display: none !important; }
 </style>
 @endpush
@@ -306,10 +316,123 @@
          }"
          >
 
-        {{-- Subtitle --}}
-        <p class="text-center" style="font-size: 1.15em; color: #6B7280; margin-bottom: 24px;">
-            {{ __('Comprendre les termes de l\'intelligence artificielle, simplement.') }}
-        </p>
+        {{-- Hero + 2-step wizard wrapper --}}
+        <div x-data="{ step: 0, submitted: false, termName: '', termDef: '' }">
+            <div class="gl-hero">
+                <h1>{{ __('Glossaire IA') }}</h1>
+                <p>{{ __('Comprendre les termes de l\'intelligence artificielle, simplement.') }}</p>
+
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <span class="gl-stats-badge">
+                        <span x-text="filteredTerms.length"></span> {{ __('termes répertoriés') }}
+                    </span>
+                    @if(class_exists(\Modules\Roadmap\Models\Board::class))
+                        @auth
+                            <button type="button" x-show="step === 0 && !submitted" @click="step = 1"
+                                style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); border: 1px solid rgba(255,255,255,0.4); cursor: pointer; font-size: 13px; transition: all 0.2s;"
+                                onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                                + {{ __('Proposer un terme') }}
+                            </button>
+                        @else
+                            <a href="{{ route('login') }}" style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); text-decoration: none; font-size: 13px; border: 1px solid rgba(255,255,255,0.4);">
+                                {{ __('Proposer un terme') }}
+                            </a>
+                        @endauth
+                    @endif
+                </div>
+
+                @auth
+                {{-- Step 1 inline : nom du terme --}}
+                <div x-show="step === 1" x-cloak x-transition.duration.300ms
+                     style="margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: var(--r-base); padding: 20px; max-width: 560px; margin-left: auto; margin-right: auto;">
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 1 sur 2 — Identification') }}</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" x-model="termName" placeholder="{{ __('Nom du terme (ex: Transformer, RAG, Fine-tuning...)') }}"
+                            style="flex: 1; min-width: 200px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; background: #fff; color: var(--c-dark); outline: none;">
+                        <button type="button" @click="if(termName.trim()) step = 2"
+                            :style="!termName.trim() ? 'opacity:0.5;cursor:not-allowed' : ''"
+                            style="height: 42px; padding: 0 20px; background: #fff; color: var(--c-primary); font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; white-space: nowrap;">
+                            {{ __('Continuer') }} →
+                        </button>
+                    </div>
+                    <div style="text-align: right; margin-top: 6px;">
+                        <button type="button" @click="step = 0; termName = ''; termDef = ''" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
+                    </div>
+                </div>
+
+                {{-- Success --}}
+                <div x-show="submitted" x-cloak x-transition style="margin-top: 16px;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 10px 24px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
+                        ✓ {{ __('Merci ! Votre proposition est soumise au vote de la communaute.') }}
+                    </span>
+                </div>
+                @endauth
+            </div>
+
+            {{-- Step 2 : Details (white card below hero) --}}
+            @auth
+            @if(class_exists(\Modules\Roadmap\Models\Board::class))
+            <div x-show="step === 2" x-cloak x-transition.duration.400ms
+                 style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 28px; max-width: 100%; margin-top: -24px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 2 sur 2 — Details') }}</span>
+                        <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
+                            {{ __('Completez les informations pour') }} <strong x-text="termName" style="color: var(--c-primary);"></strong>
+                        </h3>
+                    </div>
+                    <button type="button" @click="step = 1" style="background: none; border: none; color: var(--c-primary); cursor: pointer; font-size: 13px; font-weight: 600;">← {{ __('Retour') }}</button>
+                </div>
+
+                <form method="POST" action="{{ route('roadmap.ideas.store', ['board' => 'glossaire-communautaire']) }}"
+                      @submit.prevent="
+                        fetch($el.action, { method: 'POST', body: new FormData($el) })
+                        .then(r => { if(r.ok || r.redirected) { submitted = true; step = 0; } })
+                        .catch(() => { $el.submit(); })
+                      ">
+                    @csrf
+                    <input type="hidden" name="source" value="glossaire">
+                    <input type="hidden" name="title" :value="termName">
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Definition courte') }} <span style="color: #E74C3C;">*</span></label>
+                        <textarea name="description" required rows="3" x-model="termDef"
+                            :placeholder="'{{ __('Decrivez') }} ' + termName + ' {{ __('en 2-3 phrases simples...') }}'"
+                            style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical; background: #fff; color: var(--c-dark);"
+                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 14px;">
+                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Categorie') }}</label>
+                            <select name="category"
+                                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark);">
+                                <option value="">{{ __('Choisir...') }}</option>
+                                <option value="Concepts fondamentaux">{{ __('Concepts fondamentaux') }}</option>
+                                <option value="Acronymes et sigles">{{ __('Acronymes et sigles') }}</option>
+                                <option value="Securite et ethique">{{ __('Securite et ethique') }}</option>
+                                <option value="Outils et techniques">{{ __('Outils et techniques') }}</option>
+                                <option value="Donnees et traitement">{{ __('Donnees et traitement') }}</option>
+                                <option value="Tendances 2026">{{ __('Tendances 2026') }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 14px; display: flex; align-items: flex-end;">
+                            <button type="submit"
+                                style="width: 100%; height: 40px; background: var(--c-primary); color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; transition: background 0.2s;"
+                                onmouseover="this.style.background='var(--c-dark)'" onmouseout="this.style.background='var(--c-primary)'">
+                                {{ __('Soumettre la proposition') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 12px; color: #9CA3AF; margin: 4px 0 0;">
+                        {{ __('La communaute votera sur votre proposition dans la section Idees et votes.') }}
+                    </p>
+                </form>
+            </div>
+            @endif
+            @endauth
+        </div>
 
         {{-- Search + Category dropdown --}}
         <div class="row" style="margin-bottom: 16px;">
@@ -442,101 +565,6 @@
         </div>
     </div>
 
-    {{-- CTA Proposer un terme --}}
-    @if(class_exists(\Modules\Roadmap\Models\Board::class))
-    <div x-data="{ showForm: false, submitted: false }" style="margin-top: 40px;">
-        <div style="background: linear-gradient(135deg, var(--c-primary) 0%, #1a5276 100%); border-radius: var(--r-base); padding: 40px 30px; color: #fff; text-align: center;">
-            <h2 style="font-family: var(--f-heading); font-size: 24px; font-weight: 700; margin: 0 0 8px;">
-                {{ __('Vous ne trouvez pas un terme ?') }}
-            </h2>
-            <p style="font-size: 16px; opacity: 0.9; margin-bottom: 20px;">
-                {{ __('Proposez un nouveau terme pour le glossaire et la communaute votera !') }}
-            </p>
-
-            @auth
-                <button type="button" @click="showForm = !showForm" x-show="!submitted"
-                    style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 15px; transition: all 0.2s;"
-                    onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">
-                    <span x-text="showForm ? '{{ __('Fermer') }}' : '{{ __('Proposer un terme') }}'"></span>
-                </button>
-            @else
-                <a href="{{ route('login') }}" style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); text-decoration: none; display: inline-block; font-size: 15px;">
-                    {{ __('Connectez-vous pour proposer un terme') }}
-                </a>
-            @endauth
-
-            {{-- Success message --}}
-            <div x-show="submitted" x-cloak style="background: rgba(255,255,255,0.15); border-radius: var(--r-base); padding: 20px; margin-top: 20px;">
-                <div style="font-size: 32px; margin-bottom: 8px;">&#10003;</div>
-                <p style="font-weight: 600; font-size: 16px;">{{ __('Merci ! Votre proposition a ete soumise. La communaute pourra voter dessus dans les idees et votes.') }}</p>
-            </div>
-        </div>
-
-        @auth
-        <div x-show="showForm && !submitted" x-cloak x-transition
-             style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 30px;">
-            <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 20px; font-size: 18px;">
-                {{ __('Soumettre une proposition de terme') }}
-            </h3>
-            <form method="POST" action="{{ route('roadmap.ideas.store', ['board' => 'glossaire-communautaire']) }}"
-                  @submit.prevent="
-                    fetch($el.action, { method: 'POST', body: new FormData($el) })
-                    .then(r => { if(r.ok || r.redirected) { submitted = true; showForm = false; } })
-                    .catch(() => { $el.submit(); })
-                  ">
-                @csrf
-                <input type="hidden" name="source" value="glossaire">
-
-                <div style="margin-bottom: 16px;">
-                    <label for="gl-term-name" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
-                        {{ __('Nom du terme') }} <span style="color: #E74C3C;">*</span>
-                    </label>
-                    <input type="text" id="gl-term-name" name="title" required placeholder="{{ __('Ex: Apprentissage par transfert, XAI, Tokenisation...') }}"
-                        style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none;"
-                        onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
-                </div>
-
-                <div style="margin-bottom: 16px;">
-                    <label for="gl-term-def" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
-                        {{ __('Definition courte') }} <span style="color: #E74C3C;">*</span>
-                    </label>
-                    <textarea id="gl-term-def" name="description" rows="3" required placeholder="{{ __('Decrivez ce terme en 2-3 phrases simples...') }}"
-                        style="width: 100%; padding: 10px 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none; resize: vertical;"
-                        onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"></textarea>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6" style="margin-bottom: 16px;">
-                        <label for="gl-term-cat" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
-                            {{ __('Categorie') }}
-                        </label>
-                        <select id="gl-term-cat" name="category"
-                            style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff;">
-                            <option value="Concepts fondamentaux">{{ __('Concepts fondamentaux') }}</option>
-                            <option value="Acronymes et sigles">{{ __('Acronymes et sigles') }}</option>
-                            <option value="Securite et ethique">{{ __('Securite et ethique') }}</option>
-                            <option value="Outils et techniques">{{ __('Outils et techniques') }}</option>
-                            <option value="Donnees et traitement">{{ __('Donnees et traitement') }}</option>
-                            <option value="Tendances 2026">{{ __('Tendances 2026') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6" style="margin-bottom: 16px; display: flex; align-items: flex-end;">
-                        <button type="submit"
-                            style="width: 100%; height: 44px; background: var(--c-primary); color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 15px; transition: all 0.2s;"
-                            onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                            {{ __('Soumettre ma proposition') }}
-                        </button>
-                    </div>
-                </div>
-
-                <p style="font-size: 12px; color: #9CA3AF; margin: 0;">
-                    {{ __('Votre proposition apparaitra dans la section Idees et votes ou la communaute pourra voter. Les termes les plus populaires seront ajoutes au glossaire.') }}
-                </p>
-            </form>
-        </div>
-        @endauth
-    </div>
-    @endif
 
 </section>
 @endsection
