@@ -126,11 +126,11 @@
 
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <input type="text" name="title" required placeholder="{{ __('Acronyme (ex: RÉCIT)') }}"
-                            style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: rgba(255,255,255,0.1); color: #fff; outline: none;"
-                            onfocus="this.style.borderColor='#fff'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'">
+                            style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: #fff; color: var(--c-dark); outline: none;"
+                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
                         <input type="text" name="description" required placeholder="{{ __('Nom complet de l\'acronyme') }}"
-                            style="flex: 1; min-width: 200px; height: 42px; padding: 0 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: var(--r-base); font-size: 14px; background: rgba(255,255,255,0.1); color: #fff; outline: none;"
-                            onfocus="this.style.borderColor='#fff'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'">
+                            style="flex: 1; min-width: 200px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark); outline: none;"
+                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
                         <button type="submit"
                             style="height: 42px; padding: 0 20px; background: #fff; color: var(--c-primary); font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; white-space: nowrap;">
                             {{ __('Soumettre') }}
