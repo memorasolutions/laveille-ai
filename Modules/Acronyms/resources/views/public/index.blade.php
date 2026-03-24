@@ -167,6 +167,88 @@
         </div>
 
     </div>
+
+    {{-- CTA Proposer un acronyme --}}
+    @if(class_exists(\Modules\Roadmap\Models\Board::class))
+    <div x-data="{ showForm: false, submitted: false }" style="margin-top: 40px;">
+        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: var(--r-base); padding: 40px 30px; color: #fff; text-align: center;">
+            <h2 style="font-family: var(--f-heading); font-size: 24px; font-weight: 700; margin: 0 0 8px;">
+                {{ __('Il manque un acronyme ?') }}
+            </h2>
+            <p style="font-size: 16px; opacity: 0.9; margin-bottom: 20px;">
+                {{ __('Proposez un acronyme et la communaute votera pour son ajout !') }}
+            </p>
+
+            @auth
+                <button type="button" @click="showForm = !showForm" x-show="!submitted"
+                    style="background: #fff; color: #D97706; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 15px; transition: all 0.2s;"
+                    onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">
+                    <span x-text="showForm ? '{{ __('Fermer') }}' : '{{ __('Proposer un acronyme') }}'"></span>
+                </button>
+            @else
+                <a href="{{ route('login') }}" style="background: #fff; color: #D97706; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); text-decoration: none; display: inline-block; font-size: 15px;">
+                    {{ __('Connectez-vous pour proposer un acronyme') }}
+                </a>
+            @endauth
+
+            <div x-show="submitted" x-cloak style="background: rgba(255,255,255,0.15); border-radius: var(--r-base); padding: 20px; margin-top: 20px;">
+                <div style="font-size: 32px; margin-bottom: 8px;">&#10003;</div>
+                <p style="font-weight: 600; font-size: 16px;">{{ __('Merci ! Votre proposition a ete soumise. La communaute pourra voter dessus dans les idees et votes.') }}</p>
+            </div>
+        </div>
+
+        @auth
+        <div x-show="showForm && !submitted" x-cloak x-transition
+             style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 30px;">
+            <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 20px; font-size: 18px;">
+                {{ __('Proposer un nouvel acronyme') }}
+            </h3>
+            <form method="POST" action="{{ route('roadmap.ideas.store', ['board' => 'glossaire-communautaire']) }}"
+                  @submit.prevent="
+                    fetch($el.action, { method: 'POST', body: new FormData($el) })
+                    .then(r => { if(r.ok || r.redirected) { submitted = true; showForm = false; } })
+                    .catch(() => { $el.submit(); })
+                  ">
+                @csrf
+                <input type="hidden" name="source" value="acronymes">
+                <input type="hidden" name="category" value="Acronymes éducation">
+
+                <div class="row">
+                    <div class="col-md-4" style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
+                            {{ __('Acronyme') }} <span style="color: #E74C3C;">*</span>
+                        </label>
+                        <input type="text" name="title" required placeholder="{{ __('Ex: RÉCIT, MEEQ, CDSI...') }}"
+                            style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none; text-transform: uppercase;"
+                            onfocus="this.style.borderColor='#F59E0B'" onblur="this.style.borderColor='#E5E7EB'">
+                    </div>
+                    <div class="col-md-8" style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
+                            {{ __('Nom complet') }} <span style="color: #E74C3C;">*</span>
+                        </label>
+                        <input type="text" name="description" required placeholder="{{ __('Ex: Réseau Éducation Collaboration Innovation Technologie') }}"
+                            style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none;"
+                            onfocus="this.style.borderColor='#F59E0B'" onblur="this.style.borderColor='#E5E7EB'">
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button type="submit"
+                        style="height: 44px; padding: 0 24px; background: #F59E0B; color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 15px;"
+                        onmouseover="this.style.background='#D97706'" onmouseout="this.style.background='#F59E0B'">
+                        {{ __('Soumettre') }}
+                    </button>
+                </div>
+
+                <p style="font-size: 12px; color: #9CA3AF; margin: 10px 0 0;">
+                    {{ __('Votre proposition apparaitra dans la section Idees et votes.') }}
+                </p>
+            </form>
+        </div>
+        @endauth
+    </div>
+    @endif
+
 </div>
 @endsection
 
