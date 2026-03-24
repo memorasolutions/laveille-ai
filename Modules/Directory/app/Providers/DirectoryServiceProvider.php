@@ -43,7 +43,9 @@ class DirectoryServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Directory\Console\DirectoryEnrichToolsCommand::class,
+        ]);
     }
 
     /**
