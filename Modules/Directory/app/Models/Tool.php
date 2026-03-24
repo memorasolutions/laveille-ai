@@ -71,6 +71,11 @@ class Tool extends Model
         return $this->hasMany(ToolResource::class, 'directory_tool_id');
     }
 
+    public function screenshots(): HasMany
+    {
+        return $this->hasMany(ToolScreenshot::class, 'directory_tool_id');
+    }
+
     public function averageRating(): float
     {
         return (float) $this->reviews()->approved()->avg('rating') ?: 0;

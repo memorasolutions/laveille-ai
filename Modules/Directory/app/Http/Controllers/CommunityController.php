@@ -13,6 +13,7 @@ use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolDiscussion;
 use Modules\Directory\Models\ToolReport;
 use Modules\Directory\Models\ToolResource;
+use Modules\Directory\Models\ToolScreenshot;
 use Modules\Directory\Models\ToolReview;
 use Modules\Directory\Services\ReputationService;
 
@@ -200,5 +201,46 @@ class CommunityController extends Controller
         ]);
 
         return back()->with('success', __('Merci ! Votre suggestion sera examinée par notre équipe.'));
+    }
+
+    public function storeScreenshot(Request $request, string $slug): RedirectResponse
+    {
+        $request->validate([
+            'screenshot' => 'required|image|max:5120',
+            'caption' => 'nullable|string|max:255',
+        ]);
+
+        $tool = Tool::where('slug->' . app()->getLocale(), $slug)->firstOrFail();
+
+        $path = $request->file('screenshot')->store('directory/screenshots', 'public');
+
+        $autoApprove = false;
+        if (class_exists(\Modules\Directory\Services\ReputationService::class)) {
+            $autoApprove = \Modules\Directory\Services\ReputationService::shouldAutoApprove(Auth::user());
+        }
+
+        ToolScreenshot::create([
+            'directory_tool_id' => $tool->id,
+            'user_id' => Auth::id(),
+            'image_path' => 'storage/' . $path,
+            'caption' => $request->caption,
+            'is_approved' => $autoApprove,
+        ]);
+
+        if ($autoApprove && class_exists(\Modules\Directory\Services\ReputationService::class)) {
+            \Modules\Directory\Services\ReputationService::addPoints(Auth::user(), 8, 'screenshot_approved');
+        }
+
+        return back()->with('success', $autoApprove
+            ? __('Screenshot ajouté ! Merci pour votre contribution.')
+            : __('Screenshot soumis ! Il sera visible après modération.'));
+    }
+
+    public function voteScreenshot(Request $request, int $id): JsonResponse
+    {
+        $screenshot = ToolScreenshot::approved()->findOrFail($id);
+        $screenshot->increment('votes_count');
+
+        return response()->json(['votes' => $screenshot->votes_count]);
     }
 }

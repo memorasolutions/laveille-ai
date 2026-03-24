@@ -69,6 +69,7 @@
     $reviews = $tool->reviews()->approved()->latest()->get();
     $discussions = $tool->discussions()->approved()->topLevel()->with('replies.user', 'user')->latest()->get();
     $resources = $tool->resources()->approved()->latest()->get();
+    $screenshots = $tool->screenshots()->approved()->orderByDesc('votes_count')->get();
 @endphp
 
 <section class="section-padding" style="padding-top: 10px;">
@@ -171,6 +172,7 @@
             <button type="button" class="rt-tab-btn" :class="tab==='reviews' && 'rt-tab-active'" @click="tab='reviews'">⭐ {{ __('Avis') }} ({{ $reviews->count() }})</button>
             <button type="button" class="rt-tab-btn" :class="tab==='discussions' && 'rt-tab-active'" @click="tab='discussions'">💬 {{ __('Discussion') }} ({{ $discussions->count() }})</button>
             <button type="button" class="rt-tab-btn" :class="tab==='resources' && 'rt-tab-active'" @click="tab='resources'">📚 {{ __('Tutoriels') }} ({{ $resources->count() }})</button>
+            <button type="button" class="rt-tab-btn" :class="tab==='screenshots' && 'rt-tab-active'" @click="tab='screenshots'">📸 {{ __('Screenshots') }} ({{ $screenshots->count() }})</button>
             <button type="button" class="rt-tab-btn" :class="tab==='alternatives' && 'rt-tab-active'" @click="tab='alternatives'">🔄 {{ __('Alternatives') }}</button>
         </div>
 
@@ -503,6 +505,67 @@
                 </form>
             </div>
             @else <div style="text-align: center; margin-top: 20px; padding: 16px; background: #f3f4f6; border-radius: 12px;"><a href="{{ route('login') }}" style="color: #4f46e5; font-weight: 600;">{{ __('Connectez-vous') }}</a> {{ __('pour partager une ressource.') }}</div> @endauth
+        </div>
+
+        {{-- TAB: Screenshots --}}
+        <div class="rt-panel" x-show="tab==='screenshots'" x-cloak style="padding: 24px;">
+            <h3 style="font-weight: 700; color: var(--c-dark); margin-top: 0; margin-bottom: 16px; font-size: 18px;">📸 {{ __('Screenshots de la communaute') }}</h3>
+
+            {{-- Galerie --}}
+            @if($screenshots->isNotEmpty())
+                <div class="row" style="margin-bottom: 24px;">
+                    @foreach($screenshots as $ss)
+                    <div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom: 16px;">
+                        <div style="border: 1px solid #E5E7EB; border-radius: var(--r-base); overflow: hidden; background: #F9FAFB;">
+                            <a href="{{ asset($ss->image_path) }}" target="_blank" style="display: block;">
+                                <img src="{{ asset($ss->image_path) }}" alt="{{ $ss->caption ?? $tool->name }}" loading="lazy" style="width: 100%; height: 200px; object-fit: cover; display: block;">
+                            </a>
+                            <div style="padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 12px; color: #6B7280;">{{ $ss->caption ?? __('Screenshot') }} — {{ $ss->user->name ?? __('Anonyme') }}</span>
+                                <button onclick="fetch('{{ route('directory.screenshots.vote', $ss->id) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d=>{this.closest('div').querySelector('.vote-count').textContent=d.votes})" style="background: none; border: none; cursor: pointer; color: #E74C3C; font-size: 13px; font-weight: 600;">
+                                    ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            @else
+                <div style="text-align: center; padding: 40px 20px; background: #F9FAFB; border-radius: var(--r-base); margin-bottom: 24px;">
+                    <div style="font-size: 36px; margin-bottom: 8px;">📷</div>
+                    <p style="color: #6B7280; margin: 0;">{{ __('Aucun screenshot pour le moment. Soyez le premier a en partager !') }}</p>
+                </div>
+            @endif
+
+            {{-- Upload form --}}
+            @auth
+                <div style="background: #F0F4F8; border-radius: var(--r-base); padding: 20px; border: 2px dashed #CBD5E1;">
+                    <h4 style="font-weight: 700; color: var(--c-dark); margin: 0 0 12px; font-size: 15px;">{{ __('Ajouter un screenshot') }}</h4>
+                    <form method="POST" action="{{ route('directory.screenshots.store', $tool->slug) }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6" style="margin-bottom: 12px;">
+                                <input type="file" name="screenshot" accept="image/*" required
+                                    style="width: 100%; padding: 8px; border: 1px solid #E5E7EB; border-radius: var(--r-base); background: #fff; font-size: 13px;">
+                                <small style="color: #9CA3AF; font-size: 11px;">{{ __('Max 5 Mo. Formats : JPG, PNG, WebP.') }}</small>
+                            </div>
+                            <div class="col-md-4" style="margin-bottom: 12px;">
+                                <input type="text" name="caption" placeholder="{{ __('Description (optionnel)') }}" maxlength="255"
+                                    style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 13px;">
+                            </div>
+                            <div class="col-md-2" style="margin-bottom: 12px;">
+                                <button type="submit" style="width: 100%; height: 38px; background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); font-weight: 600; font-size: 13px; cursor: pointer;">
+                                    {{ __('Envoyer') }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            @else
+                <div style="text-align: center; padding: 16px; background: #F3F4F6; border-radius: var(--r-base);">
+                    <a href="{{ route('magic-link.request') }}" style="color: var(--c-primary); font-weight: 600;">{{ __('Connectez-vous') }}</a> {{ __('pour partager un screenshot.') }}
+                </div>
+            @endauth
         </div>
 
         {{-- TAB: Alternatives --}}

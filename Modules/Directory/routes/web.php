@@ -27,6 +27,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/annuaire/community/{type}/{id}/like', [CommunityController::class, 'toggleLike'])->name('directory.community.like');
     Route::post('/annuaire/community/{type}/{id}/report', [CommunityController::class, 'report'])->name('directory.community.report');
     Route::post('/annuaire/{slug}/suggest', [CommunityController::class, 'storeSuggestion'])->name('directory.suggestions.store');
+    Route::post('/annuaire/{slug}/screenshots', [CommunityController::class, 'storeScreenshot'])->name('directory.screenshots.store');
+    Route::post('/annuaire/screenshot/{id}/vote', [CommunityController::class, 'voteScreenshot'])->name('directory.screenshots.vote');
     Route::post('/roadmap/{id}/vote', [RoadmapController::class, 'vote'])->name('directory.roadmap.vote');
 });
 
