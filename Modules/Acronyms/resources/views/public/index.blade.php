@@ -85,70 +85,138 @@
 <div class="acr-wrapper">
     <div class="container" x-data="acronymApp()">
 
-        {{-- Hero with inline propose form --}}
-        <div class="acr-hero" x-data="{ proposing: false, submitted: false }">
-            <h1>🎓 {{ __('Acronymes de l\'éducation au Québec') }}</h1>
-            <p>{{ __('Le glossaire complet pour naviguer dans le jargon du système éducatif québécois') }}</p>
+        {{-- Hero + 2-step wizard wrapper --}}
+        <div x-data="{ step: 0, submitted: false, acronym: '', fullname: '' }">
+            <div class="acr-hero">
+                <h1>🎓 {{ __('Acronymes de l\'éducation au Québec') }}</h1>
+                <p>{{ __('Le glossaire complet pour naviguer dans le jargon du système éducatif québécois') }}</p>
 
-            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-                <span class="acr-stats-badge">
-                    <span x-text="filteredItems.length"></span> {{ __('acronymes répertoriés') }}
-                </span>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                    <span class="acr-stats-badge">
+                        <span x-text="filteredItems.length"></span> {{ __('acronymes répertoriés') }}
+                    </span>
+                    @if(class_exists(\Modules\Roadmap\Models\Board::class))
+                        @auth
+                            <button type="button" x-show="step === 0 && !submitted" @click="step = 1"
+                                style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); border: 1px solid rgba(255,255,255,0.4); cursor: pointer; font-size: 13px; transition: all 0.2s;"
+                                onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                                + {{ __('Proposer un acronyme') }}
+                            </button>
+                        @else
+                            <a href="{{ route('login') }}" style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); text-decoration: none; font-size: 13px; border: 1px solid rgba(255,255,255,0.4);">
+                                {{ __('Proposer un acronyme') }}
+                            </a>
+                        @endauth
+                    @endif
+                </div>
 
-                @if(class_exists(\Modules\Roadmap\Models\Board::class))
-                    @auth
-                        <button type="button" x-show="!proposing && !submitted" @click="proposing = true"
-                            style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); border: 1px solid rgba(255,255,255,0.4); cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                            + {{ __('Proposer un acronyme') }}
+                @auth
+                {{-- Step 1 inline: Acronyme + Nom complet --}}
+                <div x-show="step === 1" x-cloak x-transition.duration.300ms
+                     style="margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: var(--r-base); padding: 20px; max-width: 560px; margin-left: auto; margin-right: auto;">
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 1 sur 2 — Identification') }}</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" x-model="acronym" placeholder="{{ __('Acronyme (ex: RÉCIT)') }}"
+                            style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: #fff; color: var(--c-dark); outline: none;">
+                        <input type="text" x-model="fullname" placeholder="{{ __('Nom complet') }}"
+                            style="flex: 1; min-width: 180px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark); outline: none;">
+                        <button type="button" @click="if(acronym.trim() && fullname.trim()) step = 2"
+                            :style="(!acronym.trim() || !fullname.trim()) ? 'opacity:0.5;cursor:not-allowed' : ''"
+                            style="height: 42px; padding: 0 20px; background: #fff; color: var(--c-primary); font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; white-space: nowrap;">
+                            {{ __('Continuer') }} →
                         </button>
-                    @else
-                        <a href="{{ route('login') }}" style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); text-decoration: none; font-size: 13px; border: 1px solid rgba(255,255,255,0.4);">
-                            {{ __('Proposer un acronyme') }}
-                        </a>
-                    @endauth
-                @endif
+                    </div>
+                    <div style="text-align: right; margin-top: 6px;">
+                        <button type="button" @click="step = 0; acronym = ''; fullname = ''" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
+                    </div>
+                </div>
+
+                {{-- Success --}}
+                <div x-show="submitted" x-cloak x-transition style="margin-top: 16px;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 10px 24px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
+                        ✓ {{ __('Merci ! Votre proposition est soumise au vote de la communaute.') }}
+                    </span>
+                </div>
+                @endauth
             </div>
 
-            {{-- Inline form — progressive disclosure --}}
+            {{-- Step 2: Details (white card below hero) --}}
             @auth
-            <div x-show="proposing && !submitted" x-cloak x-transition.duration.300ms
-                 style="margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: var(--r-base); padding: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            @if(class_exists(\Modules\Roadmap\Models\Board::class))
+            <div x-show="step === 2" x-cloak x-transition.duration.400ms
+                 style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 28px; max-width: 100%; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 2 sur 2 — Details') }}</span>
+                        <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
+                            {{ __('Completez les informations pour') }} <strong x-text="acronym" style="color: var(--c-primary);"></strong>
+                        </h3>
+                    </div>
+                    <button type="button" @click="step = 1" style="background: none; border: none; color: var(--c-primary); cursor: pointer; font-size: 13px; font-weight: 600;">← {{ __('Retour') }}</button>
+                </div>
+
                 <form method="POST" action="{{ route('roadmap.ideas.store', ['board' => 'glossaire-communautaire']) }}"
                       @submit.prevent="
                         fetch($el.action, { method: 'POST', body: new FormData($el) })
-                        .then(r => { if(r.ok || r.redirected) { submitted = true; proposing = false; } })
+                        .then(r => { if(r.ok || r.redirected) { submitted = true; step = 0; } })
                         .catch(() => { $el.submit(); })
                       ">
                     @csrf
                     <input type="hidden" name="source" value="acronymes">
                     <input type="hidden" name="category" value="Acronymes éducation">
+                    <input type="hidden" name="title" :value="acronym">
+                    {{-- Description = nom complet + détails --}}
 
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" name="title" required placeholder="{{ __('Acronyme (ex: RÉCIT)') }}"
-                            style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: #fff; color: var(--c-dark); outline: none;"
-                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
-                        <input type="text" name="description" required placeholder="{{ __('Nom complet de l\'acronyme') }}"
-                            style="flex: 1; min-width: 200px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark); outline: none;"
-                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
-                        <button type="submit"
-                            style="height: 42px; padding: 0 20px; background: #fff; color: var(--c-primary); font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; white-space: nowrap;">
-                            {{ __('Soumettre') }}
-                        </button>
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 14px;">
+                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Site web officiel') }}</label>
+                            <input type="url" name="website_url" placeholder="https://exemple.qc.ca"
+                                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
+                                onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 14px;">
+                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('URL du logo') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('optionnel') }})</small></label>
+                            <input type="url" name="logo_url" placeholder="https://exemple.qc.ca/logo.png"
+                                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
+                                onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                        <span style="font-size: 11px; color: rgba(255,255,255,0.6);">{{ __('Votre proposition sera soumise au vote de la communauté') }}</span>
-                        <button type="button" @click="proposing = false" style="background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Description courte') }} <span style="color: #E74C3C;">*</span></label>
+                        <textarea name="description" required rows="3" :placeholder="'{{ __('Decrivez') }} ' + acronym + ' {{ __('en 2-3 phrases : mission, role, public cible...') }}'"
+                            style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical;"
+                            onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"><template x-if="fullname" x-text="fullname + ' (' + acronym + ') '"></template></textarea>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 14px;">
+                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Categorie') }}</label>
+                            <select name="acr_category"
+                                style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff;">
+                                <option value="">{{ __('Choisir...') }}</option>
+                                @isset($categories)
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->name }}">{{ $cat->icon ?? '' }} {{ $cat->name }}</option>
+                                    @endforeach
+                                @endisset
+                            </select>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 14px; display: flex; align-items: flex-end;">
+                            <button type="submit"
+                                style="width: 100%; height: 40px; background: var(--c-primary); color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; transition: background 0.2s;"
+                                onmouseover="this.style.background='var(--c-dark)'" onmouseout="this.style.background='var(--c-primary)'">
+                                {{ __('Soumettre la proposition') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 12px; color: #9CA3AF; margin: 4px 0 0;">
+                        {{ __('La communaute votera sur votre proposition dans la section Idees et votes.') }}
+                    </p>
                 </form>
             </div>
-
-            {{-- Success --}}
-            <div x-show="submitted" x-cloak x-transition style="margin-top: 16px;">
-                <span style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
-                    ✓ {{ __('Merci ! Votre proposition est soumise au vote.') }}
-                </span>
-            </div>
+            @endif
             @endauth
         </div>
 
