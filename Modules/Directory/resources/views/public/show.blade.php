@@ -385,7 +385,9 @@
                     <button type="submit" class="btn" style="background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 600;" :disabled="rating === 0">{{ __('Publier mon avis') }}</button>
                 </form>
             </div>
-            @else <div style="text-align: center; margin-top: 20px; padding: 16px; background: #f3f4f6; border-radius: 12px;"><a href="{{ route('login') }}" style="color: #4f46e5; font-weight: 600;">{{ __('Connectez-vous') }}</a> {{ __('pour donner votre avis.') }}</div> @endauth
+            @else
+                @include('fronttheme::partials.auth-inline', ['message' => __('pour donner votre avis.')])
+            @endauth
         </div>
 
         {{-- TAB: Discussion --}}
@@ -454,7 +456,7 @@
             </div>
             @endforeach
 
-            @guest <div style="text-align: center; margin-top: 20px; padding: 16px; background: #f3f4f6; border-radius: 12px;"><a href="{{ route('login') }}" style="color: #4f46e5; font-weight: 600;">{{ __('Connectez-vous') }}</a> {{ __('pour participer.') }}</div> @endguest
+            @include('fronttheme::partials.auth-inline', ['message' => __('pour participer a la discussion.')])
         </div>
 
         {{-- TAB: Tutoriels --}}
@@ -504,7 +506,9 @@
                     <p style="color: #9ca3af; font-size: 12px; margin-top: 8px;">{{ __('La ressource sera visible après approbation.') }}</p>
                 </form>
             </div>
-            @else <div style="text-align: center; margin-top: 20px; padding: 16px; background: #f3f4f6; border-radius: 12px;"><a href="{{ route('login') }}" style="color: #4f46e5; font-weight: 600;">{{ __('Connectez-vous') }}</a> {{ __('pour partager une ressource.') }}</div> @endauth
+            @else
+                @include('fronttheme::partials.auth-inline', ['message' => __('pour partager une ressource.')])
+            @endauth
         </div>
 
         {{-- TAB: Screenshots --}}
@@ -562,9 +566,7 @@
                     </form>
                 </div>
             @else
-                <div style="text-align: center; padding: 16px; background: #F3F4F6; border-radius: var(--r-base);">
-                    <a href="{{ route('magic-link.request') }}" style="color: var(--c-primary); font-weight: 600;">{{ __('Connectez-vous') }}</a> {{ __('pour partager un screenshot.') }}
-                </div>
+                @include('fronttheme::partials.auth-inline', ['message' => __('pour partager un screenshot.')])
             @endauth
         </div>
 

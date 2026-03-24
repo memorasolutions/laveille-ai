@@ -109,9 +109,7 @@
                 <div style="font-size: 48px; margin-bottom: 16px;">✍️</div>
                 <h3 style="font-family: var(--f-heading); color: var(--c-dark);">{{ __('Connectez-vous pour proposer un article') }}</h3>
                 <p style="color: #6B7280; margin-bottom: 20px;">{{ __('Partagez vos connaissances avec notre communauté.') }}</p>
-                @if(Route::has('login'))
-                    <a href="{{ route('login') }}" style="background: var(--c-primary); color: #fff; padding: 10px 24px; border-radius: var(--r-btn); font-weight: 600; text-decoration: none;">{{ __('Se connecter') }}</a>
-                @endif
+                @include('fronttheme::partials.auth-inline', ['message' => __('pour proposer un article.')])
             </div>
         @endauth
     </div>
