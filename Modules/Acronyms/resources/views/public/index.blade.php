@@ -95,8 +95,8 @@
             @if(class_exists(\Modules\Roadmap\Models\Board::class))
                 <div style="margin-top: 16px;">
                     @auth
-                        <a href="#proposer" onclick="document.querySelector('[x-data]').__x && document.querySelector('#acr-propose-btn')?.click(); this.closest('.acr-hero').nextElementSibling || window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}); return false;"
-                           style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 10px 24px; border-radius: var(--r-btn); text-decoration: none; font-size: 14px; display: inline-block;">
+                        <a href="#acr-propose-section" onclick="event.preventDefault(); document.getElementById('acr-propose-section').scrollIntoView({behavior:'smooth'}); setTimeout(function(){ window.dispatchEvent(new CustomEvent('open-propose-form')); }, 500);"
+                           style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 10px 24px; border-radius: var(--r-btn); text-decoration: none; font-size: 14px; display: inline-block; cursor: pointer;">
                             {{ __('Il manque un acronyme ? Proposez-le !') }}
                         </a>
                     @else
@@ -184,7 +184,7 @@
 
     {{-- CTA Proposer un acronyme --}}
     @if(class_exists(\Modules\Roadmap\Models\Board::class))
-    <div x-data="{ showForm: false, submitted: false }" style="margin-top: 40px;">
+    <div id="acr-propose-section" x-data="{ showForm: false, submitted: false }" @open-propose-form.window="showForm = true" style="margin-top: 40px;">
         <div style="background: linear-gradient(135deg, #92400E 0%, #78350F 100%); border-radius: var(--r-base); padding: 40px 30px; color: #fff; text-align: center;">
             <h2 style="font-family: var(--f-heading); font-size: 24px; font-weight: 700; margin: 0 0 8px;">
                 {{ __('Il manque un acronyme ?') }}
