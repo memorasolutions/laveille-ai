@@ -350,7 +350,7 @@
                                     {{ __('Proposer un terme') }}
                                 </button>
                                 <div x-show="showLogin" x-cloak x-transition style="margin-top: 12px;">
-                                    @include('fronttheme::partials.auth-inline', ['message' => __('pour proposer un terme.')])
+                                    @include('fronttheme::partials.auth-inline', ['message' => __('pour proposer un terme.'), 'dark' => true])
                                 </div>
                             </span>
                         @endauth

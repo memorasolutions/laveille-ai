@@ -131,7 +131,7 @@
                                     {{ __('Proposer un acronyme') }}
                                 </button>
                                 <div x-show="showLogin" x-cloak x-transition style="margin-top: 12px;">
-                                    @include('fronttheme::partials.auth-inline', ['message' => __('pour proposer un acronyme.')])
+                                    @include('fronttheme::partials.auth-inline', ['message' => __('pour proposer un acronyme.'), 'dark' => true])
                                 </div>
                             </span>
                         @endauth
