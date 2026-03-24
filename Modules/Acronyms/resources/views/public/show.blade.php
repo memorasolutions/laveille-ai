@@ -136,7 +136,15 @@
                     {{-- Description --}}
                     @if($acronym->description)
                         <div class="acr-show-desc">
-                            {!! nl2br(e($acronym->description)) !!}
+                            @php
+                                $descText = e($acronym->description);
+                                // Split into sentences, regroup into paragraphs (2 sentences each)
+                                $sentences = preg_split('/(?<=[.!?])\s+(?=[A-ZÀ-ÿ])/', $descText);
+                                $paragraphs = array_chunk($sentences, 2);
+                            @endphp
+                            @foreach($paragraphs as $para)
+                                <p>{!! implode(' ', $para) !!}</p>
+                            @endforeach
                         </div>
                     @else
                         <p style="color: #9CA3AF; font-style: italic;">{{ __('Aucune description détaillée disponible pour cet acronyme.') }}</p>
