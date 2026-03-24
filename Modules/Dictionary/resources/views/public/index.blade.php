@@ -347,7 +347,7 @@
                      style="margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: var(--r-base); padding: 20px; max-width: 560px; margin-left: auto; margin-right: auto;">
                     <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 1 sur 2 — Identification') }}</div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" x-model="termName" placeholder="{{ __('Nom du terme (ex: Transformer, RAG, Fine-tuning...)') }}"
+                        <input type="text" x-model="termName" placeholder="{{ __('Nom du terme (ex: Transformer, RAG, Fine-tuning...)') }}" aria-label="{{ __('Nom du terme') }}"
                             style="flex: 1; min-width: 200px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; background: #fff; color: var(--c-dark); outline: none;">
                         <button type="button" @click="if(termName.trim()) step = 2"
                             :style="!termName.trim() ? 'opacity:0.5;cursor:not-allowed' : ''"
@@ -396,7 +396,7 @@
 
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Definition courte') }} <span style="color: #E74C3C;">*</span></label>
-                        <textarea name="description" required rows="3" x-model="termDef"
+                        <textarea name="description" required rows="3" x-model="termDef" aria-label="{{ __('Définition courte') }}"
                             :placeholder="'{{ __('Decrivez') }} ' + termName + ' {{ __('en 2-3 phrases simples...') }}'"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical; background: #fff; color: var(--c-dark);"
                             onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"></textarea>
@@ -405,7 +405,7 @@
                     <div class="row">
                         <div class="col-md-6" style="margin-bottom: 14px;">
                             <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Categorie') }}</label>
-                            <select name="category"
+                            <select name="category" aria-label="{{ __('Catégorie du terme') }}"
                                 style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark);">
                                 <option value="">{{ __('Choisir...') }}</option>
                                 <option value="Concepts fondamentaux">{{ __('Concepts fondamentaux') }}</option>

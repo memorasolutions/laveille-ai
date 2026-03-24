@@ -138,9 +138,9 @@
                      style="margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: var(--r-base); padding: 20px; max-width: 560px; margin-left: auto; margin-right: auto;">
                     <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 1 sur 2 — Identification') }}</div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" x-model="acronym" placeholder="{{ __('Acronyme (ex: RÉCIT)') }}"
+                        <input type="text" x-model="acronym" placeholder="{{ __('Acronyme (ex: RÉCIT)') }}" aria-label="{{ __('Acronyme') }}"
                             style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: #fff; color: var(--c-dark); outline: none;">
-                        <input type="text" x-model="fullname" placeholder="{{ __('Nom complet') }}"
+                        <input type="text" x-model="fullname" placeholder="{{ __('Nom complet') }}" aria-label="{{ __('Nom complet de l acronyme') }}"
                             style="flex: 1; min-width: 180px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark); outline: none;">
                         <button type="button" @click="if(acronym.trim() && fullname.trim()) { descriptionText = fullname + ' (' + acronym + ') — '; step = 2; }"
                             :style="(!acronym.trim() || !fullname.trim()) ? 'opacity:0.5;cursor:not-allowed' : ''"
@@ -193,7 +193,7 @@
                         <div class="col-md-6" style="margin-bottom: 14px;">
                             <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Site web officiel') }}</label>
                             <div style="display: flex; gap: 6px;">
-                                <input type="url" name="website_url" x-model="website_url" placeholder="https://exemple.qc.ca"
+                                <input type="url" name="website_url" x-model="website_url" placeholder="https://exemple.qc.ca" aria-label="{{ __('Site web officiel') }}"
                                     @blur="scrapeUrl()"
                                     style="flex: 1; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
                                     onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
@@ -212,7 +212,7 @@
                         <div class="col-md-6" style="margin-bottom: 14px;">
                             <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('URL du logo') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('auto-détecté') }})</small></label>
                             <div style="display: flex; gap: 8px; align-items: center;">
-                                <input type="url" name="logo_url" x-model="logo_url" placeholder="https://exemple.qc.ca/logo.png"
+                                <input type="url" name="logo_url" x-model="logo_url" placeholder="https://exemple.qc.ca/logo.png" aria-label="{{ __('URL du logo') }}"
                                     style="flex: 1; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
                                     onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'">
                                 <template x-if="logo_url">
@@ -224,7 +224,7 @@
 
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Description courte') }} <span style="color: #E74C3C;">*</span></label>
-                        <textarea name="description" required rows="3" x-model="descriptionText"
+                        <textarea name="description" required rows="3" x-model="descriptionText" aria-label="{{ __('Description courte') }}"
                             :placeholder="'{{ __('Decrivez') }} ' + acronym + ' {{ __('en 2-3 phrases : mission, role, public cible...') }}'"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical;"
                             onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"></textarea>
