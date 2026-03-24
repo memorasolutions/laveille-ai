@@ -68,9 +68,9 @@
     }
     .acr-title { font-family: var(--f-heading); font-size: 1.2rem; font-weight: 700; color: var(--c-dark); margin: 0; }
     .acr-fullname { color: #6B7280; font-size: 0.88rem; line-height: 1.5; flex-grow: 1; margin-bottom: 12px; }
-    .acr-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid #F3F4F6; }
-    .acr-badge { font-size: 11px; padding: 2px 10px; border-radius: 12px; font-weight: 600; color: #fff; }
-    .acr-link { color: var(--c-primary); font-weight: 600; font-size: 13px; text-decoration: none; }
+    .acr-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; border-top: 1px solid #F3F4F6; gap: 8px; }
+    .acr-badge { font-size: 11px; padding: 2px 10px; border-radius: 12px; font-weight: 600; color: #fff; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1; }
+    .acr-link { color: var(--c-primary); font-weight: 600; font-size: 13px; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
     .acr-link:hover { text-decoration: underline; }
 
     .acr-empty { text-align: center; padding: 60px 20px; color: #6B7280; }

@@ -53,6 +53,24 @@
         .navbar-brand img { max-height: 50px; width: auto; }
         .wpo-site-footer .about-widget .logo img { max-width: 120px; height: auto; }
         .header-right-menu-wrap .logo img { max-width: 150px; height: auto; }
+        /* Drawer overlay fix — fond sombre quand le panneau lateral est ouvert */
+        .header-right-menu-wrap.right-menu-active { z-index: 9999; }
+        .header-right-menu-wrapper::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+        .header-right-menu-wrapper:has(.right-menu-active)::after {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
         .blog-sidebar .about-widget .img-holder img { max-width: 150px; height: auto; border-radius: 50%; }
         /* SVG sans dimension */
         svg:not([width]):not([class*="cc-"]) { max-width: 24px; max-height: 24px; }
