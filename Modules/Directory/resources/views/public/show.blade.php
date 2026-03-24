@@ -209,7 +209,7 @@
                 <div class="row" style="display: flex; flex-wrap: wrap;">
                     @foreach(array_filter(explode(',', $tool->core_features)) as $f)
                     <div class="col-md-4 col-sm-6" style="margin-bottom: 16px; display: flex;">
-                        <div style="background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); width: 100%; display: flex; align-items: flex-start; gap: 10px;">
+                        <div style="background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); width: 100%; display: flex; align-items: center; gap: 10px;">
                             <span style="background: #ecfdf5; color: #059669; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;">✅</span>
                             <span style="font-weight: 600; color: #334155; font-size: 14px; line-height: 1.4;">{{ trim($f) }}</span>
                         </div>
