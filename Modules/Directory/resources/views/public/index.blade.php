@@ -147,7 +147,7 @@
                     body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl })
                 });
                 const d = await res.json();
-                if (d.auth_required) { window.open('{{ route('magic-link') }}', '_blank'); this.scrapeError = '{{ __('Connectez-vous dans le nouvel onglet, puis cliquez a nouveau sur Soumettre.') }}'; }
+                if (d.auth_required) { window.open('{{ route('magic-link.request') }}', '_blank'); this.scrapeError = '{{ __('Connectez-vous dans le nouvel onglet, puis cliquez a nouveau sur Soumettre.') }}'; }
                 else if (d.success) { this.submitted = true; this.wStep = 0; }
                 else { this.scrapeError = d.message || '{{ __('Erreur lors de la soumission.') }}'; }
             } catch(e) { this.scrapeError = '{{ __('Erreur reseau.') }}'; }

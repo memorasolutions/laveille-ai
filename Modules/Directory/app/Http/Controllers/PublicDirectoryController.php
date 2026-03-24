@@ -116,7 +116,7 @@ class PublicDirectoryController extends Controller
     public function storeSubmission(Request $request): JsonResponse
     {
         if (! auth()->check()) {
-            return response()->json(['auth_required' => true, 'redirect' => route('magic-link')], 401);
+            return response()->json(['auth_required' => true, 'redirect' => route('magic-link.request')], 401);
         }
 
         $validated = $request->validate([
