@@ -85,27 +85,71 @@
 <div class="acr-wrapper">
     <div class="container" x-data="acronymApp()">
 
-        {{-- Hero --}}
-        <div class="acr-hero">
+        {{-- Hero with inline propose form --}}
+        <div class="acr-hero" x-data="{ proposing: false, submitted: false }">
             <h1>🎓 {{ __('Acronymes de l\'éducation au Québec') }}</h1>
             <p>{{ __('Le glossaire complet pour naviguer dans le jargon du système éducatif québécois') }}</p>
-            <span class="acr-stats-badge">
-                <span x-text="filteredItems.length"></span> {{ __('acronymes répertoriés') }}
-            </span>
-            @if(class_exists(\Modules\Roadmap\Models\Board::class))
-                <div style="margin-top: 16px;">
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <span class="acr-stats-badge">
+                    <span x-text="filteredItems.length"></span> {{ __('acronymes répertoriés') }}
+                </span>
+
+                @if(class_exists(\Modules\Roadmap\Models\Board::class))
                     @auth
-                        <a href="#acr-propose-section" onclick="event.preventDefault(); document.getElementById('acr-propose-section').scrollIntoView({behavior:'smooth'}); setTimeout(function(){ window.dispatchEvent(new CustomEvent('open-propose-form')); }, 500);"
-                           style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 10px 24px; border-radius: var(--r-btn); text-decoration: none; font-size: 14px; display: inline-block; cursor: pointer;">
-                            {{ __('Il manque un acronyme ? Proposez-le !') }}
-                        </a>
+                        <button type="button" x-show="!proposing && !submitted" @click="proposing = true"
+                            style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); border: 1px solid rgba(255,255,255,0.4); cursor: pointer; font-size: 13px; transition: all 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                            + {{ __('Proposer un acronyme') }}
+                        </button>
                     @else
-                        <a href="{{ route('login') }}" style="background: rgba(255,255,255,0.2); color: #fff; font-weight: 600; padding: 10px 24px; border-radius: var(--r-btn); text-decoration: none; font-size: 14px; display: inline-block; border: 1px solid rgba(255,255,255,0.4);">
-                            {{ __('Connectez-vous pour proposer un acronyme') }}
+                        <a href="{{ route('login') }}" style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); text-decoration: none; font-size: 13px; border: 1px solid rgba(255,255,255,0.4);">
+                            {{ __('Proposer un acronyme') }}
                         </a>
                     @endauth
-                </div>
-            @endif
+                @endif
+            </div>
+
+            {{-- Inline form — progressive disclosure --}}
+            @auth
+            <div x-show="proposing && !submitted" x-cloak x-transition.duration.300ms
+                 style="margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: var(--r-base); padding: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <form method="POST" action="{{ route('roadmap.ideas.store', ['board' => 'glossaire-communautaire']) }}"
+                      @submit.prevent="
+                        fetch($el.action, { method: 'POST', body: new FormData($el) })
+                        .then(r => { if(r.ok || r.redirected) { submitted = true; proposing = false; } })
+                        .catch(() => { $el.submit(); })
+                      ">
+                    @csrf
+                    <input type="hidden" name="source" value="acronymes">
+                    <input type="hidden" name="category" value="Acronymes éducation">
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" name="title" required placeholder="{{ __('Acronyme (ex: RÉCIT)') }}"
+                            style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: rgba(255,255,255,0.1); color: #fff; outline: none;"
+                            onfocus="this.style.borderColor='#fff'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'">
+                        <input type="text" name="description" required placeholder="{{ __('Nom complet de l\'acronyme') }}"
+                            style="flex: 1; min-width: 200px; height: 42px; padding: 0 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: var(--r-base); font-size: 14px; background: rgba(255,255,255,0.1); color: #fff; outline: none;"
+                            onfocus="this.style.borderColor='#fff'" onblur="this.style.borderColor='rgba(255,255,255,0.3)'">
+                        <button type="submit"
+                            style="height: 42px; padding: 0 20px; background: #fff; color: var(--c-primary); font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; white-space: nowrap;">
+                            {{ __('Soumettre') }}
+                        </button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <span style="font-size: 11px; color: rgba(255,255,255,0.6);">{{ __('Votre proposition sera soumise au vote de la communauté') }}</span>
+                        <button type="button" @click="proposing = false" style="background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Success --}}
+            <div x-show="submitted" x-cloak x-transition style="margin-top: 16px;">
+                <span style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
+                    ✓ {{ __('Merci ! Votre proposition est soumise au vote.') }}
+                </span>
+            </div>
+            @endauth
         </div>
 
         {{-- A-Z Navigation --}}
@@ -182,86 +226,6 @@
 
     </div>
 
-    {{-- CTA Proposer un acronyme --}}
-    @if(class_exists(\Modules\Roadmap\Models\Board::class))
-    <div id="acr-propose-section" x-data="{ showForm: false, submitted: false }" @open-propose-form.window="showForm = true" style="margin-top: 40px;">
-        <div style="background: linear-gradient(135deg, #92400E 0%, #78350F 100%); border-radius: var(--r-base); padding: 40px 30px; color: #fff; text-align: center;">
-            <h2 style="font-family: var(--f-heading); font-size: 24px; font-weight: 700; margin: 0 0 8px;">
-                {{ __('Il manque un acronyme ?') }}
-            </h2>
-            <p style="font-size: 16px; opacity: 0.9; margin-bottom: 20px;">
-                {{ __('Proposez un acronyme et la communaute votera pour son ajout !') }}
-            </p>
-
-            @auth
-                <button type="button" @click="showForm = !showForm" x-show="!submitted"
-                    style="background: #fff; color: #92400E; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 15px; transition: all 0.2s;"
-                    onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">
-                    <span x-text="showForm ? '{{ __('Fermer') }}' : '{{ __('Proposer un acronyme') }}'"></span>
-                </button>
-            @else
-                <a href="{{ route('login') }}" style="background: #fff; color: #92400E; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); text-decoration: none; display: inline-block; font-size: 15px;">
-                    {{ __('Connectez-vous pour proposer un acronyme') }}
-                </a>
-            @endauth
-
-            <div x-show="submitted" x-cloak style="background: rgba(255,255,255,0.15); border-radius: var(--r-base); padding: 20px; margin-top: 20px;">
-                <div style="font-size: 32px; margin-bottom: 8px;">&#10003;</div>
-                <p style="font-weight: 600; font-size: 16px;">{{ __('Merci ! Votre proposition a ete soumise. La communaute pourra voter dessus dans les idees et votes.') }}</p>
-            </div>
-        </div>
-
-        @auth
-        <div x-show="showForm && !submitted" x-cloak x-transition
-             style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 30px;">
-            <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 20px; font-size: 18px;">
-                {{ __('Proposer un nouvel acronyme') }}
-            </h3>
-            <form method="POST" action="{{ route('roadmap.ideas.store', ['board' => 'glossaire-communautaire']) }}"
-                  @submit.prevent="
-                    fetch($el.action, { method: 'POST', body: new FormData($el) })
-                    .then(r => { if(r.ok || r.redirected) { submitted = true; showForm = false; } })
-                    .catch(() => { $el.submit(); })
-                  ">
-                @csrf
-                <input type="hidden" name="source" value="acronymes">
-                <input type="hidden" name="category" value="Acronymes éducation">
-
-                <div class="row">
-                    <div class="col-md-4" style="margin-bottom: 16px;">
-                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
-                            {{ __('Acronyme') }} <span style="color: #E74C3C;">*</span>
-                        </label>
-                        <input type="text" name="title" required placeholder="{{ __('Ex: RÉCIT, MEEQ, CDSI...') }}"
-                            style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none; text-transform: uppercase;"
-                            onfocus="this.style.borderColor='#F59E0B'" onblur="this.style.borderColor='#E5E7EB'">
-                    </div>
-                    <div class="col-md-8" style="margin-bottom: 16px;">
-                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">
-                            {{ __('Nom complet') }} <span style="color: #E74C3C;">*</span>
-                        </label>
-                        <input type="text" name="description" required placeholder="{{ __('Ex: Réseau Éducation Collaboration Innovation Technologie') }}"
-                            style="width: 100%; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none;"
-                            onfocus="this.style.borderColor='#F59E0B'" onblur="this.style.borderColor='#E5E7EB'">
-                    </div>
-                </div>
-
-                <div style="text-align: right;">
-                    <button type="submit"
-                        style="height: 44px; padding: 0 24px; background: #92400E; color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 15px;"
-                        onmouseover="this.style.background='#78350F'" onmouseout="this.style.background='#92400E'">
-                        {{ __('Soumettre') }}
-                    </button>
-                </div>
-
-                <p style="font-size: 12px; color: #9CA3AF; margin: 10px 0 0;">
-                    {{ __('Votre proposition apparaitra dans la section Idees et votes.') }}
-                </p>
-            </form>
-        </div>
-        @endauth
-    </div>
-    @endif
 
 </div>
 @endsection
