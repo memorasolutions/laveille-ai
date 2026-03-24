@@ -53,6 +53,14 @@ class PublicPostController extends Controller
 
         $articles = $query->latest('published_at')->paginate(10);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('fronttheme::blog._article-cards', compact('articles'))->render(),
+                'hasMore' => $articles->hasMorePages(),
+                'nextPage' => $articles->currentPage() + 1,
+            ]);
+        }
+
         return view('fronttheme::blog.index', compact('articles'));
     }
 

@@ -293,13 +293,13 @@
         </div>
 
         {{-- Counter --}}
-        <div class="acr-counter">
-            <span x-text="filteredItems.length"></span> {{ __('résultat(s)') }}
+        <div class="acr-counter" aria-live="polite">
+            <span x-text="visibleItems.length"></span> {{ __('sur') }} <span x-text="filteredItems.length"></span> {{ __('résultat(s)') }}
         </div>
 
         {{-- Grid --}}
         <div class="row row-flex">
-            <template x-for="item in filteredItems" :key="item.id">
+            <template x-for="item in visibleItems" :key="item.id">
                 <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <a :href="'/acronymes-education/' + item.slug" class="acr-card">
                         <div class="acr-card-header">
@@ -323,6 +323,12 @@
                     </a>
                 </div>
             </template>
+        </div>
+
+        {{-- Sentinel : charge plus au scroll --}}
+        <div x-show="hasMore" x-intersect="loadMore()" class="text-center" style="padding: 24px 0;" role="status" aria-label="{{ __('Chargement en cours') }}">
+            <div style="display: inline-block; width: 24px; height: 24px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
+            <p style="color: #9CA3AF; font-size: 13px; margin-top: 8px;">{{ __('Chargement...') }}</p>
         </div>
 
         {{-- Empty state --}}
@@ -357,8 +363,14 @@ function acronymApp() {
         search: '',
         activeLetter: '',
         activeCategory: '',
+        displayCount: 30,
+        _lastFilterKey: '',
+
+        get filterKey() { return this.search + '|' + this.activeLetter + '|' + this.activeCategory; },
 
         get filteredItems() {
+            const key = this.filterKey;
+            if (key !== this._lastFilterKey) { this.displayCount = 30; this._lastFilterKey = key; }
             let r = this.items;
             if (this.search) {
                 const q = this.search.toLowerCase();
@@ -372,6 +384,10 @@ function acronymApp() {
             }
             return r.sort((a, b) => a.acronym.localeCompare(b.acronym));
         },
+
+        get visibleItems() { return this.filteredItems.slice(0, this.displayCount); },
+        get hasMore() { return this.displayCount < this.filteredItems.length; },
+        loadMore() { if (this.hasMore) this.displayCount += 30; },
 
         setLetter(l) { this.activeLetter = l; this.search = ''; },
         reset() { this.search = ''; this.activeLetter = ''; this.activeCategory = ''; }

@@ -295,10 +295,16 @@
             activeType: '',
             activeLetter: '',
             activeCategory: '',
+            displayCount: 30,
+            _lastFilterKey: '',
             terms: {{ $termsJson->toJson() }},
             categories: {{ $categoriesForFilter->toJson() }},
 
+            get filterKey() { return this.search + '|' + this.activeType + '|' + this.activeLetter + '|' + this.activeCategory; },
+
             get filteredTerms() {
+                const key = this.filterKey;
+                if (key !== this._lastFilterKey) { this.displayCount = 30; this._lastFilterKey = key; }
                 const s = this.search.toLowerCase();
                 return this.terms.filter(t => {
                     const matchSearch = !s || t.name.toLowerCase().includes(s) || t.fullDef.toLowerCase().includes(s);
@@ -309,10 +315,14 @@
                 });
             },
 
+            get visibleTerms() { return this.filteredTerms.slice(0, this.displayCount); },
+            get hasMore() { return this.displayCount < this.filteredTerms.length; },
+            loadMore() { if (this.hasMore) this.displayCount += 30; },
+
             toggleType(type) { this.activeType = this.activeType === type ? '' : type; },
             toggleLetter(l) { this.activeLetter = this.activeLetter === l ? '' : l; },
             toggleCategory(c) { this.activeCategory = this.activeCategory === c ? '' : c; },
-            resetAll() { this.search = ''; this.activeType = ''; this.activeLetter = ''; }
+            resetAll() { this.search = ''; this.activeType = ''; this.activeLetter = ''; this.activeCategory = ''; }
          }"
          >
 
@@ -489,8 +499,8 @@
         </nav>
 
         {{-- Counter --}}
-        <div class="gl-counter">
-            <strong x-text="filteredTerms.length"></strong> {{ __('termes') }}
+        <div class="gl-counter" aria-live="polite">
+            <strong x-text="visibleTerms.length"></strong> {{ __('sur') }} <strong x-text="filteredTerms.length"></strong> {{ __('termes') }}
         </div>
 
         {{-- Ad: glossary top --}}
@@ -500,7 +510,7 @@
 
         {{-- Cards grid --}}
         <div class="row row-flex">
-            <template x-for="term in filteredTerms" :key="term.id">
+            <template x-for="term in visibleTerms" :key="term.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="gl-card" :class="'border-' + term.type">
                         {{-- Hero image or icon --}}
@@ -550,6 +560,12 @@
                     </article>
                 </div>
             </template>
+        </div>
+
+        {{-- Sentinel : charge plus au scroll --}}
+        <div x-show="hasMore" x-intersect="loadMore()" class="text-center" style="padding: 24px 0;" role="status" aria-label="{{ __('Chargement en cours') }}">
+            <div style="display: inline-block; width: 24px; height: 24px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
+            <p style="color: #9CA3AF; font-size: 13px; margin-top: 8px;">{{ __('Chargement...') }}</p>
         </div>
 
         {{-- Empty state --}}
