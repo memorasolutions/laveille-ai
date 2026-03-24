@@ -98,6 +98,97 @@ class MetaScraperService
         return ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? '');
     }
 
+    /**
+     * Capture screenshot : og:image en priorite, OpenGraph.io en fallback.
+     */
+    public static function captureScreenshot(string $url, ?array $scraped = null): ?string
+    {
+        $data = $scraped ?? (function () use ($url) {
+            try {
+                return self::scrape($url);
+            } catch (\Exception) {
+                return [];
+            }
+        })();
+
+        if (! empty($data['og_image'])) {
+            return $data['og_image'];
+        }
+
+        $apiKey = env('OPENGRAPH_API_KEY');
+        if (! $apiKey) {
+            return null;
+        }
+
+        try {
+            $response = Http::timeout(15)->get('https://opengraph.io/api/1.1/site/' . urlencode($url), [
+                'app_id' => $apiKey,
+            ]);
+
+            return $response->successful() ? $response->json('hybridGraph.image') : null;
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Suit les redirections HTTP pour trouver l'URL finale canonique.
+     */
+    public static function resolveRedirectChain(string $url): string
+    {
+        $currentUrl = $url;
+
+        for ($i = 0; $i < 5; $i++) {
+            try {
+                $response = Http::timeout(5)
+                    ->withOptions(['allow_redirects' => false])
+                    ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LaVeilleBot/1.0)'])
+                    ->head($currentUrl);
+
+                if (! in_array($response->status(), [301, 302, 307, 308])) {
+                    break;
+                }
+
+                $location = $response->header('Location');
+                if (! $location) {
+                    break;
+                }
+
+                $currentUrl = str_starts_with($location, 'http') ? $location : $currentUrl . $location;
+            } catch (\Exception) {
+                break;
+            }
+        }
+
+        return $currentUrl;
+    }
+
+    /**
+     * Extrait le domaine racine (sans www, sans sous-domaine).
+     * Gere les TLD doubles (.co.uk, .gc.ca, .gouv.qc.ca).
+     */
+    public static function extractRootDomain(string $url): string
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        if (! $host) {
+            return '';
+        }
+
+        $host = strtolower(ltrim($host, 'www.'));
+        $parts = explode('.', $host);
+
+        if (count($parts) <= 2) {
+            return $host;
+        }
+
+        $doubleTlds = ['co.uk', 'com.au', 'gc.ca', 'gouv.qc.ca', 'gov.uk', 'org.uk', 'net.au', 'com.br', 'co.jp'];
+        $lastTwo = implode('.', array_slice($parts, -2));
+
+        $tldParts = in_array($lastTwo, $doubleTlds) ? 3 : 2;
+
+        return implode('.', array_slice($parts, -$tldParts));
+    }
+
     private static function makeAbsolute(?string $path, string $baseUrl): ?string
     {
         if (! $path) {
