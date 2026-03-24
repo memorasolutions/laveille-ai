@@ -344,9 +344,12 @@
                     <article class="rt-card">
                         <template x-if="tool.isFeatured"><span class="rt-featured" title="{{ __('Mis en avant') }}">★</span></template>
 
-                        <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px;">
+                        <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
                             <template x-if="tool.screenshot">
-                                <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
+                                <div style="position: relative; height: 140px;">
+                                    <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
+                                    <div style="position: absolute; inset: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), inset 0 -2px 4px rgba(0,0,0,0.05);"></div>
+                                </div>
                             </template>
                             <template x-if="!tool.screenshot">
                                 <div :style="'width:100%;height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,' + tool.gradientFrom + ' 0%,' + tool.gradientTo + ' 100%);'">
