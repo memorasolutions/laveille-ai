@@ -350,8 +350,8 @@
                         <input type="text" x-model="termName" placeholder="{{ __('Nom du terme (ex: Transformer, RAG, Fine-tuning...)') }}" aria-label="{{ __('Nom du terme') }}"
                             style="flex: 1; min-width: 200px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; background: #fff; color: var(--c-dark); outline: none;">
                         <button type="button" @click="if(termName.trim()) step = 2"
-                            :style="!termName.trim() ? 'opacity:0.5;cursor:not-allowed' : ''"
-                            style="height: 42px; padding: 0 20px; background: #fff; color: var(--c-primary); font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; white-space: nowrap;">
+                            :style="'height:42px;padding:0 20px;background:var(--c-primary);color:#fff;font-weight:700;border:2px solid rgba(255,255,255,0.3);border-radius:var(--r-btn);cursor:pointer;font-size:14px;white-space:nowrap;transition:all 0.2s;' + (!termName.trim() ? 'opacity:0.5;cursor:not-allowed;' : '')"
+                            onmouseover="this.style.background='var(--c-dark)'" onmouseout="this.style.background='var(--c-primary)'">
                             {{ __('Continuer') }} →
                         </button>
                     </div>
