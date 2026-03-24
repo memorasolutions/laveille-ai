@@ -342,11 +342,19 @@
                     <article class="rt-card">
                         <template x-if="tool.isFeatured"><span class="rt-featured" title="{{ __('Mis en avant') }}">★</span></template>
 
-                        <template x-if="tool.screenshot">
-                            <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0;">
+                        <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px;">
+                            <template x-if="tool.screenshot">
                                 <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
-                            </a>
-                        </template>
+                            </template>
+                            <template x-if="!tool.screenshot">
+                                <div :style="'width:100%;height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,' + ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'][Math.abs(tool.name.split(\'\').reduce((a,c)=>a+c.charCodeAt(0),0)) % 8] + ' 0%,' + ['#1a365d','#0B7285','#2C3E50','#C0392B','#16A085','#8E44AD','#2980B9','#D35400'][Math.abs(tool.name.split(\'\').reduce((a,c)=>a+c.charCodeAt(0),0)) % 8] + ' 100%);'">
+                                    <div style="text-align: center; color: rgba(255,255,255,0.9);">
+                                        <template x-if="tool.favicon"><img :src="tool.favicon" alt="" style="width: 40px; height: 40px; border-radius: 10px; margin-bottom: 6px; background: rgba(255,255,255,0.2); padding: 4px;" loading="lazy"></template>
+                                        <div style="font-family: var(--f-heading); font-weight: 700; font-size: 1rem; text-shadow: 0 1px 3px rgba(0,0,0,0.3);" x-text="tool.name"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </a>
 
                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
                             <template x-if="tool.favicon"><img :src="tool.favicon" alt="" class="rt-logo" loading="lazy" width="48" height="48"></template>
