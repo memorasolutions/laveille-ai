@@ -1,8 +1,4 @@
 User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /login
-Disallow: /register
+Disallow: /
 
 Sitemap: https://laveille.ai/sitemap.xml

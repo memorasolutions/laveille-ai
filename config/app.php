@@ -77,6 +77,8 @@ return [
 
     'timezone' => env('APP_TIMEZONE', 'America/Toronto'),
 
+    'noindex' => env('APP_NOINDEX', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
