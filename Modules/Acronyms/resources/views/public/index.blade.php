@@ -92,6 +92,20 @@
             <span class="acr-stats-badge">
                 <span x-text="filteredItems.length"></span> {{ __('acronymes répertoriés') }}
             </span>
+            @if(class_exists(\Modules\Roadmap\Models\Board::class))
+                <div style="margin-top: 16px;">
+                    @auth
+                        <a href="#proposer" onclick="document.querySelector('[x-data]').__x && document.querySelector('#acr-propose-btn')?.click(); this.closest('.acr-hero').nextElementSibling || window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}); return false;"
+                           style="background: #fff; color: var(--c-primary); font-weight: 700; padding: 10px 24px; border-radius: var(--r-btn); text-decoration: none; font-size: 14px; display: inline-block;">
+                            {{ __('Il manque un acronyme ? Proposez-le !') }}
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" style="background: rgba(255,255,255,0.2); color: #fff; font-weight: 600; padding: 10px 24px; border-radius: var(--r-btn); text-decoration: none; font-size: 14px; display: inline-block; border: 1px solid rgba(255,255,255,0.4);">
+                            {{ __('Connectez-vous pour proposer un acronyme') }}
+                        </a>
+                    @endauth
+                </div>
+            @endif
         </div>
 
         {{-- A-Z Navigation --}}
@@ -171,7 +185,7 @@
     {{-- CTA Proposer un acronyme --}}
     @if(class_exists(\Modules\Roadmap\Models\Board::class))
     <div x-data="{ showForm: false, submitted: false }" style="margin-top: 40px;">
-        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: var(--r-base); padding: 40px 30px; color: #fff; text-align: center;">
+        <div style="background: linear-gradient(135deg, #92400E 0%, #78350F 100%); border-radius: var(--r-base); padding: 40px 30px; color: #fff; text-align: center;">
             <h2 style="font-family: var(--f-heading); font-size: 24px; font-weight: 700; margin: 0 0 8px;">
                 {{ __('Il manque un acronyme ?') }}
             </h2>
@@ -181,12 +195,12 @@
 
             @auth
                 <button type="button" @click="showForm = !showForm" x-show="!submitted"
-                    style="background: #fff; color: #D97706; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 15px; transition: all 0.2s;"
+                    style="background: #fff; color: #92400E; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 15px; transition: all 0.2s;"
                     onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">
                     <span x-text="showForm ? '{{ __('Fermer') }}' : '{{ __('Proposer un acronyme') }}'"></span>
                 </button>
             @else
-                <a href="{{ route('login') }}" style="background: #fff; color: #D97706; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); text-decoration: none; display: inline-block; font-size: 15px;">
+                <a href="{{ route('login') }}" style="background: #fff; color: #92400E; font-weight: 700; padding: 12px 28px; border-radius: var(--r-btn); text-decoration: none; display: inline-block; font-size: 15px;">
                     {{ __('Connectez-vous pour proposer un acronyme') }}
                 </a>
             @endauth
@@ -234,8 +248,8 @@
 
                 <div style="text-align: right;">
                     <button type="submit"
-                        style="height: 44px; padding: 0 24px; background: #F59E0B; color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 15px;"
-                        onmouseover="this.style.background='#D97706'" onmouseout="this.style.background='#F59E0B'">
+                        style="height: 44px; padding: 0 24px; background: #92400E; color: #fff; font-weight: 700; border: none; border-radius: var(--r-btn); cursor: pointer; font-size: 15px;"
+                        onmouseover="this.style.background='#78350F'" onmouseout="this.style.background='#92400E'">
                         {{ __('Soumettre') }}
                     </button>
                 </div>
