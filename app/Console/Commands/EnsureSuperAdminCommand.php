@@ -58,7 +58,7 @@ class EnsureSuperAdminCommand extends Command
                 : "Superadmin {$email} OK (aucune modification)."
             );
         } else {
-            $password = (string) config('app.admin_password', 'Admin123!');
+            $password = (string) config('app.admin_password', bin2hex(random_bytes(16)));
 
             $user = User::create([
                 'name' => (string) config('app.admin_name', 'Super Admin'),

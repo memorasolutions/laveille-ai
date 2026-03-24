@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             ['email' => config('app.superadmin_email')],
             [
                 'name' => config('app.admin_name', 'Super Admin'),
-                'password' => bcrypt(config('app.admin_password', 'Admin123!')),
+                'password' => bcrypt(config('app.admin_password') ?: bin2hex(random_bytes(16))),
                 'email_verified_at' => now(),
                 'is_active' => true,
             ]

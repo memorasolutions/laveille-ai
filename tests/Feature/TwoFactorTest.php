@@ -29,7 +29,7 @@ beforeEach(function () {
     Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
 
     $this->user = User::factory()->create([
-        'password' => Hash::make('Admin123!'),
+        'password' => Hash::make('TestP@ssw0rd!'),
     ]);
     $this->user->assignRole('admin');
 });
