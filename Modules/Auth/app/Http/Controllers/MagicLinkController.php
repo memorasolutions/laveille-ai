@@ -28,6 +28,10 @@ class MagicLinkController extends Controller
 
     public function showRequestForm(): View
     {
+        if (view()->exists('fronttheme::auth.magic-link-request')) {
+            return view('fronttheme::auth.magic-link-request');
+        }
+
         return view('auth::livewire.magic-link-request');
     }
 
@@ -107,6 +111,10 @@ class MagicLinkController extends Controller
         $hasPhone = $user && $user->phone && Settings::get('sms_enabled', false);
         $smsButtonDelay = (int) Settings::get('sms_button_delay_seconds', 10);
         $expiryMinutes = (int) Settings::get('magic_link_expiry_minutes', 15);
+
+        if (view()->exists('fronttheme::auth.magic-link-verify')) {
+            return view('fronttheme::auth.magic-link-verify', compact('email', 'hasPhone', 'smsButtonDelay', 'expiryMinutes'));
+        }
 
         return view('auth::livewire.magic-link-verify', compact('email', 'hasPhone', 'smsButtonDelay', 'expiryMinutes'));
     }
