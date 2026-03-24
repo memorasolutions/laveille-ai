@@ -38,6 +38,7 @@ class DirectoryAdminController extends Controller
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
             'categories' => 'nullable|array',
             'logo' => 'nullable|image|max:2048',
+            'screenshot' => 'nullable|url|max:500',
             'is_featured' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
         ]);
@@ -58,6 +59,7 @@ class DirectoryAdminController extends Controller
             'url' => $validated['url'],
             'pricing' => $validated['pricing'],
             'logo' => $logoPath ? 'storage/' . $logoPath : null,
+            'screenshot' => $validated['screenshot'] ?? null,
             'is_featured' => $request->boolean('is_featured'),
             'sort_order' => $validated['sort_order'] ?? 0,
         ]);
@@ -86,6 +88,7 @@ class DirectoryAdminController extends Controller
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
             'categories' => 'nullable|array',
             'logo' => 'nullable|image|max:2048',
+            'screenshot' => 'nullable|url|max:500',
             'is_featured' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
         ]);
@@ -97,6 +100,7 @@ class DirectoryAdminController extends Controller
         $tool->setTranslation('short_description', $locale, $validated['short_description'] ?? '');
         $tool->url = $validated['url'];
         $tool->pricing = $validated['pricing'];
+        $tool->screenshot = $validated['screenshot'] ?? $tool->screenshot;
         $tool->is_featured = $request->boolean('is_featured');
         $tool->sort_order = $validated['sort_order'] ?? 0;
 

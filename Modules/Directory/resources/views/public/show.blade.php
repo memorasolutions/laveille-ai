@@ -109,6 +109,13 @@
         @endif
     </div>
 
+    {{-- Screenshot --}}
+    @if($tool->screenshot)
+        <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
+            <img src="{{ $tool->screenshot }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
+        </div>
+    @endif
+
     {{-- Suggérer une modification (composant réutilisable) --}}
     @include('fronttheme::partials.suggest-edit', [
         'model' => $tool,

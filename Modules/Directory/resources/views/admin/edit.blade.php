@@ -89,6 +89,25 @@
                     @enderror
                 </div>
 
+                <div class="mb-3" x-data="{ screenshotUrl: '{{ old('screenshot', $tool->screenshot ?? '') }}', capturing: false }">
+                    <label for="screenshot" class="form-label">Screenshot (URL)</label>
+                    <div class="input-group">
+                        <input type="url" class="form-control @error('screenshot') is-invalid @enderror" id="screenshot" name="screenshot" x-model="screenshotUrl" value="{{ old('screenshot', $tool->screenshot) }}" placeholder="https://...">
+                        <button type="button" class="btn btn-outline-secondary" @click="
+                            const urlField = document.getElementById('url');
+                            if (!urlField || !urlField.value) { alert('Entrez d abord l URL du site.'); return; }
+                            capturing = true;
+                            fetch('/api/scrape-meta', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }, body: JSON.stringify({ url: urlField.value }) })
+                            .then(r => r.json()).then(d => { screenshotUrl = d.og_image || ''; }).catch(() => {}).finally(() => capturing = false);
+                        " :disabled="capturing">
+                            <span x-show="!capturing">📸 Capturer</span>
+                            <span x-show="capturing">⏳</span>
+                        </button>
+                    </div>
+                    <template x-if="screenshotUrl"><img :src="screenshotUrl" alt="Preview" style="max-height: 120px; margin-top: 8px; border-radius: 6px; border: 1px solid #dee2e6;"></template>
+                    @error('screenshot')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured" value="1" {{ old('is_featured', $tool->is_featured) ? 'checked' : '' }}>
                     <label class="form-check-label" for="is_featured">Mettre en avant</label>

@@ -23,6 +23,7 @@
             'categories' => $tool->categories->pluck('name')->toArray(),
             'categorySlugs' => $tool->categories->pluck('slug')->toArray(),
             'favicon' => $host ? "https://www.google.com/s2/favicons?domain={$host}&sz=64" : '',
+            'screenshot' => $tool->screenshot,
             'showUrl' => route('directory.show', $tool->slug),
             'websiteType' => $tool->website_type ?? 'website',
             'launchYear' => $tool->launch_year ?? 0,
@@ -111,20 +112,190 @@
     resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.sortBy = 'all'; }
 }">
 
-    {{-- Hero --}}
+    {{-- Hero + wizard wrapper --}}
+    <div x-data="{
+        wStep: 0, submitted: false, scraping: false, submitting: false,
+        scrapeError: '', duplicates: [],
+        toolUrl: '', toolName: '', toolDesc: '', toolShortDesc: '', toolPricing: '', screenshotUrl: '',
+        async analyzeUrl() {
+            if (!this.toolUrl || this.scraping) return;
+            this.scraping = true; this.scrapeError = ''; this.duplicates = [];
+            try {
+                const res = await fetch('{{ route('directory.scrape-detect') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                    body: JSON.stringify({ url: this.toolUrl })
+                });
+                if (!res.ok) { const e = await res.json(); throw new Error(e.error || '{{ __('Erreur lors de l analyse.') }}'); }
+                const d = await res.json();
+                this.toolName = d.translated_name || d.original_name || '';
+                this.toolDesc = d.translated_description || d.original_description || '';
+                this.toolShortDesc = (d.translated_description || '').substring(0, 200);
+                this.screenshotUrl = d.screenshot || '';
+                if (d.duplicates && d.duplicates.length > 0) { this.duplicates = d.duplicates; }
+                else { this.wStep = 2; }
+            } catch(e) { this.scrapeError = e.message; }
+            finally { this.scraping = false; }
+        },
+        async submitTool() {
+            if (!this.toolName || !this.toolPricing || this.submitting) return;
+            this.submitting = true; this.scrapeError = '';
+            try {
+                const res = await fetch('{{ route('directory.submit') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                    body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl })
+                });
+                const d = await res.json();
+                if (d.auth_required) { window.open('{{ route('magic-link') }}', '_blank'); this.scrapeError = '{{ __('Connectez-vous dans le nouvel onglet, puis cliquez a nouveau sur Soumettre.') }}'; }
+                else if (d.success) { this.submitted = true; this.wStep = 0; }
+                else { this.scrapeError = d.message || '{{ __('Erreur lors de la soumission.') }}'; }
+            } catch(e) { this.scrapeError = '{{ __('Erreur reseau.') }}'; }
+            finally { this.submitting = false; }
+        },
+        resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; }
+    }">
     <div class="rt-hero">
         <div class="container text-center">
             <h1>{{ __('Répertoire techno') }}</h1>
-            <p style="color: #6B7280; font-size: 1.1rem; margin-bottom: 24px;">
+            <p style="color: #6B7280; font-size: 1.1rem; margin-bottom: 16px;">
                 <strong x-text="tools.length" style="color: var(--c-primary);"></strong> {{ __('outils testés et sélectionnés pour vous.') }}
             </p>
-            <div class="rt-search">
+
+            {{-- Bouton proposer (visible etape 0) --}}
+            <div x-show="wStep === 0 && !submitted" style="margin-bottom: 20px;">
+                <button type="button" @click="wStep = 1"
+                    style="background: var(--c-primary); color: #fff; font-weight: 600; padding: 10px 24px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 14px; transition: all 0.2s;"
+                    onmouseover="this.style.background='var(--c-dark)'" onmouseout="this.style.background='var(--c-primary)'">
+                    + {{ __('Proposer un outil') }}
+                </button>
+            </div>
+
+            {{-- Succes --}}
+            <div x-show="submitted" x-cloak x-transition style="margin-bottom: 20px;">
+                <span style="background: #D1FAE5; color: #065F46; padding: 10px 24px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
+                    ✓ {{ __('Merci ! Votre proposition sera examinee par notre equipe.') }}
+                </span>
+            </div>
+
+            {{-- Etape 1 : URL --}}
+            <div x-show="wStep === 1" x-cloak x-transition.duration.300ms
+                 style="margin-bottom: 20px; background: rgba(11,114,133,0.08); border: 2px solid var(--c-primary); border-radius: var(--r-base); padding: 24px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <div style="font-size: 11px; color: #6B7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 1 sur 2 — URL du site') }}</div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="url" x-model="toolUrl" placeholder="https://chatgpt.com" aria-label="{{ __('URL du site a proposer') }}"
+                        style="flex: 1; min-width: 240px; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; background: #fff; color: var(--c-dark); outline: none;"
+                        @keydown.enter="analyzeUrl()">
+                    <button type="button" @click="analyzeUrl()" :disabled="scraping || !toolUrl"
+                        :style="'height:44px;padding:0 20px;background:var(--c-primary);color:#fff;font-weight:700;border:none;border-radius:var(--r-btn);cursor:pointer;font-size:14px;white-space:nowrap;transition:all 0.2s;' + (scraping || !toolUrl ? 'opacity:0.5;cursor:not-allowed;' : '')">
+                        <span x-show="!scraping">{{ __('Analyser') }} →</span>
+                        <span x-show="scraping">⏳ {{ __('Analyse...') }}</span>
+                    </button>
+                </div>
+
+                {{-- Doublons detectes --}}
+                <template x-if="duplicates.length > 0">
+                    <div style="margin-top: 14px; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--r-base); padding: 14px; text-align: left;">
+                        <strong style="color: #92400E;">⚠️ {{ __('Cet outil semble deja dans notre repertoire :') }}</strong>
+                        <template x-for="dup in duplicates" :key="dup.id">
+                            <div style="margin-top: 6px;">
+                                <a :href="'/annuaire/' + dup.slug" target="_blank" style="color: #92400E; font-weight: 600;" x-text="dup.name"></a>
+                                <span style="font-size: 12px; color: #B45309;" x-text="'(' + dup.confidence + ')'"></span>
+                            </div>
+                        </template>
+                        <button type="button" @click="duplicates = []; wStep = 2;" style="margin-top: 10px; background: #F59E0B; color: #fff; border: none; padding: 6px 16px; border-radius: var(--r-btn); font-weight: 600; font-size: 13px; cursor: pointer;">
+                            {{ __('Proposer quand meme') }}
+                        </button>
+                    </div>
+                </template>
+
+                {{-- Erreur --}}
+                <div x-show="scrapeError && duplicates.length === 0" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
+
+                <div style="text-align: right; margin-top: 8px;">
+                    <button type="button" @click="resetWizard()" style="background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
+                </div>
+            </div>
+
+            <div class="rt-search" x-show="wStep === 0">
                 <svg class="rt-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input type="text" class="rt-search-input" x-model="search"
                        placeholder="{{ __('Rechercher un outil, une catégorie...') }}"
                        aria-label="{{ __('Rechercher un outil') }}">
             </div>
         </div>
+    </div>
+
+    {{-- Etape 2 : Details (card blanche sous hero) --}}
+    <div x-show="wStep === 2" x-cloak x-transition.duration.400ms
+         style="background: #fff; border: 2px solid #E5E7EB; border-radius: var(--r-base); padding: 28px; max-width: 800px; margin: -10px auto 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 2 sur 2 — Details') }}</span>
+                <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
+                    {{ __('Completez les informations pour') }} <strong x-text="toolName" style="color: var(--c-primary);"></strong>
+                </h3>
+            </div>
+            <button type="button" @click="wStep = 1" style="background: none; border: none; color: var(--c-primary); cursor: pointer; font-size: 13px; font-weight: 600;">← {{ __('Retour') }}</button>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l outil') }} <span style="color: #E74C3C;">*</span></label>
+                    <input type="text" x-model="toolName" aria-label="{{ __('Nom de l outil') }}"
+                        style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark);">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Description courte') }}</label>
+                    <input type="text" x-model="toolShortDesc" maxlength="255" aria-label="{{ __('Description courte') }}"
+                        style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark);">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Description') }}</label>
+                    <textarea x-model="toolDesc" rows="4" aria-label="{{ __('Description complete') }}"
+                        style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical; color: var(--c-dark);"></textarea>
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Modele economique') }} <span style="color: #E74C3C;">*</span></label>
+                    <select x-model="toolPricing" aria-label="{{ __('Modele economique') }}"
+                        style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark);">
+                        <option value="">{{ __('Choisir...') }}</option>
+                        <option value="free">🆓 {{ __('Gratuit') }}</option>
+                        <option value="freemium">💎 {{ __('Freemium') }}</option>
+                        <option value="paid">💰 {{ __('Payant') }}</option>
+                        <option value="open_source">🔓 {{ __('Open source') }}</option>
+                        <option value="enterprise">🏢 {{ __('Entreprise') }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <template x-if="screenshotUrl">
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Apercu') }}</label>
+                        <img :src="screenshotUrl" :alt="toolName" loading="lazy" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--r-base); border: 1px solid #E5E7EB;">
+                    </div>
+                </template>
+                <div style="font-size: 12px; color: #9CA3AF; margin-top: 8px;">
+                    <span x-text="toolUrl" style="word-break: break-all;"></span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Erreur --}}
+        <div x-show="scrapeError" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" @click="resetWizard()" style="background: #F3F4F6; color: var(--c-dark); border: none; padding: 10px 20px; border-radius: var(--r-btn); font-weight: 600; font-size: 14px; cursor: pointer;">
+                {{ __('Annuler') }}
+            </button>
+            <button type="button" @click="submitTool()" :disabled="!toolName || !toolPricing || submitting"
+                :style="'padding:10px 24px;background:var(--c-primary);color:#fff;font-weight:700;border:none;border-radius:var(--r-btn);cursor:pointer;font-size:14px;transition:all 0.2s;' + (!toolName || !toolPricing || submitting ? 'opacity:0.5;cursor:not-allowed;' : '')">
+                <span x-show="!submitting">{{ __('Soumettre la proposition') }}</span>
+                <span x-show="submitting">⏳ {{ __('Soumission...') }}</span>
+            </button>
+        </div>
+    </div>
     </div>
 
     <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
@@ -170,6 +341,12 @@
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="rt-card">
                         <template x-if="tool.isFeatured"><span class="rt-featured" title="{{ __('Mis en avant') }}">★</span></template>
+
+                        <template x-if="tool.screenshot">
+                            <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0;">
+                                <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
+                            </a>
+                        </template>
 
                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
                             <template x-if="tool.favicon"><img :src="tool.favicon" alt="" class="rt-logo" loading="lazy" width="48" height="48"></template>
