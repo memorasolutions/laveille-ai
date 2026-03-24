@@ -38,18 +38,7 @@
                     @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="website_url" class="form-label">{{ __('URL du site web') }}</label>
-                        <input type="url" class="form-control @error('website_url') is-invalid @enderror" id="website_url" name="website_url" value="{{ old('website_url', $acronym->website_url) }}" maxlength="500">
-                        @error('website_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="logo_url" class="form-label">{{ __('URL du logo') }}</label>
-                        <input type="url" class="form-control @error('logo_url') is-invalid @enderror" id="logo_url" name="logo_url" value="{{ old('logo_url', $acronym->logo_url) }}" maxlength="500">
-                        @error('logo_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                </div>
+                @include('acronyms::admin.partials.scraper-row')
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
