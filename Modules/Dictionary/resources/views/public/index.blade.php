@@ -40,7 +40,7 @@
             'firstLetter' => strtoupper(\Illuminate\Support\Str::substr($term->name, 0, 1)),
             'url' => route('dictionary.show', $term->slug),
             'heroImage' => $term->hero_image ? asset(str_replace('.png', '.webp', $term->hero_image)) : null,
-            'heroImageFallback' => $term->hero_image ? asset($term->hero_image) : null,
+            'heroImageFallback' => $term->hero_image ? asset(str_replace('.png', '.webp', $term->hero_image)) : null,
         ];
     })->values();
 

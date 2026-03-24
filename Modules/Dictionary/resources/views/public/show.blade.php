@@ -178,7 +178,7 @@
                         <div class="gl-hero-image">
                             <picture>
                                 <source srcset="{{ asset(str_replace('.png', '.webp', $term->hero_image)) }}" type="image/webp">
-                                <img src="{{ asset($term->hero_image) }}" alt="{{ $term->name }}" loading="lazy">
+                                <img src="{{ asset(str_replace('.png', '.webp', $term->hero_image)) }}" alt="{{ $term->name }}" loading="lazy">
                             </picture>
                         </div>
                     @endif
