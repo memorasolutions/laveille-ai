@@ -12,6 +12,7 @@ namespace Modules\Auth\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -135,5 +136,52 @@ class MagicLinkController extends Controller
         }
 
         return redirect()->intended(route('user.dashboard'));
+    }
+
+    /**
+     * API : envoyer un magic link (JSON, pour usage inline sans redirection).
+     */
+    public function sendLinkApi(Request $request): JsonResponse
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => __('Aucun compte avec cette adresse. Inscrivez-vous d abord.')], 422);
+        }
+
+        $rateLimitKey = 'magic-link-email:' . sha1($request->email);
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+
+            return response()->json(['success' => false, 'message' => __('Trop de tentatives. Reessayez dans :seconds secondes.', ['seconds' => $seconds])], 429);
+        }
+
+        RateLimiter::hit($rateLimitKey, 3600);
+
+        $result = $this->magicLink->generate($request->email);
+        $user->notify(new MagicLinkNotification($result['token']));
+
+        return response()->json(['success' => true, 'message' => __('Code de connexion envoye par courriel.')]);
+    }
+
+    /**
+     * API : verifier le code OTP (JSON, pour usage inline sans redirection).
+     */
+    public function verifyApi(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'token' => 'required|string|size:6',
+        ]);
+
+        $user = $this->magicLink->verify($request->email, $request->token);
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => __('Code invalide ou expire.')], 422);
+        }
+
+        auth()->login($user, true);
+
+        return response()->json(['success' => true, 'message' => __('Connecte avec succes !')]);
     }
 }

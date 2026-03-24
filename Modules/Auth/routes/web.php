@@ -49,6 +49,12 @@ Route::middleware(['guest', 'throttle:5,1'])->group(function () {
     Route::post('/magic-link/sms', [MagicLinkController::class, 'sendSms'])->name('magic-link.sms')->middleware('throttle:3,1');
 });
 
+// API magic-link JSON (pour auth inline sans redirection)
+Route::middleware(['web', 'throttle:5,1'])->group(function () {
+    Route::post('/api/magic-link/send', [MagicLinkController::class, 'sendLinkApi'])->name('magic-link.api.send');
+    Route::post('/api/magic-link/verify', [MagicLinkController::class, 'verifyApi'])->name('magic-link.api.verify');
+});
+
 // Route 2FA : accessible sans auth (l'utilisateur est temporairement déconnecté)
 Route::get('/two-factor-challenge', TwoFactorChallenge::class)->name('auth.two-factor-challenge');
 

@@ -119,6 +119,7 @@
         wStep: 0, submitted: false, scraping: false, submitting: false,
         scrapeError: '', duplicates: [],
         toolUrl: '', toolName: '', toolDesc: '', toolShortDesc: '', toolPricing: '', screenshotUrl: '',
+        authEmail: '', authCode: '', authSending: false, authVerifying: false, authSent: false, authError: '',
         async analyzeUrl() {
             if (!this.toolUrl || this.scraping) return;
             this.scraping = true; this.scrapeError = ''; this.duplicates = [];
@@ -149,13 +150,43 @@
                     body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl })
                 });
                 const d = await res.json();
-                if (d.auth_required) { window.open('{{ route('magic-link.request') }}', '_blank'); this.scrapeError = '{{ __('Connectez-vous dans le nouvel onglet, puis cliquez a nouveau sur Soumettre.') }}'; }
+                if (d.auth_required) { this.wStep = 3; this.authError = ''; }
                 else if (d.success) { this.submitted = true; this.wStep = 0; }
                 else { this.scrapeError = d.message || '{{ __('Erreur lors de la soumission.') }}'; }
             } catch(e) { this.scrapeError = '{{ __('Erreur reseau.') }}'; }
             finally { this.submitting = false; }
         },
-        resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; }
+        async sendMagicLink() {
+            if (!this.authEmail || this.authSending) return;
+            this.authSending = true; this.authError = '';
+            try {
+                const res = await fetch('{{ route('magic-link.api.send') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                    body: JSON.stringify({ email: this.authEmail })
+                });
+                const d = await res.json();
+                if (d.success) { this.authSent = true; }
+                else { this.authError = d.message; }
+            } catch(e) { this.authError = '{{ __('Erreur reseau.') }}'; }
+            finally { this.authSending = false; }
+        },
+        async verifyCode() {
+            if (!this.authCode || this.authCode.length !== 6 || this.authVerifying) return;
+            this.authVerifying = true; this.authError = '';
+            try {
+                const res = await fetch('{{ route('magic-link.api.verify') }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                    body: JSON.stringify({ email: this.authEmail, token: this.authCode })
+                });
+                const d = await res.json();
+                if (d.success) { this.submitTool(); }
+                else { this.authError = d.message; }
+            } catch(e) { this.authError = '{{ __('Erreur reseau.') }}'; }
+            finally { this.authVerifying = false; }
+        },
+        resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; this.authEmail = ''; this.authCode = ''; this.authSent = false; this.authError = ''; }
     }">
     <div class="rt-hero">
         <div class="container text-center">
@@ -296,6 +327,57 @@
                 <span x-show="!submitting">{{ __('Soumettre la proposition') }}</span>
                 <span x-show="submitting">⏳ {{ __('Soumission...') }}</span>
             </button>
+        </div>
+    </div>
+
+    {{-- Etape 3 : Auth inline (expand) --}}
+    <div x-show="wStep === 3" x-cloak x-transition.duration.400ms
+         style="background: #fff; border: 2px solid var(--c-primary); border-radius: var(--r-base); padding: 28px; max-width: 500px; margin: -10px auto 24px; box-shadow: 0 4px 15px rgba(11,114,133,0.1);">
+        <div style="text-align: center; margin-bottom: 16px;">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔐</div>
+            <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 4px; font-size: 16px;">{{ __('Connexion requise') }}</h3>
+            <p style="color: #6B7280; font-size: 13px; margin: 0;">{{ __('Connectez-vous pour soumettre votre proposition. Votre formulaire est sauvegarde.') }}</p>
+        </div>
+
+        {{-- Email input --}}
+        <div x-show="!authSent" style="margin-bottom: 14px;">
+            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Adresse courriel') }}</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="email" x-model="authEmail" placeholder="vous@exemple.com" aria-label="{{ __('Adresse courriel') }}"
+                    @keydown.enter="sendMagicLink()"
+                    style="flex: 1; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none; color: var(--c-dark);">
+                <button type="button" @click="sendMagicLink()" :disabled="authSending || !authEmail"
+                    :style="'height:42px;padding:0 20px;background:var(--c-primary);color:#fff;font-weight:700;border:none;border-radius:var(--r-btn);cursor:pointer;font-size:14px;white-space:nowrap;' + (authSending || !authEmail ? 'opacity:0.5;cursor:not-allowed;' : '')">
+                    <span x-show="!authSending">{{ __('Envoyer le code') }}</span>
+                    <span x-show="authSending">⏳</span>
+                </button>
+            </div>
+        </div>
+
+        {{-- OTP code input --}}
+        <div x-show="authSent" x-transition>
+            <div style="background: #D1FAE5; color: #065F46; padding: 10px 14px; border-radius: var(--r-base); font-size: 13px; margin-bottom: 14px;">
+                ✓ {{ __('Code envoye a') }} <strong x-text="authEmail"></strong>. {{ __('Verifiez vos courriels.') }}
+            </div>
+            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Code a 6 chiffres') }}</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" x-model="authCode" maxlength="6" placeholder="000000" aria-label="{{ __('Code de connexion') }}" autocomplete="one-time-code" inputmode="numeric"
+                    @keydown.enter="verifyCode()" @input="if(authCode.length === 6) verifyCode()"
+                    style="flex: 1; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 20px; font-weight: 700; letter-spacing: 8px; text-align: center; outline: none; color: var(--c-dark);">
+                <button type="button" @click="verifyCode()" :disabled="authVerifying || authCode.length !== 6"
+                    :style="'height:42px;padding:0 20px;background:var(--c-primary);color:#fff;font-weight:700;border:none;border-radius:var(--r-btn);cursor:pointer;font-size:14px;white-space:nowrap;' + (authVerifying || authCode.length !== 6 ? 'opacity:0.5;cursor:not-allowed;' : '')">
+                    <span x-show="!authVerifying">{{ __('Valider') }}</span>
+                    <span x-show="authVerifying">⏳</span>
+                </button>
+            </div>
+            <button type="button" @click="authSent = false; authCode = ''" style="background: none; border: none; color: var(--c-primary); cursor: pointer; font-size: 12px; margin-top: 8px;">{{ __('Renvoyer le code') }}</button>
+        </div>
+
+        {{-- Error --}}
+        <div x-show="authError" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="authError"></div>
+
+        <div style="text-align: center; margin-top: 14px;">
+            <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
         </div>
     </div>
     </div>
