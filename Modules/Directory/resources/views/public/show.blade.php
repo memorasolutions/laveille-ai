@@ -258,8 +258,8 @@
                                 {{ __('Les plus') }}
                             </h4>
                             @foreach(array_filter(explode(',', $tool->pros ?? '')) as $p)
-                            <div style="margin-bottom: 10px; color: #14532d; display: flex; align-items: flex-start; gap: 8px; font-size: 14px;">
-                                <span style="color: #16a34a; flex-shrink: 0;">✅</span> {{ trim($p) }}
+                            <div style="margin-bottom: 10px; color: #14532d; display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.4;">
+                                <span style="color: #16a34a; flex-shrink: 0; font-size: 16px; line-height: 1;">✅</span> {{ trim($p) }}
                             </div>
                             @endforeach
                         </div>
@@ -271,8 +271,8 @@
                                 {{ __('Les moins') }}
                             </h4>
                             @foreach(array_filter(explode(',', $tool->cons ?? '')) as $c)
-                            <div style="margin-bottom: 10px; color: #7f1d1d; display: flex; align-items: flex-start; gap: 8px; font-size: 14px;">
-                                <span style="color: #dc2626; flex-shrink: 0;">❌</span> {{ trim($c) }}
+                            <div style="margin-bottom: 10px; color: #7f1d1d; display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.4;">
+                                <span style="color: #dc2626; flex-shrink: 0; font-size: 16px; line-height: 1;">❌</span> {{ trim($c) }}
                             </div>
                             @endforeach
                         </div>
