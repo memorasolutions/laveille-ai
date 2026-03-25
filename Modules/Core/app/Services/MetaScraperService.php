@@ -19,10 +19,25 @@ class MetaScraperService
     {
         self::preventSSRF($url);
 
+        $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';
+
         $response = Http::timeout(10)
             ->maxRedirects(3)
-            ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LaVeilleBot/1.0)'])
+            ->withoutVerifying()
+            ->withHeaders([
+                'User-Agent' => $userAgent,
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language' => 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+            ])
             ->get($url);
+
+        if ($response->status() === 403) {
+            $response = Http::timeout(10)
+                ->maxRedirects(3)
+                ->withoutVerifying()
+                ->withHeaders(['User-Agent' => $userAgent])
+                ->get($url);
+        }
 
         if ($response->failed()) {
             throw new RuntimeException(__('Impossible de charger cette page.'));
@@ -142,7 +157,7 @@ class MetaScraperService
             try {
                 $response = Http::timeout(5)
                     ->withOptions(['allow_redirects' => false])
-                    ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LaVeilleBot/1.0)'])
+                    ->withoutVerifying()->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'])
                     ->head($currentUrl);
 
                 if (! in_array($response->status(), [301, 302, 307, 308])) {
