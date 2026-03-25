@@ -121,7 +121,6 @@
     @include('fronttheme::partials.suggest-edit', [
         'model' => $tool,
         'route' => route('directory.suggestions.store', $tool->slug),
-        'fields' => ['description' => 'Description', 'short_description' => 'Description courte', 'pricing' => 'Tarification', 'url' => 'URL du site', 'core_features' => 'Fonctionnalités', 'how_to_use' => 'Comment utiliser', 'use_cases' => "Cas d'usage", 'other' => 'Autre'],
     ])
 
     {{-- Ad: tool top --}}

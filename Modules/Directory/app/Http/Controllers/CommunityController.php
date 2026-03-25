@@ -183,7 +183,7 @@ class CommunityController extends Controller
         $tool = $this->findTool($slug);
 
         $validated = $request->validate([
-            'field' => ['required', 'in:description,short_description,pricing,url,core_features,how_to_use,use_cases,other'],
+            'field' => ['required', $tool->suggestableFieldValidation()],
             'suggested_value' => ['required', 'string', 'max:2000'],
             'reason' => ['nullable', 'string', 'max:500'],
         ]);

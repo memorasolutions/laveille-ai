@@ -160,13 +160,10 @@
         </div>
 
         {{-- Suggest edit --}}
-        @if(class_exists(\Modules\Directory\Models\ToolSuggestion::class))
-            @include('fronttheme::partials.suggest-edit', [
-                'model' => $term,
-                'route' => route('dictionary.suggestions.store', $term->slug),
-                'fields' => ['definition' => 'Définition', 'analogy' => 'Analogie', 'example' => 'Exemple', 'did_you_know' => 'Le saviez-vous', 'other' => 'Autre'],
-            ])
-        @endif
+        @include('fronttheme::partials.suggest-edit', [
+            'model' => $term,
+            'route' => route('dictionary.suggestions.store', $term->slug),
+        ])
 
         {{-- Main card --}}
         <div class="row">

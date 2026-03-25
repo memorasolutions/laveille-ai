@@ -100,11 +100,15 @@ class ModerationController extends Controller
         $suggestion = \Modules\Directory\Models\ToolSuggestion::findOrFail($id);
         $suggestion->update(['status' => 'approved']);
 
-        // Appliquer la modification sur l'outil
-        $tool = $suggestion->tool;
-        if ($tool && $suggestion->field !== 'other' && in_array($suggestion->field, $tool->getFillable())) {
-            $tool->setTranslation($suggestion->field, app()->getLocale(), $suggestion->suggested_value);
-            $tool->save();
+        // Appliquer la modification sur le modèle (polymorphe : Tool, Term, Acronym)
+        $model = $suggestion->suggestable ?? $suggestion->tool;
+        if ($model && $suggestion->field !== 'other' && in_array($suggestion->field, $model->getFillable())) {
+            if (method_exists($model, 'setTranslation')) {
+                $model->setTranslation($suggestion->field, app()->getLocale(), $suggestion->suggested_value);
+            } else {
+                $model->{$suggestion->field} = $suggestion->suggested_value;
+            }
+            $model->save();
         }
 
         if ($suggestion->user) {

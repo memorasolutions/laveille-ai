@@ -25,7 +25,7 @@ Route::middleware(['web', 'auth'])->group(function () {
             ->firstOrFail();
 
         $validated = $request->validate([
-            'field' => ['required', 'in:full_name,description,website_url,other'],
+            'field' => ['required', $acronym->suggestableFieldValidation()],
             'suggested_value' => ['required', 'string', 'max:2000'],
             'reason' => ['nullable', 'string', 'max:500'],
         ]);

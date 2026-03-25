@@ -21,7 +21,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         $term = \Modules\Dictionary\Models\Term::published()->where('slug->' . app()->getLocale(), $slug)->firstOrFail();
 
         $validated = $request->validate([
-            'field' => ['required', 'in:definition,analogy,example,did_you_know,other'],
+            'field' => ['required', $term->suggestableFieldValidation()],
             'suggested_value' => ['required', 'string', 'max:2000'],
             'reason' => ['nullable', 'string', 'max:500'],
         ]);

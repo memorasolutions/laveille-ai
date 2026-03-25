@@ -102,13 +102,10 @@
         </div>
 
         {{-- Suggest edit --}}
-        @if(class_exists(\Modules\Directory\Models\ToolSuggestion::class))
-            @include('fronttheme::partials.suggest-edit', [
-                'model' => $acronym,
-                'route' => route('acronyms.suggestions.store', $acronym->getTranslation('slug', app()->getLocale())),
-                'fields' => ['full_name' => __('Nom complet'), 'description' => __('Description'), 'website_url' => __('Site web'), 'other' => __('Autre')],
-            ])
-        @endif
+        @include('fronttheme::partials.suggest-edit', [
+            'model' => $acronym,
+            'route' => route('acronyms.suggestions.store', $acronym->getTranslation('slug', app()->getLocale())),
+        ])
 
         <div class="row">
             <div class="col-md-8">

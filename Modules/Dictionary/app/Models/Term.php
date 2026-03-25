@@ -12,11 +12,21 @@ namespace Modules\Dictionary\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
 class Term extends Model
 {
+    use HasSuggestions;
     use HasTranslations;
+
+    protected array $suggestableFields = [
+        'definition' => 'Définition',
+        'analogy' => 'Analogie',
+        'example' => 'Exemple',
+        'did_you_know' => 'Le saviez-vous',
+        'other' => 'Autre',
+    ];
 
     protected $table = 'dictionary_terms';
 

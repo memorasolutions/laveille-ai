@@ -13,11 +13,24 @@ namespace Modules\Directory\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
 class Tool extends Model
 {
+    use HasSuggestions;
     use HasTranslations;
+
+    protected array $suggestableFields = [
+        'description' => 'Description',
+        'short_description' => 'Description courte',
+        'pricing' => 'Tarification',
+        'url' => 'URL',
+        'core_features' => 'Fonctionnalités',
+        'how_to_use' => 'Guide',
+        'use_cases' => "Cas d'usage",
+        'other' => 'Autre',
+    ];
 
     protected $table = 'directory_tools';
 

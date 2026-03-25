@@ -10,11 +10,20 @@ namespace Modules\Acronyms\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
 class Acronym extends Model
 {
+    use HasSuggestions;
     use HasTranslations;
+
+    protected array $suggestableFields = [
+        'full_name' => 'Nom complet',
+        'description' => 'Description',
+        'website_url' => 'Site web',
+        'other' => 'Autre',
+    ];
 
     protected $table = 'acronyms';
 
