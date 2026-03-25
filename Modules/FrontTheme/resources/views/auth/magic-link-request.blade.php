@@ -10,7 +10,7 @@
 <section class="section-padding" style="padding-top: 30px;">
     <div class="container">
         <div class="row">
-            <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+            <div style="max-width: 440px; margin: 0 auto;">
                 <div style="background: #fff; border-radius: var(--r-base); padding: 40px; border: 1px solid #E5E7EB; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
                     <div style="text-align: center; margin-bottom: 24px;">
                         <div style="font-size: 40px; margin-bottom: 8px;">🔐</div>
