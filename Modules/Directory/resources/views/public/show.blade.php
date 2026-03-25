@@ -456,7 +456,7 @@
             </div>
             @endforeach
 
-            @include('fronttheme::partials.auth-inline', ['message' => __('pour participer a la discussion.')])
+            @include('fronttheme::partials.auth-inline', ['message' => __('pour participer à la discussion.')])
         </div>
 
         {{-- TAB: Tutoriels --}}

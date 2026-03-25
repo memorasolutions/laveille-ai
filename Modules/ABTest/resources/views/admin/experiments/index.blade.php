@@ -16,7 +16,7 @@
                 @include('abtest::admin.experiments._help')
             </x-backoffice::help-modal>
             <a href="{{ route('admin.experiments.create') }}" class="btn btn-primary">
-                <i data-lucide="plus"></i> {{ __('Nouvelle experience') }}
+                <i data-lucide="plus"></i> {{ __('Nouvelle expérience') }}
             </a>
         </div>
     </div>
@@ -53,7 +53,7 @@
                                     <a href="{{ route('admin.experiments.show', $experiment) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Voir') }}"><i data-lucide="eye"></i></a>
                                     <form action="{{ route('admin.experiments.destroy', $experiment) }}" method="POST" class="d-inline">
                                         @csrf @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer cette experience ?') }}')) this.closest('form').submit()"><i data-lucide="trash-2"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="trash-2"></i></button>
                                     </form>
                                 </div>
                             </td>
@@ -66,9 +66,9 @@
             @else
             <div class="text-center py-5">
                 <i data-lucide="flask-conical" class="icon-xl text-muted mb-3"></i>
-                <h5 class="text-muted">{{ __('Aucune experience') }}</h5>
-                <p class="text-muted mb-4">{{ __('Creez votre premiere experience A/B pour optimiser vos conversions.') }}</p>
-                <a href="{{ route('admin.experiments.create') }}" class="btn btn-primary"><i data-lucide="plus"></i> {{ __('Nouvelle experience') }}</a>
+                <h5 class="text-muted">{{ __('Aucune expérience') }}</h5>
+                <p class="text-muted mb-4">{{ __('Créez votre première expérience A/B pour optimiser vos conversions.') }}</p>
+                <a href="{{ route('admin.experiments.create') }}" class="btn btn-primary"><i data-lucide="plus"></i> {{ __('Nouvelle expérience') }}</a>
             </div>
             @endif
         </div>

@@ -47,12 +47,12 @@ class LegalController extends Controller
             'company' => config('privacy.company'),
             'response_delay_days' => config('privacy.rights.response_delay_days', 30),
             'request_types' => [
-                'access' => __('Droit d\'acces'),
+                'access' => __('Droit d\'accès'),
                 'rectification' => __('Droit de rectification'),
-                'erasure' => __('Droit a l\'effacement'),
-                'portability' => __('Droit a la portabilite'),
+                'erasure' => __('Droit à l\'effacement'),
+                'portability' => __('Droit à la portabilité'),
                 'opposition' => __('Droit d\'opposition'),
-                'limitation' => __('Droit a la limitation'),
+                'limitation' => __('Droit à la limitation'),
                 'withdrawal' => __('Retrait du consentement'),
             ],
         ]);

@@ -13,7 +13,7 @@
 
     <div class="mb-8 rounded-md bg-blue-50 border-l-4 border-blue-400 p-4">
         <p class="text-blue-800 font-medium mb-1">
-            {{ __('Conformement aux lois applicables (RGPD, Loi 25, LPRPDE), vous disposez de droits sur vos donnees personnelles :') }}
+            {{ __('Conformément aux lois applicables (RGPD, Loi 25, LPRPDE), vous disposez de droits sur vos données personnelles&nbsp;:') }}
         </p>
         <ul class="ml-5 list-disc text-blue-700 text-sm mb-2">
             @foreach($request_types as $type => $label)
@@ -63,7 +63,7 @@
             </label>
             <select name="request_type" id="request_type" required aria-required="true"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('request_type') border-red-500 @enderror">
-                <option value="" disabled selected>{{ __('Selectionnez un type') }}</option>
+                <option value="" disabled selected>{{ __('Sélectionnez un type') }}</option>
                 @foreach($request_types as $type => $label)
                     <option value="{{ $type }}" @selected(old('request_type') === $type)>{{ $label }}</option>
                 @endforeach

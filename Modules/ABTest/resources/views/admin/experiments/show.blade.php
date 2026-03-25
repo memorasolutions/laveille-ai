@@ -34,10 +34,10 @@
             @if($experiment->status === 'draft')
             <div class="card mb-4">
                 <div class="card-body text-center py-4">
-                    <p class="text-muted mb-3">{{ __('Cette experience est en brouillon. Demarrez-la pour commencer a collecter des donnees.') }}</p>
+                    <p class="text-muted mb-3">{{ __('Cette expérience est en brouillon. Démarrez-la pour commencer à collecter des données.') }}</p>
                     <form action="{{ route('admin.experiments.start', $experiment) }}" method="POST">
                         @csrf
-                        <button type="button" class="btn btn-primary btn-lg" onclick="if(confirm('{{ __('Demarrer cette experience ?') }}')) this.closest('form').submit()"><i data-lucide="play"></i> {{ __('Demarrer l\'experience') }}</button>
+                        <button type="button" class="btn btn-primary btn-lg" onclick="if(confirm('{{ __('Démarrer cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="play"></i> {{ __('Démarrer l\'expérience') }}</button>
                     </form>
                 </div>
             </div>
@@ -69,20 +69,20 @@
             @if($experiment->status === 'running')
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">{{ __('Terminer l\'experience') }}</h5>
+                    <h5 class="card-title">{{ __('Terminer l\'expérience') }}</h5>
                     <form action="{{ route('admin.experiments.complete', $experiment) }}" method="POST">
                         @csrf
                         <div class="row align-items-end">
                             <div class="col-md-8 mb-3">
                                 <label for="winner" class="form-label">{{ __('Variante gagnante') }}</label>
                                 <select class="form-select @error('winner') is-invalid @enderror" id="winner" name="winner" required>
-                                    <option value="">{{ __('Selectionnez...') }}</option>
+                                    <option value="">{{ __('Sélectionnez...') }}</option>
                                     @foreach($experiment->variants as $variant)<option value="{{ $variant }}">{{ $variant }}</option>@endforeach
                                 </select>
                                 @error('winner')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-4 mb-3">
-                                <button type="button" class="btn btn-success w-100" onclick="if(confirm('{{ __('Terminer cette experience ?') }}')) this.closest('form').submit()"><i data-lucide="flag"></i> {{ __('Terminer') }}</button>
+                                <button type="button" class="btn btn-success w-100" onclick="if(confirm('{{ __('Terminer cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="flag"></i> {{ __('Terminer') }}</button>
                             </div>
                         </div>
                     </form>
@@ -104,7 +104,7 @@
                 <div class="card-body text-center">
                     <form action="{{ route('admin.experiments.destroy', $experiment) }}" method="POST">
                         @csrf @method('DELETE')
-                        <button type="button" class="btn btn-outline-danger" onclick="if(confirm('{{ __('Supprimer definitivement cette experience ?') }}')) this.closest('form').submit()"><i data-lucide="trash-2"></i> {{ __('Supprimer cette experience') }}</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="if(confirm('{{ __('Supprimer définitivement cette expérience ?') }}')) this.closest('form').submit()"><i data-lucide="trash-2"></i> {{ __('Supprimer cette expérience') }}</button>
                     </form>
                 </div>
             </div>

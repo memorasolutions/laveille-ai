@@ -1,17 +1,17 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('backoffice::themes.backend.layouts.admin')
-@section('title', __('Nouvelle experience'))
+@section('title', __('Nouvelle expérience'))
 @section('content')
 <nav class="page-breadcrumb" aria-label="{{ __('Fil d\'Ariane') }}">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('Administration') }}</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.experiments.index') }}">{{ __('Experiences A/B') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.experiments.index') }}">{{ __('Expériences A/B') }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ __('Nouvelle') }}</li>
     </ol>
 </nav>
 <div class="page-content">
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <h4 class="mb-0">{{ __('Nouvelle experience') }}</h4>
+        <h4 class="mb-0">{{ __('Nouvelle expérience') }}</h4>
         <a href="{{ route('admin.experiments.index') }}" class="btn btn-secondary">
             <i data-lucide="arrow-left"></i> {{ __('Retour') }}
         </a>
@@ -83,7 +83,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary">
-                    <i data-lucide="save"></i> {{ __('Creer l\'experience') }}
+                    <i data-lucide="save"></i> {{ __('Créer l\'expérience') }}
                 </button>
             </form>
         </div>

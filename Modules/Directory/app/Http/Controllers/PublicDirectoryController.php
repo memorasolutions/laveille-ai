@@ -147,6 +147,6 @@ class PublicDirectoryController extends Controller
             $tool->categories()->sync($validated['categories']);
         }
 
-        return response()->json(['success' => true, 'message' => __('Merci ! Votre proposition sera examinee par notre equipe.')]);
+        return response()->json(['success' => true, 'message' => __('Merci ! Votre proposition sera examinée par notre équipe.')]);
     }
 }
