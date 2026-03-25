@@ -14,17 +14,24 @@ class DirectoryCategoriesSeeder extends Seeder
     {
         $categories = [
             ['name' => 'Assistants IA', 'icon' => '🤖', 'slug' => 'assistants-ia'],
-            ['name' => "Génération d'images", 'icon' => '🎨', 'slug' => 'generation-images'],
+            ['name' => 'Ecriture IA', 'icon' => '✍️', 'slug' => 'ecriture-ia'],
+            ['name' => "Generation d'images", 'icon' => '🎨', 'slug' => 'generation-images'],
             ['name' => 'Audio et voix', 'icon' => '🎵', 'slug' => 'audio-voix'],
-            ['name' => 'Vidéo', 'icon' => '🎬', 'slug' => 'video'],
-            ['name' => 'Développement', 'icon' => '💻', 'slug' => 'developpement'],
-            ['name' => 'Productivité', 'icon' => '📊', 'slug' => 'productivite'],
-            ['name' => 'Design', 'icon' => '🖌️', 'slug' => 'design'],
-            ['name' => 'Recherche', 'icon' => '🔍', 'slug' => 'recherche'],
+            ['name' => 'Video IA', 'icon' => '🎬', 'slug' => 'video'],
+            ['name' => 'Code et developpement', 'icon' => '💻', 'slug' => 'developpement'],
+            ['name' => 'Productivite', 'icon' => '📊', 'slug' => 'productivite'],
+            ['name' => 'Design et creation', 'icon' => '🖌️', 'slug' => 'design'],
+            ['name' => 'Recherche et analyse', 'icon' => '🔍', 'slug' => 'recherche'],
+            ['name' => 'SEO, GEO et AEO', 'icon' => '📈', 'slug' => 'seo-geo-aeo'],
+            ['name' => 'Education et formation', 'icon' => '🎓', 'slug' => 'education'],
+            ['name' => 'Agents IA', 'icon' => '🤝', 'slug' => 'agents-ia'],
+            ['name' => 'Musique IA', 'icon' => '🎶', 'slug' => 'musique-ia'],
+            ['name' => 'Presentations', 'icon' => '📑', 'slug' => 'presentations'],
+            ['name' => 'No-code et automatisation', 'icon' => '⚡', 'slug' => 'no-code'],
         ];
 
         foreach ($categories as $data) {
-            $category = Category::whereRaw("JSON_EXTRACT(slug, '$.fr_CA') = ?", ['"' . $data['slug'] . '"'])->first();
+            $category = Category::where('slug->fr_CA', $data['slug'])->first();
             if (! $category) {
                 $category = new Category();
             }
@@ -35,18 +42,21 @@ class DirectoryCategoriesSeeder extends Seeder
         }
 
         $assignments = [
-            'assistants-ia' => ['chatgpt', 'claude', 'copilot', 'gemini'],
-            'generation-images' => ['midjourney', 'leonardo-ai', 'ideogram-ai'],
-            'audio-voix' => ['suno', 'elevenlabs'],
-            'video' => ['runway', 'heygen'],
+            'assistants-ia' => ['chatgpt', 'claude', 'copilot', 'gemini', 'grok', 'mistral-le-chat'],
+            'generation-images' => ['midjourney', 'leonardo-ai', 'ideogram-ai', 'stability-ai', 'canva-ai'],
+            'audio-voix' => ['elevenlabs'],
+            'musique-ia' => ['suno', 'udio'],
+            'video' => ['runway', 'heygen', 'pika'],
             'developpement' => ['cursor', 'v0', 'bolt', 'lovable'],
-            'productivite' => ['notion-ai', 'gamma', 'notebooklm', 'napkin-ai'],
-            'design' => ['canva-ai'],
+            'productivite' => ['notion-ai', 'notebooklm', 'napkin-ai'],
+            'design' => ['canva-ai', 'napkin-ai'],
             'recherche' => ['perplexity'],
+            'presentations' => ['gamma'],
+            'no-code' => ['bolt', 'lovable', 'v0'],
         ];
 
         foreach ($assignments as $catSlug => $toolSlugs) {
-            $category = Category::whereRaw("JSON_EXTRACT(slug, '$.fr_CA') = ?", ['"' . $catSlug . '"'])->first();
+            $category = Category::where('slug->fr_CA', $catSlug)->first();
             if (! $category) {
                 continue;
             }
@@ -54,7 +64,7 @@ class DirectoryCategoriesSeeder extends Seeder
             foreach ($toolSlugs as $toolSlug) {
                 $tool = Tool::where('slug->fr_CA', $toolSlug)->first();
                 if ($tool) {
-                    $tool->categories()->sync([$category->id]);
+                    $tool->categories()->syncWithoutDetaching([$category->id]);
                 }
             }
         }
