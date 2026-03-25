@@ -86,4 +86,8 @@ return [
         'redirect' => env('APPLE_REDIRECT_URI', '/auth/apple/callback'),
     ],
 
+    'brevo' => [
+        'api_key' => env('BREVO_API_KEY'),
+    ],
+
 ];

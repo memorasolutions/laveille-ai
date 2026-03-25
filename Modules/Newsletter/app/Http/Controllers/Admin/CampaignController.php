@@ -14,11 +14,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Modules\Newsletter\Models\Campaign;
 use Modules\Newsletter\Models\Subscriber;
-use Modules\Newsletter\Notifications\CampaignNotification;
+use Modules\Newsletter\Services\BrevoService;
 use Modules\Newsletter\States\SentCampaignState;
 
 class CampaignController extends Controller
@@ -51,7 +50,7 @@ class CampaignController extends Controller
             ->with('success', 'Campagne créée.');
     }
 
-    public function send(Campaign $campaign): RedirectResponse
+    public function send(Campaign $campaign, BrevoService $brevo): RedirectResponse
     {
         if ($campaign->isSent()) {
             return redirect()
@@ -59,22 +58,34 @@ class CampaignController extends Controller
                 ->with('error', 'Campagne déjà envoyée.');
         }
 
+        if (! $brevo->isConfigured()) {
+            return redirect()
+                ->back()
+                ->with('error', 'Brevo API non configurée. Vérifiez BREVO_API_KEY dans .env.');
+        }
+
         $subscribers = Subscriber::active()->get();
 
-        DB::transaction(function () use ($campaign, $subscribers) {
-            $campaign->status->transitionTo(SentCampaignState::class);
-            $campaign->update([
-                'sent_at' => now(),
-                'recipient_count' => $subscribers->count(),
-            ]);
-        });
+        $result = $brevo->sendBulkCampaign($subscribers, $campaign->subject, $campaign->content);
 
-        foreach ($subscribers as $subscriber) {
-            Notification::send($subscriber, new CampaignNotification($campaign, $subscriber));
+        if ($result['success']) {
+            DB::transaction(function () use ($campaign, $result) {
+                $campaign->status->transitionTo(SentCampaignState::class);
+                $campaign->update([
+                    'sent_at' => now(),
+                    'recipient_count' => $result['stats']['sent'] ?? 0,
+                ]);
+            });
+
+            $stats = $result['stats'] ?? [];
+
+            return redirect()
+                ->route('admin.newsletter.campaigns.index')
+                ->with('success', "Campagne envoyée via Brevo : {$stats['sent']} envoyés, {$stats['failed']} échoués.");
         }
 
         return redirect()
-            ->route('admin.newsletter.campaigns.index')
-            ->with('success', "Campagne envoyée à {$subscribers->count()} abonnés.");
+            ->back()
+            ->with('error', "Erreur Brevo : {$result['error']}");
     }
 }

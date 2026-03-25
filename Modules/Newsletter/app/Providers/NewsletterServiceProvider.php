@@ -14,6 +14,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
 use Modules\Core\Providers\BaseModuleServiceProvider;
 use Modules\Newsletter\Listeners\WorkflowTriggerListener;
+use Modules\Newsletter\Services\BrevoService;
 
 class NewsletterServiceProvider extends BaseModuleServiceProvider
 {
@@ -39,5 +40,7 @@ class NewsletterServiceProvider extends BaseModuleServiceProvider
 
         $this->app->singleton(NewsletterMetricProvider::class);
         $this->app->tag([NewsletterMetricProvider::class], 'metric_providers');
+
+        $this->app->singleton(BrevoService::class);
     }
 }
