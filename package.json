@@ -57,10 +57,12 @@
         "bootstrap": "^5.3.8",
         "cropperjs": "^1.6.2",
         "flag-icons": "^7.5.0",
+        "idcac-playwright": "^0.2.0",
         "laravel-echo": "^2.3.0",
         "lowlight": "^3.3.0",
         "lucide": "^0.575.0",
         "perfect-scrollbar": "^1.5.6",
+        "puppeteer": "^24.40.0",
         "pusher-js": "^8.4.0"
     },
     "name": "laravel_vierge",

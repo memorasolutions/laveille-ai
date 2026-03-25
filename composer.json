@@ -38,6 +38,7 @@
         "socialiteproviders/apple": "^5.9",
         "socialiteproviders/linkedin": "^5.0",
         "socialiteproviders/microsoft": "^4.8",
+        "spatie/browsershot": "^5.2",
         "spatie/laravel-activitylog": "^4.11",
         "spatie/laravel-backup": "^9.4",
         "spatie/laravel-health": "^1.37",
