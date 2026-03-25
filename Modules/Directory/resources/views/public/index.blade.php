@@ -430,7 +430,7 @@
                             <template x-if="tool.screenshot">
                                 <div style="position: relative; height: 140px;">
                                     <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
-                                    <div style="position: absolute; inset: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), inset 0 -2px 4px rgba(0,0,0,0.05);"></div>
+                                    <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);"></div>
                                 </div>
                             </template>
                             <template x-if="!tool.screenshot">
