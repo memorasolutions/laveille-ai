@@ -49,7 +49,12 @@
                 </div>
             </form>
         @else
-            @include('fronttheme::partials.auth-inline', ['message' => __('pour suggérer une modification.')])
+            <div style="text-align: center; padding: 12px;">
+                <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour suggérer une modification.') }}' })"
+                    style="background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                    🔐 {{ __('Se connecter pour suggérer') }}
+                </button>
+            </div>
         @endauth
     </div>
 </div>

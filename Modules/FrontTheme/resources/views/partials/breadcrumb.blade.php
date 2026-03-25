@@ -18,6 +18,9 @@
                                             __('Glossaire IA') => Route::has('dictionary.index') ? route('dictionary.index') : null,
                                             __('Répertoire techno') => Route::has('directory.index') ? route('directory.index') : null,
                                             __('FAQ') => Route::has('faq.index') ? route('faq.index') : null,
+                                            __('Acronymes éducation') => Route::has('acronyms.index') ? route('acronyms.index') : null,
+                                            __('Répertoire') => Route::has('directory.index') ? route('directory.index') : null,
+                                            __('Glossaire') => Route::has('dictionary.index') ? route('dictionary.index') : null,
                                         ];
                                         $url = $breadcrumbRoutes[$item] ?? null;
                                     @endphp

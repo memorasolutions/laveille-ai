@@ -11,7 +11,7 @@
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $term->name,
-        'breadcrumbItems' => [__('Glossaire'), $term->name]
+        'breadcrumbItems' => [__('Glossaire IA'), $term->name]
     ])
 @endsection
 

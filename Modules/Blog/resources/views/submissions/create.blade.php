@@ -109,7 +109,10 @@
                 <div style="font-size: 48px; margin-bottom: 16px;">✍️</div>
                 <h3 style="font-family: var(--f-heading); color: var(--c-dark);">{{ __('Connectez-vous pour proposer un article') }}</h3>
                 <p style="color: #6B7280; margin-bottom: 20px;">{{ __('Partagez vos connaissances avec notre communauté.') }}</p>
-                @include('fronttheme::partials.auth-inline', ['message' => __('pour proposer un article.')])
+                <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour proposer un article.') }}' })"
+                    style="background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                    🔐 {{ __('Se connecter') }}
+                </button>
             </div>
         @endauth
     </div>

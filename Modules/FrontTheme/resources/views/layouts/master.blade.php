@@ -144,6 +144,7 @@
         @include('fronttheme::partials.footer')
 
         @include('fronttheme::partials.newsletter-modal')
+        @include('fronttheme::partials.auth-modal')
     </div>
     <!-- end of page-wrapper -->
 

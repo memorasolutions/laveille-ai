@@ -64,9 +64,9 @@
                             @endif
                             <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook"></i> Facebook</a></li>
                             <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger"></i> Messenger</a></li>
-                            @if(Route::has('magic-link.request'))
-                                <li><a href="{{ route('magic-link.request') }}">🔑 {{ __('Se connecter') }}</a></li>
-                            @endif
+                            @guest
+                                <li><a href="#" @click.prevent="$dispatch('open-auth-modal', { message: '' })" style="cursor: pointer;">🔑 {{ __('Se connecter') }}</a></li>
+                            @endguest
                         </ul>
                         @if(Route::has('login'))
                             <a href="{{ route('login') }}" style="display:block;margin-top:6px;font-size:11px;color:rgba(255,255,255,0.35);">{{ __('Administration') }}</a>

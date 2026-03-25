@@ -344,15 +344,10 @@
                                 + {{ __('Proposer un terme') }}
                             </button>
                         @else
-                            <span x-data="{ showLogin: false }">
-                                <button type="button" @click="showLogin = !showLogin"
-                                    style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); border: 1px solid rgba(255,255,255,0.4); cursor: pointer; font-size: 13px;">
-                                    {{ __('Proposer un terme') }}
-                                </button>
-                                <div x-show="showLogin" x-cloak x-transition style="margin-top: 12px;">
-                                    @include('fronttheme::partials.auth-inline', ['message' => __('pour proposer un terme.'), 'dark' => true])
-                                </div>
-                            </span>
+                            <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour proposer un terme.') }}' })"
+                                style="background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; padding: 8px 20px; border-radius: var(--r-btn); border: 1px solid rgba(255,255,255,0.4); cursor: pointer; font-size: 13px;">
+                                {{ __('Proposer un terme') }}
+                            </button>
                         @endauth
                     @endif
                 </div>

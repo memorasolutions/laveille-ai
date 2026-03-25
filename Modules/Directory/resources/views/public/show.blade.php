@@ -388,7 +388,12 @@
                 </form>
             </div>
             @else
-                @include('fronttheme::partials.auth-inline', ['message' => __('pour donner votre avis.')])
+                <div style="text-align: center; padding: 12px;">
+                    <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour donner votre avis.') }}' })"
+                        style="background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                        🔐 {{ __('Se connecter') }}
+                    </button>
+                </div>
             @endauth
         </div>
 
@@ -458,7 +463,14 @@
             </div>
             @endforeach
 
-            @include('fronttheme::partials.auth-inline', ['message' => __('pour participer à la discussion.')])
+            @guest
+            <div style="text-align: center; padding: 12px;">
+                <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour participer à la discussion.') }}' })"
+                    style="background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                    🔐 {{ __('Se connecter') }}
+                </button>
+            </div>
+            @endguest
         </div>
 
         {{-- TAB: Tutoriels --}}
@@ -509,7 +521,12 @@
                 </form>
             </div>
             @else
-                @include('fronttheme::partials.auth-inline', ['message' => __('pour partager une ressource.')])
+                <div style="text-align: center; padding: 12px;">
+                    <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour partager une ressource.') }}' })"
+                        style="background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                        🔐 {{ __('Se connecter') }}
+                    </button>
+                </div>
             @endauth
         </div>
 
@@ -568,7 +585,12 @@
                     </form>
                 </div>
             @else
-                @include('fronttheme::partials.auth-inline', ['message' => __('pour partager un screenshot.')])
+                <div style="text-align: center; padding: 12px;">
+                    <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour partager un screenshot.') }}' })"
+                        style="background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); padding: 10px 24px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                        🔐 {{ __('Se connecter') }}
+                    </button>
+                </div>
             @endauth
         </div>
 
