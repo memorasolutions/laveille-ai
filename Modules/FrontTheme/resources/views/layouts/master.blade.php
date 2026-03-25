@@ -10,6 +10,7 @@
     @if(config('app.noindex', false))
         <meta name="robots" content="noindex, nofollow">
     @endif
+    <style>[x-cloak] { display: none !important; }</style>
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}">

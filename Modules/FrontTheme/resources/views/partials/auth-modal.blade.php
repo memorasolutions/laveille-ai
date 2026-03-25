@@ -34,10 +34,10 @@
                 const d = await res.json();
                 if (d.success) {
                     this.step = 'code';
-                    this.successMsg = '{{ __('Code envoyé à') }} ' + this.email;
+                    this.successMsg = 'Code envoyé à ' + this.email;
                     this.$nextTick(() => this.$refs.codeInput && this.$refs.codeInput.focus());
-                } else { this.error = d.message || '{{ __('Erreur lors de l\'envoi.') }}'; }
-            } catch(e) { this.error = '{{ __('Erreur réseau.') }}'; }
+                } else { this.error = d.message || 'Erreur lors de l\u0027envoi.'; }
+            } catch(e) { this.error = 'Erreur réseau.'; }
             finally { this.loading = false; }
         },
 
@@ -51,8 +51,8 @@
                     body: JSON.stringify({ email: this.email, token: this.code })
                 });
                 const d = await res.json();
-                if (d.success) { window.location.reload(); } else { this.error = d.message || '{{ __('Code invalide.') }}'; }
-            } catch(e) { this.error = '{{ __('Erreur réseau.') }}'; }
+                if (d.success) { window.location.reload(); } else { this.error = d.message || 'Code invalide.'; }
+            } catch(e) { this.error = 'Erreur réseau.'; }
             finally { this.loading = false; }
         },
 
@@ -65,16 +65,11 @@
     @open-auth-modal.window="open = true; message = $event.detail?.message || ''"
     x-show="open"
     x-cloak
-    x-transition:enter="transition ease-out duration-200"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-150"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
+    @click.self="open = false"
     @keydown.escape.window="open = false"
-    style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;"
+    style="position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5);"
 >
-    <div @click.stop style="max-width: 420px; width: 90%; background: #fff; border-radius: var(--r-base); padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+    <div @click.stop style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); max-width: 420px; width: 90%; background: #fff; border-radius: var(--r-base); padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
 
         {{-- Header --}}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
