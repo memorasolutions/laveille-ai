@@ -26,7 +26,7 @@
 </head>
 <body>
     {{-- WCAG 2.4.1: Skip navigation link --}}
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-sky-700 focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:text-sm focus:font-medium">
+    <a href="#main-content" style="position:absolute;top:-40px;left:0;background:#0369a1;color:#fff;padding:8px 16px;z-index:10000;transition:top .2s;font-size:14px;border-radius:0 0 4px 0" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">
         {{ __('Aller au contenu principal') }}
     </a>
 

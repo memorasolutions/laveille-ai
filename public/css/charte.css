@@ -360,12 +360,6 @@ select:focus {
     .wpo-blog-pg-section .col.col-lg-4 { flex: 0 0 33.333%; max-width: 33.333%; }
 }
 
-/* ── 15. PRELOADER ── */
-
-.preloader {
-    background: var(--c-primary);
-}
-
 /* ── 15. BACK TO TOP ── */
 
 .back-to-top {

@@ -54,6 +54,15 @@
     details { margin-bottom: 8px; } details > summary { cursor: pointer; font-weight: 600; padding: 12px; background: #F9FAFB; border-radius: 6px; }
     details > summary:hover { background: #F3F4F6; } details > div { padding: 12px 16px; color: #4B5563; line-height: 1.6; }
 
+    /* Markdown description */
+    .rt-description h2 { font-family: var(--f-heading); font-size: 1.35rem; font-weight: 700; color: var(--c-dark); margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #E5E7EB; }
+    .rt-description h3 { font-size: 1.15rem; font-weight: 600; color: var(--c-dark); margin: 20px 0 8px; }
+    .rt-description p { margin-bottom: 14px; }
+    .rt-description ul, .rt-description ol { margin: 0 0 14px 20px; }
+    .rt-description li { margin-bottom: 4px; }
+    .rt-description strong { color: var(--c-dark); }
+    .rt-description blockquote { border-left: 4px solid var(--c-primary); background: #EEF7FF; padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+
     /* Reviews */
     .rt-stars { color: #F59E0B; font-size: 1.1rem; }
     /* Resources */
@@ -187,7 +196,10 @@
                     👋 {{ __('À propos de') }} {{ $tool->name }}
                 </h3>
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), #60a5fa); margin-bottom: 20px; border-radius: 2px;"></div>
-                <div style="font-size: 1.05rem; line-height: 1.8; color: #475569;">{!! nl2br(e($tool->description)) !!}</div>
+                <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;">{!! Str::markdown($tool->description ?? '', [
+                        'html_input' => 'strip',
+                        'allow_unsafe_links' => false,
+                    ]) !!}</div>
             </div>
 
             {{-- How to use --}}
