@@ -229,7 +229,7 @@
                 {{-- Doublons detectes --}}
                 <template x-if="duplicates.length > 0">
                     <div style="margin-top: 14px; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--r-base); padding: 14px; text-align: left;">
-                        <strong style="color: #92400E;">⚠️ {{ __('Cet outil semble deja dans notre repertoire :') }}</strong>
+                        <strong style="color: #92400E;">⚠️ {{ __('Cet outil semble déjà dans notre répertoire :') }}</strong>
                         <template x-for="dup in duplicates" :key="dup.id">
                             <div style="margin-top: 6px;">
                                 <a :href="'/annuaire/' + dup.slug" target="_blank" style="color: #92400E; font-weight: 600;" x-text="dup.name"></a>
@@ -237,7 +237,7 @@
                             </div>
                         </template>
                         <button type="button" @click="duplicates = []; wStep = 2;" style="margin-top: 10px; background: #F59E0B; color: #fff; border: none; padding: 6px 16px; border-radius: var(--r-btn); font-weight: 600; font-size: 13px; cursor: pointer;">
-                            {{ __('Proposer quand meme') }}
+                            {{ __('Proposer quand même') }}
                         </button>
                     </div>
                 </template>
