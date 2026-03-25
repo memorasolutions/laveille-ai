@@ -44,13 +44,13 @@
     <div x-show="showAuth" x-cloak x-transition style="background: {{ $dark ? 'rgba(255,255,255,0.12)' : '#fff' }}; border: 2px solid {{ $dark ? 'rgba(255,255,255,0.3)' : 'var(--c-primary)' }}; border-radius: var(--r-base); padding: 20px; margin-top: 8px; max-width: 440px; {{ $dark ? 'margin-left:auto;margin-right:auto;' : '' }}">
         <div style="text-align: center; margin-bottom: 12px;">
             <span style="font-size: 24px;">🔐</span>
-            <h4 style="font-family: var(--f-heading); color: {{ $dark ? '#fff' : 'var(--c-dark)' }}; margin: 4px 0 0; font-size: 15px;">{{ __('Connexion rapide') }}</h4>
+            <p style="font-family: var(--f-heading); color: {{ $dark ? '#fff' : 'var(--c-dark)' }}; margin: 4px 0 0; font-size: 15px; font-weight: 700;">{{ __('Connexion rapide') }}</p>
         </div>
 
         {{-- Email --}}
         <div x-show="!authSent">
             <div style="display: flex; gap: 8px;">
-                <input type="email" x-model="authEmail" placeholder="vous@exemple.com" aria-label="{{ __('Adresse courriel') }}"
+                <input type="email" x-model="authEmail" placeholder="vous@exemple.com" aria-label="{{ __('Adresse courriel') }}" autocomplete="email"
                     @keydown.enter="sendCode()"
                     style="flex: 1; height: 40px; padding: 0 12px; border: {{ $dark ? '2px solid rgba(255,255,255,0.3)' : '1px solid #E5E7EB' }}; border-radius: var(--r-base); font-size: 14px; outline: none; background: #fff; color: var(--c-dark);">
                 <button type="button" @click="sendCode()" :disabled="authSending || !authEmail"
