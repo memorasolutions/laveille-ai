@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 
 class BrevoService
 {
@@ -101,6 +102,30 @@ class BrevoService
                 'failed' => count($errors),
             ],
         ];
+    }
+
+    public static function availableTemplates(): array
+    {
+        return [
+            'modern' => 'Moderne (gradient teal/orange)',
+            'minimal' => 'Minimal (clean, sobre)',
+            'dark' => 'Dark (fond sombre, tech)',
+        ];
+    }
+
+    public function renderTemplate(string $template, string $subject, string $content, string $unsubscribeUrl): string
+    {
+        $viewName = "newsletter::emails.{$template}";
+        if (! View::exists($viewName)) {
+            $viewName = 'newsletter::emails.modern';
+        }
+
+        return View::make($viewName, [
+            'subject' => $subject,
+            'content' => $content,
+            'unsubscribeUrl' => $unsubscribeUrl,
+            'webUrl' => config('app.url'),
+        ])->render();
     }
 
     public function isConfigured(): bool

@@ -29,7 +29,9 @@ class CampaignController extends Controller
 
     public function create(): View
     {
-        return view('newsletter::admin.campaigns.create');
+        return view('newsletter::admin.campaigns.create', [
+            'templates' => BrevoService::availableTemplates(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -37,11 +39,13 @@ class CampaignController extends Controller
         $validated = $request->validate([
             'subject' => 'required|max:255',
             'content' => 'required',
+            'template' => 'required|in:' . implode(',', array_keys(BrevoService::availableTemplates())),
         ]);
 
         Campaign::create([
             'subject' => $validated['subject'],
             'content' => $validated['content'],
+            'template' => $validated['template'],
             'status' => 'draft',
         ]);
 
@@ -65,8 +69,12 @@ class CampaignController extends Controller
         }
 
         $subscribers = Subscriber::active()->get();
+        $template = $campaign->template ?? 'modern';
 
-        $result = $brevo->sendBulkCampaign($subscribers, $campaign->subject, $campaign->content);
+        // Render le HTML avec le template choisi (unsubscribe URL sera personnalisée par sendBulkCampaign)
+        $htmlContent = $brevo->renderTemplate($template, $campaign->subject, $campaign->content, '#');
+
+        $result = $brevo->sendBulkCampaign($subscribers, $campaign->subject, $htmlContent);
 
         if ($result['success']) {
             DB::transaction(function () use ($campaign, $result) {

@@ -25,6 +25,16 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Template <span class="text-danger">*</span></label>
+                        <select name="template" class="form-select @error('template') is-invalid @enderror" required>
+                            @foreach($templates as $key => $label)
+                                <option value="{{ $key }}" {{ old('template', 'modern') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('template')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="mb-3">
                         <x-editor::tiptap name="content" :value="old('content', '')" label="Contenu" />
                         @error('content')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         <div class="form-text text-muted mt-2">Le contenu sera envoyé tel quel à tous les abonnés actifs.</div>
