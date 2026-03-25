@@ -28,7 +28,7 @@ class PasswordNotCompromisedRule implements ValidationRule
         $suffix = substr($sha1, 5);
 
         try {
-            $response = Http::timeout(3)->get("https://api.pwnedpasswords.com/range/{$prefix}");
+            $response = Http::timeout(3)->withoutVerifying()->get("https://api.pwnedpasswords.com/range/{$prefix}");
 
             if ($response->successful()) {
                 foreach (explode("\n", $response->body()) as $line) {

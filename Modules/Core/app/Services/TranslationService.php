@@ -52,6 +52,7 @@ class TranslationService
             foreach (['openai/gpt-5', 'openai/gpt-5-mini'] as $model) {
                 try {
                     $response = Http::timeout(30)
+                        ->withoutVerifying()
                         ->withHeaders([
                             'Authorization' => 'Bearer ' . $apiKey,
                             'Content-Type' => 'application/json',

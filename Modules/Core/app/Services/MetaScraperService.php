@@ -136,7 +136,7 @@ class MetaScraperService
         }
 
         try {
-            $response = Http::timeout(15)->get('https://opengraph.io/api/1.1/site/' . urlencode($url), [
+            $response = Http::timeout(15)->withoutVerifying()->get('https://opengraph.io/api/1.1/site/' . urlencode($url), [
                 'app_id' => $apiKey,
             ]);
 
