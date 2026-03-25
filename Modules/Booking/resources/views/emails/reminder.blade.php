@@ -6,7 +6,7 @@ Bonjour {{ $customer_name }},
 
 Nous vous rappelons votre rendez-vous pour **{{ $service_name }}** dans **{{ $hours_before }}**.
 
-**Details :**
+**Détails :**
 - Date : {{ $date }}
 - Horaire : {{ $time }}
 
@@ -14,6 +14,6 @@ Nous vous rappelons votre rendez-vous pour **{{ $service_name }}** dans **{{ $ho
 Voir mon rendez-vous
 @endcomponent
 
-A tres bientot,<br>
-L'equipe {{ $brand_name }}
+À très bientôt,<br>
+L'équipe {{ $brand_name }}
 @endcomponent

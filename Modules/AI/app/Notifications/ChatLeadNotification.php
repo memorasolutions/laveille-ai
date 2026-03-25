@@ -49,7 +49,7 @@ class ChatLeadNotification extends TemplatedNotification
             ->line('**Sujet :** '.$this->contactMessage->subject)
             ->line('**Message :** '.$this->contactMessage->message)
             ->action('Voir dans le backoffice', url('/admin/contact-messages'))
-            ->salutation('L\'equipe MEMORA');
+            ->salutation('L\'équipe ' . config('app.name'));
     }
 
     /** @return array<string, mixed> */

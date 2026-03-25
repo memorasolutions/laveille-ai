@@ -45,7 +45,7 @@ class NewBookingAdminNotification extends TemplatedNotification
     {
         return (new MailMessage)
             ->subject('Nouveau rendez-vous')
-            ->line('Un nouveau rendez-vous a ete reserve.')
+            ->line('Un nouveau rendez-vous a été réservé.')
             ->line('**Service :** '.$this->serviceName)
             ->line('**Client :** '.$this->customerName)
             ->line('**Date :** '.$this->dateTime)

@@ -49,8 +49,8 @@ class LockoutContactNotification extends TemplatedNotification
             ->line(__('Adresse IP : :ip', ['ip' => $this->ipAddress]))
             ->line(__('Message :'))
             ->line($this->userMessage)
-            ->action(__('Gerer les utilisateurs'), url('/admin/users'))
-            ->salutation(__('L\'equipe :app', ['app' => config('app.name')]));
+            ->action(__('Gérer les utilisateurs'), url('/admin/users'))
+            ->salutation(__('L\'équipe :app', ['app' => config('app.name')]));
     }
 
     public function toArray(object $notifiable): array

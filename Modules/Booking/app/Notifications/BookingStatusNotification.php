@@ -68,6 +68,6 @@ class BookingStatusNotification extends TemplatedNotification
             ->line($message)
             ->line('**Service :** '.$this->appointment->service->name)
             ->line('**Date :** '.$this->appointment->start_at->locale('fr')->isoFormat('dddd D MMMM YYYY a HH:mm'))
-            ->action('Gerer mon rendez-vous', route('booking.manage', $this->appointment->cancel_token));
+            ->action('Gérer mon rendez-vous', route('booking.manage', $this->appointment->cancel_token));
     }
 }

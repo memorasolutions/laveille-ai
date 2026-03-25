@@ -54,16 +54,16 @@ class InviteMemberNotification extends TemplatedNotification
         $inviter = $this->invitation->inviter;
 
         return (new MailMessage)
-            ->subject(__('Invitation a rejoindre :team', ['team' => $team->name]))
+            ->subject(__('Invitation à rejoindre :team', ['team' => $team->name]))
             ->greeting(__('Bonjour !'))
-            ->line(__(':name vous a invite a rejoindre l\'equipe ":team".', [
+            ->line(__(':name vous a invité à rejoindre l\'équipe « :team ».', [
                 'name' => $inviter->name,
                 'team' => $team->name,
             ]))
-            ->line(__('Role propose : :role', ['role' => ucfirst($this->invitation->role)]))
+            ->line(__('Rôle proposé : :role', ['role' => ucfirst($this->invitation->role)]))
             ->action(__('Accepter l\'invitation'), route('teams.invitations.accept', $this->invitation->token))
             ->line(__('Cette invitation expire dans 7 jours.'))
-            ->line(__('Si vous ne souhaitez pas rejoindre cette equipe, aucune action n\'est requise.'));
+            ->line(__('Si vous ne souhaitez pas rejoindre cette équipe, aucune action n\'est requise.'));
     }
 
     public function toArray(object $notifiable): array

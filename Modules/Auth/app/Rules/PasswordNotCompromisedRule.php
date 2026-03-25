@@ -35,7 +35,7 @@ class PasswordNotCompromisedRule implements ValidationRule
                     $parts = explode(':', trim($line));
 
                     if (count($parts) === 2 && strtoupper($parts[0]) === $suffix && (int) $parts[1] > 0) {
-                        $fail('Ce mot de passe a ete compromis dans une fuite de donnees. Veuillez en choisir un autre.');
+                        $fail('Ce mot de passe a été compromis dans une fuite de données. Veuillez en choisir un autre.');
 
                         return;
                     }

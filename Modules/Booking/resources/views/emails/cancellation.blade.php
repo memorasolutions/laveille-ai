@@ -4,7 +4,7 @@
 
 Bonjour {{ $customer_name }},
 
-Votre rendez-vous pour **{{ $service_name }}** prevu le **{{ $date }}** a **{{ $time }}** a ete annule.
+Votre rendez-vous pour **{{ $service_name }}** prévu le **{{ $date }}** à **{{ $time }}** a été annulé.
 
 @if($cancel_reason)
 **Raison :** {{ $cancel_reason }}
@@ -14,8 +14,8 @@ Votre rendez-vous pour **{{ $service_name }}** prevu le **{{ $date }}** a **{{ $
 Prendre un nouveau rendez-vous
 @endcomponent
 
-Nous esperons vous revoir prochainement.
+Nous espérons vous revoir prochainement.
 
 Cordialement,<br>
-L'equipe {{ $brand_name }}
+L'équipe {{ $brand_name }}
 @endcomponent

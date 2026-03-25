@@ -36,7 +36,7 @@ class PasswordHistoryRule implements ValidationRule
 
         foreach ($previousHashes as $oldHash) {
             if (Hash::check((string) $value, $oldHash)) {
-                $fail('Ce mot de passe a deja ete utilise recemment. Veuillez en choisir un different.');
+                $fail('Ce mot de passe a déjà été utilisé récemment. Veuillez en choisir un différent.');
 
                 return;
             }
