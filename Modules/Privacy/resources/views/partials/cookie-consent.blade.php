@@ -10,17 +10,17 @@
     $hasCookie = false; // Toujours false côté serveur — le JS gère l'état via le cookie client
 
     $text = [
-        'title' => $isFr ? 'Parametres de confidentialite' : 'Privacy Settings',
+        'title' => $isFr ? 'Paramètres de confidentialité' : 'Privacy Settings',
         'intro' => $isFr
-            ? 'Nous utilisons des temoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gerer vos preferences ci-dessous.'
+            ? 'Nous utilisons des témoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos préférences ci-dessous.'
             : 'We use cookies to ensure the site works properly, analyze traffic, and personalize content. You can manage your preferences below.',
         'accept_all' => $isFr ? 'Tout accepter' : 'Accept all',
         'refuse_all' => $isFr ? 'Tout refuser' : 'Refuse all',
         'customize' => $isFr ? 'Personnaliser' : 'Customize',
         'save' => $isFr ? 'Enregistrer mes choix' : 'Save preferences',
         'back' => $isFr ? 'Retour' : 'Back',
-        'policy_link' => $isFr ? 'Politique de confidentialite' : 'Privacy policy',
-        'fab_label' => $isFr ? 'Gerer les temoins' : 'Manage cookies',
+        'policy_link' => $isFr ? 'Politique de confidentialité' : 'Privacy policy',
+        'fab_label' => $isFr ? 'Gérer les témoins' : 'Manage cookies',
     ];
 @endphp
 
