@@ -113,6 +113,7 @@ class ModerationController extends Controller
 
         if ($suggestion->user) {
             $this->reputation->addPoints($suggestion->user, 5, 'suggestion_approved');
+            $suggestion->user->notify(new \Modules\Directory\Notifications\SuggestionApprovedNotification($suggestion));
         }
 
         return back()->with('success', __('Suggestion approuvée et appliquée.'));
@@ -120,7 +121,13 @@ class ModerationController extends Controller
 
     public function rejectSuggestion(int $id): RedirectResponse
     {
-        \Modules\Directory\Models\ToolSuggestion::findOrFail($id)->update(['status' => 'rejected']);
+        $suggestion = \Modules\Directory\Models\ToolSuggestion::findOrFail($id);
+        $suggestion->update(['status' => 'rejected']);
+
+        if ($suggestion->user) {
+            $suggestion->user->notify(new \Modules\Directory\Notifications\SuggestionRejectedNotification($suggestion));
+        }
+
         return back()->with('success', __('Suggestion rejetée.'));
     }
 }

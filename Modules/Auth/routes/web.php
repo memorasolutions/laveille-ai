@@ -21,6 +21,7 @@ use Modules\Auth\Http\Controllers\TwoFactorProfileController;
 use Modules\Auth\Http\Controllers\UserActivityController;
 use Modules\Auth\Http\Controllers\UserApiTokenController;
 use Modules\Auth\Http\Controllers\UserArticleController;
+use Modules\Auth\Http\Controllers\UserContributionsController;
 use Modules\Auth\Http\Controllers\UserDashboardController;
 use Modules\Auth\Http\Controllers\UserNotificationsController;
 use Modules\Auth\Http\Controllers\UserSessionController;
@@ -147,6 +148,9 @@ Route::middleware(['auth', SetBackofficeTheme::class])->group(function () {
     Route::post('/user/two-factor/disable', [TwoFactorProfileController::class, 'disable'])->name('user.two-factor.disable');
     Route::get('/user/two-factor/recovery-codes', [TwoFactorProfileController::class, 'recoveryCodes'])->name('user.two-factor.recovery-codes');
     Route::post('/user/two-factor/recovery-codes/regenerate', [TwoFactorProfileController::class, 'regenerateRecoveryCodes'])->name('user.two-factor.regenerate');
+
+    // Mes contributions (suggestions + votes)
+    Route::get('/user/contributions', [UserContributionsController::class, 'index'])->name('user.contributions');
 
     // Journal d'activité utilisateur (Phase 96)
     Route::get('/user/activity', [UserActivityController::class, 'index'])->name('user.activity');

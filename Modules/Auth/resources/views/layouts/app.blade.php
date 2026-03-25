@@ -140,6 +140,13 @@
                         </a>
                     </li>
 
+                    <li class="nav-item {{ request()->routeIs('user.contributions') ? 'active' : '' }}">
+                        <a href="{{ route('user.contributions') }}" class="nav-link">
+                            <i class="link-icon" data-lucide="heart-handshake"></i>
+                            <span class="link-title">{{ __('Mes contributions') }}</span>
+                        </a>
+                    </li>
+
                     <li class="nav-item {{ request()->routeIs('user.profile') ? 'active' : '' }}">
                         <a href="{{ route('user.profile') }}" class="nav-link">
                             <i class="link-icon" data-lucide="user"></i>
@@ -313,6 +320,10 @@
                                     <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('user.sessions') }}">
                                         <i data-lucide="monitor" style="width:16px;height:16px;"></i>
                                         {{ __('Sessions') }}
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('user.contributions') }}">
+                                        <i data-lucide="heart-handshake" style="width:16px;height:16px;"></i>
+                                        {{ __('Mes contributions') }}
                                     </a>
                                     <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ route('user.activity') }}">
                                         <i data-lucide="activity" style="width:16px;height:16px;"></i>
