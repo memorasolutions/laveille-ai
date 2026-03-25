@@ -1,4 +1,4 @@
-{{-- Auth inline OTP : composant reutilisable pour connexion sans quitter la page --}}
+{{-- Auth inline OTP : composant réutilisable pour connexion sans quitter la page --}}
 {{-- Usage : @include('fronttheme::partials.auth-inline', ['message' => 'pour partager un screenshot']) --}}
 {{-- Mode sombre (hero) : @include('fronttheme::partials.auth-inline', ['message' => '...', 'dark' => true]) --}}
 @guest
@@ -16,7 +16,7 @@
             });
             const d = await res.json();
             if (d.success) { this.authSent = true; } else { this.authError = d.message; }
-        } catch(e) { this.authError = '{{ __('Erreur reseau.') }}'; }
+        } catch(e) { this.authError = '{{ __('Erreur réseau.') }}'; }
         finally { this.authSending = false; }
     },
     async verifyCode() {
@@ -30,11 +30,11 @@
             });
             const d = await res.json();
             if (d.success) { window.location.reload(); } else { this.authError = d.message; }
-        } catch(e) { this.authError = '{{ __('Erreur reseau.') }}'; }
+        } catch(e) { this.authError = '{{ __('Erreur réseau.') }}'; }
         finally { this.authVerifying = false; }
     }
 }">
-    {{-- Bouton declencheur --}}
+    {{-- Bouton déclencheur --}}
     <div x-show="!showAuth" style="text-align: center; padding: 12px 16px; background: {{ $dark ? 'rgba(255,255,255,0.12)' : '#F3F4F6' }}; border-radius: var(--r-base);">
         <button type="button" @click="showAuth = true" style="background: none; border: none; color: {{ $dark ? '#fff' : 'var(--c-primary)' }}; font-weight: 600; cursor: pointer; text-decoration: underline;">{{ __('Connectez-vous') }}</button>
         <span style="color: {{ $dark ? 'rgba(255,255,255,0.8)' : 'inherit' }};">{{ $message ?? __('pour continuer.') }}</span>
@@ -64,7 +64,7 @@
         {{-- OTP --}}
         <div x-show="authSent" x-transition>
             <div style="background: {{ $dark ? 'rgba(255,255,255,0.15)' : '#D1FAE5' }}; color: {{ $dark ? '#fff' : '#065F46' }}; padding: 8px 12px; border-radius: var(--r-base); font-size: 12px; margin-bottom: 10px;">
-                ✓ {{ __('Code envoye a') }} <strong x-text="authEmail"></strong>
+                ✓ {{ __('Code envoyé à') }} <strong x-text="authEmail"></strong>
             </div>
             <div style="display: flex; gap: 8px;">
                 <input type="text" x-model="authCode" maxlength="6" placeholder="000000" aria-label="{{ __('Code de connexion') }}" autocomplete="one-time-code" inputmode="numeric"

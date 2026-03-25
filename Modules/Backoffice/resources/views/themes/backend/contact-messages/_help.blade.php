@@ -66,7 +66,7 @@
         {{ __('Bon à savoir') }}
     </h6>
     <ul class="text-muted small ps-3 mb-0">
-        <li class="mb-1">{{ __('Les messages sont stockés en base de données –') }} <strong>{{ __('aucun email n\'est perdu') }}</strong> {{ __('même si votre boite mail est pleine.') }}</li>
+        <li class="mb-1">{{ __('Les messages sont stockés en base de données –') }} <strong>{{ __('aucun email n\'est perdu') }}</strong> {{ __('même si votre boîte mail est pleine.') }}</li>
         <li class="mb-1">{{ __('La suppression d\'un message est') }} <strong>{{ __('définitive') }}</strong> {{ __('– confirmez bien avant de supprimer.') }}</li>
         <li>{{ __('Utilisez la recherche pour retrouver rapidement un message précis parmi des dizaines.') }}</li>
     </ul>

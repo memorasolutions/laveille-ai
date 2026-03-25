@@ -142,7 +142,7 @@
                 {{-- Step 1 inline: Acronyme + Nom complet --}}
                 <div x-show="step === 1" x-cloak x-transition.duration.300ms
                      style="margin-top: 20px; background: rgba(255,255,255,0.12); border-radius: var(--r-base); padding: 20px; max-width: 560px; margin-left: auto; margin-right: auto;">
-                    <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 1 sur 2 — Identification') }}</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 1 sur 2 – Identification') }}</div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <input type="text" x-model="acronym" placeholder="{{ __('Acronyme (ex: RÉCIT)') }}" aria-label="{{ __('Acronyme') }}"
                             style="flex: 0 0 140px; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; font-weight: 700; text-transform: uppercase; background: #fff; color: var(--c-dark); outline: none;">
@@ -162,7 +162,7 @@
                 {{-- Success --}}
                 <div x-show="submitted" x-cloak x-transition style="margin-top: 16px;">
                     <span style="background: rgba(255,255,255,0.2); padding: 10px 24px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
-                        ✓ {{ __('Merci ! Votre proposition est soumise au vote de la communaute.') }}
+                        ✓ {{ __('Merci ! Votre proposition est soumise au vote de la communauté.') }}
                     </span>
                 </div>
                 @endauth
@@ -175,9 +175,9 @@
                  style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 28px; max-width: 100%; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <div>
-                        <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 2 sur 2 — Details') }}</span>
+                        <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
                         <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
-                            {{ __('Completez les informations pour') }} <strong x-text="acronym" style="color: var(--c-primary);"></strong>
+                            {{ __('Complétez les informations pour') }} <strong x-text="acronym" style="color: var(--c-primary);"></strong>
                         </h3>
                     </div>
                     <button type="button" @click="step = 1" style="background: none; border: none; color: var(--c-primary); cursor: pointer; font-size: 13px; font-weight: 600;">← {{ __('Retour') }}</button>
@@ -231,14 +231,14 @@
                     <div style="margin-bottom: 14px;">
                         <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Description courte') }} <span style="color: #E74C3C;">*</span></label>
                         <textarea name="description" required rows="3" x-model="descriptionText" aria-label="{{ __('Description courte') }}"
-                            :placeholder="'{{ __('Decrivez') }} ' + acronym + ' {{ __('en 2-3 phrases : mission, role, public cible...') }}'"
+                            :placeholder="'{{ __('Décrivez') }} ' + acronym + ' {{ __('en 2-3 phrases : mission, rôle, public cible...') }}'"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical;"
                             onfocus="this.style.borderColor='var(--c-primary)'" onblur="this.style.borderColor='#E5E7EB'"></textarea>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6" style="margin-bottom: 14px;">
-                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Categorie') }}</label>
+                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Catégorie') }}</label>
                             <select name="acr_category"
                                 style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff;">
                                 <option value="">{{ __('Choisir...') }}</option>
@@ -259,7 +259,7 @@
                     </div>
 
                     <p style="font-size: 12px; color: #9CA3AF; margin: 4px 0 0;">
-                        {{ __('La communaute votera sur votre proposition dans la section Idees et votes.') }}
+                        {{ __('La communauté votera sur votre proposition dans la section Idées et votes.') }}
                     </p>
                 </form>
             </div>

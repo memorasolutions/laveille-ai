@@ -94,7 +94,7 @@
         <table class="min-w-full border text-sm">
             <thead>
                 <tr class="bg-gray-100">
-                    <th class="border px-3 py-2 text-left">{{ __('Categorie') }}</th>
+                    <th class="border px-3 py-2 text-left">{{ __('Catégorie') }}</th>
                     <th class="border px-3 py-2 text-left">{{ __('Cookie') }}</th>
                     <th class="border px-3 py-2 text-left">{{ __('Fournisseur') }}</th>
                     <th class="border px-3 py-2 text-left">{{ __('Finalite') }}</th>

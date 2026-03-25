@@ -10,7 +10,7 @@
                     {{ __('Restez informé') }}
                 </h3>
                 <p class="text-center" style="color: #fff; margin: 0; font-size: 14px;">
-                    {{ __('Recevez nos sélections d\'outils et articles directement dans votre boite courriel.') }}
+                    {{ __('Recevez nos sélections d\'outils et articles directement dans votre boîte courriel.') }}
                 </p>
             </div>
             <div style="padding: 30px 40px;">

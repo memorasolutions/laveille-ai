@@ -513,7 +513,7 @@
 
         {{-- TAB: Screenshots --}}
         <div class="rt-panel" x-show="tab==='screenshots'" x-cloak style="padding: 24px;">
-            <h3 style="font-weight: 700; color: var(--c-dark); margin-top: 0; margin-bottom: 16px; font-size: 18px;">📸 {{ __('Screenshots de la communaute') }}</h3>
+            <h3 style="font-weight: 700; color: var(--c-dark); margin-top: 0; margin-bottom: 16px; font-size: 18px;">📸 {{ __('Screenshots de la communauté') }}</h3>
 
             {{-- Galerie --}}
             @if($screenshots->isNotEmpty())

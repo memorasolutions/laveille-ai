@@ -364,7 +364,7 @@
                 <div class="wpo-subscribe-wrap">
                     <div class="subscribe-text">
                         <h3>{{ __('Ne manquez aucune mise à jour !') }}</h3>
-                        <p>{{ __('Recevez les dernières nouvelles et mises à jour directement dans votre boite courriel.') }}</p>
+                        <p>{{ __('Recevez les dernières nouvelles et mises à jour directement dans votre boîte courriel.') }}</p>
                     </div>
                     <div class="subscribe-form">
                         <form action="{{ Route::has('newsletter.subscribe') ? route('newsletter.subscribe') : '#' }}" method="POST">

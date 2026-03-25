@@ -153,7 +153,7 @@
                 if (d.auth_required) { this.wStep = 3; this.authError = ''; }
                 else if (d.success) { this.submitted = true; this.wStep = 0; }
                 else { this.scrapeError = d.message || '{{ __('Erreur lors de la soumission.') }}'; }
-            } catch(e) { this.scrapeError = '{{ __('Erreur reseau.') }}'; }
+            } catch(e) { this.scrapeError = '{{ __('Erreur réseau.') }}'; }
             finally { this.submitting = false; }
         },
         async sendMagicLink() {
@@ -168,7 +168,7 @@
                 const d = await res.json();
                 if (d.success) { this.authSent = true; }
                 else { this.authError = d.message; }
-            } catch(e) { this.authError = '{{ __('Erreur reseau.') }}'; }
+            } catch(e) { this.authError = '{{ __('Erreur réseau.') }}'; }
             finally { this.authSending = false; }
         },
         async verifyCode() {
@@ -183,7 +183,7 @@
                 const d = await res.json();
                 if (d.success) { this.submitTool(); }
                 else { this.authError = d.message; }
-            } catch(e) { this.authError = '{{ __('Erreur reseau.') }}'; }
+            } catch(e) { this.authError = '{{ __('Erreur réseau.') }}'; }
             finally { this.authVerifying = false; }
         },
         resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; this.authEmail = ''; this.authCode = ''; this.authSent = false; this.authError = ''; }
@@ -214,7 +214,7 @@
             {{-- Etape 1 : URL --}}
             <div x-show="wStep === 1" x-cloak x-transition.duration.300ms
                  style="margin-bottom: 20px; background: rgba(11,114,133,0.08); border: 2px solid var(--c-primary); border-radius: var(--r-base); padding: 24px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                <div style="font-size: 11px; color: #6B7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 1 sur 2 — URL du site') }}</div>
+                <div style="font-size: 11px; color: #6B7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 1 sur 2 – URL du site') }}</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <input type="url" x-model="toolUrl" placeholder="https://chatgpt.com" aria-label="{{ __('URL du site a proposer') }}"
                         style="flex: 1; min-width: 240px; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; background: #fff; color: var(--c-dark); outline: none;"
@@ -264,9 +264,9 @@
          style="background: #fff; border: 2px solid #E5E7EB; border-radius: var(--r-base); padding: 28px; max-width: 800px; margin: -10px auto 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <div>
-                <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Etape 2 sur 2 — Details') }}</span>
+                <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
                 <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
-                    {{ __('Completez les informations pour') }} <strong x-text="toolName" style="color: var(--c-primary);"></strong>
+                    {{ __('Complétez les informations pour') }} <strong x-text="toolName" style="color: var(--c-primary);"></strong>
                 </h3>
             </div>
             <button type="button" @click="wStep = 1" style="background: none; border: none; color: var(--c-primary); cursor: pointer; font-size: 13px; font-weight: 600;">← {{ __('Retour') }}</button>
@@ -357,7 +357,7 @@
         {{-- OTP code input --}}
         <div x-show="authSent" x-transition>
             <div style="background: #D1FAE5; color: #065F46; padding: 10px 14px; border-radius: var(--r-base); font-size: 13px; margin-bottom: 14px;">
-                ✓ {{ __('Code envoye a') }} <strong x-text="authEmail"></strong>. {{ __('Verifiez vos courriels.') }}
+                ✓ {{ __('Code envoyé à') }} <strong x-text="authEmail"></strong>. {{ __('Vérifiez vos courriels.') }}
             </div>
             <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Code a 6 chiffres') }}</label>
             <div style="display: flex; gap: 8px;">

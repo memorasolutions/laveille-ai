@@ -63,7 +63,7 @@
         line-height: 1;
     }
 
-    /* Bento grid layout — Option B: definition prominent + side-by-side cards */
+    /* Bento grid layout –Option B: definition prominent + side-by-side cards */
     .gl-bento {
         display: grid;
         grid-template-columns: 1fr;
@@ -230,7 +230,7 @@
                         @endif
                     </div>
 
-                    {{-- Définition en vedette — full width --}}
+                    {{-- Définition en vedette –full width --}}
                     <div class="gl-section" style="margin-bottom: 24px;">
                         <div class="gl-section-box" style="background: #F8FAFC; border-left: 4px solid var(--c-primary); padding: 28px;">
                             <h2 class="gl-section-title" style="color: var(--c-dark); font-size: 1.3rem;">📖 {{ __('Définition') }}</h2>
@@ -263,7 +263,7 @@
                             </div>
                         @endif
 
-                        {{-- Le saviez-vous ? — full width --}}
+                        {{-- Le saviez-vous ? –full width --}}
                         @if($term->did_you_know)
                             <div class="gl-section gl-bento-full">
                                 <div class="gl-section-box gl-box-fact">
@@ -279,7 +279,7 @@
                     <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee;">
                         <p style="font-weight: 600; color: #9CA3AF; margin-bottom: 12px; font-size: 0.85rem; text-align: center;">{{ __('Partager cette définition') }}</p>
                         <div style="display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap;">
-                            @include('fronttheme::partials.share-buttons', ['title' => $term->name . ' — ' . __('Glossaire IA'), 'url' => request()->url()])
+                            @include('fronttheme::partials.share-buttons', ['title' => $term->name . ' – ' . __('Glossaire IA'), 'url' => request()->url()])
                         </div>
                     </div>
 

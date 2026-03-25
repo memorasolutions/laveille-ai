@@ -1,6 +1,6 @@
 @extends(fronttheme_layout())
 
-@section('title', __('Verification du code') . ' - ' . config('app.name'))
+@section('title', __('Vérification du code') . ' - ' . config('app.name'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Connexion')])
@@ -16,7 +16,7 @@
                         <div style="font-size: 40px; margin-bottom: 8px;">✉️</div>
                         <h1 style="font-family: var(--f-heading); font-weight: 800; font-size: 1.6rem; color: var(--c-dark); margin: 0 0 8px;">{{ __('Entrez votre code') }}</h1>
                         <p style="color: #6B7280; font-size: 0.95rem; margin: 0;">
-                            {{ __('Un code a 6 chiffres a ete envoye a') }} <strong style="color: var(--c-dark);">{{ $email }}</strong>.
+                            {{ __('Un code à 6 chiffres a été envoyé à') }} <strong style="color: var(--c-dark);">{{ $email }}</strong>.
                             {{ __('Valide') }} {{ $expiryMinutes }} {{ __('minutes.') }}
                         </p>
                     </div>
@@ -33,7 +33,7 @@
                         <input type="hidden" name="email" value="{{ $email }}">
 
                         <div style="margin-bottom: 16px;">
-                            <label for="otp-code" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">{{ __('Code a 6 chiffres') }}</label>
+                            <label for="otp-code" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 6px; font-size: 14px;">{{ __('Code à 6 chiffres') }}</label>
                             <input id="otp-code" name="token" type="text" maxlength="6" autocomplete="one-time-code" inputmode="numeric" required autofocus
                                 placeholder="000000"
                                 style="width: 100%; height: 56px; padding: 0 16px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 28px; font-weight: 700; letter-spacing: 10px; text-align: center; outline: none; background: #F9FAFB; color: var(--c-dark);"

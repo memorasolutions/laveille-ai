@@ -15,7 +15,7 @@
                     <div style="text-align: center; margin-bottom: 24px;">
                         <div style="font-size: 40px; margin-bottom: 8px;">🔐</div>
                         <h1 style="font-family: var(--f-heading); font-weight: 800; font-size: 1.6rem; color: var(--c-dark); margin: 0 0 8px;">{{ __('Connexion') }}</h1>
-                        <p style="color: #6B7280; font-size: 0.95rem; margin: 0;">{{ __('Entrez votre courriel pour recevoir un code a 6 chiffres.') }}</p>
+                        <p style="color: #6B7280; font-size: 0.95rem; margin: 0;">{{ __('Entrez votre courriel pour recevoir un code à 6 chiffres.') }}</p>
                     </div>
 
                     @if(session('status'))
