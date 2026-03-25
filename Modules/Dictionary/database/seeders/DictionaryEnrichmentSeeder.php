@@ -72,7 +72,7 @@ class DictionaryEnrichmentSeeder extends Seeder
                 'cat' => 'securite', 'diff' => 'beginner', 'icon' => '🍄',
                 'analogy' => "C'est comme un étudiant qui ne connaît pas la réponse à l'examen mais qui invente quelque chose avec une confiance absolue.",
                 'example' => "Une IA qui cite une décision de la Cour suprême du Canada qui n'a jamais existé.",
-                'fact' => "L'IA ne ment pas volontairement; elle prédit juste le mot suivant le plus probable, même si c'est faux.",
+                'fact' => "L'IA ne ment pas volontairement\u{00A0}; elle prédit juste le mot suivant le plus probable, même si c'est faux.",
             ],
             'IA agentique' => [
                 'cat' => 'concepts', 'diff' => 'intermediate', 'icon' => '🕵️',
@@ -90,7 +90,7 @@ class DictionaryEnrichmentSeeder extends Seeder
                 'cat' => 'concepts', 'diff' => 'beginner', 'icon' => '✨',
                 'analogy' => "C'est un ordinateur qui est passé de simple archiviste à artiste créateur.",
                 'example' => "Utiliser Midjourney pour créer une image d'un astronaute qui mange une poutine sur la Lune.",
-                'fact' => "Elle ne fait pas que du texte ou des images; elle peut créer du code, de la voix et même des vidéos.",
+                'fact' => "Elle ne fait pas que du texte ou des images\u{00A0}; elle peut créer du code, de la voix et même des vidéos.",
             ],
             'Inférence' => [
                 'cat' => 'donnees', 'diff' => 'intermediate', 'icon' => '⚡',
@@ -142,7 +142,7 @@ class DictionaryEnrichmentSeeder extends Seeder
             ],
             'Token' => [
                 'cat' => 'donnees', 'diff' => 'intermediate', 'icon' => '🪙',
-                'analogy' => "Ce sont les briques de lego du langage pour l'IA; un mot peut être coupé en plusieurs morceaux.",
+                'analogy' => "Ce sont les briques de lego du langage pour l'IA\u{00A0}; un mot peut être coupé en plusieurs morceaux.",
                 'example' => "Le mot « Anticonstitutionnellement » serait découpé en plusieurs tokens par l'IA.",
                 'fact' => "C'est généralement l'unité de facturation des services d'IA (prix par million de tokens).",
             ],
@@ -150,7 +150,7 @@ class DictionaryEnrichmentSeeder extends Seeder
                 'cat' => 'concepts', 'diff' => 'advanced', 'icon' => '🏗️',
                 'analogy' => "C'est une machine capable de lire une phrase entière d'un coup et de comprendre les relations entre tous les mots simultanément.",
                 'example' => "Comprendre que le mot « avocat » désigne le fruit ou le métier selon les autres mots de la phrase.",
-                'fact' => "C'est l'architecture révolutionnaire (le 'T' de GPT) inventée par Google en 2017 qui a tout changé.",
+                'fact' => "C'est l'architecture révolutionnaire (le « T » de GPT) inventée par Google en 2017 qui a tout changé.",
             ],
             'Vibe Coding' => [
                 'cat' => 'outils', 'diff' => 'beginner', 'icon' => '🤙',
