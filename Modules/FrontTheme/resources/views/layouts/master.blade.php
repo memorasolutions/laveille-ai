@@ -106,19 +106,32 @@
 
     <!-- start page-wrapper -->
     <div class="page-wrapper">
-        <!-- start preloader -->
-        <div class="preloader">
-            <div class="angular-shape">
-                <div></div>
-                <div></div>
-                <div></div>
+        <!-- preloader : overlay flou + logo animé -->
+        <div id="site-preloader" style="position:fixed;inset:0;z-index:99999;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:center;flex-direction:column;transition:opacity 0.4s ease-out;">
+            <style>
+                @keyframes preloaderFadeIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+                @keyframes preloaderPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+                @keyframes preloaderBar{from{width:0}to{width:90%}}
+                #site-preloader img{opacity:0;animation:preloaderFadeIn 0.6s ease-out 0.1s forwards}
+                #site-preloader .pl-pulse{animation:preloaderPulse 1.5s infinite ease-in-out}
+                #site-preloader .pl-bar{height:100%;background:var(--c-primary,#0B7285);border-radius:99px;animation:preloaderBar 2s ease-out forwards}
+            </style>
+            <img src="{{ asset('images/logo-horizontal.svg') }}" alt="{{ config('app.name') }}" style="height:50px;display:block;">
+            <div style="width:180px;height:3px;background:#E5E7EB;border-radius:99px;overflow:hidden;margin-top:16px;">
+                <div class="pl-bar"></div>
             </div>
-            <div class="spinner">
-                <div class="double-bounce1"></div>
-                <div class="double-bounce2"></div>
-            </div>
+            <script>
+                (function(){
+                    var p=document.getElementById('site-preloader');
+                    if(sessionStorage.getItem('sl')){p.style.display='none';return}
+                    var img=p.querySelector('img');
+                    setTimeout(function(){img.classList.add('pl-pulse')},700);
+                    function hide(){p.style.opacity='0';setTimeout(function(){p.style.display='none';if(typeof wow!=='undefined')wow.init()},400);sessionStorage.setItem('sl','1')}
+                    window.addEventListener('load',hide);
+                    setTimeout(function(){if(p.style.display!=='none')hide()},3000);
+                })();
+            </script>
         </div>
-        <!-- end preloader -->
 
         @include('fronttheme::partials.header')
 
