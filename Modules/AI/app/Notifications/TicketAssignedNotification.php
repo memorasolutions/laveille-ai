@@ -38,10 +38,10 @@ class TicketAssignedNotification extends TemplatedNotification
     protected function getFallbackMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(__('Ticket assigne : ').$this->ticket->title)
-            ->line(__('Un ticket vous a ete assigne.'))
+            ->subject(__('Ticket assigné :').$this->ticket->title)
+            ->line(__('Un ticket vous a été assigné.'))
             ->line(__('Titre : ').$this->ticket->title)
-            ->line(__('Priorite : ').__($this->ticket->priority->value))
+            ->line(__('Priorité :').__($this->ticket->priority->value))
             ->action(__('Voir le ticket'), route('admin.ai.tickets.show', $this->ticket));
     }
 

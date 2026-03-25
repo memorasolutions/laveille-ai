@@ -105,7 +105,7 @@ class LegalController extends Controller
 
         return redirect()->route('legal.rights')->with(
             'success',
-            __('Votre demande a ete enregistree. Reference : ').$rightsRequest->reference
+            __('Votre demande a été enregistrée. Référence :').$rightsRequest->reference
         );
     }
 }

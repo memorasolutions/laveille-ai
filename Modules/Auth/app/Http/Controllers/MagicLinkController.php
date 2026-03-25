@@ -170,7 +170,7 @@ class MagicLinkController extends Controller
         $result = $this->magicLink->generate($request->email);
         $user->notify(new MagicLinkNotification($result['token']));
 
-        return response()->json(['success' => true, 'message' => __('Code de connexion envoye par courriel.')]);
+        return response()->json(['success' => true, 'message' => __('Code de connexion envoyé par courriel.')]);
     }
 
     /**

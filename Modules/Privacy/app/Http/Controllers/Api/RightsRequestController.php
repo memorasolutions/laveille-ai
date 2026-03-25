@@ -72,7 +72,7 @@ class RightsRequestController extends Controller
         return response()->json([
             'success' => true,
             'reference' => $rightsRequest->reference,
-            'message' => __('Votre demande a ete enregistree. Reference : ').$rightsRequest->reference,
+            'message' => __('Votre demande a été enregistrée. Référence :').$rightsRequest->reference,
             'deadline_at' => $rightsRequest->deadline_at->toIso8601String(),
         ], 201);
     }

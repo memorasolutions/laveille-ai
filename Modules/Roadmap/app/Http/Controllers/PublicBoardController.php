@@ -64,7 +64,7 @@ class PublicBoardController extends Controller
         $service->create($board, $validated, auth()->id());
 
         $message = ($request->input('source') === 'glossaire')
-            ? __('Merci ! Votre proposition de terme a ete soumise. La communaute pourra voter dessus.')
+            ? __('Merci ! Votre proposition de terme a été soumise. La communauté pourra voter dessus.')
             : __('Idea submitted successfully.');
 
         if ($request->ajax() || $request->wantsJson()) {

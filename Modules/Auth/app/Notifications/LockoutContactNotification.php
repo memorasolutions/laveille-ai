@@ -42,9 +42,9 @@ class LockoutContactNotification extends TemplatedNotification
     protected function getFallbackMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(__('Alerte : utilisateur verrouille demande assistance'))
+            ->subject(__('Alerte : utilisateur verrouillé demande assistance'))
             ->greeting(__('Bonjour :name,', ['name' => $notifiable->name]))
-            ->line(__('Un utilisateur verrouille a envoye une demande d\'assistance.'))
+            ->line(__('Un utilisateur verrouillé a envoyé une demande d\'assistance.'))
             ->line(__('Courriel : :email', ['email' => $this->userEmail]))
             ->line(__('Adresse IP : :ip', ['ip' => $this->ipAddress]))
             ->line(__('Message :'))
