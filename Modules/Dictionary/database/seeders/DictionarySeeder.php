@@ -52,17 +52,19 @@ class DictionarySeeder extends Seeder
 
         foreach ($terms as $term) {
             $slug = Str::slug($term['name']);
-            DB::table('dictionary_terms')->insert([
-                'name' => json_encode(['fr_CA' => $term['name'], 'fr' => $term['name']]),
-                'slug' => json_encode(['fr_CA' => $slug, 'fr' => $slug]),
-                'definition' => json_encode(['fr_CA' => $term['definition'], 'fr' => $term['definition']]),
-                'type' => $term['type'],
-                'dictionary_category_id' => $catId,
-                'is_published' => true,
-                'sort_order' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('dictionary_terms')->updateOrInsert(
+                ['slug' => json_encode(['fr_CA' => $slug, 'fr' => $slug])],
+                [
+                    'name' => json_encode(['fr_CA' => $term['name'], 'fr' => $term['name']]),
+                    'definition' => json_encode(['fr_CA' => $term['definition'], 'fr' => $term['definition']]),
+                    'type' => $term['type'],
+                    'dictionary_category_id' => $catId,
+                    'is_published' => true,
+                    'sort_order' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
     }
 }
