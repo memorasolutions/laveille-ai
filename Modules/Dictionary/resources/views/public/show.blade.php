@@ -4,6 +4,9 @@
 @section('title', $term->name . ' - ' . __('Glossaire IA') . ' - ' . config('app.name'))
 @section('meta_description', Str::limit($term->analogy ?? strip_tags($term->definition), 160))
 @section('og_type', 'article')
+@if(!empty($term->hero_image))
+    @section('og_image', asset('storage/' . $term->hero_image))
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

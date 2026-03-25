@@ -1,7 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', $tool->name)
+@section('title', $tool->name . ' - ' . __('Outils') . ' - ' . config('app.name'))
+@section('meta_description', Str::limit(strip_tags($tool->description ?? ''), 160))
+@section('og_type', 'article')
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

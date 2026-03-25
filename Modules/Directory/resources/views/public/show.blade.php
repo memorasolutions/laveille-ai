@@ -4,6 +4,9 @@
 @section('title', $tool->name . ' - ' . __('Répertoire techno') . ' - ' . config('app.name'))
 @section('meta_description', Str::limit($tool->short_description ?? strip_tags($tool->description), 160))
 @section('og_type', 'article')
+@if($tool->screenshot)
+    @section('og_image', asset($tool->screenshot))
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

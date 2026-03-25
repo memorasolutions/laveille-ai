@@ -4,6 +4,9 @@
 @section('title', $acronym->acronym . ' - ' . $acronym->full_name . ' - ' . config('app.name'))
 @section('meta_description', __('Signification de') . ' ' . $acronym->acronym . ' : ' . $acronym->full_name . '. ' . Str::limit(strip_tags($acronym->description), 120))
 @section('og_type', 'article')
+@if(!empty($acronym->logo_url))
+    @section('og_image', $acronym->logo_url)
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
