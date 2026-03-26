@@ -1,4 +1,4 @@
-name: Deploy to cPanel via FTP
+name: Deploy to cPanel via rsync/SSH
 
 on:
   push:
@@ -15,40 +15,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          protocol: ftps
-          port: 21
-          timeout: 120000
-          dangerous-clean-slate: false
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .github/**
-            vendor/**
-            node_modules/**
-            storage/logs/**
-            storage/framework/cache/**
-            storage/framework/sessions/**
-            storage/framework/views/**
-            tests/**
-            .env
-            .env.example
-            .editorconfig
-            phpunit.xml
-            vite.config.js
-            package.json
-            package-lock.json
-            composer.lock
-            _*.php
-            *.log
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
+
+      - name: Deploy via rsync
+        run: |
+          rsync -azP \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='vendor/' \
+            --exclude='node_modules/' \
+            --exclude='storage/' \
+            --exclude='.env' \
+            --exclude='.env.example' \
+            --exclude='public/screenshots/' \
+            --exclude='public/build/' \
+            --exclude='bootstrap/cache/' \
+            --exclude='scripts/' \
+            --exclude='tests/' \
+            --exclude='_*.php' \
+            --exclude='*.log' \
+            --exclude='error_log' \
+            ./ gmemora@server.memora.pro:/home/gmemora/public_html/apps_diverses/laveille.ai/
+
+      - name: Clear caches on server
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan view:clear && php artisan responsecache:clear" || true
 
       - name: Deploy notification
         run: |
-          echo "::notice::Deploy FTP termine avec succes vers ${{ secrets.FTP_SERVER }}"
+          echo "::notice::Deploy rsync/SSH termine avec succes vers server.memora.pro"
           echo "Deploye le $(date -u '+%Y-%m-%d %H:%M:%S UTC') depuis le commit ${{ github.sha }}"
