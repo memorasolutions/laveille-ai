@@ -532,6 +532,7 @@
             @endforeach
 
             @auth
+            <style>.wz-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:28px 16px!important;border:1px solid #e2e8f0!important;border-radius:16px!important;background:#fff!important;cursor:pointer;text-align:center;transition:all .25s ease;min-height:140px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}.wz-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.08)!important}.wz-card.active{border-color:var(--c-primary)!important;box-shadow:0 0 0 3px rgba(11,114,133,0.12)!important}</style>
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;"
                  x-data="{
                     step: 1,
@@ -583,17 +584,17 @@
                 <div x-show="step===1" x-transition role="region" aria-label="Étape 1 : type de ressource">
                     <h4 style="margin-top:0;font-weight:700;color:#1e293b;margin-bottom:16px;">{{ __('Quel type de ressource ?') }}</h4>
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
-                        <div role="button" tabindex="0" @click="selectType('video')" @keydown.enter="selectType('video')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;cursor:pointer;text-align:center;transition:all .25s ease;min-height:140px;box-shadow:0 1px 3px rgba(0,0,0,0.04);" :style="type==='video' ? 'border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(11,114,133,0.12)' : ''" @mouseover="$el.style.transform='translateY(-3px)';$el.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" @mouseout="$el.style.transform='';type!=='video' && ($el.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)')">
+                        <div class="wz-card" :class="type==='video' && 'active'" role="button" tabindex="0" @click="selectType('video')" @keydown.enter="selectType('video')">
                             <div style="font-size:36px;margin-bottom:12px;line-height:1;">🎬</div>
                             <div style="font-weight:700;font-size:15px;color:var(--c-dark);font-family:var(--f-heading);">{{ __('Vidéo') }}</div>
                             <div style="font-size:12px;color:var(--c-text-muted);margin-top:4px;">YouTube, Vimeo...</div>
                         </div>
-                        <div role="button" tabindex="0" @click="selectType('article')" @keydown.enter="selectType('article')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;cursor:pointer;text-align:center;transition:all .25s ease;min-height:140px;box-shadow:0 1px 3px rgba(0,0,0,0.04);" :style="type==='article' ? 'border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(11,114,133,0.12)' : ''" @mouseover="$el.style.transform='translateY(-3px)';$el.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" @mouseout="$el.style.transform='';type!=='article' && ($el.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)')">
+                        <div class="wz-card" :class="type==='article' && 'active'" role="button" tabindex="0" @click="selectType('article')" @keydown.enter="selectType('article')">
                             <div style="font-size:36px;margin-bottom:12px;line-height:1;">📄</div>
                             <div style="font-weight:700;font-size:15px;color:var(--c-dark);font-family:var(--f-heading);">{{ __('Article') }}</div>
                             <div style="font-size:12px;color:var(--c-text-muted);margin-top:4px;">Blog, documentation</div>
                         </div>
-                        <div role="button" tabindex="0" @click="selectType('tutorial')" @keydown.enter="selectType('tutorial')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;cursor:pointer;text-align:center;transition:all .25s ease;min-height:140px;box-shadow:0 1px 3px rgba(0,0,0,0.04);" :style="type==='tutorial' ? 'border-color:var(--c-primary);box-shadow:0 0 0 3px rgba(11,114,133,0.12)' : ''" @mouseover="$el.style.transform='translateY(-3px)';$el.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" @mouseout="$el.style.transform='';type!=='tutorial' && ($el.style.boxShadow='0 1px 3px rgba(0,0,0,0.04)')">
+                        <div class="wz-card" :class="type==='tutorial' && 'active'" role="button" tabindex="0" @click="selectType('tutorial')" @keydown.enter="selectType('tutorial')">
                             <div style="font-size:36px;margin-bottom:12px;line-height:1;">📖</div>
                             <div style="font-weight:700;font-size:15px;color:var(--c-dark);font-family:var(--f-heading);">{{ __('Cours') }}</div>
                             <div style="font-size:12px;color:var(--c-text-muted);margin-top:4px;">Formation, tutoriel</div>
