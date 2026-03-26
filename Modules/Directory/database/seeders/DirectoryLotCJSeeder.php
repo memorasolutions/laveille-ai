@@ -19,7 +19,7 @@ class DirectoryLotCJSeeder extends Seeder
             ['name' => 'Sora', 'slug' => 'sora', 'url' => 'https://sora.com', 'pricing' => 'paid', 'launch_year' => 2024, 'short_description' => "Modèle d'OpenAI capable de générer des vidéos réalistes directement à partir de prompts texte.", 'cat' => 'video'],
             ['name' => 'Luma AI', 'slug' => 'luma-ai', 'url' => 'https://lumalabs.ai', 'pricing' => 'freemium', 'launch_year' => 2021, 'short_description' => "Outil de génération vidéo et de captures 3D photoréalistes propulsé par l'IA.", 'cat' => 'video'],
             ['name' => 'Kling AI', 'slug' => 'kling-ai', 'url' => 'https://klingai.com', 'pricing' => 'freemium', 'launch_year' => 2024, 'short_description' => "Générateur vidéo IA développé par Kuaishou offrant des clips haute qualité à partir de texte ou d'images.", 'cat' => 'video'],
-            ['name' => 'Haiper', 'slug' => 'haiper', 'url' => 'https://haiper.ai', 'pricing' => 'freemium', 'launch_year' => 2023, 'short_description' => "Outil de génération vidéo IA fondé par d'anciens chercheurs de Google DeepMind.", 'cat' => 'video'],
+            ['name' => 'Hailuo AI', 'slug' => 'hailuo', 'url' => 'https://hailuo.ai', 'pricing' => 'freemium', 'launch_year' => 2024, 'short_description' => "Plateforme de generation video 4K avec physique realiste et synchronisation audio, developpee par MiniMax.", 'cat' => 'video'],
 
             // Lot D - AI Coding
             ['name' => 'Windsurf', 'slug' => 'windsurf', 'url' => 'https://codeium.com/windsurf', 'pricing' => 'freemium', 'launch_year' => 2024, 'short_description' => "Éditeur de code IA agentique développé par Codeium qui combine copilotage et actions autonomes.", 'cat' => 'developpement'],
