@@ -202,8 +202,8 @@
                     ]) !!}</div>
             </div>
 
-            {{-- How to use --}}
-            @if($tool->how_to_use)
+            {{-- How to use (masque si contenu trop court/generique) --}}
+            @if($tool->how_to_use && Str::length($tool->how_to_use) > 200)
             <div style="background: #fff; padding: 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     🛠️ {{ __('Comment utiliser') }} {{ $tool->name }} ?
