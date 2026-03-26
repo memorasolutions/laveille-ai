@@ -1,5 +1,8 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const idcac = require('idcac-playwright');
+
+puppeteer.use(StealthPlugin());
 
 const url = process.argv[2];
 const outputPath = process.argv[3];
@@ -66,16 +69,66 @@ if (!url || !outputPath) {
         // Wait for dismiss animations
         await new Promise(function (resolve) { setTimeout(resolve, 1500); });
 
-        // Capture
-        await page.screenshot({
-            path: outputPath,
-            type: 'jpeg',
-            quality: 85,
-            fullPage: false
-        });
+        // Detect Cloudflare/bot challenge before capture
+        var isBlocked = false;
+        try {
+            isBlocked = await page.evaluate(function () {
+                var body = document.body ? document.body.innerText : '';
+                var blocked = ['Performing security verification', 'Verify you are human',
+                    'Checking your browser', 'Just a moment', 'Enable JavaScript and cookies',
+                    'Access denied', 'Attention Required'];
+                for (var i = 0; i < blocked.length; i++) {
+                    if (body.indexOf(blocked[i]) !== -1) return true;
+                }
+                return false;
+            });
+        } catch (e) {}
 
-        await browser.close();
-        console.log(JSON.stringify({ success: true, path: outputPath }));
+        if (isBlocked) {
+            // Fallback: try to get og:image instead
+            var ogImage = null;
+            try {
+                ogImage = await page.evaluate(function () {
+                    var el = document.querySelector('meta[property="og:image"]');
+                    return el ? el.getAttribute('content') : null;
+                });
+            } catch (e) {}
+
+            if (ogImage) {
+                // Download og:image as fallback
+                var https = require('https');
+                var http = require('http');
+                var fs = require('fs');
+                var imgUrl = ogImage.startsWith('//') ? 'https:' + ogImage : ogImage;
+                await new Promise(function (resolve, reject) {
+                    var mod = imgUrl.startsWith('https') ? https : http;
+                    mod.get(imgUrl, function (res) {
+                        var chunks = [];
+                        res.on('data', function (c) { chunks.push(c); });
+                        res.on('end', function () {
+                            fs.writeFileSync(outputPath, Buffer.concat(chunks));
+                            resolve();
+                        });
+                    }).on('error', reject);
+                });
+                await browser.close();
+                console.log(JSON.stringify({ success: true, path: outputPath, fallback: 'og:image' }));
+            } else {
+                await browser.close();
+                console.log(JSON.stringify({ success: false, error: 'Cloudflare/bot challenge detected, no og:image fallback' }));
+            }
+        } else {
+            // Normal capture
+            await page.screenshot({
+                path: outputPath,
+                type: 'jpeg',
+                quality: 85,
+                fullPage: false
+            });
+
+            await browser.close();
+            console.log(JSON.stringify({ success: true, path: outputPath }));
+        }
 
     } catch (error) {
         if (browser) { try { await browser.close(); } catch (e) {} }

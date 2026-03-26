@@ -63,6 +63,8 @@
         "lucide": "^0.575.0",
         "perfect-scrollbar": "^1.5.6",
         "puppeteer": "^24.40.0",
+        "puppeteer-extra": "^3.3.6",
+        "puppeteer-extra-plugin-stealth": "^2.11.2",
         "pusher-js": "^8.4.0"
     },
     "name": "laravel_vierge",
