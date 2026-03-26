@@ -582,21 +582,21 @@
                 {{-- Étape 1 : Type --}}
                 <div x-show="step===1" x-transition role="region" aria-label="Étape 1 : type de ressource">
                     <h4 style="margin-top:0;font-weight:700;color:#1e293b;margin-bottom:16px;">{{ __('Quel type de ressource ?') }}</h4>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-                        <button type="button" @click="selectType('video')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;min-height:110px;" :style="type==='video' && 'border-color:#10b981;background:#f0fdf4'" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='video' && ($el.style.borderColor='#e2e8f0')">
-                            <div style="font-size:32px;margin-bottom:6px;">🎬</div>
-                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Vidéo') }}</div>
-                            <div style="font-size:11px;color:#9ca3af;">YouTube, Vimeo...</div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+                        <button type="button" @click="selectType('video')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;border:2px solid var(--c-primary-badge, #DDF4F8);border-radius:var(--r-base);background:var(--c-primary-light, #F0FAFB);cursor:pointer;text-align:center;transition:all .25s ease;min-height:120px;box-shadow:0 2px 8px rgba(11,114,133,0.06);" :style="type==='video' ? 'border-color:var(--c-primary);background:#fff;box-shadow:0 4px 16px rgba(11,114,133,0.15)' : ''" @mouseover="$el.style.transform='translateY(-2px)';$el.style.boxShadow='0 4px 16px rgba(11,114,133,0.12)'" @mouseout="$el.style.transform='';type!=='video' && ($el.style.boxShadow='0 2px 8px rgba(11,114,133,0.06)')">
+                            <div style="font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--c-primary);border-radius:12px;margin-bottom:10px;color:#fff;font-weight:700;">🎬</div>
+                            <div style="font-weight:700;font-size:15px;color:var(--c-dark);font-family:var(--f-heading);">{{ __('Vidéo') }}</div>
+                            <div style="font-size:12px;color:var(--c-text-muted);margin-top:2px;">YouTube, Vimeo...</div>
                         </button>
-                        <button type="button" @click="selectType('article')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;min-height:110px;" :style="type==='article' && 'border-color:#10b981;background:#f0fdf4'" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='article' && ($el.style.borderColor='#e2e8f0')">
-                            <div style="font-size:32px;margin-bottom:6px;">📄</div>
-                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Article') }}</div>
-                            <div style="font-size:11px;color:#9ca3af;">Blog, documentation</div>
+                        <button type="button" @click="selectType('article')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;border:2px solid var(--c-primary-badge, #DDF4F8);border-radius:var(--r-base);background:var(--c-primary-light, #F0FAFB);cursor:pointer;text-align:center;transition:all .25s ease;min-height:120px;box-shadow:0 2px 8px rgba(11,114,133,0.06);" :style="type==='article' ? 'border-color:var(--c-primary);background:#fff;box-shadow:0 4px 16px rgba(11,114,133,0.15)' : ''" @mouseover="$el.style.transform='translateY(-2px)';$el.style.boxShadow='0 4px 16px rgba(11,114,133,0.12)'" @mouseout="$el.style.transform='';type!=='article' && ($el.style.boxShadow='0 2px 8px rgba(11,114,133,0.06)')">
+                            <div style="font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--c-accent);border-radius:12px;margin-bottom:10px;color:#fff;font-weight:700;">📄</div>
+                            <div style="font-weight:700;font-size:15px;color:var(--c-dark);font-family:var(--f-heading);">{{ __('Article') }}</div>
+                            <div style="font-size:12px;color:var(--c-text-muted);margin-top:2px;">Blog, documentation</div>
                         </button>
-                        <button type="button" @click="selectType('tutorial')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;min-height:110px;" :style="type==='tutorial' && 'border-color:#10b981;background:#f0fdf4'" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='tutorial' && ($el.style.borderColor='#e2e8f0')">
-                            <div style="font-size:32px;margin-bottom:6px;">📖</div>
-                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Cours') }}</div>
-                            <div style="font-size:11px;color:#9ca3af;">Formation, tutoriel</div>
+                        <button type="button" @click="selectType('tutorial')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;border:2px solid var(--c-primary-badge, #DDF4F8);border-radius:var(--r-base);background:var(--c-primary-light, #F0FAFB);cursor:pointer;text-align:center;transition:all .25s ease;min-height:120px;box-shadow:0 2px 8px rgba(11,114,133,0.06);" :style="type==='tutorial' ? 'border-color:var(--c-primary);background:#fff;box-shadow:0 4px 16px rgba(11,114,133,0.15)' : ''" @mouseover="$el.style.transform='translateY(-2px)';$el.style.boxShadow='0 4px 16px rgba(11,114,133,0.12)'" @mouseout="$el.style.transform='';type!=='tutorial' && ($el.style.boxShadow='0 2px 8px rgba(11,114,133,0.06)')">
+                            <div style="font-size:28px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--c-dark);border-radius:12px;margin-bottom:10px;color:#fff;font-weight:700;">📖</div>
+                            <div style="font-weight:700;font-size:15px;color:var(--c-dark);font-family:var(--f-heading);">{{ __('Cours') }}</div>
+                            <div style="font-size:12px;color:var(--c-text-muted);margin-top:2px;">Formation, tutoriel</div>
                         </button>
                     </div>
                 </div>
@@ -617,7 +617,7 @@
 
                     <div style="display:flex;gap:8px;margin-top:16px;">
                         <button type="button" @click="back()" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">← {{ __('Retour') }}</button>
-                        <button type="button" @click="fetchMeta()" :disabled="!url || url.length < 10" style="padding:10px 20px;border:none;border-radius:8px;background:#10b981;color:#fff;cursor:pointer;font-weight:600;flex:1;" :style="(!url || url.length < 10) && 'opacity:0.5;cursor:not-allowed'">{{ __('Continuer') }} →</button>
+                        <button type="button" @click="fetchMeta()" :disabled="!url || url.length < 10" style="padding:10px 20px;border:none;border-radius:8px;background:var(--c-primary);color:#fff;cursor:pointer;font-weight:600;flex:1;" :style="(!url || url.length < 10) && 'opacity:0.5;cursor:not-allowed'">{{ __('Continuer') }} →</button>
                     </div>
                 </div>
 
@@ -660,7 +660,7 @@
                         <input type="hidden" name="url" :value="url">
                         <div style="display:flex;gap:8px;margin-top:8px;">
                             <button type="button" @click="back()" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">← {{ __('Modifier') }}</button>
-                            <button type="submit" style="padding:10px 20px;border:none;border-radius:8px;background:#10b981;color:#fff;cursor:pointer;font-weight:600;flex:1;">✅ {{ __('Ajouter') }}</button>
+                            <button type="submit" style="padding:10px 20px;border:none;border-radius:8px;background:var(--c-primary);color:#fff;cursor:pointer;font-weight:600;flex:1;">✅ {{ __('Ajouter') }}</button>
                         </div>
                         <p style="color:#9ca3af;font-size:12px;margin-top:8px;">{{ __('La ressource sera visible après approbation.') }}</p>
                     </form>
