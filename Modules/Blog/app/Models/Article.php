@@ -63,6 +63,8 @@ class Article extends Model
         'content',
         'excerpt',
         'featured_image',
+        'video_url',
+        'video_summary',
         'status',
         'published_at',
         'category',

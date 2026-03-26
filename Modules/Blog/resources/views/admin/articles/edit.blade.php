@@ -123,6 +123,32 @@
                 </div>
             </div>
 
+            {{-- Vidéo YouTube --}}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">Vidéo YouTube</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <label class="form-label">URL YouTube</label>
+                        <input type="url" name="video_url" class="form-control @error('video_url') is-invalid @enderror"
+                               value="{{ old('video_url', $article->video_url) }}" placeholder="https://youtube.com/watch?v=...">
+                        @error('video_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    @if($article->video_url)
+                        <button type="button" id="btn-yt-summary" class="btn btn-sm btn-outline-primary mb-2" onclick="generateYouTubeSummary()">
+                            <i data-lucide="sparkles"></i> Générer le résumé IA
+                        </button>
+                    @endif
+                    <div id="yt-summary-result" class="{{ $article->video_summary ? '' : 'd-none' }}">
+                        <label class="form-label">Résumé IA</label>
+                        <div id="yt-summary-content" class="border rounded p-2 bg-light" style="font-size:13px;max-height:300px;overflow-y:auto;">
+                            {!! \Illuminate\Support\Str::markdown($article->video_summary ?? '') !!}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Image mise en avant --}}
             <div class="card">
                 <div class="card-header">
@@ -150,6 +176,33 @@
 @push('js')
 <script src="{{ asset('build/nobleui/plugins/tom-select/tom-select.complete.min.js') }}"></script>
 <script>
+window.generateYouTubeSummary = function() {
+    var btn = document.getElementById('btn-yt-summary');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Extraction en cours...';
+    fetch('{{ route("admin.blog.articles.youtube-summary", $article) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="sparkles"></i> Générer le résumé IA';
+        if (data.error) { alert(data.error); return; }
+        document.getElementById('yt-summary-result').classList.remove('d-none');
+        document.getElementById('yt-summary-content').innerHTML = data.summary;
+    })
+    .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="sparkles"></i> Générer le résumé IA';
+        alert('Erreur lors de la génération du résumé.');
+    });
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Category: single select with inline creation
     new TomSelect('#category-select', {

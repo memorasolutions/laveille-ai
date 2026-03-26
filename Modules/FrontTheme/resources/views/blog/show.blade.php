@@ -46,6 +46,31 @@
                                 {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-top') !!}
                             @endif
 
+                            @if($article->video_url)
+                                <div class="video-embed mb-4">
+                                    @php
+                                        $ytId = null;
+                                        if (class_exists(\Modules\AI\Services\YouTubeService::class)) {
+                                            $ytId = \Modules\AI\Services\YouTubeService::getVideoId($article->video_url);
+                                        } elseif (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $article->video_url, $m)) {
+                                            $ytId = $m[1];
+                                        }
+                                    @endphp
+                                    @if($ytId)
+                                        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;">
+                                            <iframe src="https://www.youtube-nocookie.com/embed/{{ $ytId }}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy" title="{{ $article->title }}"></iframe>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if($article->video_summary)
+                                <div class="video-summary mb-4 p-3" style="background:#f0f7ff;border-left:4px solid var(--c-primary);border-radius:6px;">
+                                    <h5 style="margin-bottom:10px;"><i class="fi flaticon-play-button" style="margin-right:6px;"></i>Résumé de la vidéo</h5>
+                                    <div class="rt-description">{!! \Illuminate\Support\Str::markdown($article->video_summary) !!}</div>
+                                </div>
+                            @endif
+
                             <div class="entry-details">
                                 @php
                                     $articleContent = $article->content;

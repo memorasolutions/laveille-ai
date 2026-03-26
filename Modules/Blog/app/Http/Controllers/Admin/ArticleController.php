@@ -46,6 +46,7 @@ class ArticleController extends Controller
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
             'featured_image' => 'nullable|image|max:2048',
+            'video_url' => 'nullable|url|max:500',
             'status' => 'nullable|in:draft,pending_review,published,archived',
             'category_id' => 'nullable|integer|exists:blog_categories,id',
             'tags_input' => 'nullable|string',
@@ -92,6 +93,7 @@ class ArticleController extends Controller
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string|max:500',
             'featured_image' => 'nullable|image|max:2048',
+            'video_url' => 'nullable|url|max:500',
             'status' => 'nullable|in:draft,pending_review,published,archived',
             'category_id' => 'nullable|integer|exists:blog_categories,id',
             'tags_input' => 'nullable|string',
@@ -152,6 +154,34 @@ class ArticleController extends Controller
         $article->status->transitionTo(DraftArticleState::class);
 
         return back()->with('success', 'Article dépublié.');
+    }
+
+    public function youtubeSummary(Article $article): JsonResponse
+    {
+        if (! class_exists(\Modules\AI\Services\YouTubeService::class)) {
+            return response()->json(['error' => 'Module AI non disponible'], 422);
+        }
+
+        if (empty($article->video_url)) {
+            return response()->json(['error' => 'Aucune URL YouTube'], 422);
+        }
+
+        $service = app(\Modules\AI\Services\YouTubeService::class);
+        $result = $service->extractTranscript($article->video_url);
+
+        if (! $result) {
+            return response()->json(['error' => 'Impossible d\'extraire la transcription'], 422);
+        }
+
+        $summary = $service->summarize($result['transcript'], $result['video_id']);
+
+        if (! $summary) {
+            return response()->json(['error' => 'Impossible de générer le résumé'], 422);
+        }
+
+        $article->update(['video_summary' => $summary]);
+
+        return response()->json(['summary' => $summary]);
     }
 
     public function regenerateSeo(Article $article): JsonResponse

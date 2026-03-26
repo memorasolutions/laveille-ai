@@ -16,6 +16,7 @@ use Modules\AI\Adapters\EmailChannelAdapter;
 use Modules\AI\Console\CheckSlaCommand;
 use Modules\AI\Console\ScrapeUrlsCommand;
 use Modules\AI\Console\SyncKnowledgeBaseCommand;
+use Modules\AI\Console\YouTubeSummarizeCommand;
 use Modules\AI\Events\HumanTakeoverRequested;
 use Modules\AI\Listeners\NotifyAgentsOfTakeover;
 use Modules\AI\Livewire\AiArticleGenerator;
@@ -72,7 +73,7 @@ class AiServiceProvider extends BaseModuleServiceProvider
         Ticket::observe(TicketObserver::class);
         Ticket::observe(CsatObserver::class);
 
-        $this->commands([SyncKnowledgeBaseCommand::class, ScrapeUrlsCommand::class, CheckSlaCommand::class]);
+        $this->commands([SyncKnowledgeBaseCommand::class, ScrapeUrlsCommand::class, CheckSlaCommand::class, YouTubeSummarizeCommand::class]);
 
         Event::listen(HumanTakeoverRequested::class, NotifyAgentsOfTakeover::class);
     }

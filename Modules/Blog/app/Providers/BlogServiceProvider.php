@@ -20,6 +20,7 @@ use Modules\Blog\Policies\CommentPolicy;
 use Modules\Blog\Console\DownloadWpImagesCommand;
 use Modules\Blog\Console\ImportWordPressCommand;
 use Modules\Blog\Console\MigrateContentImagesCommand;
+use Modules\Blog\Console\YouTubeSummarizeCommand;
 use Modules\Core\Providers\BaseModuleServiceProvider;
 
 class BlogServiceProvider extends BaseModuleServiceProvider
@@ -31,7 +32,7 @@ class BlogServiceProvider extends BaseModuleServiceProvider
     public function boot(): void
     {
         $this->bootModule();
-        $this->commands([ImportWordPressCommand::class, DownloadWpImagesCommand::class, MigrateContentImagesCommand::class]);
+        $this->commands([ImportWordPressCommand::class, DownloadWpImagesCommand::class, MigrateContentImagesCommand::class, YouTubeSummarizeCommand::class]);
 
         Gate::policy(Article::class, ArticlePolicy::class);
         Gate::policy(Comment::class, CommentPolicy::class);
