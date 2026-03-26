@@ -65,7 +65,7 @@
                             <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook"></i> Facebook</a></li>
                             <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger"></i> Messenger</a></li>
                             @guest
-                                <li><a href="#" @click.prevent="$dispatch('open-auth-modal', { message: '' })" style="cursor: pointer;">🔑 {{ __('Se connecter') }}</a></li>
+                                <li><a href="{{ route('login') }}" @click.prevent="$dispatch('open-auth-modal', { message: '' })" style="cursor: pointer;">🔑 {{ __('Se connecter') }}</a></li>
                             @endguest
                         </ul>
                         @auth
@@ -90,8 +90,8 @@
 </footer>
 @push('styles')
 <style>
-.wpo-site-footer .wpo-upper-footer .widget ul li a { color: rgba(255,255,255,0.85) !important; }
-.wpo-site-footer .wpo-upper-footer .widget ul li a:hover { color: #fff !important; }
+.wpo-site-footer .wpo-upper-footer .widget ul li a { color: rgba(255,255,255,0.85) !important; transition: color 0.2s, text-decoration 0.2s; }
+.wpo-site-footer .wpo-upper-footer .widget ul li a:hover { color: #fff !important; text-decoration: underline !important; }
 .wpo-site-footer .wpo-upper-footer .about-widget p { color: rgba(255,255,255,0.75) !important; }
 .wpo-site-footer .wpo-upper-footer .about-widget .logo.widget-title img { width: 240px !important; max-width: 100% !important; height: auto !important; }
 </style>
