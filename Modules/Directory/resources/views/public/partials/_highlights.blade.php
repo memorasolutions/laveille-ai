@@ -1,23 +1,19 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
-{{-- Section Highlights : Ajoutés récemment + Les plus populaires (slider Alpine.js) --}}
+{{-- Section Highlights : Ajoutés récemment + Les plus populaires --}}
 
 @if(isset($recentTools) && $recentTools->count() > 0)
 <div class="rt-highlights">
     {{-- Ajoutés récemment --}}
     <div class="rt-hl-section">
         <h3 class="rt-hl-title">🕐 {{ __('Ajoutés récemment') }}</h3>
-        <div x-data="{ offset: 0, step: 212 }" x-init="$data.total = $el.querySelectorAll('.rt-hl-card').length" class="rt-hl-slider">
-            <div class="rt-hl-arrow left" @click="offset = Math.max(0, offset - step)" x-show="offset > 0" x-cloak>
-                <i class="ti-angle-left"></i>
-            </div>
-            <div class="rt-hl-track" :style="`transform: translateX(-${offset}px)`">
+        <div class="rt-hl-slider" x-data="{ sl: 0 }">
+            <button type="button" class="rt-hl-arrow left" x-show="sl > 0" x-cloak @click="$refs.recentTrack.scrollBy({ left: -400, behavior: 'smooth' })"><i class="ti-angle-left"></i></button>
+            <div class="rt-hl-track" x-ref="recentTrack" @scroll="sl = $refs.recentTrack.scrollLeft">
                 @foreach($recentTools as $tool)
                     @include('directory::public.partials._highlight_card', ['tool' => $tool])
                 @endforeach
             </div>
-            <div class="rt-hl-arrow right" @click="offset = Math.min(total * step - $el.offsetWidth, offset + step)" x-show="offset < (total * step - $el.closest('.rt-hl-slider').offsetWidth)" x-cloak>
-                <i class="ti-angle-right"></i>
-            </div>
+            <button type="button" class="rt-hl-arrow right" @click="$refs.recentTrack.scrollBy({ left: 400, behavior: 'smooth' })"><i class="ti-angle-right"></i></button>
         </div>
     </div>
 
@@ -25,18 +21,14 @@
     @if(isset($popularTools) && $popularTools->count() > 0)
     <div class="rt-hl-section" style="margin-top: 24px;">
         <h3 class="rt-hl-title">🔥 {{ __('Les plus populaires') }}</h3>
-        <div x-data="{ offset: 0, step: 212 }" x-init="$data.total = $el.querySelectorAll('.rt-hl-card').length" class="rt-hl-slider">
-            <div class="rt-hl-arrow left" @click="offset = Math.max(0, offset - step)" x-show="offset > 0" x-cloak>
-                <i class="ti-angle-left"></i>
-            </div>
-            <div class="rt-hl-track" :style="`transform: translateX(-${offset}px)`">
+        <div class="rt-hl-slider" x-data="{ sl: 0 }">
+            <button type="button" class="rt-hl-arrow left" x-show="sl > 0" x-cloak @click="$refs.popTrack.scrollBy({ left: -400, behavior: 'smooth' })"><i class="ti-angle-left"></i></button>
+            <div class="rt-hl-track" x-ref="popTrack" @scroll="sl = $refs.popTrack.scrollLeft">
                 @foreach($popularTools as $tool)
                     @include('directory::public.partials._highlight_card', ['tool' => $tool])
                 @endforeach
             </div>
-            <div class="rt-hl-arrow right" @click="offset = Math.min(total * step - $el.offsetWidth, offset + step)" x-show="offset < (total * step - $el.closest('.rt-hl-slider').offsetWidth)" x-cloak>
-                <i class="ti-angle-right"></i>
-            </div>
+            <button type="button" class="rt-hl-arrow right" @click="$refs.popTrack.scrollBy({ left: 400, behavior: 'smooth' })"><i class="ti-angle-right"></i></button>
         </div>
     </div>
     @endif
