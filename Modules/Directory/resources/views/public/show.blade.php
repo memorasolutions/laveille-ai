@@ -5,7 +5,7 @@
 @section('meta_description', Str::limit($tool->short_description ?? strip_tags($tool->description), 160))
 @section('og_type', 'article')
 @if($tool->screenshot)
-    @section('og_image', asset($tool->screenshot))
+    @section('og_image', str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot))
 @endif
 
 @section('breadcrumb')
@@ -125,7 +125,7 @@
     {{-- Screenshot --}}
     @if($tool->screenshot)
         <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
-            <img src="{{ $tool->screenshot }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
+            <img src="{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
         </div>
     @endif
 
