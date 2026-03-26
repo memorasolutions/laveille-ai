@@ -43,7 +43,7 @@
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
 
-    <a href="{{ route('directory.index') }}" class="cmp-back"><i class="fa fa-arrow-left"></i> {{ __('Retour au repertoire') }}</a>
+    <a href="{{ route('directory.index') }}" class="cmp-back"><i class="ti-arrow-left"></i> {{ __('Retour au repertoire') }}</a>
 
     <div class="cmp-header">
         <h1>{{ $category->icon ?? '' }} Comparatif : {{ $category->name }}</h1>
@@ -97,7 +97,7 @@
                     <td>{{ $tool->launch_year ?? '-' }}</td>
                     <td class="tool-desc">{{ Str::limit($tool->short_description, 150) }}</td>
                     <td>
-                        <a href="{{ route('directory.show', $tool->slug) }}" class="cmp-btn">Voir <i class="fa fa-arrow-right"></i></a>
+                        <a href="{{ route('directory.show', $tool->slug) }}" class="cmp-btn">Voir <i class="ti-arrow-right"></i></a>
                     </td>
                 </tr>
                 @endforeach

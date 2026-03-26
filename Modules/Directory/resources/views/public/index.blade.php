@@ -86,8 +86,8 @@
     .rt-highlights { padding: 30px 0 10px; }
     .rt-hl-section { margin-bottom: 8px; }
     .rt-hl-title { font-family: var(--f-heading); font-size: 1.15rem; font-weight: 700; color: var(--c-dark); margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
-    .rt-hl-slider { position: relative; overflow: hidden; }
-    .rt-hl-track { display: flex; gap: 16px; transition: transform 0.4s ease; }
+    .rt-hl-slider { position: relative; overflow: visible; padding: 0 40px; }
+    .rt-hl-track { display: flex; gap: 16px; transition: transform 0.4s ease; overflow: hidden; }
     .rt-hl-card { display: block; flex: 0 0 196px; background: #fff; border-radius: var(--r-base); border: 1px solid #E5E7EB; overflow: hidden; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
     .rt-hl-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); text-decoration: none; }
     .rt-hl-img { height: 100px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
@@ -97,8 +97,8 @@
     .rt-hl-name { font-weight: 700; font-size: 13px; color: var(--c-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
     .rt-hl-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; border: none; color: var(--c-dark); font-size: 14px; }
     .rt-hl-arrow:hover { background: var(--c-primary); color: #fff; }
-    .rt-hl-arrow.left { left: -4px; }
-    .rt-hl-arrow.right { right: -4px; }
+    .rt-hl-arrow.left { left: 0; }
+    .rt-hl-arrow.right { right: 0; }
 
     /* Filter bar + pricing dropdown */
     .rt-filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -431,7 +431,7 @@
 
             <div x-data="{ open: false }" style="position: relative; display: inline-block;">
                 <button type="button" class="rt-pill" :class="{ active: activePricing !== '' }" @click="open = !open">
-                    <span x-show="!activePricing">💰 Tarification <i class="fa fa-caret-down"></i></span>
+                    <span x-show="!activePricing">💰 Tarification <i class="ti-angle-down"></i></span>
                     <span x-show="activePricing" x-cloak x-text="({free:'🆓 Gratuit',freemium:'💎 Freemium',paid:'💰 Payant',open_source:'🔓 Open source',enterprise:'🏢 Enterprise'})[activePricing]"></span>
                 </button>
                 <div x-show="open" @click.outside="open = false" x-cloak class="rt-pricing-dropdown">
@@ -442,7 +442,7 @@
                         </button>
                     @endforeach
                     <button type="button" @click="activePricing = ''; open = false" x-show="activePricing">
-                        <i class="fa fa-times"></i> {{ __('Effacer') }}
+                        <i class="ti-close"></i> {{ __('Effacer') }}
                     </button>
                 </div>
             </div>
@@ -453,7 +453,7 @@
         {{-- Category slider with emojis --}}
         @if($catCount > 1)
         <div class="rt-cat-slider" x-data="{ scrollLeft: 0 }">
-            <button type="button" class="rt-cat-arrow left" x-show="scrollLeft > 0" x-cloak @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="fa fa-chevron-left"></i></button>
+            <button type="button" class="rt-cat-arrow left" x-show="scrollLeft > 0" x-cloak @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="ti-angle-left"></i></button>
             <div class="rt-cat-track" x-ref="catTrack" @scroll="scrollLeft = $refs.catTrack.scrollLeft">
                 @foreach($categories as $cat)
                     <button type="button" class="rt-cat-chip"
@@ -461,7 +461,7 @@
                             @click="toggleCategory('{{ $cat->slug }}')">{{ $cat->icon ?? '' }} {{ $cat->name }}</button>
                 @endforeach
             </div>
-            <button type="button" class="rt-cat-arrow right" @click="$refs.catTrack.scrollBy({ left: 300, behavior: 'smooth' })"><i class="fa fa-chevron-right"></i></button>
+            <button type="button" class="rt-cat-arrow right" @click="$refs.catTrack.scrollBy({ left: 300, behavior: 'smooth' })"><i class="ti-angle-right"></i></button>
         </div>
         @endif
 
