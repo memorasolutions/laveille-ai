@@ -172,33 +172,49 @@ class ScreenshotService
         }
 
         $white = imagecolorallocate($img, 255, 255, 255);
+        $whiteAlpha = imagecolorallocatealpha($img, 255, 255, 255, 50);
 
-        // Nom de l'outil (GD built-in font 5 = plus grande)
-        $nameLen = strlen($name);
-        $charW = imagefontwidth(5);
-        $charH = imagefontheight(5);
+        // Police TTF (Inter SemiBold pour le nom, Regular pour le sous-titre)
+        $fontBold = resource_path('fonts/Inter-SemiBold.ttf');
+        $fontRegular = resource_path('fonts/Inter-Regular.ttf');
+        $hasTtf = file_exists($fontBold) && file_exists($fontRegular);
 
-        // Ecrire le nom en "gros" (3x scale via imagestring sur image plus petite puis copy)
-        $scale = 4;
-        $textW = $nameLen * $charW;
-        $textImg = imagecreatetruecolor($textW, $charH);
-        $bg = imagecolorallocate($textImg, $c1[0], $c1[1], $c1[2]);
-        imagefill($textImg, 0, 0, $bg);
-        $tw = imagecolorallocate($textImg, 255, 255, 255);
-        imagestring($textImg, 5, 0, 0, $name, $tw);
+        if ($hasTtf) {
+            // Nom de l'outil en TTF (taille adaptative)
+            $fontSize = mb_strlen($name) > 20 ? 36 : (mb_strlen($name) > 12 ? 42 : 52);
+            $bbox = imagettfbbox($fontSize, 0, $fontBold, $name);
+            $textW = $bbox[2] - $bbox[0];
+            $textH = $bbox[1] - $bbox[7];
+            $nameX = (int) (($w - $textW) / 2);
+            $nameY = (int) (($h + $textH) / 2) - 20;
+            imagettftext($img, $fontSize, 0, $nameX, $nameY, $white, $fontBold, $name);
 
-        $scaledW = $textW * $scale;
-        $scaledH = $charH * $scale;
-        $x = (int) (($w - $scaledW) / 2);
-        $y = (int) (($h - $scaledH) / 2) - 20;
-        imagecopyresized($img, $textImg, max($x, 10), $y, 0, 0, min($scaledW, $w - 20), $scaledH, $textW, $charH);
-        imagedestroy($textImg);
-
-        // "laveille.ai" en petit
-        $sub = 'laveille.ai';
-        $subLen = strlen($sub);
-        $subX = (int) (($w - $subLen * imagefontwidth(3)) / 2);
-        imagestring($img, 3, $subX, $y + $scaledH + 20, $sub, $white);
+            // "laveille.ai" en sous-titre
+            $subSize = 18;
+            $sub = 'laveille.ai';
+            $subBbox = imagettfbbox($subSize, 0, $fontRegular, $sub);
+            $subW = $subBbox[2] - $subBbox[0];
+            $subX = (int) (($w - $subW) / 2);
+            imagettftext($img, $subSize, 0, $subX, $nameY + 40, $whiteAlpha, $fontRegular, $sub);
+        } else {
+            // Fallback GD bitmap si TTF absent
+            $nameLen = strlen($name);
+            $scale = 4;
+            $charW = imagefontwidth(5);
+            $charH = imagefontheight(5);
+            $textW = $nameLen * $charW;
+            $textImg = imagecreatetruecolor($textW, $charH);
+            $bg = imagecolorallocate($textImg, $c1[0], $c1[1], $c1[2]);
+            imagefill($textImg, 0, 0, $bg);
+            imagestring($textImg, 5, 0, 0, $name, imagecolorallocate($textImg, 255, 255, 255));
+            $scaledW = $textW * $scale;
+            $scaledH = $charH * $scale;
+            $x = (int) (($w - $scaledW) / 2);
+            $y = (int) (($h - $scaledH) / 2) - 20;
+            imagecopyresized($img, $textImg, max($x, 10), $y, 0, 0, min($scaledW, $w - 20), $scaledH, $textW, $charH);
+            imagedestroy($textImg);
+            imagestring($img, 3, (int) (($w - strlen('laveille.ai') * imagefontwidth(3)) / 2), $y + $scaledH + 20, 'laveille.ai', $white);
+        }
 
         imagejpeg($img, $path, 90);
         imagedestroy($img);
