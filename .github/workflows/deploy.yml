@@ -1,0 +1,50 @@
+name: Deploy to cPanel via FTP
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          protocol: ftp
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            vendor/**
+            node_modules/**
+            storage/logs/**
+            storage/framework/cache/**
+            storage/framework/sessions/**
+            storage/framework/views/**
+            tests/**
+            .env
+            .env.example
+            .editorconfig
+            phpunit.xml
+            vite.config.js
+            package.json
+            package-lock.json
+            composer.lock
+            _*.php
+            *.log
+
+      - name: Deploy notification
+        run: |
+          echo "::notice::Deploy FTP termine avec succes vers ${{ secrets.FTP_SERVER }}"
+          echo "Deploye le $(date -u '+%Y-%m-%d %H:%M:%S UTC') depuis le commit ${{ github.sha }}"
