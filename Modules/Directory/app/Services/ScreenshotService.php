@@ -116,7 +116,97 @@ class ScreenshotService
             }
         }
 
+        // Fallback : gradient colore si toutes les tentatives echouent
+        $slug = $tool->getTranslation('slug', 'fr_CA');
+        $existingPath = public_path($tool->screenshot ?? '');
+        if (! File::exists($existingPath) || File::size($existingPath) < 20000) {
+            Log::info("Screenshot {$slug}: generation gradient fallback");
+
+            return self::generateFallbackGradient($tool);
+        }
+
         return false;
+    }
+
+    /**
+     * Genere un gradient colore avec le nom de l'outil (fallback quand capture impossible).
+     */
+    public static function generateFallbackGradient(Tool $tool): bool
+    {
+        $slug = $tool->getTranslation('slug', 'fr_CA');
+        $name = $tool->getTranslation('name', 'fr_CA');
+        if (empty($slug)) {
+            return false;
+        }
+
+        $outputDir = public_path('screenshots');
+        if (! File::isDirectory($outputDir)) {
+            File::makeDirectory($outputDir, 0755, true);
+        }
+
+        $path = "{$outputDir}/{$slug}.jpg";
+        $w = 1200;
+        $h = 630;
+
+        $palettes = [
+            [[11, 114, 133], [26, 54, 93]],   // teal → navy
+            [[26, 54, 93], [11, 114, 133]],    // navy → teal
+            [[142, 68, 173], [44, 62, 80]],    // purple → dark
+            [[231, 76, 60], [142, 68, 173]],   // red → purple
+            [[46, 204, 113], [22, 160, 133]],  // green → teal
+            [[52, 152, 219], [41, 128, 185]],  // blue → darker
+            [[243, 156, 18], [211, 84, 0]],    // orange → burnt
+            [[44, 62, 80], [52, 73, 94]],      // charcoal → slate
+        ];
+
+        $idx = abs(crc32($slug)) % count($palettes);
+        [$c1, $c2] = $palettes[$idx];
+
+        $img = imagecreatetruecolor($w, $h);
+
+        // Gradient vertical par bandes (rapide)
+        for ($y = 0; $y < $h; $y++) {
+            $r = (float) $y / $h;
+            $color = imagecolorallocate($img, (int) ($c1[0] + ($c2[0] - $c1[0]) * $r), (int) ($c1[1] + ($c2[1] - $c1[1]) * $r), (int) ($c1[2] + ($c2[2] - $c1[2]) * $r));
+            imagefilledrectangle($img, 0, $y, $w, $y, $color);
+        }
+
+        $white = imagecolorallocate($img, 255, 255, 255);
+
+        // Nom de l'outil (GD built-in font 5 = plus grande)
+        $nameLen = strlen($name);
+        $charW = imagefontwidth(5);
+        $charH = imagefontheight(5);
+
+        // Ecrire le nom en "gros" (3x scale via imagestring sur image plus petite puis copy)
+        $scale = 4;
+        $textW = $nameLen * $charW;
+        $textImg = imagecreatetruecolor($textW, $charH);
+        $bg = imagecolorallocate($textImg, $c1[0], $c1[1], $c1[2]);
+        imagefill($textImg, 0, 0, $bg);
+        $tw = imagecolorallocate($textImg, 255, 255, 255);
+        imagestring($textImg, 5, 0, 0, $name, $tw);
+
+        $scaledW = $textW * $scale;
+        $scaledH = $charH * $scale;
+        $x = (int) (($w - $scaledW) / 2);
+        $y = (int) (($h - $scaledH) / 2) - 20;
+        imagecopyresized($img, $textImg, max($x, 10), $y, 0, 0, min($scaledW, $w - 20), $scaledH, $textW, $charH);
+        imagedestroy($textImg);
+
+        // "laveille.ai" en petit
+        $sub = 'laveille.ai';
+        $subLen = strlen($sub);
+        $subX = (int) (($w - $subLen * imagefontwidth(3)) / 2);
+        imagestring($img, 3, $subX, $y + $scaledH + 20, $sub, $white);
+
+        imagejpeg($img, $path, 90);
+        imagedestroy($img);
+
+        $tool->screenshot = "screenshots/{$slug}.jpg";
+        $tool->saveQuietly();
+
+        return true;
     }
 
     public static function isAvailable(): bool
