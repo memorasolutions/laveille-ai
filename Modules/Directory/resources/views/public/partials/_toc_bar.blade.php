@@ -5,6 +5,7 @@
 <div class="rt-toc-placeholder" x-data="{
     active: '',
     fixed: false,
+    sentinelTop: 0,
     init() {
         // Scrollspy via IntersectionObserver
         const observer = new IntersectionObserver((entries) => {
@@ -12,23 +13,26 @@
         }, { rootMargin: '0px 0px -75% 0px' });
         document.querySelectorAll('.rt-description h2[id]').forEach(h2 => observer.observe(h2));
 
-        // Fixed bar quand la TOC sort du viewport
-        const sentinel = this.$refs.sentinel;
-        const fixedObs = new IntersectionObserver(([entry]) => {
-            this.fixed = !entry.isIntersecting;
-        }, { threshold: 0 });
-        fixedObs.observe(sentinel);
+        // Position de reference du sentinel
+        this.$nextTick(() => {
+            this.sentinelTop = this.$refs.sentinel.getBoundingClientRect().top + window.scrollY;
+        });
+
+        // Scroll listener pour afficher/masquer la barre fixe
+        window.addEventListener('scroll', () => {
+            this.fixed = window.scrollY > this.sentinelTop + 50;
+        }, { passive: true });
     },
     goTo(id) {
         this.active = id;
         const el = document.getElementById(id);
         if (el) {
-            const y = el.getBoundingClientRect().top + window.scrollY - 110;
+            const y = el.getBoundingClientRect().top + window.scrollY - 60;
             window.scrollTo({ top: y, behavior: 'smooth' });
         }
     }
 }">
-    {{-- Sentinel : quand il sort du viewport, la barre fixe apparait --}}
+    {{-- Sentinel : marque la position de reference --}}
     <div x-ref="sentinel" style="height: 1px;"></div>
 
     {{-- Barre inline (position normale) --}}
@@ -44,7 +48,7 @@
         </div>
     </nav>
 
-    {{-- Barre fixe (apparait quand on scrolle au-dela) --}}
+    {{-- Barre fixe (apparait quand on scrolle au-dela du sentinel) --}}
     <nav class="rt-toc-bar rt-toc-fixed" x-show="fixed" x-cloak x-transition.opacity>
         <div class="rt-toc-scroll">
             @foreach($toc as $item)
