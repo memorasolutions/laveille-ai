@@ -62,10 +62,10 @@
     .rt-description li { margin-bottom: 4px; }
     .rt-description strong { color: var(--c-dark); }
     .rt-description blockquote { border-left: 4px solid var(--c-primary); background: #EEF7FF; padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; }
-    .rt-description h2 { scroll-margin-top: 80px; }
+    .rt-description h2 { scroll-margin-top: 120px; }
 
     /* TOC scrollspy bar */
-    .rt-toc-bar { position: sticky; top: 0; background: #fff; padding: 10px 0; margin-bottom: 20px; z-index: 10; border-bottom: 1px solid #eee; }
+    .rt-toc-bar { position: sticky; top: 60px; background: #fff; padding: 12px 16px; margin-bottom: 20px; z-index: 10; border-bottom: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .rt-toc-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 2px 0; }
     .rt-toc-scroll::-webkit-scrollbar { display: none; }
     .rt-toc-link { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; background: #F3F4F6; color: var(--c-dark); font-size: 13px; font-weight: 600; text-decoration: none !important; white-space: nowrap; transition: all 0.2s; }
@@ -207,14 +207,13 @@
                 $descHtmlWithIds = $tocData['html'];
             @endphp
 
+            @include('directory::public.partials._toc_bar', ['toc' => $toc])
+
             <div style="background: #fff; padding: 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     👋 {{ __('À propos de') }} {{ $tool->name }}
                 </h3>
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), #60a5fa); margin-bottom: 20px; border-radius: 2px;"></div>
-
-                @include('directory::public.partials._toc_bar', ['toc' => $toc])
-
                 <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;">{!! $descHtmlWithIds !!}</div>
             </div>
 
