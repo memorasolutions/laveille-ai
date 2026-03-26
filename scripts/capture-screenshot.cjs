@@ -1,91 +1,104 @@
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const idcac = require('idcac-playwright');
+var puppeteer = require('puppeteer-extra');
+var StealthPlugin = require('puppeteer-extra-plugin-stealth');
+var idcac = require('idcac-playwright');
+var fs = require('fs');
+var https = require('https');
+var http = require('http');
 
 puppeteer.use(StealthPlugin());
 
-const url = process.argv[2];
-const outputPath = process.argv[3];
+var url = process.argv[2];
+var outputPath = process.argv[3];
+var MIN_FILE_SIZE = 20 * 1024; // 20 KB minimum = screenshot valide
 
 if (!url || !outputPath) {
-    console.log(JSON.stringify({ success: false, error: 'Missing URL or output path arguments' }));
+    console.log(JSON.stringify({ success: false, error: 'Usage: node capture-screenshot.cjs URL OUTPUT_PATH' }));
     process.exit(0);
 }
 
-(async () => {
-    let browser = null;
+var COOKIE_HIDE = '.cookie-banner, .cookie-consent, #cookie-consent, .cc-window, .onetrust-banner-sdk, #CybotCookiebotDialog, [class*="cookie-banner"], [id*="cookie-banner"]';
+var COOKIE_CLICK = ['.cookie-accept', '#cookie-consent button', '.cc-btn', '.cc-dismiss', '.onetrust-accept-btn-handler', '#accept-cookies', 'button[id*="accept"]', 'button[class*="accept"]'];
+
+// Detecter si la page est bloquee (Cloudflare, CAPTCHA, erreur)
+var BLOCKED_TITLES = ['just a moment', 'attention required', 'access denied', 'security check'];
+var BLOCKED_CONTENT = ['Performing security verification', 'Verify you are human', 'cf-turnstile', 'challenge-platform', 'ray ID', 'Enable JavaScript and cookies to continue', 'Checking your browser'];
+
+function downloadFile(fileUrl, destPath) {
+    return new Promise(function (resolve, reject) {
+        var imgUrl = fileUrl.startsWith('//') ? 'https:' + fileUrl : fileUrl;
+        var mod = imgUrl.startsWith('https') ? https : http;
+        mod.get(imgUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, function (res) {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                // Follow redirect
+                downloadFile(res.headers.location, destPath).then(resolve).catch(reject);
+                return;
+            }
+            if (res.statusCode !== 200) { reject(new Error('HTTP ' + res.statusCode)); return; }
+            var chunks = [];
+            res.on('data', function (c) { chunks.push(c); });
+            res.on('end', function () {
+                var buf = Buffer.concat(chunks);
+                fs.writeFileSync(destPath, buf);
+                resolve(buf.length);
+            });
+        }).on('error', reject);
+    });
+}
+
+(async function () {
+    var browser = null;
     try {
         browser = await puppeteer.launch({
             headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ]
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+            ignoreHTTPSErrors: true
         });
 
-        const page = await browser.newPage();
+        var page = await browser.newPage();
         await page.setViewport({ width: 1200, height: 630 });
 
-        // Inject IDCAC script before navigation (dismisses 95% of cookie banners)
-        const idcacScript = idcac.getInjectableScript();
-        await page.evaluateOnNewDocument(idcacScript);
+        // Stealth + idcac cookie dismiss before navigation
+        await page.evaluateOnNewDocument(idcac.getInjectableScript());
 
-        // Navigate
+        // Navigate (catch timeout gracefully)
         try {
             await page.goto(url, { timeout: 30000, waitUntil: 'networkidle2' });
-        } catch (e) {
-            // Continue even if timeout - page may be partially loaded
-        }
+        } catch (e) { /* continue with partial load */ }
 
-        // CSS hide residual cookie banners
-        var hideSelectors = [
-            '.cookie-banner', '.cookie-consent', '#cookie-consent',
-            '.cc-window', '.onetrust-banner-sdk', '#CybotCookiebotDialog',
-            '[class*="cookie-banner"]', '[id*="cookie-banner"]'
-        ];
+        // CSS hide cookie banners
+        try { await page.addStyleTag({ content: COOKIE_HIDE + ' { display: none !important; visibility: hidden !important; }' }); } catch (e) {}
 
+        // Click cookie accept buttons
         try {
-            await page.addStyleTag({
-                content: hideSelectors.join(', ') + ' { display: none !important; visibility: hidden !important; }'
-            });
-        } catch (e) {}
-
-        // Fallback: click common accept buttons
-        try {
-            await page.evaluate(function () {
-                var selectors = [
-                    '.cookie-accept', '#cookie-consent button', '.cc-btn',
-                    '.cc-dismiss', '.onetrust-accept-btn-handler', '#accept-cookies',
-                    'button[id*="accept"]', 'button[class*="accept"]'
-                ];
+            await page.evaluate(function (selectors) {
                 selectors.forEach(function (s) {
                     try { document.querySelectorAll(s).forEach(function (el) { el.click(); }); } catch (e) {}
                 });
-            });
+            }, COOKIE_CLICK);
         } catch (e) {}
 
-        // Wait for dismiss animations
-        await new Promise(function (resolve) { setTimeout(resolve, 1500); });
+        await new Promise(function (r) { setTimeout(r, 2000); });
 
-        // Detect Cloudflare/bot challenge before capture
-        var isBlocked = false;
+        // DETECTION : page bloquee?
+        var blocked = false;
         try {
-            isBlocked = await page.evaluate(function () {
-                var body = document.body ? document.body.innerText : '';
-                var blocked = ['Performing security verification', 'Verify you are human',
-                    'Checking your browser', 'Just a moment', 'Enable JavaScript and cookies',
-                    'Access denied', 'Attention Required'];
-                for (var i = 0; i < blocked.length; i++) {
-                    if (body.indexOf(blocked[i]) !== -1) return true;
-                }
-                return false;
-            });
+            var title = (await page.title() || '').toLowerCase();
+            for (var i = 0; i < BLOCKED_TITLES.length; i++) {
+                if (title.indexOf(BLOCKED_TITLES[i]) !== -1) { blocked = true; break; }
+            }
         } catch (e) {}
 
-        if (isBlocked) {
-            // Fallback: try to get og:image instead
+        if (!blocked) {
+            try {
+                var htmlContent = await page.content();
+                for (var j = 0; j < BLOCKED_CONTENT.length; j++) {
+                    if (htmlContent.indexOf(BLOCKED_CONTENT[j]) !== -1) { blocked = true; break; }
+                }
+            } catch (e) {}
+        }
+
+        if (blocked) {
+            // FALLBACK : og:image
             var ogImage = null;
             try {
                 ogImage = await page.evaluate(function () {
@@ -94,42 +107,37 @@ if (!url || !outputPath) {
                 });
             } catch (e) {}
 
+            await browser.close();
+            browser = null;
+
             if (ogImage) {
-                // Download og:image as fallback
-                var https = require('https');
-                var http = require('http');
-                var fs = require('fs');
-                var imgUrl = ogImage.startsWith('//') ? 'https:' + ogImage : ogImage;
-                await new Promise(function (resolve, reject) {
-                    var mod = imgUrl.startsWith('https') ? https : http;
-                    mod.get(imgUrl, function (res) {
-                        var chunks = [];
-                        res.on('data', function (c) { chunks.push(c); });
-                        res.on('end', function () {
-                            fs.writeFileSync(outputPath, Buffer.concat(chunks));
-                            resolve();
-                        });
-                    }).on('error', reject);
-                });
-                await browser.close();
-                console.log(JSON.stringify({ success: true, path: outputPath, fallback: 'og:image' }));
+                try {
+                    var bytes = await downloadFile(ogImage, outputPath);
+                    if (bytes >= MIN_FILE_SIZE) {
+                        console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', ogUrl: ogImage }));
+                    } else {
+                        console.log(JSON.stringify({ success: false, error: 'og:image trop petite (' + Math.round(bytes / 1024) + ' KB)', blocked: true, tooSmall: true }));
+                    }
+                } catch (dlErr) {
+                    console.log(JSON.stringify({ success: false, error: 'Bloque + og:image download echoue: ' + dlErr.message, blocked: true }));
+                }
             } else {
-                await browser.close();
-                console.log(JSON.stringify({ success: false, error: 'Cloudflare/bot challenge detected, no og:image fallback' }));
+                console.log(JSON.stringify({ success: false, error: 'Page bloquee (Cloudflare/CAPTCHA), pas d og:image', blocked: true }));
             }
         } else {
-            // Normal capture
-            await page.screenshot({
-                path: outputPath,
-                type: 'jpeg',
-                quality: 85,
-                fullPage: false
-            });
-
+            // CAPTURE NORMALE
+            await page.screenshot({ path: outputPath, type: 'jpeg', quality: 85, fullPage: false });
             await browser.close();
-            console.log(JSON.stringify({ success: true, path: outputPath }));
-        }
+            browser = null;
 
+            // VALIDATION : taille fichier
+            var fileSize = fs.statSync(outputPath).size;
+            if (fileSize < MIN_FILE_SIZE) {
+                console.log(JSON.stringify({ success: false, error: 'Screenshot trop petit (' + Math.round(fileSize / 1024) + ' KB)', tooSmall: true, path: outputPath }));
+            } else {
+                console.log(JSON.stringify({ success: true, path: outputPath, method: 'screenshot', size: fileSize }));
+            }
+        }
     } catch (error) {
         if (browser) { try { await browser.close(); } catch (e) {} }
         console.log(JSON.stringify({ success: false, error: error.message }));

@@ -12,6 +12,9 @@ use Throwable;
 
 class ScreenshotService
 {
+    /**
+     * Capture le screenshot d'un outil. Ne jamais ecraser un bon screenshot par un mauvais.
+     */
     public function capture(Tool $tool): bool
     {
         if (! self::isAvailable()) {
@@ -32,27 +35,70 @@ class ScreenshotService
 
         $filename = "{$slug}.jpg";
         $absolutePath = "{$outputDir}/{$filename}";
+        $existingSize = File::exists($absolutePath) ? File::size($absolutePath) : 0;
 
         try {
+            // Capturer dans un fichier temporaire pour ne pas ecraser l'existant
+            $tempPath = "{$outputDir}/_tmp_{$filename}";
+
             $result = Process::timeout(90)->run([
                 env('BROWSERSHOT_NODE_PATH', '/usr/local/bin/node'),
                 base_path('scripts/capture-screenshot.cjs'),
                 $tool->url,
-                $absolutePath,
+                $tempPath,
             ]);
 
             $json = json_decode(trim($result->output()), true);
 
-            if (is_array($json) && ($json['success'] ?? false) === true && File::exists($absolutePath)) {
-                $tool->screenshot = "screenshots/{$filename}";
-                $tool->saveQuietly();
+            if (! is_array($json)) {
+                Log::warning("Screenshot {$slug}: reponse JSON invalide");
+                @unlink($tempPath);
 
-                return true;
+                return false;
             }
 
-            Log::warning("Screenshot echoue pour {$slug}: " . ($json['error'] ?? $result->errorOutput() ?: 'Erreur inconnue'));
+            // Echec explicite (bloque, trop petit, erreur)
+            if (($json['success'] ?? false) !== true) {
+                $reason = $json['error'] ?? 'Erreur inconnue';
+                $blocked = $json['blocked'] ?? false;
+                $tooSmall = $json['tooSmall'] ?? false;
+                Log::warning("Screenshot {$slug}: {$reason}" . ($blocked ? ' [BLOQUE]' : '') . ($tooSmall ? ' [TROP PETIT]' : ''));
+                @unlink($tempPath);
+
+                return false;
+            }
+
+            // Succes : verifier que le fichier temporaire est valide
+            if (! File::exists($tempPath) || File::size($tempPath) < 5000) {
+                Log::warning("Screenshot {$slug}: fichier temporaire invalide");
+                @unlink($tempPath);
+
+                return false;
+            }
+
+            $newSize = File::size($tempPath);
+            $method = $json['method'] ?? 'screenshot';
+
+            // Protection : ne pas ecraser un bon screenshot (> 20 KB) par un plus petit
+            if ($existingSize > 20000 && $newSize < $existingSize * 0.5) {
+                Log::warning("Screenshot {$slug}: nouveau fichier ({$newSize}) beaucoup plus petit que l'existant ({$existingSize}) - conserve l'ancien");
+                @unlink($tempPath);
+
+                return false;
+            }
+
+            // Remplacer le fichier
+            File::move($tempPath, $absolutePath);
+
+            $tool->screenshot = "screenshots/{$filename}";
+            $tool->saveQuietly();
+
+            Log::info("Screenshot {$slug}: OK via {$method} (" . round($newSize / 1024) . ' KB)');
+
+            return true;
         } catch (Throwable $e) {
-            Log::warning("Screenshot exception pour {$slug}: {$e->getMessage()}");
+            Log::warning("Screenshot exception {$slug}: {$e->getMessage()}");
+            @unlink($outputDir . "/_tmp_{$filename}");
         }
 
         return false;
