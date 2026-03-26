@@ -39,8 +39,9 @@ class PublicDirectoryController extends Controller
         $categories = Category::orderBy('sort_order')->get();
         $pricingOptions = ['free' => __('Gratuit'), 'freemium' => __('Freemium'), 'paid' => __('Payant'), 'open_source' => __('Open source'), 'enterprise' => __('Entreprise')];
 
-        $recentTools = Tool::published()->with('categories')->orderByDesc('created_at')->limit(8)->get();
-        $popularTools = Tool::published()->with('categories')->orderByDesc('clicks_count')->limit(8)->get();
+        $recentTools = Tool::published()->with('categories')->orderByDesc('created_at')->distinct()->limit(8)->get();
+        $recentIds = $recentTools->pluck('id')->toArray();
+        $popularTools = Tool::published()->with('categories')->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit(8)->get();
 
         return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'recentTools', 'popularTools'));
     }
