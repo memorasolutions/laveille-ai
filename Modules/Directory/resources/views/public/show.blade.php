@@ -62,10 +62,11 @@
     .rt-description li { margin-bottom: 4px; }
     .rt-description strong { color: var(--c-dark); }
     .rt-description blockquote { border-left: 4px solid var(--c-primary); background: #EEF7FF; padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; }
-    .rt-description h2 { scroll-margin-top: 120px; }
+    .rt-description h2 { scroll-margin-top: 70px; }
 
     /* TOC scrollspy bar */
-    .rt-toc-bar { position: sticky; top: 60px; background: #fff; padding: 12px 16px; margin-bottom: 20px; z-index: 10; border-bottom: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .rt-toc-bar { background: #fff; padding: 12px 16px; margin-bottom: 20px; border-bottom: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .rt-toc-fixed { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; border-radius: 0; margin: 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
     .rt-toc-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 2px 0; }
     .rt-toc-scroll::-webkit-scrollbar { display: none; }
     .rt-toc-link { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; background: #F3F4F6; color: var(--c-dark); font-size: 13px; font-weight: 600; text-decoration: none !important; white-space: nowrap; transition: all 0.2s; }
