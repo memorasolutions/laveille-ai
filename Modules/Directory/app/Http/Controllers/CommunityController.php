@@ -107,26 +107,73 @@ class CommunityController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', 'in:video,article,tutorial,documentation'],
             'language' => ['required', 'in:fr,en'],
+            'video_id' => ['nullable', 'string', 'max:20'],
+            'thumbnail' => ['nullable', 'url', 'max:500'],
         ]);
 
         $user = Auth::user();
         $autoApprove = $this->reputation->shouldAutoApprove($user, 'resource');
 
-        ToolResource::create([
+        $resourceData = [
             'user_id' => $user->id,
             'directory_tool_id' => $tool->id,
             'url' => $validated['url'],
             'title' => $validated['title'],
             'type' => $validated['type'],
             'language' => $validated['language'],
+            'video_id' => $validated['video_id'] ?? null,
+            'thumbnail' => $validated['thumbnail'] ?? null,
             'is_approved' => $autoApprove,
-        ]);
+        ];
+
+        // Auto-résumé YouTube si le module AI est disponible
+        if (! empty($validated['video_id']) && class_exists(\Modules\AI\Services\YouTubeService::class)) {
+            try {
+                $ytService = app(\Modules\AI\Services\YouTubeService::class);
+                $transcript = $ytService->extractTranscript($validated['url'], $validated['language']);
+                if ($transcript) {
+                    $resourceData['video_summary'] = $ytService->summarize($transcript['transcript'], $transcript['video_id']);
+                }
+            } catch (\Throwable $e) {
+                // Pas bloquant — la ressource est créée sans résumé
+            }
+        }
+
+        ToolResource::create($resourceData);
 
         if ($autoApprove) {
             $this->reputation->addPoints($user, ReputationService::RESOURCE_APPROVED, 'resource_auto');
         }
 
         return back()->with('success', __('Merci ! La ressource sera visible après approbation.'));
+    }
+
+    public function fetchYoutubeMeta(Request $request, string $slug): JsonResponse
+    {
+        $request->validate(['url' => 'required|url|max:500']);
+        $url = $request->input('url');
+
+        $videoId = null;
+        if (class_exists(\Modules\AI\Services\YouTubeService::class)) {
+            $videoId = \Modules\AI\Services\YouTubeService::getVideoId($url);
+        } elseif (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $m)) {
+            $videoId = $m[1];
+        }
+
+        if (! $videoId) {
+            return response()->json(['youtube' => false, 'title' => null, 'thumbnail' => null]);
+        }
+
+        // Fetch oEmbed metadata (gratuit, pas d'API key)
+        $oembed = @json_decode(@file_get_contents("https://www.youtube.com/oembed?url=" . urlencode($url) . "&format=json"), true);
+
+        return response()->json([
+            'youtube' => true,
+            'video_id' => $videoId,
+            'title' => $oembed['title'] ?? null,
+            'thumbnail' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
+            'author' => $oembed['author_name'] ?? null,
+        ]);
     }
 
     public function toggleLike(Request $request, string $type, int $id): JsonResponse

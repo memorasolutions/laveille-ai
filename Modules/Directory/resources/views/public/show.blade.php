@@ -532,21 +532,139 @@
             @endforeach
 
             @auth
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;">
-                <h4 style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 16px;">{{ __('Partager une ressource') }}</h4>
-                <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST">
-                    @csrf
-                    <div class="row">
-                        <div class="col-md-6"><div class="form-group" style="margin-bottom: 12px;"><label style="font-size: 13px; font-weight: 600;">{{ __('Titre') }}</label><input type="text" name="title" class="form-control" placeholder="{{ __('Ex: Guide complet pour débuter') }}" style="border-radius: 8px; height: 40px;" required></div></div>
-                        <div class="col-md-6"><div class="form-group" style="margin-bottom: 12px;"><label style="font-size: 13px; font-weight: 600;">{{ __('URL') }}</label><input type="url" name="url" class="form-control" placeholder="https://..." style="border-radius: 8px; height: 40px;" required></div></div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;"
+                 x-data="{
+                    step: 1,
+                    type: '',
+                    url: '',
+                    title: '',
+                    language: 'fr',
+                    videoId: null,
+                    thumbnail: null,
+                    author: null,
+                    loading: false,
+                    isYoutube: false,
+                    selectType(t) { this.type = t; this.step = 2; },
+                    async fetchMeta() {
+                        if (!this.url || this.url.length < 10) return;
+                        this.isYoutube = /youtube\.com\/watch|youtu\.be\//.test(this.url);
+                        if (!this.isYoutube) { this.step = 3; return; }
+                        this.loading = true;
+                        try {
+                            const res = await fetch('{{ route('directory.youtube-meta', $tool->slug) }}', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'},
+                                body: JSON.stringify({url: this.url})
+                            });
+                            const data = await res.json();
+                            if (data.youtube) {
+                                this.videoId = data.video_id;
+                                this.title = data.title || '';
+                                this.thumbnail = data.thumbnail;
+                                this.author = data.author;
+                                this.type = this.type || 'video';
+                            }
+                        } catch(e) {}
+                        this.loading = false;
+                        this.step = 3;
+                    },
+                    back() { this.step = Math.max(1, this.step - 1); }
+                 }">
+
+                {{-- Progress bar --}}
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+                    <template x-for="i in 3" :key="i">
+                        <div style="flex:1;height:4px;border-radius:2px;transition:background .3s;" :style="i <= step ? 'background:#10b981' : 'background:#e2e8f0'"></div>
+                    </template>
+                    <span style="font-size:12px;color:#9ca3af;white-space:nowrap;" x-text="'Étape ' + step + '/3'"></span>
+                </div>
+
+                {{-- Étape 1 : Type --}}
+                <div x-show="step===1" x-transition role="region" aria-label="Étape 1 : type de ressource">
+                    <h4 style="margin-top:0;font-weight:700;color:#1e293b;margin-bottom:16px;">{{ __('Quel type de ressource ?') }}</h4>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <button type="button" @click="selectType('video')" style="flex:1;min-width:120px;padding:20px 16px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;" :style="type==='video' && 'border-color:#10b981;background:#f0fdf4'" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='video' && ($el.style.borderColor='#e2e8f0')">
+                            <div style="font-size:32px;margin-bottom:6px;">🎬</div>
+                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Vidéo') }}</div>
+                            <div style="font-size:11px;color:#9ca3af;">YouTube, Vimeo...</div>
+                        </button>
+                        <button type="button" @click="selectType('article')" style="flex:1;min-width:120px;padding:20px 16px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='article' && ($el.style.borderColor='#e2e8f0')">
+                            <div style="font-size:32px;margin-bottom:6px;">📄</div>
+                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Article') }}</div>
+                            <div style="font-size:11px;color:#9ca3af;">Blog, documentation</div>
+                        </button>
+                        <button type="button" @click="selectType('tutorial')" style="flex:1;min-width:120px;padding:20px 16px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='tutorial' && ($el.style.borderColor='#e2e8f0')">
+                            <div style="font-size:32px;margin-bottom:6px;">📖</div>
+                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Cours') }}</div>
+                            <div style="font-size:11px;color:#9ca3af;">Formation, tutoriel</div>
+                        </button>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4"><div class="form-group"><label style="font-size: 13px; font-weight: 600;">{{ __('Type') }}</label><select name="type" class="form-control" style="border-radius: 8px; height: 40px;"><option value="video">🎬 {{ __('Vidéo') }}</option><option value="article">📄 {{ __('Article') }}</option><option value="tutorial">📖 {{ __('Cours') }}</option></select></div></div>
-                        <div class="col-md-4"><div class="form-group"><label style="font-size: 13px; font-weight: 600;">{{ __('Langue') }}</label><select name="language" class="form-control" style="border-radius: 8px; height: 40px;"><option value="fr">🇫🇷 {{ __('Français') }}</option><option value="en">🇬🇧 {{ __('Anglais') }}</option></select></div></div>
-                        <div class="col-md-4"><div class="form-group"><label style="visibility: hidden; display: block;">.</label><button type="submit" class="btn btn-block" style="background: #10b981; color: #fff; border: none; border-radius: 8px; height: 40px; font-weight: 600;">{{ __('Ajouter') }}</button></div></div>
+                </div>
+
+                {{-- Étape 2 : URL --}}
+                <div x-show="step===2" x-transition role="region" aria-label="Étape 2 : URL de la ressource">
+                    <h4 style="margin-top:0;font-weight:700;color:#1e293b;margin-bottom:16px;">{{ __('Collez l\'URL de la ressource') }}</h4>
+                    <div style="margin-bottom:16px;">
+                        <input type="url" x-model="url" @paste.debounce.500ms="fetchMeta()" @input.debounce.800ms="fetchMeta()"
+                               class="form-control" placeholder="https://youtube.com/watch?v=... ou https://..." style="border-radius:8px;height:48px;font-size:15px;" required autofocus>
                     </div>
-                    <p style="color: #9ca3af; font-size: 12px; margin-top: 8px;">{{ __('La ressource sera visible après approbation.') }}</p>
-                </form>
+
+                    {{-- YouTube preview --}}
+                    <div x-show="loading" style="text-align:center;padding:20px;">
+                        <div class="spinner-border spinner-border-sm" style="color:#10b981;"></div>
+                        <span style="margin-left:8px;color:#6b7280;font-size:14px;">{{ __('Détection en cours...') }}</span>
+                    </div>
+
+                    <div style="display:flex;gap:8px;margin-top:16px;">
+                        <button type="button" @click="back()" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">← {{ __('Retour') }}</button>
+                        <button type="button" @click="fetchMeta()" :disabled="!url || url.length < 10" style="padding:10px 20px;border:none;border-radius:8px;background:#10b981;color:#fff;cursor:pointer;font-weight:600;flex:1;" :style="(!url || url.length < 10) && 'opacity:0.5;cursor:not-allowed'">{{ __('Continuer') }} →</button>
+                    </div>
+                </div>
+
+                {{-- Étape 3 : Vérifier et soumettre --}}
+                <div x-show="step===3" x-transition role="region" aria-label="Étape 3 : vérification">
+                    <h4 style="margin-top:0;font-weight:700;color:#1e293b;margin-bottom:16px;">{{ __('Vérifier et soumettre') }}</h4>
+
+                    {{-- YouTube preview card --}}
+                    <div x-show="isYoutube && thumbnail" style="display:flex;gap:14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:16px;align-items:center;">
+                        <img :src="thumbnail" alt="" style="width:120px;height:68px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+                        <div style="overflow:hidden;">
+                            <div style="font-weight:600;color:#1e293b;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" x-text="title"></div>
+                            <div style="font-size:12px;color:#6b7280;margin-top:2px;" x-show="author" x-text="author"></div>
+                            <div style="display:inline-block;background:#fef2f2;color:#ef4444;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-top:4px;">YouTube</div>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="type" :value="type">
+                        <input type="hidden" name="video_id" :value="videoId">
+                        <input type="hidden" name="thumbnail" :value="thumbnail">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="font-size:13px;font-weight:600;">{{ __('Titre') }}</label>
+                                    <input type="text" name="title" x-model="title" class="form-control" placeholder="{{ __('Ex: Guide complet pour débuter') }}" style="border-radius:8px;height:40px;" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="font-size:13px;font-weight:600;">{{ __('Langue') }}</label>
+                                    <select name="language" x-model="language" class="form-control" style="border-radius:8px;height:40px;">
+                                        <option value="fr">🇫🇷 {{ __('Français') }}</option>
+                                        <option value="en">🇬🇧 {{ __('Anglais') }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="url" :value="url">
+                        <div style="display:flex;gap:8px;margin-top:8px;">
+                            <button type="button" @click="back()" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">← {{ __('Modifier') }}</button>
+                            <button type="submit" style="padding:10px 20px;border:none;border-radius:8px;background:#10b981;color:#fff;cursor:pointer;font-weight:600;flex:1;">✅ {{ __('Ajouter') }}</button>
+                        </div>
+                        <p style="color:#9ca3af;font-size:12px;margin-top:8px;">{{ __('La ressource sera visible après approbation.') }}</p>
+                    </form>
+                </div>
             </div>
             @else
                 <div style="text-align: center; padding: 12px;">
