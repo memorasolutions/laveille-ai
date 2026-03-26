@@ -81,6 +81,22 @@
     .row-flex > [class*='col-'] { display: flex; flex-direction: column; margin-bottom: 24px; }
     .rt-empty { text-align: center; padding: 60px 20px; background: #F9FAFB; border-radius: var(--r-base); }
     [x-cloak] { display: none !important; }
+
+    /* Highlights section */
+    .rt-highlights { padding: 30px 0 10px; }
+    .rt-hl-section { margin-bottom: 8px; }
+    .rt-hl-title { font-family: var(--f-heading); font-size: 1.15rem; font-weight: 700; color: var(--c-dark); margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+    .rt-hl-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; -webkit-overflow-scrolling: touch; }
+    .rt-hl-scroll::-webkit-scrollbar { height: 6px; }
+    .rt-hl-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .rt-hl-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+    .rt-hl-card { display: block; flex: 0 0 180px; background: #fff; border-radius: var(--r-base); border: 1px solid #E5E7EB; overflow: hidden; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+    .rt-hl-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); text-decoration: none; }
+    .rt-hl-img { height: 100px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+    .rt-hl-img img { width: 100%; height: 100%; object-fit: cover; }
+    .rt-hl-img-text { color: #fff; font-weight: 700; font-size: 14px; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .rt-hl-body { padding: 10px 12px; }
+    .rt-hl-name { font-weight: 700; font-size: 13px; color: var(--c-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
 </style>
 @endpush
 
@@ -380,6 +396,11 @@
             <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
         </div>
     </div>
+    </div>
+
+    {{-- Highlights : recents + populaires --}}
+    <div class="container">
+        @include('directory::public.partials._highlights')
     </div>
 
     <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
