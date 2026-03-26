@@ -62,6 +62,15 @@
     .rt-description li { margin-bottom: 4px; }
     .rt-description strong { color: var(--c-dark); }
     .rt-description blockquote { border-left: 4px solid var(--c-primary); background: #EEF7FF; padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+    .rt-description h2 { scroll-margin-top: 80px; }
+
+    /* TOC scrollspy bar */
+    .rt-toc-bar { position: sticky; top: 0; background: #fff; padding: 10px 0; margin-bottom: 20px; z-index: 10; border-bottom: 1px solid #eee; }
+    .rt-toc-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 2px 0; }
+    .rt-toc-scroll::-webkit-scrollbar { display: none; }
+    .rt-toc-link { flex-shrink: 0; padding: 6px 14px; border-radius: 20px; background: #F3F4F6; color: var(--c-dark); font-size: 13px; font-weight: 600; text-decoration: none !important; white-space: nowrap; transition: all 0.2s; }
+    .rt-toc-link:hover { background: #E5E7EB; color: var(--c-dark); }
+    .rt-toc-link.active { background: var(--c-primary); color: #fff !important; }
 
     /* Reviews */
     .rt-stars { color: #F59E0B; font-size: 1.1rem; }
@@ -190,16 +199,23 @@
         {{-- TAB: Informations --}}
         <div class="rt-panel" x-show="tab==='info'" x-cloak style="padding: 24px;">
 
-            {{-- Description --}}
+            {{-- Description with TOC scrollspy --}}
+            @php
+                $descHtml = Str::markdown($tool->description ?? '', ['html_input' => 'strip', 'allow_unsafe_links' => false]);
+                $tocData = \Modules\Directory\Helpers\TocHelper::generate($descHtml);
+                $toc = $tocData['toc'];
+                $descHtmlWithIds = $tocData['html'];
+            @endphp
+
             <div style="background: #fff; padding: 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     👋 {{ __('À propos de') }} {{ $tool->name }}
                 </h3>
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), #60a5fa); margin-bottom: 20px; border-radius: 2px;"></div>
-                <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;">{!! Str::markdown($tool->description ?? '', [
-                        'html_input' => 'strip',
-                        'allow_unsafe_links' => false,
-                    ]) !!}</div>
+
+                @include('directory::public.partials._toc_bar', ['toc' => $toc])
+
+                <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;">{!! $descHtmlWithIds !!}</div>
             </div>
 
             {{-- How to use (masque si contenu trop court/generique) --}}
