@@ -50,6 +50,11 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="affiliate_url" class="form-label">Lien d'affiliation <small class="text-muted">(optionnel — remplace le lien "Visiter le site")</small></label>
+                    <input type="url" class="form-control" id="affiliate_url" name="affiliate_url" value="{{ old('affiliate_url', $tool->affiliate_url) }}" placeholder="https://partnerstack.com/...">
+                </div>
+
+                <div class="mb-3">
                     <label for="pricing" class="form-label">Modèle économique <span class="text-danger">*</span></label>
                     <select class="form-select @error('pricing') is-invalid @enderror" id="pricing" name="pricing" required>
                         <option value="">-- Sélectionner --</option>

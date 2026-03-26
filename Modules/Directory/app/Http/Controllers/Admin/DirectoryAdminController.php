@@ -86,6 +86,7 @@ class DirectoryAdminController extends Controller
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:255',
             'url' => 'nullable|url',
+            'affiliate_url' => 'nullable|url',
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
             'status' => 'nullable|in:published,pending,draft',
             'categories' => 'nullable|array',
@@ -101,6 +102,7 @@ class DirectoryAdminController extends Controller
         $tool->setTranslation('description', $locale, $validated['description'] ?? '');
         $tool->setTranslation('short_description', $locale, $validated['short_description'] ?? '');
         $tool->url = $validated['url'];
+        $tool->affiliate_url = $validated['affiliate_url'] ?? null;
         $tool->pricing = $validated['pricing'];
         $tool->screenshot = $validated['screenshot'] ?? $tool->screenshot;
         $tool->status = $validated['status'] ?? $tool->status;

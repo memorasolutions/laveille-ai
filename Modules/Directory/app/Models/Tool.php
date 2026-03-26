@@ -37,11 +37,21 @@ class Tool extends Model
     public array $translatable = ['name', 'slug', 'description', 'short_description', 'how_to_use', 'core_features', 'use_cases', 'pros', 'cons'];
 
     protected $fillable = [
-        'name', 'slug', 'description', 'short_description', 'url', 'logo',
+        'name', 'slug', 'description', 'short_description', 'url', 'affiliate_url', 'logo',
         'pricing', 'status', 'clicks_count', 'is_featured', 'sort_order',
         'how_to_use', 'core_features', 'use_cases', 'faq', 'pros', 'cons',
         'screenshot', 'website_type', 'launch_year', 'target_audience',
     ];
+
+    public function getVisitUrl(): string
+    {
+        return $this->affiliate_url ?: $this->url ?? '#';
+    }
+
+    public function isAffiliate(): bool
+    {
+        return ! empty($this->affiliate_url);
+    }
 
     protected $casts = [
         'is_featured' => 'boolean',

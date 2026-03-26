@@ -81,6 +81,7 @@
             <div class="row">
                 <div class="col col-xs-12">
                     <p class="copyright"> Copyright &copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('Tous droits réservés.') }}</p>
+                    <p style="font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 6px;">{{ __('Certains liens sont des liens d\'affiliation. Nous pouvons recevoir une commission sans frais pour vous.') }}</p>
                 </div>
             </div>
         </div>

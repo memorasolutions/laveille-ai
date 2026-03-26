@@ -112,7 +112,7 @@
                 <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;">{{ $tool->short_description }}</p>
             </div>
             @if($tool->url)
-                <a href="{{ $tool->url }}" target="_blank" rel="noopener noreferrer nofollow" class="rt-visit">{{ __('Visiter le site') }} →</a>
+                <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>
             @endif
         </div>
         <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center;">
@@ -347,7 +347,7 @@
             @if($tool->url)
             <div style="margin-top: 40px; background: linear-gradient(180deg, #F9FAFB, #F3F4F6); border: 1px solid #E5E7EB; border-radius: 16px; padding: 32px 20px; text-align: center;">
                 <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 20px; font-weight: 800; color: #111827;">{{ __('Envie d\'essayer') }} {{ $tool->name }} ?</h3>
-                <a href="{{ $tool->url }}" target="_blank" rel="noopener noreferrer nofollow" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
+                <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
                 <div style="margin-top: 14px; font-size: 13px; color: #059669; font-weight: 600;">✓ {{ __('Vérifié par La veille') }}</div>
             </div>
             @endif
