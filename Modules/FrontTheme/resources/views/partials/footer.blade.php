@@ -69,9 +69,7 @@
                             @endguest
                         </ul>
                         @auth
-                            <a href="{{ url('/admin') }}" style="display:block;margin-top:6px;font-size:11px;color:rgba(255,255,255,0.35);">{{ __('Administration') }}</a>
-                        @else
-                            <a href="{{ route('login') }}" style="display:block;margin-top:6px;font-size:11px;color:rgba(255,255,255,0.35);">{{ __('Administration') }}</a>
+                            <a href="{{ url('/admin') }}" target="_blank" rel="noopener" style="display:inline-block;margin-top:14px;font-size:10px;color:rgba(255,255,255,0.15);text-decoration:none;" title="Administration">&#9881;</a>
                         @endauth
                     </div>
                 </div>
