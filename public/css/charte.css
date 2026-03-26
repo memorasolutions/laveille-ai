@@ -504,6 +504,9 @@ select:focus {
     justify-content: center;
 }
 
+/* Titres sections accueil - pas de capitalize americain (decision utilisateur) */
+.wpo-section-title h2 { text-transform: none !important; }
+
 /* Panneau lateral (drawer) - z-index au-dessus du cookie consent */
 .wpo-site-header .header-right .header-right-menu-wrapper .header-right-menu-wrap {
     z-index: 10001 !important;
