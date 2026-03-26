@@ -28,7 +28,7 @@
         "@mdi/font": "^7.4.47",
         "@popperjs/core": "^2.11.8",
         "@simplewebauthn/browser": "^13.3.0",
-        "@tabler/icons-webfont": "^2.47.0",
+        "@tabler/icons-webfont": "^3.40.0",
         "@tiptap/core": "^3.19.0",
         "@tiptap/extension-character-count": "^3.20.0",
         "@tiptap/extension-code-block-lowlight": "^3.19.0",
