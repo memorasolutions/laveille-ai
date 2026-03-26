@@ -27,6 +27,8 @@ class DirectoryServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        \Modules\Directory\Models\Tool::observe(\Modules\Directory\Observers\ToolObserver::class);
     }
 
     /**

@@ -6,11 +6,8 @@ namespace Modules\Directory\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Process\Exceptions\ProcessTimedOutException;
-use Illuminate\Support\Facades\Process;
 use Modules\Directory\Models\Tool;
-use Throwable;
+use Modules\Directory\Services\ScreenshotService;
 
 class CaptureScreenshotsCommand extends Command
 {
@@ -21,24 +18,14 @@ class CaptureScreenshotsCommand extends Command
 
     protected $description = 'Capture les screenshots des outils via Puppeteer + idcac (cookie dismiss)';
 
-    private const MAX_ATTEMPTS = 3;
-
     private const RATE_LIMIT_SECONDS = 5;
 
-    public function handle(): int
+    public function handle(ScreenshotService $service): int
     {
-        $nodePath = env('BROWSERSHOT_NODE_PATH', '/usr/local/bin/node');
-        $scriptPath = base_path('scripts/capture-screenshot.cjs');
-
-        if (! file_exists($scriptPath)) {
-            $this->error("Script Node.js introuvable : {$scriptPath}");
+        if (! ScreenshotService::isAvailable()) {
+            $this->error('Node.js ou script capture-screenshot.cjs introuvable.');
 
             return self::FAILURE;
-        }
-
-        $storagePath = public_path('screenshots');
-        if (! File::isDirectory($storagePath)) {
-            File::makeDirectory($storagePath, 0755, true);
         }
 
         $query = Tool::published();
@@ -71,9 +58,7 @@ class CaptureScreenshotsCommand extends Command
                 continue;
             }
 
-            $filename = "{$slug}.jpg";
-            $relativePath = "screenshots/{$filename}";
-            $absolutePath = public_path($relativePath);
+            $absolutePath = public_path("screenshots/{$slug}.jpg");
             $fileExists = File::exists($absolutePath);
 
             if ($this->option('force')) {
@@ -94,41 +79,11 @@ class CaptureScreenshotsCommand extends Command
                 }
             }
 
-            $success = false;
-            $lastError = '';
-
-            for ($attempt = 1; $attempt <= self::MAX_ATTEMPTS; $attempt++) {
-                try {
-                    $result = Process::timeout(90)->run([
-                        $nodePath, $scriptPath, $tool->url, $absolutePath,
-                    ]);
-
-                    $json = json_decode(trim($result->output()), true);
-
-                    if (is_array($json) && ($json['success'] ?? false) === true && File::exists($absolutePath)) {
-                        $success = true;
-
-                        break;
-                    }
-
-                    $lastError = $json['error'] ?? $result->errorOutput() ?: 'Erreur inconnue';
-                } catch (Throwable $e) {
-                    $lastError = $e->getMessage();
-                }
-
-                if ($attempt < self::MAX_ATTEMPTS) {
-                    sleep((int) pow(2, $attempt)); // 2s, 4s
-                }
-            }
-
-            if ($success) {
-                $tool->screenshot = $relativePath;
-                $tool->saveQuietly();
+            if ($service->captureWithRetry($tool)) {
                 $stats['captured']++;
             } else {
                 $this->newLine();
-                $this->warn("  {$slug} : echec apres " . self::MAX_ATTEMPTS . " tentatives - {$lastError}");
-                Log::warning("Screenshot echoue pour {$slug} ({$tool->url}): {$lastError}");
+                $this->warn("  {$slug} : echec apres 3 tentatives");
                 $stats['errors']++;
             }
 

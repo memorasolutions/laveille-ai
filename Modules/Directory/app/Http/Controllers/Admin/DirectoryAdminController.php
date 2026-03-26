@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
+use Modules\Directory\Services\ScreenshotService;
 
 class DirectoryAdminController extends Controller
 {
@@ -86,9 +87,10 @@ class DirectoryAdminController extends Controller
             'short_description' => 'nullable|string|max:255',
             'url' => 'nullable|url',
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
+            'status' => 'nullable|in:published,pending,draft',
             'categories' => 'nullable|array',
             'logo' => 'nullable|image|max:2048',
-            'screenshot' => 'nullable|url|max:500',
+            'screenshot' => 'nullable|string|max:500',
             'is_featured' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
         ]);
@@ -101,6 +103,7 @@ class DirectoryAdminController extends Controller
         $tool->url = $validated['url'];
         $tool->pricing = $validated['pricing'];
         $tool->screenshot = $validated['screenshot'] ?? $tool->screenshot;
+        $tool->status = $validated['status'] ?? $tool->status;
         $tool->is_featured = $request->boolean('is_featured');
         $tool->sort_order = $validated['sort_order'] ?? 0;
 
@@ -114,6 +117,20 @@ class DirectoryAdminController extends Controller
         $tool->categories()->sync($validated['categories'] ?? []);
 
         return redirect()->route('admin.directory.index')->with('success', __('Outil mis à jour.'));
+    }
+
+    public function captureScreenshot(Tool $tool): RedirectResponse
+    {
+        if (! ScreenshotService::isAvailable()) {
+            return back()->with('error', __('Service de capture indisponible (Node.js ou script manquant).'));
+        }
+
+        $service = new ScreenshotService();
+        if ($service->captureWithRetry($tool)) {
+            return back()->with('success', __('Screenshot capture avec succes.'));
+        }
+
+        return back()->with('error', __('Echec de la capture apres 3 tentatives.'));
     }
 
     public function destroy(Tool $tool): RedirectResponse

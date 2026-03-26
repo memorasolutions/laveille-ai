@@ -65,6 +65,18 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="status" class="form-label">Statut</label>
+                    <select class="form-select @error('status') is-invalid @enderror" id="status" name="status">
+                        <option value="published" @selected(old('status', $tool->status) == 'published')>Publie</option>
+                        <option value="pending" @selected(old('status', $tool->status) == 'pending')>En attente</option>
+                        <option value="draft" @selected(old('status', $tool->status) == 'draft')>Brouillon</option>
+                    </select>
+                    @error('status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
                     <label for="categories" class="form-label">Catégories</label>
                     <select class="form-select @error('categories') is-invalid @enderror" id="categories" name="categories[]" multiple>
                         @foreach($categories as $category)
@@ -89,23 +101,29 @@
                     @enderror
                 </div>
 
-                <div class="mb-3" x-data="{ screenshotUrl: '{{ old('screenshot', $tool->screenshot ?? '') }}', capturing: false }">
-                    <label for="screenshot" class="form-label">Screenshot (URL)</label>
-                    <div class="input-group">
-                        <input type="url" class="form-control @error('screenshot') is-invalid @enderror" id="screenshot" name="screenshot" x-model="screenshotUrl" value="{{ old('screenshot', $tool->screenshot) }}" placeholder="https://...">
-                        <button type="button" class="btn btn-outline-secondary" @click="
-                            const urlField = document.getElementById('url');
-                            if (!urlField || !urlField.value) { alert('Entrez d abord l URL du site.'); return; }
-                            capturing = true;
-                            fetch('/api/scrape-meta', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }, body: JSON.stringify({ url: urlField.value }) })
-                            .then(r => r.json()).then(d => { screenshotUrl = d.og_image || ''; }).catch(() => {}).finally(() => capturing = false);
-                        " :disabled="capturing">
-                            <span x-show="!capturing">📸 Capturer</span>
-                            <span x-show="capturing">⏳</span>
-                        </button>
-                    </div>
-                    <template x-if="screenshotUrl"><img :src="screenshotUrl" alt="Preview" style="max-height: 120px; margin-top: 8px; border-radius: 6px; border: 1px solid #dee2e6;"></template>
+                <div class="mb-3">
+                    <label for="screenshot" class="form-label">Screenshot</label>
+                    <input type="text" class="form-control @error('screenshot') is-invalid @enderror" id="screenshot" name="screenshot" value="{{ old('screenshot', $tool->screenshot) }}" placeholder="screenshots/slug.jpg ou https://...">
+                    @if($tool->screenshot)
+                        <div class="mt-2">
+                            @if(str_starts_with($tool->screenshot, 'http'))
+                                <img src="{{ $tool->screenshot }}" alt="Screenshot" style="max-height: 120px; border-radius: 6px; border: 1px solid #dee2e6;">
+                            @else
+                                <img src="{{ asset($tool->screenshot) }}" alt="Screenshot" style="max-height: 120px; border-radius: 6px; border: 1px solid #dee2e6;">
+                            @endif
+                        </div>
+                    @endif
                     @error('screenshot')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="mb-3">
+                    <form action="{{ route('admin.directory.capture-screenshot', $tool) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-info btn-sm" onclick="return confirm('Capturer un vrai screenshot Puppeteer? Cela peut prendre 30 secondes.')">
+                            <i data-lucide="camera"></i> Capturer screenshot (Puppeteer)
+                        </button>
+                    </form>
+                    <small class="text-muted ms-2">Capture le site avec Chromium headless (1200x630, cookie dismiss automatique)</small>
                 </div>
 
                 <div class="mb-3 form-check">
