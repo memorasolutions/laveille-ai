@@ -12,6 +12,7 @@ use Modules\Directory\Http\Controllers\RoadmapController;
 Route::middleware('web')->group(function () {
     Route::get('/annuaire', [PublicDirectoryController::class, 'index'])->name('directory.index');
     Route::get('/annuaire/classement', [LeaderboardController::class, 'index'])->name('directory.leaderboard');
+    Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare');
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap');
     Route::get('/membre/{id}', [ProfileController::class, 'show'])->name('directory.profile');
     Route::get('/annuaire/{slug}', [PublicDirectoryController::class, 'show'])->name('directory.show')->middleware('doNotCacheResponse');

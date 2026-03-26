@@ -45,6 +45,16 @@ class PublicDirectoryController extends Controller
         return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'recentTools', 'popularTools'));
     }
 
+    public function compare(string $categorySlug): View
+    {
+        $category = Category::where('slug->fr_CA', $categorySlug)->firstOrFail();
+        $tools = $category->tools()->published()->with('categories')->orderByDesc('clicks_count')->get();
+        $allCategories = Category::orderBy('sort_order')->has('tools')->get();
+        $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source', 'enterprise' => 'Enterprise'];
+
+        return view('directory::public.compare', compact('category', 'tools', 'allCategories', 'pricingLabels'));
+    }
+
     public function show(string $slug): View
     {
         $tool = Tool::published()
