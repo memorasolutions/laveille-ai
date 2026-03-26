@@ -582,28 +582,22 @@
                 {{-- Étape 1 : Type --}}
                 <div x-show="step===1" x-transition role="region" aria-label="Étape 1 : type de ressource">
                     <h4 style="margin-top:0;font-weight:700;color:#1e293b;margin-bottom:16px;">{{ __('Quel type de ressource ?') }}</h4>
-                    <div class="row">
-                        <div class="col-xs-4">
-                            <button type="button" @click="selectType('video')" style="width:100%;padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;" :style="type==='video' && 'border-color:#10b981;background:#f0fdf4'" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='video' && ($el.style.borderColor='#e2e8f0')">
-                                <div style="font-size:32px;margin-bottom:6px;">🎬</div>
-                                <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Vidéo') }}</div>
-                                <div style="font-size:11px;color:#9ca3af;">YouTube, Vimeo...</div>
-                            </button>
-                        </div>
-                        <div class="col-xs-4">
-                            <button type="button" @click="selectType('article')" style="width:100%;padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='article' && ($el.style.borderColor='#e2e8f0')">
-                                <div style="font-size:32px;margin-bottom:6px;">📄</div>
-                                <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Article') }}</div>
-                                <div style="font-size:11px;color:#9ca3af;">Blog, documentation</div>
-                            </button>
-                        </div>
-                        <div class="col-xs-4">
-                            <button type="button" @click="selectType('tutorial')" style="width:100%;padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='tutorial' && ($el.style.borderColor='#e2e8f0')">
-                                <div style="font-size:32px;margin-bottom:6px;">📖</div>
-                                <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Cours') }}</div>
-                                <div style="font-size:11px;color:#9ca3af;">Formation, tutoriel</div>
-                            </button>
-                        </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+                        <button type="button" @click="selectType('video')" style="padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;" :style="type==='video' && 'border-color:#10b981;background:#f0fdf4'" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='video' && ($el.style.borderColor='#e2e8f0')">
+                            <div style="font-size:32px;margin-bottom:6px;">🎬</div>
+                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Vidéo') }}</div>
+                            <div style="font-size:11px;color:#9ca3af;">YouTube, Vimeo...</div>
+                        </button>
+                        <button type="button" @click="selectType('article')" style="padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='article' && ($el.style.borderColor='#e2e8f0')">
+                            <div style="font-size:32px;margin-bottom:6px;">📄</div>
+                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Article') }}</div>
+                            <div style="font-size:11px;color:#9ca3af;">Blog, documentation</div>
+                        </button>
+                        <button type="button" @click="selectType('tutorial')" style="padding:24px 12px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;text-align:center;transition:all .2s;" @mouseover="$el.style.borderColor='#10b981'" @mouseout="type!=='tutorial' && ($el.style.borderColor='#e2e8f0')">
+                            <div style="font-size:32px;margin-bottom:6px;">📖</div>
+                            <div style="font-weight:600;font-size:14px;color:#1e293b;">{{ __('Cours') }}</div>
+                            <div style="font-size:11px;color:#9ca3af;">Formation, tutoriel</div>
+                        </button>
                     </div>
                 </div>
 
