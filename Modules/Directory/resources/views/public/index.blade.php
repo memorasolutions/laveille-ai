@@ -99,6 +99,24 @@
     .rt-hl-arrow:hover { background: var(--c-primary); color: #fff; }
     .rt-hl-arrow.left { left: -4px; }
     .rt-hl-arrow.right { right: -4px; }
+
+    /* Filter bar + pricing dropdown */
+    .rt-filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .rt-filter-count { color: #9CA3AF; font-size: 0.85rem; margin-left: auto; }
+    .rt-pricing-dropdown { position: absolute; top: 100%; left: 0; z-index: 50; background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); box-shadow: 0 8px 25px rgba(0,0,0,0.1); padding: 6px; min-width: 180px; margin-top: 4px; }
+    .rt-pricing-dropdown button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; cursor: pointer; font-size: 14px; border-radius: 4px; color: var(--c-dark); }
+    .rt-pricing-dropdown button:hover { background: #F3F4F6; }
+    .rt-pricing-dropdown button.active { background: var(--c-primary); color: #fff; }
+
+    /* Category slider with emojis */
+    .rt-cat-slider { position: relative; display: flex; align-items: center; margin-bottom: 20px; }
+    .rt-cat-track { display: flex; gap: 8px; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; padding: 4px 0; flex: 1; }
+    .rt-cat-track::-webkit-scrollbar { display: none; }
+    .rt-cat-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px; border-radius: 20px; background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 13px; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .rt-cat-chip:hover { background: #E5E7EB; }
+    .rt-cat-chip.active { background: var(--c-primary); color: #fff; }
+    .rt-cat-arrow { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--c-dark); font-size: 12px; margin: 0 4px; }
+    .rt-cat-arrow:hover { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
 </style>
 @endpush
 
@@ -407,24 +425,43 @@
 
     <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
 
-        {{-- Pricing filters --}}
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px;">
-            <button type="button" class="rt-pill" :class="{ active: !activePricing }" @click="activePricing = ''">{{ __('Tous') }}</button>
-            @foreach($pricingOptions as $key => $label)
-                <button type="button" class="rt-pill" :class="{ active: activePricing === '{{ $key }}' }" @click="togglePricing('{{ $key }}')">
-                    {{ $pricingEmojis[$key] ?? '' }} {{ $label }}
+        {{-- Filters bar : Tous + dropdown pricing + compteur --}}
+        <div class="rt-filter-bar">
+            <button type="button" class="rt-pill" :class="{ active: !activePricing && !activeCategory }" @click="resetAll()">{{ __('Tous') }}</button>
+
+            <div x-data="{ open: false }" style="position: relative; display: inline-block;">
+                <button type="button" class="rt-pill" :class="{ active: activePricing !== '' }" @click="open = !open">
+                    <span x-show="!activePricing">💰 Tarification <i class="fa fa-caret-down"></i></span>
+                    <span x-show="activePricing" x-cloak x-text="({free:'🆓 Gratuit',freemium:'💎 Freemium',paid:'💰 Payant',open_source:'🔓 Open source',enterprise:'🏢 Enterprise'})[activePricing]"></span>
                 </button>
-            @endforeach
+                <div x-show="open" @click.outside="open = false" x-cloak class="rt-pricing-dropdown">
+                    @foreach($pricingOptions as $key => $label)
+                        <button type="button" @click="togglePricing('{{ $key }}'); open = false"
+                                :class="{ 'active': activePricing === '{{ $key }}' }">
+                            {{ $pricingEmojis[$key] ?? '' }} {{ $label }}
+                        </button>
+                    @endforeach
+                    <button type="button" @click="activePricing = ''; open = false" x-show="activePricing">
+                        <i class="fa fa-times"></i> {{ __('Effacer') }}
+                    </button>
+                </div>
+            </div>
+
+            <span class="rt-filter-count"><strong x-text="filteredTools.length" style="color: var(--c-primary);"></strong> {{ __('outils') }}</span>
         </div>
 
-        {{-- Category filters --}}
+        {{-- Category slider with emojis --}}
         @if($catCount > 1)
-        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px;">
-            @foreach($categories as $cat)
-                <button type="button" class="rt-pill" style="font-size: 13px; padding: 5px 12px;"
-                        :class="{ active: activeCategory === '{{ $cat->slug }}' }"
-                        @click="toggleCategory('{{ $cat->slug }}')">{{ $cat->name }}</button>
-            @endforeach
+        <div class="rt-cat-slider">
+            <button type="button" class="rt-cat-arrow left" @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="fa fa-chevron-left"></i></button>
+            <div class="rt-cat-track" x-ref="catTrack">
+                @foreach($categories as $cat)
+                    <button type="button" class="rt-cat-chip"
+                            :class="{ active: activeCategory === '{{ $cat->slug }}' }"
+                            @click="toggleCategory('{{ $cat->slug }}')">{{ $cat->icon ?? '' }} {{ $cat->name }}</button>
+                @endforeach
+            </div>
+            <button type="button" class="rt-cat-arrow right" @click="$refs.catTrack.scrollBy({ left: 300, behavior: 'smooth' })"><i class="fa fa-chevron-right"></i></button>
         </div>
         @endif
 
