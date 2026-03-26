@@ -133,6 +133,21 @@ class DirectoryAdminController extends Controller
         return back()->with('error', __('Echec de la capture apres 3 tentatives.'));
     }
 
+    public function setMainScreenshot(Tool $tool, int $screenshotId): RedirectResponse
+    {
+        $screenshot = $tool->screenshots()->findOrFail($screenshotId);
+
+        $tool->screenshot = $screenshot->image_path;
+        $tool->save();
+
+        if (! $screenshot->is_approved) {
+            $screenshot->is_approved = true;
+            $screenshot->save();
+        }
+
+        return back()->with('success', __('Screenshot principal mis a jour.'));
+    }
+
     public function destroy(Tool $tool): RedirectResponse
     {
         $tool->delete();

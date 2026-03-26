@@ -41,6 +41,7 @@ Route::middleware(['web', 'auth'])->prefix('admin/directory')->name('admin.direc
     Route::put('/{tool}', [DirectoryAdminController::class, 'update'])->name('update');
     Route::delete('/{tool}', [DirectoryAdminController::class, 'destroy'])->name('destroy');
     Route::post('/{tool}/capture-screenshot', [DirectoryAdminController::class, 'captureScreenshot'])->name('capture-screenshot');
+    Route::post('/{tool}/set-main-screenshot/{screenshotId}', [DirectoryAdminController::class, 'setMainScreenshot'])->name('set-main-screenshot');
 
     // Moderation
     Route::get('/moderation', [ModerationController::class, 'index'])->name('moderation');

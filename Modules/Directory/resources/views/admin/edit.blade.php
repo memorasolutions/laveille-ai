@@ -150,4 +150,45 @@
             </form>
         </div>
     </div>
+
+    {{-- Screenshots communaute --}}
+    @php $communityScreenshots = $tool->screenshots; @endphp
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Screenshots communaute ({{ $communityScreenshots->count() }})</h5>
+        </div>
+        <div class="card-body">
+            @if($communityScreenshots->isEmpty())
+                <p class="text-muted">Aucun screenshot soumis par la communaute.</p>
+            @else
+                <div class="row">
+                    @foreach($communityScreenshots as $screenshot)
+                        @php $isMain = ($tool->screenshot === $screenshot->image_path); @endphp
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 {{ $isMain ? 'border-success' : '' }}" style="{{ $isMain ? 'border-width: 3px;' : '' }}">
+                                <img src="{{ asset($screenshot->image_path) }}" alt="{{ $screenshot->caption }}" style="height: 130px; object-fit: cover;">
+                                <div class="card-body p-2">
+                                    <small class="text-muted">{{ $screenshot->caption ?: 'Sans titre' }}</small><br>
+                                    <span class="badge {{ $screenshot->is_approved ? 'bg-success' : 'bg-warning' }}">
+                                        {{ $screenshot->is_approved ? 'Approuve' : 'En attente' }}
+                                    </span>
+                                    @if($isMain)
+                                        <span class="badge bg-primary">Principal</span>
+                                    @endif
+                                </div>
+                                <div class="card-footer p-2">
+                                    <form action="{{ route('admin.directory.set-main-screenshot', ['tool' => $tool->id, 'screenshotId' => $screenshot->id]) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm {{ $isMain ? 'btn-outline-secondary' : 'btn-primary' }}" {{ $isMain ? 'disabled' : '' }}>
+                                            {{ $isMain ? 'Screenshot actuel' : 'Definir comme principal' }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </div>
 @endsection
