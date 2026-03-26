@@ -504,7 +504,14 @@ select:focus {
     justify-content: center;
 }
 
-/* Contrastes footer panneau latéral (liens sur fond sombre) */
+/* Panneau lateral (drawer) - z-index au-dessus du cookie consent */
+.wpo-site-header .header-right .header-right-menu-wrapper .header-right-menu-wrap {
+    z-index: 10001 !important;
+}
+.cc-backdrop { z-index: 9998 !important; }
+.cc-modal { z-index: 9999 !important; }
+
+/* Contrastes footer panneau lateral (liens sur fond sombre) */
 .header-right-menu-wrap .widget a {
     color: rgba(255, 255, 255, 0.85) !important;
 }
