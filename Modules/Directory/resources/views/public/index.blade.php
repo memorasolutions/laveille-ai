@@ -452,9 +452,9 @@
 
         {{-- Category slider with emojis --}}
         @if($catCount > 1)
-        <div class="rt-cat-slider">
-            <button type="button" class="rt-cat-arrow left" @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="fa fa-chevron-left"></i></button>
-            <div class="rt-cat-track" x-ref="catTrack">
+        <div class="rt-cat-slider" x-data="{ scrollLeft: 0 }">
+            <button type="button" class="rt-cat-arrow left" x-show="scrollLeft > 0" x-cloak @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="fa fa-chevron-left"></i></button>
+            <div class="rt-cat-track" x-ref="catTrack" @scroll="scrollLeft = $refs.catTrack.scrollLeft">
                 @foreach($categories as $cat)
                     <button type="button" class="rt-cat-chip"
                             :class="{ active: activeCategory === '{{ $cat->slug }}' }"
@@ -471,7 +471,6 @@
             <button type="button" class="rt-sort-tab" :class="sortBy === 'rating' && 'rt-sort-active'" @click="setSort('rating')">⭐ {{ __('Populaires') }}</button>
             <button type="button" class="rt-sort-tab" :class="sortBy === 'newest' && 'rt-sort-active'" @click="setSort('newest')">🆕 {{ __('Récents') }}</button>
             <button type="button" class="rt-sort-tab" :class="activePricing === 'free' && 'rt-sort-active'" @click="setSort('free')">🆓 {{ __('Gratuits') }}</button>
-            <span style="margin-left: auto; color: #9CA3AF; font-size: 0.85rem; align-self: center;"><strong x-text="filteredTools.length" style="color: var(--c-primary);"></strong> {{ __('outils') }}</span>
         </div>
 
         {{-- Ad: directory top --}}
