@@ -70,13 +70,13 @@
                         </ul>
                         @auth
                             @can('view_admin_panel')
-                            <li style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);">
-                                <a href="{{ url('/admin') }}" style="display:flex;align-items:center;gap:6px;">
+                            <li style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.15);">
+                                <a href="{{ url('/admin') }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;">
                                     <span style="background:var(--c-accent);color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ADMIN</span>
                                     {{ __('Administration') }}
                                 </a>
                             </li>
-                            <li><a href="{{ route('admin.directory.moderation') }}">📋 {{ __('Modération') }}</a></li>
+                            <li style="margin-top:6px;"><a href="{{ route('admin.directory.moderation') }}" target="_blank" rel="noopener">📋 {{ __('Modération') }}</a></li>
                             @endcan
                         @endauth
                     </div>
