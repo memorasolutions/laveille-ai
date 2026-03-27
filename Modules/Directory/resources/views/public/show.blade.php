@@ -539,7 +539,10 @@
                     @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                         @include('voting::components.vote-button', ['item' => $res, 'type' => 'resource'])
                     @endif
-                    <form action="{{ route('directory.community.report', ['type' => 'resource', 'id' => $res->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="spam"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;" title="{{ __('Signaler') }}">🚩</button></form>
+                    @include('directory::components.report-button', [
+                        'reportUrl' => route('directory.community.report', ['type' => 'resource', 'id' => $res->id]),
+                        'csrfToken' => csrf_token(),
+                    ])
                 </div>
             </div>
             @endforeach

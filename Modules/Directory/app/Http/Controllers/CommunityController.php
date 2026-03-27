@@ -212,7 +212,7 @@ class CommunityController extends Controller
         return response()->json(['upvotes' => $fresh->upvotes]);
     }
 
-    public function report(Request $request, string $type, int $id): RedirectResponse
+    public function report(Request $request, string $type, int $id): RedirectResponse|JsonResponse
     {
         $modelClass = match ($type) {
             'review' => ToolReview::class,
@@ -224,7 +224,8 @@ class CommunityController extends Controller
         $modelClass::findOrFail($id);
 
         $validated = $request->validate([
-            'reason' => ['required', 'in:spam,inappropriate,off_topic,other'],
+            'reason' => ['required', 'in:spam,inappropriate,inaccurate,broken,off_topic,other'],
+            'details' => ['nullable', 'string', 'max:500'],
             'comment' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -233,8 +234,12 @@ class CommunityController extends Controller
             'reportable_type' => $modelClass,
             'reportable_id' => $id,
             'reason' => $validated['reason'],
-            'comment' => $validated['comment'] ?? null,
+            'comment' => $validated['details'] ?? $validated['comment'] ?? null,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', __('Merci, le signalement a été envoyé.'));
     }
