@@ -90,7 +90,15 @@
     $pricingLabels = ['free'=>__('Gratuit'),'freemium'=>__('Freemium'),'paid'=>__('Payant'),'open_source'=>__('Open source'),'enterprise'=>__('Entreprise')];
     $reviews = $tool->reviews()->approved()->latest()->get();
     $discussions = $tool->discussions()->approved()->topLevel()->with('replies.user', 'user')->latest()->get();
-    $resources = $tool->resources()->approved()->latest()->get();
+    $resources = $tool->resources()->where(function($q) {
+        $q->where('is_approved', true);
+        if (auth()->check()) {
+            $q->orWhere('user_id', auth()->id());
+        }
+        if (auth()->check() && auth()->user()->can('view_admin_panel')) {
+            $q->orWhere('is_approved', false);
+        }
+    })->latest()->get();
     $screenshots = $tool->screenshots()->approved()->orderByDesc('votes_count')->get();
 @endphp
 
