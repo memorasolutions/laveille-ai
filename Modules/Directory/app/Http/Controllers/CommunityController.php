@@ -109,6 +109,9 @@ class CommunityController extends Controller
             'language' => ['required', 'in:fr,en'],
             'video_id' => ['nullable', 'string', 'max:20'],
             'thumbnail' => ['nullable', 'url', 'max:500'],
+            'duration' => ['nullable', 'integer'],
+            'channel_name' => ['nullable', 'string', 'max:255'],
+            'channel_url' => ['nullable', 'url', 'max:500'],
         ]);
 
         $user = Auth::user();
@@ -123,6 +126,9 @@ class CommunityController extends Controller
             'language' => $validated['language'],
             'video_id' => $validated['video_id'] ?? null,
             'thumbnail' => $validated['thumbnail'] ?? null,
+            'duration_seconds' => $validated['duration'] ?? null,
+            'channel_name' => $validated['channel_name'] ?? null,
+            'channel_url' => $validated['channel_url'] ?? null,
             'is_approved' => $autoApprove,
         ];
 
@@ -175,12 +181,31 @@ class CommunityController extends Controller
         // Fetch oEmbed metadata (gratuit, pas d'API key)
         $oembed = @json_decode(@file_get_contents("https://www.youtube.com/oembed?url=" . urlencode($url) . "&format=json"), true);
 
+        // Extraire durée + channel depuis la page YouTube (fallback sans API)
+        $duration = null;
+        $channelUrl = null;
+        try {
+            $html = @file_get_contents("https://www.youtube.com/watch?v={$videoId}");
+            if ($html) {
+                if (preg_match('/"lengthSeconds":"(\d+)"/', $html, $dm)) {
+                    $duration = (int) $dm[1];
+                }
+                if (preg_match('/"channelId":"([\w-]+)"/', $html, $cm)) {
+                    $channelUrl = "https://www.youtube.com/channel/{$cm[1]}";
+                }
+            }
+        } catch (\Throwable $e) {
+            // Pas bloquant
+        }
+
         return response()->json([
             'youtube' => true,
             'video_id' => $videoId,
             'title' => $oembed['title'] ?? null,
             'thumbnail' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
             'author' => $oembed['author_name'] ?? null,
+            'duration' => $duration,
+            'channel_url' => $channelUrl,
         ]);
     }
 

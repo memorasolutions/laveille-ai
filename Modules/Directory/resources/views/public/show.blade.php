@@ -517,16 +517,82 @@
             @endif
 
             @foreach($resources as $res)
-            <div data-mod-item style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <div style="display: flex; align-items: center; gap: 14px; overflow: hidden;">
-                    <img src="https://www.google.com/s2/favicons?domain={{ parse_url($res->url, PHP_URL_HOST) }}&sz=32" alt="" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6; padding: 4px;">
-                    <div>
-                        <a href="{{ $res->url }}" target="_blank" rel="nofollow noopener" style="font-weight: 700; color: #1f2937; font-size: 15px; text-decoration: none;">{{ $res->title }}</a>
-                        <div style="display: flex; gap: 6px; margin-top: 4px; align-items: center;">
-                            <span style="background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase;">{{ $res->type }}</span>
-                            <span style="background: {{ $res->language === 'fr' ? '#e0e7ff' : '#fef3c7' }}; color: {{ $res->language === 'fr' ? '#3730a3' : '#92400e' }}; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">{{ strtoupper($res->language) }}</span>
-                            <span style="color: #9ca3af; font-size: 12px;">{{ __('par') }} {{ $res->user->name ?? __('Anonyme') }}</span>
+            @php
+                $isYt = !empty($res->video_id);
+                $thumbUrl = $isYt ? "https://img.youtube.com/vi/{$res->video_id}/hqdefault.jpg" : ($res->thumbnail ?? null);
+                $durationFormatted = $res->duration_seconds ? gmdate($res->duration_seconds >= 3600 ? 'G:i:s' : 'i:s', $res->duration_seconds) : null;
+            @endphp
+            <div data-mod-item x-data="{ expanded: false }" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
+
+                {{-- Carte compacte --}}
+                <div @click="expanded = !expanded" style="display:flex;gap:14px;padding:14px;cursor:pointer;align-items:center;">
+                    {{-- Miniature --}}
+                    @if($thumbUrl)
+                    <div style="position:relative;flex-shrink:0;width:140px;height:80px;border-radius:10px;overflow:hidden;background:#f1f5f9;">
+                        <img src="{{ $thumbUrl }}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+                        @if($isYt)
+                            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);">
+                                <div style="width:32px;height:32px;background:rgba(255,0,0,0.9);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                                    <div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div>
+                                </div>
+                            </div>
+                            @if($durationFormatted)
+                                <span style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.8);color:#fff;font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;">{{ $durationFormatted }}</span>
+                            @endif
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- Infos --}}
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:var(--c-dark);font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ $res->title }}</div>
+                        <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+                            <span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;">{{ $res->type }}</span>
+                            <span style="background:{{ $res->language === 'fr' ? '#e0e7ff' : '#fef3c7' }};color:{{ $res->language === 'fr' ? '#3730a3' : '#92400e' }};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ strtoupper($res->language) }}</span>
+                            @if($res->channel_name)
+                                <span style="color:#6b7280;font-size:12px;">📺 {{ $res->channel_name }}</span>
+                            @endif
                         </div>
+                        @if($res->video_summary)
+                            <p style="color:var(--c-text-muted);font-size:13px;margin:6px 0 0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit(strip_tags($res->video_summary), 120) }}</p>
+                        @endif
+                    </div>
+
+                    {{-- Actions --}}
+                    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;" @click.stop>
+                        @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
+                            @include('voting::components.vote-button', ['item' => $res, 'type' => 'resource'])
+                        @endif
+                        @include('directory::components.report-button', [
+                            'reportUrl' => route('directory.community.report', ['type' => 'resource', 'id' => $res->id]),
+                            'csrfToken' => csrf_token(),
+                        ])
+                    </div>
+                </div>
+
+                {{-- Carte expandée (au clic) --}}
+                <div x-show="expanded" x-transition x-cloak style="border-top:1px solid #f1f5f9;padding:16px;background:#fafbfc;">
+                    {{-- Embed YouTube --}}
+                    @if($isYt)
+                    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:16px;">
+                        <iframe src="https://www.youtube-nocookie.com/embed/{{ $res->video_id }}?rel=0&modestbranding=1" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy" title="{{ $res->title }}"></iframe>
+                    </div>
+                    @endif
+
+                    {{-- Métadonnées --}}
+                    <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px;font-size:13px;color:#6b7280;">
+                        @if($res->channel_name)
+                            <span>📺 @if($res->channel_url)<a href="{{ $res->channel_url }}" target="_blank" rel="noopener nofollow" style="color:var(--c-primary);text-decoration:none;font-weight:600;">{{ $res->channel_name }}</a>@else{{ $res->channel_name }}@endif</span>
+                        @endif
+                        @if($durationFormatted)
+                            <span>⏱️ {{ $durationFormatted }}</span>
+                        @endif
+                        <span>📅 {{ __('Soumis le') }} {{ $res->created_at->format('d/m/Y') }}</span>
+                        <span>👤 {{ __('par') }} {{ $res->user->name ?? __('Anonyme') }}</span>
+                    </div>
+
+                    <div style="display:flex;gap:8px;margin-bottom:12px;">
+                        <a href="{{ $res->url }}" target="_blank" rel="nofollow noopener" style="display:inline-flex;align-items:center;gap:4px;background:var(--c-primary);color:#fff;padding:6px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">🔗 {{ __('Voir sur YouTube') }}</a>
                         @if(!$res->is_approved && Route::has('admin.directory.moderation.resource.approve'))
                             @include('directory::components.admin-inline-actions', [
                                 'approveUrl' => route('admin.directory.moderation.resource.approve', $res->id),
@@ -534,15 +600,14 @@
                             ])
                         @endif
                     </div>
-                </div>
-                <div style="display:flex;gap:10px;align-items:center;flex-shrink:0;">
-                    @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
-                        @include('voting::components.vote-button', ['item' => $res, 'type' => 'resource'])
+
+                    {{-- Résumé IA --}}
+                    @if($res->video_summary)
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">
+                        <h5 style="font-weight:700;color:var(--c-dark);margin:0 0 8px;font-size:14px;">🤖 {{ __('Résumé généré par IA') }}</h5>
+                        <div class="rt-description" style="font-size:14px;color:var(--c-text-secondary);line-height:1.6;">{!! \Illuminate\Support\Str::markdown($res->video_summary) !!}</div>
+                    </div>
                     @endif
-                    @include('directory::components.report-button', [
-                        'reportUrl' => route('directory.community.report', ['type' => 'resource', 'id' => $res->id]),
-                        'csrfToken' => csrf_token(),
-                    ])
                 </div>
             </div>
             @endforeach
@@ -559,6 +624,9 @@
                     videoId: null,
                     thumbnail: null,
                     author: null,
+                    duration: null,
+                    channelName: null,
+                    channelUrl: null,
                     submitting: false,
                     loading: false,
                     isYoutube: false,
@@ -580,6 +648,9 @@
                                 this.title = data.title || '';
                                 this.thumbnail = data.thumbnail;
                                 this.author = data.author;
+                                this.duration = data.duration;
+                                this.channelName = data.author;
+                                this.channelUrl = data.channel_url;
                                 this.type = this.type || 'video';
                             }
                         } catch(e) {}
@@ -659,6 +730,9 @@
                         <input type="hidden" name="type" :value="type">
                         <input type="hidden" name="video_id" :value="videoId">
                         <input type="hidden" name="thumbnail" :value="thumbnail">
+                        <input type="hidden" name="duration" :value="duration">
+                        <input type="hidden" name="channel_name" :value="channelName">
+                        <input type="hidden" name="channel_url" :value="channelUrl">
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="form-group" style="margin-bottom:12px;">

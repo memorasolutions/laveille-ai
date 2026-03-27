@@ -18,7 +18,8 @@ class ToolResource extends Model
     protected $fillable = [
         'directory_tool_id', 'user_id', 'url', 'title',
         'type', 'language', 'thumbnail', 'video_id',
-        'video_summary', 'is_approved',
+        'video_summary', 'duration_seconds', 'channel_name',
+        'channel_url', 'is_approved',
     ];
 
     protected $casts = [
