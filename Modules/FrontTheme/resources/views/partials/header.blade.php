@@ -1,6 +1,30 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <!-- Skip navigation (WCAG 2.4.1) -->
 <a href="#main-content" class="sr-only sr-only-focusable" style="position: absolute; top: -40px; left: 0; background: var(--c-primary); color: #fff; padding: 8px 16px; z-index: 10000; transition: top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">{{ __('Aller au contenu principal') }}</a>
+<!-- Admin bar (visible admins seulement) -->
+@auth
+@can('view_admin_panel')
+<div id="admin-bar" style="background:#1A1D23;color:#fff;font-size:12px;padding:4px 0;position:relative;z-index:10001;">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:16px;">
+            <span style="background:var(--c-accent);padding:1px 8px;border-radius:3px;font-weight:700;font-size:10px;letter-spacing:0.5px;">ADMIN</span>
+            <a href="{{ url('/admin') }}" style="color:rgba(255,255,255,0.8);text-decoration:none;">{{ __('Tableau de bord') }}</a>
+            <a href="{{ route('admin.directory.moderation') }}" style="color:rgba(255,255,255,0.8);text-decoration:none;">
+                {{ __('Modération') }}
+                @php
+                    $pendingCount = 0;
+                    if (class_exists(\Modules\Directory\Models\ToolResource::class)) $pendingCount += \Modules\Directory\Models\ToolResource::where('is_approved', false)->count();
+                    if (class_exists(\Modules\Directory\Models\ToolReview::class)) $pendingCount += \Modules\Directory\Models\ToolReview::where('is_approved', false)->count();
+                @endphp
+                @if($pendingCount > 0)<span style="background:#ef4444;color:#fff;padding:0 5px;border-radius:8px;font-size:10px;margin-left:4px;">{{ $pendingCount }}</span>@endif
+            </a>
+            <a href="{{ route('admin.blog.articles.index') }}" style="color:rgba(255,255,255,0.8);text-decoration:none;">{{ __('Articles') }}</a>
+        </div>
+        <div style="color:rgba(255,255,255,0.4);">{{ auth()->user()->name }}</div>
+    </div>
+</div>
+@endcan
+@endauth
 <!-- Start header -->
 <header id="header" class="wpo-site-header">
     <div class="topbar">
@@ -73,6 +97,9 @@
                                     @endif
                                     @if(Route::has('acronyms.index'))
                                         <li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>
+                                    @endif
+                                    @if(Route::has('roadmap.boards.index'))
+                                        <li><a href="{{ route('roadmap.boards.index') }}">{{ __('Propositions') }}</a></li>
                                     @endif
                                 </ul>
                             </li>

@@ -59,8 +59,8 @@
                             @if(Route::has('directory.leaderboard'))
                                 <li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>
                             @endif
-                            @if(Route::has('directory.roadmap'))
-                                <li><a href="{{ route('directory.roadmap') }}">💡 {{ __('Idées et votes') }}</a></li>
+                            @if(Route::has('roadmap.boards.index'))
+                                <li><a href="{{ route('roadmap.boards.index') }}">💡 {{ __('Propositions') }}</a></li>
                             @endif
                             <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook"></i> Facebook</a></li>
                             <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger"></i> Messenger</a></li>
@@ -69,7 +69,15 @@
                             @endguest
                         </ul>
                         @auth
-                            <a href="{{ url('/admin') }}" target="_blank" rel="noopener" style="display:inline-block;margin-top:14px;font-size:10px;color:rgba(255,255,255,0.15);text-decoration:none;" title="Administration">&#9881;</a>
+                            @can('view_admin_panel')
+                            <li style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);">
+                                <a href="{{ url('/admin') }}" style="display:flex;align-items:center;gap:6px;">
+                                    <span style="background:var(--c-accent);color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ADMIN</span>
+                                    {{ __('Administration') }}
+                                </a>
+                            </li>
+                            <li><a href="{{ route('admin.directory.moderation') }}">📋 {{ __('Modération') }}</a></li>
+                            @endcan
                         @endauth
                     </div>
                 </div>
