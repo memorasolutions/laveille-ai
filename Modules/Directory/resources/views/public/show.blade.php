@@ -532,7 +532,7 @@
             @endforeach
 
             @auth
-            <style>.wz-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:28px 16px!important;border:1px solid #e2e8f0!important;border-radius:16px!important;background:#fff!important;cursor:pointer;text-align:center;transition:all .25s ease;min-height:140px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}.wz-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.08)!important}.wz-card.active{border-color:var(--c-primary)!important;box-shadow:0 0 0 3px rgba(11,114,133,0.12)!important}</style>
+            <style>.wz-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:28px 16px!important;border:1px solid #e2e8f0!important;border-radius:16px!important;background:#fff!important;cursor:pointer;text-align:center;transition:all .25s ease;min-height:140px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}.wz-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.08)!important}.wz-card.active{border-color:var(--c-primary)!important;box-shadow:0 0 0 3px rgba(11,114,133,0.12)!important}.wz-submit{background:var(--c-accent)!important;color:#fff!important;border:none!important;border-radius:8px!important;padding:12px 24px!important;font-weight:600!important;font-size:15px!important;cursor:pointer;flex:1;transition:opacity .2s}.wz-submit:hover{opacity:.9}.wz-submit:disabled{opacity:.6!important;cursor:wait!important}</style>
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;"
                  x-data="{
                     step: {{ session('resource_submitted') ? 4 : 1 }},
@@ -663,7 +663,7 @@
                         <input type="hidden" name="url" :value="url">
                         <div style="display:flex;gap:8px;margin-top:8px;">
                             <button type="button" @click="back()" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">← {{ __('Modifier') }}</button>
-                            <button type="submit" :disabled="submitting" style="padding:10px 20px;border:none;border-radius:8px;background:var(--c-accent);color:#fff;cursor:pointer;font-weight:600;flex:1;transition:opacity .2s;" :style="submitting && 'opacity:0.7;cursor:wait'">
+                            <button type="submit" :disabled="submitting" class="wz-submit">
                                 <span x-show="!submitting">{{ __('Soumettre pour approbation') }}</span>
                                 <span x-show="submitting" x-cloak>{{ __('Envoi en cours...') }}</span>
                             </button>
