@@ -535,7 +535,7 @@
             <style>.wz-card{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:28px 16px!important;border:1px solid #e2e8f0!important;border-radius:16px!important;background:#fff!important;cursor:pointer;text-align:center;transition:all .25s ease;min-height:140px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}.wz-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.08)!important}.wz-card.active{border-color:var(--c-primary)!important;box-shadow:0 0 0 3px rgba(11,114,133,0.12)!important}</style>
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;"
                  x-data="{
-                    step: 1,
+                    step: {{ session('resource_submitted') ? 4 : 1 }},
                     type: '',
                     url: '',
                     title: '',
@@ -543,6 +543,7 @@
                     videoId: null,
                     thumbnail: null,
                     author: null,
+                    submitting: false,
                     loading: false,
                     isYoutube: false,
                     selectType(t) { this.type = t; this.step = 2; },
@@ -574,10 +575,11 @@
 
                 {{-- Progress bar --}}
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
-                    <template x-for="i in 3" :key="i">
-                        <div style="flex:1;height:4px;border-radius:2px;transition:background .3s;" :style="i <= step ? 'background:#10b981' : 'background:#e2e8f0'"></div>
+                    <template x-for="i in (step === 4 ? 4 : 3)" :key="i">
+                        <div style="flex:1;height:4px;border-radius:2px;transition:background .3s;" :style="i <= step ? 'background:var(--c-primary)' : 'background:#e2e8f0'"></div>
                     </template>
-                    <span style="font-size:12px;color:#9ca3af;white-space:nowrap;" x-text="'Étape ' + step + '/3'"></span>
+                    <span x-show="step < 4" style="font-size:12px;color:#9ca3af;white-space:nowrap;" x-text="'Étape ' + step + '/3'"></span>
+                    <span x-show="step === 4" style="font-size:12px;color:#16a34a;white-space:nowrap;">✓ {{ __('Soumis') }}</span>
                 </div>
 
                 {{-- Étape 1 : Type --}}
@@ -636,7 +638,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST">
+                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit="submitting = true">
                         @csrf
                         <input type="hidden" name="type" :value="type">
                         <input type="hidden" name="video_id" :value="videoId">
@@ -661,10 +663,31 @@
                         <input type="hidden" name="url" :value="url">
                         <div style="display:flex;gap:8px;margin-top:8px;">
                             <button type="button" @click="back()" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">← {{ __('Modifier') }}</button>
-                            <button type="submit" style="padding:10px 20px;border:none;border-radius:8px;background:var(--c-primary);color:#fff;cursor:pointer;font-weight:600;flex:1;">✅ {{ __('Ajouter') }}</button>
+                            <button type="submit" :disabled="submitting" style="padding:10px 20px;border:none;border-radius:8px;background:var(--c-accent);color:#fff;cursor:pointer;font-weight:600;flex:1;transition:opacity .2s;" :style="submitting && 'opacity:0.7;cursor:wait'">
+                                <span x-show="!submitting">{{ __('Soumettre pour approbation') }}</span>
+                                <span x-show="submitting" x-cloak>{{ __('Envoi en cours...') }}</span>
+                            </button>
                         </div>
-                        <p style="color:#9ca3af;font-size:12px;margin-top:8px;">{{ __('La ressource sera visible après approbation.') }}</p>
                     </form>
+                </div>
+
+                {{-- Étape 4 : Confirmation post-soumission --}}
+                <div x-show="step===4" x-transition role="region" aria-label="Étape 4 : confirmation">
+                    <div style="text-align:center;padding:20px 0;">
+                        <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+                        <h4 style="font-weight:700;color:var(--c-dark);margin-bottom:8px;">{{ __('Ressource soumise avec succès !') }}</h4>
+                        <p style="color:var(--c-text-muted);margin-bottom:20px;">{{ __('Notre équipe va examiner votre soumission. Délai estimé : 24-48h.') }}</p>
+                        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:20px;text-align:left;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                <span style="color:#16a34a;">✓</span>
+                                <span style="font-weight:600;color:#15803d;">{{ __('En attente d\'approbation') }}</span>
+                            </div>
+                            <p style="color:#6b7280;font-size:13px;margin:0;">{{ __('Vous recevrez une notification quand votre ressource sera approuvée.') }}</p>
+                        </div>
+                        @if(Route::has('user.contributions'))
+                        <a href="{{ route('user.contributions') }}" style="display:inline-block;padding:10px 24px;background:var(--c-primary);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">{{ __('Voir mes contributions') }}</a>
+                        @endif
+                    </div>
                 </div>
             </div>
             @else

@@ -139,13 +139,21 @@ class CommunityController extends Controller
             }
         }
 
-        ToolResource::create($resourceData);
+        $resource = ToolResource::create($resourceData);
+
+        // Notifier les admins
+        if (class_exists(\App\Models\User::class) && class_exists(\Spatie\Permission\Models\Permission::class)) {
+            $admins = \App\Models\User::permission('view_admin_panel')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new \Modules\Directory\Notifications\ResourceSubmittedNotification($resource));
+            }
+        }
 
         if ($autoApprove) {
             $this->reputation->addPoints($user, ReputationService::RESOURCE_APPROVED, 'resource_auto');
         }
 
-        return back()->with('success', __('Merci ! La ressource sera visible après approbation.'));
+        return back()->with('success', __('Merci ! La ressource sera visible après approbation.'))->with('resource_submitted', true);
     }
 
     public function fetchYoutubeMeta(Request $request, string $slug): JsonResponse

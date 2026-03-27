@@ -179,8 +179,17 @@
                         @if(Route::has('admin.acronyms.index'))
                         <li class="nav-item"><a href="{{ route('admin.acronyms.index') }}" class="nav-link {{ request()->routeIs('admin.acronyms.*') ? 'active' : '' }}">{{ __('Acronymes éducation') }}</a></li>
                         @endif
-                        @if(Route::has('admin.moderation.reviews'))
-                        <li class="nav-item"><a href="{{ route('admin.moderation.reviews') }}" class="nav-link {{ request()->routeIs('admin.moderation.*') ? 'active' : '' }}">{{ __('Modération') }}</a></li>
+                        @if(Route::has('admin.directory.moderation'))
+                        @php
+                            $modCount = 0;
+                            if (class_exists(\Modules\Directory\Models\ToolResource::class)) {
+                                $modCount += \Modules\Directory\Models\ToolResource::where('is_approved', false)->count();
+                            }
+                            if (class_exists(\Modules\Directory\Models\ToolReview::class)) {
+                                $modCount += \Modules\Directory\Models\ToolReview::where('is_approved', false)->count();
+                            }
+                        @endphp
+                        <li class="nav-item"><a href="{{ route('admin.directory.moderation') }}" class="nav-link {{ request()->routeIs('admin.directory.moderation') ? 'active' : '' }}">{{ __('Modération') }} @if($modCount > 0)<span class="badge bg-danger rounded-pill ms-1">{{ $modCount }}</span>@endif</a></li>
                         @endif
                     </ul>
                 </div>
