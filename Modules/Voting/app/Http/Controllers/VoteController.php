@@ -40,6 +40,20 @@ class VoteController extends Controller
             $reputation->addPoints(auth()->user(), config('voting.reputation.vote_cast', 1), 'vote_cast');
         }
 
+        // Notification seuils de votes (2, 5, 10) au créateur
+        if ($voted && in_array($count, [2, 5, 10]) && isset($item->user_id) && $item->user_id) {
+            $author = \App\Models\User::find($item->user_id);
+            if ($author && $author->id !== auth()->id()) {
+                $title = $item->title ?? $item->name ?? __('votre contenu');
+                $url = match ($type) {
+                    'tool' => route('directory.show', $item->slug ?? $id),
+                    'acronym' => route('acronyms.show', $item->getTranslation('slug', app()->getLocale())),
+                    default => url('/'),
+                };
+                $author->notify(new \Modules\Voting\Notifications\VoteThresholdNotification($count, $title, $url));
+            }
+        }
+
         // Auto-approbation si seuil atteint
         if ($voted && $tier === 'approved' && isset($item->is_approved) && ! $item->is_approved) {
             $item->is_approved = true;
