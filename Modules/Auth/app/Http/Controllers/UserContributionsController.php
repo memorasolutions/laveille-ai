@@ -26,6 +26,10 @@ class UserContributionsController extends Controller
             ? \Modules\Roadmap\Models\Vote::where('user_id', $user->id)->with('idea')->latest()->get()
             : collect();
 
-        return view('auth::contributions.index', compact('user', 'suggestions', 'votes'));
+        $resources = class_exists(\Modules\Directory\Models\ToolResource::class)
+            ? \Modules\Directory\Models\ToolResource::where('user_id', $user->id)->with('tool')->latest()->get()
+            : collect();
+
+        return view('auth::contributions.index', compact('user', 'suggestions', 'votes', 'resources'));
     }
 }

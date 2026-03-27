@@ -17,20 +17,20 @@
 
 {{-- Cartes statistiques --}}
 <div class="row gy-4 mb-4">
-    <div class="col-sm-6">
+    <div class="col-sm-4">
         <div class="card shadow-none border h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
                     <i data-lucide="lightbulb" class="text-warning"></i>
                 </div>
                 <div>
-                    <p class="text-muted mb-1">{{ __('Suggestions soumises') }}</p>
+                    <p class="text-muted mb-1">{{ __('Suggestions') }}</p>
                     <h4 class="fw-semibold text-warning mb-0">{{ $suggestions->count() }}</h4>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-4">
         <div class="card shadow-none border h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
@@ -39,6 +39,19 @@
                 <div>
                     <p class="text-muted mb-1">{{ __('Votes roadmap') }}</p>
                     <h4 class="fw-semibold text-primary mb-0">{{ $votes->count() }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card shadow-none border h-100">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                    <i data-lucide="book-open" class="text-info"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-1">{{ __('Ressources') }}</p>
+                    <h4 class="fw-semibold text-info mb-0">{{ $resources->count() }}</h4>
                 </div>
             </div>
         </div>
@@ -59,6 +72,12 @@
                 <button class="nav-link" id="votes-tab" data-bs-toggle="tab" data-bs-target="#votes" type="button" role="tab" aria-controls="votes" aria-selected="false">
                     <i data-lucide="thumbs-up" style="width:16px;height:16px;" class="me-1"></i>
                     {{ __('Votes roadmap') }} ({{ $votes->count() }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab" aria-controls="resources" aria-selected="false">
+                    <i data-lucide="book-open" style="width:16px;height:16px;" class="me-1"></i>
+                    {{ __('Ressources') }} ({{ $resources->count() }})
                 </button>
             </li>
         </ul>
@@ -175,6 +194,58 @@
                                     <td class="text-muted">{{ $vote->created_at->format('d/m/Y') }}</td>
                                 </tr>
                                 @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Onglet ressources --}}
+            <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
+                @if($resources->isEmpty())
+                    <div class="py-5 text-center text-muted">
+                        <i data-lucide="book-open" class="mb-2 d-block"></i>
+                        <p class="mb-2">{{ __('Vous n\'avez pas encore soumis de ressources.') }}</p>
+                        @if(Route::has('directory.index'))
+                            <a href="{{ route('directory.index') }}" class="btn btn-primary btn-sm rounded-2">
+                                {{ __('Voir le répertoire') }}
+                            </a>
+                        @endif
+                    </div>
+                @else
+                    <div class="table-responsive scroll-sm">
+                        <table class="table bordered-table sm-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('Titre') }}</th>
+                                    <th>{{ __('Outil') }}</th>
+                                    <th>{{ __('Type') }}</th>
+                                    <th>{{ __('Statut') }}</th>
+                                    <th>{{ __('Date') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($resources as $resource)
+                                <tr>
+                                    <td>
+                                        <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" class="fw-medium text-decoration-none">
+                                            {{ Str::limit($resource->title, 50) }}
+                                        </a>
+                                    </td>
+                                    <td class="text-muted">{{ $resource->tool->name ?? '—' }}</td>
+                                    <td>
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info fw-medium">{{ $resource->type }}</span>
+                                    </td>
+                                    <td>
+                                        @if($resource->is_approved)
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success fw-medium">{{ __('Approuvée') }}</span>
+                                        @else
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning fw-medium">{{ __('En attente') }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-muted">{{ $resource->created_at->format('d/m/Y') }}</td>
+                                </tr>
                                 @endforeach
                             </tbody>
                         </table>
