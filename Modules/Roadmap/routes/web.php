@@ -51,14 +51,24 @@ Route::middleware(['auth', 'verified'])
         });
     });
 
-// Public routes (authenticated, basic frontend — easy to replace)
-Route::middleware(['auth', 'verified'])
+// Public routes — consultation publique, actions authentifiées
+$frontMiddleware = \Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()
+    ? ['web', \Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class]
+    : ['web'];
+
+Route::middleware($frontMiddleware)
     ->prefix('roadmap')
     ->name('roadmap.')
     ->group(function () {
         Route::get('/', [PublicBoardController::class, 'index'])->name('boards.index');
         Route::get('/{board}', [PublicBoardController::class, 'show'])->name('boards.show');
         Route::get('/{board}/kanban', [PublicBoardController::class, 'kanban'])->name('boards.kanban');
+    });
+
+Route::middleware(['web', 'auth'])
+    ->prefix('roadmap')
+    ->name('roadmap.')
+    ->group(function () {
         Route::post('/{board}/ideas', [PublicBoardController::class, 'storeIdea'])->name('ideas.store');
         Route::post('/ideas/{idea}/vote', [PublicBoardController::class, 'vote'])->name('ideas.vote');
         Route::post('/ideas/{idea}/comment', [PublicBoardController::class, 'comment'])->name('ideas.comment');
