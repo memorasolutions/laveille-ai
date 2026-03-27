@@ -90,15 +90,17 @@
     $pricingLabels = ['free'=>__('Gratuit'),'freemium'=>__('Freemium'),'paid'=>__('Payant'),'open_source'=>__('Open source'),'enterprise'=>__('Entreprise')];
     $reviews = $tool->reviews()->approved()->latest()->get();
     $discussions = $tool->discussions()->approved()->topLevel()->with('replies.user', 'user')->latest()->get();
-    $resources = $tool->resources()->where(function($q) {
-        $q->where('is_approved', true);
-        if (auth()->check()) {
-            $q->orWhere('user_id', auth()->id());
-        }
-        if (auth()->check() && auth()->user()->can('view_admin_panel')) {
-            $q->orWhere('is_approved', false);
-        }
-    })->latest()->get();
+    $resourcesQuery = $tool->resources()->latest();
+    if (auth()->check() && auth()->user()->can('view_admin_panel')) {
+        // Admin voit tout
+    } elseif (auth()->check()) {
+        // Membre voit les approuvées + les siennes
+        $resourcesQuery->where(fn($q) => $q->where('is_approved', true)->orWhere('user_id', auth()->id()));
+    } else {
+        // Visiteur voit seulement les approuvées
+        $resourcesQuery->where('is_approved', true);
+    }
+    $resources = $resourcesQuery->get();
     $screenshots = $tool->screenshots()->approved()->orderByDesc('votes_count')->get();
 @endphp
 
