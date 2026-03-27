@@ -110,7 +110,7 @@
             <div style="flex: 1; min-width: 200px;">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                     <h1 class="rt-name" style="margin:0;">{{ $tool->name }}</h1>
-                    @if(class_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
+                    @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                         @include('voting::components.vote-button', ['item' => $tool, 'type' => 'tool'])
                     @endif
                 </div>
@@ -536,7 +536,7 @@
                     </div>
                 </div>
                 <div style="display:flex;gap:10px;align-items:center;flex-shrink:0;">
-                    @if(class_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
+                    @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                         @include('voting::components.vote-button', ['item' => $res, 'type' => 'resource'])
                     @endif
                     <form action="{{ route('directory.community.report', ['type' => 'resource', 'id' => $res->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="spam"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;" title="{{ __('Signaler') }}">🚩</button></form>
