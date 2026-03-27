@@ -52,6 +52,7 @@ class PublicAcronymController extends Controller
                 'cat_id' => $a->acronym_category_id,
                 'cat_name' => $a->category ? $a->category->name : __('Général'),
                 'cat_color' => $a->category ? $a->category->color : '#6B7280',
+                'vote_count' => method_exists($a, 'communityVoteCount') ? $a->communityVoteCount() : 0,
             ];
         });
 

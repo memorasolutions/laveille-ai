@@ -123,7 +123,12 @@
                             @endif
                         </div>
                         <div>
-                            <h1 class="acr-show-h1">{{ $acronym->acronym }}</h1>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <h1 class="acr-show-h1" style="margin:0;">{{ $acronym->acronym }}</h1>
+                                @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
+                                    @include('voting::components.vote-button', ['item' => $acronym, 'type' => 'acronym'])
+                                @endif
+                            </div>
                             <h2 class="acr-show-h2">{{ $acronym->full_name }}</h2>
                             @if($acronym->category)
                                 <span class="acr-show-badge" style="background: {{ $acronym->category->color ?? 'var(--c-primary)' }};">

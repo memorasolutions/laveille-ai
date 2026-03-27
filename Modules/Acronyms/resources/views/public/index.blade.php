@@ -319,6 +319,20 @@
                         <div class="acr-fullname" x-text="item.full_name"></div>
                         <div class="acr-footer">
                             <span class="acr-badge" :style="'background:' + (item.cat_color || '#6B7280')" x-text="item.cat_name"></span>
+                            @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
+                            <span @click.prevent.stop style="display:inline-flex;align-items:center;gap:3px;"
+                                  x-data="{ vc: item.vote_count || 0, vd: false }"
+                                  @click="
+                                      @auth
+                                          fetch('/community/vote/acronym/' + item.id, {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>r.json()).then(d=>{vc=d.count;vd=d.voted})
+                                      @else
+                                          $dispatch('open-auth-modal', {message:'{{ __('Connectez-vous pour voter.') }}'})
+                                      @endauth
+                                  ">
+                                <svg :style="vd ? 'color:#1877F2' : 'color:#9CA3AF'" width="14" height="14" viewBox="0 0 24 24" :fill="vd ? '#1877F2' : 'none'" stroke="currentColor" stroke-width="2"><path d="M7 22V11l5-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.1l-1.5 9A2 2 0 0 1 18 21H7z"/><path d="M2 13v8a1 1 0 0 0 1 1h3V12H3a1 1 0 0 0-1 1z"/></svg>
+                                <span x-show="vc > 0" x-text="vc" :style="vd ? 'color:#1877F2;font-weight:600' : 'color:#9CA3AF'" style="font-size:12px;"></span>
+                            </span>
+                            @endif
                             <span class="acr-link">{{ __('Voir la fiche') }} →</span>
                         </div>
                     </a>

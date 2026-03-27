@@ -17,6 +17,9 @@ class ReputationService
     public const LIKE_RECEIVED = 1;
     public const REPORT_CONFIRMED = 5;
     public const CONTENT_REJECTED = -10;
+    public const VOTE_CAST = 1;
+    public const CONTENT_COMMUNITY_APPROVED = 15;
+    public const STREAK_BONUS_7 = 10;
 
     // Niveaux
     public const LEVEL_NOUVEAU = 0;
@@ -143,6 +146,22 @@ class ReputationService
             }
         }
 
+        // Badges vote (si module Voting actif)
+        if (class_exists('Modules\\Voting\\Models\\Vote')) {
+            $votesGiven = DB::table('community_votes')->where('user_id', $uid)->count();
+            if ($votesGiven >= 50) {
+                $badges[] = 'voter';
+            }
+        }
+
+        // Badge correcteur (suggestions acceptées)
+        if (class_exists('Modules\\Directory\\Models\\ToolSuggestion')) {
+            $suggestionsAccepted = DB::table('directory_suggestions')->where('user_id', $uid)->where('status', 'approved')->count();
+            if ($suggestionsAccepted >= 10) {
+                $badges[] = 'corrector';
+            }
+        }
+
         $now = now();
         foreach ($badges as $badge) {
             DB::table('user_badges')->insertOrIgnore([
@@ -193,6 +212,8 @@ class ReputationService
             'popular' => ['name' => 'Populaire', 'emoji' => '❤️', 'description' => '20 likes reçus'],
             'expert' => ['name' => 'Expert', 'emoji' => '🏆', 'description' => 'Niveau expert atteint'],
             'published_author' => ['name' => 'Auteur publié', 'emoji' => '✍️', 'description' => 'Premier article publié sur le blog'],
+            'voter' => ['name' => 'Votant actif', 'emoji' => '👍', 'description' => '50 votes donnés'],
+            'corrector' => ['name' => 'Correcteur', 'emoji' => '📋', 'description' => '10 suggestions acceptées'],
             default => ['name' => $key, 'emoji' => '🏅', 'description' => ''],
         };
     }
