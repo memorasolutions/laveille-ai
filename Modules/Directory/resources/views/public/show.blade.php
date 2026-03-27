@@ -577,7 +577,7 @@
                     @if($isYt)
                     <div x-data="{ ytError: false }" style="margin-bottom:16px;">
                         <div x-show="!ytError" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">
-                            <iframe src="https://www.youtube-nocookie.com/embed/{{ $res->video_id }}?rel=0&modestbranding=1" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy" title="{{ $res->title }}" @error="ytError = true"></iframe>
+                            <iframe src="https://www.youtube-nocookie.com/embed/{{ $res->video_id }}?rel=0&modestbranding=1" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy" title="{{ $res->title }}" x-on:error="ytError = true"></iframe>
                         </div>
                         <div x-show="ytError" x-cloak style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px;text-align:center;">
                             <span style="font-size:24px;">🚫</span>
