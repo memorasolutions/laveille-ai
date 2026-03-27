@@ -551,6 +551,14 @@ select:focus {
 .rt-card { transition: transform 0.2s ease, box-shadow 0.2s ease !important; }
 .rt-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important; }
 
+/* Bouton vote : supprimer bordure/outline BS3 */
+[aria-label*="vote" i], [aria-label*="Soutenir"], [aria-label*="Retirer"] {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: none !important;
+}
+
 /* Glossaire : cartes hover uniforme avec homepage */
 .gl-card { transition: transform 0.2s ease, box-shadow 0.2s ease !important; }
 .gl-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important; }

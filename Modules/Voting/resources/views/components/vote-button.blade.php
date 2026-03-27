@@ -17,7 +17,7 @@
                 $dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour voter.') }}' })
             @endauth
         "
-        style="background:none;border:none;cursor:pointer;padding:4px;display:inline-flex;align-items:center;gap:5px;font-size:14px;transition:transform .2s;"
+        style="background:none;border:none;outline:none;box-shadow:none;cursor:pointer;padding:4px;display:inline-flex;align-items:center;gap:5px;font-size:14px;transition:transform .2s;"
         :style="pulse && 'transform:scale(1.3)'"
         :aria-label="voted ? '{{ __('Retirer le vote') }}' : '{{ __('Soutenir') }}'"
     >
