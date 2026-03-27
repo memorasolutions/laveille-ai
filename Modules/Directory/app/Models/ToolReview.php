@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ToolReview extends Model
 {
+    use \Modules\Voting\Traits\HasCommunityVotes;
+
     protected $table = 'directory_reviews';
 
     protected $fillable = [

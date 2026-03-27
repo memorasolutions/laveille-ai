@@ -90,17 +90,7 @@
     $pricingLabels = ['free'=>__('Gratuit'),'freemium'=>__('Freemium'),'paid'=>__('Payant'),'open_source'=>__('Open source'),'enterprise'=>__('Entreprise')];
     $reviews = $tool->reviews()->approved()->latest()->get();
     $discussions = $tool->discussions()->approved()->topLevel()->with('replies.user', 'user')->latest()->get();
-    $resourcesQuery = $tool->resources()->latest();
-    if (auth()->check() && auth()->user()->can('view_admin_panel')) {
-        // Admin voit tout
-    } elseif (auth()->check()) {
-        // Membre voit les approuvées + les siennes
-        $resourcesQuery->where(fn($q) => $q->where('is_approved', true)->orWhere('user_id', auth()->id()));
-    } else {
-        // Visiteur voit seulement les approuvées
-        $resourcesQuery->where('is_approved', true);
-    }
-    $resources = $resourcesQuery->get();
+    $resources = $tool->resources()->orderByDesc('upvotes')->latest()->get();
     $screenshots = $tool->screenshots()->approved()->orderByDesc('votes_count')->get();
 @endphp
 
@@ -118,7 +108,12 @@
         <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
             @if($favicon)<img src="{{ $favicon }}" alt="" class="rt-logo" width="64" height="64">@endif
             <div style="flex: 1; min-width: 200px;">
-                <h1 class="rt-name">{{ $tool->name }}</h1>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <h1 class="rt-name" style="margin:0;">{{ $tool->name }}</h1>
+                    @if(class_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
+                        @include('voting::components.vote-button', ['item' => $tool, 'type' => 'tool'])
+                    @endif
+                </div>
                 <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;">{{ $tool->short_description }}</p>
             </div>
             @if($tool->url)
@@ -531,9 +526,6 @@
                             <span style="background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase;">{{ $res->type }}</span>
                             <span style="background: {{ $res->language === 'fr' ? '#e0e7ff' : '#fef3c7' }}; color: {{ $res->language === 'fr' ? '#3730a3' : '#92400e' }}; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">{{ strtoupper($res->language) }}</span>
                             <span style="color: #9ca3af; font-size: 12px;">{{ __('par') }} {{ $res->user->name ?? __('Anonyme') }}</span>
-                            @if(!$res->is_approved)
-                                <span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ __('En attente') }}</span>
-                            @endif
                         </div>
                         @if(!$res->is_approved && Route::has('admin.directory.moderation.resource.approve'))
                             @include('directory::components.admin-inline-actions', [
@@ -543,8 +535,10 @@
                         @endif
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center; flex-shrink: 0;" x-data="{ likes: {{ $res->upvotes }} }">
-                    <button @click="fetch('{{ route('directory.community.like', ['type' => 'resource', 'id' => $res->id]) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d=>{likes=d.upvotes})" style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; padding: 5px 10px; color: #ef4444; font-weight: 600; font-size: 13px; cursor: pointer;">❤️ <span x-text="likes"></span></button>
+                <div style="display:flex;gap:10px;align-items:center;flex-shrink:0;">
+                    @if(class_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
+                        @include('voting::components.vote-button', ['item' => $res, 'type' => 'resource'])
+                    @endif
                     <form action="{{ route('directory.community.report', ['type' => 'resource', 'id' => $res->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="spam"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;" title="{{ __('Signaler') }}">🚩</button></form>
                 </div>
             </div>

@@ -16,6 +16,7 @@ use Spatie\Translatable\HasTranslations;
 class Acronym extends Model
 {
     use HasSuggestions;
+    use \Modules\Voting\Traits\HasCommunityVotes;
     use HasTranslations;
 
     protected array $suggestableFields = [

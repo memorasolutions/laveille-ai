@@ -20,6 +20,7 @@ class Tool extends Model
 {
     use HasSuggestions;
     use HasTranslations;
+    use \Modules\Voting\Traits\HasCommunityVotes;
 
     protected array $suggestableFields = [
         'description' => 'Description',
