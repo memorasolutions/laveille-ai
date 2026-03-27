@@ -147,12 +147,16 @@ class CommunityController extends Controller
 
         $resource = ToolResource::create($resourceData);
 
-        // Notifier les admins
-        if (class_exists(\App\Models\User::class) && class_exists(\Spatie\Permission\Models\Permission::class)) {
-            $admins = \App\Models\User::permission('view_admin_panel')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new \Modules\Directory\Notifications\ResourceSubmittedNotification($resource));
+        // Notifier les admins (non-bloquant si SMTP échoue)
+        try {
+            if (class_exists(\App\Models\User::class) && class_exists(\Spatie\Permission\Models\Permission::class)) {
+                $admins = \App\Models\User::permission('view_admin_panel')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new \Modules\Directory\Notifications\ResourceSubmittedNotification($resource));
+                }
             }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Notification admin échouée', ['error' => $e->getMessage()]);
         }
 
         if ($autoApprove) {
