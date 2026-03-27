@@ -521,3 +521,36 @@ select:focus {
 .header-right-menu-wrap .widget a:hover {
     color: #fff !important;
 }
+
+/* ═══════════════════════════════════════════════════
+   UX/UI 2026 — améliorations globales
+   ═══════════════════════════════════════════════════ */
+
+/* Homepage cartes — border-radius modernisé */
+.hp-card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+.hp-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+    border-color: var(--c-primary) !important;
+}
+
+/* Homepage sections — espacement 48px pour respirer */
+.hp-section { padding: 48px 0 !important; }
+.hp-section-alt { padding: 48px 0 !important; }
+
+/* Blog : hauteur images uniformes entre articles */
+.wpo-blog-highlights-section .wpo-blog-item .wpo-blog-img img,
+.wpo-blog-sponsored-section .wpo-blog-item .wpo-blog-img img {
+    height: 220px !important;
+    object-fit: cover !important;
+}
+
+/* Répertoire : cartes hover amélioré */
+.rt-card { transition: transform 0.2s ease, box-shadow 0.2s ease !important; }
+.rt-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important; }
+
+/* Glossaire : cartes hover uniforme avec homepage */
+.gl-card { transition: transform 0.2s ease, box-shadow 0.2s ease !important; }
+.gl-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important; }
