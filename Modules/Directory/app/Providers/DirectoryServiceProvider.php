@@ -29,6 +29,9 @@ class DirectoryServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
         \Modules\Directory\Models\Tool::observe(\Modules\Directory\Observers\ToolObserver::class);
+
+        // Middleware streak tracking (ajouté au groupe web)
+        $this->app['router']->pushMiddlewareToGroup('web', \Modules\Directory\Http\Middleware\TrackActivity::class);
     }
 
     /**

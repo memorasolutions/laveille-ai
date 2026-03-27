@@ -6,6 +6,7 @@ namespace Modules\Directory\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ReputationService
 {
@@ -49,6 +50,16 @@ class ReputationService
 
         $user->reputation_points = max(0, $user->reputation_points + $finalPoints);
         $user->save();
+
+        // Logger pour leaderboard mensuel
+        if (Schema::hasTable('reputation_logs') && $finalPoints !== 0) {
+            DB::table('reputation_logs')->insert([
+                'user_id' => $user->id,
+                'points' => $finalPoints,
+                'reason' => $reason ?: 'general',
+                'created_at' => now(),
+            ]);
+        }
 
         $this->checkLevelUp($user);
         $this->checkBadges($user);
@@ -214,6 +225,8 @@ class ReputationService
             'published_author' => ['name' => 'Auteur publié', 'emoji' => '✍️', 'description' => 'Premier article publié sur le blog'],
             'voter' => ['name' => 'Votant actif', 'emoji' => '👍', 'description' => '50 votes donnés'],
             'corrector' => ['name' => 'Correcteur', 'emoji' => '📋', 'description' => '10 suggestions acceptées'],
+            'streak_7' => ['name' => 'Assidu', 'emoji' => '🔥', 'description' => '7 jours consécutifs de visite'],
+            'streak_30' => ['name' => 'Marathonien', 'emoji' => '💎', 'description' => '30 jours consécutifs de visite'],
             default => ['name' => $key, 'emoji' => '🏅', 'description' => ''],
         };
     }

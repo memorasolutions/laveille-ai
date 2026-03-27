@@ -23,11 +23,37 @@
 <div class="container">
 
     {{-- Hero --}}
-    <div class="text-center" style="margin-bottom: 36px;">
+    <div class="text-center" style="margin-bottom: 24px;">
         <h1 style="font-family: var(--f-heading); font-weight: 800; font-size: 2rem; color: var(--c-dark); margin-bottom: 8px;">
             🏆 {{ __('Classement de la communauté') }}
         </h1>
         <p style="font-size: 1.1rem; color: #6B7280;">{{ __('Les membres les plus actifs de La veille') }}</p>
+    </div>
+
+    {{-- Onglets mois/tout temps --}}
+    <div x-data="{ tab: 'alltime' }" style="margin-bottom: 32px;">
+        <div style="display:flex!important;justify-content:center!important;gap:8px;margin-bottom:24px;">
+            <button @click="tab='alltime'" :style="tab==='alltime' ? 'background:var(--c-primary);color:#fff' : 'background:#f3f4f6;color:#6b7280'" style="border:none;padding:10px 24px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;transition:all .2s;">{{ __('Tout temps') }}</button>
+            <button @click="tab='monthly'" :style="tab==='monthly' ? 'background:var(--c-primary);color:#fff' : 'background:#f3f4f6;color:#6b7280'" style="border:none;padding:10px 24px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;transition:all .2s;">{{ __('Ce mois') }}</button>
+        </div>
+
+        {{-- Contenu tout temps --}}
+        <div x-show="tab==='alltime'" x-transition>
+            @include('directory::public.partials.leaderboard-list', ['users' => $topAllTime, 'pointsField' => 'reputation_points'])
+        </div>
+
+        {{-- Contenu mensuel --}}
+        <div x-show="tab==='monthly'" x-cloak x-transition>
+            @if($topMonthly->isEmpty())
+                <div style="text-align:center;padding:40px 20px;background:#f9fafb;border-radius:16px;border:1px dashed #d1d5db;">
+                    <div style="font-size:36px;margin-bottom:8px;">📅</div>
+                    <h3 style="font-family:var(--f-heading);color:var(--c-dark);margin-bottom:8px;">{{ __('Pas encore de points ce mois-ci') }}</h3>
+                    <p style="color:#6b7280;">{{ __('Contribuez pour apparaitre dans le classement mensuel !') }}</p>
+                </div>
+            @else
+                @include('directory::public.partials.leaderboard-list', ['users' => $topMonthly, 'pointsField' => 'monthly_points'])
+            @endif
+        </div>
     </div>
 
     {{-- Ma position --}}
@@ -56,71 +82,6 @@
         </div>
     </div>
     @endauth
-
-    @if($topAllTime->isEmpty())
-        {{-- Empty state --}}
-        <div style="text-align: center; padding: 60px 20px; background: #F9FAFB; border-radius: 16px; border: 1px dashed #D1D5DB;">
-            <div style="font-size: 48px; margin-bottom: 12px;">🌱</div>
-            <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin-bottom: 8px;">{{ __('La communauté vient de démarrer !') }}</h3>
-            <p style="color: #6B7280;">{{ __('Soyez le premier à contribuer et à gagner des points.') }}</p>
-        </div>
-    @else
-        {{-- Podium Top 3 --}}
-        @if($topAllTime->count() >= 3)
-        <div class="row" style="display: flex; align-items: flex-end; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
-            @foreach([1, 0, 2] as $podiumIndex)
-                @if(isset($topAllTime[$podiumIndex]))
-                @php
-                    $u = $topAllTime[$podiumIndex];
-                    $lvl = $getLevel($u->trust_level);
-                    $isFirst = $podiumIndex === 0;
-                    $colors = ['#FFD700', '#C0C0C0', '#CD7F32'];
-                    $medals = ['🥇', '🥈', '🥉'];
-                @endphp
-                <div class="col-sm-4 col-xs-12" style="margin-bottom: 16px;">
-                    <div style="background: #fff; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 6px 20px rgba(0,0,0,0.06); border-bottom: 4px solid {{ $colors[$podiumIndex] }}; {{ $isFirst ? 'transform: scale(1.05);' : '' }}">
-                        <div style="font-size: 36px; margin-bottom: 8px;">{{ $medals[$podiumIndex] }}</div>
-                        <h3 style="font-family: var(--f-heading); margin: 8px 0; font-weight: 700; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><a href="{{ route('directory.profile', $u->id) }}" style="color: inherit; text-decoration: none;">{{ $u->name }}</a></h3>
-                        <div style="background: #F3F4F6; display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 12px;">{{ $lvl['emoji'] }} {{ $lvl['name'] }}</div>
-                        <div style="font-weight: 800; font-size: 22px; color: {{ $colors[$podiumIndex] }};">{{ $u->reputation_points }} <span style="font-size: 11px; color: #9CA3AF;">pts</span></div>
-                    </div>
-                </div>
-                @endif
-            @endforeach
-        </div>
-        @endif
-
-        {{-- Table 4-10 --}}
-        @if($topAllTime->count() > 3)
-        <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 30px;">
-            <table class="table table-hover" style="margin-bottom: 0;">
-                <tbody>
-                    @foreach($topAllTime->slice(3) as $key => $u)
-                    @php $lvl = $getLevel($u->trust_level); @endphp
-                    <tr>
-                        <td style="vertical-align: middle; width: 50px; font-weight: 700; color: #9CA3AF; text-align: center;">{{ $key + 1 }}</td>
-                        <td style="vertical-align: middle;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 34px; height: 34px; background: #E0E7FF; color: #4F46E5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">{{ substr($u->name, 0, 1) }}</div>
-                                <a href="{{ route('directory.profile', $u->id) }}" style="font-weight: 600; color: inherit; text-decoration: none;">{{ $u->name }}</a>
-                                <span style="font-size: 11px; background: #F3F4F6; padding: 2px 6px; border-radius: 4px;">{{ $lvl['emoji'] }}</span>
-                            </div>
-                        </td>
-                        <td style="vertical-align: middle; width: 35%;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="flex: 1; height: 5px; background: #F3F4F6; border-radius: 3px; overflow: hidden;">
-                                    <div style="height: 100%; width: {{ ($u->reputation_points / $maxPoints) * 100 }}%; background: var(--c-primary); border-radius: 3px;"></div>
-                                </div>
-                                <span style="font-weight: 700; color: #4B5563; min-width: 45px; text-align: right; font-size: 14px;">{{ $u->reputation_points }}</span>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @endif
-    @endif
 
     {{-- CTA --}}
     <div class="text-center" style="margin: 40px 0;">
