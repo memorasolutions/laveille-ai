@@ -570,8 +570,9 @@
                     </div>
                 </div>
 
-                {{-- Carte expandée (au clic) --}}
-                <div x-show="expanded" x-transition x-cloak style="border-top:1px solid #f1f5f9;padding:16px;background:#fafbfc;">
+                {{-- Carte expandée (au clic) — template x-if pour ne pas charger l'iframe tant que fermé --}}
+                <template x-if="expanded">
+                <div x-transition style="border-top:1px solid #f1f5f9;padding:16px;background:#fafbfc;">
                     {{-- Embed YouTube --}}
                     @if($isYt)
                     <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:16px;">
@@ -609,6 +610,7 @@
                     </div>
                     @endif
                 </div>
+                </template>
             </div>
             @endforeach
 
