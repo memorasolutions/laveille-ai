@@ -178,8 +178,26 @@ class CommunityController extends Controller
             return response()->json(['youtube' => false, 'title' => null, 'thumbnail' => null]);
         }
 
-        // Fetch oEmbed metadata (gratuit, pas d'API key)
+        // Fetch oEmbed metadata (gratuit, pas d'API key) — valide existence + embeddabilité
         $oembed = @json_decode(@file_get_contents("https://www.youtube.com/oembed?url=" . urlencode($url) . "&format=json"), true);
+
+        if (! $oembed || empty($oembed['title'])) {
+            return response()->json([
+                'youtube' => true,
+                'valid' => false,
+                'error' => __('Vidéo introuvable, privée ou non disponible.'),
+            ]);
+        }
+
+        // Vérifier que la vidéo est embeddable (oEmbed retourne un champ html avec iframe)
+        $embeddable = isset($oembed['html']) && str_contains($oembed['html'], 'iframe');
+        if (! $embeddable) {
+            return response()->json([
+                'youtube' => true,
+                'valid' => false,
+                'error' => __('Cette vidéo ne peut pas être intégrée (embed désactivé par le créateur).'),
+            ]);
+        }
 
         // Extraire durée + channel depuis la page YouTube (fallback sans API)
         $duration = null;
@@ -200,6 +218,7 @@ class CommunityController extends Controller
 
         return response()->json([
             'youtube' => true,
+            'valid' => true,
             'video_id' => $videoId,
             'title' => $oembed['title'] ?? null,
             'thumbnail' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",

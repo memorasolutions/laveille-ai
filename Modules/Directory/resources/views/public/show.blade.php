@@ -573,10 +573,17 @@
                 {{-- Carte expandée (au clic) — template x-if pour ne pas charger l'iframe tant que fermé --}}
                 <template x-if="expanded">
                 <div x-transition style="border-top:1px solid #f1f5f9;padding:16px;background:#fafbfc;">
-                    {{-- Embed YouTube --}}
+                    {{-- Embed YouTube avec fallback si vidéo supprimée --}}
                     @if($isYt)
-                    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin-bottom:16px;">
-                        <iframe src="https://www.youtube-nocookie.com/embed/{{ $res->video_id }}?rel=0&modestbranding=1" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy" title="{{ $res->title }}"></iframe>
+                    <div x-data="{ ytError: false }" style="margin-bottom:16px;">
+                        <div x-show="!ytError" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;">
+                            <iframe src="https://www.youtube-nocookie.com/embed/{{ $res->video_id }}?rel=0&modestbranding=1" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen loading="lazy" title="{{ $res->title }}" @error="ytError = true"></iframe>
+                        </div>
+                        <div x-show="ytError" x-cloak style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px;text-align:center;">
+                            <span style="font-size:24px;">🚫</span>
+                            <p style="color:#dc2626;font-weight:600;margin:8px 0 4px;">{{ __('Vidéo indisponible') }}</p>
+                            <p style="color:#6b7280;font-size:13px;margin:0;">{{ __('Cette vidéo a été supprimée ou rendue privée.') }}</p>
+                        </div>
                     </div>
                     @endif
 
@@ -632,9 +639,11 @@
                     submitting: false,
                     loading: false,
                     isYoutube: false,
+                    videoError: null,
                     selectType(t) { this.type = t; this.step = 2; },
                     async fetchMeta() {
                         if (!this.url || this.url.length < 10) return;
+                        this.videoError = null;
                         this.isYoutube = /youtube\.com\/watch|youtu\.be\//.test(this.url);
                         if (!this.isYoutube) { this.step = 3; return; }
                         this.loading = true;
@@ -645,7 +654,12 @@
                                 body: JSON.stringify({url: this.url})
                             });
                             const data = await res.json();
-                            if (data.youtube) {
+                            if (data.youtube && data.valid === false) {
+                                this.videoError = data.error;
+                                this.loading = false;
+                                return;
+                            }
+                            if (data.youtube && data.valid) {
                                 this.videoId = data.video_id;
                                 this.title = data.title || '';
                                 this.thumbnail = data.thumbnail;
@@ -655,9 +669,9 @@
                                 this.channelUrl = data.channel_url;
                                 this.type = this.type || 'video';
                             }
-                        } catch(e) {}
+                        } catch(e) { this.videoError = '{{ __("Erreur de connexion. Réessayez.") }}'; }
                         this.loading = false;
-                        this.step = 3;
+                        if (!this.videoError) this.step = 3;
                     },
                     back() { this.step = Math.max(1, this.step - 1); }
                  }">
@@ -705,6 +719,15 @@
                     <div x-show="loading" style="text-align:center;padding:20px;">
                         <div class="spinner-border spinner-border-sm" style="color:#10b981;"></div>
                         <span style="margin-left:8px;color:#6b7280;font-size:14px;">{{ __('Détection en cours...') }}</span>
+                    </div>
+
+                    {{-- Erreur vidéo --}}
+                    <div x-show="videoError" x-cloak style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex!important;align-items:center!important;gap:10px;">
+                        <span style="font-size:20px;">⚠️</span>
+                        <div>
+                            <div style="font-weight:600;color:#dc2626;font-size:14px;" x-text="videoError"></div>
+                            <div style="font-size:12px;color:#6b7280;margin-top:2px;">{{ __('Vérifiez l\'URL et réessayez, ou utilisez une autre vidéo.') }}</div>
+                        </div>
                     </div>
 
                     <div style="display:flex;gap:8px;margin-top:16px;">
