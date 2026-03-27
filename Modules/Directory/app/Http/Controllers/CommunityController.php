@@ -203,7 +203,13 @@ class CommunityController extends Controller
             }
         }
 
-        return response()->json(['upvotes' => $model->fresh()->upvotes]);
+        // Auto-approbation si seuil de votes atteint
+        $fresh = $model->fresh();
+        if (in_array($type, ['review', 'resource']) && isset($fresh->is_approved)) {
+            \Modules\Directory\Services\AutoApproveService::checkAndApprove($fresh, $type);
+        }
+
+        return response()->json(['upvotes' => $fresh->upvotes]);
     }
 
     public function report(Request $request, string $type, int $id): RedirectResponse

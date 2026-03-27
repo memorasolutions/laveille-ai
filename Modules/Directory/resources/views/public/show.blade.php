@@ -512,7 +512,7 @@
             @endif
 
             @foreach($resources as $res)
-            <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <div data-mod-item style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; gap: 14px; overflow: hidden;">
                     <img src="https://www.google.com/s2/favicons?domain={{ parse_url($res->url, PHP_URL_HOST) }}&sz=32" alt="" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6; padding: 4px;">
                     <div>
@@ -521,7 +521,16 @@
                             <span style="background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase;">{{ $res->type }}</span>
                             <span style="background: {{ $res->language === 'fr' ? '#e0e7ff' : '#fef3c7' }}; color: {{ $res->language === 'fr' ? '#3730a3' : '#92400e' }}; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">{{ strtoupper($res->language) }}</span>
                             <span style="color: #9ca3af; font-size: 12px;">{{ __('par') }} {{ $res->user->name ?? __('Anonyme') }}</span>
+                            @if(!$res->is_approved)
+                                <span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ __('En attente') }}</span>
+                            @endif
                         </div>
+                        @if(!$res->is_approved && Route::has('admin.directory.moderation.resource.approve'))
+                            @include('directory::components.admin-inline-actions', [
+                                'approveUrl' => route('admin.directory.moderation.resource.approve', $res->id),
+                                'rejectUrl' => route('admin.directory.moderation.resource.reject', $res->id),
+                            ])
+                        @endif
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center; flex-shrink: 0;" x-data="{ likes: {{ $res->upvotes }} }">
