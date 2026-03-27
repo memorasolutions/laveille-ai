@@ -601,12 +601,13 @@
 
                     <div style="display:flex;gap:8px;margin-bottom:12px;">
                         <a href="{{ $res->url }}" target="_blank" rel="nofollow noopener" style="display:inline-flex;align-items:center;gap:4px;background:var(--c-primary);color:#fff;padding:6px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">🔗 {{ __('Voir sur YouTube') }}</a>
-                        @if(!$res->is_approved && Route::has('admin.directory.moderation.resource.approve'))
+                        @can('view_admin_panel')
                             @include('directory::components.admin-inline-actions', [
                                 'approveUrl' => route('admin.directory.moderation.resource.approve', $res->id),
                                 'rejectUrl' => route('admin.directory.moderation.resource.reject', $res->id),
+                                'deleteUrl' => route('admin.directory.moderation.resource.delete', $res->id),
                             ])
-                        @endif
+                        @endcan
                     </div>
 
                     {{-- Résumé IA --}}

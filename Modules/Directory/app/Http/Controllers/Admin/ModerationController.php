@@ -78,6 +78,13 @@ class ModerationController extends Controller
         return back()->with('success', __('Ressource rejetée.'));
     }
 
+    public function deleteResource(int $id): RedirectResponse
+    {
+        ToolResource::findOrFail($id)->delete();
+
+        return back()->with('success', __('Ressource supprimée (sans pénalité).'));
+    }
+
     public function resolveReport(int $id): RedirectResponse
     {
         ToolReport::findOrFail($id)->update(['is_resolved' => true]);
