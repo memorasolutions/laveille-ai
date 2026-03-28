@@ -852,68 +852,86 @@
                 </div>
             @endif
 
-            {{-- Upload form (drop + paste + file) --}}
+            {{-- Upload form (drop + paste + file — zone cliquable, compression auto) --}}
             @auth
                 <div x-data="{
                     preview: null,
+                    fileName: null,
                     dragging: false,
-                    handleFile(file) {
-                        if (!file || !file.type.startsWith('image/')) return;
-                        if (file.size > 5 * 1024 * 1024) { alert('{{ __('Image trop lourde (max 5 Mo)') }}'); return; }
-                        this.preview = URL.createObjectURL(file);
-                        const dt = new DataTransfer();
-                        dt.items.add(file);
-                        this.$refs.fileInput.files = dt.files;
+                    compressAndSet(file) {
+                        if (!file || !file.type.startsWith('image/')) { alert('{{ __('Format non supporté. Utilisez JPG, PNG ou WebP.') }}'); return; }
+                        const maxW = 1920, quality = 0.85;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const scale = img.width > maxW ? maxW / img.width : 1;
+                                canvas.width = img.width * scale;
+                                canvas.height = img.height * scale;
+                                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                                canvas.toBlob((blob) => {
+                                    if (blob.size > 5 * 1024 * 1024) { alert('{{ __('Image trop lourde même après compression (max 5 Mo)') }}'); return; }
+                                    this.preview = URL.createObjectURL(blob);
+                                    this.fileName = file.name || 'screenshot.jpg';
+                                    const dt = new DataTransfer();
+                                    dt.items.add(new File([blob], this.fileName, { type: 'image/jpeg' }));
+                                    this.$refs.fileInput.files = dt.files;
+                                }, 'image/jpeg', quality);
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
                     },
                     handlePaste(e) {
                         const items = e.clipboardData?.items;
                         if (!items) return;
                         for (const item of items) {
-                            if (item.type.startsWith('image/')) {
-                                e.preventDefault();
-                                this.handleFile(item.getAsFile());
-                                return;
-                            }
+                            if (item.type.startsWith('image/')) { e.preventDefault(); this.compressAndSet(item.getAsFile()); return; }
                         }
                     },
-                    handleDrop(e) {
-                        this.dragging = false;
-                        const file = e.dataTransfer?.files?.[0];
-                        if (file) this.handleFile(file);
-                    }
+                    handleDrop(e) { this.dragging = false; const f = e.dataTransfer?.files?.[0]; if (f) this.compressAndSet(f); },
+                    reset() { this.preview = null; this.fileName = null; this.$refs.fileInput.value = ''; }
                 }"
                 @paste.window="handlePaste($event)"
-                style="background:#f0f4f8;border-radius:var(--r-base);padding:20px;border:2px dashed #cbd5e1;transition:border-color .2s,background .2s;"
-                :style="dragging && 'border-color:var(--c-primary);background:#e0f2fe'"
                 @dragover.prevent="dragging = true"
                 @dragleave.prevent="dragging = false"
                 @drop.prevent="handleDrop($event)">
 
                     <h4 style="font-weight:700;color:var(--c-dark);margin:0 0 12px;font-size:15px;">{{ __('Ajouter un screenshot') }}</h4>
 
-                    {{-- Zone drop/paste --}}
-                    <div x-show="!preview" style="text-align:center;padding:24px 16px;margin-bottom:12px;">
-                        <div style="font-size:36px;margin-bottom:8px;">📋</div>
-                        <p style="color:#6b7280;font-size:14px;margin:0 0 4px;font-weight:600;">{{ __('Collez (Ctrl+V), glissez-déposez ou sélectionnez') }}</p>
-                        <p style="color:#9ca3af;font-size:12px;margin:0;">{{ __('Max 5 Mo. Formats : JPG, PNG, WebP.') }}</p>
-                    </div>
-
-                    {{-- Preview --}}
-                    <div x-show="preview" x-cloak style="text-align:center;margin-bottom:12px;">
-                        <img :src="preview" alt="Preview" style="max-height:200px;max-width:100%;border-radius:8px;border:1px solid #e5e7eb;">
-                        <button type="button" @click="preview = null; $refs.fileInput.value = ''" style="display:block;margin:8px auto 0;background:none;border:none;color:#ef4444;font-size:12px;cursor:pointer;font-weight:600;">{{ __('Retirer') }}</button>
-                    </div>
-
                     <form method="POST" action="{{ route('directory.screenshots.store', $tool->slug) }}" enctype="multipart/form-data">
                         @csrf
-                        <div style="display:flex!important;gap:8px;flex-wrap:wrap!important;align-items:flex-end!important;">
-                            <input type="file" name="screenshot" accept="image/*" required x-ref="fileInput"
-                                @change="handleFile($event.target.files[0])"
-                                style="flex:1;min-width:200px;padding:8px;border:1px solid #e5e7eb;border-radius:var(--r-base);background:#fff;font-size:13px;">
+                        <input type="file" name="screenshot" accept="image/*" required x-ref="fileInput" @change="compressAndSet($event.target.files[0])" style="display:none!important;">
+
+                        {{-- Zone drop/paste/clic --}}
+                        <div x-show="!preview"
+                            @click="$refs.fileInput.click()"
+                            style="text-align:center;padding:40px 20px;margin-bottom:14px;border:2px dashed #cbd5e1;border-radius:12px;cursor:pointer;transition:all .2s;background:#f8fafc;"
+                            :style="dragging ? 'border-color:var(--c-primary);background:#e0f2fe' : ''"
+                            @mouseenter="$el.style.borderColor='var(--c-primary)';$el.style.background='#f0f9ff'"
+                            @mouseleave="!dragging && ($el.style.borderColor='#cbd5e1') && ($el.style.background='#f8fafc')">
+                            <div style="font-size:40px;margin-bottom:10px;">📸</div>
+                            <p style="color:var(--c-dark);font-size:15px;margin:0 0 4px;font-weight:700;">{{ __('Glissez-déposez, collez (Ctrl+V) ou cliquez') }}</p>
+                            <p style="color:#9ca3af;font-size:12px;margin:0;">{{ __('JPG, PNG, WebP — compression automatique, max 1920px') }}</p>
+                        </div>
+
+                        {{-- Preview --}}
+                        <div x-show="preview" x-cloak style="text-align:center;margin-bottom:14px;border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#fff;">
+                            <img :src="preview" alt="Preview" style="max-height:220px;max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                            <div style="margin-top:10px;display:flex!important;justify-content:center!important;gap:12px;align-items:center!important;">
+                                <span style="font-size:12px;color:#6b7280;" x-text="fileName"></span>
+                                <button type="button" @click="reset()" style="background:none;border:none;color:#ef4444;font-size:12px;cursor:pointer;font-weight:600;">✕ {{ __('Retirer') }}</button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex!important;gap:8px;flex-wrap:wrap!important;align-items:center!important;">
                             <input type="text" name="caption" placeholder="{{ __('Description (optionnel)') }}" maxlength="255"
-                                style="flex:1;min-width:150px;height:38px;padding:0 12px;border:1px solid #e5e7eb;border-radius:var(--r-base);font-size:13px;">
-                            <button type="submit" style="height:38px;padding:0 20px;background:var(--c-primary);color:#fff;border:none;border-radius:var(--r-btn);font-weight:600;font-size:13px;cursor:pointer;">
-                                {{ __('Envoyer') }}
+                                style="flex:1;min-width:200px;height:40px;padding:0 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
+                            <button type="submit" :disabled="!preview"
+                                style="height:40px;padding:0 24px;background:var(--c-primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:opacity .2s;"
+                                :style="!preview && 'opacity:0.5;cursor:not-allowed'">
+                                📤 {{ __('Envoyer') }}
                             </button>
                         </div>
                     </form>
