@@ -309,13 +309,13 @@
 
     {{-- CTA membres (visible pour les visiteurs non connectés) --}}
     @guest
-    <div class="text-center" style="margin-top: 24px; padding: 24px; background: #F9FAFB; border-radius: 16px; border: 1px dashed #D1D5DB;">
+    <div x-data class="text-center" style="margin-top: 24px; padding: 24px; background: #F9FAFB; border-radius: 16px; border: 1px dashed #D1D5DB;">
         <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 6px; font-size: 1.1rem;">{{ __('Envie de plus ?') }}</h3>
-        <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 14px; font-size: 13px;">{{ __('Liens permanents, slugs personnalisés, analytics 90 jours, mot de passe, QR personnalisé...') }}</p>
-        <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Créez un compte gratuit pour débloquer toutes les fonctionnalités.') }}' })"
+        <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 14px; font-size: 13px;">{{ __('Liens permanents, slugs personnalises, analytics 90 jours, mot de passe, QR personnalise...') }}</p>
+        <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Creez un compte gratuit pour debloquer toutes les fonctionnalites.') }}' })"
             style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .2s;"
             onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
-            {{ __('Créer un compte gratuit') }}
+            {{ __('Creer un compte gratuit') }}
         </button>
     </div>
     @endguest
