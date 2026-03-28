@@ -171,7 +171,7 @@ class CommunityController extends Controller
             $this->reputation->addPoints($user, ReputationService::RESOURCE_APPROVED, 'resource_auto');
         }
 
-        return back()->with('success', __('Merci ! La ressource sera visible après approbation.'))->with('resource_submitted', true);
+        return back()->with('success', __('Merci ! La ressource sera visible après approbation.'));
     }
 
     public function fetchYoutubeMeta(Request $request, string $slug): JsonResponse
