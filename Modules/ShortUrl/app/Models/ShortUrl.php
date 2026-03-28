@@ -109,10 +109,10 @@ class ShortUrl extends Model
 
     public function getShortUrl(): string
     {
-        if ($this->domain_id !== null && $this->relationLoaded('domain') && $this->domain !== null) {
-            $scheme = parse_url(config('app.url'), PHP_URL_SCHEME) ?: 'https';
+        $domain = $this->relationLoaded('domain') ? $this->domain : $this->domain()->first();
 
-            return "{$scheme}://{$this->domain->domain}/{$this->slug}";
+        if ($this->domain_id !== null && $domain !== null) {
+            return "https://{$domain->domain}/{$this->slug}";
         }
 
         return url('/s/'.$this->slug);
