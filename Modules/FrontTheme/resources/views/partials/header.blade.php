@@ -165,9 +165,7 @@
                                     @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>@endif
                                 </ul>
                             </li>
-                            @if(Route::has('shorturl.create'))
-                            <li><a href="{{ route('shorturl.create') }}" style="color:var(--c-primary, #0B7285)!important;font-weight:700!important;">🔗 {{ __('Raccourcir') }}</a></li>
-                            @endif
+                            {{-- Lien raccourcir retiré — déjà dans le mega menu Ressources --}}
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Pages') }}</a>
                                 {{-- Mega menu pages --}}
