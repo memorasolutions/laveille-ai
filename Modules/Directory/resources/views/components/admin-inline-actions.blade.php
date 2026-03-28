@@ -10,12 +10,12 @@
             </button>
             @endif
             @if(isset($deleteUrl))
-            <button @click="if(confirm('{{ __('Supprimer cette ressource (sans pénalité) ?') }}')){fetch('{{ $deleteUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){$el.closest('[data-mod-item]')?.remove()}})}"
+            <button @click="$dispatch('confirm-action', { title: 'Supprimer', message: 'Supprimer cette ressource sans penalite ?', action: () => fetch('{{ $deleteUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){$el.closest('[data-mod-item]')?.remove()}}) })"
                 style="font-size:11px;background:#6b7280;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;">
                 {{ __('Supprimer') }}
             </button>
             @endif
-            <button @click="if(confirm('Rejeter et retirer 10 pts de reputation ?')){fetch('{{ $rejectUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){done=true;$el.closest('[data-mod-item]')?.remove()}})}"
+            <button @click="$dispatch('confirm-action', { title: 'Rejeter (-10 pts)', message: 'Rejeter et retirer 10 points de reputation ?', action: () => fetch('{{ $rejectUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){done=true;$el.closest('[data-mod-item]')?.remove()}}) })"
                 style="font-size:11px;background:#ef4444;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;"
                 title="Rejeter et retirer 10 points de reputation">
                 {{ __('Rejeter (-10 pts)') }}

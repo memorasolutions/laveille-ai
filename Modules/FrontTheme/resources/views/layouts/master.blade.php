@@ -177,6 +177,23 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
+
+    {{-- Modale confirmation réutilisable (remplace confirm() natif) --}}
+    <div x-data="{ open: false, title: '', message: '', action: null }"
+         @confirm-action.window="open = true; title = $event.detail.title || 'Confirmer'; message = $event.detail.message || ''; action = $event.detail.action"
+         x-show="open" x-cloak
+         @click.self="open = false"
+         style="position:fixed!important;inset:0!important;background:rgba(0,0,0,0.5)!important;z-index:99999!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:20px!important;">
+        <div @click.stop style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
+            <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
+            <h4 style="font-weight:700;color:var(--c-dark,#1a1a2e);margin:0 0 8px;font-size:17px;" x-text="title"></h4>
+            <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.5;" x-text="message"></p>
+            <div style="display:flex!important;gap:10px;justify-content:center!important;">
+                <button @click="open = false" style="padding:10px 24px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;font-size:14px;">{{ __('Annuler') }}</button>
+                <button @click="if(action){action()};open = false" style="padding:10px 24px;border:none;border-radius:8px;background:#ef4444;color:#fff;cursor:pointer;font-weight:600;font-size:14px;">{{ __('Confirmer') }}</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

@@ -842,7 +842,7 @@
                                         ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
                                     </button>
                                     @can('view_admin_panel')
-                                    <button onclick="if(confirm('{{ __('Supprimer ce screenshot ?') }}')){fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>{if(r.ok)this.closest('.col-md-4').remove()})}" style="background:none!important;border:none!important;cursor:pointer;color:#9ca3af;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
+                                    <button @click="$dispatch('confirm-action', { title: '{{ __("Supprimer") }}', message: '{{ __("Supprimer ce screenshot ?") }}', action: () => fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>{if(r.ok)$el.closest('.col-md-4').remove()}) })" style="background:none!important;border:none!important;cursor:pointer;color:#9ca3af;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
                                     @endcan
                                 </div>
                             </div>
