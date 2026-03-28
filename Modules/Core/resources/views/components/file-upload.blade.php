@@ -9,6 +9,7 @@
     'label' => null,
     'helpText' => null,
     'currentImage' => null,
+    'compact' => false,
 ])
 
 <div x-data="{
@@ -115,19 +116,28 @@
          :style="isDragging
             ? 'border: 2px dashed var(--c-primary, #0B7285); background: var(--c-primary-light, #F0FAFB); transform: scale(1.02); box-shadow: 0 0 0 4px rgba(11,114,133,0.1);'
             : 'border: 2px dashed #D1D5DB; background: linear-gradient(180deg, #FAFBFC 0%, #F3F4F6 100%);'"
-         style="border-radius: 16px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.25s ease; min-height: 160px; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;">
+         style="border-radius: {{ $compact ? '10px' : '16px' }}; padding: {{ $compact ? '16px 14px' : '32px 20px' }}; text-align: center; cursor: pointer; transition: all 0.25s ease; min-height: {{ $compact ? '80px' : '160px' }}; display: flex !important; flex-direction: {{ $compact ? 'row' : 'column' }} !important; align-items: center !important; justify-content: center !important; gap: {{ $compact ? '12px' : '0' }};">
+        @if(!$compact)
         <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
             <i class="fa fa-cloud-upload" style="font-size: 28px; color: var(--c-primary, #0B7285);"></i>
         </div>
-        <p style="margin: 0; font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-size: 15px; font-weight: 700; color: var(--c-dark, #1A1D23);">
-            {{ __('Glissez votre fichier ici') }}
-        </p>
-        <p style="margin: 6px 0 12px; font-size: 13px; color: var(--c-text-muted, #6E7687);">
-            {{ __('ou') }}
-        </p>
-        <span style="background: var(--c-primary, #0B7285); color: #fff; padding: 8px 20px; border-radius: var(--r-btn, 0.5rem); font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-weight: 600; font-size: 13px; display: inline-block;">
-            {{ __('Parcourir') }}
-        </span>
+        @endif
+        <div style="{{ $compact ? 'text-align: left;' : '' }}">
+            @if($compact)
+                <i class="fa fa-cloud-upload" style="font-size: 20px; color: var(--c-primary, #0B7285); margin-right: 6px;"></i>
+            @endif
+            <p style="margin: 0; font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-size: {{ $compact ? '13px' : '15px' }}; font-weight: 700; color: var(--c-dark, #1A1D23); display: {{ $compact ? 'inline' : 'block' }};">
+                {{ $compact ? __('Glissez ou') : __('Glissez votre fichier ici') }}
+            </p>
+            @if(!$compact)
+            <p style="margin: 6px 0 12px; font-size: 13px; color: var(--c-text-muted, #6E7687);">
+                {{ __('ou') }}
+            </p>
+            @endif
+            <span style="background: var(--c-primary, #0B7285); color: #fff; padding: {{ $compact ? '5px 14px' : '8px 20px' }}; border-radius: var(--r-btn, 0.5rem); font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-weight: 600; font-size: {{ $compact ? '12px' : '13px' }}; display: inline-block; {{ $compact ? 'margin-left: 4px;' : '' }}">
+                {{ __('Parcourir') }}
+            </span>
+        </div>
     </div>
 
     {{-- Input file réel (caché) --}}

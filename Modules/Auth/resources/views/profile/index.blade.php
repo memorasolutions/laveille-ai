@@ -82,6 +82,7 @@
                             accept="image/*"
                             :max-size="2"
                             :max-width="800"
+                            :compact="true"
                             :current-image="$user->avatar ? asset('storage/' . $user->avatar) : ''"
                             :help-text="__('PNG, JPG, WebP - max. 2 Mo')"
                         />
