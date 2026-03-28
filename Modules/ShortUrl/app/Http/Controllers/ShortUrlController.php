@@ -53,6 +53,11 @@ class ShortUrlController
             'is_active' => ['boolean'],
             'redirect_type' => ['nullable', 'in:301,302'],
             'tags' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'og_title' => ['nullable', 'string', 'max:255'],
+            'og_description' => ['nullable', 'string', 'max:500'],
+            'og_image' => ['nullable', 'url', 'max:500'],
+            'thumbnail' => ['nullable', 'url', 'max:500'],
             'utm_source' => ['nullable', 'string', 'max:255'],
             'utm_medium' => ['nullable', 'string', 'max:255'],
             'utm_campaign' => ['nullable', 'string', 'max:255'],
@@ -61,6 +66,10 @@ class ShortUrlController
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
+
+        if (! empty($validated['password'])) {
+            $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        }
 
         if (! empty($validated['tags'])) {
             $validated['tags'] = array_filter(array_map('trim', explode(',', $validated['tags'])));
@@ -101,6 +110,11 @@ class ShortUrlController
             'is_active' => ['boolean'],
             'redirect_type' => ['nullable', 'in:301,302'],
             'tags' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'og_title' => ['nullable', 'string', 'max:255'],
+            'og_description' => ['nullable', 'string', 'max:500'],
+            'og_image' => ['nullable', 'url', 'max:500'],
+            'thumbnail' => ['nullable', 'url', 'max:500'],
             'utm_source' => ['nullable', 'string', 'max:255'],
             'utm_medium' => ['nullable', 'string', 'max:255'],
             'utm_campaign' => ['nullable', 'string', 'max:255'],

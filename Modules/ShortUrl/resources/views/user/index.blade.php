@@ -7,14 +7,14 @@
 <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; gap: 12px; margin-bottom: 24px;">
     <div>
         <h2 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark, #1A1D23); margin: 0 0 4px;">
-            <i class="fa fa-link"></i> {{ __('Mes liens courts') }}
+            🔗 {{ __('Mes liens courts') }}
         </h2>
         <span style="font-size: 13px; color: var(--c-text-muted, #6E7687);">{{ $shortUrls->total() }} {{ __('lien(s) au total') }}</span>
     </div>
     <a href="{{ route('shorturl.create') }}"
         style="background: var(--c-primary, #0B7285); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; transition: background .2s;"
         onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
-        <i class="fa fa-plus"></i> {{ __('Nouveau lien') }}
+        ➕ {{ __('Nouveau lien') }}
     </a>
 </div>
 
@@ -26,7 +26,7 @@
         <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 20px;">{{ __('Créez votre premier lien court pour commencer à suivre vos clics.') }}</p>
         <a href="{{ route('shorturl.create') }}"
             style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; text-decoration: none;">
-            <i class="fa fa-plus"></i> {{ __('Créer un lien') }}
+            ➕ {{ __('Créer un lien') }}
         </a>
     </div>
 @else
@@ -41,22 +41,22 @@
                     {{ $link->getShortUrl() }}
                 </a>
                 <div style="font-size: 13px; color: var(--c-text-muted, #6E7687); margin-top: 4px; word-break: break-all;">
-                    <i class="fa fa-external-link"></i> {{ Str::limit($link->original_url, 60) }}
+                    🔗 {{ Str::limit($link->original_url, 60) }}
                 </div>
                 @if($link->title)
                     <div style="font-size: 13px; color: var(--c-dark, #1A1D23); margin-top: 2px; font-weight: 600;">{{ $link->title }}</div>
                 @endif
                 <div style="display: flex !important; flex-wrap: wrap !important; gap: 8px; margin-top: 8px; font-size: 12px;">
-                    <span style="color: var(--c-text-muted, #6E7687);"><i class="fa fa-mouse-pointer"></i> {{ number_format($link->clicks_count) }} {{ __('clics') }}</span>
-                    <span style="color: var(--c-text-muted, #6E7687);"><i class="fa fa-clock-o"></i> {{ $link->created_at->diffForHumans() }}</span>
+                    <span style="color: var(--c-text-muted, #6E7687);">👆 {{ number_format($link->clicks_count) }} {{ __('clics') }}</span>
+                    <span style="color: var(--c-text-muted, #6E7687);">🕐 {{ $link->created_at->diffForHumans() }}</span>
                     @if($link->expires_at)
                         <span style="background: #FFFBEB; color: #92400E; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
-                            <i class="fa fa-hourglass-end"></i> {{ $link->expires_at->format('d/m/Y') }}
+                            ⏰ {{ $link->expires_at->format('d/m/Y') }}
                         </span>
                     @endif
                     @if($link->password)
                         <span style="background: #FEF2F2; color: #DC2626; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
-                            <i class="fa fa-lock"></i> {{ __('protégé') }}
+                            🔒 {{ __('protégé') }}
                         </span>
                     @endif
                 </div>
@@ -66,28 +66,25 @@
             <div style="display: flex !important; flex-wrap: wrap !important; gap: 6px; align-items: center !important;">
                 <button @click="navigator.clipboard.writeText('{{ $link->getShortUrl() }}'); copied = true; setTimeout(() => copied = false, 2000)"
                     :style="copied ? 'background:#10B981;color:#fff;' : 'background:#F3F4F6;color:var(--c-dark, #1A1D23);'"
-                    style="border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
-                    <span x-show="!copied"><i class="fa fa-clipboard"></i></span>
-                    <span x-show="copied" x-cloak><i class="fa fa-check"></i></span>
+                    style="border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;"
+                    title="{{ __('Copier') }}">
+                    <span x-show="!copied">📋</span>
+                    <span x-show="copied" x-cloak>✅</span>
                 </button>
                 <a href="{{ route('shorturl.qr', $link->slug) }}" target="_blank"
-                    style="background: #F3F4F6; color: var(--c-dark, #1A1D23); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;">
-                    <i class="fa fa-qrcode"></i>
-                </a>
+                    style="background: #F3F4F6; color: var(--c-dark, #1A1D23); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;"
+                    title="{{ __('QR code') }}">📱</a>
                 <a href="{{ route('shorturl.stats', $link->slug) }}"
-                    style="background: #F3F4F6; color: var(--c-dark, #1A1D23); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;">
-                    <i class="fa fa-bar-chart"></i>
-                </a>
+                    style="background: #F3F4F6; color: var(--c-dark, #1A1D23); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;"
+                    title="{{ __('Statistiques') }}">📊</a>
                 <a href="{{ route('shorturl.user.edit', $link) }}"
-                    style="background: var(--c-primary, #0B7285); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;">
-                    <i class="fa fa-pencil"></i>
-                </a>
+                    style="background: var(--c-primary, #0B7285); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;"
+                    title="{{ __('Modifier') }}">✏️</a>
                 <form action="{{ route('shorturl.user.destroy', $link) }}" method="POST" style="display: inline;">
                     @csrf @method('DELETE')
                     <button type="submit" onclick="return confirm('{{ __('Supprimer ce lien ?') }}')"
-                        style="background: #FEF2F2; color: #DC2626; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
-                        <i class="fa fa-trash"></i>
-                    </button>
+                        style="background: #FEF2F2; color: #DC2626; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;"
+                        title="{{ __('Supprimer') }}">🗑️</button>
                 </form>
             </div>
         </div>

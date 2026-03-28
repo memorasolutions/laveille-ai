@@ -33,6 +33,7 @@ Route::prefix('admin')
 Route::middleware(['web', 'throttle:60,1'])->group(function () {
     Route::get('/s/{slug}', ShortUrlRedirectController::class)->name('short-url.redirect');
     Route::post('/s/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
+        ->middleware('throttle:5,1')
         ->name('short-url.password');
 });
 
@@ -46,7 +47,7 @@ Route::middleware($frontMiddleware)
     ->name('shorturl.')
     ->group(function () {
         Route::get('/', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'create'])->name('create');
-        Route::post('/', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'store'])->name('store');
+        Route::post('/', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'store'])->middleware('throttle:10,1')->name('store');
         Route::get('/{slug}/stats', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'stats'])->name('stats');
         Route::get('/{slug}/qr', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'qrCode'])->name('qr');
     });
