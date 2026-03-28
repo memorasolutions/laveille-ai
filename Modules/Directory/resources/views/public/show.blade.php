@@ -95,7 +95,7 @@
 @endphp
 
 <section class="section-padding" style="padding-top: 10px;">
-<div class="container rt-page" x-data="{ tab: 'info' }">
+<div class="container rt-page" x-data="{ tab: (['info','reviews','discussions','resources','screenshots','alternatives'].includes(window.location.hash.slice(1)) ? window.location.hash.slice(1) : 'info'), setTab(t) { this.tab = t; history.replaceState(null, '', '#' + t); } }">
 
     {{-- Back --}}
     <a href="{{ route('directory.index') }}" class="rt-back">
@@ -194,12 +194,12 @@
     {{-- TABS --}}
     <div class="rt-tabs">
         <div class="rt-tab-bar">
-            <button type="button" class="rt-tab-btn" :class="tab==='info' && 'rt-tab-active'" @click="tab='info'">📋 {{ __('Informations') }}</button>
-            <button type="button" class="rt-tab-btn" :class="tab==='reviews' && 'rt-tab-active'" @click="tab='reviews'">⭐ {{ __('Avis') }} ({{ $reviews->count() }})</button>
-            <button type="button" class="rt-tab-btn" :class="tab==='discussions' && 'rt-tab-active'" @click="tab='discussions'">💬 {{ __('Discussion') }} ({{ $discussions->count() }})</button>
-            <button type="button" class="rt-tab-btn" :class="tab==='resources' && 'rt-tab-active'" @click="tab='resources'">📚 {{ __('Tutoriels') }} ({{ $resources->count() }})</button>
-            <button type="button" class="rt-tab-btn" :class="tab==='screenshots' && 'rt-tab-active'" @click="tab='screenshots'">📸 {{ __('Screenshots') }} ({{ $screenshots->count() }})</button>
-            <button type="button" class="rt-tab-btn" :class="tab==='alternatives' && 'rt-tab-active'" @click="tab='alternatives'">🔄 {{ __('Alternatives') }}</button>
+            <button type="button" class="rt-tab-btn" :class="tab==='info' && 'rt-tab-active'" @click="setTab('info')">📋 {{ __('Informations') }}</button>
+            <button type="button" class="rt-tab-btn" :class="tab==='reviews' && 'rt-tab-active'" @click="setTab('reviews')">⭐ {{ __('Avis') }} ({{ $reviews->count() }})</button>
+            <button type="button" class="rt-tab-btn" :class="tab==='discussions' && 'rt-tab-active'" @click="setTab('discussions')">💬 {{ __('Discussion') }} ({{ $discussions->count() }})</button>
+            <button type="button" class="rt-tab-btn" :class="tab==='resources' && 'rt-tab-active'" @click="setTab('resources')">📚 {{ __('Tutoriels') }} ({{ $resources->count() }})</button>
+            <button type="button" class="rt-tab-btn" :class="tab==='screenshots' && 'rt-tab-active'" @click="setTab('screenshots')">📸 {{ __('Screenshots') }} ({{ $screenshots->count() }})</button>
+            <button type="button" class="rt-tab-btn" :class="tab==='alternatives' && 'rt-tab-active'" @click="setTab('alternatives')">🔄 {{ __('Alternatives') }}</button>
         </div>
 
         {{-- TAB: Informations --}}
