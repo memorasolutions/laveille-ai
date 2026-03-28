@@ -929,9 +929,9 @@
                             <input type="text" name="caption" placeholder="{{ __('Description (optionnel)') }}" maxlength="255"
                                 style="flex:1;min-width:200px;height:40px;padding:0 14px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;">
                             <button type="submit" :disabled="!preview"
-                                style="height:40px;padding:0 24px;background:var(--c-primary);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:opacity .2s;"
-                                :style="!preview && 'opacity:0.5;cursor:not-allowed'">
-                                📤 {{ __('Envoyer') }}
+                                style="height:40px!important;padding:0 24px!important;background:var(--c-primary)!important;color:#fff!important;border:none!important;outline:none!important;box-shadow:none!important;border-radius:8px!important;font-weight:600!important;font-size:14px!important;cursor:pointer;transition:opacity .2s;"
+                                :style="!preview && 'opacity:0.5!important;cursor:not-allowed!important'">
+                                {{ __('Envoyer') }}
                             </button>
                         </div>
                     </form>
