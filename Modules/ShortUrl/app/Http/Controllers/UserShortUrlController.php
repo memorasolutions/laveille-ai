@@ -35,9 +35,9 @@ class UserShortUrlController
         return view('shorturl::user.index', compact('shortUrls'));
     }
 
-    public function create(): View
+    public function create(): \Illuminate\Http\RedirectResponse
     {
-        return view('shorturl::user.create');
+        return redirect()->route('shorturl.create');
     }
 
     public function store(Request $request): RedirectResponse
