@@ -62,6 +62,30 @@
             navigator.clipboard.writeText(this.result.short_url);
             this.copied = true;
             setTimeout(() => this.copied = false, 2000);
+        },
+
+        qrInstance: null,
+
+        generateQR() {
+            if (!this.result?.short_url || typeof QRCodeStyling === 'undefined') return;
+            this.$refs.qrPreview.innerHTML = '';
+            this.qrInstance = new QRCodeStyling({
+                width: 180, height: 180,
+                data: this.result.short_url,
+                dotsOptions: { color: '#0B7285', type: 'rounded' },
+                cornersSquareOptions: { color: '#0B7285', type: 'extra-rounded' },
+                backgroundOptions: { color: '#ffffff' },
+                imageOptions: { crossOrigin: 'anonymous', margin: 4 }
+            });
+            this.qrInstance.append(this.$refs.qrPreview);
+        },
+
+        downloadQR() {
+            if (this.qrInstance) this.qrInstance.download({ name: 'veille-la-qr', extension: 'png' });
+        },
+
+        init() {
+            this.$watch('result', (val) => { if (val) this.$nextTick(() => this.generateQR()); });
         }
     }" style="max-width: 680px; margin: 0 auto;">
 
@@ -105,6 +129,9 @@
                 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 1.5rem; font-weight: 800; color: var(--c-primary, #0B7285); text-decoration: none; word-break: break-all; display: block; margin-bottom: 16px;"
                 x-text="result?.short_url"></a>
 
+            {{-- QR code preview inline --}}
+            <div x-ref="qrPreview" style="margin-bottom: 16px;"></div>
+
             <div style="display: flex !important; justify-content: center !important; flex-wrap: wrap !important; gap: 10px;">
                 {{-- Copier --}}
                 <button @click="copyLink()"
@@ -114,12 +141,20 @@
                     <span x-show="!copied">📋 {{ __('Copier le lien') }}</span>
                     <span x-show="copied" x-cloak>✅ {{ __('Copié !') }}</span>
                 </button>
-                {{-- QR code --}}
-                <a :href="'{{ url('/raccourcir') }}/' + result?.slug + '/qr'" target="_blank"
+                {{-- Télécharger QR --}}
+                <button @click="downloadQR()"
+                    style="background: #1A1D23; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);"
+                    onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                    ⬇️ {{ __('Télécharger QR') }}
+                </button>
+                {{-- Personnaliser QR --}}
+                @if(Route::has('tools.show'))
+                <a :href="'{{ route('tools.show', 'code-qr') }}?url=' + encodeURIComponent(result?.short_url)"
                     style="background: #1A1D23; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; text-decoration: none; display: inline-block; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);"
                     onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                    📱 {{ __('QR code') }}
+                    🎨 {{ __('Personnaliser le QR') }}
                 </a>
+                @endif
                 {{-- Stats --}}
                 <a :href="'{{ url('/raccourcir') }}/' + result?.slug + '/stats'"
                     style="background: #1A1D23; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; text-decoration: none; display: inline-block; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);"
@@ -181,4 +216,8 @@
 
 </div>
 </section>
+
+@push('scripts')
+<script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+@endpush
 @endsection

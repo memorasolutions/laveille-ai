@@ -499,7 +499,7 @@ document.addEventListener('alpine:init', function() {
     Alpine.data('qrGenerator', function() {
         return {
             type: 'url',
-            input: 'https://laveille.ai',
+            input: new URLSearchParams(window.location.search).get('url') || 'https://laveille.ai',
             ssid: '', wifiPass: '', encryption: 'WPA',
             emailTo: '', emailSubject: '', emailBody: '',
             phone: '', smsNumber: '', smsMessage: '',
