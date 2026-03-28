@@ -475,6 +475,31 @@
             @endif
         </div>
 
+        {{-- Section mise de l'avant (admin) --}}
+        @if(isset($featuredTools) && $featuredTools->isNotEmpty())
+        <div style="background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);border:1px solid #bae6fd;border-radius:14px;padding:20px;margin-bottom:24px;">
+            <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:14px;">
+                <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">⭐ {{ __('Mis de l\'avant') }}</h3>
+                <span style="font-size:12px;color:#6b7280;">{{ __('Sélection de l\'équipe') }}</span>
+            </div>
+            <div style="display:flex!important;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
+                @foreach($featuredTools as $ft)
+                @php $ftHost = $ft->url ? parse_url($ft->url, PHP_URL_HOST) : ''; @endphp
+                <a href="{{ route('directory.show', $ft->slug) }}" style="flex-shrink:0;width:220px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                    <div style="display:flex!important;align-items:center!important;gap:10px;margin-bottom:10px;">
+                        @if($ftHost)<img src="https://www.google.com/s2/favicons?domain={{ $ftHost }}&sz=32" alt="" width="24" height="24" loading="lazy" style="border-radius:4px;">@endif
+                        <span style="font-weight:700;font-size:15px;">{{ $ft->name }}</span>
+                    </div>
+                    <p style="font-size:12px;color:#6b7280;margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($ft->short_description, 70) }}</p>
+                    @if($ft->categories->isNotEmpty())
+                        <span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ $ft->categories->first()->name }}</span>
+                    @endif
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Section trending : récents + plus votés --}}
         @if($recentTools->isNotEmpty() || (isset($topVoted) && $topVoted->isNotEmpty()))
         <div style="margin-bottom:32px;">
