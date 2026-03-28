@@ -100,6 +100,7 @@
         .wpo-blog-sponsored-section .wpo-blog-img img { height: 180px; }
     </style>
     @stack('styles')
+    <style>[x-cloak]{display:none!important}</style>
 </head>
 
 <body>
