@@ -90,6 +90,14 @@
             <div class="sidebar-body">
                 <ul class="nav" id="sidebarNav">
 
+                    {{-- Retour au site --}}
+                    <li class="nav-item" style="margin-bottom:8px;">
+                        <a href="{{ url('/') }}" class="nav-link" style="background:rgba(255,255,255,0.08);border-radius:6px;font-weight:600;">
+                            <i class="link-icon" data-lucide="arrow-left"></i>
+                            <span class="link-title">{{ __('Retour au site') }}</span>
+                        </a>
+                    </li>
+
                     {{-- Dashboard --}}
                     <li class="nav-item nav-category">{{ __('Principal') }}</li>
                     <li class="nav-item {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
