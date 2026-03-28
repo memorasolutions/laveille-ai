@@ -185,22 +185,17 @@
                 <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 16px 20px; display: flex !important; align-items: center !important; gap: 14px; transition: all 0.2s;"
                      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'"
                      onmouseout="this.style.transform='none';this.style.boxShadow='none'">
-                    @php
-                        $resIcon = match(strtolower($resource->type ?? '')) {
-                            'video', 'vidéo' => 'fa-play-circle',
-                            'article', 'blog' => 'fa-file-text-o',
-                            'tutorial', 'tutoriel' => 'fa-graduation-cap',
-                            'documentation', 'doc' => 'fa-book',
-                            default => 'fa-link',
-                        };
-                        $ytThumb = null;
-                        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/', $resource->url ?? '', $m)) {
-                            $ytThumb = 'https://img.youtube.com/vi/' . $m[1] . '/mqdefault.jpg';
-                        }
-                    @endphp
-                    @if($ytThumb)
-                        <img src="{{ $ytThumb }}" alt="" style="width: 64px; height: 42px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
+                    @if($resource->thumbnail)
+                        <img src="{{ $resource->thumbnail }}" alt="" style="width: 64px; height: 42px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
                     @else
+                        @php
+                            $resIcon = match(strtolower($resource->type ?? '')) {
+                                'video', 'vidéo' => 'fa-play-circle',
+                                'article', 'blog' => 'fa-file-text-o',
+                                'tutorial', 'tutoriel' => 'fa-graduation-cap',
+                                default => 'fa-link',
+                            };
+                        @endphp
                         <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
                             <i class="fa {{ $resIcon }}" style="color: #fff; font-size: 18px;"></i>
                         </div>
