@@ -18,11 +18,11 @@
             {{ $shortUrl->getShortUrl() }}
         </a>
         <div style="font-size: 14px; color: var(--c-text-muted, #6E7687); word-break: break-all; margin-bottom: 12px;">
-            <i class="fa fa-external-link"></i> {{ Str::limit($shortUrl->original_url, 80) }}
+            ↗️ {{ Str::limit($shortUrl->original_url, 80) }}
         </div>
         @if($shortUrl->expires_at)
             <span style="background: #FFFBEB; color: #92400E; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #FDE68A;">
-                <i class="fa fa-clock-o"></i> {{ __('Expire le') }} {{ $shortUrl->expires_at->format('d/m/Y') }}
+                ⏰ {{ __('Expire le') }} {{ $shortUrl->expires_at->format('d/m/Y') }}
             </span>
         @endif
     </div>
@@ -53,7 +53,7 @@
     @if(count($clicksByDay) > 0)
     <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
         <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1rem; color: var(--c-dark, #1A1D23); margin-bottom: 16px;">
-            <i class="fa fa-bar-chart"></i> {{ __('Clics par jour') }}
+            📊 {{ __('Clics par jour') }}
         </h3>
         <div style="display: flex !important; align-items: flex-end !important; height: 160px; gap: 3px; overflow-x: auto; padding-bottom: 24px;">
             @foreach(array_slice($clicksByDay, -30) as $day)
@@ -71,7 +71,7 @@
         <div class="col-md-6 col-sm-12" style="flex: 1 !important; min-width: 280px;">
             <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; height: 100%;">
                 <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1rem; color: var(--c-dark, #1A1D23); margin-bottom: 16px;">
-                    <i class="fa fa-globe"></i> {{ __('Sources') }}
+                    🌐 {{ __('Sources') }}
                 </h3>
                 @php $maxRef = collect($analytics['top_referrers'] ?? [])->max('count') ?: 1; @endphp
                 @forelse($analytics['top_referrers'] ?? [] as $ref)
@@ -94,7 +94,7 @@
         <div class="col-md-6 col-sm-12" style="flex: 1 !important; min-width: 280px;">
             <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; height: 100%;">
                 <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1rem; color: var(--c-dark, #1A1D23); margin-bottom: 16px;">
-                    <i class="fa fa-laptop"></i> {{ __('Appareils') }}
+                    💻 {{ __('Appareils') }}
                 </h3>
                 @php
                     $devices = collect($analytics['devices'] ?? []);
@@ -115,7 +115,7 @@
 
                 {{-- Navigateurs --}}
                 <h4 style="font-weight: 700; font-size: 0.9rem; color: var(--c-dark, #1A1D23); margin: 20px 0 12px; border-top: 1px solid #E5E7EB; padding-top: 16px;">
-                    <i class="fa fa-chrome"></i> {{ __('Navigateurs') }}
+                    🌐 {{ __('Navigateurs') }}
                 </h4>
                 @forelse(array_slice($analytics['browsers'] ?? [], 0, 5) as $browser)
                     <div style="display: flex !important; justify-content: space-between !important; padding: 4px 0; font-size: 13px;">
@@ -134,7 +134,7 @@
         <a href="{{ route('shorturl.create') }}"
             style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; text-decoration: none; transition: background .2s;"
             onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
-            <i class="fa fa-link"></i> {{ __('Raccourcir un autre lien') }}
+            🔗 {{ __('Raccourcir un autre lien') }}
         </a>
     </div>
 

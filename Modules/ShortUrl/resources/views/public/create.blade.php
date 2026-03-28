@@ -15,13 +15,13 @@
     {{-- Hero --}}
     <div class="text-center" style="margin-bottom: 32px;">
         <div style="width: 80px; height: 80px; border-radius: 20px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 16px;">
-            <i class="fa fa-link" style="font-size: 36px; color: var(--c-primary, #0B7285);"></i>
+            <span style="font-size: 36px;">🔗</span>
         </div>
         <h1 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; font-size: 2rem; color: var(--c-dark, #1A1D23); margin-bottom: 8px;">
             {{ __('Raccourcissez vos liens') }}
         </h1>
         <p style="font-size: 1.1rem; color: var(--c-text-muted, #6E7687);">
-            {{ __('Service gratuit propulsé par') }} <strong>veille.la</strong>
+            {{ __('Service gratuit propulsé par') }} <a href="https://veille.la" style="color:var(--c-primary, #0B7285);font-weight:700;text-decoration:none;">veille.la</a>
         </p>
     </div>
 
@@ -75,8 +75,8 @@
             <button @click="shorten()" :disabled="loading"
                 style="height: 52px; padding: 0 28px; background: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 12px; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap; transition: background .2s;"
                 onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
-                <span x-show="!loading"><i class="fa fa-bolt"></i> {{ __('Raccourcir') }}</span>
-                <span x-show="loading" x-cloak><i class="fa fa-spinner fa-spin"></i></span>
+                <span x-show="!loading">⚡ {{ __('Raccourcir') }}</span>
+                <span x-show="loading" x-cloak>⏳</span>
             </button>
         </div>
 
@@ -93,13 +93,13 @@
 
         {{-- Erreur --}}
         <div x-show="error" x-cloak style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; color: #DC2626; font-size: 14px;">
-            <i class="fa fa-exclamation-circle"></i> <span x-text="error"></span>
+            ⚠️ <span x-text="error"></span>
         </div>
 
         {{-- Résultat --}}
         <div x-show="result" x-cloak x-transition style="background: #F0FDF4; border: 2px solid #BBF7D0; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
             <p style="font-size: 13px; color: #16A34A; margin-bottom: 8px; font-weight: 600;">
-                <i class="fa fa-check-circle"></i> {{ __('Lien raccourci avec succès !') }}
+                ✅ {{ __('Lien raccourci avec succès !') }}
             </p>
             <a :href="result?.short_url" target="_blank"
                 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 1.5rem; font-weight: 800; color: var(--c-primary, #0B7285); text-decoration: none; word-break: break-all; display: block; margin-bottom: 16px;"
@@ -110,25 +110,25 @@
                 <button @click="copyLink()"
                     :style="copied ? 'background:#10B981;color:#fff;' : 'background:#F3F4F6;color:var(--c-dark, #1A1D23);'"
                     style="border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all .2s;">
-                    <span x-show="!copied"><i class="fa fa-clipboard"></i> {{ __('Copier') }}</span>
-                    <span x-show="copied" x-cloak><i class="fa fa-check"></i> {{ __('Copié !') }}</span>
+                    <span x-show="!copied">📋 {{ __('Copier') }}</span>
+                    <span x-show="copied" x-cloak>✓ {{ __('Copié !') }}</span>
                 </button>
                 {{-- QR code --}}
                 <a :href="'{{ url('/raccourcir') }}/' + result?.slug + '/qr'" target="_blank"
                     style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-block;">
-                    <i class="fa fa-qrcode"></i> {{ __('QR code') }}
+                    📱 {{ __('QR code') }}
                 </a>
                 {{-- Stats --}}
                 <a :href="'{{ url('/raccourcir') }}/' + result?.slug + '/stats'"
                     style="background: #6B7280; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-block;">
-                    <i class="fa fa-bar-chart"></i> {{ __('Statistiques') }}
+                    📊 {{ __('Statistiques') }}
                 </a>
             </div>
 
             {{-- Message anonyme --}}
             <template x-if="result?.is_anonymous">
                 <div style="margin-top: 16px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #92400E;">
-                    <i class="fa fa-clock-o"></i> {{ __('Ce lien expire dans 30 jours.') }}
+                    ⏰ {{ __('Ce lien expire dans 30 jours.') }}
                     <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour des liens permanents et plus de fonctionnalités.') }}' })"
                         style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: 8px;">
                         {{ __('Créer un compte gratuit') }}
@@ -142,21 +142,21 @@
     <div class="row" style="margin-top: 48px; display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 20px;">
         <div class="col-md-4 col-sm-12" style="text-align: center; padding: 24px;">
             <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-                <i class="fa fa-check" style="font-size: 24px; color: var(--c-primary, #0B7285);"></i>
+                <span style="font-size: 28px;">✅</span>
             </div>
             <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-dark, #1A1D23); margin-bottom: 6px;">{{ __('100% gratuit') }}</h3>
             <p style="color: var(--c-text-muted, #6E7687); font-size: 14px;">{{ __('Aucune limite pour les membres. Pas de pub.') }}</p>
         </div>
         <div class="col-md-4 col-sm-12" style="text-align: center; padding: 24px;">
             <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-                <i class="fa fa-qrcode" style="font-size: 24px; color: var(--c-primary, #0B7285);"></i>
+                <span style="font-size: 28px;">📱</span>
             </div>
             <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-dark, #1A1D23); margin-bottom: 6px;">{{ __('QR code inclus') }}</h3>
             <p style="color: var(--c-text-muted, #6E7687); font-size: 14px;">{{ __('Chaque lien a son QR code téléchargeable.') }}</p>
         </div>
         <div class="col-md-4 col-sm-12" style="text-align: center; padding: 24px;">
             <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-                <i class="fa fa-bar-chart" style="font-size: 24px; color: var(--c-primary, #0B7285);"></i>
+                <span style="font-size: 28px;">📊</span>
             </div>
             <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-dark, #1A1D23); margin-bottom: 6px;">{{ __('Statistiques détaillées') }}</h3>
             <p style="color: var(--c-text-muted, #6E7687); font-size: 14px;">{{ __('Clics, pays, appareils, sources — tout en temps réel.') }}</p>
