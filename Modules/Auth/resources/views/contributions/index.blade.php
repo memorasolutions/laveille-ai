@@ -1,102 +1,81 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('auth::layouts.app')
+@extends('auth::layouts.user-frontend')
 
-@section('title', __('Mes contributions'))
+@section('title', __('Mes contributions') . ' - ' . config('app.name'))
 
-@section('content')
+@section('user-content')
 
-<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
-    <div>
-        <h1 class="fw-semibold mb-1">
-            <i data-lucide="heart-handshake" class="me-1"></i>
-            {{ __('Mes contributions') }}
-        </h1>
-        <p class="text-muted mb-0">{{ __('Suivez vos suggestions et votes sur le site.') }}</p>
-    </div>
-</div>
+<h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">
+    <i class="fa fa-handshake-o"></i> {{ __('Mes contributions') }}
+</h2>
+<p style="color: #777; margin: 0 0 25px;">{{ __('Suivez vos suggestions et votes sur le site.') }}</p>
 
 {{-- Cartes statistiques --}}
-<div class="row gy-4 mb-4">
-    <div class="col-sm-4">
-        <div class="card shadow-none border h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
-                    <i data-lucide="lightbulb" class="text-warning"></i>
-                </div>
-                <div>
-                    <p class="text-muted mb-1">{{ __('Suggestions') }}</p>
-                    <h4 class="fw-semibold text-warning mb-0">{{ $suggestions->count() }}</h4>
-                </div>
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-sm-4" style="margin-bottom: 15px;">
+        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
+            <div class="panel-body">
+                <i class="fa fa-lightbulb-o fa-2x" style="color: #f0ad4e;"></i>
+                <h3 style="margin: 5px 0 0;">{{ $suggestions->count() }}</h3>
+                <small style="color: #777;">{{ __('Suggestions') }}</small>
             </div>
         </div>
     </div>
-    <div class="col-sm-4">
-        <div class="card shadow-none border h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
-                    <i data-lucide="thumbs-up" class="text-primary"></i>
-                </div>
-                <div>
-                    <p class="text-muted mb-1">{{ __('Votes roadmap') }}</p>
-                    <h4 class="fw-semibold text-primary mb-0">{{ $votes->count() }}</h4>
-                </div>
+    <div class="col-sm-4" style="margin-bottom: 15px;">
+        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
+            <div class="panel-body">
+                <i class="fa fa-thumbs-up fa-2x" style="color: #337ab7;"></i>
+                <h3 style="margin: 5px 0 0;">{{ $votes->count() }}</h3>
+                <small style="color: #777;">{{ __('Votes roadmap') }}</small>
             </div>
         </div>
     </div>
-    <div class="col-sm-4">
-        <div class="card shadow-none border h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
-                    <i data-lucide="book-open" class="text-info"></i>
-                </div>
-                <div>
-                    <p class="text-muted mb-1">{{ __('Ressources') }}</p>
-                    <h4 class="fw-semibold text-info mb-0">{{ $resources->count() }}</h4>
-                </div>
+    <div class="col-sm-4" style="margin-bottom: 15px;">
+        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
+            <div class="panel-body">
+                <i class="fa fa-book fa-2x" style="color: #5bc0de;"></i>
+                <h3 style="margin: 5px 0 0;">{{ $resources->count() }}</h3>
+                <small style="color: #777;">{{ __('Ressources') }}</small>
             </div>
         </div>
     </div>
 </div>
 
 {{-- Onglets --}}
-<div class="card h-100 p-0 rounded-3">
-    <div class="card-header border-bottom bg-body py-0 px-0">
-        <ul class="nav nav-tabs" id="contributionsTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="suggestions-tab" data-bs-toggle="tab" data-bs-target="#suggestions" type="button" role="tab" aria-controls="suggestions" aria-selected="true">
-                    <i data-lucide="lightbulb" style="width:16px;height:16px;" class="me-1"></i>
-                    {{ __('Suggestions') }} ({{ $suggestions->count() }})
-                </button>
+<div class="panel panel-default">
+    <div class="panel-heading" style="padding: 0;">
+        <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 0; border-bottom: none;">
+            <li role="presentation" class="active">
+                <a href="#suggestions" aria-controls="suggestions" role="tab" data-toggle="tab">
+                    <i class="fa fa-lightbulb-o"></i> {{ __('Suggestions') }} ({{ $suggestions->count() }})
+                </a>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="votes-tab" data-bs-toggle="tab" data-bs-target="#votes" type="button" role="tab" aria-controls="votes" aria-selected="false">
-                    <i data-lucide="thumbs-up" style="width:16px;height:16px;" class="me-1"></i>
-                    {{ __('Votes roadmap') }} ({{ $votes->count() }})
-                </button>
+            <li role="presentation">
+                <a href="#votes" aria-controls="votes" role="tab" data-toggle="tab">
+                    <i class="fa fa-thumbs-up"></i> {{ __('Votes') }} ({{ $votes->count() }})
+                </a>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab" aria-controls="resources" aria-selected="false">
-                    <i data-lucide="book-open" style="width:16px;height:16px;" class="me-1"></i>
-                    {{ __('Ressources') }} ({{ $resources->count() }})
-                </button>
+            <li role="presentation">
+                <a href="#resources" aria-controls="resources" role="tab" data-toggle="tab">
+                    <i class="fa fa-book"></i> {{ __('Ressources') }} ({{ $resources->count() }})
+                </a>
             </li>
         </ul>
     </div>
-
-    <div class="card-body p-0">
-        <div class="tab-content" id="contributionsTabContent">
+    <div class="panel-body" style="padding: 0;">
+        <div class="tab-content">
 
             {{-- Onglet suggestions --}}
-            <div class="tab-pane fade show active" id="suggestions" role="tabpanel" aria-labelledby="suggestions-tab">
+            <div role="tabpanel" class="tab-pane active" id="suggestions">
                 @if($suggestions->isEmpty())
-                    <div class="py-5 text-center text-muted">
-                        <i data-lucide="lightbulb" class="mb-2 d-block"></i>
-                        <p class="mb-2">{{ __('Vous n\'avez pas encore soumis de suggestions.') }}</p>
-                        <p class="small">{{ __('Visitez le glossaire, le répertoire ou les acronymes pour proposer des modifications.') }}</p>
+                    <div style="text-align: center; padding: 40px 20px; color: #999;">
+                        <i class="fa fa-lightbulb-o fa-3x" style="margin-bottom: 10px; display: block;"></i>
+                        <p>{{ __('Vous n\'avez pas encore soumis de suggestions.') }}</p>
+                        <p><small>{{ __('Visitez le glossaire, le répertoire ou les acronymes pour proposer des modifications.') }}</small></p>
                     </div>
                 @else
-                    <div class="table-responsive scroll-sm">
-                        <table class="table bordered-table sm-table mb-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped" style="margin-bottom: 0;">
                             <thead>
                                 <tr>
                                     <th>{{ __('Fiche') }}</th>
@@ -125,14 +104,10 @@
                                             }
                                             $source = $suggestion->getSourceLabel();
                                         @endphp
-                                        <a href="{{ $route }}" class="fw-medium text-decoration-none">
-                                            {{ $suggestion->getItemName() }}
-                                        </a>
-                                        <span class="badge fw-medium ms-1" style="background: {{ $source['color'] }}20; color: {{ $source['color'] }}; border: 1px solid {{ $source['color'] }}40;">
-                                            {{ $source['name'] }}
-                                        </span>
+                                        <a href="{{ $route }}">{{ $suggestion->getItemName() }}</a>
+                                        <span class="label" style="background: {{ $source['color'] }}; color: #fff; margin-left: 5px;">{{ $source['name'] }}</span>
                                     </td>
-                                    <td class="text-muted">
+                                    <td style="color: #777;">
                                         {{ \Modules\Directory\Models\ToolSuggestion::fieldLabels()[$suggestion->field] ?? $suggestion->field }}
                                     </td>
                                     <td>
@@ -142,14 +117,14 @@
                                     </td>
                                     <td>
                                         @if($suggestion->status === 'pending')
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning fw-medium">{{ __('En attente') }}</span>
+                                            <span class="label label-warning">{{ __('En attente') }}</span>
                                         @elseif($suggestion->status === 'approved')
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success fw-medium">{{ __('Approuvée') }}</span>
+                                            <span class="label label-success">{{ __('Approuvée') }}</span>
                                         @elseif($suggestion->status === 'rejected')
-                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger fw-medium">{{ __('Rejetée') }}</span>
+                                            <span class="label label-danger">{{ __('Rejetée') }}</span>
                                         @endif
                                     </td>
-                                    <td class="text-muted">{{ $suggestion->created_at->format('d/m/Y') }}</td>
+                                    <td style="color: #777;">{{ $suggestion->created_at->format('d/m/Y') }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -159,20 +134,20 @@
             </div>
 
             {{-- Onglet votes --}}
-            <div class="tab-pane fade" id="votes" role="tabpanel" aria-labelledby="votes-tab">
+            <div role="tabpanel" class="tab-pane" id="votes">
                 @if($votes->isEmpty())
-                    <div class="py-5 text-center text-muted">
-                        <i data-lucide="thumbs-up" class="mb-2 d-block"></i>
-                        <p class="mb-2">{{ __('Vous n\'avez pas encore voté sur la roadmap.') }}</p>
+                    <div style="text-align: center; padding: 40px 20px; color: #999;">
+                        <i class="fa fa-thumbs-up fa-3x" style="margin-bottom: 10px; display: block;"></i>
+                        <p>{{ __('Vous n\'avez pas encore voté sur la roadmap.') }}</p>
                         @if(Route::has('directory.roadmap'))
-                            <a href="{{ route('directory.roadmap') }}" class="btn btn-primary btn-sm rounded-2">
+                            <a href="{{ route('directory.roadmap') }}" class="btn btn-primary btn-sm">
                                 {{ __('Voir la roadmap') }}
                             </a>
                         @endif
                     </div>
                 @else
-                    <div class="table-responsive scroll-sm">
-                        <table class="table bordered-table sm-table mb-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped" style="margin-bottom: 0;">
                             <thead>
                                 <tr>
                                     <th>{{ __('Idée') }}</th>
@@ -184,14 +159,14 @@
                                 @foreach($votes as $vote)
                                 @if($vote->idea)
                                 <tr>
-                                    <td class="fw-medium">{{ $vote->idea->title }}</td>
+                                    <td style="font-weight: 600;">{{ $vote->idea->title }}</td>
                                     <td>
                                         @php $ideaColor = $vote->idea->status->color(); @endphp
-                                        <span class="badge fw-medium" style="background: {{ $ideaColor }}20; color: {{ $ideaColor }}; border: 1px solid {{ $ideaColor }}40;">
+                                        <span class="label" style="background: {{ $ideaColor }}; color: #fff;">
                                             {{ $vote->idea->status->label() }}
                                         </span>
                                     </td>
-                                    <td class="text-muted">{{ $vote->created_at->format('d/m/Y') }}</td>
+                                    <td style="color: #777;">{{ $vote->created_at->format('d/m/Y') }}</td>
                                 </tr>
                                 @endif
                                 @endforeach
@@ -202,20 +177,20 @@
             </div>
 
             {{-- Onglet ressources --}}
-            <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
+            <div role="tabpanel" class="tab-pane" id="resources">
                 @if($resources->isEmpty())
-                    <div class="py-5 text-center text-muted">
-                        <i data-lucide="book-open" class="mb-2 d-block"></i>
-                        <p class="mb-2">{{ __('Vous n\'avez pas encore soumis de ressources.') }}</p>
+                    <div style="text-align: center; padding: 40px 20px; color: #999;">
+                        <i class="fa fa-book fa-3x" style="margin-bottom: 10px; display: block;"></i>
+                        <p>{{ __('Vous n\'avez pas encore soumis de ressources.') }}</p>
                         @if(Route::has('directory.index'))
-                            <a href="{{ route('directory.index') }}" class="btn btn-primary btn-sm rounded-2">
+                            <a href="{{ route('directory.index') }}" class="btn btn-primary btn-sm">
                                 {{ __('Voir le répertoire') }}
                             </a>
                         @endif
                     </div>
                 @else
-                    <div class="table-responsive scroll-sm">
-                        <table class="table bordered-table sm-table mb-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped" style="margin-bottom: 0;">
                             <thead>
                                 <tr>
                                     <th>{{ __('Titre') }}</th>
@@ -229,22 +204,20 @@
                                 @foreach($resources as $resource)
                                 <tr>
                                     <td>
-                                        <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" class="fw-medium text-decoration-none">
+                                        <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener">
                                             {{ Str::limit($resource->title, 50) }}
                                         </a>
                                     </td>
-                                    <td class="text-muted">{{ $resource->tool->name ?? '—' }}</td>
-                                    <td>
-                                        <span class="badge bg-info bg-opacity-10 text-info border border-info fw-medium">{{ $resource->type }}</span>
-                                    </td>
+                                    <td style="color: #777;">{{ $resource->tool->name ?? '—' }}</td>
+                                    <td><span class="label label-info">{{ $resource->type }}</span></td>
                                     <td>
                                         @if($resource->is_approved)
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success fw-medium">{{ __('Approuvée') }}</span>
+                                            <span class="label label-success">{{ __('Approuvée') }}</span>
                                         @else
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning fw-medium">{{ __('En attente') }}</span>
+                                            <span class="label label-warning">{{ __('En attente') }}</span>
                                         @endif
                                     </td>
-                                    <td class="text-muted">{{ $resource->created_at->format('d/m/Y') }}</td>
+                                    <td style="color: #777;">{{ $resource->created_at->format('d/m/Y') }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>

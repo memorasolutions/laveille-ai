@@ -18,10 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Modules\Blog\Models\Article;
-use Modules\Blog\Models\Comment;
 use Modules\Core\Shared\Traits\VerifiesPassword;
-use Modules\SaaS\Models\Plan;
 
 class UserDashboardController extends Controller
 {
@@ -36,37 +33,19 @@ class UserDashboardController extends Controller
     {
         $user = auth()->user();
 
-        $userArticleIds = Article::where('user_id', $user->id)->pluck('id');
-
         $stats = [
-            'articles_count' => $userArticleIds->count(),
-            'published_count' => Article::where('user_id', $user->id)->where('status', 'published')->count(),
-            'draft_count' => Article::where('user_id', $user->id)->where('status', 'draft')->count(),
-            'comments_count' => Comment::whereIn('article_id', $userArticleIds)->count(),
+            'suggestions_count' => class_exists(\Modules\Directory\Models\ToolSuggestion::class)
+                ? \Modules\Directory\Models\ToolSuggestion::where('user_id', $user->id)->count() : 0,
+            'votes_count' => class_exists(\Modules\Roadmap\Models\Vote::class)
+                ? \Modules\Roadmap\Models\Vote::where('user_id', $user->id)->count() : 0,
+            'bookmarks_count' => class_exists(\Modules\Core\Models\Bookmark::class)
+                ? \Modules\Core\Models\Bookmark::where('user_id', $user->id)->count() : 0,
         ];
-
-        $recentArticles = Article::where('user_id', $user->id)
-            ->latest()
-            ->take(5)
-            ->get();
-
-        // Plan actuel (via subscriptions → plans, ou "Free")
-        $planName = 'Free';
-        $activeSub = DB::table('subscriptions')
-            ->where('user_id', $user->id)
-            ->whereIn('stripe_status', ['active', 'trialing'])
-            ->whereNull('ends_at')
-            ->first();
-
-        if ($activeSub) {
-            $plan = Plan::where('stripe_price_id', $activeSub->stripe_price)->first();
-            $planName = $plan->name ?? 'Pro';
-        }
 
         $unreadNotifications = $user->unreadNotifications()->count();
 
         return view('auth::dashboard.index', compact(
-            'user', 'stats', 'recentArticles', 'planName', 'unreadNotifications'
+            'user', 'stats', 'unreadNotifications'
         ));
     }
 

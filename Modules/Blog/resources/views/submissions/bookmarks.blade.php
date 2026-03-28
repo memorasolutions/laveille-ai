@@ -1,13 +1,9 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends(fronttheme_layout())
+@extends('auth::layouts.user-frontend')
 
 @section('title', __('Mes favoris') . ' - ' . config('app.name'))
 
-@section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Mes favoris')])
-@endsection
-
-@section('content')
+@section('user-content')
 <div class="container" style="padding: 20px 0 60px; min-height: 50vh;">
     <div style="max-width: 800px; margin: 0 auto;">
         <h1 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); margin: 0 0 24px;">🔖 {{ __('Mes favoris') }}</h1>

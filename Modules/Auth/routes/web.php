@@ -32,7 +32,7 @@ use Modules\Auth\Livewire\Register;
 use Modules\Auth\Livewire\ResetPassword;
 use Modules\Auth\Livewire\TwoFactorChallenge;
 use Modules\Auth\Services\AuthService;
-use Modules\Core\Http\Middleware\SetBackofficeTheme;
+
 
 Route::middleware(['guest', 'throttle:10,1'])->group(function () {
     Route::get('/login', Login::class)->name('login');
@@ -93,8 +93,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');
 });
 
-// User Dashboard (espace personnel, auth requise, thème dynamique)
-Route::middleware(['auth', SetBackofficeTheme::class])->group(function () {
+// User Dashboard (espace personnel, auth requise, layout frontend USNews)
+Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user/profile', [UserDashboardController::class, 'profile'])->name('user.profile');
     Route::put('/user/profile', [UserDashboardController::class, 'updateProfile'])->name('user.profile.update');

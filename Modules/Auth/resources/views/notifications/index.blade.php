@@ -1,110 +1,110 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('auth::layouts.app')
+@extends('auth::layouts.user-frontend')
 
-@section('title', __('Notifications'))
+@section('title', __('Notifications') . ' - ' . config('app.name'))
 
-@section('content')
+@section('user-content')
 
-<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+<div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; flex-wrap: wrap !important; margin-bottom: 20px;">
     <div>
-        <h1 class="fw-semibold mb-1">{{ __('Notifications') }}</h1>
-        <p class="text-muted mb-0">
+        <h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">{{ __('Notifications') }}</h2>
+        <p style="color: #777; margin: 0;">
             @if($unreadCount > 0)
-                <span class="text-primary fw-semibold">{{ $unreadCount }}</span> {{ __('non lue(s)') }}
+                <strong style="color: #337ab7;">{{ $unreadCount }}</strong> {{ __('non lue(s)') }}
             @else
                 {{ __('Tout est à jour.') }}
             @endif
         </p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
+    <div style="margin-top: 5px;">
         @if($unreadCount > 0)
-        <form method="POST" action="{{ route('user.notifications.markAllRead') }}">
-            @csrf
-            <button type="submit" class="btn btn-outline-primary rounded-2">
-                <i data-lucide="check"></i>
-                {{ __('Tout marquer comme lu') }}
-            </button>
-        </form>
+            <form method="POST" action="{{ route('user.notifications.markAllRead') }}" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-default btn-sm">
+                    <i class="fa fa-check"></i> {{ __('Tout marquer comme lu') }}
+                </button>
+            </form>
         @endif
         @if($notifications->total() > 0)
-        <form method="POST" action="{{ route('user.notifications.destroyAll') }}"
-              onsubmit="return confirm('{{ __('Supprimer toutes les notifications ?') }}')">
-            @csrf @method('DELETE')
-            <button type="submit" class="btn btn-danger rounded-2">
-                <i data-lucide="trash-2"></i>
-                {{ __('Tout supprimer') }}
-            </button>
-        </form>
+            <form method="POST" action="{{ route('user.notifications.destroyAll') }}" style="display: inline;"
+                  onsubmit="return confirm('{{ __('Supprimer toutes les notifications ?') }}')">
+                @csrf
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fa fa-trash"></i> {{ __('Tout supprimer') }}
+                </button>
+            </form>
         @endif
     </div>
 </div>
 
-<div class="card">
+<div class="panel panel-default">
     @if($notifications->isEmpty())
-        <div class="card-body py-5 text-center text-muted">
-            <i data-lucide="bell-off" class="d-block mx-auto mb-2" style="width:48px;height:48px;"></i>
-            <p class="fw-medium mb-1">{{ __('Aucune notification.') }}</p>
-            <p class="text-sm mb-0">{{ __('Vous recevrez ici les alertes et messages importants.') }}</p>
+        <div class="panel-body" style="text-align: center; padding: 40px 20px; color: #999;">
+            <i class="fa fa-bell-slash fa-3x" style="margin-bottom: 10px; display: block;"></i>
+            <p style="font-weight: 600;">{{ __('Aucune notification.') }}</p>
+            <p><small>{{ __('Vous recevrez ici les alertes et messages importants.') }}</small></p>
         </div>
     @else
-        <ul class="list-unstyled mb-0">
+        <ul class="list-group" style="margin-bottom: 0;">
             @foreach($notifications as $notification)
             @php
-                $type = class_basename($notification->type);
                 $iconMap = [
-                    'PasswordChangedNotification' => ['shield-check', 'text-success', 'bg-success bg-opacity-10'],
-                    'SystemAlertNotification'     => ['alert-triangle', 'text-warning', 'bg-warning bg-opacity-10'],
+                    'PasswordChangedNotification' => ['fa-shield', 'color: #5cb85c;'],
+                    'SystemAlertNotification'     => ['fa-exclamation-triangle', 'color: #f0ad4e;'],
+                    'SuggestionApproved'          => ['fa-check-circle', 'color: #5cb85c;'],
+                    'SuggestionRejected'          => ['fa-times-circle', 'color: #d9534f;'],
+                    'VoteThresholdNotification'   => ['fa-star', 'color: #f0ad4e;'],
                 ];
-                [$icon, $iconColor, $iconBg] = $iconMap[$type] ?? ['bell', 'text-primary', 'bg-primary bg-opacity-10'];
+                $type = class_basename($notification->type);
+                [$icon, $iconStyle] = $iconMap[$type] ?? ['fa-bell', 'color: #337ab7;'];
             @endphp
-            <li class="d-flex align-items-start gap-2 px-3 py-3 border-bottom
-                {{ is_null($notification->read_at) ? 'bg-primary bg-opacity-10' : '' }}"
-                style="border-color: var(--bs-border-color) !important;">
-                <div class="rounded-circle {{ $iconBg }} d-flex align-items-center justify-content-center flex-shrink-0 mt-1" style="width:36px;height:36px;">
-                    <i data-lucide="{{ $icon }}" class="{{ $iconColor }}"></i>
-                </div>
-                <div class="flex-grow-1 min-w-0">
-                    <p class="fw-semibold text-sm mb-1">
-                        {{ $notification->data['message'] ?? $notification->data['title'] ?? $type }}
-                    </p>
-                    @if(! empty($notification->data['body'] ?? $notification->data['details'] ?? null))
-                        <p class="text-sm text-muted mb-1">
-                            {{ $notification->data['body'] ?? $notification->data['details'] }}
+            <li class="list-group-item {{ is_null($notification->read_at) ? '' : '' }}"
+                style="{{ is_null($notification->read_at) ? 'background: #f0f7ff; border-left: 3px solid #337ab7;' : '' }}">
+                <div style="display: flex !important; align-items: flex-start !important;">
+                    <i class="fa {{ $icon }} fa-lg" style="{{ $iconStyle }} margin-right: 12px; margin-top: 3px; flex-shrink: 0;"></i>
+                    <div style="flex: 1 !important; min-width: 0;">
+                        <p style="font-weight: 600; font-size: 14px; margin: 0 0 3px;">
+                            {{ $notification->data['message'] ?? $notification->data['title'] ?? $type }}
                         </p>
-                    @endif
-                    <p class="small text-muted mb-0">
-                        {{ $notification->created_at->diffForHumans() }}
-                        @if(is_null($notification->read_at))
-                            <span class="ms-2 d-inline-block" style="width:8px;height:8px;background:#487FFF;border-radius:50%;vertical-align:middle;"></span>
+                        @if(!empty($notification->data['body'] ?? $notification->data['details'] ?? null))
+                            <p style="color: #777; font-size: 13px; margin: 0 0 3px;">
+                                {{ $notification->data['body'] ?? $notification->data['details'] }}
+                            </p>
                         @endif
-                    </p>
-                </div>
-                <div class="flex-shrink-0 d-flex align-items-center gap-2">
-                    @if(is_null($notification->read_at))
-                    <form method="POST" action="{{ route('user.notifications.markRead', $notification->id) }}">
-                        @csrf
-                        <button type="submit" title="{{ __('Marquer comme lue') }}"
-                                class="btn btn-sm btn-outline-secondary rounded-2 px-2 py-1">
-                            <i data-lucide="check-circle"></i>
-                        </button>
-                    </form>
-                    @endif
-                    <form method="POST" action="{{ route('user.notifications.destroy', $notification->id) }}"
-                          onsubmit="return confirm('{{ __('Supprimer cette notification ?') }}')">
-                        @csrf @method('DELETE')
-                        <button type="submit" title="{{ __('Supprimer') }}"
-                                class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1">
-                            <i data-lucide="x-circle"></i>
-                        </button>
-                    </form>
+                        <small style="color: #999;">
+                            {{ $notification->created_at->diffForHumans() }}
+                            @if(is_null($notification->read_at))
+                                <span style="display: inline-block; width: 8px; height: 8px; background: #337ab7; border-radius: 50%; vertical-align: middle; margin-left: 5px;"></span>
+                            @endif
+                        </small>
+                    </div>
+                    <div style="flex-shrink: 0; margin-left: 10px; white-space: nowrap;">
+                        @if(is_null($notification->read_at))
+                            <form method="POST" action="{{ route('user.notifications.markRead', $notification->id) }}" style="display: inline;">
+                                @csrf
+                                <button type="submit" class="btn btn-default btn-xs" title="{{ __('Marquer comme lue') }}">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </form>
+                        @endif
+                        <form method="POST" action="{{ route('user.notifications.destroy', $notification->id) }}" style="display: inline;"
+                              onsubmit="return confirm('{{ __('Supprimer cette notification ?') }}')">
+                            @csrf
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-danger btn-xs" title="{{ __('Supprimer') }}">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </li>
             @endforeach
         </ul>
         @if($notifications->hasPages())
-        <div class="card-body border-top">
-            {{ $notifications->links() }}
-        </div>
+            <div class="panel-footer" style="text-align: center;">
+                {{ $notifications->links() }}
+            </div>
         @endif
     @endif
 </div>
