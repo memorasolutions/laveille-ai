@@ -52,7 +52,7 @@
                             <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
                             <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
                             @isset($categories)
-                            <li class="menu-item-has-children" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
+                            <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Catégories') }}</a>
                                 {{-- Mega menu catégories --}}
                                 <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms
@@ -91,7 +91,7 @@
                                 </ul>
                             </li>
                             @endisset
-                            <li class="menu-item-has-children" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
+                            <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Ressources') }}</a>
                                 {{-- Mega menu --}}
                                 <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms
@@ -168,7 +168,7 @@
                             @if(Route::has('shorturl.create'))
                             <li><a href="{{ route('shorturl.create') }}" style="color:var(--c-primary, #0B7285)!important;font-weight:700!important;">🔗 {{ __('Raccourcir') }}</a></li>
                             @endif
-                            <li class="menu-item-has-children" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
+                            <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Pages') }}</a>
                                 {{-- Mega menu pages --}}
                                 <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms

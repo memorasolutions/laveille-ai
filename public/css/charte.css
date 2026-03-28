@@ -735,3 +735,10 @@ select:focus {
     .user-space .panel-body { padding: 15px; }
     .user-space .user-stat-card h3 { font-size: 22px; }
 }
+
+/* ═══ SECTION 21 — Mega menus : masquer sub-menu fallback en desktop ═══ */
+@media (min-width: 992px) {
+    .has-mega-menu > .sub-menu {
+        display: none !important;
+    }
+}
