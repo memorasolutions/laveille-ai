@@ -139,6 +139,14 @@ class CommunityController extends Controller
                 $transcript = $ytService->extractTranscript($validated['url'], $validated['language']);
                 if ($transcript) {
                     $resourceData['video_summary'] = $ytService->summarize($transcript['transcript'], $transcript['video_id']);
+                } else {
+                    // Fallback : résumé basé sur les métadonnées (titre + outil) quand transcript indisponible
+                    $resourceData['video_summary'] = $ytService->summarizeFromMeta(
+                        $validated['title'] ?? '',
+                        $resourceData['channel_name'] ?? '',
+                        $tool->name ?? '',
+                        $tool->short_description ?? ''
+                    );
                 }
             } catch (\Throwable $e) {
                 // Pas bloquant — la ressource est créée sans résumé

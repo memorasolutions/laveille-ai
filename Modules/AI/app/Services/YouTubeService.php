@@ -97,6 +97,51 @@ class YouTubeService
         });
     }
 
+    public function summarizeFromMeta(string $videoTitle, string $channelName, string $toolName, string $toolDescription): ?string
+    {
+        if (empty($videoTitle)) {
+            return null;
+        }
+
+        $cacheKey = 'yt_meta_summary_' . md5($videoTitle);
+
+        return Cache::remember($cacheKey, 86400, function () use ($videoTitle, $channelName, $toolName, $toolDescription) {
+            try {
+                $context = "Vidéo : {$videoTitle}";
+                if ($channelName) {
+                    $context .= "\nChaine : {$channelName}";
+                }
+                if ($toolName) {
+                    $context .= "\nOutil concerné : {$toolName} - {$toolDescription}";
+                }
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
+                    'HTTP-Referer' => config('app.url'),
+                ])->timeout(60)->post('https://openrouter.ai/api/v1/chat/completions', [
+                    'model' => 'deepseek/deepseek-chat',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'A partir du titre de cette video YouTube et du contexte, genere un court resume en francais (3-5 phrases) de ce que la video couvre probablement. Mentionne que le resume est base sur le titre car les sous-titres ne sont pas disponibles. Sois informatif et utile.',
+                        ],
+                        ['role' => 'user', 'content' => $context],
+                    ],
+                ]);
+
+                if ($response->failed()) {
+                    return null;
+                }
+
+                return $response->json('choices.0.message.content');
+            } catch (\Throwable $e) {
+                Log::warning('YouTubeService: erreur resume meta', ['exception' => $e->getMessage()]);
+
+                return null;
+            }
+        });
+    }
+
     public static function getVideoId(string $url): ?string
     {
         $patterns = [
