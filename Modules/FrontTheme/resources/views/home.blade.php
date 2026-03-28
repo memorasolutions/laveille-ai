@@ -221,18 +221,29 @@
         <style>
             .hp-section { padding: 40px 0; }
             .hp-section-alt { background: #F8FAFB; }
-            .hp-header { margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+            .hp-header { margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #eee; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; }
             .hp-title { font-family: var(--f-heading); color: var(--c-dark); margin: 0; font-size: 1.5rem; font-weight: 700; }
             .hp-subtitle { color: #6B7280; font-size: 13px; margin-top: 4px; }
-            .hp-link-all { color: var(--c-primary); font-weight: 600; font-size: 14px; text-decoration: none; padding: 6px 12px; min-height: 24px; display: inline-flex; align-items: center; }
+            .hp-link-all { color: var(--c-primary); font-weight: 600; font-size: 14px; text-decoration: none; padding: 6px 12px; min-height: 24px; display: inline-flex !important; align-items: center !important; }
             .hp-link-all:hover { text-decoration: underline; color: var(--c-primary); }
-            .hp-card { display: block; background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 20px; text-decoration: none !important; color: var(--c-dark); transition: transform 0.2s, box-shadow 0.2s; height: 100%; margin-bottom: 20px; }
+            .hp-card { display: block; background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; text-decoration: none !important; color: var(--c-dark); transition: transform 0.2s, box-shadow 0.2s; height: 100%; margin-bottom: 20px; }
             .hp-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); color: var(--c-dark); border-color: var(--c-primary); }
-            .hp-card h3 { margin: 0 0 8px; font-size: 1rem; font-weight: 700; font-family: var(--f-heading); color: var(--c-dark); }
-            .hp-card p { color: #6B7280; font-size: 13px; line-height: 1.5; margin: 0; }
-            .hp-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; margin-bottom: 8px; }
-            .hp-row-flex { display: flex; flex-wrap: wrap; }
-            .hp-row-flex > [class*='col-'] { display: flex; flex-direction: column; }
+            .hp-card-img { height: 130px; overflow: hidden; position: relative; }
+            .hp-card-img img { width: 100%; height: 100%; object-fit: cover; }
+            .hp-card-img-gradient { height: 100%; display: flex !important; align-items: center !important; justify-content: center !important; }
+            .hp-card-img-text { font-family: var(--f-heading); font-size: 16px; font-weight: 700; color: #fff; text-align: center; padding: 10px; }
+            .hp-card-body { padding: 16px; }
+            .hp-card-body h3 { margin: 0 0 8px; font-size: 1rem; font-weight: 700; font-family: var(--f-heading); color: var(--c-dark); }
+            .hp-card-body p { color: #6B7280; font-size: 13px; line-height: 1.5; margin: 0 0 10px; }
+            .hp-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; }
+            .hp-badges { display: flex !important; gap: 6px !important; flex-wrap: wrap !important; }
+            .hp-row-flex { display: flex !important; flex-wrap: wrap !important; }
+            .hp-row-flex > [class*='col-'] { display: flex !important; flex-direction: column !important; }
+            .hp-card-term-header { height: 100px; overflow: hidden; position: relative; display: flex !important; align-items: center !important; justify-content: center !important; }
+            .hp-card-term-header img { width: 100%; height: 100%; object-fit: cover; }
+            .hp-card-term-emoji { font-size: 2.5rem; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+            .hp-card-icon-area { padding: 24px 16px 8px; text-align: center; }
+            .hp-card-icon-area .hp-icon { font-size: 2.5rem; display: block; margin-bottom: 4px; }
         </style>
         @endpush
 
@@ -249,13 +260,34 @@
                 </div>
                 <div class="row hp-row-flex">
                     @foreach($popularTools as $tool)
+                    @php
+                        $screenshotSrc = $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot)) : '';
+                        $gradientColors = ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'];
+                        $gIdx = abs(crc32($tool->name)) % count($gradientColors);
+                        $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source'];
+                        $pricingColors = ['free' => '#059669', 'freemium' => '#B45309', 'paid' => '#B91C1C', 'open_source' => '#6366F1'];
+                    @endphp
                     <div class="col-md-3 col-sm-6 col-xs-12">
                         <a href="{{ route('directory.show', $tool->slug) }}" class="hp-card">
-                            @if($tool->categories->isNotEmpty())
-                                <span class="hp-badge" style="background: {{ $tool->categories->first()->color ?? 'var(--c-primary)' }};">{{ $tool->categories->first()->name }}</span>
-                            @endif
-                            <h3>{{ $tool->name }}</h3>
-                            <p>{{ Str::limit($tool->short_description, 80) }}</p>
+                            <div class="hp-card-img" style="{{ $screenshotSrc ? '' : 'background: linear-gradient(135deg, ' . $gradientColors[$gIdx] . ', ' . $gradientColors[($gIdx + 1) % count($gradientColors)] . ');' }}">
+                                @if($screenshotSrc)
+                                    <img src="{{ $screenshotSrc }}" alt="{{ $tool->name }}" loading="lazy">
+                                @else
+                                    <div class="hp-card-img-gradient">
+                                        <span class="hp-card-img-text">{{ $tool->name }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="hp-card-body">
+                                <h3>{{ $tool->name }}</h3>
+                                <p>{{ Str::limit($tool->short_description, 80) }}</p>
+                                <div class="hp-badges">
+                                    <span class="hp-badge" style="background: {{ $pricingColors[$tool->pricing] ?? '#6B7280' }};">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
+                                    @if($tool->categories->isNotEmpty())
+                                        <span class="hp-badge" style="background: {{ $tool->categories->first()->color ?? 'var(--c-primary)' }};">{{ $tool->categories->first()->name }}</span>
+                                    @endif
+                                </div>
+                            </div>
                         </a>
                     </div>
                     @endforeach
@@ -277,18 +309,27 @@
                 </div>
                 <div class="row hp-row-flex">
                     @foreach($featuredTerms as $term)
+                    @php
+                        $heroSrc = $term->hero_image ? (str_starts_with($term->hero_image, 'http') ? $term->hero_image : asset($term->hero_image)) : '';
+                        $diffColor = match($term->difficulty ?? 'beginner') { 'beginner' => '#059669', 'intermediate' => '#B45309', 'advanced' => '#B91C1C', default => '#6B7280' };
+                        $diffLabel = match($term->difficulty ?? 'beginner') { 'beginner' => __('Débutant'), 'intermediate' => __('Intermédiaire'), 'advanced' => __('Avancé'), default => __('Débutant') };
+                    @endphp
                     <div class="col-md-4 col-sm-6 col-xs-12">
                         <a href="{{ route('dictionary.show', $term->slug) }}" class="hp-card">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                                <span style="font-size: 1.5rem;">{{ $term->icon ?? '📄' }}</span>
-                                @php
-                                    $diffColor = match($term->difficulty ?? 'beginner') { 'beginner' => '#059669', 'intermediate' => '#B45309', 'advanced' => '#B91C1C', default => '#6B7280' };
-                                    $diffLabel = match($term->difficulty ?? 'beginner') { 'beginner' => __('Débutant'), 'intermediate' => __('Intermédiaire'), 'advanced' => __('Avancé'), default => __('Débutant') };
-                                @endphp
-                                <span class="hp-badge" style="background: {{ $diffColor }};">{{ $diffLabel }}</span>
+                            <div class="hp-card-term-header" style="{{ $heroSrc ? '' : 'background: linear-gradient(135deg, #0B7285, #1a365d);' }}">
+                                @if($heroSrc)
+                                    <img src="{{ $heroSrc }}" alt="{{ $term->name }}" loading="lazy">
+                                @else
+                                    <span class="hp-card-term-emoji">{{ $term->icon ?? '📄' }}</span>
+                                @endif
                             </div>
-                            <h3>{{ $term->name }}</h3>
-                            <p>{{ Str::limit(strip_tags($term->definition), 80) }}</p>
+                            <div class="hp-card-body">
+                                <div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; margin-bottom: 8px;">
+                                    <h3 style="margin: 0;">{{ $term->name }}</h3>
+                                    <span class="hp-badge" style="background: {{ $diffColor }}; flex-shrink: 0; margin-left: 8px;">{{ $diffLabel }}</span>
+                                </div>
+                                <p>{{ Str::limit(strip_tags($term->definition), 80) }}</p>
+                            </div>
                         </a>
                     </div>
                     @endforeach
@@ -312,18 +353,20 @@
                     @foreach($featuredAcronyms as $acronym)
                     <div class="col-md-3 col-sm-6 col-xs-12">
                         <a href="{{ route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())) }}" class="hp-card">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                @if($acronym->logo_url)
-                                    <img src="{{ $acronym->logo_url }}" alt="{{ $acronym->acronym }}" style="width: 36px; height: 36px; object-fit: contain; border-radius: 50%; background: #F3F4F6;" loading="lazy">
-                                @else
-                                    <div style="width: 36px; height: 36px; border-radius: 50%; background: {{ $acronym->category?->color ?? '#6B7280' }}; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">{{ substr($acronym->acronym, 0, 1) }}</div>
+                            <div class="hp-card-body">
+                                <div style="display: flex !important; align-items: center !important; gap: 10px; margin-bottom: 10px;">
+                                    @if($acronym->logo_url)
+                                        <img src="{{ $acronym->logo_url }}" alt="{{ $acronym->acronym }}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 50%; background: #F3F4F6; flex-shrink: 0;" loading="lazy">
+                                    @else
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: {{ $acronym->category?->color ?? '#6B7280' }}; color: #fff; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: 700; font-size: 15px; flex-shrink: 0;">{{ substr($acronym->acronym, 0, 1) }}</div>
+                                    @endif
+                                    <h3 style="margin: 0; font-size: 1.1rem;">{{ $acronym->acronym }}</h3>
+                                </div>
+                                <p style="font-weight: 500; margin-bottom: 10px;">{{ Str::limit($acronym->full_name, 60) }}</p>
+                                @if($acronym->category)
+                                    <span class="hp-badge" style="background: {{ $acronym->category->color ?? '#6B7280' }};">{{ $acronym->category->name }}</span>
                                 @endif
-                                <h3 style="margin: 0; font-size: 1rem;">{{ $acronym->acronym }}</h3>
                             </div>
-                            <p style="font-weight: 500; margin-bottom: 8px;">{{ Str::limit($acronym->full_name, 60) }}</p>
-                            @if($acronym->category)
-                                <span class="hp-badge" style="background: {{ $acronym->category->color ?? '#6B7280' }};">{{ $acronym->category->name }}</span>
-                            @endif
                         </a>
                     </div>
                     @endforeach
@@ -346,10 +389,14 @@
                 <div class="row hp-row-flex">
                     @foreach($interactiveTools as $tool)
                     <div class="col-md-3 col-sm-6 col-xs-12">
-                        <a href="{{ route('tools.show', $tool->slug) }}" class="hp-card" style="text-align: center;">
-                            <div style="font-size: 2.5rem; margin-bottom: 12px;">{{ $tool->icon ?? '⚡' }}</div>
-                            <h3>{{ $tool->name }}</h3>
-                            <p>{{ Str::limit($tool->description, 60) }}</p>
+                        <a href="{{ route('tools.show', $tool->slug) }}" class="hp-card">
+                            <div class="hp-card-icon-area">
+                                <span class="hp-icon">{{ $tool->icon ?? '⚡' }}</span>
+                            </div>
+                            <div class="hp-card-body" style="text-align: center;">
+                                <h3>{{ $tool->name }}</h3>
+                                <p>{{ Str::limit($tool->description, 60) }}</p>
+                            </div>
                         </a>
                     </div>
                     @endforeach
