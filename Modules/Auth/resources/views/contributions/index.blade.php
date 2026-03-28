@@ -193,10 +193,18 @@
                             'documentation', 'doc' => 'fa-book',
                             default => 'fa-link',
                         };
+                        $ytThumb = null;
+                        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/', $resource->url ?? '', $m)) {
+                            $ytThumb = 'https://img.youtube.com/vi/' . $m[1] . '/mqdefault.jpg';
+                        }
                     @endphp
-                    <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
-                        <i class="fa {{ $resIcon }}" style="color: #fff; font-size: 18px;"></i>
-                    </div>
+                    @if($ytThumb)
+                        <img src="{{ $ytThumb }}" alt="" style="width: 64px; height: 42px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
+                    @else
+                        <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
+                            <i class="fa {{ $resIcon }}" style="color: #fff; font-size: 18px;"></i>
+                        </div>
+                    @endif
                     <div style="flex: 1 !important; min-width: 0;">
                         <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" style="font-weight: 600; color: var(--c-dark); text-decoration: none; font-size: 14px;">
                             {{ Str::limit($resource->title, 50) }} <i class="fa fa-external-link" style="font-size: 10px; color: var(--c-text-muted);"></i>
