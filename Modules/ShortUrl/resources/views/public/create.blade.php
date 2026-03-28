@@ -108,19 +108,22 @@
             <div style="display: flex !important; justify-content: center !important; flex-wrap: wrap !important; gap: 10px;">
                 {{-- Copier --}}
                 <button @click="copyLink()"
-                    :style="copied ? 'background:#10B981;color:#fff;' : 'background:#F3F4F6;color:var(--c-dark, #1A1D23);'"
-                    style="border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all .2s;">
-                    <span x-show="!copied">📋 {{ __('Copier') }}</span>
-                    <span x-show="copied" x-cloak>✓ {{ __('Copié !') }}</span>
+                    :style="copied ? 'background:#10B981;color:#fff;' : 'background:var(--c-primary, #0B7285);color:#fff;'"
+                    style="border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all .2s; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);"
+                    onmouseover="if(!this.__x) this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    <span x-show="!copied">📋 {{ __('Copier le lien') }}</span>
+                    <span x-show="copied" x-cloak>✅ {{ __('Copié !') }}</span>
                 </button>
                 {{-- QR code --}}
                 <a :href="'{{ url('/raccourcir') }}/' + result?.slug + '/qr'" target="_blank"
-                    style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-block;">
+                    style="background: #1A1D23; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; text-decoration: none; display: inline-block; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);"
+                    onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                     📱 {{ __('QR code') }}
                 </a>
                 {{-- Stats --}}
                 <a :href="'{{ url('/raccourcir') }}/' + result?.slug + '/stats'"
-                    style="background: #6B7280; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-block;">
+                    style="background: #1A1D23; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; text-decoration: none; display: inline-block; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);"
+                    onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                     📊 {{ __('Statistiques') }}
                 </a>
             </div>
