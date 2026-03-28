@@ -618,29 +618,66 @@ select:focus {
     color: var(--c-primary);
 }
 
-/* Boutons */
+/* Boutons — reset global pour TOUS les boutons dans l'espace utilisateur */
+.user-space button,
+.user-space .btn,
+.user-space a[style*="border-radius"] {
+    outline: none !important;
+    box-shadow: none !important;
+    font-family: var(--f-heading) !important;
+    transition: background .2s, border-color .2s, transform .1s !important;
+}
+.user-space button:focus,
+.user-space button:active,
+.user-space button:focus-visible,
+.user-space .btn:focus,
+.user-space .btn:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.user-space .btn {
+    border-radius: var(--r-btn) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    line-height: 1.4 !important;
+}
 .user-space .btn-primary {
     background: var(--c-primary) !important;
     border-color: var(--c-primary) !important;
-    border-radius: var(--r-btn);
-    font-family: var(--f-heading);
-    font-weight: 600;
+    color: #fff !important;
 }
 .user-space .btn-primary:hover,
 .user-space .btn-primary:focus {
     background: var(--c-primary-hover) !important;
     border-color: var(--c-primary-hover) !important;
 }
-.user-space .btn-default {
-    border-radius: var(--r-btn);
-    font-family: var(--f-heading);
-    border-color: #E5E7EB;
+.user-space .btn-default,
+.user-space .btn-outline-secondary {
+    background: #fff !important;
+    border: 1px solid #D1D5DB !important;
+    color: var(--c-dark) !important;
 }
-.user-space .btn-default:hover { background: #F9FAFB; border-color: #D1D5DB; }
+.user-space .btn-default:hover { background: #F9FAFB !important; border-color: #9CA3AF !important; }
 .user-space .btn-danger {
-    border-radius: var(--r-btn);
     background: #DC2626 !important;
     border-color: #DC2626 !important;
+    color: #fff !important;
+}
+.user-space .btn-danger:hover { background: #B91C1C !important; }
+.user-space .btn-outline-danger {
+    background: transparent !important;
+    border: 1px solid #FECACA !important;
+    color: #DC2626 !important;
+}
+.user-space .btn-outline-danger:hover { background: #FEF2F2 !important; }
+.user-space .btn-sm {
+    padding: 5px 12px !important;
+    font-size: 12px !important;
+}
+.user-space .btn-xs {
+    padding: 3px 8px !important;
+    font-size: 11px !important;
 }
 
 /* Labels/badges */
@@ -749,7 +786,12 @@ select:focus {
         display: none !important;
     }
 }
-/* Fix outline/border boutons shorturl — thème USNews override les inline styles */
+/* Fix global boutons user-space — thème USNews override les inline styles */
+.user-space button {
+    outline: none !important;
+    box-shadow: none !important;
+    border-width: 1px !important;
+}
 .user-space button:focus,
 .user-space button:active,
 .user-space button:focus-visible {
