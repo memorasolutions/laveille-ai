@@ -76,22 +76,16 @@
                         <p class="help-block">{{ __('Max. 500 caractères') }}</p>
                     </div>
                     <div style="margin-bottom: 20px;">
-                        <label class="control-label">{{ __('Photo de profil') }}</label>
-                        <div style="display: flex !important; align-items: center !important;">
-                            @if($user->avatar)
-                                <img src="{{ asset('storage/' . $user->avatar) }}"
-                                     style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
-                            @else
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #dbe9fe; color: #337ab7; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: 700; font-size: 18px; margin-right: 15px;">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                                </div>
-                            @endif
-                            <div style="flex: 1 !important;">
-                                <input type="file" name="avatar" accept="image/*" class="form-control">
-                                @if($errors->has('avatar'))<p class="help-block" style="color: #d9534f;">{{ $errors->first('avatar') }}</p>@endif
-                                <p class="help-block">{{ __('PNG, JPG, WebP - max. 2 Mo') }}</p>
-                            </div>
-                        </div>
+                        <x-core::file-upload
+                            name="avatar"
+                            :label="__('Photo de profil')"
+                            accept="image/*"
+                            :max-size="2"
+                            :max-width="800"
+                            :current-image="$user->avatar ? asset('storage/' . $user->avatar) : ''"
+                            :help-text="__('PNG, JPG, WebP - max. 2 Mo')"
+                        />
+                        @if($errors->has('avatar'))<p class="help-block" style="color: #d9534f;">{{ $errors->first('avatar') }}</p>@endif
                     </div>
                     <button type="submit" class="btn btn-primary">{{ __('Mettre à jour le profil') }}</button>
                 </form>
