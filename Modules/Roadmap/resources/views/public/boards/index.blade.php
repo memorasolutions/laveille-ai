@@ -10,7 +10,7 @@
 
     <div class="row">
     @forelse($boards as $board)
-        <div class="col-md-6 col-sm-12" style="margin-bottom:20px;">
+        <div class="{{ $boards->count() === 1 ? 'col-md-8 col-md-offset-2' : 'col-md-6' }} col-sm-12" style="margin-bottom:20px;">
             <a href="{{ route('roadmap.boards.show', $board) }}" style="display:block!important;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:28px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);height:100%;"
                onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'">
                 <div style="display:flex!important;align-items:flex-start!important;gap:16px;">
