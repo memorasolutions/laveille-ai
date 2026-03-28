@@ -178,6 +178,17 @@
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
 
+    {{-- Lightbox image réutilisable --}}
+    <div x-data="{ open: false, src: '', alt: '' }"
+         @lightbox.window="open = true; src = $event.detail.src; alt = $event.detail.alt || ''"
+         x-show="open" x-cloak
+         @click="open = false"
+         @keydown.escape.window="open && (open = false)"
+         style="position:fixed!important;inset:0!important;background:rgba(0,0,0,0.9)!important;z-index:99998!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:20px!important;cursor:zoom-out;">
+        <button @click="open = false" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;z-index:1;line-height:1;">&times;</button>
+        <img :src="src" :alt="alt" @click.stop style="max-width:95%;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 0 40px rgba(0,0,0,0.5);cursor:default;">
+    </div>
+
     {{-- Modale confirmation réutilisable (remplace confirm() natif) --}}
     <div x-data="{ open: false, title: '', message: '', action: null }"
          @confirm-action.window="open = true; title = $event.detail.title || 'Confirmer'; message = $event.detail.message || ''; action = $event.detail.action"

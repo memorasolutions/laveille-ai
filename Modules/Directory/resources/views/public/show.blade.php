@@ -832,7 +832,7 @@
                     @foreach($screenshots as $ss)
                     <div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom: 16px;">
                         <div style="border: 1px solid #E5E7EB; border-radius: var(--r-base); overflow: hidden; background: #F9FAFB;">
-                            <a href="{{ asset($ss->image_path) }}" target="_blank" style="display: block;">
+                            <a href="{{ asset($ss->image_path) }}" @click.prevent="$dispatch('lightbox', { src: '{{ asset($ss->image_path) }}', alt: '{{ $ss->caption ?? $tool->name }}' })" style="display: block; cursor: zoom-in;">
                                 <img src="{{ asset($ss->image_path) }}" alt="{{ $ss->caption ?? $tool->name }}" loading="lazy" style="width: 100%; height: 200px; object-fit: cover; display: block;">
                             </a>
                             <div style="padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
