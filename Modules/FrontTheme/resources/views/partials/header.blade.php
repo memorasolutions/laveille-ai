@@ -55,8 +55,9 @@
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Catégories') }}</a>
                                 {{-- Mega menu catégories --}}
-                                <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms
-                                    style="position:absolute;left:50%;transform:translateX(-50%);top:100%;width:520px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;"
+                                <div x-show="megaOpen" x-cloak
+                                    style="position:absolute;left:0;top:100%;width:520px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;opacity:1;transition:opacity .12s ease;"
+                                    :style="megaOpen ? 'opacity:1;pointer-events:auto;' : 'opacity:0;pointer-events:none;'"
                                     @click.outside="megaOpen = false">
                                     <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Explorer par thème') }}</div>
                                     <div style="display:flex!important;flex-wrap:wrap!important;gap:4px;">
@@ -94,8 +95,9 @@
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Ressources') }}</a>
                                 {{-- Mega menu --}}
-                                <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms
-                                    style="position:absolute;left:50%;transform:translateX(-50%);top:100%;width:560px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;"
+                                <div x-show="megaOpen" x-cloak
+                                    style="position:absolute;left:-100px;top:100%;width:560px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;transition:opacity .12s ease;"
+                                    :style="megaOpen ? 'opacity:1;pointer-events:auto;' : 'opacity:0;pointer-events:none;'"
                                     @click.outside="megaOpen = false">
                                     <div style="display:flex!important;gap:24px;">
                                         {{-- Colonne gauche : outils et référence --}}
@@ -169,8 +171,9 @@
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Pages') }}</a>
                                 {{-- Mega menu pages --}}
-                                <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms
-                                    style="position:absolute;right:0;top:100%;width:440px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;"
+                                <div x-show="megaOpen" x-cloak
+                                    style="position:absolute;right:0;top:100%;width:440px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;transition:opacity .12s ease;"
+                                    :style="megaOpen ? 'opacity:1;pointer-events:auto;' : 'opacity:0;pointer-events:none;'"
                                     @click.outside="megaOpen = false">
                                     <div style="display:flex!important;gap:24px;">
                                         <div style="flex:1!important;">
