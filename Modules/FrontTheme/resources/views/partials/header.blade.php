@@ -12,7 +12,7 @@
                     <div class="contact-intro">
                         <ul>
                             <li class="update"><span>{{ __('Nouveau') }}</span></li>
-                            <li>{{ $latestArticle->title ?? __('Bienvenue sur le blog') }}</li>
+                            <li>@if(isset($latestArticle))<a href="{{ route('blog.show', $latestArticle->slug) }}" style="color:inherit;text-decoration:none;">{{ $latestArticle->title }}</a>@else{{ __('Bienvenue sur le blog') }}@endif</li>
                         </ul>
                     </div>
                 </div>
