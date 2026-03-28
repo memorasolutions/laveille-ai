@@ -70,7 +70,7 @@
                             @can('view_admin_panel')
                             <li style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.15);">
                                 <a href="{{ url('/admin') }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;">
-                                    <span style="background:var(--c-accent);color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ADMIN</span>
+                                    <span style="background:#b45309;color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">ADMIN</span>
                                     {{ __('Administration') }}
                                 </a>
                             </li>
