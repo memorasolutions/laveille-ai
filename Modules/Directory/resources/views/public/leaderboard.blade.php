@@ -33,8 +33,18 @@
     {{-- Onglets mois/tout temps --}}
     <div x-data="{ tab: 'alltime' }" style="margin-bottom: 32px;">
         <div style="display:flex!important;justify-content:center!important;gap:8px;margin-bottom:24px;">
-            <button @click="tab='alltime'" :style="tab==='alltime' ? 'background:var(--c-primary);color:#fff' : 'background:#f3f4f6;color:#6b7280'" style="border:none;padding:10px 24px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;transition:all .2s;">{{ __('Tout temps') }}</button>
-            <button @click="tab='monthly'" :style="tab==='monthly' ? 'background:var(--c-primary);color:#fff' : 'background:#f3f4f6;color:#6b7280'" style="border:none;padding:10px 24px;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;transition:all .2s;">{{ __('Ce mois') }}</button>
+            <button @click="tab='alltime'"
+                :style="tab==='alltime'
+                    ? 'background:#fff;color:var(--c-dark);border:2px solid var(--c-primary);border-radius:12px;padding:10px 24px;font-family:var(--f-heading);font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(11,114,133,0.2);transition:all .2s;'
+                    : 'background:rgba(255,255,255,0.7);color:var(--c-text-muted);border:2px solid transparent;border-radius:12px;padding:10px 24px;font-family:var(--f-heading);font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;'">
+                <i class="fa fa-trophy"></i> {{ __('Tout temps') }}
+            </button>
+            <button @click="tab='monthly'"
+                :style="tab==='monthly'
+                    ? 'background:#fff;color:var(--c-dark);border:2px solid var(--c-primary);border-radius:12px;padding:10px 24px;font-family:var(--f-heading);font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(11,114,133,0.2);transition:all .2s;'
+                    : 'background:rgba(255,255,255,0.7);color:var(--c-text-muted);border:2px solid transparent;border-radius:12px;padding:10px 24px;font-family:var(--f-heading);font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;'">
+                <i class="fa fa-calendar"></i> {{ __('Ce mois') }}
+            </button>
         </div>
 
         {{-- Contenu tout temps --}}
