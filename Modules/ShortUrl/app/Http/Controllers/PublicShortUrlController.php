@@ -25,7 +25,9 @@ class PublicShortUrlController
 
     public function create(): View
     {
-        return view('shorturl::public.create');
+        $domains = \Modules\ShortUrl\Models\ShortUrlDomain::where('is_active', true)->get();
+
+        return view('shorturl::public.create', compact('domains'));
     }
 
     public function store(Request $request): JsonResponse
@@ -38,6 +40,7 @@ class PublicShortUrlController
 
         if (Auth::check()) {
             $rules += [
+                'domain_id' => 'nullable|exists:short_url_domains,id',
                 'description' => 'nullable|string|max:1000',
                 'password' => 'nullable|string|max:255',
                 'expires_at' => 'nullable|date|after:now',
@@ -58,7 +61,7 @@ class PublicShortUrlController
         if (Auth::check()) {
             $data = [
                 'original_url' => $url,
-                'domain_id' => $this->service->getDefaultDomain()?->id,
+                'domain_id' => $request->input('domain_id') ?: $this->service->getDefaultDomain()?->id,
                 'slug' => $request->input('slug') ?: null,
                 'title' => $request->input('title'),
                 'description' => $request->input('description'),
