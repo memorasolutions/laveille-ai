@@ -35,7 +35,6 @@ jobs:
             --exclude='public/screenshots/' \
             --exclude='public/build/' \
             --exclude='bootstrap/cache/' \
-            --exclude='scripts/' \
             --exclude='tests/' \
             --exclude='_*.php' \
             --exclude='*.log' \
