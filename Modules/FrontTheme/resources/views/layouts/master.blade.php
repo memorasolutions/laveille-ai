@@ -179,7 +179,8 @@
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
 
-    {{-- Floating share bar (sidebar desktop + bottom bar mobile) --}}
+    {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
+    @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*'))
     @php $shareUrl = urlencode(request()->url()); $shareTitle = urlencode(config('app.name') . ' - ' . ($__env->yieldContent('title') ?: '')); @endphp
     <div x-data="{ copied: false }" class="share-float">
         {{-- Desktop sidebar --}}
@@ -230,6 +231,7 @@
         .share-bottom .share-btn{width:44px;height:44px;}
     }
     </style>
+    @endif
 
     {{-- Lightbox image réutilisable --}}
     <div x-data="{ open: false, src: '', alt: '' }"
