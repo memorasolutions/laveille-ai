@@ -21,7 +21,7 @@
             {{ __('Raccourcissez vos liens') }}
         </h1>
         <p style="font-size: 1.1rem; color: var(--c-text-muted, #6E7687);">
-            {{ __('Service gratuit propulsé par') }} <a href="https://veille.la" style="color:var(--c-primary, #0B7285);font-weight:700;text-decoration:none;">veille.la</a>
+            {{ __('Service gratuit propulsé par') }} <a href="https://laveille.ai" style="color:var(--c-primary, #0B7285);font-weight:700;text-decoration:none;">laveille.ai</a>
         </p>
     </div>
 
