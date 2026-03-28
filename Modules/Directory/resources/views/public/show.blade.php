@@ -605,7 +605,7 @@
                     </div>
 
                     <div style="display:flex;gap:8px;margin-bottom:12px;">
-                        <a href="{{ $res->url }}" target="_blank" rel="nofollow noopener" style="display:inline-flex;align-items:center;gap:4px;background:var(--c-primary);color:#fff;padding:6px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">🔗 {{ __('Voir sur YouTube') }}</a>
+                        @if(!$isYt)<a href="{{ $res->url }}" target="_blank" rel="nofollow noopener" style="display:inline-flex;align-items:center;gap:4px;background:var(--c-primary);color:#fff;padding:6px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">🔗 {{ __('Voir la ressource') }}</a>@endif
                         @can('view_admin_panel')
                             @include('directory::components.admin-inline-actions', [
                                 'approveUrl' => route('admin.directory.moderation.resource.approve', $res->id),
