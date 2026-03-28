@@ -163,20 +163,17 @@
         @auth
         <div x-show="!result" x-cloak style="background: #fff; border: 2px solid #E5E7EB; border-radius: 16px; padding: 20px; margin-bottom: 16px; margin-top: 4px;">
             <div style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-muted, #6E7687); margin-bottom: 14px;">{{ __('Options membres') }}</div>
-            {{-- Domaine + slug --}}
-            @if(isset($domains) && $domains->count() > 1)
-            <div style="display: flex !important; align-items: center !important; gap: 8px; margin-bottom: 12px;">
-                <label style="font-size: 12px; font-weight: 600; color: var(--c-text-muted, #6E7687); white-space: nowrap;">{{ __('Domaine') }}</label>
-                <select x-model="domain_id" x-ref="domainSelect" style="height: 40px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 8px; font-size: 13px; background: #fff; min-width: 140px;">
+            {{-- Domaine + slug fusionnés --}}
+            <div style="display: flex !important; align-items: center !important; gap: 0; margin-bottom: 12px;">
+                @if(isset($domains) && $domains->count() > 1)
+                <select x-model="domain_id" style="height: 40px; padding: 0 8px; background: #F3F4F6; border: 1px solid #D1D5DB; border-right: none; border-radius: 8px 0 0 8px; font-size: 13px; color: var(--c-text-muted, #6E7687); -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer; min-width: 110px; text-align: center; font-weight: 600;">
                     @foreach($domains as $domain)
-                        <option value="{{ $domain->id }}" {{ $domain->is_default ? 'selected' : '' }}>{{ $domain->domain }}</option>
+                        <option value="{{ $domain->id }}" {{ $domain->is_default ? 'selected' : '' }}>{{ $domain->domain }}/</option>
                     @endforeach
                 </select>
-            </div>
-            @endif
-            <div style="display: flex !important; align-items: center !important; gap: 0; margin-bottom: 12px;">
-                <span style="height: 40px; padding: 0 10px; background: #F3F4F6; border: 1px solid #D1D5DB; border-right: none; border-radius: 8px 0 0 8px; font-size: 13px; color: var(--c-text-muted, #6E7687); display: flex !important; align-items: center !important;"
-                    x-text="($refs.domainSelect ? $refs.domainSelect.options[$refs.domainSelect.selectedIndex]?.text : 'veille.la') + '/'">veille.la/</span>
+                @else
+                <span style="height: 40px; padding: 0 10px; background: #F3F4F6; border: 1px solid #D1D5DB; border-right: none; border-radius: 8px 0 0 8px; font-size: 13px; color: var(--c-text-muted, #6E7687); display: flex !important; align-items: center !important;">veille.la/</span>
+                @endif
                 <input type="text" x-model="slug" placeholder="{{ __('slug-personnalise (optionnel)') }}"
                     style="flex: 1 !important; height: 40px; border: 1px solid #D1D5DB; border-radius: 0 8px 8px 0; padding: 0 12px; font-size: 14px;">
             </div>
