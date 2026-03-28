@@ -159,7 +159,8 @@
 
         {{-- Options membres (slug + accordéons avancés) --}}
         @auth
-        <div x-show="!result" x-cloak style="margin-bottom: 16px;">
+        <div x-show="!result" x-cloak style="background: #fff; border: 2px solid #E5E7EB; border-radius: 16px; padding: 20px; margin-bottom: 16px; margin-top: 4px;">
+            <div style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-muted, #6E7687); margin-bottom: 14px;">{{ __('Options membres') }}</div>
             {{-- Slug --}}
             <div style="display: flex !important; align-items: center !important; gap: 0; margin-bottom: 12px;">
                 <span style="height: 40px; padding: 0 10px; background: #F3F4F6; border: 1px solid #D1D5DB; border-right: none; border-radius: 8px 0 0 8px; font-size: 13px; color: var(--c-text-muted, #6E7687); display: flex !important; align-items: center !important;">veille.la/</span>
