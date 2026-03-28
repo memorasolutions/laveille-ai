@@ -45,6 +45,11 @@ Route::middleware(['web', 'auth'])->prefix('admin/directory')->name('admin.direc
     Route::post('/{tool}/capture-screenshot', [DirectoryAdminController::class, 'captureScreenshot'])->name('capture-screenshot');
     Route::post('/{tool}/set-main-screenshot/{screenshotId}', [DirectoryAdminController::class, 'setMainScreenshot'])->name('set-main-screenshot');
 
+    // Resources CRUD (admin)
+    Route::get('/resources', [ModerationController::class, 'resources'])->name('resources');
+    Route::get('/resources/{id}/edit', [ModerationController::class, 'editResource'])->name('resources.edit');
+    Route::put('/resources/{id}', [ModerationController::class, 'updateResource'])->name('resources.update');
+
     // Moderation
     Route::get('/moderation', [ModerationController::class, 'index'])->name('moderation');
     Route::post('/moderation/review/{id}/approve', [ModerationController::class, 'approveReview'])->name('moderation.review.approve');

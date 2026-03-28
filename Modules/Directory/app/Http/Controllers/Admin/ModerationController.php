@@ -85,6 +85,41 @@ class ModerationController extends Controller
         return back()->with('success', __('Ressource supprimée (sans pénalité).'));
     }
 
+    public function resources(): View
+    {
+        $resources = ToolResource::with('user', 'tool')->latest()->paginate(20);
+
+        return view('directory::admin.resources', compact('resources'));
+    }
+
+    public function editResource(int $id): View
+    {
+        $resource = ToolResource::with('tool')->findOrFail($id);
+
+        return view('directory::admin.resource-edit', compact('resource'));
+    }
+
+    public function updateResource(\Illuminate\Http\Request $request, int $id): RedirectResponse
+    {
+        $resource = ToolResource::findOrFail($id);
+
+        $resource->update($request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|in:video,article,tutorial,documentation',
+            'language' => 'required|in:fr,en',
+            'video_summary' => 'nullable|string|max:5000',
+            'duration_seconds' => 'nullable|integer|min:0',
+            'channel_name' => 'nullable|string|max:255',
+            'channel_url' => 'nullable|url|max:500',
+            'is_approved' => 'nullable|boolean',
+        ]));
+
+        $resource->is_approved = $request->boolean('is_approved');
+        $resource->save();
+
+        return redirect()->route('admin.directory.resources')->with('success', __('Ressource mise à jour.'));
+    }
+
     public function resolveReport(int $id): RedirectResponse
     {
         ToolReport::findOrFail($id)->update(['is_resolved' => true]);
