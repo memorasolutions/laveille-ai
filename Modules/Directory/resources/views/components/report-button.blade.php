@@ -6,7 +6,7 @@
 
     {{-- Modale signalement --}}
     <div x-show="showReport" x-cloak @click.self="showReport = false"
-         style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+         style="position:fixed!important;inset:0!important;background:rgba(0,0,0,0.5)!important;z-index:9999!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:20px!important;">
         <div @click.stop style="background:#fff;border-radius:16px;padding:24px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <h4 style="font-weight:700;color:var(--c-dark);margin:0;">{{ __('Signaler ce contenu') }}</h4>

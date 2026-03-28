@@ -15,9 +15,9 @@
                 {{ __('Supprimer') }}
             </button>
             @endif
-            <button @click="if(confirm('{{ __('Rejeter et pénaliser l\'auteur (-10 pts) ?') }}')){fetch('{{ $rejectUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){done=true;$el.closest('[data-mod-item]')?.remove()}})}"
+            <button @click="if(confirm('Rejeter et retirer 10 pts de reputation ?')){fetch('{{ $rejectUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){done=true;$el.closest('[data-mod-item]')?.remove()}})}"
                 style="font-size:11px;background:#ef4444;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;"
-                title="{{ __('Rejete et retire 10 points de réputation à l\'auteur') }}">
+                title="Rejeter et retirer 10 points de reputation">
                 {{ __('Rejeter (-10 pts)') }}
             </button>
         </div>
