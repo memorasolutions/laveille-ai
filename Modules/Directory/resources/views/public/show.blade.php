@@ -852,27 +852,69 @@
                 </div>
             @endif
 
-            {{-- Upload form --}}
+            {{-- Upload form (drop + paste + file) --}}
             @auth
-                <div style="background: #F0F4F8; border-radius: var(--r-base); padding: 20px; border: 2px dashed #CBD5E1;">
-                    <h4 style="font-weight: 700; color: var(--c-dark); margin: 0 0 12px; font-size: 15px;">{{ __('Ajouter un screenshot') }}</h4>
+                <div x-data="{
+                    preview: null,
+                    dragging: false,
+                    handleFile(file) {
+                        if (!file || !file.type.startsWith('image/')) return;
+                        if (file.size > 5 * 1024 * 1024) { alert('{{ __('Image trop lourde (max 5 Mo)') }}'); return; }
+                        this.preview = URL.createObjectURL(file);
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        this.$refs.fileInput.files = dt.files;
+                    },
+                    handlePaste(e) {
+                        const items = e.clipboardData?.items;
+                        if (!items) return;
+                        for (const item of items) {
+                            if (item.type.startsWith('image/')) {
+                                e.preventDefault();
+                                this.handleFile(item.getAsFile());
+                                return;
+                            }
+                        }
+                    },
+                    handleDrop(e) {
+                        this.dragging = false;
+                        const file = e.dataTransfer?.files?.[0];
+                        if (file) this.handleFile(file);
+                    }
+                }"
+                @paste.window="handlePaste($event)"
+                style="background:#f0f4f8;border-radius:var(--r-base);padding:20px;border:2px dashed #cbd5e1;transition:border-color .2s,background .2s;"
+                :style="dragging && 'border-color:var(--c-primary);background:#e0f2fe'"
+                @dragover.prevent="dragging = true"
+                @dragleave.prevent="dragging = false"
+                @drop.prevent="handleDrop($event)">
+
+                    <h4 style="font-weight:700;color:var(--c-dark);margin:0 0 12px;font-size:15px;">{{ __('Ajouter un screenshot') }}</h4>
+
+                    {{-- Zone drop/paste --}}
+                    <div x-show="!preview" style="text-align:center;padding:24px 16px;margin-bottom:12px;">
+                        <div style="font-size:36px;margin-bottom:8px;">📋</div>
+                        <p style="color:#6b7280;font-size:14px;margin:0 0 4px;font-weight:600;">{{ __('Collez (Ctrl+V), glissez-déposez ou sélectionnez') }}</p>
+                        <p style="color:#9ca3af;font-size:12px;margin:0;">{{ __('Max 5 Mo. Formats : JPG, PNG, WebP.') }}</p>
+                    </div>
+
+                    {{-- Preview --}}
+                    <div x-show="preview" x-cloak style="text-align:center;margin-bottom:12px;">
+                        <img :src="preview" alt="Preview" style="max-height:200px;max-width:100%;border-radius:8px;border:1px solid #e5e7eb;">
+                        <button type="button" @click="preview = null; $refs.fileInput.value = ''" style="display:block;margin:8px auto 0;background:none;border:none;color:#ef4444;font-size:12px;cursor:pointer;font-weight:600;">{{ __('Retirer') }}</button>
+                    </div>
+
                     <form method="POST" action="{{ route('directory.screenshots.store', $tool->slug) }}" enctype="multipart/form-data">
                         @csrf
-                        <div class="row">
-                            <div class="col-md-6" style="margin-bottom: 12px;">
-                                <input type="file" name="screenshot" accept="image/*" required
-                                    style="width: 100%; padding: 8px; border: 1px solid #E5E7EB; border-radius: var(--r-base); background: #fff; font-size: 13px;">
-                                <small style="color: #9CA3AF; font-size: 11px;">{{ __('Max 5 Mo. Formats : JPG, PNG, WebP.') }}</small>
-                            </div>
-                            <div class="col-md-4" style="margin-bottom: 12px;">
-                                <input type="text" name="caption" placeholder="{{ __('Description (optionnel)') }}" maxlength="255"
-                                    style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 13px;">
-                            </div>
-                            <div class="col-md-2" style="margin-bottom: 12px;">
-                                <button type="submit" style="width: 100%; height: 38px; background: var(--c-primary); color: #fff; border: none; border-radius: var(--r-btn); font-weight: 600; font-size: 13px; cursor: pointer;">
-                                    {{ __('Envoyer') }}
-                                </button>
-                            </div>
+                        <div style="display:flex!important;gap:8px;flex-wrap:wrap!important;align-items:flex-end!important;">
+                            <input type="file" name="screenshot" accept="image/*" required x-ref="fileInput"
+                                @change="handleFile($event.target.files[0])"
+                                style="flex:1;min-width:200px;padding:8px;border:1px solid #e5e7eb;border-radius:var(--r-base);background:#fff;font-size:13px;">
+                            <input type="text" name="caption" placeholder="{{ __('Description (optionnel)') }}" maxlength="255"
+                                style="flex:1;min-width:150px;height:38px;padding:0 12px;border:1px solid #e5e7eb;border-radius:var(--r-base);font-size:13px;">
+                            <button type="submit" style="height:38px;padding:0 20px;background:var(--c-primary);color:#fff;border:none;border-radius:var(--r-btn);font-weight:600;font-size:13px;cursor:pointer;">
+                                {{ __('Envoyer') }}
+                            </button>
                         </div>
                     </form>
                 </div>
