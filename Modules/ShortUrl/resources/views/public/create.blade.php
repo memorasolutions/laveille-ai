@@ -356,28 +356,29 @@
     </div>
 
     {{-- Avantages --}}
-    <div class="row" style="margin-top: 48px; display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 20px;">
-        <div class="col-md-4 col-sm-12" style="text-align: center; padding: 24px;">
-            <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-                <span style="font-size: 28px;">✅</span>
+    @php
+        $features = [
+            ['icon' => '✅', 'title' => __('100% gratuit'), 'desc' => __('Aucune limite pour les membres. Pas de pub.')],
+            ['icon' => '📱', 'title' => __('QR code inclus'), 'desc' => __('Chaque lien a son QR code telechargeable et personnalisable.')],
+            ['icon' => '📊', 'title' => __('Statistiques detaillees'), 'desc' => __('Clics, pays, appareils, sources — tout en temps reel.')],
+            ['icon' => '🔗', 'title' => __('Slug personnalise'), 'desc' => __('Choisissez votre propre alias memorable.')],
+            ['icon' => '🌐', 'title' => __('Multi-domaines'), 'desc' => __('veille.la, go3.ca — choisissez votre domaine.')],
+            ['icon' => '🔒', 'title' => __('Protection par mot de passe'), 'desc' => __('Restreignez l\'acces a vos liens.')],
+            ['icon' => '⏰', 'title' => __('Expiration et limites'), 'desc' => __('Date d\'expiration et nombre max de clics.')],
+            ['icon' => '📈', 'title' => __('Tracking UTM'), 'desc' => __('Source, medium, campagne — integre a Google Analytics.')],
+            ['icon' => '🖼️', 'title' => __('Preview social'), 'desc' => __('Personnalisez le titre et l\'image pour les reseaux sociaux.')],
+        ];
+    @endphp
+    <div class="row" style="margin-top: 48px; display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 0;">
+        @foreach($features as $f)
+        <div class="col-md-4 col-sm-6 col-xs-12" style="text-align: center; padding: 20px 16px;">
+            <div style="width: 56px; height: 56px; border-radius: 14px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 10px;">
+                <span style="font-size: 24px;">{{ $f['icon'] }}</span>
             </div>
-            <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-dark, #1A1D23); margin-bottom: 6px;">{{ __('100% gratuit') }}</h3>
-            <p style="color: var(--c-text-muted, #6E7687); font-size: 14px;">{{ __('Aucune limite pour les membres. Pas de pub.') }}</p>
+            <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1rem; color: var(--c-dark, #1A1D23); margin-bottom: 4px;">{{ $f['title'] }}</h3>
+            <p style="color: var(--c-text-muted, #6E7687); font-size: 13px; margin: 0;">{{ $f['desc'] }}</p>
         </div>
-        <div class="col-md-4 col-sm-12" style="text-align: center; padding: 24px;">
-            <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-                <span style="font-size: 28px;">📱</span>
-            </div>
-            <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-dark, #1A1D23); margin-bottom: 6px;">{{ __('QR code inclus') }}</h3>
-            <p style="color: var(--c-text-muted, #6E7687); font-size: 14px;">{{ __('Chaque lien a son QR code téléchargeable.') }}</p>
-        </div>
-        <div class="col-md-4 col-sm-12" style="text-align: center; padding: 24px;">
-            <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-                <span style="font-size: 28px;">📊</span>
-            </div>
-            <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-dark, #1A1D23); margin-bottom: 6px;">{{ __('Statistiques détaillées') }}</h3>
-            <p style="color: var(--c-text-muted, #6E7687); font-size: 14px;">{{ __('Clics, pays, appareils, sources — tout en temps réel.') }}</p>
-        </div>
+        @endforeach
     </div>
 
 {{-- CTA supprimé d'ici — déplacé plus haut après le formulaire --}}
