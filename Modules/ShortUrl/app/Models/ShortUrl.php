@@ -53,6 +53,13 @@ class ShortUrl extends Model
         'password',
     ];
 
+    protected function slug(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            set: fn (?string $value) => $value ? strtolower(preg_replace('/[^a-zA-Z0-9_-]/', '', \Illuminate\Support\Str::ascii($value))) : $value,
+        );
+    }
+
     protected function casts(): array
     {
         return [
