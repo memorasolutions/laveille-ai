@@ -21,7 +21,7 @@
             <form method="POST" action="{{ route('user.notifications.markAllRead') }}" style="display: inline;">
                 @csrf
                 <button type="submit" class="btn btn-default btn-sm">
-                    <i class="fa fa-check"></i> {{ __('Tout marquer comme lu') }}
+                    {{ __('Tout marquer comme lu') }}
                 </button>
             </form>
         @endif
@@ -31,7 +31,7 @@
                 @csrf
                 <input type="hidden" name="_method" value="DELETE">
                 <button type="submit" class="btn btn-danger btn-sm">
-                    <i class="fa fa-trash"></i> {{ __('Tout supprimer') }}
+                    {{ __('Tout supprimer') }}
                 </button>
             </form>
         @endif
@@ -41,7 +41,7 @@
 <div class="panel panel-default">
     @if($notifications->isEmpty())
         <div class="panel-body" style="text-align: center; padding: 40px 20px; color: #999;">
-            <i class="fa fa-bell-slash fa-3x" style="margin-bottom: 10px; display: block;"></i>
+            <div style="font-size: 48px; margin-bottom: 10px;">🔔</div>
             <p style="font-weight: 600;">{{ __('Aucune notification.') }}</p>
             <p><small>{{ __('Vous recevrez ici les alertes et messages importants.') }}</small></p>
         </div>
@@ -49,20 +49,21 @@
         <ul class="list-group" style="margin-bottom: 0;">
             @foreach($notifications as $notification)
             @php
-                $iconMap = [
-                    'PasswordChangedNotification' => ['fa-shield', 'color: #5cb85c;'],
-                    'SystemAlertNotification'     => ['fa-exclamation-triangle', 'color: #f0ad4e;'],
-                    'SuggestionApproved'          => ['fa-check-circle', 'color: #5cb85c;'],
-                    'SuggestionRejected'          => ['fa-times-circle', 'color: #d9534f;'],
-                    'VoteThresholdNotification'   => ['fa-star', 'color: #f0ad4e;'],
+                $emojiMap = [
+                    'PasswordChangedNotification' => '🔒',
+                    'SystemAlertNotification'     => '⚠️',
+                    'SuggestionApproved'          => '✅',
+                    'SuggestionRejected'          => '❌',
+                    'VoteThresholdNotification'   => '⭐',
+                    'NewResourceNotification'     => '📹',
                 ];
                 $type = class_basename($notification->type);
-                [$icon, $iconStyle] = $iconMap[$type] ?? ['fa-bell', 'color: #337ab7;'];
+                $emoji = $emojiMap[$type] ?? '🔔';
             @endphp
-            <li class="list-group-item {{ is_null($notification->read_at) ? '' : '' }}"
-                style="{{ is_null($notification->read_at) ? 'background: #f0f7ff; border-left: 3px solid #337ab7;' : '' }}">
+            <li class="list-group-item"
+                style="{{ is_null($notification->read_at) ? 'background: #f0f7ff; border-left: 3px solid var(--c-primary, #0B7285);' : '' }}">
                 <div style="display: flex !important; align-items: flex-start !important;">
-                    <i class="fa {{ $icon }} fa-lg" style="{{ $iconStyle }} margin-right: 12px; margin-top: 3px; flex-shrink: 0;"></i>
+                    <span style="font-size: 18px; margin-right: 12px; margin-top: 2px; flex-shrink: 0;">{{ $emoji }}</span>
                     <div style="flex: 1 !important; min-width: 0;">
                         <p style="font-weight: 600; font-size: 14px; margin: 0 0 3px;">
                             {{ $notification->data['message'] ?? $notification->data['title'] ?? $type }}
@@ -83,18 +84,18 @@
                         @if(is_null($notification->read_at))
                             <form method="POST" action="{{ route('user.notifications.markRead', $notification->id) }}" style="display: inline;">
                                 @csrf
-                                <button type="submit" class="btn btn-default btn-xs" title="{{ __('Marquer comme lue') }}">
-                                    <i class="fa fa-check"></i>
-                                </button>
+                                <a href="javascript:void(0)" onclick="this.closest('form').submit()" class="btn btn-default btn-xs" title="{{ __('Marquer comme lue') }}" style="-webkit-appearance:none;text-decoration:none;">
+                                    {{ __('Lu') }}
+                                </a>
                             </form>
                         @endif
                         <form method="POST" action="{{ route('user.notifications.destroy', $notification->id) }}" style="display: inline;"
                               onsubmit="return confirm('{{ __('Supprimer cette notification ?') }}')">
                             @csrf
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-danger btn-xs" title="{{ __('Supprimer') }}">
-                                <i class="fa fa-times"></i>
-                            </button>
+                            <a href="javascript:void(0)" onclick="this.closest('form').submit()" class="btn btn-danger btn-xs" title="{{ __('Supprimer') }}" style="-webkit-appearance:none;text-decoration:none;">
+                                {{ __('X') }}
+                            </a>
                         </form>
                     </div>
                 </div>
