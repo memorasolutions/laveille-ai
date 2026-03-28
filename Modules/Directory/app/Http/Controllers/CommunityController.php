@@ -336,8 +336,8 @@ class CommunityController extends Controller
 
         $path = $request->file('screenshot')->store('directory/screenshots', 'public');
 
-        $autoApprove = false;
-        if (class_exists(\Modules\Directory\Services\ReputationService::class)) {
+        $autoApprove = Auth::user()->can('view_admin_panel');
+        if (! $autoApprove && class_exists(\Modules\Directory\Services\ReputationService::class)) {
             $autoApprove = $this->reputation->shouldAutoApprove(Auth::user(), 'resource');
         }
 
