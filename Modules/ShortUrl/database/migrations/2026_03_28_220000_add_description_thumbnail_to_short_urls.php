@@ -17,8 +17,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('short_urls', function (Blueprint $table): void {
-            $table->text('description')->nullable()->after('title');
-            $table->string('thumbnail', 500)->nullable()->after('og_image');
+            if (! Schema::hasColumn('short_urls', 'description')) {
+                $table->text('description')->nullable()->after('title');
+            }
+            if (! Schema::hasColumn('short_urls', 'thumbnail')) {
+                $table->string('thumbnail', 500)->nullable()->after('og_image');
+            }
         });
     }
 
