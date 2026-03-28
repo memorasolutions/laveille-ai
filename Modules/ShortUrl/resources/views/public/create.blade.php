@@ -131,13 +131,18 @@
             </button>
         </div>
 
-        {{-- Slug personnalisé (membres seulement) --}}
+        {{-- Slug personnalisé + lien avancé (membres seulement) --}}
         @auth
         <div style="margin-bottom: 12px;" x-show="!result">
             <div style="display: flex !important; align-items: center !important; gap: 8px;">
                 <span style="font-size: 13px; color: var(--c-text-muted, #6E7687); white-space: nowrap;">veille.la/</span>
                 <input type="text" x-model="slug" placeholder="{{ __('slug-personnalise (optionnel)') }}"
                     style="flex: 1 !important; height: 38px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 12px; font-size: 14px;">
+            </div>
+            <div style="text-align: right; margin-top: 6px;">
+                <a href="{{ route('shorturl.user.create') }}" style="font-size: 12px; color: var(--c-primary, #0B7285); text-decoration: none; font-weight: 600;">
+                    ⚙️ {{ __('Options avancées (mot de passe, expiration, UTM, preview social...)') }}
+                </a>
             </div>
         </div>
         @endauth
