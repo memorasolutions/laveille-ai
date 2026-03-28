@@ -34,19 +34,19 @@
         <div class="col-md-9">
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible" role="alert">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer" style="background:none;border:none;font-size:20px;font-weight:700;color:inherit;opacity:0.5;cursor:pointer;padding:0;float:right;line-height:1;"><span aria-hidden="true">&times;</span></button>
                     {{ session('success') }}
                 </div>
             @endif
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible" role="alert">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer" style="background:none;border:none;font-size:20px;font-weight:700;color:inherit;opacity:0.5;cursor:pointer;padding:0;float:right;line-height:1;"><span aria-hidden="true">&times;</span></button>
                     {{ session('error') }}
                 </div>
             @endif
             @if(session('warning'))
                 <div class="alert alert-warning alert-dismissible" role="alert">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer" style="background:none;border:none;font-size:20px;font-weight:700;color:inherit;opacity:0.5;cursor:pointer;padding:0;float:right;line-height:1;"><span aria-hidden="true">&times;</span></button>
                     {{ session('warning') }}
                 </div>
             @endif
