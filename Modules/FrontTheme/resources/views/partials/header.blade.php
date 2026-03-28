@@ -79,6 +79,9 @@
                                     @if(Route::has('roadmap.boards.index'))
                                         <li><a href="{{ route('roadmap.boards.index') }}">{{ __('Propositions') }}</a></li>
                                     @endif
+                                    @if(Route::has('shorturl.create'))
+                                        <li><a href="{{ route('shorturl.create') }}">🔗 {{ __('Raccourcir un lien') }}</a></li>
+                                    @endif
                                 </ul>
                             </li>
                             <li class="menu-item-has-children">
