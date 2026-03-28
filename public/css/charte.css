@@ -736,9 +736,13 @@ select:focus {
     .user-space .user-stat-card h3 { font-size: 22px; }
 }
 
-/* ═══ SECTION 21 — Mega menus : masquer sub-menu fallback en desktop ═══ */
+/* ═══ SECTION 21 — Mega menus + drawer droite ═══ */
 @media (min-width: 992px) {
     .has-mega-menu > .sub-menu {
         display: none !important;
     }
+}
+/* Drawer droite masqué — redondant avec mega menus (desktop) et menu mobile (hamburger gauche) */
+.header-right-menu-wrapper {
+    display: none !important;
 }
