@@ -41,32 +41,31 @@
     </div>
 </div>
 
-{{-- Onglets --}}
-<div class="panel panel-default">
+{{-- Onglets Alpine.js --}}
+<div class="panel panel-default" x-data="{ tab: 'suggestions' }">
     <div class="panel-heading" style="padding: 0;">
         <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 0; border-bottom: none;">
-            <li role="presentation" class="active">
-                <a href="#suggestions" aria-controls="suggestions" role="tab" data-toggle="tab">
+            <li role="presentation" :class="tab === 'suggestions' ? 'active' : ''">
+                <a href="#" @click.prevent="tab = 'suggestions'" role="tab">
                     <i class="fa fa-lightbulb-o"></i> {{ __('Suggestions') }} ({{ $suggestions->count() }})
                 </a>
             </li>
-            <li role="presentation">
-                <a href="#votes" aria-controls="votes" role="tab" data-toggle="tab">
+            <li role="presentation" :class="tab === 'votes' ? 'active' : ''">
+                <a href="#" @click.prevent="tab = 'votes'" role="tab">
                     <i class="fa fa-thumbs-up"></i> {{ __('Votes') }} ({{ $votes->count() }})
                 </a>
             </li>
-            <li role="presentation">
-                <a href="#resources" aria-controls="resources" role="tab" data-toggle="tab">
+            <li role="presentation" :class="tab === 'resources' ? 'active' : ''">
+                <a href="#" @click.prevent="tab = 'resources'" role="tab">
                     <i class="fa fa-book"></i> {{ __('Ressources') }} ({{ $resources->count() }})
                 </a>
             </li>
         </ul>
     </div>
     <div class="panel-body" style="padding: 0;">
-        <div class="tab-content">
 
             {{-- Onglet suggestions --}}
-            <div role="tabpanel" class="tab-pane active" id="suggestions">
+            <div x-show="tab === 'suggestions'" x-transition>
                 @if($suggestions->isEmpty())
                     <div style="text-align: center; padding: 40px 20px; color: #999;">
                         <i class="fa fa-lightbulb-o fa-3x" style="margin-bottom: 10px; display: block;"></i>
@@ -134,7 +133,7 @@
             </div>
 
             {{-- Onglet votes --}}
-            <div role="tabpanel" class="tab-pane" id="votes">
+            <div x-show="tab === 'votes'" x-transition x-cloak>
                 @if($votes->isEmpty())
                     <div style="text-align: center; padding: 40px 20px; color: #999;">
                         <i class="fa fa-thumbs-up fa-3x" style="margin-bottom: 10px; display: block;"></i>
@@ -177,7 +176,7 @@
             </div>
 
             {{-- Onglet ressources --}}
-            <div role="tabpanel" class="tab-pane" id="resources">
+            <div x-show="tab === 'resources'" x-transition x-cloak>
                 @if($resources->isEmpty())
                     <div style="text-align: center; padding: 40px 20px; color: #999;">
                         <i class="fa fa-book fa-3x" style="margin-bottom: 10px; display: block;"></i>
@@ -226,7 +225,6 @@
                 @endif
             </div>
 
-        </div>
     </div>
 </div>
 
