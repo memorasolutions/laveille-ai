@@ -51,6 +51,19 @@ Route::middleware($frontMiddleware)
         Route::get('/{slug}/qr', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'qrCode'])->name('qr');
     });
 
+// ── Espace utilisateur : mes liens courts ──
+Route::middleware($frontMiddleware + ['auth'])
+    ->prefix('user/liens')
+    ->name('shorturl.user.')
+    ->group(function () {
+        Route::get('/', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'index'])->name('index');
+        Route::get('/create', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'create'])->name('create');
+        Route::post('/', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'store'])->name('store');
+        Route::get('/{short_url}/edit', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'edit'])->name('edit');
+        Route::put('/{short_url}', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'update'])->name('update');
+        Route::delete('/{short_url}', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'destroy'])->name('destroy');
+    });
+
 // ── Routes domaine veille.la (redirection slug + racine → laveille.ai) ──
 Route::middleware(['web'])->domain('veille.la')->group(function () {
     Route::get('/', fn () => redirect('https://laveille.ai', 301));

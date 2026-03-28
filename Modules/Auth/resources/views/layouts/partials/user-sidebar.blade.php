@@ -41,6 +41,11 @@
                 <i class="fa fa-bookmark" style="width: 20px;"></i> {{ __('Mes favoris') }}
             </a>
         @endif
+        @if(Route::has('shorturl.user.index'))
+            <a href="{{ route('shorturl.user.index') }}" class="list-group-item {{ request()->routeIs('shorturl.user.*') ? 'active' : '' }}">
+                <i class="fa fa-link" style="width: 20px;"></i> {{ __('Mes liens courts') }}
+            </a>
+        @endif
         @if(Route::has('user.notifications'))
             <a href="{{ route('user.notifications') }}" class="list-group-item {{ request()->routeIs('user.notifications') ? 'active' : '' }}">
                 <i class="fa fa-bell" style="width: 20px;"></i> {{ __('Notifications') }}
