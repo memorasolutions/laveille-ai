@@ -470,6 +470,9 @@
             <button type="button" class="rt-sort-tab" :class="sortBy === 'rating' && 'rt-sort-active'" @click="setSort('rating')">⭐ {{ __('Populaires') }}</button>
             <button type="button" class="rt-sort-tab" :class="sortBy === 'newest' && 'rt-sort-active'" @click="setSort('newest')">🆕 {{ __('Récents') }}</button>
             <button type="button" class="rt-sort-tab" :class="activePricing === 'free' && 'rt-sort-active'" @click="setSort('free')">🆓 {{ __('Gratuits') }}</button>
+            @if($categories->isNotEmpty())
+                <a href="{{ route('directory.compare', $categories->first()->slug) }}" class="rt-sort-tab" style="text-decoration:none!important;margin-left:auto;">📊 {{ __('Comparatifs') }}</a>
+            @endif
         </div>
 
         {{-- Section trending : récents + plus votés --}}

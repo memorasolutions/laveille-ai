@@ -174,7 +174,12 @@
         <div class="row">
             <div class="col-md-4 col-sm-4 col-xs-12" style="margin-bottom: 12px;">
                 <div style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; font-weight: 600;">📁 {{ __('Catégories') }}</div>
-                <div style="font-weight: 700; color: #111827; font-size: 14px;">{{ $tool->categories->pluck('name')->implode(', ') ?: 'N/A' }}</div>
+                <div style="font-weight: 700; color: #111827; font-size: 14px;">
+                    {{ $tool->categories->pluck('name')->implode(', ') ?: 'N/A' }}
+                    @if($tool->categories->isNotEmpty() && Route::has('directory.compare'))
+                        <a href="{{ route('directory.compare', $tool->categories->first()->slug) }}" style="font-size:11px;color:var(--c-primary);font-weight:600;margin-left:6px;text-decoration:none;">📊 {{ __('Comparer') }}</a>
+                    @endif
+                </div>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-6" style="margin-bottom: 12px;">
                 <div style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; font-weight: 600;">🎯 {{ __('Public') }}</div>
