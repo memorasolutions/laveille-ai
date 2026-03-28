@@ -74,3 +74,12 @@ Route::middleware(['web'])->domain('veille.la')->group(function () {
     Route::post('/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
         ->name('short-url.veille-password');
 });
+
+// ── Routes domaine go3.ca (redirection slug + racine → laveille.ai) ──
+Route::middleware(['web'])->domain('go3.ca')->group(function () {
+    Route::get('/', fn () => redirect('https://laveille.ai', 301));
+    Route::get('/{slug}', ShortUrlRedirectController::class)->name('short-url.go3-redirect')
+        ->where('slug', '[a-zA-Z0-9\-_]+');
+    Route::post('/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
+        ->name('short-url.go3-password');
+});
