@@ -102,8 +102,8 @@
                         }
                         $source = $suggestion->getSourceLabel();
                     @endphp
-                    <div style="width: 42px; height: 42px; border-radius: 10px; background: {{ $source['color'] }}15; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
-                        <i class="fa fa-lightbulb-o" style="color: {{ $source['color'] }}; font-size: 18px;"></i>
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: {{ $source['color'] }}; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
+                        <i class="fa fa-lightbulb-o" style="color: #fff; font-size: 18px;"></i>
                     </div>
                     <div style="flex: 1 !important; min-width: 0;">
                         <a href="{{ $route }}" style="font-weight: 600; color: var(--c-dark); text-decoration: none; font-size: 14px;">{{ $suggestion->getItemName() }}</a>
@@ -148,8 +148,8 @@
                 <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 16px 20px; display: flex !important; align-items: center !important; gap: 14px; transition: all 0.2s;"
                      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'"
                      onmouseout="this.style.transform='none';this.style.boxShadow='none'">
-                    <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(11,114,133,0.1); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
-                        <i class="fa fa-thumbs-up" style="color: var(--c-primary); font-size: 18px;"></i>
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
+                        <i class="fa fa-thumbs-up" style="color: #fff; font-size: 18px;"></i>
                     </div>
                     <div style="flex: 1 !important; min-width: 0;">
                         <div style="font-weight: 600; color: var(--c-dark); font-size: 14px;">{{ $vote->idea->title }}</div>
@@ -194,8 +194,8 @@
                             default => 'fa-link',
                         };
                     @endphp
-                    <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary-light); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
-                        <i class="fa {{ $resIcon }}" style="color: var(--c-primary); font-size: 18px;"></i>
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
+                        <i class="fa {{ $resIcon }}" style="color: #fff; font-size: 18px;"></i>
                     </div>
                     <div style="flex: 1 !important; min-width: 0;">
                         <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" style="font-weight: 600; color: var(--c-dark); text-decoration: none; font-size: 14px;">
