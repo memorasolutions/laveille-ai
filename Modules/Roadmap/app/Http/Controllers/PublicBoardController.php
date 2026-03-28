@@ -24,6 +24,7 @@ class PublicBoardController extends Controller
     public function index()
     {
         $boards = Board::where('is_public', true)
+            ->where('slug', '!=', 'glossaire-communautaire')
             ->ordered()
             ->withCount('ideas')
             ->get();
