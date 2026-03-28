@@ -365,4 +365,19 @@ class CommunityController extends Controller
 
         return response()->json(['votes' => $screenshot->votes_count]);
     }
+
+    public function deleteScreenshot(int $id): JsonResponse
+    {
+        $screenshot = ToolScreenshot::findOrFail($id);
+
+        // Supprimer le fichier image
+        $filePath = public_path($screenshot->image_path);
+        if (file_exists($filePath)) {
+            @unlink($filePath);
+        }
+
+        $screenshot->delete();
+
+        return response()->json(['success' => true]);
+    }
 }

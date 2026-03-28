@@ -837,9 +837,14 @@
                             </a>
                             <div style="padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-size: 12px; color: #6B7280;">{{ $ss->caption ?? __('Screenshot') }} — {{ $ss->user->name ?? __('Anonyme') }}</span>
-                                <button onclick="fetch('{{ route('directory.screenshots.vote', $ss->id) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d=>{this.closest('div').querySelector('.vote-count').textContent=d.votes})" style="background: none; border: none; cursor: pointer; color: #E74C3C; font-size: 13px; font-weight: 600;">
-                                    ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
-                                </button>
+                                <div style="display:flex!important;align-items:center!important;gap:8px;">
+                                    <button onclick="fetch('{{ route('directory.screenshots.vote', $ss->id) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d=>{this.closest('div').querySelector('.vote-count').textContent=d.votes})" style="background:none!important;border:none!important;cursor:pointer;color:#E74C3C;font-size:13px;font-weight:600;outline:none!important;box-shadow:none!important;">
+                                        ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
+                                    </button>
+                                    @can('view_admin_panel')
+                                    <button onclick="if(confirm('{{ __('Supprimer ce screenshot ?') }}')){fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>{if(r.ok)this.closest('.col-md-4').remove()})}" style="background:none!important;border:none!important;cursor:pointer;color:#9ca3af;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
+                                    @endcan
+                                </div>
                             </div>
                         </div>
                     </div>

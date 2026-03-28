@@ -31,6 +31,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/annuaire/{slug}/suggest', [CommunityController::class, 'storeSuggestion'])->name('directory.suggestions.store');
     Route::post('/annuaire/{slug}/screenshots', [CommunityController::class, 'storeScreenshot'])->name('directory.screenshots.store');
     Route::post('/annuaire/screenshot/{id}/vote', [CommunityController::class, 'voteScreenshot'])->name('directory.screenshots.vote');
+    Route::post('/annuaire/screenshot/{id}/delete', [CommunityController::class, 'deleteScreenshot'])->name('directory.screenshots.delete')->can('view_admin_panel');
     Route::post('/roadmap/{id}/vote', [RoadmapController::class, 'vote'])->name('directory.roadmap.vote');
 });
 
