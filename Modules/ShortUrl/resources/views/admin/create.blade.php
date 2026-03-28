@@ -38,7 +38,7 @@
                     <div class="mb-3">
                         <label for="slug" class="form-label fw-semibold">Slug personnalisé</label>
                         <div class="input-group">
-                            <span class="input-group-text">/s/</span>
+                            <span class="input-group-text">veille.la/</span>
                             <input type="text" name="slug" id="slug"
                                    class="form-control @error('slug') is-invalid @enderror"
                                    value="{{ old('slug') }}"
@@ -99,6 +99,60 @@
                                 <label for="utm_content" class="form-label fw-semibold">Contenu</label>
                                 <input type="text" name="utm_content" id="utm_content" class="form-control"
                                        value="{{ old('utm_content') }}" placeholder="banniere_header">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            {{-- Preview social et description --}}
+            <div class="card mt-4">
+                <div class="card-header py-3 px-4 border-bottom">
+                    <a class="text-decoration-none d-flex justify-content-between align-items-center"
+                       data-bs-toggle="collapse" href="#previewSocial" role="button"
+                       aria-expanded="false" aria-controls="previewSocial">
+                        <h5 class="card-title mb-0 fw-semibold">Preview social et description</h5>
+                        <i data-lucide="chevron-down" style="width:16px;height:16px;"></i>
+                    </a>
+                </div>
+                <div class="collapse" id="previewSocial">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-semibold">Description interne</label>
+                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3" placeholder="Description interne du lien">{{ old('description') }}</textarea>
+                            @error('description')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="og_title" class="form-label fw-semibold">Titre OpenGraph</label>
+                                <input type="text" class="form-control @error('og_title') is-invalid @enderror" id="og_title" name="og_title" value="{{ old('og_title') }}" placeholder="Titre pour les reseaux sociaux">
+                                @error('og_title')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-12">
+                                <label for="og_description" class="form-label fw-semibold">Description OpenGraph</label>
+                                <textarea class="form-control @error('og_description') is-invalid @enderror" id="og_description" name="og_description" rows="2" placeholder="Description pour les reseaux sociaux">{{ old('og_description') }}</textarea>
+                                @error('og_description')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="og_image" class="form-label fw-semibold">Image OpenGraph</label>
+                                <input type="url" class="form-control @error('og_image') is-invalid @enderror" id="og_image" name="og_image" value="{{ old('og_image') }}" placeholder="https://exemple.com/image.jpg">
+                                @error('og_image')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="thumbnail" class="form-label fw-semibold">Miniature</label>
+                                <input type="url" class="form-control @error('thumbnail') is-invalid @enderror" id="thumbnail" name="thumbnail" value="{{ old('thumbnail') }}" placeholder="https://exemple.com/miniature.jpg">
+                                @error('thumbnail')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
