@@ -113,6 +113,7 @@
                     @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                         @include('voting::components.vote-button', ['item' => $tool, 'type' => 'tool'])
                     @endif
+                    @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Directory\\Models\\Tool', 'id' => $tool->id])
                 </div>
                 <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;">{{ $tool->short_description }}</p>
             </div>
@@ -125,10 +126,7 @@
             <span class="rt-badge" style="background: #F3E8FF; color: #7E22CE;">{{ ucfirst($tool->website_type ?? 'website') }}</span>
             @if($tool->launch_year)<span style="color: #9CA3AF; font-size: 0.8rem;">🚀 {{ $tool->launch_year }}</span>@endif
             <span style="color: #9CA3AF; font-size: 0.8rem;">{{ number_format($tool->clicks_count) }} {{ __('clics') }}</span>
-            <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
-                @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Directory\\Models\\Tool', 'id' => $tool->id])
-                {{-- Boutons partage inline retirés — remplacés par la floating share bar globale --}}
-            </div>
+            {{-- Boutons partage inline retirés — remplacés par la floating share bar globale --}}
         </div>
         @if($tool->categories->isNotEmpty())
         <div style="margin-top: 12px;">
