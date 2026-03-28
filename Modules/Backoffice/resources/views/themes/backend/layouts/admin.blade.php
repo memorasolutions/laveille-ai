@@ -203,5 +203,22 @@
         <x-pwa-install-prompt />
         <x-pwa-update-prompt />
     @endif
+
+    {{-- Modale confirmation admin (remplace confirm() natif) --}}
+    <div x-data="{ open: false, title: '', message: '', action: null }"
+         @confirm-action.window="open = true; title = $event.detail.title || 'Confirmer'; message = $event.detail.message || ''; action = $event.detail.action"
+         x-show="open" x-cloak
+         @click.self="open = false"
+         style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;">
+        <div @click.stop style="background:#fff;border-radius:12px;padding:24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
+            <div style="font-size:28px;margin-bottom:10px;">⚠️</div>
+            <h5 style="font-weight:700;margin:0 0 8px;" x-text="title"></h5>
+            <p style="color:#6b7280;font-size:14px;margin:0 0 20px;" x-text="message"></p>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button @click="open = false" class="btn btn-outline-secondary btn-sm">{{ __('Annuler') }}</button>
+                <button @click="if(action){action()};open = false" class="btn btn-danger btn-sm">{{ __('Confirmer') }}</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
