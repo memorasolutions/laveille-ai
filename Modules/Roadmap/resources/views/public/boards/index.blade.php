@@ -3,31 +3,30 @@
 @section('title', __('Propositions de la communauté') . ' - ' . config('app.name'))
 
 @section('roadmap-content')
-    <div style="margin-bottom:24px;">
-        <h2 style="font-weight:700;color:var(--c-dark, #1A1D23);margin-bottom:8px;">{{ __('Propositions de la communauté') }}</h2>
-        <p style="color:var(--c-text-muted, #6E7687);">{{ __('Proposez vos idées, votez pour vos priorités et contribuez à faire évoluer la plateforme.') }}</p>
+    <div style="text-align:center;margin-bottom:32px;">
+        <h1 style="font-family:var(--f-heading);font-weight:800;font-size:2rem;color:var(--c-dark);margin-bottom:8px;">💡 {{ __('Propositions de la communauté') }}</h1>
+        <p style="color:#6b7280;font-size:1.1rem;">{{ __('Proposez vos idées, votez pour vos priorités et contribuez à faire évoluer la plateforme.') }}</p>
     </div>
 
+    <div class="row">
     @forelse($boards as $board)
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px;margin-bottom:16px;border-left:4px solid {{ $board->color ?? 'var(--c-primary)' }};box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-                <div>
-                    <h4 style="font-weight:700;color:var(--c-dark);margin:0 0 6px;">
-                        <a href="{{ route('roadmap.boards.show', $board) }}" style="text-decoration:none;color:inherit;">{{ $board->name }}</a>
-                    </h4>
-                    @if($board->description)
-                        <p style="color:var(--c-text-muted);margin:0;font-size:14px;">{{ Str::limit($board->description, 120) }}</p>
-                    @endif
+        <div class="col-md-6 col-sm-12" style="margin-bottom:20px;">
+            <a href="{{ route('roadmap.boards.show', $board) }}" style="display:block!important;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:28px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);height:100%;"
+               onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)'">
+                <div style="display:flex!important;align-items:flex-start!important;gap:16px;">
+                    <div style="width:48px;height:48px;border-radius:12px;background:{{ $board->color ?? 'var(--c-primary)' }}15;display:flex!important;align-items:center!important;justify-content:center!important;font-size:24px;flex-shrink:0;">💡</div>
+                    <div style="flex:1;">
+                        <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.15rem;color:var(--c-dark);margin:0 0 8px;">{{ $board->name }}</h3>
+                        @if($board->description)
+                            <p style="color:#6b7280;margin:0 0 12px;font-size:14px;line-height:1.5;">{{ Str::limit($board->description, 150) }}</p>
+                        @endif
+                        <div style="display:flex!important;align-items:center!important;gap:10px;">
+                            <span style="background:var(--c-primary-badge, #ddf4f8);color:var(--c-primary);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">{{ $board->ideas_count }} {{ __('propositions') }}</span>
+                            <span style="color:var(--c-primary);font-weight:600;font-size:13px;">{{ __('Voir') }} →</span>
+                        </div>
+                    </div>
                 </div>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <span style="background:var(--c-primary-badge, #DDF4F8);color:var(--c-primary, #0B7285);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;">
-                        {{ $board->ideas_count }} {{ __('propositions') }}
-                    </span>
-                    <a href="{{ route('roadmap.boards.show', $board) }}" style="background:var(--c-primary);color:#fff;padding:8px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
-                        {{ __('Voir') }}
-                    </a>
-                </div>
-            </div>
+            </a>
         </div>
     @empty
         <div style="text-align:center;padding:60px 20px;background:#f8fafc;border-radius:16px;border:1px dashed #e2e8f0;">
@@ -36,4 +35,5 @@
             <p style="color:var(--c-text-muted);">{{ __('Soyez le premier à proposer une idée !') }}</p>
         </div>
     @endforelse
+    </div>
 @endsection
