@@ -65,8 +65,8 @@
             {{-- Actions --}}
             <div style="display: flex !important; flex-wrap: wrap !important; gap: 6px; align-items: center !important;">
                 <button @click="navigator.clipboard.writeText('{{ $link->getShortUrl() }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                    :style="copied ? 'background:#10B981;color:#fff;' : 'background:transparent;color:var(--c-primary, #0B7285);'"
-                    style="border: 1px solid #D1D5DB; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2;"
+                    :style="copied ? 'background:#10B981;color:#fff;border-color:#10B981;' : 'background:transparent;color:var(--c-dark, #1A1D23);'"
+                    style="border: 1px solid #D1D5DB; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2; outline: none !important; box-shadow: none !important;"
                     :aria-label="copied ? '{{ __('Copié') }}' : '{{ __('Copier le lien') }}'">
                     <span x-show="!copied">{{ __('Copier') }}</span>
                     <span x-show="copied" x-cloak>{{ __('Copié!') }}</span>
@@ -83,7 +83,7 @@
                 <form action="{{ route('shorturl.user.destroy', $link) }}" method="POST" style="display: inline;">
                     @csrf @method('DELETE')
                     <button type="submit" onclick="return confirm('{{ __('Supprimer ce lien ?') }}')"
-                        style="background: transparent; color: #DC2626; border: 1px solid #FECACA; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2;"
+                        style="background: transparent; color: #DC2626; border: 1px solid #FECACA; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2; outline: none !important; box-shadow: none !important;"
                         aria-label="{{ __('Supprimer ce lien') }}">{{ __('Supprimer') }}</button>
                 </form>
             </div>
