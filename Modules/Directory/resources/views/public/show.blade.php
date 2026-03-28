@@ -522,7 +522,7 @@
             @foreach($resources as $res)
             @php
                 $isYt = !empty($res->video_id);
-                $thumbUrl = $isYt ? "https://img.youtube.com/vi/{$res->video_id}/hqdefault.jpg" : ($res->thumbnail ?? null);
+                $thumbUrl = $isYt ? "https://img.youtube.com/vi/{$res->video_id}/maxresdefault.jpg" : ($res->thumbnail ?? null);
                 $durationFormatted = $res->duration_seconds ? gmdate($res->duration_seconds >= 3600 ? 'G:i:s' : 'i:s', $res->duration_seconds) : null;
             @endphp
             <div data-mod-item x-data="{ expanded: false }" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
@@ -673,6 +673,9 @@
                                 this.channelName = data.author;
                                 this.channelUrl = data.channel_url;
                                 this.type = this.type || 'video';
+                                // Auto-détection langue : français si titre/description contient des accents français
+                                const text = (data.title || '') + ' ' + (data.description || '');
+                                this.language = /[éèêëàâçùûôîïæœ]/i.test(text) ? 'fr' : 'en';
                             }
                         } catch(e) { this.videoError = '{{ __("Erreur de connexion. Réessayez.") }}'; }
                         this.loading = false;
@@ -727,7 +730,7 @@
                     </div>
 
                     {{-- Erreur vidéo --}}
-                    <div x-show="videoError" x-cloak style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:12px;display:flex!important;align-items:center!important;gap:10px;">
+                    <div x-show="videoError" x-cloak :style="videoError ? 'display:flex;align-items:center;gap:10px;' : ''" style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
                         <span style="font-size:20px;">⚠️</span>
                         <div>
                             <div style="font-weight:600;color:#dc2626;font-size:14px;" x-text="videoError"></div>

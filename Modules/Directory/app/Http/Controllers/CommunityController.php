@@ -256,7 +256,7 @@ class CommunityController extends Controller
             'valid' => true,
             'video_id' => $videoId,
             'title' => $oembed['title'] ?? null,
-            'thumbnail' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
+            'thumbnail' => "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg",
             'author' => $oembed['author_name'] ?? null,
             'duration' => $duration,
             'channel_url' => $channelUrl,
