@@ -724,8 +724,13 @@ select:focus {
 }
 .user-space .user-stat-card small { color: var(--c-text-muted); font-size: 13px; }
 
-/* Mobile */
-@media (max-width: 767px) {
+/* Responsive desktop/mobile (fiable, remplace visible-xs/hidden-xs BS3) */
+.user-space-mobile-only { display: none !important; }
+.user-space-desktop-only { display: block !important; }
+
+@media (max-width: 991px) {
+    .user-space-mobile-only { display: block !important; }
+    .user-space-desktop-only { display: none !important; }
     .user-space .panel { box-shadow: none; }
     .user-space .panel-body { padding: 15px; }
     .user-space .user-stat-card h3 { font-size: 22px; }

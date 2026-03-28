@@ -12,8 +12,8 @@
 <div class="container user-space" style="padding: 30px 0 60px;">
     <div class="row" x-data="{ sidebarOpen: false }">
 
-        {{-- Bouton toggle sidebar mobile --}}
-        <div class="col-xs-12 visible-xs visible-sm" style="margin-bottom: 15px;">
+        {{-- Bouton toggle sidebar mobile uniquement --}}
+        <div class="col-xs-12 user-space-mobile-only" style="margin-bottom: 15px;">
             <button type="button" class="btn btn-default btn-block" @click="sidebarOpen = !sidebarOpen">
                 <i class="fa fa-bars"></i> {{ __('Menu de mon espace') }}
                 <i class="fa pull-right" :class="sidebarOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
@@ -21,12 +21,12 @@
         </div>
 
         {{-- Sidebar desktop (toujours visible) --}}
-        <div class="col-md-3 hidden-xs hidden-sm">
+        <div class="col-md-3 user-space-desktop-only">
             @include('auth::layouts.partials.user-sidebar')
         </div>
 
         {{-- Sidebar mobile (toggle Alpine.js) --}}
-        <div class="col-xs-12 visible-xs visible-sm" x-show="sidebarOpen" x-transition x-cloak>
+        <div class="col-xs-12 user-space-mobile-only" x-show="sidebarOpen" x-transition x-cloak>
             @include('auth::layouts.partials.user-sidebar')
         </div>
 
