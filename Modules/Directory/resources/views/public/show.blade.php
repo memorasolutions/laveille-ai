@@ -559,7 +559,7 @@
                             @endif
                         </div>
                         @if($res->video_summary)
-                            <p style="color:var(--c-text-muted);font-size:13px;margin:6px 0 0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit(strip_tags($res->video_summary), 120) }}</p>
+                            <p style="color:var(--c-text-muted);font-size:13px;margin:6px 0 0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit(strip_tags(Str::markdown($res->video_summary)), 120) }}</p>
                         @endif
                     </div>
 
