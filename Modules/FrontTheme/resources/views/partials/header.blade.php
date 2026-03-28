@@ -168,9 +168,9 @@
                                                         <div class="post">
                                                             <div class="img-holder">
                                                                 @if($article->featured_image)
-                                                                    <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}">
+                                                                    <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}" loading="lazy">
                                                                 @else
-                                                                    <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="">
+                                                                    <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="" loading="lazy">
                                                                 @endif
                                                             </div>
                                                             <div class="details">

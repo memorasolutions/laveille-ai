@@ -2,12 +2,12 @@
 <div class="blog-sidebar">
     <div class="widget about-widget">
         <div class="img-holder">
-            <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="border-radius: 50%; max-width: 150px;">
+            <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="border-radius: 50%; max-width: 150px;" loading="lazy">
         </div>
         <h4>{{ config('app.name') }}</h4>
         <p>{{ __('Votre veille sur l\'IA, les technologies et la transformation numérique au Québec.') }}</p>
         <div class="aw-shape">
-            <img src="{{ fronttheme_asset('images/blog/ab.png') }}" alt="">
+            <img src="{{ fronttheme_asset('images/blog/ab.png') }}" alt="" loading="lazy">
         </div>
     </div>
     <div class="widget search-widget">
@@ -36,9 +36,9 @@
                     <div class="post">
                         <div class="img-holder">
                             @if($article->featured_image)
-                                <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}">
+                                <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}" loading="lazy">
                             @else
-                                <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="">
+                                <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="" loading="lazy">
                             @endif
                         </div>
                         <div class="details">

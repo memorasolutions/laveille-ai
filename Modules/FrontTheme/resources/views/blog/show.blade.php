@@ -116,6 +116,7 @@
                                 <img src="{{ $author?->avatar ? asset($author->avatar) : asset('images/logo.webp') }}"
                                      alt="{{ $author->name ?? __('Auteur') }}"
                                      itemprop="image"
+                                     loading="lazy"
                                      style="border-radius:50%;width:120px;height:120px;object-fit:cover;">
                             </div>
                             <div class="author-content">

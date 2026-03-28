@@ -93,7 +93,7 @@
                         @foreach($articles->take(9) as $breaking)
                         <div class="wpo-breacking-item{{ $loop->first ? ' s1' : '' }}">
                             <div class="wpo-breacking-img">
-                                <img src="{{ $breaking->featured_image ? asset($breaking->featured_image) : fronttheme_asset('images/breaking-news/img-' . (($loop->index % 3) + 1) . '.jpg') }}" alt="">
+                                <img src="{{ $breaking->featured_image ? asset($breaking->featured_image) : fronttheme_asset('images/breaking-news/img-' . (($loop->index % 3) + 1) . '.jpg') }}" alt="" loading="lazy">
                             </div>
                             <div class="wpo-breacking-text">
                                 <span>{{ $breaking->published_at?->format('d M Y') }}</span>
@@ -123,13 +123,13 @@
                                     <div class="col col-lg-6 col-md-6 col-12">
                                         <div class="wpo-blog-item">
                                             <div class="wpo-blog-img">
-                                                <img src="{{ $highlight->featured_image ? asset($highlight->featured_image) : fronttheme_asset('images/blog/img-' . ($loop->iteration) . '.jpg') }}" alt="">
+                                                <img src="{{ $highlight->featured_image ? asset($highlight->featured_image) : fronttheme_asset('images/blog/img-' . ($loop->iteration) . '.jpg') }}" alt="" loading="lazy">
                                                 <div class="thumb">{{ $highlight->blogCategory->name ?? __('Général') }}</div>
                                             </div>
                                             <div class="wpo-blog-content">
                                                 <h2><a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->title }}</a></h2>
                                                 <ul>
-                                                    <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;"></li>
+                                                    <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;" loading="lazy"></li>
                                                     <li>{{ __('Par') }} <a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->getAuthorName() }}</a></li>
                                                     <li>{{ $highlight->published_at?->format('d M Y') }}</li>
                                                 </ul>
