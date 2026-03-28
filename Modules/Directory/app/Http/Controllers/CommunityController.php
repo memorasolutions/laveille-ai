@@ -338,7 +338,7 @@ class CommunityController extends Controller
 
         $autoApprove = false;
         if (class_exists(\Modules\Directory\Services\ReputationService::class)) {
-            $autoApprove = \Modules\Directory\Services\ReputationService::shouldAutoApprove(Auth::user());
+            $autoApprove = $this->reputation->shouldAutoApprove(Auth::user(), 'resource');
         }
 
         ToolScreenshot::create([
@@ -350,7 +350,7 @@ class CommunityController extends Controller
         ]);
 
         if ($autoApprove && class_exists(\Modules\Directory\Services\ReputationService::class)) {
-            \Modules\Directory\Services\ReputationService::addPoints(Auth::user(), 8, 'screenshot_approved');
+            $this->reputation->addPoints(Auth::user(), 8, 'screenshot_approved');
         }
 
         return back()->with('success', $autoApprove
