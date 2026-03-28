@@ -30,11 +30,28 @@ class PublicShortUrlController
 
     public function store(Request $request): JsonResponse
     {
-        $request->validate([
+        $rules = [
             'url' => 'required|url|max:2048',
             'slug' => 'nullable|string|alpha_dash|max:50|unique:short_urls,slug',
             'title' => 'nullable|string|max:255',
-        ]);
+        ];
+
+        if (Auth::check()) {
+            $rules += [
+                'description' => 'nullable|string|max:1000',
+                'password' => 'nullable|string|max:255',
+                'expires_at' => 'nullable|date|after:now',
+                'max_clicks' => 'nullable|integer|min:1',
+                'utm_source' => 'nullable|string|max:255',
+                'utm_medium' => 'nullable|string|max:255',
+                'utm_campaign' => 'nullable|string|max:255',
+                'og_title' => 'nullable|string|max:255',
+                'og_description' => 'nullable|string|max:500',
+                'og_image' => 'nullable|url|max:500',
+            ];
+        }
+
+        $request->validate($rules);
 
         $url = $request->input('url');
 
@@ -44,8 +61,28 @@ class PublicShortUrlController
                 'domain_id' => $this->service->getDefaultDomain()?->id,
                 'slug' => $request->input('slug') ?: null,
                 'title' => $request->input('title'),
+                'description' => $request->input('description'),
+                'password' => $request->input('password'),
+                'expires_at' => $request->input('expires_at'),
+                'max_clicks' => $request->input('max_clicks'),
+                'utm_source' => $request->input('utm_source'),
+                'utm_medium' => $request->input('utm_medium'),
+                'utm_campaign' => $request->input('utm_campaign'),
+                'og_title' => $request->input('og_title'),
+                'og_description' => $request->input('og_description'),
+                'og_image' => $request->input('og_image'),
                 'redirect_type' => 301,
             ];
+
+            if (! empty($data['password'])) {
+                $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
+            }
+
+            if (empty($data['thumbnail'])) {
+                $meta = $this->service->scrapeMetadata($url);
+                $data['thumbnail'] = $meta['thumbnail'] ?? null;
+            }
+
             $shortUrl = $this->service->createShortUrl($data, Auth::id());
         } else {
             $shortUrl = $this->service->createAnonymous($url, $request->ip());
