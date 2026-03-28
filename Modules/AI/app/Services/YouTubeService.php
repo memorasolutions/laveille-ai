@@ -97,23 +97,31 @@ class YouTubeService
         });
     }
 
-    public function summarizeFromMeta(string $videoTitle, string $channelName, string $toolName, string $toolDescription): ?string
+    public function summarizeFromMeta(string $videoTitle, string $channelName, string $toolName, string $toolDescription, string $videoDescription = ''): ?string
     {
         if (empty($videoTitle)) {
             return null;
         }
 
-        $cacheKey = 'yt_meta_summary_' . md5($videoTitle);
+        $cacheKey = 'yt_meta_summary_' . md5($videoTitle . $videoDescription);
 
-        return Cache::remember($cacheKey, 86400, function () use ($videoTitle, $channelName, $toolName, $toolDescription) {
+        return Cache::remember($cacheKey, 86400, function () use ($videoTitle, $channelName, $toolName, $toolDescription, $videoDescription) {
             try {
-                $context = "Vidéo : {$videoTitle}";
+                $context = "Titre : {$videoTitle}";
                 if ($channelName) {
-                    $context .= "\nChaine : {$channelName}";
+                    $context .= "\nChaine YouTube : {$channelName}";
                 }
                 if ($toolName) {
                     $context .= "\nOutil concerné : {$toolName} - {$toolDescription}";
                 }
+                if ($videoDescription) {
+                    $context .= "\n\nDescription de la vidéo :\n{$videoDescription}";
+                }
+
+                $hasDescription = ! empty($videoDescription) && strlen($videoDescription) > 50;
+                $systemPrompt = $hasDescription
+                    ? 'A partir de la description YouTube et des metadonnees de cette video, genere un resume structure en francais. Inclus : les points cles abordes, le public cible, et ce que le spectateur va apprendre. Format : un paragraphe introductif + 3-5 puces des points cles. Sois precis et informatif. Ne mentionne PAS que tu te bases sur la description.'
+                    : 'A partir du titre et du contexte de cette video YouTube, genere un court resume en francais (3-5 phrases) de ce que la video couvre. Sois informatif et utile.';
 
                 $response = Http::withoutVerifying()->withHeaders([
                     'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
@@ -121,10 +129,7 @@ class YouTubeService
                 ])->timeout(60)->post('https://openrouter.ai/api/v1/chat/completions', [
                     'model' => 'deepseek/deepseek-chat',
                     'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'A partir du titre de cette video YouTube et du contexte, genere un court resume en francais (3-5 phrases) de ce que la video couvre probablement. Mentionne que le resume est base sur le titre car les sous-titres ne sont pas disponibles. Sois informatif et utile.',
-                        ],
+                        ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user', 'content' => $context],
                     ],
                 ]);

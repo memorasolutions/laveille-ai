@@ -140,12 +140,22 @@ class CommunityController extends Controller
                 if ($transcript) {
                     $resourceData['video_summary'] = $ytService->summarize($transcript['transcript'], $transcript['video_id']);
                 } else {
-                    // Fallback : résumé basé sur les métadonnées (titre + outil) quand transcript indisponible
+                    // Fallback : résumé basé sur description YouTube + métadonnées
+                    $videoDesc = '';
+                    try {
+                        $ytHtml = @file_get_contents("https://www.youtube.com/watch?v={$validated['video_id']}");
+                        if ($ytHtml && preg_match('/"shortDescription":"(.*?)(?<!\\\\)"/', $ytHtml, $dm)) {
+                            $videoDesc = str_replace(['\\n', '\\r', '\\"'], ["\n", '', '"'], $dm[1]);
+                            $videoDesc = mb_substr($videoDesc, 0, 3000);
+                        }
+                    } catch (\Throwable $e) {}
+
                     $resourceData['video_summary'] = $ytService->summarizeFromMeta(
                         $validated['title'] ?? '',
                         $resourceData['channel_name'] ?? '',
                         $tool->name ?? '',
-                        $tool->short_description ?? ''
+                        $tool->short_description ?? '',
+                        $videoDesc
                     );
                 }
             } catch (\Throwable $e) {
@@ -211,9 +221,10 @@ class CommunityController extends Controller
             ]);
         }
 
-        // Extraire durée + channel depuis la page YouTube (fallback sans API)
+        // Extraire durée + channel + description depuis la page YouTube (fallback sans API)
         $duration = null;
         $channelUrl = null;
+        $videoDescription = null;
         try {
             $html = @file_get_contents("https://www.youtube.com/watch?v={$videoId}");
             if ($html) {
@@ -222,6 +233,10 @@ class CommunityController extends Controller
                 }
                 if (preg_match('/"channelId":"([\w-]+)"/', $html, $cm)) {
                     $channelUrl = "https://www.youtube.com/channel/{$cm[1]}";
+                }
+                if (preg_match('/"shortDescription":"(.*?)(?<!\\\\)"/', $html, $descMatch)) {
+                    $videoDescription = str_replace(['\\n', '\\r', '\\"'], ["\n", '', '"'], $descMatch[1]);
+                    $videoDescription = mb_substr($videoDescription, 0, 2000);
                 }
             }
         } catch (\Throwable $e) {
@@ -237,6 +252,7 @@ class CommunityController extends Controller
             'author' => $oembed['author_name'] ?? null,
             'duration' => $duration,
             'channel_url' => $channelUrl,
+            'description' => $videoDescription,
         ]);
     }
 
