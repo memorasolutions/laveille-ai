@@ -88,6 +88,10 @@ a:hover { color: var(--c-primary); }
 .topbar .contact-info ul li a:hover {
     color: #fff;
 }
+/* Masquer la topbar sur mobile — prend trop de place */
+@media (max-width: 575px) {
+    .topbar { display: none !important; }
+}
 
 .wpo-site-header .navigation .navbar-nav > li > a {
     font-family: var(--f-heading);
