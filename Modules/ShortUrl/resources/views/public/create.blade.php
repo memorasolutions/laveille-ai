@@ -33,6 +33,25 @@
         result: null,
         error: '',
         copied: false,
+        history: JSON.parse(localStorage.getItem('shorturl_history') || '[]'),
+
+        saveToHistory(data) {
+            const entry = {
+                short_url: data.short_url,
+                slug: data.slug,
+                original_url: this.url,
+                created_at: new Date().toISOString(),
+                expires_at: data.expires_at
+            };
+            this.history.unshift(entry);
+            if (this.history.length > 20) this.history = this.history.slice(0, 20);
+            localStorage.setItem('shorturl_history', JSON.stringify(this.history));
+        },
+
+        removeFromHistory(index) {
+            this.history.splice(index, 1);
+            localStorage.setItem('shorturl_history', JSON.stringify(this.history));
+        },
 
         async shorten() {
             this.error = '';
@@ -49,6 +68,7 @@
                 const data = await res.json();
                 if (data.success) {
                     this.result = data;
+                    this.saveToHistory(data);
                 } else {
                     this.error = data.errors?.url?.[0] || data.message || '{{ __('Une erreur est survenue.') }}';
                 }
@@ -163,17 +183,57 @@
                 </a>
             </div>
 
-            {{-- Message anonyme --}}
+            {{-- Message anonyme : expiration + sauvegarde stats --}}
             <template x-if="result?.is_anonymous">
-                <div style="margin-top: 16px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #92400E;">
-                    ⏰ {{ __('Ce lien expire dans 30 jours.') }}
-                    <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour des liens permanents et plus de fonctionnalités.') }}' })"
-                        style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: 8px;">
-                        {{ __('Créer un compte gratuit') }}
-                    </button>
+                <div style="margin-top: 16px;">
+                    <div style="background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #0369A1; margin-bottom: 8px;">
+                        📌 {{ __('Sauvegardez cette page pour retrouver vos statistiques. Vos liens récents sont aussi conservés ci-dessous.') }}
+                    </div>
+                    <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #92400E;">
+                        ⏰ {{ __('Ce lien expire dans 30 jours.') }}
+                        <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour des liens permanents, un tableau de bord et plus de fonctionnalités.') }}' })"
+                            style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: 8px;">
+                            {{ __('Créer un compte gratuit') }}
+                        </button>
+                    </div>
                 </div>
             </template>
         </div>
+    </div>
+
+    {{-- Historique liens récents (localStorage) --}}
+    <div x-show="history.length > 0" x-cloak style="margin-top: 32px;">
+        <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 12px;">
+            <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1rem; color: var(--c-dark, #1A1D23); margin: 0;">
+                🕐 {{ __('Mes liens récents') }}
+            </h3>
+            <span style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ __('Conservés dans votre navigateur') }}</span>
+        </div>
+        <template x-for="(item, index) in history" :key="index">
+            <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; gap: 8px;">
+                <div style="flex: 1 !important; min-width: 200px;">
+                    <a :href="item.short_url" target="_blank"
+                        style="font-weight: 700; font-size: 14px; color: var(--c-primary, #0B7285); text-decoration: none;"
+                        x-text="item.short_url"></a>
+                    <div style="font-size: 12px; color: var(--c-text-muted, #6E7687); margin-top: 2px;">
+                        <span x-text="item.original_url?.substring(0, 50) + (item.original_url?.length > 50 ? '...' : '')"></span>
+                    </div>
+                </div>
+                <div style="display: flex !important; gap: 6px; align-items: center !important;">
+                    <a :href="'{{ url('/raccourcir') }}/' + item.slug + '/stats'"
+                        style="background: var(--c-primary, #0B7285); color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none;">
+                        📊 {{ __('Stats') }}
+                    </a>
+                    <button @click="navigator.clipboard.writeText(item.short_url)"
+                        style="background: #F3F4F6; color: var(--c-dark, #1A1D23); border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;">
+                        📋
+                    </button>
+                    <button @click="removeFromHistory(index)"
+                        style="background: none; border: none; color: #9CA3AF; font-size: 14px; cursor: pointer; padding: 2px 6px;"
+                        title="{{ __('Retirer') }}">✕</button>
+                </div>
+            </div>
+        </template>
     </div>
 
     {{-- Avantages --}}
