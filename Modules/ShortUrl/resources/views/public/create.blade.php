@@ -175,7 +175,7 @@
                 <span style="height: 40px; padding: 0 10px; background: #F3F4F6; border: 1px solid #D1D5DB; border-right: none; border-radius: 8px 0 0 8px; font-size: 13px; color: var(--c-text-muted, #6E7687); display: flex !important; align-items: center !important;">veille.la/</span>
                 @endif
                 <input type="text" x-model="slug" placeholder="{{ __('slug-personnalise (optionnel)') }}"
-                    @input="slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]/g,'').toLowerCase()"
+                    @input="slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9_-]/g,'').replace(/-{2,}/g,'-').toLowerCase()"
                     style="flex: 1 !important; height: 40px; border: 1px solid #D1D5DB; border-radius: 0 8px 8px 0; padding: 0 12px; font-size: 14px;">
             </div>
             {{-- Titre + description --}}

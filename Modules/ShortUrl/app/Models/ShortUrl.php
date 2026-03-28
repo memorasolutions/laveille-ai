@@ -56,7 +56,7 @@ class ShortUrl extends Model
     protected function slug(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            set: fn (?string $value) => $value ? strtolower(preg_replace('/[^a-zA-Z0-9_-]/', '', \Illuminate\Support\Str::ascii($value))) : $value,
+            set: fn (?string $value) => $value ? strtolower(preg_replace('/-{2,}/', '-', preg_replace('/[^a-zA-Z0-9_-]/', '', str_replace(' ', '-', \Illuminate\Support\Str::ascii($value))))) : $value,
         );
     }
 
