@@ -289,60 +289,36 @@
                                 </div>
                                 <div class="header-right-menu-wrap">
                                     <button class="right-menu-close"><i class="ti-close"></i></button>
-                                    <div class="logo"><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}"></div>
+                                    <div class="logo"><img src="{{ asset('images/logo-horizontal.svg') }}?v=8" alt="{{ config('app.name') }}" style="max-height:40px;"></div>
                                     <div class="header-right-sec">
-                                        <div class="project-widget widget">
-                                            <h3>{{ __('Derniers articles') }}</h3>
-                                            <div class="posts">
-                                                @isset($latestArticles)
-                                                    @forelse($latestArticles->take(3) as $article)
-                                                        <div class="post">
-                                                            <div class="img-holder">
-                                                                @if($article->featured_image)
-                                                                    <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}" loading="lazy">
-                                                                @else
-                                                                    <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="" loading="lazy">
-                                                                @endif
-                                                            </div>
-                                                            <div class="details">
-                                                                <span class="date">{{ $article->published_at?->format('d M Y') }}</span>
-                                                                <h4><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h4>
-                                                            </div>
-                                                        </div>
-                                                    @empty
-                                                        <p>{{ __('Aucun article pour le moment.') }}</p>
-                                                    @endforelse
-                                                @endisset
-                                            </div>
-                                        </div>
+                                        {{-- Navigation principale --}}
                                         <div class="widget link-widget">
-                                            <div class="widget-title">
-                                                <h3>{{ __('Ressources') }}</h3>
-                                            </div>
+                                            <div class="widget-title"><h3>{{ __('Navigation') }}</h3></div>
                                             <ul>
-                                                @if(Route::has('tools.index'))
-                                                    <li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>
-                                                @endif
-                                                @if(Route::has('dictionary.index'))
-                                                    <li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>
-                                                @endif
-                                                @if(Route::has('directory.index'))
-                                                    <li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>
-                                                @endif
-                                                @if(Route::has('acronyms.index'))
-                                                    <li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>
-                                                @endif
+                                                <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
+                                                <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
+                                                @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">🔗 {{ __('Raccourcir un lien') }}</a></li>@endif
                                             </ul>
                                         </div>
-                                        <div class="widget wpo-contact-widget">
-                                            <div class="widget-title">
-                                                <h3>{{ __('Contact') }}</h3>
-                                            </div>
-                                            <div class="contact-ft">
-                                                <ul>
-                                                    <li><i class="fi flaticon-email"></i>{{ config('mail.from.address') }}</li>
-                                                </ul>
-                                            </div>
+                                        {{-- Ressources --}}
+                                        <div class="widget link-widget">
+                                            <div class="widget-title"><h3>{{ __('Ressources') }}</h3></div>
+                                            <ul>
+                                                @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">🛠️ {{ __('Outils gratuits') }}</a></li>@endif
+                                                @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA') }}</a></li>@endif
+                                                @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">🔍 {{ __('Répertoire techno') }}</a></li>@endif
+                                                @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🎓 {{ __('Acronymes éducation') }}</a></li>@endif
+                                            </ul>
+                                        </div>
+                                        {{-- Pages --}}
+                                        <div class="widget link-widget">
+                                            <div class="widget-title"><h3>{{ __('Pages') }}</h3></div>
+                                            <ul>
+                                                @if(Route::has('page.show'))<li><a href="{{ route('page.show', 'a-propos') }}">{{ __('À propos') }}</a></li>@endif
+                                                @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>@endif
+                                                <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
+                                                @if(Route::has('blog.submissions.create'))<li><a href="{{ route('blog.submissions.create') }}">✍️ {{ __('Proposer un article') }}</a></li>@endif
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
