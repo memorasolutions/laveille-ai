@@ -58,8 +58,9 @@
         <div style="display: flex !important; align-items: flex-end !important; justify-content: center !important; height: 160px; gap: 3px; overflow-x: auto; padding-bottom: 24px;">
             @foreach(array_slice($clicksByDay, -30) as $day)
                 <div style="flex: 1 !important; min-width: 16px; max-width: 40px; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-end !important; height: 100%;" title="{{ $day['date'] }} — {{ $day['count'] }} {{ __('clics') }}">
-                    <div style="width: 100%; background: var(--c-primary, #0B7285); border-radius: 4px 4px 0 0; min-height: 2px; height: {{ ($day['count'] / $maxDaily) * 100 }}%; transition: height .3s;"></div>
-                    <span style="font-size: 9px; color: var(--c-text-muted, #6E7687); margin-top: 4px; white-space: nowrap;">{{ \Carbon\Carbon::parse($day['date'])->format('d') }}</span>
+                    <span style="font-size: 11px; font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 4px;">{{ $day['count'] }}</span>
+                    <div style="width: 100%; background: var(--c-primary, #0B7285); border-radius: 4px 4px 0 0; min-height: 4px; height: {{ ($day['count'] / $maxDaily) * 100 }}%; transition: height .3s;"></div>
+                    <span style="font-size: 11px; color: var(--c-text-muted, #6E7687); margin-top: 4px; white-space: nowrap;">{{ \Carbon\Carbon::parse($day['date'])->format('d M') }}</span>
                 </div>
             @endforeach
         </div>
