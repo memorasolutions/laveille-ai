@@ -181,6 +181,10 @@ class CommunityController extends Controller
             $this->reputation->addPoints($user, ReputationService::RESOURCE_APPROVED, 'resource_auto');
         }
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'approved' => $autoApprove]);
+        }
+
         return back()->with('success', __('Merci ! La ressource sera visible après approbation.'));
     }
 

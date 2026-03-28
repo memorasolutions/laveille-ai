@@ -757,7 +757,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit.prevent="submitting = true; fetch($el.action, {method:'POST',body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else{alert('Erreur lors de la soumission');submitting=false}}).catch(()=>{alert('Erreur réseau');submitting=false})">
+                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit.prevent="submitting = true; fetch($el.action, {method:'POST',headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else{alert('Erreur lors de la soumission');submitting=false}}).catch(()=>{alert('Erreur réseau');submitting=false})">
                         @csrf
                         <input type="hidden" name="type" :value="type">
                         <input type="hidden" name="video_id" :value="videoId">
