@@ -749,6 +749,14 @@ select:focus {
         display: none !important;
     }
 }
+/* Fix outline/border boutons shorturl — thème USNews override les inline styles */
+.user-space button:focus,
+.user-space button:active,
+.user-space button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 /* Drawer droite masqué — redondant avec mega menus (desktop) et menu mobile (hamburger gauche) */
 .header-right-menu-wrapper {
     display: none !important;
