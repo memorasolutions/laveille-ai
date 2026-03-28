@@ -127,7 +127,7 @@
             <span style="color: #9CA3AF; font-size: 0.8rem;">{{ number_format($tool->clicks_count) }} {{ __('clics') }}</span>
             <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
                 @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Directory\\Models\\Tool', 'id' => $tool->id])
-                @include('fronttheme::partials.share-buttons', ['title' => $tool->name, 'url' => request()->url()])
+                {{-- Boutons partage inline retirés — remplacés par la floating share bar globale --}}
             </div>
         </div>
         @if($tool->categories->isNotEmpty())
