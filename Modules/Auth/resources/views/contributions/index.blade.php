@@ -201,12 +201,18 @@
                         </div>
                     @endif
                     <div style="flex: 1 !important; min-width: 0;">
-                        <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" style="font-weight: 600; color: var(--c-dark); text-decoration: none; font-size: 14px;">
-                            {{ Str::limit($resource->title, 50) }} <i class="fa fa-external-link" style="font-size: 10px; color: var(--c-text-muted);"></i>
+                        @php
+                            $toolLink = ($resource->tool && Route::has('directory.show'))
+                                ? route('directory.show', $resource->tool->slug)
+                                : '#';
+                        @endphp
+                        <a href="{{ $toolLink }}" style="font-weight: 600; color: var(--c-dark); text-decoration: none; font-size: 14px;">
+                            {{ Str::limit($resource->title, 50) }}
                         </a>
                         <div style="font-size: 12px; color: var(--c-text-muted); margin-top: 2px;">
                             {{ $resource->tool->name ?? '—' }}
                             <span style="background: rgba(8,145,178,0.1); color: #0891B2; padding: 1px 8px; border-radius: 8px; font-size: 11px; margin-left: 6px;">{{ $resource->type }}</span>
+                            <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" style="color: var(--c-text-muted); margin-left: 6px; font-size: 11px;" title="{{ __('Voir la source') }}"><i class="fa fa-external-link"></i></a>
                         </div>
                     </div>
                     <div style="flex-shrink: 0; text-align: right;">
