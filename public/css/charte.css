@@ -5,6 +5,9 @@
    Version 2.0 — Mars 2026
    ═══════════════════════════════════════════════════ */
 
+/* Alpine.js : masquer les éléments x-cloak avant initialisation (évite le flash) */
+[x-cloak] { display: none !important; }
+
 :root {
     --c-primary: #0B7285;
     --c-primary-hover: #064E5C;
