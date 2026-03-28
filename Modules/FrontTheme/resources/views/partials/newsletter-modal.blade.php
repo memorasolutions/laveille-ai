@@ -1,6 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @if(Route::has('newsletter.subscribe'))
-<div class="modal fade" id="newsletterModal" role="dialog" aria-labelledby="newsletterModalLabel" aria-hidden="true" inert>
+<div class="modal fade" id="newsletterModal" role="dialog" aria-labelledby="newsletterModalLabel" aria-hidden="true" inert style="display:none;">
     <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 420px;">
         <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none;">
             <div style="background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-hover) 100%); padding: 30px 40px; position: relative;">
