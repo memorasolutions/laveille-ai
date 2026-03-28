@@ -203,7 +203,7 @@
                     <div style="flex: 1 !important; min-width: 0;">
                         @php
                             $toolLink = ($resource->tool && Route::has('directory.show'))
-                                ? route('directory.show', $resource->tool->slug)
+                                ? route('directory.show', $resource->tool->slug) . '#resources'
                                 : '#';
                         @endphp
                         <a href="{{ $toolLink }}" style="font-weight: 600; color: var(--c-dark); text-decoration: none; font-size: 14px;">
