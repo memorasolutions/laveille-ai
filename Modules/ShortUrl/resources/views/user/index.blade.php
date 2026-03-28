@@ -65,26 +65,26 @@
             {{-- Actions --}}
             <div style="display: flex !important; flex-wrap: wrap !important; gap: 6px; align-items: center !important;">
                 <button @click="navigator.clipboard.writeText('{{ $link->getShortUrl() }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                    :style="copied ? 'background:#10B981;color:#fff;' : 'background:#F3F4F6;color:var(--c-dark, #1A1D23);'"
-                    style="border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;"
-                    title="{{ __('Copier') }}">
-                    <span x-show="!copied">📋</span>
-                    <span x-show="copied" x-cloak>✅</span>
+                    :style="copied ? 'background:#10B981;color:#fff;' : 'background:transparent;color:var(--c-primary, #0B7285);'"
+                    style="border: 1px solid #D1D5DB; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2;"
+                    :aria-label="copied ? '{{ __('Copié') }}' : '{{ __('Copier le lien') }}'">
+                    <span x-show="!copied">{{ __('Copier') }}</span>
+                    <span x-show="copied" x-cloak>{{ __('Copié!') }}</span>
                 </button>
                 <a href="{{ route('shorturl.qr', $link->slug) }}" target="_blank"
-                    style="background: #F3F4F6; color: var(--c-dark, #1A1D23); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;"
-                    title="{{ __('QR code') }}">📱</a>
+                    style="border: 1px solid #D1D5DB; color: var(--c-dark, #1A1D23); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
+                    aria-label="{{ __('Voir le QR code') }}">QR</a>
                 <a href="{{ route('shorturl.stats', $link->slug) }}"
-                    style="background: #F3F4F6; color: var(--c-dark, #1A1D23); padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;"
-                    title="{{ __('Statistiques') }}">📊</a>
+                    style="border: 1px solid #D1D5DB; color: var(--c-dark, #1A1D23); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
+                    aria-label="{{ __('Voir les statistiques') }}">{{ __('Stats') }}</a>
                 <a href="{{ route('shorturl.user.edit', $link) }}"
-                    style="background: var(--c-primary, #0B7285); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none;"
-                    title="{{ __('Modifier') }}">✏️</a>
+                    style="background: var(--c-primary, #0B7285); color: #fff; padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
+                    aria-label="{{ __('Modifier ce lien') }}">{{ __('Modifier') }}</a>
                 <form action="{{ route('shorturl.user.destroy', $link) }}" method="POST" style="display: inline;">
                     @csrf @method('DELETE')
                     <button type="submit" onclick="return confirm('{{ __('Supprimer ce lien ?') }}')"
-                        style="background: #FEF2F2; color: #DC2626; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;"
-                        title="{{ __('Supprimer') }}">🗑️</button>
+                        style="background: transparent; color: #DC2626; border: 1px solid #FECACA; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2;"
+                        aria-label="{{ __('Supprimer ce lien') }}">{{ __('Supprimer') }}</button>
                 </form>
             </div>
         </div>
