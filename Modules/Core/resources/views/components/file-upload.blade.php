@@ -113,16 +113,21 @@
          tabindex="0"
          aria-label="{{ __('Zone de téléchargement') }}"
          :style="isDragging
-            ? 'border: 2px dashed var(--c-primary); background: var(--c-primary-light); transform: scale(1.01);'
-            : 'border: 2px dashed #D1D5DB; background: #FAFBFC;'"
-         style="border-radius: var(--r-base); padding: 24px 16px; text-align: center; cursor: pointer; transition: all 0.2s; min-height: 120px; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;">
-        <i class="fa fa-cloud-upload" style="font-size: 28px; color: var(--c-primary); margin-bottom: 8px;"></i>
-        <p style="margin: 0; font-family: var(--f-heading); font-size: 14px; font-weight: 600; color: var(--c-dark);">
-            {{ __('Glissez un fichier ici') }}
+            ? 'border: 2px dashed var(--c-primary); background: var(--c-primary-light); transform: scale(1.02); box-shadow: 0 0 0 4px rgba(11,114,133,0.1);'
+            : 'border: 2px dashed #D1D5DB; background: linear-gradient(180deg, #FAFBFC 0%, #F3F4F6 100%);'"
+         style="border-radius: 16px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.25s ease; min-height: 160px; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;">
+        <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light); display: flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
+            <i class="fa fa-cloud-upload" style="font-size: 28px; color: var(--c-primary);"></i>
+        </div>
+        <p style="margin: 0; font-family: var(--f-heading); font-size: 15px; font-weight: 700; color: var(--c-dark);">
+            {{ __('Glissez votre fichier ici') }}
         </p>
-        <p style="margin: 4px 0 0; font-size: 12px; color: var(--c-text-muted);">
-            {{ __('ou cliquez pour parcourir') }}
+        <p style="margin: 6px 0 12px; font-size: 13px; color: var(--c-text-muted);">
+            {{ __('ou') }}
         </p>
+        <span style="background: var(--c-primary); color: #fff; padding: 8px 20px; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 600; font-size: 13px; display: inline-block;">
+            {{ __('Parcourir') }}
+        </span>
     </div>
 
     {{-- Input file réel (caché) --}}
