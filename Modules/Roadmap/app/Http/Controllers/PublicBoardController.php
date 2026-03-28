@@ -33,7 +33,7 @@ class PublicBoardController extends Controller
 
     public function show(Board $board, Request $request)
     {
-        abort_if(! $board->is_public, 404);
+        abort_if(! $board->is_public && ! auth()->check(), 404);
 
         $query = $board->ideas()
             ->with('user')
@@ -104,7 +104,7 @@ class PublicBoardController extends Controller
 
     public function kanban(Board $board)
     {
-        abort_if(! $board->is_public, 404);
+        abort_if(! $board->is_public && ! auth()->check(), 404);
 
         $columns = collect(IdeaStatus::cases())->mapWithKeys(fn (IdeaStatus $s) => [
             $s->value => $board->ideas()

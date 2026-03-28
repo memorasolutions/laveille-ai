@@ -104,17 +104,13 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">{{ __('Image principale') }}</label>
-                        <input type="file" name="featured_image" class="form-control @error('featured_image') is-invalid @enderror" accept="image/*">
-                        @error('featured_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        <small class="text-muted">{{ __('JPG, PNG ou WebP. Max 5 Mo.') }}</small>
+                        <x-core::file-upload name="featured_image" accept="image/*" :max-size="5" label="{{ __('Image principale') }}" help-text="{{ __('JPG, PNG ou WebP. Max 5 Mo.') }}" />
+                        @error('featured_image') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                     </div>
                     <hr>
                     <div>
-                        <label class="form-label fw-semibold">{{ __('Galerie') }}</label>
-                        <input type="file" name="gallery[]" class="form-control @error('gallery.*') is-invalid @enderror" multiple accept="image/*">
-                        @error('gallery.*') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                        <small class="text-muted">{{ __('Sélectionnez plusieurs fichiers pour ajouter à la galerie.') }}</small>
+                        <x-core::file-upload name="gallery[]" accept="image/*" :max-size="5" :multiple="true" label="{{ __('Galerie') }}" help-text="{{ __('Sélectionnez plusieurs fichiers pour ajouter à la galerie.') }}" />
+                        @error('gallery.*') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                     </div>
                 </div>
             </div>

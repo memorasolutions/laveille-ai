@@ -171,53 +171,12 @@
             </div>
 
             {{-- Image mise en avant --}}
-            <div class="card" x-data="{
-                isDragging: false,
-                preview: null,
-                handleFile(file) {
-                    if (file && ['image/jpeg','image/png','image/webp'].includes(file.type) && file.size <= 2097152) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => { this.preview = e.target.result; };
-                        reader.readAsDataURL(file);
-                    } else {
-                        alert('Image JPG/PNG/WebP max 2 Mo.');
-                        this.$refs.featuredImageInput.value = '';
-                    }
-                }
-            }">
+            <div class="card">
                 <div class="card-header py-3 px-4 border-bottom">
                     <h5 class="fw-semibold mb-0">Image mise en avant</h5>
                 </div>
                 <div class="card-body p-4">
-                    <div @click="$refs.featuredImageInput.click()"
-                         @dragover.prevent="isDragging = true"
-                         @dragleave.prevent="isDragging = false"
-                         @drop.prevent="isDragging = false; handleFile($event.dataTransfer.files[0])"
-                         class="text-center rounded-3 border border-2 border-dashed p-4"
-                         :class="isDragging ? 'border-primary bg-primary bg-opacity-10' : 'border-secondary-subtle'"
-                         style="cursor:pointer;">
-                        <template x-if="!preview">
-                            <div>
-                                <i data-lucide="upload" class="text-muted d-block mx-auto mb-3" style="width:48px;height:48px;"></i>
-                                <p class="text-sm fw-medium mb-1">Glissez une image ici</p>
-                                <p class="text-muted small">JPG, PNG, WebP — max 2 Mo</p>
-                            </div>
-                        </template>
-                        <template x-if="preview">
-                            <div>
-                                <img :src="preview" class="w-100 rounded-3 mb-3" style="max-height:11rem;object-fit:cover;">
-                                <button type="button" class="btn btn-outline-secondary btn-sm"
-                                        @click.stop="preview = null; $refs.featuredImageInput.value = ''">
-                                    Changer
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                    <input type="file" name="featured_image"
-                           x-ref="featuredImageInput"
-                           @change="handleFile($event.target.files[0])"
-                           class="d-none"
-                           accept="image/jpeg,image/png,image/webp">
+                    <x-core::file-upload name="featured_image" accept="image/jpeg,image/png,image/webp" :max-size="2" help-text="JPG, PNG ou WebP. Max 2 Mo." />
                 </div>
             </div>
         </div>

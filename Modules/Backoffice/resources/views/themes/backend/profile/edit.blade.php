@@ -47,10 +47,9 @@
                                  class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
                             <div>
                                 <label for="avatar" class="form-label fw-medium d-block">{{ __('Photo de profil') }}</label>
-                                <input type="file" name="avatar" id="avatar" accept="image/*" class="form-control form-control-sm @error('avatar') is-invalid @enderror">
-                                <small class="form-text text-muted">{{ __('Max 2 Mo. JPG, PNG ou WebP.') }}</small>
+                                <x-core::file-upload name="avatar" accept="image/*" :max-size="2" help-text="{{ __('Max 2 Mo. JPG, PNG ou WebP.') }}" :current-image="$user->avatar_url" />
                                 @error('avatar')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>

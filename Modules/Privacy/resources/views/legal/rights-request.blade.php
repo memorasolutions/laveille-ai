@@ -88,11 +88,8 @@
             <label for="file" class="block text-sm font-medium text-gray-700">
                 {{ __('Document justificatif (optionnel)') }}
             </label>
-            <input type="file" name="file" id="file" aria-describedby="file-help"
-                class="mt-1 block w-full text-gray-700 @error('file') border-red-500 @enderror">
-            <p id="file-help" class="text-xs text-gray-500 mt-1">
-                {{ __('Formats acceptes : PDF, JPG, PNG. Taille maximale : 10 Mo.') }}
-            </p>
+            <x-core::file-upload name="file" accept="application/pdf,image/jpeg,image/png" :max-size="10" help-text="{{ __('Formats acceptés : PDF, JPG, PNG. Taille maximale : 10 Mo.') }}" />
+
             @error('file')
                 <p class="mt-1 text-red-600 text-sm" role="alert">{{ $message }}</p>
             @enderror

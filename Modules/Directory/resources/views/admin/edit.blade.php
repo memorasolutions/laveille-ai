@@ -94,15 +94,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="logo" class="form-label">Logo</label>
-                    @if($tool->logo)
-                        <div class="mb-2">
-                            <img src="{{ asset($tool->logo) }}" alt="Logo actuel" style="max-height: 80px;" class="rounded">
-                        </div>
-                    @endif
-                    <input type="file" class="form-control @error('logo') is-invalid @enderror" id="logo" name="logo" accept="image/*">
+                    <x-core::file-upload name="logo" accept="image/*" :max-size="2" label="Logo" help-text="JPG, PNG ou WebP. Max 2 Mo." :current-image="$tool->logo ? asset($tool->logo) : null" />
                     @error('logo')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>
 

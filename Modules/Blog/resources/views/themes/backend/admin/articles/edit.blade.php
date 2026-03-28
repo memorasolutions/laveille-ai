@@ -209,14 +209,7 @@
                     <h5 class="fw-semibold mb-0">Image mise en avant</h5>
                 </div>
                 <div class="card-body p-4">
-                    @if($article->featured_image)
-                        <img src="{{ asset($article->featured_image) }}"
-                             class="w-100 rounded-3 mb-3" style="max-height:9rem;object-fit:cover;">
-                    @endif
-                    <input type="file" name="featured_image"
-                           class="form-control"
-                           accept="image/*">
-                    <div class="form-text text-muted">Laissez vide pour conserver l'image actuelle</div>
+                    <x-core::file-upload name="featured_image" accept="image/*" :max-size="2" help-text="Laissez vide pour conserver l'image actuelle." :current-image="$article->featured_image ? asset($article->featured_image) : null" />
                 </div>
             </div>
         </div>

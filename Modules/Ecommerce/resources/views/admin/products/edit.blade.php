@@ -62,9 +62,8 @@
                                 @endif
                             </div>
                             <div class="col">
-                                <input type="file" name="featured_image" class="form-control @error('featured_image') is-invalid @enderror" accept="image/*">
-                                @error('featured_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                <small class="text-muted">{{ __('JPG, PNG ou WebP. Max 5 Mo.') }}</small>
+                                <x-core::file-upload name="featured_image" accept="image/*" :max-size="5" help-text="{{ __('JPG, PNG ou WebP. Max 5 Mo.') }}" />
+                                @error('featured_image') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                             </div>
                         </div>
                     </div>

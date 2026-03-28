@@ -93,7 +93,7 @@
                     <option value="ux">{{ __('Expérience utilisateur') }}</option>
                 </select>
             </div>
-            <button type="submit" class="wz-submit" style="width:100%;">{{ __('Soumettre ma proposition') }}</button>
+            <button type="submit" style="width:100%;background:var(--c-primary, #0B7285);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 4px 12px rgba(11,114,133,0.15);transition:transform .2s,background .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='#096474'" onmouseout="this.style.transform='none';this.style.background='var(--c-primary, #0B7285)'">{{ __('Soumettre ma proposition') }}</button>
         </form>
     </div>
     @else

@@ -99,7 +99,7 @@
 }">
 
     @if($label)
-        <label style="font-family: var(--f-heading); font-weight: 600; font-size: 13px; color: var(--c-text-muted); display: block; margin-bottom: 6px;">{{ $label }}</label>
+        <label style="font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-weight: 600; font-size: 13px; color: var(--c-text-muted, #6E7687); display: block; margin-bottom: 6px;">{{ $label }}</label>
     @endif
 
     {{-- Zone drag & drop --}}
@@ -113,19 +113,19 @@
          tabindex="0"
          aria-label="{{ __('Zone de téléchargement') }}"
          :style="isDragging
-            ? 'border: 2px dashed var(--c-primary); background: var(--c-primary-light); transform: scale(1.02); box-shadow: 0 0 0 4px rgba(11,114,133,0.1);'
+            ? 'border: 2px dashed var(--c-primary, #0B7285); background: var(--c-primary-light, #F0FAFB); transform: scale(1.02); box-shadow: 0 0 0 4px rgba(11,114,133,0.1);'
             : 'border: 2px dashed #D1D5DB; background: linear-gradient(180deg, #FAFBFC 0%, #F3F4F6 100%);'"
          style="border-radius: 16px; padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.25s ease; min-height: 160px; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;">
-        <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light); display: flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-            <i class="fa fa-cloud-upload" style="font-size: 28px; color: var(--c-primary);"></i>
+        <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
+            <i class="fa fa-cloud-upload" style="font-size: 28px; color: var(--c-primary, #0B7285);"></i>
         </div>
-        <p style="margin: 0; font-family: var(--f-heading); font-size: 15px; font-weight: 700; color: var(--c-dark);">
+        <p style="margin: 0; font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-size: 15px; font-weight: 700; color: var(--c-dark, #1A1D23);">
             {{ __('Glissez votre fichier ici') }}
         </p>
-        <p style="margin: 6px 0 12px; font-size: 13px; color: var(--c-text-muted);">
+        <p style="margin: 6px 0 12px; font-size: 13px; color: var(--c-text-muted, #6E7687);">
             {{ __('ou') }}
         </p>
-        <span style="background: var(--c-primary); color: #fff; padding: 8px 20px; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 600; font-size: 13px; display: inline-block;">
+        <span style="background: var(--c-primary, #0B7285); color: #fff; padding: 8px 20px; border-radius: var(--r-btn, 0.5rem); font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-weight: 600; font-size: 13px; display: inline-block;">
             {{ __('Parcourir') }}
         </span>
     </div>
@@ -140,28 +140,28 @@
     <p x-show="error" x-text="error" x-cloak style="color: #DC2626; font-size: 13px; margin: 8px 0 0;"></p>
 
     {{-- Preview image existante --}}
-    <div x-show="currentImage && files.length === 0" x-cloak style="margin-top: 10px; display: flex !important; align-items: center !important; gap: 10px; background: #F9FAFB; padding: 8px 12px; border-radius: var(--r-base);">
+    <div x-show="currentImage && files.length === 0" x-cloak style="margin-top: 10px; display: flex !important; align-items: center !important; gap: 10px; background: #F9FAFB; padding: 8px 12px; border-radius: var(--r-base, 0.75rem);">
         <img :src="currentImage" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-        <span style="font-size: 13px; color: var(--c-text-muted);">{{ __('Image actuelle') }}</span>
+        <span style="font-size: 13px; color: var(--c-text-muted, #6E7687);">{{ __('Image actuelle') }}</span>
         <button type="button" @click="removeCurrent()" style="margin-left: auto; background: none; border: none; color: #DC2626; cursor: pointer; font-size: 18px;" title="{{ __('Supprimer') }}">&times;</button>
     </div>
 
     {{-- Preview nouveaux fichiers --}}
     <template x-for="(file, i) in files" :key="i">
-        <div style="margin-top: 10px; display: flex !important; align-items: center !important; gap: 10px; background: #F9FAFB; padding: 8px 12px; border-radius: var(--r-base); border: 1px solid #E5E7EB;">
+        <div style="margin-top: 10px; display: flex !important; align-items: center !important; gap: 10px; background: #F9FAFB; padding: 8px 12px; border-radius: var(--r-base, 0.75rem); border: 1px solid #E5E7EB;">
             <img x-show="file.isImage" :src="file.url" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
             <div x-show="!file.isImage" style="width: 60px; height: 60px; border-radius: 8px; background: #E5E7EB; display: flex !important; align-items: center !important; justify-content: center !important;">
-                <i class="fa fa-file" style="font-size: 20px; color: var(--c-text-muted);"></i>
+                <i class="fa fa-file" style="font-size: 20px; color: var(--c-text-muted, #6E7687);"></i>
             </div>
             <div style="flex: 1 !important; min-width: 0;">
-                <p x-text="file.name" style="margin: 0; font-size: 13px; font-weight: 600; color: var(--c-dark); word-break: break-all;"></p>
-                <small x-text="(file.size / 1024).toFixed(0) + ' Ko'" style="color: var(--c-text-muted);"></small>
+                <p x-text="file.name" style="margin: 0; font-size: 13px; font-weight: 600; color: var(--c-dark, #1A1D23); word-break: break-all;"></p>
+                <small x-text="(file.size / 1024).toFixed(0) + ' Ko'" style="color: var(--c-text-muted, #6E7687);"></small>
             </div>
             <button type="button" @click="removeFile(i)" style="background: none; border: none; color: #DC2626; cursor: pointer; font-size: 18px; padding: 4px 8px;" title="{{ __('Supprimer') }}">&times;</button>
         </div>
     </template>
 
     @if($helpText)
-        <p style="font-size: 12px; color: var(--c-text-muted); margin: 8px 0 0;">{{ $helpText }}</p>
+        <p style="font-size: 12px; color: var(--c-text-muted, #6E7687); margin: 8px 0 0;">{{ $helpText }}</p>
     @endif
 </div>
