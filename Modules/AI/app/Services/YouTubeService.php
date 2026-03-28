@@ -115,7 +115,7 @@ class YouTubeService
                     $context .= "\nOutil concerné : {$toolName} - {$toolDescription}";
                 }
 
-                $response = Http::withHeaders([
+                $response = Http::withoutVerifying()->withHeaders([
                     'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
                     'HTTP-Referer' => config('app.url'),
                 ])->timeout(60)->post('https://openrouter.ai/api/v1/chat/completions', [
