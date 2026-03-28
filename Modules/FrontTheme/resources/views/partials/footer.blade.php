@@ -59,9 +59,7 @@
                             @if(Route::has('directory.leaderboard'))
                                 <li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>
                             @endif
-                            @if(Route::has('roadmap.boards.index'))
-                                <li><a href="{{ route('roadmap.boards.index') }}">💡 {{ __('Propositions') }}</a></li>
-                            @endif
+                            {{-- Lien Propositions retiré du footer (décision utilisateur 2026-03-28) --}}
                             <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook"></i> Facebook</a></li>
                             <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger"></i> Messenger</a></li>
                             @guest
