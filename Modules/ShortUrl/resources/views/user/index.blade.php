@@ -14,7 +14,7 @@
     <a href="{{ route('shorturl.create') }}"
         style="background: var(--c-primary, #0B7285); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; transition: background .2s;"
         onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
-        ➕ {{ __('Nouveau lien') }}
+        + {{ __('Nouveau lien') }}
     </a>
 </div>
 
@@ -26,7 +26,7 @@
         <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 20px;">{{ __('Créez votre premier lien court pour commencer à suivre vos clics.') }}</p>
         <a href="{{ route('shorturl.create') }}"
             style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; text-decoration: none;">
-            ➕ {{ __('Créer un lien') }}
+            + {{ __('Créer un lien') }}
         </a>
     </div>
 @else
