@@ -52,8 +52,38 @@
                             <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
                             <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
                             @isset($categories)
-                            <li class="menu-item-has-children">
-                                <a href="#">{{ __('Catégories') }}</a>
+                            <li class="menu-item-has-children" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
+                                <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Catégories') }}</a>
+                                {{-- Mega menu catégories --}}
+                                <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms
+                                    style="position:absolute;left:50%;transform:translateX(-50%);top:100%;width:520px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;"
+                                    @click.outside="megaOpen = false">
+                                    <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Explorer par thème') }}</div>
+                                    <div style="display:flex!important;flex-wrap:wrap!important;gap:4px;">
+                                        @php
+                                            $catEmojis = [
+                                                'intelligence-artificielle' => '🤖',
+                                                'actualites-techno' => '📰',
+                                                'guides-tutoriels' => '📖',
+                                                'outils-ressources' => '🛠️',
+                                                'pedagogie-numerique' => '🎓',
+                                                'frequence-numerique' => '🎙️',
+                                                'le-concentre' => '☕',
+                                                'divers' => '📌',
+                                            ];
+                                        @endphp
+                                        @foreach($categories as $cat)
+                                        <a href="{{ route('blog.category', $cat->slug) }}" style="display:flex!important;gap:10px;padding:10px 12px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;width:calc(50% - 2px);" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                            <span style="font-size:18px;line-height:1;">{{ $catEmojis[$cat->slug] ?? '📂' }}</span>
+                                            <div style="font-weight:700;font-size:13px;color:var(--c-dark, #1A1D23);text-transform:none;">{{ ucfirst(mb_strtolower($cat->name)) }}</div>
+                                        </a>
+                                        @endforeach
+                                    </div>
+                                    <div style="border-top:1px solid #E5E7EB;margin-top:12px;padding-top:12px;text-align:center;">
+                                        <a href="{{ route('blog.index') }}" style="font-size:13px;font-weight:700;color:var(--c-primary, #0B7285);text-decoration:none!important;">{{ __('Voir tous les articles') }} →</a>
+                                    </div>
+                                </div>
+                                {{-- Fallback sub-menu mobile --}}
                                 <ul class="sub-menu">
                                     @foreach($categories as $cat)
                                         <li><a href="{{ route('blog.category', $cat->slug) }}">{{ $cat->name }}</a></li>
@@ -138,19 +168,61 @@
                             @if(Route::has('shorturl.create'))
                             <li><a href="{{ route('shorturl.create') }}" style="color:var(--c-primary, #0B7285)!important;font-weight:700!important;">🔗 {{ __('Raccourcir') }}</a></li>
                             @endif
-                            <li class="menu-item-has-children">
-                                <a href="#">{{ __('Pages') }}</a>
+                            <li class="menu-item-has-children" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
+                                <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Pages') }}</a>
+                                {{-- Mega menu pages --}}
+                                <div x-show="megaOpen" x-cloak x-transition.opacity.duration.150ms
+                                    style="position:absolute;right:0;top:100%;width:440px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;"
+                                    @click.outside="megaOpen = false">
+                                    <div style="display:flex!important;gap:24px;">
+                                        <div style="flex:1!important;">
+                                            <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Informations') }}</div>
+                                            @if(Route::has('page.show'))
+                                            <a href="{{ route('page.show', 'a-propos') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">👋</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('À propos') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Notre mission et notre equipe') }}</div></div>
+                                            </a>
+                                            @endif
+                                            @if(Route::has('faq.index'))
+                                            <a href="{{ route('faq.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">❓</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('FAQ') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Questions frequentes') }}</div></div>
+                                            </a>
+                                            @endif
+                                            <a href="{{ route('contact') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">✉️</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Contact') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Nous ecrire') }}</div></div>
+                                            </a>
+                                        </div>
+                                        <div style="flex:1!important;">
+                                            <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Participer') }}</div>
+                                            @if(Route::has('blog.submissions.create'))
+                                            <a href="{{ route('blog.submissions.create') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">✍️</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Proposer un article') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Partagez votre expertise') }}</div></div>
+                                            </a>
+                                            @endif
+                                            @if(Route::has('directory.index'))
+                                            <a href="{{ route('directory.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">🔧</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Proposer un outil') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Enrichir le repertoire') }}</div></div>
+                                            </a>
+                                            @endif
+                                            @if(Route::has('legal.privacy'))
+                                            <a href="{{ route('legal.privacy') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">🔒</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Confidentialite') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Politique de vie privee') }}</div></div>
+                                            </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- Fallback sub-menu mobile --}}
                                 <ul class="sub-menu">
-                                    @if(Route::has('page.show'))
-                                        <li><a href="{{ route('page.show', 'a-propos') }}">{{ __('À propos') }}</a></li>
-                                    @endif
-                                    @if(Route::has('faq.index'))
-                                        <li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>
-                                    @endif
+                                    @if(Route::has('page.show'))<li><a href="{{ route('page.show', 'a-propos') }}">{{ __('À propos') }}</a></li>@endif
+                                    @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>@endif
                                     <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
-                                    @if(Route::has('blog.submissions.create'))
-                                        <li><a href="{{ route('blog.submissions.create') }}">✍️ {{ __('Proposer un article') }}</a></li>
-                                    @endif
+                                    @if(Route::has('blog.submissions.create'))<li><a href="{{ route('blog.submissions.create') }}">{{ __('Proposer un article') }}</a></li>@endif
                                 </ul>
                             </li>
                         </ul>
