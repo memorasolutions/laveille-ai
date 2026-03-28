@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolDiscussion;
 use Modules\Directory\Models\ToolReport;
@@ -143,7 +144,8 @@ class CommunityController extends Controller
                     // Fallback : résumé basé sur description YouTube + métadonnées
                     $videoDesc = '';
                     try {
-                        $ytHtml = @file_get_contents("https://www.youtube.com/watch?v={$validated['video_id']}");
+                        $ytResp = Http::withoutVerifying()->timeout(15)->get("https://www.youtube.com/watch?v={$validated['video_id']}");
+                        $ytHtml = $ytResp->successful() ? $ytResp->body() : '';
                         if ($ytHtml && preg_match('/"shortDescription":"(.*?)(?<!\\\\)"/', $ytHtml, $dm)) {
                             $videoDesc = str_replace(['\\n', '\\r', '\\"'], ["\n", '', '"'], $dm[1]);
                             $videoDesc = mb_substr($videoDesc, 0, 3000);
@@ -205,7 +207,8 @@ class CommunityController extends Controller
         }
 
         // Fetch oEmbed metadata (gratuit, pas d'API key) — valide existence + embeddabilité
-        $oembed = @json_decode(@file_get_contents("https://www.youtube.com/oembed?url=" . urlencode($url) . "&format=json"), true);
+        $oembedResponse = Http::withoutVerifying()->timeout(10)->get("https://www.youtube.com/oembed", ['url' => $url, 'format' => 'json']);
+        $oembed = $oembedResponse->successful() ? $oembedResponse->json() : null;
 
         if (! $oembed || empty($oembed['title'])) {
             return response()->json([
@@ -225,12 +228,13 @@ class CommunityController extends Controller
             ]);
         }
 
-        // Extraire durée + channel + description depuis la page YouTube (fallback sans API)
+        // Extraire durée + channel + description depuis la page YouTube (Http pour contourner SSL cPanel)
         $duration = null;
         $channelUrl = null;
         $videoDescription = null;
         try {
-            $html = @file_get_contents("https://www.youtube.com/watch?v={$videoId}");
+            $ytResponse = Http::withoutVerifying()->timeout(15)->get("https://www.youtube.com/watch?v={$videoId}");
+            $html = $ytResponse->successful() ? $ytResponse->body() : '';
             if ($html) {
                 if (preg_match('/"lengthSeconds":"(\d+)"/', $html, $dm)) {
                     $duration = (int) $dm[1];
