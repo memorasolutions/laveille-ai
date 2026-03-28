@@ -44,7 +44,7 @@ class ShortUrlController
     {
         $validated = $request->validate([
             'original_url' => ['required', 'url:http,https', 'max:2048'],
-            'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug'],
+            'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug', 'not_in:' . implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
             'title' => ['nullable', 'string', 'max:255'],
             'domain_id' => ['nullable', 'exists:short_url_domains,id'],
             'password' => ['nullable', 'string', 'max:255'],
@@ -101,7 +101,7 @@ class ShortUrlController
     {
         $validated = $request->validate([
             'original_url' => ['required', 'url:http,https', 'max:2048'],
-            'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug,'.$shortUrl->id],
+            'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug,'.$shortUrl->id, 'not_in:' . implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
             'title' => ['nullable', 'string', 'max:255'],
             'domain_id' => ['nullable', 'exists:short_url_domains,id'],
             'password' => ['nullable', 'string', 'max:255'],

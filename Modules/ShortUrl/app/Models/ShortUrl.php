@@ -21,6 +21,13 @@ class ShortUrl extends Model
 {
     use SoftDeletes;
 
+    public const RESERVED_SLUGS = [
+        'admin', 'api', 'login', 'dashboard', 'user', 's', 'raccourcir',
+        'roadmap', 'blog', 'annuaire', 'glossaire', 'outils', 'acronymes',
+        'contact', 'faq', 'register', 'logout', 'password', 'search',
+        'page', 'newsletter', 'privacy-policy', 'cookie-policy',
+    ];
+
     protected $table = 'short_urls';
 
     protected $fillable = [

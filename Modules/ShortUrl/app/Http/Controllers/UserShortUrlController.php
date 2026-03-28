@@ -44,7 +44,7 @@ class UserShortUrlController
     {
         $validated = $request->validate([
             'original_url' => ['required', 'url', 'max:2048'],
-            'slug' => ['nullable', 'alpha_dash', 'max:50', 'unique:short_urls,slug'],
+            'slug' => ['nullable', 'alpha_dash', 'max:50', 'unique:short_urls,slug', 'not_in:' . implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
             'title' => ['nullable', 'max:255'],
             'description' => ['nullable', 'max:1000'],
             'password' => ['nullable', 'max:255'],
@@ -89,7 +89,7 @@ class UserShortUrlController
 
         $validated = $request->validate([
             'original_url' => ['required', 'url', 'max:2048'],
-            'slug' => ['nullable', 'alpha_dash', 'max:50', Rule::unique('short_urls', 'slug')->ignore($shortUrl->id)],
+            'slug' => ['nullable', 'alpha_dash', 'max:50', Rule::unique('short_urls', 'slug')->ignore($shortUrl->id), 'not_in:' . implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
             'title' => ['nullable', 'max:255'],
             'description' => ['nullable', 'max:1000'],
             'password' => ['nullable', 'max:255'],

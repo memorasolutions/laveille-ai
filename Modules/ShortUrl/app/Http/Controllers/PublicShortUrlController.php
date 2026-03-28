@@ -34,7 +34,7 @@ class PublicShortUrlController
     {
         $rules = [
             'url' => 'required|url|max:2048',
-            'slug' => 'nullable|string|alpha_dash|max:50|unique:short_urls,slug',
+            'slug' => ['nullable', 'string', 'alpha_dash', 'max:50', 'unique:short_urls,slug', 'not_in:' . implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
             'title' => 'nullable|string|max:255',
         ];
 
