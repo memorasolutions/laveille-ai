@@ -8,6 +8,23 @@
         <p style="color:#6b7280;font-size:1.1rem;">{{ __('Proposez vos idées, votez pour vos priorités et contribuez à faire évoluer la plateforme.') }}</p>
     </div>
 
+    {{-- CTA soumettre --}}
+    <div style="text-align:center;margin-bottom:28px;">
+        @auth
+        <a href="{{ route('roadmap.boards.show', $boards->first()) }}"
+            style="display:inline-block;background:var(--c-primary, #0B7285);color:#fff;padding:12px 28px;border-radius:10px;font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-weight:700;font-size:15px;text-decoration:none;transition:background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            ✍️ {{ __('Soumettre ma proposition') }}
+        </a>
+        @else
+        <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour soumettre une proposition.') }}' })"
+            style="background:var(--c-primary, #0B7285);color:#fff;border:none;padding:12px 28px;border-radius:10px;font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-weight:700;font-size:15px;cursor:pointer;transition:background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            🔐 {{ __('Se connecter pour proposer') }}
+        </button>
+        @endauth
+    </div>
+
     <div class="row">
     @forelse($boards as $board)
         <div class="{{ $boards->count() === 1 ? 'col-md-8 col-md-offset-2' : 'col-md-6' }} col-sm-12" style="margin-bottom:20px;">
@@ -36,4 +53,18 @@
         </div>
     @endforelse
     </div>
+
+    {{-- Lien board bugs (auth only) --}}
+    @auth
+    @if(Route::has('roadmap.boards.show'))
+    @php $bugBoard = \Modules\Roadmap\Models\Board::where('slug', 'bugs')->first(); @endphp
+    @if($bugBoard)
+    <div style="text-align:center;margin-top:24px;padding:20px;background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;">
+        <a href="{{ route('roadmap.boards.show', $bugBoard) }}" style="color:#DC2626;font-weight:700;font-size:14px;text-decoration:none;">
+            🐛 {{ __('Signaler un bug') }} →
+        </a>
+    </div>
+    @endif
+    @endif
+    @endauth
 @endsection
