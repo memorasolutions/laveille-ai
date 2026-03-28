@@ -611,6 +611,7 @@
                                 'approveUrl' => route('admin.directory.moderation.resource.approve', $res->id),
                                 'rejectUrl' => route('admin.directory.moderation.resource.reject', $res->id),
                                 'deleteUrl' => route('admin.directory.moderation.resource.delete', $res->id),
+                                'isApproved' => $res->is_approved,
                             ])
                         @endcan
                     </div>
