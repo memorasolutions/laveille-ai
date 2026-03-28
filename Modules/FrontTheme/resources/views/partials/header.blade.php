@@ -139,6 +139,32 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- Menu utilisateur connecté --}}
+                        @auth
+                        <div x-data="{ open: false }" style="display:inline-block;position:relative;margin-right:8px;vertical-align:middle;">
+                            @php $unread = auth()->user()->unreadNotifications->count(); @endphp
+                            <button @click="open = !open" @click.outside="open = false" style="background:none!important;border:none!important;cursor:pointer;padding:0;display:flex!important;align-items:center!important;gap:4px;outline:none!important;box-shadow:none!important;">
+                                <div style="width:32px;height:32px;border-radius:50%;background:var(--c-primary);color:#fff;display:flex!important;align-items:center!important;justify-content:center!important;font-weight:700;font-size:13px;">{{ substr(auth()->user()->name, 0, 1) }}</div>
+                                @if($unread > 0)<span style="position:absolute;top:-2px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex!important;align-items:center!important;justify-content:center!important;">{{ min($unread, 9) }}</span>@endif
+                            </button>
+                            <div x-show="open" x-cloak x-transition style="position:absolute;right:0;top:40px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);width:220px;z-index:9999;padding:8px 0;">
+                                <div style="padding:12px 16px;border-bottom:1px solid #f3f4f6;">
+                                    <div style="font-weight:700;color:var(--c-dark);font-size:14px;">{{ auth()->user()->name }}</div>
+                                    <div style="font-size:11px;color:#9ca3af;">{{ auth()->user()->email }}</div>
+                                </div>
+                                <a href="{{ route('user.profile') }}" style="display:block;padding:10px 16px;color:var(--c-dark);text-decoration:none!important;font-size:13px;font-weight:500;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">👤 {{ __('Mon profil') }}</a>
+                                @if(Route::has('user.contributions'))<a href="{{ route('user.contributions') }}" style="display:block;padding:10px 16px;color:var(--c-dark);text-decoration:none!important;font-size:13px;font-weight:500;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">📝 {{ __('Mes contributions') }}</a>@endif
+                                @if(Route::has('bookmarks.index'))<a href="{{ route('bookmarks.index') }}" style="display:block;padding:10px 16px;color:var(--c-dark);text-decoration:none!important;font-size:13px;font-weight:500;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">❤️ {{ __('Mes favoris') }}</a>@endif
+                                @if(Route::has('user.notifications'))<a href="{{ route('user.notifications') }}" style="display:block;padding:10px 16px;color:var(--c-dark);text-decoration:none!important;font-size:13px;font-weight:500;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">🔔 {{ __('Notifications') }} @if($unread > 0)<span style="background:#ef4444;color:#fff;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;margin-left:4px;">{{ $unread }}</span>@endif</a>@endif
+                                <div style="border-top:1px solid #f3f4f6;margin-top:4px;padding-top:4px;">
+                                    <form method="POST" action="{{ route('logout') }}">@csrf
+                                        <button type="submit" style="display:block;width:100%;text-align:left;padding:10px 16px;background:none!important;border:none!important;color:#ef4444;font-size:13px;font-weight:500;cursor:pointer;outline:none!important;box-shadow:none!important;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">🚪 {{ __('Se déconnecter') }}</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @endauth
+
                         <div class="header-right-menu-wrapper">
                             <div class="header-right-menu">
                                 <div class="right-menu-toggle-btn">
