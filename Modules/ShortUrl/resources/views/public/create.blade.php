@@ -12,6 +12,13 @@
 <section class="section-padding" style="padding-top: 20px;">
 <div class="container">
 
+    {{-- Message flash (lien expiré/supprimé redirigé ici) --}}
+    @if(session('warning'))
+        <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 14px 20px; margin-bottom: 20px; color: #92400E; font-size: 14px; text-align: center;">
+            ⚠️ {{ session('warning') }}
+        </div>
+    @endif
+
     {{-- Hero --}}
     <div class="text-center" style="margin-bottom: 32px;">
         <div style="width: 80px; height: 80px; border-radius: 20px; background: var(--c-primary-light, #F0FAFB); display: inline-flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 16px;">

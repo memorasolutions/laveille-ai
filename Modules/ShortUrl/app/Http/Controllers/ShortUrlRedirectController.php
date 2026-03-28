@@ -27,11 +27,13 @@ class ShortUrlRedirectController
         $shortUrl = $this->service->resolve($slug);
 
         if (! $shortUrl) {
-            abort(404);
+            return redirect()->route('shorturl.create')
+                ->with('warning', __('Ce lien n\'existe pas. Créez le vôtre !'));
         }
 
         if (! $shortUrl->isAccessible()) {
-            abort(410, 'Ce lien a expiré.');
+            return redirect()->route('shorturl.create')
+                ->with('warning', __('Ce lien a expiré ou a été désactivé. Créez-en un nouveau !'));
         }
 
         if (! empty($shortUrl->password) && ! $request->session()->get("short_url_password_{$shortUrl->id}")) {
