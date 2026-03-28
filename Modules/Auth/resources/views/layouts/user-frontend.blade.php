@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-<div class="container" style="padding: 30px 0 60px;">
+<div class="container user-space" style="padding: 30px 0 60px;">
     <div class="row" x-data="{ sidebarOpen: false }">
 
         {{-- Bouton toggle sidebar mobile --}}

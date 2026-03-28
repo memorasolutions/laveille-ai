@@ -13,8 +13,8 @@
 {{-- Cartes statistiques --}}
 <div class="row" style="margin-bottom: 20px;">
     <div class="col-sm-4" style="margin-bottom: 15px;">
-        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
-            <div class="panel-body">
+        <div class="user-stat-card">
+            <div>
                 <i class="fa fa-lightbulb-o fa-2x" style="color: #f0ad4e;"></i>
                 <h3 style="margin: 5px 0 0;">{{ $suggestions->count() }}</h3>
                 <small style="color: #777;">{{ __('Suggestions') }}</small>
@@ -22,8 +22,8 @@
         </div>
     </div>
     <div class="col-sm-4" style="margin-bottom: 15px;">
-        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
-            <div class="panel-body">
+        <div class="user-stat-card">
+            <div>
                 <i class="fa fa-thumbs-up fa-2x" style="color: #337ab7;"></i>
                 <h3 style="margin: 5px 0 0;">{{ $votes->count() }}</h3>
                 <small style="color: #777;">{{ __('Votes roadmap') }}</small>
@@ -31,8 +31,8 @@
         </div>
     </div>
     <div class="col-sm-4" style="margin-bottom: 15px;">
-        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
-            <div class="panel-body">
+        <div class="user-stat-card">
+            <div>
                 <i class="fa fa-book fa-2x" style="color: #5bc0de;"></i>
                 <h3 style="margin: 5px 0 0;">{{ $resources->count() }}</h3>
                 <small style="color: #777;">{{ __('Ressources') }}</small>

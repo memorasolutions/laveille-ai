@@ -11,8 +11,8 @@
 {{-- Cartes statistiques --}}
 <div class="row" style="margin-bottom: 25px;">
     <div class="col-xs-6 col-sm-3" style="margin-bottom: 15px;">
-        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
-            <div class="panel-body">
+        <div class="user-stat-card">
+            <div>
                 <i class="fa fa-lightbulb-o fa-2x" style="color: #f0ad4e; margin-bottom: 8px;"></i>
                 <h3 style="margin: 0; font-weight: 700;">{{ $stats['suggestions_count'] }}</h3>
                 <small style="color: #777;">{{ __('Suggestions') }}</small>
@@ -20,8 +20,8 @@
         </div>
     </div>
     <div class="col-xs-6 col-sm-3" style="margin-bottom: 15px;">
-        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
-            <div class="panel-body">
+        <div class="user-stat-card">
+            <div>
                 <i class="fa fa-thumbs-up fa-2x" style="color: #337ab7; margin-bottom: 8px;"></i>
                 <h3 style="margin: 0; font-weight: 700;">{{ $stats['votes_count'] }}</h3>
                 <small style="color: #777;">{{ __('Votes') }}</small>
@@ -29,8 +29,8 @@
         </div>
     </div>
     <div class="col-xs-6 col-sm-3" style="margin-bottom: 15px;">
-        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
-            <div class="panel-body">
+        <div class="user-stat-card">
+            <div>
                 <i class="fa fa-bookmark fa-2x" style="color: #5bc0de; margin-bottom: 8px;"></i>
                 <h3 style="margin: 0; font-weight: 700;">{{ $stats['bookmarks_count'] }}</h3>
                 <small style="color: #777;">{{ __('Favoris') }}</small>
@@ -38,8 +38,8 @@
         </div>
     </div>
     <div class="col-xs-6 col-sm-3" style="margin-bottom: 15px;">
-        <div class="panel panel-default" style="text-align: center; margin-bottom: 0;">
-            <div class="panel-body">
+        <div class="user-stat-card">
+            <div>
                 <i class="fa fa-bell fa-2x" style="color: #d9534f; margin-bottom: 8px;"></i>
                 <h3 style="margin: 0; font-weight: 700;">{{ $unreadNotifications }}</h3>
                 <small style="color: #777;">{{ __('Notifications non lues') }}</small>
