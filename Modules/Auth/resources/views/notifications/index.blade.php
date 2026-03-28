@@ -20,9 +20,9 @@
         @if($unreadCount > 0)
             <form method="POST" action="{{ route('user.notifications.markAllRead') }}" style="display: inline;">
                 @csrf
-                <button type="submit" class="btn btn-default btn-sm">
+                <a href="javascript:void(0)" onclick="this.closest('form').submit()" class="btn btn-default btn-sm" style="-webkit-appearance:none;text-decoration:none;">
                     {{ __('Tout marquer comme lu') }}
-                </button>
+                </a>
             </form>
         @endif
         @if($notifications->total() > 0)
@@ -30,9 +30,9 @@
                   onsubmit="return confirm('{{ __('Supprimer toutes les notifications ?') }}')">
                 @csrf
                 <input type="hidden" name="_method" value="DELETE">
-                <button type="submit" class="btn btn-danger btn-sm">
+                <a href="javascript:void(0)" onclick="this.closest('form').submit()" class="btn btn-danger btn-sm" style="-webkit-appearance:none;text-decoration:none;">
                     {{ __('Tout supprimer') }}
-                </button>
+                </a>
             </form>
         @endif
     </div>
