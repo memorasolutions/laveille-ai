@@ -174,7 +174,7 @@
                    aria-controls="resourcesMenu">
                     <i class="link-icon" data-lucide="library"></i>
                     <span class="link-title">{{ __('Ressources') }}</span>
-                    <i class="link-arrow" data-feather="chevron-down"></i>
+                    <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
                 <div class="collapse {{ request()->routeIs('admin.dictionary.*', 'admin.directory.*', 'admin.acronyms.*', 'admin.moderation.*') ? 'show' : '' }}" id="resourcesMenu">
                     <ul class="nav sub-menu">
