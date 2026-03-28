@@ -80,8 +80,11 @@
         </div>
 
         {{-- Message dynamique --}}
-        <p x-show="message" x-text="message" style="margin: 0 0 20px; color: #6B7280; font-size: 14px;"></p>
-        <p x-show="!message" style="margin: 0 0 20px; color: #6B7280; font-size: 14px;">{{ __('Entrez votre courriel pour recevoir un code à 6 chiffres.') }}</p>
+        <p x-show="message" x-text="message" style="margin: 0 0 8px; color: #6B7280; font-size: 14px;"></p>
+        <p x-show="!message" style="margin: 0 0 8px; color: #6B7280; font-size: 14px;">{{ __('Entrez votre courriel pour recevoir un code à 6 chiffres.') }}</p>
+        <p style="margin: 0 0 20px; color: #9CA3AF; font-size: 12px; line-height: 1.5;">
+            {{ __('Pas besoin de mot de passe ni d\'inscription. Entrez votre courriel, recevez un code par courriel, et c\'est tout !') }}
+        </p>
 
         {{-- Étape email --}}
         <div x-show="step === 'email'">
