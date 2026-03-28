@@ -34,6 +34,20 @@ class ShortUrlService
         return ShortUrl::create($data);
     }
 
+    public function createAnonymous(string $originalUrl, ?string $ipAddress = null): ShortUrl
+    {
+        return ShortUrl::create([
+            'user_id' => null,
+            'domain_id' => $this->getDefaultDomain()?->id,
+            'slug' => $this->generateSlug(),
+            'original_url' => $originalUrl,
+            'is_active' => true,
+            'is_anonymous' => true,
+            'redirect_type' => 301,
+            'expires_at' => now()->addDays(30),
+        ]);
+    }
+
     public function generateSlug(int $length = 6): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

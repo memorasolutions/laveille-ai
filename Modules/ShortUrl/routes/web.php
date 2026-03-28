@@ -29,9 +29,33 @@ Route::prefix('admin')
         Route::delete('short-urls/{short_url}', [ShortUrlController::class, 'destroy'])->name('short-urls.destroy')->middleware('permission:delete_short_urls');
     });
 
-// ── Routes publiques de redirection ──
+// ── Routes publiques de redirection (domaine principal) ──
 Route::middleware(['web', 'throttle:60,1'])->group(function () {
     Route::get('/s/{slug}', ShortUrlRedirectController::class)->name('short-url.redirect');
     Route::post('/s/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
         ->name('short-url.password');
+});
+
+// ── Page publique raccourcisseur (accessible sur le site principal) ──
+$frontMiddleware = \Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()
+    ? ['web', \Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class]
+    : ['web'];
+
+Route::middleware($frontMiddleware)
+    ->prefix('raccourcir')
+    ->name('shorturl.')
+    ->group(function () {
+        Route::get('/', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'create'])->name('create');
+        Route::post('/', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'store'])->name('store');
+        Route::get('/{slug}/stats', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'stats'])->name('stats');
+        Route::get('/{slug}/qr', [\Modules\ShortUrl\Http\Controllers\PublicShortUrlController::class, 'qrCode'])->name('qr');
+    });
+
+// ── Routes domaine veille.la (redirection slug + racine → laveille.ai) ──
+Route::middleware(['web'])->domain('veille.la')->group(function () {
+    Route::get('/', fn () => redirect('https://laveille.ai', 301));
+    Route::get('/{slug}', ShortUrlRedirectController::class)->name('short-url.veille-redirect')
+        ->where('slug', '[a-zA-Z0-9\-_]+');
+    Route::post('/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
+        ->name('short-url.veille-password');
 });

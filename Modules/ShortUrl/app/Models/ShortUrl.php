@@ -41,6 +41,10 @@ class ShortUrl extends Model
         'utm_campaign',
         'utm_term',
         'utm_content',
+        'og_title',
+        'og_description',
+        'og_image',
+        'is_anonymous',
     ];
 
     protected $hidden = [
@@ -56,6 +60,7 @@ class ShortUrl extends Model
             'tags' => 'array',
             'redirect_type' => 'integer',
             'max_clicks' => 'integer',
+            'is_anonymous' => 'boolean',
         ];
     }
 
