@@ -13,6 +13,7 @@ namespace Modules\ShortUrl\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Modules\Core\Services\MetaScraperService;
 use Modules\ShortUrl\Models\ShortUrl;
 use Modules\ShortUrl\Models\ShortUrlClick;
 use Modules\ShortUrl\Models\ShortUrlDomain;
@@ -149,6 +150,23 @@ class ShortUrlService
                 ->get()
                 ->toArray(),
         ];
+    }
+
+    public function scrapeMetadata(string $url): array
+    {
+        try {
+            $data = MetaScraperService::scrape($url);
+
+            return [
+                'og_title' => $data['og_title'] ?? $data['title'] ?? null,
+                'og_description' => $data['og_description'] ?? $data['description'] ?? null,
+                'og_image' => $data['og_image'] ?? null,
+                'thumbnail' => $data['og_image'] ?? null,
+                'title' => $data['title'] ?? null,
+            ];
+        } catch (\Exception) {
+            return [];
+        }
     }
 
     public function getDefaultDomain(): ?ShortUrlDomain

@@ -29,6 +29,7 @@ class ShortUrl extends Model
         'slug',
         'original_url',
         'title',
+        'description',
         'password',
         'expires_at',
         'max_clicks',
@@ -44,6 +45,7 @@ class ShortUrl extends Model
         'og_title',
         'og_description',
         'og_image',
+        'thumbnail',
         'is_anonymous',
     ];
 
