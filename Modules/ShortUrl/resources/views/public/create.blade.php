@@ -201,6 +201,19 @@
         </div>
     </div>
 
+    {{-- CTA membres (visible pour les visiteurs non connectés) --}}
+    @guest
+    <div class="text-center" style="margin-top: 24px; padding: 24px; background: #F9FAFB; border-radius: 16px; border: 1px dashed #D1D5DB;">
+        <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 6px; font-size: 1.1rem;">{{ __('Envie de plus ?') }}</h3>
+        <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 14px; font-size: 13px;">{{ __('Liens permanents, slugs personnalisés, analytics 90 jours, mot de passe, QR personnalisé...') }}</p>
+        <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Créez un compte gratuit pour débloquer toutes les fonctionnalités.') }}' })"
+            style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            {{ __('Créer un compte gratuit') }}
+        </button>
+    </div>
+    @endguest
+
     {{-- Historique liens récents (localStorage) --}}
     <div x-show="history.length > 0" x-cloak style="margin-top: 32px;">
         <div style="display: flex !important; justify-content: space-between !important; align-items: center !important; margin-bottom: 12px;">
@@ -261,18 +274,7 @@
         </div>
     </div>
 
-    {{-- CTA membres --}}
-    @guest
-    <div class="text-center" style="margin-top: 40px; padding: 32px; background: #F9FAFB; border-radius: 16px; border: 1px dashed #D1D5DB;">
-        <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 8px;">{{ __('Envie de plus ?') }}</h3>
-        <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 16px; font-size: 14px;">{{ __('Liens permanents, slugs personnalisés, QR codes SVG, analytics 90 jours, mots de passe...') }}</p>
-        <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Créez un compte gratuit pour débloquer toutes les fonctionnalités.') }}' })"
-            style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; transition: background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
-            {{ __('Créer un compte gratuit') }}
-        </button>
-    </div>
-    @endguest
+{{-- CTA supprimé d'ici — déplacé plus haut après le formulaire --}}
 
 </div>
 </section>

@@ -44,7 +44,7 @@
             <div style="font-size: 13px; color: var(--c-text-muted, #6E7687);">{{ __("Aujourd'hui") }}</div>
         </div>
         <div style="flex: 1 !important; min-width: 120px; background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
-            <div style="font-size: 1.3rem; font-weight: 800; color: var(--c-dark, #1A1D23);">{{ $shortUrl->created_at->diffForHumans(null, true) }}</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--c-dark, #1A1D23);">{{ $shortUrl->created_at->diffForHumans(null, true, 1) }}</div>
             <div style="font-size: 13px; color: var(--c-text-muted, #6E7687);">{{ __('Actif depuis') }}</div>
         </div>
     </div>
