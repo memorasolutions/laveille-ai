@@ -163,4 +163,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/api-tokens', [UserApiTokenController::class, 'index'])->name('user.api-tokens');
     Route::post('/user/api-tokens', [UserApiTokenController::class, 'store'])->name('user.api-tokens.store');
     Route::delete('/user/api-tokens/{id}', [UserApiTokenController::class, 'destroy'])->name('user.api-tokens.destroy');
+
+    // Roadmap intégré dans l'espace utilisateur
+    if (class_exists(\Modules\Auth\Http\Controllers\UserRoadmapController::class) && class_exists(\Modules\Roadmap\Models\Board::class)) {
+        Route::get('/user/idees', [\Modules\Auth\Http\Controllers\UserRoadmapController::class, 'ideas'])->name('user.roadmap.ideas');
+        Route::get('/user/bugs', [\Modules\Auth\Http\Controllers\UserRoadmapController::class, 'bugs'])->name('user.roadmap.bugs');
+    }
 });

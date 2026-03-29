@@ -55,12 +55,16 @@
             </a>
         @endif
 
-        @if(Route::has('roadmap.boards.index'))
-            <a href="{{ Route::has('roadmap.boards.show') ? route('roadmap.boards.show', 'idees') : route('roadmap.boards.index') }}" class="list-group-item {{ request()->is('roadmap/idees*') ? 'active' : '' }}">
-                <i class="fa fa-lightbulb-o" style="width: 20px;"></i> {{ __('Idées et suggestions') }}
+        @if(Route::has('user.roadmap.ideas'))
+            <a href="{{ route('user.roadmap.ideas') }}" class="list-group-item {{ request()->routeIs('user.roadmap.ideas') ? 'active' : '' }}">
+                💡 {{ __('Idées et suggestions') }}
             </a>
-            <a href="{{ Route::has('roadmap.boards.show') ? route('roadmap.boards.show', 'bugs') : route('roadmap.boards.index') }}" class="list-group-item {{ request()->is('roadmap/bugs*') ? 'active' : '' }}" style="color: #d9534f;">
-                <i class="fa fa-bug" style="width: 20px;"></i> {{ __('Signaler un bug') }}
+            <a href="{{ route('user.roadmap.bugs') }}" class="list-group-item {{ request()->routeIs('user.roadmap.bugs') ? 'active' : '' }}" style="color: #d9534f;">
+                🐛 {{ __('Signaler un bug') }}
+            </a>
+        @elseif(Route::has('roadmap.boards.index'))
+            <a href="{{ route('roadmap.boards.index') }}" class="list-group-item" target="_blank">
+                💡 {{ __('Idées et suggestions') }}
             </a>
         @endif
 
