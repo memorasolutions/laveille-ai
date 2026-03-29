@@ -234,7 +234,7 @@
             {{-- Succes --}}
             <div x-show="submitted" x-cloak x-transition style="margin-bottom: 20px;">
                 <span style="background: #D1FAE5; color: #065F46; padding: 10px 24px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
-                    ✓ {{ __('Merci ! Votre proposition sera examinée par notre équipe.') }}
+                    ✓ {{ __('Merci ! L\'outil a été ajouté au répertoire.') }}
                 </span>
             </div>
 
