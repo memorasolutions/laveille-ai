@@ -26,7 +26,7 @@ class VoteThresholdNotification extends Notification implements ShouldQueue
 
     public function toMail($notifiable): MailMessage
     {
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject("Votre contenu a atteint {$this->votesCount} votes !")
             ->greeting('Bonjour !')
             ->line("Félicitations ! Votre contenu « {$this->contentTitle} » a atteint {$this->votesCount} votes.")

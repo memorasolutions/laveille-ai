@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  *
@@ -18,7 +20,7 @@ Route::middleware('web')->group(function () {
 // Suggestions glossaire (authentifié)
 Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/glossaire/{slug}/suggest', function (\Illuminate\Http\Request $request, string $slug) {
-        $term = \Modules\Dictionary\Models\Term::published()->where('slug->' . app()->getLocale(), $slug)->firstOrFail();
+        $term = \Modules\Dictionary\Models\Term::published()->where('slug->'.app()->getLocale(), $slug)->firstOrFail();
 
         $validated = $request->validate([
             'field' => ['required', $term->suggestableFieldValidation()],

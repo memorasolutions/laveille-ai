@@ -8,9 +8,9 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Privacy\Models\RightsRequest;
 use Modules\Privacy\Models\UserConsent;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 

@@ -103,7 +103,7 @@ test('API product show includes media', function () {
 
     $this->product->addMedia(UploadedFile::fake()->image('api.jpg'))->toMediaCollection('gallery');
 
-    $this->getJson('/api/ecommerce/products/' . $this->product->slug)
+    $this->getJson('/api/ecommerce/products/'.$this->product->slug)
         ->assertOk()
         ->assertJsonStructure(['data' => ['media']]);
 });

@@ -17,7 +17,7 @@ class ToolObserver
             && (empty($tool->screenshot) || str_starts_with((string) $tool->screenshot, 'http'))
             && ScreenshotService::isAvailable()
         ) {
-            (new ScreenshotService())->captureWithRetry($tool);
+            (new ScreenshotService)->captureWithRetry($tool);
         }
     }
 }

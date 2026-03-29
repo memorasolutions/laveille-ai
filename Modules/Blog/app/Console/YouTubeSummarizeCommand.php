@@ -34,7 +34,7 @@ class YouTubeSummarizeCommand extends Command
             return 1;
         }
 
-        $this->info("Transcript : {$result['video_id']} — " . strlen($result['transcript']) . ' caractères, ' . count($result['segments']) . ' segments');
+        $this->info("Transcript : {$result['video_id']} — ".strlen($result['transcript']).' caractères, '.count($result['segments']).' segments');
         $this->info('Génération du résumé via DeepSeek...');
 
         $summary = $service->summarize($result['transcript'], $result['video_id']);

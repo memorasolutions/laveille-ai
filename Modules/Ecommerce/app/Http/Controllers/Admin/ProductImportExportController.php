@@ -34,7 +34,7 @@ class ProductImportExportController extends Controller
 
         return response()->streamDownload(function () use ($csv) {
             echo $csv;
-        }, 'products-' . date('Y-m-d') . '.csv', [
+        }, 'products-'.date('Y-m-d').'.csv', [
             'Content-Type' => 'text/csv',
         ]);
     }
@@ -54,7 +54,7 @@ class ProductImportExportController extends Controller
         ]);
 
         if (! empty($result['errors'])) {
-            $msg .= ' ' . count($result['errors']) . ' erreur(s).';
+            $msg .= ' '.count($result['errors']).' erreur(s).';
         }
 
         return redirect()->route('admin.ecommerce.import-export.index')

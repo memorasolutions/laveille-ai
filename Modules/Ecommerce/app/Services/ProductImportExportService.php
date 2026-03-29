@@ -68,6 +68,7 @@ class ProductImportExportService
 
             if (count($data) !== count($headers)) {
                 $results['errors'][] = "Ligne {$row} : nombre de colonnes incorrect.";
+
                 continue;
             }
 
@@ -75,6 +76,7 @@ class ProductImportExportService
 
             if (empty($r['name']) || empty($r['slug']) || ! is_numeric($r['price'] ?? '')) {
                 $results['errors'][] = "Ligne {$row} : name, slug et price requis.";
+
                 continue;
             }
 

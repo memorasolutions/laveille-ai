@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  *
@@ -13,9 +15,8 @@ if (! function_exists('format_date')) {
     /**
      * Format a date using site-wide configurable settings.
      *
-     * @param  mixed   $date  Carbon instance, string, or null
+     * @param  mixed  $date  Carbon instance, string, or null
      * @param  string  $type  long|short|relative|datetime|time|iso|custom
-     * @return string
      */
     function format_date(mixed $date, string $type = 'short'): string
     {
@@ -26,10 +27,10 @@ if (! function_exists('format_date')) {
         $carbon = $date instanceof Carbon ? $date : Carbon::parse($date);
 
         $defaults = [
-            'long'     => 'd MMMM YYYY',
-            'short'    => 'd MMM YYYY',
+            'long' => 'd MMMM YYYY',
+            'short' => 'd MMM YYYY',
             'datetime' => 'd MMM YYYY [à] HH:mm',
-            'time'     => 'HH:mm',
+            'time' => 'HH:mm',
         ];
 
         if ($type === 'relative') {
@@ -63,36 +64,36 @@ if (! function_exists('format_date_options')) {
 
         return [
             'long' => [
-                'label'   => __('Date longue'),
+                'label' => __('Date longue'),
                 'formats' => [
-                    'd MMMM YYYY'           => $now->isoFormat('d MMMM YYYY'),
-                    'dddd d MMMM YYYY'      => $now->isoFormat('dddd d MMMM YYYY'),
-                    'D MMMM YYYY'           => $now->isoFormat('D MMMM YYYY'),
+                    'd MMMM YYYY' => $now->isoFormat('d MMMM YYYY'),
+                    'dddd d MMMM YYYY' => $now->isoFormat('dddd d MMMM YYYY'),
+                    'D MMMM YYYY' => $now->isoFormat('D MMMM YYYY'),
                 ],
             ],
             'short' => [
-                'label'   => __('Date courte'),
+                'label' => __('Date courte'),
                 'formats' => [
-                    'd MMM YYYY'   => $now->isoFormat('d MMM YYYY'),
-                    'DD/MM/YYYY'   => $now->isoFormat('DD/MM/YYYY'),
-                    'YYYY-MM-DD'   => $now->isoFormat('YYYY-MM-DD'),
-                    'DD-MM-YYYY'   => $now->isoFormat('DD-MM-YYYY'),
+                    'd MMM YYYY' => $now->isoFormat('d MMM YYYY'),
+                    'DD/MM/YYYY' => $now->isoFormat('DD/MM/YYYY'),
+                    'YYYY-MM-DD' => $now->isoFormat('YYYY-MM-DD'),
+                    'DD-MM-YYYY' => $now->isoFormat('DD-MM-YYYY'),
                 ],
             ],
             'datetime' => [
-                'label'   => __('Date et heure'),
+                'label' => __('Date et heure'),
                 'formats' => [
-                    'd MMM YYYY [à] HH:mm'      => $now->isoFormat('d MMM YYYY [à] HH:mm'),
-                    'DD/MM/YYYY HH:mm'           => $now->isoFormat('DD/MM/YYYY HH:mm'),
+                    'd MMM YYYY [à] HH:mm' => $now->isoFormat('d MMM YYYY [à] HH:mm'),
+                    'DD/MM/YYYY HH:mm' => $now->isoFormat('DD/MM/YYYY HH:mm'),
                     'dddd d MMMM YYYY [à] HH:mm' => $now->isoFormat('dddd d MMMM YYYY [à] HH:mm'),
                 ],
             ],
             'time' => [
-                'label'   => __('Heure'),
+                'label' => __('Heure'),
                 'formats' => [
-                    'HH:mm'    => $now->isoFormat('HH:mm'),
+                    'HH:mm' => $now->isoFormat('HH:mm'),
                     'HH:mm:ss' => $now->isoFormat('HH:mm:ss'),
-                    'h:mm A'   => $now->isoFormat('h:mm A'),
+                    'h:mm A' => $now->isoFormat('h:mm A'),
                 ],
             ],
         ];

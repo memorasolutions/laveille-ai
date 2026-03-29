@@ -95,7 +95,7 @@ class BrevoService
         return [
             'success' => $successCount > 0,
             'message_id' => "bulk_{$successCount}",
-            'error' => count($errors) > 0 ? count($errors) . ' envois echoues' : null,
+            'error' => count($errors) > 0 ? count($errors).' envois echoues' : null,
             'stats' => [
                 'total' => $subscribers->count(),
                 'sent' => $successCount,
@@ -140,7 +140,7 @@ class BrevoService
                 'api-key' => $this->apiKey,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ])->$method(self::API_URL . $endpoint, $data);
+            ])->$method(self::API_URL.$endpoint, $data);
 
             if ($response->successful()) {
                 $json = $response->json();
@@ -157,7 +157,7 @@ class BrevoService
 
             return $this->errorResponse($errorMsg);
         } catch (\Throwable $e) {
-            Log::error('Brevo: ' . $e->getMessage());
+            Log::error('Brevo: '.$e->getMessage());
 
             return $this->errorResponse($e->getMessage());
         }

@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Modules\Ecommerce\Jobs\ProcessAbandonedCarts;
 use Modules\Ecommerce\Models\AbandonedCartReminder;
@@ -17,7 +18,6 @@ use Modules\Ecommerce\Models\Order;
 use Modules\Ecommerce\Models\Product;
 use Modules\Ecommerce\Models\ProductVariant;
 use Modules\Ecommerce\Notifications\AbandonedCartNotification;
-use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 

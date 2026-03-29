@@ -16,7 +16,7 @@ class TermAdminController extends Controller
 {
     public function index(): View
     {
-        $terms = Term::with('category')->orderBy('name->' . app()->getLocale())->paginate(20);
+        $terms = Term::with('category')->orderBy('name->'.app()->getLocale())->paginate(20);
 
         return view('dictionary::admin.index', compact('terms'));
     }

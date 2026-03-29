@@ -20,7 +20,7 @@ class DirectoryEditorialLot5Seeder extends Seeder
 
         foreach ($articles as $slug => $description) {
             $tool = Tool::where('slug->fr_CA', $slug)->first()
-                ?? Tool::where('slug->' . app()->getLocale(), $slug)->first();
+                ?? Tool::where('slug->'.app()->getLocale(), $slug)->first();
 
             if ($tool) {
                 $tool->setTranslation('description', 'fr_CA', $description);

@@ -8,11 +8,11 @@ declare(strict_types=1);
  * @project memora/laravel-saas-boilerplate
  */
 
-use Modules\Privacy\Models\CookieCategory;
 use App\Models\User;
-use Modules\Privacy\Database\Seeders\CookieCategorySeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Privacy\Database\Seeders\CookieCategorySeeder;
+use Modules\Privacy\Models\CookieCategory;
 
 uses(RefreshDatabase::class);
 

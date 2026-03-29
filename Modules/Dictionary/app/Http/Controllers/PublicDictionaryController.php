@@ -20,7 +20,7 @@ class PublicDictionaryController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Term::published()->orderBy('name->' . app()->getLocale());
+        $query = Term::published()->orderBy('name->'.app()->getLocale());
 
         if ($request->filled('type')) {
             $query->ofType($request->type);
@@ -28,7 +28,7 @@ class PublicDictionaryController extends Controller
 
         if ($request->filled('letter')) {
             $letter = strtolower($request->letter);
-            $query->whereRaw("LOWER(JSON_EXTRACT(name, '$." . app()->getLocale() . "')) LIKE ?", ["\"{$letter}%"]);
+            $query->whereRaw("LOWER(JSON_EXTRACT(name, '$.".app()->getLocale()."')) LIKE ?", ["\"{$letter}%"]);
         }
 
         if ($request->filled('q')) {
@@ -36,7 +36,7 @@ class PublicDictionaryController extends Controller
             $locale = app()->getLocale();
             $query->where(function ($q) use ($search, $locale) {
                 $q->where("name->{$locale}", 'like', "%{$search}%")
-                  ->orWhere("definition->{$locale}", 'like', "%{$search}%");
+                    ->orWhere("definition->{$locale}", 'like', "%{$search}%");
             });
         }
 
@@ -50,7 +50,7 @@ class PublicDictionaryController extends Controller
     public function show(string $slug): View
     {
         $term = Term::published()
-            ->where('slug->' . app()->getLocale(), $slug)
+            ->where('slug->'.app()->getLocale(), $slug)
             ->firstOrFail();
 
         $relatedTerms = Term::published()

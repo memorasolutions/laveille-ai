@@ -13,7 +13,9 @@ class Tag extends Model
     use HasTranslations;
 
     protected $table = 'directory_tags';
+
     public array $translatable = ['name', 'slug'];
+
     protected $fillable = ['name', 'slug'];
 
     public function tools(): BelongsToMany

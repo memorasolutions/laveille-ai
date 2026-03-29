@@ -10,11 +10,11 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Blog\Http\Controllers\Admin\ArticleController;
-use Modules\Blog\Http\Controllers\OEmbedController;
 use Modules\Blog\Http\Controllers\Admin\ArticleRevisionController;
 use Modules\Blog\Http\Controllers\Admin\CategoryController;
 use Modules\Blog\Http\Controllers\Admin\CommentAdminController;
 use Modules\Blog\Http\Controllers\Admin\TagController;
+use Modules\Blog\Http\Controllers\OEmbedController;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 
@@ -140,6 +140,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         ]);
         if (class_exists(\Modules\Core\Models\Bookmark::class)) {
             $added = \Modules\Core\Models\Bookmark::toggle(auth()->id(), $validated['type'], $validated['id']);
+
             return response()->json(['bookmarked' => $added]);
         }
         abort(404);
@@ -150,6 +151,7 @@ Route::middleware(['web', 'auth'])->group(function () {
             ->orderByDesc('created_at')
             ->get()
             ->groupBy('bookmarkable_type');
+
         return view('blog::submissions.bookmarks', compact('bookmarks'));
     })->name('bookmarks.index');
 });

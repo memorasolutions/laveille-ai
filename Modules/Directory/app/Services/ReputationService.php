@@ -12,25 +12,39 @@ class ReputationService
 {
     // Points
     public const REVIEW_APPROVED = 10;
+
     public const DISCUSSION_APPROVED = 5;
+
     public const RESOURCE_APPROVED = 8;
+
     public const REPLY_APPROVED = 3;
+
     public const LIKE_RECEIVED = 1;
+
     public const REPORT_CONFIRMED = 5;
+
     public const CONTENT_REJECTED = -10;
+
     public const VOTE_CAST = 1;
+
     public const CONTENT_COMMUNITY_APPROVED = 15;
+
     public const STREAK_BONUS_7 = 10;
 
     // Niveaux
     public const LEVEL_NOUVEAU = 0;
+
     public const LEVEL_CONTRIBUTEUR = 1;
+
     public const LEVEL_VERIFIE = 2;
+
     public const LEVEL_EXPERT = 3;
 
     // Seuils
     private const THRESHOLD_CONTRIBUTEUR = 15;
+
     private const THRESHOLD_VERIFIE = 50;
+
     private const THRESHOLD_EXPERT = 150;
 
     // Multiplicateurs par niveau

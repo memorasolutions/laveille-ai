@@ -162,6 +162,7 @@ class ImportWordPress extends Command
 
                 if (! $slug || ! $name) {
                     $bar->advance();
+
                     continue;
                 }
 
@@ -210,6 +211,7 @@ class ImportWordPress extends Command
 
                 if (! $slug || ! $name) {
                     $bar->advance();
+
                     continue;
                 }
 

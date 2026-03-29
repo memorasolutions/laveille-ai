@@ -1,0 +1,207 @@
+- generic [ref=e5]:
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - link "ps-logo" [ref=e10] [cursor=pointer]:
+        - /url: /home
+        - img "ps-logo" [ref=e11]
+      - navigation [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link "Accueil" [ref=e16] [cursor=pointer]:
+              - /url: /home
+              - paragraph [ref=e19]: Accueil
+          - listitem [ref=e21]:
+            - link "Commissions" [ref=e22] [cursor=pointer]:
+              - /url: /payouts
+              - paragraph [ref=e25]: Commissions
+          - listitem [ref=e27]:
+            - link "Découvrir les partenariats" [ref=e28] [cursor=pointer]:
+              - /url: /marketplace
+              - paragraph [ref=e31]: Découvrir les partenariats
+    - generic [ref=e33]:
+      - generic [ref=e35]:
+        - button "Vos programmes" [ref=e40] [cursor=pointer]:
+          - img [ref=e41]
+          - generic [ref=e43]: Vos programmes
+        - generic [ref=e47]:
+          - button [ref=e48] [cursor=pointer]:
+            - img [ref=e50]
+          - generic:
+            - generic: 0 notifications non lues
+      - button [ref=e55] [cursor=pointer]
+  - generic [ref=e3325]:
+    - list [ref=e3326]:
+      - listitem [ref=e3327]:
+        - link "Découvrir les partenariats" [ref=e3328] [cursor=pointer]:
+          - /url: "#"
+        - img [ref=e3330]
+      - listitem [ref=e3332]:
+        - link "Tous les programmes" [ref=e3333] [cursor=pointer]:
+          - /url: "#"
+        - img [ref=e3335]
+      - listitem [ref=e3337]:
+        - generic [ref=e3338]: Eleven Labs Inc.
+    - generic [ref=e3341]:
+      - generic [ref=e3344]:
+        - img "Eleven Labs Inc. logo" [ref=e3346]
+        - list [ref=e3347]:
+          - listitem [ref=e3348]:
+            - generic [ref=e3349]: Product summary
+            - generic [ref=e3350]: AI-driven text-to-speech technology that creates realistic and emotional voiceovers.
+          - listitem [ref=e3351]:
+            - generic [ref=e3352]: Categories
+            - generic [ref=e3354]:
+              - generic [ref=e3355]:
+                - link "Collaboration et productivité" [ref=e3356] [cursor=pointer]:
+                  - /url: /marketplace/collaborationproductivity
+                - text: ","
+              - link "Intelligence artificielle" [ref=e3358] [cursor=pointer]:
+                - /url: /marketplace/artificialintelligence
+          - listitem [ref=e3359]:
+            - generic [ref=e3360]: Website
+            - generic [ref=e3361]:
+              - img [ref=e3362]
+              - link "External Link" [ref=e3364] [cursor=pointer]:
+                - /url: http://elevenlabs.io
+                - text: elevenlabs.io
+          - listitem [ref=e3365]:
+            - generic [ref=e3366]: Great program for
+            - generic [ref=e3367]: Referral Partners, Affiliates, Publishers
+          - listitem [ref=e3368]:
+            - generic [ref=e3369]: Active partners
+            - generic [ref=e3370]: Plus de 10,000 partenaires
+          - listitem [ref=e3371]:
+            - generic [ref=e3372]: PartnerStack program since
+            - generic [ref=e3373]: Oct 20, 2023
+      - generic [ref=e3374]:
+        - generic [ref=e3375]:
+          - paragraph [ref=e3377]: Eleven Labs Inc.
+          - separator [ref=e3379]
+        - generic [ref=e3380]:
+          - paragraph [ref=e3381]: À propos du programme
+          - paragraph [ref=e3382]: ElevenLabs' AI Audio makes content accessible in any voice and language.
+        - generic [ref=e3383]:
+          - paragraph [ref=e3384]: Offres et structure des commissions
+          - paragraph [ref=e3385]: Earn 22% commission for the first 12 months of every new referral.
+        - generic [ref=e3386]:
+          - paragraph [ref=e3387]: Détails du programme
+          - list [ref=e3389]:
+            - listitem [ref=e3390]:
+              - generic [ref=e3391]: Application review time
+              - generic [ref=e3392]: Moins de 5 jours
+            - listitem [ref=e3393]:
+              - generic [ref=e3394]: Free trial for customers
+              - generic [ref=e3395]: N/A
+            - listitem [ref=e3396]:
+              - generic [ref=e3397]: Discounts available
+              - generic [ref=e3398]: N/A
+            - listitem [ref=e3399]:
+              - generic [ref=e3400]: Assets available
+              - generic [ref=e3401]: Oui
+            - listitem [ref=e3402]:
+              - generic [ref=e3403]: Sub-IDs
+              - generic [ref=e3404]: Oui
+            - listitem [ref=e3405]:
+              - generic [ref=e3406]: Program terms of service
+              - link "External Link" [ref=e3408] [cursor=pointer]:
+                - /url: https://elevenlabs.io/affiliates/terms
+                - text: Conditions d'utilisation
+        - generic [ref=e3422]:
+          - link:
+            - /url: "#"
+          - generic [ref=e3423]:
+            - separator [ref=e3425]
+            - generic [ref=e3429]:
+              - button [ref=e3430] [cursor=pointer]:
+                - img [ref=e3431]
+              - generic [ref=e3433]:
+                - heading "Postuler pour rejoindre le réseau PartnerStack" [level=1] [ref=e3436]:
+                  - text: Postuler pour rejoindre le
+                  - paragraph [ref=e3437]: réseau PartnerStack
+                - generic [ref=e3438]:
+                  - paragraph [ref=e3439]: "Parlez un peu de votre entreprise à PartnerStack. Une fois votre candidature approuvée, vous bénéficierez des avantages suivants :"
+                  - list [ref=e3440]:
+                    - listitem [ref=e3441]:
+                      - generic [ref=e3442]:
+                        - paragraph [ref=e3443]: 🌱
+                        - paragraph [ref=e3445]:
+                          - text: 75 % de chances en plus d'être accepté dans des programmes
+                          - button "En savoir plus" [ref=e3446] [cursor=pointer]
+                    - listitem [ref=e3447]:
+                      - generic [ref=e3448]:
+                        - paragraph [ref=e3449]: 🌱
+                        - paragraph [ref=e3451]:
+                          - text: Une visibilité accrue auprès des programmes les plus demandés
+                          - button "En savoir plus" [ref=e3452] [cursor=pointer]
+                    - listitem [ref=e3453]:
+                      - generic [ref=e3454]:
+                        - paragraph [ref=e3455]: 🌱
+                        - paragraph [ref=e3457]:
+                          - text: Des suggestions intelligentes de nouveaux partenariats adaptés à votre entreprise
+                          - button "En savoir plus" [ref=e3458] [cursor=pointer]
+                - generic [ref=e3459]:
+                  - paragraph [ref=e3464]: MEMORA|Profil réseau PartnerStack
+                  - generic [ref=e3506]:
+                    - generic [ref=e3508]:
+                      - generic [ref=e3510]: Quels secteurs d'activité privilégiez-vous ? *
+                      - button "Select" [ref=e3511] [cursor=pointer]:
+                        - generic [ref=e3513]: Select
+                        - img [ref=e3515]
+                    - generic [ref=e3518]:
+                      - generic [ref=e3520]: Quels types de canaux de vente utilisez-vous ? *
+                      - button "Select" [ref=e3521] [cursor=pointer]:
+                        - generic [ref=e3523]: Select
+                        - img [ref=e3525]
+                    - generic [ref=e3528]:
+                      - generic [ref=e3530]: Où se trouve votre audience ? *
+                      - button "Select" [ref=e3531] [cursor=pointer]:
+                        - generic [ref=e3533]: Select
+                        - img [ref=e3535]
+                    - generic [ref=e3538]:
+                      - generic [ref=e3540]: Avec quels types de clients collaborez-vous ? *
+                      - button "Select" [ref=e3541] [cursor=pointer]:
+                        - generic [ref=e3543]: Select
+                        - img [ref=e3545]
+                    - generic [ref=e3548]:
+                      - generic [ref=e3550]: Quel est le niveau de trafic mensuel de votre audience ? *
+                      - button "Select one" [ref=e3551] [cursor=pointer]:
+                        - generic [ref=e3553]: Select one
+                        - img [ref=e3555]
+                    - generic [ref=e3558]:
+                      - generic [ref=e3560]: Quelle est la structure de commission que vous préférez ? *
+                      - button "Select" [ref=e3561] [cursor=pointer]:
+                        - generic [ref=e3563]: Select
+                        - img [ref=e3565]
+                    - generic [ref=e3567]:
+                      - generic [ref=e3569]: Quel est votre tarif préférentiel pour la création ou la publication de contenu ?
+                      - textbox "Quel est votre tarif préférentiel pour la création ou la publication de contenu ?" [ref=e3571]:
+                        - /placeholder: par exemple, 500 $ par article, 100 $ par message sur les médias sociaux
+                    - paragraph [ref=e3573]: "À noter: Pour maintenir un écosystème de partenariats B2B hautement sélectif, l'équipe dédiée à la réussite des partenaires PartnerStack évalue en permanence les informations de votre profil, ainsi que votre activité sur le réseau. PartnerStack se réserve le droit de limiter votre accès aux programmes et aux partenariats du réseau à sa discrétion."
+                    - generic [ref=e3574]:
+                      - button "Retour" [ref=e3575] [cursor=pointer]:
+                        - img [ref=e3576]
+                        - text: Retour
+                      - button "Postuler pour rejoindre le réseau" [disabled] [ref=e3578]:
+                        - text: Postuler pour rejoindre le réseau
+                        - img [ref=e3579]
+          - link:
+            - /url: "#"
+  - generic [ref=e3271]:
+    - link "PartnerStack.com" [ref=e3273] [cursor=pointer]:
+      - /url: https://partnerstack.com/
+      - generic [ref=e3274]: PartnerStack.com
+    - generic [ref=e3275]:
+      - generic [ref=e3276]: "|"
+      - link "Accord de partenariat" [ref=e3277] [cursor=pointer]:
+        - /url: https://partnerstack.com/legal/partner-agreement
+        - generic [ref=e3278]: Accord de partenariat
+    - generic [ref=e3279]:
+      - generic [ref=e3280]: "|"
+      - link "Code de conduite" [ref=e3281] [cursor=pointer]:
+        - /url: https://partnerstack.com/legal/code-of-conduct
+        - generic [ref=e3282]: Code de conduite
+    - generic [ref=e3283]:
+      - generic [ref=e3284]: "|"
+      - link "Centre d'assistance" [ref=e3285] [cursor=pointer]:
+        - /url: https://support.partnerstack.com/hc/en-us
+        - generic [ref=e3286]: Centre d'assistance

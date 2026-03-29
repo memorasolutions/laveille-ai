@@ -190,8 +190,10 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
     {
         if (class_exists(\Modules\Directory\Services\ReputationService::class)) {
             $info = \Modules\Directory\Services\ReputationService::getLevelInfo($this->trust_level ?? 0);
-            return $info['emoji'] . ' ' . $info['name'];
+
+            return $info['emoji'].' '.$info['name'];
         }
+
         return '';
     }
 }

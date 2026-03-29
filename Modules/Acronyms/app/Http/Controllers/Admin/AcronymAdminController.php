@@ -20,7 +20,7 @@ class AcronymAdminController extends Controller
 {
     public function index(): View
     {
-        $acronyms = Acronym::with('category')->orderBy('acronym->' . app()->getLocale())->paginate(20);
+        $acronyms = Acronym::with('category')->orderBy('acronym->'.app()->getLocale())->paginate(20);
 
         return view('acronyms::admin.index', compact('acronyms'));
     }

@@ -33,7 +33,7 @@ class DirectoryCategoriesSeeder extends Seeder
         foreach ($categories as $data) {
             $category = Category::where('slug->fr_CA', $data['slug'])->first();
             if (! $category) {
-                $category = new Category();
+                $category = new Category;
             }
             $category->icon = $data['icon'];
             $category->setTranslation('name', 'fr_CA', $data['name']);

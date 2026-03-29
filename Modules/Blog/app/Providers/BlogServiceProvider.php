@@ -12,15 +12,15 @@ namespace Modules\Blog\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Blog\Console\DownloadWpImagesCommand;
+use Modules\Blog\Console\ImportWordPressCommand;
+use Modules\Blog\Console\MigrateContentImagesCommand;
+use Modules\Blog\Console\YouTubeSummarizeCommand;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Comment;
 use Modules\Blog\Observers\ArticleObserver;
 use Modules\Blog\Policies\ArticlePolicy;
 use Modules\Blog\Policies\CommentPolicy;
-use Modules\Blog\Console\DownloadWpImagesCommand;
-use Modules\Blog\Console\ImportWordPressCommand;
-use Modules\Blog\Console\MigrateContentImagesCommand;
-use Modules\Blog\Console\YouTubeSummarizeCommand;
 use Modules\Core\Providers\BaseModuleServiceProvider;
 
 class BlogServiceProvider extends BaseModuleServiceProvider

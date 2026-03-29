@@ -22,7 +22,7 @@ class ScrapeMetaController extends Controller
     {
         $request->validate(['url' => 'required|url|max:2048']);
 
-        $key = 'scrape_meta:' . $request->ip();
+        $key = 'scrape_meta:'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 10)) {
             return response()->json(['error' => __('Trop de requêtes. Réessayez dans quelques secondes.')], 429);
         }

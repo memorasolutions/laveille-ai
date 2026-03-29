@@ -62,7 +62,7 @@ class ScreenshotService
                 $reason = $json['error'] ?? 'Erreur inconnue';
                 $blocked = $json['blocked'] ?? false;
                 $tooSmall = $json['tooSmall'] ?? false;
-                Log::warning("Screenshot {$slug}: {$reason}" . ($blocked ? ' [BLOQUE]' : '') . ($tooSmall ? ' [TROP PETIT]' : ''));
+                Log::warning("Screenshot {$slug}: {$reason}".($blocked ? ' [BLOQUE]' : '').($tooSmall ? ' [TROP PETIT]' : ''));
                 @unlink($tempPath);
 
                 return false;
@@ -93,12 +93,12 @@ class ScreenshotService
             $tool->screenshot = "screenshots/{$filename}";
             $tool->saveQuietly();
 
-            Log::info("Screenshot {$slug}: OK via {$method} (" . round($newSize / 1024) . ' KB)');
+            Log::info("Screenshot {$slug}: OK via {$method} (".round($newSize / 1024).' KB)');
 
             return true;
         } catch (Throwable $e) {
             Log::warning("Screenshot exception {$slug}: {$e->getMessage()}");
-            @unlink($outputDir . "/_tmp_{$filename}");
+            @unlink($outputDir."/_tmp_{$filename}");
         }
 
         return false;

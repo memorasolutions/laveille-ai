@@ -39,7 +39,7 @@ class CampaignController extends Controller
         $validated = $request->validate([
             'subject' => 'required|max:255',
             'content' => 'required',
-            'template' => 'required|in:' . implode(',', array_keys(BrevoService::availableTemplates())),
+            'template' => 'required|in:'.implode(',', array_keys(BrevoService::availableTemplates())),
         ]);
 
         Campaign::create([

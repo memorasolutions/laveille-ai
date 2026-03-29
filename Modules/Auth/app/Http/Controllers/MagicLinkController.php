@@ -158,7 +158,7 @@ class MagicLinkController extends Controller
             return response()->json(['success' => false, 'message' => __('Aucun compte avec cette adresse. Inscrivez-vous d abord.')], 422);
         }
 
-        $rateLimitKey = 'magic-link-email:' . sha1($request->email);
+        $rateLimitKey = 'magic-link-email:'.sha1($request->email);
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
             $seconds = RateLimiter::availableIn($rateLimitKey);
 

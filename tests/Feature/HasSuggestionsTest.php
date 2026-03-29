@@ -15,7 +15,7 @@ class HasSuggestionsTest extends TestCase
 {
     public function test_suggestable_fields_returns_expected_array(): void
     {
-        $tool = new Tool();
+        $tool = new Tool;
         $fields = $tool->suggestableFields();
 
         $this->assertIsArray($fields);
@@ -29,7 +29,7 @@ class HasSuggestionsTest extends TestCase
 
     public function test_suggestable_field_validation_returns_in_rule(): void
     {
-        $tool = new Tool();
+        $tool = new Tool;
         $rule = $tool->suggestableFieldValidation();
 
         $this->assertIsString($rule);
@@ -41,7 +41,7 @@ class HasSuggestionsTest extends TestCase
 
     public function test_suggestions_relation_is_morph_many(): void
     {
-        $tool = new Tool();
+        $tool = new Tool;
         $relation = $tool->suggestions();
 
         $this->assertInstanceOf(MorphMany::class, $relation);
@@ -49,7 +49,8 @@ class HasSuggestionsTest extends TestCase
 
     public function test_model_without_suggestable_fields_returns_empty(): void
     {
-        $model = new class extends Model {
+        $model = new class extends Model
+        {
             use HasSuggestions;
 
             protected $table = 'test_dummy';

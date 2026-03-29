@@ -61,12 +61,12 @@ class YouTubeService
 
     public function summarize(string $transcript, ?string $videoId = null): ?string
     {
-        $cacheKey = 'yt_summary_' . ($videoId ?? md5($transcript));
+        $cacheKey = 'yt_summary_'.($videoId ?? md5($transcript));
 
         return Cache::remember($cacheKey, 86400, function () use ($transcript) {
             try {
                 $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
+                    'Authorization' => 'Bearer '.env('OPENROUTER_API_KEY'),
                     'HTTP-Referer' => config('app.url'),
                 ])->timeout(120)->post('https://openrouter.ai/api/v1/chat/completions', [
                     'model' => 'deepseek/deepseek-chat',
@@ -103,7 +103,7 @@ class YouTubeService
             return null;
         }
 
-        $cacheKey = 'yt_meta_summary_' . md5($videoTitle . $videoDescription);
+        $cacheKey = 'yt_meta_summary_'.md5($videoTitle.$videoDescription);
 
         return Cache::remember($cacheKey, 86400, function () use ($videoTitle, $channelName, $toolName, $toolDescription, $videoDescription) {
             try {
@@ -124,7 +124,7 @@ class YouTubeService
                     : 'A partir du titre et du contexte de cette video YouTube, genere un court resume en francais (3-5 phrases) de ce que la video couvre. Sois informatif et utile.';
 
                 $response = Http::withoutVerifying()->withHeaders([
-                    'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
+                    'Authorization' => 'Bearer '.env('OPENROUTER_API_KEY'),
                     'HTTP-Referer' => config('app.url'),
                 ])->timeout(60)->post('https://openrouter.ai/api/v1/chat/completions', [
                     'model' => 'deepseek/deepseek-chat',

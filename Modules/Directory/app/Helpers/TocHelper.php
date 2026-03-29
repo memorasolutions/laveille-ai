@@ -27,7 +27,7 @@ class TocHelper
             $original = $slug;
             $i = 1;
             while (in_array($slug, $usedSlugs, true)) {
-                $slug = $original . '-' . $i++;
+                $slug = $original.'-'.$i++;
             }
             $usedSlugs[] = $slug;
 
@@ -38,7 +38,7 @@ class TocHelper
                 return $matches[0]; // Already has an id
             }
 
-            return '<h2 id="' . $slug . '"' . $attrs . '>' . $matches[2] . '</h2>';
+            return '<h2 id="'.$slug.'"'.$attrs.'>'.$matches[2].'</h2>';
         }, $html);
 
         return ['html' => $modifiedHtml ?? $html, 'toc' => $toc];

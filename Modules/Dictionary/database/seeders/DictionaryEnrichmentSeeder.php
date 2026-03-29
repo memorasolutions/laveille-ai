@@ -24,9 +24,9 @@ class DictionaryEnrichmentSeeder extends Seeder
 
         $categoryIds = [];
         foreach ($categoriesConfig as $key => $config) {
-            $category = Category::whereRaw("JSON_EXTRACT(name, '$.fr_CA') = ?", ['"' . $config['name'] . '"'])->first();
+            $category = Category::whereRaw("JSON_EXTRACT(name, '$.fr_CA') = ?", ['"'.$config['name'].'"'])->first();
             if (! $category) {
-                $category = new Category();
+                $category = new Category;
                 $category->setTranslation('slug', 'fr_CA', Str::slug($config['name']));
             }
             $category->setTranslation('name', 'fr_CA', $config['name']);
@@ -48,12 +48,12 @@ class DictionaryEnrichmentSeeder extends Seeder
                 'cat' => 'securite', 'diff' => 'beginner', 'icon' => '🎭',
                 'analogy' => "C'est comme du maquillage de cinéma ultra-réaliste, mais appliqué numériquement après le tournage.",
                 'example' => "Une vidéo virale où l'on voit le président dire des choses qu'il n'a jamais prononcées.",
-                'fact' => "Le terme est une contraction de « Deep Learning » (apprentissage profond) et « Fake » (faux).",
+                'fact' => 'Le terme est une contraction de « Deep Learning » (apprentissage profond) et « Fake » (faux).',
             ],
             'Edge AI' => [
                 'cat' => 'outils', 'diff' => 'intermediate', 'icon' => '📱',
                 'analogy' => "C'est comme avoir un chef cuisinier directement à votre table plutôt que d'envoyer la commande en cuisine centrale.",
-                'example' => "La reconnaissance faciale (FaceID) de votre iPhone qui fonctionne même sans internet.",
+                'example' => 'La reconnaissance faciale (FaceID) de votre iPhone qui fonctionne même sans internet.',
                 'fact' => "C'est plus rapide et plus privé car vos données ne quittent jamais votre appareil.",
             ],
             'Fine-tuning' => [
@@ -65,7 +65,7 @@ class DictionaryEnrichmentSeeder extends Seeder
             'GPT' => [
                 'cat' => 'acronymes', 'diff' => 'beginner', 'icon' => '🤖',
                 'analogy' => "C'est comme un système d'autocomplétion sur votre téléphone, mais qui a lu tout internet et est devenu super intelligent.",
-                'example' => "Le moteur derrière ChatGPT qui peut rédiger un courriel complet à partir de trois mots.",
+                'example' => 'Le moteur derrière ChatGPT qui peut rédiger un courriel complet à partir de trois mots.',
                 'fact' => "L'acronyme signifie « Generative Pre-trained Transformer » (Transformateur génératif pré-entraîné).",
             ],
             'Hallucination' => [
@@ -78,12 +78,12 @@ class DictionaryEnrichmentSeeder extends Seeder
                 'cat' => 'concepts', 'diff' => 'intermediate', 'icon' => '🕵️',
                 'analogy' => "C'est la différence entre un stagiaire à qui il faut tout dicter et un employé autonome qui prend des initiatives.",
                 'example' => "Une IA qui ne fait pas juste vous donner la recette, mais qui commande aussi les ingrédients à l'épicerie pour vous.",
-                'fact' => "Les agents peuvent utiliser des outils (navigateur web, calculatrice) pour accomplir des tâches complexes.",
+                'fact' => 'Les agents peuvent utiliser des outils (navigateur web, calculatrice) pour accomplir des tâches complexes.',
             ],
             'IA constitutionnelle' => [
                 'cat' => 'securite', 'diff' => 'advanced', 'icon' => '📜',
                 'analogy' => "C'est comme donner une « Charte des droits et libertés » à l'IA qu'elle ne doit jamais violer.",
-                'example' => "La méthode utilisée par Anthropic pour empêcher son IA Claude de générer du contenu haineux.",
+                'example' => 'La méthode utilisée par Anthropic pour empêcher son IA Claude de générer du contenu haineux.',
                 'fact' => "On utilise souvent une autre IA pour surveiller si l'IA principale respecte bien sa « constitution ».",
             ],
             'IA générative' => [
@@ -101,8 +101,8 @@ class DictionaryEnrichmentSeeder extends Seeder
             'LLM' => [
                 'cat' => 'acronymes', 'diff' => 'beginner', 'icon' => '📚',
                 'analogy' => "C'est une bibliothèque vivante qui a lu tous les livres du monde et comprend les liens entre les mots.",
-                'example' => "La technologie de base derrière les chatbots comme ChatGPT, Claude ou Gemini.",
-                'fact' => "Ces modèles sont entraînés sur des centaines de milliards de mots provenant du web public.",
+                'example' => 'La technologie de base derrière les chatbots comme ChatGPT, Claude ou Gemini.',
+                'fact' => 'Ces modèles sont entraînés sur des centaines de milliards de mots provenant du web public.',
             ],
             'MCP' => [
                 'cat' => 'outils', 'diff' => 'advanced', 'icon' => '🔌',
@@ -113,14 +113,14 @@ class DictionaryEnrichmentSeeder extends Seeder
             'NLP' => [
                 'cat' => 'acronymes', 'diff' => 'intermediate', 'icon' => '🗣️',
                 'analogy' => "C'est apprendre à un ordinateur à comprendre la grammaire, l'argot et le contexte, pas juste des 0 et des 1.",
-                'example' => "Quand Siri comprend la différence entre « Appelle Maman » et « Appelle-moi un taxi ».",
+                'example' => 'Quand Siri comprend la différence entre « Appelle Maman » et « Appelle-moi un taxi ».',
                 'fact' => "Cela inclut la traduction, l'analyse de sentiments et la reconnaissance vocale.",
             ],
             'Prompt' => [
                 'cat' => 'concepts', 'diff' => 'beginner', 'icon' => '⌨️',
                 'analogy' => "C'est la formule magique ou les instructions précises que vous donnez au génie pour faire votre vœu.",
-                'example' => "Taper « Agis comme un nutritionniste et fais-moi un plan repas » dans ChatGPT.",
-                'fact' => "Changer un seul adjectif dans votre prompt peut transformer complètement le résultat obtenu.",
+                'example' => 'Taper « Agis comme un nutritionniste et fais-moi un plan repas » dans ChatGPT.',
+                'fact' => 'Changer un seul adjectif dans votre prompt peut transformer complètement le résultat obtenu.',
             ],
             'RAG' => [
                 'cat' => 'outils', 'diff' => 'intermediate', 'icon' => '🔍',
@@ -131,7 +131,7 @@ class DictionaryEnrichmentSeeder extends Seeder
             'RLHF' => [
                 'cat' => 'donnees', 'diff' => 'advanced', 'icon' => '👍',
                 'analogy' => "C'est le dressage de l'IA : on lui donne une friandise (bon point) quand elle répond bien et on la corrige quand elle se trompe.",
-                'example' => "Des humains qui notent les réponses de ChatGPT pour lui apprendre à être plus poli et utile.",
+                'example' => 'Des humains qui notent les réponses de ChatGPT pour lui apprendre à être plus poli et utile.',
                 'fact' => "C'est cette étape cruciale qui a rendu GPT-3 utilisable par le grand public sous forme de ChatGPT.",
             ],
             'Slop IA' => [
@@ -149,7 +149,7 @@ class DictionaryEnrichmentSeeder extends Seeder
             'Transformer' => [
                 'cat' => 'concepts', 'diff' => 'advanced', 'icon' => '🏗️',
                 'analogy' => "C'est une machine capable de lire une phrase entière d'un coup et de comprendre les relations entre tous les mots simultanément.",
-                'example' => "Comprendre que le mot « avocat » désigne le fruit ou le métier selon les autres mots de la phrase.",
+                'example' => 'Comprendre que le mot « avocat » désigne le fruit ou le métier selon les autres mots de la phrase.',
                 'fact' => "C'est l'architecture révolutionnaire (le « T » de GPT) inventée par Google en 2017 qui a tout changé.",
             ],
             'Vibe Coding' => [

@@ -18,11 +18,11 @@ class PublicAcronymController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Acronym::published()->ofDomain('education')->orderBy('acronym->' . app()->getLocale());
+        $query = Acronym::published()->ofDomain('education')->orderBy('acronym->'.app()->getLocale());
 
         if ($request->filled('letter')) {
             $letter = strtolower($request->letter);
-            $query->whereRaw("LOWER(JSON_EXTRACT(acronym, '$." . app()->getLocale() . "')) LIKE ?", ["\"{$letter}%"]);
+            $query->whereRaw("LOWER(JSON_EXTRACT(acronym, '$.".app()->getLocale()."')) LIKE ?", ["\"{$letter}%"]);
         }
 
         if ($request->filled('q')) {
@@ -30,7 +30,7 @@ class PublicAcronymController extends Controller
             $locale = app()->getLocale();
             $query->where(function ($q) use ($search, $locale) {
                 $q->where("acronym->{$locale}", 'like', "%{$search}%")
-                  ->orWhere("full_name->{$locale}", 'like', "%{$search}%");
+                    ->orWhere("full_name->{$locale}", 'like', "%{$search}%");
             });
         }
 
@@ -71,7 +71,7 @@ class PublicAcronymController extends Controller
     public function show(string $slug): View
     {
         $acronym = Acronym::published()
-            ->where('slug->' . app()->getLocale(), $slug)
+            ->where('slug->'.app()->getLocale(), $slug)
             ->firstOrFail();
 
         $relatedAcronyms = Acronym::published()

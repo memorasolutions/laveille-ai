@@ -20,6 +20,7 @@ class CartService
     public function __construct(
         private InventoryService $inventoryService,
     ) {}
+
     public function getOrCreateCart(?User $user = null): Cart
     {
         if ($user) {

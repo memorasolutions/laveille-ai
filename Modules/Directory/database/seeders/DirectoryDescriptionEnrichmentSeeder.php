@@ -21,7 +21,7 @@ class DirectoryDescriptionEnrichmentSeeder extends Seeder
         ];
 
         foreach ($descriptions as $slug => $description) {
-            $tool = Tool::where('slug->' . app()->getLocale(), $slug)->first()
+            $tool = Tool::where('slug->'.app()->getLocale(), $slug)->first()
                 ?? Tool::where('slug->fr_CA', $slug)->first();
 
             if ($tool) {

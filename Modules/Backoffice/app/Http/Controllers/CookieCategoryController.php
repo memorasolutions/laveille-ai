@@ -10,10 +10,10 @@ declare(strict_types=1);
 
 namespace Modules\Backoffice\Http\Controllers;
 
-use Modules\Privacy\Models\CookieCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Privacy\Models\CookieCategory;
 
 class CookieCategoryController
 {

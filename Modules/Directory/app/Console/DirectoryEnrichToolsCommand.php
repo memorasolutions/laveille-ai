@@ -28,6 +28,7 @@ class DirectoryEnrichToolsCommand extends Command
         foreach ($tools as $tool) {
             if (! $tool->url) {
                 $bar->advance();
+
                 continue;
             }
 

@@ -11,10 +11,10 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Ecommerce\Http\Controllers\Api\CartApiController;
 use Modules\Ecommerce\Http\Controllers\Api\CheckoutApiController;
+use Modules\Ecommerce\Http\Controllers\Api\DigitalDownloadController;
 use Modules\Ecommerce\Http\Controllers\Api\OrderApiController;
 use Modules\Ecommerce\Http\Controllers\Api\ProductApiController;
 use Modules\Ecommerce\Http\Controllers\Api\ReviewApiController;
-use Modules\Ecommerce\Http\Controllers\Api\DigitalDownloadController;
 use Modules\Ecommerce\Http\Controllers\Api\WishlistApiController;
 
 // Public

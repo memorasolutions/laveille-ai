@@ -38,8 +38,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('directory_reports');
-        Schema::table('directory_resources', function (Blueprint $table) { $table->dropColumn('upvotes'); });
-        Schema::table('directory_reviews', function (Blueprint $table) { $table->dropColumn('upvotes'); });
-        Schema::table('directory_discussions', function (Blueprint $table) { $table->dropColumn('title'); });
+        Schema::table('directory_resources', function (Blueprint $table) {
+            $table->dropColumn('upvotes');
+        });
+        Schema::table('directory_reviews', function (Blueprint $table) {
+            $table->dropColumn('upvotes');
+        });
+        Schema::table('directory_discussions', function (Blueprint $table) {
+            $table->dropColumn('title');
+        });
     }
 };

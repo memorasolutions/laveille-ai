@@ -18,7 +18,6 @@ use Illuminate\Queue\SerializesModels;
 use Modules\Ecommerce\Models\AbandonedCartReminder;
 use Modules\Ecommerce\Models\Cart;
 use Modules\Ecommerce\Models\Order;
-use Modules\Ecommerce\Notifications\AbandonedCartNotification;
 
 class ProcessAbandonedCarts implements ShouldQueue
 {

@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Modules\Ecommerce\Services;
 
-use Illuminate\Support\Collection;
 use Modules\Ecommerce\Models\Cart;
 use Modules\Ecommerce\Models\CartItem;
 use Modules\Ecommerce\Models\Promotion;

@@ -14,8 +14,8 @@ use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolDiscussion;
 use Modules\Directory\Models\ToolReport;
 use Modules\Directory\Models\ToolResource;
-use Modules\Directory\Models\ToolScreenshot;
 use Modules\Directory\Models\ToolReview;
+use Modules\Directory\Models\ToolScreenshot;
 use Modules\Directory\Services\ReputationService;
 
 class CommunityController extends Controller
@@ -24,13 +24,13 @@ class CommunityController extends Controller
 
     public function __construct()
     {
-        $this->reputation = new ReputationService();
+        $this->reputation = new ReputationService;
     }
 
     private function findTool(string $slug): Tool
     {
         return Tool::published()
-            ->where('slug->' . app()->getLocale(), $slug)
+            ->where('slug->'.app()->getLocale(), $slug)
             ->firstOrFail();
     }
 
@@ -62,6 +62,7 @@ class CommunityController extends Controller
 
         if ($autoApprove) {
             $this->reputation->addPoints($user, ReputationService::REVIEW_APPROVED, 'review_auto');
+
             return back()->with('success', __('Votre avis a été publié automatiquement !'));
         }
 
@@ -150,7 +151,8 @@ class CommunityController extends Controller
                             $videoDesc = str_replace(['\\n', '\\r', '\\"'], ["\n", '', '"'], $dm[1]);
                             $videoDesc = mb_substr($videoDesc, 0, 3000);
                         }
-                    } catch (\Throwable $e) {}
+                    } catch (\Throwable $e) {
+                    }
 
                     $resourceData['video_summary'] = $ytService->summarizeFromMeta(
                         $validated['title'] ?? '',
@@ -207,7 +209,7 @@ class CommunityController extends Controller
         }
 
         // Fetch oEmbed metadata (gratuit, pas d'API key) — valide existence + embeddabilité
-        $oembedResponse = Http::withoutVerifying()->timeout(10)->get("https://www.youtube.com/oembed", ['url' => $url, 'format' => 'json']);
+        $oembedResponse = Http::withoutVerifying()->timeout(10)->get('https://www.youtube.com/oembed', ['url' => $url, 'format' => 'json']);
         $oembed = $oembedResponse->successful() ? $oembedResponse->json() : null;
 
         if (! $oembed || empty($oembed['title'])) {
@@ -356,7 +358,7 @@ class CommunityController extends Controller
             'caption' => 'nullable|string|max:255',
         ]);
 
-        $tool = Tool::where('slug->' . app()->getLocale(), $slug)->firstOrFail();
+        $tool = Tool::where('slug->'.app()->getLocale(), $slug)->firstOrFail();
 
         $path = $request->file('screenshot')->store('directory/screenshots', 'public');
 
@@ -368,7 +370,7 @@ class CommunityController extends Controller
         ToolScreenshot::create([
             'directory_tool_id' => $tool->id,
             'user_id' => Auth::id(),
-            'image_path' => 'storage/' . $path,
+            'image_path' => 'storage/'.$path,
             'caption' => $request->caption,
             'is_approved' => $autoApprove,
         ]);

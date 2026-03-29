@@ -12,7 +12,18 @@ class Review extends Model
 {
     protected $fillable = ['reviewable_type', 'reviewable_id', 'user_id', 'guest_name', 'rating', 'content', 'status'];
 
-    public function reviewable(): MorphTo { return $this->morphTo(); }
-    public function user(): BelongsTo { return $this->belongsTo(\App\Models\User::class); }
-    public function scopeApproved($q) { return $q->where('status', 'approved'); }
+    public function reviewable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
+
+    public function scopeApproved($q)
+    {
+        return $q->where('status', 'approved');
+    }
 }

@@ -11,9 +11,13 @@ use Modules\Community\Models\Comment;
 class CommentsThread extends Component
 {
     public string $commentableType;
+
     public int $commentableId;
+
     public string $newComment = '';
+
     public ?int $replyingTo = null;
+
     public string $guestName = '';
 
     public function mount(string $commentableType, int $commentableId): void

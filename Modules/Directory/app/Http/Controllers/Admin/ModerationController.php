@@ -18,7 +18,7 @@ class ModerationController extends Controller
 
     public function __construct()
     {
-        $this->reputation = new ReputationService();
+        $this->reputation = new ReputationService;
     }
 
     public function index(): View
@@ -45,6 +45,7 @@ class ModerationController extends Controller
         if ($review->user) {
             $this->reputation->addPoints($review->user, ReputationService::REVIEW_APPROVED, 'review_approved');
         }
+
         return back()->with('success', __('Avis approuvé.'));
     }
 
@@ -55,6 +56,7 @@ class ModerationController extends Controller
             $this->reputation->addPoints($review->user, ReputationService::CONTENT_REJECTED, 'review_rejected');
         }
         $review->delete();
+
         return back()->with('success', __('Avis rejeté.'));
     }
 
@@ -65,6 +67,7 @@ class ModerationController extends Controller
         if ($resource->user) {
             $this->reputation->addPoints($resource->user, ReputationService::RESOURCE_APPROVED, 'resource_approved');
         }
+
         return back()->with('success', __('Ressource approuvée.'));
     }
 
@@ -75,6 +78,7 @@ class ModerationController extends Controller
             $this->reputation->addPoints($resource->user, ReputationService::CONTENT_REJECTED, 'resource_rejected');
         }
         $resource->delete();
+
         return back()->with('success', __('Ressource rejetée.'));
     }
 
@@ -123,6 +127,7 @@ class ModerationController extends Controller
     public function resolveReport(int $id): RedirectResponse
     {
         ToolReport::findOrFail($id)->update(['is_resolved' => true]);
+
         return back()->with('success', __('Signalement résolu.'));
     }
 
@@ -134,6 +139,7 @@ class ModerationController extends Controller
             $reportableClass::where('id', $report->reportable_id)->delete();
         }
         $report->delete();
+
         return back()->with('success', __('Contenu et signalement supprimés.'));
     }
 

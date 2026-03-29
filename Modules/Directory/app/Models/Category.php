@@ -13,7 +13,9 @@ class Category extends Model
     use HasTranslations;
 
     protected $table = 'directory_categories';
+
     public array $translatable = ['name', 'slug', 'description'];
+
     protected $fillable = ['name', 'slug', 'description', 'icon', 'sort_order'];
 
     public function tools(): BelongsToMany

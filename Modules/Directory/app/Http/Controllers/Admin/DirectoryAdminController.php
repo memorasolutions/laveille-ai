@@ -59,7 +59,7 @@ class DirectoryAdminController extends Controller
             'short_description' => [$locale => $validated['short_description'] ?? '', 'fr' => $validated['short_description'] ?? ''],
             'url' => $validated['url'],
             'pricing' => $validated['pricing'],
-            'logo' => $logoPath ? 'storage/' . $logoPath : null,
+            'logo' => $logoPath ? 'storage/'.$logoPath : null,
             'screenshot' => $validated['screenshot'] ?? null,
             'is_featured' => $request->boolean('is_featured'),
             'sort_order' => $validated['sort_order'] ?? 0,
@@ -111,7 +111,7 @@ class DirectoryAdminController extends Controller
 
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('directory/logos', 'public');
-            $tool->logo = 'storage/' . $logoPath;
+            $tool->logo = 'storage/'.$logoPath;
         }
 
         $tool->save();
@@ -127,7 +127,7 @@ class DirectoryAdminController extends Controller
             return back()->with('error', __('Service de capture indisponible (Node.js ou script manquant).'));
         }
 
-        $service = new ScreenshotService();
+        $service = new ScreenshotService;
         if ($service->captureWithRetry($tool)) {
             return back()->with('success', __('Screenshot capture avec succes.'));
         }

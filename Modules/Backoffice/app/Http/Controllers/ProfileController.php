@@ -61,7 +61,7 @@ class ProfileController
 
             if ($request->hasFile('avatar')) {
                 $path = $request->file('avatar')->store('avatars', 'public');
-                $data['avatar'] = 'storage/' . $path;
+                $data['avatar'] = 'storage/'.$path;
             }
 
             auth()->user()->update($data);

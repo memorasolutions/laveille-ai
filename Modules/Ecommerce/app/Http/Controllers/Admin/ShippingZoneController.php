@@ -14,7 +14,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Modules\Ecommerce\Models\ShippingMethod;
 use Modules\Ecommerce\Models\ShippingZone;
 
 class ShippingZoneController extends Controller

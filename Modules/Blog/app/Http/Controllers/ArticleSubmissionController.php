@@ -48,7 +48,7 @@ class ArticleSubmissionController extends Controller
         $slug = Str::slug($validated['title']);
 
         // Append sources to content
-        $contentWithSources = $validated['content'] . "\n\n---\n**Sources :**\n" . $validated['sources'];
+        $contentWithSources = $validated['content']."\n\n---\n**Sources :**\n".$validated['sources'];
 
         $article = Article::create([
             'title' => [$locale => $validated['title'], 'fr' => $validated['title']],
@@ -66,7 +66,9 @@ class ArticleSubmissionController extends Controller
             $article->setMeta('author_bio', $validated['author_bio']);
             $article->setMeta('author_url', $validated['author_url'] ?? null);
             $article->setMeta('sources', $validated['sources']);
-            if ($filePath) $article->setMeta('submission_file', $filePath);
+            if ($filePath) {
+                $article->setMeta('submission_file', $filePath);
+            }
         }
 
         return redirect()->route('blog.submissions.create')

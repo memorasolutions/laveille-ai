@@ -33,7 +33,6 @@ use Modules\Auth\Livewire\ResetPassword;
 use Modules\Auth\Livewire\TwoFactorChallenge;
 use Modules\Auth\Services\AuthService;
 
-
 Route::middleware(['guest', 'throttle:10,1'])->group(function () {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');

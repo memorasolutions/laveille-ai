@@ -110,7 +110,7 @@ class MetaScraperService
 
         $parsed = parse_url($originalUrl);
 
-        return ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? '');
+        return ($parsed['scheme'] ?? 'https').'://'.($parsed['host'] ?? '');
     }
 
     /**
@@ -136,7 +136,7 @@ class MetaScraperService
         }
 
         try {
-            $response = Http::timeout(15)->withoutVerifying()->get('https://opengraph.io/api/1.1/site/' . urlencode($url), [
+            $response = Http::timeout(15)->withoutVerifying()->get('https://opengraph.io/api/1.1/site/'.urlencode($url), [
                 'app_id' => $apiKey,
             ]);
 
@@ -169,7 +169,7 @@ class MetaScraperService
                     break;
                 }
 
-                $currentUrl = str_starts_with($location, 'http') ? $location : $currentUrl . $location;
+                $currentUrl = str_starts_with($location, 'http') ? $location : $currentUrl.$location;
             } catch (\Exception) {
                 break;
             }
@@ -213,9 +213,9 @@ class MetaScraperService
             return $path;
         }
         if (str_starts_with($path, '//')) {
-            return 'https:' . $path;
+            return 'https:'.$path;
         }
 
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+        return rtrim($baseUrl, '/').'/'.ltrim($path, '/');
     }
 }

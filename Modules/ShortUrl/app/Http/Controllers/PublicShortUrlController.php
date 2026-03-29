@@ -34,7 +34,7 @@ class PublicShortUrlController
     {
         $rules = [
             'url' => 'required|url|max:2048',
-            'slug' => ['nullable', 'string', 'alpha_dash', 'max:50', 'unique:short_urls,slug', 'not_in:' . implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
+            'slug' => ['nullable', 'string', 'alpha_dash', 'max:50', 'unique:short_urls,slug', 'not_in:'.implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
             'title' => 'nullable|string|max:255',
         ];
 
@@ -131,7 +131,7 @@ class PublicShortUrlController
 
         // Fallback : QR via Google Charts API (redirect)
         return response('', 302, [
-            'Location' => 'https://quickchart.io/qr?text=' . urlencode($url) . '&size=' . $size,
+            'Location' => 'https://quickchart.io/qr?text='.urlencode($url).'&size='.$size,
         ]);
     }
 }

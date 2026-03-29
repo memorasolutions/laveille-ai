@@ -21,6 +21,6 @@ trait HasSuggestions
 
     public function suggestableFieldValidation(): string
     {
-        return 'in:' . implode(',', array_keys($this->suggestableFields()));
+        return 'in:'.implode(',', array_keys($this->suggestableFields()));
     }
 }

@@ -32,7 +32,7 @@ class PublicDirectoryController extends Controller
         }
 
         if ($request->filled('category')) {
-            $query->whereHas('categories', fn ($q) => $q->where("slug->" . app()->getLocale(), $request->category));
+            $query->whereHas('categories', fn ($q) => $q->where('slug->'.app()->getLocale(), $request->category));
         }
 
         $tools = $query->get();
@@ -70,7 +70,7 @@ class PublicDirectoryController extends Controller
     public function show(string $slug): View
     {
         $tool = Tool::published()
-            ->where('slug->' . app()->getLocale(), $slug)
+            ->where('slug->'.app()->getLocale(), $slug)
             ->with('categories', 'tags')
             ->firstOrFail();
 
@@ -155,7 +155,7 @@ class PublicDirectoryController extends Controller
         ]);
 
         $locale = app()->getLocale();
-        $tool = new Tool();
+        $tool = new Tool;
         $tool->url = $validated['url'];
         $tool->pricing = $validated['pricing'];
         $tool->status = 'pending';

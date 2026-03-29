@@ -95,5 +95,4 @@ abstract class BaseModuleServiceProvider extends ServiceProvider
         $this->loadViewsFrom($paths, $this->nameLower);
         Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
-
 }

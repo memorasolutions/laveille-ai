@@ -67,6 +67,7 @@ class ToolSuggestion extends Model
         if ($this->suggestable) {
             return $this->suggestable->name ?? $this->suggestable->acronym ?? '';
         }
+
         return $this->tool->name ?? '';
     }
 

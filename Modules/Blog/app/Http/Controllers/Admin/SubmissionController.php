@@ -49,7 +49,7 @@ class SubmissionController extends Controller
             $user = User::find($article->submitted_by);
             if ($user) {
                 if (class_exists(\Modules\Directory\Services\ReputationService::class)) {
-                    $reputation = new \Modules\Directory\Services\ReputationService();
+                    $reputation = new \Modules\Directory\Services\ReputationService;
                     $reputation->addPoints($user, 25, 'article_approved');
                 }
                 try {

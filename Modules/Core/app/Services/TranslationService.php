@@ -37,7 +37,7 @@ class TranslationService
             return $text;
         }
 
-        $cacheKey = 'translation_' . md5($text . $from . $to);
+        $cacheKey = 'translation_'.md5($text.$from.$to);
 
         return Cache::remember($cacheKey, now()->addHours(24), function () use ($text, $from, $to) {
             $apiKey = config('services.openrouter.api_key', env('OPENROUTER_API_KEY'));
@@ -46,15 +46,15 @@ class TranslationService
             }
 
             $systemPrompt = "Tu es un traducteur professionnel {$from} vers {$to}. "
-                . 'Traduis le texte suivant de maniere naturelle et fluide. '
-                . 'Retourne UNIQUEMENT la traduction, sans commentaire ni explication.';
+                .'Traduis le texte suivant de maniere naturelle et fluide. '
+                .'Retourne UNIQUEMENT la traduction, sans commentaire ni explication.';
 
             foreach (['openai/gpt-5', 'openai/gpt-5-mini'] as $model) {
                 try {
                     $response = Http::timeout(30)
                         ->withoutVerifying()
                         ->withHeaders([
-                            'Authorization' => 'Bearer ' . $apiKey,
+                            'Authorization' => 'Bearer '.$apiKey,
                             'Content-Type' => 'application/json',
                         ])
                         ->post(self::API_URL, [

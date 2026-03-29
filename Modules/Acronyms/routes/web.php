@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  */
@@ -21,7 +23,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         }
 
         $acronym = \Modules\Acronyms\Models\Acronym::published()
-            ->where('slug->' . app()->getLocale(), $slug)
+            ->where('slug->'.app()->getLocale(), $slug)
             ->firstOrFail();
 
         $validated = $request->validate([

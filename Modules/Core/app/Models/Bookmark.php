@@ -40,6 +40,7 @@ class Bookmark extends Model
 
         if ($existing) {
             $existing->delete();
+
             return false;
         }
 
