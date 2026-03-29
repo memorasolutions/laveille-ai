@@ -18,7 +18,7 @@
 @push('styles')
 <style>
     .rt-page { padding-bottom: 60px; }
-    .rt-back { display: inline-flex; align-items: center; margin: 16px 0; color: var(--c-primary); font-weight: 600; text-decoration: none; }
+    .rt-back { display: inline-flex; align-items: center; margin: 16px 0; color: var(--c-primary); font-weight: 600; text-decoration: none; padding: 6px 0; min-height: 24px; }
     .rt-back:hover { transform: translateX(-3px); color: var(--c-primary); text-decoration: none; }
     .rt-back svg { margin-right: 8px; width: 18px; height: 18px; }
 
@@ -1018,4 +1018,24 @@
     ]
 }
 </script>
+@if(!empty($tool->faq))
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "FAQPage",
+    "mainEntity": [
+        @foreach($tool->faq as $q)
+        {
+            "@@type": "Question",
+            "name": "{{ e($q['question']) }}",
+            "acceptedAnswer": {
+                "@@type": "Answer",
+                "text": "{{ e($q['answer']) }}"
+            }
+        }{{ $loop->last ? '' : ',' }}
+        @endforeach
+    ]
+}
+</script>
+@endif
 @endpush

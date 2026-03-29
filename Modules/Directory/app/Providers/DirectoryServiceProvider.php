@@ -53,6 +53,7 @@ class DirectoryServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\Directory\Console\DirectoryEnrichToolsCommand::class,
             \Modules\Directory\Console\CaptureScreenshotsCommand::class,
+            \Modules\Directory\Console\CheckLinksCommand::class,
         ]);
     }
 
