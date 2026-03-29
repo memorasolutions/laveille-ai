@@ -106,9 +106,7 @@
                             <p>{{ __('Pour toute question concernant ces conditions :') }}</p>
                             <ul>
                                 <li><strong>{{ $company['dpo_name'] }}</strong></li>
-                                @if($company['address'] !== '123 Privacy Street, City, Country')
-                                    <li>{{ $company['address'] }}</li>
-                                @endif
+                                <li>{{ $company['address'] }}</li>
                                 <li>{{ __('Courriel') }}&nbsp;: <a href="mailto:{{ $company['email'] }}">{{ $company['email'] }}</a></li>
                             </ul>
 

@@ -15,12 +15,12 @@ return [
     |--------------------------------------------------------------------------
     */
     'company' => [
-        'name' => env('COMPANY_NAME', 'Your Company Ltd'),
-        'address' => env('COMPANY_ADDRESS', '123 Privacy Street, City, Country'),
-        'email' => env('COMPANY_EMAIL', 'contact@yourcompany.com'),
-        'dpo_email' => env('DPO_EMAIL', 'dpo@yourcompany.com'),
-        'dpo_name' => env('DPO_NAME', 'Data Protection Officer'),
-        'phone' => env('COMPANY_PHONE', '+1234567890'),
+        'name' => env('COMPANY_NAME', 'La veille de Stef'),
+        'address' => env('COMPANY_ADDRESS', '1501, rue Saint-Benoit, L\'Ancienne-Lorette, QC G2E 1P2, Canada'),
+        'email' => env('COMPANY_EMAIL', 'info@laveille.ai'),
+        'dpo_email' => env('DPO_EMAIL', 'politiques@memora.ca'),
+        'dpo_name' => env('DPO_NAME', 'Stéphane Lapointe'),
+        'phone' => env('COMPANY_PHONE', ''),
         'country' => env('COMPANY_COUNTRY', 'CA'),
     ],
 
