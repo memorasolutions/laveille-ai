@@ -45,6 +45,7 @@
                                     <li><a href="#retrait">{{ __('Procédure de retrait de contenu contrefaisant') }}</a></li>
                                     <li><a href="#infolettre">{{ __('Infolettre') }}</a></li>
                                     <li><a href="#transparence">{{ __('Transparence algorithmique') }}</a></li>
+                                    <li><a href="#disponibilite">{{ __('Disponibilité, modification et fermeture du service') }}</a></li>
                                     <li><a href="#garantie">{{ __('Exclusion de garantie') }}</a></li>
                                     <li><a href="#responsabilite">{{ __('Limitation de responsabilité et plafond de dommages') }}</a></li>
                                     <li><a href="#force-majeure">{{ __('Force majeure') }}</a></li>
@@ -68,7 +69,7 @@
                             <p>{{ __('Le Service est une plateforme de veille technologique et d\'intelligence artificielle (IA) gratuite. Les fonctionnalités incluent :') }}</p>
                             <ul>
                                 <li>{{ __('L\'agrégation de nouvelles spécialisées en technologie et IA') }}</li>
-                                <li>{{ __('Un répertoire de plus de 75 outils d\'IA') }}</li>
+                                <li>{{ __('Un répertoire d\'outils d\'IA') }}</li>
                                 <li>{{ __('Un glossaire terminologique sur l\'IA') }}</li>
                                 <li>{{ __('Une liste d\'acronymes liés au milieu de l\'éducation au Québec') }}</li>
                                 <li>{{ __('Un service de raccourcisseur d\'URL (veille.la)') }}</li>
@@ -131,48 +132,63 @@
                             <h3 id="transparence">{{ __('16. Transparence algorithmique') }}</h3>
                             <p>{{ __('Conformément à l\'article 12.1 de la Loi sur la protection des renseignements personnels dans le secteur privé (Loi 25), l\'exploitant informe l\'utilisateur que le service utilise des systèmes d\'intelligence artificielle pour générer des résumés et classer l\'information. L\'utilisateur a le droit de demander des précisions sur les paramètres principaux ayant mené à une décision ou à une recommandation automatisée le concernant, le cas échéant, en communiquant avec le responsable de la protection des renseignements personnels.') }}</p>
 
-                            {{-- SECTION 17 : EXCLUSION DE GARANTIE --}}
-                            <h3 id="garantie">{{ __('17. Exclusion de garantie') }}</h3>
+                            {{-- SECTION 17 : DISPONIBILITÉ, MODIFICATION ET FERMETURE --}}
+                            <h3 id="disponibilite">{{ __('17. Disponibilité, modification et fermeture du service') }}</h3>
+
+                            <h4>{{ __('Panne et indisponibilité') }}</h4>
+                            <p>{{ __('Le service laveille.ai est fourni « tel quel » et sans aucune garantie de disponibilité continue. Nous ne garantissons pas que le site sera exempt d\'erreurs, de pannes, d\'interruptions ou de défaillances techniques. Nous déclinons toute responsabilité pour toute perte ou tout dommage résultant de pannes, de travaux de maintenance, de cyberattaques, de défaillances techniques ou de toute autre cause d\'indisponibilité du service. L\'utilisation du site se fait à vos propres risques.') }}</p>
+
+                            <h4>{{ __('Perte de données') }}</h4>
+                            <p>{{ __('Nous ne fournissons aucune garantie quant à la sauvegarde, la conservation ou la restitution des données utilisateur, y compris, mais sans s\'y limiter, les favoris, les liens raccourcis, les contributions ou les informations de compte. Il incombe à l\'utilisateur de sauvegarder ses propres données. Aucune indemnisation ne sera versée en cas de perte de données. Cependant, en cas d\'incident de confidentialité impliquant des renseignements personnels, une notification sera effectuée conformément aux dispositions de la Loi 25 (art. 3.5).') }}</p>
+
+                            <h4>{{ __('Fermeture du service') }}</h4>
+                            <p>{{ __('Nous nous réservons le droit de fermer, de suspendre ou de cesser de fournir le service laveille.ai, en tout ou en partie, à tout moment, sans préavis ni obligation de notre part. Vous reconnaissez qu\'aucun droit acquis ne vous confère un droit sur le service ou ses fonctionnalités.') }}</p>
+
+                            <h4>{{ __('Modification du service') }}</h4>
+                            <p>{{ __('Nous nous réservons le droit de modifier, de suspendre ou de supprimer toute fonctionnalité du service laveille.ai, à tout moment, sans préavis. Votre utilisation continue du service après toute modification constitue votre acceptation de ces modifications.') }}</p>
+
+                            {{-- SECTION 18 : EXCLUSION DE GARANTIE --}}
+                            <h3 id="garantie">{{ __('18. Exclusion de garantie') }}</h3>
                             <p>{{ __('Le service laveille.ai est fourni gratuitement, « tel quel » et « selon sa disponibilité », sans aucune représentation, garantie ou condition de quelque nature que ce soit, expresse ou implicite. L\'exploitant décline expressément toute garantie de qualité marchande, d\'adéquation à un usage particulier, d\'absence de contrefaçon ou d\'exactitude. Aucun engagement n\'est pris quant à la disponibilité continue du service, à l\'absence d\'erreurs, de virus ou d\'interruptions techniques. L\'utilisateur reconnaît utiliser le service à ses propres risques.') }}</p>
 
-                            {{-- SECTION 18 : LIMITATION RESPONSABILITÉ + CAP --}}
-                            <h3 id="responsabilite">{{ __('18. Limitation de responsabilité et plafond de dommages') }}</h3>
+                            {{-- SECTION 19 : LIMITATION RESPONSABILITÉ + CAP --}}
+                            <h3 id="responsabilite">{{ __('19. Limitation de responsabilité et plafond de dommages') }}</h3>
                             <p>{{ __('Étant donné la nature gratuite du service, la responsabilité totale et cumulative de l\'exploitant, de ses employés ou représentants, pour toute réclamation découlant des présentes ou de l\'utilisation du site, est limitée à un montant maximal de zéro dollar canadien (0,00 $ CAN). En aucun cas l\'exploitant ne sera responsable des dommages indirects, spéciaux, punitifs, accessoires ou consécutifs, incluant notamment la perte de profits, la perte de données, l\'interruption des affaires ou les dommages réputationnels.') }}</p>
 
-                            {{-- SECTION 19 : FORCE MAJEURE --}}
-                            <h3 id="force-majeure">{{ __('19. Force majeure') }}</h3>
+                            {{-- SECTION 20 : FORCE MAJEURE --}}
+                            <h3 id="force-majeure">{{ __('20. Force majeure') }}</h3>
                             <p>{{ __('Conformément à l\'article 1470 du Code civil du Québec, l\'exploitant ne pourra être tenu responsable de l\'inexécution ou du retard dans l\'exécution de ses obligations si ce manquement résulte d\'un cas de force majeure. Sont considérés comme tels, sans s\'y limiter : les catastrophes naturelles, les cyberattaques d\'envergure, les pannes généralisées des réseaux de télécommunications, les conflits armés, les grèves ou les mesures gouvernementales restrictives.') }}</p>
 
-                            {{-- SECTION 20 : INDEMNISATION --}}
-                            <h3 id="indemnisation">{{ __('20. Indemnisation') }}</h3>
+                            {{-- SECTION 21 : INDEMNISATION --}}
+                            <h3 id="indemnisation">{{ __('21. Indemnisation') }}</h3>
                             <p>{{ __('Vous acceptez d\'indemniser et de dégager de toute responsabilité :name contre les réclamations, dommages ou frais (incluant les honoraires d\'avocat) découlant de votre violation des présentes conditions ou de votre utilisation du Service.', ['name' => $company['dpo_name']]) }}</p>
 
-                            {{-- SECTION 21 : LOI APPLICABLE --}}
-                            <h3 id="loi">{{ __('21. Loi applicable') }}</h3>
+                            {{-- SECTION 22 : LOI APPLICABLE --}}
+                            <h3 id="loi">{{ __('22. Loi applicable') }}</h3>
                             <p>{{ __('Les présentes conditions sont régies par les lois de la province de Québec et les lois fédérales du Canada applicables. Tout litige relatif au Service sera soumis à la compétence exclusive des tribunaux du district judiciaire de Québec.') }}</p>
 
-                            {{-- SECTION 22 : MODIFICATION --}}
-                            <h3 id="modification">{{ __('22. Modification des conditions') }}</h3>
+                            {{-- SECTION 23 : MODIFICATION --}}
+                            <h3 id="modification">{{ __('23. Modification des conditions') }}</h3>
                             <p>{{ __('L\'exploitant se réserve le droit de modifier les présentes conditions à tout moment. Les modifications entrent en vigueur dès leur publication sur le site. La poursuite de l\'utilisation du Service après publication vaut acceptation des nouvelles conditions.') }}</p>
 
-                            {{-- SECTION 23 : DIVISIBILITÉ --}}
-                            <h3 id="divisibilite">{{ __('23. Divisibilité') }}</h3>
+                            {{-- SECTION 24 : DIVISIBILITÉ --}}
+                            <h3 id="divisibilite">{{ __('24. Divisibilité') }}</h3>
                             <p>{{ __('Si une disposition des présentes conditions est jugée invalide, illégale ou inapplicable par un tribunal compétent, cette disposition sera interprétée de manière à refléter l\'intention initiale des parties dans la mesure permise par la loi, et les autres dispositions des conditions d\'utilisation demeureront pleinement en vigueur.') }}</p>
 
-                            {{-- SECTION 24 : SURVIE --}}
-                            <h3 id="survie">{{ __('24. Survie des obligations') }}</h3>
+                            {{-- SECTION 25 : SURVIE --}}
+                            <h3 id="survie">{{ __('25. Survie des obligations') }}</h3>
                             <p>{{ __('Les dispositions qui, par leur nature, doivent survivre à la fin des présentes conditions continueront de s\'appliquer après la résiliation de l\'accès au service ou la fermeture du compte de l\'utilisateur. Cela inclut, sans s\'y limiter, les sections relatives à la propriété intellectuelle, aux limitations de responsabilité, aux exclusions de garantie, à l\'indemnisation et au droit applicable.') }}</p>
 
-                            {{-- SECTION 25 : CESSION --}}
-                            <h3 id="cession">{{ __('25. Cession et transfert') }}</h3>
+                            {{-- SECTION 26 : CESSION --}}
+                            <h3 id="cession">{{ __('26. Cession et transfert') }}</h3>
                             <p>{{ __('L\'exploitant se réserve le droit de céder, de transférer ou de déléguer ses droits et obligations en vertu des présentes à un tiers, notamment dans le cadre d\'une fusion, d\'une acquisition ou d\'une vente d\'actifs, sans le consentement préalable de l\'utilisateur. L\'utilisateur ne peut céder ses droits ou obligations sans l\'accord écrit exprès de l\'exploitant.') }}</p>
 
-                            {{-- SECTION 26 : NON-RENONCIATION --}}
-                            <h3 id="non-renonciation">{{ __('26. Non-renonciation') }}</h3>
+                            {{-- SECTION 27 : NON-RENONCIATION --}}
+                            <h3 id="non-renonciation">{{ __('27. Non-renonciation') }}</h3>
                             <p>{{ __('Le fait pour l\'exploitant de ne pas se prévaloir d\'un manquement à l\'une quelconque des obligations contenues dans les présentes conditions, ou de tarder à exercer un droit qui lui est conféré, ne saurait être interprété comme une renonciation définitive à ce droit ou à l\'exécution de ladite obligation pour l\'avenir.') }}</p>
 
-                            {{-- SECTION 27 : CONTACT --}}
-                            <h3 id="contact">{{ __('27. Coordonnées') }}</h3>
+                            {{-- SECTION 28 : CONTACT --}}
+                            <h3 id="contact">{{ __('28. Coordonnées') }}</h3>
                             <p>{{ __('Pour toute question concernant ces conditions :') }}</p>
                             <ul>
                                 <li><strong>{{ $company['dpo_name'] }}</strong></li>
