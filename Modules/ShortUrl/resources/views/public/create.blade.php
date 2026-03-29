@@ -185,12 +185,12 @@
                 style="width: 100%; border: 1px solid #D1D5DB; border-radius: 8px; padding: 8px 12px; font-size: 14px; resize: vertical; margin-bottom: 12px;"></textarea>
 
             {{-- Accordéon sécurité --}}
-            <div style="border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 8px; overflow: hidden;">
-                <div @click="optionsOpen = optionsOpen === 'security' ? '' : 'security'" style="padding: 10px 14px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB;">
-                    <span style="font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23);">🔒 {{ __('Securite et expiration') }}</span>
+            <div style="border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 12px; overflow: hidden;">
+                <div @click="optionsOpen = optionsOpen === 'security' ? '' : 'security'" style="padding: 14px 18px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 48px;">
+                    <span style="font-weight: 600; font-size: 14px; color: var(--c-dark, #1A1D23);">🔒 {{ __('Securite et expiration') }}</span>
                     <span x-text="optionsOpen === 'security' ? '▲' : '▼'" style="font-size: 11px; color: var(--c-text-muted, #6E7687);"></span>
                 </div>
-                <div x-show="optionsOpen === 'security'" x-transition x-cloak style="padding: 12px 14px; border-top: 1px solid #E5E7EB;">
+                <div x-show="optionsOpen === 'security'" x-transition x-cloak style="padding: 16px 18px; border-top: 1px solid #E5E7EB;">
                     <input type="password" x-model="password" placeholder="{{ __('Mot de passe (optionnel)') }}"
                         style="width: 100%; height: 38px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 12px; font-size: 13px; margin-bottom: 8px;">
                     <div style="display: flex !important; gap: 8px; flex-wrap: wrap !important;">
@@ -207,15 +207,15 @@
             </div>
 
             {{-- Accordéon UTM --}}
-            <div style="border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 8px; overflow: hidden;">
-                <div @click="optionsOpen = optionsOpen === 'utm' ? '' : 'utm'" style="padding: 10px 14px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB;">
+            <div style="border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 12px; overflow: hidden;">
+                <div @click="optionsOpen = optionsOpen === 'utm' ? '' : 'utm'" style="padding: 14px 18px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 48px;">
                     <span style="display: flex !important; align-items: center !important; gap: 6px;">
-                        <span style="font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23);">📊 {{ __('Tracking UTM') }}</span>
+                        <span style="font-weight: 600; font-size: 14px; color: var(--c-dark, #1A1D23);">📊 {{ __('Tracking UTM') }}</span>
                         <span @click.stop="$dispatch('open-help-utm')" style="display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 18px; height: 18px; border-radius: 50%; background: #E5E7EB; color: #6B7280; font-size: 11px; font-weight: 700; cursor: help; flex-shrink: 0;" title="{{ __('Qu\'est-ce que c\'est ?') }}">?</span>
                     </span>
                     <span x-text="optionsOpen === 'utm' ? '▲' : '▼'" style="font-size: 11px; color: var(--c-text-muted, #6E7687);"></span>
                 </div>
-                <div x-show="optionsOpen === 'utm'" x-transition x-cloak style="padding: 12px 14px; border-top: 1px solid #E5E7EB;">
+                <div x-show="optionsOpen === 'utm'" x-transition x-cloak style="padding: 16px 18px; border-top: 1px solid #E5E7EB;">
                     <div style="display: flex !important; gap: 8px; flex-wrap: wrap !important;">
                         <input type="text" x-model="utm_source" placeholder="{{ __('Source (ex: newsletter)') }}" style="flex: 1 !important; min-width: 120px; height: 38px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 8px; font-size: 13px;">
                         <input type="text" x-model="utm_medium" placeholder="{{ __('Medium (ex: email)') }}" style="flex: 1 !important; min-width: 120px; height: 38px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 8px; font-size: 13px;">
@@ -225,15 +225,15 @@
             </div>
 
             {{-- Accordéon preview social --}}
-            <div style="border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 8px; overflow: hidden;">
-                <div @click="optionsOpen = optionsOpen === 'og' ? '' : 'og'" style="padding: 10px 14px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB;">
+            <div style="border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 12px; overflow: hidden;">
+                <div @click="optionsOpen = optionsOpen === 'og' ? '' : 'og'" style="padding: 14px 18px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 48px;">
                     <span style="display: flex !important; align-items: center !important; gap: 6px;">
-                        <span style="font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23);">🌐 {{ __('Preview social') }}</span>
+                        <span style="font-weight: 600; font-size: 14px; color: var(--c-dark, #1A1D23);">🌐 {{ __('Preview social') }}</span>
                         <span @click.stop="$dispatch('open-help-og')" style="display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 18px; height: 18px; border-radius: 50%; background: #E5E7EB; color: #6B7280; font-size: 11px; font-weight: 700; cursor: help; flex-shrink: 0;" title="{{ __('Qu\'est-ce que c\'est ?') }}">?</span>
                     </span>
                     <span x-text="optionsOpen === 'og' ? '▲' : '▼'" style="font-size: 11px; color: var(--c-text-muted, #6E7687);"></span>
                 </div>
-                <div x-show="optionsOpen === 'og'" x-transition x-cloak style="padding: 12px 14px; border-top: 1px solid #E5E7EB;">
+                <div x-show="optionsOpen === 'og'" x-transition x-cloak style="padding: 16px 18px; border-top: 1px solid #E5E7EB;">
                     <input type="text" x-model="og_title" placeholder="{{ __('Titre OpenGraph') }}" style="width: 100%; height: 38px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 8px; font-size: 13px; margin-bottom: 8px;">
                     <textarea x-model="og_description" placeholder="{{ __('Description OpenGraph') }}" rows="2" style="width: 100%; border: 1px solid #D1D5DB; border-radius: 8px; padding: 8px; font-size: 13px; resize: vertical; margin-bottom: 8px;"></textarea>
                     <input type="url" x-model="og_image" placeholder="{{ __('URL image OpenGraph') }}" style="width: 100%; height: 38px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 8px; font-size: 13px;">
