@@ -19,8 +19,9 @@
     .cmp-table .tool-name { font-weight: 700; color: var(--c-dark); text-decoration: none; }
     .cmp-table .tool-name:hover { color: var(--c-primary); }
     .cmp-table .tool-desc { color: #6b7280; font-size: 13px; line-height: 1.4; }
-    .cmp-btn { background: var(--c-primary); color: #fff !important; border: none; padding: 6px 14px; border-radius: var(--r-btn); font-size: 12px; font-weight: 600; text-decoration: none !important; transition: opacity 0.2s; }
+    .cmp-btn { background: var(--c-primary); color: #fff !important; border: none; padding: 6px 14px; border-radius: var(--r-btn); font-size: 12px; font-weight: 600; text-decoration: none !important; transition: opacity 0.2s; white-space: nowrap; display: inline-block; }
     .cmp-btn:hover { opacity: 0.85; color: #fff; }
+    .cmp-table td:last-child, .cmp-table th:last-child { min-width: 80px; text-align: center; }
 
     .cmp-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
     .cmp-tab { display: inline-block; padding: 7px 16px; border-radius: var(--r-btn); background: #f3f4f6; color: var(--c-dark); font-weight: 600; font-size: 13px; text-decoration: none !important; transition: all 0.2s; }
