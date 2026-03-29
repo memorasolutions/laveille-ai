@@ -34,23 +34,36 @@
                                     <li><a href="#compte">{{ __('Comptes utilisateurs') }}</a></li>
                                     <li><a href="#contenu">{{ __('Contenu généré par les utilisateurs') }}</a></li>
                                     <li><a href="#ia">{{ __('Résumés par intelligence artificielle') }}</a></li>
+                                    <li><a href="#avis-pro">{{ __('Avis de non-responsabilité professionnelle') }}</a></li>
                                     <li><a href="#shorturl">{{ __('Raccourcisseur d\'URL (veille.la)') }}</a></li>
                                     <li><a href="#rss">{{ __('Agrégation RSS et contenu tiers') }}</a></li>
                                     <li><a href="#affiliation">{{ __('Liens d\'affiliation') }}</a></li>
                                     <li><a href="#propriete">{{ __('Propriété intellectuelle') }}</a></li>
+                                    <li><a href="#anti-scraping">{{ __('Interdiction de moissonnage et d\'entraînement d\'IA') }}</a></li>
                                     <li><a href="#usage">{{ __('Comportement acceptable') }}</a></li>
                                     <li><a href="#moderation">{{ __('Modération') }}</a></li>
+                                    <li><a href="#retrait">{{ __('Procédure de retrait de contenu contrefaisant') }}</a></li>
                                     <li><a href="#infolettre">{{ __('Infolettre') }}</a></li>
-                                    <li><a href="#responsabilite">{{ __('Limitation de responsabilité') }}</a></li>
+                                    <li><a href="#transparence">{{ __('Transparence algorithmique') }}</a></li>
+                                    <li><a href="#garantie">{{ __('Exclusion de garantie') }}</a></li>
+                                    <li><a href="#responsabilite">{{ __('Limitation de responsabilité et plafond de dommages') }}</a></li>
+                                    <li><a href="#force-majeure">{{ __('Force majeure') }}</a></li>
                                     <li><a href="#indemnisation">{{ __('Indemnisation') }}</a></li>
                                     <li><a href="#loi">{{ __('Loi applicable') }}</a></li>
-                                    <li><a href="#modification">{{ __('Modification des conditions et contact') }}</a></li>
+                                    <li><a href="#modification">{{ __('Modification des conditions') }}</a></li>
+                                    <li><a href="#divisibilite">{{ __('Divisibilité') }}</a></li>
+                                    <li><a href="#survie">{{ __('Survie des obligations') }}</a></li>
+                                    <li><a href="#cession">{{ __('Cession et transfert') }}</a></li>
+                                    <li><a href="#non-renonciation">{{ __('Non-renonciation') }}</a></li>
+                                    <li><a href="#contact">{{ __('Coordonnées') }}</a></li>
                                 </ol>
                             </div>
 
+                            {{-- SECTION 1 : ACCEPTATION --}}
                             <h3 id="acceptation">{{ __('1. Acceptation des conditions') }}</h3>
                             <p>{{ __('En accédant au site laveille.ai (ci-après le « Service »), vous acceptez d\'être lié par les présentes conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, vous ne devez pas utiliser le Service. Le Service est exploité par :name, personne physique résidant au Québec, Canada.', ['name' => $company['dpo_name']]) }}</p>
 
+                            {{-- SECTION 2 : DESCRIPTION DU SERVICE --}}
                             <h3 id="service">{{ __('2. Description du service') }}</h3>
                             <p>{{ __('Le Service est une plateforme de veille technologique et d\'intelligence artificielle (IA) gratuite. Les fonctionnalités incluent :') }}</p>
                             <ul>
@@ -62,52 +75,110 @@
                                 <li>{{ __('Un blogue éditorial proposant des analyses et réflexions') }}</li>
                             </ul>
 
+                            {{-- SECTION 3 : COMPTES --}}
                             <h3 id="compte">{{ __('3. Comptes utilisateurs') }}</h3>
                             <p>{{ __('L\'accès à certaines fonctionnalités peut nécessiter la création d\'un compte. Le Service utilise une authentification sans mot de passe via l\'envoi d\'un code unique (OTP) par courriel ou par connexion sociale (Google, GitHub). Vous êtes responsable de maintenir la confidentialité de l\'accès à votre boîte courriel ou à vos comptes tiers. Toute activité effectuée sous votre compte est réputée être la vôtre.') }}</p>
 
+                            {{-- SECTION 4 : UGC --}}
                             <h3 id="contenu">{{ __('4. Contenu généré par les utilisateurs') }}</h3>
                             <p>{{ __('En soumettant du contenu (suggestions de corrections, votes, idées pour la feuille de route, signalements de bogues), vous accordez à l\'exploitant une licence mondiale, non exclusive, gratuite et perpétuelle pour utiliser, reproduire et modifier ce contenu afin d\'améliorer le Service. Vous garantissez que vous détenez les droits nécessaires sur ce contenu.') }}</p>
 
+                            {{-- SECTION 5 : IA --}}
                             <h3 id="ia">{{ __('5. Résumés par intelligence artificielle') }}</h3>
-                            <p>{{ __('Certains contenus affichés sur le Service sont enrichis ou résumés par des modèles d\'intelligence artificielle. Ces contenus sont clairement identifiés comme tels. L\'exploitant ne garantit pas l\'exactitude, la fiabilité ou l\'exhaustivité des résumés générés par IA, qui sont fournis à titre informatif uniquement.') }}</p>
+                            <p>{{ __('L\'utilisateur reconnaît que les résumés, analyses et contenus produits par les outils d\'intelligence artificielle (IA) sur la plateforme peuvent comporter des « hallucinations », des biais algorithmiques, des omissions ou des inexactitudes factuelles. L\'exploitant ne peut être tenu responsable de la véracité ou de l\'exhaustivité de ces contenus. Il incombe à l\'utilisateur de valider systématiquement les informations auprès des sources originales. Le contenu généré par IA ne constitue en aucun cas une validation officielle ou un avis professionnel.') }}</p>
 
-                            <h3 id="shorturl">{{ __('6. Raccourcisseur d\'URL (veille.la)') }}</h3>
+                            {{-- SECTION 6 : AVIS NON-RESPONSABILITÉ PROFESSIONNELLE --}}
+                            <h3 id="avis-pro">{{ __('6. Avis de non-responsabilité professionnelle') }}</h3>
+                            <p>{{ __('Le contenu diffusé sur laveille.ai, incluant les articles de veille, le glossaire et les outils d\'analyse, est fourni à des fins strictement informatives et éducatives. Ce contenu ne constitue pas et ne doit pas être interprété comme un conseil juridique, financier, technique, médical ou professionnel. L\'utilisateur ne doit pas agir sur la base de ces informations sans avoir préalablement obtenu l\'avis d\'un professionnel qualifié.') }}</p>
+
+                            {{-- SECTION 7 : SHORTURL --}}
+                            <h3 id="shorturl">{{ __('7. Raccourcisseur d\'URL (veille.la)') }}</h3>
                             <p>{{ __('L\'utilisation du service de raccourcissement d\'URL est soumise au respect des lois en vigueur. Il est strictement interdit de raccourcir des liens menant vers du contenu illégal, malveillant (hameçonnage, virus), haineux ou pornographique. L\'exploitant collecte des statistiques anonymes de clics pour assurer le bon fonctionnement et la sécurité du service.') }}</p>
 
-                            <h3 id="rss">{{ __('7. Agrégation RSS et contenu tiers') }}</h3>
+                            {{-- SECTION 8 : RSS --}}
+                            <h3 id="rss">{{ __('8. Agrégation RSS et contenu tiers') }}</h3>
                             <p>{{ __('Le Service agrège des flux RSS provenant de sources tierces. Ce contenu est affiché avec une attribution claire vers la source originale. L\'exploitant n\'exerce aucun contrôle éditorial sur ces sites tiers et décline toute responsabilité quant à leur contenu, leur légalité ou leur disponibilité.') }}</p>
 
-                            <h3 id="affiliation">{{ __('8. Liens d\'affiliation') }}</h3>
+                            {{-- SECTION 9 : AFFILIATION --}}
+                            <h3 id="affiliation">{{ __('9. Liens d\'affiliation') }}</h3>
                             <p>{{ __('Par souci de transparence, l\'utilisateur est informé que certains liens présents sur le Service peuvent être des liens d\'affiliation. Cela signifie que l\'exploitant peut percevoir une commission si vous effectuez un achat ou une action sur le site partenaire, sans frais supplémentaires pour vous.') }}</p>
 
-                            <h3 id="propriete">{{ __('9. Propriété intellectuelle') }}</h3>
+                            {{-- SECTION 10 : PI --}}
+                            <h3 id="propriete">{{ __('10. Propriété intellectuelle') }}</h3>
                             <p>{{ __('Le contenu éditorial original, la structure du site, le code source et le design appartiennent à :name. Le contenu tiers (articles de presse, logos de logiciels tiers) demeure la propriété exclusive de ses auteurs ou ayants droit respectifs. Toute reproduction non autorisée du contenu éditorial est interdite.', ['name' => $company['dpo_name']]) }}</p>
 
-                            <h3 id="usage">{{ __('10. Comportement acceptable') }}</h3>
+                            {{-- SECTION 11 : ANTI-SCRAPING --}}
+                            <h3 id="anti-scraping">{{ __('11. Interdiction de moissonnage et d\'entraînement d\'IA') }}</h3>
+                            <p>{{ __('Sauf autorisation écrite préalable de l\'exploitant, il est strictement interdit d\'utiliser des systèmes automatisés, des robots de balayage (crawlers), des algorithmes de moissonnage de données (scraping) ou tout autre procédé manuel ou automatique pour extraire du contenu de laveille.ai. Cette interdiction s\'applique spécifiquement à l\'utilisation du contenu du site pour l\'entraînement, le développement ou l\'amélioration de modèles d\'intelligence artificielle ou de grands modèles de langage (LLM).') }}</p>
+
+                            {{-- SECTION 12 : COMPORTEMENT --}}
+                            <h3 id="usage">{{ __('12. Comportement acceptable') }}</h3>
                             <p>{{ __('Vous vous engagez à utiliser le Service de manière responsable. Sont strictement interdits : le pollupostage (spam), l\'utilisation de robots pour le moissonnage de données (scraping) sans autorisation, les tentatives d\'intrusion dans les systèmes et tout comportement abusif envers les autres utilisateurs ou l\'exploitant.') }}</p>
 
-                            <h3 id="moderation">{{ __('11. Modération') }}</h3>
+                            {{-- SECTION 13 : MODÉRATION --}}
+                            <h3 id="moderation">{{ __('13. Modération') }}</h3>
                             <p>{{ __('L\'exploitant se réserve le droit discrétionnaire de modérer, de refuser ou de supprimer tout contenu soumis par un utilisateur (commentaires, suggestions, liens raccourcis) qui contreviendrait aux présentes conditions ou qui serait jugé inapproprié, sans préavis ni justification.') }}</p>
 
-                            <h3 id="infolettre">{{ __('12. Infolettre') }}</h3>
-                            <p>{{ __('L\'inscription à l\'infolettre est volontaire et nécessite votre consentement exprès, conformément à la Loi canadienne anti-pourriel (LCAP). Vous pouvez vous désinscrire en tout temps via le lien de désabonnement inclus dans chaque envoi ou en contactant l\'exploitant.') }}</p>
+                            {{-- SECTION 14 : RETRAIT CONTENU --}}
+                            <h3 id="retrait">{{ __('14. Procédure de retrait de contenu contrefaisant') }}</h3>
+                            <p>{{ __('L\'exploitant respecte les droits de propriété intellectuelle. Si vous croyez qu\'un contenu diffusé sur la plateforme porte atteinte à vos droits d\'auteur, vous pouvez soumettre une notification de retrait à l\'adresse politiques@memora.ca. La notification doit inclure une description précise de l\'œuvre protégée et la localisation de l\'infraction alléguée. L\'exploitant s\'engage à traiter ces demandes et, le cas échéant, à retirer le contenu litigieux dans un délai raisonnable.') }}</p>
 
-                            <h3 id="responsabilite">{{ __('13. Limitation de responsabilité') }}</h3>
-                            <p>{{ __('Le Service est fourni gratuitement et « tel quel », sans aucune garantie de performance, de disponibilité ou d\'exactitude. L\'exploitant ne pourra être tenu responsable des dommages directs ou indirects résultant de l\'utilisation ou de l\'impossibilité d\'utiliser le Service, incluant la perte de données ou les erreurs de contenu.') }}</p>
+                            {{-- SECTION 15 : INFOLETTRE --}}
+                            <h3 id="infolettre">{{ __('15. Infolettre') }}</h3>
+                            <p>{{ __('L\'inscription à l\'infolettre est volontaire et nécessite votre consentement exprès, conformément à la Loi canadienne anti-pourriel (LCAP, L.C. 2010, ch. 23). Vous pouvez vous désinscrire en tout temps via le lien de désabonnement inclus dans chaque envoi ou en contactant l\'exploitant.') }}</p>
 
-                            <h3 id="indemnisation">{{ __('14. Indemnisation') }}</h3>
+                            {{-- SECTION 16 : TRANSPARENCE ALGORITHMIQUE --}}
+                            <h3 id="transparence">{{ __('16. Transparence algorithmique') }}</h3>
+                            <p>{{ __('Conformément à l\'article 12.1 de la Loi sur la protection des renseignements personnels dans le secteur privé (Loi 25), l\'exploitant informe l\'utilisateur que le service utilise des systèmes d\'intelligence artificielle pour générer des résumés et classer l\'information. L\'utilisateur a le droit de demander des précisions sur les paramètres principaux ayant mené à une décision ou à une recommandation automatisée le concernant, le cas échéant, en communiquant avec le responsable de la protection des renseignements personnels.') }}</p>
+
+                            {{-- SECTION 17 : EXCLUSION DE GARANTIE --}}
+                            <h3 id="garantie">{{ __('17. Exclusion de garantie') }}</h3>
+                            <p>{{ __('Le service laveille.ai est fourni gratuitement, « tel quel » et « selon sa disponibilité », sans aucune représentation, garantie ou condition de quelque nature que ce soit, expresse ou implicite. L\'exploitant décline expressément toute garantie de qualité marchande, d\'adéquation à un usage particulier, d\'absence de contrefaçon ou d\'exactitude. Aucun engagement n\'est pris quant à la disponibilité continue du service, à l\'absence d\'erreurs, de virus ou d\'interruptions techniques. L\'utilisateur reconnaît utiliser le service à ses propres risques.') }}</p>
+
+                            {{-- SECTION 18 : LIMITATION RESPONSABILITÉ + CAP --}}
+                            <h3 id="responsabilite">{{ __('18. Limitation de responsabilité et plafond de dommages') }}</h3>
+                            <p>{{ __('Étant donné la nature gratuite du service, la responsabilité totale et cumulative de l\'exploitant, de ses employés ou représentants, pour toute réclamation découlant des présentes ou de l\'utilisation du site, est limitée à un montant maximal de zéro dollar canadien (0,00 $ CAN). En aucun cas l\'exploitant ne sera responsable des dommages indirects, spéciaux, punitifs, accessoires ou consécutifs, incluant notamment la perte de profits, la perte de données, l\'interruption des affaires ou les dommages réputationnels.') }}</p>
+
+                            {{-- SECTION 19 : FORCE MAJEURE --}}
+                            <h3 id="force-majeure">{{ __('19. Force majeure') }}</h3>
+                            <p>{{ __('Conformément à l\'article 1470 du Code civil du Québec, l\'exploitant ne pourra être tenu responsable de l\'inexécution ou du retard dans l\'exécution de ses obligations si ce manquement résulte d\'un cas de force majeure. Sont considérés comme tels, sans s\'y limiter : les catastrophes naturelles, les cyberattaques d\'envergure, les pannes généralisées des réseaux de télécommunications, les conflits armés, les grèves ou les mesures gouvernementales restrictives.') }}</p>
+
+                            {{-- SECTION 20 : INDEMNISATION --}}
+                            <h3 id="indemnisation">{{ __('20. Indemnisation') }}</h3>
                             <p>{{ __('Vous acceptez d\'indemniser et de dégager de toute responsabilité :name contre les réclamations, dommages ou frais (incluant les honoraires d\'avocat) découlant de votre violation des présentes conditions ou de votre utilisation du Service.', ['name' => $company['dpo_name']]) }}</p>
 
-                            <h3 id="loi">{{ __('15. Loi applicable') }}</h3>
-                            <p>{{ __('Les présentes conditions sont régies par les lois de la province de Québec et les lois fédérales du Canada applicables. Tout litige relatif au Service sera soumis à la compétence exclusive des tribunaux du district judiciaire de Montréal, Québec.') }}</p>
+                            {{-- SECTION 21 : LOI APPLICABLE --}}
+                            <h3 id="loi">{{ __('21. Loi applicable') }}</h3>
+                            <p>{{ __('Les présentes conditions sont régies par les lois de la province de Québec et les lois fédérales du Canada applicables. Tout litige relatif au Service sera soumis à la compétence exclusive des tribunaux du district judiciaire de Québec.') }}</p>
 
-                            <h3 id="modification">{{ __('16. Modification des conditions et contact') }}</h3>
-                            <p>{{ __('L\'exploitant se réserve le droit de modifier les présentes conditions à tout moment. Les modifications entrent en vigueur dès leur publication sur le site.') }}</p>
+                            {{-- SECTION 22 : MODIFICATION --}}
+                            <h3 id="modification">{{ __('22. Modification des conditions') }}</h3>
+                            <p>{{ __('L\'exploitant se réserve le droit de modifier les présentes conditions à tout moment. Les modifications entrent en vigueur dès leur publication sur le site. La poursuite de l\'utilisation du Service après publication vaut acceptation des nouvelles conditions.') }}</p>
+
+                            {{-- SECTION 23 : DIVISIBILITÉ --}}
+                            <h3 id="divisibilite">{{ __('23. Divisibilité') }}</h3>
+                            <p>{{ __('Si une disposition des présentes conditions est jugée invalide, illégale ou inapplicable par un tribunal compétent, cette disposition sera interprétée de manière à refléter l\'intention initiale des parties dans la mesure permise par la loi, et les autres dispositions des conditions d\'utilisation demeureront pleinement en vigueur.') }}</p>
+
+                            {{-- SECTION 24 : SURVIE --}}
+                            <h3 id="survie">{{ __('24. Survie des obligations') }}</h3>
+                            <p>{{ __('Les dispositions qui, par leur nature, doivent survivre à la fin des présentes conditions continueront de s\'appliquer après la résiliation de l\'accès au service ou la fermeture du compte de l\'utilisateur. Cela inclut, sans s\'y limiter, les sections relatives à la propriété intellectuelle, aux limitations de responsabilité, aux exclusions de garantie, à l\'indemnisation et au droit applicable.') }}</p>
+
+                            {{-- SECTION 25 : CESSION --}}
+                            <h3 id="cession">{{ __('25. Cession et transfert') }}</h3>
+                            <p>{{ __('L\'exploitant se réserve le droit de céder, de transférer ou de déléguer ses droits et obligations en vertu des présentes à un tiers, notamment dans le cadre d\'une fusion, d\'une acquisition ou d\'une vente d\'actifs, sans le consentement préalable de l\'utilisateur. L\'utilisateur ne peut céder ses droits ou obligations sans l\'accord écrit exprès de l\'exploitant.') }}</p>
+
+                            {{-- SECTION 26 : NON-RENONCIATION --}}
+                            <h3 id="non-renonciation">{{ __('26. Non-renonciation') }}</h3>
+                            <p>{{ __('Le fait pour l\'exploitant de ne pas se prévaloir d\'un manquement à l\'une quelconque des obligations contenues dans les présentes conditions, ou de tarder à exercer un droit qui lui est conféré, ne saurait être interprété comme une renonciation définitive à ce droit ou à l\'exécution de ladite obligation pour l\'avenir.') }}</p>
+
+                            {{-- SECTION 27 : CONTACT --}}
+                            <h3 id="contact">{{ __('27. Coordonnées') }}</h3>
                             <p>{{ __('Pour toute question concernant ces conditions :') }}</p>
                             <ul>
                                 <li><strong>{{ $company['dpo_name'] }}</strong></li>
                                 <li>{{ $company['address'] }}</li>
                                 <li>{{ __('Courriel') }}&nbsp;: <a href="mailto:{{ $company['email'] }}">{{ $company['email'] }}</a></li>
+                                <li>{{ __('Responsable des politiques') }}&nbsp;: <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a></li>
                             </ul>
 
                             <hr>
