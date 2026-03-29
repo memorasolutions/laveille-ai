@@ -158,7 +158,7 @@ class PublicDirectoryController extends Controller
         $tool = new Tool;
         $tool->url = $validated['url'];
         $tool->pricing = $validated['pricing'];
-        $tool->status = 'pending';
+        $tool->status = 'published';
         $tool->screenshot = $validated['screenshot'] ?? null;
         $tool->is_featured = false;
 
@@ -172,6 +172,6 @@ class PublicDirectoryController extends Controller
             $tool->categories()->sync($validated['categories']);
         }
 
-        return response()->json(['success' => true, 'message' => __('Merci ! Votre proposition sera examinée par notre équipe.')]);
+        return response()->json(['success' => true, 'message' => __('Merci ! L\'outil a été ajouté au répertoire.')]);
     }
 }
