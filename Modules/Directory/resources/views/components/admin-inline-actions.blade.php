@@ -10,12 +10,12 @@
             </button>
             @endif
             @if(isset($deleteUrl))
-            <button @click="window.__confirmAction = () => fetch('{{ $deleteUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){document.querySelector('[data-res-id=\''+{{ $resourceId ?? 0 }}+'\']')?.remove(); location.reload()}}); $dispatch('confirm-action', { title: '{{ __("Supprimer") }}', message: '{{ __("Supprimer cette ressource ?") }}' })"
+            <button onclick="window.__confirmAction=()=>fetch('{{ $deleteUrl }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok)location.reload()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Supprimer") }}',message:'{{ __("Supprimer cette ressource ?") }}'}}))"
                 style="font-size:11px;background:#6b7280;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;">
                 {{ __('Supprimer') }}
             </button>
             @endif
-            <button @click="window.__confirmAction = () => fetch('{{ $rejectUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){location.reload()}}); $dispatch('confirm-action', { title: '{{ __("Rejeter (-10 pts)") }}', message: '{{ __("Rejeter et retirer 10 points de réputation ?") }}' })"
+            <button onclick="window.__confirmAction=()=>fetch('{{ $rejectUrl }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok)location.reload()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Rejeter (-10 pts)") }}',message:'{{ __("Rejeter et retirer 10 points de réputation ?") }}'}}))"
                 style="font-size:11px;background:#ef4444;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;"
                 title="{{ __('Rejeter et retirer 10 points de réputation') }}">
                 {{ __('Rejeter (-10 pts)') }}

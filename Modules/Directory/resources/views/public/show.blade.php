@@ -843,7 +843,7 @@
                                         ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
                                     </button>
                                     @can('view_admin_panel')
-                                    <button @click="window.__confirmAction = () => fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>{if(r.ok)$el.closest('.col-md-4').remove()}); $dispatch('confirm-action', { title: '{{ __("Supprimer") }}', message: '{{ __("Supprimer ce screenshot ?") }}' })" style="background:none!important;border:none!important;cursor:pointer;color:#6B7280;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
+                                    <button onclick="window.__confirmAction=()=>fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>{if(r.ok)this.closest('.col-md-4').remove()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Supprimer") }}',message:'{{ __("Supprimer ce screenshot ?") }}'}}))" style="background:none!important;border:none!important;cursor:pointer;color:#6B7280;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
                                     @endcan
                                 </div>
                             </div>
