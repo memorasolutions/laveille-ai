@@ -57,6 +57,7 @@ class RssFetcherService
                     'pub_date' => $item->get_date('Y-m-d H:i:s') ? Carbon::parse($item->get_date('Y-m-d H:i:s')) : $now,
                     'author' => $item->get_author() ? $item->get_author()->get_name() : null,
                     'image_url' => $imageUrl,
+                    'is_published' => true,
                 ]);
                 $count++;
             }
