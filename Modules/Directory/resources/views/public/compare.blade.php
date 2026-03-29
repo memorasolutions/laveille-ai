@@ -23,10 +23,6 @@
     .cmp-btn:hover { opacity: 0.85; color: #fff; }
     .cmp-table td:last-child, .cmp-table th:last-child { min-width: 80px; text-align: center; }
 
-    .cmp-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
-    .cmp-tab { display: inline-block; padding: 7px 16px; border-radius: var(--r-btn); background: #f3f4f6; color: var(--c-dark); font-weight: 600; font-size: 13px; text-decoration: none !important; transition: all 0.2s; }
-    .cmp-tab:hover { background: #e5e7eb; color: var(--c-dark); }
-    .cmp-tab.active { background: var(--c-primary); color: #fff !important; }
 
     .cmp-header { margin-bottom: 24px; }
     .cmp-header h1 { font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0 0 6px; font-size: 1.8rem; }
@@ -51,14 +47,11 @@
         <p>{{ $tools->count() }} {{ __('outils compares') }}</p>
     </div>
 
-    <div class="cmp-tabs">
-        @foreach($allCategories as $cat)
-            <a href="{{ route('directory.compare', $cat->slug) }}"
-               class="cmp-tab {{ $category->slug === $cat->slug ? 'active' : '' }}">
-                {{ $cat->icon ?? '' }} {{ $cat->name }}
-            </a>
-        @endforeach
-    </div>
+    @include('directory::public.partials._category_slider', [
+        'categories' => $allCategories,
+        'currentRoute' => 'compare',
+        'activeSlug' => $category->slug,
+    ])
 
     @if($tools->isEmpty())
         <div style="text-align: center; padding: 60px 20px; background: #f9fafb; border-radius: var(--r-base);">
