@@ -484,32 +484,9 @@
         </div>
         @endif
 
-        {{-- Section trending : récents + plus votés --}}
-        @if($recentTools->isNotEmpty() || (isset($topVoted) && $topVoted->isNotEmpty()))
+        {{-- Section trending : plus votés --}}
+        @if(isset($topVoted) && $topVoted->isNotEmpty())
         <div style="margin-bottom:32px;">
-            {{-- Ajoutés récemment --}}
-            @if($recentTools->isNotEmpty())
-            <div style="margin-bottom:24px;">
-                <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:12px;">
-                    <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">🆕 {{ __('Ajoutés récemment') }}</h3>
-                </div>
-                <div style="display:flex!important;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
-                    @foreach($recentTools as $rt)
-                    @php $rtHost = $rt->url ? parse_url($rt->url, PHP_URL_HOST) : ''; @endphp
-                    <a href="{{ route('directory.show', $rt->slug) }}" style="flex-shrink:0;width:200px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;">
-                        <div style="display:flex!important;align-items:center!important;gap:8px;margin-bottom:8px;">
-                            @if($rtHost)<img src="https://www.google.com/s2/favicons?domain={{ $rtHost }}&sz=32" alt="" width="20" height="20" loading="lazy" style="border-radius:4px;">@endif
-                            <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $rt->name }}</span>
-                        </div>
-                        <p style="font-size:12px;color:#6b7280;margin:0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($rt->short_description, 60) }}</p>
-                        @if($rt->categories->isNotEmpty())
-                            <span style="display:inline-block;margin-top:6px;background:#eff6ff;color:#2563eb;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;">{{ $rt->categories->first()->name }}</span>
-                        @endif
-                    </a>
-                    @endforeach
-                </div>
-            </div>
-            @endif
 
             {{-- Plus votés par la communauté --}}
             @if(isset($topVoted) && $topVoted->isNotEmpty())
