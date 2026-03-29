@@ -77,7 +77,7 @@
                         style="flex: 1 !important; height: 44px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 12px; font-size: 14px;">
                     <button type="button" @click="scrapeMeta()" :disabled="scraping"
                         style="height: 44px; padding: 0 16px; background: #F3F4F6; color: var(--c-dark, #1A1D23); border: 1px solid #D1D5DB; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap;">
-                        <span x-show="!scraping">🔍 {{ __('Analyser') }}</span>
+                        <span x-show="!scraping">🔍 {{ __('Extraire les infos') }}</span>
                         <span x-show="scraping" x-cloak>⏳</span>
                     </button>
                 </div>
