@@ -8,6 +8,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
+use SimplePie\SimplePie;
 
 class RssFetcherService
 {
@@ -16,17 +17,23 @@ class RssFetcherService
         $count = 0;
 
         try {
-            $feed = \Feeds::make($source->url, 20, true);
+            $feed = new SimplePie;
+            $feed->set_feed_url($source->url);
+            $feed->set_cache_location(storage_path('framework/cache'));
+            $feed->enable_cache(false);
+            $feed->set_timeout(15);
+            $feed->init();
+            $feed->handle_content_type();
 
-            if (! $feed || $feed->error()) {
-                Log::warning("RSS feed error for {$source->url}: ".($feed ? $feed->error() : 'null feed'));
+            if ($feed->error()) {
+                Log::warning("RSS feed error for {$source->url}: ".$feed->error());
 
                 return 0;
             }
 
             $now = Carbon::now();
 
-            foreach ($feed->get_items() as $item) {
+            foreach ($feed->get_items(0, 20) as $item) {
                 $guid = $item->get_id() ?: md5($item->get_permalink().$item->get_title());
 
                 if (NewsArticle::where('guid', $guid)->exists()) {
@@ -57,7 +64,7 @@ class RssFetcherService
             $source->update(['last_fetched_at' => $now]);
 
         } catch (\Throwable $e) {
-            Log::error("Error fetching RSS from {$source->url}: {$e->getMessage()}");
+            Log::error("Error fetching RSS from {$source->url}: ".$e->getMessage());
         }
 
         return $count;
