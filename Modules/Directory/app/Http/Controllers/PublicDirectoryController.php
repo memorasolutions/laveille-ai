@@ -162,6 +162,7 @@ class PublicDirectoryController extends Controller
         $tool->status = 'published';
         $tool->screenshot = $validated['screenshot'] ?? null;
         $tool->is_featured = false;
+        $tool->submitted_by = auth()->id();
 
         $tool->setTranslation('name', $locale, $validated['name']);
         $tool->setTranslation('slug', $locale, Str::slug($validated['name']));
@@ -171,6 +172,14 @@ class PublicDirectoryController extends Controller
 
         if (! empty($validated['categories'])) {
             $tool->categories()->sync($validated['categories']);
+        }
+
+        // Notifier les admins
+        if (class_exists(\Modules\Directory\Notifications\ToolSubmittedNotification::class)) {
+            $admins = \App\Models\User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'super_admin']))->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new \Modules\Directory\Notifications\ToolSubmittedNotification($tool, auth()->user()));
+            }
         }
 
         return response()->json(['success' => true, 'message' => __('Merci ! L\'outil a été ajouté au répertoire.')]);

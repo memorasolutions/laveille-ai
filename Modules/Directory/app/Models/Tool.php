@@ -10,7 +10,9 @@ declare(strict_types=1);
 
 namespace Modules\Directory\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Directory\Traits\HasSuggestions;
@@ -42,7 +44,13 @@ class Tool extends Model
         'pricing', 'status', 'clicks_count', 'is_featured', 'sort_order',
         'how_to_use', 'core_features', 'use_cases', 'faq', 'pros', 'cons',
         'screenshot', 'website_type', 'launch_year', 'target_audience',
+        'submitted_by',
     ];
+
+    public function submitter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
+    }
 
     public function getVisitUrl(): string
     {
