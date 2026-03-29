@@ -14,6 +14,16 @@
     <div class="alert alert-success">{{ session('success') }}</div>
 @endif
 
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <a href="{{ route('admin.directory.index') }}" class="btn btn-sm {{ !request('source') && !request('status') ? 'btn-primary' : 'btn-outline-secondary' }}">{{ __('Tous') }}</a>
+    <a href="{{ route('admin.directory.index', ['source' => 'community']) }}" class="btn btn-sm {{ request('source') === 'community' ? 'btn-primary' : 'btn-outline-secondary' }}">👥 {{ __('Soumis par la communauté') }}</a>
+    <a href="{{ route('admin.directory.index', ['source' => 'admin']) }}" class="btn btn-sm {{ request('source') === 'admin' ? 'btn-primary' : 'btn-outline-secondary' }}">🛡️ {{ __('Ajoutés par l\'admin') }}</a>
+    <span class="border-start mx-1"></span>
+    <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => 'published'])) }}" class="btn btn-sm {{ request('status') === 'published' ? 'btn-success' : 'btn-outline-secondary' }}">{{ __('Publiés') }}</a>
+    <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => 'pending'])) }}" class="btn btn-sm {{ request('status') === 'pending' ? 'btn-warning' : 'btn-outline-secondary' }}">{{ __('En attente') }}</a>
+    <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => 'draft'])) }}" class="btn btn-sm {{ request('status') === 'draft' ? 'btn-secondary' : 'btn-outline-secondary' }}">{{ __('Brouillons') }}</a>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table table-hover mb-0">
@@ -23,6 +33,7 @@
                     <th>{{ __('Tarification') }}</th>
                     <th>{{ __('Catégories') }}</th>
                     <th>{{ __('Clics') }}</th>
+                    <th>{{ __('Source') }}</th>
                     <th class="text-end">{{ __('Actions') }}</th>
                 </tr>
             </thead>
@@ -38,6 +49,13 @@
                     <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ ucfirst($tool->pricing) }}</span></td>
                     <td>{{ $tool->categories->pluck('name')->implode(', ') ?: '-' }}</td>
                     <td>{{ $tool->clicks_count }}</td>
+                    <td>
+                        @if($tool->submitted_by)
+                            <span class="badge bg-info bg-opacity-10 text-info" title="{{ $tool->submitter->email ?? '' }}">👥 {{ $tool->submitter->name ?? __('Membre') }}</span>
+                        @else
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">🛡️ {{ __('Admin') }}</span>
+                        @endif
+                    </td>
                     <td class="text-end">
                         <a href="{{ route('directory.show', $tool->slug) }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i data-lucide="eye" class="icon-sm"></i></a>
                         <a href="{{ route('admin.directory.edit', $tool) }}" class="btn btn-sm btn-outline-primary"><i data-lucide="pencil" class="icon-sm"></i></a>

@@ -15,9 +15,21 @@ use Modules\Directory\Services\ScreenshotService;
 
 class DirectoryAdminController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $tools = Tool::with('categories')->orderBy('sort_order')->paginate(20);
+        $query = Tool::with(['categories', 'submitter']);
+
+        if ($request->filled('source') && $request->source === 'community') {
+            $query->whereNotNull('submitted_by');
+        } elseif ($request->filled('source') && $request->source === 'admin') {
+            $query->whereNull('submitted_by');
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $tools = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
         return view('directory::admin.index', compact('tools'));
     }
