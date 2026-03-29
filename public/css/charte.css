@@ -57,9 +57,12 @@ a:hover { color: var(--c-primary); }
 
 /* ── 3. HEADER & TOPBAR ── */
 
-.topbar {
+.topbar,
+.topbar .row {
     background-color: var(--c-primary);
     border-bottom: none;
+}
+.topbar {
     width: 100vw;
     position: relative;
     left: 50%;
