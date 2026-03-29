@@ -4,12 +4,19 @@
     <button type="button" class="rt-cat-arrow left" x-show="scrollLeft > 0" x-cloak @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="ti-angle-left"></i></button>
     <div class="rt-cat-track" x-ref="catTrack" @scroll="scrollLeft = $refs.catTrack.scrollLeft">
         @foreach($categories as $cat)
-            <a href="{{ $currentRoute === 'compare' ? route('directory.compare', $cat->slug) : '#' }}"
-               class="rt-cat-chip {{ (isset($activeSlug) && $activeSlug === $cat->slug) ? 'active' : '' }}"
-               @if($currentRoute !== 'compare') @click.prevent="toggleCategory('{{ $cat->slug }}')" :class="{ active: activeCategory === '{{ $cat->slug }}' }" @endif
-               style="text-decoration: none;">
-                {{ $cat->icon ?? '' }} {{ $cat->name }}
-            </a>
+            @if(($currentRoute ?? 'index') === 'compare')
+                <a href="{{ route('directory.compare', $cat->slug) }}"
+                   class="rt-cat-chip {{ (isset($activeSlug) && $activeSlug === $cat->slug) ? 'active' : '' }}"
+                   style="text-decoration: none;">
+                    {{ $cat->icon ?? '' }} {{ $cat->name }}
+                </a>
+            @else
+                <button type="button" class="rt-cat-chip"
+                        :class="{ active: activeCategory === '{{ $cat->slug }}' }"
+                        @click="toggleCategory('{{ $cat->slug }}')">
+                    {{ $cat->icon ?? '' }} {{ $cat->name }}
+                </button>
+            @endif
         @endforeach
     </div>
     <button type="button" class="rt-cat-arrow right" @click="$refs.catTrack.scrollBy({ left: 300, behavior: 'smooth' })"><i class="ti-angle-right"></i></button>
@@ -23,7 +30,6 @@
     .rt-cat-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px; border-radius: 20px; background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 13px; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .rt-cat-chip:hover { background: #E5E7EB; }
     .rt-cat-chip.active { background: var(--c-primary); color: #fff; }
-    .rt-cat-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; background: #fff; border: 1px solid #e5e7eb; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,.08); }
-    .rt-cat-arrow.left { left: -16px; }
-    .rt-cat-arrow.right { right: -16px; }
+    .rt-cat-arrow { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 1px solid #E5E7EB; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--c-dark); font-size: 12px; margin: 0 4px; }
+    .rt-cat-arrow:hover { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
 </style>
