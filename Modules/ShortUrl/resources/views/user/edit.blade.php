@@ -79,7 +79,7 @@
 
     {{-- Section 1 : Informations de base --}}
     <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 12px; overflow: hidden;">
-        <div @click="toggle('basic')" style="padding: 14px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none;"
+        <div @click="toggle('basic')" style="padding: 16px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 52px;"
             :style="active === 'basic' ? 'border-bottom: 1px solid #E5E7EB;' : ''">
             <span style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; color: var(--c-dark, #1A1D23);">
                 📝 {{ __('Informations de base') }}
@@ -145,7 +145,7 @@
 
     {{-- Section 2 : Securite et expiration --}}
     <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 12px; overflow: hidden;">
-        <div @click="toggle('security')" style="padding: 14px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none;"
+        <div @click="toggle('security')" style="padding: 16px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 52px;"
             :style="active === 'security' ? 'border-bottom: 1px solid #E5E7EB;' : ''">
             <span style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; color: var(--c-dark, #1A1D23);">
                 🔒 {{ __('Securite et expiration') }}
@@ -195,7 +195,7 @@
 
     {{-- Section 3 : Tracking UTM --}}
     <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 12px; overflow: hidden;">
-        <div @click="toggle('utm')" style="padding: 14px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none;"
+        <div @click="toggle('utm')" style="padding: 16px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 52px;"
             :style="active === 'utm' ? 'border-bottom: 1px solid #E5E7EB;' : ''">
             <span style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; color: var(--c-dark, #1A1D23);">
                 📊 {{ __('Tracking UTM') }}
@@ -234,7 +234,7 @@
 
     {{-- Section 4 : Preview social --}}
     <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 24px; overflow: hidden;">
-        <div @click="toggle('preview')" style="padding: 14px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none;"
+        <div @click="toggle('preview')" style="padding: 16px 20px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 52px;"
             :style="active === 'preview' ? 'border-bottom: 1px solid #E5E7EB;' : ''">
             <span style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; color: var(--c-dark, #1A1D23);">
                 🌐 {{ __('Preview social et miniature') }}
