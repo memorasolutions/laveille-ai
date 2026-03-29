@@ -52,6 +52,9 @@
                             @if(Route::has('legal.privacy'))
                                 <li><a href="{{ route('legal.privacy') }}">{{ __('Confidentialité') }}</a></li>
                             @endif
+                            @if(Route::has('legal.terms'))
+                                <li><a href="{{ route('legal.terms') }}">{{ __('Conditions d\'utilisation') }}</a></li>
+                            @endif
                             @if(Route::has('legal.cookies'))
                                 <li><a href="{{ route('legal.cookies') }}">{{ __('Cookies') }}</a></li>
                             @endif

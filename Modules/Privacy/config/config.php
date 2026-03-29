@@ -31,14 +31,14 @@ return [
     */
     'documents' => [
         'privacy_policy' => [
-            'version' => '1.0',
+            'version' => '2.0',
             'url' => '/privacy-policy',
-            'updated_at' => '2026-03-12',
+            'updated_at' => '2026-03-28',
         ],
         'terms' => [
-            'version' => '1.0',
+            'version' => '2.0',
             'url' => '/terms-of-use',
-            'updated_at' => '2026-03-12',
+            'updated_at' => '2026-03-28',
         ],
         'cookie_policy' => [
             'version' => '1.0',
