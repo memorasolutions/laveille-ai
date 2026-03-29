@@ -57,7 +57,7 @@
     /* Markdown description */
     .rt-description h2 { font-family: var(--f-heading); font-size: 1.35rem; font-weight: 700; color: var(--c-dark); margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #E5E7EB; }
     .rt-description h3 { font-size: 1.15rem; font-weight: 600; color: var(--c-dark); margin: 20px 0 8px; }
-    .rt-description p { margin-bottom: 14px; }
+    .rt-description p { margin-bottom: 14px; color: #4B5563; }
     .rt-description ul, .rt-description ol { margin: 0 0 14px 20px; }
     .rt-description li { margin-bottom: 4px; }
     .rt-description strong { color: var(--c-dark); }
@@ -124,8 +124,8 @@
         <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center;">
             <span class="rt-badge badge-{{ $tool->pricing }}">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
             <span class="rt-badge" style="background: #F3E8FF; color: #7E22CE;">{{ ucfirst($tool->website_type ?? 'website') }}</span>
-            @if($tool->launch_year)<span style="color: #9CA3AF; font-size: 0.8rem;">🚀 {{ $tool->launch_year }}</span>@endif
-            <span style="color: #9CA3AF; font-size: 0.8rem;">{{ number_format($tool->clicks_count) }} {{ __('clics') }}</span>
+            @if($tool->launch_year)<span style="color: #6B7280; font-size: 0.8rem;">🚀 {{ $tool->launch_year }}</span>@endif
+            <span style="color: #6B7280; font-size: 0.8rem;">{{ number_format($tool->clicks_count) }} {{ __('clics') }}</span>
             {{-- Boutons partage inline retirés — remplacés par la floating share bar globale --}}
         </div>
         @if($tool->categories->isNotEmpty())
@@ -190,7 +190,7 @@
         </div>
         <div style="border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
             <span style="display: inline-flex; align-items: center; color: #065F46; font-weight: 600; font-size: 12px; background: #D1FAE5; padding: 4px 10px; border-radius: 99px; border: 1px solid #A7F3D0;">✓ {{ __('Vérifié par La veille') }}</span>
-            <span style="font-size: 12px; color: #9CA3AF;">{{ __('Mis à jour le') }} {{ $tool->updated_at->format('d/m/Y') }}</span>
+            <span style="font-size: 12px; color: #6B7280;">{{ __('Mis à jour le') }} {{ $tool->updated_at->format('d/m/Y') }}</span>
         </div>
     </div>
 
@@ -388,7 +388,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 12px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div style="width: 30px; height: 30px; background: #e0e7ff; color: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">{{ substr($review->user->name ?? '?', 0, 1) }}</div>
-                        @if($review->user)<a href="{{ route('directory.profile', $review->user->id) }}" style="font-weight: 600; color: #374151; font-size: 13px; text-decoration: none;">{{ $review->user->name }}</a><span style="font-size: 11px; color: #9CA3AF; margin-left: 4px;">{{ $review->user->getLevelBadge() }}</span>@else<span style="font-weight: 600; color: #374151; font-size: 13px;">{{ __('Anonyme') }}</span>@endif
+                        @if($review->user)<a href="{{ route('directory.profile', $review->user->id) }}" style="font-weight: 600; color: #374151; font-size: 13px; text-decoration: none;">{{ $review->user->name }}</a><span style="font-size: 11px; color: #6B7280; margin-left: 4px;">{{ $review->user->getLevelBadge() }}</span>@else<span style="font-weight: 600; color: #374151; font-size: 13px;">{{ __('Anonyme') }}</span>@endif
                         <span style="color: #9ca3af; font-size: 12px;">{{ $review->created_at->diffForHumans() }}</span>
                     </div>
                     <div style="display: flex; gap: 12px;" x-data="{ likes: {{ $review->upvotes }} }">
@@ -689,7 +689,7 @@
                     <template x-for="i in (step === 4 ? 4 : 3)" :key="i">
                         <div style="flex:1;height:4px;border-radius:2px;transition:background .3s;" :style="i <= step ? 'background:var(--c-primary)' : 'background:#e2e8f0'"></div>
                     </template>
-                    <span x-show="step < 4" style="font-size:12px;color:#9ca3af;white-space:nowrap;" x-text="'Étape ' + step + '/3'"></span>
+                    <span x-show="step < 4" style="font-size:12px;color:#6B7280;white-space:nowrap;" x-text="'Étape ' + step + '/3'"></span>
                     <span x-show="step === 4" style="font-size:12px;color:#16a34a;white-space:nowrap;">✓ {{ __('Soumis') }}</span>
                 </div>
 
@@ -843,7 +843,7 @@
                                         ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
                                     </button>
                                     @can('view_admin_panel')
-                                    <button @click="$dispatch('confirm-action', { title: '{{ __("Supprimer") }}', message: '{{ __("Supprimer ce screenshot ?") }}', action: () => fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>{if(r.ok)$el.closest('.col-md-4').remove()}) })" style="background:none!important;border:none!important;cursor:pointer;color:#9ca3af;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
+                                    <button @click="$dispatch('confirm-action', { title: '{{ __("Supprimer") }}', message: '{{ __("Supprimer ce screenshot ?") }}', action: () => fetch('{{ route('directory.screenshots.delete', $ss->id) }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>{if(r.ok)$el.closest('.col-md-4').remove()}) })" style="background:none!important;border:none!important;cursor:pointer;color:#6B7280;font-size:12px;outline:none!important;box-shadow:none!important;" title="{{ __('Supprimer') }}">✕</button>
                                     @endcan
                                 </div>
                             </div>
@@ -919,7 +919,7 @@
                             @mouseleave="!dragging && ($el.style.borderColor='#cbd5e1') && ($el.style.background='#f8fafc')">
                             <div style="font-size:40px;margin-bottom:10px;">📸</div>
                             <p style="color:var(--c-dark);font-size:15px;margin:0 0 4px;font-weight:700;">{{ __('Glissez-déposez, collez (Ctrl+V) ou cliquez') }}</p>
-                            <p style="color:#9ca3af;font-size:12px;margin:0;">{{ __('JPG, PNG, WebP — compression automatique, max 1920px') }}</p>
+                            <p style="color:#6B7280;font-size:12px;margin:0;">{{ __('JPG, PNG, WebP — compression automatique, max 1920px') }}</p>
                         </div>
 
                         {{-- Preview --}}
@@ -967,7 +967,7 @@
                 </div>
                 @endforeach
             </div>
-            @else <p style="color: #9CA3AF; text-align: center; padding: 30px;">{{ __('Aucune alternative pour le moment.') }}</p> @endif
+            @else <p style="color: #6B7280; text-align: center; padding: 30px;">{{ __('Aucune alternative pour le moment.') }}</p> @endif
         </div>
     </div>
 </div>
@@ -977,13 +977,45 @@
 @push('scripts')
 <script type="application/ld+json">
 {
-    "@@context": "https://schema.org",
-    "@@type": "SoftwareApplication",
-    "name": "{{ $tool->name }}",
-    "description": "{{ Str::limit(strip_tags($tool->description), 160) }}",
-    "url": "{{ route('directory.show', $tool->slug) }}",
-    "applicationCategory": "{{ $tool->categories->first()->name ?? 'Tech' }}",
-    "operatingSystem": "Web"
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "{{ e($tool->name) }}",
+    "description": "{{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description), 200)) }}",
+    "url": "{{ $tool->url ?? route('directory.show', $tool->slug) }}",
+    "applicationCategory": "{{ e($tool->categories->first()->name ?? 'Technology') }}",
+    "operatingSystem": "Web",
+    @if($tool->screenshot)
+    "screenshot": "{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}",
+    @endif
+    "offers": {
+        "@type": "Offer",
+        "price": "{{ in_array($tool->pricing, ['free', 'freemium', 'open_source']) ? '0' : '' }}",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/OnlineOnly"
+    }
+    @if($tool->reviews->count() > 0)
+    ,"aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ number_format($tool->reviews->avg('rating'), 1) }}",
+        "reviewCount": "{{ $tool->reviews->count() }}",
+        "bestRating": "5",
+        "worstRating": "1"
+    }
+    @endif
+    @if($tool->launch_year)
+    ,"datePublished": "{{ $tool->launch_year }}-01-01"
+    @endif
+}
+</script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "{{ __('Accueil') }}", "item": "{{ config('app.url') }}"},
+        {"@type": "ListItem", "position": 2, "name": "{{ __('Répertoire') }}", "item": "{{ route('directory.index') }}"},
+        {"@type": "ListItem", "position": 3, "name": "{{ e($tool->name) }}"}
+    ]
 }
 </script>
 @endpush
