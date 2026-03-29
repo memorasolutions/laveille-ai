@@ -287,6 +287,15 @@
                             </div>
                         </div>
                         @endauth
+                        @guest
+                        <div x-data style="display:inline-block;margin-right:8px;vertical-align:middle;">
+                            <button @click="$dispatch('open-auth-modal', { message: '' })" aria-label="{{ __('Se connecter') }}" style="background:none!important;border:none!important;cursor:pointer;padding:0;display:flex!important;align-items:center!important;gap:6px;outline:none!important;box-shadow:none!important;color:var(--c-dark);font-size:13px;font-weight:600;">
+                                <div style="width:32px;height:32px;border-radius:50%;background:#E5E7EB;display:flex!important;align-items:center!important;justify-content:center!important;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </div>
+                            </button>
+                        </div>
+                        @endguest
 
                         <div class="header-right-menu-wrapper">
                             <div class="header-right-menu">
