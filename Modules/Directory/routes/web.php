@@ -26,8 +26,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/annuaire/proposer', [PublicDirectoryController::class, 'storeSubmission'])->name('directory.submit')->middleware('throttle:3,60');
     Route::post('/annuaire/{slug}/reviews', [CommunityController::class, 'storeReview'])->name('directory.reviews.store');
     Route::post('/annuaire/{slug}/discussions', [CommunityController::class, 'storeDiscussion'])->name('directory.discussions.store');
-    Route::post('/annuaire/{slug}/resources', [CommunityController::class, 'storeResource'])->name('directory.resources.store');
-    Route::post('/annuaire/{slug}/youtube-meta', [CommunityController::class, 'fetchYoutubeMeta'])->name('directory.youtube-meta');
+    Route::post('/annuaire/{slug}/resources', [CommunityController::class, 'storeResource'])->name('directory.resources.store')->middleware('throttle:5,60');
+    Route::post('/annuaire/{slug}/youtube-meta', [CommunityController::class, 'fetchYoutubeMeta'])->name('directory.youtube-meta')->middleware('throttle:10,1');
     Route::post('/annuaire/community/{type}/{id}/like', [CommunityController::class, 'toggleLike'])->name('directory.community.like');
     Route::post('/annuaire/community/{type}/{id}/report', [CommunityController::class, 'report'])->name('directory.community.report');
     Route::post('/annuaire/{slug}/suggest', [CommunityController::class, 'storeSuggestion'])->name('directory.suggestions.store');

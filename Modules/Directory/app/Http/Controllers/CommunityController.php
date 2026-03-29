@@ -116,6 +116,16 @@ class CommunityController extends Controller
             'channel_url' => ['nullable', 'url', 'max:500'],
         ]);
 
+        // Vérification doublon URL pour cet outil
+        $exists = ToolResource::where('directory_tool_id', $tool->id)->where('url', $validated['url'])->exists();
+        if ($exists) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => __('Cette ressource existe déjà pour cet outil.')], 422);
+            }
+
+            return back()->withErrors(['url' => __('Cette ressource existe déjà pour cet outil.')]);
+        }
+
         $user = Auth::user();
         $autoApprove = $this->reputation->shouldAutoApprove($user, 'resource');
 
