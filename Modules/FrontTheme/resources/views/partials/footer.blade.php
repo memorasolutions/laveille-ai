@@ -16,6 +16,9 @@
                     <div class="widget link-widget">
                         <div class="widget-title"><h3>{{ __('Ressources') }}</h3></div>
                         <ul>
+                            @if(Route::has('resources.index'))
+                                <li><a href="{{ route('resources.index') }}"><strong>{{ __('Toutes les ressources') }}</strong></a></li>
+                            @endif
                             <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
                             @if(Route::has('dictionary.index'))
                                 <li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>
