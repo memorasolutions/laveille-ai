@@ -180,7 +180,7 @@
     @stack('scripts')
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
-    @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*'))
+    @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*', 'privacy-policy*', 'terms-of-use*', 'cookie-policy*', 'rights-request*'))
     @php $shareUrl = urlencode(request()->url()); $shareTitle = urlencode(config('app.name') . ' - ' . ($__env->yieldContent('title') ?: '')); @endphp
     <div x-data="{ copied: false }" class="share-float">
         {{-- Desktop sidebar --}}
