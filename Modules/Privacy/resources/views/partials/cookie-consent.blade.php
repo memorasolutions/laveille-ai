@@ -75,7 +75,7 @@
     input:checked + .cc-slider { background-color: var(--cc-toggle-active); }
     input:checked + .cc-slider::before { transform: translateX(20px); }
     input:disabled + .cc-slider { opacity: 0.5; cursor: not-allowed; }
-    .cc-fab { position: fixed; bottom: 0; left: 20px; width: auto; height: auto; border-radius: 14px 14px 0 0; background: var(--cc-bg); color: var(--cc-text); border: 1px solid var(--cc-border); border-bottom: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); cursor: pointer; z-index: 9990; display: flex; align-items: center; gap: 6px; padding: 8px 14px; transform: translateY(calc(100% - 8px)); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .cc-fab { position: fixed; bottom: 0; left: 20px; width: auto; height: auto; border-radius: 14px 14px 0 0; background: var(--cc-bg); color: var(--cc-text); border: 1px solid var(--cc-border); border-bottom: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); cursor: pointer; z-index: 9990; display: flex; align-items: center; gap: 6px; padding: 8px 14px; transform: translateY(calc(100% - 22px)); transition: transform 0.3s ease, box-shadow 0.3s ease; }
     .cc-fab:hover, .cc-fab:focus-visible { transform: translateY(0); box-shadow: 0 -6px 20px rgba(0,0,0,0.12); }
     .cc-fab:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
     .cc-fab svg { width: 16px; height: 16px; fill: currentColor; }
