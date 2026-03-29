@@ -15,11 +15,12 @@
     .cmp-table th, .cmp-table td { padding: 12px 15px; vertical-align: middle; border-top: 1px solid #eee; text-align: left; }
     .cmp-table thead th { font-weight: 700; background: #f8f9fa; border-top: none; border-bottom: 2px solid #e5e7eb; color: var(--c-dark); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
     .cmp-table tbody tr:hover { background: #f0f9fa; }
-    .cmp-table .tool-thumb { width: 50px; height: 35px; object-fit: cover; border-radius: 4px; margin-right: 10px; vertical-align: middle; }
-    .cmp-table .tool-name { font-weight: 700; color: var(--c-dark); text-decoration: none; white-space: nowrap; }
+    .cmp-table .tool-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+    .cmp-table .tool-thumb { width: 80px; height: 50px; object-fit: cover; border-radius: 6px; }
+    .cmp-table .tool-name { font-weight: 700; color: var(--c-dark); text-decoration: none; font-size: 13px; }
     .cmp-table .tool-name:hover { color: var(--c-primary); }
     .cmp-table .tool-desc { color: #6b7280; font-size: 13px; line-height: 1.4; }
-    .cmp-table td:nth-child(2) { min-width: 140px; }
+    .cmp-table td:nth-child(2) { min-width: 120px; }
     .cmp-btn { background: var(--c-primary); color: #fff !important; border: none; padding: 6px 14px; border-radius: var(--r-btn); font-size: 12px; font-weight: 600; text-decoration: none !important; transition: opacity 0.2s; white-space: nowrap; display: inline-block; }
     .cmp-btn:hover { opacity: 0.85; color: #fff; }
     .cmp-table td:last-child, .cmp-table th:last-child { min-width: 80px; text-align: center; }
@@ -79,15 +80,17 @@
                 <tr>
                     <td style="color: #9ca3af; font-weight: 700;">{{ $index + 1 }}</td>
                     <td>
-                        @php
-                            $screenshotSrc = $tool->screenshot
-                                ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot))
-                                : '';
-                        @endphp
-                        @if($screenshotSrc)
-                            <img src="{{ $screenshotSrc }}" alt="{{ $tool->name }}" class="tool-thumb" loading="lazy">
-                        @endif
-                        <a href="{{ route('directory.show', $tool->slug) }}" class="tool-name">{{ $tool->name }}</a>
+                        <div class="tool-cell">
+                            @php
+                                $screenshotSrc = $tool->screenshot
+                                    ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot))
+                                    : '';
+                            @endphp
+                            @if($screenshotSrc)
+                                <img src="{{ $screenshotSrc }}" alt="{{ $tool->name }}" class="tool-thumb" loading="lazy">
+                            @endif
+                            <a href="{{ route('directory.show', $tool->slug) }}" class="tool-name">{{ $tool->name }}</a>
+                        </div>
                     </td>
                     <td>
                         <span class="rt-badge badge-{{ $tool->pricing }}">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
