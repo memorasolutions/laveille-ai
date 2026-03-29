@@ -35,7 +35,7 @@
                                     <li><a href="#contenu">{{ __('Contenu généré par les utilisateurs') }}</a></li>
                                     <li><a href="#ia">{{ __('Résumés par intelligence artificielle') }}</a></li>
                                     <li><a href="#avis-pro">{{ __('Avis de non-responsabilité professionnelle') }}</a></li>
-                                    <li><a href="#shorturl">{{ __('Raccourcisseur d\'URL (veille.la, go3.ca)') }}</a></li>
+                                    <li><a href="#shorturl">{{ __('Raccourcisseur d\'URL (veille.la, go3.ca et tout autre domaine exploité)') }}</a></li>
                                     <li><a href="#outils">{{ __('Outils interactifs') }}</a></li>
                                     <li><a href="#rss">{{ __('Agrégation RSS et contenu tiers') }}</a></li>
                                     <li><a href="#affiliation">{{ __('Liens d\'affiliation') }}</a></li>
@@ -73,7 +73,7 @@
                                 <li>{{ __('Un répertoire d\'outils d\'IA') }}</li>
                                 <li>{{ __('Un glossaire terminologique sur l\'IA') }}</li>
                                 <li>{{ __('Une liste d\'acronymes liés au milieu de l\'éducation au Québec') }}</li>
-                                <li>{{ __('Un service de raccourcisseur d\'URL (veille.la, go3.ca)') }}</li>
+                                <li>{{ __('Un service de raccourcisseur d\'URL (veille.la, go3.ca et tout autre domaine associé)') }}</li>
                                 <li>{{ __('Un blogue éditorial proposant des analyses et réflexions') }}</li>
                             </ul>
 
@@ -94,7 +94,7 @@
                             <p>{{ __('Le contenu diffusé sur laveille.ai, incluant les articles de veille, le glossaire et les outils d\'analyse, est fourni à des fins strictement informatives et éducatives. Ce contenu ne constitue pas et ne doit pas être interprété comme un conseil juridique, financier, technique, médical ou professionnel. L\'utilisateur ne doit pas agir sur la base de ces informations sans avoir préalablement obtenu l\'avis d\'un professionnel qualifié.') }}</p>
 
                             {{-- SECTION 7 : SHORTURL --}}
-                            <h3 id="shorturl">{{ __('7. Raccourcisseur d\'URL (veille.la, go3.ca)') }}</h3>
+                            <h3 id="shorturl">{{ __('7. Raccourcisseur d\'URL (veille.la, go3.ca et tout autre domaine exploité)') }}</h3>
                             <p>{{ __('L\'utilisation du service de raccourcissement d\'URL est soumise au respect des lois en vigueur. Il est strictement interdit de raccourcir des liens menant vers du contenu illégal, malveillant (hameçonnage, virus), haineux ou pornographique. L\'exploitant collecte des statistiques anonymes de clics pour assurer le bon fonctionnement et la sécurité du service.') }}</p>
                             <p>{{ __('Les liens créés au moyen du raccourcisseur d\'URL veille.la sont fournis sans aucune garantie de disponibilité, de pérennité ou d\'accessibilité, et laveille.ai se réserve le droit de supprimer tout lien raccourci à tout moment, sans préavis ni obligation de justification. L\'exploitant décline toute responsabilité si la page de destination d\'un lien raccourci est supprimée, modifiée, déplacée ou devient autrement inaccessible, et n\'assume aucune responsabilité quant au contenu, à l\'exactitude ou à la légalité des sites vers lesquels ces liens redirigent. L\'utilisateur reconnaît qu\'il utilise le raccourcisseur d\'URL à ses propres risques.') }}</p>
 
