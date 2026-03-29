@@ -52,7 +52,8 @@
         "spatie/laravel-translatable": "^6.12",
         "spatie/laravel-webhook-client": "^3.4",
         "spatie/laravel-webhook-server": "^3.9",
-        "stancl/tenancy": "^3.9"
+        "stancl/tenancy": "^3.9",
+        "willvincent/feeds": "^2.7"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",
