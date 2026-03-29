@@ -52,7 +52,7 @@
     #cc-host { font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; }
     .cc-backdrop { position: fixed; inset: 0; background: var(--cc-overlay); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .cc-backdrop.cc-open { opacity: 1; pointer-events: auto; }
-    .cc-modal { position: fixed; bottom: 0; left: 0; right: 0; background: var(--cc-bg); color: var(--cc-text); z-index: 9999; padding: 1.5rem; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s ease-out; max-height: 90vh; overflow-y: auto; border-top: 1px solid var(--cc-border); }
+    .cc-modal { position: fixed; bottom: 20px; left: 20px; right: auto; max-width: 420px; width: calc(100vw - 40px); background: var(--cc-bg); color: var(--cc-text); z-index: 9999; padding: 1.5rem; box-shadow: 0 12px 40px rgba(0,0,0,0.18); transform: translateY(120%); transition: transform 0.3s ease-out; max-height: min(90vh, 640px); overflow-y: auto; border: 1px solid var(--cc-border); border-radius: 16px; }
     .cc-modal.cc-open { transform: translateY(0); }
     .cc-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0; }
     .cc-text { font-size: 0.9rem; margin: 0 0 1rem 0; opacity: 0.9; }
@@ -75,10 +75,11 @@
     input:checked + .cc-slider { background-color: var(--cc-toggle-active); }
     input:checked + .cc-slider::before { transform: translateX(20px); }
     input:disabled + .cc-slider { opacity: 0.5; cursor: not-allowed; }
-    .cc-fab { position: fixed; bottom: 20px; left: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--cc-btn-primary); color: var(--cc-btn-primary-text); border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; z-index: 9990; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-    .cc-fab:hover { transform: scale(1.1); }
+    .cc-fab { position: fixed; bottom: 0; left: 20px; width: auto; height: auto; border-radius: 14px 14px 0 0; background: var(--cc-bg); color: var(--cc-text); border: 1px solid var(--cc-border); border-bottom: none; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); cursor: pointer; z-index: 9990; display: flex; align-items: center; gap: 6px; padding: 8px 14px; transform: translateY(calc(100% - 8px)); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .cc-fab:hover, .cc-fab:focus-visible { transform: translateY(0); box-shadow: 0 -6px 20px rgba(0,0,0,0.12); }
     .cc-fab:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
-    .cc-fab svg { width: 22px; height: 22px; fill: currentColor; }
+    .cc-fab svg { width: 16px; height: 16px; fill: currentColor; }
+    .cc-fab-text { font-size: 12px; font-weight: 600; white-space: nowrap; }
     .cc-hidden { display: none !important; }
     @media (max-width: 640px) {
         .cc-actions { flex-direction: column; }
@@ -90,7 +91,8 @@
 <div id="cc-host">
     {{-- FAB (visible seulement si consentement deja donne) --}}
     <button id="cc-fab" class="cc-fab {{ $hasCookie ? '' : 'cc-hidden' }}" type="button" aria-label="{{ $text['fab_label'] }}">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.95 10.99c-1.79-.03-3.7-1.95-2.68-4.22-2.97 1-5.78-1.59-5.19-4.56C7.11.74 2 6.41 2 12c0 5.52 4.48 10 10 10 5.89 0 10.54-5.08 9.95-11.01zM8.5 15c-.83 0-1.5-.67-1.5-1.5S7.67 12 8.5 12s1.5.67 1.5 1.5S9.33 15 8.5 15zm2-5C9.67 10 9 9.33 9 8.5S9.67 7 10.5 7s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 6c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>
+        <img src="{{ asset('images/favicon.png') }}" alt="" style="width:16px;height:16px;" aria-hidden="true">
+        <span class="cc-fab-text">{{ $text['fab_label'] }}</span>
     </button>
 
     {{-- Backdrop --}}
