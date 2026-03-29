@@ -11,8 +11,12 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Privacy\Http\Controllers\LegalController;
 
-// Legal pages (public, no auth required)
-Route::controller(LegalController::class)->group(function () {
+// Legal pages (public, no auth required) — layout frontend USNews
+$legalMiddleware = class_exists(\Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class)
+    ? ['web', \Modules\FrontTheme\Http\Middleware\SetFrontendTheme::class]
+    : ['web'];
+
+Route::middleware($legalMiddleware)->controller(LegalController::class)->group(function () {
     Route::get('/privacy-policy', 'privacyPolicy')->name('legal.privacy');
     Route::get('/terms-of-use', 'termsOfUse')->name('legal.terms');
     Route::get('/cookie-policy', 'cookiePolicy')->name('legal.cookies');
