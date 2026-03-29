@@ -16,9 +16,10 @@
     .cmp-table thead th { font-weight: 700; background: #f8f9fa; border-top: none; border-bottom: 2px solid #e5e7eb; color: var(--c-dark); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
     .cmp-table tbody tr:hover { background: #f0f9fa; }
     .cmp-table .tool-thumb { width: 50px; height: 35px; object-fit: cover; border-radius: 4px; margin-right: 10px; vertical-align: middle; }
-    .cmp-table .tool-name { font-weight: 700; color: var(--c-dark); text-decoration: none; }
+    .cmp-table .tool-name { font-weight: 700; color: var(--c-dark); text-decoration: none; white-space: nowrap; }
     .cmp-table .tool-name:hover { color: var(--c-primary); }
     .cmp-table .tool-desc { color: #6b7280; font-size: 13px; line-height: 1.4; }
+    .cmp-table td:nth-child(2) { min-width: 140px; }
     .cmp-btn { background: var(--c-primary); color: #fff !important; border: none; padding: 6px 14px; border-radius: var(--r-btn); font-size: 12px; font-weight: 600; text-decoration: none !important; transition: opacity 0.2s; white-space: nowrap; display: inline-block; }
     .cmp-btn:hover { opacity: 0.85; color: #fff; }
     .cmp-table td:last-child, .cmp-table th:last-child { min-width: 80px; text-align: center; }
@@ -32,7 +33,10 @@
     .cmp-back:hover { color: var(--c-dark); }
 
     @media (max-width: 768px) {
-        .cmp-table td:nth-child(5) { min-width: 200px; }
+        .cmp-table td:nth-child(4), .cmp-table th:nth-child(4),
+        .cmp-table td:nth-child(5), .cmp-table th:nth-child(5) { display: none; }
+        .cmp-table .tool-thumb { width: 40px; height: 28px; margin-right: 6px; }
+        .cmp-table th, .cmp-table td { padding: 10px 8px; }
     }
 </style>
 @endpush
