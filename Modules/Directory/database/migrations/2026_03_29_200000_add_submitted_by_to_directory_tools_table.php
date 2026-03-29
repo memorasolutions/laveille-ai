@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('directory_tools', function (Blueprint $table) {
-            $table->unsignedBigInteger('submitted_by')->nullable()->after('user_id');
+            $table->unsignedBigInteger('submitted_by')->nullable();
             $table->foreign('submitted_by')->references('id')->on('users')->onDelete('set null');
         });
     }
