@@ -119,6 +119,12 @@
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Répertoire techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('75 outils IA testés et sélectionnés') }}</div></div>
                                             </a>
                                             @endif
+                                            @if(Route::has('news.index'))
+                                            <a href="{{ route('news.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">📰</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Actualités') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Veille IA et technologie') }}</div></div>
+                                            </a>
+                                            @endif
                                             @if(Route::has('acronyms.index'))
                                             <a href="{{ route('acronyms.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🎓</span>
@@ -160,6 +166,7 @@
                                     @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>@endif
                                     @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>@endif
                                     @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>@endif
+                                    @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>@endif
                                     @if(Route::has('roadmap.boards.index'))<li><a href="{{ route('roadmap.boards.index') }}">{{ __('Propositions') }}</a></li>@endif
                                     @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>@endif
@@ -308,6 +315,7 @@
                                                 @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">🛠️ {{ __('Outils gratuits') }}</a></li>@endif
                                                 @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA') }}</a></li>@endif
                                                 @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">🔍 {{ __('Répertoire techno') }}</a></li>@endif
+                                                @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                                 @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🎓 {{ __('Acronymes éducation') }}</a></li>@endif
                                             </ul>
                                         </div>

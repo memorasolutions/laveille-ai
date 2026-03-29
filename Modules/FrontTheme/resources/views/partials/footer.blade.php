@@ -23,6 +23,9 @@
                             @if(Route::has('directory.index'))
                                 <li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>
                             @endif
+                            @if(Route::has('news.index'))
+                                <li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>
+                            @endif
                             @if(Route::has('acronyms.index'))
                                 <li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>
                             @endif
