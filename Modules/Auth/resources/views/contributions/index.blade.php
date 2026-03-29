@@ -6,7 +6,7 @@
 @section('user-content')
 
 <h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">
-    <i class="fa fa-handshake-o"></i> {{ __('Mes contributions') }}
+    🤝 {{ __('Mes contributions') }}
 </h2>
 <p style="color: var(--c-text-muted); margin: 0 0 25px;">{{ __('Suivez vos suggestions et votes sur le site.') }}</p>
 
@@ -15,7 +15,7 @@
     <div class="col-sm-4" style="margin-bottom: 15px;">
         <div class="user-stat-card">
             <div>
-                <i class="fa fa-lightbulb-o fa-2x" style="color: #f0ad4e;"></i>
+                <span style="font-size: 1.5rem;">💡</span>
                 <h3 style="margin: 5px 0 0;">{{ $suggestions->count() }}</h3>
                 <small>{{ __('Suggestions') }}</small>
             </div>
@@ -24,7 +24,7 @@
     <div class="col-sm-4" style="margin-bottom: 15px;">
         <div class="user-stat-card">
             <div>
-                <i class="fa fa-thumbs-up fa-2x" style="color: var(--c-primary);"></i>
+                <span style="font-size: 1.5rem;">👍</span>
                 <h3 style="margin: 5px 0 0;">{{ $votes->count() }}</h3>
                 <small>{{ __('Votes roadmap') }}</small>
             </div>
@@ -33,7 +33,7 @@
     <div class="col-sm-4" style="margin-bottom: 15px;">
         <div class="user-stat-card">
             <div>
-                <i class="fa fa-book fa-2x" style="color: #0891B2;"></i>
+                <span style="font-size: 1.5rem;">📚</span>
                 <h3 style="margin: 5px 0 0;">{{ $resources->count() }}</h3>
                 <small>{{ __('Ressources') }}</small>
             </div>
@@ -50,7 +50,7 @@
                 :style="tab === 'suggestions'
                     ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
                     : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
-            <i class="fa fa-lightbulb-o"></i> {{ __('Suggestions') }}
+            💡 {{ __('Suggestions') }}
             @if($suggestions->count() > 0)
                 <span style="background: linear-gradient(135deg, #f0ad4e, #e09b3d); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $suggestions->count() }}</span>
             @endif
@@ -59,7 +59,7 @@
                 :style="tab === 'votes'
                     ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
                     : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
-            <i class="fa fa-thumbs-up"></i> {{ __('Votes') }}
+            👍 {{ __('Votes') }}
             @if($votes->count() > 0)
                 <span style="background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover)); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $votes->count() }}</span>
             @endif
@@ -68,7 +68,7 @@
                 :style="tab === 'resources'
                     ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
                     : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
-            <i class="fa fa-book"></i> {{ __('Ressources') }}
+            📚 {{ __('Ressources') }}
             @if($resources->count() > 0)
                 <span style="background: linear-gradient(135deg, #0891B2, #0e7490); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $resources->count() }}</span>
             @endif
@@ -80,7 +80,7 @@
         @if($suggestions->isEmpty())
             <div style="text-align: center; padding: 60px 20px; color: var(--c-text-muted);">
                 <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, #F3F4F6, #E5E7EB); border-radius: 20px; display: flex !important; align-items: center !important; justify-content: center !important;">
-                    <i class="fa fa-lightbulb-o fa-2x" style="color: #D1D5DB;"></i>
+                    <span style="font-size: 2rem;">💡</span>
                 </div>
                 <h4 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 8px;">{{ __('Aucune suggestion') }}</h4>
                 <p style="margin: 0; font-size: 14px;">{{ __('Visitez le glossaire, le répertoire ou les acronymes pour proposer des modifications.') }}</p>
@@ -103,7 +103,7 @@
                         $source = $suggestion->getSourceLabel();
                     @endphp
                     <div style="width: 42px; height: 42px; border-radius: 10px; background: {{ $source['color'] }}; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
-                        <i class="fa fa-lightbulb-o" style="color: #fff; font-size: 18px;"></i>
+                        <span style="font-size: 18px;">💡</span>
                     </div>
                     <div style="flex: 1 !important; min-width: 0;">
                         <a href="{{ $route }}" style="font-weight: 600; color: var(--c-dark); text-decoration: none; font-size: 14px;">{{ $suggestion->getItemName() }}</a>
@@ -133,7 +133,7 @@
         @if($votes->isEmpty())
             <div style="text-align: center; padding: 60px 20px; color: var(--c-text-muted);">
                 <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, #F3F4F6, #E5E7EB); border-radius: 20px; display: flex !important; align-items: center !important; justify-content: center !important;">
-                    <i class="fa fa-thumbs-up fa-2x" style="color: #D1D5DB;"></i>
+                    <span style="font-size: 2rem;">👍</span>
                 </div>
                 <h4 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 8px;">{{ __('Aucun vote') }}</h4>
                 <p style="margin: 0 0 16px; font-size: 14px;">{{ __('Vous n\'avez pas encore voté sur la roadmap.') }}</p>
@@ -149,7 +149,7 @@
                      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'"
                      onmouseout="this.style.transform='none';this.style.boxShadow='none'">
                     <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
-                        <i class="fa fa-thumbs-up" style="color: #fff; font-size: 18px;"></i>
+                        <span style="font-size: 18px;">👍</span>
                     </div>
                     <div style="flex: 1 !important; min-width: 0;">
                         <div style="font-weight: 600; color: var(--c-dark); font-size: 14px;">{{ $vote->idea->title }}</div>
@@ -171,7 +171,7 @@
         @if($resources->isEmpty())
             <div style="text-align: center; padding: 60px 20px; color: var(--c-text-muted);">
                 <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, #F3F4F6, #E5E7EB); border-radius: 20px; display: flex !important; align-items: center !important; justify-content: center !important;">
-                    <i class="fa fa-book fa-2x" style="color: #D1D5DB;"></i>
+                    <span style="font-size: 2rem;">📚</span>
                 </div>
                 <h4 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 8px;">{{ __('Aucune ressource') }}</h4>
                 <p style="margin: 0 0 16px; font-size: 14px;">{{ __('Vous n\'avez pas encore soumis de ressources.') }}</p>
@@ -189,15 +189,15 @@
                         <img src="{{ $resource->thumbnail }}" alt="" style="width: 64px; height: 42px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
                     @else
                         @php
-                            $resIcon = match(strtolower($resource->type ?? '')) {
-                                'video', 'vidéo' => 'fa-play-circle',
-                                'article', 'blog' => 'fa-file-text-o',
-                                'tutorial', 'tutoriel' => 'fa-graduation-cap',
-                                default => 'fa-link',
+                            $resEmoji = match(strtolower($resource->type ?? '')) {
+                                'video', 'vidéo' => '🎬',
+                                'article', 'blog' => '📄',
+                                'tutorial', 'tutoriel' => '📖',
+                                default => '🔗',
                             };
                         @endphp
                         <div style="width: 42px; height: 42px; border-radius: 10px; background: var(--c-primary); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
-                            <i class="fa {{ $resIcon }}" style="color: #fff; font-size: 18px;"></i>
+                            <span style="font-size: 18px;">{{ $resEmoji }}</span>
                         </div>
                     @endif
                     <div style="flex: 1 !important; min-width: 0;">
@@ -212,7 +212,7 @@
                         <div style="font-size: 12px; color: var(--c-text-muted); margin-top: 2px;">
                             {{ $resource->tool->name ?? '—' }}
                             <span style="background: rgba(8,145,178,0.1); color: #0891B2; padding: 1px 8px; border-radius: 8px; font-size: 11px; margin-left: 6px;">{{ $resource->type }}</span>
-                            <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" style="color: var(--c-text-muted); margin-left: 6px; font-size: 11px;" title="{{ __('Voir la source') }}"><i class="fa fa-external-link"></i></a>
+                            <a href="{{ $resource->url }}" target="_blank" rel="nofollow noopener" style="color: var(--c-text-muted); margin-left: 6px; font-size: 11px;" title="{{ __('Voir la source') }}">↗</a>
                         </div>
                     </div>
                     <div style="flex-shrink: 0; text-align: right;">
