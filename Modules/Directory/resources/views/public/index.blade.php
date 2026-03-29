@@ -222,13 +222,21 @@
                 <strong x-text="tools.length" style="color: var(--c-primary);"></strong> {{ __('outils testés et sélectionnés pour vous.') }}
             </p>
 
-            {{-- Bouton proposer (visible etape 0) --}}
+            {{-- Bouton proposer (visible etape 0) — auth requise --}}
             <div x-show="wStep === 0 && !submitted" style="margin-bottom: 20px;">
+                @auth
                 <button type="button" @click="wStep = 1"
                     style="background: var(--c-primary); color: #fff; font-weight: 600; padding: 10px 24px; border-radius: var(--r-btn); border: none; cursor: pointer; font-size: 14px; transition: all 0.2s;"
                     onmouseover="this.style.background='var(--c-dark)'" onmouseout="this.style.background='var(--c-primary)'">
                     + {{ __('Proposer un outil') }}
                 </button>
+                @else
+                <a href="{{ route('login') }}" @click.prevent="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour proposer un outil') }}' })"
+                    style="display: inline-block; background: var(--c-primary); color: #fff; font-weight: 600; padding: 10px 24px; border-radius: var(--r-btn); cursor: pointer; font-size: 14px; text-decoration: none; transition: all 0.2s;"
+                    onmouseover="this.style.background='var(--c-dark)'" onmouseout="this.style.background='var(--c-primary)'">
+                    + {{ __('Proposer un outil') }}
+                </a>
+                @endauth
             </div>
 
             {{-- Succes --}}

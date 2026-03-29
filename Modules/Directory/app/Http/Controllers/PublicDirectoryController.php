@@ -140,8 +140,9 @@ class PublicDirectoryController extends Controller
      */
     public function storeSubmission(Request $request): JsonResponse
     {
+        // Auth requise via middleware — ce check est un fallback de sécurité
         if (! auth()->check()) {
-            return response()->json(['auth_required' => true, 'redirect' => route('magic-link.request')], 401);
+            abort(401);
         }
 
         $validated = $request->validate([

@@ -18,12 +18,12 @@ Route::middleware('web')->group(function () {
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap');
     Route::get('/membre/{id}', [ProfileController::class, 'show'])->name('directory.profile');
     Route::get('/annuaire/{slug}', [PublicDirectoryController::class, 'show'])->name('directory.show')->middleware('doNotCacheResponse');
-    Route::post('/annuaire/api/scrape-detect', [PublicDirectoryController::class, 'scrapeAndDetect'])->name('directory.scrape-detect');
-    Route::post('/annuaire/proposer', [PublicDirectoryController::class, 'storeSubmission'])->name('directory.submit');
 });
 
-// Community routes (authenticated users)
+// Soumission + communauté (authenticated users)
 Route::middleware(['web', 'auth'])->group(function () {
+    Route::post('/annuaire/api/scrape-detect', [PublicDirectoryController::class, 'scrapeAndDetect'])->name('directory.scrape-detect');
+    Route::post('/annuaire/proposer', [PublicDirectoryController::class, 'storeSubmission'])->name('directory.submit');
     Route::post('/annuaire/{slug}/reviews', [CommunityController::class, 'storeReview'])->name('directory.reviews.store');
     Route::post('/annuaire/{slug}/discussions', [CommunityController::class, 'storeDiscussion'])->name('directory.discussions.store');
     Route::post('/annuaire/{slug}/resources', [CommunityController::class, 'storeResource'])->name('directory.resources.store');
