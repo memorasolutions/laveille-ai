@@ -44,5 +44,6 @@
     "Directory": true,
     "Community": true,
     "Acronyms": true,
-    "Voting": true
+    "Voting": true,
+    "News": true
 }
