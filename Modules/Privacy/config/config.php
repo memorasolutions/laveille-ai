@@ -31,9 +31,9 @@ return [
     */
     'documents' => [
         'privacy_policy' => [
-            'version' => '2.0',
+            'version' => '3.0',
             'url' => '/privacy-policy',
-            'updated_at' => '2026-03-28',
+            'updated_at' => '2026-03-29',
         ],
         'terms' => [
             'version' => '3.0',
@@ -41,9 +41,9 @@ return [
             'updated_at' => '2026-03-29',
         ],
         'cookie_policy' => [
-            'version' => '1.0',
+            'version' => '2.0',
             'url' => '/cookie-policy',
-            'updated_at' => '2026-03-12',
+            'updated_at' => '2026-03-29',
         ],
     ],
 

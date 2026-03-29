@@ -53,9 +53,13 @@
                                     <li><a href="#rss">{{ __('Agrégation RSS et contenu tiers') }}</a></li>
                                     <li><a href="#newsletter">{{ __('Infolettre') }}</a></li>
                                     <li><a href="#cookies">{{ __('Cookies et traceurs') }}</a></li>
-                                    <li><a href="#sharing">{{ __('Communication et transferts') }}</a></li>
+                                    <li><a href="#bases">{{ __('Base juridique par traitement (RGPD art. 6)') }}</a></li>
+                                    <li><a href="#sharing">{{ __('Prestataires et transferts internationaux') }}</a></li>
                                     <li><a href="#retention">{{ __('Durée de conservation') }}</a></li>
+                                    <li><a href="#breach">{{ __('Notification de brèche') }}</a></li>
                                     <li><a href="#rights">{{ __('Vos droits') }}</a></li>
+                                    <li><a href="#eu">{{ __('Dispositions spécifiques visiteurs européens') }}</a></li>
+                                    <li><a href="#lia">{{ __('Intérêt légitime') }}</a></li>
                                     <li><a href="#security">{{ __('Mesures de sécurité') }}</a></li>
                                     <li><a href="#efvp">{{ __('Évaluation des facteurs relatifs à la vie privée (EFVP)') }}</a></li>
                                     <li><a href="#minors">{{ __('Mineurs') }}</a></li>
@@ -163,23 +167,62 @@
                                 {{ __('Pour plus de détails, consultez notre') }} <a href="{{ url('/cookie-policy') }}">{{ __('politique des cookies') }}</a>.
                             </p>
 
-                            <h3 id="sharing">{{ __('12. Communication et transferts de données') }}</h3>
-                            <ul>
-                                <li>{{ __('Partage avec des prestataires de service (hébergement, paiement, analyse) dans le cadre strict de la fourniture du service') }}</li>
-                                <li>{{ __('Transferts internationaux (hors Québec, Canada ou UE) uniquement avec des garanties appropriées (clauses contractuelles types, décisions d\'adéquation)') }}</li>
-                                <li>{{ __('Aucune vente de données personnelles à des tiers') }}</li>
-                            </ul>
+                            <h3 id="bases">{{ __('12. Base juridique par traitement (RGPD art. 6)') }}</h3>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" style="font-size: 13px;">
+                                    <thead><tr><th>{{ __('Traitement') }}</th><th>{{ __('Base juridique') }}</th><th>{{ __('Article RGPD') }}</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>{{ __('Gestion du compte utilisateur') }}</td><td>{{ __('Exécution d\'un contrat') }}</td><td>Art. 6(1)(b)</td></tr>
+                                        <tr><td>{{ __('Cookies strictement nécessaires') }}</td><td>{{ __('Intérêt légitime') }}</td><td>Art. 6(1)(f)</td></tr>
+                                        <tr><td>{{ __('Cookies d\'analyse (Analytics)') }}</td><td>{{ __('Consentement') }}</td><td>Art. 6(1)(a)</td></tr>
+                                        <tr><td>{{ __('Envoi d\'infolettres') }}</td><td>{{ __('Consentement (LCAP)') }}</td><td>Art. 6(1)(a)</td></tr>
+                                        <tr><td>{{ __('Génération de résumés par IA') }}</td><td>{{ __('Intérêt légitime') }}</td><td>Art. 6(1)(f)</td></tr>
+                                        <tr><td>{{ __('Sécurité et prévention de la fraude') }}</td><td>{{ __('Intérêt légitime') }}</td><td>Art. 6(1)(f)</td></tr>
+                                        <tr><td>{{ __('Statistiques liens courts') }}</td><td>{{ __('Intérêt légitime') }}</td><td>Art. 6(1)(f)</td></tr>
+                                        <tr><td>{{ __('Contenu généré par les utilisateurs') }}</td><td>{{ __('Consentement') }}</td><td>Art. 6(1)(a)</td></tr>
+                                        <tr><td>{{ __('Obligation légale') }}</td><td>{{ __('Obligation légale') }}</td><td>Art. 6(1)(c)</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                            <h3 id="retention">{{ __('13. Durée de conservation') }}</h3>
-                            <ul>
-                                <li>{{ __('Données de compte : pendant la durée de la relation contractuelle, puis archivage légal') }}</li>
-                                <li>{{ __('Données de connexion : 12 mois maximum') }}</li>
-                                <li>{{ __('Cookies : selon les durées indiquées dans le tableau ci-dessus') }}</li>
-                                <li>{{ __('Preuves de consentement : 5 ans (conformément au RGPD art. 7)') }}</li>
-                                <li>{{ __('Demandes d\'exercice de droits : durée du traitement + 3 ans en archivage') }}</li>
-                            </ul>
+                            <h3 id="sharing">{{ __('13. Prestataires et transferts internationaux') }}</h3>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" style="font-size: 13px;">
+                                    <thead><tr><th>{{ __('Prestataire') }}</th><th>{{ __('Finalité') }}</th><th>{{ __('Localisation') }}</th><th>{{ __('Mécanisme de transfert') }}</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Brevo</td><td>{{ __('Infolettre') }}</td><td>{{ __('Union européenne') }}</td><td>{{ __('Décision d\'adéquation') }}</td></tr>
+                                        <tr><td>OpenRouter / Google</td><td>{{ __('Résumés IA') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('Clauses contractuelles types (SCC)') }}</td></tr>
+                                        <tr><td>Cloudflare</td><td>{{ __('CDN, sécurité') }}</td><td>{{ __('Global') }}</td><td>{{ __('DPF UE-US') }}</td></tr>
+                                        <tr><td>cPanel / serveur</td><td>{{ __('Hébergement') }}</td><td>{{ __('Canada') }}</td><td>{{ __('Décision d\'adéquation') }}</td></tr>
+                                        <tr><td>Google Analytics 4</td><td>{{ __('Analyse d\'audience') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('SCC + mode consentement v2') }}</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>{{ __('Aucune donnée personnelle n\'est vendue à des tiers.') }}</p>
 
-                            <h3 id="rights">{{ __('14. Vos droits') }}</h3>
+                            <h3 id="retention">{{ __('14. Durée de conservation') }}</h3>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" style="font-size: 13px;">
+                                    <thead><tr><th>{{ __('Type de donnée') }}</th><th>{{ __('Durée') }}</th><th>{{ __('Justification') }}</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>{{ __('Données du compte') }}</td><td>{{ __('Durée de la relation + 3 ans') }}</td><td>{{ __('Prescription civile') }}</td></tr>
+                                        <tr><td>{{ __('Logs de connexion') }}</td><td>{{ __('12 mois') }}</td><td>{{ __('Sécurité et audit') }}</td></tr>
+                                        <tr><td>{{ __('Cookies analytics') }}</td><td>{{ __('14 mois max') }}</td><td>{{ __('Recommandation CNIL') }}</td></tr>
+                                        <tr><td>{{ __('Preuves de consentement') }}</td><td>{{ __('5 ans') }}</td><td>{{ __('RGPD art. 7') }}</td></tr>
+                                        <tr><td>{{ __('Données infolettre') }}</td><td>{{ __('Jusqu\'au désabonnement + 3 ans') }}</td><td>{{ __('LCAP, prescription') }}</td></tr>
+                                        <tr><td>{{ __('Contributions UGC') }}</td><td>{{ __('Durée de la relation + 3 ans') }}</td><td>{{ __('Archivage') }}</td></tr>
+                                        <tr><td>{{ __('Statistiques liens courts') }}</td><td>{{ __('12 mois') }}</td><td>{{ __('Anonymisation ultérieure') }}</td></tr>
+                                        <tr><td>{{ __('Demandes exercice de droits') }}</td><td>{{ __('Durée traitement + 3 ans') }}</td><td>{{ __('Preuve de traitement') }}</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 id="breach">{{ __('15. Notification de brèche') }}</h3>
+                            <p>{{ __('Conformément à l\'article 3.5 de la Loi 25, toute violation de données personnelles entraînant un risque d\'atteinte à la vie privée sera notifiée à la Commission d\'accès à l\'information du Québec (CAI) et aux personnes concernées sans délai indu.') }}</p>
+                            <p>{{ __('En vertu du RGPD (art. 33-34), les autorités de contrôle compétentes seront notifiées dans un délai de 72 heures après avoir pris connaissance de la violation. Les personnes concernées seront également informées sans délai si la violation est susceptible d\'engendrer un risque élevé pour leurs droits et libertés.') }}</p>
+                            <p>{{ __('Contact :') }} <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a></p>
+
+                            <h3 id="rights">{{ __('16. Vos droits') }}</h3>
                             <p>{{ __('Conformément aux lois applicables, vous disposez des droits suivants :') }}</p>
                             <ul>
                                 @foreach($rights['types'] as $right)
@@ -196,7 +239,22 @@
                                 {{ __('Certaines demandes peuvent nécessiter la vérification de votre identité.') }}
                             </p>
 
-                            <h3 id="security">{{ __('15. Mesures de sécurité') }}</h3>
+                            <h3 id="eu">{{ __('17. Dispositions spécifiques visiteurs européens') }}</h3>
+                            <p>{{ __('Les visiteurs issus de l\'Union européenne bénéficient des droits prévus par le RGPD, notamment : le droit d\'accès, de rectification, d\'effacement (« droit à l\'oubli »), de portabilité de leurs données, d\'opposition au traitement, de limitation du traitement, ainsi que le droit de retirer leur consentement à tout moment. Ils ont également le droit d\'introduire une réclamation auprès d\'une autorité de contrôle compétente (par exemple, la CNIL en France).') }}</p>
+                            <p>{{ __('Les transferts de données hors de l\'Union européenne sont encadrés par des clauses contractuelles types (SCC) garantissant un niveau de protection adéquat.') }}</p>
+                            <p>{{ __('Le site laveille.ai ne procède pas à un profilage des utilisateurs produisant des effets juridiques les concernant ou les affectant de manière significative.') }}</p>
+
+                            <h3 id="lia">{{ __('18. Intérêt légitime') }}</h3>
+                            <p>{{ __('Lorsque l\'intérêt légitime est invoqué comme base juridique pour le traitement de vos données personnelles, l\'exploitant a procédé à une évaluation rigoureuse de la proportionnalité entre ses intérêts et vos droits et libertés fondamentaux. Vous disposez du droit de vous opposer à ces traitements.') }}</p>
+                            <p>{{ __('Les traitements basés sur l\'intérêt légitime sont :') }}</p>
+                            <ul>
+                                <li>{{ __('Cookies strictement nécessaires au fonctionnement du site') }}</li>
+                                <li>{{ __('Génération de résumés par IA pour améliorer l\'expérience utilisateur') }}</li>
+                                <li>{{ __('Sécurité du site et prévention de la fraude') }}</li>
+                                <li>{{ __('Statistiques sur l\'utilisation des liens courts') }}</li>
+                            </ul>
+
+                            <h3 id="security">{{ __('19. Mesures de sécurité') }}</h3>
                             <p>{{ __('Nous mettons en place des mesures techniques et organisationnelles pour protéger vos données :') }}</p>
                             <ul>
                                 <li>{{ __('Chiffrement des données en transit (TLS) et au repos') }}</li>
@@ -205,7 +263,7 @@
                                 <li>{{ __('Formation du personnel à la protection des données') }}</li>
                             </ul>
 
-                            <h3 id="efvp">{{ __('16. Évaluation des facteurs relatifs à la vie privée (EFVP)') }}</h3>
+                            <h3 id="efvp">{{ __('20. Évaluation des facteurs relatifs à la vie privée (EFVP)') }}</h3>
                             <p>{{ __('Conformément à l\'article 3.3 de la Loi modernisant des dispositions législatives en matière de protection des renseignements personnels (Loi 25, Québec), notre organisation s\'engage à effectuer une Évaluation des facteurs relatifs à la vie privée (EFVP) pour tout projet impliquant la collecte, l\'utilisation, la communication, la conservation ou la destruction de renseignements personnels.') }}</p>
                             <p>{{ __('Les types de projets visés par cette obligation incluent notamment :') }}</p>
                             <ul>
@@ -225,10 +283,10 @@
                                 <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a>.
                             </p>
 
-                            <h3 id="minors">{{ __('17. Mineurs') }}</h3>
+                            <h3 id="minors">{{ __('21. Mineurs') }}</h3>
                             <p>{{ __('Conformément à l\'article 14.1 de la Loi sur la protection des renseignements personnels dans le secteur privé (RLRQ c P-39.1), nos services ne sont pas destinés aux personnes de moins de 14 ans. Nous ne collectons pas sciemment de données auprès de mineurs sans le consentement parental requis par la loi applicable.') }}</p>
 
-                            <h3 id="contact">{{ __('18. Contact, DPO et autorités de contrôle') }}</h3>
+                            <h3 id="contact">{{ __('22. Contact, DPO et autorités de contrôle') }}</h3>
                             <p>{{ __('Pour toute question ou exercice de vos droits :') }}</p>
                             <ul>
                                 <li><strong>{{ __('DPO') }}&nbsp;:</strong> {{ $company['dpo_name'] }} - <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a></li>
