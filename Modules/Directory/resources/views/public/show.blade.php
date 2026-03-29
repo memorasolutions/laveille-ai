@@ -977,8 +977,8 @@
 @push('scripts')
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    "@@context": "https://schema.org",
+    "@@type": "SoftwareApplication",
     "name": "{{ e($tool->name) }}",
     "description": "{{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description), 200)) }}",
     "url": "{{ $tool->url ?? route('directory.show', $tool->slug) }}",
@@ -988,14 +988,14 @@
     "screenshot": "{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}",
     @endif
     "offers": {
-        "@type": "Offer",
+        "@@type": "Offer",
         "price": "{{ in_array($tool->pricing, ['free', 'freemium', 'open_source']) ? '0' : '' }}",
         "priceCurrency": "USD",
         "availability": "https://schema.org/OnlineOnly"
     }
     @if($tool->reviews->count() > 0)
     ,"aggregateRating": {
-        "@type": "AggregateRating",
+        "@@type": "AggregateRating",
         "ratingValue": "{{ number_format($tool->reviews->avg('rating'), 1) }}",
         "reviewCount": "{{ $tool->reviews->count() }}",
         "bestRating": "5",
@@ -1009,12 +1009,12 @@
 </script>
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
     "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "{{ __('Accueil') }}", "item": "{{ config('app.url') }}"},
-        {"@type": "ListItem", "position": 2, "name": "{{ __('Répertoire') }}", "item": "{{ route('directory.index') }}"},
-        {"@type": "ListItem", "position": 3, "name": "{{ e($tool->name) }}"}
+        {"@@type": "ListItem", "position": 1, "name": "{{ __('Accueil') }}", "item": "{{ config('app.url') }}"},
+        {"@@type": "ListItem", "position": 2, "name": "{{ __('Répertoire') }}", "item": "{{ route('directory.index') }}"},
+        {"@@type": "ListItem", "position": 3, "name": "{{ e($tool->name) }}"}
     ]
 }
 </script>
