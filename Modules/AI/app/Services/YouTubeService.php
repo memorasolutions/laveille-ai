@@ -165,7 +165,18 @@ class YouTubeService
 
     public static function getNodePath(): string
     {
-        return env('BROWSERSHOT_NODE_PATH', trim(shell_exec('which node 2>/dev/null') ?: '/usr/local/bin/node'));
+        $envPath = env('BROWSERSHOT_NODE_PATH');
+        if ($envPath) {
+            return $envPath;
+        }
+
+        if (\function_exists('shell_exec')) {
+            $which = \shell_exec('which node 2>/dev/null');
+
+            return $which ? trim($which) : '/usr/local/bin/node';
+        }
+
+        return '/usr/local/bin/node';
     }
 
     public static function isAvailable(): bool
