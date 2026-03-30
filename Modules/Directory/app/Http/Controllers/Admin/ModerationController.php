@@ -44,6 +44,7 @@ class ModerationController extends Controller
         $review->update(['is_approved' => true]);
         if ($review->user) {
             $this->reputation->addPoints($review->user, ReputationService::REVIEW_APPROVED, 'review_approved');
+            $review->user->notify(new \Modules\Directory\Notifications\ReviewApprovedNotification($review));
         }
 
         return back()->with('success', __('Avis approuvé.'));
@@ -51,9 +52,10 @@ class ModerationController extends Controller
 
     public function rejectReview(int $id): RedirectResponse
     {
-        $review = ToolReview::findOrFail($id);
+        $review = ToolReview::with('tool')->findOrFail($id);
         if ($review->user) {
             $this->reputation->addPoints($review->user, ReputationService::CONTENT_REJECTED, 'review_rejected');
+            $review->user->notify(new \Modules\Directory\Notifications\ReviewRejectedNotification($review));
         }
         $review->delete();
 
@@ -66,6 +68,7 @@ class ModerationController extends Controller
         $resource->update(['is_approved' => true]);
         if ($resource->user) {
             $this->reputation->addPoints($resource->user, ReputationService::RESOURCE_APPROVED, 'resource_approved');
+            $resource->user->notify(new \Modules\Directory\Notifications\ResourceApprovedNotification($resource));
         }
 
         return back()->with('success', __('Ressource approuvée.'));
@@ -73,9 +76,10 @@ class ModerationController extends Controller
 
     public function rejectResource(int $id): RedirectResponse
     {
-        $resource = ToolResource::findOrFail($id);
+        $resource = ToolResource::with('tool')->findOrFail($id);
         if ($resource->user) {
             $this->reputation->addPoints($resource->user, ReputationService::CONTENT_REJECTED, 'resource_rejected');
+            $resource->user->notify(new \Modules\Directory\Notifications\ResourceRejectedNotification($resource));
         }
         $resource->delete();
 

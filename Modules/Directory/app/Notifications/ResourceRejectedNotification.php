@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Directory\Notifications;
+
+use Illuminate\Notifications\Messages\MailMessage;
+use Modules\Core\Notifications\TemplatedNotification;
+use Modules\Directory\Models\ToolResource;
+
+class ResourceRejectedNotification extends TemplatedNotification
+{
+    public function __construct(protected ToolResource $resource) {}
+
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
+
+    protected function getTemplateSlug(): string
+    {
+        return 'resource_rejected';
+    }
+
+    protected function getTemplateData(object $notifiable): array
+    {
+        return [
+            'user' => ['name' => $notifiable->name, 'email' => $notifiable->email],
+            'app' => ['name' => config('app.name'), 'url' => config('app.url')],
+            'resource' => [
+                'tool_name' => $this->resource->tool?->name ?? '',
+                'title' => $this->resource->title,
+            ],
+        ];
+    }
+
+    protected function getFallbackMail(object $notifiable): MailMessage
+    {
+        $toolName = $this->resource->tool?->name ?? '';
+
+        return (new MailMessage)
+            ->subject(__("Votre ressource n'a pas été retenue"))
+            ->greeting(__('Bonjour :name !', ['name' => $notifiable->name]))
+            ->line(__("Votre ressource « :title » pour « :tool » n'a pas été retenue.", [
+                'title' => $this->resource->title,
+                'tool' => $toolName,
+            ]))
+            ->action(__('Voir mes contributions'), route('user.contributions'));
+    }
+
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'type' => 'resource_rejected',
+            'resource_id' => $this->resource->id,
+            'tool_name' => $this->resource->tool?->name ?? '',
+            'title' => $this->resource->title,
+            'message' => __("Votre ressource « :title » n'a pas été retenue.", [
+                'title' => $this->resource->title,
+            ]),
+        ];
+    }
+}
