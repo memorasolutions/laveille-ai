@@ -267,14 +267,29 @@ class CommunityController extends Controller
             ];
         }
 
-        // Extraire durée + channel + description depuis la page YouTube (Http pour contourner SSL cPanel)
+        // Extraire titre + durée + channel + description depuis la page YouTube
+        $scrapedTitle = null;
+        $scrapedAuthor = null;
         $duration = null;
         $channelUrl = null;
         $videoDescription = null;
         try {
-            $ytResponse = Http::withoutVerifying()->timeout(15)->get("https://www.youtube.com/watch?v={$videoId}");
+            $ytResponse = Http::withoutVerifying()
+                ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36')
+                ->timeout(15)
+                ->get("https://www.youtube.com/watch?v={$videoId}");
             $html = $ytResponse->successful() ? $ytResponse->body() : '';
             if ($html) {
+                // Titre depuis <title>
+                if (preg_match('/<title>(.*?)(?:\s*-\s*YouTube)?<\/title>/i', $html, $tm)) {
+                    $scrapedTitle = html_entity_decode(trim($tm[1]), ENT_QUOTES, 'UTF-8');
+                }
+                // Auteur depuis JSON-LD
+                if (preg_match('/"author"\s*:\s*"([^"]+)"/', $html, $am)) {
+                    $scrapedAuthor = $am[1];
+                } elseif (preg_match('/"ownerChannelName"\s*:\s*"([^"]+)"/', $html, $am)) {
+                    $scrapedAuthor = $am[1];
+                }
                 if (preg_match('/"lengthSeconds":"(\d+)"/', $html, $dm)) {
                     $duration = (int) $dm[1];
                 }
@@ -290,13 +305,17 @@ class CommunityController extends Controller
             // Pas bloquant
         }
 
+        // Utiliser les données scrapées si oEmbed n'a pas fourni le titre
+        $finalTitle = $oembed['title'] ?? $scrapedTitle;
+        $finalAuthor = $oembed['author_name'] ?? $scrapedAuthor;
+
         return response()->json([
             'youtube' => true,
             'valid' => true,
             'video_id' => $videoId,
-            'title' => $oembed['title'] ?? null,
+            'title' => $finalTitle,
             'thumbnail' => "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg",
-            'author' => $oembed['author_name'] ?? null,
+            'author' => $finalAuthor,
             'duration' => $duration,
             'channel_url' => $channelUrl,
             'description' => $videoDescription,
