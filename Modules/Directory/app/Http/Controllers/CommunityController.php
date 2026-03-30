@@ -34,7 +34,7 @@ class CommunityController extends Controller
             ->firstOrFail();
     }
 
-    public function storeReview(Request $request, string $slug): RedirectResponse
+    public function storeReview(Request $request, string $slug): RedirectResponse|JsonResponse
     {
         $tool = $this->findTool($slug);
 
@@ -78,7 +78,7 @@ class CommunityController extends Controller
         return back()->with('success', __('Merci pour votre avis ! Il sera visible après approbation.'));
     }
 
-    public function storeDiscussion(Request $request, string $slug): RedirectResponse
+    public function storeDiscussion(Request $request, string $slug): RedirectResponse|JsonResponse
     {
         $tool = $this->findTool($slug);
 
@@ -122,7 +122,7 @@ class CommunityController extends Controller
         return back()->with('success', __('Votre message a été publié.'));
     }
 
-    public function storeResource(Request $request, string $slug): RedirectResponse
+    public function storeResource(Request $request, string $slug): RedirectResponse|JsonResponse
     {
         $tool = $this->findTool($slug);
 
@@ -359,7 +359,7 @@ class CommunityController extends Controller
         return back()->with('success', __('Merci, le signalement a été envoyé.'));
     }
 
-    public function storeSuggestion(Request $request, string $slug): RedirectResponse
+    public function storeSuggestion(Request $request, string $slug): RedirectResponse|JsonResponse
     {
         $tool = $this->findTool($slug);
 
@@ -384,7 +384,7 @@ class CommunityController extends Controller
         return back()->with('success', __('Merci ! Votre suggestion sera examinée par notre équipe.'));
     }
 
-    public function storeScreenshot(Request $request, string $slug): RedirectResponse
+    public function storeScreenshot(Request $request, string $slug): RedirectResponse|JsonResponse
     {
         $request->validate([
             'screenshot' => 'required|image|max:5120',
