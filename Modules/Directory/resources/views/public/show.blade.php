@@ -141,8 +141,9 @@
             <img src="{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
         </div>
     @else
-        <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; height: 200px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex; align-items: center; justify-content: center;">
-            <span style="font-family: var(--f-heading); font-size: 2rem; font-weight: 800; color: rgba(255,255,255,0.85);">{{ $tool->name }}</span>
+        <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; max-height: 400px; height: 280px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
+            <span style="font-family: var(--f-heading); font-size: 2.5rem; font-weight: 800; color: rgba(255,255,255,0.9);">{{ $tool->name }}</span>
+            <span style="font-size: 0.9rem; color: rgba(255,255,255,0.5);">laveille.ai</span>
         </div>
     @endif
 
