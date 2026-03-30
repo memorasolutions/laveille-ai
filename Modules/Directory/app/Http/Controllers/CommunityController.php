@@ -280,14 +280,18 @@ class CommunityController extends Controller
                 ->get("https://www.youtube.com/watch?v={$videoId}");
             $html = $ytResponse->successful() ? $ytResponse->body() : '';
             if ($html) {
-                // Titre depuis <title>
-                if (preg_match('/<title>(.*?)(?:\s*-\s*YouTube)?<\/title>/i', $html, $tm)) {
-                    $scrapedTitle = html_entity_decode(trim($tm[1]), ENT_QUOTES, 'UTF-8');
+                // Titre depuis JSON embarqué (ytInitialPlayerResponse)
+                if (preg_match('/"title"\s*:\s*"([^"]{2,200})"/', $html, $tm)) {
+                    $candidate = html_entity_decode($tm[1], ENT_QUOTES, 'UTF-8');
+                    // Ignorer les titres génériques YouTube
+                    if (! in_array(strtolower($candidate), ['youtube', 'watch', ''])) {
+                        $scrapedTitle = $candidate;
+                    }
                 }
-                // Auteur depuis JSON-LD
-                if (preg_match('/"author"\s*:\s*"([^"]+)"/', $html, $am)) {
+                // Auteur depuis ownerChannelName ou author
+                if (preg_match('/"ownerChannelName"\s*:\s*"([^"]+)"/', $html, $am)) {
                     $scrapedAuthor = $am[1];
-                } elseif (preg_match('/"ownerChannelName"\s*:\s*"([^"]+)"/', $html, $am)) {
+                } elseif (preg_match('/"author"\s*:\s*"([^"]+)"/', $html, $am)) {
                     $scrapedAuthor = $am[1];
                 }
                 if (preg_match('/"lengthSeconds":"(\d+)"/', $html, $dm)) {
@@ -306,8 +310,8 @@ class CommunityController extends Controller
         }
 
         // Utiliser les données scrapées si oEmbed n'a pas fourni le titre
-        $finalTitle = $oembed['title'] ?? $scrapedTitle;
-        $finalAuthor = $oembed['author_name'] ?? $scrapedAuthor;
+        $finalTitle = ! empty($oembed['title']) ? $oembed['title'] : $scrapedTitle;
+        $finalAuthor = ! empty($oembed['author_name']) ? $oembed['author_name'] : $scrapedAuthor;
 
         return response()->json([
             'youtube' => true,
