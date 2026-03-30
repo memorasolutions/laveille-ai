@@ -241,7 +241,10 @@ class CommunityController extends Controller
         }
 
         // Fetch oEmbed metadata (gratuit, pas d'API key) — valide existence + embeddabilité
-        $oembedResponse = Http::withoutVerifying()->timeout(10)->get('https://www.youtube.com/oembed', ['url' => $url, 'format' => 'json']);
+        $oembedResponse = Http::withoutVerifying()
+            ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36')
+            ->timeout(10)
+            ->get('https://www.youtube.com/oembed', ['url' => $url, 'format' => 'json']);
         $oembed = $oembedResponse->successful() ? $oembedResponse->json() : null;
 
         if (! $oembed || empty($oembed['title'])) {
