@@ -709,6 +709,21 @@
                                 // Auto-détection langue : français si titre/description contient des accents français
                                 const text = (data.title || '') + ' ' + (data.description || '');
                                 this.language = /[éèêëàâçùûôîïæœ]/i.test(text) ? 'fr' : 'en';
+
+                                // Fallback client-side : si titre vide, récupérer via noembed.com (navigateur, pas serveur)
+                                if (!this.title && this.videoId) {
+                                    try {
+                                        const ne = await fetch('https://noembed.com/embed?url=' + encodeURIComponent(this.url));
+                                        const nd = await ne.json();
+                                        if (nd && nd.title) {
+                                            this.title = nd.title;
+                                            this.author = nd.author_name || this.author;
+                                            this.channelName = nd.author_name || this.channelName;
+                                            const t2 = (nd.title || '') + ' ' + (nd.author_name || '');
+                                            this.language = /[éèêëàâçùûôîïæœ]/i.test(t2) ? 'fr' : 'en';
+                                        }
+                                    } catch(e) { /* noembed indisponible — utilisateur saisit manuellement */ }
+                                }
                             }
                         } catch(e) { this.videoError = '{{ __("Erreur de connexion. Réessayez.") }}'; }
                         this.loading = false;
