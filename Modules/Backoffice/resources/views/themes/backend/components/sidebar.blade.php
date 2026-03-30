@@ -88,7 +88,7 @@
             {{-- ===== CONTENU ===== --}}
             <li class="nav-label">{{ __('Contenu') }}</li>
 
-            <li class="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*') ? 'mm-active' : '' }}">
+            <li class="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.news.*') ? 'mm-active' : '' }}">
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                     <i class="fa fa-layer-group"></i>
                     <span class="nav-text">{{ __('Contenu') }}</span>
@@ -109,6 +109,11 @@
                     <li class="{{ request()->routeIs('admin.media.*') ? 'mm-active' : '' }}">
                         <a href="{{ route('admin.media.index') }}">{{ __('Médias') }}</a>
                     </li>
+                    @if(Route::has('admin.news.sources.index'))
+                    <li class="{{ request()->routeIs('admin.news.*') ? 'mm-active' : '' }}">
+                        <a href="{{ route('admin.news.sources.index') }}">{{ __('Sources RSS') }}</a>
+                    </li>
+                    @endif
                 </ul>
             </li>
 
