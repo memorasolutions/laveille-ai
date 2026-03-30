@@ -58,6 +58,14 @@
 
         <div style="border-top:1px solid #f3f4f6;margin:4px 0;"></div>
 
+        {{-- Modifier (redirige vers l'admin si route existe) --}}
+        @if($type === 'resources' && Route::has('admin.directory.resources.edit'))
+        <a href="{{ route('admin.directory.resources.edit', $item->id) }}"
+            style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;font-size:13px;cursor:pointer;color:#2563eb;text-decoration:none;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='none'">
+            ✏️ {{ __('Modifier') }}
+        </a>
+        @endif
+
         {{-- Épingler --}}
         <form method="POST" action="{{ route('moderation.pin', [$type, $item->id]) }}" style="margin:0;">
             @csrf
