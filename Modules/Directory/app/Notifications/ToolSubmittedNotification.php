@@ -18,8 +18,7 @@ final class ToolSubmittedNotification extends Notification
     public function __construct(
         private readonly Tool $tool,
         private readonly User $submitter,
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
@@ -28,15 +27,15 @@ final class ToolSubmittedNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $adminUrl = URL::to('/admin/directory/' . $this->tool->getKey() . '/edit');
+        $adminUrl = URL::to('/admin/directory/'.$this->tool->getKey().'/edit');
 
-        return (new MailMessage())
-            ->subject('[laveille.ai] Nouvel outil soumis : ' . $this->tool->name)
+        return (new MailMessage)
+            ->subject('[laveille.ai] Nouvel outil soumis : '.$this->tool->name)
             ->line('Un nouvel outil a été soumis via le répertoire.')
-            ->line('Nom : ' . $this->tool->name)
-            ->line('URL : ' . ($this->tool->url ?: 'N/A'))
-            ->line('Tarification : ' . ($this->tool->pricing ?: 'N/A'))
-            ->line('Soumis par : ' . $this->submitter->name . ' (' . $this->submitter->email . ')')
+            ->line('Nom : '.$this->tool->name)
+            ->line('URL : '.($this->tool->url ?: 'N/A'))
+            ->line('Tarification : '.($this->tool->pricing ?: 'N/A'))
+            ->line('Soumis par : '.$this->submitter->name.' ('.$this->submitter->email.')')
             ->action('Voir dans l\'admin', $adminUrl);
     }
 
@@ -49,7 +48,7 @@ final class ToolSubmittedNotification extends Notification
             'tool_url' => (string) $this->tool->url,
             'submitter_name' => (string) $this->submitter->name,
             'submitter_email' => (string) $this->submitter->email,
-            'message' => 'Nouvel outil soumis : ' . $this->tool->name . ' par ' . $this->submitter->name,
+            'message' => 'Nouvel outil soumis : '.$this->tool->name.' par '.$this->submitter->name,
         ];
     }
 }
