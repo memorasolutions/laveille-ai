@@ -114,6 +114,18 @@ a:hover { color: var(--c-primary); }
     color: var(--c-primary);
 }
 
+/* Réduire la hauteur du header navbar */
+.wpo-site-header .navigation #navbar > ul > li > a {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+@media (max-width: 1500px) {
+    .wpo-site-header .navigation #navbar > ul > li > a {
+        padding-top: 18px;
+        padding-bottom: 18px;
+    }
+}
+
 /* ── 4. HERO GRID ── */
 
 .wpo-blog-hero-area .wpo-blog-content .thumb {
