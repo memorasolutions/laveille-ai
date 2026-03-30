@@ -18,6 +18,7 @@ use Modules\Roadmap\Models\Idea;
 use Modules\Roadmap\Models\IdeaComment;
 use Modules\Roadmap\Services\IdeaService;
 use Modules\Roadmap\Services\VotingService;
+use Modules\Settings\Facades\Settings;
 
 class PublicBoardController extends Controller
 {
@@ -44,7 +45,7 @@ class PublicBoardController extends Controller
             $query->byStatus(IdeaStatus::from($request->status));
         }
 
-        $ideas = $query->latest('vote_count')->paginate(20);
+        $ideas = $query->latest('vote_count')->paginate((int) Settings::get('roadmap.ideas_per_page', 20));
 
         return view('roadmap::public.boards.show', [
             'board' => $board,

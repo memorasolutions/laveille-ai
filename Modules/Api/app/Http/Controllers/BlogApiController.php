@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Cache;
 use Modules\Api\Http\Resources\ArticleResource;
 use Modules\Api\Http\Resources\CommentResource;
 use Modules\Blog\Models\Article;
+use Modules\Settings\Facades\Settings;
 
 /**
  * @group Blog
@@ -35,7 +36,7 @@ final class BlogApiController extends BaseApiController
             ->with(['user', 'blogCategory'])
             ->withCount('comments')
             ->when($request->filled('category'), fn ($q) => $q->where('category', $request->category))
-            ->paginate(15);
+            ->paginate((int) Settings::get('api.blog_articles_per_page', 15));
 
         return $this->respondSuccess(ArticleResource::collection($articles));
     }
@@ -78,7 +79,7 @@ final class BlogApiController extends BaseApiController
             ->with(['user', 'blogCategory'])
             ->where("title->{$locale}", 'LIKE', $q)
             ->orWhere(fn ($query) => $query->where("content->{$locale}", 'LIKE', $q)->published())
-            ->paginate(15);
+            ->paginate((int) Settings::get('api.blog_articles_per_page', 15));
 
         return $this->respondSuccess(ArticleResource::collection($articles));
     }

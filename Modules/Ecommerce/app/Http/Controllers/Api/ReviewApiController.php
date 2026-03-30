@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Modules\Ecommerce\Models\OrderItem;
 use Modules\Ecommerce\Models\Product;
 use Modules\Ecommerce\Models\Review;
+use Modules\Settings\Facades\Settings;
 
 class ReviewApiController extends Controller
 {
@@ -25,7 +26,7 @@ class ReviewApiController extends Controller
             ->approved()
             ->with('user:id,name')
             ->latest()
-            ->paginate(10);
+            ->paginate((int) Settings::get('api.product_reviews_per_page', 10));
 
         return response()->json(['success' => true, 'data' => $reviews]);
     }

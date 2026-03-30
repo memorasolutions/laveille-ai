@@ -10,6 +10,7 @@ namespace Modules\FrontTheme\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\View\View;
+use Modules\Settings\Facades\Settings;
 use Nwidart\Modules\Facades\Module;
 
 class HomeController extends Controller
@@ -26,7 +27,7 @@ class HomeController extends Controller
                 ->published()
                 ->with(['user', 'submittedByUser', 'blogCategory'])
                 ->latest('published_at')
-                ->take(12)
+                ->take((int) Settings::get('fronttheme.home_articles_limit', 12))
                 ->get();
         }
 
@@ -38,7 +39,7 @@ class HomeController extends Controller
                 ->published()
                 ->with('categories')
                 ->orderBy("name->{$locale}")
-                ->take(4)
+                ->take((int) Settings::get('fronttheme.home_popular_tools_limit', 4))
                 ->get();
         }
 
@@ -50,7 +51,7 @@ class HomeController extends Controller
                 ->published()
                 ->with('category')
                 ->inRandomOrder()
-                ->take(5)
+                ->take((int) Settings::get('fronttheme.home_featured_terms_limit', 5))
                 ->get();
         }
 
@@ -62,7 +63,7 @@ class HomeController extends Controller
                 ->published()
                 ->with('category')
                 ->inRandomOrder()
-                ->take(5)
+                ->take((int) Settings::get('fronttheme.home_featured_acronyms_limit', 5))
                 ->get();
         }
 
@@ -73,7 +74,7 @@ class HomeController extends Controller
             $interactiveTools = $iToolClass::query()
                 ->where('is_active', true)
                 ->orderBy('sort_order')
-                ->take(4)
+                ->take((int) Settings::get('fronttheme.home_interactive_tools_limit', 4))
                 ->get();
         }
 

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Media\Models\MediaUpload;
 use Modules\Media\Services\MediaService;
+use Modules\Settings\Facades\Settings;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaController extends Controller
@@ -35,7 +36,7 @@ class MediaController extends Controller
             $query->where('custom_properties->folder', $request->query('folder'));
         }
 
-        $media = $query->orderByDesc('created_at')->paginate(24);
+        $media = $query->orderByDesc('created_at')->paginate((int) Settings::get('media.items_per_page', 24));
 
         $items = $media->map(fn (Media $item) => [
             'id' => $item->id,

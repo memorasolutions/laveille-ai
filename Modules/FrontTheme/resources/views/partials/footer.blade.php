@@ -72,8 +72,8 @@
                                 <li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>
                             @endif
                             {{-- Lien Propositions retiré du footer (décision utilisateur 2026-03-28) --}}
-                            <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook" loading="lazy"></i> Facebook</a></li>
-                            <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger" loading="lazy"></i> Messenger</a></li>
+                            <li><a href="{{ \Modules\Settings\Facades\Settings::get('social.facebook_page_url', 'https://www.facebook.com/LaVeilleDeStef') }}" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook" loading="lazy"></i> Facebook</a></li>
+                            <li><a href="{{ \Modules\Settings\Facades\Settings::get('social.messenger_url', 'https://m.me/LaVeilleDeStef') }}" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger" loading="lazy"></i> Messenger</a></li>
                             @guest
                                 <li><a href="{{ route('login') }}" @click.prevent="$dispatch('open-auth-modal', { message: '' })" style="cursor: pointer;">🔑 {{ __('Se connecter') }}</a></li>
                             @endguest

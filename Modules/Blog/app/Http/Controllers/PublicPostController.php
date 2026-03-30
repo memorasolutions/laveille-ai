@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
+use Modules\Settings\Facades\Settings;
 use Nwidart\Modules\Facades\Module;
 
 class PublicPostController extends Controller
@@ -51,7 +52,7 @@ class PublicPostController extends Controller
             });
         }
 
-        $articles = $query->latest('published_at')->paginate(10);
+        $articles = $query->latest('published_at')->paginate((int) Settings::get('blog.articles_per_page', 10));
 
         if ($request->ajax()) {
             return response()->json([
@@ -93,7 +94,7 @@ class PublicPostController extends Controller
             ->where('category_id', $category->id)
             ->with(['user', 'tagsRelation'])
             ->latest('published_at')
-            ->paginate(10);
+            ->paginate((int) Settings::get('blog.articles_per_page', 10));
 
         return view('fronttheme::blog.category', compact('category', 'articles'));
     }

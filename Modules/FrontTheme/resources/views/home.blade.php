@@ -90,7 +90,7 @@
                 <div class="row">
                     <div class="b-title"><span>{{ __('Dernières nouvelles') }}</span></div>
                     <div class="wpo-breacking-wrap owl-carousel">
-                        @foreach($articles->take(9) as $breaking)
+                        @foreach($articles->take((int) \Modules\Settings\Facades\Settings::get('fronttheme.home_breaking_news_limit', 9)) as $breaking)
                         <div class="wpo-breacking-item{{ $loop->first ? ' s1' : '' }}">
                             <div class="wpo-breacking-img">
                                 <img src="{{ $breaking->featured_image ? asset($breaking->featured_image) : fronttheme_asset('images/breaking-news/img-' . (($loop->index % 3) + 1) . '.jpg') }}" alt="" loading="lazy">
@@ -119,7 +119,7 @@
                         <div class="wpo-blog-highlights-wrap">
                             <div class="wpo-blog-items">
                                 <div class="row">
-                                    @foreach($articles->take(6) as $highlight)
+                                    @foreach($articles->take((int) \Modules\Settings\Facades\Settings::get('fronttheme.home_highlights_limit', 6)) as $highlight)
                                     <div class="col col-lg-6 col-md-6 col-12">
                                         <div class="wpo-blog-item">
                                             <div class="wpo-blog-img">
@@ -190,7 +190,7 @@
                     <div class="wpo-blog-sponsored-wrap">
                         <div class="wpo-blog-items">
                             <div class="row">
-                                @foreach($articles->skip(6)->take(4) as $sponsored)
+                                @foreach($articles->skip((int) \Modules\Settings\Facades\Settings::get('fronttheme.home_sponsored_skip', 6))->take((int) \Modules\Settings\Facades\Settings::get('fronttheme.home_sponsored_limit', 4)) as $sponsored)
                                 <div class="col col-xl-3 col-lg-6 col-md-6 col-12">
                                     <div class="wpo-blog-item">
                                         <div class="wpo-blog-img">

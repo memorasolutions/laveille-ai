@@ -14,6 +14,7 @@ use Modules\Core\Services\TranslationService;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Services\DuplicateDetectorService;
+use Modules\Settings\Facades\Settings;
 
 class PublicDirectoryController extends Controller
 {
@@ -40,9 +41,9 @@ class PublicDirectoryController extends Controller
         $pricingOptions = ['free' => __('Gratuit'), 'freemium' => __('Freemium'), 'paid' => __('Payant'), 'open_source' => __('Open source'), 'enterprise' => __('Entreprise')];
 
         $featuredTools = Tool::published()->featured()->with('categories')->orderBy('sort_order')->get();
-        $recentTools = Tool::published()->with('categories')->orderByDesc('created_at')->distinct()->limit(6)->get();
+        $recentTools = Tool::published()->with('categories')->orderByDesc('created_at')->distinct()->limit((int) Settings::get('directory.recent_tools_limit', 6))->get();
         $recentIds = $recentTools->pluck('id')->toArray();
-        $popularTools = Tool::published()->with('categories')->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit(6)->get();
+        $popularTools = Tool::published()->with('categories')->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit((int) Settings::get('directory.popular_tools_limit', 6))->get();
 
         // Plus votés par la communauté (si module Voting actif)
         $topVoted = collect();
@@ -51,7 +52,7 @@ class PublicDirectoryController extends Controller
                 ->withCount('communityVotes')
                 ->having('community_votes_count', '>', 0)
                 ->orderByDesc('community_votes_count')
-                ->limit(6)->get();
+                ->limit((int) Settings::get('directory.top_voted_tools_limit', 6))->get();
         }
 
         return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted'));
@@ -81,7 +82,7 @@ class PublicDirectoryController extends Controller
             ->whereHas('categories', function ($q) use ($tool) {
                 $q->whereIn('directory_categories.id', $tool->categories->pluck('id'));
             })
-            ->limit(4)
+            ->limit((int) Settings::get('directory.similar_tools_limit', 4))
             ->get();
 
         return view('directory::public.show', compact('tool', 'similarTools'));

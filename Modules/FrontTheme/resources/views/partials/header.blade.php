@@ -19,8 +19,8 @@
                 <div class="col col-lg-5 col-md-3 col-sm-12 col-12">
                     <div class="contact-info">
                         <ul>
-                            <li><a href="https://www.facebook.com/LaVeilleDeStef" target="_blank" rel="noopener" aria-label="Facebook"><i class="ti-facebook"></i></a></li>
-                            <li><a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener" aria-label="Messenger"><i class="ti-comment"></i></a></li>
+                            <li><a href="{{ \Modules\Settings\Facades\Settings::get('social.facebook_page_url', 'https://www.facebook.com/LaVeilleDeStef') }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="ti-facebook"></i></a></li>
+                            <li><a href="{{ \Modules\Settings\Facades\Settings::get('social.messenger_url', 'https://m.me/LaVeilleDeStef') }}" target="_blank" rel="noopener" aria-label="Messenger"><i class="ti-comment"></i></a></li>
                         </ul>
                     </div>
                 </div>

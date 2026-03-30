@@ -12,6 +12,7 @@ namespace Modules\FrontTheme\Http\ViewComposers;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Modules\Settings\Facades\Settings;
 use Nwidart\Modules\Facades\Module;
 
 class FrontendDataComposer
@@ -29,17 +30,18 @@ class FrontendDataComposer
 
             $articleClass = 'Modules\\Blog\\Models\\Article';
             if (class_exists($articleClass)) {
-                $latestArticles = Cache::remember('front_latest_articles', 600, function () use ($articleClass) {
+                $cacheDuration = (int) Settings::get('cache.frontend_composer_duration', 600);
+                $latestArticles = Cache::remember('front_latest_articles', $cacheDuration, function () use ($articleClass) {
                     return $articleClass::published()
                         ->with(['user', 'blogCategory'])
                         ->latest('published_at')
-                        ->take(5)
+                        ->take((int) Settings::get('fronttheme.sidebar_latest_articles_limit', 5))
                         ->get();
                 });
 
                 $latestArticle = $latestArticles->first();
 
-                $recentArticles = $latestArticles->take(4);
+                $recentArticles = $latestArticles->take((int) Settings::get('fronttheme.sidebar_recent_articles_limit', 4));
             }
 
             $categoryClass = 'Modules\\Blog\\Models\\Category';
@@ -55,7 +57,7 @@ class FrontendDataComposer
                     return $tagClass::all();
                 });
 
-                $popularTags = $tags->take(10);
+                $popularTags = $tags->take((int) Settings::get('fronttheme.sidebar_popular_tags_limit', 10));
             }
         }
 

@@ -7,6 +7,7 @@ namespace Modules\News\Http\Controllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller;
 use Modules\News\Models\NewsArticle;
+use Modules\Settings\Facades\Settings;
 
 class PublicNewsController extends Controller
 {
@@ -15,7 +16,7 @@ class PublicNewsController extends Controller
         $articles = NewsArticle::published()
             ->recent()
             ->with('source')
-            ->paginate(20);
+            ->paginate((int) Settings::get('news.articles_per_page', 20));
 
         return view('news::public.index', compact('articles'));
     }

@@ -32,7 +32,7 @@
         <div class="widget recent-post-widget">
             <h3>{{ __('Articles récents') }}</h3>
             <div class="posts">
-                @foreach($recentArticles->take(4) as $article)
+                @foreach($recentArticles->take((int) \Modules\Settings\Facades\Settings::get('fronttheme.sidebar_recent_articles_limit', 4)) as $article)
                     <div class="post">
                         <div class="img-holder">
                             @if($article->featured_image)

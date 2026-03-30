@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Modules\Settings\Facades\Settings;
 
 class LeaderboardController extends Controller
 {
@@ -16,7 +17,7 @@ class LeaderboardController extends Controller
     {
         $topAllTime = User::where('reputation_points', '>', 0)
             ->orderByDesc('reputation_points')
-            ->limit(10)
+            ->limit((int) Settings::get('directory.leaderboard_all_time_limit', 10))
             ->get(['id', 'name', 'reputation_points', 'trust_level', 'streak_days']);
 
         // Leaderboard mensuel (points gagnés ce mois-ci)
@@ -28,7 +29,7 @@ class LeaderboardController extends Controller
                 ->groupBy('users.id', 'users.name', 'users.trust_level', 'users.streak_days')
                 ->selectRaw('users.id, users.name, users.trust_level, users.streak_days, SUM(reputation_logs.points) as monthly_points')
                 ->orderByDesc('monthly_points')
-                ->limit(10)
+                ->limit((int) Settings::get('directory.leaderboard_monthly_limit', 10))
                 ->get();
         }
 

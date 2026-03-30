@@ -13,6 +13,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\Acronyms\Models\Acronym;
 use Modules\Acronyms\Models\AcronymCategory;
+use Modules\Settings\Facades\Settings;
 
 class PublicAcronymController extends Controller
 {
@@ -77,7 +78,7 @@ class PublicAcronymController extends Controller
         $relatedAcronyms = Acronym::published()
             ->where('id', '!=', $acronym->id)
             ->where('acronym_category_id', $acronym->acronym_category_id)
-            ->limit(6)
+            ->limit((int) Settings::get('acronyms.related_acronyms_limit', 6))
             ->get();
 
         return view('acronyms::public.show', compact('acronym', 'relatedAcronyms'));
