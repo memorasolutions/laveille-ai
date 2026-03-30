@@ -240,12 +240,19 @@ class CommunityController extends Controller
             return response()->json(['youtube' => false, 'title' => null, 'thumbnail' => null]);
         }
 
-        // Fetch oEmbed metadata (gratuit, pas d'API key) — valide existence + embeddabilité
-        $oembedResponse = Http::withoutVerifying()
+        // Fetch oEmbed metadata — YouTube direct, fallback noembed.com si bloqué
+        $httpClient = Http::withoutVerifying()
             ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36')
-            ->timeout(10)
-            ->get('https://www.youtube.com/oembed', ['url' => $url, 'format' => 'json']);
+            ->timeout(10);
+
+        $oembedResponse = $httpClient->get('https://www.youtube.com/oembed', ['url' => $url, 'format' => 'json']);
         $oembed = $oembedResponse->successful() ? $oembedResponse->json() : null;
+
+        // Fallback noembed.com si YouTube oEmbed échoue (blocage IP serveur)
+        if (! $oembed || empty($oembed['title'])) {
+            $noembedResponse = $httpClient->get('https://noembed.com/embed', ['url' => $url]);
+            $oembed = ($noembedResponse->successful() ? $noembedResponse->json() : null);
+        }
 
         if (! $oembed || empty($oembed['title'])) {
             return response()->json([
