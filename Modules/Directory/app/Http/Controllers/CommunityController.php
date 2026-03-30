@@ -280,16 +280,13 @@ class CommunityController extends Controller
                 ->get("https://www.youtube.com/watch?v={$videoId}");
             $html = $ytResponse->successful() ? $ytResponse->body() : '';
             if ($html) {
-                // Titre : chercher "videoId":"VIDEO_ID","title":"TITRE" (toujours contigu)
-                if (preg_match('/"videoId"\s*:\s*"' . preg_quote($videoId, '/') . '"\s*,\s*"title"\s*:\s*"([^"]{2,300})"/', $html, $tm)) {
-                    $scrapedTitle = html_entity_decode(str_replace(['\\u0026', '\\u0027', '\\u003c', '\\u003e'], ['&', "'", '<', '>'], $tm[1]), ENT_QUOTES, 'UTF-8');
+                // Titre depuis "title":{"runs":[{"text":"..."}]} (format YouTube 2026)
+                if (preg_match('/"title":\{"runs":\[\{"text":"([^"]{2,300})"\}/', $html, $tm)) {
+                    $scrapedTitle = html_entity_decode(str_replace(['\\u0026', '\\u0027'], ['&', "'"], $tm[1]), ENT_QUOTES, 'UTF-8');
+                } elseif (preg_match('/"title":\{"simpleText":"([^"]{2,300})"/', $html, $tm)) {
+                    $scrapedTitle = html_entity_decode($tm[1], ENT_QUOTES, 'UTF-8');
                 } elseif (preg_match('/<meta\s+name="title"\s+content="([^"]+)"/', $html, $tm)) {
                     $scrapedTitle = html_entity_decode($tm[1], ENT_QUOTES, 'UTF-8');
-                } elseif (preg_match('/<title>(.+?)(?:\s*-\s*YouTube)?<\/title>/', $html, $tm)) {
-                    $scrapedTitle = html_entity_decode(trim($tm[1]), ENT_QUOTES, 'UTF-8');
-                    if (in_array(strtolower($scrapedTitle), ['youtube', ''])) {
-                        $scrapedTitle = null;
-                    }
                 }
                 // Auteur depuis ownerChannelName ou author
                 if (preg_match('/"ownerChannelName"\s*:\s*"([^"]+)"/', $html, $am)) {
