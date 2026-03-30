@@ -135,10 +135,14 @@
         @endif
     </div>
 
-    {{-- Screenshot --}}
+    {{-- Screenshot ou gradient fallback --}}
     @if($tool->screenshot)
         <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
             <img src="{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
+        </div>
+    @else
+        <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; height: 200px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex; align-items: center; justify-content: center;">
+            <span style="font-family: var(--f-heading); font-size: 2rem; font-weight: 800; color: rgba(255,255,255,0.85);">{{ $tool->name }}</span>
         </div>
     @endif
 
