@@ -116,7 +116,7 @@
                                             @if(Route::has('directory.index'))
                                             <a href="{{ route('directory.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🔍</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Répertoire techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('directory_tools_count', 3600, fn () => class_exists(\Modules\Directory\Models\Tool::class) ? \Modules\Directory\Models\Tool::where('status', 'published')->count() : 0) }} {{ __('outils IA testés et sélectionnés') }}</div></div>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Répertoire techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('directory_tools_count', 3600, fn () => class_exists(\Modules\Directory\Models\Tool::class) ? \Modules\Directory\Models\Tool::where('status', 'published')->count() : 0) }} {{ __('outils IA avec avis, tutoriels et discussions') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('news.index'))
