@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Modules\Newsletter\Jobs\SendCampaignEmailJob;
 use Modules\Newsletter\Models\Campaign;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Services\BrevoService;
@@ -69,31 +70,35 @@ class CampaignController extends Controller
         }
 
         $subscribers = Subscriber::active()->get();
-        $template = $campaign->template ?? 'modern';
 
-        // Render le HTML avec le template choisi (unsubscribe URL sera personnalisée par sendBulkCampaign)
-        $htmlContent = $brevo->renderTemplate($template, $campaign->subject, $campaign->content, '#');
-
-        $result = $brevo->sendBulkCampaign($subscribers, $campaign->subject, $htmlContent);
-
-        if ($result['success']) {
-            DB::transaction(function () use ($campaign, $result) {
-                $campaign->status->transitionTo(SentCampaignState::class);
-                $campaign->update([
-                    'sent_at' => now(),
-                    'recipient_count' => $result['stats']['sent'] ?? 0,
-                ]);
-            });
-
-            $stats = $result['stats'] ?? [];
-
-            return redirect()
-                ->route('admin.newsletter.campaigns.index')
-                ->with('success', "Campagne envoyée via Brevo : {$stats['sent']} envoyés, {$stats['failed']} échoués.");
+        if ($subscribers->isEmpty()) {
+            return redirect()->back()->with('error', 'Aucun abonné actif.');
         }
 
+        $template = $campaign->template ?? 'modern';
+        $htmlContent = $brevo->renderTemplate($template, $campaign->subject, $campaign->content, '#');
+
+        // Dispatch un job par abonné (queue async au lieu de synchrone)
+        foreach ($subscribers as $subscriber) {
+            SendCampaignEmailJob::dispatch(
+                $subscriber->email,
+                (string) ($subscriber->name ?? ''),
+                $campaign->subject,
+                $htmlContent,
+                $campaign->id,
+            );
+        }
+
+        DB::transaction(function () use ($campaign, $subscribers) {
+            $campaign->status->transitionTo(SentCampaignState::class);
+            $campaign->update([
+                'sent_at' => now(),
+                'recipient_count' => $subscribers->count(),
+            ]);
+        });
+
         return redirect()
-            ->back()
-            ->with('error', "Erreur Brevo : {$result['error']}");
+            ->route('admin.newsletter.campaigns.index')
+            ->with('success', "{$subscribers->count()} courriels mis en file d'attente pour envoi via Brevo.");
     }
 }

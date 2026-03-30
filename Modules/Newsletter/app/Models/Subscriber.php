@@ -33,7 +33,7 @@ class Subscriber extends Model
 
     protected $table = 'newsletter_subscribers';
 
-    protected $fillable = ['email', 'name', 'token', 'confirmed_at', 'unsubscribed_at', 'tenant_id'];
+    protected $fillable = ['email', 'name', 'token', 'confirmed_at', 'unsubscribed_at', 'bounce_count', 'bounce_reason', 'tenant_id'];
 
     protected $casts = [
         'confirmed_at' => 'datetime',
