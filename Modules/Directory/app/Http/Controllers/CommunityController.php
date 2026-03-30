@@ -310,6 +310,7 @@ class CommunityController extends Controller
             'review' => ToolReview::class,
             'discussion' => ToolDiscussion::class,
             'resource' => ToolResource::class,
+            'acronym' => \Modules\Acronyms\Models\Acronym::class,
             default => abort(404),
         };
 

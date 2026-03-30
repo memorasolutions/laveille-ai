@@ -104,11 +104,19 @@
             </div>
         </div>
 
-        {{-- Suggest edit --}}
-        @include('fronttheme::partials.suggest-edit', [
-            'model' => $acronym,
-            'route' => route('acronyms.suggestions.store', $acronym->getTranslation('slug', app()->getLocale())),
-        ])
+        {{-- Suggest edit + Report --}}
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            @include('fronttheme::partials.suggest-edit', [
+                'model' => $acronym,
+                'route' => route('acronyms.suggestions.store', $acronym->getTranslation('slug', app()->getLocale())),
+            ])
+            @if(Route::has('directory.community.report'))
+                @include('directory::components.report-button', [
+                    'reportUrl' => route('directory.community.report', ['type' => 'acronym', 'id' => $acronym->id]),
+                    'csrfToken' => csrf_token(),
+                ])
+            @endif
+        </div>
 
         <div class="row">
             <div class="col-md-8">
