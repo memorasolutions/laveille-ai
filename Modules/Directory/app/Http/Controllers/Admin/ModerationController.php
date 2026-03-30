@@ -108,7 +108,7 @@ class ModerationController extends Controller
 
     public function editResource(int $id): View
     {
-        $resource = ToolResource::with('tool')->findOrFail($id);
+        $resource = ToolResource::with(['tool', 'user'])->findOrFail($id);
 
         return view('directory::admin.resource-edit', compact('resource'));
     }

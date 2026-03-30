@@ -82,9 +82,9 @@
             <div class="d-flex justify-content-between">
                 <div>
                     <small class="text-muted">
-                        {{ __('Soumis par') }} {{ $resource->user->name ?? __('Anonyme') }}
-                        {{ __('le') }} {{ $resource->created_at->format('d/m/Y H:i') }}
-                        | {{ __('Outil') }} : {{ is_array($resource->tool->name ?? null) ? ($resource->tool->name['fr_CA'] ?? '') : ($resource->tool->name ?? '-') }}
+                        {{ __('Soumis par') }} {{ $resource->user?->name ?? __('Anonyme') }}
+                        {{ __('le') }} {{ $resource->created_at?->format('d/m/Y H:i') ?? '-' }}
+                        | {{ __('Outil') }} : {{ is_array($resource->tool?->name) ? ($resource->tool->name['fr_CA'] ?? '') : ($resource->tool?->name ?? '-') }}
                     </small>
                 </div>
                 <button type="submit" class="btn btn-primary">{{ __('Enregistrer') }}</button>
