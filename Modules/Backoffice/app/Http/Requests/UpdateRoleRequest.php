@@ -16,7 +16,7 @@ class UpdateRoleRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('update_roles') ?? false;
     }
 
     public function rules(): array

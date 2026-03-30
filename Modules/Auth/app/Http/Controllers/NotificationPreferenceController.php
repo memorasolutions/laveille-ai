@@ -24,7 +24,7 @@ class NotificationPreferenceController extends Controller
         $types = NotificationPreferenceService::configurableTypes();
         $preferences = NotificationPreferenceService::getPreferences($user);
 
-        return view('auth::themes.backend.notifications.preferences', [
+        return view('auth::notifications.preferences', [
             'user' => $user,
             'types' => $types,
             'preferences' => $preferences,
