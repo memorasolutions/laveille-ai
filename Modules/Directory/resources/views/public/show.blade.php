@@ -846,14 +846,14 @@
                 <div x-show="step===4" x-transition role="region" aria-label="Étape 4 : confirmation">
                     <div style="text-align:center;padding:20px 0;">
                         <div style="font-size:48px;margin-bottom:12px;">🎉</div>
-                        <h4 style="font-weight:700;color:var(--c-dark);margin-bottom:8px;">{{ __('Ressource soumise avec succès !') }}</h4>
-                        <p style="color:var(--c-text-muted);margin-bottom:20px;">{{ __('Notre équipe va examiner votre soumission. Délai estimé : 24-48h.') }}</p>
+                        <h4 style="font-weight:700;color:var(--c-dark);margin-bottom:8px;">{{ __('Ressource ajoutée avec succès !') }}</h4>
+                        <p style="color:var(--c-text-muted);margin-bottom:20px;">{{ __('Votre contribution est maintenant visible par la communauté. Merci !') }}</p>
                         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;margin-bottom:20px;text-align:left;">
                             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                                 <span style="color:#16a34a;">✓</span>
-                                <span style="font-weight:600;color:#15803d;">{{ __('En attente d\'approbation') }}</span>
+                                <span style="font-weight:600;color:#15803d;">{{ __('Publiée') }}</span>
                             </div>
-                            <p style="color:#6b7280;font-size:13px;margin:0;">{{ __('Vous recevrez une notification quand votre ressource sera approuvée.') }}</p>
+                            <p style="color:#6b7280;font-size:13px;margin:0;">{{ __('La communauté peut maintenant voter et commenter votre ressource.') }}</p>
                         </div>
                         @if(Route::has('user.contributions'))
                         <a href="{{ route('user.contributions') }}" style="display:inline-block;padding:10px 24px;background:var(--c-primary);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">{{ __('Voir mes contributions') }}</a>

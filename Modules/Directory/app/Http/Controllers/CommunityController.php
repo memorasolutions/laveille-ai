@@ -56,7 +56,7 @@ class CommunityController extends Controller
             }
         }
 
-        $autoApprove = $this->reputation->shouldAutoApprove($user, 'review');
+        $autoApprove = true; // Tout utilisateur connecté — la communauté modère via votes et signalements
 
         ToolReview::create([
             'user_id' => $user->id,
@@ -99,7 +99,7 @@ class CommunityController extends Controller
         }
 
         $isReply = ! empty($validated['parent_id']);
-        $autoApprove = $isReply ? true : $this->reputation->shouldAutoApprove($user, 'discussion');
+        $autoApprove = true; // Tout utilisateur connecté — la communauté modère via votes et signalements
 
         $sanitizedBody = class_exists(\Mews\Purifier\Facades\Purifier::class)
             ? \Mews\Purifier\Facades\Purifier::clean($validated['body'])
@@ -149,7 +149,7 @@ class CommunityController extends Controller
         }
 
         $user = Auth::user();
-        $autoApprove = $this->reputation->shouldAutoApprove($user, 'resource');
+        $autoApprove = true; // Tout utilisateur connecté — la communauté modère via votes et signalements
 
         $resourceData = [
             'user_id' => $user->id,
