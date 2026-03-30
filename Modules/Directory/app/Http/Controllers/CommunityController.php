@@ -240,36 +240,31 @@ class CommunityController extends Controller
             return response()->json(['youtube' => false, 'title' => null, 'thumbnail' => null]);
         }
 
-        // Fetch oEmbed metadata — YouTube direct, fallback noembed.com si bloqué
-        $httpClient = Http::withoutVerifying()
-            ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36')
-            ->timeout(10);
+        // Fetch oEmbed metadata — avec fallback si serveur bloqué
+        $oembed = null;
+        try {
+            $httpClient = Http::withoutVerifying()
+                ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36')
+                ->timeout(8);
 
-        $oembedResponse = $httpClient->get('https://www.youtube.com/oembed', ['url' => $url, 'format' => 'json']);
-        $oembed = $oembedResponse->successful() ? $oembedResponse->json() : null;
+            $oembedResponse = $httpClient->get('https://www.youtube.com/oembed', ['url' => $url, 'format' => 'json']);
+            $oembed = $oembedResponse->successful() ? $oembedResponse->json() : null;
 
-        // Fallback noembed.com si YouTube oEmbed échoue (blocage IP serveur)
-        if (! $oembed || empty($oembed['title'])) {
-            $noembedResponse = $httpClient->get('https://noembed.com/embed', ['url' => $url]);
-            $oembed = ($noembedResponse->successful() ? $noembedResponse->json() : null);
+            if (! $oembed || empty($oembed['title'])) {
+                $noembedResponse = $httpClient->get('https://noembed.com/embed', ['url' => $url]);
+                $oembed = ($noembedResponse->successful() ? $noembedResponse->json() : null);
+            }
+        } catch (\Throwable $e) {
+            // Serveur ne peut pas joindre YouTube/noembed — on continue avec le fallback
         }
 
+        // Fallback : si oEmbed échoue mais videoId valide, accepter la vidéo (thumbnail prédictible)
         if (! $oembed || empty($oembed['title'])) {
-            return response()->json([
-                'youtube' => true,
-                'valid' => false,
-                'error' => __('Vidéo introuvable, privée ou non disponible.'),
-            ]);
-        }
-
-        // Vérifier que la vidéo est embeddable (oEmbed retourne un champ html avec iframe)
-        $embeddable = isset($oembed['html']) && str_contains($oembed['html'], 'iframe');
-        if (! $embeddable) {
-            return response()->json([
-                'youtube' => true,
-                'valid' => false,
-                'error' => __('Cette vidéo ne peut pas être intégrée (embed désactivé par le créateur).'),
-            ]);
+            $oembed = [
+                'title' => null,
+                'author_name' => null,
+                'html' => '<iframe src="https://www.youtube.com/embed/' . $videoId . '"></iframe>',
+            ];
         }
 
         // Extraire durée + channel + description depuis la page YouTube (Http pour contourner SSL cPanel)
