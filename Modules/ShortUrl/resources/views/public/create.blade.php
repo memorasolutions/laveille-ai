@@ -267,8 +267,7 @@
             <div style="display: flex !important; justify-content: center !important; flex-wrap: wrap !important; gap: 10px;">
                 {{-- Copier --}}
                 <a href="javascript:void(0)" @click="copyLink()"
-                    :style="copied ? 'background:#10B981;color:#fff;' : 'background:#1A1D23;color:#fff;'"
-                    style="-webkit-appearance:none;text-decoration:none;display:inline-block;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);"
+                    :style="'background:' + (copied ? '#10B981' : '#1A1D23') + ';color:#fff;-webkit-appearance:none;text-decoration:none;display:inline-block;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:var(--f-heading,\'Plus Jakarta Sans\',sans-serif);'"
                     onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                     <span x-show="!copied">📋 {{ __('Copier le lien') }}</span>
                     <span x-show="copied" x-cloak>✅ {{ __('Copié !') }}</span>
