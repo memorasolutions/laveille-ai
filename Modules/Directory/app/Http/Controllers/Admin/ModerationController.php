@@ -42,6 +42,7 @@ class ModerationController extends Controller
     {
         $review = ToolReview::findOrFail($id);
         $review->update(['is_approved' => true]);
+        activity('moderation')->performedOn($review)->causedBy(auth()->user())->log('review_approved');
         if ($review->user) {
             $this->reputation->addPoints($review->user, ReputationService::REVIEW_APPROVED, 'review_approved');
             $review->user->notify(new \Modules\Directory\Notifications\ReviewApprovedNotification($review));
@@ -53,6 +54,7 @@ class ModerationController extends Controller
     public function rejectReview(int $id): RedirectResponse
     {
         $review = ToolReview::with('tool')->findOrFail($id);
+        activity('moderation')->performedOn($review)->causedBy(auth()->user())->log('review_rejected');
         if ($review->user) {
             $this->reputation->addPoints($review->user, ReputationService::CONTENT_REJECTED, 'review_rejected');
             $review->user->notify(new \Modules\Directory\Notifications\ReviewRejectedNotification($review));
@@ -66,6 +68,7 @@ class ModerationController extends Controller
     {
         $resource = ToolResource::findOrFail($id);
         $resource->update(['is_approved' => true]);
+        activity('moderation')->performedOn($resource)->causedBy(auth()->user())->log('resource_approved');
         if ($resource->user) {
             $this->reputation->addPoints($resource->user, ReputationService::RESOURCE_APPROVED, 'resource_approved');
             $resource->user->notify(new \Modules\Directory\Notifications\ResourceApprovedNotification($resource));
@@ -77,6 +80,7 @@ class ModerationController extends Controller
     public function rejectResource(int $id): RedirectResponse
     {
         $resource = ToolResource::with('tool')->findOrFail($id);
+        activity('moderation')->performedOn($resource)->causedBy(auth()->user())->log('resource_rejected');
         if ($resource->user) {
             $this->reputation->addPoints($resource->user, ReputationService::CONTENT_REJECTED, 'resource_rejected');
             $resource->user->notify(new \Modules\Directory\Notifications\ResourceRejectedNotification($resource));
@@ -88,7 +92,9 @@ class ModerationController extends Controller
 
     public function deleteResource(int $id): RedirectResponse
     {
-        ToolResource::findOrFail($id)->delete();
+        $resource = ToolResource::findOrFail($id);
+        activity('moderation')->performedOn($resource)->causedBy(auth()->user())->log('resource_deleted');
+        $resource->delete();
 
         return back()->with('success', __('Ressource supprimée (sans pénalité).'));
     }
@@ -130,7 +136,9 @@ class ModerationController extends Controller
 
     public function resolveReport(int $id): RedirectResponse
     {
-        ToolReport::findOrFail($id)->update(['is_resolved' => true]);
+        $report = ToolReport::findOrFail($id);
+        $report->update(['is_resolved' => true]);
+        activity('moderation')->performedOn($report)->causedBy(auth()->user())->log('report_resolved');
 
         return back()->with('success', __('Signalement résolu.'));
     }
@@ -138,6 +146,7 @@ class ModerationController extends Controller
     public function deleteReported(int $id): RedirectResponse
     {
         $report = ToolReport::findOrFail($id);
+        activity('moderation')->performedOn($report)->causedBy(auth()->user())->withProperties(['reportable_type' => $report->reportable_type, 'reportable_id' => $report->reportable_id])->log('reported_content_deleted');
         $reportableClass = $report->reportable_type;
         if (class_exists($reportableClass)) {
             $reportableClass::where('id', $report->reportable_id)->delete();
@@ -151,6 +160,7 @@ class ModerationController extends Controller
     {
         $suggestion = \Modules\Directory\Models\ToolSuggestion::findOrFail($id);
         $suggestion->update(['status' => 'approved']);
+        activity('moderation')->performedOn($suggestion)->causedBy(auth()->user())->log('suggestion_approved');
 
         // Appliquer la modification sur le modèle (polymorphe : Tool, Term, Acronym)
         $model = $suggestion->suggestable ?? $suggestion->tool;
@@ -175,6 +185,7 @@ class ModerationController extends Controller
     {
         $suggestion = \Modules\Directory\Models\ToolSuggestion::findOrFail($id);
         $suggestion->update(['status' => 'rejected']);
+        activity('moderation')->performedOn($suggestion)->causedBy(auth()->user())->log('suggestion_rejected');
 
         if ($suggestion->user) {
             $suggestion->user->notify(new \Modules\Directory\Notifications\SuggestionRejectedNotification($suggestion));
