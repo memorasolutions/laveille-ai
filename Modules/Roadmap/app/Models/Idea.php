@@ -21,6 +21,7 @@ use Modules\Roadmap\Enums\IdeaStatus;
 
 class Idea extends Model
 {
+    use \Modules\Core\Traits\HasModerationStatus;
     use HasFactory, SoftDeletes;
 
     protected $table = 'roadmap_ideas';

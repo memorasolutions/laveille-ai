@@ -50,12 +50,10 @@
                     {{ __('Par') }} {{ $idea->user->name ?? __('Anonyme') }} — {{ $idea->comments_count ?? 0 }} {{ __('commentaire(s)') }} — {{ $idea->created_at->diffForHumans() }}
                 </div>
 
-                {{-- Admin inline actions --}}
-                @can('view_admin_panel')
-                <div style="margin-top:10px;display:flex;gap:6px;">
-                    <a href="{{ route('admin.roadmap.ideas.show', $idea) }}" style="font-size:11px;background:var(--c-primary);color:#fff;padding:3px 10px;border-radius:4px;text-decoration:none;">{{ __('Gérer') }}</a>
+                {{-- Modération inline --}}
+                <div style="margin-top:10px;">
+                    @include('core::components.admin-actions', ['item' => $idea, 'type' => 'ideas'])
                 </div>
-                @endcan
             </div>
         </div>
     @empty

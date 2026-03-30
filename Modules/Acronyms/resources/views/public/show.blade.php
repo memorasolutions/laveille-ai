@@ -116,6 +116,7 @@
                     'csrfToken' => csrf_token(),
                 ])
             @endif
+            @include('core::components.admin-actions', ['item' => $acronym, 'type' => 'acronyms'])
         </div>
 
         <div class="row">

@@ -20,6 +20,7 @@ class FrontendModerationController extends Controller
             'suggestions' => \Modules\Directory\Models\ToolSuggestion::class,
             'reports' => \Modules\Community\Models\Report::class,
             'acronyms' => \Modules\Acronyms\Models\Acronym::class,
+            'ideas' => \Modules\Roadmap\Models\Idea::class,
         ];
 
         abort_unless(isset($modelMap[$type]), 404, 'Type de contenu inconnu.');

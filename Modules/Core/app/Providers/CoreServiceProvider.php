@@ -37,6 +37,10 @@ class CoreServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
         $this->loadHelpers();
+
+        // Middleware de vérification de bannissement
+        $router = $this->app['router'];
+        $router->aliasMiddleware('banned', \Modules\Core\Http\Middleware\CheckBanned::class);
     }
 
     /**

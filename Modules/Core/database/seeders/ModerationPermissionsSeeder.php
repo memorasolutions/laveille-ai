@@ -20,6 +20,7 @@ class ModerationPermissionsSeeder extends Seeder
             'moderate_suggestions',
             'moderate_reports',
             'moderate_acronyms',
+            'moderate_ideas',
             'view_moderation_history',
             'ban_users',
         ];
