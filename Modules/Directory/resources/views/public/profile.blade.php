@@ -36,7 +36,7 @@
         {{-- Progress bar --}}
         <div style="max-width: 400px; margin: 0 auto;">
             <div style="height: 8px; background: #F3F4F6; border-radius: 99px; overflow: hidden; margin-bottom: 8px;">
-                <div style="height: 100%; width: {{ $pct }}%; background: linear-gradient(90deg, #16A34A, #059669); border-radius: 99px; transition: width 0.5s;"></div>
+                <div style="height: 100%; width: {{ $pct }}%; background: #059669; border-radius: 99px; transition: width 0.5s;"></div>
             </div>
             @if(!$isMax)
                 <p style="font-size: 12px; color: #6B7280;">{{ __('Plus que') }} <strong>{{ $remaining }}</strong> {{ __('pts pour') }} {{ \Modules\Directory\Services\ReputationService::getLevelInfo($user->trust_level + 1)['emoji'] ?? '' }} {{ \Modules\Directory\Services\ReputationService::getLevelInfo($user->trust_level + 1)['name'] ?? __('le prochain niveau') }}</p>
@@ -82,7 +82,7 @@
 
     {{-- CTA --}}
     <div class="text-center" style="margin-bottom: 40px;">
-        <a href="{{ route('directory.index') }}" style="display: inline-block; background: linear-gradient(135deg, var(--c-primary), var(--c-accent)); color: #fff; padding: 12px 32px; border-radius: 50px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <a href="{{ route('directory.index') }}" style="display: inline-block; background: var(--c-primary); color: #fff; padding: 12px 32px; border-radius: 0.5rem; font-weight: 700; text-decoration: none; transition: background 0.2s;" onmouseover="this.style.background='var(--c-primary-hover)'" onmouseout="this.style.background='var(--c-primary)'">
             🚀 {{ __('Contribuer au répertoire') }}
         </a>
     </div>

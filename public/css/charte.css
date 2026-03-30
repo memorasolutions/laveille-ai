@@ -21,6 +21,9 @@
     --c-text-muted: #6E7687;
     --f-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --f-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+    --c-danger: #DC2626;
+    --c-danger-hover: #B91C1C;
+    --c-surface: #F8FAFB;
     --r-base: 0.75rem;
     --r-btn: 0.5rem;
 }

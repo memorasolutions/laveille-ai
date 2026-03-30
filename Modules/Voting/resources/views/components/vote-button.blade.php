@@ -22,9 +22,9 @@
         :aria-label="voted ? '{{ __('Retirer le vote') }}' : '{{ __('Soutenir') }}'"
     >
         {{-- Pouce outline (pas voté) ou plein (voté) --}}
-        <svg x-show="!voted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#65676B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 22V11l5-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.1l-1.5 9A2 2 0 0 1 18 21H7z"/><path d="M2 13v8a1 1 0 0 0 1 1h3V12H3a1 1 0 0 0-1 1z"/></svg>
-        <svg x-show="voted" x-cloak width="20" height="20" viewBox="0 0 24 24" fill="#1877F2" stroke="#1877F2" stroke-width="1"><path d="M7 22V11l5-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.1l-1.5 9A2 2 0 0 1 18 21H7z"/><path d="M2 13v8a1 1 0 0 0 1 1h3V12H3a1 1 0 0 0-1 1z"/></svg>
-        <span :style="voted ? 'color:#1877F2;font-weight:600' : 'color:#65676B'" x-text="count > 0 ? count : ''"></span>
+        <svg x-show="!voted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6E7687" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 22V11l5-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.1l-1.5 9A2 2 0 0 1 18 21H7z"/><path d="M2 13v8a1 1 0 0 0 1 1h3V12H3a1 1 0 0 0-1 1z"/></svg>
+        <svg x-show="voted" x-cloak width="20" height="20" viewBox="0 0 24 24" fill="#0B7285" stroke="#0B7285" stroke-width="1"><path d="M7 22V11l5-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.1l-1.5 9A2 2 0 0 1 18 21H7z"/><path d="M2 13v8a1 1 0 0 0 1 1h3V12H3a1 1 0 0 0-1 1z"/></svg>
+        <span :style="voted ? 'color:#0B7285;font-weight:600' : 'color:#6E7687'" x-text="count > 0 ? count : ''"></span>
     </button>
     @include('voting::components.content-badge', ['tier' => $tier, 'isAdmin' => $item->is_approved ?? false])
 </div>

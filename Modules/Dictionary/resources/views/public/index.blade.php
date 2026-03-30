@@ -276,7 +276,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .gl-hero {
-        background: linear-gradient(135deg, var(--c-primary) 0%, #1a365d 100%);
+        background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-dark) 100%);
         color: #fff; padding: 40px 0; text-align: center; margin-bottom: 24px; border-radius: var(--r-base);
     }
     .gl-hero h1 { font-family: var(--f-heading); font-weight: 800; font-size: 2rem; color: #fff; margin: 0 0 8px; }

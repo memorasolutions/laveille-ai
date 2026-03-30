@@ -8,8 +8,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1A1D23 0%, #2D3039 50%, #3F4451 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -21,19 +21,19 @@
         .icon {
             width: 80px; height: 80px; margin: 0 auto 1.5rem;
             border-radius: 50%;
-            background: rgba(99, 102, 241, 0.2);
+            background: rgba(11, 114, 133, 0.2);
             display: flex; align-items: center; justify-content: center;
         }
-        .icon svg { width: 40px; height: 40px; color: #818cf8; }
-        h1 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+        .icon svg { width: 40px; height: 40px; color: #0B7285; }
+        h1 { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 1.5rem; margin-bottom: 0.75rem; }
         p { font-size: 1rem; color: #94a3b8; line-height: 1.6; margin-bottom: 1.5rem; }
         .btn {
             display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.75rem 2rem; background: #6366f1; color: #fff;
+            padding: 0.75rem 2rem; background: #0B7285; color: #fff;
             border: none; border-radius: 0.5rem; font-size: 1rem;
             font-weight: 600; cursor: pointer; transition: background 0.2s;
         }
-        .btn:hover { background: #4f46e5; }
+        .btn:hover { background: #064E5C; }
     </style>
 </head>
 <body>

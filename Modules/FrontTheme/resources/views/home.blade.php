@@ -262,7 +262,7 @@
                     @foreach($popularTools as $tool)
                     @php
                         $screenshotSrc = $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot)) : '';
-                        $gradientColors = ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'];
+                        $gradientColors = ['#0B7285','#064E5C','#E67E22','#D46A1F','#1A1D23','#2D3039'];
                         $gIdx = abs(crc32($tool->name)) % count($gradientColors);
                         $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source'];
                         $pricingColors = ['free' => '#059669', 'freemium' => '#B45309', 'paid' => '#B91C1C', 'open_source' => '#6366F1'];
@@ -316,7 +316,7 @@
                     @endphp
                     <div class="col-md-4 col-sm-6 col-xs-12">
                         <a href="{{ route('dictionary.show', $term->slug) }}" class="hp-card">
-                            <div class="hp-card-term-header" style="{{ $heroSrc ? '' : 'background: linear-gradient(135deg, #0B7285, #1a365d);' }}">
+                            <div class="hp-card-term-header" style="{{ $heroSrc ? '' : 'background: linear-gradient(135deg, var(--c-primary), var(--c-dark));' }}">
                                 @if($heroSrc)
                                     <img src="{{ $heroSrc }}" alt="{{ $term->name }}" loading="lazy">
                                 @else

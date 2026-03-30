@@ -10,7 +10,7 @@
     .news-card { border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; background: #fff; transition: transform 0.2s, box-shadow 0.2s; height: 100%; margin-bottom: 20px; display: flex !important; flex-direction: column !important; }
     .news-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: var(--c-primary); }
     .news-card-img { width: 100%; height: 180px; object-fit: cover; }
-    .news-card-gradient { width: 100%; height: 180px; background: linear-gradient(135deg, #0B7285, #1a365d); display: flex !important; align-items: center !important; justify-content: center !important; }
+    .news-card-gradient { width: 100%; height: 180px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex !important; align-items: center !important; justify-content: center !important; }
     .news-card-gradient span { font-size: 2rem; color: #fff; opacity: 0.7; }
     .news-card-body { padding: 16px; flex-grow: 1; display: flex !important; flex-direction: column !important; }
     .news-card-body h3 { margin: 0 0 8px; font-size: 1.1rem; font-weight: 700; font-family: var(--f-heading); }

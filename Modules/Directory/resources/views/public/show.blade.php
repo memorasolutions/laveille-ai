@@ -222,7 +222,7 @@
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     👋 {{ __('À propos de') }} {{ $tool->name }}
                 </h3>
-                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), #60a5fa); margin-bottom: 20px; border-radius: 2px;"></div>
+                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;">{!! $descHtmlWithIds !!}</div>
             </div>
 
@@ -232,7 +232,7 @@
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     🛠️ {{ __('Comment utiliser') }} {{ $tool->name }} ?
                 </h3>
-                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), #60a5fa); margin-bottom: 20px; border-radius: 2px;"></div>
+                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div style="background: #eff6ff; border-left: 5px solid #2563eb; padding: 22px; border-radius: 8px; color: #1e3a8a; font-size: 1.05rem; line-height: 1.7;">
                     {{ $tool->how_to_use }}
                 </div>
@@ -245,7 +245,7 @@
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     ✨ {{ __('Fonctionnalités clés') }}
                 </h3>
-                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, #8b5cf6, #a78bfa); margin-bottom: 20px; border-radius: 2px;"></div>
+                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="row" style="display: flex; flex-wrap: wrap;">
                     @foreach(array_filter(explode(',', $tool->core_features)) as $f)
                     <div class="col-md-4 col-sm-6" style="margin-bottom: 16px; display: flex;">
@@ -265,7 +265,7 @@
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     🚀 {{ __('Cas d\'usage') }}
                 </h3>
-                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, #f59e0b, #fbbf24); margin-bottom: 20px; border-radius: 2px;"></div>
+                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="row" style="display: flex; flex-wrap: wrap;">
                     @foreach(array_filter(explode(',', $tool->use_cases)) as $i => $u)
                     <div class="col-md-6" style="margin-bottom: 16px; display: flex;">
@@ -285,7 +285,7 @@
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     ⚖️ {{ __('Avantages et inconvénients') }}
                 </h3>
-                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, #10b981, #ef4444); margin-bottom: 20px; border-radius: 2px;"></div>
+                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="row" style="display: flex; flex-wrap: wrap;">
                     <div class="col-md-6" style="margin-bottom: 16px; display: flex;">
                         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 22px; width: 100%;">
@@ -323,7 +323,7 @@
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     🎯 {{ __('Public cible') }}
                 </h3>
-                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, #ec4899, #f472b6); margin-bottom: 20px; border-radius: 2px;"></div>
+                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                     @foreach($tool->target_audience as $a)
                     <span style="background: #e0e7ff; color: #3730a3; padding: 10px 20px; border-radius: 50px; font-weight: 600; font-size: 14px; border: 1px solid #c7d2fe;">{{ $a }}</span>
@@ -338,7 +338,7 @@
                 <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
                     ❓ {{ __('Questions fréquentes') }}
                 </h3>
-                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, #64748b, #94a3b8); margin-bottom: 20px; border-radius: 2px;"></div>
+                <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 @foreach($tool->faq as $q)
                 <details style="margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #fff;">
                     <summary style="background: #f8fafc; padding: 14px 18px; cursor: pointer; font-weight: 600; color: #334155; display: flex; align-items: center; justify-content: space-between;">
@@ -534,12 +534,12 @@
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;align-items:center;">
                 <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Type') }} :</span>
                 <template x-for="f in [{v:'',l:'{{ __("Tous") }}'},{v:'video',l:'{{ __("Vidéo") }}'},{v:'article',l:'{{ __("Article") }}'},{v:'tutorial',l:'{{ __("Tutoriel") }}'},{v:'documentation',l:'{{ __("Doc") }}'}]">
-                    <button @click="filterType = f.v" :style="filterType === f.v ? 'background:#0B7285;color:#fff' : 'background:#f1f5f9;color:#6E7687'" style="border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;" x-text="f.l"></button>
+                    <button @click="filterType = f.v" :style="'border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;' + (filterType === f.v ? 'background:var(--c-primary);color:#fff;' : 'background:var(--c-primary-light);color:var(--c-text-muted);')" x-text="f.l"></button>
                 </template>
                 <span style="color:#e5e7eb;margin:0 4px;">|</span>
                 <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Langue') }} :</span>
                 <template x-for="f in [{v:'',l:'{{ __("Toutes") }}'},{v:'fr',l:'FR'},{v:'en',l:'EN'}]">
-                    <button @click="filterLang = f.v" :style="filterLang === f.v ? 'background:#0B7285;color:#fff' : 'background:#f1f5f9;color:#6E7687'" style="border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;" x-text="f.l"></button>
+                    <button @click="filterLang = f.v" :style="'border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;' + (filterLang === f.v ? 'background:var(--c-primary);color:#fff;' : 'background:var(--c-primary-light);color:var(--c-text-muted);')" x-text="f.l"></button>
                 </template>
             </div>
             @endif

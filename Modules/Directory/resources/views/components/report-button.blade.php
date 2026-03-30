@@ -45,7 +45,7 @@
                         <button @click="if(!reason){return}; sending=true; fetch('{{ $reportUrl }}', {method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ $csrfToken }}','Accept':'application/json'},body:JSON.stringify({reason:reason,details:details})}).then(()=>{done=true;sending=false})"
                                 :disabled="!reason || sending"
                                 :style="(!reason || sending) && 'opacity:0.5;cursor:not-allowed'"
-                                style="padding:8px 16px;border:none;border-radius:8px;background:#ef4444;color:#fff;cursor:pointer;font-weight:600;">
+                                style="padding:8px 16px;border:none;border-radius:8px;background:#DC2626;color:#fff;cursor:pointer;font-weight:600;">
                             <span x-show="!sending">{{ __('Envoyer le signalement') }}</span>
                             <span x-show="sending">{{ __('Envoi...') }}</span>
                         </button>
