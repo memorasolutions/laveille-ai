@@ -13,6 +13,7 @@ class VoteController extends Controller
         'tool' => \Modules\Directory\Models\Tool::class,
         'resource' => \Modules\Directory\Models\ToolResource::class,
         'review' => \Modules\Directory\Models\ToolReview::class,
+        'discussion' => \Modules\Directory\Models\ToolDiscussion::class,
         'acronym' => \Modules\Acronyms\Models\Acronym::class,
     ];
 

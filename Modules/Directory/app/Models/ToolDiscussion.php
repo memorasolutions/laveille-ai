@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ToolDiscussion extends Model
 {
+    use \Modules\Voting\Traits\HasCommunityVotes;
+
     protected $table = 'directory_discussions';
 
     protected $fillable = [

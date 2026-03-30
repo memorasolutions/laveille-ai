@@ -391,8 +391,8 @@
                         @if($review->user)<a href="{{ route('directory.profile', $review->user->id) }}" style="font-weight: 600; color: #374151; font-size: 13px; text-decoration: none;">{{ $review->user->name }}</a><span style="font-size: 11px; color: #6B7280; margin-left: 4px;">{{ $review->user->getLevelBadge() }}</span>@else<span style="font-weight: 600; color: #374151; font-size: 13px;">{{ __('Anonyme') }}</span>@endif
                         <span style="color: #9ca3af; font-size: 12px;">{{ $review->created_at->diffForHumans() }}</span>
                     </div>
-                    <div style="display: flex; gap: 12px;" x-data="{ likes: {{ $review->upvotes }} }">
-                        <button @click="fetch('{{ route('directory.community.like', ['type' => 'review', 'id' => $review->id]) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d=>{likes=d.upvotes})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:600;font-size:13px;">❤️ <span x-text="likes"></span></button>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        @include('voting::components.vote-button', ['item' => $review, 'type' => 'review'])
                         <form action="{{ route('directory.community.report', ['type' => 'review', 'id' => $review->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;" title="{{ __('Signaler') }}">🚩</button></form>
                     </div>
                 </div>
@@ -463,8 +463,8 @@
                     <p style="color: #4b5563; line-height: 1.6; margin-bottom: 12px;">{!! nl2br(e($d->body)) !!}</p>
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 12px; font-size: 13px;">
                         <div style="color: #6b7280;">@if($d->user)<a href="{{ route('directory.profile', $d->user->id) }}" style="color: #374151; font-weight: 700; text-decoration: none;">{{ $d->user->name }}</a> <span style="font-size: 11px;">{{ $d->user->getLevelBadge() }}</span>@else<strong style="color: #374151;">{{ __('Anonyme') }}</strong>@endif · {{ $d->created_at->diffForHumans() }} · {{ $d->replies->count() }} {{ __('réponses') }}</div>
-                        <div style="display: flex; gap: 12px;" x-data="{ likes: {{ $d->upvotes }} }">
-                            <button @click="fetch('{{ route('directory.community.like', ['type' => 'discussion', 'id' => $d->id]) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d2=>{likes=d2.upvotes})" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:600;">❤️ <span x-text="likes"></span></button>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            @include('voting::components.vote-button', ['item' => $d, 'type' => 'discussion'])
                             <form action="{{ route('directory.community.report', ['type' => 'discussion', 'id' => $d->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;">🚩</button></form>
                         </div>
                     </div>
