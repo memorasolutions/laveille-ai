@@ -394,6 +394,7 @@
                     <div style="display: flex; gap: 12px; align-items: center;">
                         @include('voting::components.vote-button', ['item' => $review, 'type' => 'review'])
                         <form action="{{ route('directory.community.report', ['type' => 'review', 'id' => $review->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;" title="{{ __('Signaler') }}">🚩</button></form>
+                        @include('core::components.admin-actions', ['item' => $review, 'type' => 'reviews'])
                     </div>
                 </div>
             </div>
@@ -472,6 +473,7 @@
                         <div style="display: flex; gap: 12px; align-items: center;">
                             @include('voting::components.vote-button', ['item' => $d, 'type' => 'discussion'])
                             <form action="{{ route('directory.community.report', ['type' => 'discussion', 'id' => $d->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;">🚩</button></form>
+                            @include('core::components.admin-actions', ['item' => $d, 'type' => 'discussions'])
                         </div>
                     </div>
                 </div>
@@ -595,6 +597,7 @@
                             'reportUrl' => route('directory.community.report', ['type' => 'resource', 'id' => $res->id]),
                             'csrfToken' => csrf_token(),
                         ])
+                        @include('core::components.admin-actions', ['item' => $res, 'type' => 'resources'])
                     </div>
                 </div>
 

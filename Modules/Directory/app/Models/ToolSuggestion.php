@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class ToolSuggestion extends Model
 {
+    use \Modules\Core\Traits\HasModerationStatus;
+
     protected $table = 'directory_suggestions';
 
     protected $fillable = [

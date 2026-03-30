@@ -160,6 +160,11 @@
 
         @include('fronttheme::partials.newsletter-modal')
         @include('fronttheme::partials.auth-modal')
+        @auth
+            @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::find('Core')?->isEnabled())
+                @include('core::components.moderation-history-modal')
+            @endif
+        @endauth
     </div>
     <!-- end of page-wrapper -->
 

@@ -15,6 +15,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Acronym extends Model
 {
+    use \Modules\Core\Traits\HasModerationStatus;
     use HasSuggestions;
     use HasTranslations;
     use \Modules\Voting\Traits\HasCommunityVotes;

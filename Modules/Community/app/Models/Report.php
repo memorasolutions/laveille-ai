@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Report extends Model
 {
     use HasFactory;
+    use \Modules\Core\Traits\HasModerationStatus;
 
     protected $table = 'reports';
 

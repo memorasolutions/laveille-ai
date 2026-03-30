@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ToolResource extends Model
 {
+    use \Modules\Core\Traits\HasModerationStatus;
     use \Modules\Voting\Traits\HasCommunityVotes;
 
     protected $table = 'directory_resources';
