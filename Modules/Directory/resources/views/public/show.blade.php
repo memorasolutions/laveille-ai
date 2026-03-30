@@ -442,7 +442,13 @@
                 <form action="{{ route('directory.discussions.store', $tool->slug) }}" method="POST">
                     @csrf
                     <div class="form-group" style="margin-bottom: 12px;"><input type="text" name="title" class="form-control" placeholder="{{ __('Titre de la discussion') }}" style="border-radius: 8px; height: 42px; font-weight: 600;" required></div>
-                    <div class="form-group" style="margin-bottom: 12px;"><textarea name="body" class="form-control" rows="3" placeholder="{{ __('De quoi voulez-vous parler ?') }}" style="border-radius: 8px;" required></textarea></div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        @if(class_exists(\Modules\Editor\Providers\EditorServiceProvider::class))
+                            @include('editor::components.tiptap-light', ['name' => 'body', 'placeholder' => __('De quoi voulez-vous parler ?')])
+                        @else
+                            <textarea name="body" class="form-control" rows="3" placeholder="{{ __('De quoi voulez-vous parler ?') }}" style="border-radius: 8px;" required></textarea>
+                        @endif
+                    </div>
                     <div style="text-align: right;"><button type="submit" class="btn" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 8px 20px; font-weight: 600;">{{ __('Lancer la discussion') }}</button></div>
                 </form>
             </div>
@@ -460,7 +466,7 @@
             <div style="margin-bottom: 24px;">
                 <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                     @if($d->title)<h4 style="margin-top: 0; font-weight: 700; color: #1f2937; font-size: 17px;">{{ $d->title }}</h4>@endif
-                    <p style="color: #4b5563; line-height: 1.6; margin-bottom: 12px;">{!! nl2br(e($d->body)) !!}</p>
+                    <div style="color: #4b5563; line-height: 1.6; margin-bottom: 12px;" class="rt-description">{!! $d->body !!}</div>
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 12px; font-size: 13px;">
                         <div style="color: #6b7280;">@if($d->user)<a href="{{ route('directory.profile', $d->user->id) }}" style="color: #374151; font-weight: 700; text-decoration: none;">{{ $d->user->name }}</a> <span style="font-size: 11px;">{{ $d->user->getLevelBadge() }}</span>@else<strong style="color: #374151;">{{ __('Anonyme') }}</strong>@endif · {{ $d->created_at->diffForHumans() }} · {{ $d->replies->count() }} {{ __('réponses') }}</div>
                         <div style="display: flex; gap: 12px; align-items: center;">
@@ -477,7 +483,7 @@
                             <strong style="font-size: 13px; color: #374151;">{{ $r->user->name ?? __('Anonyme') }}</strong>
                             <span style="font-size: 12px; color: #9ca3af;">{{ $r->created_at->diffForHumans() }}</span>
                         </div>
-                        <p style="margin: 0; color: #4b5563; font-size: 14px;">{{ $r->body }}</p>
+                        <div style="margin: 0; color: #4b5563; font-size: 14px;" class="rt-description">{!! $r->body !!}</div>
                     </div>
                     @endforeach
                 </div>
@@ -488,7 +494,13 @@
                     <form x-show="replying" x-cloak action="{{ route('directory.discussions.store', $tool->slug) }}" method="POST" style="background: #fff; padding: 14px; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 8px;">
                         @csrf
                         <input type="hidden" name="parent_id" value="{{ $d->id }}">
-                        <div class="form-group" style="margin-bottom: 10px;"><textarea name="body" class="form-control" rows="2" placeholder="{{ __('Votre réponse...') }}" style="border-radius: 6px;" required></textarea></div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            @if(class_exists(\Modules\Editor\Providers\EditorServiceProvider::class))
+                                @include('editor::components.tiptap-light', ['name' => 'body', 'placeholder' => __('Votre réponse...')])
+                            @else
+                                <textarea name="body" class="form-control" rows="2" placeholder="{{ __('Votre réponse...') }}" style="border-radius: 6px;" required></textarea>
+                            @endif
+                        </div>
                         <div style="display: flex; justify-content: flex-end; gap: 8px;">
                             <button type="button" @click="replying = false" style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 13px;">{{ __('Annuler') }}</button>
                             <button type="submit" class="btn btn-sm" style="background: #2563eb; color: #fff; border-radius: 6px;">{{ __('Publier') }}</button>

@@ -405,6 +405,16 @@
     "src": "resources/js/nobleui/template.js",
     "isEntry": true
   },
+  "resources/js/tiptap-frontend.js": {
+    "file": "assets/tiptap-frontend-C1ng0Tt_.js",
+    "name": "tiptap-frontend",
+    "src": "resources/js/tiptap-frontend.js",
+    "isEntry": true,
+    "imports": [
+      "_editor-BR24yXgJ.js",
+      "_vendor-BxpX-Pxt.js"
+    ]
+  },
   "resources/sass/nobleui/app.scss": {
     "file": "assets/app-DS9wlBqe.css",
     "src": "resources/sass/nobleui/app.scss",

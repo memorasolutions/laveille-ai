@@ -1,6 +1,0 @@
-/* NobleUI splash screen */
-.splash-screen{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#fff;transition:opacity .4s}
-.splash-screen .logo{width:80px;height:80px;background:url('/favicon.ico') center/contain no-repeat}
-.splash-screen .spinner{position:absolute;bottom:30%;width:36px;height:36px;border:3px solid #e9ecef;border-top-color:#6571ff;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-body.loaded .splash-screen{opacity:0;pointer-events:none}

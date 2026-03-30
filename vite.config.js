@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/nobleui/template.js',
                 'resources/js/nobleui/color-modes.js',
+                'resources/js/tiptap-frontend.js',
             ],
             refresh: true,
         }),

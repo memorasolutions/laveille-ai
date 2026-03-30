@@ -83,12 +83,16 @@ class CommunityController extends Controller
         $isReply = ! empty($validated['parent_id']);
         $autoApprove = $isReply ? true : $this->reputation->shouldAutoApprove($user, 'discussion');
 
+        $sanitizedBody = class_exists(\Mews\Purifier\Facades\Purifier::class)
+            ? \Mews\Purifier\Facades\Purifier::clean($validated['body'])
+            : strip_tags($validated['body']);
+
         ToolDiscussion::create([
             'user_id' => $user->id,
             'directory_tool_id' => $tool->id,
             'parent_id' => $validated['parent_id'] ?? null,
             'title' => $validated['title'] ?? null,
-            'body' => $validated['body'],
+            'body' => $sanitizedBody,
             'is_approved' => $autoApprove,
         ]);
 
