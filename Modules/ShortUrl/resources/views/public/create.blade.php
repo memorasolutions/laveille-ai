@@ -152,8 +152,8 @@
                 onfocus="this.style.borderColor='var(--c-primary, #0B7285)'"
                 onblur="this.style.borderColor='#D1D5DB'">
             <button @click="shorten()" :disabled="loading"
-                style="height: 52px; padding: 0 28px; background: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 12px; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap; transition: background .2s;"
-                onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+                style="height: 52px; padding: 0 28px; background: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 0.5rem; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap; transition: background .2s;"
+                onmouseover="this.style.background='var(--c-primary-hover, #064E5C)'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
                 <span x-show="!loading">⚡ {{ __('Raccourcir') }}</span>
                 <span x-show="loading" x-cloak>⏳</span>
             </button>

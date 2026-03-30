@@ -420,7 +420,7 @@
                         <div class="col-md-6"><label style="font-weight: 600; color: #b91c1c; margin-bottom: 6px; display: block;">❌ {{ __('Points faibles') }}</label><input type="text" name="cons" class="form-control" style="border-radius: 8px; height: 40px;" placeholder="{{ __('Cher, complexe...') }}"></div>
                     </div>
                     <div class="form-group" style="margin-bottom: 18px;"><label style="font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Votre expérience') }}</label><textarea name="body" class="form-control" rows="3" style="border-radius: 8px;" placeholder="{{ __('Décrivez votre expérience...') }}" required></textarea></div>
-                    <button type="submit" class="btn" style="background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 600;" :disabled="rating === 0">{{ __('Publier mon avis') }}</button>
+                    <button type="submit" class="btn" style="background: var(--c-primary); color: #fff; border: none; border-radius: 0.5rem; padding: 10px 24px; font-weight: 600;" :disabled="rating === 0">{{ __('Publier mon avis') }}</button>
                 </form>
             </div>
             @else
@@ -449,7 +449,7 @@
                             <textarea name="body" class="form-control" rows="3" placeholder="{{ __('De quoi voulez-vous parler ?') }}" style="border-radius: 8px;" required></textarea>
                         @endif
                     </div>
-                    <div style="text-align: right;"><button type="submit" class="btn" style="background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 8px 20px; font-weight: 600;">{{ __('Lancer la discussion') }}</button></div>
+                    <div style="text-align: right;"><button type="submit" class="btn" style="background: var(--c-primary); color: #fff; border: none; border-radius: 0.5rem; padding: 8px 20px; font-weight: 600;">{{ __('Lancer la discussion') }}</button></div>
                 </form>
             </div>
             @endauth

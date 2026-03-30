@@ -100,14 +100,14 @@
         <p style="color:#6b7280;margin-bottom:16px;font-size:14px;">{{ __('Plus on est nombreux, plus le classement devient intéressant.') }}</p>
         <div style="display:flex!important;justify-content:center!important;flex-wrap:wrap!important;gap:10px;">
             <button @click="navigator.clipboard.writeText('{{ url('/annuaire/classement') }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                :style="copied ? 'background:#10b981;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;' : 'background:#f3f4f6;color:var(--c-dark);border:none;padding:10px 20px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;'">
+                :style="copied ? 'background:#059669;color:#fff;border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;' : 'background:#f3f4f6;color:var(--c-dark);border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;'">
                 <span x-show="!copied"><i class="fa fa-link"></i> {{ __('Copier le lien') }}</span>
                 <span x-show="copied" x-cloak><i class="fa fa-check"></i> {{ __('Copié !') }}</span>
             </button>
-            <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url('/annuaire/classement')) }}" target="_blank" rel="noopener" style="background:#1877f2;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;">
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url('/annuaire/classement')) }}" target="_blank" rel="noopener" style="background:#1877f2;color:#fff;border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;">
                 <i class="fa fa-facebook"></i> Facebook
             </a>
-            <a href="https://m.me/LaVeilleDeStef" target="_blank" rel="noopener" style="background:#0084FF;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;">
+            <a href="{{ \Modules\Settings\Facades\Settings::get('social.messenger_url', 'https://m.me/LaVeilleDeStef') }}" target="_blank" rel="noopener" style="background:#0084FF;color:#fff;border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;">
                 <i class="fa fa-comment"></i> Messenger
             </a>
         </div>
@@ -115,7 +115,7 @@
 
     {{-- CTA --}}
     <div class="text-center" style="margin: 40px 0;">
-        <a href="{{ route('directory.index') }}" style="display: inline-block; background: var(--c-primary); color: #fff; padding: 14px 36px; border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 16px; box-shadow: 0 4px 12px rgba(11,114,133,0.15); transition: transform .2s, background .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='#096474'" onmouseout="this.style.transform='none';this.style.background='var(--c-primary)'">
+        <a href="{{ route('directory.index') }}" style="display: inline-block; background: var(--c-primary); color: #fff; padding: 14px 36px; border-radius: 0.5rem; font-weight: 700; text-decoration: none; font-size: 16px; transition: transform .2s, background .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='var(--c-primary-hover)'" onmouseout="this.style.transform='none';this.style.background='var(--c-primary)'">
             🚀 {{ __('Commencez à contribuer') }}
         </a>
     </div>
