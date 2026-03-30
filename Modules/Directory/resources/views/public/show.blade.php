@@ -557,7 +557,7 @@
                 $thumbUrl = $isYt ? "https://img.youtube.com/vi/{$res->video_id}/maxresdefault.jpg" : ($res->thumbnail ?? null);
                 $durationFormatted = $res->duration_seconds ? gmdate($res->duration_seconds >= 3600 ? 'G:i:s' : 'i:s', $res->duration_seconds) : null;
             @endphp
-            <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $res->type }}') && (filterLang === '' || filterLang === '{{ $res->language }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
+            <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $res->type }}') && (filterLang === '' || filterLang === '{{ $res->language }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;position:relative;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
 
                 {{-- Carte compacte --}}
                 <div @click="expanded = !expanded" style="display:flex;gap:14px;padding:14px;cursor:pointer;align-items:center;">
