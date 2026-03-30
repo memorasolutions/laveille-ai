@@ -47,6 +47,15 @@ class CommunityController extends Controller
         ]);
 
         $user = Auth::user();
+
+        // Anti-spam : vérification qualité du contenu
+        if (class_exists(\Modules\Core\Services\ContentQualityService::class)) {
+            $quality = (new \Modules\Core\Services\ContentQualityService)->check($validated['body'], $user->id);
+            if (! $quality->passed) {
+                return back()->withErrors(['body' => implode(' ', $quality->reasons)])->withInput();
+            }
+        }
+
         $autoApprove = $this->reputation->shouldAutoApprove($user, 'review');
 
         ToolReview::create([
@@ -80,6 +89,15 @@ class CommunityController extends Controller
         ]);
 
         $user = Auth::user();
+
+        // Anti-spam : vérification qualité du contenu
+        if (class_exists(\Modules\Core\Services\ContentQualityService::class)) {
+            $quality = (new \Modules\Core\Services\ContentQualityService)->check($validated['body'], $user->id);
+            if (! $quality->passed) {
+                return back()->withErrors(['body' => implode(' ', $quality->reasons)])->withInput();
+            }
+        }
+
         $isReply = ! empty($validated['parent_id']);
         $autoApprove = $isReply ? true : $this->reputation->shouldAutoApprove($user, 'discussion');
 
