@@ -280,13 +280,11 @@ class CommunityController extends Controller
                 ->get("https://www.youtube.com/watch?v={$videoId}");
             $html = $ytResponse->successful() ? $ytResponse->body() : '';
             if ($html) {
-                // Titre depuis JSON embarqué (ytInitialPlayerResponse)
-                if (preg_match('/"title"\s*:\s*"([^"]{2,200})"/', $html, $tm)) {
-                    $candidate = html_entity_decode($tm[1], ENT_QUOTES, 'UTF-8');
-                    // Ignorer les titres génériques YouTube
-                    if (! in_array(strtolower($candidate), ['youtube', 'watch', ''])) {
-                        $scrapedTitle = $candidate;
-                    }
+                // Titre depuis videoDetails dans ytInitialPlayerResponse
+                if (preg_match('/"videoDetails":\s*\{[^}]*"title"\s*:\s*"([^"]{2,300})"/', $html, $tm)) {
+                    $scrapedTitle = html_entity_decode(str_replace(['\\u0026', '\\u0027'], ['&', "'"], $tm[1]), ENT_QUOTES, 'UTF-8');
+                } elseif (preg_match('/<meta\s+name="title"\s+content="([^"]+)"/', $html, $tm)) {
+                    $scrapedTitle = html_entity_decode($tm[1], ENT_QUOTES, 'UTF-8');
                 }
                 // Auteur depuis ownerChannelName ou author
                 if (preg_match('/"ownerChannelName"\s*:\s*"([^"]+)"/', $html, $am)) {
