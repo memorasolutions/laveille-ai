@@ -510,12 +510,25 @@
         </div>
 
         {{-- TAB: Tutoriels --}}
-        <div class="rt-panel" x-show="tab==='resources'" x-cloak style="padding: 24px;">
+        <div class="rt-panel" x-show="tab==='resources'" x-cloak style="padding: 24px;" x-data="{ filterType: '', filterLang: '' }">
             @if($resources->isEmpty())
             <div style="text-align: center; padding: 50px 20px; background: #f9fafb; border-radius: 16px; border: 1px dashed #d1d5db; margin-bottom: 24px;">
                 <div style="font-size: 48px; margin-bottom: 12px;">📚</div>
                 <h4 style="font-weight: 700; color: #111827; margin: 0 0 6px;">{{ __('Aucun tutoriel pour le moment') }}</h4>
                 <p style="color: #6b7280; margin: 0;">{{ __('Connaissez-vous un bon tutoriel ? Partagez-le !') }}</p>
+            </div>
+            @else
+            {{-- Filtres type + langue --}}
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;align-items:center;">
+                <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Type') }} :</span>
+                <template x-for="f in [{v:'',l:'{{ __("Tous") }}'},{v:'video',l:'{{ __("Vidéo") }}'},{v:'article',l:'{{ __("Article") }}'},{v:'tutorial',l:'{{ __("Tutoriel") }}'},{v:'documentation',l:'{{ __("Doc") }}'}]">
+                    <button @click="filterType = f.v" :style="filterType === f.v ? 'background:#0B7285;color:#fff' : 'background:#f1f5f9;color:#6E7687'" style="border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;" x-text="f.l"></button>
+                </template>
+                <span style="color:#e5e7eb;margin:0 4px;">|</span>
+                <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Langue') }} :</span>
+                <template x-for="f in [{v:'',l:'{{ __("Toutes") }}'},{v:'fr',l:'FR'},{v:'en',l:'EN'}]">
+                    <button @click="filterLang = f.v" :style="filterLang === f.v ? 'background:#0B7285;color:#fff' : 'background:#f1f5f9;color:#6E7687'" style="border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;" x-text="f.l"></button>
+                </template>
             </div>
             @endif
 
@@ -525,7 +538,7 @@
                 $thumbUrl = $isYt ? "https://img.youtube.com/vi/{$res->video_id}/maxresdefault.jpg" : ($res->thumbnail ?? null);
                 $durationFormatted = $res->duration_seconds ? gmdate($res->duration_seconds >= 3600 ? 'G:i:s' : 'i:s', $res->duration_seconds) : null;
             @endphp
-            <div data-mod-item x-data="{ expanded: false }" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
+            <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $res->type }}') && (filterLang === '' || filterLang === '{{ $res->language }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
 
                 {{-- Carte compacte --}}
                 <div @click="expanded = !expanded" style="display:flex;gap:14px;padding:14px;cursor:pointer;align-items:center;">
