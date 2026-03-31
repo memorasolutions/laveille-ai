@@ -106,8 +106,8 @@
                                 <p class="text-muted mt-1" x-show="exclusions.length === 0" style="font-size: 0.8rem;">{{ __('Aucune exclusion définie.') }}</p>
                             </div>
 
-                            {{-- Presets --}}
-                            <div class="mb-4">
+                            {{-- Presets (localStorage uniquement pour visiteurs, masqué pour connectés qui utilisent la barre en haut) --}}
+                            <div class="mb-4" x-show="!isAuthenticated">
                                 <label class="form-label fw-medium">💾 {{ __('Presets sauvegardés') }}</label>
                                 <div class="d-flex gap-2 mb-2">
                                     <input type="text" class="form-control form-control-sm" x-model="presetName" aria-label="Nom du preset" placeholder="{{ __('Nom du preset...') }}">
