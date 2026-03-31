@@ -18,6 +18,9 @@
 @push('styles')
 <style>
     .rt-page { padding-bottom: 60px; }
+    .disc-card { background: #f8fafb; border: 1px solid #d1d5db; }
+    .disc-card:hover { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .disc-card-open { background: #fff !important; border-color: var(--c-primary) !important; box-shadow: 0 2px 12px rgba(11,114,133,0.12) !important; }
     .rt-back { display: inline-flex; align-items: center; margin: 16px 0; color: var(--c-primary); font-weight: 600; text-decoration: none; padding: 6px 0; min-height: 24px; }
     .rt-back:hover { transform: translateX(-3px); color: var(--c-primary); text-decoration: none; }
     .rt-back svg { margin-right: 8px; width: 18px; height: 18px; }
@@ -476,9 +479,8 @@
             @foreach($discussions as $d)
             <div x-data="{ open: false, replying: false }" style="margin-bottom: 10px;">
                 {{-- Carte compacte (toujours visible) --}}
-                <div @click="open = !open" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.15s;"
-                     :style="open ? 'border-color: var(--c-primary); box-shadow: 0 2px 8px rgba(11,114,133,0.1);' : ''"
-                     onmouseover="if(!this.__x) this.style.background='#f9fafb'" onmouseout="if(!this.__x) this.style.background='#fff'">
+                <div @click="open = !open" class="disc-card" style="border-left: 3px solid var(--c-primary); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.15s;"
+                     :class="open ? 'disc-card-open' : ''"
                     <div style="display: flex; align-items: center; gap: 12px;">
                         {{-- Avatar --}}
                         @if($d->user)
