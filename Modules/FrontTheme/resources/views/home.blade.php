@@ -4,7 +4,27 @@
 @section('title', config('app.name') . ' - ' . __('Veille IA, technologies et transformation numerique au Quebec'))
 @section('meta_description', __('Veille technologique collaborative sur l\'intelligence artificielle, les outils IA et la transformation numerique au Quebec. Articles, glossaire, repertoire et communaute.'))
 
+@push('head')
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebSite',
+    'name' => config('app.name'),
+    'url' => config('app.url'),
+    'description' => __('Veille technologique collaborative sur l\'intelligence artificielle et la transformation numérique au Québec.'),
+    'inLanguage' => 'fr-CA',
+    'publisher' => [
+        '@type' => 'Organization',
+        'name' => config('app.name'),
+        'url' => config('app.url'),
+        'logo' => ['@type' => 'ImageObject', 'url' => asset('images/favicon.png')],
+    ],
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+</script>
+@endpush
+
 @section('content')
+        <h1 class="sr-only">{{ config('app.name') }} — {{ __('Veille IA, technologies et transformation numérique au Québec') }}</h1>
         <!-- start of wpo-blog-hero -->
         <div class="wpo-blog-hero-area">
             <div class="container">
@@ -17,13 +37,13 @@
                                 @php $hero1 = $articles[0]; @endphp
                                 <div class="grid">
                                     <div class="img-holder">
-                                        <img src="{{ $hero1->featured_image ? asset($hero1->featured_image) : fronttheme_asset('images/hero/img-1.jpg') }}" alt class="img img-responsive">
+                                        <img src="{{ $hero1->featured_image ? asset($hero1->featured_image) : fronttheme_asset('images/hero/img-1.jpg') }}" alt="{{ $hero1->title }}" class="img img-responsive">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero1->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->title }}</a></h2>
                                             <p>{{ Str::limit($hero1->excerpt ?? strip_tags($hero1->content), 120) }}</p>
                                             <ul>
-                                                <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;"></li>
+                                                <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;"></li>
                                                 <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->getAuthorName() }}</a></li>
                                                 <li>{{ $hero1->published_at?->format('d M Y') }}</li>
                                             </ul>
@@ -35,7 +55,7 @@
                                 @php $hero2 = $articles[1]; @endphp
                                 <div class="grid">
                                     <div class="img-holder">
-                                        <img src="{{ $hero2->featured_image ? asset($hero2->featured_image) : fronttheme_asset('images/hero/img-2.jpg') }}" alt class="img img-responsive">
+                                        <img src="{{ $hero2->featured_image ? asset($hero2->featured_image) : fronttheme_asset('images/hero/img-2.jpg') }}" alt="{{ $hero2->title }}" class="img img-responsive">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero2->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->title }}</a></h2>
@@ -51,7 +71,7 @@
                                 <div class="grid s2">
                                     @php $hero3 = $articles[2]; @endphp
                                     <div class="img-holder">
-                                        <img src="{{ $hero3->featured_image ? asset($hero3->featured_image) : fronttheme_asset('images/hero/img-3.jpg') }}" alt class="img img-responsive">
+                                        <img src="{{ $hero3->featured_image ? asset($hero3->featured_image) : fronttheme_asset('images/hero/img-3.jpg') }}" alt="{{ $hero3->title }}" class="img img-responsive">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero3->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->title }}</a></h2>
@@ -64,7 +84,7 @@
                                     @if($articles->count() > 3)
                                     @php $hero4 = $articles[3]; @endphp
                                     <div class="img-holder">
-                                        <img src="{{ $hero4->featured_image ? asset($hero4->featured_image) : fronttheme_asset('images/hero/img-4.jpg') }}" alt class="img img-responsive">
+                                        <img src="{{ $hero4->featured_image ? asset($hero4->featured_image) : fronttheme_asset('images/hero/img-4.jpg') }}" alt="{{ $hero4->title }}" class="img img-responsive">
                                         <div class="wpo-blog-content">
                                             <div class="thumb">{{ $hero4->blogCategory->name ?? __('Général') }}</div>
                                             <h2><a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->title }}</a></h2>
@@ -94,7 +114,7 @@
                         @foreach($articles->take((int) \Modules\Settings\Facades\Settings::get('fronttheme.home_breaking_news_limit', 9)) as $breaking)
                         <div class="wpo-breacking-item{{ $loop->first ? ' s1' : '' }}">
                             <div class="wpo-breacking-img">
-                                <img src="{{ $breaking->featured_image ? asset($breaking->featured_image) : fronttheme_asset('images/breaking-news/img-' . (($loop->index % 3) + 1) . '.jpg') }}" alt="" loading="lazy">
+                                <img src="{{ $breaking->featured_image ? asset($breaking->featured_image) : fronttheme_asset('images/breaking-news/img-' . (($loop->index % 3) + 1) . '.jpg') }}" alt="{{ $breaking->title }}" loading="lazy">
                             </div>
                             <div class="wpo-breacking-text">
                                 <span>{{ $breaking->published_at?->format('d M Y') }}</span>
@@ -124,13 +144,13 @@
                                     <div class="col col-lg-6 col-md-6 col-12">
                                         <div class="wpo-blog-item">
                                             <div class="wpo-blog-img">
-                                                <img src="{{ $highlight->featured_image ? asset($highlight->featured_image) : fronttheme_asset('images/blog/img-' . ($loop->iteration) . '.jpg') }}" alt="" loading="lazy">
+                                                <img src="{{ $highlight->featured_image ? asset($highlight->featured_image) : fronttheme_asset('images/blog/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $highlight->title }}" loading="lazy">
                                                 <div class="thumb">{{ $highlight->blogCategory->name ?? __('Général') }}</div>
                                             </div>
                                             <div class="wpo-blog-content">
                                                 <h2><a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->title }}</a></h2>
                                                 <ul>
-                                                    <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;" loading="lazy"></li>
+                                                    <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;" loading="lazy"></li>
                                                     <li>{{ __('Par') }} <a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->getAuthorName() }}</a></li>
                                                     <li>{{ $highlight->published_at?->format('d M Y') }}</li>
                                                 </ul>
@@ -161,9 +181,9 @@
                                     <div class="post">
                                         <div class="img-holder">
                                             @if($recent->featured_image)
-                                                <img src="{{ asset($recent->featured_image) }}" alt>
+                                                <img src="{{ asset($recent->featured_image) }}" alt="{{ $recent->title }}">
                                             @else
-                                                <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt>
+                                                <img src="{{ fronttheme_asset('images/recent-posts/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $recent->title }}">
                                             @endif
                                         </div>
                                         <div class="details">
@@ -195,13 +215,13 @@
                                 <div class="col col-xl-3 col-lg-6 col-md-6 col-12">
                                     <div class="wpo-blog-item">
                                         <div class="wpo-blog-img">
-                                            <img src="{{ $sponsored->featured_image ? asset($sponsored->featured_image) : fronttheme_asset('images/sponsord/img-' . ($loop->iteration) . '.jpg') }}" alt="">
+                                            <img src="{{ $sponsored->featured_image ? asset($sponsored->featured_image) : fronttheme_asset('images/sponsord/img-' . ($loop->iteration) . '.jpg') }}" alt="{{ $sponsored->title }}">
                                             <div class="thumb">{{ $sponsored->blogCategory->name ?? __('Général') }}</div>
                                         </div>
                                         <div class="wpo-blog-content">
                                             <h2><a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->title }}</a></h2>
                                             <ul>
-                                                <li><img src="{{ asset('images/logo.webp') }}" alt="" style="width:30px;height:30px;border-radius:50%;"></li>
+                                                <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;"></li>
                                                 <li>{{ __('Par') }} <a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->getAuthorName() }}</a></li>
                                                 <li>{{ $sponsored->published_at?->format('d M Y') }}</li>
                                             </ul>
