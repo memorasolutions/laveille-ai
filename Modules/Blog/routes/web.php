@@ -25,11 +25,10 @@ Route::get('oembed', OEmbedController::class)->middleware('web')->name('oembed')
 Route::get('_fix-img-404-x9k2m', function (\Illuminate\Http\Request $request) {
     abort_unless($request->query('key') === 'f1x_s3cr3t_2026', 403);
     $hash = '05eebcbbd8004c6d9144c888117cbeb4';
-    $imgTag = '<img src="/storage/blog/content/' . $hash . '.jpg" alt="Nexus Neural" style="width:200px;height:auto;border-radius:0.5rem;" loading="lazy">';
     $found = \Illuminate\Support\Facades\DB::table('ads_placements')->where('ad_code', 'like', "%{$hash}%")->get(['id', 'key', 'ad_code']);
     $results = ['found' => $found->count()];
     foreach ($found as $row) {
-        $clean = str_replace($imgTag, '', $row->ad_code);
+        $clean = preg_replace('/<img[^>]*' . $hash . '[^>]*>/', '', $row->ad_code);
         \Illuminate\Support\Facades\DB::table('ads_placements')->where('id', $row->id)->update(['ad_code' => $clean]);
         $results['fixed'][] = $row->key;
     }
