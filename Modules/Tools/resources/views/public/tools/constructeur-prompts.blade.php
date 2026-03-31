@@ -309,10 +309,22 @@
                             <input type="text" class="form-control form-control-sm" x-model="saveName" placeholder="{{ __('Titre pour retrouver ce prompt (optionnel)') }}" aria-label="{{ __('Titre du prompt') }}">
                         </div>
                         <div class="d-flex gap-2 mb-4 flex-wrap">
-                            <button class="btn flex-fill" @click="copy()" :disabled="!isValid" :style="isValid ? 'background: var(--c-accent); color: #fff;' : 'background: #e9ecef; color: #adb5bd; cursor: not-allowed;'" style="border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;"
-                                    x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
+                            <button class="btn flex-fill" @click="copy()" :disabled="!isValid || saving" :style="isValid ? 'background: var(--c-accent); color: #fff;' : 'background: #e9ecef; color: #adb5bd; cursor: not-allowed;'" style="border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;"
+                                    x-text="saving ? '{{ __('Sauvegarde...') }}' : (copied ? '{{ __('Copié !') }}' : '{{ __('Copier et sauvegarder') }}')"></button>
                             <button class="btn btn-outline-secondary" @click="exportPrompt()" :disabled="!isValid" style="border-radius: var(--r-btn);">{{ __('Exporter .txt') }}</button>
                         </div>
+                        <template x-if="!isAuthenticated">
+                            <div class="alert small p-2 mb-2" style="background: rgba(11,114,133,0.08); border: 1px solid rgba(11,114,133,0.2); border-radius: 8px; font-size: 0.85rem;">
+                                <strong style="color: var(--c-primary);">{{ __('Connectez-vous') }}</strong> {{ __('pour sauvegarder vos prompts et les retrouver sur tous vos appareils.') }}
+                                <button class="btn btn-sm ms-1" @click="$dispatch('open-auth-modal')" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 0.75rem; padding: 2px 10px;">{{ __('Se connecter') }}</button>
+                            </div>
+                        </template>
+                        <template x-if="isAuthenticated && hasLocalData">
+                            <div class="alert alert-info small p-2 mb-2" style="font-size: 0.85rem; border-radius: 8px;">
+                                {{ __('Des prompts de votre navigateur ont été trouvés.') }}
+                                <button class="btn btn-sm btn-primary ms-1" @click="importLocalStorage()" style="font-size: 0.75rem; padding: 2px 10px; border-radius: 6px;">{{ __('Importer dans mon compte') }}</button>
+                            </div>
+                        </template>
 
                         {{-- Historique --}}
                         <template x-if="history.length > 0">
@@ -329,7 +341,7 @@
                                         </div>
                                         <div class="d-flex gap-1 ms-2">
                                             <button class="btn btn-sm btn-outline-secondary" @click="copyText(h.prompt)" style="font-size: 0.7rem;">{{ __('Copier') }}</button>
-                                            <button class="btn btn-sm btn-outline-danger" @click.stop="history.splice(i, 1); localStorage.setItem('pb_history', JSON.stringify(history))" style="font-size: 0.6rem; padding: 1px 5px;">✕</button>
+                                            <button class="btn btn-sm btn-outline-danger" @click.stop="deletePrompt(h.id, i)" style="font-size: 0.6rem; padding: 1px 5px;">✕</button>
                                         </div>
                                     </div>
                                 </template>
@@ -457,6 +469,9 @@ document.addEventListener('alpine:init', function() {
             copied: false,
             showValidation: false,
             saveName: '',
+            saving: false,
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            hasLocalData: false,
             history: [],
 
             get isValid() {
@@ -568,8 +583,29 @@ document.addEventListener('alpine:init', function() {
                 return sections.join('\n\n');
             },
 
+            get wizardParams() {
+                return { personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat };
+            },
+            _headers: function() {
+                return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
+            },
             init: function() {
-                try { this.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { this.history = []; }
+                var self = this;
+                if (this.isAuthenticated) {
+                    fetch('/api/prompts', { headers: this._headers() })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            self.history = (data.data || []).map(function(item) {
+                                return { id: item.id, prompt: item.prompt_text, name: item.name, date: new Date(item.created_at).toLocaleString('fr-CA'), params: item.params };
+                            });
+                            if (localStorage.getItem('pb_history')) self.hasLocalData = true;
+                        })
+                        .catch(function() {
+                            try { self.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { self.history = []; }
+                        });
+                } else {
+                    try { this.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { this.history = []; }
+                }
             },
 
             nextStep: function() {
@@ -598,20 +634,61 @@ document.addEventListener('alpine:init', function() {
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
                 this.addToHistory();
-                localStorage.setItem('pb_last', JSON.stringify({ personaPreset: this.personaPreset, personaCustom: this.personaCustom, verb: this.verb, taskObject: this.taskObject }));
             },
 
             copyText: function(text) { navigator.clipboard.writeText(text); },
 
             addToHistory: function() {
+                if (this.saving) return;
+                var self = this;
                 var title = this.saveName.trim() || this.personaText || 'Prompt';
-                this.history.unshift({ prompt: this.prompt, name: title, date: new Date().toLocaleString('fr-CA') });
-                this.saveName = '';
-                if (this.history.length > 10) this.history = this.history.slice(0, 10);
-                localStorage.setItem('pb_history', JSON.stringify(this.history));
+                if (this.isAuthenticated) {
+                    this.saving = true;
+                    fetch('/api/prompts', {
+                        method: 'POST', headers: this._headers(),
+                        body: JSON.stringify({ name: title, prompt_text: this.prompt, params: this.wizardParams })
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        self.history.unshift({ id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
+                        self.saveName = '';
+                        self.saving = false;
+                    })
+                    .catch(function() { self.saving = false; });
+                } else {
+                    this.$dispatch('open-auth-modal');
+                }
             },
-
-            clearHistory: function() { this.history = []; localStorage.removeItem('pb_history'); },
+            deletePrompt: function(id, index) {
+                var self = this;
+                if (this.isAuthenticated && id) {
+                    fetch('/api/prompts/' + id, { method: 'DELETE', headers: this._headers() })
+                        .then(function() { self.history.splice(index, 1); })
+                        .catch(console.error);
+                } else {
+                    this.history.splice(index, 1);
+                    localStorage.setItem('pb_history', JSON.stringify(this.history));
+                }
+            },
+            importLocalStorage: function() {
+                var self = this;
+                var local = [];
+                try { local = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { return; }
+                var promises = local.map(function(item) {
+                    return fetch('/api/prompts', {
+                        method: 'POST', headers: self._headers(),
+                        body: JSON.stringify({ name: item.name || 'Prompt importé', prompt_text: item.prompt, params: {} })
+                    }).then(function(r) { return r.json(); });
+                });
+                Promise.all(promises).then(function(results) {
+                    results.forEach(function(data) {
+                        self.history.push({ id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
+                    });
+                    localStorage.removeItem('pb_history');
+                    self.hasLocalData = false;
+                });
+            },
+            clearHistory: function() { this.history = []; if (!this.isAuthenticated) localStorage.removeItem('pb_history'); },
 
             exportPrompt: function() {
                 var blob = new Blob([this.prompt], { type: 'text/plain' });

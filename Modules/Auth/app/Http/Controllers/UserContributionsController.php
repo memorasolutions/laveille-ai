@@ -30,6 +30,10 @@ class UserContributionsController extends Controller
             ? \Modules\Directory\Models\ToolResource::where('user_id', $user->id)->with('tool')->latest()->get()
             : collect();
 
-        return view('auth::contributions.index', compact('user', 'suggestions', 'votes', 'resources'));
+        $savedPrompts = class_exists(\Modules\Tools\Models\SavedPrompt::class)
+            ? \Modules\Tools\Models\SavedPrompt::forUser($user->id)->latest()->get()
+            : collect();
+
+        return view('auth::contributions.index', compact('user', 'suggestions', 'votes', 'resources', 'savedPrompts'));
     }
 }

@@ -12,7 +12,7 @@
 
 {{-- Cartes statistiques --}}
 <div class="row" style="margin-bottom: 20px;">
-    <div class="col-sm-4" style="margin-bottom: 15px;">
+    <div class="col-sm-3" style="margin-bottom: 15px;">
         <div class="user-stat-card">
             <div>
                 <span style="font-size: 1.5rem;">💡</span>
@@ -21,7 +21,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-4" style="margin-bottom: 15px;">
+    <div class="col-sm-3" style="margin-bottom: 15px;">
         <div class="user-stat-card">
             <div>
                 <span style="font-size: 1.5rem;">👍</span>
@@ -30,12 +30,21 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-4" style="margin-bottom: 15px;">
+    <div class="col-sm-3" style="margin-bottom: 15px;">
         <div class="user-stat-card">
             <div>
                 <span style="font-size: 1.5rem;">📚</span>
                 <h3 style="margin: 5px 0 0;">{{ $resources->count() }}</h3>
                 <small>{{ __('Ressources') }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3" style="margin-bottom: 15px;">
+        <div class="user-stat-card">
+            <div>
+                <span style="font-size: 1.5rem;">✨</span>
+                <h3 style="margin: 5px 0 0;">{{ $savedPrompts->count() }}</h3>
+                <small>{{ __('Prompts') }}</small>
             </div>
         </div>
     </div>
@@ -71,6 +80,15 @@
             📚 {{ __('Ressources') }}
             @if($resources->count() > 0)
                 <span style="background: linear-gradient(135deg, #0891B2, #0e7490); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $resources->count() }}</span>
+            @endif
+        </button>
+        <button @click="tab = 'prompts'" class="btn"
+                :style="tab === 'prompts'
+                    ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
+                    : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
+            ✨ {{ __('Prompts') }}
+            @if($savedPrompts->count() > 0)
+                <span style="background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedPrompts->count() }}</span>
             @endif
         </button>
     </div>
@@ -222,6 +240,44 @@
                             <span style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #92400e; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">{{ __('En attente') }}</span>
                         @endif
                         <div style="font-size: 11px; color: var(--c-text-muted); margin-top: 4px;">{{ $resource->created_at->format('d/m/Y') }}</div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
+    {{-- Onglet prompts sauvegardés --}}
+    <div x-show="tab === 'prompts'" x-transition x-cloak>
+        @if($savedPrompts->isEmpty())
+            <div style="text-align: center; padding: 60px 20px; color: var(--c-text-muted);">
+                <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, #F3F4F6, #E5E7EB); border-radius: 20px; display: flex !important; align-items: center !important; justify-content: center !important;">
+                    <span style="font-size: 2rem;">✨</span>
+                </div>
+                <h4 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 8px;">{{ __('Aucun prompt sauvegarde') }}</h4>
+                <p style="margin: 0 0 16px; font-size: 14px;">{{ __('Utilisez le constructeur de prompts pour creer et sauvegarder vos prompts.') }}</p>
+                @if(Route::has('tools.show'))
+                    <a href="{{ route('tools.show', 'constructeur-prompts') }}" class="btn btn-primary btn-sm" style="border-radius: var(--r-btn);">{{ __('Creer un prompt') }}</a>
+                @endif
+            </div>
+        @else
+            <div style="display: flex !important; flex-direction: column !important; gap: 10px;">
+                @foreach($savedPrompts as $sp)
+                <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 16px 20px; transition: all 0.2s;"
+                     onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'"
+                     onmouseout="this.style.transform='none';this.style.boxShadow='none'">
+                    <div style="display: flex !important; align-items: center !important; gap: 14px;">
+                        <div style="width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #8B5CF6, #7C3AED); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
+                            <span style="font-size: 18px; color: #fff;">✨</span>
+                        </div>
+                        <div style="flex: 1 !important; min-width: 0;">
+                            <strong style="font-size: 14px; color: var(--c-dark);">{{ $sp->name }}</strong>
+                            <div style="font-size: 12px; color: var(--c-text-muted); margin-top: 2px;">{{ Str::limit($sp->prompt_text, 120) }}</div>
+                        </div>
+                        <div style="flex-shrink: 0; text-align: right;">
+                            <button onclick="navigator.clipboard.writeText({{ json_encode($sp->prompt_text) }}); this.textContent='{{ __('Copie !') }}'; setTimeout(() => this.textContent='{{ __('Copier') }}', 2000)" class="btn btn-sm" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 11px;">{{ __('Copier') }}</button>
+                            <div style="font-size: 11px; color: var(--c-text-muted); margin-top: 4px;">{{ $sp->created_at->format('d/m/Y') }}</div>
+                        </div>
                     </div>
                 </div>
                 @endforeach
