@@ -78,7 +78,14 @@ class PublicPostController extends Controller
             ->with(['user', 'blogCategory', 'tagsRelation'])
             ->firstOrFail();
 
-        return view('fronttheme::blog.show', compact('article'));
+        $relatedArticles = Article::published()
+            ->where('id', '!=', $article->id)
+            ->when($article->blog_category_id, fn ($q) => $q->where('blog_category_id', $article->blog_category_id))
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+
+        return view('fronttheme::blog.show', compact('article', 'relatedArticles'));
     }
 
     public function category(string $slug): View

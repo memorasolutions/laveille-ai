@@ -157,6 +157,34 @@
     </section>
     <!-- end wpo-blog-single-section -->
 
+    @if($relatedArticles->isNotEmpty())
+    <section style="padding: 30px 0 40px; background: #f9fafb;">
+        <div class="container">
+            <h3 style="font-weight: 700; margin-bottom: 24px;">{{ __('Articles reliés') }}</h3>
+            <div class="row">
+                @foreach($relatedArticles as $related)
+                <div class="col-sm-4" style="margin-bottom: 20px;">
+                    <div class="panel panel-default" style="border-radius: 8px; overflow: hidden;">
+                        @if($related->featured_image)
+                            <a href="{{ route('blog.show', $related->slug) }}">
+                                <img src="{{ asset($related->featured_image) }}" alt="{{ $related->title }}" style="width: 100%; height: 150px; object-fit: cover;">
+                            </a>
+                        @endif
+                        <div class="panel-body">
+                            <small class="text-muted">{{ $related->published_at?->format('d M Y') }}</small>
+                            <h4 style="font-size: 15px; font-weight: 600; margin: 6px 0 8px; line-height: 1.4;">
+                                <a href="{{ route('blog.show', $related->slug) }}" style="color: inherit; text-decoration: none;">{{ $related->title }}</a>
+                            </h4>
+                            <p style="font-size: 13px; color: #6B7280; margin: 0;">{{ Str::limit($related->excerpt ?? strip_tags($related->content), 80) }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
 @push('scripts')
 @php
 $blogPostingJsonLd = json_encode([
