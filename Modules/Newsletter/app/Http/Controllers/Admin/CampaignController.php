@@ -55,6 +55,51 @@ class CampaignController extends Controller
             ->with('success', 'Campagne créée.');
     }
 
+    public function edit(Campaign $campaign): View|RedirectResponse
+    {
+        if ($campaign->isSent()) {
+            return redirect()->route('admin.newsletter.campaigns.index')
+                ->with('error', 'Impossible de modifier une campagne deja envoyee.');
+        }
+
+        return view('newsletter::admin.campaigns.edit', [
+            'campaign' => $campaign,
+            'templates' => BrevoService::availableTemplates(),
+        ]);
+    }
+
+    public function update(Request $request, Campaign $campaign): RedirectResponse
+    {
+        if ($campaign->isSent()) {
+            return redirect()->route('admin.newsletter.campaigns.index')
+                ->with('error', 'Impossible de modifier une campagne deja envoyee.');
+        }
+
+        $validated = $request->validate([
+            'subject' => 'required|max:255',
+            'content' => 'required',
+            'template' => 'required|in:'.implode(',', array_keys(BrevoService::availableTemplates())),
+        ]);
+
+        $campaign->update($validated);
+
+        return redirect()->route('admin.newsletter.campaigns.index')
+            ->with('success', 'Campagne mise a jour.');
+    }
+
+    public function destroy(Campaign $campaign): RedirectResponse
+    {
+        if ($campaign->isSent()) {
+            return redirect()->route('admin.newsletter.campaigns.index')
+                ->with('error', 'Impossible de supprimer une campagne envoyee.');
+        }
+
+        $campaign->delete();
+
+        return redirect()->route('admin.newsletter.campaigns.index')
+            ->with('success', 'Campagne supprimee.');
+    }
+
     public function send(Campaign $campaign, BrevoService $brevo): RedirectResponse
     {
         if ($campaign->isSent()) {

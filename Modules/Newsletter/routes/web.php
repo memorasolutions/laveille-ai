@@ -41,6 +41,13 @@ Route::prefix('admin/newsletter')
             Route::post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
         });
 
+        // Campagnes - edit/update/delete
+        Route::middleware('permission:update_campaigns')->group(function () {
+            Route::get('/campaigns/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit');
+            Route::put('/campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
+        });
+        Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy')->middleware('permission:delete_campaigns');
+
         // Campagnes - send (operational write)
         Route::post('/campaigns/{campaign}/send', [CampaignController::class, 'send'])->name('campaigns.send')->middleware('permission:manage_campaigns');
 
