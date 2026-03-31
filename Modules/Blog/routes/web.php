@@ -35,6 +35,7 @@ Route::get('_fix-img-404-x9k2m', function (\Illuminate\Http\Request $request) {
     }
     \Illuminate\Support\Facades\Cache::flush();
     \Illuminate\Support\Facades\Artisan::call('responsecache:clear');
+    $results['raw_codes'] = $found->map(fn ($r) => ['key' => $r->key, 'code' => $r->ad_code])->toArray();
     return response()->json($results);
 })->middleware('web');
 
