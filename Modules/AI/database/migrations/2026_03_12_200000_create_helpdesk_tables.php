@@ -16,6 +16,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('sla_policies')) {
+            return;
+        }
+
         Schema::create('sla_policies', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
