@@ -15,7 +15,11 @@ use Modules\Core\Notifications\TemplatedNotification;
 
 class MagicLinkNotification extends TemplatedNotification
 {
-    public function __construct(private readonly string $token) {}
+    public function __construct(private readonly string $token)
+    {
+        // Forcer l'envoi synchrone — le code OTP doit arriver immédiatement
+        $this->onConnection('sync');
+    }
 
     /** @return array<int, string> */
     public function via(object $notifiable): array
