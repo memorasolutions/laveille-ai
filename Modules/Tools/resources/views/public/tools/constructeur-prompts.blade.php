@@ -394,6 +394,14 @@
 @endsection
 
 @push('scripts')
+@php
+$defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Redacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pedagogue'],['value'=>'developpeur','label'=>'Developpeur senior'],['value'=>'consultant','label'=>'Consultant en strategie'],['value'=>'graphiste','label'=>'Graphiste creatif'],['value'=>'analyste','label'=>'Analyste de donnees'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Specialiste en ressources humaines']];
+$defaultVerbs = ['Redige','Analyse','Cree','Genere','Explique','Compare','Resume','Traduis','Optimise','Evalue','Developpe','Concois','Planifie','Diagnostique'];
+$defaultAudiences = [['value'=>'pro','label'=>'Professionnels du secteur'],['value'=>'debutants','label'=>'Debutants'],['value'=>'entrepreneurs','label'=>'Entrepreneurs et dirigeants'],['value'=>'etudiants','label'=>'Etudiants universitaires'],['value'=>'grand_public','label'=>'Grand public'],['value'=>'techniques','label'=>'Collegues techniques'],['value'=>'direction','label'=>'Direction generale']];
+$pbPersonas = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.personas', $defaultPersonas) : $defaultPersonas;
+$pbVerbs = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.verbs', $defaultVerbs) : $defaultVerbs;
+$pbAudiences = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.audiences', $defaultAudiences) : $defaultAudiences;
+@endphp
 <script>
 document.addEventListener('alpine:init', function() {
     Alpine.data('promptBuilder', function() {
@@ -402,16 +410,16 @@ document.addEventListener('alpine:init', function() {
             personaType: 'preset',
             personaPreset: '',
             personaCustom: '',
-            personas: @json(class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.personas', [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'enseignant','label'=>'Enseignant pedagogue'],['value'=>'developpeur','label'=>'Developpeur senior'],['value'=>'consultant','label'=>'Consultant en strategie'],['value'=>'analyste','label'=>'Analyste de donnees'],['value'=>'redacteur_web','label'=>'Redacteur web professionnel'],['value'=>'graphiste','label'=>'Graphiste creatif'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Specialiste en ressources humaines']]) : []),
+            personas: @json($pbPersonas),
             verbType: 'preset',
             verb: '',
-            verbs: @json(class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.verbs', ['Redige','Analyse','Cree','Genere','Explique','Compare','Resume','Traduis','Optimise','Evalue','Developpe','Concois','Planifie','Diagnostique']) : ['Redige','Analyse','Cree','Genere','Explique','Compare','Resume','Traduis','Optimise','Evalue']),
+            verbs: @json($pbVerbs),
             verbCustom: '',
             taskObject: '',
             audienceType: 'preset',
             audiencePreset: '',
             audienceCustom: '',
-            audiences: @json(class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.audiences', [['value'=>'pro','label'=>'Professionnels du secteur'],['value'=>'debutants','label'=>'Debutants'],['value'=>'entrepreneurs','label'=>'Entrepreneurs et dirigeants'],['value'=>'etudiants','label'=>'Etudiants universitaires'],['value'=>'grand_public','label'=>'Grand public'],['value'=>'techniques','label'=>'Collegues techniques'],['value'=>'direction','label'=>'Direction generale']]) : []),
+            audiences: @json($pbAudiences),
             format: '',
             length: '',
             tone: '',
