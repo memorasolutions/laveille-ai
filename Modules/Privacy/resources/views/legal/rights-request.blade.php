@@ -24,23 +24,32 @@
                                 </div>
                             @endif
 
-                            <div class="alert alert-info">
-                                <p style="margin-bottom: 8px;">
-                                    <strong>{{ __('Conformément aux lois applicables (RGPD, Loi 25, LPRPDE), vous disposez de droits sur vos données personnelles :') }}</strong>
-                                </p>
-                                <ul style="margin-bottom: 8px;">
+                            <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                                    <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(11,114,133,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B7285" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    </div>
+                                    <h4 style="margin: 0; font-family: var(--f-heading, inherit); font-weight: 700; color: var(--c-dark, #1a1a2e); font-size: 1rem;">{{ __('Vos droits sur vos donnees personnelles') }}</h4>
+                                </div>
+                                <p style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">{{ __('Conformement aux lois applicables (RGPD, Loi 25, LPRPDE), vous pouvez exercer les droits suivants :') }}</p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-bottom: 16px;">
                                     @foreach($request_types as $type => $label)
-                                        <li>{{ $label }}</li>
+                                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--c-dark, #1a1a2e);">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B7285" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                            {{ $label }}
+                                        </div>
                                     @endforeach
-                                </ul>
-                                <p style="font-size: 13px; margin-bottom: 4px;">
-                                    {{ __('Nous nous engageons à répondre à votre demande dans un délai de :days jours maximum.', ['days' => $response_delay_days]) }}
-                                </p>
-                                <p style="font-size: 13px; margin-bottom: 0;">
-                                    {{ __('Pour toute question, contactez notre DPO :') }}
-                                    <strong>{{ $company['dpo_name'] }}</strong> —
-                                    <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a>
-                                </p>
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 12px; border-top: 1px solid #f3f4f6; font-size: 13px; color: #6b7280;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B7285" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        {{ __('Delai de reponse : :days jours', ['days' => $response_delay_days]) }}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B7285" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                        {{ __('DPO :') }} <strong>{{ $company['dpo_name'] }}</strong> — <a href="mailto:{{ $company['dpo_email'] }}" style="color: var(--c-primary, #0B7285);">{{ $company['dpo_email'] }}</a>
+                                    </div>
+                                </div>
                             </div>
 
                             <form method="POST" action="{{ route('legal.rights.store') }}" enctype="multipart/form-data" novalidate>
