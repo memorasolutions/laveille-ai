@@ -477,10 +477,10 @@
 
             {{-- Cartes compactes repliées --}}
             @foreach($discussions as $d)
-            <div x-data="{ open: false, replying: false }" style="margin-bottom: 10px;">
+            <div x-data="{ expanded: false, replying: false }" style="margin-bottom: 10px;">
                 {{-- Carte compacte (toujours visible) --}}
-                <div @click="open = !open" class="disc-card" style="border-left: 3px solid var(--c-primary); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.15s;"
-                     :class="open ? 'disc-card-open' : ''"
+                <div @click="expanded = !expanded" class="disc-card" style="border-left: 3px solid var(--c-primary); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.15s;"
+                     :class="expanded ? 'disc-card-open' : ''"
                     <div style="display: flex; align-items: center; gap: 12px;">
                         {{-- Avatar --}}
                         @if($d->user)
@@ -500,13 +500,13 @@
                             @if($d->replies->count() > 0)
                             <span style="background: #f0fdf4; color: #059669; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{ $d->replies->count() }} {{ __('rép.') }}</span>
                             @endif
-                            <span x-text="open ? '▲' : '▼'" style="color: #9ca3af; font-size: 10px;"></span>
+                            <span x-text="expanded ? '▲' : '▼'" style="color: #9ca3af; font-size: 10px;"></span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Contenu étendu (caché par défaut) --}}
-                <div x-show="open" x-cloak x-transition @click.stop style="background: #fafbfc; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px; padding: 18px; margin-top: -2px;">
+                <div x-show="expanded" x-cloak x-transition @click.stop style="background: #fafbfc; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px; padding: 18px; margin-top: -2px;">
                     {{-- Body discussion --}}
                     <div style="color: #4b5563; line-height: 1.6; margin-bottom: 14px; font-size: 14px;" class="rt-description">{!! $d->body !!}</div>
 
