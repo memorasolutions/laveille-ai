@@ -113,6 +113,9 @@ a:hover { color: var(--c-primary); }
     border-top: 3px solid var(--c-primary);
 }
 
+.wpo-site-header .navigation .navbar-nav > li .sub-menu li a {
+    color: #d1d5db;
+}
 .wpo-site-header .navigation .navbar-nav > li .sub-menu li a:hover {
     color: var(--c-primary);
 }
