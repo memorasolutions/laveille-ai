@@ -25,6 +25,7 @@
                 'prompt' => ['icon' => '✨', 'label' => __('Prompts'), 'color' => '#8B5CF6'],
                 'team' => ['icon' => '👥', 'label' => __('Générateur d\'équipes'), 'color' => '#0B7285'],
                 'draw' => ['icon' => '🎲', 'label' => __('Tirage de présentations'), 'color' => '#E67E22'],
+                'qr' => ['icon' => '📱', 'label' => __('Générateur de code QR'), 'color' => '#6366f1'],
             ];
         @endphp
         @foreach($types as $type)

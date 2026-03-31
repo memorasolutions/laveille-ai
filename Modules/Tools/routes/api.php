@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\SavedPromptController;
 use Modules\Tools\Http\Controllers\SavedDrawPresetController;
+use Modules\Tools\Http\Controllers\SavedQrPresetController;
 use Modules\Tools\Http\Controllers\SavedTeamPresetController;
 use Modules\Tools\Http\Controllers\ToolsController;
 
@@ -27,4 +28,9 @@ Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
     Route::post('/draw-presets', [SavedDrawPresetController::class, 'store'])->name('api.draw-presets.store');
     Route::put('/draw-presets/{id}', [SavedDrawPresetController::class, 'update'])->name('api.draw-presets.update');
     Route::delete('/draw-presets/{id}', [SavedDrawPresetController::class, 'destroy'])->name('api.draw-presets.destroy');
+
+    Route::get('/qr-presets', [SavedQrPresetController::class, 'index'])->name('api.qr-presets.index');
+    Route::post('/qr-presets', [SavedQrPresetController::class, 'store'])->name('api.qr-presets.store');
+    Route::put('/qr-presets/{id}', [SavedQrPresetController::class, 'update'])->name('api.qr-presets.update');
+    Route::delete('/qr-presets/{id}', [SavedQrPresetController::class, 'destroy'])->name('api.qr-presets.destroy');
 });

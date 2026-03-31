@@ -10,7 +10,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 col-12">
                 <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
-                    <div class="card-body p-4 p-md-5" x-data="qrGenerator()" x-init="renderQR()">
+                    <div class="card-body p-4 p-md-5" x-data="qrGenerator()" x-init="renderQR(); initEditMode()">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
@@ -21,7 +21,25 @@
                                 <button class="btn btn-sm" @click="jQuery('#qrHelpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 32px; height: 32px; font-weight: 700; font-size: 1rem; padding: 0; line-height: 32px; flex-shrink: 0;" title="{{ __('Aide') }}">?</button>
                             </div>
                         </div>
-                        <div class="mb-4"></div>
+                        <div class="mb-3"></div>
+
+                        {{-- Barre sauvegarde (connectés) --}}
+                        <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
+                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="!input || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
+                            </div>
+                            <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
+                                {{ __('Retrouvez vos configurations dans') }} <a href="{{ route('user.saved') }}?tab=qr" style="color: var(--c-primary); text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
+                            </div>
+                            <template x-if="saveError">
+                                <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
+                            </template>
+                        </div>
+                        <div x-show="!isAuthenticated" x-cloak style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #0369a1;">
+                            {{ __('Connectez-vous pour sauvegarder vos configurations dans votre compte.') }}
+                        </div>
 
                         {{-- Sélecteur de type --}}
                         <div class="mb-3">
@@ -512,6 +530,11 @@ document.addEventListener('alpine:init', function() {
             btcAddress: '', btcAmount: '',
             socialUser: '',
             copied: false,
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            saveName: '',
+            saving: false,
+            saveError: '',
+            _editingId: null,
             qrInstance: null,
             qrLogo: '',
             qrTransparent: false,
@@ -681,6 +704,62 @@ document.addEventListener('alpine:init', function() {
                 navigator.clipboard.writeText(this.qrData);
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
+            },
+
+            _headers: function() {
+                return { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' };
+            },
+            saveToAccount: function() {
+                if (this.saving || !this.input) return;
+                var self = this;
+                var title = this.saveName.trim() || this.type.toUpperCase() + ' — ' + (this.input || '').substring(0, 30);
+                this.saving = true;
+                this.saveError = '';
+                var isEdit = !!this._editingId;
+                var url = isEdit ? '/api/qr-presets/' + this._editingId : '/api/qr-presets';
+                var method = isEdit ? 'PUT' : 'POST';
+                fetch(url, {
+                    method: method, headers: this._headers(),
+                    body: JSON.stringify({ name: title, config_text: this.input, params: {
+                        type: this.type, ssid: this.ssid, wifiPass: this.wifiPass, encryption: this.encryption,
+                        emailTo: this.emailTo, emailSubject: this.emailSubject, emailBody: this.emailBody,
+                        phone: this.phone, smsNumber: this.smsNumber, smsMessage: this.smsMessage,
+                        waNumber: this.waNumber, waMessage: this.waMessage,
+                        vcName: this.vcName, vcOrg: this.vcOrg, vcPhone: this.vcPhone, vcEmail: this.vcEmail, vcUrl: this.vcUrl,
+                        geoLat: this.geoLat, geoLng: this.geoLng,
+                        eventTitle: this.eventTitle, eventStart: this.eventStart, eventEnd: this.eventEnd, eventLocation: this.eventLocation,
+                        zoomId: this.zoomId, zoomPass: this.zoomPass,
+                        paypalUser: this.paypalUser, paypalAmount: this.paypalAmount, paypalCurrency: this.paypalCurrency,
+                        btcAddress: this.btcAddress, btcAmount: this.btcAmount, socialUser: this.socialUser,
+                        qrSize: this.qrSize, qrDotStyle: this.qrDotStyle, qrCornerStyle: this.qrCornerStyle,
+                        qrCornerDotStyle: this.qrCornerDotStyle, qrErrorLevel: this.qrErrorLevel,
+                        qrColor: this.qrColor, qrBgColor: this.qrBgColor, qrGradient: this.qrGradient, qrGradientColor2: this.qrGradientColor2,
+                        qrLogo: this.qrLogo, qrTransparent: this.qrTransparent,
+                        qrCornerColor: this.qrCornerColor, qrUseCornerColor: this.qrUseCornerColor,
+                        qrShowFrame: this.qrShowFrame, qrFrameText: this.qrFrameText
+                    } })
+                })
+                .then(function(r) { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
+                .then(function() { self._editingId = null; self.saveName = ''; self.saving = false; })
+                .catch(function(e) { self.saveError = e.message; self.saving = false; setTimeout(function() { self.saveError = ''; }, 4000); });
+            },
+            initEditMode: function() {
+                if (!this.isAuthenticated) return;
+                var self = this;
+                var editId = new URLSearchParams(window.location.search).get('edit');
+                if (!editId) return;
+                fetch('/api/qr-presets', { headers: this._headers() })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var found = (data.data || []).find(function(p) { return p.public_id === editId; });
+                        if (!found) return;
+                        self.input = found.config_text || '';
+                        var pr = found.params || {};
+                        Object.keys(pr).forEach(function(k) { if (self.hasOwnProperty(k)) self[k] = pr[k]; });
+                        self.saveName = found.name;
+                        self._editingId = found.public_id;
+                        self.$nextTick(function() { self.renderQR(); });
+                    });
             }
         };
     });

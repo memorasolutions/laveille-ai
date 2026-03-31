@@ -42,6 +42,13 @@ class UserSavedController extends Controller
             );
         }
 
+        if (class_exists(\Modules\Tools\Models\SavedQrPreset::class)) {
+            $items = $items->merge(
+                \Modules\Tools\Models\SavedQrPreset::forUser($user->id)->latest()->get()
+                    ->map(fn ($p) => (object) ['id' => $p->id, 'public_id' => $p->public_id, 'type' => 'qr', 'name' => $p->name, 'preview' => \Str::limit($p->config_text, 80), 'tool_name' => __('Générateur de code QR'), 'tool_slug' => 'code-qr', 'tool_icon' => '📱', 'tool_color' => '#6366f1', 'api_path' => '/api/qr-presets/', 'created_at' => $p->created_at])
+            );
+        }
+
         $items = $items->sortByDesc('created_at')->values();
 
         // Types disponibles pour les chips filtres
