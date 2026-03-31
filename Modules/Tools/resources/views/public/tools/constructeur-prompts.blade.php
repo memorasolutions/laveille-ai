@@ -305,12 +305,12 @@
                         <div x-show="!isValid" class="alert alert-warning small p-2 mb-2" style="font-size: 0.8rem;">
                             {{ __('Remplissez la persona (étape 1) et la tâche (étape 2) pour générer votre prompt.') }}
                         </div>
-                        <div class="form-group mb-2">
+                        <div class="form-group mb-2" x-show="isAuthenticated" x-cloak>
                             <input type="text" class="form-control form-control-sm" x-model="saveName" placeholder="{{ __('Titre pour retrouver ce prompt (optionnel)') }}" aria-label="{{ __('Titre du prompt') }}">
                         </div>
                         <div class="d-flex gap-2 mb-4 flex-wrap">
                             <button class="btn flex-fill" @click="copy()" :disabled="!isValid || saving" :style="isValid ? 'background: var(--c-accent); color: #fff;' : 'background: #e9ecef; color: #adb5bd; cursor: not-allowed;'" style="border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;"
-                                    x-text="saving ? '{{ __('Sauvegarde...') }}' : (copied ? '{{ __('Copié !') }}' : '{{ __('Copier et sauvegarder') }}')"></button>
+                                    x-text="isAuthenticated ? (saving ? '{{ __('Sauvegarde...') }}' : (copied ? '{{ __('Copié !') }}' : '{{ __('Copier et sauvegarder') }}')) : '{{ __('Copier le prompt') }}'"></button>
                             <button class="btn btn-outline-secondary" @click="exportPrompt()" :disabled="!isValid" style="border-radius: var(--r-btn);">{{ __('Exporter .txt') }}</button>
                         </div>
                         <template x-if="!isAuthenticated">
@@ -637,7 +637,7 @@ document.addEventListener('alpine:init', function() {
                 navigator.clipboard.writeText(this.prompt);
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
-                this.addToHistory();
+                if (this.isAuthenticated) this.addToHistory();
             },
 
             copyText: function(text) { navigator.clipboard.writeText(text); },
