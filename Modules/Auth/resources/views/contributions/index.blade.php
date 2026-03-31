@@ -270,17 +270,18 @@
                         <div style="width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #8B5CF6, #7C3AED); display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0;">
                             <span style="font-size: 18px; color: #fff;">✨</span>
                         </div>
-                        <div style="flex: 1 !important; min-width: 0;">
-                            <strong style="font-size: 14px; color: var(--c-dark);">{{ $sp->name }}</strong>
-                            <div style="font-size: 12px; color: var(--c-text-muted); margin-top: 2px;">{{ Str::limit($sp->prompt_text, 120) }}</div>
+                        <div style="flex: 1 !important; min-width: 0; overflow: hidden;">
+                            <strong style="font-size: 14px; color: var(--c-dark); display: block;">{{ $sp->name }}</strong>
+                            <div style="font-size: 12px; color: var(--c-text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ Str::limit($sp->prompt_text, 120) }}</div>
                         </div>
-                        <div style="flex-shrink: 0; text-align: right;">
+                        <div style="flex-shrink: 0; text-align: right; min-width: 120px;">
                             <div style="display: flex !important; gap: 4px; justify-content: flex-end !important;">
-                                <button onclick="navigator.clipboard.writeText(@json($sp->prompt_text)); this.textContent='{{ __('Copie !') }}'; setTimeout(() => this.textContent='{{ __('Copier') }}', 2000)" class="btn btn-sm" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 11px;">{{ __('Copier') }}</button>
+                                <button data-prompt-id="{{ $sp->id }}" class="btn btn-sm copy-prompt-btn" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 11px;">{{ __('Copier') }}</button>
                                 <button onclick="if(confirm('{{ __('Supprimer ce prompt ?') }}')){fetch('/api/prompts/{{ $sp->id }}',{method:'DELETE',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content,'Accept':'application/json'}}).then(()=>this.closest('[style*=background]').remove())}" class="btn btn-sm" style="background: #ef4444; color: #fff; border-radius: 6px; font-size: 11px;">{{ __('Supprimer') }}</button>
                             </div>
                             <div style="font-size: 11px; color: var(--c-text-muted); margin-top: 4px;">{{ $sp->created_at->format('d/m/Y') }}</div>
                         </div>
+                        <script type="application/json" class="prompt-data-{{ $sp->id }}">@json($sp->prompt_text)</script>
                     </div>
                 </div>
                 @endforeach
@@ -290,4 +291,21 @@
 
 </div>
 
+@push('scripts')
+<script>
+document.querySelectorAll('.copy-prompt-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var id = this.dataset.promptId;
+        var el = document.querySelector('.prompt-data-' + id);
+        if (el) {
+            var text = JSON.parse(el.textContent);
+            navigator.clipboard.writeText(text);
+            this.textContent = '{{ __("Copie !") }}';
+            var self = this;
+            setTimeout(function() { self.textContent = '{{ __("Copier") }}'; }, 2000);
+        }
+    });
+});
+</script>
+@endpush
 @endsection
