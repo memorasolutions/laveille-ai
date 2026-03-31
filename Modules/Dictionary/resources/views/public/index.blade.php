@@ -464,7 +464,7 @@
                         aria-label="{{ __('Filtrer par catégorie') }}"
                         style="width: 100%; height: 50px; border-radius: var(--r-base); border: 2px solid #E5E7EB; padding: 0 36px 0 16px; font-size: 14px; font-weight: 600; color: var(--c-dark); background: #fff; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236B7280%22 stroke-width=%222%22%3E%3Cpath d=%22M6 9l6 6 6-6%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 14px center;">
                     <option value="">{{ __('Toutes les catégories') }}</option>
-                    <template x-for="cat in categories" :key="cat.slug">
+                    <template x-for="cat in categories" :key="cat.id">
                         <option :value="cat.slug" x-text="cat.icon + ' ' + cat.name"></option>
                     </template>
                 </select>

@@ -28,6 +28,12 @@ class DirectoryServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+
+        if (class_exists(\Modules\Core\Services\ModeratableRegistry::class)) {
+            \Modules\Core\Services\ModeratableRegistry::register('discussions', \Modules\Directory\Models\ToolDiscussion::class);
+            \Modules\Core\Services\ModeratableRegistry::register('resources', \Modules\Directory\Models\ToolResource::class);
+            \Modules\Core\Services\ModeratableRegistry::register('suggestions', \Modules\Directory\Models\ToolSuggestion::class);
+        }
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
         \Modules\Directory\Models\Tool::observe(\Modules\Directory\Observers\ToolObserver::class);

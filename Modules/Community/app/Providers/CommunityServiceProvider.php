@@ -29,6 +29,11 @@ class CommunityServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+
+        if (class_exists(\Modules\Core\Services\ModeratableRegistry::class)) {
+            \Modules\Core\Services\ModeratableRegistry::register('reviews', \Modules\Community\Models\Review::class);
+            \Modules\Core\Services\ModeratableRegistry::register('reports', \Modules\Community\Models\Report::class);
+        }
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
         if (class_exists(Livewire::class)) {

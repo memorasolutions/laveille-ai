@@ -24,6 +24,10 @@ class RoadmapServiceProvider extends BaseModuleServiceProvider
     public function boot(): void
     {
         $this->bootModule();
+
+        if (class_exists(\Modules\Core\Services\ModeratableRegistry::class)) {
+            \Modules\Core\Services\ModeratableRegistry::register('ideas', \Modules\Roadmap\Models\Idea::class);
+        }
     }
 
     public function register(): void

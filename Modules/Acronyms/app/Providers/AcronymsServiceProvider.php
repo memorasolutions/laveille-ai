@@ -25,6 +25,10 @@ class AcronymsServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+
+        if (class_exists(\Modules\Core\Services\ModeratableRegistry::class)) {
+            \Modules\Core\Services\ModeratableRegistry::register('acronyms', \Modules\Acronyms\Models\Acronym::class);
+        }
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
     }
 

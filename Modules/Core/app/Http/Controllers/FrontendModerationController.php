@@ -7,25 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Modules\Core\Services\ModeratableRegistry;
 use Spatie\Activitylog\Models\Activity;
 
 class FrontendModerationController extends Controller
 {
     private function resolveModel(string $type): string
     {
-        $modelMap = [
-            'reviews' => \Modules\Community\Models\Review::class,
-            'discussions' => \Modules\Directory\Models\ToolDiscussion::class,
-            'resources' => \Modules\Directory\Models\ToolResource::class,
-            'suggestions' => \Modules\Directory\Models\ToolSuggestion::class,
-            'reports' => \Modules\Community\Models\Report::class,
-            'acronyms' => \Modules\Acronyms\Models\Acronym::class,
-            'ideas' => \Modules\Roadmap\Models\Idea::class,
-        ];
-
-        abort_unless(isset($modelMap[$type]), 404, 'Type de contenu inconnu.');
-
-        $modelClass = $modelMap[$type];
+        $modelClass = ModeratableRegistry::resolve($type);
+        abort_unless($modelClass, 404, 'Type de contenu inconnu.');
         abort_unless(class_exists($modelClass), 404, "Module pour '{$type}' non activé.");
 
         return $modelClass;
