@@ -20,6 +20,7 @@ use Modules\Backoffice\Http\Controllers\BrandingController;
 use Modules\Backoffice\Http\Controllers\CacheController;
 use Modules\Backoffice\Http\Controllers\ContactMessageController;
 use Modules\Backoffice\Http\Controllers\CookieCategoryController;
+use Modules\Backoffice\Http\Controllers\LegalPageController;
 use Modules\Backoffice\Http\Controllers\RightsRequestController;
 use Modules\Backoffice\Http\Controllers\DashboardController;
 use Modules\Backoffice\Http\Controllers\DataRetentionController;
@@ -425,6 +426,13 @@ Route::prefix('admin')
             Route::get('rights-requests/{rightsRequest}', [RightsRequestController::class, 'show'])->name('rights-requests.show');
             Route::patch('rights-requests/{rightsRequest}/mark-completed', [RightsRequestController::class, 'markCompleted'])->name('rights-requests.mark-completed');
             Route::patch('rights-requests/{rightsRequest}/add-note', [RightsRequestController::class, 'addNote'])->name('rights-requests.add-note');
+        });
+
+        // ── Pages légales ──
+        Route::middleware('permission:manage_cookies')->group(function () {
+            Route::get('legal-pages', [LegalPageController::class, 'index'])->name('legal-pages.index');
+            Route::get('legal-pages/{legalPage}/edit', [LegalPageController::class, 'edit'])->name('legal-pages.edit');
+            Route::put('legal-pages/{legalPage}', [LegalPageController::class, 'update'])->name('legal-pages.update');
         });
 
         // ── Onboarding ──

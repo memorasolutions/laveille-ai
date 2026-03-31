@@ -16,27 +16,38 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
+use Modules\Privacy\Models\LegalPage;
 use Modules\Privacy\Models\RightsRequest;
 
 class LegalController extends Controller
 {
     public function privacyPolicy(): View
     {
-        return view('privacy::legal.privacy-policy', [
-            'config' => config('privacy'),
-        ]);
+        return $this->renderLegalPage('privacy-policy', 'privacy::legal.privacy-policy');
     }
 
     public function termsOfUse(): View
     {
-        return view('privacy::legal.terms-of-use', [
-            'config' => config('privacy'),
-        ]);
+        return $this->renderLegalPage('terms-of-use', 'privacy::legal.terms-of-use');
     }
 
     public function cookiePolicy(): View
     {
-        return view('privacy::legal.cookie-policy', [
+        return $this->renderLegalPage('cookie-policy', 'privacy::legal.cookie-policy');
+    }
+
+    private function renderLegalPage(string $slug, string $fallbackView): View
+    {
+        $page = LegalPage::findBySlug($slug);
+
+        if ($page) {
+            return view('privacy::legal.dynamic', [
+                'page' => $page,
+                'config' => config('privacy'),
+            ]);
+        }
+
+        return view($fallbackView, [
             'config' => config('privacy'),
         ]);
     }
