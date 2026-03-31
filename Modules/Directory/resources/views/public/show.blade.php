@@ -466,39 +466,78 @@
                 <h4 style="font-weight: 700; color: #111827; margin: 0 0 6px;">{{ __('C\'est calme ici...') }}</h4>
                 <p style="color: #6b7280; margin: 0;">{{ __('Lancez une discussion ! Quelle est votre expérience ?') }}</p>
             </div>
-            @endif
+            @else
+            {{-- Tri --}}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <span style="font-size: 13px; color: #6b7280;">{{ $discussions->count() }} {{ __('discussion(s)') }}</span>
+            </div>
 
+            {{-- Cartes compactes repliées --}}
             @foreach($discussions as $d)
-            <div style="margin-bottom: 24px;">
-                <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                    @if($d->title)<h4 style="margin-top: 0; font-weight: 700; color: #1f2937; font-size: 17px;">{{ $d->title }}</h4>@endif
-                    <div style="color: #4b5563; line-height: 1.6; margin-bottom: 12px;" class="rt-description">{!! $d->body !!}</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 12px; font-size: 13px;">
-                        <div style="color: #6b7280;">@if($d->user)<a href="{{ route('directory.profile', $d->user->id) }}" style="color: #374151; font-weight: 700; text-decoration: none;">{{ $d->user->name }}</a> <span style="font-size: 11px;">{{ $d->user->getLevelBadge() }}</span>@else<strong style="color: #374151;">{{ __('Anonyme') }}</strong>@endif · {{ $d->created_at->diffForHumans() }} · {{ $d->replies->count() }} {{ __('réponses') }}</div>
+            <div x-data="{ open: false, replying: false }" style="margin-bottom: 10px;">
+                {{-- Carte compacte (toujours visible) --}}
+                <div @click="open = !open" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.15s;"
+                     :style="open ? 'border-color: var(--c-primary); box-shadow: 0 2px 8px rgba(11,114,133,0.1);' : ''"
+                     onmouseover="if(!this.__x) this.style.background='#f9fafb'" onmouseout="if(!this.__x) this.style.background='#fff'">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        {{-- Avatar --}}
+                        @if($d->user)
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--c-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">{{ strtoupper(substr($d->user->name, 0, 1)) }}</div>
+                        @endif
+                        {{-- Contenu compact --}}
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong style="font-size: 15px; color: #1f2937;">{{ $d->title ?: Str::limit(strip_tags($d->body), 50) }}</strong>
+                            </div>
+                            <div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">
+                                {{ $d->user->name ?? __('Anonyme') }} · {{ $d->created_at->diffForHumans() }}
+                            </div>
+                        </div>
+                        {{-- Badges --}}
+                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                            @if($d->replies->count() > 0)
+                            <span style="background: #f0fdf4; color: #059669; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{ $d->replies->count() }} {{ __('rép.') }}</span>
+                            @endif
+                            <span x-text="open ? '▲' : '▼'" style="color: #9ca3af; font-size: 10px;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Contenu étendu (caché par défaut) --}}
+                <div x-show="open" x-cloak x-transition style="background: #fafbfc; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px; padding: 18px; margin-top: -2px;">
+                    {{-- Body discussion --}}
+                    <div style="color: #4b5563; line-height: 1.6; margin-bottom: 14px; font-size: 14px;" class="rt-description">{!! $d->body !!}</div>
+
+                    {{-- Actions --}}
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 10px; font-size: 13px; margin-bottom: 14px;">
                         <div style="display: flex; gap: 12px; align-items: center;">
                             @include('voting::components.vote-button', ['item' => $d, 'type' => 'discussion'])
-                            <form action="{{ route('directory.community.report', ['type' => 'discussion', 'id' => $d->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;">🚩</button></form>
+                            <form action="{{ route('directory.community.report', ['type' => 'discussion', 'id' => $d->id]) }}" method="POST" style="display:inline;">@csrf<input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;">🚩</button></form>
                             @include('core::components.admin-actions', ['item' => $d, 'type' => 'discussions'])
                         </div>
+                        @auth
+                        <button @click.stop="replying = !replying" style="background: none; border: 1px solid #e5e7eb; border-radius: 20px; padding: 5px 14px; color: #4b5563; font-size: 12px; cursor: pointer;">↩️ {{ __('Répondre') }}</button>
+                        @endauth
                     </div>
-                </div>
-                @if($d->replies->isNotEmpty())
-                <div style="margin-left: 20px; border-left: 2px solid #e5e7eb; padding-left: 16px; margin-top: 12px;">
-                    @foreach($d->replies as $r)
-                    <div style="background: #f9fafb; border-radius: 8px; padding: 14px; margin-bottom: 8px; border: 1px solid #f3f4f6;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <strong style="font-size: 13px; color: #374151;">{{ $r->user->name ?? __('Anonyme') }}</strong>
-                            <span style="font-size: 12px; color: #9ca3af;">{{ $r->created_at->diffForHumans() }}</span>
+
+                    {{-- Réponses --}}
+                    @if($d->replies->isNotEmpty())
+                    <div style="border-left: 2px solid #e5e7eb; padding-left: 14px; margin-bottom: 12px;">
+                        @foreach($d->replies as $r)
+                        <div style="background: #fff; border-radius: 8px; padding: 12px; margin-bottom: 6px; border: 1px solid #f3f4f6;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <strong style="font-size: 13px; color: #374151;">{{ $r->user->name ?? __('Anonyme') }}</strong>
+                                <span style="font-size: 11px; color: #9ca3af;">{{ $r->created_at->diffForHumans() }}</span>
+                            </div>
+                            <div style="margin: 0; color: #4b5563; font-size: 13px;" class="rt-description">{!! $r->body !!}</div>
                         </div>
-                        <div style="margin: 0; color: #4b5563; font-size: 14px;" class="rt-description">{!! $r->body !!}</div>
+                        @endforeach
                     </div>
-                    @endforeach
-                </div>
-                @endif
-                @auth
-                <div x-data="{ replying: false }" style="margin-left: 20px; padding-left: 16px; margin-top: 8px;">
-                    <button @click="replying = !replying" x-show="!replying" style="background: none; border: 1px solid #e5e7eb; border-radius: 20px; padding: 6px 14px; color: #4b5563; font-size: 13px; cursor: pointer;">↩️ {{ __('Répondre') }}</button>
-                    <form x-show="replying" x-cloak action="{{ route('directory.discussions.store', $tool->slug) }}" method="POST" style="background: #fff; padding: 14px; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 8px;">
+                    @endif
+
+                    {{-- Formulaire réponse --}}
+                    @auth
+                    <form x-show="replying" x-cloak @click.stop action="{{ route('directory.discussions.store', $tool->slug) }}" method="POST" style="background: #fff; padding: 14px; border-radius: 8px; border: 1px solid #e5e7eb;">
                         @csrf
                         <input type="hidden" name="parent_id" value="{{ $d->id }}">
                         <div class="form-group" style="margin-bottom: 10px;">
@@ -513,10 +552,11 @@
                             <button type="submit" class="btn btn-sm" style="background: #2563eb; color: #fff; border-radius: 6px;">{{ __('Publier') }}</button>
                         </div>
                     </form>
+                    @endauth
                 </div>
-                @endauth
             </div>
             @endforeach
+            @endif
 
             @guest
             <div style="text-align: center; padding: 12px;">
