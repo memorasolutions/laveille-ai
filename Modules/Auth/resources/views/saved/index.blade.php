@@ -1,17 +1,13 @@
-@extends(fronttheme_layout())
+@extends('auth::layouts.user-frontend')
+
 @section('title', __('Mes sauvegardes') . ' - ' . config('app.name'))
 
-@section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Mes sauvegardes')])
-@endsection
+@section('user-content')
 
-@section('content')
-<section class="wpo-blog-single-section section-padding">
-    <div class="container">
-        <div class="row">
-            <div class="col col-lg-10 offset-lg-1">
-                <h1 style="font-family: var(--f-heading); font-weight: 700; margin: 0 0 8px;">{{ __('Mes sauvegardes') }}</h1>
-                <p style="color: #6B7280; margin-bottom: 24px;">{{ __('Vos prompts et configurations d\'outils sauvegardés.') }}</p>
+<h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">
+    💾 {{ __('Mes sauvegardes') }}
+</h2>
+<p style="color: var(--c-text-muted); margin: 0 0 25px;">{{ __('Vos prompts et configurations d\'outils sauvegardés.') }}</p>
 
 {{-- Onglets --}}
 <div x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'prompts' }">
@@ -129,11 +125,6 @@
     </div>
 
 </div>
-
-            </div>
-        </div>
-    </div>
-</section>
 
 @push('scripts')
 <script>
