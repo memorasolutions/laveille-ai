@@ -16,6 +16,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Core\Traits\HasTableSorting;
+use Modules\Settings\Facades\Settings;
 use Spatie\Permission\Models\Role;
 
 class UsersTable extends Component
@@ -104,7 +105,7 @@ class UsersTable extends Component
             ->when($this->filterStatus === 'inactive', fn ($q) => $q->where('is_active', false))
             ->when($this->filterRole, fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $this->filterRole)))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15)
+            ->paginate((int) Settings::get('backoffice.users_per_page', 15))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -119,7 +120,7 @@ class UsersTable extends Component
             ->when($this->filterStatus === 'inactive', fn ($q) => $q->where('is_active', false))
             ->when($this->filterRole, fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $this->filterRole)))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15);
+            ->paginate((int) Settings::get('backoffice.users_per_page', 15));
 
         $roles = Role::orderBy('name')->get();
 

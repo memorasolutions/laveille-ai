@@ -18,6 +18,7 @@ use Modules\Roadmap\Models\Idea;
 use Modules\Roadmap\Models\IdeaComment;
 use Modules\Roadmap\Services\IdeaService;
 use Modules\Roadmap\Services\VotingService;
+use Modules\Settings\Facades\Settings;
 
 class IdeaController extends Controller
 {
@@ -34,7 +35,7 @@ class IdeaController extends Controller
         }
 
         return view('roadmap::admin.ideas.index', [
-            'ideas' => $query->paginate(30),
+            'ideas' => $query->paginate((int) Settings::get('roadmap.admin_ideas_per_page', 30)),
             'boards' => Board::ordered()->get(),
             'statuses' => IdeaStatus::cases(),
             'filters' => $request->only(['status', 'board_id']),

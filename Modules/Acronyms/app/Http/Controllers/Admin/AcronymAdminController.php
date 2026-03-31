@@ -15,12 +15,13 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Acronyms\Models\Acronym;
 use Modules\Acronyms\Models\AcronymCategory;
+use Modules\Settings\Facades\Settings;
 
 class AcronymAdminController extends Controller
 {
     public function index(): View
     {
-        $acronyms = Acronym::with('category')->orderBy('acronym->'.app()->getLocale())->paginate(20);
+        $acronyms = Acronym::with('category')->orderBy('acronym->'.app()->getLocale())->paginate((int) Settings::get('acronyms.admin_per_page', 20));
 
         return view('acronyms::admin.index', compact('acronyms'));
     }

@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Settings\Facades\Settings;
 
 class UserNotificationsController extends Controller
 {
@@ -25,7 +26,7 @@ class UserNotificationsController extends Controller
     public function index(): View
     {
         $user = auth()->user();
-        $notifications = $user->notifications()->latest()->paginate(20);
+        $notifications = $user->notifications()->latest()->paginate((int) Settings::get('auth.user_notifications_per_page', 20));
         $unreadCount = $user->unreadNotifications()->count();
 
         return view('auth::notifications.index', compact('notifications', 'unreadCount'));

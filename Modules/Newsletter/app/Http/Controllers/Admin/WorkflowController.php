@@ -13,6 +13,7 @@ namespace Modules\Newsletter\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Newsletter\Models\EmailWorkflow;
+use Modules\Settings\Facades\Settings;
 use Modules\Newsletter\Models\WorkflowEnrollment;
 use Modules\Newsletter\Models\WorkflowStep;
 use Modules\Newsletter\Models\WorkflowStepLog;
@@ -24,7 +25,7 @@ class WorkflowController extends Controller
     {
         $workflows = EmailWorkflow::withCount(['steps', 'enrollments'])
             ->latest()
-            ->paginate(15);
+            ->paginate((int) Settings::get('newsletter.workflows_per_page', 15));
 
         return view('newsletter::admin.workflows.index', compact('workflows'));
     }

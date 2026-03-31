@@ -11,6 +11,7 @@ use Modules\Directory\Models\ToolReport;
 use Modules\Directory\Models\ToolResource;
 use Modules\Directory\Models\ToolReview;
 use Modules\Directory\Services\ReputationService;
+use Modules\Settings\Facades\Settings;
 
 class ModerationController extends Controller
 {
@@ -101,7 +102,7 @@ class ModerationController extends Controller
 
     public function resources(): View
     {
-        $resources = ToolResource::with('user', 'tool')->latest()->paginate(20);
+        $resources = ToolResource::with('user', 'tool')->latest()->paginate((int) Settings::get('directory.moderation_per_page', 20));
 
         return view('directory::admin.resources', compact('resources'));
     }

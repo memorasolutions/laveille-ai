@@ -11,12 +11,13 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\RssFetcherService;
+use Modules\Settings\Facades\Settings;
 
 class AdminNewsController extends Controller
 {
     public function index(): View
     {
-        $sources = NewsSource::withCount('articles')->paginate(20);
+        $sources = NewsSource::withCount('articles')->paginate((int) Settings::get('news.admin_per_page', 20));
 
         return view('news::admin.sources.index', compact('sources'));
     }

@@ -13,6 +13,7 @@ namespace Modules\Health\Http\Controllers\Admin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Settings\Facades\Settings;
 use Illuminate\View\View;
 use Modules\Health\Models\HealthIncident;
 
@@ -20,7 +21,7 @@ class IncidentController extends Controller
 {
     public function index(): View
     {
-        $incidents = HealthIncident::orderByDesc('created_at')->paginate(15);
+        $incidents = HealthIncident::orderByDesc('created_at')->paginate((int) Settings::get('health.incidents_per_page', 15));
 
         return view('health::admin.incidents.index', compact('incidents'));
     }

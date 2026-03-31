@@ -18,6 +18,7 @@ use Illuminate\View\View;
 use Modules\AI\Models\KnowledgeDocument;
 use Modules\AI\Models\KnowledgeUrl;
 use Modules\AI\Services\WebScraperService;
+use Modules\Settings\Facades\Settings;
 
 class KnowledgeUrlController extends Controller
 {
@@ -43,7 +44,7 @@ class KnowledgeUrlController extends Controller
             });
         }
 
-        $urls = $query->paginate(20)->appends($request->query());
+        $urls = $query->paginate((int) Settings::get('ai.knowledge_urls_per_page', 20))->appends($request->query());
 
         return view('ai::admin.urls.index', compact('urls'));
     }

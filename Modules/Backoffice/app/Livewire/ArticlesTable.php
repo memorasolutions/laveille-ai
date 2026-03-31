@@ -14,6 +14,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Blog\Models\Article;
+use Modules\Settings\Facades\Settings;
 use Modules\Blog\Models\Category;
 use Modules\Blog\States\ArchivedArticleState;
 use Modules\Blog\States\DraftArticleState;
@@ -128,7 +129,7 @@ class ArticlesTable extends Component
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterCategory, fn ($q) => $q->where('category_id', $this->filterCategory))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15)
+            ->paginate((int) Settings::get('backoffice.articles_per_page', 15))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -141,7 +142,7 @@ class ArticlesTable extends Component
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->when($this->filterCategory, fn ($q) => $q->where('category_id', $this->filterCategory))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15);
+            ->paginate((int) Settings::get('backoffice.articles_per_page', 15));
 
         $categories = Category::active()->orderBy('name')->get();
 

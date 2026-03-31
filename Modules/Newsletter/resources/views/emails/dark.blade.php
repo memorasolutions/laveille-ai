@@ -24,7 +24,7 @@
 <!-- Subject bar -->
 <tr><td style="padding:20px 30px;background-color:#1e293b;border-radius:8px 8px 0 0;border-left:4px solid #0ea5e9;" class="mobile-p">
 <h1 style="margin:0;font-size:22px;color:#f1f5f9;font-weight:700;line-height:1.4;">{{ $subject }}</h1>
-<p style="margin:8px 0 0;font-size:13px;color:#64748b;">{{ now()->translatedFormat('d F Y') }} - La veille de Stef</p>
+<p style="margin:8px 0 0;font-size:13px;color:#64748b;">{{ now()->translatedFormat('d F Y') }} - {{ config('app.name') }}</p>
 </td></tr>
 
 <!-- Content -->
@@ -39,7 +39,7 @@
 <tr><td align="center" style="padding:0 30px;">
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td align="center" style="background:linear-gradient(135deg,#0ea5e9,#f97316);border-radius:6px;padding:14px 30px;">
-<a href="https://laveille.ai" style="color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;">Visiter laveille.ai</a>
+<a href="{{ config('app.url') }}" style="color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;">Visiter {{ str_replace(['https://', 'http://'], '', config('app.url')) }}</a>
 </td></tr>
 </table>
 </td></tr>
@@ -49,9 +49,9 @@
 
 <!-- Footer -->
 <tr><td style="padding:20px;text-align:center;font-size:12px;color:#475569;">
-<a href="https://www.facebook.com/LaVeilleDeStef" style="color:#64748b;text-decoration:none;">Facebook</a> &nbsp;|&nbsp; <a href="https://laveille.ai" style="color:#64748b;text-decoration:none;">Site web</a>
-<p style="margin:10px 0 5px;">&copy; {{ date('Y') }} La veille. Tous droits reserves.</p>
-<p style="margin:0 0 10px;">L'Ancienne-Lorette, QC, Canada</p>
+<a href="{{ \Modules\Settings\Facades\Settings::get('social.facebook_page_url', 'https://www.facebook.com/LaVeilleDeStef') }}" style="color:#64748b;text-decoration:none;">Facebook</a> &nbsp;|&nbsp; <a href="{{ config('app.url') }}" style="color:#64748b;text-decoration:none;">Site web</a>
+<p style="margin:10px 0 5px;">&copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits reserves.</p>
+<p style="margin:0 0 10px;">{{ \Modules\Settings\Facades\Settings::get('contact.address', "L'Ancienne-Lorette, QC, Canada") }}</p>
 <a href="{{ $unsubscribeUrl }}" style="color:#f97316;text-decoration:underline;">Se desabonner</a>
 </td></tr>
 

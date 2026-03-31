@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\AI\Models\KnowledgeDocument;
 use Modules\AI\Services\KnowledgeBaseService;
+use Modules\Settings\Facades\Settings;
 
 class KnowledgeBaseController extends Controller
 {
@@ -38,7 +39,7 @@ class KnowledgeBaseController extends Controller
             $query->where('title', 'like', '%'.$search.'%');
         }
 
-        $documents = $query->paginate(20)->appends($request->query());
+        $documents = $query->paginate((int) Settings::get('ai.knowledge_base_per_page', 20))->appends($request->query());
 
         return view('ai::admin.knowledge.index', compact('documents'));
     }

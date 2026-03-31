@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Modules\ShortUrl\Models\ShortUrl;
 use Modules\ShortUrl\Models\ShortUrlDomain;
+use Modules\Settings\Facades\Settings;
 use Modules\ShortUrl\Services\ShortUrlService;
 
 class ShortUrlController
@@ -28,7 +29,7 @@ class ShortUrlController
     {
         $shortUrls = ShortUrl::with(['user', 'domain'])
             ->orderByDesc('created_at')
-            ->paginate(20);
+            ->paginate((int) Settings::get('shorturl.admin_per_page', 20));
 
         return view('shorturl::admin.index', compact('shortUrls'));
     }

@@ -16,12 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Modules\Notifications\Notifications\SystemAlertNotification;
+use Modules\Settings\Facades\Settings;
 
 class NotificationController
 {
     public function index(): View
     {
-        $notifications = auth()->user()->notifications()->paginate(20);
+        $notifications = auth()->user()->notifications()->paginate((int) Settings::get('backoffice.notifications_per_page', 20));
 
         return view('backoffice::notifications.index', compact('notifications'));
     }

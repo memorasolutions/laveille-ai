@@ -14,12 +14,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Auth\Models\BlockedIp;
+use Modules\Settings\Facades\Settings;
 
 class BlockedIpController
 {
     public function index(): View
     {
-        $blockedIps = BlockedIp::latest()->paginate(25);
+        $blockedIps = BlockedIp::latest()->paginate((int) Settings::get('backoffice.blocked_ips_per_page', 25));
 
         return view('backoffice::blocked-ips.index', [
             'title' => 'IPs bloquées',

@@ -14,13 +14,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Modules\Backoffice\Http\Requests\StoreSettingRequest;
 use Modules\Backoffice\Http\Requests\UpdateSettingRequest;
+use Modules\Settings\Facades\Settings;
 use Modules\Settings\Models\Setting;
 
 class SettingController
 {
     public function index(): View
     {
-        $settings = Setting::orderBy('group')->orderBy('key')->paginate(25);
+        $settings = Setting::orderBy('group')->orderBy('key')->paginate((int) Settings::get('backoffice.settings_per_page', 25));
 
         return view('backoffice::settings.index', compact('settings'));
     }

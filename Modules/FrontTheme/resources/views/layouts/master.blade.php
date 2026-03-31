@@ -15,9 +15,9 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}">
     <title>@yield('title', config('app.name'))</title>
-    <meta name="description" content="@yield('meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.')">
+    <meta name="description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.'))">
     <meta property="og:title" content="@yield('title', config('app.name'))">
-    <meta property="og:description" content="@yield('meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.')">
+    <meta property="og:description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.'))">
     <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:url" content="{{ url()->current() }}">
     @hasSection('og_image')

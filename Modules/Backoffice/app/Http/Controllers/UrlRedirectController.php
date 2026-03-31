@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Modules\SEO\Models\UrlRedirect;
+use Modules\Settings\Facades\Settings;
 
 class UrlRedirectController extends Controller
 {
@@ -29,7 +30,7 @@ class UrlRedirectController extends Controller
                 });
             })
             ->orderByDesc('updated_at')
-            ->paginate(25)
+            ->paginate((int) Settings::get('backoffice.url_redirects_per_page', 25))
             ->withQueryString();
 
         return view('seo::admin.redirects.index', compact('redirects'));

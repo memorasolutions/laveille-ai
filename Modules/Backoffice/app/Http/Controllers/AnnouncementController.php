@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Core\Models\Announcement;
+use Modules\Settings\Facades\Settings;
 
 class AnnouncementController extends Controller
 {
@@ -24,7 +25,7 @@ class AnnouncementController extends Controller
             ->when($request->type, fn ($q, $type) => $q->where('type', $type))
             ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%"))
             ->orderByDesc('created_at')
-            ->paginate(25)
+            ->paginate((int) Settings::get('backoffice.announcements_per_page', 25))
             ->withQueryString();
 
         return view('core::admin.announcements.index', compact('announcements'));

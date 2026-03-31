@@ -11,12 +11,13 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Dictionary\Models\Category;
 use Modules\Dictionary\Models\Term;
+use Modules\Settings\Facades\Settings;
 
 class TermAdminController extends Controller
 {
     public function index(): View
     {
-        $terms = Term::with('category')->orderBy('name->'.app()->getLocale())->paginate(20);
+        $terms = Term::with('category')->orderBy('name->'.app()->getLocale())->paginate((int) Settings::get('dictionary.terms_per_page', 20));
 
         return view('dictionary::admin.index', compact('terms'));
     }

@@ -14,6 +14,7 @@ use App\Models\User;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Settings\Facades\Settings;
 use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogsTable extends Component
@@ -105,7 +106,7 @@ class ActivityLogsTable extends Component
             ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
             ->orderBy('created_at', 'desc')
-            ->paginate(30);
+            ->paginate((int) Settings::get('backoffice.activity_logs_per_page', 30));
 
         $users = User::orderBy('name')->get(['id', 'name']);
         $logNames = Activity::distinct()->orderBy('log_name')->pluck('log_name');

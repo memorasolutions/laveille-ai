@@ -15,6 +15,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\SEO\Models\MetaTag;
+use Modules\Settings\Facades\Settings;
 
 class MetaTagsTable extends Component
 {
@@ -65,7 +66,7 @@ class MetaTagsTable extends Component
         ))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15);
+            ->paginate((int) Settings::get('backoffice.meta_tags_per_page', 15));
 
         return view('backoffice::livewire.meta-tags-table', compact('metaTags'));
     }

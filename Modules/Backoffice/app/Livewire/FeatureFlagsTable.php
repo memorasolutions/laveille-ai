@@ -15,6 +15,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Backoffice\Models\FeatureFlagCondition;
+use Modules\Settings\Facades\Settings;
 use Spatie\Permission\Models\Role;
 
 class FeatureFlagsTable extends Component
@@ -115,7 +116,7 @@ class FeatureFlagsTable extends Component
             ->where('scope', 'global')
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate((int) Settings::get('backoffice.feature_flags_per_page', 20));
 
         $knownFeatures = $this->knownFeatures;
         $conditions = FeatureFlagCondition::all()->keyBy('feature_name');

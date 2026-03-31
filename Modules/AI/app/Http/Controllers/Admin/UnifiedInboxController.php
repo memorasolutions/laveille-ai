@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\AI\Models\Channel;
 use Modules\AI\Models\ChannelMessage;
+use Modules\Settings\Facades\Settings;
 
 class UnifiedInboxController extends Controller
 {
@@ -33,7 +34,7 @@ class UnifiedInboxController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        $messages = $query->paginate(30);
+        $messages = $query->paginate((int) Settings::get('ai.unified_inbox_per_page', 30));
         $channels = Channel::active()->get();
 
         return view('ai::admin.inbox.index', compact('messages', 'channels'));

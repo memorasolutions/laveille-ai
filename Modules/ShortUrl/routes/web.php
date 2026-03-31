@@ -66,20 +66,26 @@ Route::middleware($frontMiddleware + ['auth'])
         Route::delete('/{short_url}', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'destroy'])->name('destroy');
     });
 
-// ── Routes domaine veille.la (redirection slug + racine → laveille.ai) ──
-Route::middleware(['web'])->domain('veille.la')->group(function () {
-    Route::get('/', fn () => redirect('https://laveille.ai', 301));
-    Route::get('/{slug}', ShortUrlRedirectController::class)->name('short-url.veille-redirect')
-        ->where('slug', '[a-zA-Z0-9\-_]+');
-    Route::post('/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
-        ->name('short-url.veille-password');
-});
+// ── Routes domaines raccourcisseur (dynamique depuis table short_url_domains) ──
+try {
+    $domains = \Illuminate\Support\Facades\Cache::remember('active_short_url_domains', 3600, function () {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('short_url_domains')) {
+            return collect();
+        }
 
-// ── Routes domaine go3.ca (redirection slug + racine → laveille.ai) ──
-Route::middleware(['web'])->domain('go3.ca')->group(function () {
-    Route::get('/', fn () => redirect('https://laveille.ai', 301));
-    Route::get('/{slug}', ShortUrlRedirectController::class)->name('short-url.go3-redirect')
-        ->where('slug', '[a-zA-Z0-9\-_]+');
-    Route::post('/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
-        ->name('short-url.go3-password');
-});
+        return \Modules\ShortUrl\Models\ShortUrlDomain::active()->pluck('domain');
+    });
+
+    foreach ($domains as $domain) {
+        Route::middleware(['web'])->domain($domain)->group(function () use ($domain) {
+            Route::get('/', fn () => redirect(config('app.url'), 301));
+            Route::get('/{slug}', ShortUrlRedirectController::class)
+                ->name("short-url.{$domain}-redirect")
+                ->where('slug', '[a-zA-Z0-9\-_]+');
+            Route::post('/{slug}/password', [ShortUrlRedirectController::class, 'checkPassword'])
+                ->name("short-url.{$domain}-password");
+        });
+    }
+} catch (\Exception $e) {
+    // Silencieux si table absente (fresh install)
+}

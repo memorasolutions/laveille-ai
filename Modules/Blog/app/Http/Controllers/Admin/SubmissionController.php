@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Modules\Blog\Models\Article;
+use Modules\Settings\Facades\Settings;
 
 class SubmissionController extends Controller
 {
@@ -22,7 +23,7 @@ class SubmissionController extends Controller
             ->with('submittedByUser', 'blogCategory')
             ->orderByRaw("FIELD(submission_status, 'pending', 'approved', 'rejected')")
             ->orderByDesc('created_at')
-            ->paginate(20);
+            ->paginate((int) Settings::get('blog.submissions_per_page', 20));
 
         return view('blog::admin.submissions.index', compact('submissions'));
     }

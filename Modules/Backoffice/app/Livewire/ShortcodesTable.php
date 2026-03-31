@@ -16,6 +16,7 @@ use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\Editor\Models\Shortcode;
+use Modules\Settings\Facades\Settings;
 
 class ShortcodesTable extends Component
 {
@@ -66,7 +67,7 @@ class ShortcodesTable extends Component
                     ->orWhere('name', 'like', "%{$this->search}%");
             })
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15)
+            ->paginate((int) Settings::get('backoffice.shortcodes_per_page', 15))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -80,7 +81,7 @@ class ShortcodesTable extends Component
                     ->orWhere('name', 'like', "%{$this->search}%");
             })
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15);
+            ->paginate((int) Settings::get('backoffice.shortcodes_per_page', 15));
 
         return view('backoffice::livewire.shortcodes-table', ['shortcodes' => $shortcodes]);
     }

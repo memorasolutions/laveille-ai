@@ -15,6 +15,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\Pages\Models\StaticPage;
+use Modules\Settings\Facades\Settings;
 
 class StaticPagesTable extends Component
 {
@@ -61,7 +62,7 @@ class StaticPagesTable extends Component
             ->when($this->search, fn ($q) => $q->where('title->'.app()->getLocale(), 'like', "%{$this->search}%"))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15);
+            ->paginate((int) Settings::get('pages.static_pages_per_page', 15));
 
         return view('pages::livewire.static-pages-table', compact('pages'));
     }

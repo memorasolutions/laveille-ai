@@ -15,6 +15,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Newsletter\Models\Subscriber;
+use Modules\Settings\Facades\Settings;
 
 class SubscribersTable extends Component
 {
@@ -76,7 +77,7 @@ class SubscribersTable extends Component
             ->when($this->filterStatus === 'pending', fn ($q) => $q->whereNull('confirmed_at')->whereNull('unsubscribed_at'))
             ->when($this->filterStatus === 'unsubscribed', fn ($q) => $q->whereNotNull('unsubscribed_at'))
             ->latest()
-            ->paginate(20)
+            ->paginate((int) Settings::get('backoffice.subscribers_per_page', 20))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -94,7 +95,7 @@ class SubscribersTable extends Component
             ->when($this->filterStatus === 'unsubscribed', fn ($q) => $q->whereNotNull('unsubscribed_at'))
             ->latest();
 
-        $subscribers = $query->paginate(20);
+        $subscribers = $query->paginate((int) Settings::get('backoffice.subscribers_per_page', 20));
         $totalCount = Subscriber::count();
         $activeCount = Subscriber::whereNotNull('confirmed_at')->whereNull('unsubscribed_at')->count();
         $pendingCount = Subscriber::whereNull('confirmed_at')->whereNull('unsubscribed_at')->count();

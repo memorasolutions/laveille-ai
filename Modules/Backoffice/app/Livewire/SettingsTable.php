@@ -14,6 +14,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasTableSorting;
+use Modules\Settings\Facades\Settings;
 use Modules\Settings\Models\Setting;
 
 class SettingsTable extends Component
@@ -63,7 +64,7 @@ class SettingsTable extends Component
         ))
             ->when($this->filterGroup, fn ($q) => $q->where('group', $this->filterGroup))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(20);
+            ->paginate((int) Settings::get('backoffice.settings_table_per_page', 20));
 
         return view('backoffice::livewire.settings-table', compact('settings', 'groups'));
     }

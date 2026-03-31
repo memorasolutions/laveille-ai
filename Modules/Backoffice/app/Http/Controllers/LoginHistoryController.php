@@ -12,6 +12,7 @@ namespace Modules\Backoffice\Http\Controllers;
 
 use Illuminate\View\View;
 use Modules\Auth\Models\LoginAttempt;
+use Modules\Settings\Facades\Settings;
 
 class LoginHistoryController
 {
@@ -19,7 +20,7 @@ class LoginHistoryController
     {
         $attempts = LoginAttempt::with('user')
             ->latest('logged_in_at')
-            ->paginate(30);
+            ->paginate((int) Settings::get('backoffice.login_history_per_page', 30));
 
         return view('backoffice::login-history.index', [
             'title' => 'Historique des connexions',

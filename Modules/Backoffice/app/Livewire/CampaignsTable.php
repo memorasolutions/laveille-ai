@@ -15,6 +15,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Newsletter\Models\Campaign;
+use Modules\Settings\Facades\Settings;
 use Modules\Newsletter\States\DraftCampaignState;
 use Modules\Newsletter\States\SentCampaignState;
 use Spatie\ModelStates\Exceptions\CouldNotPerformTransition;
@@ -90,7 +91,7 @@ class CampaignsTable extends Component
             ->when($this->search, fn ($q) => $q->where('subject', 'like', '%'.$this->search.'%'))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate(15)
+            ->paginate((int) Settings::get('backoffice.campaigns_per_page', 15))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -102,7 +103,7 @@ class CampaignsTable extends Component
             ->when($this->search, fn ($q) => $q->where('subject', 'like', '%'.$this->search.'%'))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate(15);
+            ->paginate((int) Settings::get('backoffice.campaigns_per_page', 15));
 
         return view('backoffice::livewire.campaigns-table', compact('campaigns'));
     }

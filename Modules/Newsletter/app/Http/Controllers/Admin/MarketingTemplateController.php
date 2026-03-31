@@ -13,6 +13,7 @@ namespace Modules\Newsletter\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Notifications\Models\EmailTemplate;
+use Modules\Settings\Facades\Settings;
 
 class MarketingTemplateController extends Controller
 {
@@ -20,7 +21,7 @@ class MarketingTemplateController extends Controller
     {
         $templates = EmailTemplate::where('module', 'newsletter')
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate((int) Settings::get('newsletter.marketing_templates_per_page', 15));
 
         return view('newsletter::admin.templates.index', compact('templates'));
     }

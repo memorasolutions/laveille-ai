@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
 use Modules\Core\Shared\Traits\ParsesTags;
+use Modules\Settings\Facades\Settings;
 
 class UserArticleController extends Controller
 {
@@ -31,7 +32,7 @@ class UserArticleController extends Controller
     {
         $articles = Article::where('user_id', auth()->id())
             ->latest()
-            ->paginate(10);
+            ->paginate((int) Settings::get('auth.user_articles_per_page', 10));
 
         return view('auth::articles.index', compact('articles'));
     }

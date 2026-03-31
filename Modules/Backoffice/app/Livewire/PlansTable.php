@@ -16,6 +16,7 @@ use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Core\Traits\HasTableSorting;
 use Modules\SaaS\Models\Plan;
+use Modules\Settings\Facades\Settings;
 
 class PlansTable extends Component
 {
@@ -96,7 +97,7 @@ class PlansTable extends Component
             ->when($this->filterInterval, fn ($q) => $q->where('interval', $this->filterInterval))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15)
+            ->paginate((int) Settings::get('backoffice.plans_per_page', 15))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -111,7 +112,7 @@ class PlansTable extends Component
             ->when($this->filterInterval, fn ($q) => $q->where('interval', $this->filterInterval))
             ->when($this->filterActive !== '', fn ($q) => $q->where('is_active', (bool) $this->filterActive))
             ->orderBy($this->sortBy, $this->sortDirection)
-            ->paginate(15);
+            ->paginate((int) Settings::get('backoffice.plans_per_page', 15));
 
         return view('backoffice::livewire.plans-table', compact('plans'));
     }

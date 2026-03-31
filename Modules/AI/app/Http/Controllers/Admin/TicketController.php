@@ -24,6 +24,7 @@ use Modules\AI\Models\SlaPolicy;
 use Modules\AI\Models\Ticket;
 use Modules\AI\Models\TicketReply;
 use Modules\AI\Models\TicketTag;
+use Modules\Settings\Facades\Settings;
 
 class TicketController extends Controller
 {
@@ -44,7 +45,7 @@ class TicketController extends Controller
             $query->where('category', $category);
         }
 
-        $tickets = $query->paginate(20);
+        $tickets = $query->paginate((int) Settings::get('ai.tickets_per_page', 20));
 
         return view('ai::admin.tickets.index', compact('tickets'));
     }

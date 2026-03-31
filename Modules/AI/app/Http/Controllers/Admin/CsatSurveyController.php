@@ -16,12 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\AI\Models\CsatSurvey;
+use Modules\Settings\Facades\Settings;
 
 class CsatSurveyController extends Controller
 {
     public function index(): View
     {
-        $surveys = CsatSurvey::with('ticket', 'user')->latest()->paginate(30);
+        $surveys = CsatSurvey::with('ticket', 'user')->latest()->paginate((int) Settings::get('ai.csat_surveys_per_page', 30));
         $avgScore = CsatSurvey::averageScore();
         $totalSurveys = CsatSurvey::count();
 

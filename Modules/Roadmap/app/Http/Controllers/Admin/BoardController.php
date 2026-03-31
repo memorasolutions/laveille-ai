@@ -14,12 +14,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Modules\Roadmap\Models\Board;
+use Modules\Settings\Facades\Settings;
 
 class BoardController extends Controller
 {
     public function index()
     {
-        $boards = Board::ordered()->withCount('ideas')->paginate(20);
+        $boards = Board::ordered()->withCount('ideas')->paginate((int) Settings::get('roadmap.boards_per_page', 20));
 
         return view('roadmap::admin.boards.index', compact('boards'));
     }

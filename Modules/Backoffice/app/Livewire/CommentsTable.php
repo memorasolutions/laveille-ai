@@ -14,6 +14,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Blog\Models\Comment;
+use Modules\Settings\Facades\Settings;
 use Modules\Blog\States\ApprovedCommentState;
 use Modules\Blog\States\PendingCommentState;
 use Modules\Blog\States\SpamCommentState;
@@ -120,7 +121,7 @@ class CommentsTable extends Component
             ))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate(20)
+            ->paginate((int) Settings::get('backoffice.comments_per_page', 20))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
@@ -137,7 +138,7 @@ class CommentsTable extends Component
             ))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
-            ->paginate(20);
+            ->paginate((int) Settings::get('backoffice.comments_per_page', 20));
 
         return view('backoffice::livewire.comments-table', compact('comments'));
     }

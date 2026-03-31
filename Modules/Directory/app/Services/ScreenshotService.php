@@ -189,9 +189,9 @@ class ScreenshotService
             $nameY = (int) (($h + $textH) / 2) - 20;
             imagettftext($img, $fontSize, 0, $nameX, $nameY, $white, $fontBold, $name);
 
-            // "laveille.ai" en sous-titre
+            // Sous-titre dynamique
             $subSize = 18;
-            $sub = 'laveille.ai';
+            $sub = str_replace(['https://', 'http://'], '', config('app.url'));
             $subBbox = imagettfbbox($subSize, 0, $fontRegular, $sub);
             $subW = $subBbox[2] - $subBbox[0];
             $subX = (int) (($w - $subW) / 2);
@@ -213,7 +213,8 @@ class ScreenshotService
             $y = (int) (($h - $scaledH) / 2) - 20;
             imagecopyresized($img, $textImg, max($x, 10), $y, 0, 0, min($scaledW, $w - 20), $scaledH, $textW, $charH);
             imagedestroy($textImg);
-            imagestring($img, 3, (int) (($w - strlen('laveille.ai') * imagefontwidth(3)) / 2), $y + $scaledH + 20, 'laveille.ai', $white);
+            $subLabel = str_replace(['https://', 'http://'], '', config('app.url'));
+            imagestring($img, 3, (int) (($w - strlen($subLabel) * imagefontwidth(3)) / 2), $y + $scaledH + 20, $subLabel, $white);
         }
 
         imagejpeg($img, $path, 90);

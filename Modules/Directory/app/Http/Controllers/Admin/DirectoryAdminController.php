@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Services\ScreenshotService;
+use Modules\Settings\Facades\Settings;
 
 class DirectoryAdminController extends Controller
 {
@@ -29,7 +30,7 @@ class DirectoryAdminController extends Controller
             $query->where('status', $request->status);
         }
 
-        $tools = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
+        $tools = $query->orderByDesc('created_at')->paginate((int) Settings::get('directory.admin_per_page', 20))->withQueryString();
 
         return view('directory::admin.index', compact('tools'));
     }

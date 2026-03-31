@@ -13,6 +13,7 @@ namespace Modules\Auth\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+use Modules\Settings\Facades\Settings;
 use Spatie\Activitylog\Models\Activity;
 
 class UserActivityController extends Controller
@@ -21,7 +22,7 @@ class UserActivityController extends Controller
     {
         $activities = Activity::causedBy(auth()->user())
             ->latest()
-            ->paginate(20);
+            ->paginate((int) Settings::get('auth.user_activity_per_page', 20));
 
         return view('auth::activity.index', ['activities' => $activities]);
     }

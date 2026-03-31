@@ -42,9 +42,9 @@
 
 <!-- Footer -->
 <tr><td style="padding:30px;background-color:#1e293b;color:#94a3b8;font-size:13px;text-align:center;">
-<a href="https://www.facebook.com/LaVeilleDeStef" style="text-decoration:none;color:#94a3b8;">Facebook</a> &nbsp;|&nbsp; <a href="https://laveille.ai" style="text-decoration:none;color:#94a3b8;">laveille.ai</a>
-<p style="margin:15px 0 5px;">&copy; {{ date('Y') }} La veille. Tous droits reserves.</p>
-<p style="margin:0 0 15px;">L'Ancienne-Lorette, QC, Canada</p>
+<a href="{{ \Modules\Settings\Facades\Settings::get('social.facebook_page_url', 'https://www.facebook.com/LaVeilleDeStef') }}" style="text-decoration:none;color:#94a3b8;">Facebook</a> &nbsp;|&nbsp; <a href="{{ config('app.url') }}" style="text-decoration:none;color:#94a3b8;">{{ str_replace(['https://', 'http://'], '', config('app.url')) }}</a>
+<p style="margin:15px 0 5px;">&copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits reserves.</p>
+<p style="margin:0 0 15px;">{{ \Modules\Settings\Facades\Settings::get('contact.address', "L'Ancienne-Lorette, QC, Canada") }}</p>
 <a href="{{ $unsubscribeUrl }}" style="color:#f97316;text-decoration:underline;font-size:12px;">Se desabonner</a>
 </td></tr>
 

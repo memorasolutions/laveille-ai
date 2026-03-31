@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\AI\Enums\ConversationStatus;
 use Modules\AI\Models\AiConversation;
+use Modules\Settings\Facades\Settings;
 
 class ConversationController extends Controller
 {
@@ -44,7 +45,7 @@ class ConversationController extends Controller
             $query->whereDate('created_at', '<=', $request->input('date_to'));
         }
 
-        $conversations = $query->paginate(20)->appends($request->query());
+        $conversations = $query->paginate((int) Settings::get('ai.conversations_per_page', 20))->appends($request->query());
 
         $statusCounts = [];
         foreach (ConversationStatus::cases() as $status) {

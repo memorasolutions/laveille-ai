@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Modules\ShortUrl\Models\ShortUrl;
+use Modules\Settings\Facades\Settings;
 use Modules\ShortUrl\Services\ShortUrlService;
 
 class UserShortUrlController
@@ -30,7 +31,7 @@ class UserShortUrlController
         $shortUrls = ShortUrl::where('user_id', auth()->id())
             ->with('domain')
             ->latest()
-            ->paginate(20);
+            ->paginate((int) Settings::get('shorturl.user_per_page', 20));
 
         return view('shorturl::user.index', compact('shortUrls'));
     }

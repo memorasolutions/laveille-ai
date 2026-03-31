@@ -16,6 +16,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasTableSorting;
+use Modules\Settings\Facades\Settings;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaTable extends Component
@@ -156,7 +157,7 @@ class MediaTable extends Component
             $query->where('custom_properties->folder', $this->filterFolder);
         }
 
-        $media = $query->orderBy($this->sortBy, $this->sortDirection)->paginate(20);
+        $media = $query->orderBy($this->sortBy, $this->sortDirection)->paginate((int) Settings::get('backoffice.media_per_page', 20));
 
         // Get distinct folders for the filter dropdown (DB-agnostic, works with SQLite + MySQL)
         $folders = Media::query()

@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+use Modules\Settings\Facades\Settings;
 
 class ContactMessageController extends Controller
 {
@@ -35,7 +36,7 @@ class ContactMessageController extends Controller
             });
         }
 
-        $messages = $query->paginate(20);
+        $messages = $query->paginate((int) Settings::get('backoffice.contact_messages_per_page', 20));
         $unreadCount = ContactMessage::unread()->count();
 
         return view('backoffice::themes.backend.contact-messages.index', compact('messages', 'unreadCount'));
