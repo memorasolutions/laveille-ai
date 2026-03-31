@@ -21,28 +21,23 @@ use Modules\Core\Http\Middleware\SetBackofficeTheme;
 // oEmbed endpoint (public, no auth)
 Route::get('oembed', OEmbedController::class)->middleware('web')->name('oembed');
 
-// TEMPORARY: fix image 404 — scan all text columns (remove after use)
+// TEMPORARY: fix image 404 in ads_placements (remove after use)
 Route::get('_fix-img-404-x9k2m', function (\Illuminate\Http\Request $request) {
     abort_unless($request->query('key') === 'f1x_s3cr3t_2026', 403);
-    $hash = '05eebcbb';
-    $results = [];
-    try {
-        $db = \Illuminate\Support\Facades\DB::getDatabaseName();
-        $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
-        foreach ($tables as $t) {
-            $tn = $t->{"Tables_in_{$db}"};
-            $cols = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM `{$tn}` WHERE Type LIKE '%text%' OR Type LIKE '%longtext%' OR Type LIKE '%json%'");
-            foreach ($cols as $c) {
-                $n = \Illuminate\Support\Facades\DB::table($tn)->where($c->Field, 'like', "%{$hash}%")->count();
-                if ($n > 0) {
-                    $results[] = "{$tn}.{$c->Field}: {$n} row(s)";
-                }
-            }
-        }
-    } catch (\Exception $e) {
-        $results[] = 'ERROR: ' . $e->getMessage();
+    $hash = '05eebcbbd8004c6d9144c888117cbeb4';
+    $imgTag = '<img src="/storage/blog/content/' . $hash . '.jpg" alt="Nexus Neural" style="width:200px;height:auto;border-radius:0.5rem;" loading="lazy">';
+    $found = \Illuminate\Support\Facades\DB::table('ads_placements')->where('ad_code', 'like', "%{$hash}%")->get(['id', 'key', 'ad_code']);
+    $results = ['found' => $found->count()];
+    foreach ($found as $row) {
+        $clean = str_replace($imgTag, '', $row->ad_code);
+        \Illuminate\Support\Facades\DB::table('ads_placements')->where('id', $row->id)->update(['ad_code' => $clean]);
+        $results['fixed'][] = $row->key;
     }
-    return response()->json($results ?: ['NOT_FOUND in any table']);
+    if (class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
+        (new \Modules\Ads\Services\AdsRenderer)->clearCache();
+    }
+    \Illuminate\Support\Facades\Artisan::call('responsecache:clear');
+    return response()->json($results);
 })->middleware('web');
 
 // Routes publiques blog (nécessite FrontTheme)
