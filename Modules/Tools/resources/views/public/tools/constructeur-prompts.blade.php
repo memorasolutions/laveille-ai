@@ -695,6 +695,7 @@ document.addEventListener('alpine:init', function() {
                         }
                         self.saveName = '';
                         self.saving = false;
+                        window.dispatchEvent(new CustomEvent('toast', { detail: { message: '{{ __("Prompt sauvegardé") }}' } }));
                     })
                     .catch(function() { self.saving = false; self.saveError = '{{ __("Erreur de sauvegarde. Reessayez.") }}'; setTimeout(function() { self.saveError = ''; }, 4000); });
                 } else {
