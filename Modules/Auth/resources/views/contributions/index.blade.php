@@ -53,7 +53,7 @@
             <div>
                 <span style="font-size: 1.5rem;">👥</span>
                 <h3 style="margin: 5px 0 0;">{{ $savedTeamPresets->count() }}</h3>
-                <small>{{ __('Presets équipes') }}</small>
+                <small>{{ __('Configurations équipes') }}</small>
             </div>
         </div>
     </div>
@@ -104,7 +104,7 @@
                 :style="tab === 'team-presets'
                     ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
                     : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
-            👥 {{ __('Presets équipes') }}
+            👥 {{ __('Configurations équipes') }}
             @if($savedTeamPresets->count() > 0)
                 <span style="background: linear-gradient(135deg, #0B7285, #0e7490); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedTeamPresets->count() }}</span>
             @endif
@@ -344,8 +344,8 @@ document.querySelectorAll('.copy-prompt-btn').forEach(function(btn) {
         @if($savedTeamPresets->isEmpty())
             <div style="text-align: center; padding: 40px 20px; color: var(--c-text-muted);">
                 <div style="font-size: 3rem; margin-bottom: 12px;">👥</div>
-                <h3 style="font-family: var(--f-heading); margin-bottom: 8px;">{{ __('Aucun preset sauvegardé') }}</h3>
-                <p>{{ __('Créez des presets dans le générateur d\'équipes pour les retrouver ici.') }}</p>
+                <h3 style="font-family: var(--f-heading); margin-bottom: 8px;">{{ __('Aucune configuration sauvegardée') }}</h3>
+                <p>{{ __('Créez des configurations dans le générateur d\'équipes pour les retrouver ici.') }}</p>
                 @if(Route::has('tools.show'))
                     <a href="{{ route('tools.show', 'generateur-equipes') }}" style="display: inline-block; background: var(--c-primary); color: #fff; padding: 10px 24px; border-radius: var(--r-btn); font-weight: 600; text-decoration: none; margin-top: 12px;">{{ __('Aller au générateur') }}</a>
                 @endif
@@ -385,7 +385,7 @@ document.querySelectorAll('.copy-prompt-btn').forEach(function(btn) {
 document.querySelectorAll('.js-delete-preset').forEach(function(btn) {
     btn.addEventListener('click', function() {
         var id = this.dataset.id;
-        if (!confirm('{{ __("Supprimer ce preset?") }}')) return;
+        if (!confirm('{{ __("Supprimer cette configuration?") }}')) return;
         var card = this.closest('.col-sm-6');
         fetch('/api/team-presets/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
             .then(function() { if (card) card.remove(); });

@@ -17,17 +17,17 @@
                                 @include('tools::partials.fullscreen-btn')
                             </div>
                         </div>
-                        <p class="text-muted mb-3">{{ __('Répartition équitable et aléatoire. Glissez-déposez pour ajuster, excluez des paires, sauvegardez vos presets.') }}</p>
+                        <p class="text-muted mb-3">{{ __('Répartition équitable et aléatoire. Glissez-déposez pour ajuster, excluez des paires, sauvegardez vos configurations.') }}</p>
 
                         {{-- Barre sauvegarde (connectés) --}}
                         <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
                             <div class="d-flex gap-2 align-items-center">
-                                <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce preset pour le retrouver...') }}" aria-label="{{ __('Nom du preset') }}" style="border-radius: 8px;">
+                                <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
                                 <button class="btn btn-sm" @click="saveToAccount()" :disabled="nameList.length < 2 || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
-                                {{ __('Retrouvez vos presets dans') }} <a href="{{ route('user.contributions') }}?tab=team-presets" style="color: var(--c-primary); text-decoration: underline;">{{ __('votre espace personnel') }}</a>.
+                                {{ __('Retrouvez vos configurations dans') }} <a href="{{ route('user.contributions') }}?tab=team-presets" style="color: var(--c-primary); text-decoration: underline;">{{ __('votre espace personnel') }}</a>.
                             </div>
                             <template x-if="saveError">
                                 <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
@@ -35,7 +35,7 @@
                         </div>
                         {{-- Bandeau visiteurs --}}
                         <div x-show="!isAuthenticated" x-cloak style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #0369a1;">
-                            {{ __('Connectez-vous pour sauvegarder vos presets dans votre compte.') }}
+                            {{ __('Connectez-vous pour sauvegarder vos configurations dans votre compte.') }}
                         </div>
 
                         @include('fronttheme::partials.tabs', ['tabs' => [
@@ -108,9 +108,9 @@
 
                             {{-- Presets (localStorage uniquement pour visiteurs, masqué pour connectés qui utilisent la barre en haut) --}}
                             <div class="mb-4" x-show="!isAuthenticated">
-                                <label class="form-label fw-medium">💾 {{ __('Presets sauvegardés') }}</label>
+                                <label class="form-label fw-medium">💾 {{ __('Configurations sauvegardées') }}</label>
                                 <div class="d-flex gap-2 mb-2">
-                                    <input type="text" class="form-control form-control-sm" x-model="presetName" aria-label="Nom du preset" placeholder="{{ __('Nom du preset...') }}">
+                                    <input type="text" class="form-control form-control-sm" x-model="presetName" aria-label="Nom de la configuration" placeholder="{{ __('Nom de la configuration...') }}">
                                     <button class="btn btn-sm" @click="savePreset()" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); white-space: nowrap;">💾 {{ __('Sauvegarder') }}</button>
                                 </div>
                                 <template x-for="(p, i) in presets" :key="i">
@@ -120,7 +120,7 @@
                                         <button class="btn btn-sm btn-outline-danger" @click="deletePreset(i)" style="font-size: 0.7rem;">✕</button>
                                     </div>
                                 </template>
-                                <p class="text-muted mt-1" x-show="presets.length === 0" style="font-size: 0.8rem;">{{ __('Aucun preset sauvegardé.') }}</p>
+                                <p class="text-muted mt-1" x-show="presets.length === 0" style="font-size: 0.8rem;">{{ __('Aucune configuration sauvegardée.') }}</p>
                             </div>
                         </div>
 
@@ -379,7 +379,7 @@ document.addEventListener('alpine:init', function() {
             saveToAccount: function() {
                 if (this.saving || this.nameList.length < 2) return;
                 var self = this;
-                var title = this.saveName.trim() || 'Preset équipes';
+                var title = this.saveName.trim() || 'Configuration équipes';
                 this.saving = true;
                 this.saveError = '';
                 var isEdit = !!this._editingId;
@@ -437,7 +437,7 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 var preset = this.presets[index];
                 if (this.isAuthenticated && preset.id) {
-                    if (!confirm('Supprimer ce preset?')) return;
+                    if (!confirm('Supprimer cette configuration?')) return;
                     fetch('/api/team-presets/' + preset.id, { method: 'DELETE', headers: this._headers() })
                         .then(function() { self.presets.splice(index, 1); });
                 } else {
