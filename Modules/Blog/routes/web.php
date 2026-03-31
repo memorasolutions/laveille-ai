@@ -33,9 +33,7 @@ Route::get('_fix-img-404-x9k2m', function (\Illuminate\Http\Request $request) {
         \Illuminate\Support\Facades\DB::table('ads_placements')->where('id', $row->id)->update(['ad_code' => $clean]);
         $results['fixed'][] = $row->key;
     }
-    if (class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
-        (new \Modules\Ads\Services\AdsRenderer)->clearCache();
-    }
+    \Illuminate\Support\Facades\Cache::flush();
     \Illuminate\Support\Facades\Artisan::call('responsecache:clear');
     return response()->json($results);
 })->middleware('web');
