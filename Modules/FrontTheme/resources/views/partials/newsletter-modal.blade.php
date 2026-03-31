@@ -21,6 +21,11 @@
                     <input type="text" name="name" placeholder="{{ __('Votre prénom (optionnel)') }}" aria-label="{{ __('Prénom') }}" autocomplete="given-name"
                            style="width: 100%; border: 1px solid #dee2e6; border-radius: 8px; padding: 12px 16px; font-size: 15px; font-family: var(--f-body); margin-bottom: 16px; outline: none; transition: border-color 0.2s;">
 
+                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #6b7280; margin-bottom: 14px; cursor: pointer; line-height: 1.4;">
+                        <input type="checkbox" name="consent" required style="margin-top: 2px; flex-shrink: 0;">
+                        {!! __('J\'accepte de recevoir l\'infolettre conformement a la <a href=":url" target="_blank" style="color: var(--c-primary); text-decoration: underline;">politique de confidentialite</a>.', ['url' => route('legal.privacy')]) !!}
+                    </label>
+
                     <div id="newsletterModalMessage" class="alert d-none" style="border-radius: 8px; font-size: 14px;"></div>
 
                     <button type="submit" id="newsletterModalSubmit"

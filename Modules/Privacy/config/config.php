@@ -132,6 +132,20 @@ return [
                     'purpose_en' => 'Consent choices storage',
                     'duration' => '6-12 mois / 6-12 months',
                 ],
+                [
+                    'name' => '__cf_bm',
+                    'provider' => 'Cloudflare',
+                    'purpose_fr' => 'Detection de bots et protection contre les abus (Cloudflare Bot Management)',
+                    'purpose_en' => 'Bot detection and abuse protection (Cloudflare Bot Management)',
+                    'duration' => '30 minutes',
+                ],
+                [
+                    'name' => '__cfruid',
+                    'provider' => 'Cloudflare',
+                    'purpose_fr' => 'Identification de session pour la repartition de charge Cloudflare',
+                    'purpose_en' => 'Session identification for Cloudflare load balancing',
+                    'duration' => 'Session',
+                ],
             ],
         ],
         'analytics' => [

@@ -159,7 +159,7 @@
 
                             {{-- SECTION 20 : LIMITATION RESPONSABILITÉ + CAP --}}
                             <h3 id="responsabilite">{{ __('20. Limitation de responsabilité et plafond de dommages') }}</h3>
-                            <p>{{ __('Étant donné la nature gratuite du service, la responsabilité totale et cumulative de l\'exploitant, de ses employés ou représentants, pour toute réclamation découlant des présentes ou de l\'utilisation du site, est limitée à un montant maximal de zéro dollar canadien (0,00 $ CAN). En aucun cas l\'exploitant ne sera responsable des dommages indirects, spéciaux, punitifs, accessoires ou consécutifs, incluant notamment la perte de profits, la perte de données, l\'interruption des affaires ou les dommages réputationnels.') }}</p>
+                            <p>{{ __('Étant donné la nature gratuite du service, la responsabilité totale et cumulative de l\'exploitant, de ses employés ou représentants, pour toute réclamation découlant des présentes ou de l\'utilisation du site, est limitée à un montant maximal de cent dollars canadiens (100,00 $ CAN). En aucun cas l\'exploitant ne sera responsable des dommages indirects, spéciaux, punitifs, accessoires ou consécutifs, incluant notamment la perte de profits, la perte de données, l\'interruption des affaires ou les dommages réputationnels.') }}</p>
 
                             {{-- SECTION 21 : FORCE MAJEURE --}}
                             <h3 id="force-majeure">{{ __('21. Force majeure') }}</h3>
