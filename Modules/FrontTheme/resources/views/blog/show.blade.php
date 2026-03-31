@@ -8,6 +8,33 @@
     @section('og_image', asset($article->featured_image))
 @endif
 
+@push('head')
+<script type="application/ld+json">
+@php
+$schemaDesc = Str::limit($article->excerpt ?? strip_tags($article->content), 160);
+$schemaData = [
+    '@context' => 'https://schema.org',
+    '@type' => 'BlogPosting',
+    'headline' => $article->title,
+    'description' => $schemaDesc,
+    'datePublished' => $article->published_at?->toIso8601String(),
+    'dateModified' => $article->updated_at->toIso8601String(),
+    'author' => ['@type' => 'Person', 'name' => $article->getAuthorName()],
+    'publisher' => [
+        '@type' => 'Organization',
+        'name' => config('app.name'),
+        'logo' => ['@type' => 'ImageObject', 'url' => asset('images/favicon.png')],
+    ],
+    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => route('blog.show', $article->slug)],
+];
+if ($article->featured_image) {
+    $schemaData['image'] = asset($article->featured_image);
+}
+@endphp
+{!! json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+</script>
+@endpush
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $article->title,
