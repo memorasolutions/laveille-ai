@@ -27,13 +27,19 @@ class ShortUrlRedirectController
         $shortUrl = $this->service->resolve($slug);
 
         if (! $shortUrl) {
-            return redirect()->route('shorturl.create')
-                ->with('warning', __('Ce lien n\'existe pas. Créez le vôtre !'));
+            return response()->view('shorturl::public.expired', [
+                'icon' => '🔗',
+                'title' => __('Lien introuvable'),
+                'message' => __('Ce lien court n\'existe pas ou a été supprimé.'),
+            ], 404);
         }
 
         if (! $shortUrl->isAccessible()) {
-            return redirect()->route('shorturl.create')
-                ->with('warning', __('Ce lien a expiré ou a été désactivé. Créez-en un nouveau !'));
+            return response()->view('shorturl::public.expired', [
+                'icon' => '⏰',
+                'title' => __('Lien expiré'),
+                'message' => __('Ce lien court a expiré ou a été désactivé par son propriétaire.'),
+            ], 410);
         }
 
         if (! empty($shortUrl->password) && ! $request->session()->get("short_url_password_{$shortUrl->id}")) {
