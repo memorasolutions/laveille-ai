@@ -90,6 +90,25 @@ class SitemapController
             });
         }
 
+        // Pages statiques publiques
+        if (Route::has('contact')) {
+            $sitemap->add(Url::create(route('contact'))->setPriority(0.5)->setChangeFrequency('monthly'));
+        }
+        if (Route::has('faq.index')) {
+            $sitemap->add(Url::create(route('faq.index'))->setPriority(0.7)->setChangeFrequency('monthly'));
+        }
+        if (Route::has('resources.index')) {
+            $sitemap->add(Url::create(route('resources.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
+        }
+        if (Route::has('directory.roadmap')) {
+            $sitemap->add(Url::create(route('directory.roadmap'))->setPriority(0.6)->setChangeFrequency('weekly'));
+        }
+
+        // News (si module News actif)
+        if (Route::has('news.index')) {
+            $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));
+        }
+
         return response($sitemap->render(), 200, ['Content-Type' => 'application/xml']);
     }
 }

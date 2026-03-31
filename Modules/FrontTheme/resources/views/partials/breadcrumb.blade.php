@@ -43,3 +43,41 @@
     </div>
 </div>
 <!-- end of wpo-breadcumb-section-->
+
+@push('scripts')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@@type": "ListItem",
+            "position": 1,
+            "name": "{{ __('Accueil') }}",
+            "item": "{{ route('home') }}"
+        }
+        @if(!empty($breadcrumbItems))
+            @foreach($breadcrumbItems as $index => $item)
+                @if($index < count($breadcrumbItems) - 1)
+                    ,{
+                        "@@type": "ListItem",
+                        "position": {{ $index + 2 }},
+                        "name": "{{ $item }}"
+                        @if(isset($breadcrumbRoutes[$item]))
+                            ,"item": "{{ $breadcrumbRoutes[$item] }}"
+                        @endif
+                    }
+                @else
+                    ,{
+                        "@@type": "ListItem",
+                        "position": {{ $index + 2 }},
+                        "name": "{{ $item }}",
+                        "item": "{{ url()->current() }}"
+                    }
+                @endif
+            @endforeach
+        @endif
+    ]
+}
+</script>
+@endpush
