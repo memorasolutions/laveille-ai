@@ -10,11 +10,13 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
+use Modules\Tools\Http\Controllers\PublicPromptController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 
 Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index');
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])->name('tools.show');
+    Route::get('/prompts', [PublicPromptController::class, 'index'])->name('prompts.index');
 });
 
 Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(function () {
