@@ -37,7 +37,7 @@ class MagicLinkController extends Controller
 
     public function sendLink(Request $request): RedirectResponse
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate(['email' => 'required|email|max:255']);
 
         $rateLimitKey = 'magic-link-email:'.sha1($request->email);
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
@@ -48,9 +48,14 @@ class MagicLinkController extends Controller
 
         RateLimiter::hit($rateLimitKey, 3600);
 
+        // Auto-créer le compte si l'email n'existe pas
+        $user = User::firstOrCreate(
+            ['email' => $request->email],
+            ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
+        );
+
         $result = $this->magicLink->generate($request->email);
-        $user = User::where('email', $request->email)->first();
-        $user?->notify(new MagicLinkNotification($result['token']));
+        $user->notify(new MagicLinkNotification($result['token']));
 
         if (app()->environment('local')) {
             session(['dev_magic_code' => $result['token']]);
@@ -64,7 +69,7 @@ class MagicLinkController extends Controller
 
     public function sendSms(Request $request): RedirectResponse
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate(['email' => 'required|email|max:255']);
 
         $smsRateLimitKey = 'magic-link-sms:'.sha1($request->email);
         if (RateLimiter::tooManyAttempts($smsRateLimitKey, 1)) {
@@ -151,12 +156,13 @@ class MagicLinkController extends Controller
      */
     public function sendLinkApi(Request $request): JsonResponse
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate(['email' => 'required|email|max:255']);
 
-        $user = User::where('email', $request->email)->first();
-        if (! $user) {
-            return response()->json(['success' => false, 'message' => __('Aucun compte avec cette adresse. Inscrivez-vous d abord.')], 422);
-        }
+        // Auto-créer le compte si l'email n'existe pas
+        $user = User::firstOrCreate(
+            ['email' => $request->email],
+            ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
+        );
 
         $rateLimitKey = 'magic-link-email:'.sha1($request->email);
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
