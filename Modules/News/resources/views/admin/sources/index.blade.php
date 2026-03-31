@@ -1,4 +1,4 @@
-@extends('backoffice::layouts.master')
+@extends('backoffice::layouts.admin')
 
 @section('content')
 <div class="card">
