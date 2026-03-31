@@ -48,6 +48,15 @@
             </div>
         </div>
     </div>
+    <div class="col-sm-3" style="margin-bottom: 15px;">
+        <div class="user-stat-card">
+            <div>
+                <span style="font-size: 1.5rem;">👥</span>
+                <h3 style="margin: 5px 0 0;">{{ $savedTeamPresets->count() }}</h3>
+                <small>{{ __('Presets équipes') }}</small>
+            </div>
+        </div>
+    </div>
 </div>
 
 {{-- Onglets modernes Alpine.js --}}
@@ -89,6 +98,15 @@
             ✨ {{ __('Prompts') }}
             @if($savedPrompts->count() > 0)
                 <span style="background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedPrompts->count() }}</span>
+            @endif
+        </button>
+        <button @click="tab = 'team-presets'" class="btn"
+                :style="tab === 'team-presets'
+                    ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
+                    : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
+            👥 {{ __('Presets équipes') }}
+            @if($savedTeamPresets->count() > 0)
+                <span style="background: linear-gradient(135deg, #0B7285, #0e7490); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedTeamPresets->count() }}</span>
             @endif
         </button>
     </div>
@@ -317,6 +335,60 @@ document.querySelectorAll('.copy-prompt-btn').forEach(function(btn) {
             var self = this;
             setTimeout(function() { self.textContent = '{{ __("Copier") }}'; }, 2000);
         }
+    });
+});
+</script>
+@endpush
+    {{-- Onglet presets équipes --}}
+    <div x-show="tab === 'team-presets'" x-transition x-cloak>
+        @if($savedTeamPresets->isEmpty())
+            <div style="text-align: center; padding: 40px 20px; color: var(--c-text-muted);">
+                <div style="font-size: 3rem; margin-bottom: 12px;">👥</div>
+                <h3 style="font-family: var(--f-heading); margin-bottom: 8px;">{{ __('Aucun preset sauvegardé') }}</h3>
+                <p>{{ __('Créez des presets dans le générateur d\'équipes pour les retrouver ici.') }}</p>
+                @if(Route::has('tools.show'))
+                    <a href="{{ route('tools.show', 'generateur-equipes') }}" style="display: inline-block; background: var(--c-primary); color: #fff; padding: 10px 24px; border-radius: var(--r-btn); font-weight: 600; text-decoration: none; margin-top: 12px;">{{ __('Aller au générateur') }}</a>
+                @endif
+            </div>
+        @else
+            <div class="row">
+                @foreach($savedTeamPresets as $tp)
+                <div class="col-sm-6 col-md-4" style="margin-bottom: 16px;">
+                    <div class="panel panel-default" style="border-radius: 10px; overflow: hidden; margin-bottom: 0;">
+                        <div class="panel-heading" style="background: var(--c-primary); color: #fff; padding: 10px 14px;">
+                            <strong>{{ $tp->name }}</strong>
+                        </div>
+                        <div class="panel-body" style="padding: 12px 14px;">
+                            <p class="text-muted" style="font-size: 12px; margin-bottom: 6px;">
+                                {{ $tp->created_at->format('d/m/Y') }}
+                                — {{ Str::limit($tp->config_text, 60) }}
+                            </p>
+                            @php $params = $tp->params ?? []; @endphp
+                            <p style="font-size: 13px; margin-bottom: 8px;">
+                                {{ ($params['mode'] ?? 'count') === 'count' ? ($params['teamCount'] ?? 2) . ' équipes' : ($params['teamSize'] ?? 3) . ' pers./équipe' }}
+                                @if(!empty($params['exclusions'])) — {{ count($params['exclusions']) }} exclusion(s) @endif
+                            </p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('tools.show', 'generateur-equipes') }}?edit={{ $tp->public_id }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 12px;">{{ __('Charger') }}</a>
+                                <button class="btn btn-sm btn-outline-danger js-delete-preset" data-id="{{ $tp->public_id }}" style="border-radius: 6px; font-size: 12px;">{{ __('Supprimer') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
+@push('scripts')
+<script>
+document.querySelectorAll('.js-delete-preset').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var id = this.dataset.id;
+        if (!confirm('{{ __("Supprimer ce preset?") }}')) return;
+        var card = this.closest('.col-sm-6');
+        fetch('/api/team-presets/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
+            .then(function() { if (card) card.remove(); });
     });
 });
 </script>

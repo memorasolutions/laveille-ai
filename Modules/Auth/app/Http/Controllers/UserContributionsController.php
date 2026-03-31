@@ -34,6 +34,10 @@ class UserContributionsController extends Controller
             ? \Modules\Tools\Models\SavedPrompt::forUser($user->id)->latest()->get()
             : collect();
 
-        return view('auth::contributions.index', compact('user', 'suggestions', 'votes', 'resources', 'savedPrompts'));
+        $savedTeamPresets = class_exists(\Modules\Tools\Models\SavedTeamPreset::class)
+            ? \Modules\Tools\Models\SavedTeamPreset::forUser($user->id)->latest()->get()
+            : collect();
+
+        return view('auth::contributions.index', compact('user', 'suggestions', 'votes', 'resources', 'savedPrompts', 'savedTeamPresets'));
     }
 }

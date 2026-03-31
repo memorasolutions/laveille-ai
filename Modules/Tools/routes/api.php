@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\SavedPromptController;
+use Modules\Tools\Http\Controllers\SavedTeamPresetController;
 use Modules\Tools\Http\Controllers\ToolsController;
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
@@ -15,4 +16,9 @@ Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
     Route::post('/prompts', [SavedPromptController::class, 'store'])->name('api.prompts.store');
     Route::put('/prompts/{id}', [SavedPromptController::class, 'update'])->name('api.prompts.update');
     Route::delete('/prompts/{id}', [SavedPromptController::class, 'destroy'])->name('api.prompts.destroy');
+
+    Route::get('/team-presets', [SavedTeamPresetController::class, 'index'])->name('api.team-presets.index');
+    Route::post('/team-presets', [SavedTeamPresetController::class, 'store'])->name('api.team-presets.store');
+    Route::put('/team-presets/{id}', [SavedTeamPresetController::class, 'update'])->name('api.team-presets.update');
+    Route::delete('/team-presets/{id}', [SavedTeamPresetController::class, 'destroy'])->name('api.team-presets.destroy');
 });

@@ -19,6 +19,25 @@
                         </div>
                         <p class="text-muted mb-3">{{ __('Répartition équitable et aléatoire. Glissez-déposez pour ajuster, excluez des paires, sauvegardez vos presets.') }}</p>
 
+                        {{-- Barre sauvegarde (connectés) --}}
+                        <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce preset pour le retrouver...') }}" aria-label="{{ __('Nom du preset') }}" style="border-radius: 8px;">
+                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="nameList.length < 2 || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
+                            </div>
+                            <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
+                                {{ __('Retrouvez vos presets dans') }} <a href="{{ route('user.contributions') }}?tab=team-presets" style="color: var(--c-primary); text-decoration: underline;">{{ __('votre espace personnel') }}</a>.
+                            </div>
+                            <template x-if="saveError">
+                                <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
+                            </template>
+                        </div>
+                        {{-- Bandeau visiteurs --}}
+                        <div x-show="!isAuthenticated" x-cloak style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #0369a1;">
+                            {{ __('Connectez-vous pour sauvegarder vos presets dans votre compte.') }}
+                        </div>
+
                         @include('fronttheme::partials.tabs', ['tabs' => [
                             ['id' => 'setup', 'label' => '👥 ' . __('Configuration')],
                             ['id' => 'options', 'label' => '⚙️ ' . __('Options avancées')],
@@ -172,8 +191,54 @@ document.addEventListener('alpine:init', function() {
             presets: [],
             presetName: '',
 
+            // Sauvegarde compte
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            saveName: '',
+            saving: false,
+            saveError: '',
+            _editingId: null,
+
             init: function() {
-                try { this.presets = JSON.parse(localStorage.getItem('tg_presets') || '[]'); } catch(e) { this.presets = []; }
+                var self = this;
+                if (this.isAuthenticated) {
+                    // Charger depuis API
+                    fetch('/api/team-presets', { headers: this._headers() })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            self.presets = (data.data || []).map(function(p) {
+                                return { id: p.public_id, name: p.name, names: p.config_text, mode: (p.params||{}).mode || 'count', teamCount: (p.params||{}).teamCount || 2, teamSize: (p.params||{}).teamSize || 3, exclusions: (p.params||{}).exclusions || [] };
+                            });
+                        }).catch(function() {
+                            try { self.presets = JSON.parse(localStorage.getItem('tg_presets') || '[]'); } catch(e) { self.presets = []; }
+                        });
+
+                    // Mode édition ?edit=PUBLIC_ID
+                    var params = new URLSearchParams(window.location.search);
+                    var editId = params.get('edit');
+                    if (editId) {
+                        fetch('/api/team-presets', { headers: this._headers() })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                var found = (data.data || []).find(function(p) { return p.public_id === editId; });
+                                if (found) {
+                                    self.names = found.config_text || '';
+                                    var pr = found.params || {};
+                                    self.mode = pr.mode || 'count';
+                                    self.teamCount = pr.teamCount || 2;
+                                    self.teamSize = pr.teamSize || 3;
+                                    self.exclusions = pr.exclusions || [];
+                                    self.saveName = found.name;
+                                    self._editingId = found.public_id;
+                                }
+                            });
+                    }
+                } else {
+                    try { this.presets = JSON.parse(localStorage.getItem('tg_presets') || '[]'); } catch(e) { this.presets = []; }
+                }
+            },
+
+            _headers: function() {
+                return { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' };
             },
 
             get nameList() {
@@ -310,9 +375,44 @@ document.addEventListener('alpine:init', function() {
             },
             removeExclusion: function(index) { this.exclusions.splice(index, 1); },
 
-            // Presets
+            // Sauvegarde compte (API)
+            saveToAccount: function() {
+                if (this.saving || this.nameList.length < 2) return;
+                var self = this;
+                var title = this.saveName.trim() || 'Preset équipes';
+                this.saving = true;
+                this.saveError = '';
+                var isEdit = !!this._editingId;
+                var url = isEdit ? '/api/team-presets/' + this._editingId : '/api/team-presets';
+                var method = isEdit ? 'PUT' : 'POST';
+                fetch(url, {
+                    method: method, headers: this._headers(),
+                    body: JSON.stringify({ name: title, config_text: this.names, params: { mode: this.mode, teamCount: this.teamCount, teamSize: this.teamSize, exclusions: this.exclusions } })
+                })
+                .then(function(r) { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
+                .then(function(data) {
+                    if (isEdit) {
+                        var idx = self.presets.findIndex(function(p) { return p.id === self._editingId; });
+                        if (idx >= 0) self.presets[idx] = { id: data.public_id, name: data.name, names: data.config_text, mode: (data.params||{}).mode, teamCount: (data.params||{}).teamCount, teamSize: (data.params||{}).teamSize, exclusions: (data.params||{}).exclusions || [] };
+                        self._editingId = null;
+                    } else {
+                        self.presets.unshift({ id: data.public_id, name: data.name, names: data.config_text, mode: (data.params||{}).mode, teamCount: (data.params||{}).teamCount, teamSize: (data.params||{}).teamSize, exclusions: (data.params||{}).exclusions || [] });
+                    }
+                    self.saveName = '';
+                    self.saving = false;
+                })
+                .catch(function(e) { self.saveError = e.message; self.saving = false; setTimeout(function() { self.saveError = ''; }, 4000); });
+            },
+
+            // Presets (localStorage pour visiteurs, API pour connectés)
             savePreset: function() {
                 if (!this.presetName.trim()) return;
+                if (this.isAuthenticated) {
+                    this.saveName = this.presetName;
+                    this.saveToAccount();
+                    this.presetName = '';
+                    return;
+                }
                 this.presets.push({
                     name: this.presetName.trim(),
                     names: this.names,
@@ -334,8 +434,16 @@ document.addEventListener('alpine:init', function() {
                 this.tab = 'setup';
             },
             deletePreset: function(index) {
-                this.presets.splice(index, 1);
-                localStorage.setItem('tg_presets', JSON.stringify(this.presets));
+                var self = this;
+                var preset = this.presets[index];
+                if (this.isAuthenticated && preset.id) {
+                    if (!confirm('Supprimer ce preset?')) return;
+                    fetch('/api/team-presets/' + preset.id, { method: 'DELETE', headers: this._headers() })
+                        .then(function() { self.presets.splice(index, 1); });
+                } else {
+                    this.presets.splice(index, 1);
+                    localStorage.setItem('tg_presets', JSON.stringify(this.presets));
+                }
             }
         };
     });
