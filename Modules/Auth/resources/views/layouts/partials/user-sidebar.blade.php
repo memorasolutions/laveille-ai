@@ -36,9 +36,9 @@
                 <i class="fa fa-handshake-o" style="width: 20px;"></i> {{ __('Mes contributions') }}
             </a>
         @endif
-        @if(class_exists(\Modules\Tools\Models\SavedPrompt::class) && Route::has('user.contributions'))
-            <a href="{{ route('user.contributions') }}?tab=prompts" class="list-group-item {{ request()->query('tab') === 'prompts' ? 'active' : '' }}">
-                ✨ {{ __('Mes prompts') }}
+        @if(Route::has('user.saved'))
+            <a href="{{ route('user.saved') }}" class="list-group-item {{ request()->routeIs('user.saved') ? 'active' : '' }}">
+                <i class="fa fa-floppy-o" style="width: 20px;"></i> {{ __('Mes sauvegardes') }}
             </a>
         @endif
         @if(Route::has('bookmarks.index'))

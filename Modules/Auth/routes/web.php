@@ -22,6 +22,7 @@ use Modules\Auth\Http\Controllers\UserActivityController;
 use Modules\Auth\Http\Controllers\UserApiTokenController;
 use Modules\Auth\Http\Controllers\UserArticleController;
 use Modules\Auth\Http\Controllers\UserContributionsController;
+use Modules\Auth\Http\Controllers\UserSavedController;
 use Modules\Auth\Http\Controllers\UserDashboardController;
 use Modules\Auth\Http\Controllers\UserNotificationsController;
 use Modules\Auth\Http\Controllers\UserSessionController;
@@ -149,8 +150,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/two-factor/recovery-codes', [TwoFactorProfileController::class, 'recoveryCodes'])->name('user.two-factor.recovery-codes');
     Route::post('/user/two-factor/recovery-codes/regenerate', [TwoFactorProfileController::class, 'regenerateRecoveryCodes'])->name('user.two-factor.regenerate');
 
-    // Mes contributions (suggestions + votes)
+    // Mes contributions (suggestions + votes + ressources = communauté)
     Route::get('/user/contributions', [UserContributionsController::class, 'index'])->name('user.contributions');
+
+    // Mes sauvegardes (prompts + configs équipes = personnel)
+    Route::get('/user/saved', [UserSavedController::class, 'index'])->name('user.saved');
 
     // Export données personnelles (RGPD art. 20)
     Route::get('/user/data-export', [\Modules\Auth\Http\Controllers\DataExportController::class, 'export'])->name('user.data-export');

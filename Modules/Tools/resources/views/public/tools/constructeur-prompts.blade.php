@@ -29,7 +29,7 @@
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre a jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2 mb-0" style="font-size: 0.8rem; color: var(--c-text-muted);">
-                                {{ __('Retrouvez vos prompts sauvegardes dans') }} <a href="{{ route('user.contributions') }}?tab=prompts" style="color: var(--c-primary); text-decoration: underline;">{{ __('votre espace personnel') }}</a>.
+                                {{ __('Retrouvez vos prompts dans') }} <a href="{{ route('user.saved') }}?tab=prompts" style="color: var(--c-primary); text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
                             </div>
                             <template x-if="saveError">
                                 <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>

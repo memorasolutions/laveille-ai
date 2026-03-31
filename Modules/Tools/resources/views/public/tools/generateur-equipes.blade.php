@@ -27,7 +27,7 @@
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
-                                {{ __('Retrouvez vos configurations dans') }} <a href="{{ route('user.contributions') }}?tab=team-presets" style="color: var(--c-primary); text-decoration: underline;">{{ __('votre espace personnel') }}</a>.
+                                {{ __('Retrouvez vos configurations dans') }} <a href="{{ route('user.saved') }}?tab=team-configs" style="color: var(--c-primary); text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
                             </div>
                             <template x-if="saveError">
                                 <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>

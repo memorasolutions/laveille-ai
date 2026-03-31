@@ -30,14 +30,6 @@ class UserContributionsController extends Controller
             ? \Modules\Directory\Models\ToolResource::where('user_id', $user->id)->with('tool')->latest()->get()
             : collect();
 
-        $savedPrompts = class_exists(\Modules\Tools\Models\SavedPrompt::class)
-            ? \Modules\Tools\Models\SavedPrompt::forUser($user->id)->latest()->get()
-            : collect();
-
-        $savedTeamPresets = class_exists(\Modules\Tools\Models\SavedTeamPreset::class)
-            ? \Modules\Tools\Models\SavedTeamPreset::forUser($user->id)->latest()->get()
-            : collect();
-
-        return view('auth::contributions.index', compact('user', 'suggestions', 'votes', 'resources', 'savedPrompts', 'savedTeamPresets'));
+        return view('auth::contributions.index', compact('user', 'suggestions', 'votes', 'resources'));
     }
 }
