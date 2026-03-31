@@ -15,6 +15,7 @@ class SavedPrompt extends Model
     protected $table = 'saved_prompts';
 
     protected $fillable = [
+        'user_id',
         'name',
         'prompt_text',
         'params',
