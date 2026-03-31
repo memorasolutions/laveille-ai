@@ -413,7 +413,7 @@
             {{-- ===== 5. CONFIGURATION ===== --}}
             @canany(['view_branding', 'view_seo', 'view_translations', 'view_feature_flags', 'view_email_templates', 'view_settings', 'view_themes'])
             <li class="nav-item nav-category">{{ __('Configuration') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.feature-flags.*', 'admin.email-templates.*', 'admin.announcements.*', 'admin.themes.*', 'admin.cookie-categories.*', 'admin.redirects.*', 'admin.settings.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.feature-flags.*', 'admin.email-templates.*', 'admin.announcements.*', 'admin.themes.*', 'admin.cookie-categories.*', 'admin.rights-requests.*', 'admin.redirects.*', 'admin.settings.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#configMenu" role="button"
                    aria-expanded="{{ request()->routeIs('admin.branding.*', 'admin.seo.*', 'admin.translations.*', 'admin.feature-flags.*', 'admin.email-templates.*', 'admin.announcements.*', 'admin.themes.*', 'admin.cookie-categories.*', 'admin.redirects.*', 'admin.settings.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="settings"></i>
@@ -463,6 +463,11 @@
                                     @if(Route::has('admin.cookie-categories.index'))
                                     @can('view_cookies')
                                     <li class="nav-item"><a href="{{ route('admin.cookie-categories.index') }}" class="nav-link {{ request()->routeIs('admin.cookie-categories.*') ? 'active' : '' }}" {{ request()->routeIs('admin.cookie-categories.*') ? 'aria-current=page' : '' }}>{{ __('Catégories cookies') }}</a></li>
+                                    @endcan
+                                    @endif
+                                    @if(Route::has('admin.rights-requests.index'))
+                                    @can('manage_cookies')
+                                    <li class="nav-item"><a href="{{ route('admin.rights-requests.index') }}" class="nav-link {{ request()->routeIs('admin.rights-requests.*') ? 'active' : '' }}" {{ request()->routeIs('admin.rights-requests.*') ? 'aria-current=page' : '' }}>{{ __('Demandes de droits') }}</a></li>
                                     @endcan
                                     @endif
                                     @if(Route::has('admin.redirects.index'))

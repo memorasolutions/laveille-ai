@@ -20,6 +20,7 @@ use Modules\Backoffice\Http\Controllers\BrandingController;
 use Modules\Backoffice\Http\Controllers\CacheController;
 use Modules\Backoffice\Http\Controllers\ContactMessageController;
 use Modules\Backoffice\Http\Controllers\CookieCategoryController;
+use Modules\Backoffice\Http\Controllers\RightsRequestController;
 use Modules\Backoffice\Http\Controllers\DashboardController;
 use Modules\Backoffice\Http\Controllers\DataRetentionController;
 use Modules\Backoffice\Http\Controllers\DocumentationController;
@@ -416,6 +417,14 @@ Route::prefix('admin')
         // ── Catégories cookies (RGPD) ──
         Route::middleware('permission:manage_cookies')->group(function () {
             Route::resource('cookie-categories', CookieCategoryController::class);
+        });
+
+        // ── Demandes de droits (DSAR) ──
+        Route::middleware('permission:manage_cookies')->group(function () {
+            Route::get('rights-requests', [RightsRequestController::class, 'index'])->name('rights-requests.index');
+            Route::get('rights-requests/{rightsRequest}', [RightsRequestController::class, 'show'])->name('rights-requests.show');
+            Route::patch('rights-requests/{rightsRequest}/mark-completed', [RightsRequestController::class, 'markCompleted'])->name('rights-requests.mark-completed');
+            Route::patch('rights-requests/{rightsRequest}/add-note', [RightsRequestController::class, 'addNote'])->name('rights-requests.add-note');
         });
 
         // ── Onboarding ──
