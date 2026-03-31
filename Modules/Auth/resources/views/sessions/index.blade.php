@@ -1,88 +1,80 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('auth::layouts.app')
+@extends('auth::layouts.user-frontend')
 
-@section('title', __('Sessions actives'))
+@section('title', __('Sessions actives') . ' - ' . config('app.name'))
 
-@section('content')
+@section('user-content')
 
-<div class="d-flex align-items-center gap-2 mb-3">
-    <a href="{{ route('user.profile') }}" class="btn btn-outline-secondary rounded-2">
-        <i data-lucide="arrow-left"></i>
-    </a>
-    <h1 class="fw-semibold mb-0">{{ __('Sessions actives') }}</h1>
+<div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; flex-wrap: wrap !important; margin-bottom: 20px;">
+    <div>
+        <h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">{{ __('Sessions actives') }}</h2>
+        <p style="color: #777; margin: 0;">{{ __('Gérez les appareils connectés à votre compte.') }}</p>
+    </div>
 </div>
 
 @if(session('success'))
-<div class="alert alert-success d-flex align-items-center gap-2 mb-3">
-    <i data-lucide="check-circle"></i>
+<div class="alert alert-success" style="border-radius: 4px; margin-bottom: 20px;">
     {{ session('success') }}
 </div>
 @endif
 
-<div class="d-flex flex-column gap-2 mb-4">
+<div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
     @forelse($sessions as $session)
-    <div class="card">
-        <div class="card-body d-flex align-items-center justify-content-between gap-3 flex-wrap">
-            <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;">
-                    <i data-lucide="monitor-smartphone" class="text-primary"></i>
-                </div>
-                <div>
-                    <p class="fw-semibold mb-1">{{ $session['parsed_agent']['browser'] }} {{ __('sur') }} {{ $session['parsed_agent']['os'] }}</p>
-                    <p class="text-sm text-muted mb-0">
-                        IP : {{ $session['ip_address'] ?? __('Inconnu') }} &middot; {{ $session['last_activity_formatted'] }}
-                    </p>
-                </div>
+    <div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(11,114,133,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px;">
+                💻
             </div>
-            <div class="flex-shrink-0">
-                @if($session['is_current'])
-                    <span class="badge fw-semibold bg-success bg-opacity-10 text-success rounded-1 px-3 py-2">
-                        <i data-lucide="check-circle"></i> {{ __('Session actuelle') }}
-                    </span>
-                @else
-                    <form action="{{ route('user.sessions.revoke', $session['id']) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-danger rounded-2">
-                            <i data-lucide="x-circle"></i> {{ __('Révoquer') }}
-                        </button>
-                    </form>
-                @endif
+            <div>
+                <p style="font-weight: 600; margin: 0 0 4px;">{{ $session['parsed_agent']['browser'] }} {{ __('sur') }} {{ $session['parsed_agent']['os'] }}</p>
+                <p style="font-size: 12px; color: #999; margin: 0;">
+                    IP : {{ $session['ip_address'] ?? __('Inconnu') }} · {{ $session['last_activity_formatted'] }}
+                </p>
             </div>
+        </div>
+        <div style="flex-shrink: 0;">
+            @if($session['is_current'])
+                <span style="font-weight: 600; background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 4px; font-size: 13px;">
+                    {{ __('Session actuelle') }}
+                </span>
+            @else
+                <form action="{{ route('user.sessions.revoke', $session['id']) }}" method="POST" style="margin: 0;">
+                    @csrf
+                    <button type="submit" class="btn btn-xs" style="background: var(--c-danger); color: #fff; border: none; border-radius: 4px; padding: 4px 12px; font-size: 13px; cursor: pointer;">
+                        {{ __('Révoquer') }}
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
     @empty
-    <div class="card">
-        <div class="card-body py-5 text-center text-muted">
-            <i data-lucide="monitor-smartphone" class="d-block mx-auto mb-2" style="width:48px;height:48px;"></i>
-            <p class="mb-0">{{ __('Aucune session active.') }}</p>
-        </div>
+    <div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; padding: 40px 16px; text-align: center; color: #999;">
+        <p style="margin: 0;">{{ __('Aucune session active.') }}</p>
     </div>
     @endforelse
 </div>
 
-{{-- Révoquer toutes les autres sessions --}}
-<div class="card border border-danger border-opacity-25">
-    <div class="card-header">
-        <h5 class="card-title fw-semibold mb-0 text-danger d-flex align-items-center gap-2">
-            <i data-lucide="log-out"></i>
+<div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden;">
+    <div style="padding: 12px 16px; border-bottom: 1px solid #fecaca; background: #fef2f2;">
+        <h4 style="font-weight: 600; margin: 0; color: var(--c-danger); font-size: 15px;">
             {{ __('Révoquer toutes les autres sessions') }}
-        </h5>
+        </h4>
     </div>
-    <div class="card-body">
-        <p class="text-muted mb-3">{{ __('Déconnectez tous les autres appareils. Confirmez avec votre mot de passe.') }}</p>
+    <div style="padding: 16px;">
+        <p style="color: #777; margin: 0 0 12px; font-size: 14px;">{{ __('Déconnectez tous les autres appareils. Confirmez avec votre mot de passe.') }}</p>
         <form method="POST" action="{{ route('user.sessions.revoke-others') }}">
             @csrf
-            <div class="d-flex align-items-start gap-2 flex-wrap">
-                <div class="flex-grow-1">
+            <div style="display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
                     <input type="password" name="password" required
                            placeholder="{{ __('Votre mot de passe actuel') }}"
-                           class="form-control rounded-2 @error('password') is-invalid @enderror">
+                           style="width: 100%; padding: 8px 12px; border: 1px solid {{ $errors->has('password') ? '#dc3545' : '#ddd' }}; border-radius: 4px; font-size: 14px;">
                     @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div style="color: #dc3545; font-size: 12px; margin-top: 4px;">{{ $message }}</div>
                     @enderror
                 </div>
-                <button type="submit" class="btn btn-danger rounded-2 flex-shrink-0">
-                    <i data-lucide="log-out"></i> {{ __('Révoquer tout') }}
+                <button type="submit" class="btn btn-sm" style="background: var(--c-danger); color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-size: 14px; cursor: pointer; white-space: nowrap;">
+                    {{ __('Révoquer tout') }}
                 </button>
             </div>
         </form>

@@ -1,50 +1,58 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-@extends('auth::layouts.app')
+@extends('auth::layouts.user-frontend')
 
-@section('title', __('Journal d\'activité'))
+@section('title', __('Journal d\'activité') . ' - ' . config('app.name'))
 
-@section('content')
+@section('user-content')
 
-<div class="d-flex align-items-center gap-2 mb-3">
-    <a href="{{ route('user.profile') }}" class="btn btn-outline-secondary rounded-2">
-        <i data-lucide="arrow-left"></i>
-    </a>
-    <h1 class="fw-semibold mb-0">{{ __('Journal d\'activité') }}</h1>
+<div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; flex-wrap: wrap !important; margin-bottom: 20px;">
+    <div>
+        <h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 5px;">{{ __('Journal d\'activité') }}</h2>
+        <p style="color: #777; margin: 0;">{{ __('Historique de vos actions sur le compte.') }}</p>
+    </div>
 </div>
 
-<div class="d-flex flex-column gap-2">
+<div style="display: flex; flex-direction: column; gap: 10px;">
     @forelse($activities as $activity)
-    <div class="card">
-        <div class="card-body d-flex align-items-start gap-2">
-            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px;height:36px;">
-                <i data-lucide="list" class="text-primary"></i>
+    <div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(11,114,133,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: var(--c-primary); font-size: 16px;">
+                @switch($activity->description)
+                    @case('created') + @break
+                    @case('updated') ✎ @break
+                    @case('deleted') ✕ @break
+                    @default ● @break
+                @endswitch
+            </span>
+        </div>
+        <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                <span style="font-weight: 600; font-size: 14px; color: #333;">
+                    {{ match($activity->description) {
+                        'created' => __('Création'),
+                        'updated' => __('Modification'),
+                        'deleted' => __('Suppression'),
+                        default => ucfirst($activity->description)
+                    } }}
+                </span>
+                <span style="display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: 600; color: #777; background: #f3f4f6; border-radius: 4px;">
+                    {{ $activity->log_name }}
+                </span>
             </div>
-            <div class="flex-grow-1 min-w-0">
-                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                    <span class="fw-semibold text-sm">{{ $activity->description }}</span>
-                    <span class="badge fw-semibold bg-secondary bg-opacity-10 text-secondary rounded-1">
-                        {{ $activity->log_name }}
-                    </span>
-                </div>
-                <p class="small text-muted mb-0">{{ $activity->created_at->diffForHumans() }}</p>
-            </div>
+            <p style="font-size: 12px; color: #999; margin: 0;">{{ $activity->created_at->diffForHumans() }}</p>
         </div>
     </div>
     @empty
-    <div class="card">
-        <div class="card-body py-5 text-center text-muted">
-            <i data-lucide="history" class="d-block mx-auto mb-2" style="width:48px;height:48px;"></i>
-            <p class="mb-1">{{ __('Aucune activité enregistrée.') }}</p>
-            <p class="small mb-0">{{ __('Vos actions sur le compte apparaîtront ici.') }}</p>
-        </div>
+    <div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; padding: 40px 16px; text-align: center; color: #999;">
+        <p style="font-size: 32px; margin: 0 0 10px;">📋</p>
+        <p style="margin: 0 0 5px;">{{ __('Aucune activité enregistrée.') }}</p>
+        <p style="font-size: 12px; margin: 0;">{{ __('Vos actions sur le compte apparaîtront ici.') }}</p>
     </div>
     @endforelse
 </div>
 
 @if($activities->hasPages())
-<div class="mt-3">
-    {{ $activities->links() }}
-</div>
+<div style="margin-top: 15px;">{{ $activities->links() }}</div>
 @endif
 
 @endsection
