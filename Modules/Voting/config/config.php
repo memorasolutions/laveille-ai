@@ -6,16 +6,16 @@ return [
     'name' => 'Voting',
 
     'thresholds' => [
-        'noticed' => (int) env('VOTING_THRESHOLD_NOTICED', 2),
-        'approved' => (int) env('VOTING_THRESHOLD_APPROVED', 5),
-        'favorite' => (int) env('VOTING_THRESHOLD_FAVORITE', 10),
+        'noticed' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.threshold_noticed', env('VOTING_THRESHOLD_NOTICED', 2)) : env('VOTING_THRESHOLD_NOTICED', 2)),
+        'approved' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.threshold_approved', env('VOTING_THRESHOLD_APPROVED', 5)) : env('VOTING_THRESHOLD_APPROVED', 5)),
+        'favorite' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.threshold_favorite', env('VOTING_THRESHOLD_FAVORITE', 10)) : env('VOTING_THRESHOLD_FAVORITE', 10)),
     ],
 
-    'rate_limit' => (int) env('VOTING_RATE_LIMIT', 50), // votes par heure
+    'rate_limit' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.rate_limit', env('VOTING_RATE_LIMIT', 50)) : env('VOTING_RATE_LIMIT', 50)),
 
     'reputation' => [
-        'vote_cast' => 1,
-        'content_community_approved' => 15,
+        'vote_cast' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.reputation_vote_cast', 1) : 1),
+        'content_community_approved' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.reputation_community_approved', 15) : 15),
     ],
 
     'badge_styles' => [

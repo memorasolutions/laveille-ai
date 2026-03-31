@@ -125,6 +125,23 @@ class SettingsDefaultsSeeder extends Seeder
             'api.blog_articles_per_page' => ['value' => 15, 'type' => 'integer', 'group' => 'api'],
             'api.product_reviews_per_page' => ['value' => 10, 'type' => 'integer', 'group' => 'api'],
 
+            // GROUPE 'voting'
+            'voting.threshold_noticed' => ['value' => 2, 'type' => 'integer', 'group' => 'voting'],
+            'voting.threshold_approved' => ['value' => 5, 'type' => 'integer', 'group' => 'voting'],
+            'voting.threshold_favorite' => ['value' => 10, 'type' => 'integer', 'group' => 'voting'],
+            'voting.rate_limit' => ['value' => 50, 'type' => 'integer', 'group' => 'voting'],
+            'voting.reputation_vote_cast' => ['value' => 1, 'type' => 'integer', 'group' => 'voting'],
+            'voting.reputation_community_approved' => ['value' => 15, 'type' => 'integer', 'group' => 'voting'],
+
+            // GROUPE 'reputation'
+            'reputation.threshold_contributeur' => ['value' => 15, 'type' => 'integer', 'group' => 'reputation'],
+            'reputation.threshold_verifie' => ['value' => 50, 'type' => 'integer', 'group' => 'reputation'],
+            'reputation.threshold_expert' => ['value' => 150, 'type' => 'integer', 'group' => 'reputation'],
+            'reputation.multiplier_contributeur' => ['value' => 1.25, 'type' => 'double', 'group' => 'reputation'],
+            'reputation.multiplier_verifie' => ['value' => 1.5, 'type' => 'double', 'group' => 'reputation'],
+            'reputation.multiplier_expert' => ['value' => 2.0, 'type' => 'double', 'group' => 'reputation'],
+            'reputation.ban_duration_days' => ['value' => 7, 'type' => 'integer', 'group' => 'reputation'],
+
             // GROUPE 'seo'
             'seo.meta_description' => ['value' => 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.', 'type' => 'string', 'group' => 'seo'],
 

@@ -7,6 +7,7 @@ namespace Modules\Directory\Services;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Settings\Facades\Settings;
 
 class ReputationService
 {
@@ -40,26 +41,37 @@ class ReputationService
 
     public const LEVEL_EXPERT = 3;
 
-    // Seuils
-    private const THRESHOLD_CONTRIBUTEUR = 15;
+    private static function thresholdContributeur(): int
+    {
+        return (int) (class_exists(Settings::class) ? Settings::get('reputation.threshold_contributeur', 15) : 15);
+    }
 
-    private const THRESHOLD_VERIFIE = 50;
+    private static function thresholdVerifie(): int
+    {
+        return (int) (class_exists(Settings::class) ? Settings::get('reputation.threshold_verifie', 50) : 50);
+    }
 
-    private const THRESHOLD_EXPERT = 150;
+    private static function thresholdExpert(): int
+    {
+        return (int) (class_exists(Settings::class) ? Settings::get('reputation.threshold_expert', 150) : 150);
+    }
 
-    // Multiplicateurs par niveau
-    private const MULTIPLIERS = [
-        self::LEVEL_NOUVEAU => 1.0,
-        self::LEVEL_CONTRIBUTEUR => 1.25,
-        self::LEVEL_VERIFIE => 1.5,
-        self::LEVEL_EXPERT => 2.0,
-    ];
+    private function getMultipliers(): array
+    {
+        return [
+            self::LEVEL_NOUVEAU => 1.0,
+            self::LEVEL_CONTRIBUTEUR => (float) (class_exists(Settings::class) ? Settings::get('reputation.multiplier_contributeur', 1.25) : 1.25),
+            self::LEVEL_VERIFIE => (float) (class_exists(Settings::class) ? Settings::get('reputation.multiplier_verifie', 1.5) : 1.5),
+            self::LEVEL_EXPERT => (float) (class_exists(Settings::class) ? Settings::get('reputation.multiplier_expert', 2.0) : 2.0),
+        ];
+    }
 
     public function addPoints(User $user, int $points, string $reason = ''): void
     {
         $finalPoints = $points;
         if ($points > 0) {
-            $finalPoints = (int) round($points * $this->getMultiplier($user->trust_level));
+            $multipliers = $this->getMultipliers();
+            $finalPoints = (int) round($points * ($multipliers[$user->trust_level] ?? 1.0));
         }
 
         $user->reputation_points = max(0, $user->reputation_points + $finalPoints);
@@ -81,16 +93,16 @@ class ReputationService
 
     public function getMultiplier(int $level): float
     {
-        return self::MULTIPLIERS[$level] ?? 1.0;
+        return $this->getMultipliers()[$level] ?? 1.0;
     }
 
     public function checkLevelUp(User $user): void
     {
         $pts = $user->reputation_points;
         $newLevel = match (true) {
-            $pts >= self::THRESHOLD_EXPERT => self::LEVEL_EXPERT,
-            $pts >= self::THRESHOLD_VERIFIE => self::LEVEL_VERIFIE,
-            $pts >= self::THRESHOLD_CONTRIBUTEUR => self::LEVEL_CONTRIBUTEUR,
+            $pts >= self::thresholdExpert() => self::LEVEL_EXPERT,
+            $pts >= self::thresholdVerifie() => self::LEVEL_VERIFIE,
+            $pts >= self::thresholdContributeur() => self::LEVEL_CONTRIBUTEUR,
             default => self::LEVEL_NOUVEAU,
         };
 
@@ -208,15 +220,15 @@ class ReputationService
     {
         return match ($level) {
             self::LEVEL_NOUVEAU => [
-                'name' => 'Nouveau', 'emoji' => '🌱', 'next_threshold' => self::THRESHOLD_CONTRIBUTEUR, 'multiplier' => 'x1',
+                'name' => 'Nouveau', 'emoji' => '🌱', 'next_threshold' => self::thresholdContributeur(), 'multiplier' => 'x1',
                 'privileges' => ['Soumettre du contenu (modéré)', 'Participer aux discussions'],
             ],
             self::LEVEL_CONTRIBUTEUR => [
-                'name' => 'Contributeur', 'emoji' => '🌿', 'next_threshold' => self::THRESHOLD_VERIFIE, 'multiplier' => 'x1.25',
+                'name' => 'Contributeur', 'emoji' => '🌿', 'next_threshold' => self::thresholdVerifie(), 'multiplier' => 'x1.25',
                 'privileges' => ['Auto-approbation des discussions', 'Badge Contributeur visible', 'Points x1.25'],
             ],
             self::LEVEL_VERIFIE => [
-                'name' => 'Membre vérifié', 'emoji' => '🌳', 'next_threshold' => self::THRESHOLD_EXPERT, 'multiplier' => 'x1.5',
+                'name' => 'Membre vérifié', 'emoji' => '🌳', 'next_threshold' => self::thresholdExpert(), 'multiplier' => 'x1.5',
                 'privileges' => ['Auto-approbation avis et ressources', 'Badge Vérifié visible', 'Voter sur la roadmap', 'Contributeur mis en avant', 'Points x1.5'],
             ],
             self::LEVEL_EXPERT => [
