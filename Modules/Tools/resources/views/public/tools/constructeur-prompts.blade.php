@@ -26,7 +26,7 @@
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce prompt pour le retrouver...') }}" aria-label="{{ __('Titre du prompt') }}" style="border-radius: 8px;">
                                 <button class="btn btn-sm" @click="addToHistory()" :disabled="!isValid || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
-                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : '{{ __('Sauvegarder') }}'"></button>
+                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre a jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <template x-if="saveError">
                                 <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
@@ -598,6 +598,40 @@ document.addEventListener('alpine:init', function() {
                         .catch(function() {
                             try { self.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { self.history = []; }
                         });
+                    // Charger un prompt existant pour edition (?edit=ID)
+                    var editId = new URLSearchParams(window.location.search).get('edit');
+                    if (editId) {
+                        fetch('/api/prompts', { headers: self._headers() })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                var found = (data.data || []).find(function(p) { return p.id == editId; });
+                                if (found && found.params) {
+                                    var p = found.params;
+                                    if (p.personaType) self.personaType = p.personaType;
+                                    if (p.personaPreset) self.personaPreset = p.personaPreset;
+                                    if (p.personaCustom) { self.personaCustom = p.personaCustom; self.personaType = 'custom'; }
+                                    if (p.verbType) self.verbType = p.verbType;
+                                    if (p.verb) self.verb = p.verb;
+                                    if (p.verbCustom) { self.verbCustom = p.verbCustom; self.verbType = 'custom'; }
+                                    if (p.taskObject) self.taskObject = p.taskObject;
+                                    if (p.audienceType) self.audienceType = p.audienceType;
+                                    if (p.audiencePreset) self.audiencePreset = p.audiencePreset;
+                                    if (p.audienceCustom) { self.audienceCustom = p.audienceCustom; self.audienceType = 'custom'; }
+                                    if (p.format) self.format = p.format;
+                                    if (p.length) self.length = p.length;
+                                    if (p.tone) self.tone = p.tone;
+                                    if (p.language) self.language = p.language;
+                                    if (p.technique) self.technique = p.technique;
+                                    if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
+                                    if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
+                                    if (p.canvasAI) self.canvasAI = p.canvasAI;
+                                    if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
+                                    self.saveName = found.name;
+                                    self.step = 4;
+                                    self._editingId = found.id;
+                                }
+                            });
+                    }
                 } else {
                     try { this.history = JSON.parse(localStorage.getItem('pb_history') || '[]'); } catch(e) { this.history = []; }
                 }
@@ -638,13 +672,22 @@ document.addEventListener('alpine:init', function() {
                 var title = this.saveName.trim() || this.personaText || 'Prompt';
                 if (this.isAuthenticated) {
                     this.saving = true;
-                    fetch('/api/prompts', {
-                        method: 'POST', headers: this._headers(),
+                    var isEdit = !!this._editingId;
+                    var url = isEdit ? '/api/prompts/' + this._editingId : '/api/prompts';
+                    var method = isEdit ? 'PUT' : 'POST';
+                    fetch(url, {
+                        method: method, headers: this._headers(),
                         body: JSON.stringify({ name: title, prompt_text: this.prompt, params: this.wizardParams })
                     })
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
-                        self.history.unshift({ id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
+                        if (isEdit) {
+                            var idx = self.history.findIndex(function(h) { return h.id == data.id; });
+                            if (idx >= 0) self.history[idx] = { id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.updated_at).toLocaleString('fr-CA'), params: data.params };
+                            self._editingId = null;
+                        } else {
+                            self.history.unshift({ id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
+                        }
                         self.saveName = '';
                         self.saving = false;
                     })
