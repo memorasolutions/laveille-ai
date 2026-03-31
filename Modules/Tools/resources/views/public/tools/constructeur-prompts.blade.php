@@ -470,6 +470,7 @@ document.addEventListener('alpine:init', function() {
             saveError: '',
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
             hasLocalData: false,
+            _editingId: null,
             history: [],
 
             get isValid() {
