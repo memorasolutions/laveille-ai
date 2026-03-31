@@ -21,7 +21,29 @@
                                 <button class="btn btn-sm" @click="jQuery('#promptHelpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 32px; height: 32px; font-weight: 700; font-size: 1rem; padding: 0; line-height: 32px; flex-shrink: 0;" title="{{ __('Aide') }}">?</button>
                             </div>
                         </div>
-                        <div class="mb-4"></div>
+                        {{-- Barre sauvegarde (visible avant les étapes) --}}
+                        <div class="mt-3 mb-3 p-3 rounded" x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce prompt pour le retrouver...') }}" aria-label="{{ __('Titre du prompt') }}" style="border-radius: 8px;">
+                                <button class="btn btn-sm" @click="addToHistory()" :disabled="!isValid || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : '{{ __('Sauvegarder') }}'"></button>
+                            </div>
+                            <template x-if="saveError">
+                                <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
+                            </template>
+                            <template x-if="hasLocalData">
+                                <div class="small mt-2 mb-0" style="font-size: 0.8rem; color: var(--c-text-muted);">
+                                    {{ __('Des prompts de votre navigateur ont ete trouves.') }}
+                                    <button class="btn btn-sm btn-outline-primary ms-1" @click="importLocalStorage()" style="font-size: 0.7rem; padding: 1px 8px; border-radius: 6px;">{{ __('Importer') }}</button>
+                                </div>
+                            </template>
+                        </div>
+                        <template x-if="!isAuthenticated">
+                            <div class="mt-3 mb-3 p-2 rounded" style="background: rgba(11,114,133,0.06); border: 1px solid rgba(11,114,133,0.15); border-radius: 10px; font-size: 0.85rem;">
+                                <strong style="color: var(--c-primary);">{{ __('Connectez-vous') }}</strong> {{ __('pour sauvegarder vos prompts et les retrouver sur tous vos appareils.') }}
+                                <button class="btn btn-sm ms-1" @click="$dispatch('open-auth-modal')" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 0.75rem; padding: 2px 10px;">{{ __('Se connecter') }}</button>
+                            </div>
+                        </template>
 
                         {{-- Indicateur d'étapes --}}
                         <div class="d-flex justify-content-between mb-4" style="position: relative;">
@@ -305,29 +327,11 @@
                         <div x-show="!isValid" class="alert alert-warning small p-2 mb-2" style="font-size: 0.8rem;">
                             {{ __('Remplissez la persona (étape 1) et la tâche (étape 2) pour générer votre prompt.') }}
                         </div>
-                        <div class="form-group mb-2" x-show="isAuthenticated" x-cloak>
-                            <input type="text" class="form-control form-control-sm" x-model="saveName" placeholder="{{ __('Titre pour retrouver ce prompt (optionnel)') }}" aria-label="{{ __('Titre du prompt') }}">
-                        </div>
                         <div class="d-flex gap-2 mb-4 flex-wrap">
-                            <button class="btn flex-fill" @click="copy()" :disabled="!isValid || saving" :style="isValid ? 'background: var(--c-accent); color: #fff;' : 'background: #e9ecef; color: #adb5bd; cursor: not-allowed;'" style="border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;"
-                                    x-text="isAuthenticated ? (saving ? '{{ __('Sauvegarde...') }}' : (copied ? '{{ __('Copié !') }}' : '{{ __('Copier et sauvegarder') }}')) : '{{ __('Copier le prompt') }}'"></button>
+                            <button class="btn flex-fill" @click="copy()" :disabled="!isValid" :style="isValid ? 'background: var(--c-accent); color: #fff;' : 'background: #e9ecef; color: #adb5bd; cursor: not-allowed;'" style="border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;"
+                                    x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
                             <button class="btn btn-outline-secondary" @click="exportPrompt()" :disabled="!isValid" style="border-radius: var(--r-btn);">{{ __('Exporter .txt') }}</button>
                         </div>
-                        <template x-if="!isAuthenticated">
-                            <div class="alert small p-2 mb-2" style="background: rgba(11,114,133,0.08); border: 1px solid rgba(11,114,133,0.2); border-radius: 8px; font-size: 0.85rem;">
-                                <strong style="color: var(--c-primary);">{{ __('Connectez-vous') }}</strong> {{ __('pour sauvegarder vos prompts et les retrouver sur tous vos appareils.') }}
-                                <button class="btn btn-sm ms-1" @click="$dispatch('open-auth-modal')" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 0.75rem; padding: 2px 10px;">{{ __('Se connecter') }}</button>
-                            </div>
-                        </template>
-                        <template x-if="saveError">
-                            <div class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem; border-radius: 8px;" x-text="saveError"></div>
-                        </template>
-                        <template x-if="isAuthenticated && hasLocalData">
-                            <div class="alert alert-info small p-2 mb-2" style="font-size: 0.85rem; border-radius: 8px;">
-                                {{ __('Des prompts de votre navigateur ont été trouvés.') }}
-                                <button class="btn btn-sm btn-primary ms-1" @click="importLocalStorage()" style="font-size: 0.75rem; padding: 2px 10px; border-radius: 6px;">{{ __('Importer dans mon compte') }}</button>
-                            </div>
-                        </template>
 
                         {{-- Historique --}}
                         <template x-if="history.length > 0">
@@ -637,7 +641,6 @@ document.addEventListener('alpine:init', function() {
                 navigator.clipboard.writeText(this.prompt);
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
-                if (this.isAuthenticated) this.addToHistory();
             },
 
             copyText: function(text) { navigator.clipboard.writeText(text); },
