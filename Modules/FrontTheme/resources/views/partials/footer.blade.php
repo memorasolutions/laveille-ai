@@ -35,9 +35,6 @@
                             @if(Route::has('tools.index'))
                                 <li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>
                             @endif
-                            @if(Route::has('prompts.index'))
-                                <li><a href="{{ route('prompts.index') }}">{{ __('Bibliothèque de prompts') }}</a></li>
-                            @endif
                             @if(Route::has('shorturl.create'))
                                 <li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>
                             @endif

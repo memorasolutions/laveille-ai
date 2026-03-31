@@ -104,11 +104,6 @@ class SitemapController
             $sitemap->add(Url::create(route('directory.roadmap'))->setPriority(0.6)->setChangeFrequency('weekly'));
         }
 
-        // Bibliothèque de prompts (si module Tools actif)
-        if (Route::has('prompts.index')) {
-            $sitemap->add(Url::create(route('prompts.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
-        }
-
         // News (si module News actif)
         if (Route::has('news.index')) {
             $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));

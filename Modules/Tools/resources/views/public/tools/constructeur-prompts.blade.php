@@ -25,10 +25,6 @@
                         <div class="mt-3 mb-3 p-3 rounded" x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce prompt pour le retrouver...') }}" aria-label="{{ __('Titre du prompt') }}" style="border-radius: 8px;">
-                                <label class="d-flex align-items-center gap-1" style="margin: 0; white-space: nowrap; font-size: 12px; font-weight: 500; color: var(--c-text-muted); cursor: pointer;">
-                                    <input type="checkbox" x-model="isPublic" style="margin: 0 3px 0 0; accent-color: var(--c-primary);">
-                                    {{ __('Public') }}
-                                </label>
                                 <button class="btn btn-sm" @click="addToHistory()" :disabled="!isValid || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre a jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
@@ -472,7 +468,6 @@ document.addEventListener('alpine:init', function() {
             saveName: '',
             saving: false,
             saveError: '',
-            isPublic: false,
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
             hasLocalData: false,
             _editingId: null,
@@ -636,7 +631,6 @@ document.addEventListener('alpine:init', function() {
                                     if (p.canvasAI) self.canvasAI = p.canvasAI;
                                     if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
                                     self.saveName = found.name;
-                                    self.isPublic = !!found.is_public;
                                     self.step = 4;
                                     self._editingId = found.id;
                                 }
@@ -687,7 +681,7 @@ document.addEventListener('alpine:init', function() {
                     var method = isEdit ? 'PUT' : 'POST';
                     fetch(url, {
                         method: method, headers: this._headers(),
-                        body: JSON.stringify({ name: title, prompt_text: this.prompt, params: this.wizardParams, is_public: this.isPublic })
+                        body: JSON.stringify({ name: title, prompt_text: this.prompt, params: this.wizardParams })
                     })
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
