@@ -275,7 +275,10 @@
                             <div style="font-size: 12px; color: var(--c-text-muted); margin-top: 2px;">{{ Str::limit($sp->prompt_text, 120) }}</div>
                         </div>
                         <div style="flex-shrink: 0; text-align: right;">
-                            <button onclick="navigator.clipboard.writeText({{ json_encode($sp->prompt_text) }}); this.textContent='{{ __('Copie !') }}'; setTimeout(() => this.textContent='{{ __('Copier') }}', 2000)" class="btn btn-sm" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 11px;">{{ __('Copier') }}</button>
+                            <div style="display: flex !important; gap: 4px; justify-content: flex-end !important;">
+                                <button onclick="navigator.clipboard.writeText(@json($sp->prompt_text)); this.textContent='{{ __('Copie !') }}'; setTimeout(() => this.textContent='{{ __('Copier') }}', 2000)" class="btn btn-sm" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 11px;">{{ __('Copier') }}</button>
+                                <button onclick="if(confirm('{{ __('Supprimer ce prompt ?') }}')){fetch('/api/prompts/{{ $sp->id }}',{method:'DELETE',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content,'Accept':'application/json'}}).then(()=>this.closest('[style*=background]').remove())}" class="btn btn-sm" style="background: #ef4444; color: #fff; border-radius: 6px; font-size: 11px;">{{ __('Supprimer') }}</button>
+                            </div>
                             <div style="font-size: 11px; color: var(--c-text-muted); margin-top: 4px;">{{ $sp->created_at->format('d/m/Y') }}</div>
                         </div>
                     </div>

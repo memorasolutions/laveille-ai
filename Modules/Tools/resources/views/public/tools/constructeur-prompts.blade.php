@@ -319,6 +319,9 @@
                                 <button class="btn btn-sm ms-1" @click="$dispatch('open-auth-modal')" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 0.75rem; padding: 2px 10px;">{{ __('Se connecter') }}</button>
                             </div>
                         </template>
+                        <template x-if="saveError">
+                            <div class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem; border-radius: 8px;" x-text="saveError"></div>
+                        </template>
                         <template x-if="isAuthenticated && hasLocalData">
                             <div class="alert alert-info small p-2 mb-2" style="font-size: 0.85rem; border-radius: 8px;">
                                 {{ __('Des prompts de votre navigateur ont été trouvés.') }}
@@ -470,6 +473,7 @@ document.addEventListener('alpine:init', function() {
             showValidation: false,
             saveName: '',
             saving: false,
+            saveError: '',
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
             hasLocalData: false,
             history: [],
@@ -654,7 +658,7 @@ document.addEventListener('alpine:init', function() {
                         self.saveName = '';
                         self.saving = false;
                     })
-                    .catch(function() { self.saving = false; });
+                    .catch(function() { self.saving = false; self.saveError = '{{ __("Erreur de sauvegarde. Reessayez.") }}'; setTimeout(function() { self.saveError = ''; }, 4000); });
                 } else {
                     this.$dispatch('open-auth-modal');
                 }

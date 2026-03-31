@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#0B7285">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}">
