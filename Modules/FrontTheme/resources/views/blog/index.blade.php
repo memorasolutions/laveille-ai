@@ -3,6 +3,7 @@
 @include('fronttheme::partials.pagination-seo', ['paginator' => $articles])
 
 @section('title', __('Blog') . ' - ' . config('app.name'))
+@section('meta_description', __('Articles et analyses sur l\'intelligence artificielle, les technologies emergentes et la transformation numerique au Quebec.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Blog')])

@@ -15,14 +15,14 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
     'short_name' => env('PWA_SHORT_NAME', 'App'),
     'description' => env('PWA_DESCRIPTION', 'Application web progressive'),
-    'theme_color' => env('PWA_THEME_COLOR', '#6366f1'),
-    'background_color' => env('PWA_BACKGROUND_COLOR', '#0f172a'),
+    'theme_color' => env('PWA_THEME_COLOR', '#0B7285'),
+    'background_color' => env('PWA_BACKGROUND_COLOR', '#ffffff'),
     'display' => 'standalone',
     'orientation' => 'any',
     'scope' => '/',
     'start_url' => '/',
     'lang' => env('APP_LOCALE', 'fr'),
-    'categories' => ['business', 'productivity'],
+    'categories' => ['news', 'education', 'technology'],
     'icons' => [
         [
             'src' => '/icons/icon-192x192.png',

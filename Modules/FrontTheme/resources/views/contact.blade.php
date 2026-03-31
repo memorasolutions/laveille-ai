@@ -2,6 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Contact') . ' - ' . config('app.name'))
+@section('meta_description', __('Contactez l\'equipe de La veille pour toute question sur la plateforme de veille technologique.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Contactez-nous')])

@@ -12,6 +12,11 @@
     @endif
     <style>[x-cloak] { display: none !important; }</style>
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#0B7285">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}">
     <title>@yield('title', config('app.name'))</title>
@@ -183,6 +188,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}</script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
     @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*', 'privacy-policy*', 'terms-of-use*', 'cookie-policy*', 'rights-request*'))

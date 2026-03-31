@@ -2,6 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', config('app.name') . ' - ' . __('Veille IA, technologies et transformation numerique au Quebec'))
+@section('meta_description', __('Veille technologique collaborative sur l\'intelligence artificielle, les outils IA et la transformation numerique au Quebec. Articles, glossaire, repertoire et communaute.'))
 
 @section('content')
         <!-- start of wpo-blog-hero -->

@@ -3,6 +3,7 @@
 @include('fronttheme::partials.pagination-seo', ['paginator' => $articles])
 
 @section('title', $category->name . ' - ' . config('app.name'))
+@section('meta_description', __('Articles dans la categorie :name — veille technologique et intelligence artificielle.', ['name' => $category->name]))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

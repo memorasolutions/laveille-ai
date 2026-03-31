@@ -2,6 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Foire aux questions') . ' - ' . config('app.name'))
+@section('meta_description', __('Questions frequentes sur La veille, la plateforme de veille technologique collaborative au Quebec.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Foire aux questions')])
