@@ -11,66 +11,42 @@
 <div x-data="tiptapEditor({ content: {{ json_encode($value ?: '') }} })" style="border:1px solid #d1d5db;border-radius:10px;overflow:hidden;">
 
     {{-- Toolbar light --}}
-    <div style="display:flex;flex-wrap:wrap;gap:3px;padding:6px 8px;background:#f8fafc;border-bottom:1px solid #e5e7eb;">
-        {{-- Gras --}}
+    <div class="tt-toolbar">
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBold().run())"
-            :style="isActive('bold') ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Gras') }}">B</button>
-
-        {{-- Italique --}}
+            :class="isActive('bold') && 'active'" class="tt-btn" aria-label="{{ __('Gras') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6V4zm0 8h9a4 4 0 014 4 4 4 0 01-4 4H6v-8z"/></svg>
+        </button>
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleItalic().run())"
-            :style="isActive('italic') ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:13px;font-style:italic;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Italique') }}">I</button>
-
-        <span style="width:1px;background:#e5e7eb;margin:0 2px;align-self:stretch;"></span>
-
-        {{-- H2 --}}
+            :class="isActive('italic') && 'active'" class="tt-btn" aria-label="{{ __('Italique') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+        </button>
+        <span class="tt-sep"></span>
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:2}).run())"
-            :style="isActive('heading', {level:2}) ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Titre H2') }}">H2</button>
-
-        {{-- H3 --}}
+            :class="isActive('heading', {level:2}) && 'active'" class="tt-btn tt-btn-text" aria-label="{{ __('Titre H2') }}">H2</button>
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleHeading({level:3}).run())"
-            :style="isActive('heading', {level:3}) ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Titre H3') }}">H3</button>
-
-        <span style="width:1px;background:#e5e7eb;margin:0 2px;align-self:stretch;"></span>
-
-        {{-- Liste à puces --}}
+            :class="isActive('heading', {level:3}) && 'active'" class="tt-btn tt-btn-text" aria-label="{{ __('Titre H3') }}">H3</button>
+        <span class="tt-sep"></span>
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBulletList().run())"
-            :style="isActive('bulletList') ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:13px;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Liste à puces') }}">• —</button>
-
-        {{-- Liste numérotée --}}
+            :class="isActive('bulletList') && 'active'" class="tt-btn" aria-label="{{ __('Liste a puces') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/><line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleOrderedList().run())"
-            :style="isActive('orderedList') ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:13px;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Liste numérotée') }}">1.</button>
-
-        <span style="width:1px;background:#e5e7eb;margin:0 2px;align-self:stretch;"></span>
-
-        {{-- Citation --}}
+            :class="isActive('orderedList') && 'active'" class="tt-btn" aria-label="{{ __('Liste numerotee') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><text x="2" y="8" fill="currentColor" stroke="none" font-size="8" font-weight="700">1</text><text x="2" y="14" fill="currentColor" stroke="none" font-size="8" font-weight="700">2</text><text x="2" y="20" fill="currentColor" stroke="none" font-size="8" font-weight="700">3</text></svg>
+        </button>
+        <span class="tt-sep"></span>
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleBlockquote().run())"
-            :style="isActive('blockquote') ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:15px;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Citation') }}">&ldquo;</button>
-
-        {{-- Code inline --}}
+            :class="isActive('blockquote') && 'active'" class="tt-btn" aria-label="{{ __('Citation') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C9.591 11.69 11 13.166 11 15a3 3 0 01-3 3c-1.305 0-2.497-.637-3.417-1.679zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C19.591 11.69 21 13.166 21 15a3 3 0 01-3 3c-1.305 0-2.497-.637-3.417-1.679z"/></svg>
+        </button>
         <button type="button" @mousedown.prevent="cmd(() => editor.chain().focus().toggleCode().run())"
-            :style="isActive('code') ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:12px;font-family:monospace;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Code en ligne') }}">&lt;/&gt;</button>
-
-        {{-- Lien --}}
+            :class="isActive('code') && 'active'" class="tt-btn" aria-label="{{ __('Code en ligne') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </button>
         <button type="button" @mousedown.prevent="setLink()"
-            :style="isActive('link') ? 'background:#0B7285;color:#fff' : 'background:#fff;color:#374151'"
-            style="border:1px solid #d1d5db;padding:4px 8px;border-radius:6px;font-size:13px;cursor:pointer;line-height:1;"
-            aria-label="{{ __('Insérer un lien') }}">🔗</button>
+            :class="isActive('link') && 'active'" class="tt-btn" aria-label="{{ __('Inserer un lien') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </button>
     </div>
 
     {{-- Zone d'édition --}}
@@ -81,6 +57,12 @@
 </div>
 
 <style>
+    .tt-toolbar { display:flex; flex-wrap:wrap; gap:2px; padding:6px 10px; background:#f8fafc; border-bottom:1px solid #e5e7eb; align-items:center; }
+    .tt-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border:none; border-radius:6px; background:transparent; color:#64748b; cursor:pointer; transition:all 0.15s ease; }
+    .tt-btn:hover { background:rgba(11,114,133,0.08); color:#0B7285; }
+    .tt-btn.active { background:#0B7285; color:#fff; }
+    .tt-btn-text { font-size:12px; font-weight:700; font-family:'DM Sans',sans-serif; width:auto; padding:0 8px; }
+    .tt-sep { width:1px; height:20px; background:#e2e8f0; margin:0 4px; flex-shrink:0; }
     .tiptap { outline: none; }
     .tiptap p { margin: 0 0 0.5em; }
     .tiptap h2 { font-size: 1.3em; font-weight: 700; margin: 0.8em 0 0.4em; }
