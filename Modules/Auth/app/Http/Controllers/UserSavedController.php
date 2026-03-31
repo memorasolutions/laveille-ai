@@ -18,18 +18,35 @@ class UserSavedController extends Controller
     {
         $user = auth()->user();
 
-        $savedPrompts = class_exists(\Modules\Tools\Models\SavedPrompt::class)
-            ? \Modules\Tools\Models\SavedPrompt::forUser($user->id)->latest()->get()
-            : collect();
+        // Collecter les sauvegardes de chaque outil avec un type identifiant
+        $items = collect();
 
-        $savedTeamPresets = class_exists(\Modules\Tools\Models\SavedTeamPreset::class)
-            ? \Modules\Tools\Models\SavedTeamPreset::forUser($user->id)->latest()->get()
-            : collect();
+        if (class_exists(\Modules\Tools\Models\SavedPrompt::class)) {
+            $items = $items->merge(
+                \Modules\Tools\Models\SavedPrompt::forUser($user->id)->latest()->get()
+                    ->map(fn ($p) => (object) ['id' => $p->id, 'public_id' => $p->public_id, 'type' => 'prompt', 'name' => $p->name, 'preview' => \Str::limit($p->prompt_text, 80), 'tool_name' => __('Constructeur de prompts'), 'tool_slug' => 'constructeur-prompts', 'tool_icon' => '✨', 'tool_color' => '#8B5CF6', 'api_path' => '/api/prompts/', 'created_at' => $p->created_at])
+            );
+        }
 
-        $savedDrawPresets = class_exists(\Modules\Tools\Models\SavedDrawPreset::class)
-            ? \Modules\Tools\Models\SavedDrawPreset::forUser($user->id)->latest()->get()
-            : collect();
+        if (class_exists(\Modules\Tools\Models\SavedTeamPreset::class)) {
+            $items = $items->merge(
+                \Modules\Tools\Models\SavedTeamPreset::forUser($user->id)->latest()->get()
+                    ->map(fn ($p) => (object) ['id' => $p->id, 'public_id' => $p->public_id, 'type' => 'team', 'name' => $p->name, 'preview' => \Str::limit($p->config_text, 80), 'tool_name' => __('Générateur d\'équipes'), 'tool_slug' => 'generateur-equipes', 'tool_icon' => '👥', 'tool_color' => '#0B7285', 'api_path' => '/api/team-presets/', 'created_at' => $p->created_at])
+            );
+        }
 
-        return view('auth::saved.index', compact('user', 'savedPrompts', 'savedTeamPresets', 'savedDrawPresets'));
+        if (class_exists(\Modules\Tools\Models\SavedDrawPreset::class)) {
+            $items = $items->merge(
+                \Modules\Tools\Models\SavedDrawPreset::forUser($user->id)->latest()->get()
+                    ->map(fn ($p) => (object) ['id' => $p->id, 'public_id' => $p->public_id, 'type' => 'draw', 'name' => $p->name, 'preview' => \Str::limit($p->config_text, 80), 'tool_name' => __('Tirage de présentations'), 'tool_slug' => 'tirage-presentations', 'tool_icon' => '🎲', 'tool_color' => '#E67E22', 'api_path' => '/api/draw-presets/', 'created_at' => $p->created_at])
+            );
+        }
+
+        $items = $items->sortByDesc('created_at')->values();
+
+        // Types disponibles pour les chips filtres
+        $types = $items->pluck('type')->unique()->values();
+
+        return view('auth::saved.index', compact('user', 'items', 'types'));
     }
 }
