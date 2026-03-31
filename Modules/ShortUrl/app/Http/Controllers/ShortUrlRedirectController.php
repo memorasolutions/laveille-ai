@@ -27,19 +27,11 @@ class ShortUrlRedirectController
         $shortUrl = $this->service->resolve($slug);
 
         if (! $shortUrl) {
-            return response()->view('shorturl::public.expired', [
-                'icon' => '🔗',
-                'title' => __('Lien introuvable'),
-                'message' => __('Ce lien court n\'existe pas ou a été supprimé.'),
-            ], 404);
+            return redirect(config('app.url') . '/lien-expire?reason=notfound');
         }
 
         if (! $shortUrl->isAccessible()) {
-            return response()->view('shorturl::public.expired', [
-                'icon' => '⏰',
-                'title' => __('Lien expiré'),
-                'message' => __('Ce lien court a expiré ou a été désactivé par son propriétaire.'),
-            ], 410);
+            return redirect(config('app.url') . '/lien-expire?reason=expired');
         }
 
         if (! empty($shortUrl->password) && ! $request->session()->get("short_url_password_{$shortUrl->id}")) {

@@ -18,6 +18,10 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('cacheResponse:600');
     Route::get('/ressources', [ResourceHubController::class, 'index'])->name('resources.index')->middleware('cacheResponse:600');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+    Route::get('/lien-expire', function () {
+        $reason = request('reason', 'notfound');
+        return response()->view('fronttheme::link-expired', compact('reason'), $reason === 'expired' ? 410 : 404);
+    })->name('link.expired');
     Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
     // Redirections legacy WordPress (SEO 301)
