@@ -21,20 +21,20 @@ use Modules\Core\Http\Middleware\SetBackofficeTheme;
 // oEmbed endpoint (public, no auth)
 Route::get('oembed', OEmbedController::class)->middleware('web')->name('oembed');
 
-// TEMPORARY: fix image 404 in article content (remove after use)
+// TEMPORARY: fix image 404 in ad_placements (remove after use)
 Route::get('_fix-img-404-x9k2m', function (\Illuminate\Http\Request $request) {
     abort_unless($request->query('key') === 'f1x_s3cr3t_2026', 403);
     $hash = '05eebcbbd8004c6d9144c888117cbeb4';
     $imgTag = '<img src="/storage/blog/content/' . $hash . '.jpg" alt="Nexus Neural" style="width:200px;height:auto;border-radius:0.5rem;" loading="lazy">';
-    $found = \Illuminate\Support\Facades\DB::table('articles')->whereRaw('content LIKE ?', ["%{$hash}%"])->get(['id', 'slug', \Illuminate\Support\Facades\DB::raw("LEFT(content,200) as preview")]);
-    $results = ['found_count' => $found->count(), 'found' => $found->toArray()];
+    $found = \Illuminate\Support\Facades\DB::table('ad_placements')->whereRaw('ad_code LIKE ?', ["%{$hash}%"])->get(['id', 'key', 'ad_code']);
+    $results = ['source' => 'ad_placements', 'found_count' => $found->count()];
     foreach ($found as $row) {
-        $raw = \Illuminate\Support\Facades\DB::table('articles')->where('id', $row->id)->value('content');
-        $clean = str_replace($imgTag, '', $raw);
-        if ($clean !== $raw) {
-            \Illuminate\Support\Facades\DB::table('articles')->where('id', $row->id)->update(['content' => $clean]);
-            $results['fixed'][] = $row->slug;
-        }
+        $clean = str_replace($imgTag, '', $row->ad_code);
+        \Illuminate\Support\Facades\DB::table('ad_placements')->where('id', $row->id)->update(['ad_code' => $clean]);
+        $results['fixed'][] = $row->key;
+    }
+    if (class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
+        (new \Modules\Ads\Services\AdsRenderer)->clearCache();
     }
     \Illuminate\Support\Facades\Artisan::call('responsecache:clear');
     return response()->json($results);
