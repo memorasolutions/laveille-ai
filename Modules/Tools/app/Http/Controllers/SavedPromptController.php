@@ -37,9 +37,11 @@ class SavedPromptController extends Controller
         return response()->json($prompt, 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $publicId): JsonResponse
     {
-        $prompt = SavedPrompt::where('user_id', auth()->id())->findOrFail($id);
+        $prompt = SavedPrompt::where('user_id', auth()->id())
+            ->where('public_id', $publicId)
+            ->firstOrFail();
 
         $validated = $request->validate([
             'name' => 'sometimes|required|max:255',
@@ -53,9 +55,11 @@ class SavedPromptController extends Controller
         return response()->json($prompt);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $publicId): JsonResponse
     {
-        $prompt = SavedPrompt::where('user_id', auth()->id())->findOrFail($id);
+        $prompt = SavedPrompt::where('user_id', auth()->id())
+            ->where('public_id', $publicId)
+            ->firstOrFail();
         $prompt->delete();
 
         return response()->json(null, 204);

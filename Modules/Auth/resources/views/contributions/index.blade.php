@@ -279,22 +279,22 @@
                             <div x-data="{ open: false }" style="position: relative;" @click.outside="open = false">
                                 <button @click="open = !open" style="background: transparent; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px 10px; line-height: 1; font-size: 18px; color: #6b7280; cursor: pointer;">&#8942;</button>
                                 <div x-show="open" x-cloak x-transition.opacity style="position: absolute; right: 0; top: 100%; margin-top: 4px; min-width: 170px; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid #e5e7eb; padding: 4px 0; z-index: 50;">
-                                    <a href="#" class="copy-prompt-btn" data-prompt-id="{{ $sp->id }}" @click="open = false" style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13px; color: var(--c-dark, #1a1a2e); text-decoration: none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                                    <a href="#" class="copy-prompt-btn" data-prompt-id="{{ $sp->public_id }}" @click="open = false" style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13px; color: var(--c-dark, #1a1a2e); text-decoration: none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>{{ __('Copier') }}
                                     </a>
                                     @if(Route::has('tools.show'))
-                                    <a href="{{ route('tools.show', 'constructeur-prompts') }}?edit={{ $sp->id }}" style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13px; color: var(--c-dark, #1a1a2e); text-decoration: none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                                    <a href="{{ route('tools.show', 'constructeur-prompts') }}?edit={{ $sp->public_id }}" style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13px; color: var(--c-dark, #1a1a2e); text-decoration: none;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>{{ __('Editer') }}
                                     </a>
                                     @endif
                                     <div style="border-top: 1px solid #f3f4f6; margin: 2px 0;"></div>
-                                    <a href="#" @click.prevent="open = false; if(confirm('{{ __('Supprimer ce prompt ?') }}')){fetch('/api/prompts/{{ $sp->id }}',{method:'DELETE',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content,'Accept':'application/json'}}).then(()=>$el.closest('[style*=border-radius]').parentElement.remove())}" style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13px; color: #ef4444; text-decoration: none;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                                    <a href="#" @click.prevent="open = false; if(confirm('{{ __('Supprimer ce prompt ?') }}')){fetch('/api/prompts/{{ $sp->public_id }}',{method:'DELETE',headers:{'X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content,'Accept':'application/json'}}).then(()=>$el.closest('[style*=border-radius]').parentElement.remove())}" style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13px; color: #ef4444; text-decoration: none;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>{{ __('Supprimer') }}
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        <script type="application/json" class="prompt-data-{{ $sp->id }}">@json($sp->prompt_text)</script>
+                        <script type="application/json" class="prompt-data-{{ $sp->public_id }}">@json($sp->prompt_text)</script>
                     </div>
                 </div>
                 @endforeach

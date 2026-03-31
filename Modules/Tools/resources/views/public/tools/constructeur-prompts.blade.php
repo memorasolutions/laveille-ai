@@ -595,7 +595,7 @@ document.addEventListener('alpine:init', function() {
                         .then(function(r) { return r.json(); })
                         .then(function(data) {
                             self.history = (data.data || []).map(function(item) {
-                                return { id: item.id, prompt: item.prompt_text, name: item.name, date: new Date(item.created_at).toLocaleString('fr-CA'), params: item.params };
+                                return { id: item.public_id || item.id, prompt: item.prompt_text, name: item.name, date: new Date(item.created_at).toLocaleString('fr-CA'), params: item.params };
                             });
                             if (localStorage.getItem('pb_history')) self.hasLocalData = true;
                         })
@@ -608,7 +608,7 @@ document.addEventListener('alpine:init', function() {
                         fetch('/api/prompts', { headers: self._headers() })
                             .then(function(r) { return r.json(); })
                             .then(function(data) {
-                                var found = (data.data || []).find(function(p) { return p.id == editId; });
+                                var found = (data.data || []).find(function(p) { return (p.public_id || p.id) == editId; });
                                 if (found && found.params) {
                                     var p = found.params;
                                     if (p.personaType) self.personaType = p.personaType;
@@ -686,11 +686,12 @@ document.addEventListener('alpine:init', function() {
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
                         if (isEdit) {
-                            var idx = self.history.findIndex(function(h) { return h.id == data.id; });
-                            if (idx >= 0) self.history[idx] = { id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.updated_at).toLocaleString('fr-CA'), params: data.params };
+                            var pid = data.public_id || data.id;
+                            var idx = self.history.findIndex(function(h) { return h.id == pid; });
+                            if (idx >= 0) self.history[idx] = { id: pid, prompt: data.prompt_text, name: data.name, date: new Date(data.updated_at).toLocaleString('fr-CA'), params: data.params };
                             self._editingId = null;
                         } else {
-                            self.history.unshift({ id: data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
+                            self.history.unshift({ id: data.public_id || data.id, prompt: data.prompt_text, name: data.name, date: new Date(data.created_at).toLocaleString('fr-CA'), params: data.params });
                         }
                         self.saveName = '';
                         self.saving = false;
