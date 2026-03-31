@@ -21,22 +21,6 @@ use Modules\Core\Http\Middleware\SetBackofficeTheme;
 // oEmbed endpoint (public, no auth)
 Route::get('oembed', OEmbedController::class)->middleware('web')->name('oembed');
 
-// TEMPORARY: fix image 404 in ads_placements (remove after use)
-Route::get('_fix-img-404-x9k2m', function (\Illuminate\Http\Request $request) {
-    abort_unless($request->query('key') === 'f1x_s3cr3t_2026', 403);
-    $hash = '05eebcbbd8004c6d9144c888117cbeb4';
-    $found = \Illuminate\Support\Facades\DB::table('ads_placements')->where('ad_code', 'like', "%{$hash}%")->get(['id', 'key', 'ad_code']);
-    $results = ['found' => $found->count()];
-    foreach ($found as $row) {
-        $clean = preg_replace('/<img[^>]*' . $hash . '[^>]*>/', '', $row->ad_code);
-        \Illuminate\Support\Facades\DB::table('ads_placements')->where('id', $row->id)->update(['ad_code' => $clean]);
-        $results['fixed'][] = $row->key;
-    }
-    \Illuminate\Support\Facades\Cache::flush();
-    \Illuminate\Support\Facades\Artisan::call('responsecache:clear');
-    $results['raw_codes'] = $found->map(fn ($r) => ['key' => $r->key, 'code' => $r->ad_code])->toArray();
-    return response()->json($results);
-})->middleware('web');
 
 // Routes publiques blog (nécessite FrontTheme)
 if (\Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
