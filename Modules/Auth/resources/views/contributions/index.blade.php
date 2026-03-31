@@ -51,7 +51,7 @@
 </div>
 
 {{-- Onglets modernes Alpine.js --}}
-<div x-data="{ tab: 'suggestions' }">
+<div x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'suggestions' }">
 
     {{-- Navigation onglets avec badges --}}
     <div style="display: flex !important; flex-wrap: wrap !important; gap: 8px; margin-bottom: 24px;">
