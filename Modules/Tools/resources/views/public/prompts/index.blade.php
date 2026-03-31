@@ -3,6 +3,23 @@
 @section('title', 'Bibliothèque de prompts')
 @section('meta_description', 'Explorez et copiez des prompts IA créés par la communauté de La veille.')
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Bibliothèque de prompts')])
+@endsection
+
+@push('schema')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "{{ __('Accueil') }}", "item": "{{ route('home') }}"},
+        {"@type": "ListItem", "position": 2, "name": "{{ __('Bibliothèque de prompts') }}", "item": "{{ route('prompts.index') }}"}
+    ]
+}
+</script>
+@endpush
+
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
 
