@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\SavedPromptController;
 use Modules\Tools\Http\Controllers\SavedDrawPresetController;
 use Modules\Tools\Http\Controllers\SavedQrPresetController;
+use Modules\Tools\Http\Controllers\SavedWheelPresetController;
 use Modules\Tools\Http\Controllers\SavedTeamPresetController;
 use Modules\Tools\Http\Controllers\ToolsController;
 
@@ -33,4 +34,9 @@ Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
     Route::post('/qr-presets', [SavedQrPresetController::class, 'store'])->name('api.qr-presets.store');
     Route::put('/qr-presets/{id}', [SavedQrPresetController::class, 'update'])->name('api.qr-presets.update');
     Route::delete('/qr-presets/{id}', [SavedQrPresetController::class, 'destroy'])->name('api.qr-presets.destroy');
+
+    Route::get('/wheel-presets', [SavedWheelPresetController::class, 'index'])->name('api.wheel-presets.index');
+    Route::post('/wheel-presets', [SavedWheelPresetController::class, 'store'])->name('api.wheel-presets.store');
+    Route::put('/wheel-presets/{id}', [SavedWheelPresetController::class, 'update'])->name('api.wheel-presets.update');
+    Route::delete('/wheel-presets/{id}', [SavedWheelPresetController::class, 'destroy'])->name('api.wheel-presets.destroy');
 });

@@ -42,6 +42,13 @@ class UserSavedController extends Controller
             );
         }
 
+        if (class_exists(\Modules\Tools\Models\SavedWheelPreset::class)) {
+            $items = $items->merge(
+                \Modules\Tools\Models\SavedWheelPreset::forUser($user->id)->latest()->get()
+                    ->map(fn ($p) => (object) ['id' => $p->id, 'public_id' => $p->public_id, 'type' => 'wheel', 'name' => $p->name, 'preview' => \Str::limit($p->config_text, 80), 'tool_name' => __('Roue de tirage'), 'tool_slug' => 'roue-tirage', 'tool_icon' => '🎡', 'tool_color' => '#ef4444', 'api_path' => '/api/wheel-presets/', 'created_at' => $p->created_at])
+            );
+        }
+
         if (class_exists(\Modules\Tools\Models\SavedQrPreset::class)) {
             $items = $items->merge(
                 \Modules\Tools\Models\SavedQrPreset::forUser($user->id)->latest()->get()

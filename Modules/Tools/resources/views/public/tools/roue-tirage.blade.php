@@ -98,6 +98,24 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                             </div>
                         </div>
 
+                        {{-- Barre sauvegarde (connectés) --}}
+                        <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
+                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="items.length < 2 || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
+                            </div>
+                            <div class="small mt-1" style="font-size: 0.8rem; color: var(--c-text-muted);">
+                                {{ __('Retrouvez vos configurations dans') }} <a href="{{ route('user.saved') }}" style="color: var(--c-primary); text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
+                            </div>
+                            <template x-if="saveError">
+                                <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
+                            </template>
+                        </div>
+                        <div x-show="!isAuthenticated" x-cloak style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.85rem; color: #0369a1;">
+                            {{ __('Connectez-vous pour sauvegarder vos configurations dans votre compte.') }}
+                        </div>
+
                         {{-- Roue centrée --}}
                         <div class="text-center">
                             <div class="wheel-container">
@@ -134,7 +152,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                                     <button class="btn btn-sm btn-outline-secondary" @click="loadPreset(p); showDrawer = false; document.body.style.overflow = ''" x-text="p.name" style="border-radius: var(--r-btn); font-size: 0.7rem;"></button>
                                                 </template>
                                             </div>
-                                            <template x-if="savedLists.length > 0">
+                                            <template x-if="!isAuthenticated && savedLists.length > 0">
                                                 <div class="mt-2">
                                                     <small class="text-muted">{{ __('Mes listes') }}</small>
                                                     <template x-for="(s, i) in savedLists" :key="'ds'+i">
@@ -381,6 +399,12 @@ document.addEventListener('alpine:init', function() {
             soundVolume: 0.08,
             confettiEnabled: true,
             eliminationMode: false,
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            saveName: '',
+            saving: false,
+            saveError: '',
+            _editingId: null,
+            tickAudio: null,
             savedLists: [],
             presets: [
                 { name: 'Numéros 1-10', items: '1\n2\n3\n4\n5\n6\n7\n8\n9\n10' },
@@ -402,7 +426,10 @@ document.addEventListener('alpine:init', function() {
 
             init: function() {
                 try { this.savedLists = JSON.parse(localStorage.getItem('rw_saved') || '[]'); } catch(e) { this.savedLists = []; }
+                this.tickAudio = new Audio('/sounds/tick.wav');
+                this.tickAudio.volume = this.soundVolume;
                 this.drawWheel();
+                this.initEditMode();
             },
 
             get items() { return this.names.split('\n').map(function(n) { return n.trim(); }).filter(function(n) { return n; }); },
@@ -447,7 +474,11 @@ document.addEventListener('alpine:init', function() {
                         flapper.style.transform = 'translateX(-50%) rotate(0deg)';
                     }, 40);
                 }, 80);
-                if (this.soundEnabled) this.playBeep(500 + Math.random() * 500, 15);
+                if (this.soundEnabled && this.tickAudio) {
+                    this.tickAudio.currentTime = 0;
+                    this.tickAudio.volume = this.soundVolume;
+                    this.tickAudio.play().catch(function() {});
+                }
             },
 
             checkSegmentChange: function() {
@@ -677,6 +708,52 @@ document.addEventListener('alpine:init', function() {
             copyHistory: function() {
                 var txt = this.history.map(function(h, i) { return '#' + (i + 1) + ' ' + h.name + ' (' + h.date + ')'; }).join('\n');
                 navigator.clipboard.writeText(txt);
+            },
+
+            _headers: function() {
+                return { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' };
+            },
+            saveToAccount: function() {
+                if (this.saving || this.items.length < 2) return;
+                var self = this;
+                var title = this.saveName.trim() || this.title || 'Roue de tirage';
+                this.saving = true;
+                this.saveError = '';
+                var isEdit = !!this._editingId;
+                var url = isEdit ? '/api/wheel-presets/' + this._editingId : '/api/wheel-presets';
+                var method = isEdit ? 'PUT' : 'POST';
+                fetch(url, {
+                    method: method, headers: this._headers(),
+                    body: JSON.stringify({ name: title, config_text: this.names, params: { paletteName: this.paletteName, spinDuration: this.spinDuration, spinDirection: this.spinDirection, soundVolume: this.soundVolume, confettiEnabled: this.confettiEnabled, eliminationMode: this.eliminationMode, weights: this.weights, title: this.title } })
+                })
+                .then(function(r) { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
+                .then(function() { self._editingId = null; self.saveName = ''; self.saving = false; window.dispatchEvent(new CustomEvent('toast', { detail: { message: '{{ __("Configuration sauvegardée") }}' } })); })
+                .catch(function(e) { self.saveError = e.message; self.saving = false; setTimeout(function() { self.saveError = ''; }, 4000); });
+            },
+            initEditMode: function() {
+                if (!this.isAuthenticated) return;
+                var self = this;
+                var editId = new URLSearchParams(window.location.search).get('edit');
+                if (!editId) return;
+                fetch('/api/wheel-presets', { headers: this._headers() })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var found = (data.data || []).find(function(p) { return p.public_id === editId; });
+                        if (!found) return;
+                        self.names = found.config_text || '';
+                        var pr = found.params || {};
+                        if (pr.paletteName) self.paletteName = pr.paletteName;
+                        if (pr.spinDuration) self.spinDuration = pr.spinDuration;
+                        if (pr.spinDirection) self.spinDirection = pr.spinDirection;
+                        if (pr.soundVolume !== undefined) self.soundVolume = pr.soundVolume;
+                        if (pr.confettiEnabled !== undefined) self.confettiEnabled = pr.confettiEnabled;
+                        if (pr.eliminationMode !== undefined) self.eliminationMode = pr.eliminationMode;
+                        if (pr.weights) self.weights = pr.weights;
+                        if (pr.title) self.title = pr.title;
+                        self.saveName = found.name;
+                        self._editingId = found.public_id;
+                        self.$nextTick(function() { self.drawWheel(); });
+                    });
             }
         };
     });
