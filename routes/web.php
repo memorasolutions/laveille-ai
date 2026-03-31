@@ -23,6 +23,12 @@ if (! \Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
 // Passkeys (spatie/laravel-passkeys)
 Route::passkeys();
 
+// TEMP: migration saved_prompts (supprimer après usage)
+Route::get('/tmp-migrate-x9k', function () {
+    \Artisan::call('migrate', ['--force' => true]);
+    return response()->json(['output' => \Artisan::output()]);
+});
+
 // PWA : manifest dynamique + page hors ligne (module Core)
 Route::get('/manifest.webmanifest', [\Modules\Core\Http\Controllers\PwaController::class, 'manifest'])->name('pwa.manifest');
 Route::get('/offline', [\Modules\Core\Http\Controllers\PwaController::class, 'offline'])->name('pwa.offline');
