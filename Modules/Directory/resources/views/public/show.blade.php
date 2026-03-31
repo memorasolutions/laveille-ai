@@ -477,7 +477,7 @@
 
             {{-- Cartes compactes repliées --}}
             @foreach($discussions as $d)
-            <div x-data="{ open: true, replying: false }" style="margin-bottom: 10px;">
+            <div x-data="{ open: false, replying: false }" style="margin-bottom: 10px;">
                 {{-- Carte compacte (toujours visible) --}}
                 <div @click="open = !open" class="disc-card" style="border-left: 3px solid var(--c-primary); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.15s;"
                      :class="open ? 'disc-card-open' : ''"
