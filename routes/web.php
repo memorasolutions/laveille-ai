@@ -23,6 +23,15 @@ if (! \Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
 // Passkeys (spatie/laravel-passkeys)
 Route::passkeys();
 
+// TEMP: config clear + git status (supprimer après usage)
+Route::get('/tmp-deploy-check-x9k', function () {
+    \Artisan::call('config:clear');
+    \Artisan::call('view:clear');
+    \Artisan::call('route:clear');
+    $git = shell_exec('cd ' . base_path() . ' && git log --oneline -3 2>&1');
+    return response()->json(['config' => 'cleared', 'git' => $git]);
+});
+
 // PWA : manifest dynamique + page hors ligne (module Core)
 Route::get('/manifest.webmanifest', [\Modules\Core\Http\Controllers\PwaController::class, 'manifest'])->name('pwa.manifest');
 Route::get('/offline', [\Modules\Core\Http\Controllers\PwaController::class, 'offline'])->name('pwa.offline');
