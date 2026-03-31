@@ -1,4 +1,4 @@
-@extends('backoffice::layouts.master')
+@extends('backoffice::layouts.admin')
 @section('title', __('Modifier la ressource'))
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
