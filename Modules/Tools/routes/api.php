@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\SavedPromptController;
+use Modules\Tools\Http\Controllers\SavedDrawPresetController;
 use Modules\Tools\Http\Controllers\SavedTeamPresetController;
 use Modules\Tools\Http\Controllers\ToolsController;
 
@@ -21,4 +22,9 @@ Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
     Route::post('/team-presets', [SavedTeamPresetController::class, 'store'])->name('api.team-presets.store');
     Route::put('/team-presets/{id}', [SavedTeamPresetController::class, 'update'])->name('api.team-presets.update');
     Route::delete('/team-presets/{id}', [SavedTeamPresetController::class, 'destroy'])->name('api.team-presets.destroy');
+
+    Route::get('/draw-presets', [SavedDrawPresetController::class, 'index'])->name('api.draw-presets.index');
+    Route::post('/draw-presets', [SavedDrawPresetController::class, 'store'])->name('api.draw-presets.store');
+    Route::put('/draw-presets/{id}', [SavedDrawPresetController::class, 'update'])->name('api.draw-presets.update');
+    Route::delete('/draw-presets/{id}', [SavedDrawPresetController::class, 'destroy'])->name('api.draw-presets.destroy');
 });

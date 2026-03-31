@@ -43,7 +43,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 col-12">
                 <div class="card shadow-sm" style="border-radius: var(--r-base);">
-                    <div class="card-body p-4 p-md-5" x-data="presOrder()">
+                    <div class="card-body p-4 p-md-5" x-data="presOrder()" x-init="initEditMode()">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                             <div class="d-flex gap-1">
@@ -53,6 +53,25 @@
                             </div>
                         </div>
                         <p class="text-muted mb-4">{{ __('Entrez vos apprenants et questions, puis tirez au sort.') }}</p>
+
+                        {{-- Barre sauvegarde (connectés) --}}
+                        <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
+                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="studentList.length < 1 || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
+                            </div>
+                            <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
+                                {{ __('Retrouvez vos configurations dans') }} <a href="{{ route('user.saved') }}?tab=draw-configs" style="color: var(--c-primary); text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
+                            </div>
+                            <template x-if="saveError">
+                                <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
+                            </template>
+                        </div>
+                        {{-- Bandeau visiteurs --}}
+                        <div x-show="!isAuthenticated" x-cloak style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; color: #0369a1;">
+                            {{ __('Connectez-vous pour sauvegarder vos configurations dans votre compte.') }}
+                        </div>
 
                         {{-- Listes cote a cote --}}
                         <div class="row mb-3">
@@ -218,9 +237,10 @@
                         <details style="font-size: 0.75rem; color: #999;">
                             <summary style="cursor: pointer;">{{ __('Protection de vos données (Loi 25)') }}</summary>
                             <ul class="mt-2 mb-0" style="padding-left: 1.2rem;">
-                                <li>{{ __('Stockage local uniquement — jamais envoyé à un serveur.') }}</li>
+                                <li x-show="isAuthenticated">{{ __('Données sauvegardées dans votre compte, protégées et supprimables à tout moment.') }}</li>
+                                <li x-show="!isAuthenticated">{{ __('Stockage local uniquement (navigateur) — jamais envoyé à un serveur.') }}</li>
                                 <li>{{ __('Aucune transmission à des tiers.') }}</li>
-                                <li>{{ __('Suppression facile via le bouton « Effacer » ou mode privé.') }}</li>
+                                <li>{{ __('Suppression facile via le bouton « Effacer » ou votre espace personnel.') }}</li>
                             </ul>
                         </details>
                     </div>
@@ -258,6 +278,13 @@ document.addEventListener('alpine:init', function() {
 
             // Fullscreen
             isFullscreen: false,
+
+            // Sauvegarde compte
+            isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            saveName: '',
+            saving: false,
+            saveError: '',
+            _editingId: null,
 
             // Sound
             soundEnabled: localStorage.getItem('tp_sound') !== 'false',
@@ -397,6 +424,54 @@ document.addEventListener('alpine:init', function() {
             clearAll: function() { this.history = []; this.drawnStudents = []; this.drawnQuestions = []; this.currentDraw = null; this.drawCount = 0; this.fullOrder = []; this.stopTimer(); },
             resetDrawn: function() { this.drawnStudents = []; this.drawnQuestions = []; },
             saveLists: function() { localStorage.setItem('tp_names', this.names); localStorage.setItem('tp_questions', this.questions); },
+
+            _headers: function() {
+                return { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' };
+            },
+            saveToAccount: function() {
+                if (this.saving || this.studentList.length < 1) return;
+                var self = this;
+                var title = this.saveName.trim() || 'Configuration tirage';
+                this.saving = true;
+                this.saveError = '';
+                var isEdit = !!this._editingId;
+                var url = isEdit ? '/api/draw-presets/' + this._editingId : '/api/draw-presets';
+                var method = isEdit ? 'PUT' : 'POST';
+                fetch(url, {
+                    method: method, headers: this._headers(),
+                    body: JSON.stringify({ name: title, config_text: this.names, params: { questions: this.questions, removeStudent: this.removeStudent, removeQuestion: this.removeQuestion, timerEnabled: this.timerEnabled, timerMinutes: this.timerMinutes } })
+                })
+                .then(function(r) { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
+                .then(function(data) {
+                    self._editingId = null;
+                    self.saveName = '';
+                    self.saving = false;
+                })
+                .catch(function(e) { self.saveError = e.message; self.saving = false; setTimeout(function() { self.saveError = ''; }, 4000); });
+            },
+            initEditMode: function() {
+                if (!this.isAuthenticated) return;
+                var self = this;
+                var params = new URLSearchParams(window.location.search);
+                var editId = params.get('edit');
+                if (!editId) return;
+                fetch('/api/draw-presets', { headers: this._headers() })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var found = (data.data || []).find(function(p) { return p.public_id === editId; });
+                        if (found) {
+                            self.names = found.config_text || '';
+                            var pr = found.params || {};
+                            self.questions = pr.questions || '';
+                            self.removeStudent = pr.removeStudent !== undefined ? pr.removeStudent : true;
+                            self.removeQuestion = pr.removeQuestion !== undefined ? pr.removeQuestion : true;
+                            self.timerEnabled = pr.timerEnabled || false;
+                            self.timerMinutes = pr.timerMinutes || 5;
+                            self.saveName = found.name;
+                            self._editingId = found.public_id;
+                        }
+                    });
+            },
 
             exportHistory: function() {
                 var text = this.history.map(function(d, i) { return '#' + (i + 1) + ' - ' + d.time + ' - ' + d.student + ' \u2192 ' + d.question; }).join('\n');

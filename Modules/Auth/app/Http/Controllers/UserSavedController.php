@@ -26,6 +26,10 @@ class UserSavedController extends Controller
             ? \Modules\Tools\Models\SavedTeamPreset::forUser($user->id)->latest()->get()
             : collect();
 
-        return view('auth::saved.index', compact('user', 'savedPrompts', 'savedTeamPresets'));
+        $savedDrawPresets = class_exists(\Modules\Tools\Models\SavedDrawPreset::class)
+            ? \Modules\Tools\Models\SavedDrawPreset::forUser($user->id)->latest()->get()
+            : collect();
+
+        return view('auth::saved.index', compact('user', 'savedPrompts', 'savedTeamPresets', 'savedDrawPresets'));
     }
 }

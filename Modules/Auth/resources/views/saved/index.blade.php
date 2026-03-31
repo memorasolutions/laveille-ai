@@ -31,6 +31,15 @@
                 <span style="background: linear-gradient(135deg, #0B7285, #0e7490); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedTeamPresets->count() }}</span>
             @endif
         </button>
+        <button @click="tab = 'draw-configs'" class="btn"
+                :style="tab === 'draw-configs'
+                    ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
+                    : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
+            🎲 {{ __('Tirages présentations') }}
+            @if($savedDrawPresets->count() > 0)
+                <span style="background: linear-gradient(135deg, #E67E22, #D97706); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedDrawPresets->count() }}</span>
+            @endif
+        </button>
     </div>
 
     {{-- Onglet prompts --}}
@@ -124,6 +133,46 @@
         @endif
     </div>
 
+    {{-- Onglet tirages présentations --}}
+    <div x-show="tab === 'draw-configs'" x-transition x-cloak>
+        @if($savedDrawPresets->isEmpty())
+            <div style="text-align: center; padding: 60px 20px; color: var(--c-text-muted);">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">🎲</div>
+                <h3 style="font-family: var(--f-heading); margin-bottom: 8px;">{{ __('Aucune configuration sauvegardée') }}</h3>
+                <p>{{ __('Créez des configurations dans le tirage de présentations pour les retrouver ici.') }}</p>
+                @if(Route::has('tools.show'))
+                    <a href="{{ route('tools.show', 'tirage-presentations') }}" style="display: inline-block; background: var(--c-primary); color: #fff; padding: 10px 24px; border-radius: var(--r-btn); font-weight: 600; text-decoration: none; margin-top: 12px;">{{ __('Aller au tirage') }}</a>
+                @endif
+            </div>
+        @else
+            <div class="row">
+                @foreach($savedDrawPresets as $dp)
+                <div class="col-sm-6 col-md-4" style="margin-bottom: 16px;">
+                    <div class="panel panel-default" style="border-radius: 10px; overflow: hidden; margin-bottom: 0;">
+                        <div class="panel-heading" style="background: #E67E22; color: #fff; padding: 10px 14px;">
+                            <strong>{{ $dp->name }}</strong>
+                        </div>
+                        <div class="panel-body" style="padding: 12px 14px;">
+                            <p class="text-muted" style="font-size: 12px; margin-bottom: 6px;">
+                                {{ $dp->created_at->format('d/m/Y') }} — {{ Str::limit($dp->config_text, 60) }}
+                            </p>
+                            @php $params = $dp->params ?? []; @endphp
+                            <p style="font-size: 13px; margin-bottom: 8px;">
+                                {{ count(array_filter(explode("\n", $dp->config_text))) }} apprenants
+                                @if(!empty($params['questions'])) — {{ count(array_filter(explode("\n", $params['questions']))) }} questions @endif
+                            </p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('tools.show', 'tirage-presentations') }}?edit={{ $dp->public_id }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-size: 12px;">{{ __('Charger') }}</a>
+                                <button class="btn btn-sm btn-outline-danger js-delete-draw" data-id="{{ $dp->public_id }}" style="border-radius: 6px; font-size: 12px;">{{ __('Supprimer') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
 </div>
 
 @push('scripts')
@@ -147,6 +196,15 @@ document.querySelectorAll('.js-delete-config').forEach(function(btn) {
         if (!confirm('{{ __("Supprimer cette configuration?") }}')) return;
         var card = this.closest('.col-sm-6');
         fetch('/api/team-presets/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
+            .then(function() { if (card) card.remove(); });
+    });
+});
+document.querySelectorAll('.js-delete-draw').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var id = this.dataset.id;
+        if (!confirm('{{ __("Supprimer cette configuration?") }}')) return;
+        var card = this.closest('.col-sm-6');
+        fetch('/api/draw-presets/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
             .then(function() { if (card) card.remove(); });
     });
 });
