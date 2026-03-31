@@ -90,6 +90,17 @@ class ResourceHubController extends Controller
             ];
         }
 
+        if (Route::has('prompts.index') && class_exists(\Modules\Tools\Models\SavedPrompt::class)) {
+            $sections[] = [
+                'icon' => '✨',
+                'title' => __('Bibliothèque de prompts'),
+                'description' => __('Prompts IA partagés par la communauté, prêts à copier et utiliser.'),
+                'count' => \Modules\Tools\Models\SavedPrompt::public()->count(),
+                'url' => route('prompts.index'),
+                'updated_at' => \Modules\Tools\Models\SavedPrompt::public()->latest()->value('created_at'),
+            ];
+        }
+
         if (Route::has('shorturl.create')) {
             $sections[] = [
                 'icon' => '🔗',
