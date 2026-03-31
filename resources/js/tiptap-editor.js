@@ -22,8 +22,7 @@ const TextStyle = BaseTextStyle.extend({
         }
     },
 })
-import Underline from '@tiptap/extension-underline'
-import Link from '@tiptap/extension-link'
+// Link et Underline sont inclus dans StarterKit v3.19+ — ne pas importer séparément
 import Highlight from '@tiptap/extension-highlight'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight, common } from 'lowlight'
@@ -60,9 +59,7 @@ export function tiptapEditorComponent(config = {}) {
             const editorInstance = new Editor({
                 element: el,
                 extensions: [
-                    StarterKit.configure({ codeBlock: false, link: false, underline: false }),
-                    Link.configure({ openOnClick: false }),
-                    Underline,
+                    StarterKit.configure({ codeBlock: false, link: { openOnClick: false } }),
                     Image,
                     Table.configure({ resizable: true }),
                     TableRow,
