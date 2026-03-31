@@ -21,44 +21,7 @@
         </div>
     </div>
     <div class="list-group" style="margin-bottom: 0;">
-        @if(Route::has('user.dashboard'))
-            <a href="{{ route('user.dashboard') }}" class="list-group-item {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
-                <i class="fa fa-tachometer" style="width: 20px;"></i> {{ __('Tableau de bord') }}
-            </a>
-        @endif
-        @if(Route::has('user.profile'))
-            <a href="{{ route('user.profile') }}" class="list-group-item {{ request()->routeIs('user.profile') ? 'active' : '' }}">
-                <i class="fa fa-user" style="width: 20px;"></i> {{ __('Mon profil') }}
-            </a>
-        @endif
-        @if(Route::has('user.contributions'))
-            <a href="{{ route('user.contributions') }}" class="list-group-item {{ request()->routeIs('user.contributions') ? 'active' : '' }}">
-                <i class="fa fa-handshake-o" style="width: 20px;"></i> {{ __('Mes contributions') }}
-            </a>
-        @endif
-        @if(Route::has('user.saved'))
-            <a href="{{ route('user.saved') }}" class="list-group-item {{ request()->routeIs('user.saved') ? 'active' : '' }}">
-                <i class="fa fa-floppy-o" style="width: 20px;"></i> {{ __('Mes sauvegardes') }}
-            </a>
-        @endif
-        @if(Route::has('bookmarks.index'))
-            <a href="{{ route('bookmarks.index') }}" class="list-group-item {{ request()->routeIs('bookmarks.index') ? 'active' : '' }}">
-                <i class="fa fa-bookmark" style="width: 20px;"></i> {{ __('Mes favoris') }}
-            </a>
-        @endif
-        @if(Route::has('shorturl.user.index'))
-            <a href="{{ route('shorturl.user.index') }}" class="list-group-item {{ request()->routeIs('shorturl.user.*') ? 'active' : '' }}">
-                <i class="fa fa-link" style="width: 20px;"></i> {{ __('Mes liens courts') }}
-            </a>
-        @endif
-        @if(Route::has('user.notifications'))
-            <a href="{{ route('user.notifications') }}" class="list-group-item {{ request()->routeIs('user.notifications') ? 'active' : '' }}">
-                <i class="fa fa-bell" style="width: 20px;"></i> {{ __('Notifications') }}
-                @if($unreadNotifications > 0)
-                    <span class="badge" style="background: #d9534f;">{{ $unreadNotifications }}</span>
-                @endif
-            </a>
-        @endif
+        @include('auth::components.user-menu-links', ['variant' => 'sidebar'])
 
         @if(Route::has('user.roadmap.ideas'))
             <a href="{{ route('user.roadmap.ideas') }}" class="list-group-item {{ request()->routeIs('user.roadmap.ideas') ? 'active' : '' }}">
