@@ -17,7 +17,7 @@ Route::middleware('web')->group(function () {
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])->name('tools.show');
 });
 
-Route::middleware(['web', 'auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('tools', [ToolAdminController::class, 'index'])->name('tools.index');
     Route::get('tools/create', [ToolAdminController::class, 'create'])->name('tools.create');
     Route::post('tools', [ToolAdminController::class, 'store'])->name('tools.store');

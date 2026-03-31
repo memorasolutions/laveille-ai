@@ -9,6 +9,7 @@
 @endsection
 
 @section('content')
+    <h1 class="sr-only">{{ __('Contact') }} — {{ config('app.name') }}</h1>
     <!-- start wpo-contact-pg-section -->
     <section class="wpo-contact-pg-section section-padding">
         <div class="container">

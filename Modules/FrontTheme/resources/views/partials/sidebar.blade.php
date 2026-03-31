@@ -13,8 +13,8 @@
     <div class="widget search-widget">
         <form action="{{ route('blog.index') }}" method="GET">
             <div>
-                <input type="text" name="search" class="form-control" placeholder="{{ __('Rechercher...') }}" value="{{ request('search') }}">
-                <button type="submit"><i class="ti-search"></i></button>
+                <input type="text" name="search" class="form-control" placeholder="{{ __('Rechercher...') }}" value="{{ request('search') }}" aria-label="{{ __('Rechercher dans le blog') }}">
+                <button type="submit" aria-label="{{ __('Rechercher') }}"><i class="ti-search"></i></button>
             </div>
         </form>
     </div>
@@ -73,7 +73,7 @@
             <form action="{{ route('newsletter.subscribe') }}" method="POST">
                 @csrf
                 <div style="margin-bottom: 10px;">
-                    <input type="email" name="email" class="form-control" placeholder="{{ __('Votre courriel') }}" required style="border-radius: 4px;">
+                    <input type="email" name="email" class="form-control" placeholder="{{ __('Votre courriel') }}" required style="border-radius: 4px;" aria-label="{{ __('Courriel pour l\'infolettre') }}" autocomplete="email">
                 </div>
                 <button type="submit" class="theme-btn" style="width: 100%; border: none; padding: 10px;">{{ __('S\'inscrire') }}</button>
             </form>

@@ -38,7 +38,7 @@
                                 </ul>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                <h2 style="margin: 0;">{{ $article->title }}</h2>
+                                <h1 style="margin: 0; font-size: 1.8rem;">{{ $article->title }}</h1>
                                 @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Blog\\Models\\Article', 'id' => $article->id])
                             </div>
 

@@ -37,7 +37,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/roadmap/{id}/vote', [RoadmapController::class, 'vote'])->name('directory.roadmap.vote');
 });
 
-Route::middleware(['web', 'auth'])->prefix('admin/directory')->name('admin.directory.')->group(function () {
+Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::class])->prefix('admin/directory')->name('admin.directory.')->group(function () {
     Route::get('/', [DirectoryAdminController::class, 'index'])->name('index');
     Route::get('/create', [DirectoryAdminController::class, 'create'])->name('create');
     Route::post('/', [DirectoryAdminController::class, 'store'])->name('store');

@@ -9,6 +9,7 @@
 @endsection
 
 @section('content')
+    <h1 class="sr-only">{{ __('Foire aux questions') }} — {{ config('app.name') }}</h1>
     <section class="wpo-blog-single-section section-padding">
         <div class="container">
             <div class="row">

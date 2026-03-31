@@ -10,6 +10,7 @@
 @endsection
 
 @section('content')
+    <h1 class="sr-only">{{ __('Blog') }} — {{ config('app.name') }}</h1>
     <!-- start wpo-blog-pg-section -->
     <section class="wpo-blog-pg-section section-padding">
         <div class="container">
