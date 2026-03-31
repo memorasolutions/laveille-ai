@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', config('app.name'))
+@section('title', config('app.name') . ' - ' . __('Veille IA, technologies et transformation numerique au Quebec'))
 
 @section('content')
         <!-- start of wpo-blog-hero -->

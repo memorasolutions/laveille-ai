@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', __('Contact'))
+@section('title', __('Contact') . ' - ' . config('app.name'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Contactez-nous')])

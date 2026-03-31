@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 @include('fronttheme::partials.pagination-seo', ['paginator' => $articles])
 
-@section('title', $category->name)
+@section('title', $category->name . ' - ' . config('app.name'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

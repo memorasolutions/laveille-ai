@@ -1,6 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
-@section('title', $tool->name)
+@section('title', $tool->name . ' - ' . config('app.name'))
 @section('meta_description', 'Calculatrice de taxes canadienne. TPS, TVQ, TVP, TVH pour toutes les provinces. Pourboire et division de facture inclus.')
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])

@@ -1,6 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
-@section('title', $tool->name)
+@section('title', $tool->name . ' - ' . config('app.name'))
 @section('meta_description', 'Générateur de mots de passe sécurisé et phrases de passe. Contrôle granulaire, entropie, crypto sécurisé, passphrase diceware. Gratuit.')
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
