@@ -88,6 +88,7 @@
                             {{-- SECTION 5 : IA --}}
                             <h3 id="ia">{{ __('5. Résumés par intelligence artificielle') }}</h3>
                             <p>{{ __('L\'utilisateur reconnaît que les résumés, analyses et contenus produits par les outils d\'intelligence artificielle (IA) sur la plateforme peuvent comporter des « hallucinations », des biais algorithmiques, des omissions ou des inexactitudes factuelles. L\'exploitant ne peut être tenu responsable de la véracité ou de l\'exhaustivité de ces contenus. Il incombe à l\'utilisateur de valider systématiquement les informations auprès des sources originales. Le contenu généré par IA ne constitue en aucun cas une validation officielle ou un avis professionnel.') }}</p>
+                            <p>{{ __('Les modèles d\'IA utilisés sont fournis par des prestataires tiers (notamment OpenRouter, Google Gemini, OpenAI, Anthropic et Mistral) et peuvent varier selon la disponibilité et les performances. L\'exploitant se réserve le droit de changer de modèle ou de prestataire sans préavis. Les prompts sauvegardés par les utilisateurs ne sont pas utilisés pour l\'entraînement de modèles d\'IA et restent la propriété de l\'utilisateur, sous licence d\'utilisation accordée à l\'exploitant selon la section 4.') }}</p>
 
                             {{-- SECTION 6 : AVIS NON-RESPONSABILITÉ PROFESSIONNELLE --}}
                             <h3 id="avis-pro">{{ __('6. Avis de non-responsabilité professionnelle') }}</h3>

@@ -188,7 +188,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
-    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}</script>
+    <script src="/js/sw-register.js" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
     @if(!request()->is('user/*', 'dashboard*', 'login*', 'register*', 'magic-link*', 'admin*', 'privacy-policy*', 'terms-of-use*', 'cookie-policy*', 'rights-request*'))
