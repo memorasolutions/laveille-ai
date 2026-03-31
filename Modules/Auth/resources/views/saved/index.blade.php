@@ -16,8 +16,8 @@
         <button @click="tab = 'prompts'" class="btn"
                 :style="tab === 'prompts'
                     ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
-                    : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
-            ✨ {{ __('Prompts') }}
+                    : 'background: #fff; color: var(--c-text-muted); border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
+            ✨ {{ __('Constructeur de prompts') }}
             @if($savedPrompts->count() > 0)
                 <span style="background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedPrompts->count() }}</span>
             @endif
@@ -25,8 +25,8 @@
         <button @click="tab = 'team-configs'" class="btn"
                 :style="tab === 'team-configs'
                     ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
-                    : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
-            👥 {{ __('Configurations équipes') }}
+                    : 'background: #fff; color: var(--c-text-muted); border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
+            👥 {{ __('Générateur d\'équipes') }}
             @if($savedTeamPresets->count() > 0)
                 <span style="background: linear-gradient(135deg, #0B7285, #0e7490); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedTeamPresets->count() }}</span>
             @endif
@@ -34,8 +34,8 @@
         <button @click="tab = 'draw-configs'" class="btn"
                 :style="tab === 'draw-configs'
                     ? 'background: #fff; color: var(--c-dark); border: 2px solid var(--c-primary); border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600; box-shadow: 0 4px 12px rgba(11,114,133,0.2); transform: translateY(-1px);'
-                    : 'background: rgba(255,255,255,0.7); color: var(--c-text-muted); border: 2px solid transparent; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
-            🎲 {{ __('Tirages présentations') }}
+                    : 'background: #fff; color: var(--c-text-muted); border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px 20px; font-family: var(--f-heading); font-weight: 600;'">
+            🎲 {{ __('Tirage de présentations') }}
             @if($savedDrawPresets->count() > 0)
                 <span style="background: linear-gradient(135deg, #E67E22, #D97706); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; margin-left: 6px;">{{ $savedDrawPresets->count() }}</span>
             @endif
