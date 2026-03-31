@@ -336,8 +336,8 @@
                             <button class="btn btn-outline-secondary" @click="exportPrompt()" :disabled="!isValid" style="border-radius: var(--r-btn);">{{ __('Exporter .txt') }}</button>
                         </div>
 
-                        {{-- Historique --}}
-                        <template x-if="history.length > 0">
+                        {{-- Historique (visible seulement pour les non-connectes, les connectes ont "Mes prompts") --}}
+                        <template x-if="!isAuthenticated && history.length > 0">
                             <div class="mt-3 pt-3 border-top">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h3 style="font-family: var(--f-heading); font-weight: 700; margin: 0; font-size: 1rem;">{{ __('Historique') }} (<span x-text="history.length"></span>)</h3>
