@@ -21,6 +21,9 @@ class PrivacyServiceProvider extends BaseModuleServiceProvider
     public function boot(): void
     {
         $this->bootModule();
+        $this->commands([
+            \Modules\Privacy\Console\PurgeExpiredDataCommand::class,
+        ]);
     }
 
     public function register(): void

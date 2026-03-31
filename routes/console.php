@@ -48,6 +48,9 @@ Schedule::command('newsletter:digest')->weeklyOn(1, '09:00');
 // AI knowledge base - scrape URLs needing refresh
 Schedule::command('ai:scrape-urls --all')->dailyAt('05:00');
 
+// Privacy - purge donnees expirees (Loi 25 / RGPD retention)
+Schedule::command('privacy:purge-expired')->dailyAt('02:30');
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {

@@ -129,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Centre de confidentialité RGPD
     Route::get('/user/privacy', [PrivacyCenterController::class, 'index'])->name('user.privacy');
+    Route::post('/user/delete-account', [PrivacyCenterController::class, 'deleteAccount'])->name('user.delete-account');
 
     // Suppression compte + export RGPD
     Route::delete('/user/account', [UserDashboardController::class, 'deleteAccount'])->name('user.account.delete');
@@ -150,6 +151,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Mes contributions (suggestions + votes)
     Route::get('/user/contributions', [UserContributionsController::class, 'index'])->name('user.contributions');
+
+    // Export données personnelles (RGPD art. 20)
+    Route::get('/user/data-export', [\Modules\Auth\Http\Controllers\DataExportController::class, 'export'])->name('user.data-export');
 
     // Journal d'activité utilisateur (Phase 96)
     Route::get('/user/activity', [UserActivityController::class, 'index'])->name('user.activity');

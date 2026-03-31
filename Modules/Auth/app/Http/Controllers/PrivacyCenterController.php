@@ -10,7 +10,12 @@ declare(strict_types=1);
 
 namespace Modules\Auth\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class PrivacyCenterController extends Controller
@@ -33,5 +38,37 @@ class PrivacyCenterController extends Controller
             'user' => $user,
             'dataCategories' => $dataCategories,
         ]);
+    }
+
+    public function deleteAccount(Request $request): RedirectResponse
+    {
+        $request->validate(['confirm_email' => 'required|email']);
+
+        $user = auth()->user();
+
+        if ($request->confirm_email !== $user->email) {
+            return back()->withErrors(['confirm_email' => __('Le courriel ne correspond pas a votre compte.')]);
+        }
+
+        Log::warning('[AccountDeletion] User #' . $user->id . ' (' . $user->email . ') requested account deletion.');
+
+        // Soft delete related data (modules may not exist)
+        try { DB::table('saved_prompts')->where('user_id', $user->id)->update(['deleted_at' => now()]); } catch (\Throwable) {}
+        try { DB::table('user_bookmarks')->where('user_id', $user->id)->delete(); } catch (\Throwable) {}
+        try { DB::table('newsletter_subscribers')->where('email', $user->email)->update(['unsubscribed_at' => now()]); } catch (\Throwable) {}
+
+        // Anonymize user (don't hard delete — preserve referential integrity)
+        $user->update([
+            'name' => '[compte supprime]',
+            'email' => 'deleted-' . $user->id . '@laveille.ai',
+            'avatar' => null,
+            'bio' => null,
+        ]);
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('success', __('Votre compte a ete supprime. Vos donnees seront purgees selon notre politique de retention.'));
     }
 }
