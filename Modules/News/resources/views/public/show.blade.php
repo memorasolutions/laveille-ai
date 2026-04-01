@@ -128,6 +128,9 @@
                         @endif
                     </div>
 
+                    {{-- Barre d'interactions --}}
+                    @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\News\\Models\\NewsArticle'])
+
                     @if($article->image_url)
                         <img src="{{ $article->image_url }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
@@ -177,11 +180,6 @@
                         {!! nl2br(e($article->description)) !!}
                     </div>
                     @endif
-
-                    {{-- Actions utilisateur --}}
-                    <div class="nw-user-actions">
-                        @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\News\\Models\\NewsArticle', 'id' => $article->id])
-                    </div>
 
                     <div style="text-align: center; margin: 2rem 0;">
                         <a href="{{ $article->url }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>

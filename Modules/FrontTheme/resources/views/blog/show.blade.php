@@ -37,10 +37,8 @@
                                     @endif
                                 </ul>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                <h1 style="margin: 0; font-size: 1.8rem;">{{ $article->title }}</h1>
-                                @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Blog\\Models\\Article', 'id' => $article->id])
-                            </div>
+                            <h1 style="margin: 0 0 12px; font-size: 1.8rem;">{{ $article->title }}</h1>
+                            @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\Blog\\Models\\Article'])
 
                             @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
                                 {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-top') !!}
