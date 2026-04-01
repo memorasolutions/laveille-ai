@@ -111,7 +111,7 @@
                 'route' => route('acronyms.suggestions.store', $acronym->getTranslation('slug', app()->getLocale())),
             ])
             @if(Route::has('directory.community.report'))
-                @include('directory::components.report-button', [
+                @include('core::components.report-modal', [
                     'reportUrl' => route('directory.community.report', ['type' => 'acronym', 'id' => $acronym->id]),
                     'csrfToken' => csrf_token(),
                 ])

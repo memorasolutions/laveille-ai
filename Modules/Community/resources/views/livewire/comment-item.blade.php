@@ -15,6 +15,12 @@
             @if($depth < 3)
                 <button wire:click="reply({{ $comment->id }})" class="btn btn-sm btn-link p-0" style="color: var(--c-accent); font-size: 0.8rem;">{{ __('Répondre') }}</button>
             @endif
+            @if(Route::has('directory.community.report'))
+                @include('core::components.report-modal', [
+                    'reportUrl' => route('directory.community.report', ['type' => 'comment', 'id' => $comment->id]),
+                    'csrfToken' => csrf_token(),
+                ])
+            @endif
             @auth
                 @if($comment->user_id === auth()->id())
                     <button wire:click="deleteComment({{ $comment->id }})" class="btn btn-sm btn-link p-0 ms-2" style="color: #DC2626; font-size: 0.8rem;">{{ __('Supprimer') }}</button>

@@ -401,7 +401,7 @@
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center;">
                         @include('voting::components.vote-button', ['item' => $review, 'type' => 'review'])
-                        <form action="{{ route('directory.community.report', ['type' => 'review', 'id' => $review->id]) }}" method="POST" style="display:inline;"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;" title="{{ __('Signaler') }}">🚩</button></form>
+                        @include('core::components.report-modal', ['reportUrl' => route('directory.community.report', ['type' => 'review', 'id' => $review->id]), 'csrfToken' => csrf_token()])
                         @include('core::components.admin-actions', ['item' => $review, 'type' => 'reviews'])
                     </div>
                 </div>
@@ -514,7 +514,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 10px; font-size: 13px; margin-bottom: 14px;">
                         <div style="display: flex; gap: 12px; align-items: center;">
                             @include('voting::components.vote-button', ['item' => $d, 'type' => 'discussion'])
-                            <form action="{{ route('directory.community.report', ['type' => 'discussion', 'id' => $d->id]) }}" method="POST" style="display:inline;">@csrf<input type="hidden" name="reason" value="inappropriate"><button type="submit" style="background:none;border:none;color:#d1d5db;cursor:pointer;font-size:12px;">🚩</button></form>
+                            @include('core::components.report-modal', ['reportUrl' => route('directory.community.report', ['type' => 'discussion', 'id' => $d->id]), 'csrfToken' => csrf_token()])
                             @include('core::components.admin-actions', ['item' => $d, 'type' => 'discussions'])
                         </div>
                         @auth
@@ -640,7 +640,7 @@
                         @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                             @include('voting::components.vote-button', ['item' => $res, 'type' => 'resource'])
                         @endif
-                        @include('directory::components.report-button', [
+                        @include('core::components.report-modal', [
                             'reportUrl' => route('directory.community.report', ['type' => 'resource', 'id' => $res->id]),
                             'csrfToken' => csrf_token(),
                         ])
