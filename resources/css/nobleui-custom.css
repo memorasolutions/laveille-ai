@@ -107,6 +107,23 @@
     font-weight: 700 !important;
 }
 
+/* Sidebar: tous les sous-menus ouverts, pas de collapse */
+.sidebar .collapse {
+    display: block !important;
+}
+.sidebar .nav-link .link-arrow {
+    display: none !important;
+}
+.sidebar .nav-item.nav-category {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 8px;
+    padding-top: 12px;
+}
+.sidebar .nav-item.nav-category:first-child {
+    border-top: none;
+    margin-top: 0;
+}
+
 /* a11y: Focus visible modern style (WCAG 2.4.7) */
 :focus-visible {
     outline: 2px solid var(--bs-primary, #6571ff);
