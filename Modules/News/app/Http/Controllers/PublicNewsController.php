@@ -14,11 +14,26 @@ class PublicNewsController extends Controller
     public function index(): View
     {
         $articles = NewsArticle::published()
+            ->whereNotNull('structured_summary')
+            ->where('relevance_score', '>=', (int) config('news.min_relevance_score', 7))
             ->recent()
             ->with('source')
-            ->paginate((int) Settings::get('news.articles_per_page', 20));
+            ->limit(50)
+            ->get();
 
-        return view('news::public.index', compact('articles'));
+        $grouped = $articles->groupBy('category_tag');
+
+        // Fallback : si aucun article structuré, montrer les anciens
+        if ($articles->isEmpty()) {
+            $articles = NewsArticle::published()
+                ->recent()
+                ->with('source')
+                ->paginate((int) Settings::get('news.articles_per_page', 20));
+
+            return view('news::public.index', compact('articles'));
+        }
+
+        return view('news::public.index', compact('articles', 'grouped'));
     }
 
     public function show(NewsArticle $article): View

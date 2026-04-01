@@ -13,11 +13,14 @@ class NewsArticle extends Model
     protected $fillable = [
         'news_source_id', 'title', 'guid', 'url', 'description',
         'summary', 'image_url', 'author', 'pub_date', 'is_published',
+        'relevance_score', 'score_justification', 'structured_summary',
+        'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
     ];
 
     protected $casts = [
         'pub_date' => 'datetime',
         'is_published' => 'boolean',
+        'structured_summary' => 'array',
     ];
 
     public function source(): BelongsTo
