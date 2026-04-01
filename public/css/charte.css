@@ -74,8 +74,15 @@ a:hover { color: var(--c-primary); }
     margin-right: -50vw;
 }
 
+.topbar .contact-intro ul {
+    display: flex;
+    align-items: center;
+}
+
 .topbar .contact-intro ul li {
     color: #fff;
+    display: flex;
+    align-items: center;
 }
 
 .topbar .contact-intro ul li.update span {
@@ -85,6 +92,8 @@ a:hover { color: var(--c-primary); }
     font-weight: 700;
     border-radius: var(--r-btn);
     padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .topbar .contact-info ul li a {
