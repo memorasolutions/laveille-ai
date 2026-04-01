@@ -77,6 +77,20 @@
     .nw-cta:hover { opacity: 0.9; color: #fff; text-decoration: none; }
     .nw-back { color: var(--c-primary); font-weight: 500; text-decoration: none; }
     .nw-back:hover { text-decoration: underline; }
+    .nw-nav { border-top: 1px solid #e5e7eb; padding: 1.25rem 0; margin: 2rem 0 1rem; display: flex; justify-content: space-between; gap: 1rem; }
+    .nw-nav a { color: var(--c-primary); text-decoration: none; font-size: 0.875rem; font-weight: 500; max-width: 48%; }
+    .nw-nav a:hover { text-decoration: underline; }
+    .nw-nav-next { text-align: right; margin-left: auto; }
+    .nw-related { border-top: 1px solid #e5e7eb; padding-top: 1.5rem; margin-top: 1rem; }
+    .nw-related h3 { font-family: var(--f-heading); font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; }
+    .nw-related-grid { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .nw-related-card { flex: 1; min-width: 200px; max-width: 33%; }
+    .nw-related-card a { text-decoration: none; color: inherit; }
+    .nw-related-card a:hover .nw-related-title { color: var(--c-primary); }
+    .nw-related-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; }
+    .nw-related-title { font-family: var(--f-heading); font-size: 0.9rem; font-weight: 600; line-height: 1.35; margin-bottom: 0.375rem; color: var(--c-dark); }
+    .nw-related-meta { font-size: 0.75rem; color: #9ca3af; }
+    @media (max-width: 767px) { .nw-related-card { max-width: 100%; } }
     .nw-summary-fallback {
         background: #f0f9fa; border-left: 4px solid var(--c-primary);
         border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.75rem;
@@ -167,7 +181,41 @@
                         <a href="{{ $article->url }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>
                     </div>
 
-                    <div style="text-align: center;">
+                    {{-- Navigation précédent/suivant --}}
+                    @if($previousArticle || $nextArticle)
+                    <nav class="nw-nav">
+                        @if($previousArticle)
+                            <a href="{{ route('news.show', $previousArticle) }}">&larr; {{ Str::limit($previousArticle->seo_title ?? $previousArticle->title, 55) }}</a>
+                        @else
+                            <span></span>
+                        @endif
+                        @if($nextArticle)
+                            <a href="{{ route('news.show', $nextArticle) }}" class="nw-nav-next">{{ Str::limit($nextArticle->seo_title ?? $nextArticle->title, 55) }} &rarr;</a>
+                        @endif
+                    </nav>
+                    @endif
+
+                    {{-- Articles connexes --}}
+                    @if($relatedArticles->isNotEmpty())
+                    <div class="nw-related">
+                        <h3>{{ __('Articles connexes') }}</h3>
+                        <div class="nw-related-grid">
+                            @foreach($relatedArticles as $related)
+                            <div class="nw-related-card">
+                                <a href="{{ route('news.show', $related) }}">
+                                    @if($related->image_url)
+                                        <img src="{{ $related->image_url }}" alt="" class="nw-related-img" loading="lazy">
+                                    @endif
+                                    <div class="nw-related-title">{{ $related->seo_title ?? $related->title }}</div>
+                                    <div class="nw-related-meta">{{ $related->source->name ?? '' }} &middot; {{ $related->pub_date?->diffForHumans() }}</div>
+                                </a>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
                         <a href="{{ route('news.index') }}" class="nw-back">&larr; {{ __('Retour aux actualités') }}</a>
                     </div>
 

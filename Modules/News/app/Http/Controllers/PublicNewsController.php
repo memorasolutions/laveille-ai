@@ -71,6 +71,37 @@ class PublicNewsController extends Controller
 
         $article->load('source');
 
-        return view('news::public.show', compact('article'));
+        // Article précédent (même catégorie, puis toutes)
+        $previousArticle = NewsArticle::published()
+            ->where('category_tag', $article->category_tag)
+            ->where('pub_date', '<', $article->pub_date)
+            ->orderBy('pub_date', 'desc')
+            ->first()
+            ?? NewsArticle::published()
+                ->where('pub_date', '<', $article->pub_date)
+                ->orderBy('pub_date', 'desc')
+                ->first();
+
+        // Article suivant (même catégorie, puis toutes)
+        $nextArticle = NewsArticle::published()
+            ->where('category_tag', $article->category_tag)
+            ->where('pub_date', '>', $article->pub_date)
+            ->orderBy('pub_date', 'asc')
+            ->first()
+            ?? NewsArticle::published()
+                ->where('pub_date', '>', $article->pub_date)
+                ->orderBy('pub_date', 'asc')
+                ->first();
+
+        // Articles connexes (même catégorie)
+        $relatedArticles = NewsArticle::published()
+            ->where('category_tag', $article->category_tag)
+            ->where('id', '!=', $article->id)
+            ->with('source')
+            ->orderBy('pub_date', 'desc')
+            ->limit(3)
+            ->get();
+
+        return view('news::public.show', compact('article', 'previousArticle', 'nextArticle', 'relatedArticles'));
     }
 }
