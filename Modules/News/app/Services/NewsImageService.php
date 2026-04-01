@@ -12,12 +12,18 @@ use Intervention\Image\ImageManager;
 
 class NewsImageService
 {
+    private function disk(): \Illuminate\Contracts\Filesystem\Filesystem
+    {
+        return Storage::disk('public');
+    }
+
     public function processFromUrl(string $url, int $articleId): ?string
     {
         try {
             $response = Http::withoutVerifying()
                 ->timeout(15)
-                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LaVeilleBot/1.0)'])
+                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'])
+                ->withOptions(['allow_redirects' => ['max' => 5]])
                 ->get($url);
 
             if (! $response->successful()) {
@@ -40,13 +46,8 @@ class NewsImageService
 
             $webpContent = $image->toWebp(80)->toString();
 
-            $directory = 'public/news/images';
-            if (! Storage::exists($directory)) {
-                Storage::makeDirectory($directory);
-            }
-
             $path = "news/images/{$articleId}.webp";
-            Storage::put("public/{$path}", $webpContent);
+            $this->disk()->put($path, $webpContent);
 
             return "/storage/{$path}";
         } catch (\Throwable $e) {
@@ -58,7 +59,7 @@ class NewsImageService
 
     public function exists(int $articleId): bool
     {
-        return Storage::exists("public/news/images/{$articleId}.webp");
+        return $this->disk()->exists("news/images/{$articleId}.webp");
     }
 
     public function getPublicPath(int $articleId): string
