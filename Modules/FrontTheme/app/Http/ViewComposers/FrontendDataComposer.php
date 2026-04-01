@@ -61,9 +61,21 @@ class FrontendDataComposer
             }
         }
 
+        // Dernier article d'actualité (module News)
+        $latestNewsArticle = null;
+        $newsArticleClass = 'Modules\\News\\Models\\NewsArticle';
+        if (Module::has('News') && Module::find('News')?->isEnabled() && class_exists($newsArticleClass)) {
+            $latestNewsArticle = Cache::remember('front_latest_news_article', 300, function () use ($newsArticleClass) {
+                return $newsArticleClass::where('is_published', true)
+                    ->latest('pub_date')
+                    ->first(['id', 'title', 'seo_title', 'slug']);
+            });
+        }
+
         $view->with(compact(
             'latestArticles',
             'latestArticle',
+            'latestNewsArticle',
             'categories',
             'recentArticles',
             'popularTags',

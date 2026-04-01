@@ -11,8 +11,8 @@
                 <div class="col col-lg-7 col-md-9 col-sm-12 col-12">
                     <div class="contact-intro">
                         <ul>
-                            <li class="update"><span>{{ __('Nouveau') }}</span></li>
-                            <li>@if(isset($latestArticle))<a href="{{ route('blog.show', $latestArticle->slug) }}" style="color:inherit;text-decoration:none;">{{ $latestArticle->title }}</a>@else{{ __('Bienvenue sur le blog') }}@endif</li>
+                            <li class="update"><a href="{{ route('news.index') }}" style="color:inherit;text-decoration:none;"><span>{{ __('Actualités') }}</span></a></li>
+                            <li>@if(isset($latestNewsArticle) && $latestNewsArticle)<a href="{{ route('news.show', $latestNewsArticle) }}" style="color:inherit;text-decoration:none;">{{ $latestNewsArticle->seo_title ?? $latestNewsArticle->title }}</a>@elseif(isset($latestArticle))<a href="{{ route('blog.show', $latestArticle->slug) }}" style="color:inherit;text-decoration:none;">{{ $latestArticle->title }}</a>@else{{ __('Veille IA et technologie') }}@endif</li>
                         </ul>
                     </div>
                 </div>

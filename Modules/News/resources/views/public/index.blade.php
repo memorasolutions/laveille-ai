@@ -9,6 +9,7 @@
 
 @push('styles')
 <style>
+    .nw-articles-grid { display: flex; flex-wrap: wrap; }
     .nw-filters { margin-bottom: 1.5rem; }
     .nw-filter-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem; }
     .nw-filter-label { font-size: 0.8125rem; font-weight: 600; color: #6b7280; min-width: 70px; }
@@ -151,7 +152,7 @@
                 <a href="{{ route('news.index') }}" class="nw-chip">{{ __('Réinitialiser les filtres') }}</a>
             </div>
         @else
-            <div class="row">
+            <div class="row nw-articles-grid">
                 @foreach($articles as $article)
                 @php
                     $ss = $article->structured_summary;
