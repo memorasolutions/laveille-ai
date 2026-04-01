@@ -50,7 +50,7 @@ class HomeController extends Controller
             $featuredTerms = $termClass::query()
                 ->published()
                 ->with('category')
-                ->inRandomOrder()
+                ->latest()
                 ->take((int) Settings::get('fronttheme.home_featured_terms_limit', 6))
                 ->get();
         }
@@ -62,7 +62,7 @@ class HomeController extends Controller
             $featuredAcronyms = $acronymClass::query()
                 ->published()
                 ->with('category')
-                ->inRandomOrder()
+                ->latest()
                 ->take((int) Settings::get('fronttheme.home_featured_acronyms_limit', 4))
                 ->get();
         }
