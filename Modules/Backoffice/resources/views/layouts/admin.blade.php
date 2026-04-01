@@ -52,5 +52,6 @@
 
     @livewireScripts
     @stack('scripts')
+    <script src="/js/infinite-scroll.js" defer></script>
 </body>
 </html>
