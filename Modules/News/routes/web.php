@@ -11,7 +11,15 @@ use Modules\News\Http\Controllers\PublicNewsController;
 // ── Routes publiques ──
 Route::middleware('web')->group(function () {
     Route::get('/actualites', [PublicNewsController::class, 'index'])->name('news.index');
-    Route::get('/actualites/{article}', [PublicNewsController::class, 'show'])->name('news.show');
+
+    // Redirect 301 : anciennes URLs /actualites/{id} → /actualites/{slug}
+    Route::get('/actualites/{id}', function (string $id) {
+        $article = \Modules\News\Models\NewsArticle::findOrFail((int) $id);
+
+        return redirect()->route('news.show', $article, 301);
+    })->where('id', '[0-9]+');
+
+    Route::get('/actualites/{article:slug}', [PublicNewsController::class, 'show'])->name('news.show');
 });
 
 // ── Routes admin ──
