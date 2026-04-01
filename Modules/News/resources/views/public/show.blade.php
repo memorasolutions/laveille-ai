@@ -90,6 +90,7 @@
     .nw-related-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; }
     .nw-related-title { font-family: var(--f-heading); font-size: 0.9rem; font-weight: 600; line-height: 1.35; margin-bottom: 0.375rem; color: var(--c-dark); }
     .nw-related-meta { font-size: 0.75rem; color: #9ca3af; }
+    .nw-user-actions { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-top: 1px solid #e5e7eb; margin-top: 1.5rem; }
     @media (max-width: 767px) { .nw-related-card { max-width: 100%; } }
     .nw-summary-fallback {
         background: #f0f9fa; border-left: 4px solid var(--c-primary);
@@ -176,6 +177,11 @@
                         {!! nl2br(e($article->description)) !!}
                     </div>
                     @endif
+
+                    {{-- Actions utilisateur --}}
+                    <div class="nw-user-actions">
+                        @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\News\\Models\\NewsArticle', 'id' => $article->id])
+                    </div>
 
                     <div style="text-align: center; margin: 2rem 0;">
                         <a href="{{ $article->url }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>

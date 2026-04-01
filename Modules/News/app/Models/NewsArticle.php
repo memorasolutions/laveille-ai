@@ -8,9 +8,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Modules\Community\Traits\HasComments;
+use Modules\Community\Traits\HasReports;
+use Modules\Voting\Traits\HasCommunityVotes;
 
 class NewsArticle extends Model
 {
+    use HasComments, HasReports, HasCommunityVotes;
     protected $fillable = [
         'news_source_id', 'title', 'slug', 'guid', 'url', 'description',
         'summary', 'image_url', 'author', 'pub_date', 'is_published',
