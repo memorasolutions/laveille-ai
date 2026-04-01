@@ -16,6 +16,7 @@ class NewsArticle extends Model
         'summary', 'image_url', 'author', 'pub_date', 'is_published',
         'relevance_score', 'score_justification', 'structured_summary',
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
+        'short_url_id',
     ];
 
     protected $casts = [
@@ -55,6 +56,26 @@ class NewsArticle extends Model
     public function source(): BelongsTo
     {
         return $this->belongsTo(NewsSource::class, 'news_source_id');
+    }
+
+    public function shortUrl(): ?BelongsTo
+    {
+        if (! class_exists(\Modules\ShortUrl\Models\ShortUrl::class)) {
+            return null;
+        }
+
+        return $this->belongsTo(\Modules\ShortUrl\Models\ShortUrl::class, 'short_url_id');
+    }
+
+    public function getShortUrlString(): ?string
+    {
+        if (! $this->short_url_id || ! class_exists(\Modules\ShortUrl\Models\ShortUrl::class)) {
+            return null;
+        }
+
+        $shortUrl = \Modules\ShortUrl\Models\ShortUrl::find($this->short_url_id);
+
+        return $shortUrl?->getShortUrl();
     }
 
     public function scopePublished(Builder $query): Builder

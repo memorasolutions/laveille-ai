@@ -29,6 +29,8 @@ class NewsServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        \Modules\News\Models\NewsArticle::observe(\Modules\News\Observers\NewsArticleObserver::class);
     }
 
     /**
