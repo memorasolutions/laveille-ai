@@ -63,7 +63,7 @@ class HomeController extends Controller
                 ->published()
                 ->with('category')
                 ->inRandomOrder()
-                ->take((int) Settings::get('fronttheme.home_featured_acronyms_limit', 5))
+                ->take((int) Settings::get('fronttheme.home_featured_acronyms_limit', 4))
                 ->get();
         }
 
