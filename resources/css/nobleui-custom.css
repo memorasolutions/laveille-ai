@@ -94,16 +94,17 @@
     transform: translateY(-50%);
 }
 
-/* WCAG: active menu item — higher contrast (not just violet on dark) */
+/* Active menu item — bold text, no background */
 .sidebar .nav-link.active,
 .sidebar .nav-item.active > .nav-link {
     color: #fff !important;
-    background-color: rgba(124, 142, 255, .15);
-    border-radius: 6px;
+    background-color: transparent !important;
+    font-weight: 700 !important;
 }
 .sidebar .sub-menu .nav-link.active {
     color: #fff !important;
-    font-weight: 600;
+    background-color: transparent !important;
+    font-weight: 700 !important;
 }
 
 /* a11y: Focus visible modern style (WCAG 2.4.7) */
