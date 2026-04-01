@@ -175,11 +175,7 @@
 
                     {{-- Share --}}
                     <div class="acr-show-share">
-                        <p class="acr-show-share-label">{{ __('Partager cet acronyme') }}</p>
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap;">
-                            @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Acronyms\\Models\\Acronym', 'id' => $acronym->id])
-                            @include('fronttheme::partials.share-buttons', ['title' => $acronym->acronym . ' –' . $acronym->full_name, 'url' => request()->url()])
-                        </div>
+                        @include('fronttheme::partials.article-action-bar', ['model' => $acronym, 'modelType' => 'Modules\\Acronyms\\Models\\Acronym'])
                     </div>
                 </article>
             </div>

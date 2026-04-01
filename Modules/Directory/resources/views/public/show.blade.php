@@ -116,9 +116,9 @@
                     @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                         @include('voting::components.vote-button', ['item' => $tool, 'type' => 'tool'])
                     @endif
-                    @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Directory\\Models\\Tool', 'id' => $tool->id])
                 </div>
                 <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;">{{ $tool->short_description }}</p>
+                @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool'])
             </div>
             @if($tool->url)
                 <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>

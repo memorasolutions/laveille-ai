@@ -189,10 +189,8 @@
                     @endif
 
                     {{-- Title + Bookmark --}}
-                    <div style="display: flex; justify-content: center; align-items: center; gap: 12px;">
-                        <h1 class="gl-term-title" style="margin: 0;">{{ $term->name }}</h1>
-                        @include('fronttheme::partials.bookmark-btn', ['type' => 'Modules\\Dictionary\\Models\\Term', 'id' => $term->id])
-                    </div>
+                    <h1 class="gl-term-title" style="margin: 0 0 0.5rem;">{{ $term->name }}</h1>
+                    @include('fronttheme::partials.article-action-bar', ['model' => $term, 'modelType' => 'Modules\\Dictionary\\Models\\Term'])
 
                     {{-- Acronym full form --}}
                     @if($term->acronym_full)
