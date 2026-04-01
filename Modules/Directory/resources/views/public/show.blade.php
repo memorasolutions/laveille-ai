@@ -480,7 +480,7 @@
             <div x-data="{ expanded: false, replying: false }" style="margin-bottom: 10px;">
                 {{-- Carte compacte (toujours visible) --}}
                 <div @click="expanded = !expanded" class="disc-card" style="border-left: 3px solid var(--c-primary); border-radius: 10px; padding: 14px 18px; cursor: pointer; transition: all 0.15s;"
-                     :class="expanded ? 'disc-card-open' : ''"
+                     :class="expanded ? 'disc-card-open' : ''">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         {{-- Avatar --}}
                         @if($d->user)
