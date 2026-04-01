@@ -30,7 +30,7 @@ class MailsterSubscribersSeeder extends Seeder
             DB::table('newsletter_subscribers')->updateOrInsert(
                 ['email' => strtolower(trim($sub['email']))],
                 [
-                    'name' => null,
+                    'name' => $sub['name'] ?? null,
                     'token' => bin2hex(random_bytes(32)),
                     'confirmed_at' => ($sub['status'] == 1) ? Carbon::createFromTimestamp($sub['signup']) : null,
                     'unsubscribed_at' => null,
