@@ -66,7 +66,7 @@
 
     // Cacher la pagination originale (remonter jusqu'au NAV ou au wrapper complet)
     var paginationWrapper = pagination.closest('nav') || pagination.parentElement;
-    paginationWrapper.style.display = 'none';
+    paginationWrapper.style.setProperty('display', 'none', 'important');
     paginationWrapper.parentElement.appendChild(loader);
 
     // Sentinel element (trigger point)
