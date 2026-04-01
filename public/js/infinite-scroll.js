@@ -64,9 +64,10 @@
         document.head.appendChild(style);
     }
 
-    // Cacher la pagination originale et ajouter le loader
-    pagination.parentElement.style.display = 'none';
-    pagination.parentElement.parentElement.appendChild(loader);
+    // Cacher la pagination originale (remonter jusqu'au NAV ou au wrapper complet)
+    var paginationWrapper = pagination.closest('nav') || pagination.parentElement;
+    paginationWrapper.style.display = 'none';
+    paginationWrapper.parentElement.appendChild(loader);
 
     // Sentinel element (trigger point)
     var sentinel = document.createElement('div');
