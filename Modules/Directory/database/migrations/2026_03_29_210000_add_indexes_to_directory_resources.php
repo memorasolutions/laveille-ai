@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('directory_resources', function (Blueprint $table) {
-            $sm = Schema::getConnection()->getDoctrineSchemaManager();
-            $indexes = array_keys($sm->listTableIndexes('directory_resources'));
+        $indexes = collect(DB::select('SHOW INDEX FROM directory_resources'))->pluck('Key_name')->unique()->toArray();
+        Schema::table('directory_resources', function (Blueprint $table) use ($indexes) {
             if (!in_array('idx_dr_tool_approved', $indexes)) {
                 $table->index(['directory_tool_id', 'is_approved'], 'idx_dr_tool_approved');
             }
