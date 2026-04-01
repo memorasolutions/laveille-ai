@@ -31,9 +31,10 @@ class MailsterSubscribersSeeder extends Seeder
                 ['email' => strtolower(trim($sub['email']))],
                 [
                     'name' => null,
-                    'is_active' => ($sub['status'] == 1),
-                    'subscribed_at' => Carbon::createFromTimestamp($sub['signup']),
-                    'created_at' => now(),
+                    'token' => bin2hex(random_bytes(32)),
+                    'confirmed_at' => ($sub['status'] == 1) ? Carbon::createFromTimestamp($sub['signup']) : null,
+                    'unsubscribed_at' => null,
+                    'created_at' => Carbon::createFromTimestamp($sub['signup']),
                     'updated_at' => now(),
                 ]
             );
