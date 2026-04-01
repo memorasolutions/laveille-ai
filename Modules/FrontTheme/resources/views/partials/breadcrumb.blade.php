@@ -21,6 +21,7 @@
                                             __('Acronymes éducation') => Route::has('acronyms.index') ? route('acronyms.index') : null,
                                             __('Répertoire') => Route::has('directory.index') ? route('directory.index') : null,
                                             __('Glossaire') => Route::has('dictionary.index') ? route('dictionary.index') : null,
+                                            __('Actualités') => Route::has('news.index') ? route('news.index') : null,
                                         ];
                                         $url = $breadcrumbRoutes[$item] ?? null;
                                     @endphp

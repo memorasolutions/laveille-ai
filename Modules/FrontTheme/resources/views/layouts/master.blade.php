@@ -189,7 +189,7 @@
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
     @include('fronttheme::partials.toast')
-    <script src="/js/infinite-scroll.js" defer></script>
+    <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
     <script src="/js/sw-register.js" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
