@@ -47,7 +47,7 @@
     .nw-lead { font-size: 1.0625rem; font-weight: 600; color: var(--c-dark); line-height: 1.6; margin-bottom: 1.5rem; }
     .nw-meta-bar {
         display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
-        padding-bottom: 1rem; margin-bottom: 1.75rem; border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 0.75rem; margin-bottom: 0; border-bottom: none;
     }
     .nw-pill {
         display: inline-flex; align-items: center; gap: 0.25rem;
