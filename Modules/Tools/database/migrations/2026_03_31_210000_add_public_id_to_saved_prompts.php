@@ -9,6 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('saved_prompts', 'public_id')) return;
         Schema::table('saved_prompts', function (Blueprint $table) {
             $table->string('public_id', 12)->unique()->after('id')->nullable();
         });

@@ -16,6 +16,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('newsletter_subscribers', 'bounce_count')) return;
         Schema::table('newsletter_subscribers', function (Blueprint $table) {
             $table->unsignedInteger('bounce_count')->default(0)->after('unsubscribed_at');
             $table->string('bounce_reason')->nullable()->after('bounce_count');

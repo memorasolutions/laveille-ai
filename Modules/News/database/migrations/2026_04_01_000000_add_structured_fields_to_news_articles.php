@@ -10,6 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('news_articles', 'relevance_score')) return;
         Schema::table('news_articles', function (Blueprint $table) {
             $table->unsignedTinyInteger('relevance_score')->nullable()->after('summary');
             $table->string('score_justification', 255)->nullable()->after('relevance_score');

@@ -11,9 +11,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('directory_resources', function (Blueprint $table) {
-            $table->index(['directory_tool_id', 'is_approved'], 'idx_dr_tool_approved');
-            $table->index(['user_id', 'created_at'], 'idx_dr_user');
-            $table->index(['is_approved', 'created_at'], 'idx_dr_approved_date');
+            $sm = Schema::getConnection()->getDoctrineSchemaManager();
+            $indexes = array_keys($sm->listTableIndexes('directory_resources'));
+            if (!in_array('idx_dr_tool_approved', $indexes)) {
+                $table->index(['directory_tool_id', 'is_approved'], 'idx_dr_tool_approved');
+            }
+            if (!in_array('idx_dr_user', $indexes)) {
+                $table->index(['user_id', 'created_at'], 'idx_dr_user');
+            }
+            if (!in_array('idx_dr_approved_date', $indexes)) {
+                $table->index(['is_approved', 'created_at'], 'idx_dr_approved_date');
+            }
         });
     }
 

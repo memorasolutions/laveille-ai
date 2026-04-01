@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('users', 'ban_expires_at')) return;
         Schema::table('users', function (Blueprint $table) {
             $table->timestamp('ban_expires_at')->nullable();
         });

@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('news_articles', 'views_count')) return;
         Schema::table('news_articles', function (Blueprint $table) {
             $table->unsignedInteger('views_count')->default(0)->after('is_published');
         });

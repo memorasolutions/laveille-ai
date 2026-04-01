@@ -12,6 +12,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('news_articles', 'slug')) return;
         Schema::table('news_articles', function (Blueprint $table) {
             $table->string('slug', 255)->nullable()->unique()->after('title');
         });
