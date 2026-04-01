@@ -33,9 +33,10 @@
     var contentContainer = null;
 
     // Chercher le container le plus probable (table tbody, .row, liste)
-    var candidates = ['tbody', '.row', '.news-grid', '[class*="list"]', '.d-flex.flex-column'];
+    var candidates = ['.news-grid', 'tbody', '.row', '[class*="list"]', '.d-flex.flex-column'];
+    var searchRoot = paginationParent.closest('.container') || paginationParent.closest('section') || document;
     for (var i = 0; i < candidates.length; i++) {
-        var found = paginationParent.parentElement.querySelector(candidates[i]);
+        var found = searchRoot.querySelector(candidates[i]);
         if (found && found.children.length > 1) {
             contentContainer = found;
             break;
