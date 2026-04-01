@@ -21,6 +21,7 @@ class NewsArticle extends Model
         'pub_date' => 'datetime',
         'is_published' => 'boolean',
         'structured_summary' => 'array',
+        'relevance_score' => 'integer',
     ];
 
     public function source(): BelongsTo

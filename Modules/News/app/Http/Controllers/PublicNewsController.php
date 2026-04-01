@@ -14,26 +14,25 @@ class PublicNewsController extends Controller
     public function index(): View
     {
         $articles = NewsArticle::published()
-            ->whereNotNull('structured_summary')
-            ->where('relevance_score', '>=', (int) config('news.min_relevance_score', 7))
             ->recent()
             ->with('source')
-            ->limit(50)
+            ->take(50)
             ->get();
 
-        $grouped = $articles->groupBy('category_tag');
+        // Grouper par catégorie pour le format digest
+        $grouped = $articles->groupBy(function ($article) {
+            return $article->category_tag ?: __('Général');
+        });
 
-        // Fallback : si aucun article structuré, montrer les anciens
-        if ($articles->isEmpty()) {
-            $articles = NewsArticle::published()
-                ->recent()
-                ->with('source')
-                ->paginate((int) Settings::get('news.articles_per_page', 20));
+        // Catégories avec icônes
+        $categoryIcons = [
+            'IA générative' => '🤖', 'Cybersécurité' => '🔒', 'Cloud' => '☁️',
+            'Robotique' => '🦾', 'Données' => '📊', 'Startup' => '🚀',
+            'Éducation tech' => '🎓', 'Infrastructure' => '🏗️', 'Autre' => '📰',
+            'Général' => '📰',
+        ];
 
-            return view('news::public.index', compact('articles'));
-        }
-
-        return view('news::public.index', compact('articles', 'grouped'));
+        return view('news::public.index', compact('grouped', 'categoryIcons'));
     }
 
     public function show(NewsArticle $article): View

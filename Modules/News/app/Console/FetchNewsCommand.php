@@ -9,12 +9,13 @@ use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
 use Modules\News\Services\RssFetcherService;
+use Modules\Settings\Facades\Settings;
 
 class FetchNewsCommand extends Command
 {
     protected $signature = 'news:fetch {--source= : ID source spécifique}';
 
-    protected $description = 'Récupère les articles RSS, filtre par pertinence IA, génère les résumés structurés.';
+    protected $description = 'Récupère les articles RSS, score et génère les résumés structurés IA.';
 
     public function handle(RssFetcherService $fetcher, AiSummaryService $summarizer): int
     {
@@ -31,99 +32,112 @@ class FetchNewsCommand extends Command
             return 0;
         }
 
-        $minScore = (int) config('news.min_relevance_score', 7);
-        $maxIa = (int) config('news.max_articles_ia', 10);
-        $maxTechno = (int) config('news.max_articles_techno', 5);
+        $minScore = (int) Settings::get('news.min_relevance_score', 7);
+        $maxIa = (int) Settings::get('news.max_ia_articles_per_day', 10);
+        $maxTech = (int) Settings::get('news.max_tech_articles_per_day', 5);
 
         $totalFetched = 0;
-        $candidates = collect();
+        $totalPublished = 0;
+        $totalFiltered = 0;
 
-        // Phase 1 : récupérer les articles RSS
+        // Compteurs du jour
+        $todayIa = NewsArticle::where('feed_type', 'ia')
+            ->where('is_published', true)
+            ->whereDate('created_at', today())
+            ->count();
+        $todayTech = NewsArticle::where('feed_type', 'techno')
+            ->where('is_published', true)
+            ->whereDate('created_at', today())
+            ->count();
+
         foreach ($sources as $source) {
             $this->info("Récupération : {$source->name}");
             $fetched = $fetcher->fetchSource($source);
             $totalFetched += $fetched;
             $this->line("  {$fetched} nouveaux articles");
-        }
 
-        // Phase 2 : filtrer + scorer + résumer
-        $toProcess = NewsArticle::whereNull('structured_summary')
-            ->where('is_published', false)
-            ->whereNull('relevance_score')
-            ->latest('pub_date')
-            ->limit(60)
-            ->get();
+            $feedType = $this->detectFeedType($source);
 
-        $this->info("Articles à traiter : {$toProcess->count()}");
+            $toProcess = NewsArticle::where('news_source_id', $source->id)
+                ->whereNull('structured_summary')
+                ->where('is_published', false)
+                ->get();
 
-        foreach ($toProcess as $article) {
-            // Filtre rapide par mots-clés
-            if (! $summarizer->isRelevant($article->title, $article->description)) {
+            foreach ($toProcess as $article) {
+                // Pré-filtre mots-clés (gratuit)
+                if (! $summarizer->isRelevant($article->title, $article->description)) {
+                    $article->update([
+                        'is_published' => false,
+                        'summary' => '[non pertinent - mots-clés]',
+                        'relevance_score' => 0,
+                        'feed_type' => $feedType,
+                    ]);
+                    $this->line("  ⊘ Filtré mots-clés : {$article->title}");
+                    $totalFiltered++;
+                    continue;
+                }
+
+                // Vérifier quota du jour
+                if ($feedType === 'ia' && $todayIa >= $maxIa) {
+                    $this->line("  ⏸ Quota IA atteint ({$maxIa}/jour)");
+                    break;
+                }
+                if ($feedType === 'techno' && $todayTech >= $maxTech) {
+                    $this->line("  ⏸ Quota techno atteint ({$maxTech}/jour)");
+                    break;
+                }
+
+                // Score + résumé IA (1 seul appel)
+                $result = $summarizer->scoreAndSummarize($article->title, $article->description, $source->language);
+
+                if (! $result) {
+                    $article->update(['summary' => '[échec IA]', 'feed_type' => $feedType]);
+                    $this->warn("  ✗ Échec IA : {$article->title}");
+                    continue;
+                }
+
+                $score = (int) ($result['score'] ?? 0);
+
                 $article->update([
-                    'is_published' => false,
-                    'relevance_score' => 0,
-                    'score_justification' => 'Filtré par mots-clés : aucun terme IA/tech détecté',
+                    'relevance_score' => $score,
+                    'score_justification' => $result['score_justification'] ?? null,
+                    'structured_summary' => $result,
+                    'category_tag' => $result['category'] ?? null,
+                    'impact_level' => $result['impact'] ?? null,
+                    'feed_type' => $feedType,
+                    'seo_title' => $result['seo_title'] ?? null,
+                    'meta_description' => $result['meta_description'] ?? null,
+                    'summary' => $result['hook'] ?? null,
+                    'is_published' => $score >= $minScore,
                 ]);
-                $this->line("  ⊘ Mots-clés : {$article->title}");
-                continue;
+
+                if ($score >= $minScore) {
+                    $totalPublished++;
+                    if ($feedType === 'ia') $todayIa++;
+                    else $todayTech++;
+                    $this->line("  ✓ [{$score}/10] {$article->title}");
+                } else {
+                    $totalFiltered++;
+                    $this->line("  ⊘ [{$score}/10] Non pertinent : {$article->title}");
+                }
             }
-
-            // Appel IA : score + résumé structuré
-            $result = $summarizer->structuredSummary(
-                $article->title,
-                $article->description,
-                $article->source->language ?? 'fr'
-            );
-
-            if (! $result) {
-                $this->warn("  ✗ Échec IA : {$article->title}");
-                continue;
-            }
-
-            $score = (int) ($result['score'] ?? 0);
-
-            $article->update([
-                'relevance_score' => $score,
-                'score_justification' => $result['score_justification'] ?? null,
-                'structured_summary' => $result,
-                'category_tag' => $result['category'] ?? null,
-                'impact_level' => $result['impact'] ?? null,
-                'seo_title' => $result['seo_title'] ?? null,
-                'meta_description' => $result['meta_description'] ?? null,
-                'summary' => $result['hook'] ?? null,
-                'feed_type' => $article->source->category ?? 'ia',
-                'is_published' => $score >= $minScore,
-            ]);
-
-            $emoji = $score >= $minScore ? '✓' : '⊘';
-            $this->line("  {$emoji} [{$score}/10] {$article->title}");
         }
 
-        // Phase 3 : limiter le quota (garder seulement les meilleurs)
-        $this->applyDailyQuota($maxIa, $maxTechno, $minScore);
-
-        $published = NewsArticle::where('is_published', true)->whereDate('pub_date', today())->count();
-        $this->info("--- Bilan : {$totalFetched} récupérés, {$published} publiés aujourd'hui ---");
+        $this->info("--- Bilan : {$totalFetched} récupérés, {$totalPublished} publiés, {$totalFiltered} filtrés ---");
 
         return 0;
     }
 
-    private function applyDailyQuota(int $maxIa, int $maxTechno, int $minScore): void
+    private function detectFeedType(NewsSource $source): string
     {
-        // Garder les top N par feed_type pour aujourd'hui
-        foreach (['ia' => $maxIa, 'techno' => $maxTechno] as $type => $max) {
-            $published = NewsArticle::where('feed_type', $type)
-                ->where('is_published', true)
-                ->whereDate('pub_date', today())
-                ->orderByDesc('relevance_score')
-                ->get();
+        $url = mb_strtolower($source->url);
+        $name = mb_strtolower($source->name);
 
-            if ($published->count() > $max) {
-                $toUnpublish = $published->slice($max);
-                NewsArticle::whereIn('id', $toUnpublish->pluck('id'))
-                    ->update(['is_published' => false]);
-                $this->line("  Quota {$type} : {$toUnpublish->count()} articles dépubliés (max {$max})");
-            }
+        if (str_contains($url, 'intelligence+artificielle') || str_contains($url, 'ai-artificial')
+            || str_contains($name, 'ia') || str_contains($name, ' ai')) {
+            return 'ia';
         }
+
+        return 'techno';
     }
 }
