@@ -44,7 +44,7 @@
             {{-- ===== 2. CONTENU (Contenu + Marketing) ===== --}}
             @canany(['view_articles', 'view_pages', 'view_categories', 'view_media', 'view_faqs', 'view_menus', 'view_comments', 'view_testimonials', 'view_widgets', 'view_shortcodes', 'view_forms', 'view_newsletter', 'view_workflows'])
             <li class="nav-item nav-category">{{ __('Contenu') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.news.*', 'admin.formbuilder.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#contentMenu" role="button"
                    aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="file-text"></i>
@@ -60,6 +60,12 @@
                         @endif
                         @if(Route::has('admin.blog.submissions.index'))
                         <li class="nav-item"><a href="{{ route('admin.blog.submissions.index') }}" class="nav-link {{ request()->routeIs('admin.blog.submissions.*') ? 'active' : '' }}">{{ __('Soumissions') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.news.articles.index'))
+                        <li class="nav-item"><a href="{{ route('admin.news.articles.index') }}" class="nav-link {{ request()->routeIs('admin.news.articles.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.articles.*') ? 'aria-current=page' : '' }}>{{ __('Actualités IA') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.news.sources.index'))
+                        <li class="nav-item"><a href="{{ route('admin.news.sources.index') }}" class="nav-link {{ request()->routeIs('admin.news.sources.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.sources.*') ? 'aria-current=page' : '' }}>{{ __('Sources RSS') }}</a></li>
                         @endif
                         @if(Route::has('admin.pages.index'))
                         @can('view_pages')
@@ -151,7 +157,7 @@
                                     @endif
                                     @if(Route::has('admin.formbuilder.forms.index'))
                                     @can('view_forms')
-                                    <li class="nav-item"><a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.formbuilder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.formbuilder.*') ? 'aria-current=page' : '' }}>{{ __('Formulaires') }}</a></li>
+                                    <li class="nav-item"><a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.news.*', 'admin.formbuilder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.formbuilder.*') ? 'aria-current=page' : '' }}>{{ __('Formulaires') }}</a></li>
                                     @endcan
                                     @endif
                                 </ul>

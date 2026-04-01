@@ -27,4 +27,9 @@ Route::prefix('admin/news')
         Route::patch('sources/{source}/toggle', [AdminNewsController::class, 'toggleActive'])->name('sources.toggle');
         Route::post('sources/{source}/fetch', [AdminNewsController::class, 'fetchNow'])->name('sources.fetch');
         Route::delete('sources/{source}', [AdminNewsController::class, 'destroy'])->name('sources.destroy');
+
+        // Articles
+        Route::get('articles', [AdminNewsController::class, 'articles'])->name('articles.index');
+        Route::patch('articles/{article}/toggle', [AdminNewsController::class, 'toggleArticle'])->name('articles.toggle');
+        Route::delete('articles/{article}', [AdminNewsController::class, 'destroyArticle'])->name('articles.destroy');
     });

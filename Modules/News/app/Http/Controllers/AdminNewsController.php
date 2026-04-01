@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\RssFetcherService;
 use Modules\Settings\Facades\Settings;
@@ -93,5 +94,57 @@ class AdminNewsController extends Controller
         $count = $fetcher->fetchSource($source);
 
         return back()->with('success', __(':count articles récupérés pour :name.', ['count' => $count, 'name' => $source->name]));
+    }
+
+    // ── Articles ──
+
+    public function articles(Request $request): View
+    {
+        $query = NewsArticle::with('source')->latest('pub_date');
+
+        // Filtres
+        if ($request->filled('status')) {
+            if ($request->status === 'published') $query->where('is_published', true);
+            elseif ($request->status === 'filtered') $query->where('is_published', false);
+        }
+        if ($request->filled('category')) {
+            $query->where('category_tag', $request->category);
+        }
+        if ($request->filled('feed')) {
+            $query->where('feed_type', $request->feed);
+        }
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        $articles = $query->paginate(30)->appends($request->all());
+
+        $categories = NewsArticle::whereNotNull('category_tag')
+            ->distinct()->pluck('category_tag')->sort();
+
+        $stats = [
+            'total' => NewsArticle::count(),
+            'published' => NewsArticle::where('is_published', true)->count(),
+            'filtered' => NewsArticle::where('is_published', false)->count(),
+            'today' => NewsArticle::whereDate('created_at', today())->where('is_published', true)->count(),
+        ];
+
+        return view('news::admin.articles.index', compact('articles', 'categories', 'stats'));
+    }
+
+    public function toggleArticle(NewsArticle $article): RedirectResponse
+    {
+        $article->update(['is_published' => ! $article->is_published]);
+
+        return back()->with('success', $article->is_published
+            ? __('Article publié.')
+            : __('Article dépublié.'));
+    }
+
+    public function destroyArticle(NewsArticle $article): RedirectResponse
+    {
+        $article->delete();
+
+        return back()->with('success', __('Article supprimé.'));
     }
 }
