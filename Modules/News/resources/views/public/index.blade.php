@@ -9,7 +9,7 @@
 
 @push('styles')
 <style>
-    .nw-articles-grid::after { content: ''; display: table; clear: both; }
+    .nw-articles-grid.row { flex-wrap: wrap !important; }
     .nw-filters { margin-bottom: 1.5rem; }
     .nw-filter-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem; }
     .nw-filter-label { font-size: 0.8125rem; font-weight: 600; color: #6b7280; min-width: 70px; }
