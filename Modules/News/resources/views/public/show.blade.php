@@ -7,8 +7,8 @@
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
-        'breadcrumbTitle' => Str::limit($article->seo_title ?? $article->title, 40),
-        'breadcrumbItems' => [__('Actualités'), Str::limit($article->seo_title ?? $article->title, 40)]
+        'breadcrumbTitle' => $article->seo_title ?? $article->title,
+        'breadcrumbItems' => [__('Actualités'), $article->seo_title ?? $article->title]
     ])
 @endsection
 

@@ -49,6 +49,7 @@ class NewsServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\News\Console\FetchNewsCommand::class,
+            \Modules\News\Console\RescrapeImagesCommand::class,
         ]);
     }
 

@@ -35,7 +35,17 @@
         position: relative;
         overflow: hidden;
         aspect-ratio: 16 / 9;
-        background: #f3f4f6;
+        background: linear-gradient(135deg, #1a2332 0%, #0b7285 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .nw-card-placeholder {
+        color: rgba(255,255,255,0.3);
+        font-size: 2.5rem;
+        font-weight: 700;
+        font-family: var(--f-heading);
+        letter-spacing: 0.05em;
     }
     .nw-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
     .nw-card:hover .nw-card-img { transform: scale(1.03); }
@@ -120,6 +130,8 @@
                                 <div class="nw-card-img-wrap">
                                     @if($article->image_url)
                                         <img src="{{ $article->image_url }}" alt="" class="nw-card-img" loading="lazy">
+                                    @else
+                                        <span class="nw-card-placeholder">{{ mb_strtoupper(mb_substr($category, 0, 2)) }}</span>
                                     @endif
                                 </div>
                                 <div class="nw-card-body">

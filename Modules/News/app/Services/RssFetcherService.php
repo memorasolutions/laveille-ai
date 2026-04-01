@@ -94,8 +94,9 @@ class RssFetcherService
 
         try {
             $response = \Illuminate\Support\Facades\Http::withoutVerifying()
-                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LaVeilleBot/1.0)'])
-                ->timeout(10)
+                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'])
+                ->timeout(15)
+                ->withOptions(['allow_redirects' => ['max' => 5]])
                 ->get($url);
 
             if (! $response->successful()) return null;
