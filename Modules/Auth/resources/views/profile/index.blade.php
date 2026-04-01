@@ -80,11 +80,11 @@
                             name="avatar"
                             :label="__('Photo de profil')"
                             accept="image/*"
-                            :max-size="2"
+                            :max-size="1"
                             :max-width="800"
                             :compact="true"
                             :current-image="$user->avatar ? asset('storage/' . $user->avatar) : ''"
-                            :help-text="__('PNG, JPG, WebP - max. 2 Mo')"
+                            :help-text="__('PNG, JPG, WebP - max. 1 Mo')"
                         />
                         @if($errors->has('avatar'))<p class="help-block" style="color: #d9534f;">{{ $errors->first('avatar') }}</p>@endif
                     </div>
