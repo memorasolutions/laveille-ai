@@ -38,6 +38,9 @@ Route::prefix('admin/news')
 
         // Articles
         Route::get('articles', [AdminNewsController::class, 'articles'])->name('articles.index');
+        Route::get('articles/{article}/edit', [AdminNewsController::class, 'editArticle'])->name('articles.edit');
+        Route::put('articles/{article}', [AdminNewsController::class, 'updateArticle'])->name('articles.update');
+        Route::post('articles/{article}/rescore', [AdminNewsController::class, 'rescoreArticle'])->name('articles.rescore');
         Route::patch('articles/{article}/toggle', [AdminNewsController::class, 'toggleArticle'])->name('articles.toggle');
         Route::delete('articles/{article}', [AdminNewsController::class, 'destroyArticle'])->name('articles.destroy');
     });

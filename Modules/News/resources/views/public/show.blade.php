@@ -4,6 +4,10 @@
 
 @section('title', ($article->seo_title ?? $article->title) . ' - ' . __('Actualités') . ' - ' . config('app.name'))
 @section('meta_description', $article->meta_description ?? Str::limit($article->summary ?? strip_tags($article->description), 155))
+@section('og_type', 'article')
+@if($article->image_url)
+    @section('og_image', url($article->image_url))
+@endif
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
@@ -15,26 +19,32 @@
 {{-- Schema.org NewsArticle + FAQPage --}}
 @push('head')
 <script type="application/ld+json">
-{!! json_encode([
+@php
+$newsSchema = [
     '@context' => 'https://schema.org',
     '@type' => 'NewsArticle',
     'headline' => $article->seo_title ?? $article->title,
     'description' => $article->meta_description ?? Str::limit($article->summary ?? '', 155),
-    'image' => $article->image_url ?: asset('images/og-image.png'),
+    'image' => $article->image_url ? url($article->image_url) : asset('images/og-image.png'),
     'datePublished' => $article->pub_date?->toIso8601String(),
     'dateModified' => $article->updated_at->toIso8601String(),
     'author' => ['@type' => 'Organization', 'name' => $article->source->name ?? config('app.name')],
     'publisher' => ['@type' => 'Organization', 'name' => config('app.name'), 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/favicon.png')]],
     'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => route('news.show', $article)],
-], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+];
+@endphp
+{!! json_encode($newsSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
 @if($ss && isset($ss['faq_question']))
 <script type="application/ld+json">
-{!! json_encode([
+@php
+$faqSchema = [
     '@context' => 'https://schema.org',
     '@type' => 'FAQPage',
     'mainEntity' => [['@type' => 'Question', 'name' => $ss['faq_question'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $ss['faq_answer'] ?? '']]],
-], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+];
+@endphp
+{!! json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
 @endif
 @endpush
@@ -109,7 +119,16 @@
 
                     <h1 class="nw-show-title">{{ $article->seo_title ?? $article->title }}</h1>
 
+                    @php
+                        $readText = strip_tags($article->description ?? '') . ' ' . ($article->summary ?? '');
+                        if ($ss) {
+                            $readText .= ' ' . ($ss['hook'] ?? '') . ' ' . implode(' ', $ss['key_points'] ?? []) . ' ' . ($ss['why_important'] ?? '');
+                        }
+                        $readMinutes = max(1, (int) ceil(str_word_count($readText) / 200));
+                    @endphp
                     <div class="nw-meta-bar">
+                        <span class="nw-pill">{{ $readMinutes }} min {{ __('de lecture') }}</span>
+                        <span class="nw-pill-sep">&middot;</span>
                         <span class="nw-pill">{{ $article->source->name ?? __('Source') }}</span>
                         @if($article->author)
                             <span class="nw-pill-sep">&middot;</span>
@@ -217,6 +236,16 @@
                             @endforeach
                         </div>
                     </div>
+                    @endif
+
+                    {{-- Commentaires --}}
+                    @if(class_exists(\Modules\Community\Livewire\CommentsThread::class))
+                        <div class="mt-4 pt-4 border-top">
+                            @livewire('community-comments-thread', [
+                                'commentableType' => \Modules\News\Models\NewsArticle::class,
+                                'commentableId' => $article->id
+                            ])
+                        </div>
                     @endif
 
                     <div style="text-align: center; margin-top: 1.5rem;">

@@ -20,7 +20,7 @@ class NewsArticle extends Model
         'summary', 'image_url', 'author', 'pub_date', 'is_published',
         'relevance_score', 'score_justification', 'structured_summary',
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
-        'short_url_id',
+        'short_url_id', 'views_count',
     ];
 
     protected $casts = [

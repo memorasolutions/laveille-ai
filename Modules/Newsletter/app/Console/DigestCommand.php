@@ -29,16 +29,27 @@ class DigestCommand extends Command
             return self::SUCCESS;
         }
 
-        if (! class_exists(\Modules\Blog\Models\Article::class)) {
-            $this->components->info('Blog module is not installed. Digest requires articles.');
-
-            return self::SUCCESS;
+        // Articles blog de la semaine
+        $articles = collect();
+        if (class_exists(\Modules\Blog\Models\Article::class)) {
+            $articles = \Modules\Blog\Models\Article::published()
+                ->where('published_at', '>=', now()->subDays(7))
+                ->latest('published_at')
+                ->get();
         }
 
-        $articles = \Modules\Blog\Models\Article::published()
-            ->where('published_at', '>=', now()->subDays(7))
-            ->latest('published_at')
-            ->get();
+        // Actualites IA de la semaine
+        $newsArticles = collect();
+        if (class_exists(\Modules\News\Models\NewsArticle::class)) {
+            $newsArticles = \Modules\News\Models\NewsArticle::where('is_published', true)
+                ->where('pub_date', '>=', now()->subDays(7))
+                ->where('relevance_score', '>=', 8)
+                ->latest('pub_date')
+                ->take(5)
+                ->get();
+        }
+
+        $articles = $articles->merge($newsArticles);
 
         if ($articles->isEmpty()) {
             $this->components->info('No new articles published in the last 7 days.');

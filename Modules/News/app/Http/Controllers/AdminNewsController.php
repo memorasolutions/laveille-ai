@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
+use Modules\News\Services\AiSummaryService;
 use Modules\News\Services\RssFetcherService;
 use Modules\Settings\Facades\Settings;
 
@@ -139,6 +140,50 @@ class AdminNewsController extends Controller
         return back()->with('success', $article->is_published
             ? __('Article publié.')
             : __('Article dépublié.'));
+    }
+
+    public function editArticle(NewsArticle $article): View
+    {
+        $article->load('source');
+
+        return view('news::admin.articles.edit', compact('article'));
+    }
+
+    public function updateArticle(Request $request, NewsArticle $article): RedirectResponse
+    {
+        $validated = $request->validate([
+            'seo_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:255',
+            'category_tag' => 'nullable|string|max:50',
+            'summary' => 'nullable|string|max:2000',
+        ]);
+
+        $article->update($validated);
+
+        return redirect()->route('admin.news.articles.index')->with('success', __('Article mis a jour.'));
+    }
+
+    public function rescoreArticle(NewsArticle $article, AiSummaryService $aiService): RedirectResponse
+    {
+        $text = $article->title . '. ' . ($article->description ?? '');
+        $result = $aiService->scoreAndSummarize($text);
+
+        if ($result) {
+            $article->update([
+                'relevance_score' => $result['score'] ?? $article->relevance_score,
+                'score_justification' => $result['score_justification'] ?? $article->score_justification,
+                'structured_summary' => $result,
+                'category_tag' => $result['category'] ?? $article->category_tag,
+                'impact_level' => $result['impact'] ?? $article->impact_level,
+                'seo_title' => $result['seo_title'] ?? $article->seo_title,
+                'meta_description' => $result['meta_description'] ?? $article->meta_description,
+                'summary' => $result['hook'] ?? $article->summary,
+            ]);
+
+            return back()->with('success', __('Article re-score : :score/10', ['score' => $result['score'] ?? '?']));
+        }
+
+        return back()->with('error', __('Erreur lors du re-scoring IA.'));
     }
 
     public function destroyArticle(NewsArticle $article): RedirectResponse

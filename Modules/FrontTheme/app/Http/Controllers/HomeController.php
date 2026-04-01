@@ -67,6 +67,18 @@ class HomeController extends Controller
                 ->get();
         }
 
+        // Dernières actualités IA
+        $latestNews = collect();
+        $newsClass = 'Modules\\News\\Models\\NewsArticle';
+        if (Module::has('News') && Module::find('News')?->isEnabled() && class_exists($newsClass)) {
+            $latestNews = $newsClass::query()
+                ->where('is_published', true)
+                ->with('source')
+                ->latest('pub_date')
+                ->take((int) Settings::get('fronttheme.home_latest_news_limit', 4))
+                ->get();
+        }
+
         // Outils interactifs gratuits
         $interactiveTools = collect();
         $iToolClass = 'Modules\\Tools\\Models\\Tool';
@@ -83,7 +95,8 @@ class HomeController extends Controller
             'popularTools',
             'featuredTerms',
             'featuredAcronyms',
-            'interactiveTools'
+            'interactiveTools',
+            'latestNews'
         ));
     }
 }

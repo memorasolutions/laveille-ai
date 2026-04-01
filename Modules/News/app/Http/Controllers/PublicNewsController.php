@@ -69,6 +69,7 @@ class PublicNewsController extends Controller
     {
         abort_if(! $article->is_published, 404);
 
+        $article->increment('views_count');
         $article->load('source');
 
         // Article précédent (même catégorie, puis toutes)

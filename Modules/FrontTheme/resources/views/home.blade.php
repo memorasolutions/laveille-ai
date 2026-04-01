@@ -268,6 +268,51 @@
         </style>
         @endpush
 
+        {{-- Section 0: Dernières actualités IA --}}
+        @if($latestNews->isNotEmpty())
+        <section class="hp-section">
+            <div class="container">
+                <div class="hp-header">
+                    <div>
+                        <h2 class="hp-title">📰 {{ __('Dernières actualités') }}</h2>
+                        <div class="hp-subtitle">{{ __('Veille quotidienne IA et technologie') }}</div>
+                    </div>
+                    <a href="{{ route('news.index') }}" class="hp-link-all">{{ __('Voir tout') }} →</a>
+                </div>
+                <div class="row hp-row-flex">
+                    @foreach($latestNews as $newsItem)
+                    @php
+                        $nScore = $newsItem->relevance_score ?? 0;
+                        $nDotClass = $nScore >= 8 ? 'nw-dot-high' : ($nScore >= 6 ? 'nw-dot-mid' : 'nw-dot-low');
+                        $nSs = $newsItem->structured_summary;
+                    @endphp
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <a href="{{ route('news.show', $newsItem) }}" class="hp-card">
+                            <div class="hp-card-img" style="{{ $newsItem->image_url ? '' : 'background: linear-gradient(135deg, #1a2332, #0b7285);' }}">
+                                @if($newsItem->image_url)
+                                    <img src="{{ $newsItem->image_url }}" alt="{{ $newsItem->seo_title ?? $newsItem->title }}" loading="lazy">
+                                @else
+                                    <div class="hp-card-img-gradient">
+                                        <span class="hp-card-img-text">{{ mb_strtoupper(mb_substr($newsItem->category_tag ?? 'IA', 0, 2)) }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="hp-card-body">
+                                <h3>{{ Str::limit($newsItem->seo_title ?? $newsItem->title, 65) }}</h3>
+                                <p>{{ Str::limit($nSs['hook'] ?? $newsItem->summary ?? strip_tags($newsItem->description), 90) }}</p>
+                                <div class="hp-badges">
+                                    <span class="hp-badge" style="background: var(--c-primary);">{{ $newsItem->source->name ?? __('Source') }}</span>
+                                    <span style="font-size: 0.6875rem; color: #9ca3af;">{{ $newsItem->pub_date?->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+        @endif
+
         {{-- Section 1: Outils IA populaires --}}
         @if($popularTools->isNotEmpty())
         <section class="hp-section">

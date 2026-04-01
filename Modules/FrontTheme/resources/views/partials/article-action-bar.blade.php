@@ -70,9 +70,13 @@
                         <button type="button" class="btn btn-default btn-sm" @click="showReport = false">{{ __('Annuler') }}</button>
                         <button type="button" class="btn btn-primary btn-sm" :disabled="!reportReason"
                             @click="
-                                fetch('{{ route('news.index') }}', {method: 'HEAD'});
+                                fetch('{{ Route::has('report.store') ? route('report.store') : '#' }}', {
+                                    method: 'POST',
+                                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json'},
+                                    body: JSON.stringify({reportable_type: '{{ addslashes($modelType) }}', reportable_id: {{ $model->id }}, reason: reportReason, details: reportDetail})
+                                });
                                 reportSent = true;
-                                setTimeout(() => { showReport = false; reportSent = false; }, 2000);
+                                setTimeout(() => { showReport = false; reportSent = false; reportReason = ''; reportDetail = ''; }, 2000);
                             ">{{ __('Envoyer') }}</button>
                     </div>
                 </div>

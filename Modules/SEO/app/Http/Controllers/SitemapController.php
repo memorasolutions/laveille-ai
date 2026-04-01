@@ -107,6 +107,16 @@ class SitemapController
         // News (si module News actif)
         if (Route::has('news.index')) {
             $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));
+            if (class_exists(\Modules\News\Models\NewsArticle::class)) {
+                \Modules\News\Models\NewsArticle::where('is_published', true)->get()->each(function ($article) use ($sitemap) {
+                    $sitemap->add(
+                        Url::create(url('/actualites/'.$article->slug))
+                            ->setLastModificationDate($article->updated_at)
+                            ->setPriority(0.6)
+                            ->setChangeFrequency('weekly')
+                    );
+                });
+            }
         }
 
         return response($sitemap->render(), 200, ['Content-Type' => 'application/xml']);
