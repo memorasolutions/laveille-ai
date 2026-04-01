@@ -47,6 +47,13 @@ class FetchNewsCommand extends Command
                 ->get();
 
             foreach ($toSummarize as $article) {
+                // Filtre de pertinence : rejeter les articles non liés à l'IA/tech
+                if (! $summarizer->isRelevant($article->title, $article->description)) {
+                    $article->update(['is_published' => false, 'summary' => '[non pertinent]']);
+                    $this->line("  ⊘ Non pertinent : {$article->title}");
+                    continue;
+                }
+
                 $summary = $summarizer->summarize($article->description, $source->language);
 
                 if ($summary) {

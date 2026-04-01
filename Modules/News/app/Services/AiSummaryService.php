@@ -15,6 +15,28 @@ class AiSummaryService
         'google/gemini-2.0-flash-001',
     ];
 
+    /**
+     * Vérifie si l'article est pertinent (lié à l'IA, la technologie ou la transformation numérique).
+     */
+    public function isRelevant(string $title, string $text): bool
+    {
+        $combined = mb_strtolower($title . ' ' . $text);
+        $keywords = ['intelligence artificielle', 'ia ', ' ai ', 'artificial intelligence', 'machine learning',
+            'deep learning', 'chatgpt', 'openai', 'claude', 'gemini', 'llm', 'gpt', 'neural', 'algorithme',
+            'robot', 'automatisation', 'données', 'data', 'cloud', 'cybersécurité', 'blockchain',
+            'apprentissage automatique', 'modèle de langage', 'prompt', 'tech', 'numérique', 'digital',
+            'startup', 'innovation', 'logiciel', 'software', 'app ', 'application', 'coding', 'développeur',
+            'api', 'saas', 'fintech', 'edtech', 'biotech'];
+
+        foreach ($keywords as $kw) {
+            if (str_contains($combined, $kw)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function summarize(string $text, string $language = 'fr'): ?string
     {
         $apiKey = config('services.openrouter.api_key', env('OPENROUTER_API_KEY'));
