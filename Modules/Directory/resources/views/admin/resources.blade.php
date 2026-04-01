@@ -54,13 +54,12 @@
                         <td>{{ $r->user->name ?? '-' }}</td>
                         <td>{{ $r->created_at->format('d/m/Y') }}</td>
                         <td class="text-end">
-                            <div class="d-flex justify-content-end gap-1">
-                                <a href="{{ route('admin.directory.resources.edit', $r->id) }}" class="btn btn-outline-primary btn-sm">{{ __('Modifier') }}</a>
-                                @if(!$r->is_approved)
-                                    <form action="{{ route('admin.directory.moderation.resource.approve', $r->id) }}" method="POST">@csrf<button type="submit" class="btn btn-success btn-sm">{{ __('Approuver') }}</button></form>
-                                @endif
-                                <form action="{{ route('admin.directory.moderation.resource.delete', $r->id) }}" method="POST">@csrf<button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('{{ __('Supprimer ?') }}')">{{ __('Supprimer') }}</button></form>
-                            </div>
+                            @include('core::components.admin-action-menu', ['actions' => array_filter([
+                                ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.directory.resources.edit', $r->id)],
+                                !$r->is_approved ? ['label' => __('Approuver'), 'icon' => 'check', 'url' => route('admin.directory.moderation.resource.approve', $r->id), 'method' => 'POST'] : null,
+                                ['divider' => true],
+                                ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.directory.moderation.resource.delete', $r->id), 'method' => 'POST', 'confirm' => __('Supprimer ?'), 'danger' => true],
+                            ])])
                         </td>
                     </tr>
                     @empty

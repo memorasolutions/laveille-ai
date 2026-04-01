@@ -102,17 +102,13 @@
                         </td>
                         <td><small>{{ $a->pub_date?->format('d/m H:i') }}</small></td>
                         <td class="text-end">
-                            <form action="{{ route('admin.news.articles.toggle', $a) }}" method="POST" style="display: inline;">
-                                @csrf @method('PATCH')
-                                <button type="submit" class="btn btn-sm {{ $a->is_published ? 'btn-outline-warning' : 'btn-outline-success' }}" title="{{ $a->is_published ? 'Dépublier' : 'Publier' }}">
-                                    {{ $a->is_published ? '⏸' : '▶' }}
-                                </button>
-                            </form>
-                            <a href="{{ $a->url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Source">↗</a>
-                            <form action="{{ route('admin.news.articles.destroy', $a) }}" method="POST" style="display: inline;">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer ?')">✕</button>
-                            </form>
+                            @include('core::components.admin-action-menu', ['actions' => [
+                                ['label' => __('Voir l\'article'), 'icon' => 'external-link', 'url' => route('news.show', $a), 'target' => '_blank'],
+                                ['label' => __('Source originale'), 'icon' => 'link', 'url' => $a->url, 'target' => '_blank'],
+                                ['label' => $a->is_published ? __('Dépublier') : __('Publier'), 'icon' => $a->is_published ? 'pause' : 'play', 'url' => route('admin.news.articles.toggle', $a), 'method' => 'PATCH'],
+                                ['divider' => true],
+                                ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.articles.destroy', $a), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article?'), 'danger' => true],
+                            ]])
                         </td>
                     </tr>
                     @empty

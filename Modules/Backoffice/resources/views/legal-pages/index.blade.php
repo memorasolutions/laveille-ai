@@ -30,9 +30,9 @@
                             </td>
                             <td>{{ $page->updated_at->format('d/m/Y H:i') }}</td>
                             <td>
-                                <a href="{{ route('admin.legal-pages.edit', $page) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-pencil"></i> Modifier
-                                </a>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.legal-pages.edit', $page)],
+                                ]])
                             </td>
                         </tr>
                     @empty

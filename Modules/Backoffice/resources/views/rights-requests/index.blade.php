@@ -99,9 +99,9 @@
                                 {{ $r->deadline_at?->format('d/m/Y') ?? '—' }}
                             </td>
                             <td>
-                                <a href="{{ route('admin.rights-requests.show', $r) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye"></i> Voir
-                                </a>
+                                @include('core::components.admin-action-menu', ['actions' => [
+                                    ['label' => __('Voir les détails'), 'icon' => 'eye', 'url' => route('admin.rights-requests.show', $r)],
+                                ]])
                             </td>
                         </tr>
                     @empty
