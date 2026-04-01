@@ -152,7 +152,7 @@
                 <a href="{{ route('news.index') }}" class="nw-chip">{{ __('Réinitialiser les filtres') }}</a>
             </div>
         @else
-            <div class="row nw-articles-grid">
+            <div class="row nw-articles-grid news-grid">
                 @foreach($articles as $article)
                 @php
                     $ss = $article->structured_summary;
