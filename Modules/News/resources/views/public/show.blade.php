@@ -41,17 +41,47 @@
 
 @push('styles')
 <style>
-    .news-show-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 24px; }
-    .news-structured { background: #fafbfc; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-    .news-structured .ns-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .news-structured .ns-tag { padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-    .news-structured .ns-hook { font-size: 17px; font-weight: 600; color: var(--c-dark); line-height: 1.5; margin-bottom: 16px; font-family: var(--f-heading); }
-    .news-structured .ns-bullets { padding-left: 20px; margin-bottom: 16px; }
-    .news-structured .ns-bullets li { font-size: 15px; color: #374151; line-height: 1.6; margin-bottom: 6px; }
-    .news-structured .ns-why { background: #fff; border-left: 3px solid var(--c-primary); padding: 14px 18px; border-radius: 0 8px 8px 0; margin-bottom: 16px; }
-    .news-structured .ns-why p { font-size: 15px; color: #4B5563; line-height: 1.6; margin: 0; }
-    .news-structured .ns-audience { font-size: 13px; color: #6B7280; }
-    .news-faq { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .nw-show { max-width: 740px; margin: 0 auto; }
+    .nw-hero { width: 100%; max-height: 420px; object-fit: cover; border-radius: 12px; margin-bottom: 1.5rem; }
+    .nw-show-title { font-family: var(--f-heading); font-size: 2rem; line-height: 1.2; margin-bottom: 1rem; }
+    .nw-lead { font-size: 1.0625rem; font-weight: 600; color: var(--c-dark); line-height: 1.6; margin-bottom: 1.5rem; }
+    .nw-meta-bar {
+        display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;
+        padding-bottom: 1rem; margin-bottom: 1.75rem; border-bottom: 1px solid #e5e7eb;
+    }
+    .nw-pill {
+        display: inline-flex; align-items: center; gap: 0.25rem;
+        padding: 0.2rem 0.625rem; border-radius: 4px;
+        font-size: 0.8125rem; font-weight: 500; background: #f3f4f6; color: #374151;
+    }
+    .nw-pill-cat { background: var(--c-primary); color: #fff; }
+    .nw-pill-sep { color: #d1d5db; font-size: 0.75rem; }
+    .nw-section-heading {
+        font-family: var(--f-heading); font-size: 1.125rem; font-weight: 700;
+        color: var(--c-dark); margin-bottom: 0.75rem; padding-bottom: 0.375rem;
+        border-bottom: 2px solid var(--c-primary);
+    }
+    .nw-key-list { padding-left: 1.25rem; margin-bottom: 1.75rem; }
+    .nw-key-list li { font-size: 0.9375rem; color: #374151; line-height: 1.65; margin-bottom: 0.5rem; }
+    .nw-why {
+        border-left: 3px solid var(--c-primary); background: #f9fafb;
+        padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin-bottom: 1.75rem;
+    }
+    .nw-why p { font-size: 0.9375rem; color: #4b5563; line-height: 1.65; margin: 0; }
+    .nw-faq { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.75rem; }
+    .nw-faq h3 { font-family: var(--f-heading); font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .nw-faq p { font-size: 0.9375rem; color: #4b5563; line-height: 1.65; margin: 0; }
+    .nw-audience { font-size: 0.8125rem; color: #6b7280; margin-bottom: 1.75rem; }
+    .nw-desc { line-height: 1.7; color: var(--c-dark); margin-bottom: 2rem; }
+    .nw-cta { display: inline-block; background: var(--c-primary); color: #fff; padding: 0.75rem 1.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; }
+    .nw-cta:hover { opacity: 0.9; color: #fff; text-decoration: none; }
+    .nw-back { color: var(--c-primary); font-weight: 500; text-decoration: none; }
+    .nw-back:hover { text-decoration: underline; }
+    .nw-summary-fallback {
+        background: #f0f9fa; border-left: 4px solid var(--c-primary);
+        border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.75rem;
+    }
+    .nw-summary-fallback p { margin: 0; color: #1a365d; line-height: 1.6; }
 </style>
 @endpush
 
@@ -60,87 +90,88 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
+                <div class="nw-show">
 
-                <h1 style="font-family: var(--f-heading); margin-bottom: 12px;">{{ $article->seo_title ?? $article->title }}</h1>
+                    <h1 class="nw-show-title">{{ $article->seo_title ?? $article->title }}</h1>
 
-                <div style="font-size: 13px; color: #6B7280; margin-bottom: 20px;">
-                    <span style="background: #E5E7EB; padding: 2px 10px; border-radius: 4px; font-weight: 600; font-size: 12px;">{{ $article->source->name ?? __('Source') }}</span>
-                    @if($article->author) · {{ $article->author }} @endif
-                    · {{ $article->pub_date?->format('d/m/Y') }}
-                    @if($article->category_tag)
-                        · <span style="color: var(--c-primary); font-weight: 600;">{{ $article->category_tag }}</span>
-                    @endif
-                </div>
-
-                @if($article->image_url)
-                    <img src="{{ $article->image_url }}" alt="{{ $article->seo_title ?? $article->title }}" class="news-show-img" loading="lazy">
-                @endif
-
-                {{-- Résumé structuré --}}
-                @if($ss && isset($ss['hook']))
-                <div class="news-structured">
-                    <div class="ns-tags">
-                        @if($article->category_tag)
-                            <span class="ns-tag" style="background: var(--c-primary-light, #E6F7F9); color: var(--c-primary);">🏷️ {{ $article->category_tag }}</span>
+                    <div class="nw-meta-bar">
+                        <span class="nw-pill">{{ $article->source->name ?? __('Source') }}</span>
+                        @if($article->author)
+                            <span class="nw-pill-sep">&middot;</span>
+                            <span class="nw-pill">{{ $article->author }}</span>
                         @endif
-                        @if($article->impact_level)
-                            <span class="ns-tag" style="background: {{ $article->impact_level === 'Élevé' ? '#FEE2E2' : ($article->impact_level === 'Moyen' ? '#FEF3C7' : '#F3F4F6') }}; color: {{ $article->impact_level === 'Élevé' ? '#991B1B' : ($article->impact_level === 'Moyen' ? '#92400E' : '#6B7280') }};">⚡ {{ $article->impact_level }}</span>
+                        <span class="nw-pill-sep">&middot;</span>
+                        <span class="nw-pill">{{ $article->pub_date?->format('d/m/Y') }}</span>
+                        @if($article->category_tag)
+                            <span class="nw-pill nw-pill-cat">{{ $article->category_tag }}</span>
                         @endif
                         @if($article->relevance_score)
-                            <span class="ns-tag" style="background: #D1FAE5; color: #065F46;">📊 {{ $article->relevance_score }}/10</span>
+                            <span class="nw-pill">{{ $article->relevance_score }}/10</span>
+                        @endif
+                        @if($article->impact_level)
+                            <span class="nw-pill">{{ $article->impact_level }}</span>
                         @endif
                     </div>
 
-                    <div class="ns-hook">📌 {{ $ss['hook'] }}</div>
-
-                    @if(!empty($ss['key_points']))
-                    <h3 style="font-size: 14px; font-weight: 700; color: var(--c-dark); margin-bottom: 8px;">🔑 {{ __('Points clés') }}</h3>
-                    <ul class="ns-bullets">
-                        @foreach($ss['key_points'] as $point)
-                            <li>{{ $point }}</li>
-                        @endforeach
-                    </ul>
+                    @if($article->image_url)
+                        <img src="{{ $article->image_url }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
 
-                    @if(isset($ss['why_important']))
-                    <h3 style="font-size: 14px; font-weight: 700; color: var(--c-dark); margin-bottom: 8px;">💡 {{ __('Pourquoi c\'est important') }}</h3>
-                    <div class="ns-why"><p>{{ $ss['why_important'] }}</p></div>
+                    {{-- Lead : hook IA --}}
+                    @if($ss && isset($ss['hook']))
+                        <p class="nw-lead">{{ $ss['hook'] }}</p>
                     @endif
 
-                    @if(!empty($ss['audience']))
-                    <div class="ns-audience">👥 {{ __('Qui est concerné') }} : {{ implode(', ', $ss['audience']) }}</div>
+                    {{-- Résumé structuré --}}
+                    @if($ss)
+                        @if(!empty($ss['key_points']))
+                        <h3 class="nw-section-heading">{{ __('Points clés') }}</h3>
+                        <ul class="nw-key-list">
+                            @foreach($ss['key_points'] as $point)
+                                <li>{{ $point }}</li>
+                            @endforeach
+                        </ul>
+                        @endif
+
+                        @if(isset($ss['why_important']))
+                        <h3 class="nw-section-heading">{{ __('Pourquoi c\'est important') }}</h3>
+                        <div class="nw-why"><p>{{ $ss['why_important'] }}</p></div>
+                        @endif
+
+                        @if(!empty($ss['audience']))
+                        <p class="nw-audience">{{ __('Public concerné') }} : {{ implode(', ', $ss['audience']) }}</p>
+                        @endif
+                    @elseif($article->summary)
+                        <div class="nw-summary-fallback">
+                            <strong style="display: block; margin-bottom: 0.5rem; color: var(--c-primary); font-size: 0.875rem;">{{ __('Résumé IA') }}</strong>
+                            <p>{{ $article->summary }}</p>
+                        </div>
                     @endif
-                </div>
-                @elseif($article->summary)
-                    <div style="background: #E6F7F9; border-left: 4px solid var(--c-primary); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;">
-                        <strong style="display: block; margin-bottom: 8px; color: var(--c-primary); font-size: 14px;">⚡ {{ __('Résumé IA') }}</strong>
-                        <p style="margin: 0; color: #1a365d; line-height: 1.6;">{{ $article->summary }}</p>
+
+                    {{-- FAQ --}}
+                    @if($ss && isset($ss['faq_question']))
+                    <div class="nw-faq">
+                        <h3>{{ $ss['faq_question'] }}</h3>
+                        <p>{{ $ss['faq_answer'] }}</p>
                     </div>
-                @endif
+                    @endif
 
-                {{-- FAQ (SEO/AEO) --}}
-                @if($ss && isset($ss['faq_question']))
-                <div class="news-faq">
-                    <h3 style="font-size: 16px; font-weight: 700; color: var(--c-dark); margin-bottom: 8px;">❓ {{ $ss['faq_question'] }}</h3>
-                    <p style="font-size: 15px; color: #4B5563; line-height: 1.6; margin: 0;">{{ $ss['faq_answer'] }}</p>
+                    {{-- Description originale (seulement si pas de résumé structuré) --}}
+                    @if($article->description && !$ss)
+                    <div class="nw-desc">
+                        {!! nl2br(e($article->description)) !!}
+                    </div>
+                    @endif
+
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <a href="{{ $article->url }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <a href="{{ route('news.index') }}" class="nw-back">&larr; {{ __('Retour aux actualités') }}</a>
+                    </div>
+
                 </div>
-                @endif
-
-                {{-- Description originale (seulement si pas de résumé structuré) --}}
-                @if($article->description && !$ss)
-                <div style="line-height: 1.7; color: var(--c-dark); margin-bottom: 30px;">
-                    {!! nl2br(e($article->description)) !!}
-                </div>
-                @endif
-
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="{{ $article->url }}" target="_blank" rel="noopener" style="display: inline-block; background: var(--c-primary); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">{{ __('Voir l\'article original') }} →</a>
-                </div>
-
-                <div style="text-align: center;">
-                    <a href="{{ route('news.index') }}" style="color: var(--c-primary); font-weight: 600; text-decoration: none;">← {{ __('Retour aux actualités') }}</a>
-                </div>
-
             </div>
         </div>
     </div>
