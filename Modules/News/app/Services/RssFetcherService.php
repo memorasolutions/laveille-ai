@@ -53,7 +53,7 @@ class RssFetcherService
                     $imageUrl = $this->scrapeOgImage($item->get_permalink());
                 }
 
-                NewsArticle::create([
+                $article = NewsArticle::create([
                     'news_source_id' => $source->id,
                     'title' => $item->get_title() ?? 'Sans titre',
                     'guid' => $guid,
@@ -64,6 +64,15 @@ class RssFetcherService
                     'image_url' => $imageUrl,
                     'is_published' => false,
                 ]);
+
+                // Optimiser l'image localement (WebP 1200x630)
+                if ($imageUrl) {
+                    $localPath = app(NewsImageService::class)->processFromUrl($imageUrl, $article->id);
+                    if ($localPath) {
+                        $article->update(['image_url' => $localPath]);
+                    }
+                }
+
                 $count++;
             }
 
