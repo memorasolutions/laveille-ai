@@ -14,6 +14,14 @@
             @csrf @method('PUT')
 
             <div class="mb-3">
+                <label class="form-label" for="slug">{{ __('Slug (URL)') }}</label>
+                <input type="text" name="slug" id="slug" class="form-control @error('slug') is-invalid @enderror"
+                    value="{{ old('slug', $article->slug) }}" maxlength="255">
+                <small class="text-muted">{{ __('URL actuelle') }} : /actualites/{{ $article->slug }}</small>
+                @error('slug') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label" for="seo_title">{{ __('Titre SEO') }}</label>
                 <input type="text" name="seo_title" id="seo_title" class="form-control @error('seo_title') is-invalid @enderror"
                     value="{{ old('seo_title', $article->seo_title) }}" maxlength="255">

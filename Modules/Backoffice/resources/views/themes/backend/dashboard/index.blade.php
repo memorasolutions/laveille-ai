@@ -176,6 +176,62 @@
             </div>
         </div>
     </div>
+
+    {{-- Actualites --}}
+    @if(class_exists(\Modules\News\Models\NewsArticle::class))
+    <div class="col-md-6 col-xl-3 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <h6 class="card-title mb-0">{{ __('Actualites') }}</h6>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-7">
+                        <h3 class="mb-2">{{ \Modules\News\Models\NewsArticle::count() }}</h3>
+                        <div class="d-flex align-items-baseline">
+                            <p class="text-muted">{{ \Modules\News\Models\NewsArticle::where('is_published', true)->count() }} {{ __('publies') }} &middot; {{ number_format(\Modules\News\Models\NewsArticle::sum('views_count')) }} {{ __('vues') }}</p>
+                        </div>
+                    </div>
+                    <div class="col-5 d-flex align-items-center justify-content-end">
+                        <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center" style="width:48px;height:48px;min-width:48px;">
+                            <i data-lucide="newspaper" class="text-danger icon-md"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Newsletter --}}
+    @if(class_exists(\Modules\Newsletter\Models\Subscriber::class))
+    <div class="col-md-6 col-xl-3 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <h6 class="card-title mb-0">{{ __('Newsletter') }}</h6>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-7">
+                        <h3 class="mb-2">{{ \Modules\Newsletter\Models\Subscriber::active()->count() }}</h3>
+                        <div class="d-flex align-items-baseline">
+                            <p class="text-success">
+                                <span>+{{ \Modules\Newsletter\Models\Subscriber::where('created_at', '>=', now()->subDays(30))->count() }}</span>
+                                <i data-lucide="arrow-up" class="icon-sm mb-1"></i>
+                            </p>
+                            <p class="text-muted ms-1">{{ __('ce mois') }}</p>
+                        </div>
+                    </div>
+                    <div class="col-5 d-flex align-items-center justify-content-end">
+                        <div class="rounded-circle bg-teal bg-opacity-10 d-flex align-items-center justify-content-center" style="width:48px;height:48px;min-width:48px;">
+                            <i data-lucide="mail" class="text-primary icon-md"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 {{-- Chart: user registrations --}}

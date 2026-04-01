@@ -159,6 +159,9 @@
                     $score = $article->relevance_score ?? 0;
                     $dotClass = $score >= 8 ? 'nw-dot-high' : ($score >= 6 ? 'nw-dot-mid' : 'nw-dot-low');
                     $impactClass = match($article->impact_level) { 'Élevé' => 'nw-impact-high', 'Moyen' => 'nw-impact-mid', default => 'nw-impact-low' };
+                    $readText = strip_tags($article->description ?? '') . ' ' . ($article->summary ?? '');
+                    if ($ss) { $readText .= ' ' . ($ss['hook'] ?? '') . ' ' . implode(' ', $ss['key_points'] ?? []) . ' ' . ($ss['why_important'] ?? ''); }
+                    $readMinutes = max(1, (int) ceil(str_word_count($readText) / 200));
                 @endphp
                 <div class="col-sm-6 col-md-4" style="margin-bottom: 1.25rem;">
                     <article class="nw-card nw-impact-bar {{ $impactClass }}">
@@ -180,6 +183,7 @@
                                     @endif
                                 </p>
                                 <div class="nw-meta">
+                                    <span class="nw-source-pill">{{ $readMinutes }} min</span>
                                     <span class="nw-source-pill">{{ $article->source->name ?? __('Source') }}</span>
                                     <span class="nw-date">
                                         {{ $article->pub_date?->diffForHumans() }}

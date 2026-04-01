@@ -7,6 +7,7 @@ namespace Modules\News\Http\Controllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\News\Models\NewsArticle;
@@ -152,11 +153,18 @@ class AdminNewsController extends Controller
     public function updateArticle(Request $request, NewsArticle $article): RedirectResponse
     {
         $validated = $request->validate([
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('news_articles')->ignore($article->id)],
             'seo_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
             'category_tag' => 'nullable|string|max:50',
             'summary' => 'nullable|string|max:2000',
         ]);
+
+        if ($request->filled('slug')) {
+            $validated['slug'] = Str::slug($request->input('slug'));
+        } else {
+            unset($validated['slug']);
+        }
 
         $article->update($validated);
 
