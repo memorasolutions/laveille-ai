@@ -273,14 +273,6 @@
 
                     </div>
 
-                    {{-- Partager --}}
-                    <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee;">
-                        <p style="font-weight: 600; color: #9CA3AF; margin-bottom: 12px; font-size: 0.85rem; text-align: center;">{{ __('Partager cette définition') }}</p>
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap;">
-                            @include('fronttheme::partials.share-buttons', ['title' => $term->name . ' – ' . __('Glossaire IA'), 'url' => request()->url()])
-                        </div>
-                    </div>
-
                 </article>
             </div>
         </div>
