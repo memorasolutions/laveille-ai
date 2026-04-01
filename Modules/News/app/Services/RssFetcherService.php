@@ -48,6 +48,11 @@ class RssFetcherService
                     }
                 }
 
+                // Scrape og:image si pas d'image dans le RSS
+                if (! $imageUrl) {
+                    $imageUrl = $this->scrapeOgImage($item->get_permalink());
+                }
+
                 NewsArticle::create([
                     'news_source_id' => $source->id,
                     'title' => $item->get_title() ?? 'Sans titre',
@@ -69,5 +74,37 @@ class RssFetcherService
         }
 
         return $count;
+    }
+
+    /**
+     * Scrape og:image d'une URL d'article.
+     */
+    private function scrapeOgImage(?string $url): ?string
+    {
+        if (! $url) return null;
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
+                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; LaVeilleBot/1.0)'])
+                ->timeout(10)
+                ->get($url);
+
+            if (! $response->successful()) return null;
+
+            $html = $response->body();
+
+            // og:image
+            if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/', $html, $m)) {
+                return $m[1];
+            }
+            // Reverse order (content before property)
+            if (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/', $html, $m)) {
+                return $m[1];
+            }
+        } catch (\Throwable $e) {
+            Log::debug("og:image scrape failed for {$url}: {$e->getMessage()}");
+        }
+
+        return null;
     }
 }

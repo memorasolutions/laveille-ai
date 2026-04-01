@@ -55,29 +55,32 @@ class AiSummaryService
         $minScore = (int) Settings::get('news.min_relevance_score', 7);
 
         $prompt = <<<PROMPT
-Tu es un journaliste tech spécialisé pour un public québécois francophone.
+Tu es un journaliste tech senior pour un public québécois francophone.
+TOUT le contenu doit être en FRANÇAIS, même si l'article source est en anglais.
 Analyse cet article et retourne UNIQUEMENT un JSON valide (aucun texte avant ou après).
 
 {
   "score": [1-10 pertinence IA/tech pour une plateforme de veille technologique],
-  "score_justification": "[1 phrase expliquant la note]",
+  "score_justification": "[1 phrase expliquant la note, en français]",
   "category": "[IA générative|Cybersécurité|Cloud|Robotique|Données|Startup|Éducation tech|Infrastructure|Autre]",
   "impact": "[Élevé|Moyen|Faible]",
-  "hook": "[1-2 phrases accrocheuses résumant l'essentiel, 25-35 mots]",
-  "key_points": ["[fait clé 1, 10-15 mots]", "[fait clé 2]", "[fait clé 3]"],
-  "why_important": "[2-3 phrases : impact concret pour professionnels et entreprises québécoises, 30-50 mots]",
+  "hook": "[2-3 phrases accrocheuses résumant l'essentiel avec contexte et enjeux, 40-60 mots. Doit donner envie de lire.]",
+  "key_points": ["[fait détaillé 1 avec chiffres si disponible, 15-25 mots]", "[fait détaillé 2, 15-25 mots]", "[fait détaillé 3, 15-25 mots]", "[fait détaillé 4, 15-25 mots]"],
+  "why_important": "[3-4 phrases : contexte québécois/canadien, impact concret sur les professionnels, ce que ça change dans leur quotidien, 50-80 mots]",
   "audience": ["[développeurs|entreprises|éducation|grand public]"],
-  "seo_title": "[titre reformulé SEO, max 60 caractères]",
-  "meta_description": "[description meta SEO, max 155 caractères]",
-  "faq_question": "[question que les gens se posent sur ce sujet]",
-  "faq_answer": "[réponse concise 1-2 phrases]"
+  "seo_title": "[titre reformulé SEO accrocheur en français, max 60 caractères]",
+  "meta_description": "[description meta SEO en français, max 155 caractères]",
+  "faq_question": "[question précise que les professionnels se posent sur ce sujet, en français]",
+  "faq_answer": "[réponse détaillée 2-3 phrases, en français]"
 }
 
-Règles :
-- Score 7+ = pertinent pour une plateforme de veille IA/tech québécoise
-- Score 1-6 = pas assez pertinent
-- Français québécois, accents corrects
-- JSON valide uniquement
+Règles STRICTES :
+- TOUT en français québécois, accents corrects — JAMAIS de contenu anglais
+- Les key_points doivent être des phrases complètes et informatives (pas 5 mots vagues)
+- Le hook doit être engageant comme un article de journal, pas un résumé scolaire
+- Le why_important doit mentionner l'impact concret au Québec/Canada
+- Score 7+ = pertinent pour une plateforme de veille IA/tech
+- JSON valide uniquement, aucun texte avant ou après
 
 Titre : {$title}
 Article :

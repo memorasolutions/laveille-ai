@@ -126,8 +126,8 @@
                 </div>
                 @endif
 
-                {{-- Description originale --}}
-                @if($article->description)
+                {{-- Description originale (seulement si pas de résumé structuré) --}}
+                @if($article->description && !$ss)
                 <div style="line-height: 1.7; color: var(--c-dark); margin-bottom: 30px;">
                     {!! nl2br(e($article->description)) !!}
                 </div>
