@@ -10,6 +10,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('directory_tools', 'submitted_by')) {
+            return;
+        }
         Schema::table('directory_tools', function (Blueprint $table) {
             $table->unsignedBigInteger('submitted_by')->nullable();
             $table->foreign('submitted_by')->references('id')->on('users')->onDelete('set null');
