@@ -37,6 +37,9 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use Billable, HasApiTokens, HasFactory, HasPushSubscriptions, HasRoles, HasTeams, InteractsWithMedia, InteractsWithPasskeys, LogsActivity, Notifiable, Searchable;
 
+    // Community module trait — guard class_exists for portability
+    use \Modules\Community\Traits\HasCategorySubscriptions;
+
     /**
      * @return array<string>
      */

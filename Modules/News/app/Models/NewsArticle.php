@@ -37,6 +37,13 @@ class NewsArticle extends Model
                 $article->slug = self::generateUniqueSlug($article->seo_title ?? $article->title ?? 'article');
             }
         });
+
+        static::updated(function (self $article) {
+            if ($article->wasChanged('is_published') && $article->is_published && $article->category_tag
+                && class_exists(\Modules\Community\Events\ContentPublished::class)) {
+                \Modules\Community\Events\ContentPublished::dispatch($article->category_tag, 'news', $article);
+            }
+        });
     }
 
     public function getRouteKeyName(): string
