@@ -99,7 +99,8 @@ class ReprocessArticlesCommand extends Command
                     $updateData['seo_title'] = $aiResult['seo_title'] ?? $article->seo_title;
                     $updateData['meta_description'] = $aiResult['meta_description'] ?? $article->meta_description;
                     $updateData['summary'] = $aiResult['hook'] ?? $article->summary;
-                    $this->info("  IA: score={$aiResult['score']} cat={$aiResult['category'] ?? '?'}");
+                    $cat = $aiResult['category'] ?? '?';
+                    $this->info("  IA: score={$aiResult['score']} cat={$cat}");
                 }
             }
 
