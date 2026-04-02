@@ -17,6 +17,7 @@ use Modules\FrontTheme\Http\Middleware\SetFrontendTheme;
 Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('cacheResponse:600');
     Route::get('/ressources', [ResourceHubController::class, 'index'])->name('resources.index')->middleware('cacheResponse:600');
+    Route::get('/plan-du-site', [\Modules\FrontTheme\Http\Controllers\SitemapHtmlController::class, 'index'])->name('sitemap.html')->middleware('cacheResponse:3600');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
     Route::get('/lien-expire', function () {
         $reason = request('reason', 'notfound');

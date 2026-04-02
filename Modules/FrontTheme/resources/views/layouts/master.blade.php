@@ -48,6 +48,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon-180x180.png') }}">
+    <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.'))">
     <meta property="og:title" content="@yield('title', config('app.name'))">
@@ -314,6 +317,13 @@
             </div>
         </div>
     </div>
+    {{-- Speculation Rules API — prefetch/prerender navigation instantanee --}}
+    <script type="speculationrules">
+    {
+      "prerender": [{"source": "document", "where": {"href_matches": "/*"}, "eagerness": "moderate"}],
+      "prefetch": [{"source": "document", "where": {"href_matches": "/*"}, "eagerness": "conservative"}]
+    }
+    </script>
 </body>
 
 </html>

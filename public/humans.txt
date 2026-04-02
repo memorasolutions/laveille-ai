@@ -1,0 +1,21 @@
+/* TEAM */
+Fondateur : Stephane Lapointe
+Site : https://laveille.ai
+Contact : stephane@memora.ca
+LinkedIn : https://www.linkedin.com/in/lapointestephane/
+Localisation : Quebec, Canada
+
+/* TECHNOLOGY */
+Framework : Laravel 12 + Livewire 4
+Frontend : Bootstrap 3 (USNews) + Alpine.js
+Admin : NobleUI (Bootstrap 5)
+Hebergement : cPanel + Cloudflare
+CDN : Cloudflare
+Base de donnees : MySQL
+Recherche : Laravel Scout (database)
+PWA : Service Worker + manifest.webmanifest
+
+/* SITE */
+Derniere mise a jour : 2026-04-02
+Standards : HTML5, CSS3, WCAG 2.2 AA
+Langue : Francais canadien (fr-CA)
