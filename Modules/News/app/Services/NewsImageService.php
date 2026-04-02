@@ -66,4 +66,97 @@ class NewsImageService
     {
         return "/storage/news/images/{$articleId}.webp";
     }
+
+    /**
+     * Génère une image OG 1200x630 avec gradient, logo et titre.
+     * Utilisée quand aucune image n'est disponible pour un article.
+     */
+    public static function generateFallbackImage(int $articleId, string $title, ?string $categoryTag = null): ?string
+    {
+        $outputDir = public_path('storage/news/images');
+        if (! is_dir($outputDir)) {
+            \Illuminate\Support\Facades\File::makeDirectory($outputDir, 0755, true);
+        }
+
+        $outputPath = "{$outputDir}/{$articleId}.webp";
+        $relativePath = "/storage/news/images/{$articleId}.webp";
+        $w = 1200;
+        $h = 630;
+
+        $palettes = [
+            [[11, 114, 133], [26, 54, 93]],
+            [[26, 54, 93], [11, 114, 133]],
+            [[142, 68, 173], [44, 62, 80]],
+            [[231, 76, 60], [142, 68, 173]],
+            [[46, 204, 113], [22, 160, 133]],
+            [[52, 152, 219], [41, 128, 185]],
+            [[243, 156, 18], [211, 84, 0]],
+            [[44, 62, 80], [52, 73, 94]],
+        ];
+
+        $idx = abs(crc32($title)) % count($palettes);
+        [$c1, $c2] = $palettes[$idx];
+
+        $img = imagecreatetruecolor($w, $h);
+
+        for ($y = 0; $y < $h; $y++) {
+            $r = (float) $y / $h;
+            $color = imagecolorallocate($img, (int) ($c1[0] + ($c2[0] - $c1[0]) * $r), (int) ($c1[1] + ($c2[1] - $c1[1]) * $r), (int) ($c1[2] + ($c2[2] - $c1[2]) * $r));
+            imagefilledrectangle($img, 0, $y, $w, $y, $color);
+        }
+
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $whiteAlpha = imagecolorallocatealpha($img, 255, 255, 255, 50);
+
+        // Logo
+        $logoPath = public_path('images/logo.webp');
+        if (file_exists($logoPath)) {
+            $logo = @imagecreatefromwebp($logoPath);
+            if ($logo) {
+                $lw = imagesx($logo);
+                $lh = imagesy($logo);
+                imagecopy($img, $logo, (int) (($w - $lw) / 2), 100, 0, 0, $lw, $lh);
+                imagedestroy($logo);
+            }
+        }
+
+        // Titre
+        $fontBold = resource_path('fonts/Inter-SemiBold.ttf');
+        $fontRegular = resource_path('fonts/Inter-Regular.ttf');
+
+        if (file_exists($fontBold)) {
+            $len = mb_strlen($title);
+            $fontSize = $len > 50 ? 26 : ($len > 35 ? 30 : ($len > 20 ? 36 : 42));
+            $wrapped = wordwrap($title, 42, "\n");
+            $lines = array_slice(explode("\n", $wrapped), 0, 3);
+            $yOffset = 280;
+
+            foreach ($lines as $line) {
+                $bbox = imagettfbbox($fontSize, 0, $fontBold, $line);
+                $textW = $bbox[2] - $bbox[0];
+                imagettftext($img, $fontSize, 0, (int) (($w - $textW) / 2), $yOffset, $white, $fontBold, $line);
+                $yOffset += $fontSize + 12;
+            }
+
+            // Catégorie
+            if ($categoryTag && file_exists($fontRegular)) {
+                $bbox = imagettfbbox(16, 0, $fontRegular, $categoryTag);
+                $catW = $bbox[2] - $bbox[0];
+                imagettftext($img, 16, 0, (int) (($w - $catW) / 2), 520, $whiteAlpha, $fontRegular, $categoryTag);
+            }
+
+            // Sous-titre
+            if (file_exists($fontRegular)) {
+                $sub = 'laveille.ai';
+                $bbox = imagettfbbox(16, 0, $fontRegular, $sub);
+                $subW = $bbox[2] - $bbox[0];
+                imagettftext($img, 16, 0, (int) (($w - $subW) / 2), 560, $whiteAlpha, $fontRegular, $sub);
+            }
+        }
+
+        imagewebp($img, $outputPath, 85);
+        imagedestroy($img);
+
+        return file_exists($outputPath) ? $relativePath : null;
+    }
 }

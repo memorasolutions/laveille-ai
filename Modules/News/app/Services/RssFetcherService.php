@@ -71,11 +71,20 @@ class RssFetcherService
                 ]);
 
                 // Optimiser l'image localement (WebP 1200x630)
+                $localPath = null;
                 if ($imageUrl) {
                     $localPath = app(NewsImageService::class)->processFromUrl($imageUrl, $article->id);
-                    if ($localPath) {
-                        $article->update(['image_url' => $localPath]);
-                    }
+                }
+                // Fallback : générer image OG avec logo + titre si pas d'image
+                if (! $localPath) {
+                    $localPath = NewsImageService::generateFallbackImage(
+                        $article->id,
+                        $article->seo_title ?? $article->title,
+                        $article->category_tag
+                    );
+                }
+                if ($localPath) {
+                    $article->update(['image_url' => $localPath]);
                 }
 
                 $count++;
