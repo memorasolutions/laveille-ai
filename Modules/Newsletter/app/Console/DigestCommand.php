@@ -12,7 +12,7 @@ namespace Modules\Newsletter\Console;
 
 use Illuminate\Console\Command;
 use Modules\Newsletter\Models\Subscriber;
-use Modules\Newsletter\Notifications\DigestNotification;
+use Modules\Newsletter\Notifications\WeeklyDigestNotification;
 use Modules\Settings\Models\Setting;
 
 class DigestCommand extends Command
@@ -29,30 +29,54 @@ class DigestCommand extends Command
             return self::SUCCESS;
         }
 
-        // Articles blog de la semaine
-        $articles = collect();
-        if (class_exists(\Modules\Blog\Models\Article::class)) {
-            $articles = \Modules\Blog\Models\Article::published()
-                ->where('published_at', '>=', now()->subDays(7))
-                ->latest('published_at')
-                ->get();
-        }
-
-        // Actualites IA de la semaine
-        $newsArticles = collect();
+        // Section 1 : fait marquant (top news article de la semaine)
+        $highlight = null;
+        $topNews = collect();
         if (class_exists(\Modules\News\Models\NewsArticle::class)) {
-            $newsArticles = \Modules\News\Models\NewsArticle::where('is_published', true)
+            $highlight = \Modules\News\Models\NewsArticle::where('is_published', true)
                 ->where('pub_date', '>=', now()->subDays(7))
-                ->where('relevance_score', '>=', 8)
-                ->latest('pub_date')
-                ->take(5)
+                ->orderByDesc('relevance_score')
+                ->first();
+
+            $topNews = \Modules\News\Models\NewsArticle::where('is_published', true)
+                ->where('pub_date', '>=', now()->subDays(7))
+                ->when($highlight, fn ($q) => $q->where('id', '!=', $highlight->id))
+                ->orderByDesc('relevance_score')
+                ->take(3)
                 ->get();
         }
 
-        $articles = $articles->merge($newsArticles);
+        // Section 3 : outil de la semaine (rotation aleatoire)
+        $toolOfWeek = null;
+        if (class_exists(\Modules\Directory\Models\Tool::class)) {
+            $toolOfWeek = \Modules\Directory\Models\Tool::where('status', 'published')
+                ->inRandomOrder()
+                ->first();
+        }
 
-        if ($articles->isEmpty()) {
-            $this->components->info('No new articles published in the last 7 days.');
+        // Section 4 : article blog vedette
+        $featuredArticle = null;
+        if (class_exists(\Modules\Blog\Models\Article::class)) {
+            $featuredArticle = \Modules\Blog\Models\Article::published()
+                ->latest('published_at')
+                ->first();
+        }
+
+        // Section 5 : le saviez-vous (terme glossaire ou acronyme)
+        $didYouKnow = null;
+        if (class_exists(\Modules\Dictionary\Models\Term::class)) {
+            $didYouKnow = \Modules\Dictionary\Models\Term::where('is_published', true)
+                ->inRandomOrder()
+                ->first();
+        }
+        if (! $didYouKnow && class_exists(\Modules\Acronyms\Models\Acronym::class)) {
+            $didYouKnow = \Modules\Acronyms\Models\Acronym::inRandomOrder()->first();
+        }
+
+        $weekNumber = (int) now()->weekOfYear;
+
+        if (! $highlight && $topNews->isEmpty()) {
+            $this->components->info('No news articles this week. Skipping digest.');
 
             return self::SUCCESS;
         }
@@ -66,13 +90,19 @@ class DigestCommand extends Command
         }
 
         foreach ($subscribers as $subscriber) {
-            $subscriber->notify(new DigestNotification($articles));
+            $subscriber->notify(new WeeklyDigestNotification(
+                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber
+            ));
         }
 
         $this->newLine();
-        $this->components->twoColumnDetail('Articles', (string) $articles->count());
-        $this->components->twoColumnDetail('Subscribers notified', (string) $subscribers->count());
-        $this->components->info('Digest sent successfully.');
+        $this->components->twoColumnDetail('Highlight', $highlight?->title ?? 'none');
+        $this->components->twoColumnDetail('Top news', (string) $topNews->count());
+        $this->components->twoColumnDetail('Tool of week', $toolOfWeek?->name ?? 'none');
+        $this->components->twoColumnDetail('Featured article', $featuredArticle?->title ?? 'none');
+        $this->components->twoColumnDetail('Did you know', $didYouKnow?->term ?? $didYouKnow?->name ?? 'none');
+        $this->components->twoColumnDetail('Subscribers', (string) $subscribers->count());
+        $this->components->info('Weekly digest #'.$weekNumber.' sent successfully.');
 
         return self::SUCCESS;
     }
