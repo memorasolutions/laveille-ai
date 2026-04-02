@@ -105,20 +105,24 @@ class NewsImageService
             imagefilledrectangle($img, 0, $y, $w, $y, $color);
         }
 
+        // Overlay noir semi-transparent pour contraste texte
+        imagealphablending($img, true);
+        $blackOverlay = imagecolorallocatealpha($img, 0, 0, 0, 60);
+        imagefilledrectangle($img, 0, 0, $w - 1, $h - 1, $blackOverlay);
+
         $white = imagecolorallocate($img, 255, 255, 255);
         $whiteAlpha = imagecolorallocatealpha($img, 255, 255, 255, 50);
 
-        // Logo
-        $logoPath = public_path('images/logo.webp');
-        if (file_exists($logoPath)) {
-            $logo = @imagecreatefromwebp($logoPath);
-            if ($logo) {
-                $lw = imagesx($logo);
-                $lh = imagesy($logo);
-                imagecopy($img, $logo, (int) (($w - $lw) / 2), 100, 0, 0, $lw, $lh);
-                imagedestroy($logo);
-            }
-        }
+        // Oeil stylise (logo laveille.ai)
+        $eyeX = (int) ($w / 2);
+        $eyeY = 120;
+        $teal = imagecolorallocate($img, 11, 114, 133);
+        $whiteEye = imagecolorallocate($img, 255, 255, 255);
+        $orange = imagecolorallocate($img, 230, 126, 34);
+        imagefilledellipse($img, $eyeX, $eyeY, 120, 60, $whiteEye);     // Forme oeil blanc
+        imageellipse($img, $eyeX, $eyeY, 120, 60, $teal);               // Contour teal
+        imagefilledellipse($img, $eyeX, $eyeY, 40, 40, $teal);          // Iris teal
+        imagefilledellipse($img, $eyeX + 4, $eyeY - 4, 14, 14, $orange); // Pupille orange
 
         // Titre
         $fontBold = resource_path('fonts/Inter-SemiBold.ttf');
