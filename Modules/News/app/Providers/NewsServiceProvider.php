@@ -52,6 +52,7 @@ class NewsServiceProvider extends ServiceProvider
             \Modules\News\Console\RescrapeImagesCommand::class,
             \Modules\News\Console\RegenerateSlugsCommand::class,
             \Modules\News\Console\RescrapeGoogleImagesCommand::class,
+            \Modules\News\Console\ReprocessArticlesCommand::class,
         ]);
     }
 
