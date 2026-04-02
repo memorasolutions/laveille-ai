@@ -1,0 +1,42 @@
+{
+  "name": "La veille",
+  "short_name": "La veille",
+  "description": "Plateforme communautaire de veille technologique au Quebec",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b7285",
+  "orientation": "any",
+  "lang": "fr-CA",
+  "categories": ["news", "education", "technology"],
+  "icons": [
+    {
+      "src": "/images/logo.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    },
+    {
+      "src": "/images/logo.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Actualites",
+      "url": "/actualites"
+    },
+    {
+      "name": "Repertoire",
+      "url": "/annuaire"
+    },
+    {
+      "name": "Glossaire",
+      "url": "/glossaire"
+    },
+    {
+      "name": "Outils",
+      "url": "/outils"
+    }
+  ]
+}

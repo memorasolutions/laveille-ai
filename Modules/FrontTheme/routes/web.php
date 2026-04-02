@@ -22,7 +22,7 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         $reason = request('reason', 'notfound');
         return response()->view('fronttheme::link-expired', compact('reason'), $reason === 'expired' ? 410 : 404);
     })->name('link.expired');
-    Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+    Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1')->name('contact.send');
 
     // Redirections legacy WordPress (SEO 301)
     Route::get('/{year}/{month}/{day}/{slug}', function (string $year, string $month, string $day, string $slug) {

@@ -8,6 +8,28 @@
     @section('og_image', str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot))
 @endif
 
+@push('styles')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "SoftwareApplication",
+    "name": "{{ $tool->name }}",
+    "description": "{{ Str::limit(strip_tags($tool->description ?? $tool->short_description ?? ''), 200) }}",
+    "url": "{{ route('directory.show', $tool->slug) }}",
+    "applicationCategory": "{{ $tool->category ?? 'UtilitiesApplication' }}",
+    "operatingSystem": "Web"
+    @if($tool->screenshot)
+    ,"image": "{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}"
+    @endif
+    @if($tool->pricing_type === 'free')
+    ,"offers": { "@@type": "Offer", "price": "0", "priceCurrency": "CAD" }
+    @elseif($tool->pricing_type)
+    ,"offers": { "@@type": "Offer", "availability": "https://schema.org/InStock" }
+    @endif
+}
+</script>
+@endpush
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $tool->name,

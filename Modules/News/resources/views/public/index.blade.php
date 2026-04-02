@@ -75,6 +75,8 @@
     .nw-impact-mid { border-left-color: #f59e0b; }
     .nw-impact-low { border-left-color: #e5e7eb; }
     .nw-empty { text-align: center; padding: 4rem 1rem; color: #9ca3af; }
+    .nw-follow-btn { background: none; border: none; padding: 2px; cursor: pointer; color: #9ca3af; transition: color 0.15s; display: inline-flex; align-items: center; flex-shrink: 0; }
+    .nw-follow-btn:hover { color: var(--c-primary); }
     .nw-page-intro { color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem; }
     .nw-active-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
     .nw-active-tag { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.5rem; background: #e0f2fe; color: #0369a1; border-radius: 4px; font-size: 0.75rem; }
@@ -126,6 +128,16 @@
                         <a href="{{ route('news.index', array_filter(array_merge(request()->except(['category', 'page']), ['category' => $cat->category_tag]))) }}" class="nw-chip {{ ($filters['category'] ?? '') === $cat->category_tag ? 'active' : '' }}">
                             {{ $cat->category_tag }} <span class="nw-chip-count">({{ $cat->count }})</span>
                         </a>
+                        @auth
+                        @if(Route::has('category-subscription.toggle'))
+                        <button x-data="{ subscribed: {{ auth()->user()->isSubscribedTo($cat->category_tag, 'news') ? 'true' : 'false' }} }"
+                            @click="subscribed = !subscribed; fetch('{{ route('category-subscription.toggle') }}', { method: 'POST', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Content-Type': 'application/json', 'Accept': 'application/json'}, body: JSON.stringify({category_tag: '{{ $cat->category_tag }}', module: 'news'}) }).catch(() => subscribed = !subscribed)"
+                            class="nw-follow-btn" :title="subscribed ? '{{ __('Ne plus suivre') }}' : '{{ __('Suivre') }}'"
+                            :aria-label="(subscribed ? '{{ __('Ne plus suivre') }}' : '{{ __('Suivre') }}') + ' {{ $cat->category_tag }}'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" :fill="subscribed ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        </button>
+                        @endif
+                        @endauth
                     @endforeach
                 </div>
             </div>
@@ -168,7 +180,7 @@
                         <a href="{{ route('news.show', $article) }}" class="nw-card-link">
                             <div class="nw-card-img-wrap">
                                 @if($article->image_url)
-                                    <img src="{{ $article->image_url }}" alt="" class="nw-card-img" loading="lazy">
+                                    <img src="{{ $article->image_url }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-card-img" loading="lazy">
                                 @else
                                     <span class="nw-card-placeholder">{{ mb_strtoupper(mb_substr($article->category_tag ?? 'N', 0, 2)) }}</span>
                                 @endif

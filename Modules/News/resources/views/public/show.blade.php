@@ -227,7 +227,7 @@ $faqSchema = [
                             <div class="nw-related-card">
                                 <a href="{{ route('news.show', $related) }}">
                                     @if($related->image_url)
-                                        <img src="{{ $related->image_url }}" alt="" class="nw-related-img" loading="lazy">
+                                        <img src="{{ $related->image_url }}" alt="{{ $related->seo_title ?? $related->title }}" class="nw-related-img" loading="lazy">
                                     @endif
                                     <div class="nw-related-title">{{ $related->seo_title ?? $related->title }}</div>
                                     <div class="nw-related-meta">{{ $related->source->name ?? '' }} &middot; {{ $related->pub_date?->diffForHumans() }}</div>

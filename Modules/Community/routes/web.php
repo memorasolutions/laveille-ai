@@ -9,8 +9,8 @@ use Modules\Community\Http\Controllers\ReportController;
 
 // Public routes
 Route::middleware(['web', 'auth'])->group(function () {
-    Route::post('/report', [ReportController::class, 'store'])->name('report.store');
-    Route::post('/category-subscription/toggle', [CategorySubscriptionController::class, 'toggle'])->name('category-subscription.toggle');
+    Route::post('/report', [ReportController::class, 'store'])->middleware('throttle:10,1')->name('report.store');
+    Route::post('/category-subscription/toggle', [CategorySubscriptionController::class, 'toggle'])->middleware('throttle:30,1')->name('category-subscription.toggle');
 });
 
 // Admin routes
