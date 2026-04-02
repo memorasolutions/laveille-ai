@@ -68,99 +68,93 @@ class NewsImageService
     }
 
     /**
-     * Génère une image OG 1200x630 avec gradient, logo et titre.
-     * Utilisée quand aucune image n'est disponible pour un article.
+     * Génère une image OG 1200x630 avec gradient, vrai logo SVG et titre.
+     * Utilise Imagick pour le rendu SVG natif.
      */
     public static function generateFallbackImage(int $articleId, string $title, ?string $categoryTag = null): ?string
     {
-        $outputDir = public_path('storage/news/images');
+        $outputPath = public_path("storage/news/images/{$articleId}.webp");
+        $outputDir = dirname($outputPath);
         if (! is_dir($outputDir)) {
             \Illuminate\Support\Facades\File::makeDirectory($outputDir, 0755, true);
         }
 
-        $outputPath = "{$outputDir}/{$articleId}.webp";
-        $relativePath = "/storage/news/images/{$articleId}.webp";
-        $w = 1200;
-        $h = 630;
+        try {
+            $w = 1200;
+            $h = 630;
 
-        $palettes = [
-            [[11, 114, 133], [26, 54, 93]],
-            [[26, 54, 93], [11, 114, 133]],
-            [[142, 68, 173], [44, 62, 80]],
-            [[231, 76, 60], [142, 68, 173]],
-            [[46, 204, 113], [22, 160, 133]],
-            [[52, 152, 219], [41, 128, 185]],
-            [[243, 156, 18], [211, 84, 0]],
-            [[44, 62, 80], [52, 73, 94]],
-        ];
+            // Gradient vertical teal → navy
+            $gradient = new \Imagick();
+            $gradient->newPseudoImage($w, $h, 'gradient:#0B7285-#1a2332');
 
-        $idx = abs(crc32($title)) % count($palettes);
-        [$c1, $c2] = $palettes[$idx];
+            // Overlay noir 40%
+            $overlay = new \Imagick();
+            $overlay->newImage($w, $h, new \ImagickPixel('rgba(0,0,0,0.4)'));
+            $gradient->compositeImage($overlay, \Imagick::COMPOSITE_OVER, 0, 0);
+            $overlay->destroy();
 
-        $img = imagecreatetruecolor($w, $h);
+            // Logo SVG (160x160, centré en haut)
+            $logoPath = public_path('images/logo-eye.svg');
+            if (file_exists($logoPath)) {
+                $logo = new \Imagick();
+                $logo->readImage($logoPath);
+                $logo->resizeImage(160, 160, \Imagick::FILTER_LANCZOS, 1);
+                $gradient->compositeImage($logo, \Imagick::COMPOSITE_OVER, (int) (($w - 160) / 2), 60);
+                $logo->destroy();
+            }
 
-        for ($y = 0; $y < $h; $y++) {
-            $r = (float) $y / $h;
-            $color = imagecolorallocate($img, (int) ($c1[0] + ($c2[0] - $c1[0]) * $r), (int) ($c1[1] + ($c2[1] - $c1[1]) * $r), (int) ($c1[2] + ($c2[2] - $c1[2]) * $r));
-            imagefilledrectangle($img, 0, $y, $w, $y, $color);
-        }
+            // Titre (gros, blanc, centré)
+            $fontBold = resource_path('fonts/Inter-SemiBold.ttf');
+            if (file_exists($fontBold)) {
+                $len = mb_strlen($title);
+                $fontSize = $len < 30 ? 56 : ($len <= 50 ? 46 : 38);
 
-        // Overlay noir semi-transparent pour contraste texte
-        imagealphablending($img, true);
-        $blackOverlay = imagecolorallocatealpha($img, 0, 0, 0, 60);
-        imagefilledrectangle($img, 0, 0, $w - 1, $h - 1, $blackOverlay);
+                $wrapped = wordwrap($title, 35, "\n");
+                $lines = explode("\n", $wrapped);
+                if (count($lines) > 3) {
+                    $lines = array_slice($lines, 0, 3);
+                    $lines[2] = mb_substr($lines[2], 0, 32) . '...';
+                }
 
-        $white = imagecolorallocate($img, 255, 255, 255);
-        $whiteAlpha = imagecolorallocatealpha($img, 255, 255, 255, 50);
-
-        // Oeil stylise (logo laveille.ai)
-        $eyeX = (int) ($w / 2);
-        $eyeY = 120;
-        $teal = imagecolorallocate($img, 11, 114, 133);
-        $whiteEye = imagecolorallocate($img, 255, 255, 255);
-        $orange = imagecolorallocate($img, 230, 126, 34);
-        imagefilledellipse($img, $eyeX, $eyeY, 120, 60, $whiteEye);     // Forme oeil blanc
-        imageellipse($img, $eyeX, $eyeY, 120, 60, $teal);               // Contour teal
-        imagefilledellipse($img, $eyeX, $eyeY, 40, 40, $teal);          // Iris teal
-        imagefilledellipse($img, $eyeX + 4, $eyeY - 4, 14, 14, $orange); // Pupille orange
-
-        // Titre
-        $fontBold = resource_path('fonts/Inter-SemiBold.ttf');
-        $fontRegular = resource_path('fonts/Inter-Regular.ttf');
-
-        if (file_exists($fontBold)) {
-            $len = mb_strlen($title);
-            $fontSize = $len > 50 ? 26 : ($len > 35 ? 30 : ($len > 20 ? 36 : 42));
-            $wrapped = wordwrap($title, 42, "\n");
-            $lines = array_slice(explode("\n", $wrapped), 0, 3);
-            $yOffset = 280;
-
-            foreach ($lines as $line) {
-                $bbox = imagettfbbox($fontSize, 0, $fontBold, $line);
-                $textW = $bbox[2] - $bbox[0];
-                imagettftext($img, $fontSize, 0, (int) (($w - $textW) / 2), $yOffset, $white, $fontBold, $line);
-                $yOffset += $fontSize + 12;
+                $draw = new \ImagickDraw();
+                $draw->setFont($fontBold);
+                $draw->setFontSize($fontSize);
+                $draw->setFillColor(new \ImagickPixel('white'));
+                $draw->setTextAlignment(\Imagick::ALIGN_CENTER);
+                $gradient->annotateImage($draw, $w / 2, 300, 0, implode("\n", $lines));
             }
 
             // Catégorie
+            $fontRegular = resource_path('fonts/Inter-Regular.ttf');
             if ($categoryTag && file_exists($fontRegular)) {
-                $bbox = imagettfbbox(16, 0, $fontRegular, $categoryTag);
-                $catW = $bbox[2] - $bbox[0];
-                imagettftext($img, 16, 0, (int) (($w - $catW) / 2), 520, $whiteAlpha, $fontRegular, $categoryTag);
+                $drawCat = new \ImagickDraw();
+                $drawCat->setFont($fontRegular);
+                $drawCat->setFontSize(22);
+                $drawCat->setFillColor(new \ImagickPixel('rgba(255,255,255,0.6)'));
+                $drawCat->setTextAlignment(\Imagick::ALIGN_CENTER);
+                $gradient->annotateImage($drawCat, $w / 2, 520, 0, $categoryTag);
             }
 
-            // Sous-titre
+            // Sous-titre laveille.ai
             if (file_exists($fontRegular)) {
-                $sub = 'laveille.ai';
-                $bbox = imagettfbbox(16, 0, $fontRegular, $sub);
-                $subW = $bbox[2] - $bbox[0];
-                imagettftext($img, 16, 0, (int) (($w - $subW) / 2), 560, $whiteAlpha, $fontRegular, $sub);
+                $drawSub = new \ImagickDraw();
+                $drawSub->setFont($fontRegular);
+                $drawSub->setFontSize(20);
+                $drawSub->setFillColor(new \ImagickPixel('rgba(255,255,255,0.5)'));
+                $drawSub->setTextAlignment(\Imagick::ALIGN_CENTER);
+                $gradient->annotateImage($drawSub, $w / 2, 570, 0, 'laveille.ai');
             }
+
+            $gradient->setImageFormat('webp');
+            $gradient->setCompressionQuality(85);
+            $gradient->writeImage($outputPath);
+            $gradient->destroy();
+
+            return "/storage/news/images/{$articleId}.webp";
+        } catch (\Throwable $e) {
+            Log::warning("NewsImage fallback failed for article {$articleId}: " . $e->getMessage());
+
+            return null;
         }
-
-        imagewebp($img, $outputPath, 85);
-        imagedestroy($img);
-
-        return file_exists($outputPath) ? $relativePath : null;
     }
 }
