@@ -5,22 +5,12 @@
 @section('meta_description', __('Veille technologique collaborative sur l\'intelligence artificielle, les outils IA et la transformation numerique au Quebec. Articles, glossaire, repertoire et communaute.'))
 
 @push('head')
-<script type="application/ld+json">
-{!! json_encode([
-    '@context' => 'https://schema.org',
-    '@type' => 'WebSite',
-    'name' => config('app.name'),
-    'url' => config('app.url'),
-    'description' => __('Veille technologique collaborative sur l\'intelligence artificielle et la transformation numérique au Québec.'),
-    'inLanguage' => 'fr-CA',
-    'publisher' => [
-        '@type' => 'Organization',
-        'name' => config('app.name'),
-        'url' => config('app.url'),
-        'logo' => ['@type' => 'ImageObject', 'url' => asset('images/favicon.png')],
-    ],
-], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-</script>
+@if(class_exists(\Modules\SEO\Services\JsonLdService::class))
+{!! \Modules\SEO\Services\JsonLdService::render(
+    \Modules\SEO\Services\JsonLdService::website(),
+    \Modules\SEO\Services\JsonLdService::organization()
+) !!}
+@endif
 @endpush
 
 @section('content')

@@ -48,24 +48,5 @@
         </div>
     </section>
 
-@push('scripts')
-@php
-    $faqItems = [];
-    foreach ($faqs as $category => $items) {
-        foreach ($items as $faq) {
-            $faqItems[] = [
-                chr(64).'type' => 'Question',
-                'name' => $faq->question,
-                'acceptedAnswer' => [
-                    chr(64).'type' => 'Answer',
-                    'text' => strip_tags($faq->answer),
-                ],
-            ];
-        }
-    }
-@endphp
-<script type="application/ld+json">
-{!! json_encode([chr(64).'context' => 'https://schema.org', chr(64).'type' => 'FAQPage', 'mainEntity' => $faqItems], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-</script>
-@endpush
+{{-- FAQPage JSON-LD is now injected via @push('head') at the top of this file using JsonLdService --}}
 @endsection
