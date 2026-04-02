@@ -1,0 +1,22 @@
+# La veille (laveille.ai)
+> Plateforme communautaire de veille technologique en intelligence artificielle et education, orientee francophonie internationale et Quebec.
+
+## A propos
+La veille (laveille.ai) est une plateforme independante fondee par Stephane Lapointe, dediee a la veille technologique en francais canadien (fr-CA). Elle vise a informer, outiller et rassembler les francophones interesses par l'IA, l'education et les technologies emergentes, avec un accent particulier sur le contexte quebecois. Le site combine contenu editorial original, actualites automatisees triees par pertinence grace a l'IA, annuaires d'outils, glossaires specialises et ressources pratiques.
+
+## Sections
+- [Blog](https://laveille.ai/blog) : 55 articles editoriaux approfondis sur l'intelligence artificielle, l'education et la technologie.
+- [Actualites](https://laveille.ai/actualites) : Plus de 450 nouvelles auto-curees provenant de 23 sources RSS, classees selon un score de pertinence genere par IA.
+- [Annuaire](https://laveille.ai/annuaire) : Repertoire de plus de 75 outils d'IA, accompagnes de captures d'ecran, d'avis critiques et de comparaisons.
+- [Glossaire](https://laveille.ai/glossaire) : Definitions claires de plus de 20 termes lies a l'intelligence artificielle.
+- [Acronymes education](https://laveille.ai/acronymes-education) : Repertoire de 307 acronymes utilises dans le systeme d'education quebecois.
+- [Outils](https://laveille.ai/outils) : Neuf outils interactifs pratiques (calculateur d'impot, generateur de mots de passe, etc.).
+- [FAQ](https://laveille.ai/faq) : Reponses aux questions frequemment posees sur le site et ses fonctionnalites.
+- [Flux RSS](https://laveille.ai/feed) : Flux complet des contenus du site au format RSS.
+- [Ressources](https://laveille.ai/ressources) : Hub central regroupant tous les contenus et sections du site.
+- [Raccourcir](https://laveille.ai/raccourcir) : Service de raccourcissement d'URL personnalise (veille.la).
+
+## Contact
+Courriel : stephane@memora.ca
+Telephone : 418-800-6656
+Reseaux sociaux : [Facebook](https://facebook.com/LaVeilleDeStef) | [LinkedIn](https://linkedin.com/in/lapointestephane)

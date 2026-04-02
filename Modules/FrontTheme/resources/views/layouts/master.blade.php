@@ -9,6 +9,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @if(config('app.noindex', false))
         <meta name="robots" content="noindex, nofollow">
+    @else
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     @endif
     <style>[x-cloak] { display: none !important; }</style>
     @if(env('GA_MEASUREMENT_ID') && env('PRIVACY_GA_ENABLED', false))
@@ -65,6 +67,8 @@
     <meta property="og:site_name" content="{{ config('app.name') }}">
     <meta property="og:locale" content="fr_CA">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', config('app.name'))">
+    <meta name="twitter:description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Quebec.'))">
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="fr-CA" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">

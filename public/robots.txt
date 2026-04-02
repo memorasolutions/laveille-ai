@@ -1,3 +1,7 @@
+# robots.txt — laveille.ai
+# SEO + GEO (Generative Engine Optimization)
+
+# Moteurs de recherche classiques
 User-agent: *
 Allow: /
 Disallow: /admin
@@ -5,5 +9,49 @@ Disallow: /user
 Disallow: /login
 Disallow: /dashboard
 Disallow: /s/
+Disallow: /api/
 
+# Bots IA autorises (GEO — pour etre cite dans les reponses IA)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Bots de scraping bloques (pas de citation, juste du scraping)
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+# Fichiers SEO
 Sitemap: https://laveille.ai/sitemap.xml
+
+# Fichiers GEO/AEO (instructions pour les LLMs)
+# llms.txt: https://laveille.ai/llms.txt
+# llms-full.txt: https://laveille.ai/llms-full.txt

@@ -18,7 +18,28 @@ final class JsonLdService
             '@type' => 'Organization',
             'name' => config('app.name'),
             'url' => config('app.url'),
-            'logo' => config('app.url').'/logo.png',
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => config('app.url').'/images/og-image.png',
+                'width' => 1200,
+                'height' => 630,
+            ],
+            'description' => 'Plateforme communautaire de veille technologique en intelligence artificielle et education, orientee francophonie internationale et Quebec.',
+            'founder' => [
+                '@type' => 'Person',
+                'name' => 'Stephane Lapointe',
+                'url' => 'https://www.linkedin.com/in/lapointestephane/',
+            ],
+            'contactPoint' => [
+                '@type' => 'ContactPoint',
+                'telephone' => '+1-418-800-6656',
+                'contactType' => 'customer service',
+                'availableLanguage' => 'French',
+            ],
+            'sameAs' => [
+                'https://www.facebook.com/LaVeilleDeStef',
+                'https://www.linkedin.com/in/lapointestephane/',
+            ],
         ];
     }
 
@@ -30,7 +51,7 @@ final class JsonLdService
             'url' => config('app.url'),
             'potentialAction' => [
                 '@type' => 'SearchAction',
-                'target' => config('app.url').'/search?q={search_term_string}',
+                'target' => config('app.url').'/blog?search={search_term_string}',
                 'query-input' => 'required name=search_term_string',
             ],
         ];
