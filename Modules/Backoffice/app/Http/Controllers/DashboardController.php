@@ -15,6 +15,7 @@ use Illuminate\View\View;
 use Modules\Blog\Models\Article;
 use Modules\Core\Services\MetricAggregatorService;
 use Modules\Newsletter\Models\Subscriber;
+use Nwidart\Modules\Facades\Module;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 
@@ -46,6 +47,20 @@ class DashboardController
             return ['label' => $date->locale('fr')->isoFormat('MMM'), 'count' => $articleDates->get($date->format('Y-n'), 0)];
         })->values()->all();
 
+        $newsByMonth = [];
+        if (Module::has('News') && Module::find('News')?->isEnabled() && class_exists(\Modules\News\Models\NewsArticle::class)) {
+            $newsDates = \Modules\News\Models\NewsArticle::where('created_at', '>=', $start)
+                ->pluck('created_at')
+                ->groupBy(fn ($d) => $d->format('Y-n'))
+                ->map->count();
+
+            $newsByMonth = collect(range(11, 0))->map(function ($i) use ($newsDates) {
+                $date = now()->subMonths($i);
+
+                return ['label' => $date->locale('fr')->isoFormat('MMM'), 'count' => $newsDates->get($date->format('Y-n'), 0)];
+            })->values()->all();
+        }
+
         return view('backoffice::dashboard.index', [
             'usersCount' => User::count(),
             'activeUsersCount' => User::where('is_active', true)->count(),
@@ -62,6 +77,7 @@ class DashboardController
             'environment' => app()->environment(),
             'usersByMonth' => $usersByMonth,
             'articlesByMonth' => $articlesByMonth,
+            'newsByMonth' => $newsByMonth,
             'isMaintenanceMode' => app()->isDownForMaintenance(),
             'metricWidgets' => app(MetricAggregatorService::class)->getAllWidgets(),
         ]);

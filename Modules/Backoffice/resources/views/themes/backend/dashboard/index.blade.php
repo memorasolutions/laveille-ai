@@ -249,6 +249,23 @@
     </div>
 </div>
 
+{{-- Chart: news articles (si module News actif) --}}
+@if(!empty($newsByMonth))
+<div class="row">
+    <div class="col-12 grid-margin stretch-card">
+        <div class="card overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-4 mb-md-3">
+                    <h6 class="card-title mb-0">{{ __('Actualités collectées') }}</h6>
+                </div>
+                <p class="text-secondary fs-13px mb-3 mb-md-0">{{ __('Nombre d\'articles News collectés par mois sur les 12 derniers mois.') }}</p>
+                <div id="newsArticlesChart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Recent activity + Quick actions --}}
 <div class="row">
     <div class="col-lg-7 col-xl-8 grid-margin stretch-card" id="dashboard-activity">
@@ -379,6 +396,23 @@ document.addEventListener('DOMContentLoaded', function() {
         tooltip: { theme: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light' }
     };
     new ApexCharts(document.querySelector('#usersRegistrationChart'), options).render();
+
+    // Graphique News articles par mois
+    var newsData = @json($newsByMonth ?? []);
+    if (newsData.length && document.querySelector('#newsArticlesChart')) {
+        var newsOptions = {
+            series: [{ name: @json(__('Actualités')), data: newsData.map(function(i) { return i.count; }) }],
+            chart: { height: 280, type: 'bar', toolbar: { show: false }, fontFamily: 'Roboto, sans-serif' },
+            colors: ['#2bc155'],
+            plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+            dataLabels: { enabled: false },
+            xaxis: { categories: newsData.map(function(i) { return i.label; }), labels: { style: { colors: '#6c757d', fontSize: '11px' } } },
+            yaxis: { labels: { style: { colors: '#6c757d', fontSize: '11px' } } },
+            grid: { borderColor: 'var(--bs-border-color, #e9ecef)', strokeDashArray: 4 },
+            tooltip: { theme: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light' }
+        };
+        new ApexCharts(document.querySelector('#newsArticlesChart'), newsOptions).render();
+    }
 });
 </script>
 @endpush

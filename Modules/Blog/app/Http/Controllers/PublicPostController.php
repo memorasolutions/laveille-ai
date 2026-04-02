@@ -52,7 +52,26 @@ class PublicPostController extends Controller
             });
         }
 
+        $currentCategory = null;
+        if ($request->filled('category')) {
+            $categorySlug = $request->input('category');
+            $locale = app()->getLocale();
+            $currentCategory = Category::where("slug->{$locale}", $categorySlug)
+                ->orWhere('slug', $categorySlug)
+                ->first();
+            if ($currentCategory) {
+                $query->where('blog_category_id', $currentCategory->id);
+            }
+        }
+
         $articles = $query->latest('published_at')->paginate((int) Settings::get('blog.articles_per_page', 10));
+
+        $categories = Category::withCount(['articles as published_articles_count' => function (Builder $q) {
+            $q->published();
+        }])
+            ->having('published_articles_count', '>', 0)
+            ->orderByDesc('published_articles_count')
+            ->get();
 
         if ($request->ajax()) {
             return response()->json([
@@ -62,7 +81,7 @@ class PublicPostController extends Controller
             ]);
         }
 
-        return view('fronttheme::blog.index', compact('articles'));
+        return view('fronttheme::blog.index', compact('articles', 'categories', 'currentCategory'));
     }
 
     public function show(string $slug): View

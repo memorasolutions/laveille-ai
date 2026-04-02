@@ -13,6 +13,33 @@
     <h1 class="sr-only">{{ __('Blog') }} — {{ config('app.name') }}</h1>
     <!-- start wpo-blog-pg-section -->
     <section class="wpo-blog-pg-section section-padding">
+
+        {{-- Chips catégories + bouton suivre --}}
+        @if(isset($categories) && $categories->isNotEmpty())
+        <div class="container" style="margin-bottom: 1.5rem;">
+            <div class="nw-filter-row">
+                <span class="nw-filter-label">{{ __('Catégorie') }}</span>
+                <div class="nw-chips">
+                    <a href="{{ route('blog.index', request()->except(['category', 'page'])) }}" class="nw-chip {{ is_null($currentCategory ?? null) ? 'active' : '' }}">{{ __('Toutes') }}</a>
+                    @foreach($categories as $cat)
+                        <a href="{{ route('blog.index', array_merge(request()->except(['category', 'page']), ['category' => $cat->slug])) }}" class="nw-chip {{ ($currentCategory->id ?? null) === $cat->id ? 'active' : '' }}">
+                            {{ $cat->name }} <span class="nw-chip-count">({{ $cat->published_articles_count }})</span>
+                        </a>
+                        @auth
+                        @if(Route::has('category-subscription.toggle'))
+                        <button x-data="{ subscribed: {{ auth()->user()->isSubscribedTo($cat->name, 'blog') ? 'true' : 'false' }} }"
+                            @click="subscribed = !subscribed; fetch('{{ route('category-subscription.toggle') }}', { method: 'POST', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Content-Type': 'application/json', 'Accept': 'application/json'}, body: JSON.stringify({category_tag: '{{ $cat->name }}', module: 'blog'}) }).catch(() => subscribed = !subscribed)"
+                            class="nw-follow-btn" :title="subscribed ? '{{ __('Ne plus suivre') }}' : '{{ __('Suivre') }}'"
+                            :aria-label="(subscribed ? '{{ __('Ne plus suivre') }}' : '{{ __('Suivre') }}') + ' {{ $cat->name }}'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" :fill="subscribed ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        </button>
+                        @endif
+                        @endauth
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
         <div class="container">
             <div class="row">
                 <div class="col col-lg-8 col-12"
@@ -90,6 +117,20 @@
     <!-- end wpo-blog-pg-section -->
 
     @push('styles')
-    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .nw-filter-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem; }
+        .nw-filter-label { font-size: 0.8125rem; font-weight: 600; color: #6b7280; min-width: 70px; }
+        .nw-chips { display: flex; overflow-x: auto; gap: 0.5rem; padding: 0.125rem 0; scrollbar-width: none; }
+        .nw-chips::-webkit-scrollbar { display: none; }
+        .nw-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.8125rem; white-space: nowrap; text-decoration: none; transition: all 0.15s; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        .nw-chip:hover { background: #e5e7eb; color: #1f2937; text-decoration: none; }
+        .nw-chip.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
+        .nw-chip.active:hover { opacity: 0.9; color: #fff; text-decoration: none; }
+        .nw-chip-count { font-size: 0.6875rem; opacity: 0.8; }
+        .nw-follow-btn { background: none; border: none; padding: 2px; cursor: pointer; color: #9ca3af; transition: color 0.15s; display: inline-flex; align-items: center; flex-shrink: 0; }
+        .nw-follow-btn:hover { color: var(--c-primary); }
+        @media (max-width: 640px) { .nw-filter-row { flex-direction: column; align-items: stretch; } .nw-filter-label { min-width: auto; } }
+    </style>
     @endpush
 @endsection
