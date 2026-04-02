@@ -183,8 +183,8 @@ class AdminNewsController extends Controller
                 'structured_summary' => $result,
                 'category_tag' => $result['category'] ?? $article->category_tag,
                 'impact_level' => $result['impact'] ?? $article->impact_level,
-                'seo_title' => $result['seo_title'] ?? $article->seo_title,
-                'meta_description' => $result['meta_description'] ?? $article->meta_description,
+                'seo_title' => Str::limit($result['seo_title'] ?? $article->seo_title, 250, ''),
+                'meta_description' => Str::limit($result['meta_description'] ?? $article->meta_description, 250, ''),
                 'summary' => $result['hook'] ?? $article->summary,
             ]);
 

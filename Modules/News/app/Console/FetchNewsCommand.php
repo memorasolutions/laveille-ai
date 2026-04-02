@@ -105,8 +105,8 @@ class FetchNewsCommand extends Command
                     'category_tag' => $result['category'] ?? null,
                     'impact_level' => $result['impact'] ?? null,
                     'feed_type' => $feedType,
-                    'seo_title' => $result['seo_title'] ?? null,
-                    'meta_description' => $result['meta_description'] ?? null,
+                    'seo_title' => \Illuminate\Support\Str::limit($result['seo_title'] ?? '', 250, ''),
+                    'meta_description' => \Illuminate\Support\Str::limit($result['meta_description'] ?? '', 250, ''),
                     'summary' => $result['hook'] ?? null,
                     'is_published' => $score >= $minScore,
                 ]);

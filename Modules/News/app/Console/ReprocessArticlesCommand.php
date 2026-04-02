@@ -96,8 +96,8 @@ class ReprocessArticlesCommand extends Command
                     $updateData['structured_summary'] = $aiResult;
                     $updateData['category_tag'] = $aiResult['category'] ?? $article->category_tag;
                     $updateData['impact_level'] = $aiResult['impact'] ?? $article->impact_level;
-                    $updateData['seo_title'] = $aiResult['seo_title'] ?? $article->seo_title;
-                    $updateData['meta_description'] = $aiResult['meta_description'] ?? $article->meta_description;
+                    $updateData['seo_title'] = Str::limit($aiResult['seo_title'] ?? $article->seo_title, 250, '');
+                    $updateData['meta_description'] = Str::limit($aiResult['meta_description'] ?? $article->meta_description, 250, '');
                     $updateData['summary'] = $aiResult['hook'] ?? $article->summary;
                     $cat = $aiResult['category'] ?? '?';
                     $this->info("  IA: score={$aiResult['score']} cat={$cat}");
