@@ -94,7 +94,7 @@ class NewsImageService
             $overlay->destroy();
 
             // Logo SVG (200x200, fond transparent, centré en haut)
-            $logoPath = public_path('images/logo-eye.svg');
+            $logoPath = public_path('images/logo-eye-white.svg');
             if (file_exists($logoPath)) {
                 $logo = new \Imagick();
                 $logo->setBackgroundColor('transparent');
