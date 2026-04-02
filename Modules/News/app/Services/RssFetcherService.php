@@ -6,6 +6,7 @@ namespace Modules\News\Services;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 use SimplePie\SimplePie;
@@ -53,10 +54,7 @@ class RssFetcherService
                     }
                 }
 
-                // Scrape og:image si pas d'image valide dans le RSS
-                if (! $imageUrl) {
-                    $imageUrl = $this->scrapeOgImage($item->get_permalink());
-                }
+                // og:image sera extraite par ContentExtractor après résolution URL
 
                 $article = NewsArticle::create([
                     'news_source_id' => $source->id,
@@ -69,6 +67,26 @@ class RssFetcherService
                     'image_url' => $imageUrl,
                     'is_published' => false,
                 ]);
+
+                // Résoudre URL Google News vers article original
+                if (GoogleNewsResolver::isGoogleNewsUrl($article->url)) {
+                    $resolvedUrl = app(GoogleNewsResolver::class)->resolve($article->url);
+                    if ($resolvedUrl && $resolvedUrl !== $article->url) {
+                        $article->update(['resolved_url' => $resolvedUrl]);
+                    }
+                }
+                $articleUrl = $article->resolved_url ?? $article->url;
+
+                // Extraire contenu complet pour résumé IA + image
+                $extracted = app(ContentExtractor::class)->extract($articleUrl);
+                if ($extracted) {
+                    if (! $imageUrl && $extracted['image']) {
+                        $imageUrl = $extracted['image'];
+                    }
+                    if ($extracted['word_count'] > 100 && mb_strlen($extracted['content']) > mb_strlen($article->description ?? '')) {
+                        $article->update(['description' => Str::limit($extracted['content'], 5000)]);
+                    }
+                }
 
                 // Optimiser l'image localement (WebP 1200x630)
                 $localPath = null;
@@ -99,36 +117,5 @@ class RssFetcherService
         return $count;
     }
 
-    /**
-     * Scrape og:image d'une URL d'article.
-     */
-    private function scrapeOgImage(?string $url): ?string
-    {
-        if (! $url) return null;
-
-        try {
-            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
-                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'])
-                ->timeout(15)
-                ->withOptions(['allow_redirects' => ['max' => 5]])
-                ->get($url);
-
-            if (! $response->successful()) return null;
-
-            $html = $response->body();
-
-            // og:image
-            if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/', $html, $m)) {
-                return $m[1];
-            }
-            // Reverse order (content before property)
-            if (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/', $html, $m)) {
-                return $m[1];
-            }
-        } catch (\Throwable $e) {
-            Log::debug("og:image scrape failed for {$url}: {$e->getMessage()}");
-        }
-
-        return null;
-    }
+    // scrapeOgImage supprimé — utiliser ContentExtractor::extractOgImage() (zéro duplication)
 }

@@ -51,7 +51,7 @@ class AiSummaryService
         }
 
         $models = config('services.openrouter.summary_models', self::DEFAULT_MODELS);
-        $truncatedText = mb_substr($text, 0, 2000);
+        $truncatedText = mb_substr($text, 0, 4000);
         $minScore = (int) Settings::get('news.min_relevance_score', 7);
 
         $prompt = <<<PROMPT
@@ -59,14 +59,22 @@ Tu es un journaliste tech senior pour un public québécois francophone.
 TOUT le contenu doit être en FRANÇAIS, même si l'article source est en anglais.
 Analyse cet article et retourne UNIQUEMENT un JSON valide (aucun texte avant ou après).
 
+RÈGLES DE FIDÉLITÉ (OBLIGATOIRES) :
+1. Base ton résumé UNIQUEMENT sur le texte fourni. Aucune information externe.
+2. Cite les chiffres, pourcentages, noms propres et faits exacts du texte original sans les reformuler.
+3. Si le texte parle d'un sujet précis (ex: une entreprise, un produit, un événement), le résumé DOIT refléter ce sujet spécifique, pas le généraliser.
+4. Ne mentionne PAS le Québec, le Canada ou l'éducation SAUF si le texte original en parle explicitement.
+5. Le hook doit être un résumé fidèle du contenu, pas une accroche générique.
+6. Les key_points doivent être des FAITS tirés du texte, pas des généralités.
+
 {
   "score": [1-10 pertinence IA/tech pour une plateforme de veille technologique],
   "score_justification": "[1 phrase expliquant la note, en français]",
   "category": "[IA générative|Cybersécurité|Cloud|Robotique|Données|Startup|Éducation tech|Infrastructure|Autre]",
   "impact": "[Élevé|Moyen|Faible]",
-  "hook": "[2-3 phrases accrocheuses résumant l'essentiel avec contexte et enjeux, 40-60 mots. Doit donner envie de lire.]",
-  "key_points": ["[fait détaillé 1 avec chiffres si disponible, 15-25 mots]", "[fait détaillé 2, 15-25 mots]", "[fait détaillé 3, 15-25 mots]", "[fait détaillé 4, 15-25 mots]"],
-  "why_important": "[3-4 phrases : contexte québécois/canadien, impact concret sur les professionnels, ce que ça change dans leur quotidien, 50-80 mots]",
+  "hook": "[2-3 phrases résumant fidèlement le contenu avec les faits clés, 40-60 mots. Doit refléter le sujet précis de l'article.]",
+  "key_points": ["[fait détaillé 1 avec chiffres exacts du texte, 15-25 mots]", "[fait détaillé 2, 15-25 mots]", "[fait détaillé 3, 15-25 mots]", "[fait détaillé 4, 15-25 mots]"],
+  "why_important": "[3-4 phrases : impact concret sur les professionnels, ce que ça change, pourquoi c'est pertinent, 50-80 mots]",
   "audience": ["[développeurs|entreprises|éducation|grand public]"],
   "seo_title": "[titre reformulé SEO accrocheur en français, max 60 caractères]",
   "meta_description": "[description meta SEO en français, max 155 caractères]",
@@ -75,10 +83,9 @@ Analyse cet article et retourne UNIQUEMENT un JSON valide (aucun texte avant ou 
 }
 
 Règles STRICTES :
-- TOUT en français québécois, accents corrects — JAMAIS de contenu anglais
-- Les key_points doivent être des phrases complètes et informatives (pas 5 mots vagues)
-- Le hook doit être engageant comme un article de journal, pas un résumé scolaire
-- Le why_important doit mentionner l'impact concret au Québec/Canada
+- TOUT en français, accents corrects — JAMAIS de contenu anglais
+- Les key_points doivent être des phrases complètes avec des faits précis du texte
+- Le hook doit refléter le sujet spécifique de l'article, pas être générique
 - Score 7+ = pertinent pour une plateforme de veille IA/tech
 - JSON valide uniquement, aucun texte avant ou après
 

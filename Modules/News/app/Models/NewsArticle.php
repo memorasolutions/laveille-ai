@@ -16,7 +16,7 @@ class NewsArticle extends Model
 {
     use HasComments, HasReports, HasCommunityVotes;
     protected $fillable = [
-        'news_source_id', 'title', 'slug', 'guid', 'url', 'description',
+        'news_source_id', 'title', 'slug', 'guid', 'url', 'resolved_url', 'description',
         'summary', 'image_url', 'author', 'pub_date', 'is_published',
         'relevance_score', 'score_justification', 'structured_summary',
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',

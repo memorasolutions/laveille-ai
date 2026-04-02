@@ -39,7 +39,8 @@ class RescrapeGoogleImagesCommand extends Command
         $updated = 0;
 
         foreach ($articles as $article) {
-            $ogImage = $this->scrapeOgImage($article->url);
+            $extracted = app(\Modules\News\Services\ContentExtractor::class)->extract($article->resolved_url ?? $article->url);
+            $ogImage = $extracted['image'] ?? null;
 
             if (! $ogImage) {
                 $this->warn("[{$article->id}] Aucune og:image pour {$article->url}");
@@ -73,35 +74,5 @@ class RescrapeGoogleImagesCommand extends Command
         return self::SUCCESS;
     }
 
-    private function scrapeOgImage(?string $url): ?string
-    {
-        if (! $url) {
-            return null;
-        }
-
-        try {
-            $response = Http::withoutVerifying()
-                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'])
-                ->timeout(15)
-                ->withOptions(['allow_redirects' => ['max' => 5]])
-                ->get($url);
-
-            if (! $response->successful()) {
-                return null;
-            }
-
-            $html = $response->body();
-
-            if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/', $html, $m)) {
-                return $m[1];
-            }
-            if (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/', $html, $m)) {
-                return $m[1];
-            }
-        } catch (\Throwable $e) {
-            Log::debug("og:image scrape failed for {$url}: {$e->getMessage()}");
-        }
-
-        return null;
-    }
+    // scrapeOgImage supprimé — utilise ContentExtractor::extract() (zéro duplication)
 }
