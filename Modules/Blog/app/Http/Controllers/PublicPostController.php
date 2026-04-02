@@ -60,7 +60,7 @@ class PublicPostController extends Controller
                 ->orWhere('slug', $categorySlug)
                 ->first();
             if ($currentCategory) {
-                $query->where('blog_category_id', $currentCategory->id);
+                $query->where('category_id', $currentCategory->id);
             }
         }
 
