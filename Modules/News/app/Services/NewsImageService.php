@@ -93,27 +93,29 @@ class NewsImageService
             $gradient->compositeImage($overlay, \Imagick::COMPOSITE_OVER, 0, 0);
             $overlay->destroy();
 
-            // Logo SVG (160x160, centré en haut)
+            // Logo SVG (200x200, fond transparent, centré en haut)
             $logoPath = public_path('images/logo-eye.svg');
             if (file_exists($logoPath)) {
                 $logo = new \Imagick();
+                $logo->setBackgroundColor('transparent');
                 $logo->readImage($logoPath);
-                $logo->resizeImage(160, 160, \Imagick::FILTER_LANCZOS, 1);
-                $gradient->compositeImage($logo, \Imagick::COMPOSITE_OVER, (int) (($w - 160) / 2), 60);
+                $logo->setImageAlphaChannel(\Imagick::ALPHACHANNEL_ACTIVATE);
+                $logo->resizeImage(200, 200, \Imagick::FILTER_LANCZOS, 1);
+                $gradient->compositeImage($logo, \Imagick::COMPOSITE_OVER, (int) (($w - 200) / 2), 50);
                 $logo->destroy();
             }
 
-            // Titre (gros, blanc, centré)
+            // Titre (très gros, blanc, centré)
             $fontBold = resource_path('fonts/Inter-SemiBold.ttf');
             if (file_exists($fontBold)) {
                 $len = mb_strlen($title);
-                $fontSize = $len < 30 ? 56 : ($len <= 50 ? 46 : 38);
+                $fontSize = $len < 25 ? 64 : ($len <= 40 ? 54 : 44);
 
-                $wrapped = wordwrap($title, 35, "\n");
+                $wrapped = wordwrap($title, 28, "\n");
                 $lines = explode("\n", $wrapped);
                 if (count($lines) > 3) {
                     $lines = array_slice($lines, 0, 3);
-                    $lines[2] = mb_substr($lines[2], 0, 32) . '...';
+                    $lines[2] = mb_substr($lines[2], 0, 25) . '...';
                 }
 
                 $draw = new \ImagickDraw();
@@ -121,7 +123,7 @@ class NewsImageService
                 $draw->setFontSize($fontSize);
                 $draw->setFillColor(new \ImagickPixel('white'));
                 $draw->setTextAlignment(\Imagick::ALIGN_CENTER);
-                $gradient->annotateImage($draw, $w / 2, 300, 0, implode("\n", $lines));
+                $gradient->annotateImage($draw, $w / 2, 340, 0, implode("\n", $lines));
             }
 
             // Catégorie
@@ -129,7 +131,7 @@ class NewsImageService
             if ($categoryTag && file_exists($fontRegular)) {
                 $drawCat = new \ImagickDraw();
                 $drawCat->setFont($fontRegular);
-                $drawCat->setFontSize(22);
+                $drawCat->setFontSize(28);
                 $drawCat->setFillColor(new \ImagickPixel('rgba(255,255,255,0.6)'));
                 $drawCat->setTextAlignment(\Imagick::ALIGN_CENTER);
                 $gradient->annotateImage($drawCat, $w / 2, 520, 0, $categoryTag);
@@ -139,10 +141,10 @@ class NewsImageService
             if (file_exists($fontRegular)) {
                 $drawSub = new \ImagickDraw();
                 $drawSub->setFont($fontRegular);
-                $drawSub->setFontSize(20);
+                $drawSub->setFontSize(24);
                 $drawSub->setFillColor(new \ImagickPixel('rgba(255,255,255,0.5)'));
                 $drawSub->setTextAlignment(\Imagick::ALIGN_CENTER);
-                $gradient->annotateImage($drawSub, $w / 2, 570, 0, 'laveille.ai');
+                $gradient->annotateImage($drawSub, $w / 2, 580, 0, 'laveille.ai');
             }
 
             $gradient->setImageFormat('webp');
