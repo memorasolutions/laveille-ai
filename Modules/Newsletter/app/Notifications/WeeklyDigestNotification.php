@@ -29,7 +29,7 @@ class WeeklyDigestNotification extends Notification
 
     public function toMail($notifiable): MailMessage
     {
-        $unsubscribeUrl = route('newsletter.unsubscribe', ['token' => $notifiable->token]);
+        $unsubscribeUrl = route('newsletter.unsubscribe', ['token' => $notifiable->token ?? 'preview']);
         $subject = 'Le digest IA #'.$this->weekNumber.' — '.($this->highlight?->seo_title ?? $this->highlight?->title ?? 'Votre veille hebdomadaire');
 
         return (new MailMessage)
