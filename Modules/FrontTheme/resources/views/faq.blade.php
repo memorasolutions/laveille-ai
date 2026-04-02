@@ -8,6 +8,12 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Foire aux questions')])
 @endsection
 
+@push('head')
+@if(class_exists(\Modules\SEO\Services\JsonLdService::class))
+{!! \Modules\SEO\Services\JsonLdService::render(\Modules\SEO\Services\JsonLdService::faqPage($faqs->flatten())) !!}
+@endif
+@endpush
+
 @section('content')
     <h1 class="sr-only">{{ __('Foire aux questions') }} — {{ config('app.name') }}</h1>
     <section class="wpo-blog-single-section section-padding">

@@ -124,6 +124,25 @@ final class JsonLdService
         ];
     }
 
+    public static function faqPage($faqs): array
+    {
+        $mainEntity = $faqs->map(function ($faq) {
+            return [
+                '@type' => 'Question',
+                'name' => $faq->question,
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => strip_tags($faq->answer),
+                ],
+            ];
+        })->all();
+
+        return [
+            '@type' => 'FAQPage',
+            'mainEntity' => $mainEntity,
+        ];
+    }
+
     /**
      * Rend un ou plusieurs schémas en balise JSON-LD.
      *
