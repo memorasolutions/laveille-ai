@@ -34,8 +34,8 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::get('/category/{slug}', fn (string $slug) => redirect()->route('blog.category', $slug, 301));
 
     // Redirections WordPress supplémentaires (migration SEO)
-    Route::get('/feed', fn () => redirect('/blog', 301));
-    Route::get('/feed/{any?}', fn () => redirect('/blog', 301))->where('any', '.*');
+    // /feed is now a real RSS route in Blog module (FeedController)
+    Route::get('/feed/{any}', fn () => redirect('/feed', 301))->where('any', '.*');
     Route::get('/les-outils', fn () => redirect('/outils', 301));
     Route::get('/le-concentre', fn () => redirect('/categorie/le-concentre', 301));
     Route::get('/wp-admin/{any?}', fn () => redirect('/', 301))->where('any', '.*');

@@ -5,7 +5,7 @@
     <title>{{ config('app.name') }}</title>
     <link>{{ url('/blog') }}</link>
     <description>Les derniers articles</description>
-    <language>fr-FR</language>
+    <language>fr-CA</language>
     <atom:link href="{{ route('blog.feed') }}" rel="self" type="application/rss+xml" />
     @foreach($articles as $article)
     <item>
