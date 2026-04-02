@@ -293,7 +293,12 @@
             })
         }).catch(function() {});
 
-        // 3. Scripts tiers + fermer
+        // 3. GA4 Consent Mode v2 update
+        if (typeof updateGtagConsent === 'function') {
+            updateGtagConsent(!!choices.analytics);
+        }
+
+        // 4. Scripts tiers + fermer
         injectScripts(choices);
         closeBanner();
     }
@@ -351,6 +356,10 @@
                 if (inp && !inp.disabled) inp.checked = !!existing[k];
             }
             injectScripts(existing);
+            // GA4 Consent Mode v2 : restaurer le consentement existant
+            if (typeof updateGtagConsent === 'function') {
+                updateGtagConsent(!!existing.analytics);
+            }
         } else {
             // Consentement expire ou politique mise a jour : re-prompt
             setTimeout(function() { openBanner(); }, 100);

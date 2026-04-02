@@ -233,12 +233,9 @@ return [
     |--------------------------------------------------------------------------
     */
     'scripts' => [
-        [
-            'category' => 'analytics',
-            'name' => 'Google Analytics',
-            'code' => '<script async src="https://www.googletagmanager.com/gtag/js?id='.env('GA_MEASUREMENT_ID', 'G-XXXXXXXXXX').'"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","'.env('GA_MEASUREMENT_ID', 'G-XXXXXXXXXX').'");</script>',
-            'enabled' => env('PRIVACY_GA_ENABLED', false),
-        ],
+        // GA4 is now loaded in the <head> with Consent Mode v2 (master.blade.php)
+        // Consent update is handled via updateGtagConsent() in cookie-consent.blade.php
+        // No need to inject gtag.js again here — would cause double tracking
         [
             'category' => 'marketing',
             'name' => 'Facebook Pixel',

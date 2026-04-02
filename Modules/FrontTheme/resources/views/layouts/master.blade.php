@@ -11,6 +11,33 @@
         <meta name="robots" content="noindex, nofollow">
     @endif
     <style>[x-cloak] { display: none !important; }</style>
+    @if(env('GA_MEASUREMENT_ID') && env('PRIVACY_GA_ENABLED', false))
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('GA_MEASUREMENT_ID') }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        'ad_storage': 'denied',
+        'analytics_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied'
+      });
+      gtag('js', new Date());
+      gtag('config', '{{ env('GA_MEASUREMENT_ID') }}', {
+        'anonymize_ip': true,
+        'send_page_view': true
+      });
+      function updateGtagConsent(granted) {
+        var status = granted ? 'granted' : 'denied';
+        gtag('consent', 'update', {
+          'ad_storage': status,
+          'analytics_storage': status,
+          'ad_user_data': status,
+          'ad_personalization': status
+        });
+      }
+    </script>
+    @endif
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="manifest" href="/manifest.webmanifest">
