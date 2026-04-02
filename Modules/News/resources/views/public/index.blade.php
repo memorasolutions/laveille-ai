@@ -64,7 +64,7 @@
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1;
     }
     .nw-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; }
-    .nw-source-pill { background: #f3f4f6; color: #6b7280; font-size: 0.6875rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 4px; text-transform: uppercase; }
+    .nw-source-pill { background: #f3f4f6; color: #6b7280; font-size: 0.6875rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 4px; text-transform: uppercase; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .nw-date { font-size: 0.75rem; color: #9ca3af; display: flex; align-items: center; gap: 0.375rem; }
     .nw-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .nw-dot-high { background: #10b981; }
