@@ -8,6 +8,7 @@ use fivefilters\Readability\Configuration;
 use fivefilters\Readability\Readability;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 
 class ContentExtractor
 {
@@ -65,7 +66,7 @@ class ContentExtractor
                 'title' => $readability->getTitle() ?? '',
                 'content' => $contentText,
                 'html' => $contentHtml,
-                'image' => $ogImage ?? $readability->getImage(),
+                'image' => $ogImage ?? $readability->getImage() ?? self::extractOgImageViaPuppeteer($url),
                 'author' => $readability->getAuthor(),
                 'word_count' => $wordCount,
             ];
@@ -89,6 +90,36 @@ class ContentExtractor
         }
         if (preg_match('/<meta[^>]+(?:property|name)=["\']twitter:image["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $m)) {
             return $m[1];
+        }
+
+        return null;
+    }
+
+    /**
+     * Fallback Puppeteer : extraire og:image des sites SPA/anti-bot.
+     */
+    public static function extractOgImageViaPuppeteer(string $url): ?string
+    {
+        try {
+            $nodePath = env('BROWSERSHOT_NODE_PATH', '/usr/bin/node');
+            $scriptPath = base_path('scripts/extract-og-image.cjs');
+
+            if (! file_exists($scriptPath)) {
+                return null;
+            }
+
+            $process = Process::timeout(20)->run([$nodePath, $scriptPath, $url]);
+
+            if ($process->successful()) {
+                $imageUrl = trim($process->output());
+                if (! empty($imageUrl) && filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                    Log::info("ContentExtractor: Puppeteer og:image found for {$url}: {$imageUrl}");
+
+                    return $imageUrl;
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::debug("ContentExtractor: Puppeteer og:image failed for {$url}: {$e->getMessage()}");
         }
 
         return null;

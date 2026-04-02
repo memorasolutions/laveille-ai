@@ -136,7 +136,8 @@
     } else {
         // Fallback pour vieux navigateurs : bouton "Charger plus"
         var btn = document.createElement('button');
-        btn.textContent = 'Charger plus';
+        var lang = (document.documentElement.lang || 'fr').substring(0, 2);
+        btn.textContent = lang === 'en' ? 'Load more' : 'Charger plus';
         btn.className = 'btn btn-primary';
         btn.style.cssText = 'display:block;margin:20px auto;';
         btn.onclick = loadMore;
