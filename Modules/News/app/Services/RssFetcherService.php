@@ -44,11 +44,16 @@ class RssFetcherService
                 if ($enclosure = $item->get_enclosure()) {
                     $type = $enclosure->get_type() ?? '';
                     if (str_starts_with($type, 'image/')) {
-                        $imageUrl = $enclosure->get_link();
+                        $link = $enclosure->get_link();
+                        // Ignorer les logos/images Google News (pas l'image de l'article)
+                        $isGoogleImage = $link && preg_match('#(google\.com|googleusercontent\.com|gstatic\.com)#i', $link);
+                        if (! $isGoogleImage) {
+                            $imageUrl = $link;
+                        }
                     }
                 }
 
-                // Scrape og:image si pas d'image dans le RSS
+                // Scrape og:image si pas d'image valide dans le RSS
                 if (! $imageUrl) {
                     $imageUrl = $this->scrapeOgImage($item->get_permalink());
                 }
