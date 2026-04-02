@@ -106,19 +106,26 @@
         <!-- end of wpo-blog-hero -->
 
         <!-- start of wpo-breacking-news -->
+        @if($latestNews->isNotEmpty())
         <div class="wpo-breacking-news section-padding">
             <div class="container">
                 <div class="row">
-                    <div class="b-title"><span>{{ __('Dernières nouvelles') }}</span></div>
+                    <div class="b-title"><span>{{ __('Dernières actualités') }}</span></div>
                     <div class="wpo-breacking-wrap owl-carousel">
-                        @foreach($articles->take((int) \Modules\Settings\Facades\Settings::get('fronttheme.home_breaking_news_limit', 9)) as $breaking)
+                        @foreach($latestNews->take(9) as $newsItem)
                         <div class="wpo-breacking-item{{ $loop->first ? ' s1' : '' }}">
                             <div class="wpo-breacking-img">
-                                <img src="{{ $breaking->featured_image ? asset($breaking->featured_image) : fronttheme_asset('images/breaking-news/img-' . (($loop->index % 3) + 1) . '.jpg') }}" alt="{{ $breaking->title }}" loading="lazy">
+                                @if($newsItem->image_url)
+                                    <img src="{{ $newsItem->image_url }}" alt="{{ $newsItem->seo_title ?? $newsItem->title }}" loading="lazy">
+                                @else
+                                    <div style="background: linear-gradient(135deg, #1a2332 0%, #0b7285 100%); display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 8px; color: rgba(255,255,255,0.3); font-weight: 700; font-size: 1.25rem;">
+                                        {{ mb_strtoupper(mb_substr($newsItem->category_tag ?? 'N', 0, 2)) }}
+                                    </div>
+                                @endif
                             </div>
                             <div class="wpo-breacking-text">
-                                <span>{{ $breaking->published_at?->format('d M Y') }}</span>
-                                <h3><a href="{{ route('blog.show', $breaking->slug) }}">{{ $breaking->title }}</a></h3>
+                                <span>{{ $newsItem->pub_date?->diffForHumans() }}</span>
+                                <h3><a href="{{ route('news.show', $newsItem) }}">{{ $newsItem->seo_title ?? $newsItem->title }}</a></h3>
                             </div>
                         </div>
                         @endforeach
@@ -126,6 +133,7 @@
                 </div>
             </div>
         </div>
+        @endif
         <!-- end of wpo-breacking-news -->
 
         <!-- start wpo-blog-highlights-section -->

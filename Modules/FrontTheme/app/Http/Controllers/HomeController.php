@@ -75,7 +75,7 @@ class HomeController extends Controller
                 ->where('is_published', true)
                 ->with('source')
                 ->latest('pub_date')
-                ->take((int) Settings::get('fronttheme.home_latest_news_limit', 4))
+                ->take((int) Settings::get('fronttheme.home_latest_news_limit', 9))
                 ->get();
         }
 
