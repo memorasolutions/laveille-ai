@@ -71,7 +71,33 @@
     @endif
 
     {{-- ============================================================ --}}
-    {{-- 3. ACTUALITES (5 avec miniatures)                             --}}
+    {{-- 3. DEFI DE LA QUINZAINE (semaines paires, position haute)     --}}
+    {{-- ============================================================ --}}
+    @if(($weeklyPrompt ?? null) && (($weekNumber ?? 0) % 2 === 0))
+    <tr>
+        <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Defi de la quinzaine</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Essayez ce prompt cette semaine :</td></tr>
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;font-style:italic;line-height:1.5;">
+                            {{ $weeklyPrompt }}
+                        </td></tr>
+                    </table>
+                </td></tr>
+                <tr><td align="center" style="padding-bottom:16px;font-size:13px;color:#94a3b8;">Copiez ce prompt et testez-le dans ChatGPT, Claude ou Gemini !</td></tr>
+                <tr><td align="center">
+                    <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- 4. ACTUALITES (5 avec miniatures alternees)                   --}}
     {{-- ============================================================ --}}
     @if(($topNews ?? null) && $topNews->count())
     <tr>
@@ -80,13 +106,23 @@
             @foreach($topNews as $news)
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:14px;{{ !$loop->last ? 'border-bottom:1px solid #f0f0f0;padding-bottom:14px;' : '' }}">
                 <tr>
-                    <td width="80" valign="top" style="padding-right:12px;">
-                        <img src="{{ newsletterImg($news->image_url ?? null) }}" width="80" height="80" alt="" style="border-radius:6px;width:80px;height:80px;object-fit:cover;"/>
+                    @if($loop->odd)
+                    <td width="80" valign="top" class="stack-col" style="padding-right:12px;">
+                        <img src="{{ newsletterImg($news->image_url ?? null) }}" width="80" height="80" alt="{{ $news->seo_title ?? $news->title ?? '' }}" style="border-radius:6px;width:80px;height:80px;object-fit:cover;"/>
                     </td>
-                    <td valign="middle">
+                    <td valign="middle" class="stack-col">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
                         @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#999;">{{ $news->source_name }}</span>@endif
                     </td>
+                    @else
+                    <td valign="middle" class="stack-col" style="padding-right:12px;">
+                        <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
+                        @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#999;">{{ $news->source_name }}</span>@endif
+                    </td>
+                    <td width="80" valign="top" class="stack-col">
+                        <img src="{{ newsletterImg($news->image_url ?? null) }}" width="80" height="80" alt="{{ $news->seo_title ?? $news->title ?? '' }}" style="border-radius:6px;width:80px;height:80px;object-fit:cover;"/>
+                    </td>
+                    @endif
                 </tr>
             </table>
             @endforeach
@@ -225,31 +261,7 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- ============================================================ --}}
-    {{-- 8. DEFI DE LA QUINZAINE (semaines paires uniquement)          --}}
-    {{-- ============================================================ --}}
-    @if(($weeklyPrompt ?? null) && (($weekNumber ?? 0) % 2 === 0))
-    <tr>
-        <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Defi de la quinzaine</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Essayez ce prompt cette semaine :</td></tr>
-                <tr><td style="padding-bottom:14px;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;font-style:italic;line-height:1.5;">
-                            {{ $weeklyPrompt }}
-                        </td></tr>
-                    </table>
-                </td></tr>
-                <tr><td align="center" style="padding-bottom:16px;font-size:13px;color:#94a3b8;">Copiez ce prompt et testez-le dans ChatGPT, Claude ou Gemini !</td></tr>
-                <tr><td align="center">
-                    <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>
-                </td></tr>
-            </table>
-        </td>
-    </tr>
-    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
-    @endif
+    {{-- (defi de la quinzaine deplace en position 3, avant les actus) --}}
 
     {{-- ============================================================ --}}
     {{-- 9. LE SAVIEZ-VOUS? (promo veille.la)                         --}}

@@ -94,8 +94,7 @@ class DigestCommand extends Command
         // Section 8 : prompt de la quinzaine (semaines paires, lie au terme IA)
         $weeklyPrompt = null;
         if ($weekNumber % 2 === 0 && $aiTerm) {
-            $termName = $aiTerm->name ?? '';
-            $weeklyPrompt = "Explique-moi le concept de \"{$termName}\" comme si j'avais 12 ans, avec une analogie du quotidien et un exemple concret d'utilisation en 2026.";
+            $weeklyPrompt = self::generateWeeklyPrompt($aiTerm->name ?? '', $aiTerm->type ?? null);
         }
 
         if (! $highlight && $topNews->isEmpty()) {
@@ -128,5 +127,31 @@ class DigestCommand extends Command
         $this->components->info('Weekly digest #'.$weekNumber.' sent successfully.');
 
         return self::SUCCESS;
+    }
+
+    private static function generateWeeklyPrompt(string $termName, ?string $termType = null): string
+    {
+        $lower = mb_strtolower($termName);
+
+        // Lois et reglements
+        if (str_contains($lower, 'loi') || str_contains($lower, 'rgpd') || str_contains($lower, 'regulation') || str_contains($lower, 'gouvernance') || str_contains($lower, 'ethique') || str_contains($lower, 'audit')) {
+            return "Analyse mon site web [collez votre URL] et identifie les 3 points les plus urgents a corriger pour etre conforme a {$termName}. Pour chaque point, propose une solution concrete et realisable en moins de 2 heures.";
+        }
+
+        // Techniques et methodes
+        $techniques = ['apprentissage', 'fine-tuning', 'rag', 'prompt', 'chain', 'embedding', 'token', 'inference', 'distillation', 'quantification', 'rlhf', 'few-shot', 'zero-shot', 'attention', 'transformer', 'vectorisation', 'clustering', 'classification', 'regression', 'mlops'];
+        foreach ($techniques as $kw) {
+            if (str_contains($lower, $kw)) {
+                return "Concois une experience pratique que je peux realiser en 15 minutes pour comprendre {$termName} : les outils gratuits a utiliser, un exemple concret avec mes propres donnees, et ce que je devrais observer comme resultat.";
+            }
+        }
+
+        // Outils et technologies
+        if (str_contains($lower, 'gpu') || str_contains($lower, 'tpu') || str_contains($lower, 'cloud') || str_contains($lower, 'api') || str_contains($lower, 'ocr') || str_contains($lower, 'iot')) {
+            return "Je suis debutant. Explique-moi {$termName} avec une analogie simple, puis montre-moi comment je pourrais l'utiliser gratuitement cette semaine dans un projet personnel concret.";
+        }
+
+        // Concept general (defaut)
+        return "Explique {$termName} comme si je n'y connaissais rien, puis propose-moi une idee originale pour l'appliquer dans un projet personnel cette semaine — quelque chose de faisable sans competences techniques avancees.";
     }
 }
