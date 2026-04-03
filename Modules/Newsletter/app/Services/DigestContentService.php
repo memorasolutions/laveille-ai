@@ -145,7 +145,7 @@ class DigestContentService
                         ],
                         [
                             'role' => 'user',
-                            'content' => "Ecris un mini-editorial base sur cette actualite : {$highlightTitle}. Contexte : {$highlightSummary}. Format : 1 question provocante ou reflexion personnelle + 1-2 phrases de contexte. Termine par '- Stephane'. Maximum 50 mots.",
+                            'content' => "Ecris un mini-editorial base sur cette actualite : {$highlightTitle}. Contexte : {$highlightSummary}. Format : 1 question provocante ou reflexion personnelle + 1-2 phrases de contexte. Termine par '- Stephane'. Maximum 50 mots. INTERDIT : pas de Markdown, pas de **, pas de *, pas de #. Texte brut uniquement.",
                         ],
                     ],
                     'temperature' => 0.8,
@@ -153,7 +153,7 @@ class DigestContentService
                 ]);
 
             if ($response->successful()) {
-                return $response->json('choices.0.message.content');
+                return self::stripMarkdown($response->json('choices.0.message.content') ?? '');
             }
         } catch (\Throwable $e) {
             Log::warning('Newsletter editorial generation failed: '.$e->getMessage());
@@ -316,6 +316,20 @@ class DigestContentService
     }
 
     /**
+     * Nettoie le Markdown des réponses IA (**, *, #, ```, etc.)
+     */
+    public static function stripMarkdown(string $text): string
+    {
+        $text = preg_replace('/\*{1,3}([^*]+)\*{1,3}/', '$1', $text); // **bold**, *italic*
+        $text = preg_replace('/#{1,6}\s*/', '', $text); // # headers
+        $text = preg_replace('/`{1,3}[^`]*`{1,3}/', '', $text); // `code`, ```blocks```
+        $text = preg_replace('/\[([^\]]+)\]\([^)]+\)/', '$1', $text); // [links](url)
+        $text = str_replace(['```', '`'], '', $text);
+
+        return trim($text);
+    }
+
+    /**
      * Génère un prompt unique via OpenRouter deepseek-chat.
      * Chaque semaine, une technique de prompting différente est sélectionnée (rotation).
      */
@@ -351,7 +365,7 @@ class DigestContentService
                         ],
                         [
                             'role' => 'user',
-                            'content' => "Génère un prompt éducatif de haute qualité sur le terme IA '{$termName}' en utilisant la technique de prompting '{$selectedTechnique}'.\n\nLe prompt doit :\n- Être prêt à copier-coller dans ChatGPT, Claude ou Gemini\n- Enseigner le concept du terme tout en démontrant la technique\n- Être en français québécois, ton amical, entre 60 et 100 mots\n- Refléter les meilleures pratiques de prompting en 2026\n\nRéponds UNIQUEMENT avec le texte du prompt, rien d'autre. Pas d'introduction, pas d'explication.",
+                            'content' => "Génère un prompt éducatif de haute qualité sur le terme IA '{$termName}' en utilisant la technique de prompting '{$selectedTechnique}'.\n\nLe prompt doit :\n- Être prêt à copier-coller dans ChatGPT, Claude ou Gemini\n- Enseigner le concept du terme tout en démontrant la technique\n- Être en français québécois, ton amical, entre 60 et 100 mots\n- Refléter les meilleures pratiques de prompting en 2026\n\nRéponds UNIQUEMENT avec le texte du prompt, rien d'autre. Pas d'introduction, pas d'explication. INTERDIT : pas de Markdown, pas de **, pas de *, pas de #, pas de backticks. Texte brut uniquement.",
                         ],
                     ],
                     'temperature' => 0.8,
@@ -359,7 +373,7 @@ class DigestContentService
                 ]);
 
             if ($response->successful()) {
-                $text = trim($response->json('choices.0.message.content') ?? '');
+                $text = self::stripMarkdown(trim($response->json('choices.0.message.content') ?? ''));
                 if ($text) {
                     return [
                         'prompt' => $text,
