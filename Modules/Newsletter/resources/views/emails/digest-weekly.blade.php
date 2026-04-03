@@ -40,7 +40,7 @@
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td>
-                        <img src="{{ asset('images/logo-horizontal-white.svg') }}" width="160" alt="{{ config('app.name') }}" style="width:160px;height:auto;"/>
+                        <img src="{{ asset('images/logo-horizontal-white.png') }}" width="160" alt="{{ config('app.name') }}" style="width:160px;height:auto;"/>
                     </td>
                     <td align="right" style="font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;">
                         Veille hebdo #{{ $weekNumber ?? '?' }}<br/>{{ now()->translatedFormat('j F Y') }}
@@ -176,7 +176,14 @@
             <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#d97706;font-weight:bold;font-family:Arial,sans-serif;">Outil gratuit a essayer</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td style="font-family:Arial,sans-serif;">
+                    <td width="70" valign="top" style="padding-right:15px;">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                            <tr><td style="width:60px;height:60px;background-color:#d97706;border-radius:8px;text-align:center;vertical-align:middle;font-size:28px;">
+                                &#9889;
+                            </td></tr>
+                        </table>
+                    </td>
+                    <td valign="top" style="font-family:Arial,sans-serif;">
                         <h3 style="margin:0 0 6px;font-size:18px;color:#1a1a2e;">{{ $interactiveTool->name }}</h3>
                         <p style="margin:0 0 14px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($interactiveTool->description ?? ''), 150) }}</p>
                         <a href="{{ route('tools.show', $interactiveTool->slug) }}" style="display:inline-block;background-color:#d97706;color:#fff;padding:10px 20px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Essayer gratuitement &rarr;</a>
@@ -196,11 +203,19 @@
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
             <h3 style="margin:0 0 14px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-family:Arial,sans-serif;">Termes IA a decouvrir</h3>
             @foreach($aiTerms as $term)
+            @php $termName = $term->term ?? $term->name ?? ''; @endphp
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:10px;">
                 <tr>
-                    <td style="font-family:Arial,sans-serif;padding:10px 14px;background-color:#ffffff;border-radius:6px;border-left:3px solid #0B7285;">
-                        <strong style="color:#1a1a2e;font-size:14px;">{{ $term->term ?? $term->name ?? '' }}</strong>
-                        <span style="color:#777;font-size:13px;"> — {{ Str::limit(strip_tags($term->definition ?? $term->description ?? ''), 100) }}</span>
+                    <td width="40" valign="top" style="padding-right:10px;">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                            <tr><td style="width:36px;height:36px;background-color:#0B7285;border-radius:6px;text-align:center;vertical-align:middle;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;color:#ffffff;">
+                                {{ mb_strtoupper(mb_substr($termName, 0, 1)) }}
+                            </td></tr>
+                        </table>
+                    </td>
+                    <td valign="middle" style="font-family:Arial,sans-serif;padding:8px 12px;background-color:#ffffff;border-radius:6px;">
+                        <strong style="color:#1a1a2e;font-size:14px;">{{ $termName }}</strong>
+                        <br/><span style="color:#777;font-size:13px;">{{ Str::limit(strip_tags($term->definition ?? $term->description ?? ''), 100) }}</span>
                     </td>
                 </tr>
             </table>
