@@ -91,6 +91,13 @@ class DigestCommand extends Command
 
         $weekNumber = (int) now()->weekOfYear;
 
+        // Section 8 : prompt de la quinzaine (semaines paires, lie au terme IA)
+        $weeklyPrompt = null;
+        if ($weekNumber % 2 === 0 && $aiTerm) {
+            $termName = $aiTerm->name ?? '';
+            $weeklyPrompt = "Explique-moi le concept de \"{$termName}\" comme si j'avais 12 ans, avec une analogie du quotidien et un exemple concret d'utilisation en 2026.";
+        }
+
         if (! $highlight && $topNews->isEmpty()) {
             $this->components->info('No news articles this week. Skipping digest.');
 
@@ -107,7 +114,7 @@ class DigestCommand extends Command
 
         foreach ($subscribers as $subscriber) {
             $subscriber->notify(new WeeklyDigestNotification(
-                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber, $aiTerm, $interactiveTool
+                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber, $aiTerm, $interactiveTool, $weeklyPrompt
             ));
         }
 
