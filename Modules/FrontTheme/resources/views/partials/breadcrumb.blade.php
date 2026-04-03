@@ -63,10 +63,8 @@
                     ,{
                         "@@type": "ListItem",
                         "position": {{ $index + 2 }},
-                        "name": "{{ $item }}"
-                        @if(isset($breadcrumbRoutes[$item]))
-                            ,"item": "{{ $breadcrumbRoutes[$item] }}"
-                        @endif
+                        "name": "{{ $item }}",
+                        "item": "{{ $breadcrumbRoutes[$item] ?? url()->current() }}"
                     }
                 @else
                     ,{
