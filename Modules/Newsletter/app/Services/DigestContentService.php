@@ -211,16 +211,16 @@ class DigestContentService
         // PRIORITE 1 : le terme EST une technique de prompting → le prompt la demontre
         $promptExamples = [
             'chain-of-thought' => [
-                'prompt' => "Resous cette enigme etape par etape : si j'ai 3 boites et chacune contient 2 balles rouges et 1 bleue, combien de balles bleues ai-je au total ? Pense a voix haute a chaque etape avant de donner ta reponse finale.",
-                'explain' => 'Force le raisonnement pas a pas pour resoudre des problemes complexes.',
+                'prompt' => "Résous cette énigme étape par étape : si j'ai 3 boîtes et chacune contient 2 balles rouges et 1 bleue, combien de balles bleues ai-je au total ? Pense à voix haute à chaque étape avant de donner ta réponse finale.",
+                'explain' => 'Force le raisonnement pas à pas pour résoudre des problèmes complexes.',
             ],
             'chaine de pensee' => [
-                'prompt' => "Resous cette enigme etape par etape : si j'ai 3 boites et chacune contient 2 balles rouges et 1 bleue, combien de balles bleues ai-je au total ? Pense a voix haute a chaque etape avant de donner ta reponse finale.",
-                'explain' => 'Force le raisonnement pas a pas pour resoudre des problemes complexes.',
+                'prompt' => "Résous cette énigme étape par étape : si j'ai 3 boîtes et chacune contient 2 balles rouges et 1 bleue, combien de balles bleues ai-je au total ? Pense à voix haute à chaque étape avant de donner ta réponse finale.",
+                'explain' => 'Force le raisonnement pas à pas pour résoudre des problèmes complexes.',
             ],
             'step-back' => [
-                'prompt' => "D'abord, enumere 3 principes fondamentaux de la cybersecurite. Ensuite, utilise ces principes pour expliquer pourquoi les mots de passe courts sont dangereux. Reponse en points.",
-                'explain' => 'Commence par des principes generaux avant d\'aborder le cas specifique.',
+                'prompt' => "D'abord, énumère 3 principes fondamentaux de la cybersécurité. Ensuite, utilise ces principes pour expliquer pourquoi les mots de passe courts sont dangereux. Réponse en points.",
+                'explain' => 'Commence par des principes généraux avant d\'aborder le cas spécifique.',
             ],
             'few-shot' => [
                 'prompt' => "Classifie ces outils IA (exemples : ChatGPT = chatbot, Midjourney = image, Runway = video). Maintenant classifie : Suno = ?, ElevenLabs = ?, Cursor = ?",
@@ -228,75 +228,75 @@ class DigestContentService
             ],
             'zero-shot' => [
                 'prompt' => "Classifie cette phrase comme positive, negative ou neutre : \"L'IA va transformer l'education au Quebec d'ici 2030.\"",
-                'explain' => 'Demande une tache sans aucun exemple prealable, testant la comprehension du modele.',
+                'explain' => 'Demande une tâche sans aucun exemple préalable, testant la compréhension du modèle.',
             ],
             'role prompting' => [
-                'prompt' => "Tu es un chef cuisinier etoile. Explique le concept de base de donnees relationnelle en utilisant uniquement des metaphores culinaires. Maximum 100 mots.",
-                'explain' => 'Attribue un role precis a l\'IA pour orienter le style et le contenu.',
+                'prompt' => "Tu es un chef cuisinier étoilé. Explique le concept de base de données relationnelle en utilisant uniquement des métaphores culinaires. Maximum 100 mots.",
+                'explain' => 'Attribue un rôle précis à l\'IA pour orienter le style et le contenu.',
             ],
             'tree-of-thought' => [
-                'prompt' => "Propose 3 approches differentes pour apprendre a coder en 2026. Pour chaque approche, evalue les avantages et inconvenients, puis choisis la meilleure avec justification.",
-                'explain' => 'Explore plusieurs branches de raisonnement en parallele avant de converger.',
+                'prompt' => "Propose 3 approches différentes pour apprendre à coder en 2026. Pour chaque approche, évalue les avantages et inconvénients, puis choisis la meilleure avec justification.",
+                'explain' => 'Explore plusieurs branches de raisonnement en parallèle avant de converger.',
             ],
             'graph-of-thought' => [
-                'prompt' => "Analyse les liens entre ces 3 concepts : IA generative, emploi et education. Pour chaque paire, decris la relation. Puis synthetise comment les 3 interagissent ensemble.",
-                'explain' => 'Cartographie les relations entre concepts pour une comprehension systemique.',
+                'prompt' => "Analyse les liens entre ces 3 concepts : IA générative, emploi et éducation. Pour chaque paire, décris la relation. Puis synthétise comment les 3 interagissent ensemble.",
+                'explain' => 'Cartographie les relations entre concepts pour une compréhension systémique.',
             ],
             'react' => [
-                'prompt' => "Tache : trouver la population du Quebec en 2026. Etape 1 : Reflechis a la meilleure source. Etape 2 : Consulte ta connaissance. Etape 3 : Donne le chiffre avec ta source. Alterne reflexion et action.",
-                'explain' => 'Combine raisonnement (Reason) et action (Act) de maniere iterative.',
+                'prompt' => "Tâche : trouver la population du Québec en 2026. Étape 1 : Réfléchis à la meilleure source. Étape 2 : Consulte ta connaissance. Étape 3 : Donne le chiffre avec ta source. Alterne réflexion et action.",
+                'explain' => 'Combine raisonnement (Reason) et action (Act) de manière itérative.',
             ],
             'self-refine' => [
-                'prompt' => "Ecris un slogan pour une application de meditation IA. Puis evalue ton slogan sur 3 criteres (clarte, emotion, memorabilite). Ameliore-le en fonction de ton evaluation.",
-                'explain' => 'Demande a l\'IA d\'evaluer et d\'ameliorer sa propre reponse.',
+                'prompt' => "Écris un slogan pour une application de méditation IA. Puis évalue ton slogan sur 3 critères (clarté, émotion, mémorabilité). Améliore-le en fonction de ton évaluation.",
+                'explain' => 'Demande à l\'IA d\'évaluer et d\'améliorer sa propre réponse.',
             ],
             'self-consistency' => [
-                'prompt' => "Reponds 3 fois a cette question : \"Quel est le meilleur langage de programmation pour debuter en 2026 ?\" Puis compare tes 3 reponses et donne ta reponse finale la plus fiable.",
+                'prompt' => "Réponds 3 fois à cette question : \"Quel est le meilleur langage de programmation pour débuter en 2026 ?\" Puis compare tes 3 réponses et donne ta réponse finale la plus fiable.",
                 'explain' => 'Genere plusieurs reponses et choisit la plus coherente par consensus.',
             ],
             'least-to-most' => [
-                'prompt' => "Decompose cette tache complexe du plus simple au plus difficile : creer un chatbot IA pour un site web. Commence par l'etape la plus basique et progresse vers la plus avancee.",
-                'explain' => 'Decompose un probleme du plus simple au plus complexe, etape par etape.',
+                'prompt' => "Décompose cette tâche complexe du plus simple au plus difficile : créer un chatbot IA pour un site web. Commence par l'étape la plus basique et progresse vers la plus avancée.",
+                'explain' => 'Décompose un problème du plus simple au plus complexe, étape par étape.',
             ],
             'meta-prompting' => [
-                'prompt' => "Genere le meilleur prompt possible pour obtenir un resume executif d'un article scientifique. Explique pourquoi chaque element de ton prompt est important.",
-                'explain' => 'Genere ou optimise d\'autres prompts de maniere recursive.',
+                'prompt' => "Génère le meilleur prompt possible pour obtenir un résumé exécutif d'un article scientifique. Explique pourquoi chaque élément de ton prompt est important.",
+                'explain' => 'Génère ou optimise d\'autres prompts de manière récursive.',
             ],
             'emotion prompting' => [
-                'prompt' => "Cette reponse est vraiment importante pour ma carriere. Explique-moi les 3 competences IA les plus recherchees en 2026 au Quebec, avec des conseils concrets pour les developper.",
-                'explain' => 'Integre des elements emotionnels pour influencer la qualite de la reponse.',
+                'prompt' => "Cette réponse est vraiment importante pour ma carrière. Explique-moi les 3 compétences IA les plus recherchées en 2026 au Québec, avec des conseils concrets pour les développer.",
+                'explain' => 'Intègre des éléments émotionnels pour influencer la qualité de la réponse.',
             ],
             'generated knowledge' => [
-                'prompt' => "D'abord, genere 5 faits cles sur le changement climatique et l'IA. Ensuite, utilise ces faits pour rediger un paragraphe expliquant comment l'IA aide a combattre le changement climatique.",
+                'prompt' => "D'abord, génère 5 faits clés sur le changement climatique et l'IA. Ensuite, utilise ces faits pour rédiger un paragraphe expliquant comment l'IA aide à combattre le changement climatique.",
                 'explain' => 'Fait generer des connaissances pertinentes avant de repondre a la question.',
             ],
             'analogical' => [
-                'prompt' => "Explique le fonctionnement d'un reseau de neurones artificiels en utilisant l'analogie d'une equipe de soccer. Chaque joueur = un neurone. L'entraineur = l'algorithme.",
-                'explain' => 'Utilise des analogies pour transferer des connaissances entre domaines.',
+                'prompt' => "Explique le fonctionnement d'un réseau de neurones artificiels en utilisant l'analogie d'une équipe de soccer. Chaque joueur = un neurone. L'entraîneur = l'algorithme.",
+                'explain' => 'Utilise des analogies pour transférer des connaissances entre domaines.',
             ],
             'contrastive' => [
-                'prompt' => "Compare le fine-tuning et le RAG : similitudes, differences, et dans quelles situations choisir l'un plutot que l'autre. Presente sous forme de tableau.",
-                'explain' => 'Compare des cas similaires et differents pour clarifier les concepts.',
+                'prompt' => "Compare le fine-tuning et le RAG : similitudes, différences, et dans quelles situations choisir l'un plutôt que l'autre. Présente sous forme de tableau.",
+                'explain' => 'Compare des cas similaires et différents pour clarifier les concepts.',
             ],
             'skeleton-of-thought' => [
-                'prompt' => "D'abord, ecris le squelette (plan en 5 points) d'un article sur l'avenir de l'education avec l'IA. Ensuite, developpe chaque point en 2 phrases.",
+                'prompt' => "D'abord, écris le squelette (plan en 5 points) d'un article sur l'avenir de l'éducation avec l'IA. Ensuite, développe chaque point en 2 phrases.",
                 'explain' => 'Genere d\'abord une structure/squelette, puis developpe chaque partie.',
             ],
             'program-of-thought' => [
-                'prompt' => "Resous ce probleme comme un programme : si un abonnement coute 12$/mois avec 20% de rabais annuel, combien je paie par an ? Ecris le calcul etape par etape comme du pseudo-code.",
+                'prompt' => "Résous ce problème comme un programme : si un abonnement coûte 12$/mois avec 20% de rabais annuel, combien je paie par an ? Écris le calcul étape par étape comme du pseudo-code.",
                 'explain' => 'Structure le raisonnement comme un programme informatique avec des etapes logiques.',
             ],
             'chain-of-verification' => [
-                'prompt' => "Reponds a cette question : quels sont les 3 plus grands modeles de langage en 2026 ? Puis verifie chacune de tes affirmations : est-ce que c'est encore vrai ? Corrige si necessaire.",
-                'explain' => 'Genere une reponse puis verifie systematiquement chaque affirmation.',
+                'prompt' => "Réponds à cette question : quels sont les 3 plus grands modèles de langage en 2026 ? Puis vérifie chacune de tes affirmations : est-ce que c'est encore vrai ? Corrige si nécessaire.",
+                'explain' => 'Génère une réponse puis vérifie systématiquement chaque affirmation.',
             ],
             'chain-of-density' => [
                 'prompt' => "Resume cet article en 5 versions de plus en plus denses : version 1 = 50 mots generaux, version 5 = 50 mots ultra-precis avec tous les faits cles. Article : L'IA generative transforme l'education au Quebec.",
-                'explain' => 'Genere des resumes de plus en plus denses et informatifs a chaque iteration.',
+                'explain' => 'Génère des résumés de plus en plus denses et informatifs à chaque itération.',
             ],
             'directional stimulus' => [
-                'prompt' => "Ecris un courriel professionnel pour demander une augmentation. Indices : mentionne tes resultats du dernier trimestre, le marche actuel, et ta loyaute. Ton : assertif mais respectueux.",
-                'explain' => 'Guide la generation avec des indices semantiques cibles pour orienter le contenu.',
+                'prompt' => "Écris un courriel professionnel pour demander une augmentation. Indices : mentionne tes résultats du dernier trimestre, le marché actuel, et ta loyauté. Ton : assertif mais respectueux.",
+                'explain' => 'Guide la génération avec des indices sémantiques ciblés pour orienter le contenu.',
             ],
         ];
 
@@ -314,16 +314,16 @@ class DigestContentService
         foreach ($lawKw as $kw) {
             if (str_contains($lower, $kw)) {
                 return [
-                    'prompt' => "Tu es un expert en conformite numerique. Analyse les implications de {$termName} pour un site web quebecois. Presente 3 actions concretes, classees par urgence.",
-                    'technique' => "Prompt structure avec role d'expert : l'attribution d'un role specialise guide l'IA vers une reponse autoritaire et contextuelle.",
+                    'prompt' => "Tu es un expert en conformité numérique. Analyse les implications de {$termName} pour un site web québécois. Présente 3 actions concrètes, classées par urgence.",
+                    'technique' => "Prompt structuré avec rôle d'expert : l'attribution d'un rôle spécialisé guide l'IA vers une réponse autoritaire et contextuelle.",
                 ];
             }
         }
 
         // PRIORITE 3 : concept general
         return [
-            'prompt' => "Tu es un vulgarisateur scientifique. Explique {$termName} avec une analogie de la vie quotidienne. Structure : l'analogie, la definition simple, un exemple concret en 2026.",
-            'technique' => "Prompt structure avec role et format : le role de vulgarisateur et la structure en 3 parties guident l'IA vers une explication accessible.",
+            'prompt' => "Tu es un vulgarisateur scientifique. Explique {$termName} avec une analogie de la vie quotidienne. Structure : l'analogie, la définition simple, un exemple concret en 2026.",
+            'technique' => "Prompt structuré avec rôle et format : le rôle de vulgarisateur et la structure en 3 parties guident l'IA vers une explication accessible.",
         ];
     }
 }
