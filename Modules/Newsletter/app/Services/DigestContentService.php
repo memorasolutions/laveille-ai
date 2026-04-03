@@ -316,6 +316,24 @@ class DigestContentService
     }
 
     /**
+     * Explication grand public d'une technique de prompting (pour la newsletter).
+     */
+    public static function getTechniqueExplanation(string $technique): string
+    {
+        return match (mb_strtolower($technique)) {
+            'chaîne de pensée' => "Cette technique demande à l'IA de réfléchir étape par étape. Essayez de lui demander : \"Explique-moi comment faire X, en détaillant chaque étape\".",
+            'role prompting' => "On donne un rôle précis à l'IA, comme un expert ou un professeur. Demandez-lui : \"Agis comme un spécialiste en X et explique-moi Y\".",
+            'few-shot' => "On montre à l'IA quelques exemples pour qu'elle comprenne ce qu'on attend. Donnez-lui 2-3 exemples avant de poser votre vraie question.",
+            'analogie' => "On demande à l'IA de comparer un concept à quelque chose de la vie quotidienne. Dites : \"Explique-moi ce concept comme si c'était une recette de cuisine\".",
+            'step-back' => "On part des principes généraux avant d'aborder le cas précis. Commencez par : \"Quels sont les grands principes de X avant de parler de Y ?\".",
+            'décomposition' => "On découpe un gros problème en petites étapes faciles à suivre. Demandez : \"Décompose ce problème en étapes simples\".",
+            'self-refine' => "On demande à l'IA de vérifier et d'améliorer sa propre réponse. Après sa réponse, ajoutez : \"Évalue ta réponse et améliore-la\".",
+            'contraintes créatives' => "On donne des limites précises pour obtenir une réponse plus ciblée. Essayez : \"Réponds en 3 paragraphes, avec un exemple concret du Québec\".",
+            default => "Cette technique aide l'IA à mieux comprendre votre demande. Essayez de reformuler votre question clairement pour de meilleurs résultats.",
+        };
+    }
+
+    /**
      * Nettoie le Markdown des réponses IA (**, *, #, ```, etc.)
      */
     public static function stripMarkdown(string $text): string
@@ -377,7 +395,7 @@ class DigestContentService
                 if ($text) {
                     return [
                         'prompt' => $text,
-                        'technique' => "Technique utilisée : {$selectedTechnique} - prompt généré dynamiquement par IA pour refléter les meilleures pratiques actuelles.",
+                        'technique' => self::getTechniqueExplanation($selectedTechnique),
                     ];
                 }
             }

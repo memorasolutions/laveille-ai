@@ -99,13 +99,14 @@
                 @if(is_array($weeklyPrompt) && ($weeklyPrompt['technique'] ?? null))
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;font-size:13px;color:#94a3b8;line-height:1.5;">
-                            <strong style="color:#3dc9d8;">Technique utilisee :</strong> {{ $weeklyPrompt['technique'] }}
+                        <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;font-size:13px;color:#94a3b8;line-height:1.6;">
+                            <strong style="color:#3dc9d8;">Pourquoi ce prompt fonctionne :</strong> {{ $weeklyPrompt['technique'] }}<br/>
+                            <span style="color:#64748b;">Astuce : réutilisez cette approche dans vos propres requêtes pour de meilleurs résultats.</span>
                         </td></tr>
                     </table>
                 </td></tr>
                 @endif
-                <tr><td align="center" style="padding-bottom:8px;font-size:13px;color:#94a3b8;">Copiez ce prompt et testez-le dans ChatGPT, Claude ou Gemini !</td></tr>
+                <tr><td align="center" style="padding-bottom:8px;font-size:13px;color:#94a3b8;">Copiez ce prompt et collez-le dans ChatGPT, Claude ou Gemini pour voir le résultat.</td></tr>
                 <tr><td align="center">
                     <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>
                 </td></tr>
@@ -158,10 +159,7 @@
             <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Outil de la semaine</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td width="200" valign="top" class="stack-col" style="padding-right:16px;">
-                        <img src="{{ newsletterImg($toolOfWeek->screenshot ?? null) }}" width="200" alt="{{ $toolOfWeek->name }}" style="border-radius:8px;width:200px;"/>
-                    </td>
-                    <td valign="top" class="stack-col">
+                    <td valign="top" class="stack-col" style="padding-right:16px;">
                         <span style="font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $toolOfWeek->name }}</span>
                         @php
                             $pColor = match(strtolower($toolOfWeek->pricing ?? '')) { 'free','gratuit' => '#10b981', 'freemium' => '#f97316', default => '#6b7280' };
@@ -169,6 +167,9 @@
                         @endphp
                         <span style="display:inline-block;background-color:{{ $pColor }};color:#fff;font-size:10px;font-weight:bold;padding:3px 8px;border-radius:3px;margin-left:6px;vertical-align:middle;">{{ $pLabel }}</span>
                         <p style="margin:8px 0 0;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($toolOfWeek->short_description ?? $toolOfWeek->description ?? ''), 120) }}</p>
+                    </td>
+                    <td width="200" valign="top" class="stack-col" style="padding-left:16px;">
+                        <img src="{{ newsletterImg($toolOfWeek->screenshot ?? null) }}" width="200" alt="{{ $toolOfWeek->name }}" style="border-radius:8px;width:200px;"/>
                     </td>
                 </tr>
                 <tr><td colspan="2" style="padding-top:14px;">
@@ -188,20 +189,20 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- 6. A LIRE (texte gauche, image droite) --}}
+    {{-- 6. A LIRE (image gauche, texte droite — alternance) --}}
     @if($featuredArticle ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
             <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">A lire cette semaine</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td valign="top" class="stack-col" style="padding-right:20px;">
+                    <td width="180" valign="top" class="stack-col" style="padding-right:16px;">
+                        <img src="{{ newsletterImg($featuredArticle->featured_image ?? null) }}" width="180" alt="{{ $featuredArticle->title }}" style="border-radius:6px;width:180px;"/>
+                    </td>
+                    <td valign="top" class="stack-col">
                         <a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#1a1a2e;font-size:16px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $featuredArticle->title }}</a>
                         <p style="margin:8px 0 12px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($featuredArticle->excerpt ?? $featuredArticle->content ?? ''), 120) }}</p>
                         <a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#0B7285;font-weight:bold;font-size:14px;">Lire l'article &rarr;</a>
-                    </td>
-                    <td width="180" valign="top" class="stack-col">
-                        <img src="{{ newsletterImg($featuredArticle->featured_image ?? null) }}" width="180" alt="{{ $featuredArticle->title }}" style="border-radius:6px;width:180px;"/>
                     </td>
                 </tr>
             </table>
@@ -217,12 +218,12 @@
             <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#d97706;font-weight:bold;">Outil gratuit a essayer</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td width="150" valign="top" class="stack-col" style="padding-right:16px;">
-                        <img src="{{ newsletterImg($interactiveTool->featured_image ?? null) }}" width="150" alt="{{ $interactiveTool->name }}" style="border-radius:8px;width:150px;"/>
-                    </td>
-                    <td valign="top" class="stack-col">
+                    <td valign="top" class="stack-col" style="padding-right:16px;">
                         <span style="font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $interactiveTool->icon ?? '' }} {{ $interactiveTool->name }}</span>
                         <p style="margin:8px 0 0;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($interactiveTool->description ?? ''), 120) }}</p>
+                    </td>
+                    <td width="150" valign="top" class="stack-col" style="padding-left:16px;">
+                        <img src="{{ newsletterImg($interactiveTool->featured_image ?? null) }}" width="150" alt="{{ $interactiveTool->name }}" style="border-radius:8px;width:150px;"/>
                     </td>
                 </tr>
                 <tr><td colspan="2" style="padding-top:14px;">
@@ -235,19 +236,19 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- 8. TERME IA DE LA SEMAINE (image gauche, titre/desc droite, reste en dessous) --}}
+    {{-- 8. TERME IA DE LA SEMAINE (texte gauche, image droite — alternance) --}}
     @if($aiTerm ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
             <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Terme IA de la semaine</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td width="200" valign="top" class="stack-col" style="padding-right:16px;">
-                        <img src="{{ newsletterImg($aiTerm->hero_image ?? null) }}" alt="{{ $aiTerm->name ?? '' }}" width="200" style="border-radius:8px;width:200px;"/>
-                    </td>
-                    <td valign="top" class="stack-col">
+                    <td valign="top" class="stack-col" style="padding-right:16px;">
                         <span style="font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $aiTerm->name ?? '' }}</span>
                         <p style="margin:8px 0 0;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($aiTerm->definition ?? ''), 180) }}</p>
+                    </td>
+                    <td width="200" valign="top" class="stack-col" style="padding-left:16px;">
+                        <img src="{{ newsletterImg($aiTerm->hero_image ?? null) }}" alt="{{ $aiTerm->name ?? '' }}" width="200" style="border-radius:8px;width:200px;"/>
                     </td>
                 </tr>
                 <tr><td colspan="2" style="padding-top:14px;">
