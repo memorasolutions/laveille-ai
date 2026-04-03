@@ -5,98 +5,85 @@ declare(strict_types=1);
 namespace Modules\Newsletter\Http\Controllers;
 
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\View\View;
+use Modules\Newsletter\Models\NewsletterIssue;
 
 class NewsletterWebController extends Controller
 {
-    public function show(int $year, int $week)
+    public function show(int $year, int $week): View
     {
+        $issue = NewsletterIssue::where('year', $year)
+            ->where('week_number', $week)
+            ->whereNotNull('sent_at')
+            ->firstOrFail();
+
+        $data = $this->buildContentFromIssue($issue);
+
+        return view('newsletter::web.show', $data);
+    }
+
+    public function latest(): View
+    {
+        $issue = NewsletterIssue::published()->firstOrFail();
+        $data = $this->buildContentFromIssue($issue);
+
+        return view('newsletter::web.show', $data);
+    }
+
+    public function archive(): View
+    {
+        $issues = NewsletterIssue::published()->paginate(12);
+
+        return view('newsletter::web.archive', compact('issues'));
+    }
+
+    private function buildContentFromIssue(NewsletterIssue $issue): array
+    {
+        $content = $issue->content ?? [];
+
         $highlight = null;
         $topNews = collect();
         $toolOfWeek = null;
         $featuredArticle = null;
         $aiTerm = null;
         $interactiveTool = null;
-        $weeklyPrompt = null;
 
-        // Recuperer les items envoyes pour cette semaine
-        $sentItems = [];
-        if (Schema::hasTable('newsletter_sent_items')) {
-            $sentItems = DB::table('newsletter_sent_items')
-                ->where('week_number', $week)
-                ->where('year', $year)
-                ->pluck('item_id', 'type')
-                ->toArray();
+        if (($content['highlight_id'] ?? null) && class_exists(\Modules\News\Models\NewsArticle::class)) {
+            $highlight = \Modules\News\Models\NewsArticle::find($content['highlight_id']);
         }
 
-        // Outil de la semaine (depuis tracking)
-        if (isset($sentItems['tool']) && class_exists(\Modules\Directory\Models\Tool::class)) {
-            $toolOfWeek = \Modules\Directory\Models\Tool::find($sentItems['tool']);
+        if (! empty($content['top_news_ids']) && class_exists(\Modules\News\Models\NewsArticle::class)) {
+            $topNews = \Modules\News\Models\NewsArticle::whereIn('id', $content['top_news_ids'])->get();
         }
 
-        // Terme IA (depuis tracking)
-        if (isset($sentItems['term']) && class_exists(\Modules\Dictionary\Models\Term::class)) {
-            $aiTerm = \Modules\Dictionary\Models\Term::find($sentItems['term']);
+        if (($content['tool_id'] ?? null) && class_exists(\Modules\Directory\Models\Tool::class)) {
+            $toolOfWeek = \Modules\Directory\Models\Tool::find($content['tool_id']);
         }
 
-        // Outil interactif (depuis tracking)
-        if (isset($sentItems['interactive_tool']) && class_exists(\Modules\Tools\Models\Tool::class)) {
-            $interactiveTool = \Modules\Tools\Models\Tool::find($sentItems['interactive_tool']);
+        if (($content['article_id'] ?? null) && class_exists(\Modules\Blog\Models\Article::class)) {
+            $featuredArticle = \Modules\Blog\Models\Article::find($content['article_id']);
         }
 
-        // Fait marquant + top news (pas trackes, requete directe)
-        if (class_exists(\Modules\News\Models\NewsArticle::class)) {
-            $highlight = \Modules\News\Models\NewsArticle::where('is_published', true)
-                ->where('pub_date', '>=', now()->setISODate($year, $week)->startOfWeek())
-                ->where('pub_date', '<=', now()->setISODate($year, $week)->endOfWeek())
-                ->orderByDesc('relevance_score')
-                ->first();
-
-            $topNews = \Modules\News\Models\NewsArticle::where('is_published', true)
-                ->where('pub_date', '>=', now()->setISODate($year, $week)->startOfWeek())
-                ->where('pub_date', '<=', now()->setISODate($year, $week)->endOfWeek())
-                ->when($highlight, fn ($q) => $q->where('id', '!=', $highlight->id))
-                ->orderByDesc('relevance_score')
-                ->take(5)
-                ->get();
+        if (($content['term_id'] ?? null) && class_exists(\Modules\Dictionary\Models\Term::class)) {
+            $aiTerm = \Modules\Dictionary\Models\Term::find($content['term_id']);
         }
 
-        // Article blog vedette
-        if (class_exists(\Modules\Blog\Models\Article::class)) {
-            $featuredArticle = \Modules\Blog\Models\Article::published()
-                ->latest('published_at')
-                ->first();
+        if (($content['interactive_tool_id'] ?? null) && class_exists(\Modules\Tools\Models\Tool::class)) {
+            $interactiveTool = \Modules\Tools\Models\Tool::find($content['interactive_tool_id']);
         }
 
-        // Prompt de la quinzaine
-        if ($week % 2 === 0 && $aiTerm) {
-            $ref = new \ReflectionMethod(\Modules\Newsletter\Console\DigestCommand::class, 'generateWeeklyPrompt');
-            $ref->setAccessible(true);
-            $weeklyPrompt = $ref->invoke(null, $aiTerm->name ?? '', $aiTerm->type ?? null);
-        }
-
-        $subject = 'Veille hebdo #'.$week.' - '.config('app.name');
-
-        return view('newsletter::emails.digest-weekly', [
-            'subject' => $subject,
+        return [
+            'issue' => $issue,
+            'subject' => $issue->subject,
             'highlight' => $highlight,
             'topNews' => $topNews,
             'toolOfWeek' => $toolOfWeek,
             'featuredArticle' => $featuredArticle,
             'aiTerm' => $aiTerm,
             'interactiveTool' => $interactiveTool,
-            'weeklyPrompt' => $weeklyPrompt,
-            'weekNumber' => $week,
+            'weeklyPrompt' => $content['weekly_prompt'] ?? null,
+            'weekNumber' => $issue->week_number,
             'unsubscribeUrl' => '#',
-        ]);
-    }
-
-    public function latest()
-    {
-        $week = (int) now()->weekOfYear;
-        $year = (int) now()->year;
-
-        return $this->show($year, $week);
+        ];
     }
 }

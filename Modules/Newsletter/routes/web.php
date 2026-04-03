@@ -30,6 +30,9 @@ Route::middleware('web')->group(function () {
     Route::get('/newsletter/web', [\Modules\Newsletter\Http\Controllers\NewsletterWebController::class, 'latest'])
         ->name('newsletter.web.latest')
         ->middleware('cacheResponse:3600');
+    Route::get('/infolettre', [\Modules\Newsletter\Http\Controllers\NewsletterWebController::class, 'archive'])
+        ->name('newsletter.archive')
+        ->middleware('cacheResponse:600');
 });
 
 Route::prefix('admin/newsletter')

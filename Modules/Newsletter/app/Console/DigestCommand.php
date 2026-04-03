@@ -105,12 +105,33 @@ class DigestCommand extends Command
             ));
         }
 
+        // Sauvegarder le numero de newsletter pour l'archivage web
+        if (class_exists(\Modules\Newsletter\Models\NewsletterIssue::class) && Schema::hasTable('newsletter_issues')) {
+            \Modules\Newsletter\Models\NewsletterIssue::updateOrCreate(
+                ['year' => (int) now()->year, 'week_number' => $weekNumber],
+                [
+                    'subject' => 'Veille hebdo #'.$weekNumber.' - '.config('app.name'),
+                    'content' => [
+                        'highlight_id' => $highlight?->id,
+                        'top_news_ids' => $topNews->pluck('id')->toArray(),
+                        'tool_id' => $toolOfWeek?->id,
+                        'article_id' => $featuredArticle?->id,
+                        'term_id' => $aiTerm?->id,
+                        'interactive_tool_id' => $interactiveTool?->id,
+                        'weekly_prompt' => $weeklyPrompt,
+                    ],
+                    'subscriber_count' => $subscribers->count(),
+                    'sent_at' => now(),
+                ]
+            );
+        }
+
         $this->newLine();
         $this->components->twoColumnDetail('Highlight', $highlight?->title ?? 'none');
         $this->components->twoColumnDetail('Top news', (string) $topNews->count());
         $this->components->twoColumnDetail('Tool of week', $toolOfWeek?->name ?? 'none');
         $this->components->twoColumnDetail('Featured article', $featuredArticle?->title ?? 'none');
-        $this->components->twoColumnDetail('Did you know', $didYouKnow?->term ?? $didYouKnow?->name ?? 'none');
+        $this->components->twoColumnDetail('AI term', $aiTerm?->name ?? 'none');
         $this->components->twoColumnDetail('Subscribers', (string) $subscribers->count());
         $this->components->info('Weekly digest #'.$weekNumber.' sent successfully.');
 
