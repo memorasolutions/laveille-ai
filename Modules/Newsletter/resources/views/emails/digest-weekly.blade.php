@@ -152,13 +152,13 @@
             <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;font-family:Arial,sans-serif;">A lire cette semaine</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td width="180" valign="top" class="stack-col" style="padding-right:20px;">
-                        <img src="{{ newsletterImg($featuredArticle->featured_image ?? null) }}" width="180" alt="{{ $featuredArticle->title }}" style="border-radius:6px;width:180px;"/>
-                    </td>
-                    <td valign="top" class="stack-col" style="font-family:Arial,sans-serif;">
+                    <td valign="top" class="stack-col" style="font-family:Arial,sans-serif;padding-right:20px;">
                         <a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#1a1a2e;font-size:16px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $featuredArticle->title }}</a>
                         <p style="margin:8px 0 12px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($featuredArticle->excerpt ?? $featuredArticle->content ?? ''), 120) }}</p>
                         <a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#0B7285;font-weight:bold;font-size:14px;">Lire l'article &rarr;</a>
+                    </td>
+                    <td width="180" valign="top" class="stack-col">
+                        <img src="{{ newsletterImg($featuredArticle->featured_image ?? null) }}" width="180" alt="{{ $featuredArticle->title }}" style="border-radius:6px;width:180px;"/>
                     </td>
                 </tr>
             </table>
@@ -176,15 +176,11 @@
             <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#d97706;font-weight:bold;font-family:Arial,sans-serif;">Outil gratuit a essayer</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td width="70" valign="top" style="padding-right:15px;">
-                        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                            <tr><td style="width:60px;height:60px;background-color:#d97706;border-radius:8px;text-align:center;vertical-align:middle;font-size:28px;">
-                                &#9889;
-                            </td></tr>
-                        </table>
+                    <td width="100" valign="top" class="stack-col" style="padding-right:15px;">
+                        <img src="{{ newsletterImg($interactiveTool->featured_image ?? null) }}" width="100" height="100" alt="{{ $interactiveTool->name }}" style="border-radius:8px;width:100px;height:100px;object-fit:cover;"/>
                     </td>
                     <td valign="top" style="font-family:Arial,sans-serif;">
-                        <h3 style="margin:0 0 6px;font-size:18px;color:#1a1a2e;">{{ $interactiveTool->name }}</h3>
+                        <h3 style="margin:0 0 6px;font-size:18px;color:#1a1a2e;">{{ $interactiveTool->icon ?? '' }} {{ $interactiveTool->name }}</h3>
                         <p style="margin:0 0 14px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($interactiveTool->description ?? ''), 150) }}</p>
                         <a href="{{ route('tools.show', $interactiveTool->slug) }}" style="display:inline-block;background-color:#d97706;color:#fff;padding:10px 20px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Essayer gratuitement &rarr;</a>
                     </td>
