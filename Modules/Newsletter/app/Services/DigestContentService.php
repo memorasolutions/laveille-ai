@@ -309,32 +309,74 @@ class DigestContentService
             }
         }
 
-        // PRIORITE 2 : loi/regulation → consultant conformité
-        $lawKw = ['loi', 'rgpd', 'regulation', 'gouvernance', 'ethique', 'audit', 'confidentialite', 'responsable'];
-        foreach ($lawKw as $kw) {
-            if (str_contains($lower, $kw)) {
-                return [
-                    'prompt' => "Tu es un consultant en conformité numérique spécialisé dans les lois québécoises et canadiennes. Explique les implications pratiques de {$termName} pour un propriétaire de petite entreprise ayant un site web. Indique 3 actions concrètes et urgentes à entreprendre, ainsi que les risques encourus en cas de non-conformité. Présente ta réponse sous forme de liste numérotée, en utilisant un langage simple et des conseils actionnables.",
-                    'technique' => "Prompt structuré avec rôle d'expert : le rôle de consultant spécialisé cadre l'IA vers des recommandations concrètes et pratiques.",
-                ];
+        // PRIORITE 2 : tous les autres termes → prompt généré dynamiquement par IA
+        // Chaque semaine, une technique de prompting différente est utilisée (rotation)
+        // L'IA génère un prompt unique, créatif et pédagogique basé sur les meilleures pratiques actuelles
+        return self::generateDynamicPrompt($termName, (int) now()->weekOfYear);
+    }
+
+    /**
+     * Génère un prompt unique via OpenRouter deepseek-chat.
+     * Chaque semaine, une technique de prompting différente est sélectionnée (rotation).
+     */
+    public static function generateDynamicPrompt(string $termName, int $weekNumber): array
+    {
+        $techniques = [
+            'chaîne de pensée',
+            'role prompting',
+            'few-shot',
+            'analogie',
+            'step-back',
+            'décomposition',
+            'self-refine',
+            'contraintes créatives',
+        ];
+
+        $selectedTechnique = $techniques[$weekNumber % count($techniques)];
+
+        try {
+            $apiKey = env('OPENROUTER_API_KEY');
+            if (! $apiKey) {
+                throw new \RuntimeException('OPENROUTER_API_KEY manquante');
             }
+
+            $response = Http::withToken($apiKey)
+                ->timeout(20)
+                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                    'model' => 'deepseek/deepseek-chat',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => "Tu es un expert en prompt engineering pour une infolettre éducative sur l'IA au Québec. Tu génères des prompts uniques, créatifs et pédagogiques. Tous les accents français doivent être présents. Style authentiquement humain, pas robotique.",
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => "Génère un prompt éducatif de haute qualité sur le terme IA '{$termName}' en utilisant la technique de prompting '{$selectedTechnique}'.\n\nLe prompt doit :\n- Être prêt à copier-coller dans ChatGPT, Claude ou Gemini\n- Enseigner le concept du terme tout en démontrant la technique\n- Être en français québécois, ton amical, entre 60 et 100 mots\n- Refléter les meilleures pratiques de prompting en 2026\n\nRéponds UNIQUEMENT avec le texte du prompt, rien d'autre. Pas d'introduction, pas d'explication.",
+                        ],
+                    ],
+                    'temperature' => 0.8,
+                    'max_tokens' => 400,
+                ]);
+
+            if ($response->successful()) {
+                $text = trim($response->json('choices.0.message.content') ?? '');
+                if ($text) {
+                    return [
+                        'prompt' => $text,
+                        'technique' => "Technique utilisée : {$selectedTechnique} - prompt généré dynamiquement par IA pour refléter les meilleures pratiques actuelles.",
+                    ];
+                }
+            }
+
+            Log::warning('Newsletter dynamic prompt generation failed', ['status' => $response->status(), 'term' => $termName]);
+        } catch (\Throwable $e) {
+            Log::warning('Newsletter dynamic prompt error: '.$e->getMessage());
         }
 
-        // PRIORITE 2b : technologie/outil → formateur + analogie cuisine
-        $toolKw = ['gpu', 'tpu', 'cloud', 'api', 'ocr', 'iot', 'benchmark', 'modèle de', 'modèle du'];
-        foreach ($toolKw as $kw) {
-            if (str_contains($lower, $kw)) {
-                return [
-                    'prompt' => "Tu es un formateur en technologies qui excelle dans les analogies créatives. Explique {$termName} à quelqu'un qui n'a jamais codé mais est curieux de technologie, en utilisant une analogie tirée de la cuisine. Montre un outil gratuit qu'il peut essayer cette semaine pour expérimenter ce concept. Explique pourquoi c'est important en 2026. Structure ta réponse en 3 paragraphes : l'analogie, l'aspect pratique avec l'outil, et l'importance future. Adopte un ton décontracté et amical.",
-                    'technique' => "Prompt structuré avec analogie imposée : la contrainte de la cuisine rend le concept tangible et mémorable pour les non-initiés.",
-                ];
-            }
-        }
-
-        // PRIORITE 3 : concept général → professeur PCRF complet
+        // Fallback statique si l'API échoue
         return [
             'prompt' => "Tu es un professeur passionné qui enseigne l'IA à des débutants depuis 20 ans. Explique le concept de {$termName} à un public adulte non-technique en utilisant uniquement des exemples de la vie de tous les jours. Décris le concept étape par étape : commence par une analogie simple, explique ensuite comment cela fonctionne de manière simplifiée, donne un exemple concret de son utilisation en 2026, et termine par une idée fausse courante à son sujet. Rédige ta réponse en 4 courts paragraphes, avec un ton amical et un total de moins de 300 mots.",
-            'technique' => "Prompt structuré PCRF (persona, contexte, requête, format) : chaque élément guide l'IA vers une réponse pédagogique adaptée à l'audience.",
+            'technique' => "Prompt structuré PCRF (fallback) : le prompt statique est utilisé car la génération dynamique a échoué.",
         ];
     }
 }
