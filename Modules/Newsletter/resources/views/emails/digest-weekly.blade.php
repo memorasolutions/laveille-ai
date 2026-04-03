@@ -14,9 +14,19 @@
             .stack-col { display:block !important; width:100% !important; padding-right:0 !important; padding-bottom:15px !important; }
             .stack-col img { width:100% !important; }
             .mobile-p { padding:20px 15px !important; }
+            .hide-mobile { display:none !important; }
         }
     </style>
 </head>
+@php
+    // Helper : genere une URL absolue pour les images News/Directory
+    // Les images News sont en /storage/news/images/X.webp (chemin relatif)
+    function newsletterImg($path, $fallback = 'images/og-image.png') {
+        if (!$path) return asset($fallback);
+        if (str_starts_with($path, 'http')) return $path;
+        return asset($path);
+    }
+@endphp
 <body style="margin:0;padding:0;background-color:#f4f4f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#f4f4f4">
 <tr><td align="center" style="padding:20px 10px;">
@@ -50,8 +60,7 @@
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td width="200" valign="top" class="stack-col" style="padding-right:20px;">
-                        @php $hlImg = $highlight->image_path ?? null; @endphp
-                        <img src="{{ $hlImg ? asset($hlImg) : asset('images/og-image.png') }}" width="200" alt="" style="border-radius:6px;width:200px;"/>
+                        <img src="{{ newsletterImg($highlight->image_url ?? null) }}" width="200" alt="{{ $highlight->seo_title ?? $highlight->title ?? '' }}" style="border-radius:6px;width:200px;"/>
                     </td>
                     <td valign="top" class="stack-col" style="font-family:Arial,sans-serif;">
                         <h2 style="margin:0 0 8px;font-size:20px;line-height:1.3;color:#1a1a2e;">{{ $highlight->seo_title ?? $highlight->title ?? '' }}</h2>
@@ -69,18 +78,17 @@
     @endif
 
     {{-- ============================================================ --}}
-    {{-- 3. ACTUALITES DE LA SEMAINE (miniatures 80x80)                --}}
+    {{-- 3. ACTUALITES DE LA SEMAINE (5 articles avec miniatures)       --}}
     {{-- ============================================================ --}}
     @if(($topNews ?? null) && $topNews->count())
     <tr>
         <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
             <h3 style="margin:0 0 16px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-family:Arial,sans-serif;">Actualites de la semaine</h3>
             @foreach($topNews as $news)
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:12px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:14px;{{ !$loop->last ? 'border-bottom:1px solid #f0f0f0;padding-bottom:14px;' : '' }}">
                 <tr>
                     <td width="80" valign="top" style="padding-right:12px;">
-                        @php $nImg = $news->image_path ?? null; @endphp
-                        <img src="{{ $nImg ? asset($nImg) : asset('images/og-image.png') }}" width="80" height="80" alt="" style="border-radius:6px;width:80px;height:80px;object-fit:cover;"/>
+                        <img src="{{ newsletterImg($news->image_url ?? null) }}" width="80" height="80" alt="{{ $news->seo_title ?? $news->title ?? '' }}" style="border-radius:6px;width:80px;height:80px;object-fit:cover;"/>
                     </td>
                     <td valign="middle" style="font-family:Arial,sans-serif;">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
@@ -91,6 +99,11 @@
                 </tr>
             </table>
             @endforeach
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr><td align="center" style="padding-top:8px;">
+                    <a href="{{ route('news.index') }}" style="color:#0B7285;font-weight:bold;font-size:13px;font-family:Arial,sans-serif;">Voir toutes les actualites &rarr;</a>
+                </td></tr>
+            </table>
         </td>
     </tr>
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
@@ -106,8 +119,7 @@
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td width="220" valign="top" class="stack-col" style="padding-right:20px;">
-                        @php $tImg = $toolOfWeek->screenshot ?? null; @endphp
-                        <img src="{{ $tImg ? (str_starts_with($tImg, 'http') ? $tImg : asset($tImg)) : asset('images/og-image.png') }}" width="220" alt="" style="border-radius:6px;width:220px;"/>
+                        <img src="{{ newsletterImg($toolOfWeek->screenshot ?? null) }}" width="220" alt="{{ $toolOfWeek->name }}" style="border-radius:6px;width:220px;"/>
                     </td>
                     <td valign="top" class="stack-col" style="font-family:Arial,sans-serif;">
                         <h3 style="margin:0 0 6px;font-size:18px;color:#0B7285;">{{ $toolOfWeek->name }}</h3>
@@ -141,8 +153,7 @@
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td width="180" valign="top" class="stack-col" style="padding-right:20px;">
-                        @php $aImg = $featuredArticle->featured_image ?? null; @endphp
-                        <img src="{{ $aImg ? asset($aImg) : asset('images/og-image.png') }}" width="180" alt="" style="border-radius:6px;width:180px;"/>
+                        <img src="{{ newsletterImg($featuredArticle->featured_image ?? null) }}" width="180" alt="{{ $featuredArticle->title }}" style="border-radius:6px;width:180px;"/>
                     </td>
                     <td valign="top" class="stack-col" style="font-family:Arial,sans-serif;">
                         <a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#1a1a2e;font-size:16px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $featuredArticle->title }}</a>
@@ -157,21 +168,53 @@
     @endif
 
     {{-- ============================================================ --}}
-    {{-- 6. LE SAVIEZ-VOUS? (bandeau teal)                             --}}
+    {{-- 6. TERMES IA A DECOUVRIR (3 termes)                          --}}
     {{-- ============================================================ --}}
-    @if($didYouKnow ?? null)
+    @if(($aiTerms ?? null) && $aiTerms->count())
     <tr>
-        <td style="padding:25px 30px;background-color:#0B7285;" class="mobile-p">
-            <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.7);font-weight:bold;font-family:Arial,sans-serif;">Le saviez-vous ?</p>
-            <p style="margin:0;font-size:16px;color:#ffffff;line-height:1.5;font-family:Arial,sans-serif;">
-                <strong>{{ $didYouKnow->term ?? $didYouKnow->name ?? '' }}</strong> — {{ Str::limit(strip_tags($didYouKnow->definition ?? $didYouKnow->description ?? ''), 200) }}
+        <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
+            <h3 style="margin:0 0 14px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-family:Arial,sans-serif;">Termes IA a decouvrir</h3>
+            @foreach($aiTerms as $term)
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:10px;">
+                <tr>
+                    <td style="font-family:Arial,sans-serif;padding:10px 14px;background-color:#ffffff;border-radius:6px;border-left:3px solid #0B7285;">
+                        <strong style="color:#1a1a2e;font-size:14px;">{{ $term->term ?? $term->name ?? '' }}</strong>
+                        <span style="color:#777;font-size:13px;"> — {{ Str::limit(strip_tags($term->definition ?? $term->description ?? ''), 100) }}</span>
+                    </td>
+                </tr>
+            </table>
+            @endforeach
+            @if(Route::has('dictionary.index'))
+            <p style="margin:8px 0 0;text-align:center;">
+                <a href="{{ route('dictionary.index') }}" style="color:#0B7285;font-weight:bold;font-size:13px;font-family:Arial,sans-serif;">Explorer le glossaire &rarr;</a>
             </p>
+            @endif
         </td>
     </tr>
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
     {{-- ============================================================ --}}
-    {{-- 7. FOOTER                                                      --}}
+    {{-- 7. SAVIEZ-VOUS? RACCOURCISSEUR + QR CODE (promo veille.la)    --}}
+    {{-- ============================================================ --}}
+    <tr>
+        <td style="padding:25px 30px;background-color:#0B7285;" class="mobile-p">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td style="font-family:Arial,sans-serif;">
+                        <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.7);font-weight:bold;">Le saviez-vous ?</p>
+                        <p style="margin:0 0 12px;font-size:16px;color:#ffffff;line-height:1.5;">
+                            <strong>veille.la</strong> est notre raccourcisseur d'URL gratuit ! Creez des liens courts personnalises avec code QR, statistiques de clics et preview social.
+                        </p>
+                        <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#ffffff;color:#0B7285;padding:10px 20px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    {{-- ============================================================ --}}
+    {{-- 8. FOOTER                                                      --}}
     {{-- ============================================================ --}}
     <tr>
         <td style="padding:30px;text-align:center;background-color:#fafafa;" class="mobile-p">
@@ -185,6 +228,8 @@
                     <a href="https://www.linkedin.com/in/lapointestephane/" style="color:#999;text-decoration:none;">LinkedIn</a>
                     &nbsp;&middot;&nbsp;
                     <a href="https://laveille.ai" style="color:#999;text-decoration:none;">Site web</a>
+                    &nbsp;&middot;&nbsp;
+                    <a href="https://laveille.ai/feed" style="color:#999;text-decoration:none;">RSS</a>
                 </td></tr>
                 <tr><td align="center" style="font-family:Arial,sans-serif;font-size:11px;color:#bbb;padding-bottom:8px;">
                     &copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits reserves.

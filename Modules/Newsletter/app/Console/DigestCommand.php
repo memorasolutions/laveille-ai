@@ -42,7 +42,7 @@ class DigestCommand extends Command
                 ->where('pub_date', '>=', now()->subDays(7))
                 ->when($highlight, fn ($q) => $q->where('id', '!=', $highlight->id))
                 ->orderByDesc('relevance_score')
-                ->take(3)
+                ->take(5)
                 ->get();
         }
 
@@ -73,6 +73,15 @@ class DigestCommand extends Command
             $didYouKnow = \Modules\Acronyms\Models\Acronym::inRandomOrder()->first();
         }
 
+        // Section 6 : termes IA a decouvrir (3 termes glossaire)
+        $aiTerms = collect();
+        if (class_exists(\Modules\Dictionary\Models\Term::class)) {
+            $aiTerms = \Modules\Dictionary\Models\Term::where('is_published', true)
+                ->inRandomOrder()
+                ->take(3)
+                ->get();
+        }
+
         $weekNumber = (int) now()->weekOfYear;
 
         if (! $highlight && $topNews->isEmpty()) {
@@ -91,7 +100,7 @@ class DigestCommand extends Command
 
         foreach ($subscribers as $subscriber) {
             $subscriber->notify(new WeeklyDigestNotification(
-                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber
+                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber, $aiTerms
             ));
         }
 
