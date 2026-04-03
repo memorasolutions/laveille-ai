@@ -192,36 +192,49 @@
     @endif
 
     {{-- ============================================================ --}}
-    {{-- 7. TERMES IA A DECOUVRIR (3 termes)                          --}}
+    {{-- 7. TERME IA DE LA SEMAINE (hero card educative)               --}}
     {{-- ============================================================ --}}
-    @if(($aiTerms ?? null) && $aiTerms->count())
+    @if($aiTerm ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
-            <h3 style="margin:0 0 14px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-family:Arial,sans-serif;">Termes IA a decouvrir</h3>
-            @foreach($aiTerms as $term)
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:10px;">
-                <tr>
-                    <td style="padding:8px 12px;background-color:#ffffff;border-radius:6px;">
-                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                            <tr>
-                                <td width="50" valign="top" class="stack-col" style="padding-right:12px;">
-                                    <img src="{{ newsletterImg($term->hero_image ?? null) }}" width="50" height="50" alt="{{ $term->name ?? '' }}" style="border-radius:6px;width:50px;height:50px;object-fit:cover;"/>
-                                </td>
-                                <td valign="middle" style="font-family:Arial,sans-serif;">
-                                    <strong style="color:#1a1a2e;font-size:14px;">{{ $term->name ?? '' }}</strong>
-                                    <br/><span style="color:#777;font-size:13px;">{{ Str::limit(strip_tags($term->definition ?? $term->description ?? ''), 100) }}</span>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-family:Arial,sans-serif;">
+                <tr><td align="center" style="padding-bottom:16px;">
+                    <span style="color:#0B7285;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;">Terme IA de la semaine</span>
+                </td></tr>
+                <tr><td align="center" style="padding-bottom:14px;">
+                    <img src="{{ newsletterImg($aiTerm->hero_image ?? null) }}" alt="{{ $aiTerm->name ?? '' }}" width="200" height="200" style="border-radius:8px;width:200px;height:200px;object-fit:cover;"/>
+                </td></tr>
+                <tr><td align="center" style="padding-bottom:8px;">
+                    <span style="color:#1a1a2e;font-size:20px;font-weight:bold;">{{ $aiTerm->name ?? '' }}</span>
+                </td></tr>
+                <tr><td align="center" style="padding-bottom:16px;color:#555;font-size:14px;line-height:1.5;">
+                    {{ Str::limit(strip_tags($aiTerm->definition ?? ''), 200) }}
+                </td></tr>
+                @if($aiTerm->analogy ?? null)
+                <tr><td style="padding-bottom:16px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td width="4" bgcolor="#0B7285" style="vertical-align:top;"></td>
+                            <td style="padding-left:15px;">
+                                <span style="color:#0B7285;font-size:12px;font-style:italic;">En d'autres mots...</span><br/>
+                                <span style="color:#555;font-size:14px;line-height:1.5;">{{ Str::limit(strip_tags($aiTerm->analogy), 180) }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td></tr>
+                @endif
+                @if($aiTerm->did_you_know ?? null)
+                <tr><td align="center" style="padding-bottom:16px;">
+                    <span style="color:#d97706;font-size:12px;font-weight:bold;">Le saviez-vous ?</span><br/>
+                    <span style="color:#666;font-size:13px;">{{ Str::limit(strip_tags($aiTerm->did_you_know), 150) }}</span>
+                </td></tr>
+                @endif
+                <tr><td align="center">
+                    @if(Route::has('dictionary.index'))
+                    <a href="{{ route('dictionary.index') }}" target="_blank" style="color:#0B7285;font-size:13px;font-weight:bold;text-decoration:none;">Explorer le glossaire &rarr;</a>
+                    @endif
+                </td></tr>
             </table>
-            @endforeach
-            @if(Route::has('dictionary.index'))
-            <p style="margin:8px 0 0;text-align:center;">
-                <a href="{{ route('dictionary.index') }}" style="color:#0B7285;font-weight:bold;font-size:13px;font-family:Arial,sans-serif;">Explorer le glossaire &rarr;</a>
-            </p>
-            @endif
         </td>
     </tr>
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>

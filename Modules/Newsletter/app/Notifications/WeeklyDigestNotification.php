@@ -20,7 +20,7 @@ class WeeklyDigestNotification extends Notification
         public ?object $featuredArticle,
         public ?object $didYouKnow,
         public int $weekNumber,
-        public ?Collection $aiTerms = null,
+        public ?object $aiTerm = null,
         public ?object $interactiveTool = null
     ) {}
 
@@ -43,7 +43,7 @@ class WeeklyDigestNotification extends Notification
                 'toolOfWeek' => $this->toolOfWeek,
                 'featuredArticle' => $this->featuredArticle,
                 'didYouKnow' => $this->didYouKnow,
-                'aiTerms' => $this->aiTerms ?? collect(),
+                'aiTerm' => $this->aiTerm,
                 'interactiveTool' => $this->interactiveTool,
                 'unsubscribeUrl' => $unsubscribeUrl,
                 'weekNumber' => $this->weekNumber,

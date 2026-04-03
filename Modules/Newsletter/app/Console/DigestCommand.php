@@ -81,13 +81,12 @@ class DigestCommand extends Command
                 ->first();
         }
 
-        // Section 7 : termes IA a decouvrir (3 termes glossaire)
-        $aiTerms = collect();
+        // Section 7 : terme IA de la semaine (1 seul, hero card educative)
+        $aiTerm = null;
         if (class_exists(\Modules\Dictionary\Models\Term::class)) {
-            $aiTerms = \Modules\Dictionary\Models\Term::where('is_published', true)
+            $aiTerm = \Modules\Dictionary\Models\Term::where('is_published', true)
                 ->inRandomOrder()
-                ->take(3)
-                ->get();
+                ->first();
         }
 
         $weekNumber = (int) now()->weekOfYear;
@@ -108,7 +107,7 @@ class DigestCommand extends Command
 
         foreach ($subscribers as $subscriber) {
             $subscriber->notify(new WeeklyDigestNotification(
-                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber, $aiTerms, $interactiveTool
+                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber, $aiTerm, $interactiveTool
             ));
         }
 
