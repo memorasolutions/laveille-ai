@@ -73,7 +73,15 @@ class DigestCommand extends Command
             $didYouKnow = \Modules\Acronyms\Models\Acronym::inRandomOrder()->first();
         }
 
-        // Section 6 : termes IA a decouvrir (3 termes glossaire)
+        // Section 6 : outil interactif gratuit (rotation)
+        $interactiveTool = null;
+        if (class_exists(\Modules\Tools\Models\Tool::class)) {
+            $interactiveTool = \Modules\Tools\Models\Tool::where('is_active', true)
+                ->inRandomOrder()
+                ->first();
+        }
+
+        // Section 7 : termes IA a decouvrir (3 termes glossaire)
         $aiTerms = collect();
         if (class_exists(\Modules\Dictionary\Models\Term::class)) {
             $aiTerms = \Modules\Dictionary\Models\Term::where('is_published', true)
@@ -100,7 +108,7 @@ class DigestCommand extends Command
 
         foreach ($subscribers as $subscriber) {
             $subscriber->notify(new WeeklyDigestNotification(
-                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber, $aiTerms
+                $highlight, $topNews, $toolOfWeek, $featuredArticle, $didYouKnow, $weekNumber, $aiTerms, $interactiveTool
             ));
         }
 

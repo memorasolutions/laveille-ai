@@ -39,11 +39,11 @@
         <td style="background-color:#0c1427;padding:24px 30px;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td style="font-family:Arial,sans-serif;font-size:22px;font-weight:bold;color:#f1f5f9;">
-                        La <span style="color:#0B7285;">veille</span><span style="color:#f97316;">.</span>
+                    <td>
+                        <img src="{{ asset('images/logo-horizontal-white.svg') }}" width="160" alt="{{ config('app.name') }}" style="width:160px;height:auto;"/>
                     </td>
                     <td align="right" style="font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;">
-                        Digest #{{ $weekNumber ?? '?' }}<br/>{{ now()->translatedFormat('j F Y') }}
+                        Veille hebdo #{{ $weekNumber ?? '?' }}<br/>{{ now()->translatedFormat('j F Y') }}
                     </td>
                 </tr>
             </table>
@@ -168,7 +168,28 @@
     @endif
 
     {{-- ============================================================ --}}
-    {{-- 6. TERMES IA A DECOUVRIR (3 termes)                          --}}
+    {{-- 6. OUTIL GRATUIT A ESSAYER (outil interactif /outils)         --}}
+    {{-- ============================================================ --}}
+    @if($interactiveTool ?? null)
+    <tr>
+        <td style="padding:25px 30px;background-color:#fffbeb;" class="mobile-p">
+            <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#d97706;font-weight:bold;font-family:Arial,sans-serif;">Outil gratuit a essayer</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td style="font-family:Arial,sans-serif;">
+                        <h3 style="margin:0 0 6px;font-size:18px;color:#1a1a2e;">{{ $interactiveTool->name }}</h3>
+                        <p style="margin:0 0 14px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($interactiveTool->description ?? ''), 150) }}</p>
+                        <a href="{{ route('tools.show', $interactiveTool->slug) }}" style="display:inline-block;background-color:#d97706;color:#fff;padding:10px 20px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Essayer gratuitement &rarr;</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- 7. TERMES IA A DECOUVRIR (3 termes)                          --}}
     {{-- ============================================================ --}}
     @if(($aiTerms ?? null) && $aiTerms->count())
     <tr>
@@ -198,15 +219,15 @@
     {{-- 7. SAVIEZ-VOUS? RACCOURCISSEUR + QR CODE (promo veille.la)    --}}
     {{-- ============================================================ --}}
     <tr>
-        <td style="padding:25px 30px;background-color:#0B7285;" class="mobile-p">
+        <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td style="font-family:Arial,sans-serif;">
-                        <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.7);font-weight:bold;">Le saviez-vous ?</p>
-                        <p style="margin:0 0 12px;font-size:16px;color:#ffffff;line-height:1.5;">
-                            <strong>veille.la</strong> est notre raccourcisseur d'URL gratuit ! Creez des liens courts personnalises avec code QR, statistiques de clics et preview social.
+                        <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Le saviez-vous ?</p>
+                        <p style="margin:0 0 14px;font-size:16px;color:#e2e8f0;line-height:1.6;">
+                            <a href="{{ config('app.url') }}/raccourcir" style="color:#0B7285;font-weight:bold;text-decoration:underline;">veille.la</a> est notre raccourcisseur d'URL gratuit ! Creez des liens courts personnalises avec code QR, statistiques de clics et apercu social — le tout sans inscription.
                         </p>
-                        <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#ffffff;color:#0B7285;padding:10px 20px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
+                        <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#0B7285;color:#ffffff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
                     </td>
                 </tr>
             </table>
