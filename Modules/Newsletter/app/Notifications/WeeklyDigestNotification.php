@@ -22,7 +22,7 @@ class WeeklyDigestNotification extends Notification
         public int $weekNumber,
         public ?object $aiTerm = null,
         public ?object $interactiveTool = null,
-        public ?string $weeklyPrompt = null
+        public string|array|null $weeklyPrompt = null
     ) {}
 
     public function via($notifiable): array

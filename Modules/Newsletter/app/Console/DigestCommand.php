@@ -129,29 +129,52 @@ class DigestCommand extends Command
         return self::SUCCESS;
     }
 
-    private static function generateWeeklyPrompt(string $termName, ?string $termType = null): string
+    /**
+     * Genere un prompt RCTFC (Role + Contexte + Tache + Format + Contrainte)
+     * adapte au terme IA, avec le nom de la technique de prompting utilisee.
+     */
+    private static function generateWeeklyPrompt(string $termName, ?string $termType = null): array
     {
         $lower = mb_strtolower($termName);
+        $search = $lower.' '.mb_strtolower($termType ?? '');
 
-        // Lois et reglements
-        if (str_contains($lower, 'loi') || str_contains($lower, 'rgpd') || str_contains($lower, 'regulation') || str_contains($lower, 'gouvernance') || str_contains($lower, 'ethique') || str_contains($lower, 'audit')) {
-            return "Analyse mon site web [collez votre URL] et identifie les 3 points les plus urgents a corriger pour etre conforme a {$termName}. Pour chaque point, propose une solution concrete et realisable en moins de 2 heures.";
-        }
-
-        // Techniques et methodes
-        $techniques = ['apprentissage', 'fine-tuning', 'rag', 'prompt', 'chain', 'embedding', 'token', 'inference', 'distillation', 'quantification', 'rlhf', 'few-shot', 'zero-shot', 'attention', 'transformer', 'vectorisation', 'clustering', 'classification', 'regression', 'mlops'];
-        foreach ($techniques as $kw) {
-            if (str_contains($lower, $kw)) {
-                return "Concois une experience pratique que je peux realiser en 15 minutes pour comprendre {$termName} : les outils gratuits a utiliser, un exemple concret avec mes propres donnees, et ce que je devrais observer comme resultat.";
+        // Lois et reglements → role prompting + chaine de pensee
+        $lawKw = ['loi', 'rgpd', 'regulation', 'gouvernance', 'ethique', 'audit', 'confidentialite', 'responsable'];
+        foreach ($lawKw as $kw) {
+            if (str_contains($search, $kw)) {
+                return [
+                    'prompt' => "Tu es un expert en conformite numerique. Analyse etape par etape les implications pratiques de {$termName} pour un site web quebecois. Presente 3 actions concretes a realiser cette semaine, classees par urgence.",
+                    'technique' => "Role prompting + chaine de pensee : le role d'expert guide l'IA vers une analyse structuree etape par etape.",
+                ];
             }
         }
 
-        // Outils et technologies
-        if (str_contains($lower, 'gpu') || str_contains($lower, 'tpu') || str_contains($lower, 'cloud') || str_contains($lower, 'api') || str_contains($lower, 'ocr') || str_contains($lower, 'iot')) {
-            return "Je suis debutant. Explique-moi {$termName} avec une analogie simple, puis montre-moi comment je pourrais l'utiliser gratuitement cette semaine dans un projet personnel concret.";
+        // Techniques et methodes → zero-shot avec contraintes
+        $techKw = ['apprentissage', 'fine-tuning', 'rag', 'prompt', 'chain', 'embedding', 'token', 'inference', 'distillation', 'quantification', 'rlhf', 'few-shot', 'zero-shot', 'attention', 'transformer', 'vectorisation', 'clustering', 'classification', 'regression', 'mlops', 'reseau', 'perceptron', 'encodeur', 'segmentation', 'detection'];
+        foreach ($techKw as $kw) {
+            if (str_contains($search, $kw)) {
+                return [
+                    'prompt' => "Propose une experience pratique de 15 minutes pour explorer {$termName} en utilisant uniquement des outils gratuits. Decris les etapes numerotees, du setup initial a l'interpretation des resultats.",
+                    'technique' => "Zero-shot avec contraintes : aucun exemple fourni, mais des contraintes precises (15 minutes, gratuit, etapes numerotees) qui cadrent la reponse.",
+                ];
+            }
         }
 
-        // Concept general (defaut)
-        return "Explique {$termName} comme si je n'y connaissais rien, puis propose-moi une idee originale pour l'appliquer dans un projet personnel cette semaine — quelque chose de faisable sans competences techniques avancees.";
+        // Outils et technologies → role + analogie
+        $toolKw = ['gpu', 'tpu', 'cloud', 'api', 'ocr', 'iot', 'benchmark', 'modele de', 'modele du'];
+        foreach ($toolKw as $kw) {
+            if (str_contains($search, $kw)) {
+                return [
+                    'prompt' => "Tu es un formateur en technologies. Explique {$termName} avec une analogie de la cuisine, puis montre comment je pourrais l'utiliser gratuitement cette semaine dans un projet personnel. Reponse en 3 paragraphes courts.",
+                    'technique' => "Role prompting + analogie : la comparaison avec la cuisine rend le concept concret et memorable.",
+                ];
+            }
+        }
+
+        // Concept general (defaut) → role vulgarisateur + analogie
+        return [
+            'prompt' => "Tu es un vulgarisateur scientifique. Explique le concept de {$termName} en utilisant une analogie tiree de la vie quotidienne. Structure ta reponse en trois paragraphes : l'analogie, la definition simple, et un exemple d'application en 2026.",
+            'technique' => "Role prompting + demande d'analogie : le role de vulgarisateur force un langage accessible, et l'analogie ancre le concept dans le quotidien.",
+        ];
     }
 }

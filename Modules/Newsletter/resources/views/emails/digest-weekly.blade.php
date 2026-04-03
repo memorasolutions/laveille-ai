@@ -11,8 +11,8 @@
         a { color:#0B7285; text-decoration:none; }
         @media only screen and (max-width:600px) {
             .email-container { width:100% !important; }
-            .stack-col { display:block !important; width:100% !important; padding-right:0 !important; padding-bottom:15px !important; }
-            .stack-col img { width:100% !important; }
+            .stack-col { display:block !important; width:100% !important; padding-right:0 !important; padding-left:0 !important; padding-bottom:12px !important; }
+            .stack-col img { width:100% !important; height:auto !important; }
             .mobile-p { padding:20px 15px !important; }
         }
     </style>
@@ -29,9 +29,7 @@
 <tr><td align="center" style="padding:20px 10px;">
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="max-width:600px;background-color:#ffffff;border-radius:8px;overflow:hidden;">
 
-    {{-- ============================================================ --}}
-    {{-- 1. HEADER DARK                                                --}}
-    {{-- ============================================================ --}}
+    {{-- 1. HEADER DARK --}}
     <tr>
         <td style="background-color:#0c1427;padding:24px 30px;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -43,9 +41,7 @@
         </td>
     </tr>
 
-    {{-- ============================================================ --}}
-    {{-- 2. LE FAIT MARQUANT                                           --}}
-    {{-- ============================================================ --}}
+    {{-- 2. LE FAIT MARQUANT --}}
     @if($highlight ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
@@ -70,9 +66,7 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- ============================================================ --}}
-    {{-- 3. DEFI DE LA QUINZAINE (semaines paires, position haute)     --}}
-    {{-- ============================================================ --}}
+    {{-- 3. DEFI DE LA QUINZAINE (semaines paires, position haute pour max engagement) --}}
     @if(($weeklyPrompt ?? null) && (($weekNumber ?? 0) % 2 === 0))
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
@@ -82,11 +76,20 @@
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;font-style:italic;line-height:1.5;">
-                            {{ $weeklyPrompt }}
+                            {{ is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt }}
                         </td></tr>
                     </table>
                 </td></tr>
-                <tr><td align="center" style="padding-bottom:16px;font-size:13px;color:#94a3b8;">Copiez ce prompt et testez-le dans ChatGPT, Claude ou Gemini !</td></tr>
+                @if(is_array($weeklyPrompt) && ($weeklyPrompt['technique'] ?? null))
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;font-size:13px;color:#94a3b8;line-height:1.5;">
+                            <strong style="color:#3dc9d8;">Technique utilisee :</strong> {{ $weeklyPrompt['technique'] }}
+                        </td></tr>
+                    </table>
+                </td></tr>
+                @endif
+                <tr><td align="center" style="padding-bottom:8px;font-size:13px;color:#94a3b8;">Copiez ce prompt et testez-le dans ChatGPT, Claude ou Gemini !</td></tr>
                 <tr><td align="center">
                     <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>
                 </td></tr>
@@ -96,9 +99,7 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- ============================================================ --}}
-    {{-- 4. ACTUALITES (5 avec miniatures alternees)                   --}}
-    {{-- ============================================================ --}}
+    {{-- 4. ACTUALITES (5 avec miniatures alternees + résumés) --}}
     @if(($topNews ?? null) && $topNews->count())
     <tr>
         <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
@@ -110,13 +111,15 @@
                     <td width="80" valign="top" class="stack-col" style="padding-right:12px;">
                         <img src="{{ newsletterImg($news->image_url ?? null) }}" width="80" height="80" alt="{{ $news->seo_title ?? $news->title ?? '' }}" style="border-radius:6px;width:80px;height:80px;object-fit:cover;"/>
                     </td>
-                    <td valign="middle" class="stack-col">
+                    <td valign="top" class="stack-col">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
+                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#777;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
                         @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#999;">{{ $news->source_name }}</span>@endif
                     </td>
                     @else
-                    <td valign="middle" class="stack-col" style="padding-right:12px;">
+                    <td valign="top" class="stack-col" style="padding-right:12px;">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
+                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#777;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
                         @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#999;">{{ $news->source_name }}</span>@endif
                     </td>
                     <td width="80" valign="top" class="stack-col">
@@ -132,35 +135,35 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- ============================================================ --}}
-    {{-- 4. OUTIL DE LA SEMAINE (hero card educative)                  --}}
-    {{-- ============================================================ --}}
+    {{-- 5. OUTIL DE LA SEMAINE (miniature gauche + titre droite + reste en dessous) --}}
     @if($toolOfWeek ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#f0fdfa;" class="mobile-p">
+            <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Outil de la semaine</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:16px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;">Outil de la semaine</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;">
-                    <img src="{{ newsletterImg($toolOfWeek->screenshot ?? null) }}" width="250" alt="{{ $toolOfWeek->name }}" style="border-radius:8px;width:250px;"/>
-                </td></tr>
-                <tr><td align="center" style="padding-bottom:6px;">
-                    <span style="font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $toolOfWeek->name }}</span>
-                    @php
-                        $pColor = match(strtolower($toolOfWeek->pricing ?? '')) { 'free','gratuit' => '#10b981', 'freemium' => '#f97316', default => '#6b7280' };
-                        $pLabel = match(strtolower($toolOfWeek->pricing ?? '')) { 'free','gratuit' => 'Gratuit', 'freemium' => 'Freemium', default => 'Payant' };
-                    @endphp
-                    <span style="display:inline-block;background-color:{{ $pColor }};color:#fff;font-size:10px;font-weight:bold;padding:3px 8px;border-radius:3px;margin-left:6px;vertical-align:middle;">{{ $pLabel }}</span>
-                </td></tr>
-                <tr><td align="center" style="padding-bottom:14px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($toolOfWeek->short_description ?? $toolOfWeek->description ?? ''), 150) }}</td></tr>
-                @if($toolOfWeek->use_cases ?? null)
-                <tr><td align="center" style="padding-bottom:4px;"><span style="font-size:13px;font-weight:bold;color:#0B7285;">Pour qui ?</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;font-size:14px;color:#555;">{{ Str::limit(strip_tags($toolOfWeek->use_cases), 100) }}</td></tr>
-                @endif
-                @if($toolOfWeek->pros ?? null)
-                <tr><td align="center" style="padding-bottom:4px;"><span style="font-size:13px;font-weight:bold;color:#0B7285;">Pourquoi l'essayer ?</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;font-size:14px;color:#555;">{{ Str::limit(strip_tags($toolOfWeek->pros), 100) }}</td></tr>
-                @endif
-                <tr><td align="center" style="padding-top:6px;">
+                <tr>
+                    <td width="200" valign="top" class="stack-col" style="padding-right:16px;">
+                        <img src="{{ newsletterImg($toolOfWeek->screenshot ?? null) }}" width="200" alt="{{ $toolOfWeek->name }}" style="border-radius:8px;width:200px;"/>
+                    </td>
+                    <td valign="top" class="stack-col">
+                        <span style="font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $toolOfWeek->name }}</span>
+                        @php
+                            $pColor = match(strtolower($toolOfWeek->pricing ?? '')) { 'free','gratuit' => '#10b981', 'freemium' => '#f97316', default => '#6b7280' };
+                            $pLabel = match(strtolower($toolOfWeek->pricing ?? '')) { 'free','gratuit' => 'Gratuit', 'freemium' => 'Freemium', default => 'Payant' };
+                        @endphp
+                        <span style="display:inline-block;background-color:{{ $pColor }};color:#fff;font-size:10px;font-weight:bold;padding:3px 8px;border-radius:3px;margin-left:6px;vertical-align:middle;">{{ $pLabel }}</span>
+                        <p style="margin:8px 0 0;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($toolOfWeek->short_description ?? $toolOfWeek->description ?? ''), 120) }}</p>
+                    </td>
+                </tr>
+                <tr><td colspan="2" style="padding-top:14px;">
+                    @if($toolOfWeek->use_cases ?? null)
+                    <p style="margin:0 0 4px;font-size:13px;font-weight:bold;color:#0B7285;">Pour qui ?</p>
+                    <p style="margin:0 0 12px;font-size:14px;color:#555;">{{ Str::limit(strip_tags($toolOfWeek->use_cases), 100) }}</p>
+                    @endif
+                    @if($toolOfWeek->pros ?? null)
+                    <p style="margin:0 0 4px;font-size:13px;font-weight:bold;color:#0B7285;">Pourquoi l'essayer ?</p>
+                    <p style="margin:0 0 14px;font-size:14px;color:#555;">{{ Str::limit(strip_tags($toolOfWeek->pros), 100) }}</p>
+                    @endif
                     <a href="{{ route('directory.show', $toolOfWeek->slug) }}" target="_blank" style="display:inline-block;background-color:#0B7285;color:#fff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Decouvrir sur laveille.ai &rarr;</a>
                 </td></tr>
             </table>
@@ -169,9 +172,7 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- ============================================================ --}}
-    {{-- 5. A LIRE (texte gauche, image droite)                        --}}
-    {{-- ============================================================ --}}
+    {{-- 6. A LIRE (texte gauche, image droite) --}}
     @if($featuredArticle ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
@@ -193,23 +194,23 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- ============================================================ --}}
-    {{-- 6. OUTIL GRATUIT A ESSAYER (hero card)                        --}}
-    {{-- ============================================================ --}}
+    {{-- 7. OUTIL GRATUIT (miniature gauche + titre droite + reste en dessous) --}}
     @if($interactiveTool ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#fffbeb;" class="mobile-p">
+            <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#d97706;font-weight:bold;">Outil gratuit a essayer</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:16px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#d97706;">Outil gratuit a essayer</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;">
-                    <img src="{{ newsletterImg($interactiveTool->featured_image ?? null) }}" width="200" alt="{{ $interactiveTool->name }}" style="border-radius:8px;width:200px;"/>
-                </td></tr>
-                <tr><td align="center" style="padding-bottom:4px;font-size:22px;">{{ $interactiveTool->icon ?? '' }}</td></tr>
-                <tr><td align="center" style="padding-bottom:10px;font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $interactiveTool->name }}</td></tr>
-                <tr><td align="center" style="padding-bottom:14px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($interactiveTool->description ?? ''), 150) }}</td></tr>
-                <tr><td align="center" style="padding-bottom:6px;font-size:13px;font-weight:bold;color:#d97706;">Essayez-le maintenant</td></tr>
-                <tr><td align="center" style="padding-bottom:16px;font-size:13px;color:#777;">100% gratuit, dans votre navigateur, aucune inscription.</td></tr>
-                <tr><td align="center">
+                <tr>
+                    <td width="150" valign="top" class="stack-col" style="padding-right:16px;">
+                        <img src="{{ newsletterImg($interactiveTool->featured_image ?? null) }}" width="150" alt="{{ $interactiveTool->name }}" style="border-radius:8px;width:150px;"/>
+                    </td>
+                    <td valign="top" class="stack-col">
+                        <span style="font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $interactiveTool->icon ?? '' }} {{ $interactiveTool->name }}</span>
+                        <p style="margin:8px 0 0;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($interactiveTool->description ?? ''), 120) }}</p>
+                    </td>
+                </tr>
+                <tr><td colspan="2" style="padding-top:14px;">
+                    <p style="margin:0 0 14px;font-size:13px;color:#777;">100% gratuit, dans votre navigateur, aucune inscription.</p>
                     <a href="{{ route('tools.show', $interactiveTool->slug) }}" target="_blank" style="display:inline-block;background-color:#d97706;color:#fff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Essayer gratuitement &rarr;</a>
                 </td></tr>
             </table>
@@ -218,9 +219,7 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- ============================================================ --}}
-    {{-- 7. TERME IA DE LA SEMAINE (hero card educative)               --}}
-    {{-- ============================================================ --}}
+    {{-- 8. TERME IA DE LA SEMAINE (hero card educative) --}}
     @if($aiTerm ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
@@ -261,11 +260,7 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- (defi de la quinzaine deplace en position 3, avant les actus) --}}
-
-    {{-- ============================================================ --}}
-    {{-- 9. LE SAVIEZ-VOUS? (promo veille.la)                         --}}
-    {{-- ============================================================ --}}
+    {{-- 9. LE SAVIEZ-VOUS? (promo veille.la) --}}
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -280,9 +275,7 @@
         </td>
     </tr>
 
-    {{-- ============================================================ --}}
-    {{-- 10. FOOTER                                                     --}}
-    {{-- ============================================================ --}}
+    {{-- 10. FOOTER --}}
     <tr>
         <td style="padding:30px;text-align:center;background-color:#fafafa;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
