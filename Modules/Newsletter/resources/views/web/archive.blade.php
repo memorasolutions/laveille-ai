@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Archives de l\'infolettre') . ' - ' . config('app.name'))
-@section('meta_description', __('Retrouvez tous les numeros passes de l\'infolettre La veille, votre veille technologique hebdomadaire en IA.'))
+@section('meta_description', __('Retrouvez tous les numéros passés de l\'infolettre La veille, votre veille technologique hebdomadaire en IA.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Infolettre')])
@@ -13,7 +13,7 @@
     <section class="wpo-blog-single-section section-padding">
         <div class="container">
             @if($issues->isEmpty())
-                <div class="alert alert-info text-center">{{ __('Aucun numero publie pour le moment. Revenez bientot !') }}</div>
+                <div class="alert alert-info text-center">{{ __('Aucun numéro publié pour le moment. Revenez bientôt !') }}</div>
             @else
             <div class="row">
                 @foreach($issues as $issue)
@@ -24,9 +24,8 @@
                             <h3 style="font-size:16px;margin:0 0 8px;line-height:1.3;">
                                 <a href="{{ $issue->web_url }}" style="color:#1a1a2e;">{{ $issue->subject }}</a>
                             </h3>
-                            <p style="margin:0 0 8px;font-size:13px;color:#777;">{{ $issue->sent_at?->translatedFormat('j F Y') }}</p>
-                            <p style="margin:0 0 12px;font-size:12px;color:#999;">{{ number_format($issue->subscriber_count, 0, ',', ' ') }} {{ __('abonnes') }}</p>
-                            <a href="{{ $issue->web_url }}" style="color:#0B7285;font-weight:bold;font-size:14px;">{{ __('Lire ce numero') }} &rarr;</a>
+                            <p style="margin:0 0 12px;font-size:13px;color:#777;">{{ $issue->sent_at?->translatedFormat('j F Y') }}</p>
+                            <a href="{{ $issue->web_url }}" style="color:#0B7285;font-weight:bold;font-size:14px;">{{ __('Lire ce numéro') }} &rarr;</a>
                         </div>
                     </div>
                 </div>
