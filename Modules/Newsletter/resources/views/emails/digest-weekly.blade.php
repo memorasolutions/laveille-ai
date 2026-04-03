@@ -130,13 +130,13 @@
                     </td>
                     <td valign="top" class="stack-col">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
-                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#555;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
+                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#555;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 140) }}</span>@endif
                         @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#666;">{{ $news->source_name }}</span>@endif
                     </td>
                     @else
                     <td valign="top" class="stack-col" style="padding-right:12px;">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
-                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#555;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
+                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#555;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 140) }}</span>@endif
                         @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#666;">{{ $news->source_name }}</span>@endif
                     </td>
                     <td width="80" valign="top" class="stack-col">
