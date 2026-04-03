@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Newsletter\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Modules\Newsletter\Models\NewsletterIssue;
 
@@ -64,7 +66,13 @@ class DigestContentService
             $weeklyPrompt = self::generateWeeklyPrompt($aiTerm->name ?? '', $aiTerm->type ?? null);
         }
 
-        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'weekNumber');
+        // Mini-editorial auto-genere via IA
+        $editorial = self::generateEditorial(
+            $highlight?->seo_title ?? $highlight?->title,
+            $highlight?->summary ?? null
+        );
+
+        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'weekNumber', 'editorial');
     }
 
     /**
@@ -105,9 +113,53 @@ class DigestContentService
         }
 
         $weeklyPrompt = $content['weekly_prompt'] ?? null;
+        $editorial = $content['editorial'] ?? null;
         $weekNumber = $issue->week_number;
 
-        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'weekNumber');
+        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'weekNumber', 'editorial');
+    }
+
+    /**
+     * Genere un mini-editorial via OpenRouter deepseek-chat.
+     */
+    public static function generateEditorial(?string $highlightTitle, ?string $highlightSummary): ?string
+    {
+        if (! $highlightTitle) {
+            return null;
+        }
+
+        try {
+            $apiKey = env('OPENROUTER_API_KEY');
+            if (! $apiKey) {
+                return null;
+            }
+
+            $response = Http::withToken($apiKey)
+                ->timeout(15)
+                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                    'model' => 'deepseek/deepseek-chat',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => "Tu es Stephane Lapointe, fondateur de laveille.ai, passionne d'IA et d'education au Quebec. Tu ecris un mini-editorial de 50 mots maximum pour ta newsletter hebdomadaire. Ton style : curieux, direct, authentique, avec une touche quebecoise sans etre caricatural. Pas de tiret cadratin. Utilise des guillemets francais.",
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => "Ecris un mini-editorial base sur cette actualite : {$highlightTitle}. Contexte : {$highlightSummary}. Format : 1 question provocante ou reflexion personnelle + 1-2 phrases de contexte. Termine par '- Stephane'. Maximum 50 mots.",
+                        ],
+                    ],
+                    'temperature' => 0.8,
+                    'max_tokens' => 150,
+                ]);
+
+            if ($response->successful()) {
+                return $response->json('choices.0.message.content');
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Newsletter editorial generation failed: '.$e->getMessage());
+        }
+
+        return "Cette semaine en IA, une question me trotte dans la tete... Bonne lecture ! - Stephane";
     }
 
     /**

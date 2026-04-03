@@ -36,7 +36,7 @@
         </td>
     </tr>
 
-    {{-- 1. HEADER DARK --}}
+    {{-- 1. HEADER DARK + EDITORIAL --}}
     <tr>
         <td style="background-color:#0c1427;padding:24px 30px;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -47,6 +47,15 @@
             </table>
         </td>
     </tr>
+
+    {{-- 1.5. MINI-EDITORIAL --}}
+    @if($editorial ?? null)
+    <tr>
+        <td style="padding:20px 30px 16px;background-color:#ffffff;border-bottom:1px solid #f0f0f0;" class="mobile-p">
+            <p style="margin:0;font-size:15px;color:#333;line-height:1.6;font-style:italic;">{{ $editorial }}</p>
+        </td>
+    </tr>
+    @endif
 
     {{-- 2. LE FAIT MARQUANT --}}
     @if($highlight ?? null)

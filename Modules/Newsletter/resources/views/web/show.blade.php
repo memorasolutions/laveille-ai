@@ -18,7 +18,14 @@
                 <div class="col-md-8 col-md-offset-2">
 
                     <h1 style="font-size:1.8rem;margin:0 0 8px;">{{ $subject }}</h1>
-                    <p style="color:#777;font-size:14px;margin-bottom:30px;">{{ $issue->sent_at?->translatedFormat('j F Y') }} - Semaine {{ $weekNumber }}</p>
+                    <p style="color:#777;font-size:14px;margin-bottom:20px;">{{ $issue->sent_at?->translatedFormat('j F Y') }} - Semaine {{ $weekNumber }}</p>
+
+                    {{-- Mini-editorial --}}
+                    @if($editorial ?? null)
+                    <blockquote style="border-left:4px solid #0B7285;padding:12px 20px;margin:0 0 30px;background-color:#f8fafc;border-radius:0 6px 6px 0;">
+                        <p style="margin:0;font-size:15px;color:#333;font-style:italic;line-height:1.6;">{{ $editorial }}</p>
+                    </blockquote>
+                    @endif
 
                     {{-- Fait marquant --}}
                     @if($highlight ?? null)

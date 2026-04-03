@@ -52,7 +52,8 @@ class DigestCommand extends Command
                 $data['weekNumber'],
                 $data['aiTerm'],
                 $data['interactiveTool'],
-                $data['weeklyPrompt']
+                $data['weeklyPrompt'],
+                $data['editorial'] ?? null
             ));
         }
 
@@ -70,6 +71,7 @@ class DigestCommand extends Command
                         'term_id' => $data['aiTerm']?->id,
                         'interactive_tool_id' => $data['interactiveTool']?->id,
                         'weekly_prompt' => $data['weeklyPrompt'],
+                        'editorial' => $data['editorial'] ?? null,
                     ],
                     'subscriber_count' => $subscribers->count(),
                     'sent_at' => now(),

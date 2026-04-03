@@ -22,7 +22,8 @@ class WeeklyDigestNotification extends Notification
         public int $weekNumber,
         public ?object $aiTerm = null,
         public ?object $interactiveTool = null,
-        public string|array|null $weeklyPrompt = null
+        public string|array|null $weeklyPrompt = null,
+        public ?string $editorial = null
     ) {}
 
     public function via($notifiable): array
@@ -47,6 +48,7 @@ class WeeklyDigestNotification extends Notification
                 'aiTerm' => $this->aiTerm,
                 'interactiveTool' => $this->interactiveTool,
                 'weeklyPrompt' => $this->weeklyPrompt,
+                'editorial' => $this->editorial,
                 'unsubscribeUrl' => $unsubscribeUrl,
                 'weekNumber' => $this->weekNumber,
             ]);
