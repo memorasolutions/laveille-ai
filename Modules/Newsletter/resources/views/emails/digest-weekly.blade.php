@@ -31,7 +31,7 @@
 
     {{-- 0. LIEN "VOIR DANS LE NAVIGATEUR" --}}
     <tr>
-        <td align="center" style="padding:10px 30px;background-color:#f4f4f4;font-size:12px;color:#999;">
+        <td align="center" style="padding:10px 30px;background-color:#f4f4f4;font-size:12px;color:#666;">
             <a href="{{ route('newsletter.web', ['year' => now()->year, 'week' => $weekNumber ?? now()->weekOfYear]) }}" style="color:#0B7285;text-decoration:underline;">Voir cette infolettre dans votre navigateur</a>
         </td>
     </tr>
@@ -72,7 +72,7 @@
                         <p style="margin:0 0 10px;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit($highlight->summary ?? strip_tags($highlight->content ?? ''), 150) }}</p>
                         <a href="{{ $highlight->url ?? route('news.show', $highlight->slug ?? '') }}" style="color:#0B7285;font-weight:bold;font-size:14px;">Lire &rarr;</a>
                         @if($highlight->source_name ?? null)
-                        <p style="margin:8px 0 0;font-size:11px;color:#999;">{{ $highlight->source_name }}</p>
+                        <p style="margin:8px 0 0;font-size:11px;color:#666;">{{ $highlight->source_name }}</p>
                         @endif
                     </td>
                 </tr>
@@ -101,7 +101,7 @@
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;font-size:13px;color:#94a3b8;line-height:1.6;">
                             <strong style="color:#3dc9d8;">Pourquoi ce prompt fonctionne :</strong> {{ $weeklyPrompt['technique'] }}<br/>
-                            <span style="color:#64748b;">Astuce : réutilisez cette approche dans vos propres requêtes pour de meilleurs résultats.</span>
+                            <span style="color:#94a3b8;">Astuce : réutilisez cette approche dans vos propres requêtes pour de meilleurs résultats.</span>
                         </td></tr>
                     </table>
                 </td></tr>
@@ -130,14 +130,14 @@
                     </td>
                     <td valign="top" class="stack-col">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
-                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#777;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
-                        @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#999;">{{ $news->source_name }}</span>@endif
+                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#555;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
+                        @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#666;">{{ $news->source_name }}</span>@endif
                     </td>
                     @else
                     <td valign="top" class="stack-col" style="padding-right:12px;">
                         <a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}" style="color:#1a1a2e;font-size:14px;font-weight:bold;text-decoration:none;line-height:1.3;">{{ $news->seo_title ?? $news->title ?? '' }}</a>
-                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#777;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
-                        @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#999;">{{ $news->source_name }}</span>@endif
+                        @if($news->summary ?? null)<br/><span style="font-size:12px;color:#555;line-height:1.4;">{{ Str::limit(strip_tags($news->summary), 80) }}</span>@endif
+                        @if($news->source_name ?? null)<br/><span style="font-size:11px;color:#666;">{{ $news->source_name }}</span>@endif
                     </td>
                     <td width="80" valign="top" class="stack-col">
                         <img src="{{ newsletterImg($news->image_url ?? null) }}" width="80" height="80" alt="{{ $news->seo_title ?? $news->title ?? '' }}" style="border-radius:6px;width:80px;height:80px;object-fit:cover;"/>
@@ -215,7 +215,7 @@
     @if($interactiveTool ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#fffbeb;" class="mobile-p">
-            <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#d97706;font-weight:bold;">Outil gratuit a essayer</p>
+            <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#b45309;font-weight:bold;">Outil gratuit a essayer</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td valign="top" class="stack-col" style="padding-right:16px;">
@@ -227,7 +227,7 @@
                     </td>
                 </tr>
                 <tr><td colspan="2" style="padding-top:14px;">
-                    <p style="margin:0 0 14px;font-size:13px;color:#777;">100% gratuit, dans votre navigateur, aucune inscription.</p>
+                    <p style="margin:0 0 14px;font-size:13px;color:#555;">100% gratuit, dans votre navigateur, aucune inscription.</p>
                     <a href="{{ route('tools.show', $interactiveTool->slug) }}" target="_blank" style="display:inline-block;background-color:#d97706;color:#fff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Essayer gratuitement &rarr;</a>
                 </td></tr>
             </table>
@@ -264,7 +264,7 @@
                     </table>
                     @endif
                     @if($aiTerm->did_you_know ?? null)
-                    <p style="margin:0 0 4px;font-size:12px;font-weight:bold;color:#d97706;">Le saviez-vous ?</p>
+                    <p style="margin:0 0 4px;font-size:12px;font-weight:bold;color:#b45309;">Le saviez-vous ?</p>
                     <p style="margin:0 0 14px;font-size:13px;color:#666;line-height:1.4;">{{ Str::limit(strip_tags($aiTerm->did_you_know), 150) }}</p>
                     @endif
                     @if(Route::has('dictionary.index'))
@@ -299,16 +299,16 @@
                 <tr><td align="center" style="padding-bottom:20px;">
                     <a href="https://laveille.ai" style="display:inline-block;background-color:#0B7285;color:#fff;padding:12px 28px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Visiter laveille.ai</a>
                 </td></tr>
-                <tr><td align="center" style="font-size:12px;color:#999;padding-bottom:10px;">
-                    <a href="https://www.facebook.com/LaVeilleDeStef" style="color:#999;text-decoration:none;">Facebook</a>
+                <tr><td align="center" style="font-size:12px;color:#666;padding-bottom:10px;">
+                    <a href="https://www.facebook.com/LaVeilleDeStef" style="color:#666;text-decoration:none;">Facebook</a>
                     &nbsp;&middot;&nbsp;
-                    <a href="https://www.linkedin.com/in/lapointestephane/" style="color:#999;text-decoration:none;">LinkedIn</a>
+                    <a href="https://www.linkedin.com/in/lapointestephane/" style="color:#666;text-decoration:none;">LinkedIn</a>
                     &nbsp;&middot;&nbsp;
-                    <a href="https://laveille.ai" style="color:#999;text-decoration:none;">Site web</a>
+                    <a href="https://laveille.ai" style="color:#666;text-decoration:none;">Site web</a>
                     &nbsp;&middot;&nbsp;
-                    <a href="https://laveille.ai/feed" style="color:#999;text-decoration:none;">RSS</a>
+                    <a href="https://laveille.ai/feed" style="color:#666;text-decoration:none;">RSS</a>
                 </td></tr>
-                <tr><td align="center" style="font-size:11px;color:#bbb;padding-bottom:8px;">
+                <tr><td align="center" style="font-size:11px;color:#737373;padding-bottom:8px;">
                     &copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits reserves.
                 </td></tr>
                 <tr><td align="center">
