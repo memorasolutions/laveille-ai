@@ -219,20 +219,24 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- 8. TERME IA DE LA SEMAINE (hero card educative) --}}
+    {{-- 8. TERME IA DE LA SEMAINE (image gauche, titre/desc droite, reste en dessous) --}}
     @if($aiTerm ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
+            <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Terme IA de la semaine</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:16px;"><span style="color:#0B7285;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;">Terme IA de la semaine</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;">
-                    <img src="{{ newsletterImg($aiTerm->hero_image ?? null) }}" alt="{{ $aiTerm->name ?? '' }}" width="200" height="200" style="border-radius:8px;width:200px;height:200px;object-fit:cover;"/>
-                </td></tr>
-                <tr><td align="center" style="padding-bottom:8px;font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $aiTerm->name ?? '' }}</td></tr>
-                <tr><td align="center" style="padding-bottom:16px;color:#555;font-size:14px;line-height:1.5;">{{ Str::limit(strip_tags($aiTerm->definition ?? ''), 200) }}</td></tr>
-                @if($aiTerm->analogy ?? null)
-                <tr><td style="padding-bottom:16px;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td width="200" valign="top" class="stack-col" style="padding-right:16px;">
+                        <img src="{{ newsletterImg($aiTerm->hero_image ?? null) }}" alt="{{ $aiTerm->name ?? '' }}" width="200" style="border-radius:8px;width:200px;"/>
+                    </td>
+                    <td valign="top" class="stack-col">
+                        <span style="font-size:20px;font-weight:bold;color:#1a1a2e;">{{ $aiTerm->name ?? '' }}</span>
+                        <p style="margin:8px 0 0;font-size:14px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($aiTerm->definition ?? ''), 180) }}</p>
+                    </td>
+                </tr>
+                <tr><td colspan="2" style="padding-top:14px;">
+                    @if($aiTerm->analogy ?? null)
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:14px;">
                         <tr>
                             <td width="4" bgcolor="#0B7285" style="vertical-align:top;"></td>
                             <td style="padding-left:15px;">
@@ -241,17 +245,13 @@
                             </td>
                         </tr>
                     </table>
-                </td></tr>
-                @endif
-                @if($aiTerm->did_you_know ?? null)
-                <tr><td align="center" style="padding-bottom:16px;">
-                    <span style="color:#d97706;font-size:12px;font-weight:bold;">Le saviez-vous ?</span><br/>
-                    <span style="color:#666;font-size:13px;">{{ Str::limit(strip_tags($aiTerm->did_you_know), 150) }}</span>
-                </td></tr>
-                @endif
-                <tr><td align="center">
+                    @endif
+                    @if($aiTerm->did_you_know ?? null)
+                    <p style="margin:0 0 4px;font-size:12px;font-weight:bold;color:#d97706;">Le saviez-vous ?</p>
+                    <p style="margin:0 0 14px;font-size:13px;color:#666;line-height:1.4;">{{ Str::limit(strip_tags($aiTerm->did_you_know), 150) }}</p>
+                    @endif
                     @if(Route::has('dictionary.index'))
-                    <a href="{{ route('dictionary.index') }}" target="_blank" style="color:#0B7285;font-size:13px;font-weight:bold;text-decoration:none;">Explorer le glossaire &rarr;</a>
+                    <p style="margin:0;text-align:center;"><a href="{{ route('dictionary.index') }}" target="_blank" style="color:#0B7285;font-size:13px;font-weight:bold;text-decoration:none;">Explorer le glossaire &rarr;</a></p>
                     @endif
                 </td></tr>
             </table>
@@ -267,7 +267,7 @@
                 <tr><td>
                     <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;font-weight:bold;">Le saviez-vous ?</p>
                     <p style="margin:0 0 14px;font-size:16px;color:#e2e8f0;line-height:1.6;">
-                        <a href="{{ config('app.url') }}/raccourcir" style="color:#3dc9d8;font-weight:bold;text-decoration:underline;">veille.la</a> est notre raccourcisseur d'URL gratuit ! Creez des liens courts avec code QR, statistiques et apercu social — sans inscription.
+                        <a href="{{ config('app.url') }}/raccourcir" style="color:#3dc9d8;font-weight:bold;text-decoration:underline;">veille.la</a> est le domaine utilise pour notre raccourcisseur de liens. Creez des liens courts avec code QR, statistiques de clics et apercu social, le tout gratuitement et sans inscription.
                     </p>
                     <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
                 </td></tr>
