@@ -13,15 +13,34 @@ class NewsletterIssue extends Model
         'week_number',
         'year',
         'subject',
+        'status',
         'content',
+        'editorial_edited',
         'subscriber_count',
         'sent_at',
+        'edited_at',
     ];
 
     protected $casts = [
         'content' => 'array',
         'sent_at' => 'datetime',
+        'edited_at' => 'datetime',
     ];
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft';
+    }
+
+    public function isReady(): bool
+    {
+        return in_array($this->status, ['draft', 'ready']);
+    }
+
+    public function isSent(): bool
+    {
+        return $this->status === 'sent';
+    }
 
     public function scopePublished(Builder $query): Builder
     {

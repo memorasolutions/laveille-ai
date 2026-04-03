@@ -82,6 +82,12 @@ Route::prefix('admin/newsletter')
         // Templates marketing - delete
         Route::delete('/templates/{template}', [MarketingTemplateController::class, 'destroy'])->name('templates.destroy')->middleware('permission:delete_campaigns');
 
+        // Brouillon newsletter hebdomadaire (digest)
+        Route::get('/digest/draft', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'edit'])->name('digest.edit');
+        Route::put('/digest/draft/{issue}', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'update'])->name('digest.update');
+        Route::get('/digest/draft/{issue}/preview', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'preview'])->name('digest.preview');
+        Route::post('/digest/draft/{issue}/send', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'sendNow'])->name('digest.send');
+
         // Workflows - view
         Route::middleware('permission:view_workflows')->group(function () {
             Route::get('/workflows', [WorkflowController::class, 'index'])->name('workflows.index');
