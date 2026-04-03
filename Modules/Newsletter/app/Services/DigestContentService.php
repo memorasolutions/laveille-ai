@@ -309,21 +309,32 @@ class DigestContentService
             }
         }
 
-        // PRIORITE 2 : loi/regulation
+        // PRIORITE 2 : loi/regulation → consultant conformité
         $lawKw = ['loi', 'rgpd', 'regulation', 'gouvernance', 'ethique', 'audit', 'confidentialite', 'responsable'];
         foreach ($lawKw as $kw) {
             if (str_contains($lower, $kw)) {
                 return [
-                    'prompt' => "Tu es un expert en conformité numérique. Analyse les implications de {$termName} pour un site web québécois. Présente 3 actions concrètes, classées par urgence.",
-                    'technique' => "Prompt structuré avec rôle d'expert : l'attribution d'un rôle spécialisé guide l'IA vers une réponse autoritaire et contextuelle.",
+                    'prompt' => "Tu es un consultant en conformité numérique spécialisé dans les lois québécoises et canadiennes. Explique les implications pratiques de {$termName} pour un propriétaire de petite entreprise ayant un site web. Indique 3 actions concrètes et urgentes à entreprendre, ainsi que les risques encourus en cas de non-conformité. Présente ta réponse sous forme de liste numérotée, en utilisant un langage simple et des conseils actionnables.",
+                    'technique' => "Prompt structuré avec rôle d'expert : le rôle de consultant spécialisé cadre l'IA vers des recommandations concrètes et pratiques.",
                 ];
             }
         }
 
-        // PRIORITE 3 : concept general
+        // PRIORITE 2b : technologie/outil → formateur + analogie cuisine
+        $toolKw = ['gpu', 'tpu', 'cloud', 'api', 'ocr', 'iot', 'benchmark', 'modèle de', 'modèle du'];
+        foreach ($toolKw as $kw) {
+            if (str_contains($lower, $kw)) {
+                return [
+                    'prompt' => "Tu es un formateur en technologies qui excelle dans les analogies créatives. Explique {$termName} à quelqu'un qui n'a jamais codé mais est curieux de technologie, en utilisant une analogie tirée de la cuisine. Montre un outil gratuit qu'il peut essayer cette semaine pour expérimenter ce concept. Explique pourquoi c'est important en 2026. Structure ta réponse en 3 paragraphes : l'analogie, l'aspect pratique avec l'outil, et l'importance future. Adopte un ton décontracté et amical.",
+                    'technique' => "Prompt structuré avec analogie imposée : la contrainte de la cuisine rend le concept tangible et mémorable pour les non-initiés.",
+                ];
+            }
+        }
+
+        // PRIORITE 3 : concept général → professeur PCRF complet
         return [
-            'prompt' => "Tu es un vulgarisateur scientifique. Explique {$termName} avec une analogie de la vie quotidienne. Structure : l'analogie, la définition simple, un exemple concret en 2026.",
-            'technique' => "Prompt structuré avec rôle et format : le rôle de vulgarisateur et la structure en 3 parties guident l'IA vers une explication accessible.",
+            'prompt' => "Tu es un professeur passionné qui enseigne l'IA à des débutants depuis 20 ans. Explique le concept de {$termName} à un public adulte non-technique en utilisant uniquement des exemples de la vie de tous les jours. Décris le concept étape par étape : commence par une analogie simple, explique ensuite comment cela fonctionne de manière simplifiée, donne un exemple concret de son utilisation en 2026, et termine par une idée fausse courante à son sujet. Rédige ta réponse en 4 courts paragraphes, avec un ton amical et un total de moins de 300 mots.",
+            'technique' => "Prompt structuré PCRF (persona, contexte, requête, format) : chaque élément guide l'IA vers une réponse pédagogique adaptée à l'audience.",
         ];
     }
 }
