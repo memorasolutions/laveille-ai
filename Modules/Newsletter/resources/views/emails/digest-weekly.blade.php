@@ -42,7 +42,7 @@
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td><img src="{{ asset('images/logo-horizontal-white.png') }}" width="130" alt="{{ config('app.name') }}" style="width:130px;height:auto;"/></td>
-                    <td align="right" style="font-size:12px;color:#94a3b8;">Veille hebdo #{{ $weekNumber ?? '?' }}<br/>{{ now()->translatedFormat('j F Y') }}</td>
+                    <td align="right" style="font-size:12px;color:#94a3b8;">La veille IA #{{ $weekNumber ?? '?' }}<br/>{{ now()->translatedFormat('j F Y') }}</td>
                 </tr>
             </table>
         </td>

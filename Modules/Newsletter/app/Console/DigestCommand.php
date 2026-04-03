@@ -60,7 +60,7 @@ class DigestCommand extends Command
             NewsletterIssue::updateOrCreate(
                 ['year' => $year, 'week_number' => $week],
                 [
-                    'subject' => 'Veille hebdo #'.$week.' - '.config('app.name'),
+                    'subject' => 'La veille IA #'.$week.' - '.config('app.name'),
                     'status' => 'draft',
                     'content' => [
                         'highlight_id' => $data['highlight']?->id,
@@ -155,7 +155,7 @@ class DigestCommand extends Command
             NewsletterIssue::updateOrCreate(
                 ['year' => $year, 'week_number' => $week],
                 [
-                    'subject' => 'Veille hebdo #'.$data['weekNumber'].' - '.config('app.name'),
+                    'subject' => 'La veille IA #'.$data['weekNumber'].' - '.config('app.name'),
                     'status' => 'sent',
                     'content' => [
                         'highlight_id' => $data['highlight']?->id,
