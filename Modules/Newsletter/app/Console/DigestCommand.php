@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Modules\Newsletter\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Notifications\WeeklyDigestNotification;
 use Modules\Settings\Models\Setting;
@@ -46,15 +48,13 @@ class DigestCommand extends Command
                 ->get();
         }
 
-        // Section 3 : outil de la semaine (rotation aleatoire)
+        // Section 3 : outil de la semaine (rotation sans repetition)
         $toolOfWeek = null;
         if (class_exists(\Modules\Directory\Models\Tool::class)) {
-            $toolOfWeek = \Modules\Directory\Models\Tool::where('status', 'published')
-                ->inRandomOrder()
-                ->first();
+            $toolOfWeek = self::getUnsentItem('tool', \Modules\Directory\Models\Tool::where('status', 'published')->inRandomOrder());
         }
 
-        // Section 4 : article blog vedette
+        // Section 4 : article blog vedette (le plus recent)
         $featuredArticle = null;
         if (class_exists(\Modules\Blog\Models\Article::class)) {
             $featuredArticle = \Modules\Blog\Models\Article::published()
@@ -62,31 +62,19 @@ class DigestCommand extends Command
                 ->first();
         }
 
-        // Section 5 : le saviez-vous (terme glossaire ou acronyme)
+        // Section 5 : (reserve pour usage futur)
         $didYouKnow = null;
-        if (class_exists(\Modules\Dictionary\Models\Term::class)) {
-            $didYouKnow = \Modules\Dictionary\Models\Term::where('is_published', true)
-                ->inRandomOrder()
-                ->first();
-        }
-        if (! $didYouKnow && class_exists(\Modules\Acronyms\Models\Acronym::class)) {
-            $didYouKnow = \Modules\Acronyms\Models\Acronym::inRandomOrder()->first();
-        }
 
-        // Section 6 : outil interactif gratuit (rotation)
+        // Section 6 : outil interactif gratuit (rotation sans repetition)
         $interactiveTool = null;
         if (class_exists(\Modules\Tools\Models\Tool::class)) {
-            $interactiveTool = \Modules\Tools\Models\Tool::where('is_active', true)
-                ->inRandomOrder()
-                ->first();
+            $interactiveTool = self::getUnsentItem('interactive_tool', \Modules\Tools\Models\Tool::where('is_active', true)->inRandomOrder());
         }
 
-        // Section 7 : terme IA de la semaine (1 seul, hero card educative)
+        // Section 7 : terme IA de la semaine (rotation sans repetition)
         $aiTerm = null;
         if (class_exists(\Modules\Dictionary\Models\Term::class)) {
-            $aiTerm = \Modules\Dictionary\Models\Term::where('is_published', true)
-                ->inRandomOrder()
-                ->first();
+            $aiTerm = self::getUnsentItem('term', \Modules\Dictionary\Models\Term::where('is_published', true)->inRandomOrder());
         }
 
         $weekNumber = (int) now()->weekOfYear;
@@ -133,6 +121,43 @@ class DigestCommand extends Command
      * Genere un prompt RCTFC (Role + Contexte + Tache + Format + Contrainte)
      * adapte au terme IA, avec le nom de la technique de prompting utilisee.
      */
+    /**
+     * Selectionne un item non encore envoye dans les newsletters precedentes.
+     * Quand tous les items ont ete envoyes, reset et recommence le cycle.
+     */
+    private static function getUnsentItem(string $type, $query): ?object
+    {
+        if (! Schema::hasTable('newsletter_sent_items')) {
+            return $query->first();
+        }
+
+        $sentIds = DB::table('newsletter_sent_items')
+            ->where('type', $type)
+            ->pluck('item_id')
+            ->toArray();
+
+        $item = (clone $query)->whereNotIn('id', $sentIds)->first();
+
+        if (! $item) {
+            DB::table('newsletter_sent_items')->where('type', $type)->delete();
+            $item = (clone $query)->first();
+        }
+
+        if ($item) {
+            DB::table('newsletter_sent_items')->insert([
+                'type' => $type,
+                'item_id' => $item->id,
+                'week_number' => (int) now()->weekOfYear,
+                'year' => (int) now()->year,
+                'sent_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $item;
+    }
+
     private static function generateWeeklyPrompt(string $termName, ?string $termType = null): array
     {
         $lower = mb_strtolower($termName);
