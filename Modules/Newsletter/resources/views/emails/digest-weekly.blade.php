@@ -29,6 +29,13 @@
 <tr><td align="center" style="padding:20px 10px;">
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="max-width:600px;background-color:#ffffff;border-radius:8px;overflow:hidden;">
 
+    {{-- 0. LIEN "VOIR DANS LE NAVIGATEUR" --}}
+    <tr>
+        <td align="center" style="padding:10px 30px;background-color:#f4f4f4;font-size:12px;color:#999;">
+            <a href="{{ route('newsletter.web', ['year' => now()->year, 'week' => $weekNumber ?? now()->weekOfYear]) }}" style="color:#0B7285;text-decoration:underline;">Voir cette infolettre dans votre navigateur</a>
+        </td>
+    </tr>
+
     {{-- 1. HEADER DARK --}}
     <tr>
         <td style="background-color:#0c1427;padding:24px 30px;" class="mobile-p">

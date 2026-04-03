@@ -21,6 +21,15 @@ Route::middleware('web')->group(function () {
     Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
     Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
     Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
+    // Version web de la newsletter (pour les clients email qui affichent mal le HTML)
+    Route::get('/newsletter/web/{year}/{week}', [\Modules\Newsletter\Http\Controllers\NewsletterWebController::class, 'show'])
+        ->where(['year' => '\d{4}', 'week' => '\d{1,2}'])
+        ->name('newsletter.web')
+        ->middleware('cacheResponse:3600');
+    Route::get('/newsletter/web', [\Modules\Newsletter\Http\Controllers\NewsletterWebController::class, 'latest'])
+        ->name('newsletter.web.latest')
+        ->middleware('cacheResponse:3600');
 });
 
 Route::prefix('admin/newsletter')
