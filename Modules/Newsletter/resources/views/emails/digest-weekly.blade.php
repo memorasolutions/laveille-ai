@@ -199,19 +199,20 @@
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
             <h3 style="margin:0 0 14px;font-size:14px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-family:Arial,sans-serif;">Termes IA a decouvrir</h3>
             @foreach($aiTerms as $term)
-            @php $termName = $term->term ?? $term->name ?? ''; @endphp
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:10px;">
                 <tr>
-                    <td width="40" valign="top" style="padding-right:10px;">
-                        <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                            <tr><td style="width:36px;height:36px;background-color:#0B7285;border-radius:6px;text-align:center;vertical-align:middle;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;color:#ffffff;">
-                                {{ mb_strtoupper(mb_substr($termName, 0, 1)) }}
-                            </td></tr>
+                    <td style="padding:8px 12px;background-color:#ffffff;border-radius:6px;">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td width="50" valign="top" class="stack-col" style="padding-right:12px;">
+                                    <img src="{{ newsletterImg($term->hero_image ?? null) }}" width="50" height="50" alt="{{ $term->name ?? '' }}" style="border-radius:6px;width:50px;height:50px;object-fit:cover;"/>
+                                </td>
+                                <td valign="middle" style="font-family:Arial,sans-serif;">
+                                    <strong style="color:#1a1a2e;font-size:14px;">{{ $term->name ?? '' }}</strong>
+                                    <br/><span style="color:#777;font-size:13px;">{{ Str::limit(strip_tags($term->definition ?? $term->description ?? ''), 100) }}</span>
+                                </td>
+                            </tr>
                         </table>
-                    </td>
-                    <td valign="middle" style="font-family:Arial,sans-serif;padding:8px 12px;background-color:#ffffff;border-radius:6px;">
-                        <strong style="color:#1a1a2e;font-size:14px;">{{ $termName }}</strong>
-                        <br/><span style="color:#777;font-size:13px;">{{ Str::limit(strip_tags($term->definition ?? $term->description ?? ''), 100) }}</span>
                     </td>
                 </tr>
             </table>
@@ -234,11 +235,11 @@
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td style="font-family:Arial,sans-serif;">
-                        <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Le saviez-vous ?</p>
+                        <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;font-weight:bold;">Le saviez-vous ?</p>
                         <p style="margin:0 0 14px;font-size:16px;color:#e2e8f0;line-height:1.6;">
-                            <a href="{{ config('app.url') }}/raccourcir" style="color:#0B7285;font-weight:bold;text-decoration:underline;">veille.la</a> est notre raccourcisseur d'URL gratuit ! Creez des liens courts personnalises avec code QR, statistiques de clics et apercu social — le tout sans inscription.
+                            <a href="{{ config('app.url') }}/raccourcir" style="color:#3dc9d8;font-weight:bold;text-decoration:underline;">veille.la</a> est notre raccourcisseur d'URL gratuit ! Creez des liens courts personnalises avec code QR, statistiques de clics et apercu social — le tout sans inscription.
                         </p>
-                        <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#0B7285;color:#ffffff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
+                        <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
                     </td>
                 </tr>
             </table>
