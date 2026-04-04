@@ -96,7 +96,7 @@
                                 </ul>
                             </div>
                             <h1>{{ $subject }}</h1>
-                            @if(class_exists(\Modules\Newsletter\Models\NewsletterIssue::class))
+                            @if(class_exists(\Modules\Newsletter\Models\NewsletterIssue::class) && $issue instanceof \Modules\Newsletter\Models\NewsletterIssue)
                                 @include('fronttheme::partials.article-action-bar', ['model' => $issue, 'modelType' => 'Modules\\Newsletter\\Models\\NewsletterIssue'])
                             @endif
                             <div class="entry-details">
