@@ -12,7 +12,8 @@
         a { color:#0B7285; text-decoration:none; }
         @media only screen and (max-width:600px) {
             .email-container { width:100% !important; }
-            .stack-col { display:block !important; width:100% !important; padding-bottom:12px !important; }
+            .stack-col { display:block !important; width:100% !important; padding-right:0 !important; padding-left:0 !important; padding-bottom:12px !important; }
+            .stack-col img { width:100% !important; height:auto !important; }
             .mobile-p { padding:20px 15px !important; }
         }
     </style>
@@ -24,24 +25,29 @@
 
     {{-- 1. HEADER DARK --}}
     <tr>
-        <td style="background-color:#0c1427;padding:30px;text-align:center;" class="mobile-p">
-            <img src="{{ asset('images/logo-horizontal-white.png') }}" width="130" alt="{{ config('app.name') }}" style="width:130px;height:auto;margin:0 auto;"/>
-            <h1 style="color:#ffffff;font-size:24px;margin:15px 0 0;font-weight:bold;">Bienvenue sur La veille IA !</h1>
+        <td style="background-color:#0c1427;padding:24px 30px;" class="mobile-p">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td><img src="{{ asset('images/logo-horizontal-white.png') }}" width="130" alt="{{ config('app.name') }}" style="width:130px;height:auto;"/></td>
+                    <td align="right" style="font-size:12px;color:#94a3b8;">Bienvenue !<br/>{{ now()->translatedFormat('j F Y') }}</td>
+                </tr>
+            </table>
         </td>
     </tr>
 
     {{-- 2. MOT DE STÉPHANE --}}
     <tr>
         <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
+            <p style="margin:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Mot du créateur</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                     <td width="80" valign="top" class="stack-col" style="padding-right:20px;">
-                        <img src="{{ asset('images/stephane.jpg') }}" alt="Stéphane Lapointe" width="80" height="80" style="border-radius:50%;width:80px;height:80px;"/>
+                        <img src="{{ asset('images/logo-avatar.png') }}" alt="La veille" width="80" height="80" style="border-radius:50%;width:80px;height:80px;object-fit:cover;"/>
                     </td>
                     <td valign="top" class="stack-col">
-                        <p style="margin:0 0 12px;font-size:15px;color:#333;line-height:1.6;">Bonjour{{ ($subscriberName ?? null) ? ' '.$subscriberName : '' }},</p>
-                        <p style="margin:0 0 12px;font-size:15px;color:#333;line-height:1.6;">Je suis Stéphane Lapointe, créateur de La veille. Merci de rejoindre notre communauté ! Le nouveau site <strong>laveille.ai</strong> regorge de nouveautés que j'ai hâte de vous faire découvrir.</p>
-                        <p style="margin:0 0 12px;font-size:15px;color:#333;line-height:1.6;">Chaque semaine, je vous envoie une sélection personnalisée de l'essentiel en intelligence artificielle : actualités, outils, défis et ressources pour rester à jour sans y passer des heures.</p>
+                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">Bonjour{{ ($subscriberName ?? null) ? ' '.$subscriberName : '' }},</p>
+                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">Je suis Stéphane Lapointe, créateur de La veille. Merci de rejoindre notre communauté ! Le nouveau site <strong><a href="{{ config('app.url') }}" style="color:#0B7285;">laveille.ai</a></strong> regorge de nouveautés que j'ai hâte de vous faire découvrir.</p>
+                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">Chaque semaine, je vous envoie une sélection personnalisée de l'essentiel en intelligence artificielle : actualités, outils, défis et ressources pour rester à jour sans y passer des heures.</p>
                         <p style="margin:0;font-size:15px;color:#333;font-weight:bold;">- Stéphane</p>
                     </td>
                 </tr>
@@ -55,13 +61,13 @@
         <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
             <p style="margin:0 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Chaque semaine dans votre boîte</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;"><strong style="color:#0B7285;">&#x1F4E2;</strong> <strong>Le fait marquant</strong> — l'actualité IA incontournable</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;"><strong style="color:#0B7285;">&#x1F4F0;</strong> <strong>5 actualités</strong> — résumées et triées pour vous</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;"><strong style="color:#0B7285;">&#x1F3AF;</strong> <strong>Un défi prompt</strong> — un prompt à essayer immédiatement</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;"><strong style="color:#0B7285;">&#x1F527;</strong> <strong>L'outil de la semaine</strong> — testé et recommandé</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;"><strong style="color:#0B7285;">&#x1F4D6;</strong> <strong>Un terme IA expliqué</strong> — pour comprendre sans jargon</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;"><strong style="color:#0B7285;">&#x1F4DD;</strong> <strong>Un article approfondi</strong> — analyse ou tutoriel</td></tr>
-                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;"><strong style="color:#0B7285;">&#x1F381;</strong> <strong>Un outil gratuit</strong> — à essayer dans votre navigateur</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4E2; <strong>Le fait marquant</strong> — l'actualité IA incontournable</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4F0; <strong>5 actualités</strong> — résumées et triées pour vous</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F3AF; <strong>Un défi prompt</strong> — un prompt à essayer immédiatement</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F527; <strong>L'outil de la semaine</strong> — testé et recommandé</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4D6; <strong>Un terme IA expliqué</strong> — pour comprendre sans jargon</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4DD; <strong>Un article approfondi</strong> — analyse ou tutoriel</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F381; <strong>Un outil gratuit</strong> — à essayer dans votre navigateur</td></tr>
             </table>
         </td>
     </tr>
@@ -85,7 +91,7 @@
                     <span style="font-size:14px;color:#555;">Calculatrices, générateurs, constructeur de prompts</span>
                 </td></tr>
                 <tr><td align="center">
-                    <a href="{{ config('app.url') }}" target="_blank" style="display:inline-block;background-color:#0B7285;color:#fff;padding:12px 28px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Explorer le site &rarr;</a>
+                    <a href="{{ config('app.url') }}" target="_blank" style="display:inline-block;background-color:#0B7285;color:#fff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Explorer le site &rarr;</a>
                 </td></tr>
             </table>
         </td>
@@ -95,15 +101,17 @@
     {{-- 5. PREMIER DÉFI --}}
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
-            <p style="margin:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;font-weight:bold;">Votre premier défi</p>
-            <p style="color:#e2e8f0;font-size:16px;margin:0 0 14px;line-height:1.5;">Essayez ce prompt avec votre IA préférée :</p>
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;margin-bottom:12px;">
-                    <p style="color:#e2e8f0;font-style:italic;font-size:15px;margin:0;line-height:1.5;">Explique-moi [un concept de ton domaine] comme si j'avais 10 ans, puis comme si j'étais un expert. Compare les deux réponses et dis-moi ce que chaque version perd ou gagne en précision.</p>
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Votre premier défi</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Essayez ce prompt avec votre IA préférée :</td></tr>
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;font-style:italic;line-height:1.5;">
+                            Explique-moi [un concept de ton domaine] comme si j'avais 10 ans, puis comme si j'étais un expert. Compare les deux réponses et dis-moi ce que chaque version perd ou gagne en précision.
+                        </td></tr>
+                    </table>
                 </td></tr>
-            </table>
-            <p style="color:#94a3b8;font-size:13px;margin:14px 0;text-align:center;">Copiez ce prompt et collez-le dans ChatGPT, Claude ou Gemini.</p>
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center">
+                <tr><td align="center" style="padding-bottom:8px;font-size:13px;color:#94a3b8;">Copiez ce prompt et collez-le dans ChatGPT, Claude ou Gemini pour voir le résultat.</td></tr>
                 <tr><td align="center">
                     <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>
                 </td></tr>
@@ -111,7 +119,7 @@
         </td>
     </tr>
 
-    {{-- 6. FOOTER --}}
+    {{-- 6. FOOTER (identique au digest) --}}
     <tr>
         <td style="padding:30px;text-align:center;background-color:#fafafa;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
