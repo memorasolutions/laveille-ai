@@ -11,9 +11,9 @@
         </div>
     </div>
     <div class="widget search-widget">
-        <form action="{{ route('blog.index') }}" method="GET">
+        <form action="{{ Route::has('search.index') ? route('search.index') : route('blog.index') }}" method="GET">
             <div>
-                <input type="text" name="search" class="form-control" placeholder="{{ __('Rechercher...') }}" value="{{ request('search') }}" aria-label="{{ __('Rechercher dans le blog') }}">
+                <input type="text" name="q" class="form-control" placeholder="{{ __('Rechercher...') }}" value="{{ request('q', request('search')) }}" aria-label="{{ __('Rechercher sur le site') }}">
                 <button type="submit" aria-label="{{ __('Rechercher') }}"><i class="ti-search"></i></button>
             </div>
         </form>

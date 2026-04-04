@@ -2,10 +2,13 @@
 
 /**
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
- *
- * @project memora/laravel-saas-boilerplate
  */
 
 declare(strict_types=1);
 
-// Frontend search removed - admin search handled via Livewire GlobalSearch component
+use Illuminate\Support\Facades\Route;
+use Modules\Search\Http\Controllers\FrontSearchController;
+
+Route::middleware(['web'])->group(function () {
+    Route::get('/recherche', [FrontSearchController::class, 'index'])->name('search.index');
+});
