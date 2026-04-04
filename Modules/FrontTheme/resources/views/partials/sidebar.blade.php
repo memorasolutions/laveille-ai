@@ -2,7 +2,7 @@
 <div class="blog-sidebar">
     <div class="widget about-widget">
         <div class="img-holder">
-            <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="border-radius: 50%; max-width: 150px;" loading="lazy">
+            <img src="{{ asset('images/logo-eye.svg') }}" alt="{{ config('app.name') }}" style="max-width: 120px;" loading="lazy">
         </div>
         <h4>{{ config('app.name') }}</h4>
         <p>{{ __('Votre veille sur l\'IA, les technologies et la transformation numérique au Québec.') }}</p>
