@@ -13,6 +13,9 @@
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     @endif
     <style>[x-cloak] { display: none !important; }</style>
+    @if(env('ADSENSE_CLIENT_ID'))
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ env('ADSENSE_CLIENT_ID') }}" crossorigin="anonymous"></script>
+    @endif
     @if(env('GA_MEASUREMENT_ID') && env('PRIVACY_GA_ENABLED', false))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('GA_MEASUREMENT_ID') }}"></script>
     <script>
