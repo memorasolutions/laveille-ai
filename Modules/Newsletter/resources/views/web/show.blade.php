@@ -11,19 +11,73 @@
 
 @push('styles')
 <style>
-    .newsletter-section-title {
+    .wpo-blog-content .entry-details .newsletter-section-title {
+        font-size: 20px;
+        color: #1a1a2e;
         margin-top: 2rem;
+        margin-bottom: 16px;
         padding-bottom: 0.5rem;
         border-bottom: 2px solid var(--c-primary);
     }
-    .newsletter-challenge {
+    .wpo-blog-content .entry-details .newsletter-challenge {
         background-color: #0c1427;
-        color: white;
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        margin-bottom: 2rem;
+        padding: 24px;
+        border-radius: 8px;
+        margin: 20px 0;
     }
-    .newsletter-challenge h3 { color: #3dc9d8; }
+    .wpo-blog-content .entry-details .newsletter-challenge h3 {
+        color: #3dc9d8;
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+    .wpo-blog-content .entry-details .newsletter-challenge p {
+        color: #e2e8f0;
+        line-height: 1.6;
+    }
+    .wpo-blog-content .entry-details .media {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .wpo-blog-content .entry-details .media:last-of-type {
+        border-bottom: none;
+    }
+    .wpo-blog-content .entry-details .media .media-left img {
+        border-radius: 6px;
+        object-fit: cover;
+    }
+    .wpo-blog-content .entry-details .media h4 a {
+        color: #1a1a2e;
+        transition: color 0.2s;
+    }
+    .wpo-blog-content .entry-details .media h4 a:hover {
+        color: var(--c-primary);
+    }
+    .wpo-blog-content .entry-details blockquote {
+        border-left: 4px solid var(--c-primary);
+        padding: 12px 20px;
+        background: #f8fafc;
+        border-radius: 0 6px 6px 0;
+        margin: 0 0 20px;
+        font-style: italic;
+    }
+    .wpo-blog-content .entry-details .btn {
+        border-radius: 4px;
+        font-weight: 600;
+        padding: 8px 20px;
+    }
+    .wpo-blog-content .entry-details h3 {
+        font-size: 18px;
+        margin: 0 0 8px;
+        color: #1a1a2e;
+    }
+    .wpo-blog-content .entry-details .entry-media img {
+        border-radius: 8px;
+        margin-bottom: 16px;
+        max-height: 350px;
+        width: 100%;
+        object-fit: cover;
+    }
 </style>
 @endpush
 
