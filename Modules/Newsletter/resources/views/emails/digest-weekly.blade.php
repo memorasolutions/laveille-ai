@@ -187,12 +187,12 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- 3. DEFI DE LA QUINZAINE (semaines paires, position haute pour max engagement) --}}
-    @if($weeklyPrompt ?? null)
+    {{-- 3. DEFI DE LA SEMAINE (masqué dans welcome car W4 le remplace) --}}
+    @if(($weeklyPrompt ?? null) && !($isWelcome ?? false))
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Défi de la quinzaine</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Défi de la semaine</span></td></tr>
                 <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Essayez ce prompt cette semaine :</td></tr>
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">

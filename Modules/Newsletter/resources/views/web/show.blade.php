@@ -65,10 +65,10 @@
                                     <a href="{{ $highlight->url ?? route('news.show', $highlight->slug ?? '') }}" style="color:var(--c-primary);font-weight:bold;">Lire l'article &rarr;</a>
                                 @endif
 
-                                {{-- Défi de la quinzaine --}}
+                                {{-- Défi de la semaine --}}
                                 @if($weeklyPrompt ?? null)
                                     <div class="newsletter-challenge">
-                                        <h3>Défi de la quinzaine</h3>
+                                        <h3>Défi de la semaine</h3>
                                         <p>Essayez ce prompt cette semaine :</p>
                                         <div style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;margin-bottom:12px;">
                                             <p style="color:#e2e8f0;font-style:italic;margin:0;line-height:1.5;">{{ is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt }}</p>
