@@ -41,12 +41,84 @@
         <td style="background-color:#0c1427;padding:24px 30px;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td><img src="{{ asset('images/logo-horizontal-white.png') }}" width="130" alt="{{ config('app.name') }}" style="width:130px;height:auto;"/></td>
-                    <td align="right" style="font-size:12px;color:#94a3b8;">La veille IA #{{ $weekNumber ?? '?' }}<br/>{{ now()->translatedFormat('j F Y') }}</td>
+                    <td><img src="{{ asset('images/logo-email-white.png') }}" width="200" alt="{{ config('app.name') }}" style="width:200px;height:auto;"/></td>
+                    <td align="right" style="font-size:12px;color:#94a3b8;">{{ ($isWelcome ?? false) ? 'Bienvenue !' : 'La veille IA #'.($weekNumber ?? '?') }}<br/>{{ now()->translatedFormat('j F Y') }}</td>
                 </tr>
             </table>
         </td>
     </tr>
+
+    {{-- SECTIONS BIENVENUE (welcome uniquement) --}}
+    @if($isWelcome ?? false)
+
+    {{-- W1. MOT DE STEF --}}
+    <tr>
+        <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
+            <p style="margin:0 0 14px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Mot de Stef</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td width="80" valign="top" class="stack-col" style="padding-right:20px;">
+                        <img src="{{ asset('images/logo-avatar.png') }}" alt="La veille" width="80" height="80" style="border-radius:50%;width:80px;height:80px;object-fit:cover;"/>
+                    </td>
+                    <td valign="top" class="stack-col">
+                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">Bonjour{{ ($subscriberName ?? null) ? ' '.$subscriberName : '' }},</p>
+                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;"><strong>laveilledestef.com</strong> est devenu <strong><a href="{{ config('app.url') }}" style="color:#0B7285;">laveille.ai</a></strong> ! J'ai complètement repensé le site pour vous offrir la meilleure expérience de veille en intelligence artificielle. Bienvenue dans cette nouvelle aventure !</p>
+                        <p style="font-family:'Dancing Script','Brush Script MT','Segoe Script',cursive;font-size:24px;color:#0B7285;margin:12px 0 0;">Stef</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
+
+    {{-- W2. CHAQUE SEMAINE DANS VOTRE BOÎTE --}}
+    <tr>
+        <td style="padding:25px 30px;background-color:#f8fafc;" class="mobile-p">
+            <p style="margin:0 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Chaque semaine dans votre boîte</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4E2; <strong>Le fait marquant</strong> — l'actualité IA incontournable</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4F0; <strong>5 actualités</strong> — résumées et triées pour vous</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F3AF; <strong>Un défi prompt</strong> — un prompt à essayer immédiatement</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F527; <strong>L'outil de la semaine</strong> — testé et recommandé</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4D6; <strong>Un terme IA expliqué</strong> — pour comprendre sans jargon</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F4DD; <strong>Un article approfondi</strong> — analyse ou tutoriel</td></tr>
+                <tr><td style="padding:6px 0;font-size:14px;color:#333;line-height:1.5;">&#x1F381; <strong>Un outil gratuit</strong> — à essayer dans votre navigateur</td></tr>
+            </table>
+            <p style="margin:14px 0 0;font-size:14px;color:#555;font-style:italic;">Voici votre premier numéro. Bonne lecture !</p>
+        </td>
+    </tr>
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
+
+    {{-- W3. LE NOUVEAU LAVEILLE.AI --}}
+    <tr>
+        <td style="padding:25px 30px;background-color:#ffffff;" class="mobile-p">
+            <p style="margin:0 0 16px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;font-weight:bold;">Le nouveau laveille.ai</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr><td style="padding-bottom:12px;">
+                    <strong style="font-size:15px;color:#1a1a2e;">Répertoire de 75+ outils IA</strong><br/>
+                    <span style="font-size:13px;color:#555;">Fiches détaillées, screenshots, avis de la communauté</span>
+                </td></tr>
+                <tr><td style="padding-bottom:12px;">
+                    <strong style="font-size:15px;color:#1a1a2e;">Glossaire IA interactif</strong><br/>
+                    <span style="font-size:13px;color:#555;">140+ termes expliqués simplement avec analogies</span>
+                </td></tr>
+                <tr><td style="padding-bottom:12px;">
+                    <strong style="font-size:15px;color:#1a1a2e;">Outils gratuits en ligne</strong><br/>
+                    <span style="font-size:13px;color:#555;">Calculatrices, générateurs, constructeur de prompts</span>
+                </td></tr>
+                <tr><td style="padding-bottom:16px;">
+                    <strong style="font-size:15px;color:#1a1a2e;">Acronymes en éducation</strong><br/>
+                    <span style="font-size:13px;color:#555;">300+ acronymes du milieu éducatif québécois</span>
+                </td></tr>
+                <tr><td align="center">
+                    <a href="{{ config('app.url') }}" target="_blank" style="display:inline-block;background-color:#0B7285;color:#fff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Explorer le site &rarr;</a>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
+
+    @endif
 
     {{-- 1.5. MINI-EDITORIAL --}}
     @if($editorial ?? null)
