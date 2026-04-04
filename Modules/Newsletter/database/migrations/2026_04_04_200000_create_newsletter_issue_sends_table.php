@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('newsletter_issue_sends', function (Blueprint $table): void {
+            $table->id();
+            $table->unsignedBigInteger('issue_id')->index();
+            $table->string('subscriber_email', 255);
+            $table->timestamp('sent_at')->nullable();
+            $table->timestamp('created_at')->nullable();
+
+            $table->unique(['issue_id', 'subscriber_email'], 'issue_sends_issue_email_unique');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('newsletter_issue_sends');
+    }
+};

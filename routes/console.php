@@ -42,8 +42,12 @@ Schedule::command('app:block-suspicious-ips')->everyFiveMinutes();
 Schedule::command('notifications:send-digest --frequency=daily')->dailyAt('08:00');
 Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '08:00');
 
-// Newsletter digest (weekly, Monday 09:00)
-Schedule::command('newsletter:digest')->weeklyOn(1, '09:00');
+// Newsletter digest (preview mardi, envoi mercredi)
+Schedule::command('newsletter:digest --preview')->weeklyOn(2, '09:00');
+Schedule::command('newsletter:digest --send --force')->weeklyOn(3, '09:00');
+
+// Queue worker pour jobs newsletter (shared hosting — pas de daemon)
+Schedule::command('queue:work --queue=newsletters --stop-when-empty --max-time=55')->everyMinute();
 
 // AI knowledge base - scrape URLs needing refresh
 Schedule::command('ai:scrape-urls --all')->dailyAt('05:00');

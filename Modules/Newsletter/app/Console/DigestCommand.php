@@ -7,6 +7,8 @@ namespace Modules\Newsletter\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
+use Modules\Newsletter\Jobs\SendDigestJob;
 use Modules\Newsletter\Models\NewsletterIssue;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Notifications\WeeklyDigestNotification;
@@ -138,25 +140,31 @@ class DigestCommand extends Command
             return self::SUCCESS;
         }
 
-        // Envoi aux abonnés
-        foreach ($subscribers as $subscriber) {
-            $subscriber->notify(new WeeklyDigestNotification(
-                $data['highlight'], $data['topNews'], $data['toolOfWeek'] ?? null,
-                $data['featuredArticle'] ?? null, null, $data['weekNumber'],
-                $data['aiTerm'] ?? null, $data['interactiveTool'] ?? null,
-                $data['weeklyPrompt'] ?? null, $data['editorial'] ?? null
-            ));
-        }
+        // Pré-rendre le HTML une seule fois (placeholder pour unsubscribe)
+        $subject = 'La veille IA #'.$data['weekNumber'].' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Votre veille hebdomadaire');
 
-        // Mettre à jour l'issue
-        if ($issue) {
-            $issue->update(['status' => 'sent', 'sent_at' => now(), 'subscriber_count' => $subscribers->count()]);
-        } elseif (Schema::hasTable('newsletter_issues')) {
-            NewsletterIssue::updateOrCreate(
+        $htmlContent = View::make('newsletter::emails.digest-weekly', [
+            'subject' => $subject,
+            'highlight' => $data['highlight'] ?? null,
+            'topNews' => $data['topNews'] ?? collect(),
+            'toolOfWeek' => $data['toolOfWeek'] ?? null,
+            'featuredArticle' => $data['featuredArticle'] ?? null,
+            'didYouKnow' => null,
+            'aiTerm' => $data['aiTerm'] ?? null,
+            'interactiveTool' => $data['interactiveTool'] ?? null,
+            'weeklyPrompt' => $data['weeklyPrompt'] ?? null,
+            'editorial' => $data['editorial'] ?? null,
+            'unsubscribeUrl' => '{{UNSUBSCRIBE_URL}}',
+            'weekNumber' => $data['weekNumber'],
+        ])->render();
+
+        // Sauvegarder l'issue si elle n'existe pas encore
+        if (! $issue && Schema::hasTable('newsletter_issues')) {
+            $issue = NewsletterIssue::updateOrCreate(
                 ['year' => $year, 'week_number' => $week],
                 [
-                    'subject' => 'La veille IA #'.$data['weekNumber'].' - '.config('app.name'),
-                    'status' => 'sent',
+                    'subject' => $subject,
+                    'status' => 'draft',
                     'content' => [
                         'highlight_id' => $data['highlight']?->id,
                         'top_news_ids' => ($data['topNews'] ?? collect())->pluck('id')->toArray(),
@@ -167,17 +175,38 @@ class DigestCommand extends Command
                         'weekly_prompt' => $data['weeklyPrompt'] ?? null,
                         'editorial' => $data['editorial'] ?? null,
                     ],
-                    'subscriber_count' => $subscribers->count(),
-                    'sent_at' => now(),
                 ]
             );
         }
 
+        // Dispatcher un Job par abonné (queue database, anti-doublon intégré)
+        $dispatched = 0;
+        foreach ($subscribers as $subscriber) {
+            if (! $subscriber->email || ! $subscriber->token) {
+                continue;
+            }
+
+            SendDigestJob::dispatch(
+                $subscriber->email,
+                (string) ($subscriber->name ?? ''),
+                $subject,
+                $htmlContent,
+                $issue?->id ?? 0,
+                $subscriber->token,
+            );
+            $dispatched++;
+        }
+
+        // Mettre à jour l'issue
+        if ($issue) {
+            $issue->update(['status' => 'sent', 'sent_at' => now(), 'subscriber_count' => $dispatched]);
+        }
+
         $this->newLine();
-        $this->components->twoColumnDetail('Abonnés', (string) $subscribers->count());
+        $this->components->twoColumnDetail('Jobs dispatches', (string) $dispatched);
         $this->components->twoColumnDetail('Depuis brouillon', $issue ? 'oui' : 'non (contenu frais)');
         $this->components->twoColumnDetail('Éditorial édité', ($issue && $issue->editorial_edited) ? 'oui' : 'non');
-        $this->components->info("Newsletter #$week envoyée avec succès.");
+        $this->components->info("Newsletter #$week : $dispatched jobs dispatches dans la queue.");
 
         return self::SUCCESS;
     }
