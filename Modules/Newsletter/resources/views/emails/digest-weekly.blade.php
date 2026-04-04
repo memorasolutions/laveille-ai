@@ -118,6 +118,39 @@
     </tr>
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
 
+    {{-- W4. PREMIER DÉFI — prompt animal de feu --}}
+    <tr>
+        <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Votre premier défi — création d'image IA</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Copiez ce prompt dans <strong style="color:#3dc9d8;">Gemini</strong> (Google) ou <strong style="color:#3dc9d8;">ChatGPT</strong> (DALL-E) en mode création d'image — les deux meilleurs pour ce type de rendu. Vous pouvez aussi l'essayer dans d'autres outils !</td></tr>
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:14px;color:#e2e8f0;font-style:italic;line-height:1.6;">
+                            Un plan moyen cadré à la taille, filmé avec une focale de 85mm, profondeur de champ faible (f/1.8) avec un léger bokeh en arrière-plan. Rendu photoréaliste et cinématographique, qualité 8K, éclairage volumétrique. Un homme barbu dans la trentaine, vêtu d'une chemise sombre aux manches retroussées, se tient de profil gauche dans une pièce plongée dans l'obscurité. Son regard exprime un émerveillement mêlé de révérence alors qu'il contemple l'esprit complexe et ardent d'un(e) <strong style="color:#3dc9d8;font-style:normal;">__ANIMAL__</strong> qui se matérialise au-dessus de sa main droite tendue, paume ouverte vers le ciel. La créature éthérée est entièrement sculptée de flammes tourbillonnantes dorées, orangées et blanc incandescent. Des volutes de fumée ambrée s'élèvent en spirales douces, tandis que des étincelles et des braises flottent dans l'air comme des lucioles. L'éclairage principal provient exclusivement de l'esprit de feu, projetant une lueur chaude et dorée sur le visage et le torse de l'homme, créant un clair-obscur prononcé. L'arrière-plan révèle à peine les contours flous d'une chambre dans la pénombre. Atmosphère magique, intime et profondément contemplative.
+                        </td></tr>
+                    </table>
+                </td></tr>
+                <tr><td style="padding-bottom:14px;">
+                    <p style="color:#f97316;font-size:14px;font-weight:bold;margin:0 0 6px;">&#x1F4A1; Remplacez __ANIMAL__ par votre animal préféré !</p>
+                    <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Loup, cerf, phénix, dragon, raton laveur... chaque animal donne un résultat unique et spectaculaire.</p>
+                </td></tr>
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;">
+                            <p style="color:#3dc9d8;font-size:12px;font-weight:bold;margin:0 0 6px;">Pourquoi ce prompt fonctionne :</p>
+                            <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Ce prompt suit les bonnes pratiques 2026 : il commence par les instructions techniques de caméra (focale 85mm, ouverture f/1.8) pour un cadrage cinématographique précis. L'éclairage est décrit comme source unique — l'esprit de feu — ce qui crée un clair-obscur dramatique cohérent. Les détails sensoriels empilés (flammes, fumée ambrée, étincelles, bokeh) donnent de la richesse sans que l'IA doive deviner quoi ajouter.</p>
+                        </td></tr>
+                    </table>
+                </td></tr>
+                <tr><td align="center">
+                    <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
+
     @endif
 
     {{-- 1.5. MINI-EDITORIAL --}}
