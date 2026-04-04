@@ -77,8 +77,9 @@
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
     {{-- RSS désactivé (décision utilisateur 2026-04-04) --}}
     @stack('head')
-    <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet">
+    @include('fronttheme::partials.critical-css')
+    <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/animate.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/owl.carousel.css') }}" rel="stylesheet">
