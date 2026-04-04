@@ -26,14 +26,18 @@ class SitemapController
         // Page d'accueil
         $sitemap->add(Url::create(route('home'))->setPriority(1.0)->setChangeFrequency('daily'));
 
-        // Articles publiés
+        // Articles publiés (avec images)
         Article::where('status', 'published')->whereNotNull('published_at')->get()->each(function ($article) use ($sitemap) {
-            $sitemap->add(
-                Url::create(url('/blog/'.$article->slug))
-                    ->setLastModificationDate($article->updated_at)
-                    ->setPriority(0.8)
-                    ->setChangeFrequency('weekly')
-            );
+            $url = Url::create(url('/blog/'.$article->slug))
+                ->setLastModificationDate($article->updated_at)
+                ->setPriority(0.8)
+                ->setChangeFrequency('weekly');
+
+            if ($article->featured_image) {
+                $url->addImage(url($article->featured_image));
+            }
+
+            $sitemap->add($url);
         });
 
         // Pages statiques publiées
@@ -55,12 +59,16 @@ class SitemapController
         if (Route::has('dictionary.index') && class_exists(\Modules\Dictionary\Models\Term::class)) {
             $sitemap->add(Url::create(route('dictionary.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
             \Modules\Dictionary\Models\Term::published()->get()->each(function ($term) use ($sitemap) {
-                $sitemap->add(
-                    Url::create(route('dictionary.show', $term->slug))
-                        ->setLastModificationDate($term->updated_at)
-                        ->setPriority(0.7)
-                        ->setChangeFrequency('monthly')
-                );
+                $url = Url::create(route('dictionary.show', $term->slug))
+                    ->setLastModificationDate($term->updated_at)
+                    ->setPriority(0.7)
+                    ->setChangeFrequency('monthly');
+
+                if ($term->hero_image) {
+                    $url->addImage(url($term->hero_image));
+                }
+
+                $sitemap->add($url);
             });
         }
 
@@ -68,12 +76,16 @@ class SitemapController
         if (Route::has('directory.index') && class_exists(\Modules\Directory\Models\Tool::class)) {
             $sitemap->add(Url::create(route('directory.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
             \Modules\Directory\Models\Tool::published()->get()->each(function ($tool) use ($sitemap) {
-                $sitemap->add(
-                    Url::create(route('directory.show', $tool->slug))
-                        ->setLastModificationDate($tool->updated_at)
-                        ->setPriority(0.7)
-                        ->setChangeFrequency('monthly')
-                );
+                $url = Url::create(route('directory.show', $tool->slug))
+                    ->setLastModificationDate($tool->updated_at)
+                    ->setPriority(0.7)
+                    ->setChangeFrequency('monthly');
+
+                if ($tool->screenshot) {
+                    $url->addImage(str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : url($tool->screenshot));
+                }
+
+                $sitemap->add($url);
             });
         }
 
@@ -109,12 +121,16 @@ class SitemapController
             $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));
             if (class_exists(\Modules\News\Models\NewsArticle::class)) {
                 \Modules\News\Models\NewsArticle::where('is_published', true)->get()->each(function ($article) use ($sitemap) {
-                    $sitemap->add(
-                        Url::create(url('/actualites/'.$article->slug))
-                            ->setLastModificationDate($article->updated_at)
-                            ->setPriority(0.6)
-                            ->setChangeFrequency('weekly')
-                    );
+                    $url = Url::create(url('/actualites/'.$article->slug))
+                        ->setLastModificationDate($article->updated_at)
+                        ->setPriority(0.6)
+                        ->setChangeFrequency('weekly');
+
+                    if ($article->image_url) {
+                        $url->addImage(str_starts_with($article->image_url, 'http') ? $article->image_url : url($article->image_url));
+                    }
+
+                    $sitemap->add($url);
                 });
             }
         }
