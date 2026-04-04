@@ -101,6 +101,18 @@
                                         {{-- Colonne gauche : outils et référence --}}
                                         <div style="flex:1!important;">
                                             <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Outils et référence') }}</div>
+                                            @if(Route::has('news.index'))
+                                            <a href="{{ route('news.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">📰</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Actualités') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Veille IA et technologie') }}</div></div>
+                                            </a>
+                                            @endif
+                                            @if(Route::has('directory.index'))
+                                            <a href="{{ route('directory.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">🔍</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Répertoire techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('directory_tools_count', 3600, fn () => class_exists(\Modules\Directory\Models\Tool::class) ? \Modules\Directory\Models\Tool::where('status', 'published')->count() : 0) }} {{ __('outils IA avec avis, tutoriels et discussions') }}</div></div>
+                                            </a>
+                                            @endif
                                             @if(Route::has('tools.index'))
                                             <a href="{{ route('tools.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🛠️</span>
@@ -111,18 +123,6 @@
                                             <a href="{{ route('dictionary.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">📚</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Glossaire IA') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Termes et définitions de l\'IA') }}</div></div>
-                                            </a>
-                                            @endif
-                                            @if(Route::has('directory.index'))
-                                            <a href="{{ route('directory.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🔍</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Répertoire techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('directory_tools_count', 3600, fn () => class_exists(\Modules\Directory\Models\Tool::class) ? \Modules\Directory\Models\Tool::where('status', 'published')->count() : 0) }} {{ __('outils IA avec avis, tutoriels et discussions') }}</div></div>
-                                            </a>
-                                            @endif
-                                            @if(Route::has('news.index'))
-                                            <a href="{{ route('news.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">📰</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Actualités') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Veille IA et technologie') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('acronyms.index'))
@@ -163,10 +163,10 @@
                                 </div>
                                 {{-- Fallback sub-menu pour mobile (le mega menu est masqué en mobile) --}}
                                 <ul class="sub-menu">
+                                    @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>@endif
+                                    @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>@endif
                                     @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>@endif
                                     @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>@endif
-                                    @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>@endif
-                                    @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>@endif
                                     @if(Route::has('roadmap.boards.index'))<li><a href="{{ route('roadmap.boards.index') }}">{{ __('Propositions') }}</a></li>@endif
                                     @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>@endif
@@ -317,10 +317,10 @@
                                         <div class="widget link-widget">
                                             <div class="widget-title"><h3>{{ __('Ressources') }}</h3></div>
                                             <ul>
+                                                @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
+                                                @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">🔍 {{ __('Répertoire techno') }}</a></li>@endif
                                                 @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">🛠️ {{ __('Outils gratuits') }}</a></li>@endif
                                                 @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA') }}</a></li>@endif
-                                                @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">🔍 {{ __('Répertoire techno') }}</a></li>@endif
-                                                @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                                 @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🎓 {{ __('Acronymes éducation') }}</a></li>@endif
                                             </ul>
                                         </div>
