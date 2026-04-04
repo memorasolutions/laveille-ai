@@ -187,7 +187,7 @@
             {{-- Accordéon sécurité --}}
             <div style="border: 1px solid #E5E7EB; border-radius: 12px; margin-bottom: 12px; overflow: hidden;">
                 <div @click="optionsOpen = optionsOpen === 'security' ? '' : 'security'" style="padding: 14px 18px; cursor: pointer; display: flex !important; justify-content: space-between !important; align-items: center !important; user-select: none; background: #F9FAFB; min-height: 48px;">
-                    <span style="font-weight: 600; font-size: 14px; color: var(--c-dark, #1A1D23);">🔒 {{ __('Securite et expiration') }}</span>
+                    <span style="font-weight: 600; font-size: 14px; color: var(--c-dark, #1A1D23);">🔒 {{ __('Sécurité et expiration') }}</span>
                     <span x-text="optionsOpen === 'security' ? '▲' : '▼'" style="font-size: 11px; color: var(--c-text-muted, #6E7687);"></span>
                 </div>
                 <div x-show="optionsOpen === 'security'" x-transition x-cloak style="padding: 16px 18px; border-top: 1px solid #E5E7EB;">
@@ -320,7 +320,7 @@
         <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Creez un compte gratuit pour debloquer toutes les fonctionnalites.') }}' })"
             style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .2s;"
             onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
-            {{ __('Creer un compte gratuit') }}
+            {{ __('Créer un compte gratuit') }}
         </button>
     </div>
     @endguest

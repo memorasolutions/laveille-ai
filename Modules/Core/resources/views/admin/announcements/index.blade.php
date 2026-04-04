@@ -45,8 +45,8 @@
                 <div class="col-md-4">
                     <select name="type" class="form-select">
                         <option value="">Tous les types</option>
-                        <option value="feature" {{ request('type') == 'feature' ? 'selected' : '' }}>Nouveaute</option>
-                        <option value="improvement" {{ request('type') == 'improvement' ? 'selected' : '' }}>Amelioration</option>
+                        <option value="feature" {{ request('type') == 'feature' ? 'selected' : '' }}>Nouveauté</option>
+                        <option value="improvement" {{ request('type') == 'improvement' ? 'selected' : '' }}>Amélioration</option>
                         <option value="fix" {{ request('type') == 'fix' ? 'selected' : '' }}>Correctif</option>
                         <option value="announcement" {{ request('type') == 'announcement' ? 'selected' : '' }}>Annonce</option>
                     </select>

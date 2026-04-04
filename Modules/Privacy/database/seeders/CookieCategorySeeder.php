@@ -21,7 +21,7 @@ class CookieCategorySeeder extends Seeder
             ['name' => 'essential'],
             [
                 'label' => 'Cookies essentiels',
-                'description' => 'Necessaires au fonctionnement du site. Session, CSRF, securite.',
+                'description' => 'Nécessaires au fonctionnement du site. Session, CSRF, sécurité.',
                 'required' => true,
                 'order' => 1,
                 'is_active' => true,

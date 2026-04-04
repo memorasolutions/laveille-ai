@@ -123,7 +123,7 @@
                             {{ __('Tirer au sort') }}
                         </button>
 
-                        {{-- Resultat du tirage --}}
+                        {{-- Résultat du tirage --}}
                         <template x-if="currentDraw">
                             <div class="text-center p-4 rounded mb-4 draw-card-enter" style="background: var(--c-accent-light, #FDF5ED); border: 2px solid var(--c-accent);">
                                 <div class="d-flex justify-content-between align-items-start">
