@@ -83,7 +83,7 @@
     @endif
 
     {{-- 3. DEFI DE LA QUINZAINE (semaines paires, position haute pour max engagement) --}}
-    @if(($weeklyPrompt ?? null) && (($weekNumber ?? 0) % 2 === 0))
+    @if($weeklyPrompt ?? null)
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">

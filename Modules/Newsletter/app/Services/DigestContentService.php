@@ -114,6 +114,14 @@ class DigestContentService
 
         $weeklyPrompt = $content['weekly_prompt'] ?? null;
         $editorial = $content['editorial'] ?? null;
+
+        if (! $editorial && class_exists(\Modules\Newsletter\Models\EditorialBank::class)) {
+            try {
+                $bankEditorial = \Modules\Newsletter\Models\EditorialBank::getNextEditorial();
+                $editorial = $bankEditorial?->content;
+            } catch (\Throwable) {}
+        }
+
         $weekNumber = $issue->week_number;
 
         return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'weekNumber', 'editorial');

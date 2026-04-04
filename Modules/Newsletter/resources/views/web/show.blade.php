@@ -66,7 +66,7 @@
                                 @endif
 
                                 {{-- Défi de la quinzaine --}}
-                                @if(($weeklyPrompt ?? null) && (($weekNumber ?? 0) % 2 === 0))
+                                @if($weeklyPrompt ?? null)
                                     <div class="newsletter-challenge">
                                         <h3>Défi de la quinzaine</h3>
                                         <p>Essayez ce prompt cette semaine :</p>
