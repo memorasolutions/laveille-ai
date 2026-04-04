@@ -28,7 +28,8 @@ if (\Nwidart\Modules\Facades\Module::find('FrontTheme')?->isEnabled()) {
         Route::get('/blog', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'index'])->name('blog.index')->middleware('cacheResponse:600');
         Route::get('/blog/{slug}', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'show'])->name('blog.show')->middleware('cacheResponse:600');
         Route::get('/categorie/{slug}', [\Modules\Blog\Http\Controllers\PublicPostController::class, 'category'])->name('blog.category');
-        Route::get('/feed', [\Modules\Blog\Http\Controllers\FeedController::class, 'rss'])->name('blog.feed')->middleware('cacheResponse:3600');
+        // RSS désactivé (décision utilisateur 2026-04-04)
+        // Route::get('/feed', [\Modules\Blog\Http\Controllers\FeedController::class, 'rss'])->name('blog.feed')->middleware('cacheResponse:3600');
     });
 }
 

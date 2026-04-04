@@ -43,11 +43,16 @@ class NewsletterWebController extends Controller
         // Fallback preview avant premier envoi
         $data = DigestContentService::gatherFreshContent();
         $data['subject'] = 'Bienvenue sur La veille IA';
-        $data['issue'] = (object) ['subject' => $data['subject'], 'sent_at' => now(), 'week_number' => now()->weekOfYear];
         $data['isWelcome'] = true;
         $data['unsubscribeUrl'] = '#';
 
-        return view('newsletter::web.show', $data);
+        $emailHtml = view('newsletter::emails.digest-weekly', $data)->render();
+
+        return view('newsletter::web.embed', [
+            'emailHtml' => $emailHtml,
+            'subject' => $data['subject'],
+            'issue' => (object) ['subject' => $data['subject'], 'sent_at' => now(), 'week_number' => now()->weekOfYear],
+        ]);
     }
 
     private function renderWebFromEmail(NewsletterIssue $issue, bool $isWelcome = false): View

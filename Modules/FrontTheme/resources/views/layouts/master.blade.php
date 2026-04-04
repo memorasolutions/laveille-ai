@@ -75,9 +75,7 @@
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="fr-CA" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
-    @if(Route::has('blog.feed'))
-    <link rel="alternate" type="application/rss+xml" title="{{ config('app.name') }} - Flux RSS" href="{{ route('blog.feed') }}">
-    @endif
+    {{-- RSS désactivé (décision utilisateur 2026-04-04) --}}
     @stack('head')
     <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet">
