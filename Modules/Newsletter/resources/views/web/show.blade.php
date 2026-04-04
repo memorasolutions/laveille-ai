@@ -78,6 +78,29 @@
         width: 100%;
         object-fit: cover;
     }
+    /* Newsletter section system */
+    .nl-section-label { font-size:11px; text-transform:uppercase; letter-spacing:1.5px; color:#0B7285; font-weight:bold; margin-bottom:12px; }
+    .nl-section { padding:20px 0; border-bottom:1px solid #e5e7eb; }
+    .nl-section:last-child { border-bottom:0; }
+    .nl-highlight .media .media-left img { width:200px; max-width:100%; border-radius:6px; }
+    .nl-challenge { background:#0c1427; color:#e2e8f0; padding:24px; border-radius:8px; margin:20px 0; }
+    .nl-challenge h3 { color:#3dc9d8; font-size:18px; }
+    .nl-challenge p { color:#e2e8f0; }
+    .nl-prompt-box { background:#1e293b; border:1px solid #3dc9d8; border-radius:6px; padding:15px; font-style:italic; color:#e2e8f0; line-height:1.6; margin-bottom:12px; }
+    .nl-technique { border-left:3px solid #3dc9d8; padding-left:12px; color:#94a3b8; font-size:13px; margin-bottom:12px; }
+    .nl-challenge .btn { background:#3dc9d8; color:#0c1427; font-weight:bold; border:none; }
+    .nl-news .media .media-left img { width:80px; height:80px; object-fit:cover; border-radius:6px; }
+    .nl-tool { background:#f0fdfa; padding:20px; border-radius:6px; }
+    .nl-tool .media .media-left img { width:200px; max-width:100%; border-radius:8px; }
+    .nl-pricing { display:inline-block; font-size:10px; font-weight:bold; padding:3px 8px; border-radius:3px; color:#fff; vertical-align:middle; margin-left:6px; }
+    .nl-free-tool { background:#fffbeb; padding:20px; border-radius:6px; }
+    .nl-free-tool .btn { background:#d97706; color:#fff; border:none; }
+    .nl-term { background:#f8fafc; padding:20px; border-radius:6px; }
+    .nl-term .media .media-left img { width:150px; height:150px; object-fit:cover; border-radius:8px; }
+    .nl-promo { background:#0c1427; color:#e2e8f0; padding:24px; border-radius:8px; }
+    .nl-promo a { color:#3dc9d8; }
+    .nl-cta { text-align:center; padding:30px 0; }
+    .nl-cta .btn { background:var(--c-primary); color:#fff; padding:12px 30px; font-weight:bold; border-radius:4px; border:none; }
 </style>
 @endpush
 
@@ -142,96 +165,117 @@
 
                                 {{-- Éditorial --}}
                                 @if($editorial ?? null)
-                                    <blockquote style="border-left: 3px solid var(--c-primary); padding-left: 1rem;">
-                                        {{ $editorial }}
-                                    </blockquote>
+                                <div class="nl-section">
+                                    <p class="nl-section-label">Éditorial</p>
+                                    <blockquote>{{ $editorial }}</blockquote>
+                                </div>
                                 @endif
 
                                 {{-- Fait marquant --}}
                                 @if($highlight ?? null)
-                                    <h2 class="newsletter-section-title">Le fait marquant</h2>
-                                    @if($highlight->image_url)
-                                    <div class="entry-media"><img src="{{ asset($highlight->image_url) }}" alt="{{ $highlight->seo_title ?? $highlight->title }}"></div>
-                                    @endif
-                                    <h3>{{ $highlight->seo_title ?? $highlight->title }}</h3>
-                                    <p>{{ Str::limit($highlight->summary ?? strip_tags($highlight->content ?? ''), 200) }}</p>
-                                    <a href="{{ $highlight->url ?? route('news.show', $highlight->slug ?? '') }}" style="color:var(--c-primary);font-weight:bold;">Lire l'article &rarr;</a>
+                                <div class="nl-section nl-highlight">
+                                    <p class="nl-section-label">Le fait marquant</p>
+                                    <div class="media">
+                                        @if($highlight->image_url)
+                                        <div class="media-left"><img src="{{ asset($highlight->image_url) }}" alt="{{ $highlight->seo_title ?? $highlight->title }}" loading="lazy"></div>
+                                        @endif
+                                        <div class="media-body">
+                                            <h2>{{ $highlight->seo_title ?? $highlight->title }}</h2>
+                                            <p>{{ Str::limit($highlight->summary ?? strip_tags($highlight->content ?? ''), 200) }}</p>
+                                            <a href="{{ $highlight->url ?? route('news.show', $highlight->slug ?? '') }}" class="btn btn-sm" style="background:var(--c-primary);color:#fff;">Lire l'article &rarr;</a>
+                                        </div>
+                                    </div>
+                                </div>
                                 @endif
 
-                                {{-- Défi de la semaine --}}
-                                @if($weeklyPrompt ?? null)
-                                    <div class="newsletter-challenge">
-                                        <h3>Défi de la semaine</h3>
-                                        <p>Essayez ce prompt cette semaine :</p>
-                                        <div style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;margin-bottom:12px;">
-                                            <p style="color:#e2e8f0;font-style:italic;margin:0;line-height:1.5;">{{ is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt }}</p>
-                                        </div>
-                                        @if(is_array($weeklyPrompt) && ($weeklyPrompt['technique'] ?? null))
-                                        <p><strong style="color:#3dc9d8;">Technique utilisée :</strong> <span style="color:#94a3b8;">{{ $weeklyPrompt['technique'] }}</span></p>
-                                        @endif
-                                    </div>
+                                {{-- Défi de la semaine (masqué dans welcome) --}}
+                                @if(($weeklyPrompt ?? null) && !($isWelcome ?? false))
+                                <div class="nl-challenge">
+                                    <p class="nl-section-label" style="color:#3dc9d8;">Défi de la semaine</p>
+                                    <h3>Essayez ce prompt cette semaine :</h3>
+                                    <div class="nl-prompt-box">{{ is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt }}</div>
+                                    @if(is_array($weeklyPrompt) && ($weeklyPrompt['technique'] ?? null))
+                                    <div class="nl-technique"><strong style="color:#3dc9d8;">Technique utilisée :</strong> {{ $weeklyPrompt['technique'] }}</div>
+                                    @endif
+                                    <a href="{{ config('app.url') }}/outils/constructeur-prompts" class="btn">Construire mon prompt &rarr;</a>
+                                </div>
                                 @endif
 
                                 {{-- Actualités --}}
                                 @if(($topNews ?? null) && $topNews->count())
-                                    <h2 class="newsletter-section-title">Actualités de la semaine</h2>
+                                <div class="nl-section nl-news">
+                                    <p class="nl-section-label">Actualités de la semaine</p>
                                     @foreach($topNews as $news)
-                                    <div class="media" style="{{ !$loop->last ? 'border-bottom:1px solid #f0f0f0;padding-bottom:16px;margin-bottom:16px;' : '' }}">
+                                    <div class="media">
                                         @if($news->image_url)
-                                        <div class="media-left"><img src="{{ asset($news->image_url) }}" alt="{{ $news->seo_title ?? $news->title }}" style="width:80px;height:80px;border-radius:6px;object-fit:cover;" loading="lazy"></div>
+                                        <div class="media-left"><img src="{{ asset($news->image_url) }}" alt="{{ $news->seo_title ?? $news->title }}" loading="lazy"></div>
                                         @endif
                                         <div class="media-body">
-                                            <h4 style="margin:0 0 4px;font-size:15px;"><a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}">{{ $news->seo_title ?? $news->title }}</a></h4>
-                                            @if($news->summary)<p style="color:#777;font-size:13px;margin:0;">{{ Str::limit(strip_tags($news->summary), 140) }}</p>@endif
+                                            <h4><a href="{{ $news->url ?? route('news.show', $news->slug ?? '') }}">{{ $news->seo_title ?? $news->title }}</a></h4>
+                                            @if($news->summary)<p>{{ Str::limit(strip_tags($news->summary), 140) }}</p>@endif
                                         </div>
                                     </div>
                                     @endforeach
+                                </div>
                                 @endif
 
                                 {{-- Outil de la semaine --}}
                                 @if($toolOfWeek ?? null)
-                                    <h2 class="newsletter-section-title">Outil de la semaine</h2>
+                                <div class="nl-section nl-tool">
+                                    <p class="nl-section-label">Outil de la semaine</p>
                                     <div class="media">
                                         @if($toolOfWeek->screenshot)
-                                        <div class="media-left"><img src="{{ str_starts_with($toolOfWeek->screenshot, 'http') ? $toolOfWeek->screenshot : asset($toolOfWeek->screenshot) }}" alt="{{ $toolOfWeek->name }}" width="200" style="border-radius:8px;" loading="lazy"></div>
+                                        <div class="media-left"><img src="{{ str_starts_with($toolOfWeek->screenshot, 'http') ? $toolOfWeek->screenshot : asset($toolOfWeek->screenshot) }}" alt="{{ $toolOfWeek->name }}" loading="lazy"></div>
                                         @endif
                                         <div class="media-body">
-                                            <h3 style="margin:0 0 6px;">{{ $toolOfWeek->name }}</h3>
+                                            <h3>{{ $toolOfWeek->name }}
+                                                @php $pColor = match(strtolower($toolOfWeek->pricing ?? '')) { 'free','gratuit' => '#10b981', 'freemium' => '#f97316', default => '#6b7280' }; $pLabel = match(strtolower($toolOfWeek->pricing ?? '')) { 'free','gratuit' => 'Gratuit', 'freemium' => 'Freemium', default => 'Payant' }; @endphp
+                                                <span class="nl-pricing" style="background:{{ $pColor }};">{{ $pLabel }}</span>
+                                            </h3>
                                             <p>{{ Str::limit(strip_tags($toolOfWeek->short_description ?? $toolOfWeek->description ?? ''), 150) }}</p>
-                                            <a href="{{ route('directory.show', $toolOfWeek->slug) }}" style="color:var(--c-primary);font-weight:bold;">Découvrir &rarr;</a>
+                                            @if($toolOfWeek->use_cases)<p><strong style="color:var(--c-primary);">Pour qui ?</strong> {{ Str::limit(strip_tags($toolOfWeek->use_cases), 100) }}</p>@endif
+                                            @if($toolOfWeek->pros)<p><strong style="color:var(--c-primary);">Pourquoi l'essayer ?</strong> {{ Str::limit(strip_tags($toolOfWeek->pros), 100) }}</p>@endif
+                                            <a href="{{ route('directory.show', $toolOfWeek->slug) }}" class="btn btn-sm" style="background:var(--c-primary);color:#fff;">Découvrir &rarr;</a>
                                         </div>
                                     </div>
+                                </div>
                                 @endif
 
                                 {{-- Article à lire --}}
                                 @if($featuredArticle ?? null)
-                                    <h2 class="newsletter-section-title">À lire cette semaine</h2>
+                                <div class="nl-section">
+                                    <p class="nl-section-label">À lire cette semaine</p>
                                     <div class="media">
                                         @if($featuredArticle->featured_image)
-                                        <div class="media-left"><img src="{{ asset($featuredArticle->featured_image) }}" alt="{{ $featuredArticle->title }}" style="width:180px;border-radius:6px;" loading="lazy"></div>
+                                        <div class="media-left"><img src="{{ asset($featuredArticle->featured_image) }}" alt="{{ $featuredArticle->title }}" loading="lazy" style="width:180px;border-radius:6px;"></div>
                                         @endif
                                         <div class="media-body">
-                                            <h3 style="margin:0 0 8px;"><a href="{{ route('blog.show', $featuredArticle->slug) }}">{{ $featuredArticle->title }}</a></h3>
+                                            <h3><a href="{{ route('blog.show', $featuredArticle->slug) }}">{{ $featuredArticle->title }}</a></h3>
                                             <p>{{ Str::limit(strip_tags($featuredArticle->excerpt ?? $featuredArticle->content ?? ''), 150) }}</p>
-                                            <a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:var(--c-primary);font-weight:bold;">Lire l'article &rarr;</a>
+                                            <a href="{{ route('blog.show', $featuredArticle->slug) }}" class="btn btn-sm" style="background:var(--c-primary);color:#fff;">Lire l'article &rarr;</a>
                                         </div>
                                     </div>
+                                </div>
                                 @endif
 
                                 {{-- Outil gratuit --}}
                                 @if($interactiveTool ?? null)
-                                    <h2 class="newsletter-section-title" style="color:#d97706;border-color:#d97706;">Outil gratuit à essayer</h2>
+                                <div class="nl-section nl-free-tool">
+                                    <p class="nl-section-label" style="color:#d97706;">Outil gratuit à essayer</p>
                                     <h3>{{ $interactiveTool->icon ?? '' }} {{ $interactiveTool->name }}</h3>
                                     <p>{{ Str::limit(strip_tags($interactiveTool->description ?? ''), 150) }}</p>
-                                    <a href="{{ route('tools.show', $interactiveTool->slug) }}" class="btn" style="background-color:#d97706;color:#fff;border:none;border-radius:4px;">Essayer gratuitement &rarr;</a>
+                                    <p style="font-size:13px;color:#555;">100% gratuit, dans votre navigateur, aucune inscription.</p>
+                                    <a href="{{ route('tools.show', $interactiveTool->slug) }}" class="btn">Essayer gratuitement &rarr;</a>
+                                </div>
                                 @endif
 
                                 {{-- Terme IA --}}
                                 @if($aiTerm ?? null)
-                                    <h2 class="newsletter-section-title">Terme IA de la semaine</h2>
+                                <div class="nl-section nl-term">
+                                    <p class="nl-section-label">Terme IA de la semaine</p>
                                     <div class="media">
                                         @if($aiTerm->hero_image)
-                                        <div class="media-left"><img src="{{ asset($aiTerm->hero_image) }}" alt="{{ $aiTerm->name }}" style="width:150px;height:150px;border-radius:8px;object-fit:cover;" loading="lazy"></div>
+                                        <div class="media-left"><img src="{{ asset($aiTerm->hero_image) }}" alt="{{ $aiTerm->name }}" loading="lazy"></div>
                                         @endif
                                         <div class="media-body">
                                             <h3>{{ $aiTerm->name }}</h3>
@@ -239,16 +283,20 @@
                                         </div>
                                     </div>
                                     @if($aiTerm->analogy)
-                                    <blockquote style="border-left:4px solid var(--c-primary);padding-left:15px;margin-top:14px;">
+                                    <blockquote>
                                         <p style="color:var(--c-primary);font-size:13px;font-style:italic;margin-bottom:4px;">En d'autres mots...</p>
                                         <p>{{ strip_tags($aiTerm->analogy) }}</p>
                                     </blockquote>
                                     @endif
+                                    @if($aiTerm->did_you_know ?? null)
+                                    <p><strong style="color:#d97706;">Le saviez-vous ?</strong> {{ Str::limit(strip_tags($aiTerm->did_you_know), 150) }}</p>
+                                    @endif
+                                </div>
                                 @endif
 
                                 {{-- CTA abonnement --}}
-                                <div class="text-center" style="margin:30px 0;">
-                                    <a href="{{ route('home') }}#newsletter" class="btn btn-lg" style="background-color:var(--c-primary);color:#fff;border:none;border-radius:4px;padding:12px 30px;font-weight:bold;">S'abonner à l'infolettre</a>
+                                <div class="nl-cta">
+                                    <a href="{{ route('home') }}#newsletter" class="btn btn-lg">S'abonner à l'infolettre</a>
                                     @if(Route::has('newsletter.archive'))
                                     <br/><a href="{{ route('newsletter.archive') }}" style="color:var(--c-primary);font-size:14px;margin-top:10px;display:inline-block;">Voir tous les numéros &rarr;</a>
                                     @endif
