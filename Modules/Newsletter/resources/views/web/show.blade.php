@@ -15,12 +15,13 @@
     <section class="wpo-blog-single-section section-padding">
         <div class="container">
             <div class="row">
-                <div class="col-md-8 col-md-offset-2">
+                <div class="col col-lg-8 col-12">
+                    <div class="wpo-blog-content">
 
                     <h1 style="font-size:1.8rem;margin:0 0 8px;">{{ $subject }}</h1>
                     <p style="color:#777;font-size:14px;margin-bottom:20px;">{{ $issue->sent_at?->translatedFormat('j F Y') }} - Semaine {{ $weekNumber }}</p>
 
-                    {{-- Mini-editorial --}}
+                    {{-- Mini-éditorial --}}
                     @if($editorial ?? null)
                     <blockquote style="border-left:4px solid #0B7285;padding:12px 20px;margin:0 0 30px;background-color:#f8fafc;border-radius:0 6px 6px 0;">
                         <p style="margin:0;font-size:15px;color:#333;font-style:italic;line-height:1.6;">{{ $editorial }}</p>
@@ -42,25 +43,25 @@
                     </div>
                     @endif
 
-                    {{-- Defi de la quinzaine --}}
+                    {{-- Défi de la quinzaine --}}
                     @if(($weeklyPrompt ?? null) && (($weekNumber ?? 0) % 2 === 0))
                     <div style="background-color:#0c1427;border-radius:6px;padding:24px;margin-bottom:20px;">
-                        <p style="font-size:11px;text-transform:uppercase;color:#3dc9d8;font-weight:bold;margin-bottom:12px;">Defi de la quinzaine</p>
+                        <p style="font-size:11px;text-transform:uppercase;color:#3dc9d8;font-weight:bold;margin-bottom:12px;">Défi de la quinzaine</p>
                         <p style="color:#e2e8f0;font-size:16px;margin-bottom:12px;">Essayez ce prompt cette semaine :</p>
                         <div style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;margin-bottom:12px;">
                             <p style="color:#e2e8f0;font-style:italic;font-size:15px;margin:0;line-height:1.5;">{{ is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt }}</p>
                         </div>
                         @if(is_array($weeklyPrompt) && ($weeklyPrompt['technique'] ?? null))
                         <div style="border-left:3px solid #3dc9d8;padding-left:12px;margin-bottom:12px;">
-                            <p style="color:#94a3b8;font-size:13px;margin:0;"><strong style="color:#3dc9d8;">Technique utilisee :</strong> {{ $weeklyPrompt['technique'] }}</p>
+                            <p style="color:#94a3b8;font-size:13px;margin:0;"><strong style="color:#3dc9d8;">Technique utilisée :</strong> {{ $weeklyPrompt['technique'] }}</p>
                         </div>
                         @endif
                     </div>
                     @endif
 
-                    {{-- Actualites --}}
+                    {{-- Actualités --}}
                     @if(($topNews ?? null) && $topNews->count())
-                    <h2 style="font-size:18px;color:#0B7285;margin-bottom:16px;">Actualites de la semaine</h2>
+                    <h2 style="font-size:18px;color:#0B7285;margin-bottom:16px;">Actualités de la semaine</h2>
                     @foreach($topNews as $news)
                     <div class="media" style="margin-bottom:16px;padding-bottom:16px;{{ !$loop->last ? 'border-bottom:1px solid #f0f0f0;' : '' }}">
                         @if($news->image_url)
@@ -90,16 +91,16 @@
                                 <div class="media-body">
                                     <h3 style="margin:0 0 6px;font-size:20px;">{{ $toolOfWeek->name }}</h3>
                                     <p style="color:#555;">{{ Str::limit(strip_tags($toolOfWeek->short_description ?? $toolOfWeek->description ?? ''), 150) }}</p>
-                                    <a href="{{ route('directory.show', $toolOfWeek->slug) }}" style="color:#0B7285;font-weight:bold;">Decouvrir &rarr;</a>
+                                    <a href="{{ route('directory.show', $toolOfWeek->slug) }}" style="color:#0B7285;font-weight:bold;">Découvrir &rarr;</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                     @endif
 
-                    {{-- Article a lire --}}
+                    {{-- Article à lire --}}
                     @if($featuredArticle ?? null)
-                    <h2 style="font-size:18px;color:#0B7285;margin-bottom:16px;">A lire cette semaine</h2>
+                    <h2 style="font-size:18px;color:#0B7285;margin-bottom:16px;">À lire cette semaine</h2>
                     <div class="panel panel-default" style="border-radius:6px;">
                         <div class="panel-body">
                             <h3 style="margin:0 0 8px;font-size:18px;"><a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#1a1a2e;">{{ $featuredArticle->title }}</a></h3>
@@ -111,7 +112,7 @@
 
                     {{-- Outil gratuit --}}
                     @if($interactiveTool ?? null)
-                    <h2 style="font-size:18px;color:#d97706;margin-bottom:16px;">Outil gratuit a essayer</h2>
+                    <h2 style="font-size:18px;color:#d97706;margin-bottom:16px;">Outil gratuit à essayer</h2>
                     <div class="panel panel-default" style="border-radius:6px;background-color:#fffbeb;">
                         <div class="panel-body">
                             <h3 style="margin:0 0 8px;font-size:18px;">{{ $interactiveTool->icon ?? '' }} {{ $interactiveTool->name }}</h3>
@@ -149,12 +150,16 @@
 
                     {{-- CTA abonnement --}}
                     <div class="text-center" style="margin:30px 0;">
-                        <a href="{{ route('home') }}#newsletter" class="btn btn-lg" style="background-color:#0B7285;color:#fff;border:none;border-radius:4px;padding:12px 30px;font-weight:bold;">S'abonner a l'infolettre</a>
+                        <a href="{{ route('home') }}#newsletter" class="btn btn-lg" style="background-color:#0B7285;color:#fff;border:none;border-radius:4px;padding:12px 30px;font-weight:bold;">S'abonner à l'infolettre</a>
                         @if(Route::has('newsletter.archive'))
-                        <br/><a href="{{ route('newsletter.archive') }}" style="color:#0B7285;font-size:14px;margin-top:10px;display:inline-block;">Voir tous les numeros &rarr;</a>
+                        <br/><a href="{{ route('newsletter.archive') }}" style="color:#0B7285;font-size:14px;margin-top:10px;display:inline-block;">Voir tous les numéros &rarr;</a>
                         @endif
                     </div>
 
+                    </div>
+                </div>
+                <div class="col col-lg-4 col-12">
+                    @include('fronttheme::partials.sidebar')
                 </div>
             </div>
         </div>
