@@ -38,6 +38,17 @@ class NewsletterWebController extends Controller
         return view('newsletter::web.show', $data);
     }
 
+    public function welcome(): View
+    {
+        $data = DigestContentService::gatherFreshContent();
+        $data['isWelcome'] = true;
+        $data['subject'] = 'Bienvenue sur La veille IA';
+        $data['issue'] = (object) ['subject' => $data['subject'], 'sent_at' => now(), 'week_number' => now()->weekOfYear];
+        $data['unsubscribeUrl'] = '#';
+
+        return view('newsletter::web.show', $data);
+    }
+
     public function archive(): View
     {
         $issues = NewsletterIssue::published()->paginate(12);

@@ -33,7 +33,7 @@
     <tr>
         <td align="center" style="padding:10px 30px;background-color:#f4f4f4;font-size:12px;color:#666;">
             @if($isWelcome ?? false)
-                <a href="{{ config('app.url') }}" style="color:#0B7285;text-decoration:underline;">Voir sur le site laveille.ai</a>
+                <a href="{{ config('app.url') }}/newsletter/bienvenue" style="color:#0B7285;text-decoration:underline;">Voir cette infolettre dans votre navigateur</a>
             @else
                 <a href="{{ route('newsletter.web', ['year' => now()->year, 'week' => $weekNumber ?? now()->weekOfYear]) }}" style="color:#0B7285;text-decoration:underline;">Voir cette infolettre dans votre navigateur</a>
             @endif
@@ -417,8 +417,6 @@
                     <a href="https://www.linkedin.com/in/lapointestephane/" style="color:#666;text-decoration:none;">LinkedIn</a>
                     &nbsp;&middot;&nbsp;
                     <a href="https://laveille.ai" style="color:#666;text-decoration:none;">Site web</a>
-                    &nbsp;&middot;&nbsp;
-                    <a href="https://laveille.ai/feed" style="color:#666;text-decoration:none;">RSS</a>
                 </td></tr>
                 <tr><td align="center" style="font-size:11px;color:#737373;padding-bottom:8px;">
                     &copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits réservés.

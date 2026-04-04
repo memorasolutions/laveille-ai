@@ -23,6 +23,9 @@ Route::middleware('web')->group(function () {
     Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
     // Version web de la newsletter (pour les clients email qui affichent mal le HTML)
+    Route::get('/newsletter/bienvenue', [\Modules\Newsletter\Http\Controllers\NewsletterWebController::class, 'welcome'])
+        ->name('newsletter.welcome')
+        ->middleware('cacheResponse:3600');
     Route::get('/newsletter/web/{year}/{week}', [\Modules\Newsletter\Http\Controllers\NewsletterWebController::class, 'show'])
         ->where(['year' => '\d{4}', 'week' => '\d{1,2}'])
         ->name('newsletter.web')

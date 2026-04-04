@@ -101,6 +101,45 @@
                             @endif
                             <div class="entry-details">
 
+                                {{-- Sections welcome --}}
+                                @if($isWelcome ?? false)
+                                    {{-- Mot de Stef --}}
+                                    <div class="media" style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #f0f0f0;">
+                                        <div class="media-left" style="padding-right:16px;">
+                                            <img src="{{ asset('images/logo-eye.svg') }}" alt="La veille" style="width:80px;height:80px;">
+                                        </div>
+                                        <div class="media-body">
+                                            <h2 class="newsletter-section-title" style="margin-top:0;">Mot de Stef</h2>
+                                            <p>Je suis ravi de vous retrouver pour cette nouvelle étape où <strong>laveilledestef.com</strong> devient officiellement <strong><a href="{{ config('app.url') }}">laveille.ai</a></strong> avec un site entièrement repensé pour vous. Je vous donne désormais rendez-vous <strong>chaque mercredi</strong> dans votre boîte courriel, et notre envoi régulier débutera officiellement le <strong>15 avril</strong> prochain.</p>
+                                            <p>Je tiens sincèrement à vous remercier de nous suivre dans cette aventure technologique qui évolue si rapidement. D'ici notre première édition, je vous souhaite un excellent congé de Pâques entouré de vos proches !</p>
+                                            <p style="font-family:'Dancing Script','Brush Script MT',cursive;font-size:24px;color:var(--c-primary);">Stef</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- Chaque semaine --}}
+                                    <h2 class="newsletter-section-title">Chaque semaine dans votre boîte</h2>
+                                    <ul style="list-style:none;padding:0;">
+                                        <li style="padding:4px 0;">📢 <strong>Le fait marquant</strong> — l'actualité IA incontournable</li>
+                                        <li style="padding:4px 0;">📰 <strong>5 actualités</strong> — résumées et triées pour vous</li>
+                                        <li style="padding:4px 0;">🎯 <strong>Un défi prompt</strong> — un prompt à essayer immédiatement</li>
+                                        <li style="padding:4px 0;">🔧 <strong>L'outil de la semaine</strong> — testé et recommandé</li>
+                                        <li style="padding:4px 0;">📖 <strong>Un terme IA expliqué</strong> — pour comprendre sans jargon</li>
+                                        <li style="padding:4px 0;">📝 <strong>Un article approfondi</strong> — analyse ou tutoriel</li>
+                                        <li style="padding:4px 0;">🎁 <strong>Un outil gratuit</strong> — à essayer dans votre navigateur</li>
+                                    </ul>
+                                    <p style="font-style:italic;color:#555;">Voici votre premier numéro. Bonne lecture !</p>
+
+                                    {{-- Le nouveau laveille.ai --}}
+                                    <h2 class="newsletter-section-title">Le nouveau laveille.ai</h2>
+                                    <div style="margin-bottom:20px;">
+                                        <p><strong>Répertoire de 75+ outils IA</strong> — fiches détaillées, screenshots, avis de la communauté</p>
+                                        <p><strong>Glossaire IA interactif</strong> — 140+ termes expliqués simplement avec analogies</p>
+                                        <p><strong>Outils gratuits en ligne</strong> — calculatrices, générateurs, constructeur de prompts</p>
+                                        <p><strong>Acronymes en éducation</strong> — 300+ acronymes du milieu éducatif québécois</p>
+                                        <a href="{{ config('app.url') }}" class="btn" style="background-color:var(--c-primary);color:#fff;">Explorer le site &rarr;</a>
+                                    </div>
+                                @endif
+
                                 {{-- Éditorial --}}
                                 @if($editorial ?? null)
                                     <blockquote style="border-left: 3px solid var(--c-primary); padding-left: 1rem;">
