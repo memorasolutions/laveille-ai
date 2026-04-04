@@ -41,7 +41,7 @@
         <td style="background-color:#0c1427;padding:24px 30px;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                    <td><img src="{{ asset('images/logo-email-white.png') }}" width="200" alt="{{ config('app.name') }}" style="width:200px;height:auto;"/></td>
+                    <td><img src="{{ asset('images/logo-email-white.png') }}?v={{ time() }}" width="200" alt="{{ config('app.name') }}" style="width:200px;height:auto;"/></td>
                     <td align="right" style="font-size:12px;color:#94a3b8;">{{ ($isWelcome ?? false) ? 'Bienvenue !' : 'La veille IA #'.($weekNumber ?? '?') }}<br/>{{ now()->translatedFormat('j F Y') }}</td>
                 </tr>
             </table>
