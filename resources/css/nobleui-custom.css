@@ -107,12 +107,16 @@
     font-weight: 700 !important;
 }
 
-/* Sidebar: tous les sous-menus ouverts, pas de collapse */
-.sidebar .collapse {
+/* Sidebar: sous-menus principaux ouverts, mais "Plus..." reste collapsible */
+.sidebar .collapse:not(#contentMore) {
     display: block !important;
 }
 .sidebar .nav-link .link-arrow {
     display: none !important;
+}
+/* Fix: sous-menu imbriqué dans "Plus..." — même niveau que le parent */
+.sidebar .nav.sub-menu .nav.sub-menu {
+    padding-left: 0 !important;
 }
 .sidebar .nav-item.nav-category {
     border-top: 1px solid rgba(255,255,255,0.1);
