@@ -15,8 +15,19 @@
     <div class="row">
         {{-- Image --}}
         <div class="col-md-6" style="margin-bottom: 24px;">
-            @if(!empty($product->images) && isset($product->images[0]))
-                <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" style="width: 100%; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            @if(!empty($product->images))
+                <div x-data="{ activeImage: 0, images: {{ json_encode($product->images) }} }">
+                    <img :src="images[activeImage]" alt="{{ $product->name }}" style="width: 100%; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                    @if(count($product->images) > 1)
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <template x-for="(image, index) in images" :key="index">
+                                <img :src="image" :alt="'{{ $product->name }}'" @click="activeImage = index" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer;" :style="activeImage === index ? 'border: 2px solid #0B7285;' : 'border: 2px solid transparent;'">
+                            </template>
+                        </div>
+                        <p style="font-size: 12px; color: #94a3b8; font-style: italic; margin-top: 8px;">{{ __('Illustration. Le design imprime correspond au motif ci-dessous.') }}</p>
+                    @endif
+                </div>
             @else
                 <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #0B7285, #0CA678); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 72px; font-weight: 700;">{{ substr($product->name, 0, 1) }}</div>
             @endif
@@ -46,7 +57,18 @@
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
 
-                @if(!empty($product->variants))
+                @if(!empty($product->variants) && in_array($product->category, ['t-shirts', 'hoodies']))
+                    <div style="margin-bottom: 16px;" x-data="{ selectedSize: '{{ $product->variants[0]['label'] ?? 'M' }}', variants: {{ json_encode($product->variants) }} }">
+                        <label style="font-weight: 600; margin-bottom: 8px; display: block;">{{ __('Taille') }}</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            @foreach($product->variants as $variant)
+                                <button type="button" @click="selectedSize = '{{ $variant['label'] }}'" style="padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s;" :style="selectedSize === '{{ $variant['label'] }}' ? 'background: #0B7285; color: #fff; border: 1px solid #0B7285;' : 'background: #fff; color: #475569; border: 1px solid #cbd5e1;'">{{ $variant['label'] }}</button>
+                            @endforeach
+                        </div>
+                        <input type="hidden" name="variant_label" :value="selectedSize">
+                        <input type="hidden" name="variant_gelato_uid" :value="variants.find(v => v.label === selectedSize)?.gelato_uid || ''">
+                    </div>
+                @elseif(!empty($product->variants))
                     <div style="margin-bottom: 16px;">
                         <label style="font-weight: 600; margin-bottom: 8px; display: block;">{{ __('Variante') }}</label>
                         @foreach($product->variants as $variant)
