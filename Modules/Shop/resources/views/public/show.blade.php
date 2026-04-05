@@ -22,7 +22,7 @@
                     @if(count($product->images) > 1)
                         <div style="display: flex; gap: 10px; margin-top: 10px;">
                             <template x-for="(image, index) in images" :key="index">
-                                <img :src="image" :alt="'{{ $product->name }}'" @click="activeImage = index" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer;" :style="activeImage === index ? 'border: 2px solid #0B7285;' : 'border: 2px solid transparent;'">
+                                <img :src="image" :alt="'{{ $product->name }}'" @click="activeImage = index" :style="'width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;' + (activeImage === index ? 'border:2px solid #0B7285;' : 'border:2px solid transparent;')">
                             </template>
                         </div>
                         <p style="font-size: 12px; color: #94a3b8; font-style: italic; margin-top: 8px;">{{ __('Illustration. Le design imprime correspond au motif ci-dessous.') }}</p>
