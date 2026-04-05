@@ -107,8 +107,8 @@
     font-weight: 700 !important;
 }
 
-/* Sidebar: sous-menus principaux ouverts, mais "Plus..." reste collapsible */
-.sidebar .collapse:not(#contentMore) {
+/* Sidebar: tous les sous-menus ouverts */
+.sidebar .collapse {
     display: block !important;
 }
 .sidebar .nav-link .link-arrow {

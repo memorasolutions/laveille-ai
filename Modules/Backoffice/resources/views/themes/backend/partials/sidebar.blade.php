@@ -92,13 +92,8 @@
                         <li class="nav-item"><a href="{{ route('admin.menus.index') }}" class="nav-link {{ request()->routeIs('admin.menus.*') ? 'active' : '' }}" {{ request()->routeIs('admin.menus.*') ? 'aria-current=page' : '' }}>{{ __('Menus') }}</a></li>
                         @endcan
                         @endif
-                        {{-- Plus... (Contenu) --}}
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: #9CA3AF;" data-bs-toggle="collapse" href="#contentMore" role="button" aria-expanded="false">
-                                <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i> {{ __('Plus...') }}
-                            </a>
-                            <div class="collapse" id="contentMore">
-                                <ul class="nav sub-menu">
+                        {{-- Séparateur --}}
+                        <li class="nav-item"><hr style="border-color:rgba(255,255,255,0.1);margin:4px 0;"></li>
                                     @if(Route::has('admin.blog.tags.index'))
                                     @can('view_articles')
                                     <li class="nav-item"><a href="{{ route('admin.blog.tags.index') }}" class="nav-link {{ request()->routeIs('admin.blog.tags.*') ? 'active' : '' }}" {{ request()->routeIs('admin.blog.tags.*') ? 'aria-current=page' : '' }}>{{ __('Tags') }}</a></li>
@@ -160,9 +155,6 @@
                                     <li class="nav-item"><a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.news.*', 'admin.formbuilder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.formbuilder.*') ? 'aria-current=page' : '' }}>{{ __('Formulaires') }}</a></li>
                                     @endcan
                                     @endif
-                                </ul>
-                            </div>
-                        </li>
                     </ul>
                 </div>
             </li>
