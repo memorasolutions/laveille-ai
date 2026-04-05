@@ -5,6 +5,7 @@ use Modules\Shop\Http\Controllers\PublicShopController;
 use Modules\Shop\Http\Controllers\CartController;
 use Modules\Shop\Http\Controllers\CheckoutController;
 use Modules\Shop\Http\Controllers\WebhookController;
+use Modules\Shop\Http\Controllers\UserOrderController;
 use Modules\Shop\Http\Controllers\Admin\ProductController;
 use Modules\Shop\Http\Controllers\Admin\OrderController;
 use Modules\Shop\Http\Controllers\Admin\SettingsController;
@@ -21,6 +22,13 @@ Route::middleware('web')
         Route::post('/commander', [CheckoutController::class, 'create'])->name('shop.checkout');
         Route::get('/confirmation/{order}', [CheckoutController::class, 'success'])->name('shop.confirmation');
         Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
+    });
+
+// Mes commandes (authentifié)
+Route::middleware(['web', 'auth'])
+    ->prefix(config('shop.routes.prefix', 'boutique'))
+    ->group(function () {
+        Route::get('/mes-commandes', [UserOrderController::class, 'index'])->name('shop.my-orders');
     });
 
 // Webhooks (pas de CSRF)
