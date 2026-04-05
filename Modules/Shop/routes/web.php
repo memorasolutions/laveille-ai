@@ -7,6 +7,7 @@ use Modules\Shop\Http\Controllers\CheckoutController;
 use Modules\Shop\Http\Controllers\WebhookController;
 use Modules\Shop\Http\Controllers\UserOrderController;
 use Modules\Shop\Http\Controllers\Admin\ProductController;
+use Modules\Shop\Http\Controllers\Admin\ProductWizardController;
 use Modules\Shop\Http\Controllers\Admin\OrderController;
 use Modules\Shop\Http\Controllers\Admin\SettingsController;
 
@@ -50,4 +51,16 @@ Route::middleware(['web', 'auth'])
         Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');
         Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+
+        // Wizard création produit Gelato
+        Route::get('wizard/step1', [ProductWizardController::class, 'step1'])->name('wizard.step1');
+        Route::post('wizard/step1', [ProductWizardController::class, 'step1Store']);
+        Route::get('wizard/step2', [ProductWizardController::class, 'step2'])->name('wizard.step2');
+        Route::post('wizard/step2', [ProductWizardController::class, 'step2Store']);
+        Route::get('wizard/step3', [ProductWizardController::class, 'step3'])->name('wizard.step3');
+        Route::post('wizard/step3', [ProductWizardController::class, 'step3Store']);
+        Route::get('wizard/step4', [ProductWizardController::class, 'step4'])->name('wizard.step4');
+        Route::post('wizard/step4', [ProductWizardController::class, 'step4Store']);
+        Route::get('wizard/step5', [ProductWizardController::class, 'step5'])->name('wizard.step5');
+        Route::post('wizard/step5', [ProductWizardController::class, 'step5Store']);
     });

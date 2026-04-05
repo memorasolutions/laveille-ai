@@ -236,6 +236,9 @@
                         @if(Route::has('admin.shop.settings'))
                         <li class="nav-item"><a href="{{ route('admin.shop.settings') }}" class="nav-link {{ request()->routeIs('admin.shop.settings') ? 'active' : '' }}">{{ __('Paramètres boutique') }}</a></li>
                         @endif
+                        @if(Route::has('admin.shop.wizard.step1'))
+                        <li class="nav-item"><a href="{{ route('admin.shop.wizard.step1') }}" class="nav-link {{ request()->routeIs('admin.shop.wizard.*') ? 'active' : '' }}">{{ __('+ Nouveau (Gelato)') }}</a></li>
+                        @endif
                         {{-- Boutique (legacy Ecommerce) --}}
                         @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
                         @if(Route::has('admin.ecommerce.dashboard'))
