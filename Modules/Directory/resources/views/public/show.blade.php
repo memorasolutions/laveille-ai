@@ -244,6 +244,10 @@
                 $tocData = \Modules\Directory\Helpers\TocHelper::generate($descHtml);
                 $toc = $tocData['toc'];
                 $descHtmlWithIds = $tocData['html'];
+                // AEO : sections wrappées, itemprop sur premiers paragraphes
+                if (class_exists(\App\Helpers\AeoHelper::class)) {
+                    $descHtmlWithIds = \App\Helpers\AeoHelper::chunkContent($descHtmlWithIds);
+                }
             @endphp
 
             @include('directory::public.partials._toc_bar', ['toc' => $toc])

@@ -86,6 +86,10 @@
                                     if (function_exists('render_shortcodes')) {
                                         $articleContent = render_shortcodes($articleContent);
                                     }
+                                    // AEO : sections wrappées, IDs sur headings, itemprop sur premiers paragraphes
+                                    if (class_exists(\App\Helpers\AeoHelper::class)) {
+                                        $articleContent = \App\Helpers\AeoHelper::chunkContent($articleContent);
+                                    }
                                 @endphp
                                 {!! $articleContent !!}
                             </div>
