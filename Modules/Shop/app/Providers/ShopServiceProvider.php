@@ -43,7 +43,9 @@ class ShopServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Shop\Console\SyncGelatoPricesCommand::class,
+        ]);
     }
 
     /**
