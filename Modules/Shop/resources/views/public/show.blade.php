@@ -1,4 +1,4 @@
-@extends('front-theme::layouts.master')
+@extends(fronttheme_layout())
 
 @section('title', $product->name . ' - ' . __('Boutique'))
 
