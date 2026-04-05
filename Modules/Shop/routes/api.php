@@ -1,8 +1,3 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Shop\Http\Controllers\ShopController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('shops', ShopController::class)->names('shop');
-});
+// API routes du module Shop — réservées pour usage futur (headless/mobile)
