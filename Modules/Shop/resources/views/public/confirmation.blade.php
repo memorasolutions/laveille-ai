@@ -2,6 +2,10 @@
 
 @section('title', __('Confirmation de commande'))
 
+@push('head')
+<meta name="robots" content="noindex, nofollow">
+@endpush
+
 @section('content')
 <div class="container" style="padding-top: 40px; padding-bottom: 60px;">
     <div class="row">

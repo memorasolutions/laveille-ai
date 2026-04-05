@@ -2,6 +2,10 @@
 
 @section('title', $product->name . ' - ' . __('Boutique'))
 
+@push('head')
+<meta name="robots" content="noindex, nofollow">
+@endpush
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $product->name,

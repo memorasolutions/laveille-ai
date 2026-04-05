@@ -2,6 +2,10 @@
 
 @section('title', __('Boutique'))
 
+@push('head')
+<meta name="robots" content="noindex, nofollow">
+@endpush
+
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
     <div class="row">
