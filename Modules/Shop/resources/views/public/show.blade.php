@@ -2,14 +2,15 @@
 
 @section('title', $product->name . ' - ' . __('Boutique'))
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', [
+        'breadcrumbTitle' => $product->name,
+        'breadcrumbItems' => [__('Boutique'), $product->name]
+    ])
+@endsection
+
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
-    {{-- Breadcrumb --}}
-    <ol class="breadcrumb" style="background: transparent; padding: 0; margin-bottom: 20px;">
-        <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
-        <li><a href="{{ route('shop.index') }}">{{ __('Boutique') }}</a></li>
-        <li class="active">{{ $product->name }}</li>
-    </ol>
 
     <div class="row">
         {{-- Image --}}
