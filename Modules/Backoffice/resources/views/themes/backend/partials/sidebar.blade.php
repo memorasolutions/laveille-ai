@@ -446,44 +446,35 @@
                         <li class="nav-item"><a href="{{ route('admin.announcements.index') }}" class="nav-link {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}" {{ request()->routeIs('admin.announcements.*') ? 'aria-current=page' : '' }}>{{ __('Annonces') }}</a></li>
                         @endcan
                         @endif
-                        {{-- Plus... --}}
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: #9CA3AF;" data-bs-toggle="collapse" href="#configMore" role="button" aria-expanded="false">
-                                <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i> {{ __('Plus...') }}
-                            </a>
-                            <div class="collapse" id="configMore">
-                                <ul class="nav sub-menu">
-                                    @if(Route::has('admin.themes.index'))
-                                    @can('view_themes')
-                                    <li class="nav-item"><a href="{{ route('admin.themes.index') }}" class="nav-link {{ request()->routeIs('admin.themes.*') ? 'active' : '' }}" {{ request()->routeIs('admin.themes.*') ? 'aria-current=page' : '' }}>{{ __('Thèmes') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    @if(Route::has('admin.cookie-categories.index'))
-                                    @can('view_cookies')
-                                    <li class="nav-item"><a href="{{ route('admin.cookie-categories.index') }}" class="nav-link {{ request()->routeIs('admin.cookie-categories.*') ? 'active' : '' }}" {{ request()->routeIs('admin.cookie-categories.*') ? 'aria-current=page' : '' }}>{{ __('Catégories cookies') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    @if(Route::has('admin.rights-requests.index'))
-                                    @can('manage_cookies')
-                                    <li class="nav-item"><a href="{{ route('admin.rights-requests.index') }}" class="nav-link {{ request()->routeIs('admin.rights-requests.*') ? 'active' : '' }}" {{ request()->routeIs('admin.rights-requests.*') ? 'aria-current=page' : '' }}>{{ __('Demandes de droits') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    @if(Route::has('admin.redirects.index'))
-                                    @can('view_seo')
-                                    <li class="nav-item"><a href="{{ route('admin.redirects.index') }}" class="nav-link {{ request()->routeIs('admin.redirects.*') ? 'active' : '' }}" {{ request()->routeIs('admin.redirects.*') ? 'aria-current=page' : '' }}>{{ __('Redirections URL') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    @if(Route::has('admin.legal-pages.index'))
-                                    @can('manage_cookies')
-                                    <li class="nav-item"><a href="{{ route('admin.legal-pages.index') }}" class="nav-link {{ request()->routeIs('admin.legal-pages.*') ? 'active' : '' }}" {{ request()->routeIs('admin.legal-pages.*') ? 'aria-current=page' : '' }}>{{ __('Pages légales') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    @can('view_settings')
-                                    <li class="nav-item"><a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" {{ request()->routeIs('admin.settings.*') ? 'aria-current=page' : '' }}>{{ __('Paramètres') }}</a></li>
-                                    @endcan
-                                </ul>
-                            </div>
-                        </li>
+                        {{-- Séparateur configuration avancée --}}
+                        @if(Route::has('admin.themes.index'))
+                        @can('view_themes')
+                        <li class="nav-item"><a href="{{ route('admin.themes.index') }}" class="nav-link {{ request()->routeIs('admin.themes.*') ? 'active' : '' }}" {{ request()->routeIs('admin.themes.*') ? 'aria-current=page' : '' }}>{{ __('Thèmes') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.cookie-categories.index'))
+                        @can('view_cookies')
+                        <li class="nav-item"><a href="{{ route('admin.cookie-categories.index') }}" class="nav-link {{ request()->routeIs('admin.cookie-categories.*') ? 'active' : '' }}" {{ request()->routeIs('admin.cookie-categories.*') ? 'aria-current=page' : '' }}>{{ __('Catégories cookies') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.rights-requests.index'))
+                        @can('manage_cookies')
+                        <li class="nav-item"><a href="{{ route('admin.rights-requests.index') }}" class="nav-link {{ request()->routeIs('admin.rights-requests.*') ? 'active' : '' }}" {{ request()->routeIs('admin.rights-requests.*') ? 'aria-current=page' : '' }}>{{ __('Demandes de droits') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.redirects.index'))
+                        @can('view_seo')
+                        <li class="nav-item"><a href="{{ route('admin.redirects.index') }}" class="nav-link {{ request()->routeIs('admin.redirects.*') ? 'active' : '' }}" {{ request()->routeIs('admin.redirects.*') ? 'aria-current=page' : '' }}>{{ __('Redirections URL') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.legal-pages.index'))
+                        @can('manage_cookies')
+                        <li class="nav-item"><a href="{{ route('admin.legal-pages.index') }}" class="nav-link {{ request()->routeIs('admin.legal-pages.*') ? 'active' : '' }}" {{ request()->routeIs('admin.legal-pages.*') ? 'aria-current=page' : '' }}>{{ __('Pages légales') }}</a></li>
+                        @endcan
+                        @endif
+                        @can('view_settings')
+                        <li class="nav-item"><a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" {{ request()->routeIs('admin.settings.*') ? 'aria-current=page' : '' }}>{{ __('Paramètres') }}</a></li>
+                        @endcan
                     </ul>
                 </div>
             </li>
@@ -516,70 +507,59 @@
                         @can('manage_system')
                         <li class="nav-item"><a href="{{ route('admin.cache') }}" class="nav-link {{ request()->routeIs('admin.cache') ? 'active' : '' }}" {{ request()->routeIs('admin.cache') ? 'aria-current=page' : '' }}>{{ __('Cache') }}</a></li>
                         @endcan
-                        {{-- Plus... --}}
-                        <li class="nav-item">
-                            <a class="nav-link" style="color: #9CA3AF;" data-bs-toggle="collapse" href="#systemMore" role="button" aria-expanded="false">
-                                <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i> {{ __('Plus...') }}
-                            </a>
-                            <div class="collapse" id="systemMore">
-                                <ul class="nav sub-menu">
-                                    @if(Route::has('admin.push-notifications.index'))
-                                    @can('view_notifications')
-                                    <li class="nav-item"><a href="{{ route('admin.push-notifications.index') }}" class="nav-link {{ request()->routeIs('admin.push-notifications.*') ? 'active' : '' }}" {{ request()->routeIs('admin.push-notifications.*') ? 'aria-current=page' : '' }}>{{ __('Notifications push') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    @can('manage_system')
-                                    @if(Route::has('admin.scheduler'))
-                                    <li class="nav-item"><a href="{{ route('admin.scheduler') }}" class="nav-link {{ request()->routeIs('admin.scheduler') ? 'active' : '' }}" {{ request()->routeIs('admin.scheduler') ? 'aria-current=page' : '' }}>{{ __('Tâches planifiées') }}</a></li>
-                                    @endif
-                                    @if(Route::has('admin.failed-jobs.index'))
-                                    <li class="nav-item"><a href="{{ route('admin.failed-jobs.index') }}" class="nav-link {{ request()->routeIs('admin.failed-jobs.*') ? 'active' : '' }}" {{ request()->routeIs('admin.failed-jobs.*') ? 'aria-current=page' : '' }}>{{ __('Jobs échoués') }}</a></li>
-                                    @endif
-                                    @endcan
-                                    @can('view_security')
-                                    <li class="nav-item"><a href="{{ route('admin.login-history') }}" class="nav-link {{ request()->routeIs('admin.login-history') ? 'active' : '' }}" {{ request()->routeIs('admin.login-history') ? 'aria-current=page' : '' }}>{{ __('Historique connexions') }}</a></li>
-                                    @endcan
-                                    @can('manage_system')
-                                    <li class="nav-item"><a href="{{ route('admin.mail-log') }}" class="nav-link {{ request()->routeIs('admin.mail-log') ? 'active' : '' }}" {{ request()->routeIs('admin.mail-log') ? 'aria-current=page' : '' }}>{{ __('Courriels envoyés') }}</a></li>
-                                    @endcan
-                                    @can('view_security')
-                                    <li class="nav-item"><a href="{{ route('admin.blocked-ips.index') }}" class="nav-link {{ request()->routeIs('admin.blocked-ips.*') ? 'active' : '' }}" {{ request()->routeIs('admin.blocked-ips.*') ? 'aria-current=page' : '' }}>{{ __('IP bloquées') }}</a></li>
-                                    @endcan
-                                    @can('view_activity_logs')
-                                    <li class="nav-item"><a href="{{ route('admin.activity-logs.index') }}" class="nav-link {{ request()->routeIs('admin.activity-logs.*') ? 'active' : '' }}" {{ request()->routeIs('admin.activity-logs.*') ? 'aria-current=page' : '' }}>{{ __('Journaux activité') }}</a></li>
-                                    @endcan
-                                    @can('view_trash')
-                                    <li class="nav-item"><a href="{{ route('admin.trash.index') }}" class="nav-link {{ request()->routeIs('admin.trash.*') ? 'active' : '' }}" {{ request()->routeIs('admin.trash.*') ? 'aria-current=page' : '' }}>{{ __('Corbeille') }}</a></li>
-                                    @endcan
-                                    @can('manage_system')
-                                    @if(Route::has('admin.data-retention'))
-                                    <li class="nav-item"><a href="{{ route('admin.data-retention') }}" class="nav-link {{ request()->routeIs('admin.data-retention') ? 'active' : '' }}" {{ request()->routeIs('admin.data-retention') ? 'aria-current=page' : '' }}>{{ __('Rétention données') }}</a></li>
-                                    @endif
-                                    <li class="nav-item"><a href="{{ route('admin.system-info') }}" class="nav-link {{ request()->routeIs('admin.system-info') ? 'active' : '' }}" {{ request()->routeIs('admin.system-info') ? 'aria-current=page' : '' }}>{{ __('Infos système') }}</a></li>
-                                    @endcan
-                                    @can('view_notifications')
-                                    <li class="nav-item"><a href="{{ route('admin.notifications.index') }}" class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}" {{ request()->routeIs('admin.notifications.*') ? 'aria-current=page' : '' }}>{{ __('Notifications') }}</a></li>
-                                    @endcan
-                                    @if(Route::has('admin.webhooks.index'))
-                                    @can('manage_webhooks')
-                                    <li class="nav-item"><a href="{{ route('admin.webhooks.index') }}" class="nav-link {{ request()->routeIs('admin.webhooks.*') ? 'active' : '' }}" {{ request()->routeIs('admin.webhooks.*') ? 'aria-current=page' : '' }}>{{ __('Webhooks') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    {{-- Recherche (déplacé des liens autonomes) --}}
-                                    @if(Route::has('admin.search'))
-                                    @can('manage_system')
-                                    <li class="nav-item"><a href="{{ route('admin.search') }}" class="nav-link {{ request()->routeIs('admin.search') ? 'active' : '' }}" {{ request()->routeIs('admin.search') ? 'aria-current=page' : '' }}>{{ __('Recherche') }}</a></li>
-                                    @endcan
-                                    @endif
-                                    {{-- Documentation (déplacé des liens autonomes) --}}
-                                    @if(Route::has('admin.documentation'))
-                                    @can('view_documentation')
-                                    <li class="nav-item"><a href="{{ route('admin.documentation') }}" class="nav-link {{ request()->routeIs('admin.documentation') ? 'active' : '' }}" {{ request()->routeIs('admin.documentation') ? 'aria-current=page' : '' }}>{{ __('Documentation') }}</a></li>
-                                    @endcan
-                                    @endif
-                                </ul>
-                            </div>
-                        </li>
+                        {{-- Séparateur système avancé --}}
+                        @if(Route::has('admin.push-notifications.index'))
+                        @can('view_notifications')
+                        <li class="nav-item"><a href="{{ route('admin.push-notifications.index') }}" class="nav-link {{ request()->routeIs('admin.push-notifications.*') ? 'active' : '' }}" {{ request()->routeIs('admin.push-notifications.*') ? 'aria-current=page' : '' }}>{{ __('Notifications push') }}</a></li>
+                        @endcan
+                        @endif
+                        @can('manage_system')
+                        @if(Route::has('admin.scheduler'))
+                        <li class="nav-item"><a href="{{ route('admin.scheduler') }}" class="nav-link {{ request()->routeIs('admin.scheduler') ? 'active' : '' }}" {{ request()->routeIs('admin.scheduler') ? 'aria-current=page' : '' }}>{{ __('Tâches planifiées') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.failed-jobs.index'))
+                        <li class="nav-item"><a href="{{ route('admin.failed-jobs.index') }}" class="nav-link {{ request()->routeIs('admin.failed-jobs.*') ? 'active' : '' }}" {{ request()->routeIs('admin.failed-jobs.*') ? 'aria-current=page' : '' }}>{{ __('Jobs échoués') }}</a></li>
+                        @endif
+                        @endcan
+                        @can('view_security')
+                        <li class="nav-item"><a href="{{ route('admin.login-history') }}" class="nav-link {{ request()->routeIs('admin.login-history') ? 'active' : '' }}" {{ request()->routeIs('admin.login-history') ? 'aria-current=page' : '' }}>{{ __('Historique connexions') }}</a></li>
+                        @endcan
+                        @can('manage_system')
+                        <li class="nav-item"><a href="{{ route('admin.mail-log') }}" class="nav-link {{ request()->routeIs('admin.mail-log') ? 'active' : '' }}" {{ request()->routeIs('admin.mail-log') ? 'aria-current=page' : '' }}>{{ __('Courriels envoyés') }}</a></li>
+                        @endcan
+                        @can('view_security')
+                        <li class="nav-item"><a href="{{ route('admin.blocked-ips.index') }}" class="nav-link {{ request()->routeIs('admin.blocked-ips.*') ? 'active' : '' }}" {{ request()->routeIs('admin.blocked-ips.*') ? 'aria-current=page' : '' }}>{{ __('IP bloquées') }}</a></li>
+                        @endcan
+                        @can('view_activity_logs')
+                        <li class="nav-item"><a href="{{ route('admin.activity-logs.index') }}" class="nav-link {{ request()->routeIs('admin.activity-logs.*') ? 'active' : '' }}" {{ request()->routeIs('admin.activity-logs.*') ? 'aria-current=page' : '' }}>{{ __('Journaux activité') }}</a></li>
+                        @endcan
+                        @can('view_trash')
+                        <li class="nav-item"><a href="{{ route('admin.trash.index') }}" class="nav-link {{ request()->routeIs('admin.trash.*') ? 'active' : '' }}" {{ request()->routeIs('admin.trash.*') ? 'aria-current=page' : '' }}>{{ __('Corbeille') }}</a></li>
+                        @endcan
+                        @can('manage_system')
+                        @if(Route::has('admin.data-retention'))
+                        <li class="nav-item"><a href="{{ route('admin.data-retention') }}" class="nav-link {{ request()->routeIs('admin.data-retention') ? 'active' : '' }}" {{ request()->routeIs('admin.data-retention') ? 'aria-current=page' : '' }}>{{ __('Rétention données') }}</a></li>
+                        @endif
+                        <li class="nav-item"><a href="{{ route('admin.system-info') }}" class="nav-link {{ request()->routeIs('admin.system-info') ? 'active' : '' }}" {{ request()->routeIs('admin.system-info') ? 'aria-current=page' : '' }}>{{ __('Infos système') }}</a></li>
+                        @endcan
+                        @can('view_notifications')
+                        <li class="nav-item"><a href="{{ route('admin.notifications.index') }}" class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}" {{ request()->routeIs('admin.notifications.*') ? 'aria-current=page' : '' }}>{{ __('Notifications') }}</a></li>
+                        @endcan
+                        @if(Route::has('admin.webhooks.index'))
+                        @can('manage_webhooks')
+                        <li class="nav-item"><a href="{{ route('admin.webhooks.index') }}" class="nav-link {{ request()->routeIs('admin.webhooks.*') ? 'active' : '' }}" {{ request()->routeIs('admin.webhooks.*') ? 'aria-current=page' : '' }}>{{ __('Webhooks') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.search'))
+                        @can('manage_system')
+                        <li class="nav-item"><a href="{{ route('admin.search') }}" class="nav-link {{ request()->routeIs('admin.search') ? 'active' : '' }}" {{ request()->routeIs('admin.search') ? 'aria-current=page' : '' }}>{{ __('Recherche') }}</a></li>
+                        @endcan
+                        @endif
+                        @if(Route::has('admin.documentation'))
+                        @can('view_documentation')
+                        <li class="nav-item"><a href="{{ route('admin.documentation') }}" class="nav-link {{ request()->routeIs('admin.documentation') ? 'active' : '' }}" {{ request()->routeIs('admin.documentation') ? 'aria-current=page' : '' }}>{{ __('Documentation') }}</a></li>
+                        @endcan
+                        @endif
                     </ul>
                 </div>
             </li>
