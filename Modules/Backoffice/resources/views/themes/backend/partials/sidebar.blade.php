@@ -208,6 +208,7 @@
             {{-- ===== 3. VENTES (Boutique + SaaS + Réservations) ===== --}}
             @php
                 $salesModuleActive = class_exists(\Nwidart\Modules\Facades\Module::class) && (
+                    (\Nwidart\Modules\Facades\Module::has('Shop') && \Nwidart\Modules\Facades\Module::isEnabled('Shop')) ||
                     (\Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce')) ||
                     (\Nwidart\Modules\Facades\Module::has('SaaS') && \Nwidart\Modules\Facades\Module::isEnabled('SaaS')) ||
                     (\Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking'))
@@ -216,16 +217,26 @@
             @if($salesModuleActive)
             @canany(['view_ecommerce', 'view_products', 'view_ecommerce_orders', 'view_coupons', 'view_plans', 'view_tenants', 'view_onboarding', 'view_booking', 'manage_booking'])
             <li class="nav-item nav-category">{{ __('Ventes') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.shop.*', 'admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#salesMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'true' : 'false' }}" aria-controls="salesMenu">
+                   aria-expanded="{{ request()->routeIs('admin.shop.*', 'admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'true' : 'false' }}" aria-controls="salesMenu">
                     <i class="link-icon" data-lucide="shopping-cart"></i>
                     <span class="link-title">{{ __('Ventes') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'show' : '' }}" id="salesMenu">
+                <div class="collapse {{ request()->routeIs('admin.shop.*', 'admin.ecommerce.*', 'admin.plans.*', 'admin.revenue', 'admin.tenants.*', 'admin.onboarding-steps.*', 'admin.booking.*') ? 'show' : '' }}" id="salesMenu">
                     <ul class="nav sub-menu">
-                        {{-- Boutique --}}
+                        {{-- Shop (Gelato POD) --}}
+                        @if(Route::has('admin.shop.products.index'))
+                        <li class="nav-item"><a href="{{ route('admin.shop.products.index') }}" class="nav-link {{ request()->routeIs('admin.shop.products.*') ? 'active' : '' }}">{{ __('Produits POD') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.shop.orders.index'))
+                        <li class="nav-item"><a href="{{ route('admin.shop.orders.index') }}" class="nav-link {{ request()->routeIs('admin.shop.orders.*') ? 'active' : '' }}">{{ __('Commandes') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.shop.settings'))
+                        <li class="nav-item"><a href="{{ route('admin.shop.settings') }}" class="nav-link {{ request()->routeIs('admin.shop.settings') ? 'active' : '' }}">{{ __('Paramètres boutique') }}</a></li>
+                        @endif
+                        {{-- Boutique (legacy Ecommerce) --}}
                         @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('Ecommerce') && \Nwidart\Modules\Facades\Module::isEnabled('Ecommerce'))
                         @if(Route::has('admin.ecommerce.dashboard'))
                         @can('view_ecommerce')

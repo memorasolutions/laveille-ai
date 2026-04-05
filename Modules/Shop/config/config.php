@@ -38,4 +38,15 @@ return [
     ],
 
     'pagination' => (int) env('SHOP_PAGINATION', 12),
+
+    'pricing' => [
+        'margins' => [
+            't-shirts' => 0.45,
+            'mugs' => 0.50,
+            'tote-bags' => 0.60,
+            'posters' => 0.50,
+            'hoodies' => 0.45,
+            'default' => 0.45,
+        ],
+    ],
 ];
