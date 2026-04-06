@@ -5,6 +5,7 @@ namespace Modules\Shop\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Modules\Shop\Models\Cart;
 use Modules\Shop\Services\GelatoService;
 
@@ -17,12 +18,21 @@ class ShippingQuoteController extends Controller
             'country' => 'required|string|size:2',
         ]);
 
+        $empty = ['methods' => [], 'cheapest_price' => 0];
+
         $cart = auth()->check()
             ? Cart::where('user_id', auth()->id())->active()->first()
             : Cart::bySession(session()->getId())->active()->first();
 
         if (! $cart || empty($cart->items)) {
-            return response()->json(['methods' => [], 'cheapest_price' => 0]);
+            Log::debug('ShippingQuote: panier vide', ['user' => auth()->id(), 'session' => session()->getId()]);
+            return response()->json(array_merge($empty, ['debug' => 'panier vide']));
+        }
+
+        $hasGelato = collect($cart->items)->contains(fn ($i) => ! empty($i['gelato_variant_id']));
+        if (! $hasGelato) {
+            Log::warning('ShippingQuote: aucun item avec gelato_variant_id', ['items' => $cart->items]);
+            return response()->json(array_merge($empty, ['debug' => 'items sans gelato_variant_id']));
         }
 
         $shippingAddress = [
@@ -40,6 +50,11 @@ class ShippingQuoteController extends Controller
             auth()->user()?->email
         );
 
-        return response()->json($quote ?? ['methods' => [], 'cheapest_price' => 0]);
+        if (! $quote) {
+            Log::error('ShippingQuote: Gelato retourne null', ['address' => $shippingAddress]);
+            return response()->json(array_merge($empty, ['debug' => 'gelato_null']));
+        }
+
+        return response()->json($quote);
     }
 }
