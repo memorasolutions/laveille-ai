@@ -6,12 +6,18 @@
 <meta name="robots" content="noindex, nofollow">
 @endpush
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', [
+        'breadcrumbTitle' => __('Boutique'),
+        'breadcrumbItems' => [__('Boutique')]
+    ])
+@endsection
+
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
-    <div class="row">
-        <div class="col-sm-12">
-            <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Boutique') }}</h1>
-        </div>
+    <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">{{ __('Boutique') }}</h1>
+        <p style="color: #64748b; font-size: 15px;">{{ $products->total() }} {{ __('produits imprimés à la demande au Canada') }}</p>
     </div>
 
     @if($products->isEmpty())
