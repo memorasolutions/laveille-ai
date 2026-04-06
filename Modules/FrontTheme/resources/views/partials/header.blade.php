@@ -257,6 +257,8 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- Mini-cart (conditionnel — module Shop activé) --}}
+                        @includeIf('shop::partials.mini-cart')
                         {{-- Menu utilisateur connecté --}}
                         @auth
                         <div x-data="{ open: false }" style="display:inline-block;position:relative;margin-right:8px;vertical-align:middle;">

@@ -3,6 +3,7 @@
 namespace Modules\Shop\Providers;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
@@ -27,6 +28,8 @@ class ShopServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        View::composer('shop::partials.mini-cart', \Modules\Shop\Http\ViewComposers\CartComposer::class);
     }
 
     /**
