@@ -20,6 +20,13 @@ class GelatoService
         ])->baseUrl(config('shop.gelato.api_url'));
     }
 
+    private function orderClient()
+    {
+        return Http::withHeaders([
+            'X-API-KEY' => config('shop.gelato.api_key'),
+        ])->baseUrl('https://order.gelatoapis.com');
+    }
+
     public function getCatalogs(): array
     {
         try {
@@ -68,7 +75,7 @@ class GelatoService
                 ],
             ];
 
-            $response = $this->client()->post('/v4/orders', $body);
+            $response = $this->orderClient()->post('/v4/orders', $body);
 
             if ($response->successful()) {
                 return $response->json('id');
@@ -85,7 +92,7 @@ class GelatoService
     public function getOrder(string $gelatoOrderId): array
     {
         try {
-            return $this->client()->get("/v4/orders/{$gelatoOrderId}")->json() ?? [];
+            return $this->orderClient()->get("/v4/orders/{$gelatoOrderId}")->json() ?? [];
         } catch (\Exception $e) {
             Log::error('Gelato getOrder: ' . $e->getMessage());
             return [];
@@ -155,7 +162,7 @@ class GelatoService
                 'products' => $products,
             ];
 
-            $response = $this->client()->post('/v4/orders:quote', $body);
+            $response = $this->orderClient()->post('/v4/orders:quote', $body);
 
             if (! $response->successful()) {
                 Log::error('Gelato getQuote failed: ' . $response->body());
