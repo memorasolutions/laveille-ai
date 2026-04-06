@@ -42,12 +42,12 @@ return [
     'pricing' => [
         'usd_cad_rate' => (float) env('SHOP_USD_CAD_RATE', 1.40),
         'margins' => [
-            't-shirts' => 0.45,
-            'mugs' => 0.50,
-            'tote-bags' => 0.60,
-            'posters' => 0.50,
-            'hoodies' => 0.45,
-            'default' => 0.45,
+            't-shirts' => 1.25,
+            'mugs' => 1.35,
+            'tote-bags' => 1.15,
+            'posters' => 1.00,
+            'hoodies' => 1.10,
+            'default' => 1.00,
         ],
     ],
 ];
