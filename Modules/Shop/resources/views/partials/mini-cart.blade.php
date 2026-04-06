@@ -1,9 +1,9 @@
 {{-- Mini-cart header — composant réutilisable du module Shop --}}
 @if(class_exists(\Modules\Shop\Models\Cart::class))
-<div x-data="{ open: false }" @click.outside="open = false" style="display:flex; align-items:center; position:relative; margin-left:8px; flex-shrink:0; min-width:24px; min-height:24px;">
-    <i class="ti-shopping-cart" style="font-size:18px; color:inherit; cursor:pointer;" @click="open = !open"></i>
+<div x-data="{ open: false }" @click.outside="open = false" @click="open = !open" style="position:relative; display:flex; align-items:center; flex-shrink:0; margin-left:12px; cursor:pointer;">
+    <span class="ti-shopping-cart" style="font-size:22px; color:#555b6a; transition:transform 0.2s ease;" :style="open ? 'transform:scale(1.1)' : ''" @mouseenter="$el.style.transform='scale(1.1)'" @mouseleave="if(!open) $el.style.transform=''"></span>
     @if(($cartItemCount ?? 0) > 0)
-        <span style="position:absolute; top:-6px; right:-8px; background:#0B7285; color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center;">{{ $cartItemCount }}</span>
+        <span style="position:absolute; top:-8px; right:-10px; background:#0B7285; color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #fff;">{{ $cartItemCount }}</span>
     @endif
     <div x-show="open" x-cloak x-transition style="position:absolute; right:0; top:40px; width:320px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:9999; padding:16px;">
         @if(($cartItemCount ?? 0) > 0)
