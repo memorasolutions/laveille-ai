@@ -37,21 +37,7 @@
                 <div>
                     <img :src="images[activeImage]" alt="{{ $product->name }}" style="width: 100%; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
 
-                    {{-- Sélecteur de couleur (cercles colorés) --}}
-                    @if($hasColorVariants)
-                        <div style="margin-top: 15px;">
-                            <label style="font-weight: 600; margin-bottom: 8px; display: block;">{{ __('Couleur') }}</label>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <template x-for="(variant, index) in allVariants" :key="variant.gelato_uid">
-                                    <div @click="selectColor(index)"
-                                         :title="variant.label"
-                                         :style="`width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: all 0.2s; background-color: ${variant.color}; border: 3px solid ${selectedVariantIndex === index ? '#0B7285' : '#e2e8f0'}; box-shadow: ${selectedVariantIndex === index ? '0 0 0 2px #0B7285' : 'none'};`">
-                                    </div>
-                                </template>
-                            </div>
-                            <p style="font-size: 13px; color: #475569; margin-top: 6px;" x-text="currentVariant?.label || ''"></p>
-                        </div>
-                    @endif
+                    {{-- Sélecteur couleurs déplacé dans la zone formulaire (col droite) --}}
 
                     {{-- Miniatures (si plusieurs images pour la même couleur/produit) --}}
                     <template x-if="images.length > 1">
@@ -102,8 +88,20 @@
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
 
-                {{-- Hidden inputs pour la variante sélectionnée (couleur ou taille) --}}
+                {{-- Sélecteur variante (couleur ou taille) --}}
                 @if($hasColorVariants)
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px;">{{ __('Couleur') }}</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <template x-for="(variant, index) in allVariants" :key="variant.gelato_uid">
+                                <button type="button" @click="selectColor(index)"
+                                    :style="'display:flex; align-items:center; padding:8px 16px; height:44px; border-radius:10px; cursor:pointer; transition:all 0.2s; font-size:14px; font-weight:600; outline:none; ' + (selectedVariantIndex === index ? 'background:#e0f7fa; border:2px solid #0B7285; color:#0B7285;' : 'background:#f1f5f9; border:1px solid #cbd5e1; color:#374151;')">
+                                    <span :style="'display:inline-block; width:16px; height:16px; border-radius:50%; margin-right:8px; background-color:' + variant.color + ';'"></span>
+                                    <span x-text="variant.label"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                     <input type="hidden" name="variant_label" :value="currentVariant?.label || ''">
                     <input type="hidden" name="variant_gelato_uid" :value="currentVariant?.gelato_uid || ''">
                 @elseif($hasSizeVariants)
