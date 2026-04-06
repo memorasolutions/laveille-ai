@@ -7,6 +7,7 @@ use Modules\Shop\Http\Controllers\CheckoutController;
 use Modules\Shop\Http\Controllers\WebhookController;
 use Modules\Shop\Http\Controllers\UserOrderController;
 use Modules\Shop\Http\Controllers\ShippingQuoteController;
+use Modules\Shop\Http\Controllers\OrderLookupController;
 use Modules\Shop\Http\Controllers\Admin\ProductController;
 use Modules\Shop\Http\Controllers\Admin\ProductWizardController;
 use Modules\Shop\Http\Controllers\Admin\OrderController;
@@ -24,6 +25,14 @@ Route::middleware('web')
         Route::post('/commander', [CheckoutController::class, 'create'])->name('shop.checkout');
         Route::get('/confirmation/{order}', [CheckoutController::class, 'success'])->name('shop.confirmation');
         Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
+    });
+
+// Suivi commande (guest — sans auth)
+Route::middleware('web')
+    ->prefix(config('shop.routes.prefix', 'boutique'))
+    ->group(function () {
+        Route::get('/suivi', [OrderLookupController::class, 'index'])->name('shop.order-lookup');
+        Route::post('/suivi', [OrderLookupController::class, 'search'])->name('shop.order-lookup.search');
     });
 
 // Estimation livraison (AJAX)
