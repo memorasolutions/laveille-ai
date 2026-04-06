@@ -150,7 +150,7 @@
                         </div>
                         <input type="hidden" name="shipping_address[country]" value="CA">
 
-                        {{-- Estimation livraison dynamique --}}
+                        {{-- Estimation livraison dynamique (auto-calcul) --}}
                         <div x-data="{
                             loading: false,
                             methods: [],
@@ -158,7 +158,7 @@
                             selectedCost: 0,
                             async fetchQuote() {
                                 const pc = document.querySelector('[name=\'shipping_address[postal_code]\']').value.replace(/\s/g, '');
-                                if (pc.length < 6) { this.methods = []; return; }
+                                if (pc.length < 6) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
                                 this.loading = true;
                                 try {
                                     const res = await fetch('{{ route('shop.shipping-quote') }}', {
@@ -171,19 +171,22 @@
                                     if (this.methods.length) {
                                         this.selectedUid = this.methods[0].uid;
                                         this.selectedCost = this.methods[0].price;
-                                    }
-                                } catch (e) { this.methods = []; }
+                                    } else { this.selectedUid = null; this.selectedCost = 0; }
+                                } catch (e) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; }
                                 this.loading = false;
                             },
-                            select(m) { this.selectedUid = m.uid; this.selectedCost = m.price; }
+                            select(m) { this.selectedUid = m.uid; this.selectedCost = m.price; },
+                            init() {
+                                const pcInput = document.querySelector('[name=\'shipping_address[postal_code]\']');
+                                let tid;
+                                pcInput.addEventListener('input', () => { clearTimeout(tid); tid = setTimeout(() => this.fetchQuote(), 800); });
+                                this.fetchQuote();
+                            }
                         }" style="margin-top: 12px;">
-                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">{{ __('Livraison') }}</label>
-                            <button type="button" @click="fetchQuote()" class="btn btn-sm" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 8px;">
-                                <i class="fa fa-truck"></i> {{ __('Calculer les frais') }}
-                            </button>
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;"><i class="fa fa-truck"></i> {{ __('Livraison') }}</label>
                             <div x-show="loading" style="color: #64748b;"><i class="fa fa-spinner fa-spin"></i> {{ __('Calcul en cours...') }}</div>
                             <div x-show="!loading && methods.length === 0" style="font-style: italic; color: #64748b; font-size: 13px;">
-                                {{ __('Entrez votre code postal pour estimer les frais de livraison.') }}
+                                {{ __('Les frais seront calculés automatiquement à la saisie du code postal.') }}
                             </div>
                             <template x-for="m in methods" :key="m.uid">
                                 <label style="display: block; padding: 6px 0; cursor: pointer;">
