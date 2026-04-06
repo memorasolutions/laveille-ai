@@ -66,26 +66,18 @@
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
 
-                @if(!empty($product->variants) && in_array($product->category, ['t-shirts', 'hoodies']))
-                    <div style="margin-bottom: 16px;" x-data="{ selectedSize: '{{ $product->variants[0]['label'] ?? 'M' }}', variants: {{ json_encode($product->variants) }} }">
-                        <label style="font-weight: 600; margin-bottom: 8px; display: block;">{{ __('Taille') }}</label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                            @foreach($product->variants as $variant)
-                                <button type="button" @click="selectedSize = '{{ $variant['label'] }}'" style="padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.15s;" :style="selectedSize === '{{ $variant['label'] }}' ? 'background: #0B7285; color: #fff; border: 1px solid #0B7285;' : 'background: #fff; color: #475569; border: 1px solid #cbd5e1;'">{{ $variant['label'] }}</button>
-                            @endforeach
-                        </div>
-                        <input type="hidden" name="variant_label" :value="selectedSize">
-                        <input type="hidden" name="variant_gelato_uid" :value="variants.find(v => v.label === selectedSize)?.gelato_uid || ''">
-                    </div>
-                @elseif(!empty($product->variants))
-                    <div style="margin-bottom: 16px;">
-                        <label style="font-weight: 600; margin-bottom: 8px; display: block;">{{ __('Variante') }}</label>
-                        @foreach($product->variants as $variant)
-                            <label style="display: inline-block; margin-right: 12px; cursor: pointer;">
-                                <input type="radio" name="variant_label" value="{{ $variant['label'] ?? $variant }}" {{ $loop->first ? 'checked' : '' }}>
-                                {{ $variant['label'] ?? $variant }}
-                            </label>
-                        @endforeach
+                @if(!empty($product->variants))
+                    <div style="margin-bottom: 16px;" x-data="{ selectedSize: '{{ $product->variants[0]['label'] ?? 'M' }}' }">
+                        @include('fronttheme::partials.pill-selector', [
+                            'items' => array_map(fn($v) => $v['label'] ?? $v, $product->variants),
+                            'alpineVar' => 'selectedSize',
+                            'inputName' => 'variant_label',
+                            'label' => in_array($product->category, ['t-shirts', 'hoodies']) ? __('Taille') : __('Variante'),
+                            'extraData' => $product->variants,
+                            'extraInput' => 'variant_gelato_uid',
+                            'extraKey' => 'gelato_uid',
+                            'matchKey' => 'label',
+                        ])
                     </div>
                 @endif
 
