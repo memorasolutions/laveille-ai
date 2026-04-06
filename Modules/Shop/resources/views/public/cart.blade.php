@@ -102,7 +102,7 @@
                     {{-- Formulaire checkout (layout multi-colonnes compact) --}}
                     <form action="{{ route('shop.checkout') }}" method="POST" style="margin-top: 16px;">
                         @csrf
-                        <div style="margin-bottom: 10px; max-width: 70%;">
+                        <div style="margin-bottom: 10px;">
                             <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Courriel') }}</label>
                             <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required autocomplete="email" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                         </div>
