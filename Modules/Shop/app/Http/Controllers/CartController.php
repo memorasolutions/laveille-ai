@@ -27,12 +27,14 @@ class CartController extends Controller
             'product_id' => 'required|exists:shop_products,id',
             'quantity' => 'integer|min:1',
             'variant_label' => 'nullable|string',
+            'variant_gelato_uid' => 'nullable|string',
         ]);
 
         $this->cartService->add(
             $request->integer('product_id'),
             $request->integer('quantity', 1),
-            $request->input('variant_label')
+            $request->input('variant_label'),
+            $request->input('variant_gelato_uid')
         );
 
         return back()->with('success', __('Produit ajouté au panier.'))->with('cart_added', true);

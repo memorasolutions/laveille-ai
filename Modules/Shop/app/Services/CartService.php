@@ -33,7 +33,7 @@ class CartService
         ]);
     }
 
-    public function add(int $productId, int $qty = 1, ?string $variantLabel = null): Cart
+    public function add(int $productId, int $qty = 1, ?string $variantLabel = null, ?string $gelatoVariantId = null): Cart
     {
         $cart = $this->getOrCreateCart();
         $items = $cart->items ?? [];
@@ -43,9 +43,17 @@ class CartService
             $items[$index]['quantity'] += $qty;
         } else {
             $product = Product::findOrFail($productId);
+
+            // Si pas de gelato_variant_id fourni, chercher dans les variants du produit
+            if (! $gelatoVariantId && ! empty($product->variants)) {
+                $match = collect($product->variants)->firstWhere('label', $variantLabel);
+                $gelatoVariantId = $match['gelato_uid'] ?? null;
+            }
+
             $items[] = [
                 'product_id' => $productId,
                 'variant_label' => $variantLabel,
+                'gelato_variant_id' => $gelatoVariantId,
                 'quantity' => $qty,
                 'unit_price' => (float) $product->price,
             ];
