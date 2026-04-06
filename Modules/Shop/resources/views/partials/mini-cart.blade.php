@@ -1,7 +1,7 @@
 {{-- Mini-cart header — composant réutilisable du module Shop --}}
 @if(class_exists(\Modules\Shop\Models\Cart::class))
 <div x-data="{ open: false }" @click.outside="open = false" style="display:flex; align-items:center; position:relative; margin-left:8px; flex-shrink:0; min-width:24px; min-height:24px;">
-    <i class="fa fa-shopping-bag" style="font-size:18px; color:inherit; cursor:pointer;" @click="open = !open"></i>
+    <i class="ti-shopping-cart" style="font-size:18px; color:inherit; cursor:pointer;" @click="open = !open"></i>
     @if(($cartItemCount ?? 0) > 0)
         <span style="position:absolute; top:-6px; right:-8px; background:#0B7285; color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center;">{{ $cartItemCount }}</span>
     @endif
