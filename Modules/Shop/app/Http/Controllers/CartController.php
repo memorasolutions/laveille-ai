@@ -35,7 +35,7 @@ class CartController extends Controller
             $request->input('variant_label')
         );
 
-        return back()->with('success', __('Produit ajouté au panier.'));
+        return back()->with('success', __('Produit ajouté au panier.'))->with('cart_added', true);
     }
 
     public function remove(Request $request)

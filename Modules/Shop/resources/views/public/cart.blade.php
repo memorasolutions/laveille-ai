@@ -7,6 +7,20 @@
 @endpush
 
 @section('content')
+{{-- Toast notification ajout panier --}}
+@if(session('cart_added'))
+<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+     x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-200"
+     style="position: fixed; top: 20px; right: 20px; z-index: 1050; max-width: 320px; background: #fff; border-left: 4px solid #0CA678; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+    <i class="fa fa-check-circle" style="color: #0CA678; font-size: 20px;"></i>
+    <div>
+        <strong style="font-size: 14px;">{{ __('Produit ajouté au panier') }}</strong><br>
+        <a href="{{ route('shop.cart') }}" style="font-size: 13px; color: #0B7285;">{{ __('Voir le panier') }}</a>
+    </div>
+    <button @click="show = false" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 18px; margin-left: auto;">&times;</button>
+</div>
+@endif
+
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
     <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Panier') }} ({{ $itemCount ?? 0 }})</h1>
 
@@ -32,9 +46,14 @@
                     @foreach($content as $item)
                         <tr>
                             <td>
-                                <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="color: #1e293b; font-weight: 600;">
-                                    {{ $item['product_name'] }}
-                                </a>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    @if(!empty($item['product_images'][0]))
+                                        <img src="{{ asset($item['product_images'][0]) }}" alt="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">
+                                    @endif
+                                    <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="color: #1e293b; font-weight: 600;">
+                                        {{ $item['product_name'] }}
+                                    </a>
+                                </div>
                             </td>
                             <td>{{ $item['variant_label'] ?? '-' }}</td>
                             <td>
@@ -85,28 +104,46 @@
                         @csrf
                         <div style="margin-bottom: 12px;">
                             <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Courriel') }}</label>
-                            <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required autocomplete="email" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         </div>
                         <div style="margin-bottom: 8px;">
                             <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Prénom') }}</label>
-                            <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name') }}" required autocomplete="given-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         </div>
                         <div style="margin-bottom: 8px;">
                             <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Nom') }}</label>
-                            <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name') }}" required autocomplete="family-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         </div>
                         <div style="margin-bottom: 8px;">
                             <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Adresse') }}</label>
-                            <input type="text" name="shipping_address[address_line1]" value="{{ old('shipping_address.address_line1') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            <input type="text" name="shipping_address[address_line1]" value="{{ old('shipping_address.address_line1') }}" required autocomplete="street-address" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         </div>
                         <div class="row">
-                            <div class="col-sm-6" style="margin-bottom: 8px;">
+                            <div class="col-sm-4" style="margin-bottom: 8px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Ville') }}</label>
-                                <input type="text" name="shipping_address[city]" value="{{ old('shipping_address.city') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                <input type="text" name="shipping_address[city]" value="{{ old('shipping_address.city') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                             </div>
-                            <div class="col-sm-6" style="margin-bottom: 8px;">
+                            <div class="col-sm-4" style="margin-bottom: 8px;">
+                                <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Province') }}</label>
+                                <select name="shipping_address[state]" required autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                    <option value="QC" selected>Québec</option>
+                                    <option value="ON">Ontario</option>
+                                    <option value="BC">Colombie-Britannique</option>
+                                    <option value="AB">Alberta</option>
+                                    <option value="MB">Manitoba</option>
+                                    <option value="SK">Saskatchewan</option>
+                                    <option value="NS">Nouvelle-Écosse</option>
+                                    <option value="NB">Nouveau-Brunswick</option>
+                                    <option value="NL">Terre-Neuve-et-Labrador</option>
+                                    <option value="PE">Île-du-Prince-Édouard</option>
+                                    <option value="NT">Territoires du Nord-Ouest</option>
+                                    <option value="YT">Yukon</option>
+                                    <option value="NU">Nunavut</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4" style="margin-bottom: 8px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Code postal') }}</label>
-                                <input type="text" name="shipping_address[postal_code]" value="{{ old('shipping_address.postal_code') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                <input type="text" name="shipping_address[postal_code]" value="{{ old('shipping_address.postal_code') }}" required autocomplete="postal-code" pattern="[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d" title="Format : A1A 1A1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                             </div>
                         </div>
                         <input type="hidden" name="shipping_address[country]" value="CA">
@@ -159,6 +196,17 @@
                         </div>
 
                         <button type="submit" class="btn" style="width: 100%; background: #0B7285; color: #fff; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 16px; margin-top: 12px;">{{ __('Passer la commande') }}</button>
+
+                        {{-- Badges confiance --}}
+                        <div style="text-align: center; color: #94a3b8; font-size: 13px; margin-top: 12px;">
+                            <p style="margin-bottom: 6px;"><i class="fa fa-lock" aria-hidden="true"></i> {{ __('Paiement sécurisé par Stripe') }}</p>
+                            <p style="margin-bottom: 6px;">
+                                <i class="fa fa-cc-visa" style="font-size: 24px; margin-right: 8px;" aria-hidden="true"></i>
+                                <i class="fa fa-cc-mastercard" style="font-size: 24px; margin-right: 8px;" aria-hidden="true"></i>
+                                <i class="fa fa-cc-amex" style="font-size: 24px;" aria-hidden="true"></i>
+                            </p>
+                            <p style="font-style: italic;">{{ __('Vos données sont protégées') }}</p>
+                        </div>
                     </form>
                 </div>
             </div>

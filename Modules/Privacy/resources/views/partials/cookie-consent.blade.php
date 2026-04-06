@@ -81,6 +81,8 @@
     .cc-fab svg { width: 16px; height: 16px; fill: currentColor; }
     .cc-fab-text { font-size: 12px; font-weight: 600; white-space: nowrap; }
     .cc-hidden { display: none !important; }
+    body:has(.cc-modal.cc-open) { padding-bottom: 300px; }
+    @media (min-width: 768px) { body:has(.cc-modal.cc-open) { padding-bottom: 250px; } }
     @media (max-width: 640px) {
         .cc-actions { flex-direction: column; }
         .cc-btn { width: 100%; }
