@@ -102,18 +102,16 @@
                     {{-- Formulaire checkout (layout multi-colonnes compact) --}}
                     <form action="{{ route('shop.checkout') }}" method="POST" style="margin-top: 16px;">
                         @csrf
-                        <div class="row">
-                            <div class="col-sm-7" style="margin-bottom: 10px;">
-                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Courriel') }}</label>
-                                <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required autocomplete="email" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                            </div>
+                        <div style="margin-bottom: 10px; max-width: 70%;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Courriel') }}</label>
+                            <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required autocomplete="email" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                         </div>
-                        <div class="row">
-                            <div class="col-sm-6" style="margin-bottom: 10px;">
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <div style="flex: 1; min-width: 120px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Prénom') }}</label>
                                 <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name') }}" required autocomplete="given-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
-                            <div class="col-sm-6" style="margin-bottom: 10px;">
+                            <div style="flex: 1; min-width: 120px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Nom') }}</label>
                                 <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name') }}" required autocomplete="family-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
@@ -122,12 +120,12 @@
                             <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Adresse') }}</label>
                             <input type="text" name="shipping_address[address_line1]" value="{{ old('shipping_address.address_line1') }}" required autocomplete="street-address" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                         </div>
-                        <div class="row">
-                            <div class="col-sm-5" style="margin-bottom: 10px;">
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <div style="flex: 2; min-width: 100px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Ville') }}</label>
                                 <input type="text" name="shipping_address[city]" value="{{ old('shipping_address.city') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
-                            <div class="col-sm-4" style="margin-bottom: 10px;">
+                            <div style="flex: 1.5; min-width: 100px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Province') }}</label>
                                 <select name="shipping_address[state]" required autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                                     <option value="QC" selected>Québec</option>
@@ -145,7 +143,7 @@
                                     <option value="NU">Nunavut</option>
                                 </select>
                             </div>
-                            <div class="col-sm-3" style="margin-bottom: 10px;">
+                            <div style="flex: 1; min-width: 90px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Code postal') }}</label>
                                 <input type="text" name="shipping_address[postal_code]" value="{{ old('shipping_address.postal_code') }}" required autocomplete="postal-code" pattern="[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d" title="Format : A1A 1A1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
