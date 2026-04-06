@@ -40,6 +40,7 @@ return [
     'pagination' => (int) env('SHOP_PAGINATION', 12),
 
     'pricing' => [
+        'usd_cad_rate' => (float) env('SHOP_USD_CAD_RATE', 1.40),
         'margins' => [
             't-shirts' => 0.45,
             'mugs' => 0.50,

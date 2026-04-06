@@ -46,10 +46,11 @@
             @endif
 
             <div style="margin-bottom: 20px;">
-                <span style="font-size: 28px; font-weight: 700; color: #0B7285;">{{ number_format($product->price, 2, ',', ' ') }} $</span>
+                <span style="font-size: 28px; font-weight: 700; color: #0B7285;">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
                 @if($product->compare_price)
                     <span style="font-size: 16px; color: #94a3b8; text-decoration: line-through; margin-left: 8px;">{{ number_format($product->compare_price, 2, ',', ' ') }} $</span>
                 @endif
+                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Taxes en sus (TPS + TVQ)</div>
             </div>
 
             @if($product->category)
@@ -89,6 +90,13 @@
                     <button type="submit" class="btn" style="background: #0B7285; color: #fff; padding: 10px 32px; border-radius: 6px; font-weight: 600;">{{ __('Ajouter au panier') }}</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    {{-- Guide des tailles et specs --}}
+    <div class="row" style="margin-top: 30px;">
+        <div class="col-sm-12">
+            @include('shop::public.partials._size-guide', ['product' => $product])
         </div>
     </div>
 

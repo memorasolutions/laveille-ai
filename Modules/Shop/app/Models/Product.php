@@ -47,8 +47,11 @@ class Product extends Model
         return $query->where('category', $category);
     }
 
-    public static function smartPrice(float $costBase, string $category = 'default'): float
+    public static function smartPrice(float $costBaseUsd, string $category = 'default'): float
     {
+        $rate = config('shop.pricing.usd_cad_rate', 1.40);
+        $costCad = $costBaseUsd * $rate;
+
         $margins = config('shop.pricing.margins', [
             't-shirts' => 0.45,
             'mugs' => 0.50,
@@ -59,7 +62,7 @@ class Product extends Model
         ]);
 
         $margin = Arr::get($margins, $category, $margins['default']);
-        $result = $costBase * (1 + $margin);
+        $result = $costCad * (1 + $margin);
 
         return ceil($result) - 0.01;
     }
