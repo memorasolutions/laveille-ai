@@ -25,7 +25,7 @@ class StripeService
             ->asForm();
     }
 
-    public function createCheckoutSession(array $cartItems, string $successUrl, string $cancelUrl, ?string $customerEmail = null): ?array
+    public function createCheckoutSession(array $cartItems, string $returnUrl, ?string $customerEmail = null): ?array
     {
         try {
             $productIds = array_column($cartItems, 'product_id');
@@ -42,9 +42,8 @@ class StripeService
 
             $params = array_merge($lineItems, [
                 'mode' => 'payment',
-                'success_url' => $successUrl,
-                'cancel_url' => $cancelUrl,
-                'shipping_address_collection[allowed_countries][0]' => 'CA',
+                'ui_mode' => 'embedded',
+                'return_url' => $returnUrl,
             ]);
 
             if ($customerEmail) {
@@ -56,7 +55,7 @@ class StripeService
             if ($response->successful()) {
                 $data = $response->json();
                 return [
-                    'url' => $data['url'],
+                    'client_secret' => $data['client_secret'],
                     'session_id' => $data['id'],
                 ];
             }

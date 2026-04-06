@@ -67,11 +67,11 @@ class CheckoutController extends Controller
 
         event(new ShopOrderCreated($order));
 
-        // Créer session Stripe Checkout
+        // Créer session Stripe Checkout (mode embedded)
+        $returnUrl = route('shop.confirmation', $order) . '?session_id={CHECKOUT_SESSION_ID}';
         $checkout = $this->stripeService->createCheckoutSession(
             $cartItems,
-            route('shop.confirmation', $order),
-            route('shop.cart'),
+            $returnUrl,
             $request->input('email')
         );
 
@@ -86,7 +86,23 @@ class CheckoutController extends Controller
         // Vider le panier
         $this->cartService->clear();
 
-        return redirect($checkout['url']);
+        return redirect()->route('shop.checkout.pay', $order)
+            ->with('stripe_client_secret', $checkout['client_secret']);
+    }
+
+    public function pay(Order $order)
+    {
+        $clientSecret = session('stripe_client_secret');
+
+        if (! $clientSecret) {
+            return redirect()->route('shop.cart')->with('error', __('Session de paiement expirée. Veuillez réessayer.'));
+        }
+
+        return view('shop::public.checkout-pay', [
+            'order' => $order,
+            'clientSecret' => $clientSecret,
+            'stripeKey' => config('shop.stripe.publishable_key'),
+        ]);
     }
 
     public function success(Order $order)
