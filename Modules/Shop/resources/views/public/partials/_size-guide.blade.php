@@ -13,27 +13,27 @@
                 <h4 style="margin-top: 0; color: #0B7285;">T-shirt unisex</h4>
                 <p><strong>Matériau :</strong> 100 % coton prérétréci, 153 g/m²</p>
                 <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
-                    <div style="flex: 0 0 auto;">
-                        <img src="/images/shop/tshirt-size-guide.svg" alt="Comment mesurer un t-shirt : longueur et largeur poitrine" width="150" height="175">
+                    <div style="flex: 0 0 200px;">
+                        <img src="/images/shop/tshirt-size-guide.svg" alt="Comment mesurer un t-shirt : longueur et largeur poitrine" style="width: 200px; height: auto;">
                     </div>
-                    <div style="flex: 1;">
-                        <table class="table table-bordered" style="background-color: white;">
+                    <div style="flex: 0 1 auto;">
+                        <table style="width: auto; border-collapse: collapse; font-size: 13px; background-color: white;">
                             <thead>
                                 <tr style="background-color: #0B7285; color: white;">
-                                    <th>Taille</th>
-                                    <th>Longueur (cm)</th>
-                                    <th>Largeur poitrine (cm)</th>
+                                    <th style="padding: 8px;">Taille</th>
+                                    <th style="padding: 8px;">Longueur (cm)</th>
+                                    <th style="padding: 8px;">Largeur poitrine (cm)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td>S</td><td>71</td><td>46</td></tr>
-                                <tr><td>M</td><td>74</td><td>51</td></tr>
-                                <tr><td>L</td><td>76</td><td>56</td></tr>
-                                <tr><td>XL</td><td>79</td><td>61</td></tr>
-                                <tr><td>2XL</td><td>81</td><td>66</td></tr>
+                                <tr><td style="padding: 8px; font-weight: 700;">S</td><td style="padding: 8px;">71</td><td style="padding: 8px;">46</td></tr>
+                                <tr><td style="padding: 8px; font-weight: 700;">M</td><td style="padding: 8px;">74</td><td style="padding: 8px;">51</td></tr>
+                                <tr><td style="padding: 8px; font-weight: 700;">L</td><td style="padding: 8px;">76</td><td style="padding: 8px;">56</td></tr>
+                                <tr><td style="padding: 8px; font-weight: 700;">XL</td><td style="padding: 8px;">79</td><td style="padding: 8px;">61</td></tr>
+                                <tr><td style="padding: 8px; font-weight: 700;">2XL</td><td style="padding: 8px;">81</td><td style="padding: 8px;">66</td></tr>
                             </tbody>
                         </table>
-                        <p style="font-size: 12px; color: #94a3b8; font-style: italic;">Mesures prises à plat. Tolérance ± 2 cm.</p>
+                        <p style="font-size: 12px; color: #94a3b8; font-style: italic; margin-top: 8px;">Mesures prises à plat. Tolérance ± 2 cm.</p>
                     </div>
                 </div>
             </div>
