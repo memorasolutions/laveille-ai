@@ -207,14 +207,20 @@
                         <button type="submit" class="btn" style="width: 100%; background: #0B7285; color: #fff; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 16px; margin-top: 12px;">{{ __('Passer la commande') }}</button>
 
                         {{-- Badges confiance --}}
-                        <div style="text-align: center; color: #94a3b8; font-size: 13px; margin-top: 12px;">
-                            <p style="margin-bottom: 6px;"><i class="fa fa-lock" aria-hidden="true"></i> {{ __('Paiement sécurisé par Stripe') }}</p>
-                            <p style="margin-bottom: 6px;">
-                                <i class="fa fa-cc-visa" style="font-size: 24px; margin-right: 8px;" aria-hidden="true"></i>
-                                <i class="fa fa-cc-mastercard" style="font-size: 24px; margin-right: 8px;" aria-hidden="true"></i>
-                                <i class="fa fa-cc-amex" style="font-size: 24px;" aria-hidden="true"></i>
-                            </p>
-                            <p style="font-style: italic;">{{ __('Vos données sont protégées') }}</p>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-top: 16px; text-align: center;">
+                            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 8px;">
+                                <i class="fa fa-shield" style="color: #0CA678; font-size: 16px; margin-right: 8px;" aria-hidden="true"></i>
+                                <span style="font-weight: 700; font-size: 14px; color: #1e293b;">{{ __('Paiement sécurisé') }}</span>
+                                <span style="color: #cbd5e1; margin: 0 10px;">•</span>
+                                <i class="fa fa-lock" style="color: #475569; font-size: 14px; margin-right: 6px;" aria-hidden="true"></i>
+                                <span style="font-size: 13px; color: #475569;">{{ __('Chiffrement SSL') }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                <i class="fa fa-cc-visa" style="font-size: 22px; color: #64748b; margin: 0 5px;" aria-hidden="true"></i>
+                                <i class="fa fa-cc-mastercard" style="font-size: 22px; color: #64748b; margin: 0 5px;" aria-hidden="true"></i>
+                                <i class="fa fa-cc-amex" style="font-size: 22px; color: #64748b; margin: 0 5px;" aria-hidden="true"></i>
+                                <span style="font-size: 12px; color: #94a3b8; font-style: italic; margin-left: 10px;">{{ __('Propulsé par Stripe') }}</span>
+                            </div>
                         </div>
                     </form>
                 </div>
