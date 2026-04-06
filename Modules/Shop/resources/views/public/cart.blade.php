@@ -22,7 +22,7 @@
                     <tr style="border-bottom: 2px solid #e2e8f0;">
                         <th>{{ __('Produit') }}</th>
                         <th>{{ __('Variante') }}</th>
-                        <th style="width: 120px;">{{ __('Quantite') }}</th>
+                        <th style="width: 120px;">{{ __('Quantité') }}</th>
                         <th>{{ __('Prix') }}</th>
                         <th>{{ __('Sous-total') }}</th>
                         <th></th>
@@ -88,7 +88,7 @@
                             <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         </div>
                         <div style="margin-bottom: 8px;">
-                            <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Prenom') }}</label>
+                            <label style="font-weight: 600; display: block; margin-bottom: 4px;">{{ __('Prénom') }}</label>
                             <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name') }}" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
                         </div>
                         <div style="margin-bottom: 8px;">
@@ -110,6 +110,54 @@
                             </div>
                         </div>
                         <input type="hidden" name="shipping_address[country]" value="CA">
+
+                        {{-- Estimation livraison dynamique --}}
+                        <div x-data="{
+                            loading: false,
+                            methods: [],
+                            selectedUid: null,
+                            selectedCost: 0,
+                            async fetchQuote() {
+                                const pc = document.querySelector('[name=\'shipping_address[postal_code]\']').value.replace(/\s/g, '');
+                                if (pc.length < 6) { this.methods = []; return; }
+                                this.loading = true;
+                                try {
+                                    const res = await fetch('{{ route('shop.shipping-quote') }}', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                        body: JSON.stringify({ postal_code: pc, country: 'CA' })
+                                    });
+                                    const data = await res.json();
+                                    this.methods = data.methods || [];
+                                    if (this.methods.length) {
+                                        this.selectedUid = this.methods[0].uid;
+                                        this.selectedCost = this.methods[0].price;
+                                    }
+                                } catch (e) { this.methods = []; }
+                                this.loading = false;
+                            },
+                            select(m) { this.selectedUid = m.uid; this.selectedCost = m.price; }
+                        }" style="margin-top: 12px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">{{ __('Livraison') }}</label>
+                            <button type="button" @click="fetchQuote()" class="btn btn-sm" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 8px;">
+                                <i class="fa fa-truck"></i> {{ __('Calculer les frais') }}
+                            </button>
+                            <div x-show="loading" style="color: #64748b;"><i class="fa fa-spinner fa-spin"></i> {{ __('Calcul en cours...') }}</div>
+                            <div x-show="!loading && methods.length === 0" style="font-style: italic; color: #64748b; font-size: 13px;">
+                                {{ __('Entrez votre code postal pour estimer les frais de livraison.') }}
+                            </div>
+                            <template x-for="m in methods" :key="m.uid">
+                                <label style="display: block; padding: 6px 0; cursor: pointer;">
+                                    <input type="radio" name="shipping_method" :value="m.uid" x-model="selectedUid" @change="select(m)">
+                                    <span x-text="m.name"></span> –
+                                    <strong style="color: #0B7285;" x-text="parseFloat(m.price).toFixed(2) + ' $'"></strong>
+                                    <span style="color: #64748b; font-size: 12px;" x-text="'(' + m.min_days + '-' + m.max_days + ' jours)'"></span>
+                                </label>
+                            </template>
+                            <input type="hidden" name="shipping_method_uid" x-model="selectedUid">
+                            <input type="hidden" name="shipping_cost" x-model="selectedCost">
+                        </div>
+
                         <button type="submit" class="btn" style="width: 100%; background: #0B7285; color: #fff; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 16px; margin-top: 12px;">{{ __('Passer la commande') }}</button>
                     </form>
                 </div>

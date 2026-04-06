@@ -25,7 +25,7 @@ class StripeService
             ->asForm();
     }
 
-    public function createCheckoutSession(array $cartItems, string $successUrl, string $cancelUrl, ?string $customerEmail = null): ?string
+    public function createCheckoutSession(array $cartItems, string $successUrl, string $cancelUrl, ?string $customerEmail = null): ?array
     {
         try {
             $productIds = array_column($cartItems, 'product_id');
@@ -54,7 +54,11 @@ class StripeService
             $response = $this->client()->post("{$this->apiUrl}/checkout/sessions", $params);
 
             if ($response->successful()) {
-                return $response->json('url');
+                $data = $response->json();
+                return [
+                    'url' => $data['url'],
+                    'session_id' => $data['id'],
+                ];
             }
 
             Log::error('Stripe createCheckoutSession failed: ' . $response->body());

@@ -103,4 +103,90 @@ class GelatoService
             return [];
         }
     }
+
+    public function getQuote(Order $order): ?array
+    {
+        return $this->requestQuote(
+            'quote-' . $order->id,
+            (string) ($order->user_id ?? $order->email),
+            $order->shipping_address ?? [],
+            $order->email,
+            $order->items->map(fn ($item) => [
+                'itemReferenceId' => (string) $item->id,
+                'productUid' => $item->gelato_variant_id,
+                'quantity' => $item->quantity,
+            ])->toArray()
+        );
+    }
+
+    public function getQuoteFromCart(array $cartItems, array $shippingAddress, ?string $email = null): ?array
+    {
+        $products = array_map(fn ($item) => [
+            'itemReferenceId' => (string) ($item['product_id'] ?? uniqid()),
+            'productUid' => $item['gelato_variant_id'] ?? '',
+            'quantity' => $item['quantity'] ?? 1,
+        ], $cartItems);
+
+        return $this->requestQuote(
+            'quote-cart-' . uniqid(),
+            $email ?? 'guest',
+            $shippingAddress,
+            $email,
+            $products
+        );
+    }
+
+    private function requestQuote(string $orderRefId, string $customerRefId, array $address, ?string $email, array $products): ?array
+    {
+        try {
+            $body = [
+                'orderReferenceId' => $orderRefId,
+                'customerReferenceId' => $customerRefId,
+                'currency' => config('shop.currency', 'CAD'),
+                'recipient' => [
+                    'firstName' => $address['first_name'] ?? '',
+                    'lastName' => $address['last_name'] ?? '',
+                    'addressLine1' => $address['address_line1'] ?? '',
+                    'city' => $address['city'] ?? '',
+                    'postCode' => $address['postal_code'] ?? '',
+                    'country' => $address['country'] ?? 'CA',
+                    'email' => $email ?? '',
+                ],
+                'products' => $products,
+            ];
+
+            $response = $this->client()->post('/v4/orders:quote', $body);
+
+            if (! $response->successful()) {
+                Log::error('Gelato getQuote failed: ' . $response->body());
+                return null;
+            }
+
+            $data = $response->json();
+            $allMethods = [];
+
+            foreach ($data['quotes'] ?? [] as $quote) {
+                foreach ($quote['shipmentMethods'] ?? [] as $method) {
+                    $allMethods[] = [
+                        'name' => $method['name'] ?? '',
+                        'uid' => $method['shipmentMethodUid'] ?? '',
+                        'price' => (float) ($method['price'] ?? 0),
+                        'currency' => $method['currency'] ?? 'CAD',
+                        'min_days' => $method['minDeliveryDays'] ?? null,
+                        'max_days' => $method['maxDeliveryDays'] ?? null,
+                    ];
+                }
+            }
+
+            usort($allMethods, fn ($a, $b) => $a['price'] <=> $b['price']);
+
+            return [
+                'methods' => $allMethods,
+                'cheapest_price' => $allMethods[0]['price'] ?? 0,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Gelato getQuote: ' . $e->getMessage());
+            return null;
+        }
+    }
 }

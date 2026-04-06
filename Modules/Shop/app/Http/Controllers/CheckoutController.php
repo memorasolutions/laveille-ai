@@ -38,7 +38,8 @@ class CheckoutController extends Controller
 
         $subtotal = $this->cartService->getSubtotal();
         $taxAmount = $this->cartService->getTaxAmount();
-        $total = $this->cartService->getTotal();
+        $shippingCost = (float) $request->input('shipping_cost', 0);
+        $total = round($this->cartService->getTotal() + $shippingCost, 2);
 
         // Créer la commande
         $order = Order::create([
@@ -47,6 +48,7 @@ class CheckoutController extends Controller
             'status' => 'pending',
             'subtotal' => $subtotal,
             'tax_amount' => $taxAmount,
+            'shipping_cost' => $shippingCost,
             'total' => $total,
             'shipping_address' => $request->input('shipping_address'),
         ]);
@@ -66,25 +68,25 @@ class CheckoutController extends Controller
         event(new ShopOrderCreated($order));
 
         // Créer session Stripe Checkout
-        $stripeUrl = $this->stripeService->createCheckoutSession(
+        $checkout = $this->stripeService->createCheckoutSession(
             $cartItems,
             route('shop.confirmation', $order),
             route('shop.cart'),
             $request->input('email')
         );
 
-        if (! $stripeUrl) {
+        if (! $checkout) {
             $order->update(['status' => 'cancelled', 'notes' => 'Stripe checkout session creation failed']);
             return back()->with('error', __('Erreur lors de la création du paiement. Veuillez réessayer.'));
         }
 
         // Sauvegarder le session ID Stripe
-        $order->update(['stripe_session_id' => last(explode('/', parse_url($stripeUrl, PHP_URL_PATH)))]);
+        $order->update(['stripe_session_id' => $checkout['session_id']]);
 
         // Vider le panier
         $this->cartService->clear();
 
-        return redirect($stripeUrl);
+        return redirect($checkout['url']);
     }
 
     public function success(Order $order)

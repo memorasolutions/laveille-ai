@@ -6,6 +6,7 @@ use Modules\Shop\Http\Controllers\CartController;
 use Modules\Shop\Http\Controllers\CheckoutController;
 use Modules\Shop\Http\Controllers\WebhookController;
 use Modules\Shop\Http\Controllers\UserOrderController;
+use Modules\Shop\Http\Controllers\ShippingQuoteController;
 use Modules\Shop\Http\Controllers\Admin\ProductController;
 use Modules\Shop\Http\Controllers\Admin\ProductWizardController;
 use Modules\Shop\Http\Controllers\Admin\OrderController;
@@ -24,6 +25,11 @@ Route::middleware('web')
         Route::get('/confirmation/{order}', [CheckoutController::class, 'success'])->name('shop.confirmation');
         Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
     });
+
+// Estimation livraison (AJAX)
+Route::middleware('web')
+    ->post('/api/shop/shipping-quote', ShippingQuoteController::class)
+    ->name('shop.shipping-quote');
 
 // Mes commandes (authentifié)
 Route::middleware(['web', 'auth'])

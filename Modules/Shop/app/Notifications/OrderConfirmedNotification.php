@@ -29,7 +29,7 @@ class OrderConfirmedNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Confirmation de votre commande #' . $this->order->id)
             ->greeting('Bonjour !')
-            ->line('Votre commande #' . $this->order->id . ' a bien ete confirmee.')
+            ->line('Votre commande #' . $this->order->id . ' a bien été confirmée.')
             ->line('Montant total : ' . number_format($this->order->total, 2, ',', ' ') . ' $')
             ->action('Voir la boutique', url(config('shop.routes.prefix', 'boutique')))
             ->line('Merci pour votre achat !');
@@ -40,7 +40,7 @@ class OrderConfirmedNotification extends Notification implements ShouldQueue
         return [
             'order_id' => $this->order->id,
             'status' => $this->order->status,
-            'message' => 'Votre commande #' . $this->order->id . ' a ete confirmee.',
+            'message' => 'Votre commande #' . $this->order->id . ' a été confirmée.',
         ];
     }
 }
