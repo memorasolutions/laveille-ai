@@ -14,7 +14,7 @@
                 <p><strong>Matériau :</strong> 100 % coton prérétréci, 153 g/m²</p>
                 <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
                     <div style="flex: 0 0 auto;">
-                        <img src="/images/shop/tshirt-size-guide.svg" alt="Comment mesurer un t-shirt : longueur et largeur poitrine" width="180" height="180" style="display: block;">
+                        <img src="/images/shop/tshirt-size-guide.svg" alt="Comment mesurer un t-shirt : longueur et largeur poitrine" width="180" height="210" style="display: block;">
                     </div>
                     <div style="flex: 1;">
                         <table class="table table-bordered" style="background-color: white;">

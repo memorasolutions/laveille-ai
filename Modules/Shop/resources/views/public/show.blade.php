@@ -29,7 +29,10 @@
                                 <img :src="image" :alt="'{{ $product->name }}'" @click="activeImage = index" :style="'width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;' + (activeImage === index ? 'border:2px solid #0B7285;' : 'border:2px solid transparent;')">
                             </template>
                         </div>
-                        <p style="font-size: 12px; color: #94a3b8; font-style: italic; margin-top: 8px;">{{ __('Illustration. Le design imprime correspond au motif ci-dessous.') }}</p>
+                        <div style="margin-top: 12px;">
+                            <i class="fa fa-info-circle" style="font-size: 12px; color: #94a3b8;"></i>
+                            <span style="font-size: 12px; color: #94a3b8; font-style: italic;">{{ __('Les images sont des simulations. Les couleurs du produit reçu peuvent légèrement varier en raison des différences entre les écrans et les procédés d\'impression.') }}</span>
+                        </div>
                     @endif
                 </div>
             @else
