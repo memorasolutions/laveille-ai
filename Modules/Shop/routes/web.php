@@ -24,15 +24,9 @@ Route::middleware('web')
         Route::post('/panier/quantite', [CartController::class, 'updateQuantity'])->name('shop.cart.quantity');
         Route::post('/commander', [CheckoutController::class, 'create'])->name('shop.checkout');
         Route::get('/confirmation/{order}', [CheckoutController::class, 'success'])->name('shop.confirmation');
-        Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
-    });
-
-// Suivi commande (guest — sans auth)
-Route::middleware('web')
-    ->prefix(config('shop.routes.prefix', 'boutique'))
-    ->group(function () {
         Route::get('/suivi', [OrderLookupController::class, 'index'])->name('shop.order-lookup');
         Route::post('/suivi', [OrderLookupController::class, 'search'])->name('shop.order-lookup.search');
+        Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
     });
 
 // Estimation livraison (AJAX)
