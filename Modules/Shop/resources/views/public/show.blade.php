@@ -41,7 +41,11 @@
         <div class="col-md-6">
             <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 12px;">{{ $product->name }}</h1>
 
-            @if($product->short_description)
+            @if($product->description)
+                <div class="rt-description" style="font-size: 15px; line-height: 1.7; color: #475569; margin-bottom: 16px;">
+                    {!! Str::markdown($product->description) !!}
+                </div>
+            @elseif($product->short_description)
                 <p style="color: #64748b; font-size: 15px; margin-bottom: 16px;">{{ $product->short_description }}</p>
             @endif
 
@@ -100,17 +104,7 @@
         </div>
     </div>
 
-    {{-- Description --}}
-    @if($product->description)
-        <div class="row" style="margin-top: 40px;">
-            <div class="col-sm-12">
-                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 16px;">{{ __('Description') }}</h2>
-                <div class="rt-description" style="font-size: 15px; line-height: 1.8; color: #475569;">
-                    {!! Str::markdown($product->description) !!}
-                </div>
-            </div>
-        </div>
-    @endif
+    {{-- Description déplacée en haut dans la zone info produit --}}
 </div>
 
 {{-- Schema.org Product --}}

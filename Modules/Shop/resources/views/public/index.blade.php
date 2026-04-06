@@ -32,12 +32,14 @@
                             <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 8px;">
                                 <a href="{{ route('shop.show', $product) }}" style="color: #1e293b; text-decoration: none;">{{ $product->name }}</a>
                             </h3>
-                            @if($product->short_description)
-                                <p style="color: #64748b; font-size: 13px; margin-bottom: 12px; line-height: 1.4;">{{ Str::limit($product->short_description, 80) }}</p>
+                            @if($product->description)
+                                <p style="color: #64748b; font-size: 13px; margin-bottom: 12px; line-height: 1.4;">{{ Str::limit(strip_tags($product->description), 100) }}</p>
+                            @elseif($product->short_description)
+                                <p style="color: #64748b; font-size: 13px; margin-bottom: 12px; line-height: 1.4;">{{ Str::limit($product->short_description, 100) }}</p>
                             @endif
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div>
-                                    <span style="font-size: 18px; font-weight: 700; color: #0B7285;">{{ number_format($product->price, 2, ',', ' ') }} $</span>
+                                    <span style="font-size: 18px; font-weight: 700; color: #0B7285;">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
                                     @if($product->compare_price)
                                         <span style="font-size: 13px; color: #94a3b8; text-decoration: line-through; margin-left: 6px;">{{ number_format($product->compare_price, 2, ',', ' ') }} $</span>
                                     @endif
