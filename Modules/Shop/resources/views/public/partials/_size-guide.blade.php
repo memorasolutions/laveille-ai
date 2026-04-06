@@ -12,25 +12,25 @@
             <div style="color: #475569; margin-bottom: 20px;">
                 <h4 style="margin-top: 0; color: #0B7285;">T-shirt unisex</h4>
                 <p><strong>Matériau :</strong> 100 % coton prérétréci, 153 g/m²</p>
-                <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
-                    <div style="flex: 0 0 200px;">
-                        <img src="/images/shop/tshirt-size-guide.svg" alt="Comment mesurer un t-shirt : longueur et largeur poitrine" style="width: 200px; height: auto;">
+                <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+                    <div style="flex: 0 0 220px;">
+                        <img src="/images/shop/tshirt-size-guide.svg" alt="Comment mesurer un t-shirt" style="width: 100%; height: auto;">
                     </div>
-                    <div style="flex: 0 1 auto;">
-                        <table style="width: auto; border-collapse: collapse; font-size: 13px; background-color: white;">
+                    <div style="flex: 1; min-width: 280px;">
+                        <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
                             <thead>
-                                <tr style="background-color: #0B7285; color: white;">
-                                    <th style="padding: 8px;">Taille</th>
-                                    <th style="padding: 8px;">Longueur (cm)</th>
-                                    <th style="padding: 8px;">Largeur poitrine (cm)</th>
+                                <tr style="background: #0B7285; color: #fff;">
+                                    <th style="padding: 10px 16px; text-align: center;">Taille</th>
+                                    <th style="padding: 10px 16px; text-align: center;">Longueur (cm)</th>
+                                    <th style="padding: 10px 16px; text-align: center;">Largeur poitrine (cm)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td style="padding: 8px; font-weight: 700;">S</td><td style="padding: 8px;">71</td><td style="padding: 8px;">46</td></tr>
-                                <tr><td style="padding: 8px; font-weight: 700;">M</td><td style="padding: 8px;">74</td><td style="padding: 8px;">51</td></tr>
-                                <tr><td style="padding: 8px; font-weight: 700;">L</td><td style="padding: 8px;">76</td><td style="padding: 8px;">56</td></tr>
-                                <tr><td style="padding: 8px; font-weight: 700;">XL</td><td style="padding: 8px;">79</td><td style="padding: 8px;">61</td></tr>
-                                <tr><td style="padding: 8px; font-weight: 700;">2XL</td><td style="padding: 8px;">81</td><td style="padding: 8px;">66</td></tr>
+                                <tr style="background: #f8fafc;"><td style="padding: 10px 16px; font-weight: 700; text-align: center; color: #1e293b;">S</td><td style="padding: 10px 16px; text-align: center; color: #475569;">71</td><td style="padding: 10px 16px; text-align: center; color: #475569;">46</td></tr>
+                                <tr><td style="padding: 10px 16px; font-weight: 700; text-align: center; color: #1e293b;">M</td><td style="padding: 10px 16px; text-align: center; color: #475569;">74</td><td style="padding: 10px 16px; text-align: center; color: #475569;">51</td></tr>
+                                <tr style="background: #f8fafc;"><td style="padding: 10px 16px; font-weight: 700; text-align: center; color: #1e293b;">L</td><td style="padding: 10px 16px; text-align: center; color: #475569;">76</td><td style="padding: 10px 16px; text-align: center; color: #475569;">56</td></tr>
+                                <tr><td style="padding: 10px 16px; font-weight: 700; text-align: center; color: #1e293b;">XL</td><td style="padding: 10px 16px; text-align: center; color: #475569;">79</td><td style="padding: 10px 16px; text-align: center; color: #475569;">61</td></tr>
+                                <tr style="background: #f8fafc;"><td style="padding: 10px 16px; font-weight: 700; text-align: center; color: #1e293b;">2XL</td><td style="padding: 10px 16px; text-align: center; color: #475569;">81</td><td style="padding: 10px 16px; text-align: center; color: #475569;">66</td></tr>
                             </tbody>
                         </table>
                         <p style="font-size: 12px; color: #94a3b8; font-style: italic; margin-top: 8px;">Mesures prises à plat. Tolérance ± 2 cm.</p>
