@@ -14,14 +14,7 @@
                 <p><strong>Matériau :</strong> 100 % coton prérétréci, 153 g/m²</p>
                 <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
                     <div style="flex: 0 0 auto;">
-                        <svg width="180" height="220" viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
-                            <defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#0B7285"/></marker></defs>
-                            <path d="M60 30 L40 50 L55 50 L55 90 L60 95 L60 180 L100 200 L140 180 L140 95 L145 90 L145 50 L160 50 L140 30 L120 35 Q100 45 80 35 Z" fill="none" stroke="#94a3b8" stroke-width="2"/>
-                            <line x1="30" y1="30" x2="30" y2="200" stroke="#0B7285" stroke-width="1.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-                            <text x="25" y="115" fill="#475569" font-size="11" font-family="sans-serif" text-anchor="end" transform="rotate(-90, 25, 115)">Longueur</text>
-                            <line x1="60" y1="95" x2="140" y2="95" stroke="#0B7285" stroke-width="1.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-                            <text x="100" y="88" fill="#475569" font-size="10" font-family="sans-serif" text-anchor="middle">Largeur poitrine</text>
-                        </svg>
+                        <img src="/images/shop/tshirt-size-guide.svg" alt="Comment mesurer un t-shirt : longueur et largeur poitrine" width="180" height="180" style="display: block;">
                     </div>
                     <div style="flex: 1;">
                         <table class="table table-bordered" style="background-color: white;">

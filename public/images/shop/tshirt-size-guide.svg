@@ -1,0 +1,20 @@
+<svg width="200" height="200" viewBox="-30 80 170 135" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#0B7285"/>
+    </marker>
+    <marker id="arrowhead-start" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+      <path d="M6,0 L0,3 L6,6 Z" fill="#0B7285"/>
+    </marker>
+  </defs>
+  <!-- T-shirt body -->
+  <path d="m 82.845819,88.645478 -14.651776,5.517895 c 0,0 -26.030979,24.506847 -30.548566,28.565107 5.132178,7.58108 12.979618,17.45964 12.979618,17.45964 l 15.239804,-10.91465 c 0,0 4.228179,7.44639 4.228179,19.43232 0,11.98593 -4.228179,54.07332 -4.228179,54.07332 h 32.804544 0.740498 32.804539 c 0,0 -4.3031,-41.76778 -4.3031,-53.95934 0,-12.19156 4.3031,-19.5463 4.3031,-19.5463 l 15.2398,10.91465 c 0,0 7.84745,-9.87856 12.97962,-17.45964 -4.51758,-4.05826 -30.54857,-28.565107 -30.54857,-28.565107 L 115.23357,88.645478 H 99.409941 98.669443 Z" fill="#E5E7EB" stroke="#94a3b8" stroke-width="1.2"/>
+  <!-- Collar -->
+  <path d="m 82.845819,88.645478 c 0,11.776122 6.239633,20.199402 16.088991,20.155192 9.84936,-0.0442 16.19407,-7.75642 16.19407,-20.155192" fill="none" stroke="#94a3b8" stroke-width="1.2"/>
+  <!-- Longueur (vertical arrow) -->
+  <line x1="50" y1="89" x2="50" y2="203" stroke="#0B7285" stroke-width="1.5" marker-start="url(#arrowhead-start)" marker-end="url(#arrowhead)"/>
+  <text x="47" y="150" fill="#475569" font-size="9" font-family="sans-serif" text-anchor="middle" transform="rotate(-90, 47, 150)">Longueur</text>
+  <!-- Largeur poitrine (horizontal arrow) -->
+  <line x1="66" y1="130" x2="132" y2="130" stroke="#0B7285" stroke-width="1.5" marker-start="url(#arrowhead-start)" marker-end="url(#arrowhead)"/>
+  <text x="99" y="124" fill="#475569" font-size="9" font-family="sans-serif" text-anchor="middle">Largeur poitrine</text>
+</svg>
