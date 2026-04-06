@@ -6,8 +6,12 @@
 <meta name="robots" content="noindex, nofollow">
 @endpush
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Confirmation'), 'breadcrumbItems' => [__('Boutique'), __('Confirmation')]])
+@endsection
+
 @section('content')
-<div class="container" style="padding-top: 40px; padding-bottom: 60px;">
+<div class="container" style="padding-top: 30px; padding-bottom: 40px;">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div style="background: #fff; padding: 40px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center;">

@@ -6,6 +6,10 @@
 <meta name="robots" content="noindex, nofollow">
 @endpush
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Mes commandes'), 'breadcrumbItems' => [__('Boutique'), __('Mes commandes')]])
+@endsection
+
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
     <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Mes commandes') }}</h1>

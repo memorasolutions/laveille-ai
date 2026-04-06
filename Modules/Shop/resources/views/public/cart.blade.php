@@ -6,6 +6,10 @@
 <meta name="robots" content="noindex, nofollow">
 @endpush
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Panier'), 'breadcrumbItems' => [__('Boutique'), __('Panier')]])
+@endsection
+
 @section('content')
 {{-- Toast notification ajout panier --}}
 @if(session('cart_added'))
