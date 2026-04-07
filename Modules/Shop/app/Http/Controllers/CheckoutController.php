@@ -26,6 +26,7 @@ class CheckoutController extends Controller
             'shipping_address.last_name' => 'required|string',
             'shipping_address.address_line1' => 'required|string',
             'shipping_address.city' => 'required|string',
+            'shipping_address.state' => 'nullable|string',
             'shipping_address.postal_code' => 'required|string',
             'shipping_address.country' => 'required|string|size:2',
         ]);
@@ -37,9 +38,10 @@ class CheckoutController extends Controller
         }
 
         $subtotal = $this->cartService->getSubtotal();
-        $taxAmount = $this->cartService->getTaxAmount();
+        $country = $request->input('shipping_address.country', 'CA');
+        $taxAmount = ($country === 'CA') ? $this->cartService->getTaxAmount() : 0;
         $shippingCost = (float) $request->input('shipping_cost', 0);
-        $total = round($this->cartService->getTotal() + $shippingCost, 2);
+        $total = round($subtotal + $taxAmount + $shippingCost, 2);
 
         // Créer la commande
         $order = Order::create([

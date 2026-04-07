@@ -14,7 +14,7 @@ class ShippingQuoteController extends Controller
     public function __invoke(Request $request, GelatoService $gelatoService): JsonResponse
     {
         $request->validate([
-            'postal_code' => 'required|string|min:6',
+            'postal_code' => 'required|string|min:3',
             'country' => 'required|string|size:2',
         ]);
 

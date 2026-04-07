@@ -138,7 +138,20 @@
                                 <input type="text" name="shipping_address[postal_code]" value="{{ old('shipping_address.postal_code') }}" required autocomplete="postal-code" pattern="[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d" title="Format : A1A 1A1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                         </div>
-                        <input type="hidden" name="shipping_address[country]" value="CA">
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">{{ __('Pays') }} <span style="color:#ef4444;">*</span></label>
+                            <select name="shipping_address[country]" id="country-select" required autocomplete="country" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <optgroup label="{{ __('Pays populaires') }}">
+                                    <option value="CA" selected>Canada</option>
+                                    <option value="US">États-Unis</option>
+                                    <option value="FR">France</option>
+                                    <option value="GB">Royaume-Uni</option>
+                                </optgroup>
+                                <optgroup label="{{ __('Tous les pays') }}">
+                                    <option value="DE">Allemagne</option><option value="AU">Australie</option><option value="BE">Belgique</option><option value="BR">Brésil</option><option value="CL">Chili</option><option value="CN">Chine</option><option value="CO">Colombie</option><option value="KR">Corée du Sud</option><option value="DK">Danemark</option><option value="AE">Émirats arabes unis</option><option value="ES">Espagne</option><option value="FI">Finlande</option><option value="GR">Grèce</option><option value="IN">Inde</option><option value="ID">Indonésie</option><option value="IE">Irlande</option><option value="IL">Israël</option><option value="IT">Italie</option><option value="JP">Japon</option><option value="MY">Malaisie</option><option value="MX">Mexique</option><option value="NZ">Nouvelle-Zélande</option><option value="NL">Pays-Bas</option><option value="PL">Pologne</option><option value="PT">Portugal</option><option value="CZ">République tchèque</option><option value="SG">Singapour</option><option value="ZA">Afrique du Sud</option><option value="SE">Suède</option><option value="CH">Suisse</option><option value="TH">Thaïlande</option><option value="TR">Turquie</option><option value="VN">Viêt Nam</option>
+                                </optgroup>
+                            </select>
+                        </div>
 
                         {{-- Estimation livraison dynamique (auto-calcul) --}}
                         <div x-data="{
@@ -148,13 +161,13 @@
                             selectedCost: 0,
                             async fetchQuote() {
                                 const pc = document.querySelector('[name=\'shipping_address[postal_code]\']').value.replace(/\s/g, '');
-                                if (pc.length < 6) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
+                                if (pc.length < 3) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
                                 this.loading = true;
                                 try {
                                     const res = await fetch('{{ route('shop.shipping-quote') }}', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                                        body: JSON.stringify({ postal_code: pc, country: 'CA' })
+                                        body: JSON.stringify({ postal_code: pc, country: document.getElementById('country-select').value })
                                     });
                                     const data = await res.json();
                                     this.methods = data.methods || [];
