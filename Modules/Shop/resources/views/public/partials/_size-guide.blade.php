@@ -63,7 +63,7 @@
             <h4 style="margin-top: 0; color: #0B7285;">
                 <i class="fa fa-truck" style="margin-right: 10px;"></i> Livraison
             </h4>
-            <p style="margin-bottom: 0;">{{ __('Produit imprimé à la demande localement (production dans 32 pays). Les délais et frais de livraison sont calculés au moment de la commande selon votre destination.') }}</p>
+            <p style="margin-bottom: 0;">{{ __('Les délais et frais de livraison sont calculés au moment de la commande selon votre destination. Production dans plus de 30 pays.') }}</p>
         </div>
     </div>
 </div>
