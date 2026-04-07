@@ -7,35 +7,11 @@
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#0B7285"/>
     </marker>
   </defs>
-  
-  <!-- Hoodie front (clipped) -->
   <g clip-path="url(#front-clip)">
-
-  <defs
+<defs
      id="defs1" />
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1">
-    <inkscape:page
-       x="0"
-       y="0"
-       inkscape:label="1"
-       id="page1"
-       width="800"
-       height="666.66669"
-       margin="0"
-       bleed="0" />
-  </sodipodi:namedview>
   <g
-     id="g1"
-     inkscape:groupmode="layer"
-     inkscape:label="1">
+     id="g1">
     <g
        id="group-R5">
       <path
@@ -555,16 +531,11 @@
          transform="matrix(0.13333333,0,0,-0.13333333,0,666.66667)" />
     </g>
   </g>
-
   </g>
-  
-  <!-- Arrow: Longueur (vertical left) -->
   <line x1="20" y1="55" x2="20" y2="620" stroke="#0B7285" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
   <line x1="15" y1="55" x2="25" y2="55" stroke="#0B7285" stroke-width="1"/>
   <line x1="15" y1="620" x2="25" y2="620" stroke="#0B7285" stroke-width="1"/>
   <text x="10" y="345" font-family="system-ui,sans-serif" font-size="12" fill="#0B7285" transform="rotate(-90,10,345)">Longueur</text>
-  
-  <!-- Arrow: Largeur poitrine (horizontal bottom) -->
   <line x1="85" y1="690" x2="330" y2="690" stroke="#0B7285" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
   <line x1="85" y1="685" x2="85" y2="695" stroke="#0B7285" stroke-width="1"/>
   <line x1="330" y1="685" x2="330" y2="695" stroke="#0B7285" stroke-width="1"/>
