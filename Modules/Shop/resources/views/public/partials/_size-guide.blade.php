@@ -46,7 +46,7 @@
                         <img src="/images/shop/hoodie-size-guide.svg" alt="Hoodie guide des tailles" style="width: 100%; height: auto;">
                     </div>
                     <div style="flex: 1; min-width: 300px;">
-                        @php $sizes = [['S',69,27,51,20,85,'33.5'],['M',71,28,56,22,88,'34.5'],['L',74,29,61,24,90,'35.5'],['XL',76,30,66,26,93,'36.5'],['2XL',79,31,71,28,95,'37.5'],['3XL',81,32,76,30,98,'38.5'],['4XL',84,33,81,32,100,'39.4'],['5XL',86,34,86,34,103,'40.6']]; @endphp
+                        @php $sizes = [['S','68.6',27,'50.8',20,'85.1','33.5'],['M','71.1',28,'55.9',22,'87.6','34.5'],['L','73.7',29,61,24,'90.2','35.5'],['XL','76.2',30,66,26,'92.7','36.5'],['2XL','78.7',31,'71.1',28,'95.3','37.5'],['3XL','81.3',32,'76.2',30,'97.8','38.5'],['4XL',84,'33.1',81,'31.9',100,'39.4'],['5XL',86,'33.9',86,'33.9',103,'40.6']]; @endphp
                         <table style="width:100%; border-collapse:separate; border-spacing:0; border-radius:8px; border:1px solid #e2e8f0; overflow:hidden; font-size:13px; background:#fff;">
                             <thead>
                                 <tr>
