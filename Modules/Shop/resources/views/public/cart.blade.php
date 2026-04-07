@@ -78,56 +78,7 @@
         {{-- Totaux --}}
         <div class="row" style="margin-top: 24px;">
             <div class="col-md-6 col-md-offset-6">
-                <div x-data="{
-                    country: 'CA',
-                    loading: false,
-                    methods: [],
-                    selectedUid: null,
-                    selectedCost: 0,
-                    provincesCA: {AB:'Alberta',BC:'Colombie-Britannique',MB:'Manitoba',NB:'Nouveau-Brunswick',NL:'Terre-Neuve-et-Labrador',NS:'Nouvelle-Écosse',NT:'Territoires du Nord-Ouest',NU:'Nunavut',ON:'Ontario',PE:'Île-du-Prince-Édouard',QC:'Québec',SK:'Saskatchewan',YT:'Yukon'},
-                    statesUS: {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'Californie',CO:'Colorado',CT:'Connecticut',DE:'Delaware',DC:'District de Columbia',FL:'Floride',GA:'Géorgie',HI:'Hawaï',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiane',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'Nouveau-Mexique',NY:'New York',NC:'Caroline du Nord',ND:'Dakota du Nord',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvanie',RI:'Rhode Island',SC:'Caroline du Sud',SD:'Dakota du Sud',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginie',WA:'Washington',WV:'Virginie-Occidentale',WI:'Wisconsin',WY:'Wyoming'},
-                    get provinceLabel() {
-                        if (this.country === 'CA') return '{{ __('Province') }}';
-                        if (this.country === 'US') return '{{ __('État') }}';
-                        return '{{ __('Province / État / Région') }}';
-                    },
-                    get postalPattern() {
-                        if (this.country === 'CA') return '[A-Za-z]\\d[A-Za-z]\\s?\\d[A-Za-z]\\d';
-                        if (this.country === 'US') return '\\d{5}(-\\d{4})?';
-                        return null;
-                    },
-                    get postalTitle() {
-                        if (this.country === 'CA') return 'Format : A1A 1A1';
-                        if (this.country === 'US') return 'Format : 12345 ou 12345-6789';
-                        return '';
-                    },
-                    get postalRequired() { return this.country === 'CA' || this.country === 'US'; },
-                    select(m) { this.selectedUid = m.uid; this.selectedCost = m.price; },
-                    async fetchQuote() {
-                        const pc = this.$refs.postalCode ? this.$refs.postalCode.value.replace(/\s/g, '') : '';
-                        if (pc.length < 3) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
-                        this.loading = true;
-                        try {
-                            const res = await fetch('{{ route('shop.shipping-quote') }}', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                                body: JSON.stringify({ postal_code: pc, country: this.country })
-                            });
-                            const data = await res.json();
-                            this.methods = data.methods || [];
-                            if (this.methods.length) { this.selectedUid = this.methods[0].uid; this.selectedCost = this.methods[0].price; }
-                            else { this.selectedUid = null; this.selectedCost = 0; }
-                        } catch (e) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; }
-                        this.loading = false;
-                    },
-                    init() {
-                        let tid;
-                        this.$watch('country', () => { this.fetchQuote(); });
-                        if (this.$refs.postalCode) {
-                            this.$refs.postalCode.addEventListener('input', () => { clearTimeout(tid); tid = setTimeout(() => this.fetchQuote(), 800); });
-                        }
-                    }
-                }" style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div x-data="shopCheckout()" style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>{{ __('Sous-total') }}</span>
                         <span>{{ number_format($subtotal, 2, ',', ' ') }} $</span>
@@ -159,14 +110,22 @@
                                 <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name') }}" required autocomplete="family-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                         </div>
-                        <div style="margin-bottom: 10px;">
+                        <div style="margin-bottom: 10px; position: relative;" @click.outside="showSuggestions = false">
                             <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Adresse') }} <span style="color:#ef4444;">*</span></label>
-                            <input type="text" name="shipping_address[address_line1]" value="{{ old('shipping_address.address_line1') }}" required autocomplete="street-address" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            <input type="text" name="shipping_address[address_line1]" x-ref="addressLine1" value="{{ old('shipping_address.address_line1') }}" required autocomplete="off" @input="searchAddress($event.target.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            <div x-show="showSuggestions" x-transition style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: #fff; border: 1px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto;">
+                                <template x-for="s in suggestions" :key="(s.osm_id || '') + (s.postcode || '')">
+                                    <div @click="selectAddress(s)" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px;" onmouseenter="this.style.backgroundColor='#f8fafc'" onmouseleave="this.style.backgroundColor=''">
+                                        <strong x-text="[s.street, s.housenumber].filter(Boolean).join(' ') || s.name || ''"></strong>
+                                        <span style="color: #64748b;" x-text="', ' + (s.city || '') + (s.postcode ? ' ' + s.postcode : '') + ' — ' + (s.country || '')"></span>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
                             <div style="flex: 2; min-width: 100px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Ville') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[city]" value="{{ old('shipping_address.city') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <input type="text" name="shipping_address[city]" x-ref="cityInput" value="{{ old('shipping_address.city') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                             <div style="flex: 1.5; min-width: 100px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;" x-text="provinceLabel + ' *'"></label>
@@ -258,3 +217,88 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('shopCheckout', () => ({
+        country: 'CA',
+        loading: false,
+        methods: [],
+        selectedUid: null,
+        selectedCost: 0,
+        suggestions: [],
+        showSuggestions: false,
+        addrTid: null,
+        provincesCA: {AB:'Alberta',BC:'Colombie-Britannique',MB:'Manitoba',NB:'Nouveau-Brunswick',NL:'Terre-Neuve-et-Labrador',NS:'Nouvelle-Écosse',NT:'Territoires du Nord-Ouest',NU:'Nunavut',ON:'Ontario',PE:'Île-du-Prince-Édouard',QC:'Québec',SK:'Saskatchewan',YT:'Yukon'},
+        statesUS: {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'Californie',CO:'Colorado',CT:'Connecticut',DE:'Delaware',DC:'District de Columbia',FL:'Floride',GA:'Géorgie',HI:'Hawaï',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiane',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'Nouveau-Mexique',NY:'New York',NC:'Caroline du Nord',ND:'Dakota du Nord',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvanie',RI:'Rhode Island',SC:'Caroline du Sud',SD:'Dakota du Sud',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginie',WA:'Washington',WV:'Virginie-Occidentale',WI:'Wisconsin',WY:'Wyoming'},
+        get provinceLabel() {
+            if (this.country === 'CA') return 'Province';
+            if (this.country === 'US') return 'État';
+            return 'Province / État / Région';
+        },
+        get postalPattern() {
+            if (this.country === 'CA') return '[A-Za-z]\\d[A-Za-z]\\s?\\d[A-Za-z]\\d';
+            if (this.country === 'US') return '\\d{5}(-\\d{4})?';
+            return null;
+        },
+        get postalTitle() {
+            if (this.country === 'CA') return 'Format : A1A 1A1';
+            if (this.country === 'US') return 'Format : 12345 ou 12345-6789';
+            return '';
+        },
+        get postalRequired() { return this.country === 'CA' || this.country === 'US'; },
+        select(m) { this.selectedUid = m.uid; this.selectedCost = m.price; },
+        searchAddress(query) {
+            clearTimeout(this.addrTid);
+            if (query.length < 4) { this.suggestions = []; this.showSuggestions = false; return; }
+            this.addrTid = setTimeout(() => {
+                fetch('https://photon.komoot.io/api/?q=' + encodeURIComponent(query) + '&limit=5&lang=fr')
+                    .then(r => r.json())
+                    .then(d => { this.suggestions = (d.features || []).map(f => f.properties); this.showSuggestions = this.suggestions.length > 0; })
+                    .catch(() => { this.suggestions = []; this.showSuggestions = false; });
+            }, 500);
+        },
+        selectAddress(s) {
+            this.$refs.addressLine1.value = [s.street, s.housenumber].filter(Boolean).join(' ');
+            this.$refs.cityInput.value = s.city || '';
+            if (this.$refs.postalCode) {
+                var ns = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                ns.call(this.$refs.postalCode, s.postcode || '');
+                this.$refs.postalCode.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            if (s.countrycode) { var cc = s.countrycode.toUpperCase(); if (cc !== this.country) { this.country = cc; } }
+            if (s.state && this.country !== 'CA' && this.country !== 'US') {
+                var stateInput = document.querySelector('input[name="shipping_address[state]"]:not([disabled])');
+                if (stateInput) stateInput.value = s.state;
+            }
+            this.showSuggestions = false;
+        },
+        async fetchQuote() {
+            var pc = this.$refs.postalCode ? this.$refs.postalCode.value.replace(/\s/g, '') : '';
+            if (pc.length < 3) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
+            this.loading = true;
+            try {
+                var res = await fetch(@json(route('shop.shipping-quote')), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': @json(csrf_token()) },
+                    body: JSON.stringify({ postal_code: pc, country: this.country })
+                });
+                var data = await res.json();
+                this.methods = data.methods || [];
+                if (this.methods.length) { this.selectedUid = this.methods[0].uid; this.selectedCost = this.methods[0].price; }
+                else { this.selectedUid = null; this.selectedCost = 0; }
+            } catch (e) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; }
+            this.loading = false;
+        },
+        init() {
+            var tid;
+            this.$watch('country', () => { this.fetchQuote(); });
+            if (this.$refs.postalCode) {
+                this.$refs.postalCode.addEventListener('input', () => { clearTimeout(tid); tid = setTimeout(() => this.fetchQuote(), 800); });
+            }
+        }
+    }));
+});
+</script>
+@endpush
