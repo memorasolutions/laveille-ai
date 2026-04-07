@@ -29,7 +29,7 @@
                     <div style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; height: 100%;">
                         <a href="{{ route('shop.show', $product) }}">
                             @if(!empty($product->images) && isset($product->images[0]))
-                                <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+                                <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" loading="lazy" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
                             @else
                                 <div style="width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg, #0B7285, #0CA678); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 48px; font-weight: 700;">{{ substr($product->name, 0, 1) }}</div>
                             @endif
