@@ -104,6 +104,17 @@
                     </div>
                     <input type="hidden" name="variant_label" :value="currentVariant?.label || ''">
                     <input type="hidden" name="variant_gelato_uid" :value="currentVariant?.gelato_uid || ''">
+                    {{-- Sélecteur tailles (si le produit a aussi des tailles, ex: hoodies) --}}
+                    @if($product->metadata['sizes'] ?? null)
+                        <div x-data="{ selectedSize: '{{ $product->metadata['sizes'][1] ?? 'M' }}' }" style="margin-bottom: 16px;">
+                            @include('fronttheme::partials.pill-selector', [
+                                'items' => $product->metadata['sizes'],
+                                'alpineVar' => 'selectedSize',
+                                'inputName' => 'size_label',
+                                'label' => __('Taille'),
+                            ])
+                        </div>
+                    @endif
                 @elseif($hasSizeVariants)
                     <div style="margin-bottom: 16px;" x-data="{ selectedSize: '{{ $product->variants[0]['label'] ?? 'M' }}' }">
                         @include('fronttheme::partials.pill-selector', [
