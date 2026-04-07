@@ -26,13 +26,15 @@ class OrderConfirmedNotification extends Notification implements ShouldQueue
 
     public function toMail($notifiable): MailMessage
     {
+        $this->order->load('items.product');
+        $trackingUrl = route('shop.order-lookup') . '?email=' . urlencode($this->order->email) . '&order_id=' . $this->order->id;
+
         return (new MailMessage)
             ->subject('Confirmation de votre commande #' . $this->order->id)
-            ->greeting('Bonjour !')
-            ->line('Votre commande #' . $this->order->id . ' a bien été confirmée.')
-            ->line('Montant total : ' . number_format($this->order->total, 2, ',', ' ') . ' $')
-            ->action('Voir la boutique', url(config('shop.routes.prefix', 'boutique')))
-            ->line('Merci pour votre achat !');
+            ->view('shop::emails.order-confirmed', [
+                'order' => $this->order,
+                'trackingUrl' => $trackingUrl,
+            ]);
     }
 
     public function toArray($notifiable): array
