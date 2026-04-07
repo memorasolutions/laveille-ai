@@ -190,6 +190,14 @@
                             <input type="hidden" name="shipping_cost" x-model="selectedCost">
                         </div>
 
+                        {{-- Checkbox newsletter (LCAP/Loi 25 — case vide par défaut) --}}
+                        <div style="margin-top: 12px; margin-bottom: 4px;">
+                            <label style="display: flex; gap: 8px; align-items: start;">
+                                <input type="checkbox" name="newsletter" value="1" style="width: 18px; height: 18px; margin-top: 2px; accent-color: #0B7285; flex-shrink: 0;">
+                                <span style="font-size: 13px; color: #475569; line-height: 1.4;">{{ __("J'accepte de recevoir des offres et nouvelles de La veille par courriel. Vous pouvez vous désabonner en tout temps.") }}</span>
+                            </label>
+                        </div>
+
                         <button type="submit" class="btn" style="width: 100%; background: #0B7285; color: #fff; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 16px; margin-top: 12px;">{{ __('Passer la commande') }}</button>
 
                         {{-- Badges confiance --}}

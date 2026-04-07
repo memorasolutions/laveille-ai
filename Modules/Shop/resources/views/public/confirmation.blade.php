@@ -54,6 +54,16 @@
                 <p style="color: #94a3b8; font-size: 12px; margin-top: 8px;">{{ __('Sur votre relevé bancaire, cette transaction apparaîtra sous le nom LAVEILLE.AI') }}</p>
 
                 <a href="{{ route('shop.index') }}" class="btn" style="background: #0B7285; color: #fff; padding: 10px 24px; border-radius: 6px; margin-top: 16px;">{{ __('Retourner à la boutique') }}</a>
+
+                {{-- Account nudge (guest seulement) --}}
+                @guest
+                <div style="background: #f0fdfa; border: 1px solid #0B7285; border-radius: 8px; padding: 16px; margin-top: 20px; text-align: center;">
+                    <i class="ti-user" style="color: #0B7285; font-size: 20px;"></i>
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1e293b; margin-top: 8px; margin-bottom: 4px;">{{ __('Créer un compte') }}</h3>
+                    <p style="font-size: 13px; color: #475569; margin-bottom: 16px;">{{ __('Suivez vos commandes et accélérez vos prochains achats.') }}</p>
+                    <a href="{{ route('login', ['email' => $order->email]) }}" style="background: #0B7285; color: #fff; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; text-decoration: none;">{{ __('Créer mon compte') }}</a>
+                </div>
+                @endguest
             </div>
         </div>
     </div>

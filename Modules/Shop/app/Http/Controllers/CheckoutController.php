@@ -67,6 +67,14 @@ class CheckoutController extends Controller
 
         event(new ShopOrderCreated($order));
 
+        // Inscription newsletter si coché (LCAP conforme — opt-in explicite)
+        if ($request->input('newsletter') && class_exists(\Modules\Newsletter\Models\Subscriber::class)) {
+            \Modules\Newsletter\Models\Subscriber::updateOrCreate(
+                ['email' => $request->input('email')],
+                ['status' => 'subscribed', 'subscribed_at' => now()]
+            );
+        }
+
         // Créer session Stripe Checkout (mode embedded)
         $returnUrl = route('shop.confirmation', $order) . '?session_id={CHECKOUT_SESSION_ID}';
         $checkout = $this->stripeService->createCheckoutSession(
