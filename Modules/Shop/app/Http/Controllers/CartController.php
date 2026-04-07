@@ -37,7 +37,13 @@ class CartController extends Controller
             $request->input('variant_gelato_uid')
         );
 
-        return back()->with('success', __('Produit ajouté au panier.'))->with('cart_added', true);
+        $product = \Modules\Shop\Models\Product::find($request->integer('product_id'));
+        return back()->with('success', __('Produit ajouté au panier.'))->with('cart_added', [
+            'name' => $product?->name ?? __('Produit'),
+            'variant' => $request->input('variant_label'),
+            'price' => $product?->price ?? 0,
+            'image' => $product?->images[0] ?? null,
+        ]);
     }
 
     public function remove(Request $request)

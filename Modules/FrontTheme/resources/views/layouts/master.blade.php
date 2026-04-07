@@ -194,17 +194,28 @@
 
         @yield('breadcrumb')
 
-        {{-- Toast global ajout panier --}}
+        {{-- Toast enrichi ajout panier --}}
         @if(session('cart_added'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+        @php $cartAdded = session('cart_added'); @endphp
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)"
              x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-200"
-             style="position: fixed; top: 20px; right: 20px; z-index: 1050; max-width: 320px; background: #fff; border-left: 4px solid #0CA678; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-            <i class="ti-check" style="color: #0CA678; font-size: 20px;"></i>
-            <div>
-                <strong style="font-size: 14px;">{{ __('Produit ajouté au panier') }}</strong><br>
-                <a href="{{ Route::has('shop.cart') ? route('shop.cart') : '#' }}" style="font-size: 13px; color: #0B7285;">{{ __('Voir le panier') }}</a>
+             style="position: fixed; top: 20px; right: 20px; z-index: 1050; max-width: 360px; background: #fff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div style="background: #f0fdfa; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center;"><i class="ti-check" style="color: #0CA678; margin-right: 8px;"></i><strong style="font-size: 14px;">{{ __('Produit ajouté au panier') }}</strong></div>
+                <button @click="show = false" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #94a3b8;">&times;</button>
             </div>
-            <button @click="show = false" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 18px; margin-left: auto;">&times;</button>
+            <div style="padding: 12px 16px; display: flex; align-items: center;">
+                @if(is_array($cartAdded) && !empty($cartAdded['image']))<img src="{{ asset($cartAdded['image']) }}" alt="" style="width: 50px; height: 50px; border-radius: 6px; margin-right: 12px; object-fit: cover;">@endif
+                <div>
+                    <div style="font-size: 14px; font-weight: 700;">{{ is_array($cartAdded) ? ($cartAdded['name'] ?? '') : __('Produit') }}</div>
+                    @if(is_array($cartAdded) && !empty($cartAdded['variant']))<div style="font-size: 12px; color: #6b7280;">{{ $cartAdded['variant'] }}</div>@endif
+                    @if(is_array($cartAdded) && !empty($cartAdded['price']))<div style="font-size: 15px; font-weight: 700; color: #0B7285;">{{ number_format($cartAdded['price'], 2, ',', ' ') }} $</div>@endif
+                </div>
+            </div>
+            <div style="padding: 8px 16px; border-top: 1px solid #f1f5f9; display: flex; gap: 10px;">
+                <a href="{{ Route::has('shop.cart') ? route('shop.cart') : '#' }}" style="flex: 1; text-align: center; padding: 8px; background: #0B7285; color: #fff; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px;">{{ __('Voir le panier') }}</a>
+                <button @click="show = false" style="flex: 1; padding: 8px; background: #f1f5f9; color: #374151; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">{{ __('Continuer') }}</button>
+            </div>
         </div>
         @endif
 
