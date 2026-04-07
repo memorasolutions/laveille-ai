@@ -62,7 +62,7 @@ class DigestContentService
         $weekNumber = (int) now()->weekOfYear;
 
         $weeklyPrompt = null;
-        if ($weekNumber % 2 === 0 && $aiTerm) {
+        if ($aiTerm) {
             $weeklyPrompt = self::generateWeeklyPrompt($aiTerm->name ?? '', $aiTerm->type ?? null);
         }
 
