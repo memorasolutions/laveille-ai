@@ -13,8 +13,8 @@ class HoodieProductSeeder extends Seeder
             ['slug' => 'hoodie-je-prompt-donc-je-suis'],
             [
                 'name' => 'Hoodie "Je prompt donc je suis"',
-                'description' => "Restez au chaud avec style grâce à ce hoodie unisex premium. Le design « Je prompt donc je suis » avec le logo cerveau IA est imprimé en haute qualité sur un tissu doux et confortable. Capuche doublée, poche kangourou et cordon de serrage. Parfait pour le bureau, le café ou les soirées hackathon.",
-                'short_description' => 'Hoodie unisex premium avec le design « Je prompt donc je suis » et logo cerveau IA.',
+                'description' => "Restez au chaud avec style grâce à ce hoodie Gildan 18500 unisex heavy blend. Le design « Je prompt donc je suis » avec le logo cerveau IA est imprimé en haute qualité. Tissu 50 % coton, 50 % polyester avec fil air jet pour un toucher plus doux et moins de boulochage. Capuche doublée avec cordon assorti, poche kangourou frontale, poignets et taille côtelés avec élasthanne. Du S au 5XL.",
+                'short_description' => 'Hoodie Gildan 18500 heavy blend avec le design « Je prompt donc je suis ». 50/50 coton-polyester, S-5XL.',
                 'price' => 39.99,
                 'currency' => 'CAD',
                 'category' => 'hoodies',
@@ -32,7 +32,7 @@ class HoodieProductSeeder extends Seeder
                     ['label' => 'Gris', 'color' => '#9ca3af', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_sport_grey_gpr_4-4', 'images' => ['/images/shop/hoodie-prompt-gris_1.jpeg']],
                     ['label' => 'Rose', 'color' => '#f9a8d4', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_light_pink_gpr_4-4', 'images' => ['/images/shop/hoodie-prompt-rose_1.jpeg', '/images/shop/hoodie-prompt-rose_2.jpeg']],
                 ],
-                'metadata' => ['cost_base' => 26.16, 'sizes' => ['S', 'M', 'L', 'XL', '2XL']],
+                'metadata' => ['cost_base' => 26.16, 'sizes' => ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']],
             ]
         );
 

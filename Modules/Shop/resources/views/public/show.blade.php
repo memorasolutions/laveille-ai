@@ -28,7 +28,7 @@
         selectedVariantIndex: 0,
         hasColors: {{ $hasColorVariants ? 'true' : 'false' }},
         get currentVariant() { return this.hasColors ? this.allVariants[this.selectedVariantIndex] : null; },
-        get images() { return this.hasColors && this.currentVariant?.images ? this.currentVariant.images : this.fallbackImages; },
+        get images() { return this.hasColors && this.currentVariant?.images?.length ? this.currentVariant.images : this.fallbackImages; },
         selectColor(index) { this.selectedVariantIndex = index; this.activeImage = 0; }
     }">
         {{-- Image --}}
