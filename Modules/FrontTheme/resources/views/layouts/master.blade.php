@@ -197,8 +197,7 @@
         {{-- Toast enrichi ajout panier --}}
         @if(session('cart_added'))
         @php $cartAdded = session('cart_added'); @endphp
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)"
-             x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-200"
+        <div x-data="{ show: true }" x-show="show" x-init="$nextTick(() => setTimeout(() => show = false, 6000))"
              style="position: fixed; top: 20px; right: 20px; z-index: 1050; max-width: 360px; background: #fff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); overflow: hidden;">
             <div style="background: #f0fdfa; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center;"><i class="ti-check" style="color: #0CA678; margin-right: 8px;"></i><strong style="font-size: 14px;">{{ __('Produit ajouté au panier') }}</strong></div>
