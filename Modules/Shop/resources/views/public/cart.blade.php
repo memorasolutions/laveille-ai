@@ -10,6 +10,10 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Panier'), 'breadcrumbItems' => [__('Boutique'), __('Panier')]])
 @endsection
 
+@push('head')
+<style>@keyframes spin-icon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
+@endpush
+
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
     <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Panier') }} ({{ $itemCount ?? 0 }})</h1>
@@ -74,12 +78,61 @@
         {{-- Totaux --}}
         <div class="row" style="margin-top: 24px;">
             <div class="col-md-6 col-md-offset-6">
-                <div style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div x-data="{
+                    country: 'CA',
+                    loading: false,
+                    methods: [],
+                    selectedUid: null,
+                    selectedCost: 0,
+                    provincesCA: {AB:'Alberta',BC:'Colombie-Britannique',MB:'Manitoba',NB:'Nouveau-Brunswick',NL:'Terre-Neuve-et-Labrador',NS:'Nouvelle-Écosse',NT:'Territoires du Nord-Ouest',NU:'Nunavut',ON:'Ontario',PE:'Île-du-Prince-Édouard',QC:'Québec',SK:'Saskatchewan',YT:'Yukon'},
+                    statesUS: {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'Californie',CO:'Colorado',CT:'Connecticut',DE:'Delaware',DC:'District de Columbia',FL:'Floride',GA:'Géorgie',HI:'Hawaï',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiane',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'Nouveau-Mexique',NY:'New York',NC:'Caroline du Nord',ND:'Dakota du Nord',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvanie',RI:'Rhode Island',SC:'Caroline du Sud',SD:'Dakota du Sud',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginie',WA:'Washington',WV:'Virginie-Occidentale',WI:'Wisconsin',WY:'Wyoming'},
+                    get provinceLabel() {
+                        if (this.country === 'CA') return '{{ __('Province') }}';
+                        if (this.country === 'US') return '{{ __('État') }}';
+                        return '{{ __('Province / État / Région') }}';
+                    },
+                    get postalPattern() {
+                        if (this.country === 'CA') return '[A-Za-z]\\d[A-Za-z]\\s?\\d[A-Za-z]\\d';
+                        if (this.country === 'US') return '\\d{5}(-\\d{4})?';
+                        return null;
+                    },
+                    get postalTitle() {
+                        if (this.country === 'CA') return 'Format : A1A 1A1';
+                        if (this.country === 'US') return 'Format : 12345 ou 12345-6789';
+                        return '';
+                    },
+                    get postalRequired() { return this.country === 'CA' || this.country === 'US'; },
+                    select(m) { this.selectedUid = m.uid; this.selectedCost = m.price; },
+                    async fetchQuote() {
+                        const pc = this.$refs.postalCode ? this.$refs.postalCode.value.replace(/\s/g, '') : '';
+                        if (pc.length < 3) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
+                        this.loading = true;
+                        try {
+                            const res = await fetch('{{ route('shop.shipping-quote') }}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify({ postal_code: pc, country: this.country })
+                            });
+                            const data = await res.json();
+                            this.methods = data.methods || [];
+                            if (this.methods.length) { this.selectedUid = this.methods[0].uid; this.selectedCost = this.methods[0].price; }
+                            else { this.selectedUid = null; this.selectedCost = 0; }
+                        } catch (e) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; }
+                        this.loading = false;
+                    },
+                    init() {
+                        let tid;
+                        this.$watch('country', () => { this.fetchQuote(); });
+                        if (this.$refs.postalCode) {
+                            this.$refs.postalCode.addEventListener('input', () => { clearTimeout(tid); tid = setTimeout(() => this.fetchQuote(), 800); });
+                        }
+                    }
+                }" style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>{{ __('Sous-total') }}</span>
                         <span>{{ number_format($subtotal, 2, ',', ' ') }} $</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #64748b; font-size: 14px;">
+                    <div x-show="country === 'CA'" style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #64748b; font-size: 14px;">
                         <span>{{ __('TPS') }} ({{ config('shop.tax.tps', 5) }}%) + {{ __('TVQ') }} ({{ config('shop.tax.tvq', 9.975) }}%)</span>
                         <span>{{ number_format($tax, 2, ',', ' ') }} $</span>
                     </div>
@@ -116,31 +169,30 @@
                                 <input type="text" name="shipping_address[city]" value="{{ old('shipping_address.city') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                             <div style="flex: 1.5; min-width: 100px;">
-                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Province') }} <span style="color:#ef4444;">*</span></label>
-                                <select name="shipping_address[state]" required autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                                    <option value="QC" selected>Québec</option>
-                                    <option value="ON">Ontario</option>
-                                    <option value="BC">Colombie-Britannique</option>
-                                    <option value="AB">Alberta</option>
-                                    <option value="MB">Manitoba</option>
-                                    <option value="SK">Saskatchewan</option>
-                                    <option value="NS">Nouvelle-Écosse</option>
-                                    <option value="NB">Nouveau-Brunswick</option>
-                                    <option value="NL">Terre-Neuve-et-Labrador</option>
-                                    <option value="PE">Île-du-Prince-Édouard</option>
-                                    <option value="NT">Territoires du Nord-Ouest</option>
-                                    <option value="YT">Yukon</option>
-                                    <option value="NU">Nunavut</option>
+                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;" x-text="provinceLabel + ' *'"></label>
+                                {{-- Canada : select provinces --}}
+                                <select x-show="country === 'CA'" :disabled="country !== 'CA'" name="shipping_address[state]" autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                    <template x-for="(name, code) in provincesCA" :key="code">
+                                        <option :value="code" x-text="name" :selected="code === 'QC'"></option>
+                                    </template>
                                 </select>
+                                {{-- USA : select states --}}
+                                <select x-show="country === 'US'" :disabled="country !== 'US'" name="shipping_address[state]" autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                    <template x-for="(name, code) in statesUS" :key="code">
+                                        <option :value="code" x-text="name"></option>
+                                    </template>
+                                </select>
+                                {{-- Autres pays : champ texte libre --}}
+                                <input x-show="country !== 'CA' && country !== 'US'" :disabled="country === 'CA' || country === 'US'" type="text" name="shipping_address[state]" autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;" :placeholder="'{{ __('Province / État / Région') }}'">
                             </div>
                             <div style="flex: 1; min-width: 90px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Code postal') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[postal_code]" value="{{ old('shipping_address.postal_code') }}" required autocomplete="postal-code" pattern="[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d" title="Format : A1A 1A1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <input type="text" name="shipping_address[postal_code]" x-ref="postalCode" value="{{ old('shipping_address.postal_code') }}" :required="postalRequired" autocomplete="postal-code" :pattern="postalPattern" :title="postalTitle" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                         </div>
                         <div style="margin-bottom: 10px;">
                             <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">{{ __('Pays') }} <span style="color:#ef4444;">*</span></label>
-                            <select name="shipping_address[country]" id="country-select" required autocomplete="country" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            <select name="shipping_address[country]" id="country-select" x-model="country" required autocomplete="country" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                                 <optgroup label="{{ __('Pays populaires') }}">
                                     <option value="CA" selected>Canada</option>
                                     <option value="US">États-Unis</option>
@@ -154,40 +206,9 @@
                         </div>
 
                         {{-- Estimation livraison dynamique (auto-calcul) --}}
-                        <div x-data="{
-                            loading: false,
-                            methods: [],
-                            selectedUid: null,
-                            selectedCost: 0,
-                            async fetchQuote() {
-                                const pc = document.querySelector('[name=\'shipping_address[postal_code]\']').value.replace(/\s/g, '');
-                                if (pc.length < 3) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
-                                this.loading = true;
-                                try {
-                                    const res = await fetch('{{ route('shop.shipping-quote') }}', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                                        body: JSON.stringify({ postal_code: pc, country: document.getElementById('country-select').value })
-                                    });
-                                    const data = await res.json();
-                                    this.methods = data.methods || [];
-                                    if (this.methods.length) {
-                                        this.selectedUid = this.methods[0].uid;
-                                        this.selectedCost = this.methods[0].price;
-                                    } else { this.selectedUid = null; this.selectedCost = 0; }
-                                } catch (e) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; }
-                                this.loading = false;
-                            },
-                            select(m) { this.selectedUid = m.uid; this.selectedCost = m.price; },
-                            init() {
-                                const pcInput = document.querySelector('[name=\'shipping_address[postal_code]\']');
-                                let tid;
-                                pcInput.addEventListener('input', () => { clearTimeout(tid); tid = setTimeout(() => this.fetchQuote(), 800); });
-                                this.fetchQuote();
-                            }
-                        }" style="margin-top: 12px;">
-                            <label style="font-weight: 600; display: block; margin-bottom: 8px;"><i class="fa fa-truck"></i> {{ __('Livraison') }}</label>
-                            <div x-show="loading" style="color: #64748b;"><i class="fa fa-spinner fa-spin"></i> {{ __('Calcul en cours...') }}</div>
+                        <div style="margin-top: 12px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;"><i class="ti-truck" style="margin-right: 6px;"></i>{{ __('Livraison') }}</label>
+                            <div x-show="loading" style="color: #64748b;"><i class="ti-reload" style="display: inline-block; animation: spin-icon 1s linear infinite;"></i> {{ __('Calcul en cours...') }}</div>
                             <div x-show="!loading && methods.length === 0" style="font-style: italic; color: #64748b; font-size: 13px;">
                                 {{ __('Les frais seront calculés automatiquement à la saisie du code postal.') }}
                             </div>
