@@ -11,20 +11,6 @@
 @endsection
 
 @section('content')
-{{-- Toast notification ajout panier --}}
-@if(session('cart_added'))
-<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-     x-transition:enter="transition ease-out duration-300" x-transition:leave="transition ease-in duration-200"
-     style="position: fixed; top: 20px; right: 20px; z-index: 1050; max-width: 320px; background: #fff; border-left: 4px solid #0CA678; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-    <i class="fa fa-check-circle" style="color: #0CA678; font-size: 20px;"></i>
-    <div>
-        <strong style="font-size: 14px;">{{ __('Produit ajouté au panier') }}</strong><br>
-        <a href="{{ route('shop.cart') }}" style="font-size: 13px; color: #0B7285;">{{ __('Voir le panier') }}</a>
-    </div>
-    <button @click="show = false" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 18px; margin-left: auto;">&times;</button>
-</div>
-@endif
-
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
     <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Panier') }} ({{ $itemCount ?? 0 }})</h1>
 

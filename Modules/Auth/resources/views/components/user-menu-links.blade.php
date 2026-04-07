@@ -12,6 +12,7 @@
         ['route' => 'user.contributions', 'label' => __('Mes contributions'), 'icon' => 'fa-handshake-o', 'emoji' => '📝'],
         ['route' => 'user.saved', 'label' => __('Mes sauvegardes'), 'icon' => 'fa-floppy-o', 'emoji' => '💾'],
         ['route' => 'bookmarks.index', 'label' => __('Mes favoris'), 'icon' => 'fa-bookmark', 'emoji' => '❤️'],
+        ['route' => 'shop.my-orders', 'label' => __('Mes commandes'), 'icon' => 'fa-shopping-bag', 'emoji' => '🛒'],
         ['route' => 'shorturl.user.index', 'label' => __('Mes liens courts'), 'icon' => 'fa-link', 'emoji' => '🔗'],
         ['route' => 'user.notifications', 'label' => __('Notifications'), 'icon' => 'fa-bell', 'emoji' => '🔔', 'badge' => true],
     ];
