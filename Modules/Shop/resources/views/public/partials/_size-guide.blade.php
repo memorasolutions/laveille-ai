@@ -43,7 +43,7 @@
                 <p><strong>Matériau :</strong> 80 % coton, 20 % polyester, 271 g/m²</p>
                 <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
                     <div style="flex: 0 0 220px;">
-                        <img src="/images/shop/hoodie-size-guide.svg" alt="Comment mesurer un hoodie" style="width: 100%; height: auto;">
+                        <img src="/images/shop/hoodie-size-guide.png" alt="Comment mesurer un hoodie" style="width: 100%; height: auto;">
                     </div>
                     <div style="flex: 1; min-width: 280px;">
                         <table style="width:100%; border-collapse:separate; border-spacing:0; border-radius:8px; border:1px solid #e2e8f0; overflow:hidden; font-size:14px; background:#fff;">
