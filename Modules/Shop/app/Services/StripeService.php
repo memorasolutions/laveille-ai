@@ -44,6 +44,7 @@ class StripeService
                 'mode' => 'payment',
                 'ui_mode' => 'embedded',
                 'return_url' => $returnUrl,
+                'payment_intent_data[statement_descriptor]' => 'LAVEILLE.AI',
             ]);
 
             if ($customerEmail) {

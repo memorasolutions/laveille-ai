@@ -205,6 +205,9 @@
                                 <span>Visa</span><span>•</span><span>Mastercard</span><span>•</span><span>Amex</span>
                                 <span style="margin-left: 8px; font-style: italic;">{{ __('Propulsé par Stripe') }}</span>
                             </div>
+                            <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">
+                                {{ __('Sur votre relevé bancaire : LAVEILLE.AI') }}
+                            </div>
                         </div>
                     </form>
                 </div>

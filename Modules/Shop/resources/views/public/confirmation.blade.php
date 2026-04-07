@@ -51,6 +51,7 @@
                 @endif
 
                 <p style="color: #64748b; font-size: 14px;">{{ __('Un courriel de confirmation sera envoyé à') }} {{ $order->email }}.</p>
+                <p style="color: #94a3b8; font-size: 12px; margin-top: 8px;">{{ __('Sur votre relevé bancaire, cette transaction apparaîtra sous le nom LAVEILLE.AI') }}</p>
 
                 <a href="{{ route('shop.index') }}" class="btn" style="background: #0B7285; color: #fff; padding: 10px 24px; border-radius: 6px; margin-top: 16px;">{{ __('Retourner à la boutique') }}</a>
             </div>
