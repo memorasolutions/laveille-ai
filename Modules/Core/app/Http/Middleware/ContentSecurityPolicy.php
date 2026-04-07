@@ -25,14 +25,15 @@ class ContentSecurityPolicy
 
         $policy = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'nonce-{$nonce}'",
+            "script-src 'self' 'nonce-{$nonce}' https://js.stripe.com",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https:",
             "font-src 'self'",
-            "connect-src 'self'",
+            "connect-src 'self' https://api.stripe.com",
+            "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
             "frame-ancestors 'self'",
             "base-uri 'self'",
-            "form-action 'self'",
+            "form-action 'self' https://api.stripe.com",
         ]);
 
         $response->headers->set('Content-Security-Policy', $policy);
