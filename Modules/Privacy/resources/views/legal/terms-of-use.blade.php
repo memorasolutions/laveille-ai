@@ -89,7 +89,7 @@
 
                             {{-- SECTION 4 : UGC --}}
                             <h3 id="contenu">{{ __('4. Contenu généré par les utilisateurs') }}</h3>
-                            <p>{{ __('En soumettant du contenu (suggestions de corrections, votes, idées pour la feuille de route, signalements de bogues), vous accordez à l\'exploitant une licence mondiale, non exclusive, gratuite et perpétuelle pour utiliser, reproduire et modifier ce contenu afin d\'améliorer le Service. Vous garantissez que vous détenez les droits nécessaires sur ce contenu.') }}</p>
+                            <p>{{ __('En soumettant du contenu (suggestions de corrections, votes, idées pour la feuille de route, signalements de bogues), vous accordez à l\'exploitant une licence mondiale, non exclusive, gratuite et perpétuelle pour utiliser, reproduire et modifier ce contenu afin d\'améliorer le Service. Vous garantissez que vous détenez les droits nécessaires sur ce contenu et renoncez à tout droit moral (droit d\'attribution et droit à l\'intégrité) sur le contenu soumis, dans la mesure permise par la loi.') }}</p>
 
                             {{-- SECTION 5 : IA --}}
                             <h3 id="ia">{{ __('5. Résumés par intelligence artificielle') }}</h3>
@@ -149,7 +149,7 @@
 
                             {{-- SECTION 16 : INFOLETTRE --}}
                             <h3 id="infolettre">{{ __('16. Infolettre') }}</h3>
-                            <p>{{ __('L\'inscription à l\'infolettre est volontaire et nécessite votre consentement exprès, conformément à la Loi canadienne anti-pourriel (LCAP, L.C. 2010, ch. 23). Vous pouvez vous désinscrire en tout temps via le lien de désabonnement inclus dans chaque envoi ou en contactant l\'exploitant.') }}</p>
+                            <p>{{ __('L\'inscription à l\'infolettre est volontaire et nécessite votre consentement exprès, conformément à la Loi canadienne anti-pourriel (LCAP, L.C. 2010, ch. 23). Vous pouvez vous désinscrire en tout temps via le lien de désabonnement inclus dans chaque envoi ou en contactant l\'exploitant. Après votre désabonnement, votre adresse courriel est conservée dans une liste de suppression pendant 2 ans afin d\'éviter toute réinscription involontaire et de respecter nos obligations légales.') }}</p>
 
                             {{-- SECTION 17 : TRANSPARENCE ALGORITHMIQUE --}}
                             <h3 id="transparence">{{ __('17. Transparence algorithmique') }}</h3>
@@ -177,6 +177,7 @@
                             {{-- SECTION 20 : LIMITATION RESPONSABILITÉ + CAP --}}
                             <h3 id="responsabilite">{{ __('20. Limitation de responsabilité et plafond de dommages') }}</h3>
                             <p>{{ __('Étant donné la nature gratuite du service, la responsabilité totale et cumulative de l\'exploitant, de ses employés ou représentants, pour toute réclamation découlant des présentes ou de l\'utilisation du site, est limitée à un montant maximal de cent dollars canadiens (100,00 $ CAN). En aucun cas l\'exploitant ne sera responsable des dommages indirects, spéciaux, punitifs, accessoires ou consécutifs, incluant notamment la perte de profits, la perte de données, l\'interruption des affaires ou les dommages réputationnels.') }}</p>
+                            <p>{{ __('Toute réclamation découlant de l\'utilisation du Service doit être formulée dans un délai maximal d\'un (1) an suivant l\'événement à l\'origine de la réclamation, à défaut de quoi elle sera prescrite. Cette limitation ne s\'applique pas aux réclamations découlant d\'une faute intentionnelle ou d\'une fraude de l\'exploitant.') }}</p>
 
                             {{-- SECTION 21 : FORCE MAJEURE --}}
                             <h3 id="force-majeure">{{ __('21. Force majeure') }}</h3>
