@@ -26,7 +26,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span style="font-weight: 600;">{{ __('Statut') }}</span>
-                        <span style="color: #f59e0b;">{{ ucfirst($order->status) }}</span>
+                        <span style="color: #f59e0b;">{{ __(['pending' => 'En attente', 'paid' => 'Payé', 'shipped' => 'Expédié', 'fulfilled' => 'Complété', 'cancelled' => 'Annulé', 'refunded' => 'Remboursé'][$order->status] ?? ucfirst($order->status)) }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span style="font-weight: 600;">{{ __('Total') }}</span>

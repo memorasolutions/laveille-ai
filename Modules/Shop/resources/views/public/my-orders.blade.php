@@ -37,12 +37,14 @@
                         <td>
                             @php
                                 $badges = [
-                                    'paid' => ['label' => 'Payee', 'class' => 'label-success'],
                                     'pending' => ['label' => 'En attente', 'class' => 'label-warning'],
+                                    'paid' => ['label' => 'Payée', 'class' => 'label-success'],
                                     'processing' => ['label' => 'En production', 'class' => 'label-info'],
-                                    'shipped' => ['label' => 'Expediee', 'class' => 'label-info'],
-                                    'delivered' => ['label' => 'Livree', 'class' => 'label-success'],
-                                    'cancelled' => ['label' => 'Annulee', 'class' => 'label-danger'],
+                                    'shipped' => ['label' => 'Expédiée', 'class' => 'label-info'],
+                                    'fulfilled' => ['label' => 'Complétée', 'class' => 'label-success'],
+                                    'delivered' => ['label' => 'Livrée', 'class' => 'label-success'],
+                                    'cancelled' => ['label' => 'Annulée', 'class' => 'label-danger'],
+                                    'refunded' => ['label' => 'Remboursée', 'class' => 'label-default'],
                                 ];
                                 $badge = $badges[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'label-default'];
                             @endphp

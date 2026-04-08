@@ -26,11 +26,11 @@ class HoodieProductSeeder extends Seeder
                     '/images/shop/hoodie-prompt-noir_3.jpeg',
                 ],
                 'variants' => [
-                    ['label' => 'Noir', 'color' => '#1a1a2e', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-4', 'images' => ['/images/shop/hoodie-prompt-noir_2.jpeg', '/images/shop/hoodie-prompt-noir_1.jpeg', '/images/shop/hoodie-prompt-noir_3.jpeg']],
-                    ['label' => 'Bleu marine', 'color' => '#1e3a5f', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-4', 'images' => ['/images/shop/hoodie-prompt-bleu_1.jpeg']],
-                    ['label' => 'Vert forêt', 'color' => '#2d5a27', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_forest_green_gpr_4-4', 'images' => ['/images/shop/hoodie-prompt-forest_1.jpeg']],
-                    ['label' => 'Gris', 'color' => '#9ca3af', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_sport_grey_gpr_4-4', 'images' => ['/images/shop/hoodie-prompt-gris_1.jpeg']],
-                    ['label' => 'Rose', 'color' => '#f9a8d4', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_light_pink_gpr_4-4', 'images' => ['/images/shop/hoodie-prompt-rose_1.jpeg', '/images/shop/hoodie-prompt-rose_2.jpeg']],
+                    ['label' => 'Noir', 'color' => '#1a1a2e', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0', 'images' => ['/images/shop/hoodie-prompt-noir_2.jpeg', '/images/shop/hoodie-prompt-noir_1.jpeg', '/images/shop/hoodie-prompt-noir_3.jpeg']],
+                    ['label' => 'Bleu marine', 'color' => '#1e3a5f', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0', 'images' => ['/images/shop/hoodie-prompt-bleu_1.jpeg']],
+                    ['label' => 'Vert forêt', 'color' => '#2d5a27', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_forest_green_gpr_4-0', 'images' => ['/images/shop/hoodie-prompt-forest_1.jpeg']],
+                    ['label' => 'Gris', 'color' => '#9ca3af', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_sport_grey_gpr_4-0', 'images' => ['/images/shop/hoodie-prompt-gris_1.jpeg']],
+                    ['label' => 'Rose', 'color' => '#f9a8d4', 'gelato_uid' => 'apparel_product_gca_hoodie_gsc_pullover_gcu_unisex_gqa_classic_gsi_m_gco_light_pink_gpr_4-0', 'images' => ['/images/shop/hoodie-prompt-rose_1.jpeg', '/images/shop/hoodie-prompt-rose_2.jpeg']],
                 ],
                 'metadata' => ['cost_base' => 26.16, 'sizes' => ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL']],
             ]

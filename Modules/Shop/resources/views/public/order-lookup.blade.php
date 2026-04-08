@@ -47,7 +47,7 @@
                         $statusColors = ['paid' => '#0CA678', 'processing' => '#0B7285', 'shipped' => '#3b82f6', 'fulfilled' => '#0CA678', 'pending' => '#f59e0b', 'cancelled' => '#ef4444', 'gelato_failed' => '#ef4444'];
                         $bg = $statusColors[$order->status] ?? '#94a3b8';
                     @endphp
-                    <span style="padding: 4px 12px; border-radius: 20px; background: {{ $bg }}; color: #fff; font-size: 13px; font-weight: 600;">{{ ucfirst($order->status) }}</span>
+                    <span style="padding: 4px 12px; border-radius: 20px; background: {{ $bg }}; color: #fff; font-size: 13px; font-weight: 600;">{{ ['pending' => 'En attente', 'paid' => 'Payé', 'shipped' => 'Expédié', 'fulfilled' => 'Complété', 'cancelled' => 'Annulé', 'refunded' => 'Remboursé'][$order->status] ?? ucfirst($order->status) }}</span>
                 </div>
 
                 <div style="color: #64748b; font-size: 13px; margin-bottom: 16px;">
