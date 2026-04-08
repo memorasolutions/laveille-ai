@@ -5,7 +5,7 @@
 <div style="max-width:600px; margin:20px auto; background:#fff; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
     {{-- Header --}}
     <div style="background:#0B7285; padding:20px; text-align:center;">
-        <img src="https://laveille.ai/images/logo-horizontal-white.png" alt="La veille" style="max-width:150px; height:auto;">
+        <img src="{{ asset('images/logo-email-white.png') }}?v={{ time() }}" alt="{{ config('app.name') }}" style="width:200px; height:auto;">
     </div>
 
     {{-- Contenu --}}
