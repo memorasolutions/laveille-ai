@@ -28,12 +28,20 @@ class CartController extends Controller
             'quantity' => 'integer|min:1',
             'variant_label' => 'nullable|string',
             'variant_gelato_uid' => 'nullable|string',
+            'size_label' => 'nullable|string',
         ]);
+
+        $variantLabel = $request->input('variant_label');
+        if ($request->filled('size_label') && $variantLabel) {
+            $variantLabel = $variantLabel . ' - ' . $request->input('size_label');
+        } elseif ($request->filled('size_label')) {
+            $variantLabel = $request->input('size_label');
+        }
 
         $this->cartService->add(
             $request->integer('product_id'),
             $request->integer('quantity', 1),
-            $request->input('variant_label'),
+            $variantLabel,
             $request->input('variant_gelato_uid')
         );
 

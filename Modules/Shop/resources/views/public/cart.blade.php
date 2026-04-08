@@ -56,7 +56,11 @@
                     <div style="margin-left: 14px; min-width: 0;">
                         <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="font-weight: 700; font-size: 15px; color: #1e293b; text-decoration: none; display: block;">{{ $item['product_name'] }}</a>
                         @if(!empty($item['variant_label']))
-                        <span style="display: inline-block; background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-top: 6px;">{{ $item['variant_label'] }}</span>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+                            @foreach(explode(' - ', $item['variant_label']) as $opt)
+                            <span style="display: inline-block; background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 4px; font-size: 12px;">{{ trim($opt) }}</span>
+                            @endforeach
+                        </div>
                         @endif
                     </div>
                 </div>
