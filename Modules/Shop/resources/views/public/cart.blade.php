@@ -44,7 +44,7 @@
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
                     <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
-                    <button type="submit" style="background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 15px; padding: 4px; transition: color 0.2s;" title="{{ __('Retirer') }}" onmouseenter="this.style.color='#ef4444'" onmouseleave="this.style.color='#cbd5e1'"><i class="ti-trash"></i></button>
+                    <button type="submit" aria-label="{{ __('Retirer') }} {{ $item['product_name'] }}" style="background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 15px; padding: 6px; border-radius: 6px; transition: all 0.2s; outline-offset: 2px;" title="{{ __('Retirer') }}" onmouseenter="this.style.color='#ef4444';this.style.background='#fef2f2'" onmouseleave="this.style.color='#94a3b8';this.style.background='none'" onfocus="this.style.outline='2px solid #0B7285'" onblur="this.style.outline='none'"><i class="ti-trash" aria-hidden="true"></i></button>
                 </form>
                 {{-- Ligne 1 : image + nom + variante --}}
                 <div style="display: flex; align-items: center; margin-bottom: 14px;">
