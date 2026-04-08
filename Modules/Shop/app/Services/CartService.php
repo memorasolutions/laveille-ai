@@ -125,6 +125,9 @@ class CartService
                 'product_name' => $product?->name ?? 'Produit supprimé',
                 'product_slug' => $product?->slug,
                 'product_images' => $product?->images ?? [],
+                'product_variants' => $product?->variants ?? [],
+                'product_sizes' => $product?->metadata['sizes'] ?? [],
+                'product_category' => $product?->category,
             ]);
         }, $cart->items);
     }
@@ -199,6 +202,25 @@ class CartService
         }
 
         return array_reduce($cart->items, fn ($total, $item) => $total + $item['quantity'], 0);
+    }
+
+    public function updateItemVariant(int $productId, string $oldLabel, string $newLabel, ?string $newGelatoUid = null): void
+    {
+        $cart = $this->getCart();
+        if (! $cart || empty($cart->items)) {
+            return;
+        }
+
+        $items = $cart->items;
+        $index = $this->findItemIndex($items, $productId, $oldLabel);
+
+        if ($index !== false) {
+            $items[$index]['variant_label'] = $newLabel;
+            if ($newGelatoUid !== null) {
+                $items[$index]['gelato_variant_id'] = $newGelatoUid;
+            }
+            $cart->update(['items' => $items]);
+        }
     }
 
     private function findItemIndex(array $items, int $productId, ?string $variantLabel): int|false

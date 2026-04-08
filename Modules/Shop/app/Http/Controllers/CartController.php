@@ -81,4 +81,23 @@ class CartController extends Controller
 
         return back()->with('success', __('Quantité mise à jour.'));
     }
+
+    public function updateVariant(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:shop_products,id',
+            'old_variant_label' => 'required|string',
+            'new_variant_label' => 'required|string',
+            'new_gelato_uid' => 'nullable|string',
+        ]);
+
+        $this->cartService->updateItemVariant(
+            $request->integer('product_id'),
+            $request->input('old_variant_label'),
+            $request->input('new_variant_label'),
+            $request->input('new_gelato_uid')
+        );
+
+        return back()->with('success', __('Option mise à jour.'));
+    }
 }

@@ -56,10 +56,13 @@
                     <div style="margin-left: 14px; min-width: 0;">
                         <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="font-weight: 700; font-size: 15px; color: #1e293b; text-decoration: none; display: block;">{{ $item['product_name'] }}</a>
                         @if(!empty($item['variant_label']))
-                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px;">
                             @foreach(explode(' - ', $item['variant_label']) as $opt)
                             <span style="display: inline-block; background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 4px; font-size: 12px;">{{ trim($opt) }}</span>
                             @endforeach
+                            @if($item['product_slug'])
+                            <a href="{{ route('shop.show', $item['product_slug']) }}" style="color: #0B7285; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;" title="{{ __('Modifier les options') }}"><i class="ti-pencil" style="font-size: 10px;" aria-hidden="true"></i>{{ __('modifier') }}</a>
+                            @endif
                         </div>
                         @endif
                     </div>

@@ -22,6 +22,7 @@ Route::middleware('web')
         Route::post('/panier/ajouter', [CartController::class, 'add'])->name('shop.cart.add');
         Route::post('/panier/retirer', [CartController::class, 'remove'])->name('shop.cart.remove');
         Route::post('/panier/quantite', [CartController::class, 'updateQuantity'])->name('shop.cart.quantity');
+        Route::post('/panier/variante', [CartController::class, 'updateVariant'])->name('shop.cart.variant');
         Route::post('/commander', [CheckoutController::class, 'create'])->name('shop.checkout');
         Route::get('/paiement/{order}', [CheckoutController::class, 'pay'])->name('shop.checkout.pay');
         Route::get('/confirmation/{order}', [CheckoutController::class, 'success'])->name('shop.confirmation');
