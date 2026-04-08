@@ -72,7 +72,7 @@
                     </div>
                 </div>
                 <div class="col col-lg-2 col-md-6 col-sm-12 col-12">
-                    <div class="widget social-widget">
+                    <div class="widget link-widget">
                         <div class="widget-title"><h3>{{ __('Communauté') }}</h3></div>
                         <ul>
                             @if(Route::has('directory.leaderboard'))
