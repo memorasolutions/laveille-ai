@@ -210,8 +210,11 @@
                         <div style="margin-top: 12px;">
                             <label style="font-weight: 600; display: block; margin-bottom: 8px;"><i class="ti-truck" style="margin-right: 6px;"></i>{{ __('Livraison') }}</label>
                             <div x-show="loading" style="color: #64748b;"><i class="ti-reload" style="display: inline-block; animation: spin-icon 1s linear infinite;"></i> {{ __('Calcul en cours...') }}</div>
-                            <div x-show="!loading && methods.length === 0" style="font-style: italic; color: #64748b; font-size: 13px;">
+                            <div x-show="!loading && methods.length === 0 && !quoteFetched" style="font-style: italic; color: #64748b; font-size: 13px;">
                                 {{ __('Les frais seront calculés automatiquement à la saisie du code postal.') }}
+                            </div>
+                            <div x-show="!loading && methods.length === 0 && quoteFetched" style="color: #ef4444; font-size: 13px; padding: 8px 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;">
+                                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{ __('Désolé, la livraison n\'est pas disponible pour cette destination. Veuillez vérifier votre code postal ou essayer un autre pays.') }}
                             </div>
                             <template x-for="m in methods" :key="m.uid">
                                 <label style="display: block; padding: 6px 0; cursor: pointer;">
@@ -328,6 +331,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('shopCheckout', () => ({
         country: 'CA',
         loading: false,
+        quoteFetched: false,
         methods: [],
         cartSubtotal: {{ $subtotal ?? 0 }},
         cartTps: {{ isset($subtotal) ? round($subtotal * config('shop.tax.tps', 5) / 100, 2) : 0 }},
@@ -384,7 +388,7 @@ document.addEventListener('alpine:init', () => {
         },
         async fetchQuote() {
             var pc = this.$refs.postalCode ? this.$refs.postalCode.value.replace(/\s/g, '') : '';
-            if (pc.length < 3) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; return; }
+            if (pc.length < 3) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; this.quoteFetched = false; return; }
             this.loading = true;
             try {
                 var res = await fetch(@json(route('shop.shipping-quote')), {
@@ -397,6 +401,7 @@ document.addEventListener('alpine:init', () => {
                 if (this.methods.length) { this.selectedUid = this.methods[0].uid; this.selectedCost = this.methods[0].price; }
                 else { this.selectedUid = null; this.selectedCost = 0; }
             } catch (e) { this.methods = []; this.selectedUid = null; this.selectedCost = 0; }
+            this.quoteFetched = true;
             this.loading = false;
         },
         init() {

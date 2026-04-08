@@ -83,6 +83,16 @@
                 <p style="margin-bottom: 16px;"><span style="background: #f1f5f9; padding: 4px 12px; border-radius: 20px; font-size: 13px; color: #475569;">{{ $product->category }}</span></p>
             @endif
 
+            {{-- Badges livraison + POD --}}
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; background: #f0fdfa; border: 1px solid #d1fae5; padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #0B7285; font-weight: 600;">
+                    <i class="fa fa-globe" aria-hidden="true"></i> {{ __('Livraison dans 200+ pays') }}
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #64748b;">
+                    <i class="fa fa-print" aria-hidden="true"></i> {{ __('Imprimé à la demande') }}
+                </span>
+            </div>
+
             {{-- Formulaire ajout au panier --}}
             <form action="{{ route('shop.cart.add') }}" method="POST" style="margin-top: 24px;">
                 @csrf
