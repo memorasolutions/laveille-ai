@@ -51,12 +51,11 @@
                             </td>
                             <td>{{ $item['variant_label'] ?? '-' }}</td>
                             <td>
-                                <form action="{{ route('shop.cart.quantity') }}" method="POST" style="display: flex; gap: 4px;">
+                                <form action="{{ route('shop.cart.quantity') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
                                     <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
-                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="0" max="99" style="width: 60px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center;">
-                                    <button type="submit" class="btn btn-sm" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px;">OK</button>
+                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="0" max="99" @change="$el.closest('form').submit()" style="width: 60px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center;">
                                 </form>
                             </td>
                             <td>{{ number_format($item['unit_price'], 2, ',', ' ') }} $</td>
