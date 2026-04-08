@@ -20,6 +20,7 @@ Route::middleware($legalMiddleware)->controller(LegalController::class)->group(f
     Route::get('/privacy-policy', 'privacyPolicy')->name('legal.privacy');
     Route::get('/terms-of-use', 'termsOfUse')->name('legal.terms');
     Route::get('/cookie-policy', 'cookiePolicy')->name('legal.cookies');
+    Route::get('/conditions-de-vente', 'salesConditions')->name('legal.sales');
     Route::get('/rights-request', 'rightsRequest')->name('legal.rights');
     Route::post('/rights-request', 'rightsRequestStore')->name('legal.rights.store');
 });

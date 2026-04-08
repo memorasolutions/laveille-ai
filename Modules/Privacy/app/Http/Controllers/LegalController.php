@@ -36,6 +36,11 @@ class LegalController extends Controller
         return $this->renderLegalPage('cookie-policy', 'privacy::legal.cookie-policy');
     }
 
+    public function salesConditions(): View
+    {
+        return $this->renderLegalPage('conditions-de-vente', 'privacy::legal.sales-conditions');
+    }
+
     private function renderLegalPage(string $slug, string $fallbackView): View
     {
         $page = LegalPage::findBySlug($slug);

@@ -236,6 +236,16 @@
                             </label>
                         </div>
 
+                        {{-- Checkbox conditions de vente (obligatoire) --}}
+                        <div style="margin-top: 12px; margin-bottom: 8px;">
+                            <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;">
+                                <input type="checkbox" name="accept_terms" value="1" required style="display: inline-block !important; width: 20px !important; height: 20px !important; margin-top: 1px; accent-color: #0B7285; flex-shrink: 0; cursor: pointer; -webkit-appearance: checkbox !important; appearance: checkbox !important;">
+                                <span style="font-size: 13px; color: #475569; line-height: 1.4;">
+                                    {!! __('J\'accepte les <a href=":url" target="_blank" style="color: #0B7285; text-decoration: underline;">conditions de vente</a>.', ['url' => route('legal.sales')]) !!} <span style="color: #ef4444;">*</span>
+                                </span>
+                            </label>
+                        </div>
+
                         <button type="submit" class="btn" style="width: 100%; background: #0B7285; color: #fff; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 16px; margin-top: 12px;">{{ __('Passer la commande') }}</button>
 
                         {{-- Badges confiance --}}

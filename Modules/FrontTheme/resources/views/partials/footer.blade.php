@@ -4,7 +4,7 @@
     <div class="wpo-upper-footer">
         <div class="container">
             <div class="row">
-                <div class="col col-lg-4 col-md-6 col-sm-12 col-12">
+                <div class="col col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="widget about-widget">
                         <div class="logo widget-title" style="max-width: none;">
                             <img src="{{ asset('images/logo-horizontal-white.svg') }}?v=10" alt="{{ config('app.name') }}" style="width: 230px !important; max-width: 230px !important; height: auto !important; margin-bottom: 16px;" loading="lazy">
@@ -61,6 +61,9 @@
                             @if(Route::has('legal.terms'))
                                 <li><a href="{{ route('legal.terms') }}">{{ __('Conditions d\'utilisation') }}</a></li>
                             @endif
+                            @if(Route::has('legal.sales'))
+                                <li><a href="{{ route('legal.sales') }}">{{ __('Conditions de vente') }}</a></li>
+                            @endif
                             @if(Route::has('legal.cookies'))
                                 <li><a href="{{ route('legal.cookies') }}">{{ __('Cookies') }}</a></li>
                             @endif
@@ -71,7 +74,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col col-lg-2 col-md-6 col-sm-12 col-12">
+                <div class="col col-lg-3 col-md-6 col-sm-12 col-12">
                     <div class="widget link-widget">
                         <div class="widget-title"><h3>{{ __('Communauté') }}</h3></div>
                         <ul>
