@@ -63,6 +63,10 @@ class CartController extends Controller
             $request->input('variant_label')
         );
 
+        if ($request->wantsJson()) {
+            return response()->json($this->cartTotals());
+        }
+
         return back()->with('success', __('Produit retiré du panier.'));
     }
 
@@ -78,6 +82,10 @@ class CartController extends Controller
             $request->integer('quantity'),
             $request->input('variant_label')
         );
+
+        if ($request->wantsJson()) {
+            return response()->json($this->cartTotals());
+        }
 
         return back()->with('success', __('Quantité mise à jour.'));
     }
@@ -103,5 +111,21 @@ class CartController extends Controller
         }
 
         return back()->with('success', __('Option mise à jour.'));
+    }
+
+    private function cartTotals(): array
+    {
+        $subtotal = $this->cartService->getSubtotal();
+        $tps = round($subtotal * config('shop.tax.tps', 5) / 100, 2);
+        $tvq = round($subtotal * config('shop.tax.tvq', 9.975) / 100, 2);
+
+        return [
+            'success' => true,
+            'subtotal' => $subtotal,
+            'tps' => $tps,
+            'tvq' => $tvq,
+            'total' => round($subtotal + $tps + $tvq, 2),
+            'itemCount' => $this->cartService->itemCount(),
+        ];
     }
 }

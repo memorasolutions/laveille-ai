@@ -26,7 +26,7 @@
 
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
-    <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Panier') }} ({{ $itemCount ?? 0 }})</h1>
+    <h1 x-data="{ count: {{ $itemCount ?? 0 }} }" @cart-updated.window="count = $event.detail.itemCount" style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Panier') }} (<span x-text="count"></span>)</h1>
 
     @if(empty($content))
         <div style="text-align: center; padding: 60px 0;">
@@ -38,14 +38,9 @@
         <div class="col-md-7">
         <div style="display: flex; flex-direction: column; gap: 14px;">
             @foreach($content as $item)
-            <div class="shop-cart-card" style="background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 18px; position: relative; transition: transform 0.2s, box-shadow 0.2s;">
+            <div class="shop-cart-card" x-data="cartItem({{ $item['product_id'] }}, '{{ addslashes($item['variant_label'] ?? '') }}', {{ $item['quantity'] }}, {{ $item['unit_price'] }})" x-show="!removed" x-transition style="background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 18px; position: relative; transition: transform 0.2s, box-shadow 0.2s;">
                 {{-- Supprimer --}}
-                <form action="{{ route('shop.cart.remove') }}" method="POST" style="position: absolute; top: 12px; right: 14px;">
-                    @csrf
-                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                    <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
-                    <button type="submit" aria-label="{{ __('Retirer') }} {{ $item['product_name'] }}" style="background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 15px; padding: 6px; border-radius: 6px; transition: all 0.2s; outline-offset: 2px;" title="{{ __('Retirer') }}" onmouseenter="this.style.color='#ef4444';this.style.background='#fef2f2'" onmouseleave="this.style.color='#94a3b8';this.style.background='none'" onfocus="this.style.outline='2px solid #0B7285'" onblur="this.style.outline='none'"><i class="ti-trash" aria-hidden="true"></i></button>
-                </form>
+                <button type="button" @click="removeItem()" aria-label="{{ __('Retirer') }} {{ $item['product_name'] }}" style="position: absolute; top: 12px; right: 14px; background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 15px; padding: 6px; border-radius: 6px; transition: all 0.2s; outline-offset: 2px;" title="{{ __('Retirer') }}" onmouseenter="this.style.color='#ef4444';this.style.background='#fef2f2'" onmouseleave="this.style.color='#94a3b8';this.style.background='none'"><i class="ti-trash" aria-hidden="true"></i></button>
                 {{-- Ligne 1 : image + nom + variante --}}
                 <div style="display: flex; align-items: center; margin-bottom: 14px;">
                     @if(!empty($item['product_images'][0]))
@@ -102,21 +97,15 @@
                     </div>
                 </div>
                 {{-- Ligne 2 : quantité + prix --}}
-                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f1f5f9;" x-data="{ qty: {{ $item['quantity'] }} }">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f1f5f9;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <form action="{{ route('shop.cart.quantity') }}" method="POST" x-ref="qtyForm">
-                            @csrf
-                            <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                            <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
-                            <input type="hidden" name="quantity" :value="qty">
-                        </form>
-                        <button type="button" @click="qty = Math.max(0, qty - 1); $nextTick(() => $refs.qtyForm.submit())" style="width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">-</button>
+                        <button type="button" @click="changeQty(-1)" style="width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">-</button>
                         <span style="width: 28px; text-align: center; font-size: 18px; font-weight: 700; color: #1e293b;" x-text="qty"></span>
-                        <button type="button" @click="qty = Math.min(99, qty + 1); $nextTick(() => $refs.qtyForm.submit())" style="width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">+</button>
+                        <button type="button" @click="changeQty(1)" style="width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">+</button>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 12px; color: #94a3b8;">{{ number_format($item['unit_price'], 2, ',', ' ') }} $ × <span x-text="qty"></span></div>
-                        <div style="font-weight: 700; font-size: 18px; color: #0B7285;">{{ number_format($item['unit_price'] * $item['quantity'], 2, ',', ' ') }} $</div>
+                        <div style="font-size: 12px; color: #94a3b8;" x-text="unitPrice.toFixed(2).replace('.', ',') + ' $ × ' + qty"></div>
+                        <div style="font-weight: 700; font-size: 18px; color: #0B7285;" x-text="(unitPrice * qty).toFixed(2).replace('.', ',') + ' $'"></div>
                     </div>
                 </div>
             </div>
@@ -125,31 +114,25 @@
 
         </div>{{-- end col-md-7 --}}
         <div class="col-md-5">
-                <div x-data="shopCheckout()" style="background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; position: sticky; top: 100px;">
+                <div x-data="shopCheckout()" @cart-updated.window="cartSubtotal=$event.detail.subtotal; cartTps=$event.detail.tps; cartTvq=$event.detail.tvq; cartTotal=$event.detail.total" style="background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; position: sticky; top: 100px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>{{ __('Sous-total') }}</span>
-                        <span>{{ number_format($subtotal, 2, ',', ' ') }} $</span>
+                        <span x-text="cartSubtotal.toFixed(2).replace('.', ',') + ' $'"></span>
                     </div>
-                    @php
-                        $tpsRate = config('shop.tax.tps', 5);
-                        $tvqRate = config('shop.tax.tvq', 9.975);
-                        $tpsAmount = round($subtotal * $tpsRate / 100, 2);
-                        $tvqAmount = round($subtotal * $tvqRate / 100, 2);
-                    @endphp
                     <div x-show="country === 'CA'" style="margin-bottom: 8px; color: #64748b; font-size: 13px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <span>{{ __('TPS') }} ({{ $tpsRate }}%) <span style="color: #94a3b8; font-size: 11px;">839145984</span></span>
-                            <span>{{ number_format($tpsAmount, 2, ',', ' ') }} $</span>
+                            <span>{{ __('TPS') }} ({{ config('shop.tax.tps', 5) }}%) <span style="color: #94a3b8; font-size: 11px;">839145984</span></span>
+                            <span x-text="cartTps.toFixed(2).replace('.', ',') + ' $'"></span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>{{ __('TVQ') }} ({{ $tvqRate }}%) <span style="color: #94a3b8; font-size: 11px;">1221788059</span></span>
-                            <span>{{ number_format($tvqAmount, 2, ',', ' ') }} $</span>
+                            <span>{{ __('TVQ') }} ({{ config('shop.tax.tvq', 9.975) }}%) <span style="color: #94a3b8; font-size: 11px;">1221788059</span></span>
+                            <span x-text="cartTvq.toFixed(2).replace('.', ',') + ' $'"></span>
                         </div>
                     </div>
                     <hr style="margin: 12px 0;">
                     <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700;">
                         <span>{{ __('Total') }}</span>
-                        <span style="color: #0B7285;">{{ number_format($total, 2, ',', ' ') }} $</span>
+                        <span style="color: #0B7285;" x-text="cartTotal.toFixed(2).replace('.', ',') + ' $'"></span>
                     </div>
 
                     {{-- Formulaire checkout (layout multi-colonnes compact) --}}
@@ -283,6 +266,30 @@
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
+    Alpine.data('cartItem', (productId, variantLabel, initialQty, price) => ({
+        qty: initialQty,
+        unitPrice: price,
+        removed: false,
+        async changeQty(delta) {
+            this.qty = Math.max(0, Math.min(99, this.qty + delta));
+            if (this.qty === 0) { this.removeItem(); return; }
+            var res = await fetch(@json(route('shop.cart.quantity')), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value, 'Accept': 'application/json' },
+                body: JSON.stringify({ product_id: productId, quantity: this.qty, variant_label: variantLabel })
+            }).then(r => r.json());
+            if (res.success) this.$dispatch('cart-updated', res);
+        },
+        async removeItem() {
+            this.removed = true;
+            var res = await fetch(@json(route('shop.cart.remove')), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value, 'Accept': 'application/json' },
+                body: JSON.stringify({ product_id: productId, variant_label: variantLabel })
+            }).then(r => r.json());
+            if (res.success) this.$dispatch('cart-updated', res);
+        }
+    }));
     Alpine.data('variantPicker', (productId, color, size, oldLabel, hasColors) => ({
         editing: null,
         currentColor: color,
@@ -311,6 +318,10 @@ document.addEventListener('alpine:init', () => {
         country: 'CA',
         loading: false,
         methods: [],
+        cartSubtotal: {{ $subtotal ?? 0 }},
+        cartTps: {{ isset($subtotal) ? round($subtotal * config('shop.tax.tps', 5) / 100, 2) : 0 }},
+        cartTvq: {{ isset($subtotal) ? round($subtotal * config('shop.tax.tvq', 9.975) / 100, 2) : 0 }},
+        cartTotal: {{ $total ?? 0 }},
         selectedUid: null,
         selectedCost: 0,
         suggestions: [],
