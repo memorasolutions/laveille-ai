@@ -67,7 +67,7 @@
                             <p>{{ __('Les paiements sont traités de manière sécurisée via Stripe (chiffrement SSL). Nous acceptons Visa, Mastercard et American Express. Le descripteur sur votre relevé bancaire sera MEMORA* LAVEILLE.AI.') }}</p>
 
                             <h3 id="juridiction">{{ __('Juridiction') }}</h3>
-                            <p>{{ __('Les présentes conditions sont régies par les lois de la province de Québec. Tout litige relèvera de la compétence exclusive des tribunaux du district de Montréal.') }}</p>
+                            <p>{{ __('Les présentes conditions sont régies par les lois de la province de Québec. Tout litige relèvera de la compétence exclusive des tribunaux du district judiciaire de Québec.') }}</p>
 
                             <h3 id="contact">{{ __('Contact') }}</h3>
                             <p>{{ __('Pour toute question concernant ces conditions ou une commande, veuillez écrire à') }} <a href="mailto:info@laveille.ai">info@laveille.ai</a>.</p>
