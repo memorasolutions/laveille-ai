@@ -20,7 +20,6 @@ class CheckoutController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'accept_terms' => 'required|accepted',
             'email' => 'required|email',
             'shipping_address' => 'required|array',
             'shipping_address.first_name' => 'required|string',
