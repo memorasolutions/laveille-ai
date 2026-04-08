@@ -116,7 +116,7 @@ class VotingServiceProvider extends ServiceProvider
         $existing = config($key, []);
         $module_config = require $path;
 
-        config([$key => array_replace_recursive($existing, $module_config)]);
+        config([$key => array_replace_recursive($module_config, $existing)]);
     }
 
     /**
