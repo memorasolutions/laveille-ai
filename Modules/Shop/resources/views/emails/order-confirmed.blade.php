@@ -36,7 +36,11 @@
         {{-- Totaux --}}
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
             <tr><td style="padding:6px 0; font-size:14px;">Sous-total</td><td style="padding:6px 0; text-align:right; font-size:14px;">{{ number_format($order->subtotal, 2, ',', ' ') }} $</td></tr>
-            <tr><td style="padding:6px 0; font-size:14px; color:#64748b;">Taxes</td><td style="padding:6px 0; text-align:right; font-size:14px; color:#64748b;">{{ number_format($order->tax_amount, 2, ',', ' ') }} $</td></tr>
+            @if($order->tax_amount > 0)
+            @php $tpsAmt = round($order->subtotal * config('shop.tax.tps', 5) / 100, 2); $tvqAmt = round($order->subtotal * config('shop.tax.tvq', 9.975) / 100, 2); @endphp
+            <tr><td style="padding:4px 0; font-size:13px; color:#64748b;">TPS (5%) <span style="color:#94a3b8; font-size:11px;">839145984</span></td><td style="padding:4px 0; text-align:right; font-size:13px; color:#64748b;">{{ number_format($tpsAmt, 2, ',', ' ') }} $</td></tr>
+            <tr><td style="padding:4px 0; font-size:13px; color:#64748b;">TVQ (9,975%) <span style="color:#94a3b8; font-size:11px;">1221788059</span></td><td style="padding:4px 0; text-align:right; font-size:13px; color:#64748b;">{{ number_format($tvqAmt, 2, ',', ' ') }} $</td></tr>
+            @endif
             @if($order->shipping_cost > 0)
             <tr><td style="padding:6px 0; font-size:14px; color:#64748b;">Livraison</td><td style="padding:6px 0; text-align:right; font-size:14px; color:#64748b;">{{ number_format($order->shipping_cost, 2, ',', ' ') }} $</td></tr>
             @endif

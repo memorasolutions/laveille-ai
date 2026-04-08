@@ -89,9 +89,21 @@
                         <span>{{ __('Sous-total') }}</span>
                         <span>{{ number_format($subtotal, 2, ',', ' ') }} $</span>
                     </div>
-                    <div x-show="country === 'CA'" style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #64748b; font-size: 14px;">
-                        <span>{{ __('TPS') }} ({{ config('shop.tax.tps', 5) }}%) + {{ __('TVQ') }} ({{ config('shop.tax.tvq', 9.975) }}%)</span>
-                        <span>{{ number_format($tax, 2, ',', ' ') }} $</span>
+                    @php
+                        $tpsRate = config('shop.tax.tps', 5);
+                        $tvqRate = config('shop.tax.tvq', 9.975);
+                        $tpsAmount = round($subtotal * $tpsRate / 100, 2);
+                        $tvqAmount = round($subtotal * $tvqRate / 100, 2);
+                    @endphp
+                    <div x-show="country === 'CA'" style="margin-bottom: 8px; color: #64748b; font-size: 13px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>{{ __('TPS') }} ({{ $tpsRate }}%) <span style="color: #94a3b8; font-size: 11px;">839145984</span></span>
+                            <span>{{ number_format($tpsAmount, 2, ',', ' ') }} $</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>{{ __('TVQ') }} ({{ $tvqRate }}%) <span style="color: #94a3b8; font-size: 11px;">1221788059</span></span>
+                            <span>{{ number_format($tvqAmount, 2, ',', ' ') }} $</span>
+                        </div>
                     </div>
                     <hr style="margin: 12px 0;">
                     <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700;">

@@ -28,10 +28,17 @@
                     <span>{{ __('Sous-total') }}</span>
                     <span>{{ number_format($order->subtotal, 2, ',', ' ') }} $</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 14px; color: #64748b; margin-bottom: 4px;">
-                    <span>{{ __('Taxes') }}</span>
-                    <span>{{ number_format($order->tax_amount, 2, ',', ' ') }} $</span>
+                @if($order->tax_amount > 0)
+                @php $tpsAmt = round($order->subtotal * config('shop.tax.tps', 5) / 100, 2); $tvqAmt = round($order->subtotal * config('shop.tax.tvq', 9.975) / 100, 2); @endphp
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 3px;">
+                    <span>{{ __('TPS') }} (5%) <span style="color: #94a3b8; font-size: 11px;">839145984</span></span>
+                    <span>{{ number_format($tpsAmt, 2, ',', ' ') }} $</span>
                 </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 4px;">
+                    <span>{{ __('TVQ') }} (9,975%) <span style="color: #94a3b8; font-size: 11px;">1221788059</span></span>
+                    <span>{{ number_format($tvqAmt, 2, ',', ' ') }} $</span>
+                </div>
+                @endif
                 @if($order->shipping_cost > 0)
                 <div style="display: flex; justify-content: space-between; font-size: 14px; color: #64748b; margin-bottom: 4px;">
                     <span>{{ __('Livraison') }}</span>
