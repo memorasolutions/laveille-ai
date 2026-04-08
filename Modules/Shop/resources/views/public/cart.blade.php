@@ -34,6 +34,8 @@
             <a href="{{ route('shop.index') }}" class="btn" style="background: #0B7285; color: #fff; padding: 10px 24px; border-radius: 6px;">{{ __('Parcourir la boutique') }}</a>
         </div>
     @else
+        <div class="row">
+        <div class="col-md-7">
         <div style="display: flex; flex-direction: column; gap: 14px;">
             @foreach($content as $item)
             <div class="shop-cart-card" style="background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px; display: flex; align-items: center; position: relative; transition: transform 0.2s, box-shadow 0.2s;">
@@ -77,10 +79,9 @@
             @endforeach
         </div>
 
-        {{-- Totaux --}}
-        <div class="row" style="margin-top: 24px;">
-            <div class="col-md-6 col-md-offset-6">
-                <div x-data="shopCheckout()" style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        </div>{{-- end col-md-7 --}}
+        <div class="col-md-5">
+                <div x-data="shopCheckout()" style="background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; position: sticky; top: 100px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>{{ __('Sous-total') }}</span>
                         <span>{{ number_format($subtotal, 2, ',', ' ') }} $</span>
@@ -214,8 +215,8 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </div>
+        </div>{{-- end col-md-5 --}}
+        </div>{{-- end row --}}
     @endif
 </div>
 @endsection
