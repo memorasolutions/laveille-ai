@@ -201,11 +201,14 @@
                             <input type="hidden" name="shipping_cost" x-model="selectedCost">
                         </div>
 
-                        {{-- Checkbox newsletter (LCAP/Loi 25 — case vide par défaut) --}}
-                        <div style="margin-top: 12px; margin-bottom: 4px;">
-                            <label style="display: flex; gap: 8px; align-items: start;">
-                                <input type="checkbox" name="newsletter" value="1" style="width: 18px; height: 18px; margin-top: 2px; accent-color: #0B7285; flex-shrink: 0;">
-                                <span style="font-size: 13px; color: #475569; line-height: 1.4;">{{ __("J'accepte de recevoir des offres et nouvelles de La veille par courriel. Vous pouvez vous désabonner en tout temps.") }}</span>
+                        {{-- Checkbox newsletter (LCAP/Loi 25 — case vide par défaut, opt-in explicite) --}}
+                        <div style="margin-top: 16px; margin-bottom: 8px; background: #f0fdfa; border: 1px solid #d1fae5; border-radius: 8px; padding: 12px 14px;">
+                            <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;">
+                                <input type="checkbox" name="newsletter" value="1" style="display: inline-block !important; width: 20px !important; height: 20px !important; margin-top: 1px; accent-color: #0B7285; flex-shrink: 0; cursor: pointer; -webkit-appearance: checkbox !important; appearance: checkbox !important;">
+                                <div>
+                                    <span style="font-size: 14px; font-weight: 600; color: #1e293b; display: block;">{{ __('Restez informé') }} <i class="ti-email" style="color: #0B7285; font-size: 13px;"></i></span>
+                                    <span style="font-size: 12px; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">{{ __('Recevez notre veille IA chaque mercredi — outils, actualités et astuces. Désabonnement en 1 clic.') }}</span>
+                                </div>
                             </label>
                         </div>
 
