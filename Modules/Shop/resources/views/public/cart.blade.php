@@ -11,7 +11,17 @@
 @endsection
 
 @push('head')
-<style>@keyframes spin-icon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
+<style>
+@keyframes spin-icon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.shop-cart-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1) !important; }
+@media (max-width: 768px) {
+    .shop-cart-card { flex-wrap: wrap !important; }
+    .shop-cart-card > a:first-of-type { width: 100%; text-align: center; margin-bottom: 12px; }
+    .shop-cart-card > a:first-of-type img { width: 120px !important; height: 120px !important; margin: 0 auto; }
+    .shop-cart-card > div:nth-child(4) { margin-left: 0 !important; width: 100%; }
+    .shop-cart-card > div:last-child { margin-left: auto !important; margin-top: 12px; }
+}
+</style>
 @endpush
 
 @section('content')
@@ -24,54 +34,47 @@
             <a href="{{ route('shop.index') }}" class="btn" style="background: #0B7285; color: #fff; padding: 10px 24px; border-radius: 6px;">{{ __('Parcourir la boutique') }}</a>
         </div>
     @else
-        <div class="table-responsive">
-            <table class="table" style="background: #fff; border-radius: 8px;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #e2e8f0;">
-                        <th>{{ __('Produit') }}</th>
-                        <th>{{ __('Variante') }}</th>
-                        <th style="width: 120px;">{{ __('Quantité') }}</th>
-                        <th>{{ __('Prix') }}</th>
-                        <th>{{ __('Sous-total') }}</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($content as $item)
-                        <tr>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    @if(!empty($item['product_images'][0]))
-                                        <img src="{{ asset($item['product_images'][0]) }}" alt="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">
-                                    @endif
-                                    <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="color: #1e293b; font-weight: 600;">
-                                        {{ $item['product_name'] }}
-                                    </a>
-                                </div>
-                            </td>
-                            <td>{{ $item['variant_label'] ?? '-' }}</td>
-                            <td>
-                                <form action="{{ route('shop.cart.quantity') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                                    <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
-                                    <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="0" max="99" @change="$el.closest('form').submit()" style="width: 60px; padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center;">
-                                </form>
-                            </td>
-                            <td>{{ number_format($item['unit_price'], 2, ',', ' ') }} $</td>
-                            <td style="font-weight: 600;">{{ number_format($item['unit_price'] * $item['quantity'], 2, ',', ' ') }} $</td>
-                            <td>
-                                <form action="{{ route('shop.cart.remove') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                                    <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
-                                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 18px;" title="{{ __('Retirer') }}">&times;</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            @foreach($content as $item)
+            <div class="shop-cart-card" style="background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 16px; display: flex; align-items: center; position: relative; transition: transform 0.2s, box-shadow 0.2s;">
+                {{-- Supprimer --}}
+                <form action="{{ route('shop.cart.remove') }}" method="POST" style="position: absolute; top: 10px; right: 12px;">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
+                    <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
+                    <button type="submit" style="background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 16px; padding: 4px; transition: color 0.2s;" title="{{ __('Retirer') }}" onmouseenter="this.style.color='#ef4444'" onmouseleave="this.style.color='#cbd5e1'"><i class="ti-trash"></i></button>
+                </form>
+                {{-- Image --}}
+                @if(!empty($item['product_images'][0]))
+                <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="flex-shrink: 0;">
+                    <img src="{{ asset($item['product_images'][0]) }}" alt="{{ $item['product_name'] }}" style="width: 100px; height: 100px; border-radius: 10px; object-fit: cover;">
+                </a>
+                @endif
+                {{-- Infos --}}
+                <div style="flex: 1; margin-left: 16px; min-width: 0;">
+                    <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="font-weight: 700; font-size: 15px; color: #1e293b; text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $item['product_name'] }}</a>
+                    @if(!empty($item['variant_label']))
+                    <span style="display: inline-block; background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-top: 4px;">{{ $item['variant_label'] }}</span>
+                    @endif
+                    <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">{{ number_format($item['unit_price'], 2, ',', ' ') }} $ / unité</div>
+                </div>
+                {{-- Quantité +/- --}}
+                <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 16px;" x-data="{ qty: {{ $item['quantity'] }} }">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <form action="{{ route('shop.cart.quantity') }}" method="POST" x-ref="qtyForm">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
+                            <input type="hidden" name="variant_label" value="{{ $item['variant_label'] ?? '' }}">
+                            <input type="hidden" name="quantity" :value="qty">
+                        </form>
+                        <button type="button" @click="qty = Math.max(0, qty - 1); $nextTick(() => $refs.qtyForm.submit())" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">-</button>
+                        <span style="width: 32px; text-align: center; font-size: 18px; font-weight: 700; color: #1e293b;" x-text="qty"></span>
+                        <button type="button" @click="qty = Math.min(99, qty + 1); $nextTick(() => $refs.qtyForm.submit())" style="width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">+</button>
+                    </div>
+                    <span style="font-weight: 700; font-size: 16px; color: #0B7285;">{{ number_format($item['unit_price'] * $item['quantity'], 2, ',', ' ') }} $</span>
+                </div>
+            </div>
+            @endforeach
         </div>
 
         {{-- Totaux --}}
