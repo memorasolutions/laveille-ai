@@ -247,6 +247,7 @@
                         </div>
 
                         <button type="submit" class="btn" style="width: 100%; background: #0B7285; color: #fff; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 16px; margin-top: 12px;">{{ __('Passer la commande') }}</button>
+                        <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 8px; line-height: 1.4;">{{ __('Produit fabriqué à la demande — non remboursable sauf défaut de fabrication.') }}</p>
 
                         {{-- Badges confiance --}}
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-top: 16px; text-align: center;">
