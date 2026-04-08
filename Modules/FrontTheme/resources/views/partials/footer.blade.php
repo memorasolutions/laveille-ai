@@ -82,7 +82,7 @@
                             <li><a href="{{ \Modules\Settings\Facades\Settings::get('social.facebook_page_url', 'https://www.facebook.com/LaVeilleDeStef') }}" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook" loading="lazy"></i> Facebook</a></li>
                             <li><a href="{{ \Modules\Settings\Facades\Settings::get('social.messenger_url', 'https://m.me/LaVeilleDeStef') }}" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger" loading="lazy"></i> Messenger</a></li>
                             @guest
-                                <li><a href="{{ route('login') }}" @click.prevent="$dispatch('open-auth-modal', { message: '' })" style="cursor: pointer;">🔑 {{ __('Se connecter') }}</a></li>
+                                <li><a href="{{ route('login') }}" target="_blank" rel="noopener">🔑 {{ __('Se connecter') }}</a></li>
                             @endguest
                         </ul>
                         @auth
