@@ -61,12 +61,20 @@ class GelatoService
                 'items' => $order->items->map(function ($item) {
                     $entry = [
                         'itemReferenceId' => (string) $item->id,
-                        'productUid' => $item->gelato_variant_id,
                         'quantity' => $item->quantity,
                     ];
                     $product = $item->product;
-                    if ($product && !empty($product->metadata['print_file_url'])) {
-                        $entry['files'] = [['type' => 'default', 'url' => $product->metadata['print_file_url']]];
+
+                    // Priorité au storeProductVariantId (design configuré dans le dashboard Gelato)
+                    $storeVariantId = $product->metadata['store_variant_map'][$item->gelato_variant_id] ?? null;
+
+                    if ($storeVariantId) {
+                        $entry['storeProductVariantId'] = $storeVariantId;
+                    } else {
+                        $entry['productUid'] = $item->gelato_variant_id;
+                        if ($product && !empty($product->metadata['print_file_url'])) {
+                            $entry['files'] = [['type' => 'default', 'url' => $product->metadata['print_file_url']]];
+                        }
                     }
                     return $entry;
                 })->toArray(),
