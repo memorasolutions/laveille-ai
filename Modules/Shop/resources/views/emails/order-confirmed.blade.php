@@ -52,7 +52,7 @@
             <a href="{{ $trackingUrl }}" style="display:inline-block; background:#0B7285; color:#fff; padding:12px 30px; text-decoration:none; border-radius:6px; font-weight:700; font-size:15px;">Suivre ma commande</a>
         </div>
 
-        <p style="font-size:12px; color:#94a3b8; text-align:center;">Sur votre relevé bancaire : LAVEILLE.AI</p>
+        <p style="font-size:12px; color:#94a3b8; text-align:center;">Sur votre relevé bancaire : MEMORA* LAVEILLE.AI</p>
     </div>
 
     {{-- Footer --}}

@@ -207,7 +207,7 @@
                                 <input type="checkbox" name="newsletter" value="1" style="display: inline-block !important; width: 20px !important; height: 20px !important; margin-top: 1px; accent-color: #0B7285; flex-shrink: 0; cursor: pointer; -webkit-appearance: checkbox !important; appearance: checkbox !important;">
                                 <div>
                                     <span style="font-size: 14px; font-weight: 600; color: #1e293b; display: block;">{{ __('Restez informé') }} <i class="ti-email" style="color: #0B7285; font-size: 13px;"></i></span>
-                                    <span style="font-size: 12px; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">{{ __('Recevez notre veille IA chaque mercredi — outils, actualités et astuces. Désabonnement en 1 clic.') }}</span>
+                                    <span style="font-size: 12px; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">{{ __('Recevez notre veille IA chaque mercredi — outils, actualités, défi et astuces. Désabonnement en 1 clic.') }}</span>
                                 </div>
                             </label>
                         </div>
@@ -228,7 +228,7 @@
                                 <span style="margin-left: 8px; font-style: italic;">{{ __('Propulsé par Stripe') }}</span>
                             </div>
                             <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">
-                                {{ __('Sur votre relevé bancaire : LAVEILLE.AI') }}
+                                {{ __('Sur votre relevé bancaire : MEMORA* LAVEILLE.AI') }}
                             </div>
                         </div>
                     </form>
