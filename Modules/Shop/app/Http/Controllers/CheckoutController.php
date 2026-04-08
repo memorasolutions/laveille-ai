@@ -82,7 +82,9 @@ class CheckoutController extends Controller
         $checkout = $this->stripeService->createCheckoutSession(
             $cartItems,
             $returnUrl,
-            $request->input('email')
+            $request->input('email'),
+            $taxAmount,
+            $shippingCost
         );
 
         if (! $checkout) {

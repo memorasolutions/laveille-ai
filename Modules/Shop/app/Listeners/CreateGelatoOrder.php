@@ -39,8 +39,7 @@ class CreateGelatoOrder implements ShouldQueue
             Log::error("Échec création commande Gelato pour commande #{$order->id}: {$e->getMessage()}");
 
             $order->update([
-                'status' => 'gelato_failed',
-                'notes' => "Échec Gelato : {$e->getMessage()}",
+                'notes' => "Échec Gelato : " . mb_substr($e->getMessage(), 0, 500),
             ]);
         }
     }

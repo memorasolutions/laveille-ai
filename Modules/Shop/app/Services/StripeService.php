@@ -25,19 +25,37 @@ class StripeService
             ->asForm();
     }
 
-    public function createCheckoutSession(array $cartItems, string $returnUrl, ?string $customerEmail = null): ?array
+    public function createCheckoutSession(array $cartItems, string $returnUrl, ?string $customerEmail = null, float $taxAmount = 0, float $shippingCost = 0): ?array
     {
         try {
             $productIds = array_column($cartItems, 'product_id');
             $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+            $currency = strtolower(config('shop.currency', 'CAD'));
 
             $lineItems = [];
-            foreach ($cartItems as $i => $item) {
+            $idx = 0;
+            foreach ($cartItems as $item) {
                 $product = $products[$item['product_id']] ?? null;
-                $lineItems["line_items[{$i}][price_data][currency]"] = strtolower(config('shop.currency', 'CAD'));
-                $lineItems["line_items[{$i}][price_data][product_data][name]"] = $product?->name ?? 'Produit';
-                $lineItems["line_items[{$i}][price_data][unit_amount]"] = (int) round($item['unit_price'] * 100);
-                $lineItems["line_items[{$i}][quantity]"] = $item['quantity'];
+                $lineItems["line_items[{$idx}][price_data][currency]"] = $currency;
+                $lineItems["line_items[{$idx}][price_data][product_data][name]"] = ($product?->name ?? 'Produit') . ($item['variant_label'] ? ' — ' . $item['variant_label'] : '');
+                $lineItems["line_items[{$idx}][price_data][unit_amount]"] = (int) round($item['unit_price'] * 100);
+                $lineItems["line_items[{$idx}][quantity]"] = $item['quantity'];
+                $idx++;
+            }
+
+            if ($taxAmount > 0) {
+                $lineItems["line_items[{$idx}][price_data][currency]"] = $currency;
+                $lineItems["line_items[{$idx}][price_data][product_data][name]"] = 'TPS + TVQ';
+                $lineItems["line_items[{$idx}][price_data][unit_amount]"] = (int) round($taxAmount * 100);
+                $lineItems["line_items[{$idx}][quantity]"] = 1;
+                $idx++;
+            }
+
+            if ($shippingCost > 0) {
+                $lineItems["line_items[{$idx}][price_data][currency]"] = $currency;
+                $lineItems["line_items[{$idx}][price_data][product_data][name]"] = 'Livraison';
+                $lineItems["line_items[{$idx}][price_data][unit_amount]"] = (int) round($shippingCost * 100);
+                $lineItems["line_items[{$idx}][quantity]"] = 1;
             }
 
             $params = array_merge($lineItems, [

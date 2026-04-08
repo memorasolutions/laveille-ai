@@ -57,11 +57,19 @@ class GelatoService
             $body = [
                 'orderReferenceId' => (string) $order->id,
                 'customerReferenceId' => (string) ($order->user_id ?? $order->email),
-                'items' => $order->items->map(fn ($item) => [
-                    'itemReferenceId' => (string) $item->id,
-                    'productUid' => $item->gelato_variant_id,
-                    'quantity' => $item->quantity,
-                ])->toArray(),
+                'currency' => strtoupper(config('shop.currency', 'CAD')),
+                'items' => $order->items->map(function ($item) {
+                    $entry = [
+                        'itemReferenceId' => (string) $item->id,
+                        'productUid' => $item->gelato_variant_id,
+                        'quantity' => $item->quantity,
+                    ];
+                    $product = $item->product;
+                    if ($product && !empty($product->metadata['print_file_url'])) {
+                        $entry['files'] = [['type' => 'default', 'url' => $product->metadata['print_file_url']]];
+                    }
+                    return $entry;
+                })->toArray(),
                 'shippingAddress' => [
                     'firstName' => $address['first_name'] ?? '',
                     'lastName' => $address['last_name'] ?? '',
