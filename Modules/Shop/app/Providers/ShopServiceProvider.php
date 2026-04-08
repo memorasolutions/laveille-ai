@@ -48,6 +48,7 @@ class ShopServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Shop\Console\SyncGelatoPricesCommand::class,
+            \Modules\Shop\Console\SyncGelatoStoreCommand::class,
         ]);
     }
 

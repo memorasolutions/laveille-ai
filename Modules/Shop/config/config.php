@@ -9,6 +9,7 @@ return [
     'gelato' => [
         'api_key' => env('GELATO_API_KEY'),
         'api_url' => env('GELATO_API_URL', 'https://api.gelato.com'),
+        'store_id' => env('GELATO_STORE_ID'),
     ],
 
     'stripe' => [
