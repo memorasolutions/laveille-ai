@@ -64,33 +64,27 @@
                             $itemIdx = $loop->index;
                             $sizeOptions = !empty($item['product_sizes']) ? $item['product_sizes'] : (!$hasColors ? array_map(fn($v) => $v['label'] ?? $v, $item['product_variants']) : []);
                         @endphp
-                        <div x-data="{ editing: null }" style="margin-top: 6px;">
+                        <div x-data="variantPicker({{ $item['product_id'] }}, '{{ addslashes($currentColor ?? '') }}', '{{ addslashes($currentSize ?? '') }}', '{{ addslashes($item['variant_label']) }}', {{ $hasColors ? 'true' : 'false' }})" style="margin-top: 6px;">
                             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                                 @if($currentColor)
-                                <span @click="editing = editing === 'color' ? null : 'color'" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 4px; font-size: 12px; transition: all 0.15s;" onmouseenter="this.style.background='#e0f2fe';this.style.color='#0B7285'" onmouseleave="this.style.background='#f1f5f9';this.style.color='#64748b'">{{ $currentColor }} <i class="ti-pencil-alt" style="font-size: 9px;" aria-hidden="true"></i></span>
+                                <span @click="editing = editing === 'color' ? null : 'color'" x-text="currentColor + ' ✎'" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 4px; font-size: 12px; transition: all 0.15s;" onmouseenter="this.style.background='#e0f2fe';this.style.color='#0B7285'" onmouseleave="this.style.background='#f1f5f9';this.style.color='#64748b'"></span>
                                 @endif
                                 @if($currentSize)
-                                <span @click="editing = editing === 'size' ? null : 'size'" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 4px; font-size: 12px; transition: all 0.15s;" onmouseenter="this.style.background='#e0f2fe';this.style.color='#0B7285'" onmouseleave="this.style.background='#f1f5f9';this.style.color='#64748b'">{{ $currentSize }} <i class="ti-pencil-alt" style="font-size: 9px;" aria-hidden="true"></i></span>
+                                <span @click="editing = editing === 'size' ? null : 'size'" x-text="currentSize + ' ✎'" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 4px; font-size: 12px; transition: all 0.15s;" onmouseenter="this.style.background='#e0f2fe';this.style.color='#0B7285'" onmouseleave="this.style.background='#f1f5f9';this.style.color='#64748b'"></span>
                                 @endif
+                                <span x-show="updating" style="font-size: 11px; color: #0B7285;"><i class="ti-reload" style="display: inline-block; animation: spin-icon 1s linear infinite; font-size: 10px;"></i></span>
                             </div>
                             {{-- Sélecteur couleur --}}
                             @if($hasColors)
                             <div x-show="editing === 'color'" x-transition style="display: flex; gap: 8px; margin-top: 8px; padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
                                 @foreach($item['product_variants'] as $v)
                                 @if(!empty($v['color']))
-                                <form method="POST" action="{{ route('shop.cart.variant') }}" style="display:inline;">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                                    <input type="hidden" name="old_variant_label" value="{{ $item['variant_label'] }}">
-                                    <input type="hidden" name="new_variant_label" value="{{ $v['label'] }}{{ $currentSize ? ' - '.$currentSize : '' }}">
-                                    <input type="hidden" name="new_gelato_uid" value="{{ $v['gelato_uid'] }}">
-                                    <button type="submit" style="width: 28px; height: 28px; border-radius: 50%; background: {{ $v['color'] }}; border: 2px solid {{ $v['label'] === $currentColor ? '#0B7285' : '#e2e8f0' }}; cursor: pointer; transition: all 0.15s;" title="{{ $v['label'] }}" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform='scale(1)'"></button>
-                                </form>
+                                <button type="button" @click="pick('{{ $v['label'] }}{{ $currentSize ? ' - '.$currentSize : '' }}', '{{ $v['gelato_uid'] }}')" :style="'width:28px;height:28px;border-radius:50%;background:{{ $v['color'] }};cursor:pointer;transition:all 0.15s;border:2px solid '+(currentColor==='{{ $v['label'] }}'?'#0B7285':'#e2e8f0')" title="{{ $v['label'] }}" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform='scale(1)'"></button>
                                 @endif
                                 @endforeach
                             </div>
                             @endif
-                            {{-- Sélecteur taille — chaque option = un form individuel --}}
+                            {{-- Sélecteur taille --}}
                             @if(!empty($sizeOptions))
                             <div x-show="editing === 'size'" x-transition style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
                                 @foreach($sizeOptions as $sz)
@@ -99,14 +93,7 @@
                                     $szUid = $szVariant['gelato_uid'] ?? preg_replace('/_gsi_[^_]+_/', '_gsi_' . strtolower($sz) . '_', $item['gelato_variant_id'] ?? '');
                                     $newLabel = $currentColor ? $currentColor . ' - ' . $sz : $sz;
                                 @endphp
-                                <form method="POST" action="{{ route('shop.cart.variant') }}" style="display:inline;">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $item['product_id'] }}">
-                                    <input type="hidden" name="old_variant_label" value="{{ $item['variant_label'] }}">
-                                    <input type="hidden" name="new_variant_label" value="{{ $newLabel }}">
-                                    <input type="hidden" name="new_gelato_uid" value="{{ $szUid }}">
-                                    <button type="submit" style="padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid {{ $sz === $currentSize ? '#0B7285' : '#e2e8f0' }}; background: {{ $sz === $currentSize ? '#e0f2fe' : '#f8fafc' }}; color: {{ $sz === $currentSize ? '#0B7285' : '#64748b' }}; transition: all 0.15s;" onmouseenter="this.style.borderColor='#0B7285'" onmouseleave="this.style.borderColor='{{ $sz === $currentSize ? '#0B7285' : '#e2e8f0' }}'">{{ $sz }}</button>
-                                </form>
+                                <button type="button" @click="pick('{{ addslashes($newLabel) }}', '{{ $szUid }}')" :style="'padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;border:1.5px solid '+(currentSize==='{{ $sz }}'?'#0B7285':'#e2e8f0')+';background:'+(currentSize==='{{ $sz }}'?'#e0f2fe':'#f8fafc')+';color:'+(currentSize==='{{ $sz }}'?'#0B7285':'#64748b')" onmouseenter="this.style.borderColor='#0B7285'" onmouseleave="">{{ $sz }}</button>
                                 @endforeach
                             </div>
                             @endif
@@ -296,6 +283,30 @@
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
+    Alpine.data('variantPicker', (productId, color, size, oldLabel, hasColors) => ({
+        editing: null,
+        currentColor: color,
+        currentSize: size,
+        oldLabel: oldLabel,
+        updating: false,
+        async pick(newLabel, newUid) {
+            this.updating = true;
+            try {
+                await fetch(@json(route('shop.cart.variant')), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value, 'Accept': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, old_variant_label: this.oldLabel, new_variant_label: newLabel, new_gelato_uid: newUid })
+                });
+                this.oldLabel = newLabel;
+                var parts = newLabel.split(' - ');
+                if (parts.length === 2) { this.currentColor = parts[0]; this.currentSize = parts[1]; }
+                else if (hasColors) { this.currentColor = parts[0]; }
+                else { this.currentSize = parts[0]; }
+            } catch(e) { console.error('Variant update failed', e); }
+            this.editing = null;
+            this.updating = false;
+        }
+    }));
     Alpine.data('shopCheckout', () => ({
         country: 'CA',
         loading: false,

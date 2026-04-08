@@ -98,6 +98,10 @@ class CartController extends Controller
             $request->input('new_gelato_uid')
         );
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'new_variant_label' => $request->input('new_variant_label')]);
+        }
+
         return back()->with('success', __('Option mise à jour.'));
     }
 }
