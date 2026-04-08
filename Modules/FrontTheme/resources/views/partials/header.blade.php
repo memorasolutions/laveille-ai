@@ -269,7 +269,7 @@
                                 @else
                                     <div style="width:32px;height:32px;border-radius:50%;background:var(--c-primary);color:#fff;display:flex!important;align-items:center!important;justify-content:center!important;font-weight:700;font-size:13px;">{{ substr(auth()->user()->name, 0, 1) }}</div>
                                 @endif
-                                @if($unread > 0)<span style="position:absolute;top:-2px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex!important;align-items:center!important;justify-content:center!important;">{{ min($unread, 9) }}</span>@endif
+                                @include('fronttheme::partials.badge-count', ['count' => $unread, 'color' => '#ef4444'])
                             </button>
                             <div x-show="open" x-cloak x-transition style="position:absolute;right:0;top:40px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);width:220px;z-index:9999;padding:8px 0;">
                                 <div style="padding:12px 16px;border-bottom:1px solid #f3f4f6;">

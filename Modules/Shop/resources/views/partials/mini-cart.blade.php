@@ -1,11 +1,9 @@
 {{-- Mini-cart header — composant réutilisable du module Shop --}}
 <style>.mini-cart-icon{font-size:26px!important;color:#333!important;padding:4px!important;cursor:pointer;transition:transform 0.2s ease;}.mini-cart-icon:hover{transform:scale(1.1);}</style>
 @if(class_exists(\Modules\Shop\Models\Cart::class))
-<div x-data="{ open: false }" @click.outside="open = false" @click="open = !open" style="position:relative; display:flex; align-items:center; flex-shrink:0; margin-left:12px; cursor:pointer;">
+<div x-data="{ open: false }" @click.outside="open = false" @click="open = !open" style="position:relative; display:inline-flex; align-items:center; flex-shrink:0; margin-left:12px; margin-right:8px; cursor:pointer; vertical-align:middle;">
     <span class="mini-cart-icon ti-shopping-cart"></span>
-    @if(($cartItemCount ?? 0) > 0)
-        <span style="position:absolute; top:-8px; right:-10px; background:#0B7285; color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #fff;">{{ $cartItemCount }}</span>
-    @endif
+    @include('fronttheme::partials.badge-count', ['count' => $cartItemCount ?? 0, 'color' => '#ef4444'])
     <div x-show="open" x-cloak x-transition style="position:absolute; right:0; top:40px; width:320px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:9999; padding:16px;">
         @if(($cartItemCount ?? 0) > 0)
             <h3 style="font-size:14px; font-weight:700; margin:0 0 12px;">{{ __('Panier') }} ({{ $cartItemCount }})</h3>
