@@ -57,13 +57,15 @@
                                     <li><a href="#survie">{{ __('Survie des obligations') }}</a></li>
                                     <li><a href="#cession">{{ __('Cession et transfert') }}</a></li>
                                     <li><a href="#non-renonciation">{{ __('Non-renonciation') }}</a></li>
+                                    <li><a href="#confidentialite">{{ __('Protection des renseignements personnels') }}</a></li>
+                                    <li><a href="#accessibilite">{{ __('Accessibilité') }}</a></li>
                                     <li><a href="#contact">{{ __('Coordonnées') }}</a></li>
                                 </ol>
                             </div>
 
                             {{-- SECTION 1 : ACCEPTATION --}}
                             <h3 id="acceptation">{{ __('1. Acceptation des conditions') }}</h3>
-                            <p>{{ __('En accédant au site laveille.ai (ci-après le « Service »), vous acceptez d\'être lié par les présentes conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, vous ne devez pas utiliser le Service. Le Service est exploité par :name, personne physique résidant au Québec, Canada.', ['name' => $company['dpo_name']]) }}</p>
+                            <p>{{ __('En accédant au site laveille.ai (ci-après le « Service »), vous acceptez d\'être lié par les présentes conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, vous ne devez pas utiliser le Service. Le Service est exploité par MEMORA solutions (incorporation), 1501, rue Saint-Benoit, L\'Ancienne-Lorette (Québec) G2E 1P2, Canada (ci-après l\'« exploitant »). NEQ : 1170260492.') }}</p>
 
                             {{-- SECTION 2 : DESCRIPTION DU SERVICE --}}
                             <h3 id="service">{{ __('2. Description du service') }}</h3>
@@ -75,11 +77,15 @@
                                 <li>{{ __('Une liste d\'acronymes liés au milieu de l\'éducation au Québec') }}</li>
                                 <li>{{ __('Un service de raccourcisseur d\'URL (veille.la, go3.ca et tout autre domaine associé)') }}</li>
                                 <li>{{ __('Un blogue éditorial proposant des analyses et réflexions') }}</li>
+                                <li>{{ __('Une boutique en ligne de produits imprimés à la demande (les achats sont régis par nos') }} <a href="{{ route('legal.sales') }}">{{ __('conditions de vente') }}</a>)</li>
+                                <li>{{ __('Des outils interactifs gratuits (calculatrices, générateurs, compteurs)') }}</li>
+                                <li>{{ __('Une infolettre hebdomadaire sur l\'IA et la technologie') }}</li>
                             </ul>
 
                             {{-- SECTION 3 : COMPTES --}}
                             <h3 id="compte">{{ __('3. Comptes utilisateurs') }}</h3>
                             <p>{{ __('L\'accès à certaines fonctionnalités peut nécessiter la création d\'un compte. Le Service utilise une authentification sans mot de passe via l\'envoi d\'un code unique (OTP) par courriel ou par connexion sociale (Google, GitHub). Vous êtes responsable de maintenir la confidentialité de l\'accès à votre boîte courriel ou à vos comptes tiers. Toute activité effectuée sous votre compte est réputée être la vôtre.') }}</p>
+                            <p>{{ __('Vous devez avoir au moins 16 ans pour créer un compte. Pour effectuer des achats sur la boutique, vous devez avoir au moins 18 ans ou avoir l\'autorisation d\'un parent ou tuteur. L\'exploitant se réserve le droit de suspendre ou de supprimer tout compte, sans préavis, en cas de violation des présentes conditions, d\'inactivité prolongée ou de comportement abusif.') }}</p>
 
                             {{-- SECTION 4 : UGC --}}
                             <h3 id="contenu">{{ __('4. Contenu généré par les utilisateurs') }}</h3>
@@ -113,7 +119,7 @@
 
                             {{-- SECTION 11 : PI --}}
                             <h3 id="propriete">{{ __('11. Propriété intellectuelle') }}</h3>
-                            <p>{{ __('Le contenu éditorial original, la structure du site, le code source et le design appartiennent à :name. Le contenu tiers (articles de presse, logos de logiciels tiers) demeure la propriété exclusive de ses auteurs ou ayants droit respectifs. Toute reproduction non autorisée du contenu éditorial est interdite.', ['name' => $company['dpo_name']]) }}</p>
+                            <p>{{ __('Le contenu éditorial original, la structure du site, le code source et le design appartiennent à MEMORA solutions (incorporation) ou à ses partenaires. Le contenu tiers (articles de presse, logos de logiciels tiers) demeure la propriété exclusive de ses auteurs ou ayants droit respectifs. Toute reproduction non autorisée du contenu éditorial est interdite sans l\'accord écrit préalable de l\'exploitant.') }}</p>
 
                             {{-- SECTION 12 : ANTI-SCRAPING --}}
                             <h3 id="anti-scraping">{{ __('12. Interdiction de moissonnage et d\'entraînement d\'IA') }}</h3>
@@ -121,7 +127,17 @@
 
                             {{-- SECTION 13 : COMPORTEMENT --}}
                             <h3 id="usage">{{ __('13. Comportement acceptable') }}</h3>
-                            <p>{{ __('Vous vous engagez à utiliser le Service de manière responsable. Sont strictement interdits : le pollupostage (spam), l\'utilisation de robots pour le moissonnage de données (scraping) sans autorisation, les tentatives d\'intrusion dans les systèmes et tout comportement abusif envers les autres utilisateurs ou l\'exploitant.') }}</p>
+                            <p>{{ __('Vous vous engagez à utiliser le Service de manière responsable. Sont strictement interdits :') }}</p>
+                            <ul>
+                                <li>{{ __('le pollupostage (spam), la publicité non sollicitée ou le démarchage commercial') }}</li>
+                                <li>{{ __('l\'utilisation de robots, de scripts ou d\'outils automatisés pour le moissonnage de données (scraping) sans autorisation') }}</li>
+                                <li>{{ __('les tentatives d\'intrusion, de piratage ou de contournement des mesures de sécurité') }}</li>
+                                <li>{{ __('le harcèlement, les menaces, l\'intimidation ou tout comportement abusif envers les autres utilisateurs ou l\'exploitant') }}</li>
+                                <li>{{ __('la diffusion de discours haineux, discriminatoire, diffamatoire ou incitant à la violence (Code criminel, art. 319)') }}</li>
+                                <li>{{ __('l\'usurpation d\'identité ou la création de faux comptes') }}</li>
+                                <li>{{ __('la diffusion de contenu illégal, obscène, pornographique ou portant atteinte aux droits de tiers') }}</li>
+                                <li>{{ __('toute tentative de décompiler, désassembler ou procéder à l\'ingénierie inverse du Service') }}</li>
+                            </ul>
 
                             {{-- SECTION 14 : MODÉRATION --}}
                             <h3 id="moderation">{{ __('14. Modération') }}</h3>
@@ -168,7 +184,7 @@
 
                             {{-- SECTION 22 : INDEMNISATION --}}
                             <h3 id="indemnisation">{{ __('22. Indemnisation') }}</h3>
-                            <p>{{ __('Vous acceptez d\'indemniser et de dégager de toute responsabilité :name contre les réclamations, dommages ou frais (incluant les honoraires d\'avocat) découlant de votre violation des présentes conditions ou de votre utilisation du Service.', ['name' => $company['dpo_name']]) }}</p>
+                            <p>{{ __('Vous acceptez d\'indemniser et de dégager de toute responsabilité MEMORA solutions, ses dirigeants, employés et représentants contre toute réclamation, dommage, perte ou frais (incluant les honoraires d\'avocat raisonnables) découlant de votre violation des présentes conditions, de votre utilisation du Service ou de tout contenu que vous soumettez.') }}</p>
 
                             {{-- SECTION 23 : LOI APPLICABLE --}}
                             <h3 id="loi">{{ __('23. Loi applicable') }}</h3>
@@ -194,14 +210,22 @@
                             <h3 id="non-renonciation">{{ __('28. Non-renonciation') }}</h3>
                             <p>{{ __('Le fait pour l\'exploitant de ne pas se prévaloir d\'un manquement à l\'une quelconque des obligations contenues dans les présentes conditions, ou de tarder à exercer un droit qui lui est conféré, ne saurait être interprété comme une renonciation définitive à ce droit ou à l\'exécution de ladite obligation pour l\'avenir.') }}</p>
 
-                            {{-- SECTION 29 : CONTACT --}}
-                            <h3 id="contact">{{ __('29. Coordonnées') }}</h3>
+                            {{-- SECTION 29 : CONFIDENTIALITÉ --}}
+                            <h3 id="confidentialite">{{ __('29. Protection des renseignements personnels') }}</h3>
+                            <p>{{ __('La collecte et le traitement de vos renseignements personnels sont régis par notre') }} <a href="{{ route('legal.privacy') }}">{{ __('politique de confidentialité') }}</a>{{ __(', qui fait partie intégrante des présentes conditions. Nos pratiques sont conformes à la Loi 25 du Québec (Loi sur la protection des renseignements personnels dans le secteur privé) et à la Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) du Canada.') }}</p>
+
+                            {{-- SECTION 30 : ACCESSIBILITÉ --}}
+                            <h3 id="accessibilite">{{ __('30. Accessibilité') }}</h3>
+                            <p>{{ __('L\'exploitant s\'engage à rendre le Service accessible au plus grand nombre, conformément aux normes WCAG 2.2 niveau AA. Si vous rencontrez des difficultés d\'accessibilité, veuillez nous contacter à politiques@memora.ca afin que nous puissions y remédier.') }}</p>
+
+                            {{-- SECTION 31 : CONTACT --}}
+                            <h3 id="contact">{{ __('31. Coordonnées') }}</h3>
                             <p>{{ __('Pour toute question concernant ces conditions :') }}</p>
                             <ul>
-                                <li><strong>{{ $company['dpo_name'] }}</strong></li>
-                                <li>{{ $company['address'] }}</li>
-                                <li>{{ __('Courriel') }}&nbsp;: <a href="mailto:{{ $company['email'] }}">{{ $company['email'] }}</a></li>
-                                <li>{{ __('Responsable des politiques') }}&nbsp;: <a href="mailto:{{ $company['dpo_email'] }}">{{ $company['dpo_email'] }}</a></li>
+                                <li><strong>MEMORA solutions</strong> ({{ __('exploitation') }} : laveille.ai)</li>
+                                <li>1501, rue Saint-Benoit, L'Ancienne-Lorette (Québec) G2E 1P2, Canada</li>
+                                <li>{{ __('Courriel') }}&nbsp;: <a href="mailto:politiques@memora.ca">politiques@memora.ca</a></li>
+                                <li>{{ __('Téléphone') }}&nbsp;: 418-800-6656 / {{ __('sans frais') }} : 1-833-363-6672</li>
                             </ul>
 
                             <hr>
