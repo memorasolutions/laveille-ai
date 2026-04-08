@@ -86,7 +86,7 @@ class StripeService
                 $session = $event['data']['object'];
                 $order = Order::where('stripe_session_id', $session['id'])->first();
 
-                if ($order) {
+                if ($order && $order->status === 'pending') {
                     $order->update([
                         'status' => 'paid',
                         'stripe_payment_intent_id' => $session['payment_intent'] ?? null,
