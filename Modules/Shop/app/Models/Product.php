@@ -48,23 +48,19 @@ class Product extends Model
     }
 
     /**
-     * Calcule le prix de vente incluant production + livraison estimée + marge.
-     * Arrondi au .99 : >= .05 → .99 même entier, <= .04 → .99 entier précédent.
+     * Calcule le prix de vente : production × taux CAD × (1 + marge).
+     * La livraison est facturée séparément au checkout (pas dans le prix produit).
+     * Arrondi au .99 : >= .05 → même entier, <= .04 → entier précédent.
      */
-    public static function smartPrice(float $costBaseUsd, string $category = 'default', ?float $estimatedShippingUsd = null): float
+    public static function smartPrice(float $costBaseUsd, string $category = 'default'): float
     {
         $rate = config('shop.pricing.usd_cad_rate', 1.40);
-        $shippingByCategory = config('shop.pricing.shipping_by_category', []);
-        $shippingUsd = $estimatedShippingUsd
-            ?? Arr::get($shippingByCategory, $category)
-            ?? config('shop.pricing.estimated_shipping_usd', 11.00);
-
-        $totalCostCad = ($costBaseUsd + $shippingUsd) * $rate;
+        $costCad = $costBaseUsd * $rate;
 
         $margins = config('shop.pricing.margins', ['default' => 0.30]);
         $margin = Arr::get($margins, $category, $margins['default'] ?? 0.30);
 
-        $result = $totalCostCad * (1 + $margin);
+        $result = $costCad * (1 + $margin);
 
         return self::roundTo99($result);
     }
