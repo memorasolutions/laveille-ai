@@ -15,8 +15,11 @@ La veille (laveille.ai) est une plateforme independante fondee par Stephane Lapo
 - [Flux RSS](https://laveille.ai/feed) : Flux complet des contenus du site au format RSS.
 - [Ressources](https://laveille.ai/ressources) : Hub central regroupant tous les contenus et sections du site.
 - [Raccourcir](https://laveille.ai/raccourcir) : Service de raccourcissement d'URL personnalise (veille.la).
+- [Boutique](https://laveille.ai/boutique) : Produits derives (t-shirts, tasses, hoodies) imprimes a la demande, livraison mondiale.
+- [Infolettre](https://laveille.ai/infolettre) : Archive des numeros de l'infolettre hebdomadaire.
+- [Roadmap](https://laveille.ai/roadmap) : Tableau public des fonctionnalites prevues et en cours de developpement.
 
 ## Contact
-Courriel : stephane@memora.ca
+Courriel : info@laveille.ai
 Telephone : 418-800-6656
 Reseaux sociaux : [Facebook](https://facebook.com/LaVeilleDeStef) | [LinkedIn](https://linkedin.com/in/lapointestephane)

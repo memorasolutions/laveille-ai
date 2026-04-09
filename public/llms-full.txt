@@ -62,6 +62,15 @@ https://laveille.ai/ressources
 Contact
 https://laveille.ai/contact
 
+Boutique (produits derives)
+https://laveille.ai/boutique
+
+Infolettre (archives)
+https://laveille.ai/infolettre
+
+Roadmap public
+https://laveille.ai/roadmap
+
 Flux RSS
 https://laveille.ai/feed
 
