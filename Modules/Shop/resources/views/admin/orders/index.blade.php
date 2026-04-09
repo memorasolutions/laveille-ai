@@ -39,13 +39,13 @@
                                 <td>
                                     @switch($order->status)
                                         @case('pending') <span class="badge bg-secondary">{{ __('En attente') }}</span> @break
-                                        @case('paid') <span class="badge bg-success">{{ __('Paye') }}</span> @break
+                                        @case('paid') <span class="badge bg-success">{{ __('Payé') }}</span> @break
                                         @case('processing') <span class="badge bg-warning text-dark">{{ __('En production') }}</span> @break
                                         @case('fulfilled') <span class="badge bg-info">{{ __('Produit') }}</span> @break
-                                        @case('shipped') <span class="badge bg-primary">{{ __('Expedie') }}</span> @break
-                                        @case('delivered') <span class="badge bg-success">{{ __('Livre') }}</span> @break
-                                        @case('cancelled') <span class="badge bg-danger">{{ __('Annule') }}</span> @break
-                                        @case('refunded') <span class="badge bg-dark">{{ __('Rembourse') }}</span> @break
+                                        @case('shipped') <span class="badge bg-primary">{{ __('Expédié') }}</span> @break
+                                        @case('delivered') <span class="badge bg-success">{{ __('Livré') }}</span> @break
+                                        @case('cancelled') <span class="badge bg-danger">{{ __('Annulé') }}</span> @break
+                                        @case('refunded') <span class="badge bg-dark">{{ __('Remboursé') }}</span> @break
                                     @endswitch
                                 </td>
                                 <td>{{ number_format($order->total, 2, ',', ' ') }} $</td>
