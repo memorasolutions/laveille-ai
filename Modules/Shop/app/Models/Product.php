@@ -54,7 +54,7 @@ class Product extends Model
      */
     public static function smartPrice(float $costBaseUsd, string $category = 'default'): float
     {
-        $rate = config('shop.pricing.usd_cad_rate', 1.40);
+        $rate = \Modules\Shop\Services\ExchangeRateService::rate();
         $costCad = $costBaseUsd * $rate;
 
         $margins = config('shop.pricing.margins', ['default' => 0.30]);
