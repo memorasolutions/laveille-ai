@@ -21,6 +21,12 @@ class WebhookController extends Controller
     public function gelato(Request $request)
     {
         try {
+            $secret = config('shop.gelato_webhook_secret');
+            if ($secret && $request->header('X-Gelato-Secret') !== $secret) {
+                Log::warning('Gelato webhook : secret invalide');
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
             $payload = $request->all();
             $event = $payload['event'] ?? null;
 

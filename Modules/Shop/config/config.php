@@ -10,7 +10,10 @@ return [
         'api_key' => env('GELATO_API_KEY'),
         'api_url' => env('GELATO_API_URL', 'https://api.gelato.com'),
         'store_id' => env('GELATO_STORE_ID'),
+        'webhook_secret' => env('GELATO_WEBHOOK_SECRET'),
     ],
+
+    'gelato_webhook_secret' => env('GELATO_WEBHOOK_SECRET'),
 
     'stripe' => [
         'secret_key' => env('STRIPE_SECRET_KEY'),
