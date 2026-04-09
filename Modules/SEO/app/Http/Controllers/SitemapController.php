@@ -50,9 +50,20 @@ class SitemapController
             );
         });
 
-        // Outils (si module Tools actif)
+        // Outils interactifs (si module Tools actif)
         if (Route::has('tools.index') && class_exists(\Modules\Tools\Models\Tool::class)) {
             $sitemap->add(Url::create(route('tools.index'))->setPriority(0.9)->setChangeFrequency('weekly'));
+
+            if (Route::has('tools.show')) {
+                \Modules\Tools\Models\Tool::active()->ordered()->get()->each(function ($tool) use ($sitemap) {
+                    $sitemap->add(
+                        Url::create(route('tools.show', $tool->slug))
+                            ->setLastModificationDate($tool->updated_at)
+                            ->setPriority(0.8)
+                            ->setChangeFrequency('weekly')
+                    );
+                });
+            }
         }
 
         // Glossaire (si module Dictionary actif)
@@ -102,6 +113,27 @@ class SitemapController
             });
         }
 
+        // Boutique (si module Shop actif)
+        if (Route::has('shop.index') && class_exists(\Modules\Shop\Models\Product::class)) {
+            $sitemap->add(Url::create(route('shop.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
+
+            if (Route::has('shop.show')) {
+                \Modules\Shop\Models\Product::published()->get()->each(function ($product) use ($sitemap) {
+                    $tag = Url::create(route('shop.show', $product))
+                        ->setLastModificationDate($product->updated_at)
+                        ->setPriority(0.7)
+                        ->setChangeFrequency('weekly');
+
+                    if (is_array($product->images) && ! empty($product->images)) {
+                        $img = $product->images[0];
+                        $tag->addImage(str_starts_with($img, 'http') ? $img : url($img));
+                    }
+
+                    $sitemap->add($tag);
+                });
+            }
+        }
+
         // Pages statiques publiques
         if (Route::has('contact')) {
             $sitemap->add(Url::create(route('contact'))->setPriority(0.5)->setChangeFrequency('monthly'));
@@ -112,8 +144,8 @@ class SitemapController
         if (Route::has('resources.index')) {
             $sitemap->add(Url::create(route('resources.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
         }
-        if (Route::has('directory.roadmap')) {
-            $sitemap->add(Url::create(route('directory.roadmap'))->setPriority(0.6)->setChangeFrequency('weekly'));
+        if (Route::has('roadmap.boards.index')) {
+            $sitemap->add(Url::create(route('roadmap.boards.index'))->setPriority(0.6)->setChangeFrequency('weekly'));
         }
 
         // News (si module News actif)
@@ -133,6 +165,18 @@ class SitemapController
                     $sitemap->add($url);
                 });
             }
+        }
+
+        // Pages legales
+        foreach (['legal.sales', 'legal.terms', 'legal.cookies', 'legal.privacy'] as $legalRoute) {
+            if (Route::has($legalRoute)) {
+                $sitemap->add(Url::create(route($legalRoute))->setPriority(0.4)->setChangeFrequency('monthly'));
+            }
+        }
+
+        // Newsletter archive
+        if (Route::has('newsletter.archive')) {
+            $sitemap->add(Url::create(route('newsletter.archive'))->setPriority(0.5)->setChangeFrequency('monthly'));
         }
 
         return response($sitemap->render(), 200, ['Content-Type' => 'application/xml']);
