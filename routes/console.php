@@ -49,6 +49,9 @@ Schedule::command('newsletter:digest --send --force')->weeklyOn(3, '09:00');
 // Queue worker pour jobs newsletter (shared hosting — pas de daemon)
 Schedule::command('queue:work --queue=newsletters --stop-when-empty --max-time=55')->everyMinute();
 
+// Synchronisation produits Gelato (dimanche 3h)
+Schedule::command('shop:sync-gelato')->sundays()->at('03:00');
+
 // AI knowledge base - scrape URLs needing refresh
 Schedule::command('ai:scrape-urls --all')->dailyAt('05:00');
 
