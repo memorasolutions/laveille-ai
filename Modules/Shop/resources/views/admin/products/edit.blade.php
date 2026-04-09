@@ -1,6 +1,4 @@
-@extends('admin.layouts.master')
-
-@section('title', __('Editer') . ' ' . $product->name)
+@extends('backoffice::layouts.admin', ['title' => __('Modifier le produit')])
 
 @section('content')
 <div class="row">

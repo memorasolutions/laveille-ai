@@ -1,6 +1,5 @@
-@extends('admin.layouts.master')
+@extends('backoffice::layouts.admin', ['title' => __('Commande') . ' #' . $order->id])
 
-@section('title', __('Commande') . ' #' . $order->id)
 
 @section('content')
 <div class="row">

@@ -1,6 +1,4 @@
-@extends('admin.layouts.master')
-
-@section('title', __('Parametres boutique'))
+@extends('backoffice::layouts.admin', ['title' => __('Paramètres boutique')])
 
 @section('content')
 <div class="row">
