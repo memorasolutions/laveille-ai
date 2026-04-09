@@ -1,60 +1,47 @@
 @extends(fronttheme_layout())
 
+@php
+    $metaDescription = $product->short_description
+        ? Str::limit($product->short_description, 160)
+        : Str::limit(strip_tags($product->description), 160);
+
+    $productImage = !empty($product->images)
+        ? (Str::startsWith($product->images[0], ['http://', 'https://'])
+            ? $product->images[0]
+            : asset($product->images[0]))
+        : null;
+@endphp
+
 @section('title', $product->name . ' - ' . __('Boutique'))
+@section('meta_description', $metaDescription)
+@section('og_type', 'product')
+@if($productImage)
+    @section('og_image', $productImage)
+@endif
+
+@php
+    $schemaJson = json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $product->name,
+        'description' => $product->short_description ?: Str::limit(strip_tags($product->description), 300),
+        'url' => route('shop.show', $product),
+        'sku' => $product->slug,
+        'brand' => ['@type' => 'Brand', 'name' => 'La veille'],
+        'image' => $productImage,
+        'offers' => [
+            '@type' => 'Offer',
+            'url' => route('shop.show', $product),
+            'priceCurrency' => 'CAD',
+            'price' => number_format($product->price, 2, '.', ''),
+            'availability' => 'https://schema.org/InStock',
+            'seller' => ['@type' => 'Organization', 'name' => 'La veille'],
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+@endphp
 
 @push('head')
-    @php
-        $metaDescription = $product->short_description
-            ? Str::limit($product->short_description, 160)
-            : Str::limit(strip_tags($product->description), 160);
-
-        $productImage = !empty($product->images)
-            ? (Str::startsWith($product->images[0], ['http://', 'https://'])
-                ? $product->images[0]
-                : asset($product->images[0]))
-            : null;
-
-        $productUrl = route('shop.show', $product);
-
-        $schema = [
-            '@context' => 'https://schema.org',
-            '@type' => 'Product',
-            'name' => $product->name,
-            'description' => $product->short_description ?: Str::limit(strip_tags($product->description), 300),
-            'url' => $productUrl,
-            'sku' => $product->slug,
-            'brand' => ['@type' => 'Brand', 'name' => 'La veille'],
-            'offers' => [
-                '@type' => 'Offer',
-                'url' => $productUrl,
-                'priceCurrency' => 'CAD',
-                'price' => number_format($product->price, 2, '.', ''),
-                'availability' => 'https://schema.org/InStock',
-                'seller' => ['@type' => 'Organization', 'name' => 'La veille'],
-            ],
-        ];
-
-        if ($productImage) {
-            $schema['image'] = $productImage;
-        }
-
-        if (!empty($product->compare_price) && $product->compare_price > $product->price) {
-            $schema['offers']['priceValidUntil'] = now()->addDays(30)->toDateString();
-        }
-    @endphp
-
-    <meta name="description" content="{{ $metaDescription }}">
-    <meta property="og:title" content="{{ $product->name }}">
-    <meta property="og:description" content="{{ $metaDescription }}">
-    <meta property="og:type" content="product">
-    <meta property="og:url" content="{{ $productUrl }}">
-    @if($productImage)
-        <meta property="og:image" content="{{ $productImage }}">
-    @endif
-
-    <script type="application/ld+json">
-        {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
-    </script>
+    <script type="application/ld+json">{!! $schemaJson !!}</script>
 @endpush
 
 @section('breadcrumb')
