@@ -187,8 +187,14 @@ class SyncGelatoStoreCommand extends Command
         $sizes = array_values(array_unique(array_filter($sizes)));
         usort($sizes, fn ($a, $b) => $this->sizeOrder($a) <=> $this->sizeOrder($b));
 
+        // Calculer le prix automatiquement via l'API Gelato + smartPrice
+        $firstUid = collect($colorGroups)->first()['uid_m'] ?? '';
+        $costBase = $this->fetchCostBase($firstUid);
+        $category = $this->detectCategory($gelato['title'] ?? '');
+        $price = ($costBase !== null) ? Product::smartPrice($costBase, $category) : 0;
+
         if ($this->option('dry-run')) {
-            $this->components->twoColumnDetail("[DRY RUN CRÉÉ] {$gelato['title']}", count($variants).' couleurs');
+            $this->components->twoColumnDetail("[DRY RUN CRÉÉ] {$gelato['title']}", count($variants)." couleurs, {$category}, coût {$costBase} USD → {$price} CAD");
             return 'created';
         }
 
@@ -196,7 +202,8 @@ class SyncGelatoStoreCommand extends Command
             'name' => $gelato['title'] ?? 'Produit Gelato',
             'slug' => Str::slug($gelato['title'] ?? 'produit-gelato'),
             'description' => strip_tags($gelato['description'] ?? ''),
-            'price' => 0,
+            'price' => $price,
+            'category' => $category,
             'images' => [],
             'variants' => $variants,
             'status' => 'draft',
@@ -204,11 +211,52 @@ class SyncGelatoStoreCommand extends Command
                 'gelato_store_product_id' => $gelato['id'],
                 'store_variant_map' => $storeVariantMap,
                 'sizes' => $sizes,
+                'cost_base' => $costBase,
+                'cost_currency' => 'USD',
             ],
         ]);
 
-        $this->components->twoColumnDetail("[CRÉÉ] {$gelato['title']}", count($variants).' couleurs (status: draft)');
+        $this->components->twoColumnDetail("[CRÉÉ] {$gelato['title']}", count($variants)." couleurs, {$price} CAD (status: draft)");
         return 'created';
+    }
+
+    private function fetchCostBase(string $productUid): ?float
+    {
+        try {
+            $response = Http::withHeaders([
+                'X-API-KEY' => config('shop.gelato.api_key'),
+            ])->get("https://product.gelatoapis.com/v3/products/{$productUid}/prices", [
+                'country' => 'CA',
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return isset($data[0]['price']) ? round((float) $data[0]['price'], 2) : null;
+            }
+        } catch (\Exception $e) {
+            $this->components->warn("Erreur API prix : {$e->getMessage()}");
+        }
+
+        return null;
+    }
+
+    private function detectCategory(string $title): string
+    {
+        $title = strtolower($title);
+        $map = [
+            'hoodie' => 'hoodies', 't-shirt' => 't-shirts', 'tshirt' => 't-shirts',
+            'mug' => 'mugs', 'tasse' => 'mugs', 'water bottle' => 'water-bottles',
+            'bouteille' => 'water-bottles', 'tote' => 'tote-bags', 'sac' => 'tote-bags',
+            'poster' => 'posters',
+        ];
+
+        foreach ($map as $keyword => $category) {
+            if (str_contains($title, $keyword)) {
+                return $category;
+            }
+        }
+
+        return 'default';
     }
 
     private function sizeOrder(string $size): int

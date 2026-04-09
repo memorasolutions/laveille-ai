@@ -14,7 +14,7 @@ class SyncGelatoPricesCommand extends Command
 
     public function handle(): int
     {
-        $products = Product::whereNotNull('gelato_product_id')->get();
+        $products = Product::all()->filter(fn ($p) => ! empty($p->metadata['cost_base']));
         $results = [];
         $force = $this->option('force');
 
@@ -23,9 +23,15 @@ class SyncGelatoPricesCommand extends Command
                 $oldCost = $product->metadata['cost_base'] ?? null;
                 $oldPrice = (float) $product->price;
 
+                $productUid = collect($product->variants ?? [])->first()['gelato_uid'] ?? null;
+                if (! $productUid) {
+                    $results[] = [$product->name, $oldCost, '-', $oldPrice, '-', 'Pas de UID Gelato'];
+                    continue;
+                }
+
                 $response = Http::withHeaders([
                     'X-API-KEY' => config('shop.gelato.api_key'),
-                ])->get("https://product.gelatoapis.com/v3/products/{$product->gelato_product_id}/prices", [
+                ])->get("https://product.gelatoapis.com/v3/products/{$productUid}/prices", [
                     'country' => 'CA',
                 ]);
 
