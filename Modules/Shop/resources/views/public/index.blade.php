@@ -20,7 +20,13 @@
         <p style="color: #64748b; font-size: 15px;">{{ $products->total() }} {{ __('produits imprimés à la demande au Canada') }}</p>
     </div>
 
-    @if($products->isEmpty())
+    @if(config('shop.maintenance', false))
+        <div style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🛠️</div>
+            <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">{{ __('Boutique en préparation') }}</h2>
+            <p style="color: #64748b; font-size: 16px; max-width: 480px; margin: 0 auto;">{{ __('Nous préparons de nouveaux produits pour vous. Revenez bientôt pour découvrir notre collection mise à jour.') }}</p>
+        </div>
+    @elseif($products->isEmpty())
         <div class="alert alert-info">{{ __('Aucun produit disponible pour le moment.') }}</div>
     @else
         <div class="row">

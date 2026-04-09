@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     'name' => 'Shop',
     'enabled' => env('SHOP_ENABLED', true),
+    'maintenance' => env('SHOP_MAINTENANCE', false),
 
     'gelato' => [
         'api_key' => env('GELATO_API_KEY'),
