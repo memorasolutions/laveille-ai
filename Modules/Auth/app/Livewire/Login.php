@@ -109,7 +109,13 @@ class Login extends Component
             return;
         }
 
+        $oldSessionId = session()->getId();
         session()->regenerate();
+
+        // Synchroniser le panier guest → user
+        if (class_exists(\Modules\Shop\Services\CartService::class)) {
+            app(\Modules\Shop\Services\CartService::class)->syncSessionCart($oldSessionId, Auth::id());
+        }
 
         if ($user->must_change_password) {
             $this->redirect(route('password.force-change'), navigate: false);

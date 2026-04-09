@@ -142,7 +142,13 @@ class MagicLinkController extends Controller
             return redirect()->route('auth.two-factor-challenge');
         }
 
+        $oldSessionId = session()->getId();
         auth()->login($user, true);
+
+        // Synchroniser le panier guest → user (le login régénère le session_id)
+        if (class_exists(\Modules\Shop\Services\CartService::class)) {
+            app(\Modules\Shop\Services\CartService::class)->syncSessionCart($oldSessionId, $user->id);
+        }
 
         if ($user->must_change_password) {
             return redirect()->route('password.force-change');
@@ -194,8 +200,14 @@ class MagicLinkController extends Controller
             return response()->json(['success' => false, 'message' => __('Code invalide ou expire.')], 422);
         }
 
+        $oldSessionId = session()->getId();
         auth()->login($user, true);
 
-        return response()->json(['success' => true, 'message' => __('Connecte avec succes !')]);
+        // Synchroniser le panier guest → user
+        if (class_exists(\Modules\Shop\Services\CartService::class)) {
+            app(\Modules\Shop\Services\CartService::class)->syncSessionCart($oldSessionId, $user->id);
+        }
+
+        return response()->json(['success' => true, 'message' => __('Connecté avec succès !')]);
     }
 }

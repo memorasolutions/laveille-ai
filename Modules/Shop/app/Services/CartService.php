@@ -167,7 +167,16 @@ class CartService
 
     public function syncWithUser(int $userId): void
     {
-        $sessionCart = Cart::bySession(session()->getId())->active()->first();
+        $this->syncSessionCart(session()->getId(), $userId);
+    }
+
+    /**
+     * Synchronise le panier d'une session (avant login) vers un utilisateur.
+     * Appelé avec l'ancien session_id capturé AVANT la régénération de session.
+     */
+    public function syncSessionCart(string $oldSessionId, int $userId): void
+    {
+        $sessionCart = Cart::bySession($oldSessionId)->active()->first();
 
         if (! $sessionCart) {
             return;
