@@ -59,23 +59,18 @@ class GelatoService
                 'customerReferenceId' => (string) ($order->user_id ?? $order->email),
                 'currency' => strtoupper(config('shop.currency', 'CAD')),
                 'items' => $order->items->map(function ($item) {
+                    $product = $item->product;
                     $entry = [
                         'itemReferenceId' => (string) $item->id,
+                        'productUid' => $item->gelato_variant_id,
                         'quantity' => $item->quantity,
                     ];
-                    $product = $item->product;
 
-                    // Priorité au storeProductVariantId (design configuré dans le dashboard Gelato)
-                    $storeVariantId = $product->metadata['store_variant_map'][$item->gelato_variant_id] ?? null;
-
-                    if ($storeVariantId) {
-                        $entry['storeProductVariantId'] = $storeVariantId;
-                    } else {
-                        $entry['productUid'] = $item->gelato_variant_id;
-                        if ($product && !empty($product->metadata['print_file_url'])) {
-                            $entry['files'] = [['type' => 'default', 'url' => $product->metadata['print_file_url']]];
-                        }
+                    // Fichier d'impression obligatoire pour la production
+                    if ($product && !empty($product->metadata['print_file_url'])) {
+                        $entry['files'] = [['type' => 'default', 'url' => $product->metadata['print_file_url']]];
                     }
+
                     return $entry;
                 })->toArray(),
                 'shippingAddress' => [
