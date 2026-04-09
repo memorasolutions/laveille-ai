@@ -209,8 +209,4 @@
     {{-- Description déplacée en haut dans la zone info produit --}}
 </div>
 
-{{-- Schema.org Product --}}
-@if(isset($schema))
-    <script type="application/ld+json">{!! $schema !!}</script>
-@endif
 @endsection
