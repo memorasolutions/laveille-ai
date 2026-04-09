@@ -47,24 +47,42 @@ class Product extends Model
         return $query->where('category', $category);
     }
 
-    public static function smartPrice(float $costBaseUsd, string $category = 'default'): float
+    /**
+     * Calcule le prix de vente incluant production + livraison estimée + marge.
+     * Arrondi au .99 : >= .05 → .99 même entier, <= .04 → .99 entier précédent.
+     */
+    public static function smartPrice(float $costBaseUsd, string $category = 'default', ?float $estimatedShippingUsd = null): float
     {
         $rate = config('shop.pricing.usd_cad_rate', 1.40);
-        $costCad = $costBaseUsd * $rate;
+        $shippingByCategory = config('shop.pricing.shipping_by_category', []);
+        $shippingUsd = $estimatedShippingUsd
+            ?? Arr::get($shippingByCategory, $category)
+            ?? config('shop.pricing.estimated_shipping_usd', 11.00);
 
-        $margins = config('shop.pricing.margins', [
-            't-shirts' => 0.45,
-            'mugs' => 0.50,
-            'tote-bags' => 0.60,
-            'posters' => 0.50,
-            'hoodies' => 0.45,
-            'default' => 0.45,
-        ]);
+        $totalCostCad = ($costBaseUsd + $shippingUsd) * $rate;
 
-        $margin = Arr::get($margins, $category, $margins['default']);
-        $result = $costCad * (1 + $margin);
+        $margins = config('shop.pricing.margins', ['default' => 0.30]);
+        $margin = Arr::get($margins, $category, $margins['default'] ?? 0.30);
 
-        return ceil($result) - 0.01;
+        $result = $totalCostCad * (1 + $margin);
+
+        return self::roundTo99($result);
+    }
+
+    /**
+     * Arrondi intelligent au .99 :
+     * >= .05 → .99 du même entier (54.24 → 54.99)
+     * <= .04 → .99 de l'entier précédent (55.04 → 54.99, 55.00 → 54.99)
+     */
+    public static function roundTo99(float $price): float
+    {
+        $cents = round(($price - floor($price)) * 100);
+
+        if ($cents >= 5) {
+            return floor($price) + 0.99;
+        }
+
+        return floor($price) - 1 + 0.99;
     }
 
     public function calculatePrice(): float

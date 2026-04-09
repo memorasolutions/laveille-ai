@@ -42,13 +42,23 @@ return [
 
     'pricing' => [
         'usd_cad_rate' => (float) env('SHOP_USD_CAD_RATE', 1.40),
+        'estimated_shipping_usd' => (float) env('SHOP_ESTIMATED_SHIPPING_USD', 11.00),
+        'shipping_by_category' => [
+            'hoodies' => 12.00,
+            't-shirts' => 8.00,
+            'mugs' => 6.00,
+            'tote-bags' => 7.00,
+            'water-bottles' => 7.00,
+            'posters' => 5.00,
+        ],
         'margins' => [
-            't-shirts' => 1.25,
-            'mugs' => 1.35,
-            'tote-bags' => 1.15,
-            'posters' => 1.00,
-            'hoodies' => 1.10,
-            'default' => 1.00,
+            'hoodies' => 0.30,
+            't-shirts' => 0.30,
+            'mugs' => 0.35,
+            'tote-bags' => 0.30,
+            'water-bottles' => 0.30,
+            'posters' => 0.25,
+            'default' => 0.30,
         ],
     ],
 ];
