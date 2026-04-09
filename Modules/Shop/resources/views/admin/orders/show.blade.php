@@ -90,6 +90,22 @@
                     <h6 class="mt-3">{{ __('Notes') }}</h6>
                     <p>{{ $order->notes }}</p>
                 @endif
+
+                <h6 class="mt-3">{{ __('Profit estimé') }}</h6>
+                @php
+                    $rate = (float) config('shop.usd_cad_rate', env('SHOP_USD_CAD_RATE', 1.40));
+                    $costTotal = 0;
+                    foreach ($order->items as $item) {
+                        $costBase = (float) ($item->product?->metadata['cost_base'] ?? 0);
+                        $costTotal += $costBase * $rate * $item->quantity;
+                    }
+                    $profit = $order->subtotal - $costTotal;
+                @endphp
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted">{{ __('Coût production') }}</td><td class="text-end">{{ number_format($costTotal, 2, ',', ' ') }} $</td></tr>
+                    <tr><td class="text-muted">{{ __('Sous-total vendu') }}</td><td class="text-end">{{ number_format($order->subtotal, 2, ',', ' ') }} $</td></tr>
+                    <tr class="fw-bold {{ $profit >= 0 ? 'text-success' : 'text-danger' }}"><td>{{ __('Profit') }}</td><td class="text-end">{{ number_format($profit, 2, ',', ' ') }} $</td></tr>
+                </table>
             </div>
         </div>
     </div>
