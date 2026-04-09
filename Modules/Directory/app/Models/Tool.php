@@ -23,6 +23,12 @@ class Tool extends Model
     use HasSuggestions;
     use HasTranslations;
     use \Modules\Voting\Traits\HasCommunityVotes;
+    use \Modules\SEO\Traits\NotifiesIndexNow;
+
+    public function getPublicUrl(): string
+    {
+        return route('directory.show', $this->slug);
+    }
 
     protected array $suggestableFields = [
         'description' => 'Description',

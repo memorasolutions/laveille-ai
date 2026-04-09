@@ -10,6 +10,12 @@ use Illuminate\Support\Arr;
 class Product extends Model
 {
     use SoftDeletes;
+    use \Modules\SEO\Traits\NotifiesIndexNow;
+
+    public function getPublicUrl(): string
+    {
+        return route('shop.show', $this);
+    }
 
     protected $table = 'shop_products';
 

@@ -15,6 +15,12 @@ use Modules\Voting\Traits\HasCommunityVotes;
 class NewsArticle extends Model
 {
     use HasComments, HasReports, HasCommunityVotes;
+    use \Modules\SEO\Traits\NotifiesIndexNow;
+
+    public function getPublicUrl(): string
+    {
+        return url('/actualites/' . $this->slug);
+    }
     protected $fillable = [
         'news_source_id', 'title', 'slug', 'guid', 'url', 'resolved_url', 'description',
         'summary', 'image_url', 'author', 'pub_date', 'is_published',

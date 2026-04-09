@@ -40,6 +40,12 @@ use Spatie\Translatable\HasTranslations;
 class Article extends Model
 {
     use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasStates, HasTranslations, LogsActivity, Searchable, SoftDeletes;
+    use \Modules\SEO\Traits\NotifiesIndexNow;
+
+    public function getPublicUrl(): string
+    {
+        return url('/blog/' . $this->slug);
+    }
 
     public array $translatable = ['title', 'slug', 'content', 'excerpt'];
 
