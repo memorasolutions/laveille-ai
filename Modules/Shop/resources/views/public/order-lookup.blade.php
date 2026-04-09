@@ -42,7 +42,7 @@
         <div style="max-width: 640px; margin: 0 auto;">
             <div style="background: #fff; border-radius: 8px; padding: 24px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h2 style="font-size: 22px; font-weight: 700; margin: 0;">{{ __('Commande') }} #{{ $order->id }}</h2>
+                    <h2 style="font-size: 22px; font-weight: 700; margin: 0;">{{ __('Commande') }} #{{ $order->order_number ?? $order->id }}</h2>
                     @php
                         $statusColors = ['paid' => '#0CA678', 'processing' => '#0B7285', 'shipped' => '#3b82f6', 'fulfilled' => '#0CA678', 'pending' => '#f59e0b', 'cancelled' => '#ef4444', 'gelato_failed' => '#ef4444'];
                         $bg = $statusColors[$order->status] ?? '#94a3b8';

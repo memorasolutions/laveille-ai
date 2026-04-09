@@ -10,7 +10,7 @@
 
     {{-- Contenu --}}
     <div style="padding:30px;">
-        <h1 style="color:#0B7285; font-size:22px; margin:0 0 16px;">Confirmation de commande #{{ $order->id }}</h1>
+        <h1 style="color:#0B7285; font-size:22px; margin:0 0 16px;">Confirmation de commande #{{ $order->order_number ?? $order->id }}</h1>
         <p>Bonjour {{ $order->shipping_address['first_name'] ?? 'client' }},</p>
         <p>Votre commande a été confirmée et sera traitée sous peu.</p>
 

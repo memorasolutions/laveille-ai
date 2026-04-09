@@ -1,4 +1,4 @@
-@extends('backoffice::layouts.admin', ['title' => __('Commande') . ' #' . $order->id])
+@extends('backoffice::layouts.admin', ['title' => __('Commande') . ' #' . ($order->order_number ?? $order->id)])
 
 
 @section('content')
@@ -6,7 +6,7 @@
     <div class="col-md-8 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">{{ __('Commande') }} #{{ $order->id }}</h4>
+                <h4 class="card-title">{{ __('Commande') }} #{{ $order->order_number ?? $order->id }}</h4>
 
                 <div class="row mb-4">
                     <div class="col-md-6">

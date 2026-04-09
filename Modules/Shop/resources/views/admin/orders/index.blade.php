@@ -34,7 +34,7 @@
                         <tbody>
                             @forelse ($orders as $order)
                             <tr>
-                                <td>{{ $order->id }}</td>
+                                <td>{{ $order->order_number ?? $order->id }}</td>
                                 <td>{{ $order->email }}</td>
                                 <td>
                                     @switch($order->status)

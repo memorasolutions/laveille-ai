@@ -22,7 +22,7 @@
                 <div style="background: #f8fafc; padding: 20px; border-radius: 8px; text-align: left; margin-bottom: 24px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span style="font-weight: 600;">{{ __('Commande') }}</span>
-                        <span>#{{ $order->id }}</span>
+                        <span>#{{ $order->order_number ?? $order->id }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span style="font-weight: 600;">{{ __('Statut') }}</span>

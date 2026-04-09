@@ -55,7 +55,7 @@ class GelatoService
             $address = $order->shipping_address ?? [];
 
             $body = [
-                'orderReferenceId' => (string) $order->id,
+                'orderReferenceId' => $order->order_number ?? (string) $order->id,
                 'customerReferenceId' => (string) ($order->user_id ?? $order->email),
                 'currency' => strtoupper(config('shop.currency', 'CAD')),
                 'items' => $order->items->map(function ($item) {

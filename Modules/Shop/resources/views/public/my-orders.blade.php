@@ -31,7 +31,7 @@
                 <tbody>
                     @foreach($orders as $order)
                     <tr>
-                        <td>{{ $order->id }}</td>
+                        <td>{{ $order->order_number ?? $order->id }}</td>
                         <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                         <td>{{ number_format($order->total, 2, ',', ' ') }} $</td>
                         <td>
