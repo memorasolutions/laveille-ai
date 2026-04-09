@@ -61,17 +61,23 @@ class CartController extends Controller
         ]);
 
         $variantLabel = $request->input('variant_label');
-        if ($request->filled('size_label') && $variantLabel) {
-            $variantLabel = $variantLabel . ' - ' . $request->input('size_label');
-        } elseif ($request->filled('size_label')) {
-            $variantLabel = $request->input('size_label');
+        $gelatoUid = $request->input('variant_gelato_uid');
+
+        if ($request->filled('size_label')) {
+            $size = $request->input('size_label');
+            // Combiner couleur + taille dans le label
+            $variantLabel = $variantLabel ? $variantLabel . ' - ' . $size : $size;
+            // Remplacer la taille dans le UID Gelato (_gsi_m_ → _gsi_2xl_, etc.)
+            if ($gelatoUid) {
+                $gelatoUid = preg_replace('/_gsi_[^_]+_/', '_gsi_' . strtolower($size) . '_', $gelatoUid);
+            }
         }
 
         $this->cartService->add(
             $request->integer('product_id'),
             $request->integer('quantity', 1),
             $variantLabel,
-            $request->input('variant_gelato_uid')
+            $gelatoUid
         );
 
         $product = \Modules\Shop\Models\Product::find($request->integer('product_id'));
