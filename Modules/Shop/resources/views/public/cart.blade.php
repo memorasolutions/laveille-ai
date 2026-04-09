@@ -228,6 +228,16 @@
                             <input type="hidden" name="shipping_cost" x-model="selectedCost">
                         </div>
 
+                        {{-- Checkbox sauvegarder adresse (Loi 25 — opt-in explicite, case vide par défaut) --}}
+                        @auth
+                        <div style="margin-top: 16px; margin-bottom: 8px;">
+                            <label style="display: flex; gap: 10px; align-items: center; cursor: pointer;">
+                                <input type="checkbox" name="save_address" value="1" style="display: inline-block !important; width: 18px !important; height: 18px !important; accent-color: #0B7285; flex-shrink: 0; cursor: pointer; -webkit-appearance: checkbox !important; appearance: checkbox !important;">
+                                <span style="font-size: 13px; color: #475569;">{{ __('Sauvegarder cette adresse pour mes prochaines commandes') }}</span>
+                            </label>
+                        </div>
+                        @endauth
+
                         {{-- Checkbox newsletter (LCAP/Loi 25 — case vide par défaut, opt-in explicite) --}}
                         <div style="margin-top: 16px; margin-bottom: 8px; background: #f0fdfa; border: 1px solid #d1fae5; border-radius: 8px; padding: 12px 14px;">
                             <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;">

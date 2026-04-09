@@ -77,6 +77,11 @@ class CheckoutController extends Controller
             );
         }
 
+        // Sauvegarder l'adresse dans le profil si le client a coché (Loi 25 — opt-in)
+        if ($request->input('save_address') && auth()->check()) {
+            auth()->user()->update(['shipping_address' => $request->input('shipping_address')]);
+        }
+
         // Créer session Stripe Checkout (mode embedded)
         $returnUrl = route('shop.confirmation', $order) . '?session_id={CHECKOUT_SESSION_ID}';
         $checkout = $this->stripeService->createCheckoutSession(

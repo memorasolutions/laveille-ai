@@ -14,22 +14,29 @@ class CartController extends Controller
 
     public function index()
     {
-        // Pré-remplir le formulaire avec la dernière adresse de livraison connue
+        // Pré-remplir : profil sauvegardé → dernière commande → nom du profil
         $savedAddress = [];
         if (Auth::check()) {
-            $lastOrder = Order::where('user_id', Auth::id())
-                ->whereNotNull('shipping_address')
-                ->whereIn('status', ['paid', 'processing', 'fulfilled', 'shipped', 'delivered'])
-                ->latest()
-                ->first();
-            $savedAddress = $lastOrder?->shipping_address ?? [];
+            $user = Auth::user();
 
-            // Fallback : pré-remplir le nom depuis le profil si pas de commande
+            // Priorité 1 : adresse sauvegardée dans le profil (consentement Loi 25)
+            $savedAddress = $user->shipping_address ?? [];
+
+            // Priorité 2 : dernière commande réussie
+            if (empty($savedAddress)) {
+                $lastOrder = Order::where('user_id', $user->id)
+                    ->whereNotNull('shipping_address')
+                    ->whereIn('status', ['paid', 'processing', 'fulfilled', 'shipped', 'delivered'])
+                    ->latest()
+                    ->first();
+                $savedAddress = $lastOrder?->shipping_address ?? [];
+            }
+
+            // Priorité 3 : nom depuis le profil
             if (empty($savedAddress['first_name'])) {
-                $user = Auth::user();
                 $parts = explode(' ', $user->name ?? '', 2);
-                $savedAddress['first_name'] = $savedAddress['first_name'] ?? ($parts[0] ?? '');
-                $savedAddress['last_name'] = $savedAddress['last_name'] ?? ($parts[1] ?? '');
+                $savedAddress['first_name'] = $parts[0] ?? '';
+                $savedAddress['last_name'] = $parts[1] ?? '';
             }
         }
 
