@@ -145,16 +145,16 @@
                         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
                             <div style="flex: 1; min-width: 120px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Prénom') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name') }}" required autocomplete="given-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name', $savedAddress['first_name'] ?? '') }}" required autocomplete="given-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                             <div style="flex: 1; min-width: 120px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Nom') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name') }}" required autocomplete="family-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name', $savedAddress['last_name'] ?? '') }}" required autocomplete="family-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                         </div>
                         <div style="margin-bottom: 10px; position: relative;" @click.outside="showSuggestions = false">
                             <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Adresse') }} <span style="color:#ef4444;">*</span></label>
-                            <input type="text" name="shipping_address[address_line1]" x-ref="addressLine1" value="{{ old('shipping_address.address_line1') }}" required autocomplete="off" @input="searchAddress($event.target.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            <input type="text" name="shipping_address[address_line1]" x-ref="addressLine1" value="{{ old('shipping_address.address_line1', $savedAddress['address_line1'] ?? '') }}" required autocomplete="off" @input="searchAddress($event.target.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             <div x-show="showSuggestions" x-transition style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: #fff; border: 1px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto;">
                                 <template x-for="s in suggestions" :key="(s.osm_id || '') + (s.postcode || '')">
                                     <div @click="selectAddress(s)" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px;" onmouseenter="this.style.backgroundColor='#f8fafc'" onmouseleave="this.style.backgroundColor=''">
@@ -167,14 +167,14 @@
                         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
                             <div style="flex: 2; min-width: 100px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Ville') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[city]" x-ref="cityInput" value="{{ old('shipping_address.city') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <input type="text" name="shipping_address[city]" x-ref="cityInput" value="{{ old('shipping_address.city', $savedAddress['city'] ?? '') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                             <div style="flex: 1.5; min-width: 100px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;" x-text="provinceLabel + ' *'"></label>
                                 {{-- Canada : select provinces --}}
                                 <select x-show="country === 'CA'" :disabled="country !== 'CA'" name="shipping_address[state]" autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                                     <template x-for="(name, code) in provincesCA" :key="code">
-                                        <option :value="code" x-text="name" :selected="code === 'QC'"></option>
+                                        <option :value="code" x-text="name" :selected="code === '{{ $savedAddress['state'] ?? 'QC' }}'"></option>
                                     </template>
                                 </select>
                                 {{-- USA : select states --}}
@@ -188,14 +188,14 @@
                             </div>
                             <div style="flex: 1; min-width: 90px;">
                                 <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Code postal') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[postal_code]" x-ref="postalCode" value="{{ old('shipping_address.postal_code') }}" :required="postalRequired" autocomplete="postal-code" :pattern="postalPattern" :title="postalTitle" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <input type="text" name="shipping_address[postal_code]" x-ref="postalCode" value="{{ old('shipping_address.postal_code', $savedAddress['postal_code'] ?? '') }}" :required="postalRequired" autocomplete="postal-code" :pattern="postalPattern" :title="postalTitle" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                             </div>
                         </div>
                         <div style="margin-bottom: 10px;">
                             <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">{{ __('Pays') }} <span style="color:#ef4444;">*</span></label>
                             <select name="shipping_address[country]" id="country-select" x-model="country" required autocomplete="country" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
                                 <optgroup label="{{ __('Pays populaires') }}">
-                                    <option value="CA" selected>Canada</option>
+                                    <option value="CA" {{ ($savedAddress['country'] ?? 'CA') === 'CA' ? 'selected' : '' }}>Canada</option>
                                     <option value="US">États-Unis</option>
                                     <option value="FR">France</option>
                                     <option value="GB">Royaume-Uni</option>
@@ -322,7 +322,7 @@ document.addEventListener('alpine:init', () => {
         }
     }));
     Alpine.data('shopCheckout', () => ({
-        country: 'CA',
+        country: '{{ $savedAddress['country'] ?? 'CA' }}',
         loading: false,
         quoteFetched: false,
         methods: [],

@@ -4,6 +4,8 @@ namespace Modules\Shop\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Modules\Shop\Models\Order;
 use Modules\Shop\Services\CartService;
 
 class CartController extends Controller
@@ -12,12 +14,32 @@ class CartController extends Controller
 
     public function index()
     {
+        // Pré-remplir le formulaire avec la dernière adresse de livraison connue
+        $savedAddress = [];
+        if (Auth::check()) {
+            $lastOrder = Order::where('user_id', Auth::id())
+                ->whereNotNull('shipping_address')
+                ->whereIn('status', ['paid', 'processing', 'fulfilled', 'shipped', 'delivered'])
+                ->latest()
+                ->first();
+            $savedAddress = $lastOrder?->shipping_address ?? [];
+
+            // Fallback : pré-remplir le nom depuis le profil si pas de commande
+            if (empty($savedAddress['first_name'])) {
+                $user = Auth::user();
+                $parts = explode(' ', $user->name ?? '', 2);
+                $savedAddress['first_name'] = $savedAddress['first_name'] ?? ($parts[0] ?? '');
+                $savedAddress['last_name'] = $savedAddress['last_name'] ?? ($parts[1] ?? '');
+            }
+        }
+
         return view('shop::public.cart', [
             'content' => $this->cartService->getContent(),
             'subtotal' => $this->cartService->getSubtotal(),
             'tax' => $this->cartService->getTaxAmount(),
             'total' => $this->cartService->getTotal(),
             'itemCount' => $this->cartService->itemCount(),
+            'savedAddress' => $savedAddress,
         ]);
     }
 
