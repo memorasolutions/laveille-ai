@@ -21,8 +21,8 @@ class NotificationBell extends Component
 
     public function mount(): void
     {
-        $this->notifications = collect();
         $this->unreadCount = auth()->user()->unreadNotifications()->count();
+        $this->notifications = $this->loadNotifications();
     }
 
     /** @return array<string, string> */
