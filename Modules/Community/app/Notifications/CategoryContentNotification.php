@@ -29,7 +29,7 @@ class CategoryContentNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(__('Nouveau contenu dans :category', ['category' => $this->categoryTag]))
-            ->line(__('Un nouveau contenu a ete publie dans la categorie ":category" :', ['category' => $this->categoryTag]))
+            ->line(__('Un nouveau contenu a été publié dans la catégorie ":category" :', ['category' => $this->categoryTag]))
             ->line($title)
             ->action(__('Voir'), $this->getContentUrl());
     }

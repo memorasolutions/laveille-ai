@@ -27,9 +27,9 @@ class OrderStatusNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Mise a jour commande #' . $this->order->id)
+            ->subject('Mise à jour commande #' . $this->order->id)
             ->greeting('Bonjour !')
-            ->line('Le statut de votre commande #' . $this->order->id . ' a ete mis a jour.')
+            ->line('Le statut de votre commande #' . $this->order->id . ' a été mis à jour.')
             ->line('Nouveau statut : ' . $this->order->status)
             ->action('Voir la boutique', url(config('shop.routes.prefix', 'boutique')))
             ->line('Nous vous remercions de votre confiance.');

@@ -29,9 +29,9 @@ class OrderShippedNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         $mail = (new MailMessage)
-            ->subject('Votre commande #' . $this->order->id . ' a ete expediee')
+            ->subject('Votre commande #' . $this->order->id . ' a été expédiée')
             ->greeting('Bonjour !')
-            ->line('Bonne nouvelle ! Votre commande #' . $this->order->id . ' a ete expediee.');
+            ->line('Bonne nouvelle ! Votre commande #' . $this->order->id . ' a été expédiée.');
 
         if ($this->trackingUrl) {
             $mail->action('Suivre mon colis', $this->trackingUrl);
@@ -46,7 +46,7 @@ class OrderShippedNotification extends Notification implements ShouldQueue
             'order_id' => $this->order->id,
             'status' => $this->order->status,
             'tracking_url' => $this->trackingUrl,
-            'message' => 'Votre commande #' . $this->order->id . ' a ete expediee.',
+            'message' => 'Votre commande #' . $this->order->id . ' a été expédiée.',
         ];
     }
 }
