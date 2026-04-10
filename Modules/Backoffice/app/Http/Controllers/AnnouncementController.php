@@ -47,7 +47,7 @@ class AnnouncementController extends Controller
         Announcement::create($validated);
 
         return redirect()->route('admin.announcements.index')
-            ->with('success', 'Annonce creee.');
+            ->with('success', 'Annonce créée.');
     }
 
     public function edit(Announcement $announcement): View
@@ -68,7 +68,7 @@ class AnnouncementController extends Controller
         $announcement->update($validated);
 
         return redirect()->route('admin.announcements.index')
-            ->with('success', 'Annonce mise a jour.');
+            ->with('success', 'Annonce mise à jour.');
     }
 
     public function destroy(Announcement $announcement): RedirectResponse
@@ -76,7 +76,7 @@ class AnnouncementController extends Controller
         $announcement->delete();
 
         return redirect()->route('admin.announcements.index')
-            ->with('success', 'Annonce supprimee.');
+            ->with('success', 'Annonce supprimée.');
     }
 
     /** @return array<string, mixed> */

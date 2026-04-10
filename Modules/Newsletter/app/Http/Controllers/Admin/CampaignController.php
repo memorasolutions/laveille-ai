@@ -59,7 +59,7 @@ class CampaignController extends Controller
     {
         if ($campaign->isSent()) {
             return redirect()->route('admin.newsletter.campaigns.index')
-                ->with('error', 'Impossible de modifier une campagne deja envoyee.');
+                ->with('error', 'Impossible de modifier une campagne déjà envoyée.');
         }
 
         return view('newsletter::admin.campaigns.edit', [
@@ -72,7 +72,7 @@ class CampaignController extends Controller
     {
         if ($campaign->isSent()) {
             return redirect()->route('admin.newsletter.campaigns.index')
-                ->with('error', 'Impossible de modifier une campagne deja envoyee.');
+                ->with('error', 'Impossible de modifier une campagne déjà envoyée.');
         }
 
         $validated = $request->validate([
@@ -84,20 +84,20 @@ class CampaignController extends Controller
         $campaign->update($validated);
 
         return redirect()->route('admin.newsletter.campaigns.index')
-            ->with('success', 'Campagne mise a jour.');
+            ->with('success', 'Campagne mise à jour.');
     }
 
     public function destroy(Campaign $campaign): RedirectResponse
     {
         if ($campaign->isSent()) {
             return redirect()->route('admin.newsletter.campaigns.index')
-                ->with('error', 'Impossible de supprimer une campagne envoyee.');
+                ->with('error', 'Impossible de supprimer une campagne envoyée.');
         }
 
         $campaign->delete();
 
         return redirect()->route('admin.newsletter.campaigns.index')
-            ->with('success', 'Campagne supprimee.');
+            ->with('success', 'Campagne supprimée.');
     }
 
     public function send(Campaign $campaign, BrevoService $brevo): RedirectResponse

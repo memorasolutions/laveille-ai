@@ -69,6 +69,6 @@ class PrivacyCenterController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', __('Votre compte a ete supprime. Vos donnees seront purgees selon notre politique de retention.'));
+        return redirect('/')->with('success', __('Votre compte a été supprimé. Vos données seront purgées selon notre politique de rétention.'));
     }
 }

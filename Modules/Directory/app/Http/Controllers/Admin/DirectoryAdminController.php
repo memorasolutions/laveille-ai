@@ -142,7 +142,7 @@ class DirectoryAdminController extends Controller
 
         $service = new ScreenshotService;
         if ($service->captureWithRetry($tool)) {
-            return back()->with('success', __('Screenshot capture avec succes.'));
+            return back()->with('success', __('Screenshot capturé avec succès.'));
         }
 
         return back()->with('error', __('Echec de la capture apres 3 tentatives.'));
