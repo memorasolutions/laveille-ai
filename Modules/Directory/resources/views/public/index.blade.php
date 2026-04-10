@@ -27,6 +27,7 @@
             'showUrl' => route('directory.show', $tool->slug),
             'websiteType' => $tool->website_type ?? 'website',
             'launchYear' => $tool->launch_year ?? 0,
+            'createdTs' => $tool->created_at ? $tool->created_at->timestamp : 0,
             'avgRating' => round($tool->averageRating(), 1),
             'gradientFrom' => ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#C0392B','#16A085','#8E44AD','#2980B9','#D35400'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
@@ -128,7 +129,7 @@
             return matchSearch && matchPricing && matchCat;
         });
         if (this.sortBy === 'rating') return [...t].sort((a,b) => b.avgRating - a.avgRating);
-        if (this.sortBy === 'newest') return [...t].sort((a,b) => b.launchYear - a.launchYear);
+        if (this.sortBy === 'newest') return [...t].sort((a,b) => b.createdTs - a.createdTs);
         return t;
     },
 
