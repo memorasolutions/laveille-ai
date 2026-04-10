@@ -24,6 +24,10 @@ class SEOServiceProvider extends BaseModuleServiceProvider
     public function boot(): void
     {
         $this->bootModule();
+
+        $this->commands([
+            \Modules\SEO\Console\IndexNowSubmitCommand::class,
+        ]);
     }
 
     /**

@@ -8,6 +8,32 @@
     @section('og_image', asset($article->featured_image))
 @endif
 
+@php
+    $schemaJson = json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Article',
+        'headline' => $article->title,
+        'description' => Str::limit(strip_tags($article->excerpt ?? $article->content), 300),
+        'datePublished' => $article->published_at?->toIso8601String(),
+        'dateModified' => $article->updated_at->toIso8601String(),
+        'author' => [
+            '@type' => 'Person',
+            'name' => $article->author->name ?? 'La veille',
+        ],
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => 'La veille',
+            'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-avatar.png')],
+        ],
+        'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => url('/blog/' . $article->slug)],
+    ] + ($article->featured_image ? ['image' => asset($article->featured_image)] : []),
+    JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+@endphp
+
+@push('head')
+    <script type="application/ld+json">{!! $schemaJson !!}</script>
+@endpush
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $article->title,
