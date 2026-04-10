@@ -258,7 +258,8 @@
                     <button type="button" @click="analyzeUrl()" :disabled="scraping || !toolUrl"
                         :style="'height:44px;padding:0 20px;background:var(--c-primary);color:#fff;font-weight:700;border:none;border-radius:var(--r-btn);cursor:pointer;font-size:14px;white-space:nowrap;transition:all 0.2s;' + (scraping || !toolUrl ? 'opacity:0.5;cursor:not-allowed;' : '')">
                         <span x-show="!scraping">{{ __('Analyser') }} →</span>
-                        <span x-show="scraping">⏳ {{ __('Analyse...') }}</span>
+                        <span x-show="scraping" x-data="{dots:''}" x-init="setInterval(()=>{dots=dots.length>=3?'':dots+'.'},400)" style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:wsp .6s linear infinite"></span><span>{{ __('Analyse en cours') }}<span x-text="dots" style="display:inline-block;width:1.2em;text-align:left"></span></span></span>
+                        <style>@keyframes wsp{to{transform:rotate(360deg)}}</style>
                     </button>
                 </div>
 
@@ -361,7 +362,7 @@
             <button type="button" @click="submitTool()" :disabled="!toolName || !toolPricing || submitting"
                 :style="'padding:10px 24px;background:var(--c-primary);color:#fff;font-weight:700;border:none;border-radius:var(--r-btn);cursor:pointer;font-size:14px;transition:all 0.2s;' + (!toolName || !toolPricing || submitting ? 'opacity:0.5;cursor:not-allowed;' : '')">
                 <span x-show="!submitting">{{ __('Soumettre la proposition') }}</span>
-                <span x-show="submitting">⏳ {{ __('Soumission...') }}</span>
+                <span x-show="submitting" x-data="{dots:''}" x-init="setInterval(()=>{dots=dots.length>=3?'':dots+'.'},400)" style="display:inline-flex;align-items:center;gap:6px"><span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;animation:wsp .6s linear infinite"></span><span>{{ __('Soumission en cours') }}<span x-text="dots" style="display:inline-block;width:1.2em;text-align:left"></span></span></span>
             </button>
         </div>
     </div>
