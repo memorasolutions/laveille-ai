@@ -66,8 +66,7 @@
                     </td>
                     <td valign="top" class="stack-col">
                         <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">Bonjour{{ ($subscriberName ?? null) ? ' '.$subscriberName : '' }},</p>
-                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">Je suis ravi de vous retrouver pour cette nouvelle étape où <strong>laveilledestef.com</strong> devient officiellement <strong><a href="{{ config('app.url') }}" style="color:#0B7285;">laveille.ai</a></strong> avec un site entièrement repensé pour vous. Je vous donne désormais rendez-vous <strong>chaque mercredi</strong> dans votre boîte courriel, et notre envoi régulier débutera officiellement le <strong>15 avril</strong> prochain.</p>
-                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">Je tiens sincèrement à vous remercier de nous suivre dans cette aventure technologique qui évolue si rapidement. D'ici notre première édition, je vous souhaite un excellent congé de Pâques entouré de vos proches !</p>
+                        <p style="margin:0 0 10px;font-size:15px;color:#333;line-height:1.6;">C'est un plaisir de vous retrouver pour votre rendez-vous hebdomadaire sur <strong><a href="{{ config('app.url') }}" style="color:#0B7285;">laveille.ai</a></strong>. Voici les actualités technologiques et les innovations incontournables de la semaine.</p>
                         <p style="font-family:'Dancing Script','Brush Script MT','Segoe Script',cursive;font-size:24px;color:#0B7285;margin:12px 0 0;">Stef</p>
                     </td>
                 </tr>
