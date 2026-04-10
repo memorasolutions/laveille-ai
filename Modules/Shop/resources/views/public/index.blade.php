@@ -2,13 +2,8 @@
 
 @section('title', __('Boutique'))
 
-@push('head')
-    <meta name="description" content="{{ __('Boutique La veille - T-shirts, tasses et hoodies pour les passionnes de technologie et d\'IA.') }}">
-    <meta property="og:title" content="{{ __('Boutique') }} - La veille">
-    <meta property="og:description" content="{{ __('Boutique La veille - T-shirts, tasses et hoodies pour les passionnes de technologie et d\'IA.') }}">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ route('shop.index') }}">
-@endpush
+@section('meta_description', __('Boutique La veille - T-shirts, tasses et hoodies pour les passionnés de technologie et d\'IA.'))
+@section('og_image', asset('images/og-image.png'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
