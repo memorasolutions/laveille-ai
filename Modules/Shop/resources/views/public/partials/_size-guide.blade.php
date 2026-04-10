@@ -1,4 +1,4 @@
-<div x-data="{ open: true }" style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px;">
+<div x-data="{ open: false }" style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px; max-width: 800px;">
     <button
         @click="open = !open"
         style="width: 100%; text-align: left; background-color: #0B7285; color: white; border: none; padding: 15px; font-size: 18px; border-radius: 4px; cursor: pointer;"
