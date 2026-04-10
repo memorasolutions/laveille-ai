@@ -58,7 +58,7 @@ class DigestNotification extends TemplatedNotification
         $mail = (new MailMessage)
             ->subject("Nouveaux articles cette semaine - {$appName}")
             ->greeting('Bonjour,')
-            ->line("Voici les nouveaux articles publies cette semaine sur {$appName}.")
+            ->line("Voici les nouveaux articles publiés cette semaine sur {$appName}.")
             ->line("{$count} nouvel{$plural} article{$plural} :");
 
         foreach ($this->articles->take(5) as $article) {
