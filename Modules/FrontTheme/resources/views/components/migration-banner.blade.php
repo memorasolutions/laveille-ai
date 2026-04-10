@@ -5,7 +5,7 @@
             position: sticky;
             top: 0;
             z-index: 9999;
-            background: #0B7285;
+            background: var(--c-accent, #E67E22);
             color: #fff;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             transform: translateY(-100%);
@@ -26,7 +26,7 @@
             line-height: 1.45;
             text-align: center;
         }
-        #migrationBanner .mb-inner strong { color: #C3FAE8; }
+        #migrationBanner .mb-inner strong { color: #fff; text-decoration: underline; text-decoration-thickness: 2px; }
         #migrationBanner .mb-close {
             position: absolute;
             right: .5rem;
