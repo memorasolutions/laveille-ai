@@ -51,15 +51,34 @@ class MetaScraperService
         $crawler = new Crawler($body);
         $baseUrl = self::resolveBaseUrl($crawler, $url);
 
+        $ogDesc = self::meta($crawler, 'meta[property="og:description"]');
+        $metaDesc = self::meta($crawler, 'meta[name="description"]');
+
         return [
             'og_title' => self::meta($crawler, 'meta[property="og:title"]'),
-            'og_description' => self::meta($crawler, 'meta[property="og:description"]'),
+            'og_description' => $ogDesc,
             'og_image' => self::makeAbsolute(self::meta($crawler, 'meta[property="og:image"]'), $baseUrl),
-            'description' => self::meta($crawler, 'meta[name="description"]'),
+            'description' => $metaDesc ?? $ogDesc ?? self::extractFirstParagraph($crawler),
             'favicon' => self::makeAbsolute(self::findFavicon($crawler), $baseUrl),
             'title' => self::extractTitle($crawler),
             'url' => $url,
         ];
+    }
+
+    private static function extractFirstParagraph(Crawler $crawler): ?string
+    {
+        foreach (['article', 'main', '.entry-content', '.post-content', '.content', 'body'] as $selector) {
+            $nodes = $crawler->filter($selector);
+            if ($nodes->count() === 0) { continue; }
+            foreach ($nodes->first()->filter('p') as $p) {
+                $text = trim(strip_tags($p->textContent));
+                if (mb_strlen($text) < 50) { continue; }
+
+                return mb_strlen($text) <= 300 ? $text : mb_substr($text, 0, mb_strrpos(mb_substr($text, 0, 300), ' ')).'…';
+            }
+        }
+
+        return null;
     }
 
     private static function preventSSRF(string $url): void
