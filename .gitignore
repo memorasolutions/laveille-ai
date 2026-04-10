@@ -56,3 +56,8 @@ MIGRATION_PLAN.md
 
 # CSRF temp
 csrf*
+
+# Debug / dev temp
+stripe-*.yml
+logo-white-canvas.txt
+.images/
