@@ -18,6 +18,11 @@
     </a>
 </div>
 
+{{-- Message expiration --}}
+<div style="background: #F0FAFB; border: 1px solid #D5EDF0; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #475569; line-height: 1.5;">
+    💡 {{ __('Vos liens raccourcis expirent automatiquement après 12 mois sans visite. Vous pouvez repousser la date d\'expiration de chaque lien à tout moment depuis cette page.') }}
+</div>
+
 @if($shortUrls->isEmpty())
     {{-- État vide --}}
     <div style="text-align: center; padding: 48px 24px; background: #F9FAFB; border-radius: 16px; border: 2px dashed #D1D5DB;">
@@ -32,16 +37,21 @@
 @else
     {{-- Liste des liens --}}
     @foreach($shortUrls as $link)
-    <div x-data="{ copied: false }" style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; transition: box-shadow .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.06)'" onmouseout="this.style.boxShadow='none'">
+    <div x-data="{ copied: false, copiedShort: false, copiedLong: false }" style="background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; transition: box-shadow .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.06)'" onmouseout="this.style.boxShadow='none'">
         <div style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; flex-wrap: wrap !important; gap: 12px;">
             {{-- Info lien --}}
             <div style="flex: 1 !important; min-width: 200px;">
-                <a href="{{ $link->getShortUrl() }}" target="_blank"
-                    style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-primary, #0B7285); text-decoration: none; word-break: break-all;">
-                    {{ $link->getShortUrl() }}
+                <a href="#" x-on:click.prevent="navigator.clipboard.writeText('{{ $link->getShortUrl() }}'); copiedShort = true; setTimeout(() => copiedShort = false, 1500)"
+                    title="{{ __('Cliquer pour copier') }}"
+                    style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-primary, #0B7285); text-decoration: none; word-break: break-all; cursor: pointer;">
+                    <span x-show="!copiedShort">{{ $link->getShortUrl() }}</span>
+                    <span x-show="copiedShort" x-cloak style="color: #10B981;">✅ {{ __('Copié !') }}</span>
                 </a>
-                <div style="font-size: 13px; color: var(--c-text-muted, #6E7687); margin-top: 4px; word-break: break-all;">
-                    🔗 {{ Str::limit($link->original_url, 60) }}
+                <div x-on:click="navigator.clipboard.writeText('{{ $link->original_url }}'); copiedLong = true; setTimeout(() => copiedLong = false, 1500)"
+                    title="{{ __('Cliquer pour copier') }}"
+                    style="font-size: 13px; color: var(--c-text-muted, #6E7687); margin-top: 4px; word-break: break-all; cursor: pointer;">
+                    <span x-show="!copiedLong">🔗 {{ Str::limit($link->original_url, 60) }}</span>
+                    <span x-show="copiedLong" x-cloak style="color: #10B981;">✅ {{ __('Copié !') }}</span>
                 </div>
                 @if($link->title)
                     <div style="font-size: 13px; color: var(--c-dark, #1A1D23); margin-top: 2px; font-weight: 600;">{{ $link->title }}</div>
@@ -80,6 +90,14 @@
                 <a href="{{ route('shorturl.user.edit', $link) }}"
                     style="background: var(--c-primary, #0B7285); color: #fff; padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
                     aria-label="{{ __('Modifier ce lien') }}">{{ __('Modifier') }}</a>
+                @if($link->expires_at)
+                <form action="{{ route('shorturl.user.extend', $link) }}" method="POST" style="display: inline;">
+                    @csrf
+                    <button type="submit"
+                        style="-webkit-appearance:none;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;line-height:1.2;"
+                        aria-label="{{ __('Prolonger ce lien') }}">⏰ {{ __('Prolonger') }}</button>
+                </form>
+                @endif
                 <form action="{{ route('shorturl.user.destroy', $link) }}" method="POST" style="display: inline;">
                     @csrf @method('DELETE')
                     <button type="submit" onclick="return confirm('{{ __('Supprimer ce lien ?') }}')"

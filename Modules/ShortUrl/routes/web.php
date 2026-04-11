@@ -64,6 +64,7 @@ Route::middleware($frontMiddleware + ['auth'])
         Route::get('/{short_url}/edit', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'edit'])->name('edit');
         Route::put('/{short_url}', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'update'])->name('update');
         Route::delete('/{short_url}', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'destroy'])->name('destroy');
+        Route::post('/{short_url}/extend', [\Modules\ShortUrl\Http\Controllers\UserShortUrlController::class, 'extend'])->name('extend');
     });
 
 // ── Routes domaines raccourcisseur (dynamique depuis table short_url_domains) ──

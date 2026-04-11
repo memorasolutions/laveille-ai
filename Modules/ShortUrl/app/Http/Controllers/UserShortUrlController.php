@@ -133,4 +133,22 @@ class UserShortUrlController
 
         return redirect()->route('shorturl.user.index')->with('success', __('Lien raccourci supprimé.'));
     }
+
+    public function extend(ShortUrl $shortUrl): RedirectResponse
+    {
+        abort_if($shortUrl->user_id !== auth()->id(), 403);
+
+        $limit = now()->addMonthsNoOverflow(12);
+
+        if ($shortUrl->expires_at && $shortUrl->expires_at->gt($limit)) {
+            return back()->with('warning', __('Ce lien est déjà prolongé au maximum (12 mois).'));
+        }
+
+        $shortUrl->forceFill([
+            'expires_at' => $limit,
+            'expiry_notified_at' => null,
+        ])->save();
+
+        return back()->with('success', __('Lien prolongé de 12 mois.'));
+    }
 }
