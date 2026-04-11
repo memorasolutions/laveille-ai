@@ -146,7 +146,7 @@
 
         {{-- Input URL --}}
         <div style="display: flex !important; gap: 8px; margin-bottom: 12px;">
-            <input type="url" x-model="url" @keydown.enter="shorten()"
+            <input type="url" x-model="url" x-ref="urlInput" @keydown.enter="shorten()"
                 placeholder="{{ __('Collez votre lien ici...') }}"
                 style="flex: 1 !important; height: 52px; border: 2px solid #D1D5DB; border-radius: 12px; padding: 0 16px; font-size: 16px; outline: none; transition: border-color .2s;"
                 onfocus="this.style.borderColor='var(--c-primary, #0B7285)'"
@@ -291,6 +291,12 @@
                     style="background: #1A1D23; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; text-decoration: none; display: inline-block; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif);"
                     onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                     📊 {{ __('Statistiques') }}
+                </a>
+                {{-- Créer un autre lien --}}
+                <a href="#" @click.prevent="result = null; url = ''; copied = false; $nextTick(() => $refs.urlInput?.focus())"
+                    style="background:#0B7285;color:#fff;-webkit-appearance:none;text-decoration:none;display:inline-block;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);"
+                    onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                    ➕ {{ __('Créer un autre lien') }}
                 </a>
             </div>
 
