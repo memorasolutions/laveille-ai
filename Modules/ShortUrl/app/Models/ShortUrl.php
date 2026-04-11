@@ -54,6 +54,8 @@ class ShortUrl extends Model
         'og_image',
         'thumbnail',
         'is_anonymous',
+        'last_visited_at',
+        'expiry_notified_at',
     ];
 
     protected $hidden = [
@@ -71,6 +73,8 @@ class ShortUrl extends Model
     {
         return [
             'expires_at' => 'datetime',
+            'last_visited_at' => 'datetime',
+            'expiry_notified_at' => 'datetime',
             'is_active' => 'boolean',
             'clicks_count' => 'integer',
             'tags' => 'array',
