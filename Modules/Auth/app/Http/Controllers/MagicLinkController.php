@@ -54,6 +54,10 @@ class MagicLinkController extends Controller
             ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
         );
 
+        if ($user->wasRecentlyCreated && method_exists($user, 'assignRole')) {
+            $user->assignRole('user');
+        }
+
         $result = $this->magicLink->generate($request->email);
         $user->notify(new MagicLinkNotification($result['token']));
 
@@ -169,6 +173,10 @@ class MagicLinkController extends Controller
             ['email' => $request->email],
             ['name' => explode('@', $request->email)[0], 'password' => bcrypt(\Str::random(32))]
         );
+
+        if ($user->wasRecentlyCreated && method_exists($user, 'assignRole')) {
+            $user->assignRole('user');
+        }
 
         $rateLimitKey = 'magic-link-email:'.sha1($request->email);
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {

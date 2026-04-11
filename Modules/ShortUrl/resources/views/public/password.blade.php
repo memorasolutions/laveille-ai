@@ -41,7 +41,7 @@
 <body>
     <div class="wrapper">
         <a href="/" class="logo-link">
-            <img src="{{ asset('images/logo-horizontal.svg') }}" alt="laveille.ai">
+            <img src="https://laveille.ai/images/logo-horizontal.svg" alt="laveille.ai">
         </a>
         <div class="card">
             <div class="lock-icon">
