@@ -6,7 +6,7 @@
 <div class="panel panel-default" style="margin-bottom: 20px;">
     <div class="panel-heading" style="padding: 12px 15px;">
         <div style="display: flex !important; align-items: center !important;">
-            @if(auth()->user()->avatar)
+            @if(auth()->user()?->avatar)
                 <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}"
                      style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
             @else

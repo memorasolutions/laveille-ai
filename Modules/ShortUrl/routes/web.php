@@ -53,7 +53,7 @@ Route::middleware($frontMiddleware)
     });
 
 // ── Espace utilisateur : mes liens courts ──
-Route::middleware($frontMiddleware + ['auth'])
+Route::middleware(array_merge($frontMiddleware, ['auth']))
     ->prefix('user/liens')
     ->name('shorturl.user.')
     ->group(function () {
