@@ -315,6 +315,7 @@
                                             <div class="d-flex justify-content-center gap-2">
                                                 <button class="btn" @click="copyUrl(selectedTransform.url)" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;" x-text="copied === selectedTransform.url ? '{{ __('Copié !') }}' : '{{ __('Copier le lien') }}'"></button>
                                                 <a :href="selectedTransform.url" target="_blank" rel="noopener" class="btn" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">{{ __('Ouvrir le lien') }}</a>
+                                                <button type="button" class="btn" style="background:#1A1D23;color:#fff;border-radius:var(--r-btn);font-family:var(--f-heading);font-weight:700" @click="localStorage.setItem('pendingShortUrl', selectedTransform.url); window.location.href='/raccourcir'">✂️ {{ __('Raccourcir avec veille.la') }}</button>
                                             </div>
                                         </div>
                                     </template>

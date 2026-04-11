@@ -141,6 +141,9 @@
 
         init() {
             this.$watch('result', (val) => { if (val) this.$nextTick(() => this.generateQR()); });
+            // Pré-remplir depuis localStorage (vient de l'outil liens Google)
+            const pending = localStorage.getItem('pendingShortUrl');
+            if (pending) { this.url = pending; localStorage.removeItem('pendingShortUrl'); }
         }
     }" style="max-width: 680px; margin: 0 auto;">
 
