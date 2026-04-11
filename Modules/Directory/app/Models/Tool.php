@@ -47,7 +47,7 @@ class Tool extends Model
 
     protected $fillable = [
         'name', 'slug', 'description', 'short_description', 'url', 'affiliate_url', 'logo',
-        'pricing', 'status', 'clicks_count', 'is_featured', 'sort_order',
+        'pricing', 'status', 'clicks_count', 'is_featured', 'featured_until', 'featured_order', 'sort_order',
         'how_to_use', 'core_features', 'use_cases', 'faq', 'pros', 'cons',
         'screenshot', 'website_type', 'launch_year', 'target_audience',
         'submitted_by',
@@ -70,6 +70,8 @@ class Tool extends Model
 
     protected $casts = [
         'is_featured' => 'boolean',
+        'featured_until' => 'datetime',
+        'featured_order' => 'integer',
         'faq' => 'array',
         'target_audience' => 'array',
     ];
@@ -91,7 +93,10 @@ class Tool extends Model
 
     public function scopeFeatured($query)
     {
-        return $query->where('is_featured', true);
+        return $query->where('is_featured', true)
+            ->where(fn ($q) => $q->whereNull('featured_until')->orWhere('featured_until', '>', now()))
+            ->orderBy('featured_order')
+            ->orderByDesc('clicks_count');
     }
 
     public function reviews(): HasMany

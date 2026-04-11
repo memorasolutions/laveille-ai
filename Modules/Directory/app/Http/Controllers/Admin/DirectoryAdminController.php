@@ -54,6 +54,8 @@ class DirectoryAdminController extends Controller
             'logo' => 'nullable|image|max:2048',
             'screenshot' => 'nullable|url|max:500',
             'is_featured' => 'nullable|boolean',
+            'featured_until' => 'nullable|date',
+            'featured_order' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer',
         ]);
 
@@ -75,6 +77,8 @@ class DirectoryAdminController extends Controller
             'logo' => $logoPath ? 'storage/'.$logoPath : null,
             'screenshot' => $validated['screenshot'] ?? null,
             'is_featured' => $request->boolean('is_featured'),
+            'featured_until' => $validated['featured_until'] ?? null,
+            'featured_order' => $validated['featured_order'] ?? 0,
             'sort_order' => $validated['sort_order'] ?? 0,
         ]);
 
@@ -106,6 +110,8 @@ class DirectoryAdminController extends Controller
             'logo' => 'nullable|image|max:2048',
             'screenshot' => 'nullable|string|max:500',
             'is_featured' => 'nullable|boolean',
+            'featured_until' => 'nullable|date',
+            'featured_order' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer',
         ]);
 
@@ -120,6 +126,8 @@ class DirectoryAdminController extends Controller
         $tool->screenshot = $validated['screenshot'] ?? $tool->screenshot;
         $tool->status = $validated['status'] ?? $tool->status;
         $tool->is_featured = $request->boolean('is_featured');
+        $tool->featured_until = $validated['featured_until'] ?? null;
+        $tool->featured_order = $validated['featured_order'] ?? 0;
         $tool->sort_order = $validated['sort_order'] ?? 0;
 
         if ($request->hasFile('logo')) {

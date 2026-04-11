@@ -75,7 +75,7 @@
     .rt-btn-visit:hover { opacity: 0.9; color: #fff; }
     .rt-btn-details { color: var(--c-dark); font-weight: 600; font-size: 13px; text-decoration: none; }
     .rt-btn-details:hover { color: var(--c-primary); }
-    .rt-featured { color: #F59E0B; position: absolute; top: 12px; right: 12px; }
+    .rt-featured { position: absolute; top: 12px; right: 12px; background: #0B7285; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; z-index: 2; letter-spacing: 0.3px; }
     .rt-stars { color: #F59E0B; font-size: 13px; font-weight: 700; }
 
     .row-flex { display: flex; flex-wrap: wrap; }
@@ -471,10 +471,10 @@
 
         {{-- Section mise de l'avant (admin) --}}
         @if(isset($featuredTools) && $featuredTools->isNotEmpty())
-        <div style="background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);border:1px solid #bae6fd;border-radius:14px;padding:20px;margin-bottom:24px;">
+        <div style="background:linear-gradient(135deg,#f0fafb 0%,#e0f4f7 100%);border:1px solid #b2e0e6;border-radius:14px;padding:20px;margin-bottom:24px;">
             <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:14px;">
-                <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">⭐ {{ __('Mis de l\'avant') }}</h3>
-                <span style="font-size:12px;color:#6b7280;">{{ __('Sélection de l\'équipe') }}</span>
+                <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">{{ __('En vedette') }}</h3>
+                <span style="font-size:12px;color:#0B7285;font-weight:600;">{{ __('Sponsorise') }}</span>
             </div>
             <div style="display:flex!important;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
                 @foreach($featuredTools as $ft)
@@ -535,7 +535,7 @@
             <template x-for="tool in filteredTools" :key="tool.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="rt-card">
-                        <template x-if="tool.isFeatured"><span class="rt-featured" title="{{ __('Mis en avant') }}">★</span></template>
+                        <template x-if="tool.isFeatured"><span class="rt-featured">{{ __('En vedette') }}</span></template>
 
                         <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
                             <template x-if="tool.screenshot">

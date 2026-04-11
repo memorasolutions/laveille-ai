@@ -20,7 +20,7 @@ class PublicDirectoryController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Tool::published()->with('categories', 'tags')->orderBy('sort_order');
+        $query = Tool::published()->with('categories', 'tags')->orderByDesc('clicks_count');
 
         if ($request->filled('pricing')) {
             $query->where('pricing', $request->pricing);

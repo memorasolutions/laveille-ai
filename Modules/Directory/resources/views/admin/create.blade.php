@@ -103,7 +103,26 @@
 
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}>
-                    <label class="form-check-label" for="is_featured">Mettre en avant</label>
+                    <label class="form-check-label" for="is_featured">En vedette (sponsorise)</label>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="featured_until" class="form-label">Expiration mise en vedette</label>
+                        <input type="datetime-local" class="form-control @error('featured_until') is-invalid @enderror" id="featured_until" name="featured_until" value="{{ old('featured_until') }}">
+                        <small class="text-muted">Laisser vide = permanent</small>
+                        @error('featured_until')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label for="featured_order" class="form-label">Ordre vedette</label>
+                        <input type="number" class="form-control @error('featured_order') is-invalid @enderror" id="featured_order" name="featured_order" value="{{ old('featured_order', 0) }}" min="0">
+                        <small class="text-muted">0 = premier affiche</small>
+                        @error('featured_order')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mb-3">
