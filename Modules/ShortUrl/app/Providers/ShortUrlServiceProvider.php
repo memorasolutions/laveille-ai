@@ -22,7 +22,8 @@ class ShortUrlServiceProvider extends BaseModuleServiceProvider
     {
         $this->bootModule();
 
-        \Modules\ShortUrl\Models\ShortUrl::observe(\Modules\ShortUrl\Observers\ShortUrlVisitObserver::class);
+        // Observer désactivé temporairement — la mise à jour last_visited_at se fait dans le redirect controller
+        // \Modules\ShortUrl\Models\ShortUrl::observe(\Modules\ShortUrl\Observers\ShortUrlVisitObserver::class);
 
         $this->commands([
             \Modules\ShortUrl\Console\CleanupExpiredCommand::class,
