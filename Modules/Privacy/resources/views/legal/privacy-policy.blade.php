@@ -136,6 +136,9 @@
                             <p>{{ __('Pour l\'envoi de nos actualités et alertes de veille, nous collectons votre adresse courriel et, de manière optionnelle, votre prénom. Ce service est géré via le prestataire tiers Brevo, dont les serveurs assurent la sécurité des envois.') }}</p>
                             <p>{{ __('Ce traitement est effectué conformément à la Loi canadienne anti-pourriel (LCAP, L.C. 2010, ch. 23) et repose sur votre consentement exprès. Vous pouvez vous désinscrire à tout moment via le lien de désabonnement présent dans chaque envoi. Vos données sont conservées tant que vous demeurez abonné, puis archivées pour une période de 3 ans après votre désinscription à des fins de preuve de conformité, avant suppression définitive.') }}</p>
 
+                            <h3 id="transactional">{{ __('10b. Communications transactionnelles') }}</h3>
+                            <p>{{ __('Certaines communications par courrier électronique sont envoyées automatiquement à titre de messages transactionnels au sens de la Loi canadienne anti-pourriel (LCAP, L.C. 2010, ch. 23), notamment les avis d\'expiration de liens raccourcis, les confirmations de commande et les notifications de sécurité du compte. Ces messages ne constituent pas des communications commerciales et ne requièrent pas de consentement marketing. Chaque message inclut les coordonnées de l\'expéditeur et un mécanisme de désabonnement.') }}</p>
+
                             <h3 id="cookies">{{ __('11. Cookies et traceurs') }}</h3>
                             <p>{{ __('Des cookies de différentes catégories sont utilisés sur notre site. Vous pouvez gérer vos préférences à tout moment via notre bannière de consentement.') }}</p>
                             <div class="table-responsive">
