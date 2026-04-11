@@ -93,9 +93,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');
 });
 
+// Dashboard public (affiche formulaire OTP si non connecté)
+Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
+
 // User Dashboard (espace personnel, auth requise, layout frontend USNews)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user/profile', [UserDashboardController::class, 'profile'])->name('user.profile');
     Route::put('/user/profile', [UserDashboardController::class, 'updateProfile'])->name('user.profile.update');
     Route::put('/user/password', [UserDashboardController::class, 'updatePassword'])->name('user.password.update');

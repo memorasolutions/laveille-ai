@@ -26,11 +26,15 @@ class UserDashboardController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except('dashboard');
     }
 
     public function dashboard(): View
     {
+        if (! auth()->check()) {
+            return view('auth::dashboard.guest');
+        }
+
         $user = auth()->user();
 
         $stats = [
