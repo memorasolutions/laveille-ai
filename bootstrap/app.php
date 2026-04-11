@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\RequestId::class);
         $middleware->append(\Modules\Auth\Http\Middleware\CheckBlockedIp::class);
         $middleware->append(\Modules\Core\Http\Middleware\SecurityHeaders::class);
+        $middleware->append(\App\Http\Middleware\NoCacheWhenAuthenticated::class);
 
         $aliases = [
             'csp' => \Modules\Core\Http\Middleware\ContentSecurityPolicy::class,
