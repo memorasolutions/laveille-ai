@@ -23,6 +23,40 @@
         scraping: false,
         scraped: false,
         ogImage: '{{ old('og_image', '') }}',
+        tagInput: '',
+        tags: @json(old('tags', [])),
+        tagSuggestions: [],
+
+        tagHashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); hash = hash & hash; }
+            return Math.abs(hash);
+        },
+
+        addTag(text) {
+            text = text ? text.trim() : '';
+            if (!text || text.length > 30 || this.tags.length >= 10) return;
+            if (!/^[a-zA-Z0-9\u00C0-\u00FF\s\-_]+$/.test(text)) return;
+            if (this.tags.some(t => t.toLowerCase() === text.toLowerCase())) return;
+            this.tags.push(text);
+            this.tagInput = '';
+            this.tagSuggestions = [];
+        },
+
+        removeTag(index) { this.tags.splice(index, 1); },
+
+        async fetchTagSuggestions() {
+            let q = this.tagInput ? this.tagInput.trim() : '';
+            if (q.length < 1) { this.tagSuggestions = []; return; }
+            try {
+                let res = await fetch('/user/liens/tags-suggest?q=' + encodeURIComponent(q));
+                if (res.ok) {
+                    let data = await res.json();
+                    let current = this.tags.map(t => t.toLowerCase());
+                    this.tagSuggestions = data.filter(s => !current.includes(s.toLowerCase()));
+                }
+            } catch (e) { this.tagSuggestions = []; }
+        },
 
         toggle(section) {
             this.active = this.active === section ? '' : section;
@@ -124,6 +158,69 @@
                     <div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ $message }}</div>
                 @enderror
             </div>
+        </div>
+    </div>
+
+    {{-- Section : Tags --}}
+    <div style="background: #fff; border: 2px solid #E5E7EB; border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div @click="toggle('tags')" style="cursor: pointer; user-select: none;"
+            :style="'padding:18px 24px;display:flex;justify-content:space-between;align-items:center;background:#F0F1F3;min-height:56px;box-sizing:border-box;line-height:1.4;' + (active === 'tags' ? 'border-bottom:1px solid #E5E7EB;' : '')">
+            <span style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; color: var(--c-dark, #1A1D23);">
+                {{ __('Tags (optionnel)') }}
+            </span>
+            <span x-text="active === 'tags' ? '&#9650;' : '&#9660;'" style="font-size: 12px; color: var(--c-text-muted, #6E7687);"></span>
+        </div>
+        <div x-show="active === 'tags'" x-transition x-cloak style="padding: 20px;">
+            <label for="tag-input" style="font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23); margin-bottom: 6px; display: block;">
+                {{ __('Ajouter des tags') }}
+                <span style="font-weight: 400; color: var(--c-text-muted, #6E7687); font-size: 12px;">({{ __('max 10, 30 caracteres chacun') }})</span>
+            </label>
+            <div style="position: relative;" @click.outside="tagSuggestions = []">
+                <input type="text" id="tag-input" x-model="tagInput"
+                    @input.debounce.300ms="fetchTagSuggestions()"
+                    @keydown.enter.prevent="addTag(tagInput)"
+                    @keydown.escape="tagSuggestions = []"
+                    maxlength="30"
+                    :disabled="tags.length >= 10"
+                    :placeholder="tags.length >= 10 ? '{{ __('Maximum atteint') }}' : '{{ __('Saisir un tag et appuyer sur Entree...') }}'"
+                    autocomplete="off"
+                    aria-label="{{ __('Champ de saisie pour ajouter un tag') }}"
+                    style="width: 100%; height: 44px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 12px; font-size: 14px;">
+                <div x-show="tagSuggestions.length > 0" x-transition
+                    style="position: absolute; z-index: 50; width: 100%; background: #fff; border: 1px solid #D1D5DB; border-top: none; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+                    role="listbox" aria-label="{{ __('Suggestions de tags') }}">
+                    <template x-for="suggestion in tagSuggestions" :key="suggestion">
+                        <div @click="addTag(suggestion); tagSuggestions = []"
+                            style="padding: 10px 12px; cursor: pointer; font-size: 14px; transition: background .15s;"
+                            onmouseover="this.style.background='#F0FAFB'" onmouseout="this.style.background='#fff'"
+                            role="option" x-text="suggestion"></div>
+                    </template>
+                </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;">
+                <template x-for="(tag, index) in tags" :key="'tag-' + index">
+                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;"
+                          :style="'background-color: hsl(' + (tagHashCode(tag) % 360) + ', 65%, 92%); color: hsl(' + (tagHashCode(tag) % 360) + ', 55%, 35%);'">
+                        <span x-text="tag"></span>
+                        <button type="button" @click="removeTag(index)"
+                            :aria-label="'{{ __('Supprimer le tag') }} ' + tag"
+                            style="background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 700; padding: 0 0 0 2px; line-height: 1; opacity: 0.7;"
+                            onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">&times;</button>
+                        <input type="hidden" name="tags[]" :value="tag">
+                    </span>
+                </template>
+            </div>
+            <template x-if="tags.length > 0">
+                <p style="color: var(--c-text-muted, #6E7687); font-size: 12px; margin-top: 6px;">
+                    <span x-text="tags.length"></span>/10 {{ __('tags utilises') }}
+                </p>
+            </template>
+            @error('tags')
+                <div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ $message }}</div>
+            @enderror
+            @error('tags.*')
+                <div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ $message }}</div>
+            @enderror
         </div>
     </div>
 
