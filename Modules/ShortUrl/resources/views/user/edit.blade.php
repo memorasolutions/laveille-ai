@@ -27,7 +27,7 @@
     </div>
     <div style="background: #F9FAFB; border-radius: 10px; padding: 12px 20px; flex: 1 !important; min-width: 120px; text-align: center;">
         <div style="font-size: 14px; font-weight: 600; color: var(--c-dark, #1A1D23);">{{ $shortUrl->created_at->format('d/m/Y') }}</div>
-        <div style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ __('cree le') }}</div>
+        <div style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ __('créé le') }}</div>
     </div>
     @if($shortUrl->expires_at)
     <div style="background: #FFFBEB; border-radius: 10px; padding: 12px 20px; flex: 1 !important; min-width: 120px; text-align: center;">
@@ -141,7 +141,7 @@
 
             <div style="margin-bottom: 16px;">
                 <label for="slug" style="font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23); margin-bottom: 6px; display: block;">
-                    {{ __('Slug personnalise') }}
+                    {{ __('Slug personnalisé') }}
                 </label>
                 <div style="display: flex !important; align-items: center !important; gap: 0;">
                     <span style="height: 44px; padding: 0 12px; background: #F3F4F6; border: 1px solid #D1D5DB; border-right: none; border-radius: 8px 0 0 8px; font-size: 13px; color: var(--c-text-muted, #6E7687); display: flex !important; align-items: center !important;">veille.la/</span>
@@ -182,7 +182,7 @@
         <div @click="toggle('security')" style="cursor: pointer; user-select: none;"
             :style="'padding:18px 24px;display:flex;justify-content:space-between;align-items:center;background:#F0F1F3;min-height:56px;box-sizing:border-box;line-height:1.4;' + (active === 'security' ? 'border-bottom:1px solid #E5E7EB;' : '')">
             <span style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; color: var(--c-dark, #1A1D23);">
-                🔒 {{ __('Securite et expiration') }}
+                🔒 {{ __('Sécurité et expiration') }}
             </span>
             <span x-text="active === 'security' ? '▲' : '▼'" style="font-size: 12px; color: var(--c-text-muted, #6E7687);"></span>
         </div>
@@ -194,7 +194,7 @@
                         <span style="font-size: 11px; background: #FEF2F2; color: #DC2626; padding: 2px 8px; border-radius: 4px; margin-left: 6px;">{{ __('actif') }}</span>
                     @endif
                 </label>
-                <input type="password" id="password" name="password" placeholder="{{ $shortUrl->password ? __('Laisser vide pour garder l\'actuel') : __('Proteger l\'acces au lien') }}"
+                <input type="password" id="password" name="password" placeholder="{{ $shortUrl->password ? __('Laisser vide pour garder l\'actuel') : __('Protéger l\'accès au lien') }}"
                     style="width: 100%; height: 44px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 12px; font-size: 14px;">
                 @error('password')
                     <div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ $message }}</div>
@@ -239,7 +239,7 @@
         <div x-show="active === 'tags'" x-transition x-cloak style="padding: 20px;">
             <label for="tag-input" style="font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23); margin-bottom: 6px; display: block;">
                 {{ __('Ajouter des tags') }}
-                <span style="font-weight: 400; color: var(--c-text-muted, #6E7687); font-size: 12px;">({{ __('max 10, 30 caracteres chacun') }})</span>
+                <span style="font-weight: 400; color: var(--c-text-muted, #6E7687); font-size: 12px;">({{ __('max 10, 30 caractères chacun') }})</span>
             </label>
             <div style="position: relative;" @click.outside="tagSuggestions = []">
                 <input type="text" id="tag-input" x-model="tagInput"
@@ -248,7 +248,7 @@
                     @keydown.escape="tagSuggestions = []"
                     maxlength="30"
                     :disabled="tags.length >= 10"
-                    :placeholder="tags.length >= 10 ? '{{ __('Maximum atteint') }}' : '{{ __('Saisir un tag et appuyer sur Entree...') }}'"
+                    :placeholder="tags.length >= 10 ? '{{ __('Maximum atteint') }}' : '{{ __('Saisir un tag et appuyer sur Entrée...') }}'"
                     autocomplete="off"
                     aria-label="{{ __('Champ de saisie pour ajouter un tag') }}"
                     style="width: 100%; height: 44px; border: 1px solid #D1D5DB; border-radius: 8px; padding: 0 12px; font-size: 14px;">
@@ -278,7 +278,7 @@
             </div>
             <template x-if="tags.length > 0">
                 <p style="color: var(--c-text-muted, #6E7687); font-size: 12px; margin-top: 6px;">
-                    <span x-text="tags.length"></span>/10 {{ __('tags utilises') }}
+                    <span x-text="tags.length"></span>/10 {{ __('tags utilisés') }}
                 </p>
             </template>
             @error('tags')
@@ -340,7 +340,7 @@
         </div>
         <div x-show="active === 'preview'" x-transition x-cloak style="padding: 20px;">
             <div x-show="scraped" x-cloak style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: #16A34A;">
-                ✨ {{ __('Donnees extraites automatiquement de l\'URL') }}
+                ✨ {{ __('Données extraites automatiquement de l\'URL') }}
             </div>
 
             <div style="margin-bottom: 16px;">
@@ -378,7 +378,7 @@
             </div>
 
             <div x-show="ogImage" x-cloak style="background: #F9FAFB; border-radius: 8px; padding: 12px; text-align: center;">
-                <p style="font-size: 12px; color: var(--c-text-muted, #6E7687); margin-bottom: 8px;">{{ __('Apercu de la miniature') }}</p>
+                <p style="font-size: 12px; color: var(--c-text-muted, #6E7687); margin-bottom: 8px;">{{ __('Aperçu de la miniature') }}</p>
                 <img :src="ogImage" alt="{{ __('Apercu') }}" style="max-height: 120px; max-width: 100%; border-radius: 6px; border: 1px solid #E5E7EB;" loading="lazy">
             </div>
         </div>

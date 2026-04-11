@@ -60,7 +60,7 @@
 
     {{-- Message expiration --}}
     <div style="background: #F0FAFB; border: 1px solid #D5EDF0; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #475569; line-height: 1.5;">
-        {{ __('Vos liens raccourcis expirent automatiquement apres 12 mois sans visite. Vous pouvez repousser la date d\'expiration de chaque lien a tout moment depuis cette page.') }}
+        {{ __('Vos liens raccourcis expirent automatiquement après 12 mois sans visite. Vous pouvez repousser la date d\'expiration de chaque lien à tout moment depuis cette page.') }}
     </div>
 
     @if($allLinks->isEmpty())
@@ -70,10 +70,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6E7687" stroke-width="1.5" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             </div>
             <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 8px;">{{ __('Aucun lien pour le moment') }}</h3>
-            <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 20px;">{{ __('Creez votre premier lien court pour commencer a suivre vos clics.') }}</p>
+            <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 20px;">{{ __('Créez votre premier lien court pour commencer à suivre vos clics.') }}</p>
             <a href="{{ route('shorturl.create') }}"
                 style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; text-decoration: none;">
-                + {{ __('Creer un lien') }}
+                + {{ __('Créer un lien') }}
             </a>
         </div>
     @else
@@ -87,13 +87,13 @@
                             :title="'{{ __('Cliquer pour copier') }}'"
                             style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-primary, #0B7285); text-decoration: none; word-break: break-all; cursor: pointer;">
                             <span x-show="copiedId !== 'short-' + link.id" x-text="link.short_url"></span>
-                            <span x-show="copiedId === 'short-' + link.id" x-cloak style="color: #10B981;">{{ __('Copie !') }}</span>
+                            <span x-show="copiedId === 'short-' + link.id" x-cloak style="color: #10B981;">{{ __('Copié !') }}</span>
                         </a>
                         <div @click="copyToClipboard(link.original_url, 'orig-' + link.id)"
                             :title="'{{ __('Cliquer pour copier') }}'"
                             style="font-size: 13px; color: var(--c-text-muted, #6E7687); margin-top: 4px; word-break: break-all; cursor: pointer;">
                             <span x-show="copiedId !== 'orig-' + link.id" x-text="truncateUrl(link.original_url, 60)"></span>
-                            <span x-show="copiedId === 'orig-' + link.id" x-cloak style="color: #10B981;">{{ __('Copie !') }}</span>
+                            <span x-show="copiedId === 'orig-' + link.id" x-cloak style="color: #10B981;">{{ __('Copié !') }}</span>
                         </div>
                         <template x-if="link.title">
                             <div style="font-size: 13px; color: var(--c-dark, #1A1D23); margin-top: 2px; font-weight: 600;" x-text="link.title"></div>
@@ -117,19 +117,18 @@
                                 <span style="background: #FFFBEB; color: #92400E; padding: 2px 8px; border-radius: 4px; font-weight: 600;" x-text="link.expires_at_formatted"></span>
                             </template>
                             <template x-if="link.has_password">
-                                <span style="background: #FEF2F2; color: #DC2626; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ __('protege') }}</span>
+                                <span style="background: #FEF2F2; color: #DC2626; padding: 2px 8px; border-radius: 4px; font-weight: 600;">{{ __('protégé') }}</span>
                             </template>
                         </div>
                     </div>
 
                     {{-- Actions --}}
                     <div style="display: flex !important; flex-wrap: wrap !important; gap: 6px; align-items: center !important;">
-                        <button type="button" @click="copyToClipboard(link.short_url, 'action-' + link.id)"
-                            :style="copiedId === 'action-' + link.id ? 'background:#10B981;color:#fff;border-color:#10B981;' : 'background:transparent;color:var(--c-dark, #1A1D23);border-color:#D1D5DB;'"
-                            style="border: 1px solid #D1D5DB; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2;"
+                        <a href="javascript:void(0)" @click="copyToClipboard(link.short_url, 'action-' + link.id)"
+                            :style="(copiedId === 'action-' + link.id ? 'background:#10B981;color:#fff;border-color:#10B981;' : 'background:transparent;color:var(--c-dark, #1A1D23);border-color:#D1D5DB;') + 'border: 1px solid #D1D5DB; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2; text-decoration: none; display: inline-block;'"
                             :aria-label="'{{ __('Copier le lien') }}'">
-                            <span x-text="copiedId === 'action-' + link.id ? '{{ __('Copie!') }}' : '{{ __('Copier') }}'"></span>
-                        </button>
+                            <span x-text="copiedId === 'action-' + link.id ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></span>
+                        </a>
                         <a :href="link.qr_url" target="_blank"
                             style="border: 1px solid #D1D5DB; color: var(--c-dark, #1A1D23); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
                             aria-label="{{ __('Voir le QR code') }}">QR</a>
@@ -162,10 +161,10 @@
         {{-- Aucun resultat --}}
         <template x-if="filteredLinks.length === 0 && (searchQuery.length > 0 || activeTags.length > 0)">
             <div style="text-align: center; padding: 40px 20px; color: var(--c-text-muted, #6E7687); font-size: 15px;">
-                <p>{{ __('Aucun lien ne correspond a votre recherche.') }}</p>
+                <p>{{ __('Aucun lien ne correspond à votre recherche.') }}</p>
                 <button type="button" @click="searchQuery = ''; activeTags = []"
                     style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 8px;">
-                    {{ __('Reinitialiser les filtres') }}
+                    {{ __('Réinitialiser les filtres') }}
                 </button>
             </div>
         </template>
