@@ -24,7 +24,8 @@ class AnalyticsService
     public function getOverview(int $days = 30): array
     {
         $since = now()->subDays($days);
-        $totalWebhookCalls = WebhookCall::count();
+        $webhooksAvailable = class_exists(\Modules\Webhooks\Models\WebhookCall::class);
+        $totalWebhookCalls = $webhooksAvailable ? WebhookCall::count() : 0;
 
         return [
             'total_users' => User::count(),
@@ -36,7 +37,7 @@ class AnalyticsService
             'pending_comments' => Comment::where('status', 'pending')->count(),
             'total_subscribers' => Subscriber::count(),
             'total_webhook_calls' => $totalWebhookCalls,
-            'webhook_success_rate' => $totalWebhookCalls > 0
+            'webhook_success_rate' => $webhooksAvailable && $totalWebhookCalls > 0
                 ? round((WebhookCall::where('status', 'success')->count() / $totalWebhookCalls) * 100, 1)
                 : 0,
             'total_activities' => Activity::count(),
@@ -45,6 +46,10 @@ class AnalyticsService
 
     public function getWebhookStats(int $days = 30): array
     {
+        if (! class_exists(\Modules\Webhooks\Models\WebhookCall::class)) {
+            return ['total' => 0, 'successful' => 0, 'failed' => 0, 'pending' => 0, 'success_rate' => 0, 'by_event' => []];
+        }
+
         $since = now()->subDays($days);
         $total = WebhookCall::where('created_at', '>=', $since)->count();
         $successful = WebhookCall::where('status', 'success')->where('created_at', '>=', $since)->count();
