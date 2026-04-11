@@ -24,7 +24,7 @@ class AnalyticsService
     public function getOverview(int $days = 30): array
     {
         $since = now()->subDays($days);
-        $webhooksAvailable = class_exists(\Modules\Webhooks\Models\WebhookCall::class);
+        $webhooksAvailable = \Schema::hasTable('webhook_calls');
         $totalWebhookCalls = $webhooksAvailable ? WebhookCall::count() : 0;
 
         return [
@@ -46,7 +46,7 @@ class AnalyticsService
 
     public function getWebhookStats(int $days = 30): array
     {
-        if (! class_exists(\Modules\Webhooks\Models\WebhookCall::class)) {
+        if (! \Schema::hasTable('webhook_calls')) {
             return ['total' => 0, 'successful' => 0, 'failed' => 0, 'pending' => 0, 'success_rate' => 0, 'by_event' => []];
         }
 
