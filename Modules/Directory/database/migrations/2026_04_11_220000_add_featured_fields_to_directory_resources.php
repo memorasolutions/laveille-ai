@@ -8,8 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('directory_resources', function (Blueprint $table) {
-            if (! Schema::hasColumn('directory_resources', 'is_featured')) {
+        Schema::table('directory_tools', function (Blueprint $table) {
+            if (! Schema::hasColumn('directory_tools', 'is_featured')) {
                 $table->boolean('is_featured')->default(false);
             }
             $table->dateTime('featured_until')->nullable()->default(null);
@@ -19,7 +19,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('directory_resources', function (Blueprint $table) {
+        Schema::table('directory_tools', function (Blueprint $table) {
             $table->dropColumn(['featured_until', 'featured_order']);
         });
     }
