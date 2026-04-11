@@ -299,7 +299,7 @@
                 <a href="#" @click.prevent="result = null; url = ''; copied = false; $nextTick(() => $refs.urlInput?.focus())"
                     style="background:#0B7285;color:#fff;-webkit-appearance:none;text-decoration:none;display:inline-block;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);"
                     onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                    ➕ {{ __('Créer un autre lien') }}
+                    + {{ __('Créer un autre lien') }}
                 </a>
             </div>
 
