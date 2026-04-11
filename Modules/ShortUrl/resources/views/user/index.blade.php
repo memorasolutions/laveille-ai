@@ -90,7 +90,7 @@
                 <a href="{{ route('shorturl.user.edit', $link) }}"
                     style="background: var(--c-primary, #0B7285); color: #fff; padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
                     aria-label="{{ __('Modifier ce lien') }}">{{ __('Modifier') }}</a>
-                @if($link->expires_at)
+                @if($link->expires_at && Route::has('shorturl.user.extend'))
                 <form action="{{ route('shorturl.user.extend', $link) }}" method="POST" style="display: inline;">
                     @csrf
                     <button type="submit"
