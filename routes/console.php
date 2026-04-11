@@ -58,6 +58,9 @@ Schedule::command('ai:scrape-urls --all')->dailyAt('05:00');
 // Privacy - purge donnees expirees (Loi 25 / RGPD retention)
 Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 
+// Short URLs - nettoyage liens expires + avertissements 30j
+Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {

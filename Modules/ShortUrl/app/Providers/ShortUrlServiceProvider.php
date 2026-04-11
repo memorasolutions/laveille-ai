@@ -21,6 +21,12 @@ class ShortUrlServiceProvider extends BaseModuleServiceProvider
     public function boot(): void
     {
         $this->bootModule();
+
+        \Modules\ShortUrl\Models\ShortUrl::observe(\Modules\ShortUrl\Observers\ShortUrlVisitObserver::class);
+
+        $this->commands([
+            \Modules\ShortUrl\Console\CleanupExpiredCommand::class,
+        ]);
     }
 
     public function register(): void
