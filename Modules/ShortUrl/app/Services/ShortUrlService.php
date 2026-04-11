@@ -105,6 +105,11 @@ class ShortUrlService
 
         $shortUrl->incrementClicks();
 
+        $shortUrl->forceFill([
+            'last_visited_at' => now(),
+            'expires_at' => now()->addMonthsNoOverflow(12),
+        ])->saveQuietly();
+
         Cache::forget("short_url:{$shortUrl->slug}");
     }
 
