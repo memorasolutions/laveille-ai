@@ -65,6 +65,28 @@ class IngestController
             }
         }
 
+        // Dédup par nom (fuzzy matching — catch "DeepSeek" vs "Deep Seek AI")
+        $incomingNameNorm = strtolower(trim(preg_replace('/\s*(ai|tool|app)\s*$/i', '', $validated['name'])));
+        $allTools = Tool::select('id', 'name', 'slug', 'url', 'status')->get();
+        foreach ($allTools as $existing) {
+            $existingName = strtolower(trim($existing->getTranslation('name', 'fr_CA', false) ?? ''));
+            similar_text($incomingNameNorm, $existingName, $percent);
+            if ($percent > 85) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Un outil similaire existe déjà (correspondance {$percent}%).",
+                    'duplicate' => [
+                        'id' => $existing->id,
+                        'name' => $existing->getTranslation('name', 'fr_CA', false),
+                        'slug' => $existing->getTranslation('slug', 'fr_CA', false),
+                        'url' => $existing->url,
+                        'status' => $existing->status,
+                        'similarity' => round($percent, 1),
+                    ],
+                ], 409);
+            }
+        }
+
         // Slug unique
         $locale = 'fr_CA';
         $baseSlug = Str::slug($validated['name']);
