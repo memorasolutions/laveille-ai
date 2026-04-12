@@ -98,13 +98,15 @@
                             <div class="entry-details">
                                 @php
                                     $articleContent = $article->content;
-                                    if (class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
+                                    if (! ($isPreview ?? false) && class_exists(\Modules\Ads\Services\AdsRenderer::class)) {
                                         $adsRenderer = app(\Modules\Ads\Services\AdsRenderer::class);
                                         $articleContent = $adsRenderer->renderShortcodes($articleContent);
                                         $articleContent = $adsRenderer->injectAfterParagraph($articleContent, 'article-inline', 3);
                                     }
+                                    // Regex plus strict : matche uniquement un heading ou paragraphe dont le TITRE commence par
+                                    // "Sources" ou "Références" (avec strong/b optionnel), suivi d'un ":" — évite les faux positifs sur "open source"
                                     $articleContent = preg_replace(
-                                        '/(<(?:h[2-4]|p)[^>]*>(?:<(?:strong|b|em)>)?(?:[^<]*(?:sources?\s*:?|références?\s*:?))(?:<\/(?:strong|b|em)>)?[^<]*<\/(?:h[2-4]|p)>)/i',
+                                        '/(<(?:h[2-4])[^>]*>(?:<(?:strong|b|em)>)?\s*(?:Sources?|Références?)\s*:?\s*(?:<\/(?:strong|b|em)>)?\s*<\/(?:h[2-4])>)/i',
                                         '</div><div class="sources-section">$1',
                                         $articleContent,
                                         1
@@ -113,7 +115,8 @@
                                         $articleContent = render_shortcodes($articleContent);
                                     }
                                     // AEO : sections wrappées, IDs sur headings, itemprop sur premiers paragraphes
-                                    if (class_exists(\App\Helpers\AeoHelper::class)) {
+                                    // (skip en mode preview pour éviter le bug DOMDocument avec HTML complexe)
+                                    if (! ($isPreview ?? false) && class_exists(\App\Helpers\AeoHelper::class)) {
                                         $articleContent = \App\Helpers\AeoHelper::chunkContent($articleContent);
                                     }
                                 @endphp

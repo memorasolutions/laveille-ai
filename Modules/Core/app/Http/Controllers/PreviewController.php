@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Modules\Core\Http\Controllers;
 
+use Illuminate\Support\Facades\View as ViewFacade;
 use Illuminate\View\View;
 
 class PreviewController
@@ -35,6 +36,20 @@ class PreviewController
 
         if (! $model) {
             abort(404);
+        }
+
+        if ($type === 'article' && ViewFacade::exists('fronttheme::blog.show')) {
+            // Pas de eager load — l'Article n'a pas toujours les relations chargées selon le module
+
+            return view('fronttheme::blog.show', [
+                'article' => $model,
+                'articleContent' => $model->content,
+                'schemaJson' => '{}',
+                'blogPostingJsonLd' => '',
+                'similarArticles' => collect(),
+                'relatedArticles' => collect(),
+                'isPreview' => true,
+            ]);
         }
 
         return view('core::preview', compact('model', 'type'));

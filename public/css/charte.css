@@ -867,3 +867,15 @@ select:focus {
 .header-right-menu-wrapper {
     display: none !important;
 }
+
+/* === Typographie FR : line-height plus aéré pour titres multi-lignes === */
+/* Les H2/H3 dans le contenu d'article avec accents FR ont besoin de plus d'espace */
+.wpo-blog-single-section .post h2,
+.wpo-blog-single-section .post h3,
+.entry-details h2,
+.entry-details h3,
+article h2,
+article h3 {
+    line-height: 1.4 !important;
+    padding-top: 0.2em;
+}
