@@ -66,6 +66,9 @@
                             <h1 style="margin: 0 0 12px; font-size: 1.8rem;">{{ $article->title }}</h1>
                             @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\Blog\\Models\\Article'])
 
+                            {{-- Navigation série (détection automatique par slug "-partie-N") --}}
+                            @include('fronttheme::partials.series-nav', ['article' => $article])
+
                             @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
                                 {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-top') !!}
                             @endif
@@ -187,6 +190,11 @@
         </div>
     </section>
     <!-- end wpo-blog-single-section -->
+
+    {{-- Navigation série en bas d'article --}}
+    <div class="container">
+        @include('fronttheme::partials.series-nav', ['article' => $article])
+    </div>
 
     @if($relatedArticles->isNotEmpty())
     <section style="padding: 30px 0 40px; background: #f9fafb;">
