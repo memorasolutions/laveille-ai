@@ -19,7 +19,7 @@ class IngestController
     {
         $token = $request->bearerToken();
 
-        if (! $token || $token !== env('DIRECTORY_INGEST_TOKEN')) {
+        if (! $token || $token !== config('directory.ingest_token')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Jeton d\'authentification invalide ou manquant.',
