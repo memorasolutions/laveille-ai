@@ -43,7 +43,7 @@ class SitemapController
         // Pages statiques publiées
         StaticPage::where('status', 'published')->get()->each(function ($page) use ($sitemap) {
             $sitemap->add(
-                Url::create(url('/pages/'.$page->slug))
+                Url::create(route('page.show', $page->slug))
                     ->setLastModificationDate($page->updated_at)
                     ->setPriority(0.6)
                     ->setChangeFrequency('monthly')
