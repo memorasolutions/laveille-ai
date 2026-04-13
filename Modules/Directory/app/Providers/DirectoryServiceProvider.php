@@ -61,6 +61,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\CaptureScreenshotsCommand::class,
             \Modules\Directory\Console\CheckLinksCommand::class,
             \Modules\Directory\Console\EnrichTutorialsCommand::class,
+            \Modules\Directory\Console\EnrichPendingCommand::class,
         ]);
     }
 
@@ -71,6 +72,7 @@ class DirectoryServiceProvider extends ServiceProvider
     {
         $this->app->booted(function () {
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+            $schedule->command('tools:enrich-pending --batch=3')->dailyAt('05:15');
             $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
         });
     }
