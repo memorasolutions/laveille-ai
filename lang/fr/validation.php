@@ -240,6 +240,13 @@ return [
         'font_family' => 'police',
         'site_name' => 'nom du site',
         'site_description' => 'description du site',
+        'shipping_address.first_name' => 'prénom',
+        'shipping_address.last_name' => 'nom de famille',
+        'shipping_address.address_line1' => 'adresse',
+        'shipping_address.city' => 'ville',
+        'shipping_address.state' => 'province',
+        'shipping_address.postal_code' => 'code postal',
+        'shipping_address.country' => 'pays',
     ],
 
 ];

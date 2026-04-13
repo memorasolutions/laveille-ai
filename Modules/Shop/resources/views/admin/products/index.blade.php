@@ -36,13 +36,13 @@
                                 <td>{{ $product->category ?? '-' }}</td>
                                 <td>
                                     @switch($product->status)
-                                        @case('published') <span class="badge bg-success">{{ __('Publie') }}</span> @break
+                                        @case('published') <span class="badge bg-success">{{ __('Publié') }}</span> @break
                                         @case('draft') <span class="badge bg-warning text-dark">{{ __('Brouillon') }}</span> @break
-                                        @case('archived') <span class="badge bg-danger">{{ __('Archive') }}</span> @break
+                                        @case('archived') <span class="badge bg-danger">{{ __('Archivé') }}</span> @break
                                     @endswitch
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.shop.products.edit', $product) }}" class="btn btn-outline-primary btn-sm">{{ __('Editer') }}</a>
+                                    <a href="{{ route('admin.shop.products.edit', $product) }}" class="btn btn-outline-primary btn-sm">{{ __('Modifier') }}</a>
                                     <form action="{{ route('admin.shop.products.destroy', $product) }}" method="POST" class="d-inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('{{ __('Supprimer ce produit ?') }}')">{{ __('Supprimer') }}</button>
