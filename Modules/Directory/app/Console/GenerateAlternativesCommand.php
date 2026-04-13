@@ -3,6 +3,7 @@
 namespace Modules\Directory\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Services\OpenRouterService;
 
@@ -63,17 +64,11 @@ class GenerateAlternativesCommand extends Command
                     continue;
                 }
 
-                $altTool = Tool::where('status', 'published')
-                    ->whereRaw("JSON_EXTRACT(name, '$.fr_CA') LIKE ?", ["%{$altName}%"])
-                    ->first();
+                $altTool = $this->findAlternativeTool($altName, $tool->id);
 
                 if (! $altTool) {
                     $this->line("  - {$altName} : non trouvé en DB");
 
-                    continue;
-                }
-
-                if ($altTool->id === $tool->id) {
                     continue;
                 }
 
@@ -103,5 +98,43 @@ class GenerateAlternativesCommand extends Command
         $this->info("=== BILAN : {$totalProcessed} outil(s) traité(s), {$totalLinked} alternative(s) liée(s) ===");
 
         return self::SUCCESS;
+    }
+
+    private function findAlternativeTool(string $rawName, int $excludeId): ?Tool
+    {
+        $cleanName = trim(preg_replace('/\[\d+\]/', '', $rawName));
+
+        if ($cleanName === '') {
+            return null;
+        }
+
+        $baseQuery = fn () => Tool::where('status', 'published')->where('id', '!=', $excludeId);
+
+        $tool = $baseQuery()
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.fr_CA')) LIKE ?", ['%' . $cleanName . '%'])
+            ->first();
+
+        if ($tool) {
+            return $tool;
+        }
+
+        $words = preg_split('/\s+/', $cleanName);
+        if (count($words) >= 2) {
+            $lastWord = end($words);
+            if (mb_strlen($lastWord) > 2) {
+                $tool = $baseQuery()
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.fr_CA')) LIKE ?", ['%' . $lastWord . '%'])
+                    ->first();
+                if ($tool) {
+                    return $tool;
+                }
+            }
+        }
+
+        $slug = Str::slug($cleanName);
+
+        return $baseQuery()
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(slug, '$.fr_CA')) LIKE ?", ['%' . $slug . '%'])
+            ->first();
     }
 }
