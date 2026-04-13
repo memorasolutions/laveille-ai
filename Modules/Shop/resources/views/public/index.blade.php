@@ -16,7 +16,7 @@
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
     <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">{{ __('Boutique') }}</h1>
-        <p style="color: #64748b; font-size: 15px;">{{ $products->total() }} {{ __('produits imprimés à la demande au Canada') }}</p>
+        <p style="color: #64748b; font-size: 15px;">{{ $products->total() }} {{ trans_choice('produit imprimé à la demande au Canada|produits imprimés à la demande au Canada', $products->total()) }}</p>
     </div>
 
     @if(config('shop.maintenance', false))

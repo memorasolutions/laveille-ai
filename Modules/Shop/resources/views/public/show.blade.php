@@ -5,11 +5,13 @@
         ? Str::limit($product->short_description, 160)
         : Str::limit(strip_tags($product->description), 160);
 
-    $productImage = !empty($product->images)
-        ? (Str::startsWith($product->images[0], ['http://', 'https://'])
-            ? $product->images[0]
-            : asset($product->images[0]))
-        : null;
+    $productImage = file_exists(public_path('images/shop/tshirt-laveille-og.jpg'))
+        ? asset('images/shop/tshirt-laveille-og.jpg')
+        : (!empty($product->images)
+            ? (Str::startsWith($product->images[0], ['http://', 'https://'])
+                ? $product->images[0]
+                : asset($product->images[0]))
+            : null);
 @endphp
 
 @section('title', $product->name . ' - ' . __('Boutique'))

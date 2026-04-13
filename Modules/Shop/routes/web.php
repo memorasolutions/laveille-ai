@@ -28,6 +28,7 @@ Route::middleware('web')
         Route::get('/confirmation/{order}', [CheckoutController::class, 'success'])->name('shop.confirmation');
         Route::get('/suivi', [OrderLookupController::class, 'index'])->name('shop.order-lookup');
         Route::post('/suivi', [OrderLookupController::class, 'search'])->name('shop.order-lookup.search');
+        Route::get('/mes-commandes', [UserOrderController::class, 'index'])->name('shop.my-orders')->middleware('auth');
         Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
     });
 
@@ -35,13 +36,6 @@ Route::middleware('web')
 Route::middleware('web')
     ->post('/api/shop/shipping-quote', ShippingQuoteController::class)
     ->name('shop.shipping-quote');
-
-// Mes commandes (authentifié)
-Route::middleware(['web', 'auth'])
-    ->prefix(config('shop.routes.prefix', 'boutique'))
-    ->group(function () {
-        Route::get('/mes-commandes', [UserOrderController::class, 'index'])->name('shop.my-orders');
-    });
 
 // Webhooks (pas de CSRF)
 Route::middleware('api')

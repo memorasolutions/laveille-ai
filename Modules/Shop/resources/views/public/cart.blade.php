@@ -26,6 +26,21 @@
 
 @section('content')
 <div class="container" style="padding-top: 30px; padding-bottom: 40px;">
+    @if($errors->any())
+        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #991b1b;">
+            <strong>{{ __('Veuillez corriger les erreurs suivantes :') }}</strong>
+            <ul style="margin: 8px 0 0; padding-left: 20px;">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    @if(session('error'))
+        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #991b1b;">
+            {{ session('error') }}
+        </div>
+    @endif
     <h1 x-data="{ count: {{ $itemCount ?? 0 }} }" @cart-updated.window="count = $event.detail.itemCount" style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Panier') }} (<span x-text="count"></span>)</h1>
 
     @if(empty($content))
