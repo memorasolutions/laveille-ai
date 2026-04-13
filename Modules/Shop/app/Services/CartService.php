@@ -3,6 +3,7 @@
 namespace Modules\Shop\Services;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Modules\Shop\Models\Cart;
 use Modules\Shop\Models\Product;
 
@@ -55,7 +56,7 @@ class CartService
                 'variant_label' => $variantLabel,
                 'gelato_variant_id' => $gelatoVariantId,
                 'quantity' => $qty,
-                'unit_price' => (float) $product->price,
+                'unit_price' => $this->resolveUnitPrice($product, $variantLabel),
             ];
         }
 
@@ -228,8 +229,37 @@ class CartService
             if ($newGelatoUid !== null) {
                 $items[$index]['gelato_variant_id'] = $newGelatoUid;
             }
+            // Mettre à jour le prix si la taille a changé
+            $product = Product::find($items[$index]['product_id']);
+            if ($product) {
+                $items[$index]['unit_price'] = $this->resolveUnitPrice($product, $newLabel);
+            }
             $cart->update(['items' => $items]);
         }
+    }
+
+    private function resolveSizeFromLabel(?string $variantLabel): ?string
+    {
+        if (! $variantLabel || ! str_contains($variantLabel, ' - ')) {
+            return null;
+        }
+
+        return trim(Str::after($variantLabel, ' - '));
+    }
+
+    private function resolveUnitPrice(Product $product, ?string $variantLabel): float
+    {
+        $size = $this->resolveSizeFromLabel($variantLabel);
+
+        if ($size && ! empty($product->variants)) {
+            foreach ($product->variants as $variant) {
+                if (! empty($variant['size_prices'][$size])) {
+                    return (float) $variant['size_prices'][$size];
+                }
+            }
+        }
+
+        return (float) $product->price;
     }
 
     private function findItemIndex(array $items, int $productId, ?string $variantLabel): int|false

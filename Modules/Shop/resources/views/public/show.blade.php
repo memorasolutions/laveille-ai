@@ -66,10 +66,17 @@
         allVariants: {{ json_encode($product->variants ?? []) }},
         fallbackImages: {{ json_encode($product->images ?? []) }},
         selectedVariantIndex: 0,
+        selectedSize: '{{ $product->metadata['sizes'][1] ?? 'M' }}',
+        basePrice: {{ $product->price }},
         hasColors: {{ $hasColorVariants ? 'true' : 'false' }},
         get currentVariant() { return this.hasColors ? this.allVariants[this.selectedVariantIndex] : null; },
         get images() { return this.hasColors && this.currentVariant?.images?.length ? this.currentVariant.images : this.fallbackImages; },
-        selectColor(index) { this.selectedVariantIndex = index; this.activeImage = 0; }
+        get currentPrice() { return this.currentVariant?.size_prices?.[this.selectedSize] ? parseFloat(this.currentVariant.size_prices[this.selectedSize]) : this.basePrice; },
+        get availableSizes() { return this.currentVariant?.size_prices ? Object.keys(this.currentVariant.size_prices) : []; },
+        selectColor(index) { this.selectedVariantIndex = index; this.activeImage = 0; },
+        selectSize(size) { this.selectedSize = size; },
+        formatPrice(v) { return parseFloat(v).toFixed(2).replace('.', ','); },
+        surcharge(size) { if (!this.currentVariant?.size_prices?.[size]) return 0; const d = parseFloat(this.currentVariant.size_prices[size]) - this.basePrice; return d > 0.01 ? d : 0; }
     }">
         {{-- Image --}}
         <div class="col-md-6" style="margin-bottom: 24px;">
@@ -112,7 +119,7 @@
             @endif
 
             <div style="margin-bottom: 20px;">
-                <span style="font-size: 28px; font-weight: 700; color: #0B7285;">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
+                <span style="font-size: 28px; font-weight: 700; color: #0B7285;" x-text="formatPrice(currentPrice) + ' $ CAD'">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
                 @if($product->compare_price)
                     <span style="font-size: 16px; color: #94a3b8; text-decoration: line-through; margin-left: 8px;">{{ number_format($product->compare_price, 2, ',', ' ') }} $</span>
                 @endif
@@ -152,19 +159,24 @@
                             </template>
                         </div>
                     </div>
-                    <input type="hidden" name="variant_label" :value="currentVariant?.label || ''">
+                    <input type="hidden" name="variant_label" :value="(currentVariant?.label || '') + (selectedSize ? ' - ' + selectedSize : '')">
                     <input type="hidden" name="variant_gelato_uid" :value="currentVariant?.gelato_uid || ''">
-                    {{-- Sélecteur tailles (si le produit a aussi des tailles, ex: hoodies) --}}
-                    @if($product->metadata['sizes'] ?? null)
-                        <div x-data="{ selectedSize: '{{ $product->metadata['sizes'][1] ?? 'M' }}' }" style="margin-bottom: 16px;">
-                            @include('fronttheme::partials.pill-selector', [
-                                'items' => $product->metadata['sizes'],
-                                'alpineVar' => 'selectedSize',
-                                'inputName' => 'size_label',
-                                'label' => __('Taille'),
-                            ])
+                    {{-- Sélecteur tailles avec prix par taille --}}
+                    <template x-if="availableSizes.length > 0">
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px;">{{ __('Taille') }}</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <template x-for="size in availableSizes" :key="size">
+                                    <button type="button" @click="selectSize(size)"
+                                        :style="'padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; outline: none; transition: all 0.2s; ' + (selectedSize === size ? 'background: #e0f7fa; border: 2px solid #0B7285; color: #0B7285;' : 'background: #f1f5f9; border: 1px solid #cbd5e1; color: #374151;')">
+                                        <span x-text="size"></span>
+                                        <span x-show="surcharge(size) > 0" x-text="' +' + formatPrice(surcharge(size)) + ' $'" style="font-size: 11px; opacity: 0.7;"></span>
+                                    </button>
+                                </template>
+                            </div>
+                            <input type="hidden" name="size_label" :value="selectedSize">
                         </div>
-                    @endif
+                    </template>
                 @elseif($hasSizeVariants)
                     <div style="margin-bottom: 16px;" x-data="{ selectedSize: '{{ $product->variants[0]['label'] ?? 'M' }}' }">
                         @include('fronttheme::partials.pill-selector', [
