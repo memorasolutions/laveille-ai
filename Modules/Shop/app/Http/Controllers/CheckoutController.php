@@ -21,6 +21,9 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
+            'shipping_cost' => 'required|numeric|min:0|max:100',
+            'newsletter' => 'sometimes|boolean',
+            'save_address' => 'sometimes|boolean',
             'shipping_address' => 'required|array',
             'shipping_address.first_name' => 'required|string',
             'shipping_address.last_name' => 'required|string',
