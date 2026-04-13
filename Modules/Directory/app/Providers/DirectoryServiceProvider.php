@@ -60,6 +60,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\DirectoryEnrichToolsCommand::class,
             \Modules\Directory\Console\CaptureScreenshotsCommand::class,
             \Modules\Directory\Console\CheckLinksCommand::class,
+            \Modules\Directory\Console\EnrichTutorialsCommand::class,
         ]);
     }
 
@@ -68,10 +69,10 @@ class DirectoryServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+            $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
+        });
     }
 
     /**
