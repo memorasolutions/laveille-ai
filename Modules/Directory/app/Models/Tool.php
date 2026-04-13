@@ -119,6 +119,25 @@ class Tool extends Model
         return $this->hasMany(ToolScreenshot::class, 'directory_tool_id');
     }
 
+    public function alternatives(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'tool_alternatives', 'tool_id', 'alternative_tool_id')
+            ->withPivot('relevance_score', 'source')
+            ->withTimestamps();
+    }
+
+    public function alternativeOf(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'tool_alternatives', 'alternative_tool_id', 'tool_id')
+            ->withPivot('relevance_score', 'source')
+            ->withTimestamps();
+    }
+
+    public function allAlternatives()
+    {
+        return $this->alternatives->merge($this->alternativeOf)->unique('id');
+    }
+
     public function averageRating(): float
     {
         return (float) $this->reviews()->approved()->avg('rating') ?: 0;

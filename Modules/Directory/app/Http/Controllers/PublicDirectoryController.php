@@ -77,13 +77,25 @@ class PublicDirectoryController extends Controller
 
         $tool->increment('clicks_count');
 
-        $similarTools = Tool::published()
+        $limit = (int) Settings::get('directory.similar_tools_limit', 8);
+
+        $alternatives = $tool->allAlternatives()
+            ->where('id', '!=', $tool->id);
+
+        $similarByCategory = Tool::published()
             ->where('id', '!=', $tool->id)
+            ->whereNotIn('id', $alternatives->pluck('id'))
             ->whereHas('categories', function ($q) use ($tool) {
                 $q->whereIn('directory_categories.id', $tool->categories->pluck('id'));
             })
-            ->limit((int) Settings::get('directory.similar_tools_limit', 4))
+            ->limit($limit)
             ->get();
+
+        $similarTools = $alternatives
+            ->merge($similarByCategory)
+            ->unique('id')
+            ->take($limit)
+            ->values();
 
         return view('directory::public.show', compact('tool', 'similarTools'));
     }

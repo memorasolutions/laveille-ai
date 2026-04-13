@@ -63,6 +63,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\EnrichTutorialsCommand::class,
             \Modules\Directory\Console\EnrichPendingCommand::class,
             \Modules\Directory\Console\SummarizePendingCommand::class,
+            \Modules\Directory\Console\GenerateAlternativesCommand::class,
         ]);
     }
 
