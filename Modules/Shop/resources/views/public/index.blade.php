@@ -3,7 +3,7 @@
 @section('title', __('Boutique'))
 
 @section('meta_description', __('Boutique La veille - T-shirts, tasses et hoodies pour les passionnés de technologie et d\'IA.'))
-@section('og_image', asset('images/og-image.png'))
+@section('og_image', asset('images/shop/tshirt-laveille-og.jpg'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

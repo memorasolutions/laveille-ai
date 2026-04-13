@@ -162,10 +162,21 @@ class SyncGelatoStoreCommand extends Command
             return 'updated';
         }
 
-        $product->update([
+        $updateData = [
             'variants' => $newVariants,
             'metadata' => array_merge($metadata, ['sizes' => $sizes]),
-        ]);
+        ];
+
+        // Ne jamais écraser les images existantes du produit
+        // Les images sont gérées manuellement via l'admin
+        if (empty($product->images)) {
+            $previewUrl = $gelato['previewUrl'] ?? null;
+            if ($previewUrl) {
+                $updateData['images'] = [$previewUrl];
+            }
+        }
+
+        $product->update($updateData);
 
         $this->components->twoColumnDetail("[MIS À JOUR] {$product->name}", count($newVariants).' couleurs, '.count($storeVariantMap).' mappings');
         return 'updated';
