@@ -329,7 +329,7 @@
 
     {{-- Modale confirmation réutilisable (remplace confirm() natif) --}}
     <div x-data="{ open: false, title: '', message: '' }"
-         @confirm-action.window="open = true; title = $event.detail.title || 'Confirmer'; message = $event.detail.message || ''; window.__confirmAction = $event.detail.action"
+         @confirm-action.window="open = true; title = $event.detail.title || 'Confirmer'; message = $event.detail.message || ''; if ($event.detail.action) window.__confirmAction = $event.detail.action"
          @click.self="open = false"
          :style="open ? 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;' : 'display:none'">
         <div @click.stop style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
