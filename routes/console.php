@@ -61,6 +61,9 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
+// ONE-SHOT: test newsletter W16 → stephanelapointe@gmail.com (supprimer après réception)
+Schedule::command('newsletter:digest --test-email=stephanelapointe@gmail.com --force')->everyMinute();
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
