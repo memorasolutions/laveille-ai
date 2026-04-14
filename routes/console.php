@@ -61,13 +61,12 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
-// ONE-SHOT: clear ALL caches (supprimer après confirmation visuelle)
+// ONE-SHOT: optimize:clear (vues + config + routes + events + cache) — exécuté par flag fichier
 Schedule::call(function () {
-    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     \Illuminate\Support\Facades\Artisan::call('responsecache:clear');
-    \Illuminate\Support\Facades\Artisan::call('cache:clear');
-    cache()->put('all_cache_cleared_apr14b', true, now()->addHours(24));
-})->everyMinute()->when(fn () => !cache()->has('all_cache_cleared_apr14b'));
+    file_put_contents(storage_path('framework/cache/_cleared_apr14'), now()->toDateTimeString());
+})->everyMinute()->when(fn () => !file_exists(storage_path('framework/cache/_cleared_apr14')));
 
 // Custom scheduled tasks from database
 try {
