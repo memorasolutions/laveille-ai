@@ -11,7 +11,7 @@
             @endif
             @if(isset($deleteUrl))
             <button onclick="var tk=document.querySelector('meta[name=csrf-token]')?.content;window.__confirmAction=()=>fetch('{{ $deleteUrl }}',{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>{if(r.ok)location.reload()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Supprimer") }}',message:'{{ __("Supprimer cette ressource ?") }}'}}))"
-                class="ct-btn ct-btn-ghost ct-btn-xs">
+                class="ct-btn ct-btn-outline ct-btn-xs">
                 {{ __('Supprimer') }}
             </button>
             @endif
