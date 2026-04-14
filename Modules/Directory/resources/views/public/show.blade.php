@@ -926,9 +926,12 @@
                             </div>
                             <p style="color:#6b7280;font-size:13px;margin:0;">{{ __('La communauté peut maintenant voter et commenter votre ressource.') }}</p>
                         </div>
-                        @if(Route::has('user.contributions'))
-                        <a href="{{ route('user.contributions') }}" style="display:inline-block;padding:10px 24px;background:var(--c-primary);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">{{ __('Voir mes contributions') }}</a>
-                        @endif
+                        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                            @if(Route::has('user.contributions'))
+                            <a href="{{ route('user.contributions') }}" style="display:inline-block;padding:10px 24px;background:var(--c-primary);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">{{ __('Voir mes contributions') }}</a>
+                            @endif
+                            <button type="button" @click="step=1;submitted=false;toolUrl='';toolName='';toolDesc='';toolShortDesc='';toolPricing='';screenshotUrl='';scrapeError='';duplicates=[]" style="padding:10px 24px;background:#fff;color:var(--c-primary);border:2px solid var(--c-primary);border-radius:8px;font-weight:600;cursor:pointer;">{{ __('Soumettre une autre ressource') }}</button>
+                        </div>
                     </div>
                 </div>
             </div>

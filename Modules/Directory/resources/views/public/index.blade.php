@@ -241,10 +241,11 @@
             </div>
 
             {{-- Succes --}}
-            <div x-show="submitted" x-cloak x-transition style="margin-bottom: 20px;">
+            <div x-show="submitted" x-cloak x-transition style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <span style="background: #D1FAE5; color: #065F46; padding: 10px 24px; border-radius: var(--r-btn); font-size: 14px; font-weight: 600;">
                     ✓ {{ __('Merci ! L\'outil a été ajouté au répertoire.') }}
                 </span>
+                <button type="button" @click="submitted=false;wStep=1;toolUrl='';toolName='';toolDesc='';toolShortDesc='';toolPricing='';screenshotUrl='';scrapeError='';duplicates=[]" style="padding:8px 20px;background:#fff;color:var(--c-primary);border:2px solid var(--c-primary);border-radius:var(--r-btn);font-weight:600;cursor:pointer;font-size:13px;">{{ __('Soumettre un autre outil') }}</button>
             </div>
 
             {{-- Etape 1 : URL --}}
