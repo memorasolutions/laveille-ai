@@ -471,7 +471,14 @@ class CommunityController extends Controller
     public function voteScreenshot(Request $request, int $id): JsonResponse
     {
         $screenshot = ToolScreenshot::approved()->findOrFail($id);
+
+        $key = 'ss_vote_'.$id.'_'.(Auth::id() ?? $request->ip());
+        if (cache()->has($key)) {
+            return response()->json(['votes' => $screenshot->votes_count, 'already_voted' => true]);
+        }
+
         $screenshot->increment('votes_count');
+        cache()->put($key, true, now()->addDays(30));
 
         return response()->json(['votes' => $screenshot->votes_count]);
     }
