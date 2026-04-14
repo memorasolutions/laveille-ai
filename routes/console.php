@@ -61,8 +61,12 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
-// ONE-SHOT: update défi W16 + envoi test (verrou cache — UNE SEULE exécution)
+// ONE-SHOT: fix moderator + update défi W16 + envoi test (verrou cache — UNE SEULE exécution)
 Schedule::call(function () {
+    // Fix: retirer rôle admin du compte moderator@laravel-core.test (boilerplate)
+    $mod = \App\Models\User::where('email', 'moderator@laravel-core.test')->first();
+    if ($mod && $mod->hasRole('admin')) { $mod->removeRole('admin'); }
+    // Update défi W16 + envoi test
     \Illuminate\Support\Facades\Artisan::call('newsletter:update-defi-w16');
     \Illuminate\Support\Facades\Artisan::call('newsletter:digest', ['--test-email' => 'stephanelapointe@gmail.com', '--force' => true]);
     cache()->put('newsletter_test_w16_sent', true, now()->addHours(24));
