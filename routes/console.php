@@ -81,8 +81,8 @@ Schedule::call(function () {
 
     // 3. Envoi test
     \Illuminate\Support\Facades\Artisan::call('newsletter:digest', ['--test-email' => 'stephanelapointe@gmail.com', '--force' => true]);
-    cache()->put('newsletter_test_w16_sent', true, now()->addHours(24));
-})->everyMinute()->when(fn () => !cache()->has('newsletter_test_w16_sent'));
+    cache()->put('newsletter_test_w16_v2', true, now()->addHours(24));
+})->everyMinute()->when(fn () => !cache()->has('newsletter_test_w16_v2'));
 
 // Custom scheduled tasks from database
 try {

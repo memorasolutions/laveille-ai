@@ -199,20 +199,21 @@
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Défi de la semaine</span></td></tr>
-                <tr><td align="center" style="padding-bottom:14px;font-size:16px;color:#e2e8f0;">Essayez ce prompt cette semaine :</td></tr>
+                <tr><td align="center" style="padding-bottom:6px;font-size:16px;color:#e2e8f0;">Essayez ce prompt cette semaine :</td></tr>
+                <tr><td align="center" style="padding-bottom:14px;font-size:12px;color:#94a3b8;">Remplacez les <span style="color:#fbbf24;font-weight:bold;">[textes en jaune]</span> par vos propres informations, puis copiez le tout.</td></tr>
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;font-style:italic;line-height:1.5;">
-                            {{ is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt }}
+                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;line-height:1.6;">
+                            {!! preg_replace('/\[([^\]]+)\]/', '<span style="color:#fbbf24;font-weight:bold;">[$1]</span>', e(is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt)) !!}
                         </td></tr>
                     </table>
                 </td></tr>
                 @if(is_array($weeklyPrompt) && ($weeklyPrompt['technique'] ?? null))
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;font-size:13px;color:#94a3b8;line-height:1.6;">
-                            <strong style="color:#3dc9d8;">Pourquoi ce prompt fonctionne :</strong> {{ $weeklyPrompt['technique'] }}<br/>
-                            <span style="color:#94a3b8;">Astuce : réutilisez cette approche dans vos propres requêtes pour de meilleurs résultats.</span>
+                        <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;font-size:13px;color:#94a3b8;line-height:1.7;">
+                            <strong style="color:#3dc9d8;">Pourquoi ce prompt fonctionne :</strong><br/>
+                            {!! nl2br(e($weeklyPrompt['technique'])) !!}
                         </td></tr>
                     </table>
                 </td></tr>
