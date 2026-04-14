@@ -1029,13 +1029,13 @@
                         {{-- Zone drop/paste/clic --}}
                         <div x-show="!preview"
                             @click="$refs.fileInput.click()"
-                            style="text-align:center;padding:40px 30px;margin-bottom:14px;border:2px dashed #94a3b8;border-radius:12px;cursor:pointer;transition:all .2s;background:#f8fafc;"
+                            style="text-align:center;padding:48px 30px;margin-bottom:14px;border:3px dashed #64748b;border-radius:12px;cursor:pointer;transition:all .2s;background:#f1f5f9;"
                             :style="dragging ? 'border-color:var(--c-primary);background:#e0f2fe' : ''"
                             @mouseenter="$el.style.borderColor='var(--c-primary)';$el.style.background='#f0f9ff'"
-                            @mouseleave="!dragging && ($el.style.borderColor='#cbd5e1') && ($el.style.background='#f8fafc')">
-                            <div style="font-size:40px;margin-bottom:10px;">📸</div>
-                            <p style="color:var(--c-dark);font-size:15px;margin:0 0 4px;font-weight:700;">{{ __('Glissez-déposez, collez (Ctrl+V) ou cliquez') }}</p>
-                            <p style="color:#6B7280;font-size:12px;margin:0;">{{ __('JPG, PNG, WebP — compression automatique, max 1920px') }}</p>
+                            @mouseleave="!dragging && ($el.style.borderColor='#64748b') && ($el.style.background='#f1f5f9')">
+                            <div style="font-size:48px;margin-bottom:12px;">📸</div>
+                            <p style="color:var(--c-dark);font-size:16px;margin:0 0 6px;font-weight:700;">{{ __('Glissez-déposez, collez (Ctrl+V) ou cliquez') }}</p>
+                            <p style="color:#6B7280;font-size:13px;margin:0;">{{ __('JPG, PNG, WebP — compression automatique, max 1920px') }}</p>
                         </div>
 
                         {{-- Preview --}}
