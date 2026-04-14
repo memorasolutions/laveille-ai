@@ -63,11 +63,23 @@ Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
 // ONE-SHOT: fix moderator + update défi W16 + envoi test (verrou cache — UNE SEULE exécution)
 Schedule::call(function () {
-    // Fix: retirer rôle admin du compte moderator@laravel-core.test (boilerplate)
+    // 1. Fix: retirer rôle admin du compte moderator@laravel-core.test
     $mod = \App\Models\User::where('email', 'moderator@laravel-core.test')->first();
     if ($mod && $mod->hasRole('admin')) { $mod->removeRole('admin'); }
-    // Update défi W16 + envoi test
-    \Illuminate\Support\Facades\Artisan::call('newsletter:update-defi-w16');
+
+    // 2. Update défi W16 avec format court
+    $issue = \Modules\Newsletter\Models\NewsletterIssue::where('week_number', 16)->where('year', 2026)->first();
+    if ($issue) {
+        $content = $issue->content ?? [];
+        $content['weekly_prompt'] = [
+            'prompt' => "Tu es un assistant personnel expert en productivité et en automatisation.\n\nMon contexte : chaque [semaine/jour], je perds environ [nombre] minutes à [décris ta tâche plate — ex. : trier mes courriels, planifier mes repas, classer mes factures]. Je travaille comme [ton rôle] et j'utilise déjà [outils que tu connais — ex. : Google Agenda, Notion, Excel].\n\nPropose-moi un système étape par étape pour automatiser cette tâche au maximum. Pour chaque étape, dis-moi exactement quoi faire, quel outil gratuit utiliser, et donne-moi les instructions comme si j'avais jamais touché à ça.",
+            'technique' => "🎭 Role prompting — « Tu es un assistant personnel expert... » On donne un rôle précis à l'IA pour qu'elle réponde comme une spécialiste, pas un robot générique.\n\n🧩 Context engineering — « Mon contexte : chaque [jour], je perds [nombre] minutes à [tâche]... » On nourrit l'IA avec TON contexte réel. Plus elle en sait, plus sa réponse est taillée sur mesure.\n\n💡 Pour aller plus loin : on aurait pu ajouter du negative prompting (« Ne me suggère pas d'outils payants ») pour filtrer les réponses inutiles. On explore ça la semaine prochaine !",
+        ];
+        $issue->content = $content;
+        $issue->save();
+    }
+
+    // 3. Envoi test
     \Illuminate\Support\Facades\Artisan::call('newsletter:digest', ['--test-email' => 'stephanelapointe@gmail.com', '--force' => true]);
     cache()->put('newsletter_test_w16_sent', true, now()->addHours(24));
 })->everyMinute()->when(fn () => !cache()->has('newsletter_test_w16_sent'));
