@@ -6,19 +6,23 @@
 <meta name="robots" content="noindex, nofollow">
 @endpush
 
+@push('styles')
+<link rel="stylesheet" href="/css/shop.css">
+@endpush
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Mes commandes'), 'breadcrumbItems' => [__('Boutique'), __('Mes commandes')]])
 @endsection
 
 @section('content')
-<div class="container" style="padding-top: 30px; padding-bottom: 40px;">
-    <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Mes commandes') }}</h1>
+<div class="container sp-container">
+    <h1 class="sp-page-title" style="margin-bottom: 24px;">{{ __('Mes commandes') }}</h1>
 
     @if($orders->isEmpty())
         <div class="alert alert-info">{{ __('Vous n\'avez pas encore de commande.') }}</div>
     @else
         <div class="table-responsive">
-            <table class="table table-striped" style="background: #fff; border-radius: 8px; overflow: hidden;">
+            <table class="table table-striped sp-table">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -51,7 +55,7 @@
                             <span class="label {{ $badge['class'] }}">{{ $badge['label'] }}</span>
                         </td>
                         <td>
-                            <a href="{{ route('shop.confirmation', $order) }}" class="btn btn-xs" style="background: #0B7285; color: #fff; border-radius: 4px;">{{ __('Voir') }}</a>
+                            <a href="{{ route('shop.confirmation', $order) }}" class="sp-btn-primary sp-btn-xs">{{ __('Voir') }}</a>
                         </td>
                     </tr>
                     @endforeach

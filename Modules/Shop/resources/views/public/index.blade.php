@@ -1,5 +1,9 @@
 @extends(fronttheme_layout())
 
+@push('styles')
+    <link rel="stylesheet" href="/css/shop.css">
+@endpush
+
 @section('title', __('Boutique'))
 
 @section('meta_description', __('Boutique La veille - T-shirts, tasses et hoodies pour les passionnés de technologie et d\'IA.'))
@@ -13,17 +17,17 @@
 @endsection
 
 @section('content')
-<div class="container" style="padding-top: 30px; padding-bottom: 40px;">
-    <div style="text-align: center; margin-bottom: 24px;">
-        <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">{{ __('Boutique') }}</h1>
-        <p style="color: #64748b; font-size: 15px;">{{ $products->total() }} {{ trans_choice('produit imprimé à la demande au Canada|produits imprimés à la demande au Canada', $products->total()) }}</p>
+<div class="container sp-container">
+    <div class="sp-page-header">
+        <h1 class="sp-page-title">{{ __('Boutique') }}</h1>
+        <p class="sp-page-subtitle">{{ $products->total() }} {{ trans_choice('produit imprimé à la demande au Canada|produits imprimés à la demande au Canada', $products->total()) }}</p>
     </div>
 
     @if(config('shop.maintenance', false))
-        <div style="text-align: center; padding: 60px 20px;">
-            <div style="font-size: 48px; margin-bottom: 16px;">🛠️</div>
-            <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">{{ __('Boutique en préparation') }}</h2>
-            <p style="color: #64748b; font-size: 16px; max-width: 480px; margin: 0 auto;">{{ __('Nous préparons de nouveaux produits pour vous. Revenez bientôt pour découvrir notre collection mise à jour.') }}</p>
+        <div class="sp-maintenance">
+            <div class="sp-maintenance-icon">🛠️</div>
+            <h2 class="sp-maintenance-title">{{ __('Boutique en préparation') }}</h2>
+            <p class="sp-maintenance-desc">{{ __('Nous préparons de nouveaux produits pour vous. Revenez bientôt pour découvrir notre collection mise à jour.') }}</p>
         </div>
     @elseif($products->isEmpty())
         <div class="alert alert-info">{{ __('Aucun produit disponible pour le moment.') }}</div>
@@ -31,31 +35,31 @@
         <div class="row">
             @foreach ($products as $product)
                 <div class="col-md-4 col-sm-6" style="margin-bottom: 30px;">
-                    <div style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; height: 100%;">
+                    <div class="sp-card">
                         <a href="{{ route('shop.show', $product) }}">
                             @if(!empty($product->images) && isset($product->images[0]))
-                                <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" loading="lazy" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+                                <img src="{{ $product->images[0] }}" alt="{{ $product->name }}" loading="lazy" class="sp-card-img">
                             @else
-                                <div style="width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg, #0B7285, #0CA678); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 48px; font-weight: 700;">{{ substr($product->name, 0, 1) }}</div>
+                                <div class="sp-card-fallback">{{ substr($product->name, 0, 1) }}</div>
                             @endif
                         </a>
-                        <div style="padding: 16px;">
-                            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 8px;">
-                                <a href="{{ route('shop.show', $product) }}" style="color: #1e293b; text-decoration: none;">{{ $product->name }}</a>
+                        <div class="sp-card-body">
+                            <h3 class="sp-card-title">
+                                <a href="{{ route('shop.show', $product) }}">{{ $product->name }}</a>
                             </h3>
                             @if($product->description)
-                                <p style="color: #64748b; font-size: 13px; margin-bottom: 12px; line-height: 1.4;">{{ Str::limit(strip_tags($product->description), 100) }}</p>
+                                <p class="sp-card-desc">{{ Str::limit(strip_tags($product->description), 100) }}</p>
                             @elseif($product->short_description)
-                                <p style="color: #64748b; font-size: 13px; margin-bottom: 12px; line-height: 1.4;">{{ Str::limit($product->short_description, 100) }}</p>
+                                <p class="sp-card-desc">{{ Str::limit($product->short_description, 100) }}</p>
                             @endif
-                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="sp-card-footer">
                                 <div>
-                                    <span style="font-size: 18px; font-weight: 700; color: #0B7285;">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
+                                    <span class="sp-card-price">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
                                     @if($product->compare_price)
-                                        <span style="font-size: 13px; color: #94a3b8; text-decoration: line-through; margin-left: 6px;">{{ number_format($product->compare_price, 2, ',', ' ') }} $</span>
+                                        <span class="sp-card-price-old">{{ number_format($product->compare_price, 2, ',', ' ') }} $</span>
                                     @endif
                                 </div>
-                                <a href="{{ route('shop.show', $product) }}" class="btn btn-sm" style="background: #0B7285; color: #fff; border-radius: 6px; padding: 6px 16px; font-size: 13px;">{{ __('Voir') }}</a>
+                                <a href="{{ route('shop.show', $product) }}" class="sp-btn-primary sp-btn-sm">{{ __('Voir') }}</a>
                             </div>
                         </div>
                     </div>

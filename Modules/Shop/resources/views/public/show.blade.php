@@ -46,6 +46,10 @@
     <script type="application/ld+json">{!! $schemaJson !!}</script>
 @endpush
 
+@push('styles')
+    <link rel="stylesheet" href="/css/shop.css">
+@endpush
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $product->name,
@@ -54,7 +58,7 @@
 @endsection
 
 @section('content')
-<div class="container" style="padding-top: 30px; padding-bottom: 40px;">
+<div class="container sp-container">
 
     @php
         $hasColorVariants = !empty($product->variants) && isset($product->variants[0]['color']);
@@ -79,81 +83,79 @@
         surcharge(size) { if (!this.currentVariant?.size_prices?.[size]) return 0; const d = parseFloat(this.currentVariant.size_prices[size]) - this.basePrice; return d > 0.01 ? d : 0; }
     }">
         {{-- Image --}}
-        <div class="col-md-6" style="margin-bottom: 24px;">
+        <div class="col-md-6 sp-gallery-col">
             <template x-if="images.length > 0">
                 <div>
-                    <img :src="images[activeImage]" alt="{{ $product->name }}" style="width: 100%; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <img :src="images[activeImage]" alt="{{ $product->name }}" class="sp-gallery-main">
 
-                    {{-- Sélecteur couleurs déplacé dans la zone formulaire (col droite) --}}
-
-                    {{-- Miniatures (si plusieurs images pour la même couleur/produit) --}}
+                    {{-- Miniatures --}}
                     <template x-if="images.length > 1">
-                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <div class="sp-gallery-thumbs">
                             <template x-for="(image, index) in images" :key="index">
-                                <img :src="image" :alt="'{{ $product->name }}'" @click="activeImage = index" :style="'width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;' + (activeImage === index ? 'border:2px solid #0B7285;' : 'border:2px solid transparent;')">
+                                <img :src="image" :alt="'{{ $product->name }}'" @click="activeImage = index" :class="'sp-gallery-thumb' + (activeImage === index ? ' active' : '')">
                             </template>
                         </div>
                     </template>
 
-                    <div style="margin-top: 12px;">
-                        <i class="fa fa-info-circle" style="font-size: 12px; color: #94a3b8;"></i>
-                        <span style="font-size: 12px; color: #94a3b8; font-style: italic;">{{ __('Les images sont des simulations. Les couleurs du produit reçu peuvent légèrement varier en raison des différences entre les écrans et les procédés d\'impression.') }}</span>
+                    <div class="sp-gallery-notice">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        {{ __('Les images sont des simulations. Les couleurs du produit reçu peuvent légèrement varier en raison des différences entre les écrans et les procédés d\'impression.') }}
                     </div>
                 </div>
             </template>
             <template x-if="images.length === 0">
-                <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #0B7285, #0CA678); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 72px; font-weight: 700;">{{ substr($product->name, 0, 1) }}</div>
+                <div class="sp-gallery-fallback">{{ substr($product->name, 0, 1) }}</div>
             </template>
         </div>
 
         {{-- Infos produit --}}
         <div class="col-md-6">
-            <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 12px;">{{ $product->name }}</h1>
+            <h1 class="sp-product-title">{{ $product->name }}</h1>
 
             @if($product->description)
-                <div class="rt-description" style="font-size: 15px; line-height: 1.7; color: #475569; margin-bottom: 16px;">
+                <div class="rt-description sp-description">
                     {!! Str::markdown($product->description) !!}
                 </div>
             @elseif($product->short_description)
-                <p style="color: #64748b; font-size: 15px; margin-bottom: 16px;">{{ $product->short_description }}</p>
+                <p class="sp-description">{{ $product->short_description }}</p>
             @endif
 
-            <div style="margin-bottom: 20px;">
-                <span style="font-size: 28px; font-weight: 700; color: #0B7285;" x-text="formatPrice(currentPrice) + ' $ CAD'">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
+            <div class="sp-price-block">
+                <span class="sp-product-price" x-text="formatPrice(currentPrice) + ' $ CAD'">{{ number_format($product->price, 2, ',', ' ') }} $ CAD</span>
                 @if($product->compare_price)
-                    <span style="font-size: 16px; color: #94a3b8; text-decoration: line-through; margin-left: 8px;">{{ number_format($product->compare_price, 2, ',', ' ') }} $</span>
+                    <span class="sp-product-price-old">{{ number_format($product->compare_price, 2, ',', ' ') }} $</span>
                 @endif
-                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Taxes en sus (TPS + TVQ)</div>
+                <div class="sp-product-tax-note">Taxes en sus (TPS + TVQ)</div>
             </div>
 
             @if($product->category)
-                <p style="margin-bottom: 16px;"><span style="background: #f1f5f9; padding: 4px 12px; border-radius: 20px; font-size: 13px; color: #475569;">{{ $product->category }}</span></p>
+                <p class="sp-category-badge-wrap"><span class="sp-category-badge">{{ $product->category }}</span></p>
             @endif
 
             {{-- Badges livraison + POD --}}
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
-                <span style="display: inline-flex; align-items: center; gap: 5px; background: #f0fdfa; border: 1px solid #d1fae5; padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #0B7285; font-weight: 600;">
+            <div class="sp-badge-group">
+                <span class="sp-badge-pod">
                     <i class="fa fa-globe" aria-hidden="true"></i> {{ __('Livraison dans 200+ pays') }}
                 </span>
-                <span style="display: inline-flex; align-items: center; gap: 5px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 20px; font-size: 12px; color: #64748b;">
+                <span class="sp-badge-info">
                     <i class="fa fa-print" aria-hidden="true"></i> {{ __('Imprimé à la demande') }}
                 </span>
             </div>
 
             {{-- Formulaire ajout au panier --}}
-            <form action="{{ route('shop.cart.add') }}" method="POST" style="margin-top: 24px;">
+            <form action="{{ route('shop.cart.add') }}" method="POST">
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
 
                 {{-- Sélecteur variante (couleur ou taille) --}}
                 @if($hasColorVariants)
-                    <div style="margin-bottom: 16px;">
-                        <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px;">{{ __('Couleur') }}</label>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="sp-variant-group">
+                        <label class="sp-form-label">{{ __('Couleur') }}</label>
+                        <div class="sp-variant-options">
                             <template x-for="(variant, index) in allVariants" :key="variant.gelato_uid">
                                 <button type="button" @click="selectColor(index)"
                                     :style="'display:flex; align-items:center; padding:8px 16px; height:44px; border-radius:10px; cursor:pointer; transition:all 0.2s; font-size:14px; font-weight:600; outline:none; ' + (selectedVariantIndex === index ? 'background:#e0f7fa; border:2px solid #0B7285; color:#0B7285;' : 'background:#f1f5f9; border:1px solid #cbd5e1; color:#374151;')">
-                                    <span :style="'display:inline-block; width:16px; height:16px; border-radius:50%; margin-right:8px; background-color:' + variant.color + ';'"></span>
+                                    <span class="sp-color-dot" :style="'background-color:' + variant.color + ';'"></span>
                                     <span x-text="variant.label"></span>
                                 </button>
                             </template>
@@ -163,14 +165,14 @@
                     <input type="hidden" name="variant_gelato_uid" :value="currentVariant?.gelato_uid || ''">
                     {{-- Sélecteur tailles avec prix par taille --}}
                     <template x-if="availableSizes.length > 0">
-                        <div style="margin-bottom: 16px;">
-                            <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px;">{{ __('Taille') }}</label>
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <div class="sp-variant-group">
+                            <label class="sp-form-label">{{ __('Taille') }}</label>
+                            <div class="sp-size-options">
                                 <template x-for="size in availableSizes" :key="size">
                                     <button type="button" @click="selectSize(size)"
                                         :style="'padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; outline: none; transition: all 0.2s; ' + (selectedSize === size ? 'background: #e0f7fa; border: 2px solid #0B7285; color: #0B7285;' : 'background: #f1f5f9; border: 1px solid #cbd5e1; color: #374151;')">
                                         <span x-text="size"></span>
-                                        <span x-show="surcharge(size) > 0" x-text="' +' + formatPrice(surcharge(size)) + ' $'" style="font-size: 11px; opacity: 0.7;"></span>
+                                        <span x-show="surcharge(size) > 0" x-text="' +' + formatPrice(surcharge(size)) + ' $'" class="sp-size-surcharge"></span>
                                     </button>
                                 </template>
                             </div>
@@ -178,7 +180,7 @@
                         </div>
                     </template>
                 @elseif($hasSizeVariants)
-                    <div style="margin-bottom: 16px;" x-data="{ selectedSize: '{{ $product->variants[0]['label'] ?? 'M' }}' }">
+                    <div class="sp-variant-group" x-data="{ selectedSize: '{{ $product->variants[0]['label'] ?? 'M' }}' }">
                         @include('fronttheme::partials.pill-selector', [
                             'items' => array_map(fn($v) => $v['label'] ?? $v, $product->variants),
                             'alpineVar' => 'selectedSize',
@@ -192,22 +194,20 @@
                     </div>
                 @endif
 
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <input type="number" name="quantity" value="1" min="1" max="10" style="width: 80px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
-                    <button type="submit" class="btn" style="background: #0B7285; color: #fff; padding: 10px 32px; border-radius: 6px; font-weight: 600;">{{ __('Ajouter au panier') }}</button>
+                <div class="sp-cart-actions">
+                    <input type="number" name="quantity" value="1" min="1" max="10" class="sp-qty-input">
+                    <button type="submit" class="sp-btn-primary">{{ __('Ajouter au panier') }}</button>
                 </div>
             </form>
         </div>
     </div>
 
     {{-- Guide des tailles et specs --}}
-    <div class="row" style="margin-top: 30px;">
+    <div class="row sp-size-guide-row">
         <div class="col-sm-12">
             @include('shop::public.partials._size-guide', ['product' => $product])
         </div>
     </div>
-
-    {{-- Description déplacée en haut dans la zone info produit --}}
 </div>
 
 @endsection

@@ -6,28 +6,18 @@
 <meta name="robots" content="noindex, nofollow">
 @endpush
 
+@push('styles')
+<link rel="stylesheet" href="/css/shop.css">
+@endpush
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Panier'), 'breadcrumbItems' => [__('Boutique'), __('Panier')]])
 @endsection
 
-@push('head')
-<style>
-@keyframes spin-icon { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.shop-cart-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1) !important; }
-@media (max-width: 768px) {
-    .shop-cart-card { flex-wrap: wrap !important; }
-    .shop-cart-card > a:first-of-type { width: 100%; text-align: center; margin-bottom: 12px; }
-    .shop-cart-card > a:first-of-type img { width: 120px !important; height: 120px !important; margin: 0 auto; }
-    .shop-cart-card > div:nth-child(4) { margin-left: 0 !important; width: 100%; }
-    .shop-cart-card > div:last-child { margin-left: auto !important; margin-top: 12px; }
-}
-</style>
-@endpush
-
 @section('content')
-<div class="container" style="padding-top: 30px; padding-bottom: 40px;">
+<div class="container sp-container">
     @if($errors->any())
-        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #991b1b;">
+        <div class="sp-error-box">
             <strong>{{ __('Veuillez corriger les erreurs suivantes :') }}</strong>
             <ul style="margin: 8px 0 0; padding-left: 20px;">
                 @foreach($errors->all() as $error)
@@ -37,34 +27,32 @@
         </div>
     @endif
     @if(session('error'))
-        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px; color: #991b1b;">
-            {{ session('error') }}
-        </div>
+        <div class="sp-error-box">{{ session('error') }}</div>
     @endif
-    <h1 x-data="{ count: {{ $itemCount ?? 0 }} }" @cart-updated.window="count = $event.detail.itemCount" style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">{{ __('Panier') }} (<span x-text="count"></span>)</h1>
+    <h1 class="sp-page-title" x-data="{ count: {{ $itemCount ?? 0 }} }" @cart-updated.window="count = $event.detail.itemCount">{{ __('Panier') }} (<span x-text="count"></span>)</h1>
 
     @if(empty($content))
-        <div style="text-align: center; padding: 60px 0;">
-            <p style="font-size: 18px; color: #64748b; margin-bottom: 20px;">{{ __('Votre panier est vide.') }}</p>
-            <a href="{{ route('shop.index') }}" class="btn" style="background: #0B7285; color: #fff; padding: 10px 24px; border-radius: 6px;">{{ __('Parcourir la boutique') }}</a>
+        <div class="sp-empty">
+            <p class="sp-empty-text">{{ __('Votre panier est vide.') }}</p>
+            <a href="{{ route('shop.index') }}" class="sp-btn-primary">{{ __('Parcourir la boutique') }}</a>
         </div>
     @else
         <div class="row">
         <div class="col-md-7">
-        <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="sp-cart-list">
             @foreach($content as $item)
-            <div class="shop-cart-card" x-data="cartItem({{ $item['product_id'] }}, '{{ addslashes($item['variant_label'] ?? '') }}', {{ $item['quantity'] }}, {{ $item['unit_price'] }})" x-show="!removed" x-transition style="background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 18px; position: relative; transition: transform 0.2s, box-shadow 0.2s;">
+            <div class="sp-cart-card" x-data="cartItem({{ $item['product_id'] }}, '{{ addslashes($item['variant_label'] ?? '') }}', {{ $item['quantity'] }}, {{ $item['unit_price'] }})" x-show="!removed" x-transition>
                 {{-- Supprimer --}}
-                <button type="button" @click="removeItem()" aria-label="{{ __('Retirer') }} {{ $item['product_name'] }}" style="position: absolute; top: 12px; right: 14px; background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 15px; padding: 6px; border-radius: 6px; transition: all 0.2s; outline-offset: 2px;" title="{{ __('Retirer') }}" onmouseenter="this.style.color='#ef4444';this.style.background='#fef2f2'" onmouseleave="this.style.color='#94a3b8';this.style.background='none'"><i class="ti-trash" aria-hidden="true"></i></button>
+                <button type="button" @click="removeItem()" aria-label="{{ __('Retirer') }} {{ $item['product_name'] }}" class="sp-cart-remove" title="{{ __('Retirer') }}"><i class="ti-trash" aria-hidden="true"></i></button>
                 {{-- Ligne 1 : image + nom + variante --}}
-                <div style="display: flex; align-items: center; margin-bottom: 14px;">
+                <div class="sp-cart-top">
                     @if(!empty($item['product_images'][0]))
-                    <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="flex-shrink: 0;">
-                        <img src="{{ asset($item['product_images'][0]) }}" alt="{{ $item['product_name'] }}" style="width: 90px; height: 90px; border-radius: 10px; object-fit: cover;">
+                    <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}">
+                        <img src="{{ asset($item['product_images'][0]) }}" alt="{{ $item['product_name'] }}" class="sp-cart-img">
                     </a>
                     @endif
-                    <div style="margin-left: 14px; min-width: 0;">
-                        <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" style="font-weight: 700; font-size: 15px; color: #1e293b; text-decoration: none; display: block;">{{ $item['product_name'] }}</a>
+                    <div class="sp-cart-item-info">
+                        <a href="{{ $item['product_slug'] ? route('shop.show', $item['product_slug']) : '#' }}" class="sp-cart-item-name">{{ $item['product_name'] }}</a>
                         @if(!empty($item['variant_label']))
                         @php
                             $parts = explode(' - ', $item['variant_label']);
@@ -74,36 +62,36 @@
                             $itemIdx = $loop->index;
                             $sizeOptions = !empty($item['product_sizes']) ? $item['product_sizes'] : (!$hasColors ? array_map(fn($v) => $v['label'] ?? $v, $item['product_variants']) : []);
                         @endphp
-                        <div x-data="variantPicker({{ $item['product_id'] }}, '{{ addslashes($currentColor ?? '') }}', '{{ addslashes($currentSize ?? '') }}', '{{ addslashes($item['variant_label']) }}', {{ $hasColors ? 'true' : 'false' }})" style="margin-top: 6px;">
+                        <div x-data="variantPicker({{ $item['product_id'] }}, '{{ addslashes($currentColor ?? '') }}', '{{ addslashes($currentSize ?? '') }}', '{{ addslashes($item['variant_label']) }}', {{ $hasColors ? 'true' : 'false' }})" class="sp-variant-tags">
                             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                                 @if($currentColor)
-                                <span @click="editing = editing === 'color' ? null : 'color'" x-text="currentColor + ' ✎'" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 4px; font-size: 12px; transition: all 0.15s;" onmouseenter="this.style.background='#e0f2fe';this.style.color='#0B7285'" onmouseleave="this.style.background='#f1f5f9';this.style.color='#64748b'"></span>
+                                <span @click="editing = editing === 'color' ? null : 'color'" x-text="currentColor + ' ✎'" class="sp-cart-variant-tag"></span>
                                 @endif
                                 @if($currentSize)
-                                <span @click="editing = editing === 'size' ? null : 'size'" x-text="currentSize + ' ✎'" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #f1f5f9; color: #64748b; border-radius: 4px; font-size: 12px; transition: all 0.15s;" onmouseenter="this.style.background='#e0f2fe';this.style.color='#0B7285'" onmouseleave="this.style.background='#f1f5f9';this.style.color='#64748b'"></span>
+                                <span @click="editing = editing === 'size' ? null : 'size'" x-text="currentSize + ' ✎'" class="sp-cart-variant-tag"></span>
                                 @endif
-                                <span x-show="updating" style="font-size: 11px; color: #0B7285;"><i class="ti-reload" style="display: inline-block; animation: spin-icon 1s linear infinite; font-size: 10px;"></i></span>
+                                <span x-show="updating" class="sp-spin" style="font-size: 11px; color: var(--c-primary);"><i class="ti-reload" style="font-size: 10px;"></i></span>
                             </div>
                             {{-- Sélecteur couleur --}}
                             @if($hasColors)
-                            <div x-show="editing === 'color'" x-transition style="display: flex; gap: 8px; margin-top: 8px; padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                            <div x-show="editing === 'color'" x-transition class="sp-variant-picker">
                                 @foreach($item['product_variants'] as $v)
                                 @if(!empty($v['color']))
-                                <button type="button" @click="pick('{{ $v['label'] }}{{ $currentSize ? ' - '.$currentSize : '' }}', '{{ $v['gelato_uid'] }}')" :style="'width:28px;height:28px;border-radius:50%;background:{{ $v['color'] }};cursor:pointer;transition:all 0.15s;border:2px solid '+(currentColor==='{{ $v['label'] }}'?'#0B7285':'#e2e8f0')" title="{{ $v['label'] }}" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform='scale(1)'"></button>
+                                <button type="button" @click="pick('{{ $v['label'] }}{{ $currentSize ? ' - '.$currentSize : '' }}', '{{ $v['gelato_uid'] }}')" class="sp-color-circle" :class="currentColor==='{{ $v['label'] }}' ? 'active' : ''" style="background:{{ $v['color'] }}" title="{{ $v['label'] }}"></button>
                                 @endif
                                 @endforeach
                             </div>
                             @endif
                             {{-- Sélecteur taille --}}
                             @if(!empty($sizeOptions))
-                            <div x-show="editing === 'size'" x-transition style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                            <div x-show="editing === 'size'" x-transition class="sp-variant-picker">
                                 @foreach($sizeOptions as $sz)
                                 @php
                                     $szVariant = collect($item['product_variants'])->first(fn($v) => ($v['label'] ?? '') === $sz);
                                     $szUid = $szVariant['gelato_uid'] ?? preg_replace('/_gsi_[^_]+_/', '_gsi_' . strtolower($sz) . '_', $item['gelato_variant_id'] ?? '');
                                     $newLabel = $currentColor ? $currentColor . ' - ' . $sz : $sz;
                                 @endphp
-                                <button type="button" @click="pick('{{ addslashes($newLabel) }}', '{{ $szUid }}')" :style="'padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;border:1.5px solid '+(currentSize==='{{ $sz }}'?'#0B7285':'#e2e8f0')+';background:'+(currentSize==='{{ $sz }}'?'#e0f2fe':'#f8fafc')+';color:'+(currentSize==='{{ $sz }}'?'#0B7285':'#64748b')" onmouseenter="this.style.borderColor='#0B7285'" onmouseleave="">{{ $sz }}</button>
+                                <button type="button" @click="pick('{{ addslashes($newLabel) }}', '{{ $szUid }}')" class="sp-size-pill" :class="currentSize==='{{ $sz }}' ? 'active' : ''">{{ $sz }}</button>
                                 @endforeach
                             </div>
                             @endif
@@ -112,15 +100,15 @@
                     </div>
                 </div>
                 {{-- Ligne 2 : quantité + prix --}}
-                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                <div class="sp-cart-line">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <button type="button" @click="changeQty(-1)" style="width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">-</button>
-                        <span style="width: 28px; text-align: center; font-size: 18px; font-weight: 700; color: #1e293b;" x-text="qty"></span>
-                        <button type="button" @click="changeQty(1)" style="width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #0B7285; background: #fff; color: #0B7285; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseenter="this.style.background='#0B7285';this.style.color='#fff'" onmouseleave="this.style.background='#fff';this.style.color='#0B7285'">+</button>
+                        <button type="button" @click="changeQty(-1)" class="sp-qty-circle">-</button>
+                        <span class="sp-qty-value" x-text="qty"></span>
+                        <button type="button" @click="changeQty(1)" class="sp-qty-circle">+</button>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 12px; color: #94a3b8;" x-text="unitPrice.toFixed(2).replace('.', ',') + ' $ × ' + qty"></div>
-                        <div style="font-weight: 700; font-size: 18px; color: #0B7285;" x-text="(unitPrice * qty).toFixed(2).replace('.', ',') + ' $'"></div>
+                        <div class="sp-cart-unit-price" x-text="unitPrice.toFixed(2).replace('.', ',') + ' $ × ' + qty"></div>
+                        <div class="sp-cart-total-price" x-text="(unitPrice * qty).toFixed(2).replace('.', ',') + ' $'"></div>
                     </div>
                 </div>
             </div>
@@ -129,86 +117,86 @@
 
         </div>{{-- end col-md-7 --}}
         <div class="col-md-5">
-                <div x-data="shopCheckout()" @cart-updated.window="cartSubtotal=$event.detail.subtotal; cartTps=$event.detail.tps; cartTvq=$event.detail.tvq; cartTotal=$event.detail.total" style="background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; position: sticky; top: 100px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <div class="sp-summary-box" x-data="shopCheckout()" @cart-updated.window="cartSubtotal=$event.detail.subtotal; cartTps=$event.detail.tps; cartTvq=$event.detail.tvq; cartTotal=$event.detail.total">
+                    <div class="sp-summary-row">
                         <span>{{ __('Sous-total') }}</span>
                         <span x-text="cartSubtotal.toFixed(2).replace('.', ',') + ' $'"></span>
                     </div>
-                    <div x-show="country === 'CA'" style="margin-bottom: 8px; color: #64748b; font-size: 13px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <span>{{ __('TPS') }} ({{ config('shop.tax.tps', 5) }}%) <span style="color: #94a3b8; font-size: 11px;">839145984</span></span>
+                    <div x-show="country === 'CA'" class="sp-tax-block">
+                        <div class="sp-tax-row">
+                            <span>{{ __('TPS') }} ({{ config('shop.tax.tps', 5) }}%) <span class="sp-tax-number">839145984</span></span>
                             <span x-text="cartTps.toFixed(2).replace('.', ',') + ' $'"></span>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>{{ __('TVQ') }} ({{ config('shop.tax.tvq', 9.975) }}%) <span style="color: #94a3b8; font-size: 11px;">1221788059</span></span>
+                        <div class="sp-tax-row">
+                            <span>{{ __('TVQ') }} ({{ config('shop.tax.tvq', 9.975) }}%) <span class="sp-tax-number">1221788059</span></span>
                             <span x-text="cartTvq.toFixed(2).replace('.', ',') + ' $'"></span>
                         </div>
                     </div>
                     <hr style="margin: 12px 0;">
-                    <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 700;">
+                    <div class="sp-summary-total">
                         <span>{{ __('Total') }}</span>
-                        <span style="color: #0B7285;" x-text="cartTotal.toFixed(2).replace('.', ',') + ' $'"></span>
+                        <span class="sp-summary-total-value" x-text="cartTotal.toFixed(2).replace('.', ',') + ' $'"></span>
                     </div>
 
-                    {{-- Formulaire checkout (layout multi-colonnes compact) --}}
+                    {{-- Formulaire checkout --}}
                     <form action="{{ route('shop.checkout') }}" method="POST" style="margin-top: 16px;">
                         @csrf
-                        <div style="margin-bottom: 10px;">
-                            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Courriel') }} <span style="color:#ef4444;">*</span></label>
-                            <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required autocomplete="email" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">{{ __('Courriel') }} <span class="sp-required">*</span></label>
+                            <input type="email" name="email" value="{{ auth()->user()?->email ?? old('email') }}" required autocomplete="email" class="sp-form-input">
                         </div>
-                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
-                            <div style="flex: 1; min-width: 120px;">
-                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Prénom') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name', $savedAddress['first_name'] ?? '') }}" required autocomplete="given-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <div class="sp-form-row">
+                            <div class="sp-form-col">
+                                <label class="sp-form-label">{{ __('Prénom') }} <span class="sp-required">*</span></label>
+                                <input type="text" name="shipping_address[first_name]" value="{{ old('shipping_address.first_name', $savedAddress['first_name'] ?? '') }}" required autocomplete="given-name" class="sp-form-input">
                             </div>
-                            <div style="flex: 1; min-width: 120px;">
-                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Nom') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name', $savedAddress['last_name'] ?? '') }}" required autocomplete="family-name" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            <div class="sp-form-col">
+                                <label class="sp-form-label">{{ __('Nom') }} <span class="sp-required">*</span></label>
+                                <input type="text" name="shipping_address[last_name]" value="{{ old('shipping_address.last_name', $savedAddress['last_name'] ?? '') }}" required autocomplete="family-name" class="sp-form-input">
                             </div>
                         </div>
-                        <div style="margin-bottom: 10px; position: relative;" @click.outside="showSuggestions = false">
-                            <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Adresse') }} <span style="color:#ef4444;">*</span></label>
-                            <input type="text" name="shipping_address[address_line1]" x-ref="addressLine1" value="{{ old('shipping_address.address_line1', $savedAddress['address_line1'] ?? '') }}" required autocomplete="off" @input="searchAddress($event.target.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
-                            <div x-show="showSuggestions" x-transition style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: #fff; border: 1px solid #cbd5e1; border-top: none; border-radius: 0 0 6px 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto;">
+                        <div class="sp-form-group sp-address-wrap" @click.outside="showSuggestions = false">
+                            <label class="sp-form-label">{{ __('Adresse') }} <span class="sp-required">*</span></label>
+                            <input type="text" name="shipping_address[address_line1]" x-ref="addressLine1" value="{{ old('shipping_address.address_line1', $savedAddress['address_line1'] ?? '') }}" required autocomplete="off" @input="searchAddress($event.target.value)" class="sp-form-input">
+                            <div x-show="showSuggestions" x-transition class="sp-suggestions">
                                 <template x-for="s in suggestions" :key="(s.osm_id || '') + (s.postcode || '')">
-                                    <div @click="selectAddress(s)" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px;" onmouseenter="this.style.backgroundColor='#f8fafc'" onmouseleave="this.style.backgroundColor=''">
+                                    <div @click="selectAddress(s)" class="sp-suggestion-item">
                                         <strong x-text="[s.street, s.housenumber].filter(Boolean).join(' ') || s.name || ''"></strong>
-                                        <span style="color: #64748b;" x-text="', ' + (s.city || '') + (s.postcode ? ' ' + s.postcode : '') + ' — ' + (s.country || '')"></span>
+                                        <span style="color: var(--c-text-muted);" x-text="', ' + (s.city || '') + (s.postcode ? ' ' + s.postcode : '') + ' — ' + (s.country || '')"></span>
                                     </div>
                                 </template>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
-                            <div style="flex: 2; min-width: 100px;">
-                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Ville') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[city]" x-ref="cityInput" value="{{ old('shipping_address.city', $savedAddress['city'] ?? '') }}" required autocomplete="address-level2" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <div class="sp-form-row">
+                            <div class="sp-form-col-city">
+                                <label class="sp-form-label">{{ __('Ville') }} <span class="sp-required">*</span></label>
+                                <input type="text" name="shipping_address[city]" x-ref="cityInput" value="{{ old('shipping_address.city', $savedAddress['city'] ?? '') }}" required autocomplete="address-level2" class="sp-form-input">
                             </div>
-                            <div style="flex: 1.5; min-width: 100px;">
-                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;" x-text="provinceLabel + ' *'"></label>
-                                {{-- Canada : select provinces --}}
-                                <select x-show="country === 'CA'" :disabled="country !== 'CA'" name="shipping_address[state]" autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            <div class="sp-form-col-state">
+                                <label class="sp-form-label" x-text="provinceLabel + ' *'"></label>
+                                {{-- Canada --}}
+                                <select x-show="country === 'CA'" :disabled="country !== 'CA'" name="shipping_address[state]" autocomplete="address-level1" class="sp-form-select">
                                     <template x-for="(name, code) in provincesCA" :key="code">
                                         <option :value="code" x-text="name" :selected="code === '{{ $savedAddress['state'] ?? 'QC' }}'"></option>
                                     </template>
                                 </select>
-                                {{-- USA : select states --}}
-                                <select x-show="country === 'US'" :disabled="country !== 'US'" name="shipping_address[state]" autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                {{-- USA --}}
+                                <select x-show="country === 'US'" :disabled="country !== 'US'" name="shipping_address[state]" autocomplete="address-level1" class="sp-form-select">
                                     <template x-for="(name, code) in statesUS" :key="code">
                                         <option :value="code" x-text="name"></option>
                                     </template>
                                 </select>
-                                {{-- Autres pays : champ texte libre --}}
-                                <input x-show="country !== 'CA' && country !== 'US'" :disabled="country === 'CA' || country === 'US'" type="text" name="shipping_address[state]" autocomplete="address-level1" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;" :placeholder="'{{ __('Province / État / Région') }}'">
+                                {{-- Autres --}}
+                                <input x-show="country !== 'CA' && country !== 'US'" :disabled="country === 'CA' || country === 'US'" type="text" name="shipping_address[state]" autocomplete="address-level1" class="sp-form-input" :placeholder="'{{ __('Province / État / Région') }}'">
                             </div>
-                            <div style="flex: 1; min-width: 90px;">
-                                <label style="font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px;">{{ __('Code postal') }} <span style="color:#ef4444;">*</span></label>
-                                <input type="text" name="shipping_address[postal_code]" x-ref="postalCode" value="{{ old('shipping_address.postal_code', $savedAddress['postal_code'] ?? '') }}" :required="postalRequired" autocomplete="postal-code" :pattern="postalPattern" :title="postalTitle" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            <div class="sp-form-col-postal">
+                                <label class="sp-form-label">{{ __('Code postal') }} <span class="sp-required">*</span></label>
+                                <input type="text" name="shipping_address[postal_code]" x-ref="postalCode" value="{{ old('shipping_address.postal_code', $savedAddress['postal_code'] ?? '') }}" :required="postalRequired" autocomplete="postal-code" :pattern="postalPattern" :title="postalTitle" class="sp-form-input">
                             </div>
                         </div>
-                        <div style="margin-bottom: 10px;">
-                            <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">{{ __('Pays') }} <span style="color:#ef4444;">*</span></label>
-                            <select name="shipping_address[country]" id="country-select" x-model="country" required autocomplete="country" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                        <div class="sp-form-group">
+                            <label class="sp-form-label">{{ __('Pays') }} <span class="sp-required">*</span></label>
+                            <select name="shipping_address[country]" id="country-select" x-model="country" required autocomplete="country" class="sp-form-select">
                                 <optgroup label="{{ __('Pays populaires') }}">
                                     <option value="CA" {{ ($savedAddress['country'] ?? 'CA') === 'CA' ? 'selected' : '' }}>Canada</option>
                                     <option value="US">États-Unis</option>
@@ -221,69 +209,69 @@
                             </select>
                         </div>
 
-                        {{-- Estimation livraison dynamique (auto-calcul) --}}
+                        {{-- Estimation livraison --}}
                         <div style="margin-top: 12px;">
-                            <label style="font-weight: 600; display: block; margin-bottom: 8px;"><i class="ti-truck" style="margin-right: 6px;"></i>{{ __('Livraison') }}</label>
-                            <div x-show="loading" style="color: #64748b;"><i class="ti-reload" style="display: inline-block; animation: spin-icon 1s linear infinite;"></i> {{ __('Calcul en cours...') }}</div>
-                            <div x-show="!loading && methods.length === 0 && !quoteFetched" style="font-style: italic; color: #64748b; font-size: 13px;">
+                            <label class="sp-shipping-label"><i class="ti-truck" style="margin-right: 6px;"></i>{{ __('Livraison') }}</label>
+                            <div x-show="loading" style="color: var(--c-text-muted);"><i class="ti-reload sp-spin" style="font-size: 14px;"></i> {{ __('Calcul en cours...') }}</div>
+                            <div x-show="!loading && methods.length === 0 && !quoteFetched" class="sp-shipping-hint">
                                 {{ __('Les frais seront calculés automatiquement à la saisie du code postal.') }}
                             </div>
-                            <div x-show="!loading && methods.length === 0 && quoteFetched" style="color: #ef4444; font-size: 13px; padding: 8px 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;">
+                            <div x-show="!loading && methods.length === 0 && quoteFetched" class="sp-shipping-unavailable">
                                 <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{ __('Désolé, la livraison n\'est pas disponible pour cette destination. Veuillez vérifier votre code postal ou essayer un autre pays.') }}
                             </div>
                             <template x-for="m in methods" :key="m.uid">
-                                <label style="display: block; padding: 6px 0; cursor: pointer;">
+                                <label class="sp-shipping-option">
                                     <input type="radio" name="shipping_method" :value="m.uid" x-model="selectedUid" @change="select(m)">
                                     <span x-text="m.name"></span> –
-                                    <strong style="color: #0B7285;" x-text="parseFloat(m.price).toFixed(2) + ' $'"></strong>
-                                    <span style="color: #64748b; font-size: 12px;" x-text="'(' + m.min_days + '-' + m.max_days + ' jours)'"></span>
+                                    <strong class="sp-shipping-price" x-text="parseFloat(m.price).toFixed(2) + ' $'"></strong>
+                                    <span class="sp-shipping-days" x-text="'(' + m.min_days + '-' + m.max_days + ' jours)'"></span>
                                 </label>
                             </template>
                             <input type="hidden" name="shipping_method_uid" x-model="selectedUid">
                             <input type="hidden" name="shipping_cost" x-model="selectedCost">
                         </div>
 
-                        {{-- Checkbox sauvegarder adresse (Loi 25 — opt-in explicite, case vide par défaut) --}}
+                        {{-- Sauvegarder adresse --}}
                         @auth
-                        <div style="margin-top: 16px; margin-bottom: 8px;">
-                            <label style="display: flex; gap: 10px; align-items: center; cursor: pointer;">
-                                <input type="checkbox" name="save_address" value="1" style="display: inline-block !important; width: 18px !important; height: 18px !important; accent-color: #0B7285; flex-shrink: 0; cursor: pointer; -webkit-appearance: checkbox !important; appearance: checkbox !important;">
-                                <span style="font-size: 13px; color: #475569;">{{ __('Sauvegarder cette adresse pour mes prochaines commandes') }}</span>
+                        <div class="sp-checkbox-wrap">
+                            <label class="sp-checkbox-label">
+                                <input type="checkbox" name="save_address" value="1" class="sp-checkbox">
+                                <span class="sp-checkbox-text">{{ __('Sauvegarder cette adresse pour mes prochaines commandes') }}</span>
                             </label>
                         </div>
                         @endauth
 
-                        {{-- Checkbox newsletter (LCAP/Loi 25 — case vide par défaut, opt-in explicite) --}}
-                        <div style="margin-top: 16px; margin-bottom: 8px; background: #f0fdfa; border: 1px solid #d1fae5; border-radius: 8px; padding: 12px 14px;">
-                            <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;">
-                                <input type="checkbox" name="newsletter" value="1" style="display: inline-block !important; width: 20px !important; height: 20px !important; margin-top: 1px; accent-color: #0B7285; flex-shrink: 0; cursor: pointer; -webkit-appearance: checkbox !important; appearance: checkbox !important;">
+                        {{-- Newsletter --}}
+                        <div class="sp-newsletter-box">
+                            <label class="sp-checkbox-label-top">
+                                <input type="checkbox" name="newsletter" value="1" class="sp-checkbox sp-checkbox-lg">
                                 <div>
-                                    <span style="font-size: 14px; font-weight: 600; color: #1e293b; display: block;">{{ __('Restez informé') }} <i class="ti-email" style="color: #0B7285; font-size: 13px;"></i></span>
-                                    <span style="font-size: 12px; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">{{ __('Recevez notre veille IA chaque mercredi — outils, actualités, défi et astuces. Désabonnement en 1 clic.') }}</span>
+                                    <span class="sp-newsletter-title">{{ __('Restez informé') }} <i class="ti-email" style="color: var(--c-primary); font-size: 13px;"></i></span>
+                                    <span class="sp-newsletter-desc">{{ __('Recevez notre veille IA chaque mercredi — outils, actualités, défi et astuces. Désabonnement en 1 clic.') }}</span>
                                 </div>
                             </label>
                         </div>
 
-                        <button type="submit" class="btn" style="width: 100%; background: #0B7285; color: #fff; padding: 12px; border-radius: 6px; font-weight: 700; font-size: 16px; margin-top: 12px;">{{ __('Passer la commande') }}</button>
-                        <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 8px; line-height: 1.5;">
-                            {!! __('En passant commande, vous acceptez nos <a href=":url" target="_blank" style="color: #0B7285; text-decoration: underline;">conditions de vente</a>.', ['url' => route('legal.sales')]) !!}
+                        <button type="submit" class="sp-btn-primary sp-btn-full" style="margin-top: 12px;">{{ __('Passer la commande') }}</button>
+                        <p class="sp-legal-note">
+                            {!! __('En passant commande, vous acceptez nos <a href=":url" target="_blank">conditions de vente</a>.', ['url' => route('legal.sales')]) !!}
                         </p>
-                        <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 8px; line-height: 1.4;">{{ __('Produit fabriqué à la demande — non remboursable sauf défaut de fabrication.') }}</p>
+                        <p class="sp-pod-note">{{ __('Produit fabriqué à la demande — non remboursable sauf défaut de fabrication.') }}</p>
 
                         {{-- Badges confiance --}}
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-top: 16px; text-align: center;">
-                            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 8px;">
-                                <i class="ti-shield" style="color: #0CA678; font-size: 16px; margin-right: 8px;" aria-hidden="true"></i>
-                                <span style="font-weight: 700; font-size: 14px; color: #1e293b;">{{ __('Paiement sécurisé') }}</span>
-                                <span style="color: #cbd5e1; margin: 0 10px;">•</span>
-                                <i class="ti-lock" style="color: #475569; font-size: 14px; margin-right: 6px;" aria-hidden="true"></i>
-                                <span style="font-size: 13px; color: #475569;">{{ __('Chiffrement SSL') }}</span>
+                        <div class="sp-trust-box">
+                            <div class="sp-trust-main">
+                                <i class="ti-shield sp-trust-icon" aria-hidden="true"></i>
+                                <span class="sp-trust-title">{{ __('Paiement sécurisé') }}</span>
+                                <span class="sp-trust-sep">•</span>
+                                <i class="ti-lock sp-trust-lock" aria-hidden="true"></i>
+                                <span class="sp-trust-ssl">{{ __('Chiffrement SSL') }}</span>
                             </div>
-                            <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 13px; color: #94a3b8;">
+                            <div class="sp-trust-methods">
                                 <span>Visa</span><span>•</span><span>Mastercard</span><span>•</span><span>Amex</span>
-                                <span style="margin-left: 8px; font-style: italic;">{{ __('Propulsé par Stripe') }}</span>
+                                <span class="sp-trust-stripe">{{ __('Propulsé par Stripe') }}</span>
                             </div>
-                            <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">
+                            <div class="sp-trust-statement">
                                 {{ __('Sur votre relevé bancaire : MEMORA* LAVEILLE.AI') }}
                             </div>
                         </div>
