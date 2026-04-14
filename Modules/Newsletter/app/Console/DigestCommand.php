@@ -20,6 +20,7 @@ class DigestCommand extends Command
     protected $signature = 'newsletter:digest
         {--preview : Génère le brouillon et envoie un aperçu à l\'admin (dimanche)}
         {--send : Envoie le brouillon existant aux abonnés (lundi)}
+        {--test-email= : Envoie un test du brouillon à cette adresse email}
         {--force : Envoie même si le digest est désactivé}';
 
     protected $description = 'Gestion de la newsletter hebdomadaire (preview dimanche, envoi lundi)';
@@ -35,11 +36,43 @@ class DigestCommand extends Command
         $year = (int) now()->year;
         $week = (int) now()->weekOfYear;
 
+        if ($testEmail = $this->option('test-email')) {
+            return $this->handleTestEmail($year, $week, $testEmail);
+        }
+
         if ($this->option('preview')) {
             return $this->handlePreview($year, $week);
         }
 
         return $this->handleSend($year, $week);
+    }
+
+    /**
+     * MODE TEST : envoie le brouillon existant à une adresse email spécifique.
+     */
+    private function handleTestEmail(int $year, int $week, string $email): int
+    {
+        $issue = Schema::hasTable('newsletter_issues')
+            ? NewsletterIssue::where('year', $year)->where('week_number', $week)->first()
+            : null;
+
+        $data = $issue
+            ? DigestContentService::gatherFromIssue($issue)
+            : DigestContentService::gatherFreshContent();
+
+        Notification::route('mail', $email)->notify(
+            new WeeklyDigestNotification(
+                $data['highlight'] ?? null, $data['topNews'] ?? collect(),
+                $data['toolOfWeek'] ?? null, $data['featuredArticle'] ?? null,
+                null, (int) ($data['weekNumber'] ?? $week),
+                $data['aiTerm'] ?? null, $data['interactiveTool'] ?? null,
+                $data['weeklyPrompt'] ?? null, $data['editorial'] ?? null
+            )
+        );
+
+        $this->components->info("Newsletter test W{$week} envoyée à {$email}");
+
+        return self::SUCCESS;
     }
 
     /**
