@@ -441,9 +441,31 @@ class CommunityController extends Controller
             $this->reputation->addPoints(Auth::user(), 8, 'screenshot_approved');
         }
 
+        // Auto-set comme screenshot principal si l'outil n'en a pas
+        if ($autoApprove && empty($tool->screenshot)) {
+            $tool->update(['screenshot' => 'storage/'.$path]);
+        }
+
         return back()->with('success', $autoApprove
             ? __('Screenshot ajouté ! Merci pour votre contribution.')
             : __('Screenshot soumis ! Il sera visible après modération.'));
+    }
+
+    /**
+     * Admin : promouvoir un screenshot communautaire comme image principale de l'outil.
+     */
+    public function promoteScreenshot(Request $request, int $id): RedirectResponse|JsonResponse
+    {
+        $screenshot = ToolScreenshot::approved()->findOrFail($id);
+        $tool = $screenshot->tool;
+
+        $tool->update(['screenshot' => $screenshot->image_path]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => __('Screenshot défini comme image principale.')]);
+        }
+
+        return back()->with('success', __('Screenshot défini comme image principale.'));
     }
 
     public function voteScreenshot(Request $request, int $id): JsonResponse
