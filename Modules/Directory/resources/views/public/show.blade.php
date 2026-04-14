@@ -707,7 +707,7 @@
                     </div>
 
                     <div style="display:flex;gap:8px;margin-bottom:12px;">
-                        @if(!$isYt)<a href="{{ $res->url }}" target="_blank" rel="nofollow noopener" class="ct-btn ct-btn-primary ct-btn-sm">🔗 {{ __('Voir la ressource') }}</a>@endif
+                        @if(!$isYt)<a href="{{ $res->url }}" target="_blank" rel="nofollow noopener" class="ct-btn ct-btn-primary ct-btn-xs">🔗 {{ __('Voir la ressource') }}</a>@endif
                         @can('view_admin_panel')
                             @include('directory::components.admin-inline-actions', [
                                 'approveUrl' => route('admin.directory.moderation.resource.approve', $res->id),
