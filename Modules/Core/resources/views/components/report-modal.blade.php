@@ -3,13 +3,13 @@
      Source unique de vérité pour le signalement de contenu sur toute la plateforme.
 --}}
 <div x-data="{ showReport: false, reason: '', details: '', sending: false, done: false }" style="display:inline;">
-    <button @click="showReport = true" type="button" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:13px;padding:4px;" title="{{ __('Signaler') }}">
+    <button @click="showReport = true" type="button" class="ct-btn ct-btn-ghost ct-btn-xs" title="{{ __('Signaler') }}">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
     </button>
 
     {{-- Modale signalement --}}
     <div x-show="showReport" x-cloak @click.self="showReport = false"
-         style="position:fixed!important;inset:0!important;background:rgba(0,0,0,0.5)!important;z-index:9999!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:20px!important;">
+         :style="showReport ? 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;' : 'display:none'">
         <div @click.stop style="background:#fff;border-radius:16px;padding:24px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <h4 style="font-weight:700;color:var(--c-dark);margin:0;">{{ __('Signaler ce contenu') }}</h4>
@@ -44,11 +44,10 @@
                     </div>
 
                     <div style="display:flex;gap:8px;justify-content:flex-end;">
-                        <button @click="showReport = false" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">{{ __('Annuler') }}</button>
-                        <button @click="if(!reason){return}; sending=true; fetch('{{ $reportUrl }}', {method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ $csrfToken }}','Accept':'application/json'},body:JSON.stringify({reason:reason,details:details})}).then(()=>{done=true;sending=false})"
+                        <button @click="showReport = false" class="ct-btn ct-btn-ghost ct-btn-sm">{{ __('Annuler') }}</button>
+                        <button @click="if(!reason){return}; sending=true; var tk=document.querySelector('meta[name=csrf-token]')?.content||'{{ $csrfToken }}'; fetch('{{ $reportUrl }}', {method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':tk,'Accept':'application/json'},body:JSON.stringify({reason:reason,details:details})}).then(()=>{done=true;sending=false})"
                                 :disabled="!reason || sending"
-                                :style="(!reason || sending) && 'opacity:0.5;cursor:not-allowed'"
-                                style="padding:8px 16px;border:none;border-radius:8px;background:#DC2626;color:#fff;cursor:pointer;font-weight:600;">
+                                class="ct-btn ct-btn-danger ct-btn-sm" :style="(!reason || sending) && 'opacity:0.5;cursor:not-allowed'">
                             <span x-show="!sending">{{ __('Envoyer le signalement') }}</span>
                             <span x-show="sending">{{ __('Envoi...') }}</span>
                         </button>
@@ -61,7 +60,7 @@
                     <div style="font-size:36px;margin-bottom:8px;">✅</div>
                     <p style="font-weight:600;color:var(--c-dark);">{{ __('Signalement envoyé') }}</p>
                     <p style="color:var(--c-text-muted);font-size:14px;">{{ __('Notre équipe examinera ce contenu. Merci.') }}</p>
-                    <button @click="showReport = false" style="margin-top:12px;padding:8px 20px;border:none;border-radius:8px;background:var(--c-primary);color:#fff;cursor:pointer;font-weight:600;">{{ __('Fermer') }}</button>
+                    <button @click="showReport = false" class="ct-btn ct-btn-primary ct-btn-sm" style="margin-top:12px;">{{ __('Fermer') }}</button>
                 </div>
             </template>
         </div>
