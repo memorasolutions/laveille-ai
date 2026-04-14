@@ -4,19 +4,19 @@
     <template x-if="!done">
         <div style="display:flex;gap:4px;flex-wrap:wrap;">
             @if(empty($isApproved))
-            <button @click="fetch('{{ $approveUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok){done=true;$el.closest('[data-mod-item]')?.classList.add('border-success')}})"
-                style="font-size:11px;background:#16a34a;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;">
+            <button @click="var tk=document.querySelector('meta[name=csrf-token]')?.content;fetch('{{ $approveUrl }}', {method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>{if(r.ok){done=true;$el.closest('[data-mod-item]')?.classList.add('border-success')}})"
+                class="ct-btn ct-btn-primary ct-btn-xs">
                 {{ __('Approuver') }}
             </button>
             @endif
             @if(isset($deleteUrl))
-            <button onclick="window.__confirmAction=()=>fetch('{{ $deleteUrl }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok)location.reload()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Supprimer") }}',message:'{{ __("Supprimer cette ressource ?") }}'}}))"
-                style="font-size:11px;background:#6b7280;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;">
+            <button onclick="var tk=document.querySelector('meta[name=csrf-token]')?.content;window.__confirmAction=()=>fetch('{{ $deleteUrl }}',{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>{if(r.ok)location.reload()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Supprimer") }}',message:'{{ __("Supprimer cette ressource ?") }}'}}))"
+                class="ct-btn ct-btn-ghost ct-btn-xs">
                 {{ __('Supprimer') }}
             </button>
             @endif
-            <button onclick="window.__confirmAction=()=>fetch('{{ $rejectUrl }}',{method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}}).then(r=>{if(r.ok)location.reload()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Rejeter (-10 pts)") }}',message:'{{ __("Rejeter et retirer 10 points de réputation ?") }}'}}))"
-                style="font-size:11px;background:#ef4444;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-weight:600;"
+            <button onclick="var tk=document.querySelector('meta[name=csrf-token]')?.content;window.__confirmAction=()=>fetch('{{ $rejectUrl }}',{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>{if(r.ok)location.reload()});window.dispatchEvent(new CustomEvent('confirm-action',{detail:{title:'{{ __("Rejeter (-10 pts)") }}',message:'{{ __("Rejeter et retirer 10 points de réputation ?") }}'}}))"
+                class="ct-btn ct-btn-outline-danger ct-btn-xs"
                 title="{{ __('Rejeter et retirer 10 points de réputation') }}">
                 {{ __('Rejeter (-10 pts)') }}
             </button>

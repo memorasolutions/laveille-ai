@@ -881,6 +881,55 @@ article h3 {
 }
 
 /* ═══════════════════════════════════════════════════
+   24. BOUTONS CHARTE — système ct-btn
+   Classes réutilisables pour tous les boutons du site
+   ═══════════════════════════════════════════════════ */
+
+.ct-btn {
+    padding: 10px 16px;
+    border-radius: var(--r-btn);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    font-family: var(--f-heading);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 1.4;
+    border: none;
+    text-decoration: none;
+    background-color: transparent;
+    color: var(--c-dark);
+}
+.ct-btn:hover { text-decoration: none; }
+.ct-btn:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+
+.ct-btn-primary { background: var(--c-primary); color: #fff; }
+.ct-btn-primary:hover { background: var(--c-primary-hover); color: #fff; }
+
+.ct-btn-outline { background: transparent; border: 2px solid var(--c-primary); color: var(--c-primary); }
+.ct-btn-outline:hover { background: var(--c-primary); color: #fff; }
+
+.ct-btn-danger { background: var(--c-danger); color: #fff; }
+.ct-btn-danger:hover { background: var(--c-danger-hover); color: #fff; }
+
+.ct-btn-outline-danger { background: transparent; border: 2px solid var(--c-danger); color: var(--c-danger); }
+.ct-btn-outline-danger:hover { background: var(--c-danger); color: #fff; }
+
+.ct-btn-ghost { background: transparent; color: var(--c-text-muted); }
+.ct-btn-ghost:hover { background: var(--c-surface); }
+
+.ct-btn-accent { background: var(--c-accent); color: #fff; }
+.ct-btn-accent:hover { background: var(--c-accent-hover); color: #fff; }
+
+.ct-btn-sm { padding: 7px 14px; font-size: 13px; }
+.ct-btn-xs { padding: 5px 10px; font-size: 12px; }
+.ct-btn-lg { padding: 12px 20px; font-size: 16px; }
+.ct-btn-full { width: 100%; justify-content: center; }
+.ct-btn-icon { padding: 0; min-width: 36px; min-height: 36px; justify-content: center; }
+
+/* ═══════════════════════════════════════════════════
    23. IMPRESSION (@media print)
    Masquer les éléments UI non pertinents à l'impression
    ═══════════════════════════════════════════════════ */
