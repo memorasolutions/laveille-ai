@@ -328,11 +328,12 @@
     </div>
 
     {{-- Modale confirmation réutilisable (remplace confirm() natif) --}}
+    <style>.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex!important;align-items:center;justify-content:center;padding:20px;}.confirm-overlay[x-cloak]{display:none!important;}</style>
     <div x-data="{ open: false, title: '', message: '' }"
          @confirm-action.window="open = true; title = $event.detail.title || 'Confirmer'; message = $event.detail.message || ''; window.__confirmAction = $event.detail.action"
          x-show="open" x-cloak
          @click.self="open = false"
-         style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;">
+         class="confirm-overlay">
         <div @click.stop style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
             <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
             <h4 style="font-weight:700;color:var(--c-dark,#1a1a2e);margin:0 0 8px;font-size:17px;" x-text="title"></h4>
