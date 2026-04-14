@@ -976,7 +976,7 @@
 
             {{-- Upload form (drop + paste + file — zone cliquable, compression auto) --}}
             @auth
-                <div x-data="{
+                <div style="background:#fff;border:1px solid #E5E7EB;border-radius:var(--r-base);padding:20px;margin-bottom:24px;" x-data="{
                     preview: null,
                     fileName: null,
                     dragging: false,
