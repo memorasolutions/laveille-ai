@@ -88,6 +88,9 @@
         .cc-btn { width: 100%; }
         .cc-modal { padding: 1rem; }
     }
+    @media print {
+        #cc-host, .cc-backdrop, .cc-modal, .cc-fab { display: none !important; }
+    }
 </style>
 
 <div id="cc-host">

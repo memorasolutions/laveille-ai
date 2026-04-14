@@ -879,3 +879,30 @@ article h3 {
     line-height: 1.4 !important;
     padding-top: 0.2em;
 }
+
+/* ═══════════════════════════════════════════════════
+   23. IMPRESSION (@media print)
+   Masquer les éléments UI non pertinents à l'impression
+   ═══════════════════════════════════════════════════ */
+
+@media print {
+    /* Cookie consent */
+    #cc-host, .cc-backdrop, .cc-modal, .cc-fab { display: none !important; }
+    /* Navigation et UI */
+    .wpo-site-header, .share-float, .back-to-top, #site-preloader { display: none !important; }
+    /* Footer et newsletter */
+    .wpo-site-footer, .wpo-subscribe-section { display: none !important; }
+    /* Sidebar blog */
+    .blog-sidebar { display: none !important; }
+    /* Breadcrumb hero */
+    .wpo-breadcumb-area { display: none !important; }
+    /* Social share bar flottante */
+    .floating-share, [class*="share-float"] { display: none !important; }
+    /* Contenu principal pleine largeur */
+    .col-lg-8 { width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; }
+    /* Pas de box-shadow ni border en print */
+    .panel, .card, .rt-card, .sp-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+    /* Liens : afficher l'URL */
+    a[href]:after { content: " (" attr(href) ")"; font-size: 0.8em; color: #666; }
+    a[href^="#"]:after, a[href^="javascript"]:after, a.btn:after, .sp-btn-primary:after { content: "" !important; }
+}
