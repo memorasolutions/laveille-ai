@@ -40,6 +40,9 @@
 @push('styles')
 <style>
     .rt-page { padding-bottom: 60px; }
+    .rt-dropzone { text-align:center; padding:40px 30px; border:3px dashed #94a3b8; border-radius:12px; cursor:pointer; transition:all .2s; background:#f8fafc; margin-bottom:14px; }
+    .rt-dropzone:hover { border-color:var(--c-primary); background:#f0f9ff; }
+    .rt-dropzone-active { border-color:var(--c-primary) !important; background:#e0f2fe !important; }
     .disc-card { background: #f8fafb; border: 1px solid #d1d5db; }
     .disc-card:hover { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .disc-card-open { background: #fff !important; border-color: var(--c-primary) !important; box-shadow: 0 2px 12px rgba(11,114,133,0.12) !important; }
@@ -1029,10 +1032,8 @@
                         {{-- Zone drop/paste/clic --}}
                         <div x-show="!preview"
                             @click="$refs.fileInput.click()"
-                            style="text-align:center;padding:40px 30px;border:3px dashed #94a3b8;border-radius:12px;cursor:pointer;transition:all .2s;background:#f8fafc;margin-bottom:14px;"
-                            :style="dragging ? 'border-color:var(--c-primary);background:#e0f2fe' : ''"
-                            @mouseenter="$el.style.borderColor='var(--c-primary)';$el.style.background='#f0f9ff'"
-                            @mouseleave="!dragging && ($el.style.borderColor='#94a3b8') && ($el.style.background='#f8fafc')">
+                            class="rt-dropzone"
+                            :class="dragging ? 'rt-dropzone-active' : ''">
                             <div style="font-size:48px;margin-bottom:12px;">📸</div>
                             <p style="color:var(--c-dark);font-size:16px;margin:0 0 6px;font-weight:700;">{{ __('Glissez-déposez, collez (Ctrl+V) ou cliquez') }}</p>
                             <p style="color:#6B7280;font-size:13px;margin:0;">{{ __('JPG, PNG, WebP — compression automatique, max 1920px') }}</p>
