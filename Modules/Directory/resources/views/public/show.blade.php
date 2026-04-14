@@ -958,7 +958,7 @@
                             <div style="padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-size: 12px; color: #6B7280;">{{ $ss->caption ?? __('Screenshot') }} — {{ $ss->user->name ?? __('Anonyme') }}</span>
                                 <div style="display:flex!important;align-items:center!important;gap:8px;">
-                                    <button onclick="fetch('{{ route('directory.screenshots.vote', $ss->id) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d=>{this.closest('div').querySelector('.vote-count').textContent=d.votes})" style="background:none!important;border:none!important;cursor:pointer;color:#E74C3C;font-size:13px;font-weight:600;outline:none!important;box-shadow:none!important;">
+                                    <button onclick="if(this.dataset.voted)return;this.dataset.voted=1;fetch('{{ route('directory.screenshots.vote', $ss->id) }}', {method:'POST',headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}).then(r=>r.json()).then(d=>{this.closest('div').querySelector('.vote-count').textContent=d.votes;if(d.already_voted){this.style.opacity='0.5';this.style.cursor='default';}else{this.style.color='#dc2626';}})" style="background:none!important;border:none!important;cursor:pointer;color:#E74C3C;font-size:13px;font-weight:600;outline:none!important;box-shadow:none!important;">
                                         ❤️ <span class="vote-count">{{ $ss->votes_count }}</span>
                                     </button>
                                     @can('view_admin_panel')
