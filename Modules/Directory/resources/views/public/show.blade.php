@@ -1029,7 +1029,7 @@
                         {{-- Zone drop/paste/clic --}}
                         <div x-show="!preview"
                             @click="$refs.fileInput.click()"
-                            style="text-align:center;padding:40px 20px;margin-bottom:14px;border:2px dashed #cbd5e1;border-radius:12px;cursor:pointer;transition:all .2s;background:#f8fafc;"
+                            style="text-align:center;padding:40px 30px;margin-bottom:14px;border:2px dashed #94a3b8;border-radius:12px;cursor:pointer;transition:all .2s;background:#f8fafc;"
                             :style="dragging ? 'border-color:var(--c-primary);background:#e0f2fe' : ''"
                             @mouseenter="$el.style.borderColor='var(--c-primary)';$el.style.background='#f0f9ff'"
                             @mouseleave="!dragging && ($el.style.borderColor='#cbd5e1') && ($el.style.background='#f8fafc')">
