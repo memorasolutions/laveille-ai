@@ -419,8 +419,8 @@
     </div>
     </div>
 
-    {{-- Highlights : recents + populaires --}}
-    <div class="container">
+    {{-- Highlights : recents + populaires (masqué quand recherche active) --}}
+    <div class="container" x-show="!search" x-transition>
         @include('directory::public.partials._highlights')
     </div>
 
@@ -458,6 +458,20 @@
             'activeSlug' => null,
         ])
 
+        {{-- Bandeau résultats de recherche (visible seulement quand recherche active) --}}
+        <div x-show="search" x-cloak x-transition style="background: var(--c-primary-light); border: 1px solid var(--c-primary); border-radius: var(--r-base); padding: 12px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <span style="font-size: 15px; color: var(--c-dark);">
+                    <strong x-text="filteredTools.length" style="color: var(--c-primary); font-size: 20px;"></strong>
+                    <span x-text="filteredTools.length === 1 ? 'résultat pour' : 'résultats pour'"></span>
+                    « <strong x-text="search" style="color: var(--c-primary);"></strong> »
+                </span>
+            </div>
+            <button type="button" @click="search = ''" style="background: none; border: 1px solid var(--c-primary); color: var(--c-primary); padding: 4px 12px; border-radius: var(--r-btn); font-size: 13px; font-weight: 600; cursor: pointer;">
+                <i class="ti-close" style="font-size: 10px;"></i> {{ __('Effacer') }}
+            </button>
+        </div>
+
         {{-- Sort tabs --}}
         <div class="rt-sort-bar">
             <button type="button" class="rt-sort-tab" :class="sortBy === 'all' && activePricing !== 'free' && 'rt-sort-active'" @click="setSort('all')">{{ __('Tous') }}</button>
@@ -469,9 +483,9 @@
             @endif
         </div>
 
-        {{-- Section mise de l'avant (admin) --}}
+        {{-- Section mise de l'avant (masqué quand recherche active) --}}
         @if(isset($featuredTools) && $featuredTools->isNotEmpty())
-        <div style="background:linear-gradient(135deg,#f0fafb 0%,#e0f4f7 100%);border:1px solid #b2e0e6;border-radius:14px;padding:20px;margin-bottom:24px;">
+        <div x-show="!search" x-transition style="background:linear-gradient(135deg,#f0fafb 0%,#e0f4f7 100%);border:1px solid #b2e0e6;border-radius:14px;padding:20px;margin-bottom:24px;">
             <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:14px;">
                 <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">{{ __('En vedette') }}</h3>
                 <span style="font-size:12px;color:#0B7285;font-weight:600;">{{ __('Sponsorise') }}</span>
@@ -494,9 +508,9 @@
         </div>
         @endif
 
-        {{-- Section trending : plus votés --}}
+        {{-- Section trending : plus votés (masqué quand recherche active) --}}
         @if(isset($topVoted) && $topVoted->isNotEmpty())
-        <div style="margin-bottom:32px;">
+        <div style="margin-bottom:32px;" x-show="!search" x-transition>
 
             {{-- Plus votés par la communauté --}}
             @if(isset($topVoted) && $topVoted->isNotEmpty())
