@@ -31,6 +31,7 @@
             'avgRating' => round($tool->averageRating(), 1),
             'gradientFrom' => ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#C0392B','#16A085','#8E44AD','#2980B9','#D35400'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
+            'hasEduPricing' => (bool) $tool->has_education_pricing,
         ];
     })->values();
 
@@ -575,6 +576,7 @@
                                 <h3 class="rt-card-name"><a :href="tool.showUrl" x-text="tool.name"></a></h3>
                                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                     <span class="rt-badge" :class="'badge-' + tool.pricing" x-text="tool.pricingLabel"></span>
+                                    <template x-if="tool.hasEduPricing"><span style="background:#ecfdf5;color:#065f46;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;">🎓 {{ __('Éducation') }}</span></template>
                                     <template x-if="tool.launchYear > 0"><span style="color: #9CA3AF; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>
                                 </div>
                             </div>

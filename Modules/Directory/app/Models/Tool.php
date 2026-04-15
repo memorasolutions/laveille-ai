@@ -43,7 +43,7 @@ class Tool extends Model
 
     protected $table = 'directory_tools';
 
-    public array $translatable = ['name', 'slug', 'description', 'short_description', 'how_to_use', 'core_features', 'use_cases', 'pros', 'cons'];
+    public array $translatable = ['name', 'slug', 'description', 'short_description', 'how_to_use', 'core_features', 'use_cases', 'pros', 'cons', 'education_pricing_details'];
 
     protected $fillable = [
         'name', 'slug', 'description', 'short_description', 'url', 'affiliate_url', 'logo',
@@ -53,6 +53,7 @@ class Tool extends Model
         'submitted_by',
         'last_enriched_at', 'enrichment_version',
         'parent_tool_id', 'ecosystem_tag',
+        'has_education_pricing', 'education_pricing_type', 'education_pricing_details', 'education_pricing_url',
     ];
 
     public function submitter(): BelongsTo
@@ -87,6 +88,7 @@ class Tool extends Model
 
     protected $casts = [
         'is_featured' => 'boolean',
+        'has_education_pricing' => 'boolean',
         'featured_until' => 'datetime',
         'featured_order' => 'integer',
         'faq' => 'array',
