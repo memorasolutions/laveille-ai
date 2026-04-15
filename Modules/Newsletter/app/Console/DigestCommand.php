@@ -215,8 +215,13 @@ class DigestCommand extends Command
         // Dispatcher un Job par abonné (queue database, anti-doublon intégré)
         $dispatched = 0;
         foreach ($subscribers as $subscriber) {
-            if (! $subscriber->email || ! $subscriber->token) {
+            if (! $subscriber->email) {
                 continue;
+            }
+
+            // Générer un token si manquant (abonnés importés sans token)
+            if (empty($subscriber->token)) {
+                $subscriber->update(['token' => \Illuminate\Support\Str::random(64)]);
             }
 
             SendDigestJob::dispatch(
