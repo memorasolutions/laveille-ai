@@ -30,8 +30,7 @@ class YouTubeService
             'part' => 'id',
             'type' => 'video',
             'order' => 'viewCount',
-            'videoDuration' => 'medium',
-            'publishedAfter' => Carbon::now()->subMonths(24)->toIso8601String(),
+            'publishedAfter' => Carbon::now()->subMonths(36)->toIso8601String(),
             'maxResults' => $maxResults,
             'relevanceLanguage' => $lang,
         ];
