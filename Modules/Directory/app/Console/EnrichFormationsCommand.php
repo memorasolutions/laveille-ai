@@ -99,7 +99,7 @@ class EnrichFormationsCommand extends Command
                 }
 
                 // Détection langue par le titre (plus fiable que ce que sonar-pro retourne)
-                if (preg_match('/formation|cours|apprendre|découvr|maîtris|guide.*gratuit|introduction à|tutoriel/iu', $title)) {
+                if (preg_match('/formation|cours|apprendre|découvr|maîtris|guide.*gratuit|introduction à|tutoriel|comment utiliser|créer|générer|utiliser|débutant|complet|comprendre|outil|gratuit|tuto |les bases|en français|pour les|avec l/iu', $title)) {
                     $language = 'fr';
                 }
 
