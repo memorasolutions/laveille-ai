@@ -152,9 +152,15 @@ class ToolDiscoveryService
 
                     $desc = Str::limit(trim($desc), 500);
 
+                    // Extraire le vrai lien produit depuis le contenu PH (/r/p/ID)
+                    $realUrl = $link;
+                    if ($isAtom && str_contains($link, 'producthunt.com') && preg_match('/href="(https:\/\/www\.producthunt\.com\/r\/[^"]+)"/', $content, $rMatch)) {
+                        $realUrl = $this->resolveProductHuntUrl($rMatch[1]);
+                    }
+
                     $tools[] = [
                         'name' => $title,
-                        'url' => $link,
+                        'url' => $realUrl,
                         'description' => $desc,
                         'pricing' => 'freemium',
                         'source' => "rss:{$feedName}",
@@ -304,6 +310,27 @@ class ToolDiscoveryService
 
             return false;
         }));
+    }
+
+    public function resolveProductHuntUrl(string $phUrl): string
+    {
+        if (! str_contains($phUrl, 'producthunt.com')) {
+            return $phUrl;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/125.0.0.0',
+            ])->withOptions(['allow_redirects' => false])->timeout(10)->get($phUrl);
+
+            $location = $response->header('Location');
+            if ($location && ! str_contains($location, 'producthunt.com')) {
+                return $location;
+            }
+        } catch (\Throwable) {
+        }
+
+        return $phUrl;
     }
 
     public function mapPricing(string $raw): string
