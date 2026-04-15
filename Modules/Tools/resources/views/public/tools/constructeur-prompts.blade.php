@@ -18,14 +18,14 @@
                             </div>
                             <div class="d-flex gap-1">
                                 @include('tools::partials.fullscreen-btn')
-                                <button class="btn btn-sm" @click="jQuery('#promptHelpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 32px; height: 32px; font-weight: 700; font-size: 1rem; padding: 0; line-height: 32px; flex-shrink: 0;" title="{{ __('Aide') }}">?</button>
+                                <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#promptHelpModal').modal('show')" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;flex-shrink:0;" title="{{ __('Aide') }}">?</button>
                             </div>
                         </div>
                         {{-- Barre sauvegarde (visible avant les étapes) --}}
                         <div class="mt-3 mb-3 p-3 rounded" x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce prompt pour le retrouver...') }}" aria-label="{{ __('Titre du prompt') }}" style="border-radius: 8px;">
-                                <button class="btn btn-sm" @click="addToHistory()" :disabled="!isValid || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                <button class="ct-btn ct-btn-primary ct-btn-sm" @click="addToHistory()" :disabled="!isValid || saving" style="white-space:nowrap;"
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre a jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2 mb-0" style="font-size: 0.8rem; color: var(--c-text-muted);">
@@ -37,14 +37,14 @@
                             <template x-if="hasLocalData">
                                 <div class="small mt-2 mb-0" style="font-size: 0.8rem; color: var(--c-text-muted);">
                                     {{ __('Des prompts de votre navigateur ont ete trouves.') }}
-                                    <button class="btn btn-sm btn-outline-primary ms-1" @click="importLocalStorage()" style="font-size: 0.7rem; padding: 1px 8px; border-radius: 6px;">{{ __('Importer') }}</button>
+                                    <button class="ct-btn ct-btn-outline ct-btn-xs ms-1" @click="importLocalStorage()">{{ __('Importer') }}</button>
                                 </div>
                             </template>
                         </div>
                         <template x-if="!isAuthenticated">
                             <div class="mt-3 mb-3 p-2 rounded" style="background: rgba(11,114,133,0.06); border: 1px solid rgba(11,114,133,0.15); border-radius: 10px; font-size: 0.85rem;">
                                 <strong style="color: var(--c-primary);">{{ __('Connectez-vous') }}</strong> {{ __('pour sauvegarder vos prompts et les retrouver sur tous vos appareils.') }}
-                                <button class="btn btn-sm ms-1" @click="$dispatch('open-auth-modal')" style="background: var(--c-primary); color: #fff; border-radius: 6px; font-size: 0.75rem; padding: 2px 10px;">{{ __('Se connecter') }}</button>
+                                <button class="ct-btn ct-btn-primary ct-btn-xs ms-1" @click="$dispatch('open-auth-modal')">{{ __('Se connecter') }}</button>
                             </div>
                         </template>
 
@@ -62,7 +62,7 @@
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('1. Définir la persona') }} <span style="color: #DC2626;">*</span></h3>
-                                <button class="btn btn-sm" @click="showHelp.persona = !showHelp.persona" style="background: #e9ecef; color: var(--c-dark); border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; padding: 0; line-height: 22px; font-weight: 700; margin-left: 4px; flex-shrink: 0;">?</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.persona = !showHelp.persona" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <p class="text-muted small mb-1">{{ __('Quel rôle l\'IA doit-elle jouer ?') }}</p>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
@@ -91,7 +91,7 @@
                         <div x-show="step === 2" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('2. Définir la tâche') }} <span style="color: #DC2626;">*</span></h3>
-                                <button class="btn btn-sm" @click="showHelp.task = !showHelp.task" style="background: #e9ecef; color: var(--c-dark); border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; padding: 0; line-height: 22px; font-weight: 700; margin-left: 4px; flex-shrink: 0;">?</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.task = !showHelp.task" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <p class="text-muted small mb-1">{{ __('Que doit faire l\'IA ?') }}</p>
                             <div x-show="showHelp.task" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">
@@ -127,7 +127,7 @@
                         <div x-show="step === 3" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('3. Définir l\'audience') }}</h3>
-                                <button class="btn btn-sm" @click="showHelp.audience = !showHelp.audience" style="background: #e9ecef; color: var(--c-dark); border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; padding: 0; line-height: 22px; font-weight: 700; margin-left: 4px; flex-shrink: 0;">?</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.audience = !showHelp.audience" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <p class="text-muted small mb-1">{{ __('À qui s\'adresse le contenu ?') }}</p>
                             <div x-show="showHelp.audience" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.audience"></div>
@@ -156,7 +156,7 @@
                         <div x-show="step === 4" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('4. Options avancées') }}</h3>
-                                <button class="btn btn-sm" @click="showHelp.options = !showHelp.options" style="background: #e9ecef; color: var(--c-dark); border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; padding: 0; line-height: 22px; font-weight: 700; margin-left: 4px; flex-shrink: 0;">?</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.options = !showHelp.options" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <div x-show="showHelp.options" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">
                                 <strong>{{ __('Format') }}</strong> : <span x-text="helps.format"></span><br>
@@ -216,7 +216,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-2" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
                                 <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1rem; margin: 0;">{{ __('Technique de prompting') }}</h3>
-                                <button class="btn btn-sm" @click="showHelp.technique = !showHelp.technique" style="background: #e9ecef; color: var(--c-dark); border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; padding: 0; line-height: 22px; font-weight: 700; margin-left: 4px; flex-shrink: 0;">?</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.technique = !showHelp.technique" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <div x-show="showHelp.technique" x-transition class="alert alert-info small mb-2 p-2" style="font-size: 0.8rem;" x-text="helps.technique"></div>
                             <div class="row mb-3">
@@ -244,7 +244,7 @@
 
                             <div class="d-flex align-items-center gap-2" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
                                 <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1rem; margin: 0;">{{ __('Contraintes') }}</h3>
-                                <button class="btn btn-sm" @click="showHelp.constraints = !showHelp.constraints" style="background: #e9ecef; color: var(--c-dark); border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; padding: 0; line-height: 22px; font-weight: 700; margin-left: 4px; flex-shrink: 0;">?</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.constraints = !showHelp.constraints" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <div x-show="showHelp.constraints" x-transition class="alert alert-info small mb-2 p-2" style="font-size: 0.8rem;">
                                 {{ __('Les contraintes limitent ou orientent le comportement de l\'IA. Cochez celles qui correspondent à votre besoin. Elles seront ajoutées automatiquement au prompt.') }}
@@ -312,9 +312,9 @@
                             <span x-show="step === 2 && (verbType === 'custom' ? !!verbCustom : !!verb) && !taskObject">{{ __('Veuillez décrire la tâche.') }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-4">
-                            <button class="btn btn-outline-secondary" @click="prevStep()" x-show="step > 1" style="border-radius: var(--r-btn);">{{ __('Précédent') }}</button>
+                            <button class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1">{{ __('Précédent') }}</button>
                             <div x-show="step === 1"></div>
-                            <button class="btn" @click="nextStep()" x-show="step < 4" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">
+                            <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 4">
 {{ __('Suivant') }}</button>
                         </div>
 
@@ -331,9 +331,9 @@
                             {{ __('Remplissez la persona (étape 1) et la tâche (étape 2) pour générer votre prompt.') }}
                         </div>
                         <div class="d-flex gap-2 mb-4 flex-wrap">
-                            <button class="btn flex-fill" @click="copy()" :disabled="!isValid" :style="isValid ? 'background: var(--c-accent); color: #fff;' : 'background: #e9ecef; color: #adb5bd; cursor: not-allowed;'" style="border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;"
+                            <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
-                            <button class="btn btn-outline-secondary" @click="exportPrompt()" :disabled="!isValid" style="border-radius: var(--r-btn);">{{ __('Exporter .txt') }}</button>
+                            <button class="ct-btn ct-btn-outline" @click="exportPrompt()" :disabled="!isValid">{{ __('Exporter .txt') }}</button>
                         </div>
 
                         {{-- Historique (visible seulement pour les non-connectes, les connectes ont "Mes prompts") --}}
@@ -341,7 +341,7 @@
                             <div class="mt-3 pt-3 border-top">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h3 style="font-family: var(--f-heading); font-weight: 700; margin: 0; font-size: 1rem;">{{ __('Historique') }} (<span x-text="history.length"></span>)</h3>
-                                    <button class="btn btn-sm btn-outline-danger" @click="clearHistory()" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
+                                    <button class="ct-btn ct-btn-outline-danger ct-btn-xs" @click="clearHistory()">{{ __('Effacer') }}</button>
                                 </div>
                                 <template x-for="(h, i) in history" :key="i">
                                     <div class="d-flex justify-content-between align-items-center p-2 mb-1 rounded" style="background: #f8f9fa; font-size: 0.8rem;">
@@ -350,8 +350,8 @@
                                             <div class="text-muted" x-text="h.prompt.substring(0, 80) + '...'"></div>
                                         </div>
                                         <div class="d-flex gap-1 ms-2">
-                                            <button class="btn btn-sm btn-outline-secondary" @click="copyText(h.prompt)" style="font-size: 0.7rem;">{{ __('Copier') }}</button>
-                                            <button class="btn btn-sm btn-outline-danger" @click.stop="deletePrompt(h.id, i)" style="font-size: 0.6rem; padding: 1px 5px;">✕</button>
+                                            <button class="ct-btn ct-btn-outline ct-btn-xs" @click="copyText(h.prompt)">{{ __('Copier') }}</button>
+                                            <button class="ct-btn ct-btn-outline-danger ct-btn-xs" @click.stop="deletePrompt(h.id, i)" style="padding:1px 5px;">✕</button>
                                         </div>
                                     </div>
                                 </template>
@@ -389,7 +389,7 @@
                 </ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn" onclick="jQuery('#promptHelpModal').modal('hide')" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);">{{ __('Compris !') }}</button>
+                <button type="button" class="ct-btn ct-btn-primary" onclick="jQuery('#promptHelpModal').modal('hide')">{{ __('Compris !') }}</button>
             </div>
         </div>
     </div>

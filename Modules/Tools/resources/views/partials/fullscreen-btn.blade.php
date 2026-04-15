@@ -4,11 +4,11 @@
      Ou passer un targetId: @include('tools::partials.fullscreen-btn', ['targetId' => '#mon-id'])
 --}}
 <button type="button"
-        class="js-tool-fullscreen-btn"
+        class="js-tool-fullscreen-btn ct-btn ct-btn-ghost ct-btn-xs"
         data-fullscreen-target="{{ $targetId ?? '' }}"
         title="{{ __('Plein écran') }}"
         aria-label="{{ __('Plein écran') }}"
-        style="border-radius: var(--r-btn, 4px); border: 1px solid #dee2e6; padding: 4px 8px; font-size: 0.85rem; background: #fff; color: #333; cursor: pointer; line-height: 1; display: inline-flex; align-items: center; justify-content: center;">
+        style="display:inline-flex;align-items:center;justify-content:center;">
     <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: block;">
         <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
     </svg>
