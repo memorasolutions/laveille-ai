@@ -51,7 +51,11 @@ class SummarizePendingCommand extends Command
             $transcript = $captionsService->getTranscript($resource->video_id);
 
             if ($transcript && strlen($transcript) >= 100) {
-                $summary = $openRouterService->summarize($transcript, 200);
+                $toolName = $resource->tool?->getTranslation('name', 'fr_CA', false) ?? '';
+                $summary = $openRouterService->generate(
+                    "Écris un résumé structuré de ce tutoriel en 2-3 phrases en français. Format : \"Ce tutoriel montre comment [action] avec {$toolName}. [Contenu]. Idéal pour [public].\" Voici la transcription :\n\n" . mb_substr($transcript, 0, 3000),
+                    'Résume des tutoriels vidéo. Français québécois professionnel. Commence toujours par "Ce tutoriel montre comment". Pas de bullet points.'
+                );
                 if ($summary) {
                     $this->info("  Résumé (transcript) : {$resource->title}");
                 }
@@ -64,8 +68,8 @@ class SummarizePendingCommand extends Command
                 $context = "Outil : {$toolName}\nTitre : {$resource->title}\nChaîne : {$resource->channel_name}\nDurée : {$duration}\nLangue : {$resource->language}";
 
                 $summary = $openRouterService->generate(
-                    "Résume cette vidéo YouTube en 2-3 phrases en français, basé sur ses métadonnées :\n{$context}",
-                    'Tu résumes des tutoriels vidéo pour laveille.ai. Style concis, informatif, en français québécois professionnel.'
+                    "Écris un résumé structuré de cette vidéo YouTube en 2-3 phrases en français. Format : \"Ce tutoriel montre comment [action précise] avec {$toolName}. [Détail du contenu]. Idéal pour [public cible].\" Basé sur :\n{$context}",
+                    'Tu résumes des tutoriels vidéo pour laveille.ai. Style concis, informatif, français québécois professionnel. Toujours commencer par "Ce tutoriel montre comment". Jamais de bullet points.'
                 );
 
                 if ($summary) {
