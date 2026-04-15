@@ -266,10 +266,11 @@
     @php
         $shareUrl = urlencode(request()->url());
         $shareTitle = urlencode(config('app.name') . ' - ' . ($__env->yieldContent('title') ?: ''));
-        $shareDescRaw = trim(strip_tags($__env->yieldContent('meta_description') ?: ''));
+        $shareDescRaw = html_entity_decode(trim(strip_tags($__env->yieldContent('meta_description') ?: '')), ENT_QUOTES, 'UTF-8');
         $shareDescRaw = mb_substr($shareDescRaw, 0, 200);
         $shareDesc = urlencode($shareDescRaw);
-        $shareClipboard = $shareDescRaw . "\n\nPourquoi c'est important? Qu'en penses-tu?\n\n📰 " . request()->url() . "\n🔄 Actualités mises à jour en continu sur laveille.ai";
+        $shareTextRaw = trim($__env->yieldContent('share_text') ?: '');
+        $shareClipboard = $shareTextRaw ? html_entity_decode($shareTextRaw, ENT_QUOTES, 'UTF-8') : ($shareDescRaw . "\n\nPourquoi c'est important? Qu'en penses-tu?\n\n📰 " . request()->url() . "\n🔄 Actualités mises à jour en continu sur laveille.ai");
         $shareTagline = urlencode('Actualités mises à jour en continu sur laveille.ai');
         $xText = urlencode($shareDescRaw ? $shareDescRaw . ' — Actualités en continu sur laveille.ai' : config('app.name'));
     @endphp

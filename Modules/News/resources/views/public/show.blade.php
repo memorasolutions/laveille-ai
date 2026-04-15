@@ -4,6 +4,12 @@
 
 @section('title', ($article->seo_title ?? $article->title) . ' - ' . __('Actualités') . ' - ' . config('app.name'))
 @section('meta_description', $article->meta_description ?? Str::limit($article->summary ?? strip_tags($article->description), 155))
+@section('share_text'){{ $ss['hook'] ?? ($article->meta_description ?? '') }}
+
+{{ __('Pourquoi c\'est important') }} : {{ $ss['why_important'] ?? '' }}
+
+📰 {{ request()->url() }}
+🔄 {{ __('Actualités mises à jour en continu sur laveille.ai') }}@endsection
 @section('og_type', 'article')
 @if($article->image_url)
     @section('og_image', url($article->image_url))
