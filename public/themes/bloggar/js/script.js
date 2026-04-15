@@ -696,8 +696,8 @@
             submitHandler: function (form) {
                 $.ajax({
                     type: "POST",
-                    url: "mail-contact.php",
-                    data: $(form).serialize(),
+                    url: "/contact",
+                    data: $(form).serialize() + "&_token=" + document.querySelector('meta[name="csrf-token"]').content,
                     success: function () {
                         $("#loader").hide();
                         $("#success").slideDown("slow");

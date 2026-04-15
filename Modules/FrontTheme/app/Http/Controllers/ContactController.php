@@ -38,6 +38,10 @@ class ContactController extends Controller
                 ->replyTo($validated['email'], $validated['name']);
         });
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => __('Votre message a bien été envoyé.')]);
+        }
+
         return back()->with('success', __('Votre message a bien été envoyé.'));
     }
 }
