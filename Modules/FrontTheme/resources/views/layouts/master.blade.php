@@ -259,6 +259,7 @@
     @include('fronttheme::partials.toast')
     <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
     <script src="/js/sw-register.js" defer></script>
+    <script src="/js/newsletter-popup.js?v={{ filemtime(public_path('js/newsletter-popup.js')) }}" defer></script>
     <script src="/js/ga4-events.js" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
