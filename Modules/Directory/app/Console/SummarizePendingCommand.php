@@ -45,31 +45,41 @@ class SummarizePendingCommand extends Command
         $summarized = 0;
 
         foreach ($resources as $index => $resource) {
+            $summary = null;
+
+            // Stratégie 1 : sous-titres YouTube (meilleure qualité)
             $transcript = $captionsService->getTranscript($resource->video_id);
 
-            if ($transcript === null) {
-                $this->warn("Pas de sous-titres : {$resource->video_id}");
-
-                continue;
+            if ($transcript && strlen($transcript) >= 100) {
+                $summary = $openRouterService->summarize($transcript, 200);
+                if ($summary) {
+                    $this->info("  Résumé (transcript) : {$resource->title}");
+                }
             }
 
-            if (strlen($transcript) < 100) {
-                $this->warn("Transcript trop court : {$resource->video_id}");
+            // Stratégie 2 : métadonnées (fallback 100% fiable)
+            if (empty($summary)) {
+                $toolName = $resource->tool?->getTranslation('name', 'fr_CA', false) ?? '';
+                $duration = $resource->duration_seconds ? floor($resource->duration_seconds / 60) . ' minutes' : '';
+                $context = "Outil : {$toolName}\nTitre : {$resource->title}\nChaîne : {$resource->channel_name}\nDurée : {$duration}\nLangue : {$resource->language}";
 
-                continue;
+                $summary = $openRouterService->generate(
+                    "Résume cette vidéo YouTube en 2-3 phrases en français, basé sur ses métadonnées :\n{$context}",
+                    'Tu résumes des tutoriels vidéo pour laveille.ai. Style concis, informatif, en français québécois professionnel.'
+                );
+
+                if ($summary) {
+                    $this->info("  Résumé (métadonnées) : {$resource->title}");
+                }
             }
-
-            $summary = $openRouterService->summarize($transcript, 200);
 
             if (empty($summary)) {
-                $this->warn("Résumé vide : {$resource->video_id}");
+                $this->warn("  Échec résumé : {$resource->video_id}");
 
                 continue;
             }
 
             $resource->update(['video_summary' => $summary]);
-
-            $this->info("Résumé : {$resource->title}");
             $summarized++;
 
             if ($index < $total - 1) {
