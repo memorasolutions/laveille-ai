@@ -133,7 +133,7 @@
 
                                     <div class="tip-section" id="tip-section" style="display: none;">
                                         <div class="tip-popup-trigger">
-                                            <button type="button" id="tip-popup-btn" class="btn btn-secondary">{{ __('Ajouter un pourboire') }}</button>
+                                            <button type="button" id="tip-popup-btn" class="ct-btn ct-btn-outline">{{ __('Ajouter un pourboire') }}</button>
                                         </div>
                                         <div class="tip-result" id="tip-display" style="display: none;">
                                             <div class="result-row">
@@ -145,8 +145,8 @@
                                                 <span class="total-with-tip">$0.00</span>
                                             </div>
                                             <div class="tip-actions">
-                                                <button type="button" id="tip-modify-btn" class="btn btn-secondary">{{ __('Modifier') }}</button>
-                                                <button type="button" id="tip-remove-btn" class="btn btn-secondary">{{ __('Supprimer') }}</button>
+                                                <button type="button" id="tip-modify-btn" class="ct-btn ct-btn-outline">{{ __('Modifier') }}</button>
+                                                <button type="button" id="tip-remove-btn" class="ct-btn ct-btn-outline">{{ __('Supprimer') }}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -174,9 +174,9 @@
 
                                     <div class="actions-section" id="actions-section" style="display: none;">
                                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                            <button id="reset-btn" class="btn btn-secondary" style="display: none;">{{ __('Nouveau calcul') }}</button>
-                                            <button id="copy-result-btn" class="btn btn-secondary" style="display: none;">{{ __('Copier le résultat') }}</button>
-                                            <button id="save-history-btn" class="btn btn-secondary" style="display: none;">💾 {{ __('Sauvegarder') }}</button>
+                                            <button id="reset-btn" class="ct-btn ct-btn-outline" style="display: none;">{{ __('Nouveau calcul') }}</button>
+                                            <button id="copy-result-btn" class="ct-btn ct-btn-outline" style="display: none;">{{ __('Copier le résultat') }}</button>
+                                            <button id="save-history-btn" class="ct-btn ct-btn-outline" style="display: none;">💾 {{ __('Sauvegarder') }}</button>
                                         </div>
                                     </div>
 

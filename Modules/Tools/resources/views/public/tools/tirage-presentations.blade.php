@@ -47,7 +47,7 @@
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                             <div class="d-flex gap-1">
-                                <button class="btn btn-sm" :class="soundEnabled ? 'btn-outline-secondary' : 'btn-outline-danger'" @click="toggleSound()" :title="soundEnabled ? '{{ __('Son actif') }}' : '{{ __('Son muet') }}'" style="border-radius: var(--r-btn);">
+                                <button class="ct-btn ct-btn-sm" :class="soundEnabled ? 'ct-btn-outline' : 'ct-btn-outline-danger'" @click="toggleSound()" :title="soundEnabled ? '{{ __('Son actif') }}' : '{{ __('Son muet') }}'">
                                     <span x-text="soundEnabled ? '🔊' : '🔇'"></span>
                                 </button>
                             </div>
@@ -58,7 +58,7 @@
                         <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
-                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="studentList.length < 1 || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                <button class="ct-btn ct-btn-primary ct-btn-sm" @click="saveToAccount()" :disabled="studentList.length < 1 || saving" style="white-space:nowrap;"
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
@@ -118,7 +118,7 @@
                         </div>
 
                         {{-- Gros bouton tirer --}}
-                        <button class="btn w-100 mb-4" @click="drawOne()" :disabled="!canDraw"
+                        <button class="ct-btn ct-btn-accent ct-btn-full mb-4" @click="drawOne()" :disabled="!canDraw"
                                 style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700; font-size: 1.2rem; padding: 14px;">
                             {{ __('Tirer au sort') }}
                         </button>
@@ -141,7 +141,7 @@
                         {{-- Fullscreen overlay --}}
                         <template x-if="isFullscreen && currentDraw">
                             <div class="fullscreen-overlay" @click.self="exitFullscreen()" @keydown.escape.window="exitFullscreen()">
-                                <button class="btn btn-sm" @click="exitFullscreen()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2); color: #fff; border-radius: var(--r-btn); font-size: 1.2rem;">✕ {{ __('Fermer') }}</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-sm" @click="exitFullscreen()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.2);color:#fff;font-size:1.2rem;">✕ {{ __('Fermer') }}</button>
                                 <span class="badge mb-3" style="background: rgba(255,255,255,0.2); color: #fff; font-size: 1rem;" x-text="'#' + drawCount"></span>
                                 <div class="fs-student" x-text="currentDraw.student" style="font-family: var(--f-heading);"></div>
                                 <div style="font-size: 3rem; opacity: 0.5; margin: 0.5rem 0;">&rarr;</div>
@@ -213,7 +213,7 @@
                                         <span class="ct-btn ct-btn-outline ct-btn-sm" @click="$refs.impQuestions.click()" style="border-radius: var(--r-btn);">{{ __('Importer questions') }}</span>
                                     </label>
                                 </div>
-                                <button class="btn btn-sm w-100" @click="generateFullOrder()" :disabled="studentList.length < 2"
+                                <button class="ct-btn ct-btn-primary ct-btn-sm ct-btn-full" @click="generateFullOrder()" :disabled="studentList.length < 2"
                                         style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);">
                                     {{ __('Générer l\'ordre complet des présentations') }}
                                 </button>
@@ -229,7 +229,7 @@
                                         <li class="mb-1"><span x-text="item.student"></span> &rarr; <em x-text="item.question"></em></li>
                                     </template>
                                 </ol>
-                                <button class="btn btn-sm" @click="copyFullOrder()" style="background: var(--c-dark); color: #fff; border-radius: var(--r-btn);" x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></button>
+                                <button class="ct-btn ct-btn-primary ct-btn-sm" @click="copyFullOrder()" x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></button>
                             </div>
                         </template>
 

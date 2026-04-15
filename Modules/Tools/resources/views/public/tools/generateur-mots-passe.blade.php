@@ -43,7 +43,7 @@
 
                             {{-- Boutons --}}
                             <div class="d-flex gap-2 mb-4">
-                                <button class="btn flex-fill" @click="generate(); addToHistory();" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">
+                                <button class="ct-btn ct-btn-accent flex-fill" @click="generate(); addToHistory();">
                                     🎲 {{ __('Générer') }}
                                 </button>
                                 <button class="btn" @click="copy(password)" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);"
@@ -81,7 +81,7 @@
 
                             {{-- Options avancées --}}
                             <div class="mb-3">
-                                <button class="btn btn-sm btn-outline-secondary w-100" @click="showAdvanced = !showAdvanced" style="border-radius: var(--r-btn);">
+                                <button class="ct-btn ct-btn-outline ct-btn-sm ct-btn-full" @click="showAdvanced = !showAdvanced">
                                     <span x-text="showAdvanced ? '▲ Masquer' : '▼ Options avancées'"></span>
                                 </button>
                             </div>
@@ -108,7 +108,7 @@
                                     <template x-for="(bp, i) in batchPasswords" :key="i">
                                         <div class="d-flex align-items-center gap-2 mb-1">
                                             <code class="flex-fill p-1 rounded" style="background: #fff; font-size: 0.85rem; word-break: break-all;" x-text="bp"></code>
-                                            <button class="btn btn-sm" @click="copy(bp)" style="background: var(--c-primary); color: #fff; font-size: 0.75rem;">📋</button>
+                                            <button class="ct-btn ct-btn-primary ct-btn-xs" @click="copy(bp)">📋</button>
                                         </div>
                                     </template>
                                 </div>
@@ -149,7 +149,7 @@
 
                             {{-- Boutons --}}
                             <div class="d-flex gap-2 mb-4">
-                                <button class="btn flex-fill" @click="generatePassphrase()" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">
+                                <button class="ct-btn ct-btn-accent flex-fill" @click="generatePassphrase()">
                                     🎲 {{ __('Générer') }}
                                 </button>
                                 <button class="btn" @click="copyPassphrase()" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);"
@@ -167,7 +167,7 @@
                                 <label class="form-label fw-medium">{{ __('Séparateur') }}</label>
                                 <div class="d-flex flex-wrap gap-2">
                                     <template x-for="s in separators" :key="s.value">
-                                        <button class="btn btn-sm" :class="separator === s.value ? 'btn-primary' : 'btn-outline-secondary'"
+                                        <button class="ct-btn ct-btn-sm" :class="separator === s.value ? 'ct-btn-primary' : 'ct-btn-outline'"
                                                 @click="separator = s.value; generatePassphrase();" x-text="s.label" style="border-radius: var(--r-btn);"></button>
                                     </template>
                                 </div>

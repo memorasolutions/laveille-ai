@@ -16,7 +16,7 @@
                                 <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                                 <p class="text-muted mb-0">{{ $tool->description }}</p>
                             </div>
-                            <button class="btn btn-sm" @click="jQuery('#helpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 32px; height: 32px; font-weight: 700; font-size: 1rem; padding: 0; line-height: 32px; flex-shrink: 0;" title="{{ __('Aide') }}">?</button>
+                            <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#helpModal').modal('show')" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;flex-shrink:0;" title="{{ __('Aide') }}">?</button>
                         </div>
                         <div class="mb-4"></div>
 
@@ -32,7 +32,7 @@
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control form-control-lg" x-model="query" @keydown.enter="generateSearch()" placeholder="{{ __('Entrez votre recherche...') }}" aria-label="{{ __('Recherche Google avancée') }}">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-lg" @click="generateSearch()" style="background: var(--c-accent); color: #fff; border-radius: 0 var(--r-btn) var(--r-btn) 0;">{{ __('Générer') }}</button>
+                                    <button class="ct-btn ct-btn-accent ct-btn-lg" @click="generateSearch()" style="border-radius:0 var(--r-btn) var(--r-btn) 0;">{{ __('Générer') }}</button>
                                 </span>
                             </div>
 
@@ -41,7 +41,7 @@
                                 <label class="form-label fw-medium" style="font-size: 0.85rem;">{{ __('Presets de recherche') }}</label>
                                 <div class="d-flex flex-wrap gap-1">
                                     <template x-for="(p, i) in presetsSearch" :key="i">
-                                        <button class="btn btn-sm btn-outline-secondary" @click="loadSearchPreset(p)" x-text="p.name" style="border-radius: var(--r-btn); font-size: 0.75rem;"></button>
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" @click="loadSearchPreset(p)" x-text="p.name" style="border-radius: var(--r-btn); font-size: 0.75rem;"></button>
                                     </template>
                                 </div>
                             </div>
@@ -115,7 +115,7 @@
                                             <input type="number" class="form-control form-control-sm" x-model.number="advAround" min="0" max="50" placeholder="0" aria-label="AROUND">
                                         </div>
                                         <div class="col-md-4 mb-2 d-flex align-items-end">
-                                            <button class="btn btn-sm btn-outline-secondary w-100" @click="clearAdvanced()" style="border-radius: var(--r-btn);">{{ __('Réinitialiser') }}</button>
+                                            <button class="ct-btn ct-btn-outline ct-btn-sm ct-btn-full" @click="clearAdvanced()">{{ __('Réinitialiser') }}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -125,7 +125,7 @@
                             <div class="p-3 rounded mb-3" x-show="builtQuery" style="background: var(--c-primary-light); font-family: monospace; font-size: 0.9rem; word-break: break-all;">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <span x-text="builtQuery"></span>
-                                    <button class="btn btn-sm" @click="copyUrl(builtQuery)" style="background: var(--c-primary); color: #fff; font-size: 0.7rem; white-space: nowrap; margin-left: 8px;" x-text="copied === builtQuery ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></button>
+                                    <button class="ct-btn ct-btn-primary ct-btn-xs" @click="copyUrl(builtQuery)" style="white-space:nowrap;margin-left:8px;" x-text="copied === builtQuery ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></button>
                                 </div>
                             </div>
 
@@ -139,8 +139,8 @@
                                                     <span x-text="link.icon"></span> <span x-text="link.label"></span>
                                                 </a>
                                                 <div class="d-flex gap-1">
-                                                    <a :href="link.url" target="_blank" rel="noopener" class="btn btn-sm" style="background: var(--c-accent); color: #fff; font-size: 0.7rem;">{{ __('Ouvrir') }}</a>
-                                                    <button class="btn btn-sm" @click="copyUrl(link.url)" style="background: var(--c-primary); color: #fff; font-size: 0.7rem;" x-text="copied === link.url ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></button>
+                                                    <a :href="link.url" target="_blank" rel="noopener" class="ct-btn ct-btn-accent ct-btn-xs">{{ __('Ouvrir') }}</a>
+                                                    <button class="ct-btn ct-btn-primary ct-btn-xs" @click="copyUrl(link.url)" x-text="copied === link.url ? '{{ __('Copié !') }}' : '{{ __('Copier') }}'"></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -154,7 +154,7 @@
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control form-control-lg" x-model="googleUrl" @input="detectUrl()" @paste="setTimeout(detectUrl.bind($data), 100)" placeholder="{{ __('Collez un lien Google (Docs, Sheets, Slides, Drive, YouTube...)') }}" aria-label="{{ __('Lien Google à transformer') }}">
                                 <span class="input-group-btn">
-                                    <button class="btn btn-lg" @click="googleUrl = ''; detected = null; transforms = []; selectedTransform = null; showPdfOptions = false;" style="background: #DC2626; color: #fff; border-radius: 0 var(--r-btn) var(--r-btn) 0;" x-show="googleUrl">&#10005;</button>
+                                    <button class="ct-btn ct-btn-danger ct-btn-lg" @click="googleUrl = ''; detected = null; transforms = []; selectedTransform = null; showPdfOptions = false;" style="border-radius:0 var(--r-btn) var(--r-btn) 0;" x-show="googleUrl">&#10005;</button>
                                 </span>
                             </div>
 
@@ -177,7 +177,7 @@
                                                     <small class="text-muted d-block mb-1" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;" x-text="cat"></small>
                                                     <div class="d-flex flex-wrap gap-1">
                                                         <template x-for="(t, ti) in transforms.filter(function(t) { return t.cat === cat; })" :key="cat + '-' + ti">
-                                                            <button class="btn btn-sm" @click="if (t.name.indexOf('PDF') !== -1 && detected && detected.type === 'google_sheets') { showPdfOptions = !showPdfOptions; selectedTransform = t; } else { showPdfOptions = false; selectedTransform = t; }"
+                                                            <button class="ct-btn ct-btn-sm" @click="if (t.name.indexOf('PDF') !== -1 && detected && detected.type === 'google_sheets') { showPdfOptions = !showPdfOptions; selectedTransform = t; } else { showPdfOptions = false; selectedTransform = t; }"
                                                                     :style="selectedTransform && selectedTransform.name === t.name ? 'background: var(--c-primary); color: #fff;' : 'background: #f8f9fa; color: var(--c-dark);'"
                                                                     style="border-radius: var(--r-btn); font-size: 0.8rem; border: 1px solid #dee2e6;">
                                                                 <span x-text="t.icon"></span> <span x-text="t.name"></span>
@@ -191,7 +191,7 @@
                                     <template x-if="transforms.length > 0 && !transforms[0].cat">
                                         <div class="d-flex flex-wrap gap-2 mb-3">
                                             <template x-for="(t, ti) in transforms" :key="t.name">
-                                                <button class="btn btn-sm" @click="showPdfOptions = false; selectedTransform = t;"
+                                                <button class="ct-btn ct-btn-sm" @click="showPdfOptions = false; selectedTransform = t;"
                                                         :style="selectedTransform && selectedTransform.name === t.name ? 'background: var(--c-primary); color: #fff;' : 'background: #f8f9fa; color: var(--c-dark);'"
                                                         style="border-radius: var(--r-btn); font-size: 0.8rem; border: 1px solid #dee2e6;">
                                                     <span x-text="t.icon"></span> <span x-text="t.name"></span>
@@ -220,8 +220,8 @@
                                             <div class="col-md-4 mb-2">
                                                 <label style="font-size: 0.85rem; color: var(--c-dark);">{{ __('Orientation') }}</label><br>
                                                 <div class="d-flex gap-1">
-                                                    <button class="btn btn-sm" @click="pdfPortrait = true" :style="pdfPortrait ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn);">{{ __('Portrait') }}</button>
-                                                    <button class="btn btn-sm" @click="pdfPortrait = false" :style="!pdfPortrait ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn);">{{ __('Paysage') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfPortrait = true" :class="pdfPortrait ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Portrait') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfPortrait = false" :class="!pdfPortrait ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Paysage') }}</button>
                                                 </div>
                                             </div>
                                             <div class="col-md-4 mb-2">
@@ -247,17 +247,17 @@
                                             <div class="col-md-4 mb-2">
                                                 <label style="font-size: 0.85rem; color: var(--c-dark);">{{ __('Marges') }}</label>
                                                 <div class="d-flex gap-1 flex-wrap">
-                                                    <button class="btn btn-sm" @click="pdfMargins = 'normal'" :style="pdfMargins === 'normal' ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Normal') }}</button>
-                                                    <button class="btn btn-sm" @click="pdfMargins = 'narrow'" :style="pdfMargins === 'narrow' ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Étroit') }}</button>
-                                                    <button class="btn btn-sm" @click="pdfMargins = 'wide'" :style="pdfMargins === 'wide' ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Large') }}</button>
-                                                    <button class="btn btn-sm" @click="pdfMargins = 'none'" :style="pdfMargins === 'none' ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Sans') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfMargins = 'normal'" :class="pdfMargins === 'normal' ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Normal') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfMargins = 'narrow'" :class="pdfMargins === 'narrow' ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Étroit') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfMargins = 'wide'" :class="pdfMargins === 'wide' ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Large') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfMargins = 'none'" :class="pdfMargins === 'none' ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Sans') }}</button>
                                                 </div>
                                             </div>
                                             <div class="col-md-4 mb-2">
                                                 <label style="font-size: 0.85rem; color: var(--c-dark);">{{ __('Ordre des pages') }}</label>
                                                 <div class="d-flex gap-1">
-                                                    <button class="btn btn-sm" @click="pdfPageorder = '1'" :style="pdfPageorder === '1' ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Bas puis droite') }}</button>
-                                                    <button class="btn btn-sm" @click="pdfPageorder = '2'" :style="pdfPageorder === '2' ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Droite puis bas') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfPageorder = '1'" :class="pdfPageorder === '1' ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Bas puis droite') }}</button>
+                                                    <button class="ct-btn ct-btn-sm" @click="pdfPageorder = '2'" :class="pdfPageorder === '2' ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Droite puis bas') }}</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -296,10 +296,10 @@
                                         </div>
                                         <div class="d-flex gap-2 align-items-center">
                                             <div class="d-flex gap-1">
-                                                <button class="btn btn-sm" @click="pdfAttachment = false" :style="!pdfAttachment ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.8rem;">{{ __('Ouvrir') }}</button>
-                                                <button class="btn btn-sm" @click="pdfAttachment = true" :style="pdfAttachment ? 'background: var(--c-primary); color: #fff;' : ''" style="border-radius: var(--r-btn); font-size: 0.8rem;">{{ __('Télécharger') }}</button>
+                                                <button class="ct-btn ct-btn-sm" @click="pdfAttachment = false" :class="!pdfAttachment ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Ouvrir') }}</button>
+                                                <button class="ct-btn ct-btn-sm" @click="pdfAttachment = true" :class="pdfAttachment ? 'ct-btn-primary' : 'ct-btn-outline'">{{ __('Télécharger') }}</button>
                                             </div>
-                                            <button class="btn btn-sm flex-fill" @click="applyPdfOptions()" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">{{ __('Générer le lien PDF personnalisé') }}</button>
+                                            <button class="ct-btn ct-btn-accent ct-btn-sm flex-fill" @click="applyPdfOptions()">{{ __('Générer le lien PDF personnalisé') }}</button>
                                         </div>
                                     </div>
 
@@ -326,7 +326,7 @@
                                 <div class="mt-4">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h3 style="color: var(--c-dark); margin: 0; font-size: 1rem; font-family: var(--f-heading); font-weight: 700;">{{ __('Historique récent') }}</h3>
-                                        <button class="btn btn-sm btn-outline-danger" @click="transformHistory = []; localStorage.removeItem('glh')" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
+                                        <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="transformHistory = []; localStorage.removeItem('glh')" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
                                     </div>
                                     <template x-for="(h, hi) in transformHistory" :key="h.timestamp">
                                         <div class="p-2 mb-1 rounded small d-flex justify-content-between align-items-center" style="background: #f8f9fa;">
@@ -334,7 +334,7 @@
                                                 <span x-text="h.icon"></span> <span x-text="h.type"></span> -
                                                 <span class="text-muted" x-text="h.url.substring(0, 55) + '...'"></span>
                                             </div>
-                                            <button class="btn btn-sm btn-outline-danger" @click.stop="transformHistory.splice(hi, 1); localStorage.setItem('glh', JSON.stringify(transformHistory))" style="font-size: 0.6rem; padding: 1px 5px;">✕</button>
+                                            <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click.stop="transformHistory.splice(hi, 1); localStorage.setItem('glh', JSON.stringify(transformHistory))" style="font-size: 0.6rem; padding: 1px 5px;">✕</button>
                                         </div>
                                     </template>
                                 </div>
@@ -350,7 +350,7 @@
                                     <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1rem; margin-bottom: 0.5rem;" x-text="cat.name"></h3>
                                     <div class="d-flex flex-wrap gap-2">
                                         <template x-for="(d, di) in cat.dorks" :key="di">
-                                            <button class="btn btn-sm" @click="loadDork(d)" style="border-radius: var(--r-btn); font-size: 0.8rem; text-align: left; background: #f8f9fa; border: 1px solid #dee2e6; color: var(--c-dark);">
+                                            <button class="ct-btn ct-btn-ghost ct-btn-sm" @click="loadDork(d)" style="text-align:left;">
                                                 <strong x-text="d.name"></strong>
                                                 <br><small style="color: #6c757d; font-family: monospace; font-size: 0.7rem;" x-text="d.query.substring(0, 50) + (d.query.length > 50 ? '...' : '')"></small>
                                             </button>
@@ -365,7 +365,7 @@
                             <div class="mt-4 pt-3 border-top">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h3 style="font-family: var(--f-heading); font-weight: 700; margin: 0; font-size: 1rem;">{{ __('Historique des recherches') }} (<span x-text="searchHistory.length"></span>)</h6>
-                                    <button class="btn btn-sm btn-outline-danger" @click="searchHistory = []; localStorage.removeItem('gl_searches')" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
+                                    <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="searchHistory = []; localStorage.removeItem('gl_searches')" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
                                 </div>
                                 <template x-for="(h, i) in searchHistory" :key="i">
                                     <div class="p-2 mb-1 rounded small d-flex justify-content-between align-items-center" style="background: #f8f9fa; cursor: pointer;" @click="query = h.query; generateSearch();">
