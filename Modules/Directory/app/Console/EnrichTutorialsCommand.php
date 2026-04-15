@@ -102,6 +102,7 @@ class EnrichTutorialsCommand extends Command
                         'title' => $tuto['title'] ?? '',
                         'type' => 'youtube',
                         'language' => $tuto['language'] ?? 'fr',
+                        'level' => ToolResource::detectLevel($tuto['title'] ?? ''),
                         'thumbnail' => $tuto['thumbnail'] ?? null,
                         'video_id' => $videoId,
                         'duration_seconds' => $tuto['duration_seconds'] ?? null,

@@ -18,10 +18,31 @@ class ToolResource extends Model
 
     protected $fillable = [
         'directory_tool_id', 'user_id', 'url', 'title',
-        'type', 'language', 'thumbnail', 'video_id',
+        'type', 'language', 'level', 'thumbnail', 'video_id',
         'video_summary', 'duration_seconds', 'channel_name',
         'channel_url', 'is_approved',
     ];
+
+    public static function detectLevel(string $title): string
+    {
+        $t = mb_strtolower($title);
+
+        $advanced = ['avancé', 'advanced', 'pro tips', 'expert', 'master', 'deep dive', 'optimisation', 'architecture', 'scaling', 'enterprise', 'astuces pro'];
+        foreach ($advanced as $kw) {
+            if (str_contains($t, $kw)) {
+                return 'advanced';
+            }
+        }
+
+        $beginner = ['débutant', 'beginner', 'getting started', 'premiers pas', 'introduction', 'basics', 'fundamentals', '101', 'pour commencer', 'débuter', 'apprendre', 'learn', 'easy', 'simple', 'guide complet', 'from scratch', 'de zéro'];
+        foreach ($beginner as $kw) {
+            if (str_contains($t, $kw)) {
+                return 'beginner';
+            }
+        }
+
+        return 'intermediate';
+    }
 
     protected $casts = [
         'is_approved' => 'boolean',

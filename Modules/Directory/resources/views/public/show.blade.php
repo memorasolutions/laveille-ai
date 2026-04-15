@@ -630,7 +630,7 @@
         </div>
 
         {{-- TAB: Tutoriels --}}
-        <div class="rt-panel" x-show="tab==='resources'" x-cloak style="padding: 24px;" x-data="{ filterType: '', filterLang: '' }">
+        <div class="rt-panel" x-show="tab==='resources'" x-cloak style="padding: 24px;" x-data="{ filterType: '', filterLang: '', filterLevel: '' }">
             @if($resources->isEmpty())
             <div style="text-align: center; padding: 50px 20px; background: #f9fafb; border-radius: 16px; border: 1px dashed #d1d5db; margin-bottom: 24px;">
                 <div style="font-size: 48px; margin-bottom: 12px;">📚</div>
@@ -649,6 +649,11 @@
                 <template x-for="f in [{v:'',l:'{{ __("Toutes") }}'},{v:'fr',l:'FR'},{v:'en',l:'EN'}]">
                     <button @click="filterLang = f.v" :style="'border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;' + (filterLang === f.v ? 'background:var(--c-primary);color:#fff;' : 'background:var(--c-primary-light);color:var(--c-text-muted);')" x-text="f.l"></button>
                 </template>
+                <span style="color:#e5e7eb;margin:0 4px;">|</span>
+                <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Niveau') }} :</span>
+                <template x-for="f in [{v:'',l:'{{ __("Tous") }}'},{v:'beginner',l:'🟢 {{ __("Débutant") }}'},{v:'intermediate',l:'🟡 {{ __("Intermédiaire") }}'},{v:'advanced',l:'🔴 {{ __("Avancé") }}'}]">
+                    <button @click="filterLevel = f.v" :style="'border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;' + (filterLevel === f.v ? 'background:var(--c-primary);color:#fff;' : 'background:var(--c-primary-light);color:var(--c-text-muted);')" x-text="f.l"></button>
+                </template>
             </div>
             @endif
 
@@ -658,7 +663,7 @@
                 $thumbUrl = $isYt ? "https://img.youtube.com/vi/{$res->video_id}/maxresdefault.jpg" : ($res->thumbnail ?? null);
                 $durationFormatted = $res->duration_seconds ? gmdate($res->duration_seconds >= 3600 ? 'G:i:s' : 'i:s', $res->duration_seconds) : null;
             @endphp
-            <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $res->type }}') && (filterLang === '' || filterLang === '{{ $res->language }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;position:relative;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
+            <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $res->type }}') && (filterLang === '' || filterLang === '{{ $res->language }}') && (filterLevel === '' || filterLevel === '{{ $res->level }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;position:relative;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
 
                 {{-- Carte compacte --}}
                 <div @click="expanded = !expanded" style="display:flex;gap:14px;padding:14px;cursor:pointer;align-items:center;">
@@ -685,6 +690,10 @@
                         <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
                             <span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;">{{ $res->type }}</span>
                             <span style="background:{{ $res->language === 'fr' ? '#e0e7ff' : '#fef3c7' }};color:{{ $res->language === 'fr' ? '#3730a3' : '#92400e' }};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ strtoupper($res->language) }}</span>
+                            @if($res->level)
+                                @php $levelColors = ['beginner' => ['#dcfce7','#166534'], 'intermediate' => ['#fef9c3','#854d0e'], 'advanced' => ['#fee2e2','#991b1b']]; $lc = $levelColors[$res->level] ?? ['#f3f4f6','#374151']; $levelLabels = ['beginner' => 'Débutant', 'intermediate' => 'Intermédiaire', 'advanced' => 'Avancé']; @endphp
+                                <span style="background:{{ $lc[0] }};color:{{ $lc[1] }};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ $levelLabels[$res->level] ?? $res->level }}</span>
+                            @endif
                             @if($res->channel_name)
                                 <span style="color:#6b7280;font-size:12px;">📺 {{ $res->channel_name }}</span>
                             @endif
