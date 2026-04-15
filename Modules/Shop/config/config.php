@@ -29,6 +29,8 @@ return [
         'tvq' => (float) env('SHOP_TAX_TVQ', 9.975),
     ],
 
+    'handling_fee' => (float) env('SHOP_HANDLING_FEE', 1.00),
+
     'shipping_countries' => env('SHOP_SHIPPING_COUNTRIES')
         ? array_values(array_filter(array_map('trim', explode(',', (string) env('SHOP_SHIPPING_COUNTRIES')))))
         : ['CA'],

@@ -185,10 +185,11 @@ class GelatoService
 
             foreach ($data['quotes'] ?? [] as $quote) {
                 foreach ($quote['shipmentMethods'] ?? [] as $method) {
+                    $handlingFee = (float) config('shop.handling_fee', 1.00);
                     $allMethods[] = [
                         'name' => $method['name'] ?? '',
                         'uid' => $method['shipmentMethodUid'] ?? '',
-                        'price' => (float) ($method['price'] ?? 0),
+                        'price' => round((float) ($method['price'] ?? 0) + $handlingFee, 2),
                         'currency' => $method['currency'] ?? 'CAD',
                         'min_days' => $method['minDeliveryDays'] ?? null,
                         'max_days' => $method['maxDeliveryDays'] ?? null,

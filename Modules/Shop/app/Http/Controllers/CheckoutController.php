@@ -94,12 +94,14 @@ class CheckoutController extends Controller
 
         // Créer session Stripe Checkout (mode embedded)
         $returnUrl = route('shop.confirmation', $order) . '?session_id={CHECKOUT_SESSION_ID}';
+        $taxLabel = ($country === 'CA' && strtoupper($province) === 'QC') ? 'TPS + TVQ' : 'TPS';
         $checkout = $this->stripeService->createCheckoutSession(
             $cartItems,
             $returnUrl,
             $request->input('email'),
             $taxAmount,
-            $shippingCost
+            $shippingCost,
+            $taxLabel
         );
 
         if (! $checkout) {

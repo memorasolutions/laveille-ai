@@ -25,7 +25,7 @@ class StripeService
             ->asForm();
     }
 
-    public function createCheckoutSession(array $cartItems, string $returnUrl, ?string $customerEmail = null, float $taxAmount = 0, float $shippingCost = 0): ?array
+    public function createCheckoutSession(array $cartItems, string $returnUrl, ?string $customerEmail = null, float $taxAmount = 0, float $shippingCost = 0, string $taxLabel = 'TPS + TVQ'): ?array
     {
         try {
             $productIds = array_column($cartItems, 'product_id');
@@ -45,7 +45,7 @@ class StripeService
 
             if ($taxAmount > 0) {
                 $lineItems["line_items[{$idx}][price_data][currency]"] = $currency;
-                $lineItems["line_items[{$idx}][price_data][product_data][name]"] = 'TPS + TVQ';
+                $lineItems["line_items[{$idx}][price_data][product_data][name]"] = $taxLabel;
                 $lineItems["line_items[{$idx}][price_data][unit_amount]"] = (int) round($taxAmount * 100);
                 $lineItems["line_items[{$idx}][quantity]"] = 1;
                 $idx++;
@@ -143,7 +143,9 @@ class StripeService
 
         $secret = config('shop.stripe.webhook_secret');
         if (! $secret) {
-            return true; // Pas de secret configuré = pas de vérification
+            Log::warning('Stripe webhook: STRIPE_SHOP_WEBHOOK_SECRET non configuré — vérification désactivée');
+
+            return true;
         }
 
         // Parser le header Stripe-Signature

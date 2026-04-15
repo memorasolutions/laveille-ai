@@ -148,11 +148,14 @@ class CartController extends Controller
         return back()->with('success', __('Option mise à jour.'));
     }
 
-    private function cartTotals(): array
+    private function cartTotals(?string $country = null, ?string $province = null): array
     {
         $subtotal = $this->cartService->getSubtotal();
-        $tps = round($subtotal * config('shop.tax.tps', 5) / 100, 2);
-        $tvq = round($subtotal * config('shop.tax.tvq', 9.975) / 100, 2);
+        $country = $country ?? request()->input('country', 'CA');
+        $province = $province ?? request()->input('province', 'QC');
+
+        $tps = ($country === 'CA') ? round($subtotal * config('shop.tax.tps', 5) / 100, 2) : 0;
+        $tvq = ($country === 'CA' && strtoupper($province) === 'QC') ? round($subtotal * config('shop.tax.tvq', 9.975) / 100, 2) : 0;
 
         return [
             'success' => true,

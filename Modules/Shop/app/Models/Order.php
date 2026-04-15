@@ -43,12 +43,16 @@ class Order extends Model
     /**
      * Génère un numéro de commande unique : yyyymmddHHmmss-XXX
      */
-    public static function generateUniqueOrderNumber(): string
+    public static function generateUniqueOrderNumber(int $attempts = 0): string
     {
+        if ($attempts >= 10) {
+            return Carbon::now()->format('Ymd-His') . '-' . random_int(10000, 99999);
+        }
+
         $number = Carbon::now()->format('Ymd-His') . '-' . random_int(100, 999);
 
         if (static::where('order_number', $number)->exists()) {
-            return self::generateUniqueOrderNumber();
+            return self::generateUniqueOrderNumber($attempts + 1);
         }
 
         return $number;
