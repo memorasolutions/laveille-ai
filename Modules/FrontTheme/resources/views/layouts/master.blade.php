@@ -271,7 +271,7 @@
         $shareDescRaw = mb_substr($shareDescRaw, 0, 200);
         $shareDesc = urlencode($shareDescRaw);
         $shareTextRaw = trim($__env->yieldContent('share_text') ?: '');
-        $shareClipboard = $shareTextRaw ? html_entity_decode($shareTextRaw, ENT_QUOTES, 'UTF-8') : ($shareDescRaw . "\n\nPourquoi c'est important? Qu'en penses-tu?\n\n📰 " . request()->url() . "\n🔄 Actualités mises à jour en continu sur laveille.ai");
+        $shareClipboard = $shareTextRaw ? html_entity_decode($shareTextRaw, ENT_QUOTES, 'UTF-8') : ($shareDescRaw ?: config('app.name'));
         $shareTagline = urlencode('Actualités mises à jour en continu sur laveille.ai');
         $xText = urlencode($shareDescRaw ? $shareDescRaw . ' — Actualités en continu sur laveille.ai' : config('app.name'));
     @endphp
