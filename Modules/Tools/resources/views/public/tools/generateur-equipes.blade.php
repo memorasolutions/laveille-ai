@@ -100,7 +100,7 @@
                                 <template x-for="(excl, i) in exclusions" :key="i">
                                     <div class="d-flex align-items-center gap-2 mb-1 p-2 rounded" style="background: #FEE2E2; font-size: 0.85rem;">
                                         <span x-text="excl.name1"></span> <span>≠</span> <span x-text="excl.name2"></span>
-                                        <button class="btn btn-sm btn-outline-danger ms-auto" @click="removeExclusion(i)" style="font-size: 0.7rem;">✕</button>
+                                        <button class="ct-btn ct-btn-outline-danger ct-btn-xs ms-auto" @click="removeExclusion(i)">✕</button>
                                     </div>
                                 </template>
                                 <p class="text-muted mt-1" x-show="exclusions.length === 0" style="font-size: 0.8rem;">{{ __('Aucune exclusion définie.') }}</p>

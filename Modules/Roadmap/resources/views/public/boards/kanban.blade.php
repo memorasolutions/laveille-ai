@@ -5,7 +5,7 @@
 @section('roadmap-content')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{{ $board->name }} — Kanban</h2>
-        <a href="{{ route('roadmap.boards.show', $board) }}" class="btn btn-outline-primary btn-sm">
+        <a href="{{ route('roadmap.boards.show', $board) }}" class="ct-btn ct-btn-outline ct-btn-sm">
             {{ __('Vue liste') }}
         </a>
     </div>

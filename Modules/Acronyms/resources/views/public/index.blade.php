@@ -351,7 +351,7 @@
             <div style="font-size: 48px; margin-bottom: 12px;">🔍</div>
             <h3 style="font-family: var(--f-heading); color: var(--c-dark);">{{ __('Aucun résultat trouvé') }}</h3>
             <p>{{ __('Essayez de modifier vos filtres ou votre recherche.') }}</p>
-            <button class="btn btn-default" @click="reset()" style="margin-top: 8px;">{{ __('Réinitialiser les filtres') }}</button>
+            <button class="ct-btn ct-btn-outline ct-btn-sm" @click="reset()" style="margin-top:8px;">{{ __('Réinitialiser les filtres') }}</button>
         </div>
 
     </div>

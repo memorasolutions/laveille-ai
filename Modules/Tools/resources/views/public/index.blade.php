@@ -40,7 +40,7 @@
                                             {{ $tool->name }}
                                         </h3>
                                         <p class="card-text text-muted flex-grow-1">{{ $tool->description }}</p>
-                                        <a href="{{ route('tools.show', $tool->slug) }}" class="btn mt-2" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">
+                                        <a href="{{ route('tools.show', $tool->slug) }}" class="ct-btn ct-btn-accent mt-2">
                                             {{ __('Utiliser') }}
                                         </a>
                                     </div>

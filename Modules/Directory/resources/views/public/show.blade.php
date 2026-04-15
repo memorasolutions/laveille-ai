@@ -580,7 +580,7 @@
                         </div>
                         <div style="display: flex; justify-content: flex-end; gap: 8px;">
                             <button type="button" @click="replying = false" style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 13px;">{{ __('Annuler') }}</button>
-                            <button type="submit" class="btn btn-sm" style="background: #2563eb; color: #fff; border-radius: 6px;">{{ __('Publier') }}</button>
+                            <button type="submit" class="ct-btn ct-btn-primary ct-btn-sm">{{ __('Publier') }}</button>
                         </div>
                     </form>
                     @endauth
