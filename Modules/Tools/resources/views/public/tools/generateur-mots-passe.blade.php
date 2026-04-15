@@ -119,12 +119,12 @@
                                 <div class="mt-3 pt-3 border-top">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h6 style="font-family: var(--f-heading); font-weight: 700; margin: 0;">{{ __('Historique') }}</h6>
-                                        <button class="btn btn-sm btn-outline-danger" @click="clearHistory()" style="font-size: 0.75rem;">{{ __('Effacer') }}</button>
+                                        <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="clearHistory()" style="font-size: 0.75rem;">{{ __('Effacer') }}</button>
                                     </div>
                                     <template x-for="(h, i) in history" :key="i">
                                         <div class="d-flex align-items-center gap-2 mb-1">
                                             <code class="flex-fill" style="font-size: 0.8rem; color: #666;" x-text="h"></code>
-                                            <button class="btn btn-sm btn-outline-secondary" @click="copy(h)" style="font-size: 0.7rem;">📋</button>
+                                            <button class="ct-btn ct-btn-outline ct-btn-sm" @click="copy(h)" style="font-size: 0.7rem;">📋</button>
                                         </div>
                                     </template>
                                 </div>

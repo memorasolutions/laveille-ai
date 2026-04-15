@@ -100,8 +100,8 @@
                                 <span class="badge" style="background: var(--c-dark); color: #fff; font-size: 0.9rem;" x-text="timerMinutes + ' min'"></span>
                                 <template x-if="timerRunning">
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-sm btn-outline-secondary" @click="pauseTimer()" x-text="timerPaused ? '{{ __('Reprendre') }}' : '{{ __('Pause') }}'" style="border-radius: var(--r-btn);"></button>
-                                        <button class="btn btn-sm btn-outline-danger" @click="stopTimer()" style="border-radius: var(--r-btn);">{{ __('Arrêter') }}</button>
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" @click="pauseTimer()" x-text="timerPaused ? '{{ __('Reprendre') }}' : '{{ __('Pause') }}'" style="border-radius: var(--r-btn);"></button>
+                                        <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="stopTimer()" style="border-radius: var(--r-btn);">{{ __('Arrêter') }}</button>
                                     </div>
                                 </template>
                             </div>
@@ -128,7 +128,7 @@
                             <div class="text-center p-4 rounded mb-4 draw-card-enter" style="background: var(--c-accent-light, #FDF5ED); border: 2px solid var(--c-accent);">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <span class="badge mb-2" style="background: var(--c-dark); color: #fff;" x-text="'#' + drawCount"></span>
-                                    <button class="btn btn-sm btn-outline-secondary" @click="enterFullscreen()" title="{{ __('Plein écran') }}" style="border-radius: var(--r-btn);">
+                                    <button class="ct-btn ct-btn-outline ct-btn-sm" @click="enterFullscreen()" title="{{ __('Plein écran') }}" style="border-radius: var(--r-btn);">
                                         <span x-text="isFullscreen ? '✕' : '⛶'"></span> {{ __('Plein écran') }}
                                     </button>
                                 </div>
@@ -172,9 +172,9 @@
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h6 style="font-family: var(--f-heading); font-weight: 700; margin: 0;">{{ __('Historique') }} (<span x-text="history.length"></span>)</h6>
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-sm btn-outline-secondary" @click="exportHistory()" style="font-size: 0.7rem;">{{ __('Exporter .txt') }}</button>
-                                        <button class="btn btn-sm btn-outline-secondary" @click="printHistory()" style="font-size: 0.7rem;">{{ __('Imprimer') }}</button>
-                                        <button class="btn btn-sm btn-outline-danger" @click="clearAll()" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" @click="exportHistory()" style="font-size: 0.7rem;">{{ __('Exporter .txt') }}</button>
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" @click="printHistory()" style="font-size: 0.7rem;">{{ __('Imprimer') }}</button>
+                                        <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="clearAll()" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
                                     </div>
                                 </div>
                                 <template x-for="(d, i) in history" :key="i">
@@ -203,14 +203,14 @@
                                     <span style="font-size: 0.9rem;">{{ __('Activer le minuteur par présentation') }}</span>
                                 </label>
                                 <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <button class="btn btn-sm btn-outline-secondary" @click="resetDrawn()" style="border-radius: var(--r-btn);">{{ __('Réinitialiser les listes') }}</button>
+                                    <button class="ct-btn ct-btn-outline ct-btn-sm" @click="resetDrawn()" style="border-radius: var(--r-btn);">{{ __('Réinitialiser les listes') }}</button>
                                     <label style="cursor: pointer;">
                                         <input type="file" accept=".txt" @change="importFile($event, 'names')" style="display:none" x-ref="impNames">
-                                        <span class="btn btn-sm btn-outline-secondary" @click="$refs.impNames.click()" style="border-radius: var(--r-btn);">{{ __('Importer apprenants') }}</span>
+                                        <span class="ct-btn ct-btn-outline ct-btn-sm" @click="$refs.impNames.click()" style="border-radius: var(--r-btn);">{{ __('Importer apprenants') }}</span>
                                     </label>
                                     <label style="cursor: pointer;">
                                         <input type="file" accept=".txt" @change="importFile($event, 'questions')" style="display:none" x-ref="impQuestions">
-                                        <span class="btn btn-sm btn-outline-secondary" @click="$refs.impQuestions.click()" style="border-radius: var(--r-btn);">{{ __('Importer questions') }}</span>
+                                        <span class="ct-btn ct-btn-outline ct-btn-sm" @click="$refs.impQuestions.click()" style="border-radius: var(--r-btn);">{{ __('Importer questions') }}</span>
                                     </label>
                                 </div>
                                 <button class="btn btn-sm w-100" @click="generateFullOrder()" :disabled="studentList.length < 2"

@@ -23,7 +23,7 @@
                         <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
-                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="nameList.length < 2 || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                <button class="ct-btn ct-btn-primary ct-btn-sm" @click="saveToAccount()" :disabled="nameList.length < 2 || saving" style="white-space:nowrap;"
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
@@ -50,14 +50,14 @@
                                     <label class="form-label fw-medium">{{ __('Participants') }} (<span x-text="nameList.length"></span>)</label>
                                     <textarea class="form-control" rows="6" x-model="names" aria-label="Liste des participants" placeholder="{{ __("Alice\nBob\nCharlie\nDiane\nÉric\nFrançoise\nGabriel\nHélène") }}"></textarea>
                                     <div class="d-flex gap-2 mt-2">
-                                        <button class="btn btn-sm btn-outline-secondary" @click="addFromClipboard()" style="border-radius: var(--r-btn); font-size: 0.8rem;">📋 {{ __('Coller') }}</button>
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" @click="addFromClipboard()" style="border-radius: var(--r-btn); font-size: 0.8rem;">📋 {{ __('Coller') }}</button>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-medium">{{ __('Répartir par') }}</label>
                                     <div class="btn-group w-100 mb-3">
-                                        <button class="btn btn-sm" :class="mode === 'count' ? 'btn-primary' : 'btn-outline-secondary'" @click="mode = 'count'">{{ __('Nombre d\'équipes') }}</button>
-                                        <button class="btn btn-sm" :class="mode === 'size' ? 'btn-primary' : 'btn-outline-secondary'" @click="mode = 'size'">{{ __('Taille d\'équipe') }}</button>
+                                        <button class="ct-btn ct-btn-sm" :class="mode === 'count' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="mode = 'count'">{{ __('Nombre d\'équipes') }}</button>
+                                        <button class="ct-btn ct-btn-sm" :class="mode === 'size' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="mode = 'size'">{{ __('Taille d\'équipe') }}</button>
                                     </div>
                                     <div x-show="mode === 'count'" class="mb-3">
                                         <label class="form-label">{{ __('Nombre d\'équipes') }} : <strong x-text="teamCount"></strong></label>
@@ -76,12 +76,12 @@
 
                             {{-- Boutons action --}}
                             <div class="d-flex gap-2 mb-4">
-                                <button class="btn flex-fill" @click="generate()" :disabled="nameList.length < 2"
+                                <button class="ct-btn ct-btn-accent flex-fill" @click="generate()" :disabled="nameList.length < 2"
                                         style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">
                                     <span x-text="drawn ? '🔀 Re-mélanger' : '🎲 Générer les équipes'"></span>
                                 </button>
-                                <button class="btn btn-outline-secondary" @click="undo()" x-show="previousTeams" style="border-radius: var(--r-btn);" title="{{ __('Annuler') }}">↩️</button>
-                                <button class="btn btn-outline-secondary" @click="reset()" x-show="drawn" style="border-radius: var(--r-btn);" title="{{ __('Réinitialiser') }}">🗑️</button>
+                                <button class="ct-btn ct-btn-outline" @click="undo()" x-show="previousTeams" style="border-radius: var(--r-btn);" title="{{ __('Annuler') }}">↩️</button>
+                                <button class="ct-btn ct-btn-outline" @click="reset()" x-show="drawn" style="border-radius: var(--r-btn);" title="{{ __('Réinitialiser') }}">🗑️</button>
                             </div>
                         </div>
 
@@ -95,7 +95,7 @@
                                     <input type="text" class="form-control form-control-sm" x-model="newExcl1" aria-label="Personne 1 exclusion" placeholder="{{ __('Personne 1') }}">
                                     <span class="align-self-center">≠</span>
                                     <input type="text" class="form-control form-control-sm" x-model="newExcl2" aria-label="Personne 2 exclusion" placeholder="{{ __('Personne 2') }}">
-                                    <button class="btn btn-sm" @click="addExclusion()" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); white-space: nowrap;">+ {{ __('Ajouter') }}</button>
+                                    <button class="ct-btn ct-btn-primary ct-btn-sm" @click="addExclusion()" style="white-space:nowrap;">+ {{ __('Ajouter') }}</button>
                                 </div>
                                 <template x-for="(excl, i) in exclusions" :key="i">
                                     <div class="d-flex align-items-center gap-2 mb-1 p-2 rounded" style="background: #FEE2E2; font-size: 0.85rem;">
@@ -111,13 +111,13 @@
                                 <label class="form-label fw-medium">💾 {{ __('Configurations sauvegardées') }}</label>
                                 <div class="d-flex gap-2 mb-2">
                                     <input type="text" class="form-control form-control-sm" x-model="presetName" aria-label="Nom de la configuration" placeholder="{{ __('Nom de la configuration...') }}">
-                                    <button class="btn btn-sm" @click="savePreset()" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); white-space: nowrap;">💾 {{ __('Sauvegarder') }}</button>
+                                    <button class="ct-btn ct-btn-primary ct-btn-sm" @click="savePreset()" style="white-space:nowrap;">💾 {{ __('Sauvegarder') }}</button>
                                 </div>
                                 <template x-for="(p, i) in presets" :key="i">
                                     <div class="d-flex align-items-center gap-2 mb-1 p-2 rounded" style="background: #f8f9fa; font-size: 0.85rem;">
                                         <span class="flex-fill" x-text="p.name"></span>
-                                        <button class="btn btn-sm btn-outline-primary" @click="loadPreset(i)" style="font-size: 0.7rem;">{{ __('Charger') }}</button>
-                                        <button class="btn btn-sm btn-outline-danger" @click="deletePreset(i)" style="font-size: 0.7rem;">✕</button>
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" @click="loadPreset(i)" style="font-size: 0.7rem;">{{ __('Charger') }}</button>
+                                        <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="deletePreset(i)" style="font-size: 0.7rem;">✕</button>
                                     </div>
                                 </template>
                                 <p class="text-muted mt-1" x-show="presets.length === 0" style="font-size: 0.8rem;">{{ __('Aucune configuration sauvegardée.') }}</p>
@@ -152,7 +152,7 @@
                                         </div>
                                     </template>
                                 </div>
-                                <button class="btn w-100 mt-2" @click="copyResults()" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);"
+                                <button class="ct-btn ct-btn-primary ct-btn-full mt-2" @click="copyResults()"
                                         x-text="copied ? '✅ Copié !' : '📋 Copier les résultats'"></button>
                             </div>
                         </template>

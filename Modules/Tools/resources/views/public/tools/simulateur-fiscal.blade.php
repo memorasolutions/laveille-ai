@@ -128,14 +128,14 @@ function fiscalSim(cfg) {
                                         <h2 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Paramètres') }}</h2>
                                         <div class="d-flex gap-1">
                                             @include('tools::partials.fullscreen-btn')
-                                            <button class="btn btn-sm" @click="jQuery('#fiscalHelpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 28px; height: 28px; font-weight: 700; font-size: 0.8rem; padding: 0; line-height: 28px; flex-shrink: 0;">?</button>
+                                            <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#fiscalHelpModal').modal('show')" style="border-radius:50%;width:28px;height:28px;padding:0;line-height:28px;flex-shrink:0;">?</button>
                                         </div>
                                     </div>
 
                                     {{-- Salarié/autonome --}}
                                     <div class="d-flex gap-1 mb-3">
-                                        <button class="btn btn-sm flex-fill" :style="isEmployee ? 'background: var(--c-primary); color: #fff;' : ''" @click="isEmployee = true" style="border-radius: var(--r-btn); font-weight: 600; font-size: 0.8rem;">{{ __('Salarié') }}</button>
-                                        <button class="btn btn-sm flex-fill" :style="!isEmployee ? 'background: var(--c-accent); color: #fff;' : ''" @click="isEmployee = false" style="border-radius: var(--r-btn); font-weight: 600; font-size: 0.8rem;">{{ __('Autonome') }}</button>
+                                        <button class="ct-btn ct-btn-sm flex-fill" :style="isEmployee ? 'background: var(--c-primary); color: #fff;' : ''" @click="isEmployee = true">{{ __('Salarié') }}</button>
+                                        <button class="ct-btn ct-btn-sm flex-fill" :style="!isEmployee ? 'background: var(--c-accent); color: #fff;' : ''" @click="isEmployee = false">{{ __('Autonome') }}</button>
                                     </div>
 
                                     {{-- Revenu --}}

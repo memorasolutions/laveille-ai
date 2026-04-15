@@ -832,8 +832,8 @@
                 <input type="text" id="circuit-name" placeholder="Mon circuit RLC">
             </div>
             <div class="modal-actions">
-                <button id="btn-save-confirm" class="btn btn-primary">Sauvegarder</button>
-                <button id="btn-save-cancel" class="btn btn-secondary">Annuler</button>
+                <button id="btn-save-confirm" class="ct-btn ct-btn-primary">Sauvegarder</button>
+                <button id="btn-save-cancel" class="ct-btn ct-btn-outline">Annuler</button>
             </div>
         </div>
     </dialog>
@@ -846,7 +846,7 @@
                 <!-- Rempli dynamiquement -->
             </div>
             <div class="modal-actions">
-                <button id="btn-circuits-close" class="btn btn-secondary">Fermer</button>
+                <button id="btn-circuits-close" class="ct-btn ct-btn-outline">Fermer</button>
             </div>
         </div>
     </dialog>
