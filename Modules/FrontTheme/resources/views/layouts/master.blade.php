@@ -269,10 +269,11 @@
         $shareDescRaw = trim(strip_tags($__env->yieldContent('meta_description') ?: ''));
         $shareDescRaw = mb_substr($shareDescRaw, 0, 200);
         $shareDesc = urlencode($shareDescRaw);
+        $shareClipboard = $shareDescRaw . "\n\nPourquoi c'est important? Qu'en penses-tu?\n\n📰 " . request()->url() . "\n🔄 Actualités mises à jour en continu sur laveille.ai";
         $shareTagline = urlencode('Actualités mises à jour en continu sur laveille.ai');
         $xText = urlencode($shareDescRaw ? $shareDescRaw . ' — Actualités en continu sur laveille.ai' : config('app.name'));
     @endphp
-    <div x-data="{ copied: false, linkedinCopied: false, showLiModal: false, liUrl: '', liText: {{ \Illuminate\Support\Js::from($shareDescRaw) }}, openLi() { window.open(this.liUrl, '_blank'); this.showLiModal = false; } }" class="share-float">
+    <div x-data="{ copied: false, linkedinCopied: false, showLiModal: false, liUrl: '', liText: {{ \Illuminate\Support\Js::from($shareClipboard) }}, openLi() { window.open(this.liUrl, '_blank'); this.showLiModal = false; } }" class="share-float">
         {{-- Desktop sidebar --}}
         <div class="share-sidebar">
             <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}&quote={{ $shareDesc }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur Facebook') }}" class="share-btn share-fb">
