@@ -31,8 +31,8 @@ class ToolDiscoveryService
             Log::error('[ToolDiscovery] RSS feeds échoué', ['error' => $e->getMessage()]);
         }
 
-        // Ne garder que les outils liés à l'IA
-        return $this->filterAiRelevant($allTools);
+        // Ne garder que les outils tech pertinents
+        return $this->filterTechRelevant($allTools);
     }
 
     public function fetchProductHunt(): array
@@ -254,20 +254,48 @@ class ToolDiscoveryService
     }
 
     /**
-     * Filtre les outils pour ne garder que ceux liés à l'IA.
+     * Filtre les outils pour ne garder que ceux pertinents au répertoire techno.
      */
-    public function filterAiRelevant(array $tools): array
+    public function filterTechRelevant(array $tools): array
     {
         $keywords = [
-            'ai', 'artificial intelligence', 'machine learning', 'ml', 'llm',
-            'gpt', 'chatbot', 'copilot', 'automation', 'nlp', 'neural',
-            'deep learning', 'generative', 'prompt', 'agent', 'rag',
-            'computer vision', 'speech', 'transcription', 'diffusion',
+            // IA / ML / LLM
+            'ai', 'artificial intelligence', 'machine learning', 'deep learning', 'llm', 'gpt',
+            'chatbot', 'copilot', 'neural', 'nlp', 'generative', 'prompt', 'agent', 'rag',
+            'computer vision', 'speech', 'transcription', 'diffusion', 'text-to-image',
             'intelligence artificielle', 'apprentissage automatique',
+            // Développeurs / IDE / API
+            'developer', 'développeur', 'ide', 'ci/cd', 'github', 'gitlab', 'sdk', 'api',
+            'graphql', 'testing', 'playwright', 'debugging', 'code review', 'cli',
+            'docker', 'framework', 'open source', 'open-source',
+            // SaaS / Productivité
+            'saas', 'productivity', 'productivité', 'collaboration', 'project management',
+            'gestion de projet', 'dashboard', 'tableau de bord', 'documentation',
+            // Design / No-code
+            'design', 'figma', 'no-code', 'nocode', 'low-code', 'lowcode', 'prototype',
+            'website builder', 'drag-and-drop',
+            // Cybersécurité
+            'cybersecurity', 'cybersécurité', 'security', 'sécurité', 'encryption', 'vpn',
+            'authentication', 'zero trust', 'vulnerability',
+            // Cloud / DevOps
+            'cloud', 'aws', 'azure', 'gcp', 'serverless', 'kubernetes', 'terraform',
+            'devops', 'monitoring', 'deployment', 'déploiement',
+            // Analytics / SEO / Marketing
+            'analytics', 'seo', 'référencement', 'marketing digital', 'crm', 'email marketing',
+            'conversion', 'tracking',
+            // Automatisation
+            'automation', 'automatisation', 'workflow', 'rpa', 'integration', 'scraping', 'etl',
+            // Éducation tech
+            'e-learning', 'bootcamp', 'coding', 'programmation', 'tutorial', 'tutoriel',
+            // Data
+            'database', 'base de données', 'sql', 'data science', 'big data',
+            // Termes généraux tech
+            'startup', 'tech', 'software', 'logiciel', 'plugin', 'extension', 'outil', 'tool',
+            'blockchain', 'web3', 'iot', 'ar', 'vr', '3d', 'robotics', 'quantum',
         ];
 
         return array_values(array_filter($tools, function ($tool) use ($keywords) {
-            $text = strtolower(($tool['name'] ?? '').' '.($tool['description'] ?? ''));
+            $text = mb_strtolower(($tool['name'] ?? '') . ' ' . ($tool['description'] ?? ''));
             foreach ($keywords as $kw) {
                 if (str_contains($text, $kw)) {
                     return true;

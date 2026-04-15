@@ -15,5 +15,6 @@ return [
     // Seuls les flux qui listent des PRODUITS/OUTILS (pas des articles de nouvelles)
     'discovery_feeds' => [
         'producthunt' => 'https://www.producthunt.com/feed',
+        'hackernews_show' => 'https://hnrss.org/show',
     ],
 ];
