@@ -90,12 +90,17 @@ class EnrichFormationsCommand extends Command
                     continue;
                 }
 
-                $title = $parts[0];
-                $url = $parts[1];
+                $title = trim($parts[0], '* ');
+                $url = trim($parts[1]);
                 $language = isset($parts[2]) ? strtolower(trim($parts[2])) : 'en';
 
                 if (! filter_var($url, FILTER_VALIDATE_URL)) {
                     continue;
+                }
+
+                // Détection langue par le titre (plus fiable que ce que sonar-pro retourne)
+                if (preg_match('/formation|cours|apprendre|découvr|maîtris|guide.*gratuit|introduction à|tutoriel/iu', $title)) {
+                    $language = 'fr';
                 }
 
                 if (! in_array($language, ['fr', 'en'])) {
