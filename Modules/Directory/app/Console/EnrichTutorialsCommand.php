@@ -65,7 +65,7 @@ class EnrichTutorialsCommand extends Command
             $this->info("--- {$toolName} (ID:{$tool->id}) — {$existing}/5 tutoriels ---");
 
             try {
-                $tutorials = $youtubeService->findTutorials($toolName, $needed);
+                $tutorials = $youtubeService->findTutorials($toolName, $needed, $tool->url);
             } catch (\Throwable $e) {
                 $this->warn("  Échec YouTube : {$e->getMessage()}");
                 Log::warning("[EnrichTutorials] Échec pour {$toolName}", ['error' => $e->getMessage()]);

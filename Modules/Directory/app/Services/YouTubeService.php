@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Log;
 
 class YouTubeService
 {
-    public function findTutorials(string $toolName, int $limit = 5): array
+    public function findTutorials(string $toolName, int $limit = 5, ?string $toolUrl = null): array
     {
         try {
-            $videoIds = $this->searchTutorials($toolName);
+            $videoIds = $this->searchTutorials($toolName, 10, $toolUrl);
 
             if (empty($videoIds)) {
                 return [];
@@ -23,7 +23,7 @@ class YouTubeService
                 return [];
             }
 
-            return array_slice($this->scoreAndFilter($videos), 0, $limit);
+            return array_slice($this->scoreAndFilter($videos, $toolName), 0, $limit);
         } catch (\Throwable $e) {
             Log::warning('YouTubeService::findTutorials — erreur', [
                 'tool_name' => $toolName,
@@ -34,12 +34,21 @@ class YouTubeService
         }
     }
 
-    public function searchTutorials(string $toolName, int $maxResults = 10): array
+    public function searchTutorials(string $toolName, int $maxResults = 10, ?string $toolUrl = null): array
     {
         try {
+            // Construire une requête désambiguïsée (éviter les homonymes : Poe vs Path of Exile)
+            $domain = $toolUrl ? parse_url($toolUrl, PHP_URL_HOST) : '';
+            $domain = preg_replace('/^www\./', '', $domain ?? '');
+            $queryParts = [$toolName, 'IA', 'tutoriel français'];
+            if ($domain && ! str_contains($domain, 'producthunt.com')) {
+                $queryParts[] = $domain;
+            }
+            $searchQuery = implode(' ', $queryParts);
+
             $response = Http::get('https://www.googleapis.com/youtube/v3/search', [
                 'key' => config('directory.youtube_api_key'),
-                'q' => "{$toolName} tutoriel français",
+                'q' => $searchQuery,
                 'part' => 'id',
                 'type' => 'video',
                 'order' => 'viewCount',
@@ -127,12 +136,23 @@ class YouTubeService
         }
     }
 
-    public function scoreAndFilter(array $videos): array
+    public function scoreAndFilter(array $videos, ?string $toolName = null): array
     {
-        $filtered = array_values(array_filter($videos, fn (array $v) => $v['view_count'] >= 5000
-            && $v['duration_seconds'] >= 180
-            && $v['duration_seconds'] <= 7200
-        ));
+        $filtered = array_values(array_filter($videos, function (array $v) use ($toolName) {
+            if ($v['view_count'] < 5000 || $v['duration_seconds'] < 180 || $v['duration_seconds'] > 7200) {
+                return false;
+            }
+            // Filtre de pertinence : le titre doit contenir le nom de l'outil (évite les homonymes)
+            if ($toolName) {
+                $titleLower = strtolower($v['title'] ?? '');
+                $nameLower = strtolower($toolName);
+                if (! str_contains($titleLower, $nameLower)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }));
 
         if (empty($filtered)) {
             return [];
