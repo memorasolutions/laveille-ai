@@ -42,8 +42,9 @@
 <style>
 #newsletterModal { pointer-events: none; }
 #newsletterModal.show { pointer-events: auto; }
-#newsletterModal .modal-content { max-height: 90vh; overflow-y: auto; }
+#newsletterModal .modal-content { max-height: 90vh; overflow-y: auto; overflow-x: hidden; }
 #newsletterModal .modal-dialog { margin: 20px auto; }
+#newsletterModal input[type="checkbox"] { display: inline-block !important; width: 16px !important; height: 16px !important; appearance: auto !important; -webkit-appearance: checkbox !important; opacity: 1 !important; position: static !important; }
 #newsletterModal input:focus { border-color: var(--c-primary) !important; box-shadow: 0 0 0 3px rgba(11,114,133,0.15); }
 #newsletterModalSubmit:hover { background: var(--c-primary) !important; }
 </style>
