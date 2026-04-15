@@ -251,7 +251,7 @@
     <script src="{{ fronttheme_asset('js/modernizr.custom.js') }}"></script>
     <script src="{{ fronttheme_asset('js/jquery.dlmenu.js') }}"></script>
     <script src="{{ fronttheme_asset('js/jquery-plugin-collection.js') }}"></script>
-    <script src="{{ fronttheme_asset('js/script.js') }}"></script>
+    <script src="{{ fronttheme_asset('js/script.js') }}?v={{ filemtime(public_path('themes/' . config('app.frontend_theme', 'bloggar') . '/js/script.js')) }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
