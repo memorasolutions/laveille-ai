@@ -40,7 +40,7 @@
                         @if(session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
-                        <form method="post" class="contact-validation-active" action="{{ route('contact.send') }}" id="contact-form-main">
+                        <form method="post" action="{{ route('contact.send') }}" id="contact-form-main">
                             @csrf
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-12">
