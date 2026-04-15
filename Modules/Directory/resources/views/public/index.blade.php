@@ -510,11 +510,11 @@
         @endif
 
         {{-- Section trending : plus votés (masqué quand recherche active) --}}
-        @if(isset($topVoted) && $topVoted->isNotEmpty())
+        @if(isset($topVoted) && $topVoted->count() >= 5)
         <div style="margin-bottom:32px;" x-show="!search" x-transition>
 
-            {{-- Plus votés par la communauté --}}
-            @if(isset($topVoted) && $topVoted->isNotEmpty())
+            {{-- Plus votés par la communauté (minimum 5 outils votés pour afficher) --}}
+            @if(isset($topVoted) && $topVoted->count() >= 5)
             <div>
                 <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:12px;">
                     <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">🔥 {{ __('Les plus votés') }}</h3>
