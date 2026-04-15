@@ -65,6 +65,8 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\SummarizePendingCommand::class,
             \Modules\Directory\Console\GenerateAlternativesCommand::class,
             \Modules\Directory\Console\DiscoverNewToolsCommand::class,
+            \Modules\Directory\Console\ReenrichStaleCommand::class,
+            \Modules\Directory\Console\RefreshPricingCommand::class,
         ]);
     }
 
@@ -79,6 +81,8 @@ class DirectoryServiceProvider extends ServiceProvider
             $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
             $schedule->command('resources:summarize-pending --batch=10')->dailyAt('05:30');
             $schedule->command('tools:discover-new')->dailyAt('04:00');
+            $schedule->command('tools:reenrich-stale --batch=2 --months=3')->monthlyOn(1, '06:00');
+            $schedule->command('tools:refresh-pricing --batch=5')->quarterly();
         });
     }
 

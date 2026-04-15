@@ -51,6 +51,7 @@ class Tool extends Model
         'how_to_use', 'core_features', 'use_cases', 'faq', 'pros', 'cons',
         'screenshot', 'website_type', 'launch_year', 'target_audience',
         'submitted_by',
+        'last_enriched_at', 'enrichment_version',
     ];
 
     public function submitter(): BelongsTo
@@ -74,6 +75,8 @@ class Tool extends Model
         'featured_order' => 'integer',
         'faq' => 'array',
         'target_audience' => 'array',
+        'last_enriched_at' => 'datetime',
+        'enrichment_version' => 'integer',
     ];
 
     public function categories(): BelongsToMany
