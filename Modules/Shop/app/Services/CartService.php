@@ -155,9 +155,45 @@ class CartService
         return round($subtotal * ($tps + $tvq) / 100, 2);
     }
 
+    public function getTpsOnly(): float
+    {
+        return round($this->getSubtotal() * config('shop.tax.tps', 0) / 100, 2);
+    }
+
     public function getTotal(): float
     {
         return round($this->getSubtotal() + $this->getTaxAmount(), 2);
+    }
+
+    public function revalidatePrices(): bool
+    {
+        $cart = $this->getCart();
+        if (! $cart || empty($cart->items)) {
+            return false;
+        }
+
+        $changed = false;
+        $items = $cart->items;
+
+        foreach ($items as &$item) {
+            $product = Product::find($item['product_id'] ?? 0);
+            if (! $product) {
+                continue;
+            }
+
+            $currentPrice = $this->resolveUnitPrice($product, $item['variant_label'] ?? null);
+            if (abs($currentPrice - ($item['unit_price'] ?? 0)) > 0.01) {
+                $item['unit_price'] = $currentPrice;
+                $changed = true;
+            }
+        }
+        unset($item);
+
+        if ($changed) {
+            $cart->update(['items' => $items]);
+        }
+
+        return $changed;
     }
 
     public function clear(): void

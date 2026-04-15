@@ -49,6 +49,7 @@ class ShopServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\Shop\Console\SyncGelatoPricesCommand::class,
             \Modules\Shop\Console\SyncGelatoStoreCommand::class,
+            \Modules\Shop\Console\CleanupPendingOrdersCommand::class,
         ]);
     }
 
@@ -60,6 +61,7 @@ class ShopServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
             $schedule->command('shop:sync-prices')->dailyAt('04:00')->withoutOverlapping();
+            $schedule->command('shop:cleanup-pending --hours=24')->dailyAt('03:00');
         });
     }
 

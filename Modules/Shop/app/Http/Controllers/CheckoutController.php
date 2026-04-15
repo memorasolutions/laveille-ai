@@ -34,6 +34,7 @@ class CheckoutController extends Controller
             'shipping_address.country' => 'required|string|size:2',
         ]);
 
+        $this->cartService->revalidatePrices();
         $cartItems = $this->cartService->getContent();
 
         if (empty($cartItems)) {
@@ -42,7 +43,13 @@ class CheckoutController extends Controller
 
         $subtotal = $this->cartService->getSubtotal();
         $country = $request->input('shipping_address.country', 'CA');
-        $taxAmount = ($country === 'CA') ? $this->cartService->getTaxAmount() : 0;
+        $province = $request->input('shipping_address.state', '');
+
+        $taxAmount = match (true) {
+            $country === 'CA' && strtoupper($province) === 'QC' => $this->cartService->getTaxAmount(),
+            $country === 'CA' => $this->cartService->getTpsOnly(),
+            default => 0,
+        };
         $shippingCost = (float) $request->input('shipping_cost', 0);
         $total = round($subtotal + $taxAmount + $shippingCost, 2);
 
