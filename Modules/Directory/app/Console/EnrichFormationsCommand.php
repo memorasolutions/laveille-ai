@@ -58,11 +58,13 @@ class EnrichFormationsCommand extends Command
 
             try {
                 $response = $openRouter->search(
-                    "Trouve 3 formations ou cours en ligne 100% GRATUITS pour apprendre {$toolName} ({$toolUrl}). "
-                    ."Sources prioritaires : site officiel de l'outil, Google Skillshop, Microsoft Learn, Canva Design School, "
-                    .'Notion Academy, OpenClassrooms, HubSpot Academy, freeCodeCamp, DeepLearning.AI, openformation.fr. '
+                    "Trouve 3 à 5 formations ou cours en ligne 100% GRATUITS pour apprendre {$toolName} ({$toolUrl}). "
+                    .'PRIORITÉ ABSOLUE aux formations en FRANÇAIS. Si pas assez de FR, compléter avec les meilleures en anglais. '
+                    ."Sources prioritaires : site officiel de l'outil, Google Skillshop, Microsoft Learn, OpenClassrooms, "
+                    .'Canva Design School, Notion Academy, HubSpot Academy, freeCodeCamp, DeepLearning.AI, openformation.fr. '
                     ."Pour chaque formation retourne exactement : TITLE | URL | LANGUAGE (fr ou en). "
-                    .'Une formation par ligne. Pas de formations payantes, pas de Udemy payant, pas de Coursera payant.'
+                    .'Une formation par ligne. Pas de formations payantes, pas de Udemy payant, pas de Coursera payant. '
+                    .'Ne retourne QUE des URLs qui existent réellement et sont accessibles gratuitement.'
                 );
             } catch (\Throwable $e) {
                 $this->warn("  Erreur recherche : {$e->getMessage()}");
