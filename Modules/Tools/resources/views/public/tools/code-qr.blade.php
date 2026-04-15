@@ -18,7 +18,7 @@
                             </div>
                             <div class="d-flex gap-1">
                                 @include('tools::partials.fullscreen-btn')
-                                <button class="btn btn-sm" @click="jQuery('#qrHelpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 32px; height: 32px; font-weight: 700; font-size: 1rem; padding: 0; line-height: 32px; flex-shrink: 0;" title="{{ __('Aide') }}">?</button>
+                                <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#qrHelpModal').modal('show')" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;flex-shrink:0;" title="{{ __('Aide') }}">?</button>
                             </div>
                         </div>
                         <div class="mb-3"></div>
@@ -27,7 +27,7 @@
                         <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
-                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="!input || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                <button class="ct-btn ct-btn-primary ct-btn-sm" @click="saveToAccount()" :disabled="!input || saving" style="white-space:nowrap;"
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2" style="font-size: 0.8rem; color: var(--c-text-muted);">
@@ -45,25 +45,25 @@
                         <div class="mb-3">
                             <label class="form-label fw-medium">{{ __('Type de contenu') }}</label>
                             <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-sm" :class="type === 'url' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'url'; renderQR()" style="border-radius: var(--r-btn);">URL</button>
-                                <button class="btn btn-sm" :class="type === 'text' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'text'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Texte') }}</button>
-                                <button class="btn btn-sm" :class="type === 'wifi' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'wifi'; renderQR()" style="border-radius: var(--r-btn);">WiFi</button>
-                                <button class="btn btn-sm" :class="type === 'email' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'email'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Courriel') }}</button>
-                                <button class="btn btn-sm" :class="type === 'phone' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'phone'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Téléphone') }}</button>
-                                <button class="btn btn-sm" :class="type === 'sms' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'sms'; renderQR()" style="border-radius: var(--r-btn);">SMS</button>
-                                <button class="btn btn-sm" :class="type === 'whatsapp' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'whatsapp'; renderQR()" style="border-radius: var(--r-btn);">WhatsApp</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'url' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'url'; renderQR()" style="border-radius: var(--r-btn);">URL</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'text' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'text'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Texte') }}</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'wifi' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'wifi'; renderQR()" style="border-radius: var(--r-btn);">WiFi</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'email' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'email'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Courriel') }}</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'phone' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'phone'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Téléphone') }}</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'sms' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'sms'; renderQR()" style="border-radius: var(--r-btn);">SMS</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'whatsapp' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'whatsapp'; renderQR()" style="border-radius: var(--r-btn);">WhatsApp</button>
 
-                                <button class="btn btn-sm" :class="type === 'vcard' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'vcard'; renderQR()" style="border-radius: var(--r-btn);">vCard</button>
-                                <button class="btn btn-sm" :class="type === 'geo' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'geo'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Géolocalisation') }}</button>
-                                <button class="btn btn-sm" :class="type === 'event' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'event'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Événement') }}</button>
-                                <button class="btn btn-sm" :class="type === 'zoom' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'zoom'; renderQR()" style="border-radius: var(--r-btn);">Zoom</button>
-                                <button class="btn btn-sm" :class="type === 'paypal' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'paypal'; renderQR()" style="border-radius: var(--r-btn);">PayPal</button>
-                                <button class="btn btn-sm" :class="type === 'bitcoin' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'bitcoin'; renderQR()" style="border-radius: var(--r-btn);">Bitcoin</button>
-                                <button class="btn btn-sm" :class="type === 'instagram' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'instagram'; renderQR()" style="border-radius: var(--r-btn);">Instagram</button>
-                                <button class="btn btn-sm" :class="type === 'facebook' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'facebook'; renderQR()" style="border-radius: var(--r-btn);">Facebook</button>
-                                <button class="btn btn-sm" :class="type === 'linkedin' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'linkedin'; renderQR()" style="border-radius: var(--r-btn);">LinkedIn</button>
-                                <button class="btn btn-sm" :class="type === 'youtube' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'youtube'; renderQR()" style="border-radius: var(--r-btn);">YouTube</button>
-                                <button class="btn btn-sm" :class="type === 'twitter' ? 'btn-primary' : 'btn-outline-secondary'" @click="type = 'twitter'; renderQR()" style="border-radius: var(--r-btn);">X (Twitter)</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'vcard' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'vcard'; renderQR()" style="border-radius: var(--r-btn);">vCard</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'geo' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'geo'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Géolocalisation') }}</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'event' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'event'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Événement') }}</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'zoom' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'zoom'; renderQR()" style="border-radius: var(--r-btn);">Zoom</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'paypal' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'paypal'; renderQR()" style="border-radius: var(--r-btn);">PayPal</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'bitcoin' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'bitcoin'; renderQR()" style="border-radius: var(--r-btn);">Bitcoin</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'instagram' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'instagram'; renderQR()" style="border-radius: var(--r-btn);">Instagram</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'facebook' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'facebook'; renderQR()" style="border-radius: var(--r-btn);">Facebook</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'linkedin' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'linkedin'; renderQR()" style="border-radius: var(--r-btn);">LinkedIn</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'youtube' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'youtube'; renderQR()" style="border-radius: var(--r-btn);">YouTube</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'twitter' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'twitter'; renderQR()" style="border-radius: var(--r-btn);">X (Twitter)</button>
                             </div>
                         </div>
 
@@ -284,7 +284,7 @@
                             <label class="form-label fw-medium">{{ __('Style rapide') }}</label>
                             <div class="d-flex flex-wrap gap-2">
                                 <template x-for="(p, pi) in presets" :key="pi">
-                                    <button class="btn btn-sm" @click="applyPreset(p)" style="border-radius: var(--r-btn); font-size: 0.8rem; background: #f8f9fa; border: 1px solid #dee2e6; color: var(--c-dark);" x-text="p.name"></button>
+                                    <button class="ct-btn ct-btn-ghost ct-btn-sm" @click="applyPreset(p)" x-text="p.name"></button>
                                 </template>
                             </div>
                         </div>
@@ -342,9 +342,9 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <label style="cursor: pointer;">
                                                 <input type="file" accept="image/*" @change="uploadLogo($event)" style="display:none" x-ref="logoInput">
-                                                <span class="btn btn-sm btn-outline-secondary" @click="$refs.logoInput.click()" style="border-radius: var(--r-btn);">{{ __('Choisir un logo') }}</span>
+                                                <span class="ct-btn ct-btn-outline ct-btn-sm" @click="$refs.logoInput.click()">{{ __('Choisir un logo') }}</span>
                                             </label>
-                                            <button class="btn btn-sm btn-outline-danger" x-show="qrLogo" @click="removeLogo()" style="border-radius: var(--r-btn);">{{ __('Retirer') }}</button>
+                                            <button class="ct-btn ct-btn-outline-danger ct-btn-sm" x-show="qrLogo" @click="removeLogo()">{{ __('Retirer') }}</button>
                                             <img :src="qrLogo" x-show="qrLogo" style="width: 30px; height: 30px; object-fit: contain; border-radius: 4px;">
                                         </div>
                                         <small class="text-muted">{{ __('Max 500 Ko, redimensionné à 150px. Correction H recommandée. Aucune image n\'est envoyée au serveur.') }}</small>
@@ -431,8 +431,8 @@
                             <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
                                 <button class="btn" @click="downloadQR('png')" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">{{ __('Télécharger PNG') }}</button>
                                 <button class="btn" @click="downloadQR('svg')" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700;">{{ __('Télécharger SVG') }}</button>
-                                <button class="btn btn-outline-secondary" @click="copyData()" style="border-radius: var(--r-btn);" x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier les données') }}'"></button>
-                                <button class="btn btn-outline-secondary" @click="saveToHistory()" style="border-radius: var(--r-btn);">{{ __('Sauvegarder') }}</button>
+                                <button class="ct-btn ct-btn-outline" @click="copyData()" x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier les données') }}'"></button>
+                                <button class="ct-btn ct-btn-outline" @click="saveToHistory()">{{ __('Sauvegarder') }}</button>
                             </div>
                         </div>
 
@@ -441,7 +441,7 @@
                             <div class="mt-3 pt-3 border-top">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h3 style="font-family: var(--f-heading); font-weight: 700; margin: 0; font-size: 1rem;">{{ __('QR sauvegardés') }} (<span x-text="qrHistory.length"></span>)</h3>
-                                    <button class="btn btn-sm btn-outline-danger" @click="clearHistory()" style="font-size: 0.7rem;">{{ __('Effacer') }}</button>
+                                    <button class="ct-btn ct-btn-outline-danger ct-btn-xs" @click="clearHistory()">{{ __('Effacer') }}</button>
                                 </div>
                                 <template x-for="(h, hi) in qrHistory" :key="hi">
                                     <div class="d-flex justify-content-between align-items-center p-2 mb-1 rounded" style="background: #f8f9fa; font-size: 0.85rem; cursor: pointer;" @click="loadFromHistory(hi)">

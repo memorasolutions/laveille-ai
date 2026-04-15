@@ -80,12 +80,12 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                         <div class="d-flex justify-content-between align-items-center mb-3" style="flex-wrap: wrap; gap: 8px; position: relative;">
                             <input type="text" x-model="title" style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); font-size: 1.3rem; border: none; background: transparent; outline: none; flex: 1; min-width: 200px;" aria-label="Titre de la roue">
                             <div class="d-flex gap-1">
-                                <button class="btn btn-sm" :style="soundEnabled ? '' : 'color: #dc2626;'" @click="soundEnabled = !soundEnabled; localStorage.setItem('rw_sound', soundEnabled)" style="border-radius: var(--r-btn); border: 1px solid #dee2e6;" aria-label="Son">
+                                <button class="ct-btn ct-btn-ghost ct-btn-sm" :style="soundEnabled ? '' : 'color: #dc2626;'" @click="soundEnabled = !soundEnabled; localStorage.setItem('rw_sound', soundEnabled)" aria-label="Son">
                                     <span x-text="soundEnabled ? '🔊' : '🔇'"></span>
                                 </button>
-                                <button class="btn btn-sm" @click="toggleFullscreen()" style="border-radius: var(--r-btn); border: 1px solid #dee2e6;" aria-label="Plein écran">⛶</button>
-                                <button class="btn btn-sm" @click="showDrawer = true; document.body.style.overflow = 'hidden'" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); font-size: 0.8rem; font-weight: 600;" aria-label="Paramètres">⚙ {{ __('Paramètres') }}</button>
-                                <button class="btn btn-sm" @click="jQuery('#roueTirageHelpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 28px; height: 28px; font-weight: 700; font-size: 0.8rem; padding: 0; line-height: 28px;">?</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-sm" @click="toggleFullscreen()" aria-label="Plein écran">⛶</button>
+                                <button class="ct-btn ct-btn-primary ct-btn-sm" @click="showDrawer = true; document.body.style.overflow = 'hidden'" aria-label="Paramètres">⚙ {{ __('Paramètres') }}</button>
+                                <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#roueTirageHelpModal').modal('show')" style="border-radius:50%;width:28px;height:28px;padding:0;line-height:28px;">?</button>
                             </div>
                         </div>
 
@@ -102,7 +102,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                         <div x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer cette configuration...') }}" aria-label="{{ __('Nom de la configuration') }}" style="border-radius: 8px;">
-                                <button class="btn btn-sm" @click="saveToAccount()" :disabled="items.length < 2 || saving" style="background: var(--c-primary); color: #fff; border-radius: 8px; font-weight: 600; white-space: nowrap; padding: 6px 16px;"
+                                <button class="ct-btn ct-btn-primary ct-btn-sm" @click="saveToAccount()" :disabled="items.length < 2 || saving" style="white-space:nowrap;"
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-1" style="font-size: 0.8rem; color: var(--c-text-muted);">
@@ -126,7 +126,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                 <div class="wheel-center"><template x-if="centerLogo"><img :src="centerLogo" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></template><template x-if="!centerLogo"><img src="{{ asset('images/logo-eye.svg') }}" style="width:36px;height:36px;" alt="Logo"></template></div>
                             </div>
 
-                            <button class="btn btn-lg mt-3" @click="spin()" :disabled="spinning || weightedItems.length < 2" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700; min-width: 220px; font-size: 1.1rem; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: all 0.1s;" aria-label="Tourner la roue">
+                            <button class="ct-btn ct-btn-accent ct-btn-lg mt-3" @click="spin()" :disabled="spinning || weightedItems.length < 2" style="min-width:220px;box-shadow:0 4px 0 rgba(0,0,0,0.2);transition:all 0.1s;" aria-label="Tourner la roue">
                                 <span x-text="spinning ? '{{ __('En cours...') }}' : '{{ __('Tourner !') }}'"></span>
                             </button>
                         </div>
@@ -149,7 +149,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                         <div x-show="openSection === 'presets'" x-transition style="padding: 8px 0;">
                                             <div class="d-flex flex-wrap gap-1">
                                                 <template x-for="(p, i) in presets" :key="i">
-                                                    <button class="btn btn-sm btn-outline-secondary" @click="loadPreset(p); showDrawer = false; document.body.style.overflow = ''" x-text="p.name" style="border-radius: var(--r-btn); font-size: 0.7rem;"></button>
+                                                    <button class="ct-btn ct-btn-outline ct-btn-sm" @click="loadPreset(p); showDrawer = false; document.body.style.overflow = ''" x-text="p.name" style="border-radius: var(--r-btn); font-size: 0.7rem;"></button>
                                                 </template>
                                             </div>
                                             <template x-if="!isAuthenticated && savedLists.length > 0">
@@ -157,8 +157,8 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                                     <small class="text-muted">{{ __('Mes listes') }}</small>
                                                     <template x-for="(s, i) in savedLists" :key="'ds'+i">
                                                         <div class="d-flex mt-1">
-                                                            <button class="btn btn-sm btn-outline-primary" @click="loadPreset(s); showDrawer = false; document.body.style.overflow = ''" x-text="s.name" style="border-radius: var(--r-btn) 0 0 var(--r-btn); font-size: 0.7rem; flex: 1; text-align: left;"></button>
-                                                            <button class="btn btn-sm btn-outline-danger" @click="deleteSaved(i)" style="border-radius: 0 var(--r-btn) var(--r-btn) 0; font-size: 0.6rem; padding: 0 6px;">✕</button>
+                                                            <button class="ct-btn ct-btn-outline ct-btn-sm" @click="loadPreset(s); showDrawer = false; document.body.style.overflow = ''" x-text="s.name" style="border-radius: var(--r-btn) 0 0 var(--r-btn); font-size: 0.7rem; flex: 1; text-align: left;"></button>
+                                                            <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="deleteSaved(i)" style="border-radius: 0 var(--r-btn) var(--r-btn) 0; font-size: 0.6rem; padding: 0 6px;">✕</button>
                                                         </div>
                                                     </template>
                                                 </div>
@@ -171,12 +171,12 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                         <div @click="openSection = openSection === 'lists' ? null : 'lists'" style="{{ $acc }}">{{ __('Gestion des listes') }} <span x-text="openSection === 'lists' ? '▲' : '▼'" style="font-size:0.7rem;color:#9ca3af;"></span></div>
                                         <div x-show="openSection === 'lists'" x-transition style="padding: 8px 0;">
                                             <div class="d-flex flex-wrap gap-1">
-                                                <button class="btn btn-sm btn-outline-secondary" @click="saveCurrentList()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Sauvegarder') }}</button>
-                                                <button class="btn btn-sm btn-outline-secondary" @click="shuffleItems()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Mélanger') }}</button>
-                                                <button class="btn btn-sm btn-outline-secondary" @click="exportList()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Exporter') }}</button>
+                                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="saveCurrentList()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Sauvegarder') }}</button>
+                                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="shuffleItems()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Mélanger') }}</button>
+                                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="exportList()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Exporter') }}</button>
                                                 <label style="cursor: pointer; margin: 0;">
                                                     <input type="file" accept=".txt" @change="importList($event)" style="display:none" x-ref="impList">
-                                                    <span class="btn btn-sm btn-outline-secondary" @click="$refs.impList.click()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Importer') }}</span>
+                                                    <span class="ct-btn ct-btn-outline ct-btn-sm" @click="$refs.impList.click()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Importer') }}</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -196,7 +196,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                             <label style="font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; display: block;">{{ __('Logo central') }}</label>
                                             <input type="file" accept="image/*" @change="uploadLogo($event)" class="form-control" style="font-size: 0.8rem;">
                                             <div x-show="centerLogo" class="mt-1">
-                                                <button @click="removeLogo()" class="btn btn-sm btn-outline-danger" style="font-size: 0.7rem; border-radius: var(--r-btn);">{{ __('Retirer le logo') }}</button>
+                                                <button @click="removeLogo()" class="ct-btn ct-btn-outline-danger ct-btn-sm" style="font-size: 0.7rem; border-radius: var(--r-btn);">{{ __('Retirer le logo') }}</button>
                                             </div>
                                         </div>
                                     </div>
@@ -258,9 +258,9 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                                 {{ __('Effets sonores') }}
                                             </label>
                                             <div x-show="soundEnabled" class="d-flex align-items-center gap-2 mt-1 mb-2">
-                                                <button @click="soundVolume = Math.max(0.01, soundVolume - 0.03)" class="btn btn-sm btn-outline-secondary" style="width: 30px; height: 30px; padding: 0; border-radius: var(--r-btn); font-weight: 700;">−</button>
+                                                <button @click="soundVolume = Math.max(0.01, soundVolume - 0.03)" class="ct-btn ct-btn-outline ct-btn-sm" style="width: 30px; height: 30px; padding: 0; border-radius: var(--r-btn); font-weight: 700;">−</button>
                                                 <span style="font-size: 0.8rem; min-width: 40px; text-align: center;" x-text="Math.round(soundVolume * 100) + ' %'"></span>
-                                                <button @click="soundVolume = Math.min(0.3, soundVolume + 0.03)" class="btn btn-sm btn-outline-secondary" style="width: 30px; height: 30px; padding: 0; border-radius: var(--r-btn); font-weight: 700;">+</button>
+                                                <button @click="soundVolume = Math.min(0.3, soundVolume + 0.03)" class="ct-btn ct-btn-outline ct-btn-sm" style="width: 30px; height: 30px; padding: 0; border-radius: var(--r-btn); font-weight: 700;">+</button>
                                             </div>
                                             <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; font-size: 0.85rem;">
                                                 <input type="checkbox" class="rw-check" x-model="confettiEnabled">
@@ -277,8 +277,8 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                             <div class="text-center p-4 rounded mt-3" style="background: var(--c-accent-light, #FDF5ED); border: 2px solid var(--c-accent);" aria-live="polite">
                                 <h3 style="font-family: var(--f-heading); color: var(--c-accent); margin: 0;" x-text="winner"></h3>
                                 <div class="d-flex justify-content-center gap-2 mt-2">
-                                    <button class="btn btn-sm btn-outline-danger" @click="removeWinner()">{{ __('Retirer et re-tirer') }}</button>
-                                    <button class="btn btn-sm" @click="copyResult()" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);">{{ __('Copier le résultat') }}</button>
+                                    <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="removeWinner()">{{ __('Retirer et re-tirer') }}</button>
+                                    <button class="ct-btn ct-btn-primary ct-btn-sm" @click="copyResult()">{{ __('Copier le résultat') }}</button>
                                 </div>
                             </div>
                         </template>
@@ -289,8 +289,8 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h6 style="font-family: var(--f-heading); font-weight: 700; margin: 0;">{{ __('Historique') }} (<span x-text="history.length"></span>)</h6>
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-sm btn-outline-secondary" @click="copyHistory()" style="font-size: 0.65rem;">{{ __('Copier') }}</button>
-                                        <button class="btn btn-sm btn-outline-danger" @click="history = []" style="font-size: 0.65rem;">{{ __('Effacer') }}</button>
+                                        <button class="ct-btn ct-btn-outline ct-btn-sm" @click="copyHistory()" style="font-size: 0.65rem;">{{ __('Copier') }}</button>
+                                        <button class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="history = []" style="font-size: 0.65rem;">{{ __('Effacer') }}</button>
                                     </div>
                                 </div>
                                 <div style="max-height: 200px; overflow-y: auto;">
@@ -319,7 +319,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                         {{-- Fullscreen overlay --}}
                         <template x-if="isFullscreen">
                             <div class="fs-overlay" @keydown.escape.window="isFullscreen = false">
-                                <button class="btn btn-sm" @click="isFullscreen = false" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2); color: #fff; border-radius: var(--r-btn); font-size: 1.2rem;">✕ {{ __('Fermer') }}</button>
+                                <button class="ct-btn ct-btn-ghost ct-btn-sm" @click="isFullscreen = false" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.2);color:#fff;font-size:1.2rem;">✕ {{ __('Fermer') }}</button>
                                 <div class="wheel-container" style="width: 500px; height: 500px;">
                                     <div class="wheel-pointer" x-ref="pointer"></div>
                                     <div class="wheel-canvas-wrap" style="width: 500px; height: 500px;" :style="'transform: rotate(' + rotation + 'deg)'">
@@ -327,7 +327,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                     </div>
                                     <div class="wheel-center"><template x-if="centerLogo"><img :src="centerLogo" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></template><template x-if="!centerLogo"><img src="{{ asset('images/logo-eye.svg') }}" style="width:36px;height:36px;" alt="Logo"></template></div>
                                 </div>
-                                <button class="btn btn-lg mt-3" @click="spin()" :disabled="spinning || weightedItems.length < 2" style="background: var(--c-accent); color: #fff; border-radius: var(--r-btn); font-family: var(--f-heading); font-weight: 700; min-width: 250px; font-size: 1.3rem;">
+                                <button class="ct-btn ct-btn-accent ct-btn-lg mt-3" @click="spin()" :disabled="spinning || weightedItems.length < 2" style="min-width:250px;">
                                     <span x-text="spinning ? '{{ __('En cours...') }}' : '{{ __('Tourner !') }}'"></span>
                                 </button>
                                 <div class="fs-winner" x-show="winner" x-text="winner"></div>
