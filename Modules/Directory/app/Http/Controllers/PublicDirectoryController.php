@@ -97,7 +97,13 @@ class PublicDirectoryController extends Controller
             ->take($limit)
             ->values();
 
-        return view('directory::public.show', compact('tool', 'similarTools'));
+        $resources = $tool->resources()
+            ->where('is_approved', true)
+            ->orderByRaw("FIELD(language, 'fr', 'en') ASC")
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('directory::public.show', compact('tool', 'similarTools', 'resources'));
     }
 
     /**

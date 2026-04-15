@@ -118,7 +118,8 @@
     $pricingLabels = ['free'=>__('Gratuit'),'freemium'=>__('Freemium'),'paid'=>__('Payant'),'open_source'=>__('Open source'),'enterprise'=>__('Entreprise')];
     $reviews = $tool->reviews()->approved()->latest()->get();
     $discussions = $tool->discussions()->approved()->topLevel()->with('replies.user', 'user')->latest()->get();
-    $resources = $tool->resources()->orderByDesc('upvotes')->latest()->get();
+    // $resources passé depuis le controller (FR-first, puis date)
+    $resources = $resources ?? $tool->resources()->where('is_approved', true)->orderByRaw("FIELD(language, 'fr', 'en') ASC")->orderByDesc('created_at')->get();
     $screenshots = $tool->screenshots()->approved()->orderByDesc('votes_count')->get();
 @endphp
 
