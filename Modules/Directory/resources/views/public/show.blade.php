@@ -612,7 +612,7 @@
             {{-- Filtres type + langue --}}
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;align-items:center;">
                 <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Type') }} :</span>
-                <template x-for="f in [{v:'',l:'{{ __("Tous") }}'},{v:'video',l:'{{ __("Vidéo") }}'},{v:'article',l:'{{ __("Article") }}'},{v:'tutorial',l:'{{ __("Tutoriel") }}'},{v:'documentation',l:'{{ __("Doc") }}'}]">
+                <template x-for="f in [{v:'',l:'{{ __("Tous") }}'},{v:'youtube',l:'{{ __("YouTube") }}'},{v:'formation',l:'{{ __("Formation") }}'},{v:'article',l:'{{ __("Article") }}'},{v:'tutorial',l:'{{ __("Tutoriel") }}'},{v:'documentation',l:'{{ __("Doc") }}'}]">
                     <button @click="filterType = f.v" :style="'border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;' + (filterType === f.v ? 'background:var(--c-primary);color:#fff;' : 'background:var(--c-primary-light);color:var(--c-text-muted);')" x-text="f.l"></button>
                 </template>
                 <span style="color:#e5e7eb;margin:0 4px;">|</span>

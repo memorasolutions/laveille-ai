@@ -67,6 +67,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\DiscoverNewToolsCommand::class,
             \Modules\Directory\Console\ReenrichStaleCommand::class,
             \Modules\Directory\Console\RefreshPricingCommand::class,
+            \Modules\Directory\Console\EnrichFormationsCommand::class,
         ]);
     }
 
@@ -83,6 +84,7 @@ class DirectoryServiceProvider extends ServiceProvider
             $schedule->command('tools:discover-new')->dailyAt('04:00');
             $schedule->command('tools:reenrich-stale --batch=2 --months=3')->monthlyOn(1, '06:00');
             $schedule->command('tools:refresh-pricing --batch=5')->quarterly();
+            $schedule->command('tools:enrich-formations --batch=5')->weeklyOn(0, '07:00');
         });
     }
 
