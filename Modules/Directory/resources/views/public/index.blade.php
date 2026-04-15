@@ -118,6 +118,7 @@
     search: '',
     activePricing: '',
     activeCategory: '',
+    eduFilter: false,
     sortBy: 'all',
     tools: {{ $toolsJson->toJson() }},
 
@@ -127,7 +128,8 @@
             const matchSearch = !s || t.name.toLowerCase().includes(s) || t.shortDesc.toLowerCase().includes(s);
             const matchPricing = !this.activePricing || t.pricing === this.activePricing;
             const matchCat = !this.activeCategory || t.categorySlugs.includes(this.activeCategory);
-            return matchSearch && matchPricing && matchCat;
+            const matchEdu = !this.eduFilter || t.hasEduPricing;
+            return matchSearch && matchPricing && matchCat && matchEdu;
         });
         if (this.sortBy === 'rating') return [...t].sort((a,b) => b.avgRating - a.avgRating);
         if (this.sortBy === 'newest') return [...t].sort((a,b) => b.createdTs - a.createdTs);
@@ -140,7 +142,7 @@
         if (s === 'free') { this.activePricing = 'free'; this.sortBy = 'all'; }
         else { this.sortBy = s; if (this.activePricing === 'free') this.activePricing = ''; }
     },
-    resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.sortBy = 'all'; }
+    resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.eduFilter = false; this.sortBy = 'all'; }
 }">
 
     {{-- Hero + wizard wrapper --}}
@@ -480,6 +482,7 @@
             <button type="button" class="rt-sort-tab" :class="sortBy === 'rating' && 'rt-sort-active'" @click="setSort('rating')">⭐ {{ __('Populaires') }}</button>
             <button type="button" class="rt-sort-tab" :class="sortBy === 'newest' && 'rt-sort-active'" @click="setSort('newest')">🆕 {{ __('Récents') }}</button>
             <button type="button" class="rt-sort-tab" :class="activePricing === 'free' && 'rt-sort-active'" @click="setSort('free')">🆓 {{ __('Gratuits') }}</button>
+            <button type="button" class="rt-sort-tab" :class="eduFilter && 'rt-sort-active'" @click="eduFilter = !eduFilter" :style="eduFilter ? 'background:#ecfdf5;color:#065f46;border-color:#065f46;' : ''">🎓 {{ __('Éducation') }}</button>
             @if($categories->isNotEmpty())
                 <a href="{{ route('directory.compare', $categories->first()->slug) }}" class="rt-sort-tab" style="text-decoration:none!important;margin-left:auto;">📊 {{ __('Comparatifs') }}</a>
             @endif
