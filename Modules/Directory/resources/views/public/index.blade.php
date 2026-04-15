@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', __('Répertoire techno') . ' - ' . config('app.name'))
-@section('meta_description', __('Les meilleurs outils techno, testés et sélectionnés pour vous. ChatGPT, Claude, Midjourney, Perplexity et plus.'))
+@section('meta_description', __('Les meilleurs outils techno sélectionnés pour vous. ChatGPT, Claude, Midjourney, Perplexity et plus.'))
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Répertoire techno')])
@@ -223,7 +223,7 @@
         <div class="container text-center">
             <h1>{{ __('Répertoire techno') }}</h1>
             <p style="color: #6B7280; font-size: 1.1rem; margin-bottom: 16px;">
-                <strong x-text="tools.length" style="color: var(--c-primary);"></strong> {{ __('outils testés et sélectionnés pour vous.') }}
+                <strong x-text="tools.length" style="color: var(--c-primary);"></strong> {{ __('outils sélectionnés pour vous.') }}
             </p>
 
             {{-- Bouton proposer (visible etape 0) — auth requise --}}
@@ -629,7 +629,7 @@
     "@@context": "https://schema.org",
     "@@type": "CollectionPage",
     "name": "{{ __('Répertoire techno') }}",
-    "description": "{{ __('Les meilleurs outils techno, testés et sélectionnés pour vous.') }}",
+    "description": "{{ __('Les meilleurs outils techno sélectionnés pour vous.') }}",
     "url": "{{ route('directory.index') }}"
 }
 </script>
