@@ -101,7 +101,7 @@ class EnrichTutorialsCommand extends Command
                         'url' => $tuto['url'] ?? "https://youtube.com/watch?v={$videoId}",
                         'title' => $tuto['title'] ?? '',
                         'type' => 'youtube',
-                        'language' => 'fr',
+                        'language' => $tuto['language'] ?? 'fr',
                         'thumbnail' => $tuto['thumbnail'] ?? null,
                         'video_id' => $videoId,
                         'duration_seconds' => $tuto['duration_seconds'] ?? null,
