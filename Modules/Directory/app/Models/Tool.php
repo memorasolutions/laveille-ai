@@ -52,11 +52,27 @@ class Tool extends Model
         'screenshot', 'website_type', 'launch_year', 'target_audience',
         'submitted_by',
         'last_enriched_at', 'enrichment_version',
+        'parent_tool_id', 'ecosystem_tag',
     ];
 
     public function submitter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'submitted_by');
+    }
+
+    public function parentTool(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_tool_id');
+    }
+
+    public function childTools(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_tool_id');
+    }
+
+    public function scopeEcosystem($query, string $tag)
+    {
+        return $query->where('ecosystem_tag', $tag);
     }
 
     public function getVisitUrl(): string
