@@ -305,8 +305,8 @@
         </div>
 
         {{-- Mini-modal LinkedIn copie presse-papier --}}
-        <div x-cloak x-show="showLiModal" x-transition.opacity.duration.200ms @click.self="showLiModal=false" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);">
-            <div @click.stop style="background:#fff;max-width:380px;width:90%;border-radius:12px;padding:24px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18);">
+        <div x-cloak x-show="showLiModal" x-transition.opacity.duration.200ms @click.self="showLiModal=false" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);">
+            <div @click.stop style="background:#fff;max-width:380px;width:90%;border-radius:12px;padding:24px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative;">
                 <div style="font-size:2.5rem;margin-bottom:12px;">📋</div>
                 <p style="margin:0 0 18px;font-size:15px;line-height:1.5;color:#333;">
                     {{ __('Texte copié! Collez-le dans votre publication LinkedIn.') }}
