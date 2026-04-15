@@ -3,7 +3,7 @@
 <div class="modal fade" id="newsletterModal" role="dialog" aria-labelledby="newsletterModalLabel" aria-hidden="true" inert style="display:none;">
     <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 420px;">
         <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none;">
-            <div style="background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-hover) 100%); padding: 30px 40px; position: relative;">
+            <div style="background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-hover) 100%); padding: 20px 30px; position: relative;">
                 <button type="button" id="newsletterModalClose" aria-label="Fermer" style="position: absolute; top: 14px; right: 18px; color: #fff; font-size: 26px; line-height: 1; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; background: none; border: none; padding: 0; font-weight: 300; outline: none;">&times;</button>
                 <div style="text-align: center; font-size: 40px; line-height: 1;">✉️</div>
                 <h3 class="text-center" id="newsletterModalLabel" style="font-family: var(--f-heading); color: #fff; font-weight: 800; margin: 10px 0 8px;">
@@ -13,7 +13,7 @@
                     {{ __('Recevez nos sélections d\'outils et articles directement dans votre boîte courriel.') }}
                 </p>
             </div>
-            <div style="padding: 30px 40px;">
+            <div style="padding: 20px 30px;">
                 <form id="newsletterModalForm">
                     @csrf
                     <input type="email" name="email" placeholder="{{ __('Votre courriel *') }}" required aria-label="{{ __('Courriel') }}" autocomplete="email"
@@ -42,6 +42,8 @@
 <style>
 #newsletterModal { pointer-events: none; }
 #newsletterModal.show { pointer-events: auto; }
+#newsletterModal .modal-content { max-height: 90vh; overflow-y: auto; }
+#newsletterModal .modal-dialog { margin: 20px auto; }
 #newsletterModal input:focus { border-color: var(--c-primary) !important; box-shadow: 0 0 0 3px rgba(11,114,133,0.15); }
 #newsletterModalSubmit:hover { background: var(--c-primary) !important; }
 </style>
