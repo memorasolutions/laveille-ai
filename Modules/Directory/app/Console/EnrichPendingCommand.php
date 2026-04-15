@@ -26,7 +26,7 @@ class EnrichPendingCommand extends Command
         $batch = max(1, (int) $this->option('batch'));
 
         $tools = Tool::query()
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'pending'])
             ->whereRaw("CHAR_LENGTH(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(description, '$.\"fr_CA\"')), '')) < 500")
             ->orderByDesc('clicks_count')
             ->orderByDesc('is_featured')
@@ -94,6 +94,13 @@ class EnrichPendingCommand extends Command
                 $tool->setTranslation('description', 'fr_CA', $description);
                 $tool->setTranslation('short_description', 'fr_CA', $shortDesc);
                 $tool->last_enriched_at = now();
+
+                // Auto-publier les outils pending enrichis avec succès
+                if ($tool->status === 'pending') {
+                    $tool->status = 'published';
+                    $this->info("  Publié automatiquement (était pending)");
+                }
+
                 $tool->save();
 
                 $this->info("  OK — " . mb_strlen($description) . " chars");
