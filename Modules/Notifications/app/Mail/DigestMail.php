@@ -34,7 +34,7 @@ class DigestMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'notifications::email.digest',
+            markdown: 'notifications::email.digest',
         );
     }
 }
