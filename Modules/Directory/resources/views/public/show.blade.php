@@ -1205,5 +1205,49 @@
     ]
 }
 </script>
+@else
+@php
+    $faqClean = strip_tags($tool->short_description ?: mb_substr(strip_tags($tool->description ?? ''), 0, 200));
+    $faqPricing = match($tool->pricing) {
+        'free' => 'Oui, ' . $tool->name . ' est entièrement gratuit.',
+        'freemium' => $tool->name . ' fonctionne sur un modèle freemium : une version gratuite est disponible, avec des plans payants pour des fonctionnalités avancées.',
+        'open_source' => $tool->name . ' est open source et gratuit.',
+        'paid' => $tool->name . ' est un outil payant.',
+        'contact' => 'La tarification de ' . $tool->name . ' est disponible sur demande.',
+        default => 'Consultez le site officiel de ' . $tool->name . ' pour connaître les tarifs.',
+    };
+    $faqAlts = $similarTools->take(3)->pluck('name')->implode(', ');
+    $faqAltsAnswer = $faqAlts
+        ? 'Parmi les alternatives à ' . $tool->name . ', on trouve notamment : ' . $faqAlts . '.'
+        : 'De nombreuses alternatives sont disponibles dans notre annuaire.';
+    $faqCats = $tool->categories->pluck('name')->implode(', ');
+    $faqAudience = $faqCats
+        ? 'Cet outil s\'adresse aux utilisateurs intéressés par : ' . $faqCats . '.'
+        : 'Professionnels, passionnés et utilisateurs intéressés par les outils IA.';
+    $faqItems = [
+        ['q' => 'Qu\'est-ce que ' . $tool->name . ' ?', 'a' => $faqClean ?: ($tool->name . ' est un outil IA référencé dans notre annuaire.')],
+        ['q' => $tool->name . ' est-il gratuit ?', 'a' => $faqPricing],
+        ['q' => 'Quelles sont les alternatives à ' . $tool->name . ' ?', 'a' => $faqAltsAnswer],
+        ['q' => 'À qui s\'adresse ' . $tool->name . ' ?', 'a' => $faqAudience],
+    ];
+    if ($tool->launch_year) {
+        $faqItems[] = ['q' => 'Depuis quand ' . $tool->name . ' existe ?', 'a' => $tool->name . ' a été lancé en ' . $tool->launch_year . '.'];
+    }
+    $faqLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'FAQPage',
+        'mainEntity' => array_map(fn($item) => [
+            '@type' => 'Question',
+            'name' => $item['q'],
+            'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text' => $item['a'],
+            ],
+        ], $faqItems),
+    ];
+@endphp
+<script type="application/ld+json">
+{!! json_encode($faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
 @endif
 @endpush
