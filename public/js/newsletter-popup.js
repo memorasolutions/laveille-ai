@@ -3,7 +3,8 @@
 
   var MODAL_SEL = '#newsletterModal';
   var COOKIE_SUB = 'nl_subscribed';
-  var SS_DISMISSED = 'nl_dismissed';
+  var COOKIE_DISMISSED = 'nl_dismissed';
+  var DISMISSED_DAYS = 180; // 6 mois
   var SS_SHOWN = 'nl_shown';
 
   function safeSessionGet(key) {
@@ -32,7 +33,7 @@
   function canShow() {
     if (!document.querySelector(MODAL_SEL)) return false;
     if (getCookie(COOKIE_SUB)) return false;
-    if (safeSessionGet(SS_DISMISSED) === 'true') return false;
+    if (getCookie(COOKIE_DISMISSED)) return false;
     if (safeSessionGet(SS_SHOWN) === 'true') return false;
     if (document.querySelector('[data-user-id]')) return false;
     if (isBlockedPage()) return false;
@@ -51,9 +52,9 @@
   function init() {
     if (!document.querySelector(MODAL_SEL)) return;
 
-    // Quand la modale se ferme → marquer dismissed
+    // Quand la modale se ferme → cookie 6 mois (évite réapparition fréquente)
     $(document).on('hidden.bs.modal', MODAL_SEL, function () {
-      safeSessionSet(SS_DISMISSED, 'true');
+      setCookie(COOKIE_DISMISSED, '1', DISMISSED_DAYS);
     });
 
     // Quand inscription réussie → cookie 365 jours
