@@ -100,6 +100,19 @@ class SitemapController
             });
         }
 
+        // Collections publiques (si module Directory actif)
+        if (Route::has('collections.index') && class_exists(\Modules\Directory\Models\ToolCollection::class)) {
+            $sitemap->add(Url::create(route('collections.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
+            \Modules\Directory\Models\ToolCollection::public()->get()->each(function ($collection) use ($sitemap) {
+                $sitemap->add(
+                    Url::create(route('collections.show', $collection->slug))
+                        ->setLastModificationDate($collection->updated_at)
+                        ->setPriority(0.6)
+                        ->setChangeFrequency('weekly')
+                );
+            });
+        }
+
         // Acronymes éducation (si module Acronyms actif)
         if (Route::has('acronyms.index') && class_exists(\Modules\Acronyms\Models\Acronym::class)) {
             $sitemap->add(Url::create(route('acronyms.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
