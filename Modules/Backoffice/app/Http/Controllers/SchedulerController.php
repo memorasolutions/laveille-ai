@@ -42,7 +42,83 @@ class SchedulerController extends Controller
             'systemTasks' => $systemTasks,
             'customTasks' => $customTasks,
             'killSwitches' => $this->killSwitches(),
+            'failedJobs' => $this->failedJobsStats(),
         ]);
+    }
+
+    /**
+     * Stats des jobs échoués depuis la table failed_jobs.
+     *
+     * @return array{total:int, last_7_days:int, last_24h:int, by_class:mixed, recent:mixed}
+     */
+    private function failedJobsStats(): array
+    {
+        try {
+            $total = \Illuminate\Support\Facades\DB::table('failed_jobs')->count();
+            $last7Days = \Illuminate\Support\Facades\DB::table('failed_jobs')
+                ->where('failed_at', '>=', now()->subDays(7))
+                ->count();
+            $last24h = \Illuminate\Support\Facades\DB::table('failed_jobs')
+                ->where('failed_at', '>=', now()->subDay())
+                ->count();
+
+            $byClass = \Illuminate\Support\Facades\DB::table('failed_jobs')
+                ->select('payload', \Illuminate\Support\Facades\DB::raw('COUNT(*) as count'), \Illuminate\Support\Facades\DB::raw('MAX(failed_at) as last_failed'))
+                ->groupBy('payload')
+                ->orderByDesc('count')
+                ->limit(50)
+                ->get()
+                ->map(function ($row) {
+                    $decoded = json_decode((string) $row->payload, false);
+                    return (object) [
+                        'class' => $decoded->displayName ?? 'Unknown',
+                        'count' => (int) $row->count,
+                        'last_failed' => $row->last_failed,
+                    ];
+                })
+                ->groupBy('class')
+                ->map(function ($group) {
+                    return (object) [
+                        'class' => $group->first()->class,
+                        'count' => $group->sum('count'),
+                        'last_failed' => \Illuminate\Support\Carbon::parse($group->max('last_failed')),
+                    ];
+                })
+                ->sortByDesc('count')
+                ->take(5)
+                ->values();
+
+            $recent = \Illuminate\Support\Facades\DB::table('failed_jobs')
+                ->select('id', 'payload', 'exception', 'failed_at')
+                ->orderByDesc('failed_at')
+                ->limit(5)
+                ->get()
+                ->map(function ($row) {
+                    $decoded = json_decode((string) $row->payload, false);
+                    return (object) [
+                        'id' => $row->id,
+                        'displayName' => $decoded->displayName ?? 'Unknown',
+                        'exception' => \Illuminate\Support\Str::limit((string) $row->exception, 200),
+                        'failed_at' => \Illuminate\Support\Carbon::parse($row->failed_at),
+                    ];
+                });
+
+            return [
+                'total' => $total,
+                'last_7_days' => $last7Days,
+                'last_24h' => $last24h,
+                'by_class' => $byClass,
+                'recent' => $recent,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'total' => 0,
+                'last_7_days' => 0,
+                'last_24h' => 0,
+                'by_class' => collect(),
+                'recent' => collect(),
+            ];
+        }
     }
 
     /**

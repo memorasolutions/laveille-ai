@@ -27,6 +27,108 @@
     </div>
 </div>
 
+{{-- Jobs échoués (queue) — visibilité ops --}}
+@if(isset($failedJobs))
+    @if($failedJobs['total'] === 0)
+        <div class="card mb-3 border-0 shadow-sm">
+            <div class="card-body py-3 px-4 d-flex align-items-center gap-3">
+                <span class="badge bg-success bg-opacity-10 text-success p-2 rounded-circle">
+                    <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
+                </span>
+                <span class="fw-semibold text-muted">{{ __('Aucun job échoué — la queue fonctionne parfaitement.') }}</span>
+            </div>
+        </div>
+    @else
+        <div class="card mb-3">
+            <div class="card-header py-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="fw-semibold mb-0 d-flex align-items-center gap-2">
+                    <i data-lucide="alert-triangle" class="text-danger icon-sm"></i>
+                    {{ __('Jobs échoués (queue)') }}
+                </h5>
+                <span class="badge bg-danger bg-opacity-10 text-danger">
+                    {{ $failedJobs['total'] }} {{ __('échoué') }}{{ $failedJobs['total'] > 1 ? 's' : '' }}
+                </span>
+            </div>
+            <div class="card-body py-3 px-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 text-center h-100">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                                <i data-lucide="database" class="text-secondary icon-sm"></i>
+                                <span class="text-muted small fw-semibold text-uppercase">{{ __('Total') }}</span>
+                            </div>
+                            <span class="fs-3 fw-bold text-danger">{{ number_format($failedJobs['total']) }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 text-center h-100">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                                <i data-lucide="calendar" class="text-secondary icon-sm"></i>
+                                <span class="text-muted small fw-semibold text-uppercase">{{ __('7 derniers jours') }}</span>
+                            </div>
+                            <span class="fs-3 fw-bold {{ $failedJobs['last_7_days'] > 0 ? 'text-warning' : 'text-success' }}">
+                                {{ number_format($failedJobs['last_7_days']) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded-3 p-3 text-center h-100">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                                <i data-lucide="clock" class="text-secondary icon-sm"></i>
+                                <span class="text-muted small fw-semibold text-uppercase">{{ __('24 dernières heures') }}</span>
+                            </div>
+                            <span class="fs-3 fw-bold {{ $failedJobs['last_24h'] > 0 ? 'text-danger' : 'text-success' }}">
+                                {{ number_format($failedJobs['last_24h']) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                @if($failedJobs['by_class']->count() > 0)
+                    <h6 class="fw-semibold mb-2 d-flex align-items-center gap-1">
+                        <i data-lucide="bar-chart-2" class="text-muted icon-sm"></i>
+                        {{ __('Top jobs problématiques') }}
+                    </h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-3 fw-semibold text-body small">{{ __('Classe') }}</th>
+                                    <th class="py-2 px-3 fw-semibold text-body small text-center" style="width:100px;">{{ __('Échecs') }}</th>
+                                    <th class="py-2 px-3 fw-semibold text-body small text-end" style="width:180px;">{{ __('Dernier') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($failedJobs['by_class'] as $row)
+                                    <tr>
+                                        <td class="py-2 px-3">
+                                            <code class="small">{{ class_basename($row->class) }}</code>
+                                            <span class="d-block text-muted small text-truncate" style="max-width:400px;">{{ $row->class }}</span>
+                                        </td>
+                                        <td class="py-2 px-3 text-center">
+                                            <span class="badge bg-danger bg-opacity-10 text-danger">{{ $row->count }}</span>
+                                        </td>
+                                        <td class="py-2 px-3 text-end small text-muted">
+                                            {{ $row->last_failed->locale('fr')->diffForHumans() }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                <div class="text-end">
+                    <a href="{{ route('admin.failed-jobs.index') }}" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1">
+                        <i data-lucide="external-link" class="icon-sm"></i>
+                        {{ __('Voir tous les jobs échoués') }} ({{ $failedJobs['total'] }})
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+@endif
+
 {{-- Kill switches automatisations (Laravel Pennant) --}}
 @if(!empty($killSwitches))
 @php
