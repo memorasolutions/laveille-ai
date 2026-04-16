@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Newsletter\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -138,6 +139,22 @@ class DigestCommand extends Command
      * MODE SEND (lundi 8h) : envoie le brouillon (ou la version éditée) aux abonnés.
      */
     private function handleSend(int $year, int $week): int
+    {
+        // Idempotence : empêche double envoi si cron rerun (lock 30 min)
+        $lock = Cache::lock("newsletter-digest-send-{$year}-w{$week}", 1800);
+        if (! $lock->get()) {
+            $this->components->warn("Newsletter W{$week} déjà en cours d'envoi par un autre processus. Skip.");
+            return self::SUCCESS;
+        }
+
+        try {
+            return $this->doHandleSend($year, $week);
+        } finally {
+            optional($lock)->release();
+        }
+    }
+
+    private function doHandleSend(int $year, int $week): int
     {
         $this->components->info("Envoi newsletter semaine #$week...");
 

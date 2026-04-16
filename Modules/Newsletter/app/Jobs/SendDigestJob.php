@@ -20,7 +20,19 @@ class SendDigestJob implements ShouldQueue
 
     public int $tries = 3;
 
-    public int $backoff = 60;
+    public function backoff(): array
+    {
+        return [
+            $this->jitter(30),
+            $this->jitter(90),
+            $this->jitter(300),
+        ];
+    }
+
+    private function jitter(int $seconds): int
+    {
+        return $seconds + random_int(0, 30);
+    }
 
     public function __construct(
         public readonly string $email,

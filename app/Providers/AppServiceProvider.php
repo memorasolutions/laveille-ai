@@ -95,7 +95,24 @@ class AppServiceProvider extends ServiceProvider
                 'job' => $event->job->resolveName(),
                 'connection' => $event->connectionName,
                 'exception' => $event->exception->getMessage(),
+                'trace' => $event->exception->getTraceAsString(),
             ]);
+
+            try {
+                if (class_exists(\Modules\Notifications\Services\AutomationAlertService::class)) {
+                    \Modules\Notifications\Services\AutomationAlertService::fire(
+                        'queue',
+                        $event->job->resolveName(),
+                        $event->exception->getMessage(),
+                        [
+                            'connection' => $event->connectionName,
+                            'trace' => $event->exception->getTraceAsString(),
+                        ]
+                    );
+                }
+            } catch (\Throwable) {
+                // Ne jamais throw depuis un failing handler
+            }
         });
     }
 
