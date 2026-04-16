@@ -278,16 +278,16 @@
     <div x-data="{ copied: false, linkedinCopied: false, showLiModal: false, liUrl: '', liText: {{ \Illuminate\Support\Js::from($shareClipboard) }}, openLi() { window.open(this.liUrl, '_blank'); this.showLiModal = false; } }" class="share-float">
         {{-- Desktop sidebar --}}
         <div class="share-sidebar">
-            <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}&quote={{ $shareDesc }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur Facebook') }}" class="share-btn share-fb">
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}&quote={{ $shareDesc }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur Facebook') }}" class="share-btn share-fb" @click.prevent="window.__openShare($el.href,liText,'Facebook','#1877F2')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>
-            <a href="https://twitter.com/intent/tweet?url={{ $shareUrl }}&text={{ $xText }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur X') }}" class="share-btn share-x">
+            <a href="https://twitter.com/intent/tweet?url={{ $shareUrl }}&text={{ $xText }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur X') }}" class="share-btn share-x" @click.prevent="window.__openShare($el.href,liText,'X','#000')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
             <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ $shareUrl }}&summary={{ $shareDesc }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur LinkedIn') }}" class="share-btn share-li" @click.prevent="window.__openLinkedIn($el.href,liText)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             </a>
-            <a href="{{ \Modules\Settings\Facades\Settings::get('social.messenger_url', 'https://m.me/LaVeilleDeStef') }}" target="_blank" rel="noopener" aria-label="{{ __('Envoyer via Messenger') }}" class="share-btn share-msg">
+            <a href="{{ \Modules\Settings\Facades\Settings::get('social.messenger_url', 'https://m.me/LaVeilleDeStef') }}" target="_blank" rel="noopener" aria-label="{{ __('Envoyer via Messenger') }}" class="share-btn share-msg" @click.prevent="window.__openShare($el.href,liText,'Messenger','#0099FF','message')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.373 0 0 4.974 0 11.111c0 3.498 1.744 6.614 4.469 8.654V24l4.088-2.242c1.092.301 2.246.464 3.443.464 6.627 0 12-4.975 12-11.111S18.627 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8.2l3.131 3.26 5.886-3.26-6.558 6.763z"/></svg>
             </a>
             <button @click="navigator.clipboard.writeText(window.location.href);copied=true;setTimeout(()=>copied=false,2000)" :aria-label="copied ? '{{ __('Lien copié') }}' : '{{ __('Copier le lien') }}'" class="share-btn share-copy">
@@ -298,8 +298,8 @@
 
         {{-- Mobile bottom bar --}}
         <div class="share-bottom">
-            <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}&quote={{ $shareDesc }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur Facebook') }}" class="share-btn share-fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-            <a href="https://twitter.com/intent/tweet?url={{ $shareUrl }}&text={{ $xText }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur X') }}" class="share-btn share-x"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}&quote={{ $shareDesc }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur Facebook') }}" class="share-btn share-fb" @click.prevent="window.__openShare($el.href,liText,'Facebook','#1877F2')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+            <a href="https://twitter.com/intent/tweet?url={{ $shareUrl }}&text={{ $xText }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur X') }}" class="share-btn share-x" @click.prevent="window.__openShare($el.href,liText,'X','#000')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
             <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ $shareUrl }}&summary={{ $shareDesc }}" target="_blank" rel="noopener" aria-label="{{ __('Partager sur LinkedIn') }}" class="share-btn share-li" @click.prevent="window.__openLinkedIn($el.href,liText)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
             <button @click="navigator.clipboard.writeText(window.location.href);copied=true;setTimeout(()=>copied=false,2000)" aria-label="{{ __('Copier le lien') }}" class="share-btn share-copy">
                 <svg x-show="!copied" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -362,21 +362,25 @@
     }
     </script>
     <script>
-    window.__openLinkedIn=function(url,text){
+    window.__openShare=function(url,text,platform,color,label){
+        label=label||'publication';
         navigator.clipboard.writeText(text).catch(function(){});
+        var id='share-modal-overlay';
+        var prev=document.getElementById(id);if(prev)prev.remove();
         var o=document.createElement('div');
-        o.id='li-modal-overlay';
+        o.id=id;
         o.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45)';
         o.innerHTML='<div style="background:#fff;max-width:380px;width:90%;border-radius:12px;padding:24px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18)">'
             +'<div style="font-size:2.5rem;margin-bottom:12px">📋</div>'
-            +'<p style="margin:0 0 18px;font-size:15px;line-height:1.5;color:#333">{{ __("Texte copié! Collez-le dans votre publication LinkedIn.") }}</p>'
-            +'<button onclick="window.open(this.dataset.url,\'_blank\');document.getElementById(\'li-modal-overlay\').remove()" data-url="'+url+'" style="background:#0A66C2;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600">{{ __("Ouvrir LinkedIn") }} →</button>'
+            +'<p style="margin:0 0 18px;font-size:15px;line-height:1.5;color:#333">{{ __("Texte copié!") }} {{ __("Collez-le dans votre") }} '+label+' '+platform+'.</p>'
+            +'<button onclick="window.open(this.dataset.url,\'_blank\');document.getElementById(\'share-modal-overlay\').remove()" data-url="'+url+'" style="background:'+color+';color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600">{{ __("Ouvrir") }} '+platform+' →</button>'
             +'<div style="margin-top:12px;font-size:12px;color:#9ca3af">{{ __("Ouverture automatique dans 2 secondes...") }}</div>'
             +'</div>';
         o.addEventListener('click',function(e){if(e.target===o)o.remove()});
         document.body.appendChild(o);
-        setTimeout(function(){if(document.getElementById('li-modal-overlay')){window.open(url,'_blank');o.remove()}},2500);
+        setTimeout(function(){var m=document.getElementById(id);if(m){window.open(url,'_blank');m.remove()}},2500);
     };
+    window.__openLinkedIn=function(url,text){window.__openShare(url,text,'LinkedIn','#0A66C2');};
     </script>
 </body>
 
