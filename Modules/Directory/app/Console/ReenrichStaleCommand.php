@@ -2,6 +2,7 @@
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -10,7 +11,9 @@ use Modules\Directory\Services\OpenRouterService;
 
 class ReenrichStaleCommand extends Command
 {
-    protected $signature = 'tools:reenrich-stale {--batch=3} {--months=3}';
+    use HasKillSwitch;
+
+    protected $signature = 'tools:reenrich-stale {--batch=3} {--months=3} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Re-enrichit les fiches outils dont la dernière mise à jour dépasse X mois';
 
@@ -20,6 +23,10 @@ class ReenrichStaleCommand extends Command
             $this->error('Module Directory introuvable.');
 
             return self::FAILURE;
+        }
+
+        if ($this->shouldSkipForKillSwitch('cron.ai-enrich')) {
+            return self::SUCCESS;
         }
 
         $apiKey = config('directory.openrouter_api_key') ?: env('OPENROUTER_API_KEY');

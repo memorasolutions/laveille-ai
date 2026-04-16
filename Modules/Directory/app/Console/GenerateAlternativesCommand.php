@@ -2,6 +2,7 @@
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Modules\Directory\Models\Tool;
@@ -9,7 +10,9 @@ use Modules\Directory\Services\OpenRouterService;
 
 class GenerateAlternativesCommand extends Command
 {
-    protected $signature = 'tools:generate-alternatives {--batch=5}';
+    use HasKillSwitch;
+
+    protected $signature = 'tools:generate-alternatives {--batch=5} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Génère les alternatives croisées pour les outils IA via sonar-pro';
 
@@ -19,6 +22,10 @@ class GenerateAlternativesCommand extends Command
             $this->error('Le module Directory est désactivé ou introuvable.');
 
             return self::FAILURE;
+        }
+
+        if ($this->shouldSkipForKillSwitch('cron.ai-enrich')) {
+            return self::SUCCESS;
         }
 
         $batch = max(1, (int) $this->option('batch'));

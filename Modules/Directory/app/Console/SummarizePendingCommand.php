@@ -2,6 +2,7 @@
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Modules\Directory\Models\ToolResource;
 use Modules\Directory\Services\OpenRouterService;
@@ -9,12 +10,18 @@ use Modules\Directory\Services\YouTubeCaptionsService;
 
 class SummarizePendingCommand extends Command
 {
-    protected $signature = 'resources:summarize-pending {--batch=10}';
+    use HasKillSwitch;
+
+    protected $signature = 'resources:summarize-pending {--batch=10} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Résume les tutoriels YouTube en attente via IA';
 
     public function handle(): int
     {
+        if ($this->shouldSkipForKillSwitch('cron.ai-enrich')) {
+            return self::SUCCESS;
+        }
+
         if (! class_exists(ToolResource::class)) {
             $this->error('Le module Directory est désactivé ou introuvable.');
 

@@ -2,6 +2,7 @@
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Modules\Directory\Models\Tool;
@@ -9,12 +10,18 @@ use Modules\Directory\Services\OpenRouterService;
 
 class EnrichPendingCommand extends Command
 {
-    protected $signature = 'tools:enrich-pending {--batch=3}';
+    use HasKillSwitch;
+
+    protected $signature = 'tools:enrich-pending {--batch=3} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Enrichit les fiches outils IA via OpenRouter (sonar-pro recherche + qwen3-max rédaction)';
 
     public function handle(): int
     {
+        if ($this->shouldSkipForKillSwitch('cron.ai-enrich')) {
+            return self::SUCCESS;
+        }
+
         $apiKey = config('directory.openrouter_api_key') ?: env('OPENROUTER_API_KEY');
         if (empty($apiKey)) {
             $this->error('OPENROUTER_API_KEY non configurée.');

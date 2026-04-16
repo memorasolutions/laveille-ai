@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Modules\Core\Services\MetaScraperService;
 use Modules\Core\Services\TranslationService;
@@ -11,12 +12,18 @@ use Modules\Directory\Models\Tool;
 
 class DirectoryEnrichToolsCommand extends Command
 {
-    protected $signature = 'directory:enrich-tools {--force : Force re-enrichment}';
+    use HasKillSwitch;
+
+    protected $signature = 'directory:enrich-tools {--force : Force re-enrichment (bypass aussi kill switch)}';
 
     protected $description = 'Enrich directory tools with screenshots (og:image) and FR translations';
 
     public function handle(): int
     {
+        if ($this->shouldSkipForKillSwitch('cron.ai-enrich')) {
+            return self::SUCCESS;
+        }
+
         $tools = Tool::published()->get();
         $force = $this->option('force');
 
