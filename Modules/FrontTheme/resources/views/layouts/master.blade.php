@@ -231,7 +231,7 @@
 
         @include('fronttheme::partials.footer')
 
-        @include('fronttheme::partials.newsletter-modal')
+        @include('fronttheme::partials.newsletter-scroll-trigger')
         @include('fronttheme::partials.auth-modal')
         @auth
             @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::find('Core')?->isEnabled())
@@ -259,7 +259,7 @@
     @include('fronttheme::partials.toast')
     <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
     <script src="/js/sw-register.js" defer></script>
-    <script src="/js/newsletter-popup.js?v={{ filemtime(public_path('js/newsletter-popup.js')) }}" defer></script>
+    <script src="/js/newsletter-scroll-trigger.js?v={{ filemtime(public_path('js/newsletter-scroll-trigger.js')) }}" defer></script>
     <script src="/js/ga4-events.js" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
