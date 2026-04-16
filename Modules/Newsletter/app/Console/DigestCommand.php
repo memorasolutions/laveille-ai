@@ -140,6 +140,14 @@ class DigestCommand extends Command
      */
     private function handleSend(int $year, int $week): int
     {
+        // Kill switch Pennant : permet pause instantanée sans redeploy
+        if (class_exists(\Laravel\Pennant\Feature::class)
+            && ! \Laravel\Pennant\Feature::active('cron.newsletter-send')
+            && ! $this->option('force')) {
+            $this->components->warn('Kill switch cron.newsletter-send actif. Use --force pour bypasser.');
+            return self::SUCCESS;
+        }
+
         // Idempotence : empêche double envoi si cron rerun (lock 30 min)
         $lock = Cache::lock("newsletter-digest-send-{$year}-w{$week}", 1800);
         if (! $lock->get()) {

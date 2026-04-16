@@ -84,6 +84,12 @@ class AppServiceProvider extends ServiceProvider
         Feature::define('module-media', true);
         Feature::define('module-backup', true);
 
+        // Kill switches automatisations critiques (activés par défaut — désactivables via Feature::deactivate() pour pause instantanée sans redeploy)
+        Feature::define('cron.newsletter-send', true);
+        Feature::define('cron.newsletter-preview', true);
+        Feature::define('cron.ai-enrich', true);
+        Feature::define('cron.gelato-sync', true);
+
         $this->configureRateLimiting();
         $this->configureQueueFailureHandling();
     }
