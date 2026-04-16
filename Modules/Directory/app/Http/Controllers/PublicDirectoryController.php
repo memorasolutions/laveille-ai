@@ -103,7 +103,16 @@ class PublicDirectoryController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('directory::public.show', compact('tool', 'similarTools', 'resources'));
+        $relatedCollections = collect();
+        if (class_exists(\Modules\Directory\Models\ToolCollection::class)) {
+            $relatedCollections = \Modules\Directory\Models\ToolCollection::public()
+                ->whereHas('tools', fn ($q) => $q->where('directory_tools.id', $tool->id))
+                ->withCount('tools')
+                ->limit(6)
+                ->get();
+        }
+
+        return view('directory::public.show', compact('tool', 'similarTools', 'resources', 'relatedCollections'));
     }
 
     /**

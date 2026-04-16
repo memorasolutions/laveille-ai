@@ -1135,6 +1135,10 @@
         </div>
     </div>
 </div>
+
+<div class="container">
+    @include('directory::public.partials.related-collections')
+</div>
 </section>
 @endsection
 
