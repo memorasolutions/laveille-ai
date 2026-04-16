@@ -138,6 +138,7 @@ class SchedulerController extends Controller
             ['flag' => 'cron.directory-tutorials', 'label' => 'Tutoriels YouTube', 'description' => '05h00 batch 5, enrich FR'],
             ['flag' => 'cron.directory-pricing', 'label' => 'Refresh pricing', 'description' => 'Re-vérification pricing outils'],
             ['flag' => 'cron.directory-formations', 'label' => 'Formations gratuites', 'description' => 'Dimanche 07h00 batch 5'],
+            ['flag' => 'cron.cart-abandonment', 'label' => 'Rappels panier abandonné', 'description' => 'Horaire, rappels email 24h et 72h pour commandes Shop pending'],
         ];
 
         if (! class_exists(\Laravel\Pennant\Feature::class)) {
@@ -168,6 +169,7 @@ class SchedulerController extends Controller
             'cron.directory-tutorials',
             'cron.directory-pricing',
             'cron.directory-formations',
+            'cron.cart-abandonment',
         ];
 
         if (! in_array($flag, $allowed, true)) {
