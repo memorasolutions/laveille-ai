@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use Modules\Newsletter\Models\NewsletterEvent;
 use Modules\Newsletter\Models\Subscriber;
 
 class BrevoWebhookController extends Controller
@@ -40,6 +41,16 @@ class BrevoWebhookController extends Controller
         if (! $subscriber) {
             return response()->json(['status' => 'ok'], 200);
         }
+
+        NewsletterEvent::create([
+            'email' => $email,
+            'subscriber_id' => $subscriber?->id,
+            'event' => $event,
+            'message_id' => $payload['message-id'] ?? null,
+            'link' => $event === 'clicked' ? ($payload['link'] ?? null) : null,
+            'ip' => $request->ip(),
+            'metadata' => $payload,
+        ]);
 
         match ($event) {
             'hard_bounce', 'complaint', 'blocked' => $this->handlePermanentFailure($subscriber, $event),

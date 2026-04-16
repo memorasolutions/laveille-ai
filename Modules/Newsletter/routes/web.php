@@ -44,6 +44,7 @@ Route::prefix('admin/newsletter')
     ->group(function () {
         // Newsletter subscribers - view/delete
         Route::get('/', [NewsletterAdminController::class, 'index'])->name('index')->middleware('permission:view_newsletter');
+        Route::get('/stats', [\Modules\Newsletter\Http\Controllers\Admin\NewsletterStatsController::class, 'index'])->name('stats')->middleware('permission:view_newsletter');
         Route::get('/export', [NewsletterAdminController::class, 'export'])->name('export')->middleware('permission:view_newsletter');
         Route::delete('/{subscriber}', [NewsletterAdminController::class, 'destroy'])->name('destroy')->middleware('permission:manage_newsletter');
 
