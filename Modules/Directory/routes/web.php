@@ -26,6 +26,7 @@ Route::middleware('web')->group(function () {
 // Collections utilisateur (authenticated)
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/user/collections', [CollectionController::class, 'myCollections'])->name('collections.my');
+    Route::get('/user/collections/list', [CollectionController::class, 'listJson'])->name('collections.list');
     Route::post('/user/collections', [CollectionController::class, 'store'])->name('collections.store');
     Route::delete('/user/collections/{collection}', [CollectionController::class, 'destroy'])->name('collections.destroy');
     Route::post('/api/collections/toggle-tool', [CollectionController::class, 'toggleTool'])->name('collections.toggle-tool');

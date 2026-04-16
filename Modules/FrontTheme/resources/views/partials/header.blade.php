@@ -137,6 +137,12 @@
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Boutique') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Merch IA et technologie') }}</div></div>
                                             </a>
                                             @endif
+                                            @if(Route::has('collections.index'))
+                                            <a href="{{ route('collections.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                                                <span style="font-size:18px;line-height:1;">📁</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Collections') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Listes d\'outils de la communauté') }}</div></div>
+                                            </a>
+                                            @endif
                                         </div>
                                         {{-- Colonne droite : communauté + CTA --}}
                                         <div style="flex:1!important;">
@@ -174,6 +180,7 @@
                                     @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>@endif
                                     @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>@endif
+                                    @if(Route::has('collections.index'))<li><a href="{{ route('collections.index') }}">{{ __('Collections') }}</a></li>@endif
                                     @if(Route::has('roadmap.boards.index'))<li><a href="{{ route('roadmap.boards.index') }}">{{ __('Propositions') }}</a></li>@endif
                                     @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>@endif
                                 </ul>

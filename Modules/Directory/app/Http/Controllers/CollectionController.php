@@ -33,6 +33,25 @@ class CollectionController extends Controller
         return view('directory::public.collections.show', compact('collection'));
     }
 
+    public function listJson(Request $request): JsonResponse
+    {
+        $toolId = (int) $request->query('tool_id', 0);
+
+        $collections = ToolCollection::forUser((int) auth()->id())
+            ->latest()
+            ->get(['id', 'name', 'is_public'])
+            ->map(function (ToolCollection $c) use ($toolId): array {
+                return [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'is_public' => $c->is_public,
+                    'has_tool' => $toolId > 0 && $c->hasTool($toolId),
+                ];
+            });
+
+        return response()->json($collections);
+    }
+
     public function myCollections(): View
     {
         $collections = ToolCollection::where('user_id', auth()->id())

@@ -424,6 +424,9 @@
                 <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 20px; font-weight: 800; color: #111827;">{{ __('Envie d\'essayer') }} {{ $tool->name }} ?</h3>
                 <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
                 <div style="margin-top: 14px; font-size: 13px; color: #059669; font-weight: 600;">✓ {{ __('Vérifié par La veille') }}</div>
+                <div style="margin-top: 16px;">
+                    @include('directory::public.partials.collection-button', ['tool' => $tool])
+                </div>
             </div>
             @endif
 
