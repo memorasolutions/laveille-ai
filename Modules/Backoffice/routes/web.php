@@ -377,6 +377,7 @@ Route::prefix('admin')
             Route::put('scheduler/{scheduledTask}', [SchedulerController::class, 'update'])->name('scheduler.update');
             Route::delete('scheduler/{scheduledTask}', [SchedulerController::class, 'destroy'])->name('scheduler.destroy');
             Route::post('scheduler/{scheduledTask}/toggle', [SchedulerController::class, 'toggle'])->name('scheduler.toggle');
+            Route::post('scheduler/kill-switch/{flag}/toggle', [SchedulerController::class, 'toggleKillSwitch'])->name('scheduler.kill-switch.toggle')->where('flag', '[a-z0-9.\-]+');
             Route::get('mail-log', [MailLogController::class, 'index'])->name('mail-log');
             Route::get('system-info', [SystemInfoController::class, 'index'])->name('system-info');
             Route::get('data-retention', [DataRetentionController::class, 'index'])->name('data-retention');

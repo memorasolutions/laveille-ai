@@ -27,6 +27,73 @@
     </div>
 </div>
 
+{{-- Kill switches automatisations (Laravel Pennant) --}}
+@if(!empty($killSwitches))
+@php
+    $activeKs = collect($killSwitches)->where('active', true)->count();
+    $totalKs = count($killSwitches);
+@endphp
+<div class="card mb-3">
+    <div class="card-header py-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+        <h5 class="fw-semibold mb-0 d-flex align-items-center gap-2">
+            <i data-lucide="shield-alert" class="text-warning icon-sm"></i>
+            {{ __('Kill switches automatisations') }}
+        </h5>
+        <span class="badge bg-{{ $activeKs === $totalKs ? 'success' : 'warning' }} bg-opacity-10 text-{{ $activeKs === $totalKs ? 'success' : 'warning' }}">
+            {{ $activeKs }} / {{ $totalKs }} {{ __('actifs') }}
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="py-3 px-4 fw-semibold text-body" style="width:22%">{{ __('Flag') }}</th>
+                        <th class="py-3 px-4 fw-semibold text-body">{{ __('Automatisation') }}</th>
+                        <th class="py-3 px-4 fw-semibold text-body" style="width:10%">{{ __('Statut') }}</th>
+                        <th class="py-3 px-4 fw-semibold text-body text-end" style="width:14%">{{ __('Action') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($killSwitches as $ks)
+                    <tr>
+                        <td class="py-3 px-4 align-middle">
+                            <code class="text-primary small bg-primary bg-opacity-10 px-2 py-1 rounded">{{ $ks['flag'] }}</code>
+                        </td>
+                        <td class="py-3 px-4 align-middle">
+                            <div class="fw-medium text-body">{{ $ks['label'] }}</div>
+                            <small class="text-muted">{{ $ks['description'] }}</small>
+                        </td>
+                        <td class="py-3 px-4 align-middle">
+                            @if($ks['active'])
+                                <span class="badge bg-success">{{ __('Actif') }}</span>
+                            @else
+                                <span class="badge bg-danger">{{ __('En pause') }}</span>
+                            @endif
+                        </td>
+                        <td class="py-3 px-4 align-middle text-end">
+                            <form action="{{ route('admin.scheduler.kill-switch.toggle', ['flag' => $ks['flag']]) }}" method="POST" class="d-inline">
+                                @csrf
+                                @if($ks['active'])
+                                    <button type="submit" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1" title="{{ __('Mettre en pause') }}" onclick="return confirm('{{ __('Désactiver cette automatisation ?') }}')">
+                                        <i data-lucide="pause" class="icon-sm"></i> {{ __('Pause') }}
+                                    </button>
+                                @else
+                                    <button type="submit" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1" title="{{ __('Réactiver') }}">
+                                        <i data-lucide="play" class="icon-sm"></i> {{ __('Activer') }}
+                                    </button>
+                                @endif
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Tâches système --}}
 <div class="card mb-3">
     <div class="card-header py-3 px-4 border-bottom">

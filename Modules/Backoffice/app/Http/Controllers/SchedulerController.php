@@ -41,7 +41,78 @@ class SchedulerController extends Controller
             'subtitle' => 'Scheduler',
             'systemTasks' => $systemTasks,
             'customTasks' => $customTasks,
+            'killSwitches' => $this->killSwitches(),
         ]);
+    }
+
+    /**
+     * Retourne la liste des 9 kill switches Pennant avec leur état actuel.
+     *
+     * @return list<array{flag: string, label: string, description: string, active: bool}>
+     */
+    private function killSwitches(): array
+    {
+        $flags = [
+            ['flag' => 'cron.newsletter-send', 'label' => 'Envoi newsletter hebdomadaire', 'description' => 'Mercredi 9h, digest aux 48 abonnés'],
+            ['flag' => 'cron.newsletter-preview', 'label' => 'Preview newsletter', 'description' => 'Mardi 9h, envoi aperçu à l\'admin'],
+            ['flag' => 'cron.ai-enrich', 'label' => 'Enrichissement IA outils', 'description' => '6 commandes Directory (enrich, summarize, alternatives, reenrich-stale, screenshots, FR trad)'],
+            ['flag' => 'cron.gelato-sync', 'label' => 'Sync prix Gelato', 'description' => 'Dimanche 3h, sync coûts POD'],
+            ['flag' => 'cron.news-fetch', 'label' => 'Fetch news RSS', 'description' => ':15 chaque heure, 23 sources'],
+            ['flag' => 'cron.directory-discovery', 'label' => 'Découverte outils', 'description' => '04h00 Product Hunt + RSS'],
+            ['flag' => 'cron.directory-tutorials', 'label' => 'Tutoriels YouTube', 'description' => '05h00 batch 5, enrich FR'],
+            ['flag' => 'cron.directory-pricing', 'label' => 'Refresh pricing', 'description' => 'Re-vérification pricing outils'],
+            ['flag' => 'cron.directory-formations', 'label' => 'Formations gratuites', 'description' => 'Dimanche 07h00 batch 5'],
+        ];
+
+        if (! class_exists(\Laravel\Pennant\Feature::class)) {
+            foreach ($flags as $i => $item) {
+                $flags[$i]['active'] = true;
+            }
+            return $flags;
+        }
+
+        foreach ($flags as $i => $item) {
+            $flags[$i]['active'] = \Laravel\Pennant\Feature::active($item['flag']);
+        }
+        return $flags;
+    }
+
+    /**
+     * Bascule un kill switch Pennant (whitelist stricte).
+     */
+    public function toggleKillSwitch(string $flag): RedirectResponse
+    {
+        $allowed = [
+            'cron.newsletter-send',
+            'cron.newsletter-preview',
+            'cron.ai-enrich',
+            'cron.gelato-sync',
+            'cron.news-fetch',
+            'cron.directory-discovery',
+            'cron.directory-tutorials',
+            'cron.directory-pricing',
+            'cron.directory-formations',
+        ];
+
+        if (! in_array($flag, $allowed, true)) {
+            abort(404, 'Kill switch inconnu.');
+        }
+
+        if (! class_exists(\Laravel\Pennant\Feature::class)) {
+            return redirect()->route('admin.scheduler')
+                ->with('error', 'Laravel Pennant n\'est pas installé.');
+        }
+
+        if (\Laravel\Pennant\Feature::active($flag)) {
+            \Laravel\Pennant\Feature::deactivate($flag);
+            $state = 'désactivé';
+        } else {
+            \Laravel\Pennant\Feature::activate($flag);
+            $state = 'activé';
+        }
+
+        return redirect()->route('admin.scheduler')
+            ->with('success', "Le kill switch « {$flag} » a été {$state}.");
     }
 
     public function create(): View
