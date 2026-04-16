@@ -97,6 +97,9 @@ class AppServiceProvider extends ServiceProvider
         Feature::define('cron.directory-pricing', true);
         Feature::define('cron.directory-formations', true);
 
+        // Kill switch Shop cart abandonment recovery (session 16g)
+        Feature::define('cron.cart-abandonment', true);
+
         $this->configureRateLimiting();
         $this->configureQueueFailureHandling();
     }

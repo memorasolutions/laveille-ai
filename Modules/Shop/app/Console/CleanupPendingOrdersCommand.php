@@ -8,9 +8,9 @@ use Modules\Shop\Models\Order;
 
 class CleanupPendingOrdersCommand extends Command
 {
-    protected $signature = 'shop:cleanup-pending {--hours=24}';
+    protected $signature = 'shop:cleanup-pending {--hours=168}';
 
-    protected $description = 'Supprime les commandes en attente (pending) expirées';
+    protected $description = 'Supprime les commandes en attente (pending) expirées (défaut: 168h / 7 jours pour laisser la place aux rappels d\'abandon)';
 
     public function handle(): int
     {

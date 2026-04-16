@@ -50,6 +50,7 @@ class ShopServiceProvider extends ServiceProvider
             \Modules\Shop\Console\SyncGelatoPricesCommand::class,
             \Modules\Shop\Console\SyncGelatoStoreCommand::class,
             \Modules\Shop\Console\CleanupPendingOrdersCommand::class,
+            \Modules\Shop\Console\SendAbandonmentRemindersCommand::class,
         ]);
     }
 
@@ -61,7 +62,8 @@ class ShopServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
             $schedule->command('shop:sync-prices')->dailyAt('04:00')->withoutOverlapping();
-            $schedule->command('shop:cleanup-pending --hours=24')->dailyAt('03:00');
+            $schedule->command('shop:cleanup-pending --hours=168')->dailyAt('03:00');
+            $schedule->command('shop:send-abandonment-reminders')->hourly()->withoutOverlapping();
         });
     }
 
