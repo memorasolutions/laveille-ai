@@ -8,16 +8,27 @@ use Modules\Directory\Http\Controllers\Admin\ModerationController;
 use Modules\Directory\Http\Controllers\CommunityController;
 use Modules\Directory\Http\Controllers\LeaderboardController;
 use Modules\Directory\Http\Controllers\ProfileController;
+use Modules\Directory\Http\Controllers\CollectionController;
 use Modules\Directory\Http\Controllers\PublicDirectoryController;
 use Modules\Directory\Http\Controllers\RoadmapController;
 
 Route::middleware('web')->group(function () {
+    Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
+    Route::get('/collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
     Route::get('/annuaire', [PublicDirectoryController::class, 'index'])->name('directory.index');
     Route::get('/annuaire/classement', [LeaderboardController::class, 'index'])->name('directory.leaderboard');
     Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare');
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap');
     Route::get('/membre/{id}', [ProfileController::class, 'show'])->name('directory.profile');
     Route::get('/annuaire/{slug}', [PublicDirectoryController::class, 'show'])->name('directory.show')->middleware('doNotCacheResponse');
+});
+
+// Collections utilisateur (authenticated)
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/user/collections', [CollectionController::class, 'myCollections'])->name('collections.my');
+    Route::post('/user/collections', [CollectionController::class, 'store'])->name('collections.store');
+    Route::delete('/user/collections/{collection}', [CollectionController::class, 'destroy'])->name('collections.destroy');
+    Route::post('/api/collections/toggle-tool', [CollectionController::class, 'toggleTool'])->name('collections.toggle-tool');
 });
 
 // Soumission + communauté (authenticated users)
