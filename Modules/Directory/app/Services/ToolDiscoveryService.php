@@ -11,6 +11,42 @@ use Modules\Directory\Models\Tool;
 
 class ToolDiscoveryService
 {
+    private const TRACKING_PARAMS = [
+        'ref', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+        'fbclid', 'gclid', 'msclkid', 'mc_cid', 'mc_eid',
+    ];
+
+    public static function cleanUrl(string $url): string
+    {
+        $parts = parse_url($url);
+        if (! $parts || empty($parts['host'])) {
+            return $url;
+        }
+
+        $query = [];
+        if (! empty($parts['query'])) {
+            parse_str($parts['query'], $query);
+            foreach (self::TRACKING_PARAMS as $key) {
+                unset($query[$key]);
+            }
+        }
+
+        $out = ($parts['scheme'] ?? 'https').'://'.$parts['host'];
+        if (isset($parts['port'])) {
+            $out .= ':'.$parts['port'];
+        }
+        $out .= $parts['path'] ?? '';
+
+        if (! empty($query)) {
+            $out .= '?'.http_build_query($query);
+        }
+        if (isset($parts['fragment'])) {
+            $out .= '#'.$parts['fragment'];
+        }
+
+        return $out;
+    }
+
     public function discoverAll(): array
     {
         $allTools = [];
@@ -82,7 +118,7 @@ class ToolDiscoveryService
             }
             $tools[] = [
                 'name' => $node['name'],
-                'url' => $node['website'],
+                'url' => self::cleanUrl($node['website']),
                 'description' => $node['tagline'] ?? '',
                 'pricing' => $this->mapPricing($node['pricingType'] ?? ''),
                 'source' => 'producthunt',
@@ -160,7 +196,7 @@ class ToolDiscoveryService
 
                     $tools[] = [
                         'name' => $title,
-                        'url' => $realUrl,
+                        'url' => self::cleanUrl($realUrl),
                         'description' => $desc,
                         'pricing' => 'freemium',
                         'source' => "rss:{$feedName}",
@@ -182,6 +218,8 @@ class ToolDiscoveryService
         if (! $url || ! $name) {
             return null;
         }
+
+        $url = self::cleanUrl($url);
 
         // Dédup par domaine (sauf plateformes d'agrégation)
         $host = parse_url($url, PHP_URL_HOST);
