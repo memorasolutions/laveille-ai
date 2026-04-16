@@ -2,6 +2,7 @@
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Modules\Directory\Models\Tool;
@@ -10,7 +11,9 @@ use Modules\Directory\Services\OpenRouterService;
 
 class EnrichFormationsCommand extends Command
 {
-    protected $signature = 'tools:enrich-formations {--batch=5}';
+    use HasKillSwitch;
+
+    protected $signature = 'tools:enrich-formations {--batch=5} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Enrichit les outils avec des formations gratuites via sonar-pro';
 
@@ -20,6 +23,10 @@ class EnrichFormationsCommand extends Command
             $this->error('Module Directory introuvable.');
 
             return self::FAILURE;
+        }
+
+        if ($this->shouldSkipForKillSwitch('cron.directory-formations')) {
+            return self::SUCCESS;
         }
 
         $apiKey = config('directory.openrouter_api_key') ?: env('OPENROUTER_API_KEY');

@@ -2,6 +2,7 @@
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Modules\Directory\Models\Tool;
@@ -10,12 +11,18 @@ use Modules\Directory\Services\YouTubeService;
 
 class EnrichTutorialsCommand extends Command
 {
-    protected $signature = 'tools:enrich-tutorials {--batch=5}';
+    use HasKillSwitch;
+
+    protected $signature = 'tools:enrich-tutorials {--batch=5} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Enrichit les outils publiés avec des tutoriels YouTube FR manquants';
 
     public function handle(): int
     {
+        if ($this->shouldSkipForKillSwitch('cron.directory-tutorials')) {
+            return self::SUCCESS;
+        }
+
         if (! class_exists(Tool::class) || ! class_exists(ToolResource::class)) {
             $this->error('Le module Directory est désactivé ou introuvable.');
 

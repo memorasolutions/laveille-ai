@@ -2,6 +2,7 @@
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Modules\Directory\Models\Tool;
@@ -9,12 +10,18 @@ use Modules\Directory\Services\OpenRouterService;
 
 class RefreshPricingCommand extends Command
 {
-    protected $signature = 'tools:refresh-pricing {--batch=5}';
+    use HasKillSwitch;
+
+    protected $signature = 'tools:refresh-pricing {--batch=5} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Vérifie et met à jour le pricing des outils via sonar-pro';
 
     public function handle(): int
     {
+        if ($this->shouldSkipForKillSwitch('cron.directory-pricing')) {
+            return self::SUCCESS;
+        }
+
         if (! class_exists(Tool::class)) {
             $this->error('Module Directory introuvable.');
 

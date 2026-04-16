@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\News\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
@@ -13,12 +14,18 @@ use Modules\Settings\Facades\Settings;
 
 class FetchNewsCommand extends Command
 {
-    protected $signature = 'news:fetch {--source= : ID source spécifique}';
+    use HasKillSwitch;
+
+    protected $signature = 'news:fetch {--source= : ID source spécifique} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Récupère les articles RSS, score et génère les résumés structurés IA.';
 
     public function handle(RssFetcherService $fetcher, AiSummaryService $summarizer): int
     {
+        if ($this->shouldSkipForKillSwitch('cron.news-fetch')) {
+            return self::SUCCESS;
+        }
+
         $query = NewsSource::active();
 
         if ($sourceId = $this->option('source')) {

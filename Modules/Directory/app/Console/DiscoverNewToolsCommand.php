@@ -4,20 +4,28 @@ declare(strict_types=1);
 
 namespace Modules\Directory\Console;
 
+use App\Console\Concerns\HasKillSwitch;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Modules\Directory\Services\ToolDiscoveryService;
 
 class DiscoverNewToolsCommand extends Command
 {
+    use HasKillSwitch;
+
     protected $signature = 'tools:discover-new
         {--dry-run : Simuler sans insérer}
-        {--source= : Filtrer une source (producthunt|rss)}';
+        {--source= : Filtrer une source (producthunt|rss)}
+        {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Découvre de nouveaux outils IA depuis Product Hunt et flux RSS';
 
     public function handle(): int
     {
+        if ($this->shouldSkipForKillSwitch('cron.directory-discovery')) {
+            return self::SUCCESS;
+        }
+
         $dryRun = $this->option('dry-run');
         $source = $this->option('source');
 

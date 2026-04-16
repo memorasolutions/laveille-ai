@@ -90,6 +90,13 @@ class AppServiceProvider extends ServiceProvider
         Feature::define('cron.ai-enrich', true);
         Feature::define('cron.gelato-sync', true);
 
+        // Kill switches supplémentaires (session 16e — étendus aux modules News/Directory)
+        Feature::define('cron.news-fetch', true);
+        Feature::define('cron.directory-discovery', true);
+        Feature::define('cron.directory-tutorials', true);
+        Feature::define('cron.directory-pricing', true);
+        Feature::define('cron.directory-formations', true);
+
         $this->configureRateLimiting();
         $this->configureQueueFailureHandling();
     }
