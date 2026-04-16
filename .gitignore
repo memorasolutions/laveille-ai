@@ -49,6 +49,17 @@ tests/Browser/screenshots/
 # Fichiers Claude/AI session
 .claude/SESSION_STATE.md
 .claude/plans/
+.claude/projects/
+.claude/logo-pack/
+.claude/logo-pack-*.zip
+.claude/google.com!*.xml
+.claude/google.com!*.zip
+
+# Contenu réseaux sociaux privé (drafts Stef)
+.reseaux_sociaux/
+
+# Snapshots QA temporaires
+qa-*-snapshot.md
 
 # Docs temporaires
 AUDIT_REPORT.md
