@@ -150,6 +150,7 @@
         wStep: 0, submitted: false, scraping: false, submitting: false,
         scrapeError: '', duplicates: [],
         toolUrl: '', toolName: '', toolDesc: '', toolShortDesc: '', toolPricing: '', screenshotUrl: '',
+        selectedCollections: [], newCollectionName: '',
         authEmail: '', authCode: '', authSending: false, authVerifying: false, authSent: false, authError: '',
         async analyzeUrl() {
             if (!this.toolUrl || this.scraping) return;
@@ -178,7 +179,7 @@
                 const res = await fetch('{{ route('directory.submit') }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
-                    body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl })
+                    body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl, collection_ids: this.selectedCollections, new_collection_name: this.newCollectionName })
                 });
                 const d = await res.json();
                 if (d.auth_required) { this.wStep = 3; this.authError = ''; }
@@ -217,7 +218,7 @@
             } catch(e) { this.authError = '{{ __('Erreur réseau.') }}'; }
             finally { this.authVerifying = false; }
         },
-        resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; this.authEmail = ''; this.authCode = ''; this.authSent = false; this.authError = ''; }
+        resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; this.selectedCollections = []; this.newCollectionName = ''; this.authEmail = ''; this.authCode = ''; this.authSent = false; this.authError = ''; }
     }">
     <div class="rt-hero">
         <div class="container text-center">
@@ -341,6 +342,40 @@
                         <option value="open_source">🔓 {{ __('Open source') }}</option>
                         <option value="enterprise">🏢 {{ __('Entreprise') }}</option>
                     </select>
+                </div>
+
+                {{-- Ajouter à mes collections (optionnel) --}}
+                <div style="margin-top: 6px; margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); font-size: 13px; margin-bottom: 4px;">
+                        📂 {{ __('Ajouter à mes collections') }}
+                        <span style="font-weight: 400; font-size: 12px; color: #6B7280;">({{ __('optionnel') }})</span>
+                    </label>
+                    <p style="font-size: 12px; color: #6B7280; margin: 0 0 10px 0; line-height: 1.4;">
+                        {{ __('Classe cet outil dans une ou plusieurs de tes collections (privées par défaut).') }}
+                    </p>
+                    @auth
+                        @if(isset($userCollections) && $userCollections->count() > 0)
+                            <div style="max-height: 110px; overflow-y: auto; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 8px 10px; background: #fff; margin-bottom: 10px;">
+                                @foreach($userCollections as $collection)
+                                    <label
+                                        style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; margin: 3px 4px 3px 0; border-radius: 9999px; font-size: 12px; cursor: pointer; user-select: none; transition: all .15s;"
+                                        :style="selectedCollections.includes({{ $collection->id }})
+                                            ? 'background: rgba(11,114,133,0.12); border: 1px solid var(--c-primary); color: var(--c-primary); font-weight: 600;'
+                                            : 'background: #F9FAFB; border: 1px solid #E5E7EB; color: #374151; font-weight: 400;'"
+                                    >
+                                        <input type="checkbox" value="{{ $collection->id }}" x-model.number="selectedCollections" style="display: none;">
+                                        <span x-show="selectedCollections.includes({{ $collection->id }})" style="color: var(--c-primary); font-size: 13px;">✓</span>
+                                        <span>{{ $collection->name }}</span>
+                                        <span style="font-size: 10px; color: #9CA3AF; margin-left: 2px;" title="{{ $collection->is_public ? __('Publique') : __('Privée') }}">{{ $collection->is_public ? '🌐' : '🔒' }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
+                    @endauth
+                    <input type="text" x-model="newCollectionName" maxlength="100"
+                        placeholder="{{ __('Ou créer une nouvelle collection privée...') }}"
+                        aria-label="{{ __('Nom de la nouvelle collection') }}"
+                        style="width: 100%; height: 38px; background: #fff; border: 1px solid #E5E7EB; padding: 0 12px; border-radius: var(--r-base); font-size: 13px; color: var(--c-dark); outline: none;">
                 </div>
             </div>
             <div class="col-md-4 text-center">

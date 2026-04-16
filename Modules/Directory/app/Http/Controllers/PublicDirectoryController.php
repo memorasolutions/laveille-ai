@@ -55,7 +55,14 @@ class PublicDirectoryController extends Controller
                 ->limit((int) Settings::get('directory.top_voted_tools_limit', 6))->get();
         }
 
-        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted'));
+        $userCollections = collect();
+        if (auth()->check() && class_exists(\Modules\Directory\Models\ToolCollection::class)) {
+            $userCollections = \Modules\Directory\Models\ToolCollection::forUser((int) auth()->id())
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug', 'is_public']);
+        }
+
+        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections'));
     }
 
     public function compare(string $categorySlug): View
@@ -181,6 +188,9 @@ class PublicDirectoryController extends Controller
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
             'categories' => 'nullable|array',
             'screenshot' => 'nullable|url|max:500',
+            'collection_ids' => 'nullable|array',
+            'collection_ids.*' => 'integer',
+            'new_collection_name' => 'nullable|string|max:100',
         ]);
 
         $locale = app()->getLocale();
@@ -200,6 +210,40 @@ class PublicDirectoryController extends Controller
 
         if (! empty($validated['categories'])) {
             $tool->categories()->sync($validated['categories']);
+        }
+
+        // Attachement aux collections utilisateur (module désactivable)
+        if (class_exists(\Modules\Directory\Models\ToolCollection::class)) {
+            try {
+                $userId = (int) auth()->id();
+
+                if (! empty($validated['collection_ids'])) {
+                    $safeIds = array_map('intval', $validated['collection_ids']);
+                    $collections = \Modules\Directory\Models\ToolCollection::forUser($userId)
+                        ->whereIn('id', $safeIds)
+                        ->get();
+
+                    foreach ($collections as $collection) {
+                        if ((int) $collection->user_id === $userId) {
+                            $collection->addTool($tool->id);
+                        }
+                    }
+                }
+
+                if (! empty($validated['new_collection_name'])) {
+                    $newCollection = \Modules\Directory\Models\ToolCollection::create([
+                        'user_id' => $userId,
+                        'name' => $validated['new_collection_name'],
+                        'is_public' => false,
+                    ]);
+                    $newCollection->addTool($tool->id);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning(
+                    '[Directory] Échec attachement collection lors de la soumission',
+                    ['tool_id' => $tool->id, 'error' => $e->getMessage()]
+                );
+            }
         }
 
         // Notifier les admins
