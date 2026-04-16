@@ -2,20 +2,31 @@
 
 declare(strict_types=1);
 
+$votingSafeGet = static function (string $key, mixed $default = null): mixed {
+    if (! class_exists(\Modules\Settings\Facades\Settings::class)) {
+        return $default;
+    }
+    try {
+        return \Modules\Settings\Facades\Settings::get($key, $default);
+    } catch (\Throwable $e) {
+        return $default;
+    }
+};
+
 return [
     'name' => 'Voting',
 
     'thresholds' => [
-        'noticed' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.threshold_noticed', env('VOTING_THRESHOLD_NOTICED', 2)) : env('VOTING_THRESHOLD_NOTICED', 2)),
-        'approved' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.threshold_approved', env('VOTING_THRESHOLD_APPROVED', 5)) : env('VOTING_THRESHOLD_APPROVED', 5)),
-        'favorite' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.threshold_favorite', env('VOTING_THRESHOLD_FAVORITE', 10)) : env('VOTING_THRESHOLD_FAVORITE', 10)),
+        'noticed' => (int) $votingSafeGet('voting.threshold_noticed', env('VOTING_THRESHOLD_NOTICED', 2)),
+        'approved' => (int) $votingSafeGet('voting.threshold_approved', env('VOTING_THRESHOLD_APPROVED', 5)),
+        'favorite' => (int) $votingSafeGet('voting.threshold_favorite', env('VOTING_THRESHOLD_FAVORITE', 10)),
     ],
 
-    'rate_limit' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.rate_limit', env('VOTING_RATE_LIMIT', 50)) : env('VOTING_RATE_LIMIT', 50)),
+    'rate_limit' => (int) $votingSafeGet('voting.rate_limit', env('VOTING_RATE_LIMIT', 50)),
 
     'reputation' => [
-        'vote_cast' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.reputation_vote_cast', 1) : 1),
-        'content_community_approved' => (int) (class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('voting.reputation_community_approved', 15) : 15),
+        'vote_cast' => (int) $votingSafeGet('voting.reputation_vote_cast', 1),
+        'content_community_approved' => (int) $votingSafeGet('voting.reputation_community_approved', 15),
     ],
 
     'badge_styles' => [
