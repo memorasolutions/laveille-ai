@@ -151,6 +151,7 @@
         scrapeError: '', duplicates: [],
         toolUrl: '', toolName: '', toolDesc: '', toolShortDesc: '', toolPricing: '', screenshotUrl: '',
         selectedCollections: [], newCollectionName: '',
+        collectionToastShow: false, collectionToastMessage: '',
         authEmail: '', authCode: '', authSending: false, authVerifying: false, authSent: false, authError: '',
         async analyzeUrl() {
             if (!this.toolUrl || this.scraping) return;
@@ -183,7 +184,13 @@
                 });
                 const d = await res.json();
                 if (d.auth_required) { this.wStep = 3; this.authError = ''; }
-                else if (d.success) { this.submitted = true; this.wStep = 0; }
+                else if (d.success) {
+                    const hadNewCollection = this.newCollectionName && this.newCollectionName.trim().length > 0;
+                    const hadSelectedCollections = this.selectedCollections && this.selectedCollections.length > 0;
+                    if (hadNewCollection) { this.collectionToastMessage = '{{ __('Collection créée et outil proposé avec succès !') }}'; this.collectionToastShow = true; setTimeout(() => { this.collectionToastShow = false; }, 5000); }
+                    else if (hadSelectedCollections) { this.collectionToastMessage = '{{ __('Outil ajouté à vos collections.') }}'; this.collectionToastShow = true; setTimeout(() => { this.collectionToastShow = false; }, 4000); }
+                    this.submitted = true; this.wStep = 0;
+                }
                 else { this.scrapeError = d.message || '{{ __('Erreur lors de la soumission.') }}'; }
             } catch(e) { this.scrapeError = '{{ __('Erreur réseau.') }}'; }
             finally { this.submitting = false; }
@@ -220,6 +227,20 @@
         },
         resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; this.selectedCollections = []; this.newCollectionName = ''; this.authEmail = ''; this.authCode = ''; this.authSent = false; this.authError = ''; }
     }">
+    <div x-show="collectionToastShow" x-cloak x-transition.duration.300ms
+         role="status" aria-live="polite"
+         style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #fff; border-left: 4px solid var(--c-primary, #0B7285); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; max-width: 360px; font-size: 14px; color: #111827;">
+        <span style="font-size: 20px;">✅</span>
+        <div style="flex: 1;">
+            <div style="font-weight: 700; margin-bottom: 2px;" x-text="collectionToastMessage"></div>
+            @auth
+            @if(Route::has('collections.my'))
+            <a href="{{ route('collections.my') }}" style="font-size: 12px; color: var(--c-primary, #0B7285); text-decoration: none; font-weight: 600;">{{ __('Voir mes collections') }} →</a>
+            @endif
+            @endauth
+        </div>
+        <button type="button" @click="collectionToastShow = false" aria-label="{{ __('Fermer') }}" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #9CA3AF; line-height: 1; padding: 0;">×</button>
+    </div>
     <div class="rt-hero">
         <div class="container text-center">
             <h1>{{ __('Répertoire techno') }}</h1>
