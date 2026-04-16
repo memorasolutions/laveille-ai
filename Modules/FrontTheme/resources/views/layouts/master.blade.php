@@ -152,6 +152,7 @@
 </head>
 
 <body>
+<a href="#main-content" class="skip-link">{{ __('Aller au contenu principal') }}</a>
     <a href="#main-content" class="skip-link" style="position:absolute;top:-100px;left:0;background:var(--c-primary,#0B7285);color:#fff;padding:8px 16px;z-index:100000;font-weight:700;transition:top .2s;" onfocus="this.style.top='0'" onblur="this.style.top='-100px'">{{ __('Aller au contenu principal') }}</a>
 
     <!-- start page-wrapper -->

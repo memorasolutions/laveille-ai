@@ -1,7 +1,7 @@
 {{-- Carrousel horizontal catégories réutilisable (index + compare) --}}
 @if($categories->count() > 1)
 <div class="rt-cat-slider" x-data="{ scrollLeft: 0 }">
-    <button type="button" class="rt-cat-arrow left" x-show="scrollLeft > 0" x-cloak @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="ti-angle-left"></i></button>
+    <button type="button" class="rt-cat-arrow left" aria-label="{{ __('Catégorie précédente') }}" x-show="scrollLeft > 0" x-cloak @click="$refs.catTrack.scrollBy({ left: -300, behavior: 'smooth' })"><i class="ti-angle-left" aria-hidden="true"></i></button>
     <div class="rt-cat-track" x-ref="catTrack" @scroll="scrollLeft = $refs.catTrack.scrollLeft">
         @foreach($categories as $cat)
             @if(($currentRoute ?? 'index') === 'compare')
@@ -19,7 +19,7 @@
             @endif
         @endforeach
     </div>
-    <button type="button" class="rt-cat-arrow right" @click="$refs.catTrack.scrollBy({ left: 300, behavior: 'smooth' })"><i class="ti-angle-right"></i></button>
+    <button type="button" class="rt-cat-arrow right" aria-label="{{ __('Catégorie suivante') }}" @click="$refs.catTrack.scrollBy({ left: 300, behavior: 'smooth' })"><i class="ti-angle-right" aria-hidden="true"></i></button>
 </div>
 @endif
 

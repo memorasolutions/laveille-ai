@@ -850,6 +850,10 @@ select:focus {
 .rt-badge { display: inline-block; padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; }
 .rt-badge.badge-free { background: #ECFDF5; color: #047857; }
 .rt-badge.badge-freemium { background: #FFFBEB; color: #B45309; }
+
+/* WCAG 2.4.1 Bypass Blocks — skip link global visible au focus clavier */
+.skip-link { position: absolute; top: -40px; left: 0; z-index: 9999; padding: 14px 24px; background: #1a1a1a; color: #fff; font-weight: 700; text-decoration: none; border-radius: 0 0 8px 0; transition: top 0.15s ease-out; }
+.skip-link:focus { top: 0; outline: 3px solid #0B7285; outline-offset: 2px; color: #fff; }
 .rt-badge.badge-paid { background: #F3F4F6; color: #4B5563; }
 .rt-badge.badge-open_source { background: #EFF6FF; color: #2563EB; }
 .rt-hl-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; background: #fff; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.12); display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer; z-index: 10; border: none; padding: 0; color: var(--c-text-muted); font-size: 14px; }
