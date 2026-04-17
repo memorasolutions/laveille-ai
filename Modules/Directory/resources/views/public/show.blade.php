@@ -13,25 +13,6 @@
 <meta name="llm:summary" content="{{ e($tool->name) }} — {{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description ?? ''), 200)) }} ({{ e(ucfirst((string) ($tool->pricing_type ?? 'outil'))) }})">
 <meta name="llm:keywords" content="{{ e($tool->name) }}, IA, intelligence artificielle, {{ e((string) ($tool->category ?? 'outil IA')) }}, francophone, Québec">
 <meta name="llm:url" content="{{ route('directory.show', $tool->slug) }}">
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org",
-    "@@type": "SoftwareApplication",
-    "name": "{{ $tool->name }}",
-    "description": "{{ Str::limit(strip_tags($tool->description ?? $tool->short_description ?? ''), 200) }}",
-    "url": "{{ route('directory.show', $tool->slug) }}",
-    "applicationCategory": "{{ $tool->category ?? 'UtilitiesApplication' }}",
-    "operatingSystem": "Web"
-    @if($tool->screenshot)
-    ,"image": "{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}"
-    @endif
-    @if($tool->pricing_type === 'free')
-    ,"offers": { "@@type": "Offer", "price": "0", "priceCurrency": "CAD" }
-    @elseif($tool->pricing_type)
-    ,"offers": { "@@type": "Offer", "availability": "https://schema.org/InStock" }
-    @endif
-}
-</script>
 @endpush
 
 @section('breadcrumb')
@@ -1163,111 +1144,13 @@
 @endsection
 
 @push('scripts')
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org",
-    "@@type": "SoftwareApplication",
-    "name": "{{ e($tool->name) }}",
-    "description": "{{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description), 200)) }}",
-    "url": "{{ $tool->url ?? route('directory.show', $tool->slug) }}",
-    "applicationCategory": "{{ e($tool->categories->first()->name ?? 'Technology') }}",
-    "operatingSystem": "Web",
-    @if($tool->screenshot)
-    "screenshot": "{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}",
-    @endif
-    "offers": {
-        "@@type": "Offer",
-        "price": "{{ in_array($tool->pricing, ['free', 'freemium', 'open_source']) ? '0' : '' }}",
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/OnlineOnly"
-    }
-    @if($tool->reviews->count() > 0)
-    ,"aggregateRating": {
-        "@@type": "AggregateRating",
-        "ratingValue": "{{ number_format($tool->reviews->avg('rating'), 1) }}",
-        "reviewCount": "{{ $tool->reviews->count() }}",
-        "bestRating": "5",
-        "worstRating": "1"
-    }
-    @endif
-    @if($tool->launch_year)
-    ,"datePublished": "{{ $tool->launch_year }}-01-01"
-    @endif
-}
-</script>
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org",
-    "@@type": "BreadcrumbList",
-    "itemListElement": [
-        {"@@type": "ListItem", "position": 1, "name": "{{ __('Accueil') }}", "item": "{{ config('app.url') }}"},
-        {"@@type": "ListItem", "position": 2, "name": "{{ __('Répertoire') }}", "item": "{{ route('directory.index') }}"},
-        {"@@type": "ListItem", "position": 3, "name": "{{ e($tool->name) }}"}
-    ]
-}
-</script>
-@if(!empty($tool->faq))
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org",
-    "@@type": "FAQPage",
-    "mainEntity": [
-        @foreach($tool->faq as $q)
-        {
-            "@@type": "Question",
-            "name": "{{ e($q['question']) }}",
-            "acceptedAnswer": {
-                "@@type": "Answer",
-                "text": "{{ e($q['answer']) }}"
-            }
-        }{{ $loop->last ? '' : ',' }}
-        @endforeach
-    ]
-}
-</script>
-@else
-@php
-    $faqClean = strip_tags($tool->short_description ?: mb_substr(strip_tags($tool->description ?? ''), 0, 200));
-    $faqPricing = match($tool->pricing) {
-        'free' => 'Oui, ' . $tool->name . ' est entièrement gratuit.',
-        'freemium' => $tool->name . ' fonctionne sur un modèle freemium : une version gratuite est disponible, avec des plans payants pour des fonctionnalités avancées.',
-        'open_source' => $tool->name . ' est open source et gratuit.',
-        'paid' => $tool->name . ' est un outil payant.',
-        'contact' => 'La tarification de ' . $tool->name . ' est disponible sur demande.',
-        default => 'Consultez le site officiel de ' . $tool->name . ' pour connaître les tarifs.',
-    };
-    $faqAlts = $similarTools->take(3)->pluck('name')->implode(', ');
-    $faqAltsAnswer = $faqAlts
-        ? 'Parmi les alternatives à ' . $tool->name . ', on trouve notamment : ' . $faqAlts . '.'
-        : 'De nombreuses alternatives sont disponibles dans notre annuaire.';
-    $faqCats = $tool->categories->pluck('name')->implode(', ');
-    $faqAudience = $faqCats
-        ? 'Cet outil s\'adresse aux utilisateurs intéressés par : ' . $faqCats . '.'
-        : 'Professionnels, passionnés et utilisateurs intéressés par les outils IA.';
-    $faqItems = [
-        ['q' => 'Qu\'est-ce que ' . $tool->name . ' ?', 'a' => $faqClean ?: ($tool->name . ' est un outil IA référencé dans notre annuaire.')],
-        ['q' => $tool->name . ' est-il gratuit ?', 'a' => $faqPricing],
-        ['q' => 'Quelles sont les alternatives à ' . $tool->name . ' ?', 'a' => $faqAltsAnswer],
-        ['q' => 'À qui s\'adresse ' . $tool->name . ' ?', 'a' => $faqAudience],
-    ];
-    if ($tool->launch_year) {
-        $faqItems[] = ['q' => 'Depuis quand ' . $tool->name . ' existe ?', 'a' => $tool->name . ' a été lancé en ' . $tool->launch_year . '.'];
-    }
-    $faqLd = [
-        '@context' => 'https://schema.org',
-        '@type' => 'FAQPage',
-        'mainEntity' => array_map(fn($item) => [
-            '@type' => 'Question',
-            'name' => $item['q'],
-            'acceptedAnswer' => [
-                '@type' => 'Answer',
-                'text' => $item['a'],
-            ],
-        ], $faqItems),
-    ];
-@endphp
-<script type="application/ld+json">
-{!! json_encode($faqLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-</script>
-@endif
+{!! \Modules\SEO\Services\JsonLdService::render(
+    \Modules\SEO\Services\JsonLdService::softwareApplication($tool),
+    \Modules\SEO\Services\JsonLdService::breadcrumbs([
+        ['name' => __('Accueil'), 'url' => config('app.url')],
+        ['name' => __('Répertoire'), 'url' => route('directory.index')],
+        ['name' => $tool->name],
+    ]),
+    \Modules\SEO\Services\JsonLdService::toolFaqPage($tool, $similarTools ?? null),
+) !!}
 @endpush

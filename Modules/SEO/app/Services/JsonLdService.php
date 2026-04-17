@@ -100,6 +100,111 @@ final class JsonLdService
         ];
     }
 
+    public static function softwareApplication(object $tool): array
+    {
+        $description = \Illuminate\Support\Str::limit(strip_tags($tool->description ?? $tool->short_description ?? ''), 200);
+
+        $schema = [
+            '@type' => 'SoftwareApplication',
+            'name' => $tool->name,
+            'description' => $description,
+            'url' => route('directory.show', $tool->slug),
+            'applicationCategory' => $tool->categories->first()?->name ?? 'UtilitiesApplication',
+            'operatingSystem' => 'Web',
+            'offers' => [
+                '@type' => 'Offer',
+                'price' => in_array($tool->pricing, ['free', 'freemium', 'open_source']) ? '0' : '',
+                'priceCurrency' => 'CAD',
+                'availability' => 'https://schema.org/OnlineOnly',
+            ],
+        ];
+
+        if ($tool->screenshot) {
+            $schema['image'] = str_starts_with($tool->screenshot, 'http')
+                ? $tool->screenshot
+                : asset($tool->screenshot);
+        }
+
+        if ($tool->reviews?->count() > 0) {
+            $schema['aggregateRating'] = [
+                '@type' => 'AggregateRating',
+                'ratingValue' => number_format($tool->reviews->avg('rating'), 1),
+                'reviewCount' => $tool->reviews->count(),
+                'bestRating' => '5',
+                'worstRating' => '1',
+            ];
+        }
+
+        if ($tool->launch_year) {
+            $schema['datePublished'] = $tool->launch_year . '-01-01';
+        }
+
+        return $schema;
+    }
+
+    public static function toolFaqPage(object $tool, $similarTools = null): array
+    {
+        $questions = [];
+
+        if (! empty($tool->faq) && is_array($tool->faq)) {
+            foreach ($tool->faq as $item) {
+                $questions[] = ['question' => $item['question'] ?? '', 'answer' => $item['answer'] ?? ''];
+            }
+        } else {
+            $name = $tool->name;
+
+            $questions[] = [
+                'question' => "Qu'est-ce que {$name} ?",
+                'answer' => $tool->short_description ?? "{$name} est un outil d'intelligence artificielle disponible en ligne.",
+            ];
+
+            $pricingAnswer = match ($tool->pricing) {
+                'free' => "{$name} est entièrement gratuit.",
+                'freemium' => "{$name} propose une version gratuite avec des fonctionnalités premium payantes.",
+                'open_source' => "{$name} est un logiciel open source et gratuit.",
+                'paid' => "{$name} est un outil payant. Consultez le site officiel pour connaître les tarifs.",
+                'contact' => "Les tarifs de {$name} sont disponibles sur demande. Contactez l'éditeur pour obtenir un devis.",
+                default => "Consultez le site officiel de {$name} pour connaître les conditions tarifaires.",
+            };
+            $questions[] = ['question' => "{$name} est-il gratuit ?", 'answer' => $pricingAnswer];
+
+            $altNames = $similarTools?->take(3)->pluck('name')->implode(', ');
+            $questions[] = [
+                'question' => "Quelles sont les alternatives à {$name} ?",
+                'answer' => $altNames
+                    ? "Parmi les alternatives à {$name}, on retrouve : {$altNames}."
+                    : "Explorez notre répertoire pour découvrir des alternatives à {$name}.",
+            ];
+
+            $categories = $tool->categories->pluck('name')->implode(', ');
+            $questions[] = [
+                'question' => "À qui s'adresse {$name} ?",
+                'answer' => $categories
+                    ? "{$name} s'adresse aux utilisateurs intéressés par : {$categories}."
+                    : "{$name} s'adresse à toute personne cherchant un outil d'intelligence artificielle performant.",
+            ];
+
+            if ($tool->launch_year) {
+                $questions[] = [
+                    'question' => "Depuis quand {$name} existe ?",
+                    'answer' => "{$name} a été lancé en {$tool->launch_year}.",
+                ];
+            }
+        }
+
+        return [
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(fn (array $q) => [
+                '@type' => 'Question',
+                'name' => $q['question'],
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $q['answer'],
+                ],
+            ], $questions),
+        ];
+    }
+
     public static function breadcrumbs(array $items): array
     {
         $itemListElement = [];
