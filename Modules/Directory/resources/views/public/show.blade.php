@@ -663,10 +663,11 @@
             @foreach($resources as $res)
             @php
                 $isYt = !empty($res->video_id);
+                $displayType = $isYt ? 'youtube' : $res->type;
                 $thumbUrl = $isYt ? "https://img.youtube.com/vi/{$res->video_id}/maxresdefault.jpg" : ($res->thumbnail ?? null);
                 $durationFormatted = $res->duration_seconds ? gmdate($res->duration_seconds >= 3600 ? 'G:i:s' : 'i:s', $res->duration_seconds) : null;
             @endphp
-            <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $res->type }}') && (filterLang === '' || filterLang === '{{ $res->language }}') && (filterLevel === '' || filterLevel === '{{ $res->level }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;position:relative;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
+            <div data-mod-item x-data="{ expanded: false }" x-show="(filterType === '' || filterType === '{{ $displayType }}') && (filterLang === '' || filterLang === '{{ $res->language }}') && (filterLevel === '' || filterLevel === '{{ $res->level }}')" style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 4px rgba(0,0,0,0.03);transition:box-shadow .2s;position:relative;" @mouseover="$el.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" @mouseout="!expanded && ($el.style.boxShadow='0 2px 4px rgba(0,0,0,0.03)')">
 
                 {{-- Carte compacte --}}
                 <div @click="expanded = !expanded" style="display:flex;gap:14px;padding:14px;cursor:pointer;align-items:center;">
@@ -691,7 +692,7 @@
                     <div style="flex:1;min-width:0;">
                         <div style="font-weight:700;color:var(--c-dark);font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ $res->title }}</div>
                         <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
-                            <span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;">{{ $res->type }}</span>
+                            <span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;">{{ $displayType }}</span>
                             <span style="background:{{ $res->language === 'fr' ? '#e0e7ff' : '#fef3c7' }};color:{{ $res->language === 'fr' ? '#3730a3' : '#92400e' }};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ strtoupper($res->language) }}</span>
                             @if($res->level)
                                 @php $levelColors = ['beginner' => ['#dcfce7','#166534'], 'intermediate' => ['#fef9c3','#854d0e'], 'advanced' => ['#fee2e2','#991b1b']]; $lc = $levelColors[$res->level] ?? ['#f3f4f6','#374151']; $levelLabels = ['beginner' => 'Débutant', 'intermediate' => 'Intermédiaire', 'advanced' => 'Avancé']; @endphp
@@ -973,7 +974,7 @@
                             @if(Route::has('user.contributions'))
                             <a href="{{ route('user.contributions') }}" style="display:inline-block;padding:10px 24px;background:var(--c-primary);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">{{ __('Voir mes contributions') }}</a>
                             @endif
-                            <button type="button" @click="step=1;submitted=false;toolUrl='';toolName='';toolDesc='';toolShortDesc='';toolPricing='';screenshotUrl='';scrapeError='';duplicates=[]" style="padding:10px 24px;background:#fff;color:var(--c-primary);border:2px solid var(--c-primary);border-radius:8px;font-weight:600;cursor:pointer;">{{ __('Soumettre une autre ressource') }}</button>
+                            <button type="button" @click="step=1;type='';url='';title='';language='fr';videoId=null;thumbnail=null;author=null;duration=null;channelName=null;channelUrl=null;submitting=false;loading=false;isYoutube=false;videoError=null" style="padding:10px 24px;background:#fff;color:var(--c-primary);border:2px solid var(--c-primary);border-radius:8px;font-weight:600;cursor:pointer;">{{ __('Soumettre une autre ressource') }}</button>
                         </div>
                     </div>
                 </div>
