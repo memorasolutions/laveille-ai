@@ -152,7 +152,7 @@
 </head>
 
 <body>
-<a href="#main-content" class="skip-link">{{ __('Aller au contenu principal') }}</a>
+<a href="#main-content" class="skip-link" aria-label="Skip to main content — Aller au contenu principal">{{ __('Aller au contenu principal') }}</a>
 
     <!-- start page-wrapper -->
     <div class="page-wrapper">

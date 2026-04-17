@@ -1,7 +1,5 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
-<!-- Skip navigation (WCAG 2.4.1) -->
-<a href="#main-content" class="sr-only sr-only-focusable" style="position: absolute; top: -40px; left: 0; background: var(--c-primary); color: #fff; padding: 8px 16px; z-index: 10000; transition: top 0.2s;" onfocus="this.style.top='0'" onblur="this.style.top='-40px'">{{ __('Aller au contenu principal') }}</a>
-<!-- Admin bar (visible admins seulement) -->
+{{-- Skip-link WCAG 2.4.1 géré par layout master.blade.php (DRY — session 21 dedup) --}}
 {{-- Barre admin retirée — remplacée par le dropdown avatar dans le header (session 2026-03-28) --}}
 <!-- Start header -->
 <header id="header" class="wpo-site-header">
