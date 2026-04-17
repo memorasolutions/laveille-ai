@@ -52,6 +52,7 @@
         Route::has('admin.directory.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.directory.destroy', $tool->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet outil définitivement ?'), 'danger' => true] : null,
     ]),
 ])
+@include('core::components.mode-toggle', ['editUrl' => route('admin.directory.edit', $tool->id)])
 @endauth
 
 @push('styles')
@@ -155,12 +156,12 @@
             @if($favicon)<img src="{{ $favicon }}" alt="" class="rt-logo" width="64" height="64">@endif
             <div style="flex: 1; min-width: 200px;">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <h1 class="rt-name" style="margin:0;">{{ $tool->name }}</h1>
+                    <h1 class="rt-name" style="margin:0;" data-editable="name">{{ $tool->name }}</h1>
                     @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                         @include('voting::components.vote-button', ['item' => $tool, 'type' => 'tool'])
                     @endif
                 </div>
-                <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;">{{ $tool->short_description }}</p>
+                <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;" data-editable="short_description">{{ $tool->short_description }}</p>
                 @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool'])
             </div>
             @if($tool->url)
@@ -307,7 +308,7 @@
                     👋 {{ __('À propos de') }} {{ $tool->name }}
                 </h3>
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
-                <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;">{!! $descHtmlWithIds !!}</div>
+                <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;" data-editable="description">{!! $descHtmlWithIds !!}</div>
             </div>
 
             {{-- How to use (masque si contenu trop court/generique) --}}
