@@ -53,6 +53,7 @@
     ]),
 ])
 @include('core::components.mode-toggle', ['editUrl' => route('admin.directory.edit', $tool->id)])
+@include('core::components.admin-activity-mini', ['model' => $tool])
 @endauth
 
 @push('styles')

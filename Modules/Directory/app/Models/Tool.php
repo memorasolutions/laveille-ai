@@ -16,14 +16,32 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Directory\Traits\HasSuggestions;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 class Tool extends Model
 {
     use HasSuggestions;
     use HasTranslations;
+    use LogsActivity;
     use \Modules\Voting\Traits\HasCommunityVotes;
     use \Modules\SEO\Traits\NotifiesIndexNow;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'url', 'pricing', 'status', 'short_description', 'description', 'is_featured'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('tool')
+            ->setDescriptionForEvent(fn (string $event): string => match ($event) {
+                'created' => 'Outil créé',
+                'updated' => 'Outil modifié',
+                'deleted' => 'Outil supprimé',
+                default => "Outil {$event}",
+            });
+    }
 
     public function getPublicUrl(): string
     {
