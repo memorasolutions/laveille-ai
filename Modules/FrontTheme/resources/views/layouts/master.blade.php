@@ -258,7 +258,6 @@
     @stack('scripts')
     @include('fronttheme::partials.toast')
     <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
-    <script src="/js/wcag-collapse-inert.js?v={{ filemtime(public_path('js/wcag-collapse-inert.js')) }}" defer></script>
     <script src="/js/sw-register.js" defer></script>
     <script src="/js/newsletter-scroll-trigger.js?v={{ filemtime(public_path('js/newsletter-scroll-trigger.js')) }}" defer></script>
     <script src="/js/ga4-events.js" defer></script>
