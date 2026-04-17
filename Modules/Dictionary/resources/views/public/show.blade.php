@@ -27,6 +27,7 @@
 @if(Route::has('admin.dictionary.edit'))
     @include('core::components.mode-toggle', ['editUrl' => route('admin.dictionary.edit', $term->id)])
 @endif
+@include('core::components.admin-activity-mini', ['model' => $term])
 @endauth
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer la définition --}}

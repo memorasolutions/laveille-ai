@@ -27,6 +27,7 @@
 @if(Route::has('admin.acronyms.edit'))
     @include('core::components.mode-toggle', ['editUrl' => route('admin.acronyms.edit', $acronym->id)])
 @endif
+@include('core::components.admin-activity-mini', ['model' => $acronym])
 @endauth
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer l'acronyme --}}

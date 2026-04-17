@@ -12,6 +12,7 @@ namespace Modules\Dictionary\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
@@ -19,6 +20,10 @@ class Term extends Model
 {
     use HasSuggestions;
     use HasTranslations;
+    use LogsActivityStandard;
+
+    protected array $activitylogFields = ['name', 'definition', 'analogy', 'example', 'did_you_know', 'is_published'];
+    protected string $activitylogName = 'term';
 
     protected array $suggestableFields = [
         'definition' => 'Définition',

@@ -35,6 +35,7 @@
 @if(Route::has('admin.news.articles.edit'))
     @include('core::components.mode-toggle', ['editUrl' => route('admin.news.articles.edit', $article->id)])
 @endif
+@include('core::components.admin-activity-mini', ['model' => $article])
 @endauth
 
 {{-- Meta AEO/LLM-first 2026 + Schema.org NewsArticle + FAQPage --}}

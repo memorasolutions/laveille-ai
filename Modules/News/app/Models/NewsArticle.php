@@ -10,12 +10,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Modules\Community\Traits\HasComments;
 use Modules\Community\Traits\HasReports;
+use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Voting\Traits\HasCommunityVotes;
 
 class NewsArticle extends Model
 {
     use HasComments, HasReports, HasCommunityVotes;
+    use LogsActivityStandard;
     use \Modules\SEO\Traits\NotifiesIndexNow;
+
+    protected array $activitylogFields = ['title', 'seo_title', 'summary', 'description', 'is_published', 'relevance_score'];
+    protected string $activitylogName = 'news_article';
 
     public function getPublicUrl(): string
     {

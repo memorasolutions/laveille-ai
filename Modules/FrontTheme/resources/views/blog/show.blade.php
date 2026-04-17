@@ -57,6 +57,7 @@
 @if(Route::has('admin.blog.articles.edit'))
     @include('core::components.mode-toggle', ['editUrl' => route('admin.blog.articles.edit', $article)])
 @endif
+@include('core::components.admin-activity-mini', ['model' => $article])
 @endauth
 
 @section('content')

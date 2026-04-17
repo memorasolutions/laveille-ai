@@ -10,6 +10,7 @@ namespace Modules\Acronyms\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
@@ -18,7 +19,11 @@ class Acronym extends Model
     use \Modules\Core\Traits\HasModerationStatus;
     use HasSuggestions;
     use HasTranslations;
+    use LogsActivityStandard;
     use \Modules\Voting\Traits\HasCommunityVotes;
+
+    protected array $activitylogFields = ['acronym', 'full_name', 'description', 'website_url', 'is_published'];
+    protected string $activitylogName = 'acronym';
 
     protected array $suggestableFields = [
         'full_name' => 'Nom complet',
