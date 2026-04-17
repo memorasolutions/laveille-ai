@@ -6,6 +6,7 @@ return [
     'name' => 'Directory',
     'ingest_token' => env('DIRECTORY_INGEST_TOKEN'),
     'youtube_api_key' => env('YOUTUBE_API_KEY'),
+    'youtube_api_keys' => array_values(array_filter(array_map('trim', explode(',', (string) env('YOUTUBE_API_KEYS', ''))))),
     'openrouter_api_key' => env('OPENROUTER_API_KEY'),
 
     // Product Hunt API v2 (GraphQL) — token développeur gratuit

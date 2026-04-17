@@ -11,8 +11,7 @@ class YouTubeService
 {
     public function searchTutorials(string $toolName, int $maxResults = 10, ?string $toolUrl = null, string $lang = 'fr'): array
     {
-        $apiKey = config('directory.youtube_api_key');
-        if (empty($apiKey)) {
+        if (empty($this->getApiKeys())) {
             return [];
         }
 
@@ -26,7 +25,6 @@ class YouTubeService
         }
 
         $params = [
-            'key' => $apiKey,
             'q' => $query,
             'part' => 'id',
             'type' => 'video',
@@ -45,13 +43,13 @@ class YouTubeService
 
         return Cache::remember($cacheKey, now()->addDays(14), function () use ($params, $toolName, $lang) {
             try {
-                $response = Http::get('https://www.googleapis.com/youtube/v3/search', $params);
+                $response = $this->callApi('https://www.googleapis.com/youtube/v3/search', $params);
 
-                if ($response->failed()) {
+                if (! $response || $response->failed()) {
                     Log::warning('YouTubeService::searchTutorials — échec API', [
                         'tool_name' => $toolName,
                         'lang' => $lang,
-                        'status' => $response->status(),
+                        'status' => $response ? $response->status() : null,
                     ]);
 
                     return [];
@@ -79,13 +77,12 @@ class YouTubeService
         }
 
         try {
-            $response = Http::get('https://www.googleapis.com/youtube/v3/videos', [
-                'key' => config('directory.youtube_api_key'),
+            $response = $this->callApi('https://www.googleapis.com/youtube/v3/videos', [
                 'id' => implode(',', $videoIds),
                 'part' => 'snippet,statistics,contentDetails',
             ]);
 
-            if ($response->failed()) {
+            if (! $response || $response->failed()) {
                 return [];
             }
 
@@ -230,5 +227,44 @@ class YouTubeService
 
             return [];
         }
+    }
+
+    private function callApi(string $endpoint, array $params): ?\Illuminate\Http\Client\Response
+    {
+        $keys = $this->getApiKeys();
+        $lastResponse = null;
+
+        foreach ($keys as $key) {
+            $response = Http::get($endpoint, array_merge($params, ['key' => $key]));
+            $lastResponse = $response;
+
+            if ($response->status() === 200) {
+                return $response;
+            }
+
+            if ($response->status() === 403 && str_contains($response->body(), 'quotaExceeded')) {
+                Log::warning('YouTubeService::callApi — quotaExceeded, rotation de cle', ['endpoint' => $endpoint]);
+                continue;
+            }
+
+            return $response;
+        }
+
+        Log::warning('YouTube API pool exhausted: tous les quotas epuises');
+
+        return $lastResponse;
+    }
+
+    private function getApiKeys(): array
+    {
+        $keys = config('directory.youtube_api_keys');
+
+        if (is_array($keys) && ! empty($keys)) {
+            return array_values(array_filter($keys, fn ($k) => ! empty($k)));
+        }
+
+        $single = config('directory.youtube_api_key');
+
+        return ! empty($single) ? [$single] : [];
     }
 }
