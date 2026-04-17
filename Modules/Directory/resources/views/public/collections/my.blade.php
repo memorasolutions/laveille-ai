@@ -26,10 +26,10 @@
                         @csrf
                         <div class="form-group" style="margin-bottom: 18px;">
                             <label for="name" style="font-weight: 600; color: #444; font-size: 14px; margin-bottom: 6px; display: block;">
-                                {{ __('Nom') }} <span style="color: #e74c3c;">*</span>
+                                {{ __('Nom') }} <span style="color: #B91C1C;">*</span>
                             </label>
                             <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required placeholder="{{ __('Ex: Mes outils de productivité') }}" style="border-radius: 4px; border: 1px solid #ddd; padding: 10px 14px; font-size: 14px;">
-                            @error('name')<span style="color: #e74c3c; font-size: 12px;">{{ $message }}</span>@enderror
+                            @error('name')<span style="color: #B91C1C; font-size: 12px;">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group" style="margin-bottom: 18px;">
                             <label for="description" style="font-weight: 600; color: #444; font-size: 14px; margin-bottom: 6px; display: block;">{{ __('Description') }}</label>

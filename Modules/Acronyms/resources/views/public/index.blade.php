@@ -208,7 +208,7 @@
                                     <span x-text="scraping ? '' : '{{ __('Auto-remplir') }}'"></span>
                                 </button>
                             </div>
-                            <p x-show="scrapeError" x-cloak x-text="scrapeError" style="color: #E74C3C; font-size: 11px; margin: 4px 0 0;"></p>
+                            <p x-show="scrapeError" x-cloak x-text="scrapeError" style="color: #B91C1C; font-size: 11px; margin: 4px 0 0;"></p>
                         </div>
                         <div class="col-md-6" style="margin-bottom: 14px;">
                             <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('URL du logo') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('auto-détecté') }})</small></label>

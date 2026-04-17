@@ -406,7 +406,7 @@
                     <input type="hidden" name="title" :value="termName">
 
                     <div style="margin-bottom: 14px;">
-                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Définition courte') }} <span style="color: #E74C3C;">*</span></label>
+                        <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Définition courte') }} <span style="color: #B91C1C;">*</span></label>
                         <textarea name="description" required rows="3" x-model="termDef" aria-label="{{ __('Définition courte') }}"
                             :placeholder="'{{ __('Décrivez') }} ' + termName + ' {{ __('en 2-3 phrases simples...') }}'"
                             style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical; background: #fff; color: var(--c-dark);"

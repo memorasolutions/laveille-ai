@@ -339,7 +339,7 @@
         <div class="row">
             <div class="col-md-8">
                 <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l outil') }} <span style="color: #E74C3C;">*</span></label>
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l outil') }} <span style="color: #B91C1C;">*</span></label>
                     <input type="text" x-model="toolName" aria-label="{{ __('Nom de l outil') }}"
                         style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark);">
                 </div>
@@ -354,7 +354,7 @@
                         style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical; color: var(--c-dark);"></textarea>
                 </div>
                 <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Modele economique') }} <span style="color: #E74C3C;">*</span></label>
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Modele economique') }} <span style="color: #B91C1C;">*</span></label>
                     <select x-model="toolPricing" aria-label="{{ __('Modele economique') }}"
                         style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark);">
                         <option value="">{{ __('Choisir...') }}</option>
