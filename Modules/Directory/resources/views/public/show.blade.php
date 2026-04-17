@@ -9,6 +9,10 @@
 @endif
 
 @push('styles')
+{{-- Meta AEO/LLM-first 2026 : aide les crawlers IA (GPTBot, ClaudeBot, PerplexityBot) à citer la fiche --}}
+<meta name="llm:summary" content="{{ e($tool->name) }} — {{ e(Str::limit(strip_tags($tool->short_description ?? $tool->description ?? ''), 200)) }} ({{ e(ucfirst((string) ($tool->pricing_type ?? 'outil'))) }})">
+<meta name="llm:keywords" content="{{ e($tool->name) }}, IA, intelligence artificielle, {{ e((string) ($tool->category ?? 'outil IA')) }}, francophone, Québec">
+<meta name="llm:url" content="{{ route('directory.show', $tool->slug) }}">
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",
