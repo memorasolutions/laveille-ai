@@ -24,6 +24,9 @@
         Route::has('admin.dictionary.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.dictionary.destroy', $term->id), 'method' => 'DELETE', 'confirm' => __('Supprimer ce terme ?'), 'danger' => true] : null,
     ]),
 ])
+@if(Route::has('admin.dictionary.edit'))
+    @include('core::components.mode-toggle', ['editUrl' => route('admin.dictionary.edit', $term->id)])
+@endif
 @endauth
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer la définition --}}
@@ -207,7 +210,7 @@
                     @endif
 
                     {{-- Title + Bookmark --}}
-                    <h1 class="gl-term-title" style="margin: 0 0 0.5rem;">{{ $term->name }}</h1>
+                    <h1 class="gl-term-title" style="margin: 0 0 0.5rem;" data-editable="name">{{ $term->name }}</h1>
                     @include('fronttheme::partials.article-action-bar', ['model' => $term, 'modelType' => 'Modules\\Dictionary\\Models\\Term'])
 
                     {{-- Acronym full form --}}

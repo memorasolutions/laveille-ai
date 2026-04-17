@@ -25,7 +25,7 @@
 
 <style>
     .core-admin-activity-mini {
-        position: fixed; top: 132px; right: 16px; z-index: 8999;
+        position: fixed; top: 180px; right: 16px; z-index: 8998;
         display: inline-flex; align-items: center; gap: 6px;
         font-family: var(--f-body, system-ui, -apple-system, sans-serif);
         font-size: 11px; font-weight: 500; color: #4B5563; font-style: italic;
@@ -36,7 +36,7 @@
     }
     .core-admin-activity-mini__icon { flex-shrink: 0; font-size: 10px; line-height: 1; }
     @media (max-width: 767px) {
-        .core-admin-activity-mini { top: 118px; right: 8px; font-size: 10px; padding: 4px 8px; max-width: 240px; }
+        .core-admin-activity-mini { top: 168px; right: 8px; font-size: 10px; padding: 4px 8px; max-width: 240px; }
     }
     @media print { .core-admin-activity-mini { display: none !important; } }
 </style>

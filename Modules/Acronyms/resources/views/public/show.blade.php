@@ -24,6 +24,9 @@
         Route::has('admin.acronyms.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.acronyms.destroy', $acronym->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet acronyme ?'), 'danger' => true] : null,
     ]),
 ])
+@if(Route::has('admin.acronyms.edit'))
+    @include('core::components.mode-toggle', ['editUrl' => route('admin.acronyms.edit', $acronym->id)])
+@endif
 @endauth
 
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer l'acronyme --}}
@@ -151,7 +154,7 @@
                         </div>
                         <div>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <h1 class="acr-show-h1" style="margin:0;">{{ $acronym->acronym }}</h1>
+                                <h1 class="acr-show-h1" style="margin:0;" data-editable="acronym">{{ $acronym->acronym }}</h1>
                                 @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
                                     @include('voting::components.vote-button', ['item' => $acronym, 'type' => 'acronym'])
                                 @endif

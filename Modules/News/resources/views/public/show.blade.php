@@ -32,6 +32,9 @@
         Route::has('admin.news.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.news.articles.destroy', $article->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
     ]),
 ])
+@if(Route::has('admin.news.articles.edit'))
+    @include('core::components.mode-toggle', ['editUrl' => route('admin.news.articles.edit', $article->id)])
+@endif
 @endauth
 
 {{-- Meta AEO/LLM-first 2026 + Schema.org NewsArticle + FAQPage --}}
@@ -138,7 +141,7 @@ $faqSchema = [
             <div class="col-lg-8">
                 <div class="nw-show">
 
-                    <h1 class="nw-show-title">{{ $article->seo_title ?? $article->title }}</h1>
+                    <h1 class="nw-show-title" data-editable="title">{{ $article->seo_title ?? $article->title }}</h1>
 
                     @php
                         $readText = strip_tags($article->description ?? '') . ' ' . ($article->summary ?? '');

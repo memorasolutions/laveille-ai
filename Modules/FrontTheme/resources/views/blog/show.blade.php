@@ -54,6 +54,9 @@
         Route::has('admin.blog.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.blog.articles.destroy', $article), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
     ]),
 ])
+@if(Route::has('admin.blog.articles.edit'))
+    @include('core::components.mode-toggle', ['editUrl' => route('admin.blog.articles.edit', $article)])
+@endif
 @endauth
 
 @section('content')
@@ -78,7 +81,7 @@
                                     @endif
                                 </ul>
                             </div>
-                            <h1 style="margin: 0 0 12px; font-size: 1.8rem;">{{ $article->title }}</h1>
+                            <h1 style="margin: 0 0 12px; font-size: 1.8rem;" data-editable="title">{{ $article->title }}</h1>
                             @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\Blog\\Models\\Article'])
 
                             {{-- Navigation série (détection automatique par slug "-partie-N") --}}
