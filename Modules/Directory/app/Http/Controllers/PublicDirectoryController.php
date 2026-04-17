@@ -182,9 +182,9 @@ class PublicDirectoryController extends Controller
 
         $validated = $request->validate([
             'url' => 'required|url',
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:80',
             'description' => 'nullable|string|max:2000',
-            'short_description' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string|max:160',
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
             'categories' => 'nullable|array',
             'screenshot' => 'nullable|url|max:500',
@@ -195,6 +195,9 @@ class PublicDirectoryController extends Controller
             'collection_ids' => 'nullable|array',
             'collection_ids.*' => 'integer',
             'new_collection_name' => 'nullable|string|max:100',
+        ], [
+            'name.max' => 'Le nom doit tenir en 80 caractères. Évite les taglines (exemple : "Wooclap", pas "Plateforme de présentation interactive Wooclap").',
+            'short_description.max' => 'Le résumé court doit tenir en 160 caractères (format Twitter).',
         ]);
 
         $locale = app()->getLocale();

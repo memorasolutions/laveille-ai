@@ -12,7 +12,7 @@ class EnrichPendingCommand extends Command
 {
     use HasKillSwitch;
 
-    protected $signature = 'tools:enrich-pending {--batch=3} {--force : Forcer même si kill switch actif}';
+    protected $signature = 'tools:enrich-pending {--batch=3} {--slug= : Slug exact (bypass batch)} {--id= : ID exact (bypass batch)} {--force : Forcer même si kill switch actif}';
 
     protected $description = 'Enrichit les fiches outils IA via OpenRouter (sonar-pro recherche + qwen3-max rédaction)';
 
@@ -32,13 +32,24 @@ class EnrichPendingCommand extends Command
         $openRouter = new OpenRouterService;
         $batch = max(1, (int) $this->option('batch'));
 
-        $tools = Tool::query()
-            ->whereIn('status', ['published', 'pending'])
-            ->whereRaw("CHAR_LENGTH(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(description, '$.\"fr_CA\"')), '')) < 500")
-            ->orderByDesc('clicks_count')
-            ->orderByDesc('is_featured')
-            ->limit($batch)
-            ->get();
+        $slug = $this->option('slug');
+        $id = $this->option('id');
+        if ($id) {
+            $tools = Tool::where('id', (int) $id)->get();
+        } elseif ($slug) {
+            $tools = Tool::where('slug->fr_CA', $slug)
+                ->orWhere('slug->fr', $slug)
+                ->orWhere('slug->en', $slug)
+                ->get();
+        } else {
+            $tools = Tool::query()
+                ->whereIn('status', ['published', 'pending'])
+                ->whereRaw("CHAR_LENGTH(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(description, '$.\"fr_CA\"')), '')) < 500")
+                ->orderByDesc('clicks_count')
+                ->orderByDesc('is_featured')
+                ->limit($batch)
+                ->get();
+        }
 
         if ($tools->isEmpty()) {
             $this->info('Tous les outils sont enrichis. Rien à faire.');
