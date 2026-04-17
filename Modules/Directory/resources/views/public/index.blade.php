@@ -150,6 +150,7 @@
         wStep: 0, submitted: false, scraping: false, submitting: false,
         scrapeError: '', duplicates: [],
         toolUrl: '', toolName: '', toolDesc: '', toolShortDesc: '', toolPricing: '', screenshotUrl: '',
+        hasEducationPricing: false, educationPricingType: '', educationPricingDetails: '', educationPricingUrl: '',
         selectedCollections: [], newCollectionName: '',
         collectionToastShow: false, collectionToastMessage: '',
         authEmail: '', authCode: '', authSending: false, authVerifying: false, authSent: false, authError: '',
@@ -180,7 +181,7 @@
                 const res = await fetch('{{ route('directory.submit') }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
-                    body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl, collection_ids: this.selectedCollections, new_collection_name: this.newCollectionName })
+                    body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl, has_education_pricing: this.hasEducationPricing, education_pricing_type: this.educationPricingType, education_pricing_details: this.educationPricingDetails, education_pricing_url: this.educationPricingUrl, collection_ids: this.selectedCollections, new_collection_name: this.newCollectionName })
                 });
                 const d = await res.json();
                 if (d.auth_required) { this.wStep = 3; this.authError = ''; }
@@ -363,6 +364,40 @@
                         <option value="open_source">🔓 {{ __('Open source') }}</option>
                         <option value="enterprise">🏢 {{ __('Entreprise') }}</option>
                     </select>
+                </div>
+
+                {{-- Tarif éducation enseignants (optionnel) --}}
+                <div style="margin-bottom: 14px;">
+                    <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
+                        <input type="checkbox" x-model="hasEducationPricing" id="education-pricing-toggle" style="margin-top: 2px; accent-color: var(--c-primary); cursor: pointer;">
+                        <label for="education-pricing-toggle" style="font-weight: 600; color: var(--c-dark); font-size: 13px; cursor: pointer; line-height: 1.4;">
+                            🎓 {{ __('Cet outil offre un tarif spécial ou gratuit pour enseignants/étudiants') }}
+                        </label>
+                    </div>
+                    <p style="font-size: 12px; color: #6B7280; margin: 0 0 10px 0; line-height: 1.4;">
+                        💡 {{ __('Coche cette case si l\'outil propose un programme éducation (tarif réduit, gratuit avec courriel @.edu, etc.)') }}
+                    </p>
+
+                    <template x-if="hasEducationPricing">
+                        <div style="border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 14px; background: #F9FAFB; margin-top: 6px;">
+                            <div style="margin-bottom: 14px;">
+                                <label for="education-pricing-type" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Type de tarif éducation') }}</label>
+                                <select id="education-pricing-type" x-model="educationPricingType" style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark); background: #fff; cursor: pointer;">
+                                    <option value="">{{ __('Choisir...') }}</option>
+                                    <option value="free">{{ __('Gratuit pour enseignants') }}</option>
+                                    <option value="discount">{{ __('Tarif réduit / Programme éducation') }}</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 14px;">
+                                <label for="education-pricing-details" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Détails du programme éducation') }}</label>
+                                <textarea id="education-pricing-details" x-model="educationPricingDetails" rows="2" placeholder="{{ __('Ex: 50% de réduction avec courriel @.edu | Gratuit jusqu\'à 30 élèves | Plan Plus offert aux étudiants') }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark); resize: vertical;"></textarea>
+                            </div>
+                            <div>
+                                <label for="education-pricing-url" style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Lien vers la page éducation (optionnel)') }}</label>
+                                <input type="url" id="education-pricing-url" x-model="educationPricingUrl" placeholder="https://exemple.com/education" style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark);">
+                            </div>
+                        </div>
+                    </template>
                 </div>
 
                 {{-- Ajouter à mes collections (optionnel) --}}

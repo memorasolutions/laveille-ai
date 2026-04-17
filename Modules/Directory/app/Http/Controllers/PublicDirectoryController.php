@@ -188,6 +188,10 @@ class PublicDirectoryController extends Controller
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
             'categories' => 'nullable|array',
             'screenshot' => 'nullable|url|max:500',
+            'has_education_pricing' => 'nullable|boolean',
+            'education_pricing_type' => 'nullable|in:free,discount',
+            'education_pricing_details' => 'nullable|string|max:500',
+            'education_pricing_url' => 'nullable|url|max:500',
             'collection_ids' => 'nullable|array',
             'collection_ids.*' => 'integer',
             'new_collection_name' => 'nullable|string|max:100',
@@ -206,6 +210,16 @@ class PublicDirectoryController extends Controller
         $tool->setTranslation('slug', $locale, Str::slug($validated['name']));
         $tool->setTranslation('description', $locale, $validated['description'] ?? '');
         $tool->setTranslation('short_description', $locale, $validated['short_description'] ?? Str::limit($validated['description'] ?? '', 200));
+
+        if (! empty($validated['has_education_pricing'])) {
+            $tool->has_education_pricing = true;
+            $tool->education_pricing_type = $validated['education_pricing_type'] ?? null;
+            $tool->education_pricing_url = $validated['education_pricing_url'] ?? null;
+            if (! empty($validated['education_pricing_details'])) {
+                $tool->setTranslation('education_pricing_details', $locale, $validated['education_pricing_details']);
+            }
+        }
+
         $tool->save();
 
         if (! empty($validated['categories'])) {
