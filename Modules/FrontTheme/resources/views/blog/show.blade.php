@@ -31,6 +31,9 @@
 @endphp
 
 @push('head')
+    <meta name="llm:summary" content="{{ e($article->title) }} — {{ e(Str::limit(strip_tags($article->excerpt ?? $article->content ?? ''), 200)) }}">
+    <meta name="llm:keywords" content="{{ e($article->title) }}, article, blog, IA, intelligence artificielle, francophone, Québec">
+    <meta name="llm:url" content="{{ url('/blog/' . $article->slug) }}">
     <script type="application/ld+json">{!! $schemaJson !!}</script>
 @endpush
 
