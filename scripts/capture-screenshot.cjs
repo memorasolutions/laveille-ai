@@ -16,8 +16,34 @@ if (!url || !outputPath) {
     process.exit(0);
 }
 
-var COOKIE_HIDE = '.cookie-banner, .cookie-consent, #cookie-consent, .cc-window, .onetrust-banner-sdk, #CybotCookiebotDialog, [class*="cookie-banner"], [id*="cookie-banner"]';
-var COOKIE_CLICK = ['.cookie-accept', '#cookie-consent button', '.cc-btn', '.cc-dismiss', '.onetrust-accept-btn-handler', '#accept-cookies', 'button[id*="accept"]', 'button[class*="accept"]'];
+var COOKIE_HIDE = '.cookie-banner, .cookie-consent, #cookie-consent, .cc-window, .onetrust-banner-sdk, #CybotCookiebotDialog, [class*="cookie-banner"], [id*="cookie-banner"], #axeptio_overlay, .ax-widget-overlay, #didomi-notice, #didomi-popup, .didomi-popup-view, #tarteaucitronRoot, #tarteaucitronAlertBig, .qc-cmp2-container, #usercentrics-root, [class*="gdpr"], [class*="consent-banner"], [id*="gdpr"]';
+var COOKIE_CLICK = ['.cookie-accept', '#cookie-consent button', '.cc-btn', '.cc-dismiss', '.onetrust-accept-btn-handler', '#accept-cookies', 'button[id*="accept"]', 'button[class*="accept"]', '.ax-button--primary', '[data-qa="accept-button"]', '#didomi-notice-agree-button', '#tarteaucitronPersonalize2', '#tarteaucitronAllAllowed', 'button[mode="primary"]', '[data-testid="uc-accept-all-button"]', '[aria-label*="accept"]', '[class*="agree"]'];
+
+async function dismissCookies(page) {
+    var hideStyle = COOKIE_HIDE + ' { display: none !important; visibility: hidden !important; opacity: 0 !important; }';
+    var pass = async function () {
+        try { await page.addStyleTag({ content: hideStyle }); } catch (e) {}
+        try {
+            await page.evaluate(function (selectors) {
+                selectors.forEach(function (s) {
+                    try { document.querySelectorAll(s).forEach(function (el) { el.click(); }); } catch (e) {}
+                });
+            }, COOKIE_CLICK);
+        } catch (e) {}
+    };
+    await pass();
+    await new Promise(function (r) { setTimeout(r, 1000); });
+    await pass();
+    try { await page.keyboard.press('Escape'); } catch (e) {}
+    try {
+        await page.evaluate(function (ts) {
+            try { localStorage.setItem('axeptio_answers', '{}'); } catch (e) {}
+            try { localStorage.setItem('didomi_token', 'accepted'); } catch (e) {}
+            try { document.cookie = 'CookieConsent=yes; path=/'; } catch (e) {}
+            try { document.cookie = 'OptanonAlertBoxClosed=' + ts + '; path=/'; } catch (e) {}
+        }, Date.now());
+    } catch (e) {}
+}
 
 // Detecter si la page est bloquee (Cloudflare, CAPTCHA, erreur)
 var BLOCKED_TITLES = ['just a moment', 'attention required', 'access denied', 'security check'];
@@ -65,19 +91,10 @@ function downloadFile(fileUrl, destPath) {
             await page.goto(url, { timeout: 30000, waitUntil: 'networkidle2' });
         } catch (e) { /* continue with partial load */ }
 
-        // CSS hide cookie banners
-        try { await page.addStyleTag({ content: COOKIE_HIDE + ' { display: none !important; visibility: hidden !important; }' }); } catch (e) {}
+        // Dismiss cookies (2 passes + ESC + localStorage pré-accept)
+        await dismissCookies(page);
 
-        // Click cookie accept buttons
-        try {
-            await page.evaluate(function (selectors) {
-                selectors.forEach(function (s) {
-                    try { document.querySelectorAll(s).forEach(function (el) { el.click(); }); } catch (e) {}
-                });
-            }, COOKIE_CLICK);
-        } catch (e) {}
-
-        await new Promise(function (r) { setTimeout(r, 2000); });
+        await new Promise(function (r) { setTimeout(r, 1000); });
 
         // DETECTION : page bloquee?
         var blocked = false;

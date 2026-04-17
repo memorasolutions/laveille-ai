@@ -174,6 +174,11 @@ class DirectoryAdminController extends Controller
     public function destroy(Tool $tool): RedirectResponse
     {
         $tool->delete();
+        $referer = url()->previous();
+
+        if (str_contains($referer, '/annuaire/') && !str_contains($referer, '/admin/')) {
+            return redirect()->route('directory.index')->with('success', __('Outil supprimé.'));
+        }
 
         return redirect()->route('admin.directory.index')->with('success', __('Outil supprimé.'));
     }
