@@ -449,8 +449,10 @@ select:focus {
 .wpo-site-header #navbar > ul li a:focus { color: var(--c-primary); }
 
 /* Panneau lateral droit — contraste WCAG AA (liens blancs sur fond #292932) */
-.header-right-menu-wrap .link-widget ul li a { color: rgba(255,255,255,0.85) !important; }
-.header-right-menu-wrap .link-widget ul li a:hover { color: #fff !important; }
+.header-right-menu-wrap a,
+.header-right-menu-wrap ul li a { color: rgba(255,255,255,0.85) !important; }
+.header-right-menu-wrap a:hover,
+.header-right-menu-wrap ul li a:hover { color: #fff !important; }
 
 /* Footer */
 .wpo-site-footer .link-widget ul li a:hover { color: var(--c-accent); }
