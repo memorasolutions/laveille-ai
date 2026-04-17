@@ -94,10 +94,10 @@ class ReprocessArticlesCommand extends Command
                 if ($aiResult && isset($aiResult['score'])) {
                     $updateData['relevance_score'] = $aiResult['score'];
                     $updateData['structured_summary'] = $aiResult;
-                    $updateData['category_tag'] = $aiResult['category'] ?? $article->category_tag;
-                    $updateData['impact_level'] = $aiResult['impact'] ?? $article->impact_level;
-                    $updateData['seo_title'] = Str::limit($aiResult['seo_title'] ?? $article->seo_title, 250, '');
-                    $updateData['meta_description'] = Str::limit($aiResult['meta_description'] ?? $article->meta_description, 250, '');
+                    $updateData['category_tag'] = mb_substr((string) ($aiResult['category'] ?? $article->category_tag ?? ''), 0, 50);
+                    $updateData['impact_level'] = mb_substr((string) ($aiResult['impact'] ?? $article->impact_level ?? ''), 0, 10);
+                    $updateData['seo_title'] = mb_substr((string) ($aiResult['seo_title'] ?? $article->seo_title ?? ''), 0, 200);
+                    $updateData['meta_description'] = mb_substr((string) ($aiResult['meta_description'] ?? $article->meta_description ?? ''), 0, 200);
                     $updateData['summary'] = $aiResult['hook'] ?? $article->summary;
                     $cat = $aiResult['category'] ?? '?';
                     $this->info("  IA: score={$aiResult['score']} cat={$cat}");
