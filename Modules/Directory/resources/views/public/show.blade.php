@@ -41,6 +41,19 @@
     ])
 @endsection
 
+@auth
+@include('core::components.admin-bar', [
+    'label' => __('Outil admin'),
+    'actions' => array_filter([
+        Route::has('admin.directory.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.directory.edit', $tool->id)] : null,
+        Route::has('admin.directory.capture-screenshot') ? ['label' => __('Recapturer screenshot'), 'icon' => 'camera', 'url' => route('admin.directory.capture-screenshot', $tool->id), 'method' => 'POST', 'confirm' => __('Recapturer le screenshot ?')] : null,
+        Route::has('admin.directory.moderation') ? ['label' => __('Modération'), 'icon' => 'shield', 'url' => route('admin.directory.moderation'), 'target' => '_blank'] : null,
+        ['divider' => true],
+        Route::has('admin.directory.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.directory.destroy', $tool->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet outil définitivement ?'), 'danger' => true] : null,
+    ]),
+])
+@endauth
+
 @push('styles')
 <style>
     .rt-page { padding-bottom: 60px; }
