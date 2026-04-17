@@ -15,7 +15,7 @@ use Modules\News\Services\NewsImageService;
 
 class ReprocessArticlesCommand extends Command
 {
-    protected $signature = 'news:reprocess {--google-only : Uniquement les articles Google News} {--limit=10 : Nombre max d\'articles} {--dry-run}';
+    protected $signature = 'news:reprocess {--google-only : Uniquement les articles Google News} {--unresolved-only : Uniquement ceux sans resolved_url} {--limit=10 : Nombre max d\'articles} {--dry-run}';
 
     protected $description = 'Re-traiter les articles News existants avec le nouveau pipeline';
 
@@ -28,6 +28,10 @@ class ReprocessArticlesCommand extends Command
         if ($this->option('google-only')) {
             $googleSourceIds = NewsSource::where('name', 'like', '%Google%')->pluck('id');
             $query->whereIn('news_source_id', $googleSourceIds);
+        }
+
+        if ($this->option('unresolved-only')) {
+            $query->whereNull('resolved_url');
         }
 
         $articles = $query->get();
