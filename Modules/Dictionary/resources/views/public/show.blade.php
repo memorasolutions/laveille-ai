@@ -333,19 +333,7 @@
 @endsection
 
 @push('scripts')
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org/",
-    "@@type": "DefinedTerm",
-    "@@id": "{{ route('dictionary.show', $term->slug) }}",
-    "name": "{{ $term->name }}",
-    "description": "{{ Str::limit(strip_tags($term->definition), 160) }}",
-    "inDefinedTermSet": {
-        "@@type": "DefinedTermSet",
-        "@@id": "{{ route('dictionary.index') }}",
-        "name": "{{ __('Glossaire IA') }}"
-    },
-    "termCode": "{{ $term->slug }}"
-}
-</script>
+{!! \Modules\SEO\Services\JsonLdService::render(
+    \Modules\SEO\Services\JsonLdService::definedTerm('dictionary.index', __('Glossaire IA'), $term->name, Str::limit(strip_tags($term->definition), 160), (string) $term->slug),
+) !!}
 @endpush

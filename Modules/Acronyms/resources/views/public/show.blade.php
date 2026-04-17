@@ -226,19 +226,13 @@
 @endsection
 
 @push('scripts')
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org/",
-    "@@type": "DefinedTerm",
-    "@@id": "{{ route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())) }}",
-    "name": "{{ $acronym->acronym }}",
-    "description": "{{ $acronym->full_name }}{{ $acronym->description ? ' - ' . Str::limit(strip_tags($acronym->description), 200) : '' }}",
-    "inDefinedTermSet": {
-        "@@type": "DefinedTermSet",
-        "@@id": "{{ route('acronyms.index') }}",
-        "name": "{{ __('Acronymes de l\'éducation au Québec') }}"
-    },
-    "termCode": "{{ $acronym->acronym }}"
-}
-</script>
+{!! \Modules\SEO\Services\JsonLdService::render(
+    \Modules\SEO\Services\JsonLdService::definedTerm(
+        'acronyms.index',
+        __('Acronymes de l\'éducation au Québec'),
+        $acronym->acronym,
+        $acronym->full_name . ($acronym->description ? ' - ' . Str::limit(strip_tags($acronym->description), 200) : ''),
+        $acronym->acronym,
+    ),
+) !!}
 @endpush

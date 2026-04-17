@@ -142,6 +142,50 @@ final class JsonLdService
         return $schema;
     }
 
+    public static function newsArticle(object $article): array
+    {
+        return [
+            '@type' => 'NewsArticle',
+            'headline' => $article->seo_title ?? $article->title,
+            'description' => $article->meta_description ?? \Illuminate\Support\Str::limit($article->summary ?? '', 155),
+            'image' => $article->image_url ? url($article->image_url) : asset('images/og-image.png'),
+            'datePublished' => $article->pub_date?->toIso8601String(),
+            'dateModified' => $article->updated_at->toIso8601String(),
+            'author' => [
+                '@type' => 'Organization',
+                'name' => $article->source->name ?? config('app.name'),
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => config('app.name'),
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => asset('images/favicon.png'),
+                ],
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => route('news.show', $article),
+            ],
+        ];
+    }
+
+    public static function definedTerm(string $indexRouteName, string $setName, string $termName, string $description, ?string $termCode = null): array
+    {
+        return [
+            '@type' => 'DefinedTerm',
+            '@id' => url()->current(),
+            'name' => $termName,
+            'description' => $description,
+            'inDefinedTermSet' => [
+                '@type' => 'DefinedTermSet',
+                '@id' => route($indexRouteName),
+                'name' => $setName,
+            ],
+            'termCode' => $termCode ?? $termName,
+        ];
+    }
+
     public static function toolFaqPage(object $tool, $similarTools = null): array
     {
         $questions = [];

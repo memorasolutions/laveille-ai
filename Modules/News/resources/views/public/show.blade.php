@@ -43,34 +43,13 @@
 <meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} — {{ e(Str::limit(strip_tags($article->meta_description ?? $article->summary ?? $article->description ?? ''), 200)) }} ({{ e($article->source->name ?? 'Actualité IA') }})">
 <meta name="llm:keywords" content="actualité IA, {{ e($article->source->name ?? 'IA') }}, intelligence artificielle, francophone, Québec">
 <meta name="llm:url" content="{{ route('news.show', $article) }}">
-<script type="application/ld+json">
-@php
-$newsSchema = [
-    '@context' => 'https://schema.org',
-    '@type' => 'NewsArticle',
-    'headline' => $article->seo_title ?? $article->title,
-    'description' => $article->meta_description ?? Str::limit($article->summary ?? '', 155),
-    'image' => $article->image_url ? url($article->image_url) : asset('images/og-image.png'),
-    'datePublished' => $article->pub_date?->toIso8601String(),
-    'dateModified' => $article->updated_at->toIso8601String(),
-    'author' => ['@type' => 'Organization', 'name' => $article->source->name ?? config('app.name')],
-    'publisher' => ['@type' => 'Organization', 'name' => config('app.name'), 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/favicon.png')]],
-    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => route('news.show', $article)],
-];
-@endphp
-{!! json_encode($newsSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-</script>
 @if($ss && isset($ss['faq_question']))
-<script type="application/ld+json">
-@php
-$faqSchema = [
-    '@context' => 'https://schema.org',
-    '@type' => 'FAQPage',
-    'mainEntity' => [['@type' => 'Question', 'name' => $ss['faq_question'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $ss['faq_answer'] ?? '']]],
-];
-@endphp
-{!! json_encode($faqSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-</script>
+    {!! \Modules\SEO\Services\JsonLdService::render(
+        \Modules\SEO\Services\JsonLdService::newsArticle($article),
+        ['@type' => 'FAQPage', 'mainEntity' => [['@type' => 'Question', 'name' => $ss['faq_question'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $ss['faq_answer'] ?? '']]]],
+    ) !!}
+@else
+    {!! \Modules\SEO\Services\JsonLdService::render(\Modules\SEO\Services\JsonLdService::newsArticle($article)) !!}
 @endif
 @endpush
 
