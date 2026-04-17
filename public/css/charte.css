@@ -851,9 +851,9 @@ select:focus {
 .rt-badge.badge-free { background: #ECFDF5; color: #047857; }
 .rt-badge.badge-freemium { background: #FFFBEB; color: #B45309; }
 
-/* WCAG 2.4.1 Bypass Blocks — skip link global visible au focus clavier */
-.skip-link { position: absolute; top: -40px; left: 0; z-index: 9999; padding: 14px 24px; background: #1a1a1a; color: #fff; font-weight: 700; text-decoration: none; border-radius: 0 0 8px 0; transition: top 0.15s ease-out; }
-.skip-link:focus { top: 0; outline: 3px solid #0B7285; outline-offset: 2px; color: #fff; }
+/* WCAG 2.4.1 Bypass Blocks — skip link caché jusqu'au focus clavier (pattern visually-hidden) */
+.skip-link { position: absolute; left: 0; top: 0; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; color: #fff; background: #1a1a1a; }
+.skip-link:focus { position: fixed; top: 0; left: 0; width: auto; height: auto; margin: 0; clip: auto; overflow: visible; white-space: normal; padding: 14px 24px; font-weight: 700; text-decoration: none; border-radius: 0 0 8px 0; z-index: 9999; outline: 3px solid #0B7285; outline-offset: 2px; }
 .rt-badge.badge-paid { background: #F3F4F6; color: #4B5563; }
 .rt-badge.badge-open_source { background: #EFF6FF; color: #2563EB; }
 .rt-hl-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; background: #fff; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.12); display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer; z-index: 10; border: none; padding: 0; color: var(--c-text-muted); font-size: 14px; }
