@@ -15,6 +15,17 @@
     ])
 @endsection
 
+@auth
+@include('core::components.admin-bar', [
+    'label' => __('Acronyme admin'),
+    'actions' => array_filter([
+        Route::has('admin.acronyms.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.acronyms.edit', $acronym->id)] : null,
+        ['divider' => true],
+        Route::has('admin.acronyms.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.acronyms.destroy', $acronym->id), 'method' => 'DELETE', 'confirm' => __('Supprimer cet acronyme ?'), 'danger' => true] : null,
+    ]),
+])
+@endauth
+
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer l'acronyme --}}
 @push('head')
 <meta name="llm:summary" content="{{ e($acronym->acronym) }} = {{ e($acronym->full_name) }}. {{ e(Str::limit(strip_tags($acronym->description ?? ''), 180)) }} (Acronyme éducation Québec)">

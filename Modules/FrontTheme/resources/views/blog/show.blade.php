@@ -44,6 +44,18 @@
     ])
 @endsection
 
+@auth
+@include('core::components.admin-bar', [
+    'label' => __('Article admin'),
+    'actions' => array_filter([
+        Route::has('admin.blog.articles.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.blog.articles.edit', $article)] : null,
+        Route::has('admin.blog.comments.index') ? ['label' => __('Modération commentaires'), 'icon' => 'shield', 'url' => route('admin.blog.comments.index'), 'target' => '_blank'] : null,
+        ['divider' => true],
+        Route::has('admin.blog.articles.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.blog.articles.destroy', $article), 'method' => 'DELETE', 'confirm' => __('Supprimer cet article ?'), 'danger' => true] : null,
+    ]),
+])
+@endauth
+
 @section('content')
     <!-- start wpo-blog-single-section -->
     <section class="wpo-blog-single-section section-padding">

@@ -15,6 +15,17 @@
     ])
 @endsection
 
+@auth
+@include('core::components.admin-bar', [
+    'label' => __('Terme admin'),
+    'actions' => array_filter([
+        Route::has('admin.dictionary.edit') ? ['label' => __('Éditer'), 'icon' => 'pencil', 'url' => route('admin.dictionary.edit', $term->id)] : null,
+        ['divider' => true],
+        Route::has('admin.dictionary.destroy') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'url' => route('admin.dictionary.destroy', $term->id), 'method' => 'DELETE', 'confirm' => __('Supprimer ce terme ?'), 'danger' => true] : null,
+    ]),
+])
+@endauth
+
 {{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer la définition --}}
 @push('head')
 <meta name="llm:summary" content="{{ e($term->name) }} — {{ e(Str::limit(strip_tags($term->analogy ?? $term->definition ?? ''), 200)) }} (Glossaire IA)">
