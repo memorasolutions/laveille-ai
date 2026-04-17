@@ -61,7 +61,7 @@
     .rt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); }
     .rt-logo { width: 48px; height: 48px; border-radius: 12px; background: #f9fafb; padding: 3px; border: 1px solid #e5e7eb; flex-shrink: 0; }
     .rt-card-name { font-family: var(--f-heading); font-size: 1.1rem; font-weight: 700; color: var(--c-dark); margin: 0 0 4px; }
-    .rt-card-name a { color: inherit; text-decoration: none; }
+    .rt-card-name a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; padding: 2px 0; }
     .rt-card-name a:hover { color: var(--c-primary); }
     .rt-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .badge-free { background: #D1FAE5; color: #065F46; }
@@ -74,7 +74,7 @@
     .rt-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 14px; border-top: 1px solid #F3F4F6; align-items: center; }
     .rt-btn-visit { background: var(--c-accent); color: #fff !important; border: none; padding: 7px 16px; border-radius: var(--r-btn); font-weight: 600; text-decoration: none !important; font-size: 13px; transition: opacity 0.2s; }
     .rt-btn-visit:hover { opacity: 0.9; color: #fff; }
-    .rt-btn-details { color: var(--c-dark); font-weight: 600; font-size: 13px; text-decoration: none; }
+    .rt-btn-details { color: var(--c-dark); font-weight: 600; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; padding: 2px 6px; }
     .rt-btn-details:hover { color: var(--c-primary); }
     .rt-featured { position: absolute; top: 12px; right: 12px; background: #0B7285; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; z-index: 2; letter-spacing: 0.3px; }
     .rt-stars { color: #F59E0B; font-size: 13px; font-weight: 700; }
