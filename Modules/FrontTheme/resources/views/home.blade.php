@@ -300,7 +300,7 @@
                                 <p>{{ Str::limit($nSs['hook'] ?? $newsItem->summary ?? strip_tags($newsItem->description), 90) }}</p>
                                 <div class="hp-badges">
                                     <span class="hp-badge" style="background: var(--c-primary);">{{ $newsItem->source->name ?? __('Source') }}</span>
-                                    <span style="font-size: 0.6875rem; color: #9ca3af;">{{ $newsItem->pub_date?->diffForHumans() }}</span>
+                                    <span style="font-size: 0.6875rem; color: #6B7280;">{{ $newsItem->pub_date?->diffForHumans() }}</span>
                                 </div>
                             </div>
                         </a>
