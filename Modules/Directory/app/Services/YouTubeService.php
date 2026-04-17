@@ -3,6 +3,7 @@
 namespace Modules\Directory\Services;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -39,31 +40,36 @@ class YouTubeService
             $params['regionCode'] = 'CA';
         }
 
-        try {
-            $response = Http::get('https://www.googleapis.com/youtube/v3/search', $params);
+        $region = $params['regionCode'] ?? 'GLOBAL';
+        $cacheKey = "yt:search:{$region}:{$lang}:{$maxResults}:" . sha1($query);
 
-            if ($response->failed()) {
-                Log::warning('YouTubeService::searchTutorials — échec API', [
+        return Cache::remember($cacheKey, now()->addDays(14), function () use ($params, $toolName, $lang) {
+            try {
+                $response = Http::get('https://www.googleapis.com/youtube/v3/search', $params);
+
+                if ($response->failed()) {
+                    Log::warning('YouTubeService::searchTutorials — échec API', [
+                        'tool_name' => $toolName,
+                        'lang' => $lang,
+                        'status' => $response->status(),
+                    ]);
+
+                    return [];
+                }
+
+                return array_map(
+                    fn ($item) => $item['id']['videoId'],
+                    array_filter($response->json('items') ?? [], fn ($item) => isset($item['id']['videoId']))
+                );
+            } catch (\Throwable $e) {
+                Log::warning('YouTubeService::searchTutorials — exception', [
                     'tool_name' => $toolName,
-                    'lang' => $lang,
-                    'status' => $response->status(),
+                    'message' => $e->getMessage(),
                 ]);
 
                 return [];
             }
-
-            return array_map(
-                fn ($item) => $item['id']['videoId'],
-                array_filter($response->json('items') ?? [], fn ($item) => isset($item['id']['videoId']))
-            );
-        } catch (\Throwable $e) {
-            Log::warning('YouTubeService::searchTutorials — exception', [
-                'tool_name' => $toolName,
-                'message' => $e->getMessage(),
-            ]);
-
-            return [];
-        }
+        });
     }
 
     public function getVideoDetails(array $videoIds): array

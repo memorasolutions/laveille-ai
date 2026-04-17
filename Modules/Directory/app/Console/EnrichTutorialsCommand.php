@@ -46,6 +46,8 @@ class EnrichTutorialsCommand extends Command
         ])
             ->where('status', 'published')
             ->having('resources_count', '<', 5)
+            ->where(fn ($q) => $q->whereNull('tutorials_last_scanned_at')
+                ->orWhere('tutorials_last_scanned_at', '<', now()->subDays(14)))
             ->orderBy('resources_count', 'asc')
             ->orderByDesc('clicks_count')
             ->orderByDesc('is_featured')
@@ -126,6 +128,7 @@ class EnrichTutorialsCommand extends Command
             }
 
             $totalProcessed++;
+            $tool->update(['tutorials_last_scanned_at' => now()]);
         }
 
         $this->newLine();
