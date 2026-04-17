@@ -37,7 +37,7 @@
 
                     <div style="margin-bottom:16px;">
                         <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">{{ __('Détails (optionnel)') }}</label>
-                        <textarea x-model="details" rows="2" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:14px;resize:vertical;" placeholder="{{ __('Précisez votre signalement...') }}"></textarea>
+                        <textarea x-model="details" rows="2" aria-label="{{ __('Détails du signalement') }}" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:14px;resize:vertical;" placeholder="{{ __('Précisez votre signalement...') }}"></textarea>
                     </div>
 
                     <div style="display:flex;gap:8px;justify-content:flex-end;">
