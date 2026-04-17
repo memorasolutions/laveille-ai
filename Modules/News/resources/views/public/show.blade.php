@@ -204,10 +204,11 @@
                     </div>
                     @endif
 
+                    @php $externalUrl = $article->resolved_url ?: $article->url; @endphp
                     <div style="text-align: center; margin: 2rem 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-                        <a href="{{ $article->url }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>
+                        <a href="{{ $externalUrl }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>
                         @if($article->source?->language === 'en')
-                            <a href="https://translate.google.com/translate?sl=en&tl=fr&u={{ urlencode($article->url) }}" target="_blank" rel="noopener" class="nw-cta" style="background: #4285F4;">{{ __('Lire en français') }} <i class="ti-world" style="margin-left: 4px;"></i></a>
+                            <a href="https://translate.google.com/translate?sl=en&tl=fr&u={{ urlencode($externalUrl) }}" target="_blank" rel="noopener" class="nw-cta" style="background: #4285F4;">{{ __('Lire en français') }} <i class="ti-world" style="margin-left: 4px;"></i></a>
                         @endif
                     </div>
 
