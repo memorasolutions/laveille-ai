@@ -20,6 +20,8 @@ DOCS.md
 /public/fonts
 /public/hot
 /public/storage
+/public/images/shop/*-old.*
+/public/images/shop/Gemini_Generated_*
 /storage/*.key
 /storage/pail
 /vendor
