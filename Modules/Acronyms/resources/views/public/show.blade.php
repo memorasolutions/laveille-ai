@@ -15,6 +15,13 @@
     ])
 @endsection
 
+{{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer l'acronyme --}}
+@push('head')
+<meta name="llm:summary" content="{{ e($acronym->acronym) }} = {{ e($acronym->full_name) }}. {{ e(Str::limit(strip_tags($acronym->description ?? ''), 180)) }} (Acronyme éducation Québec)">
+<meta name="llm:keywords" content="{{ e($acronym->acronym) }}, {{ e($acronym->full_name) }}, acronyme éducation, sigle, Québec">
+<meta name="llm:url" content="{{ route('acronyms.show', $acronym->slug) }}">
+@endpush
+
 @push('styles')
 <style>
     .acr-show-wrapper { padding: 10px 0 60px; min-height: 60vh; }

@@ -15,6 +15,13 @@
     ])
 @endsection
 
+{{-- Meta AEO/LLM-first 2026 : aide les crawlers IA à citer la définition --}}
+@push('head')
+<meta name="llm:summary" content="{{ e($term->name) }} — {{ e(Str::limit(strip_tags($term->analogy ?? $term->definition ?? ''), 200)) }} (Glossaire IA)">
+<meta name="llm:keywords" content="{{ e($term->name) }}, glossaire IA, intelligence artificielle, définition, francophone, Québec">
+<meta name="llm:url" content="{{ route('dictionary.show', $term->slug) }}">
+@endpush
+
 @push('styles')
 <style>
     .gl-show-wrapper { padding: 10px 0 60px; min-height: 60vh; }

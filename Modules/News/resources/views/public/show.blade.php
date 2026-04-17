@@ -22,8 +22,11 @@
     ])
 @endsection
 
-{{-- Schema.org NewsArticle + FAQPage --}}
+{{-- Meta AEO/LLM-first 2026 + Schema.org NewsArticle + FAQPage --}}
 @push('head')
+<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} — {{ e(Str::limit(strip_tags($article->meta_description ?? $article->summary ?? $article->description ?? ''), 200)) }} ({{ e($article->source->name ?? 'Actualité IA') }})">
+<meta name="llm:keywords" content="actualité IA, {{ e($article->source->name ?? 'IA') }}, intelligence artificielle, francophone, Québec">
+<meta name="llm:url" content="{{ route('news.show', $article) }}">
 <script type="application/ld+json">
 @php
 $newsSchema = [
