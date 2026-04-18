@@ -129,8 +129,14 @@
     eduFilter: false,
     sortBy: 'all',
     tools: {{ $toolsJson->toJson() }},
+    displayCount: 30,
+    _lastFilterKey: '',
+
+    get filterKey() { return this.search + '|' + this.activePricing + '|' + this.activeCategory + '|' + this.eduFilter + '|' + this.sortBy; },
 
     get filteredTools() {
+        const key = this.filterKey;
+        if (key !== this._lastFilterKey) { this.displayCount = 30; this._lastFilterKey = key; }
         const s = this.search.toLowerCase();
         let t = this.tools.filter(t => {
             const matchSearch = !s || t.name.toLowerCase().includes(s) || t.shortDesc.toLowerCase().includes(s);
@@ -143,6 +149,10 @@
         if (this.sortBy === 'newest') return [...t].sort((a,b) => b.createdTs - a.createdTs);
         return t;
     },
+
+    get visibleTools() { return this.filteredTools.slice(0, this.displayCount); },
+    get hasMore() { return this.displayCount < this.filteredTools.length; },
+    loadMore() { if (this.hasMore) this.displayCount += 30; },
 
     togglePricing(p) { this.activePricing = this.activePricing === p ? '' : p; },
     toggleCategory(c) { this.activeCategory = this.activeCategory === c ? '' : c; },
@@ -650,7 +660,7 @@
 
         {{-- Grid --}}
         <div class="row row-flex">
-            <template x-for="tool in filteredTools" :key="tool.id">
+            <template x-for="tool in visibleTools" :key="tool.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="rt-card">
                         <template x-if="tool.isFeatured"><span class="rt-featured">{{ __('En vedette') }}</span></template>
@@ -716,6 +726,11 @@
         @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
             {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('directory-bottom') !!}
         @endif
+
+        {{-- Sentinel : charge plus au scroll --}}
+        <div x-show="hasMore" x-intersect="loadMore()" class="text-center" style="padding: 24px 0;" role="status" aria-label="{{ __('Chargement en cours') }}">
+            <div style="display: inline-block; width: 24px; height: 24px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
+        </div>
 
         {{-- Empty --}}
         <div x-show="filteredTools.length === 0" x-cloak>
