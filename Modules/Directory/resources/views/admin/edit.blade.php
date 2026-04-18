@@ -125,6 +125,18 @@
                     <small class="text-muted ms-2">Capture le site avec Chromium headless (1200x630, cookie dismiss automatique)</small>
                 </div>
 
+                <div class="mb-3 p-3" style="background:#f8f9fa;border-radius:8px;border:1px solid #e5e7eb;">
+                    <h6 class="mb-2">{{ __('Uploader un screenshot manuel') }}</h6>
+                    <p class="text-muted small mb-2">{{ __('Si Puppeteer ne capture pas bien (sites Cloudflare-protégés, SPA lents), upload un fichier propre. Sera redimensionné automatiquement en 1200×630.') }}</p>
+                    <form action="{{ route('admin.directory.upload-screenshot', $tool) }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+                        @csrf
+                        <input type="file" name="screenshot" accept="image/jpeg,image/png,image/webp" required class="form-control form-control-sm" style="max-width: 360px;">
+                        <button type="submit" class="btn btn-sm btn-outline-success">
+                            <i data-lucide="upload" class="icon-sm"></i> {{ __('Uploader') }}
+                        </button>
+                    </form>
+                </div>
+
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured" value="1" {{ old('is_featured', $tool->is_featured) ? 'checked' : '' }}>
                     <label class="form-check-label" for="is_featured">En vedette (sponsorise)</label>

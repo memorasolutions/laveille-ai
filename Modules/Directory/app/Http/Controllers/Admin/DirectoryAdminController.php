@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
+use Intervention\Image\Laravel\Facades\Image;
 use Modules\Directory\Services\ScreenshotService;
 use Modules\Settings\Facades\Settings;
 
@@ -151,6 +152,36 @@ class DirectoryAdminController extends Controller
         \Modules\Directory\Jobs\CaptureScreenshotJob::dispatch($tool);
 
         return back()->with('success', __('Capture screenshot lancée en arrière-plan. Rafraîchissez la page dans 1-2 minutes.'));
+    }
+
+    public function uploadScreenshot(Request $request, Tool $tool): RedirectResponse
+    {
+        $request->validate([
+            'screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        try {
+            $slug = $tool->getTranslation('slug', 'fr_CA') ?: $tool->slug;
+            $filePath = "screenshots/{$slug}.jpg";
+            $fullPath = public_path($filePath);
+
+            if (file_exists($fullPath)) {
+                @copy($fullPath, "{$fullPath}.bak");
+            }
+
+            $image = Image::read($request->file('screenshot')->getRealPath())
+                ->cover(1200, 630)
+                ->toJpeg(85);
+
+            file_put_contents($fullPath, $image);
+
+            $tool->screenshot = $filePath;
+            $tool->saveQuietly();
+
+            return back()->with('success', __('Screenshot uploadé avec succès (redimensionné 1200×630).'));
+        } catch (\Throwable $e) {
+            return back()->with('error', __('Échec upload : :msg', ['msg' => $e->getMessage()]));
+        }
     }
 
     public function setMainScreenshot(Tool $tool, int $screenshotId): RedirectResponse
