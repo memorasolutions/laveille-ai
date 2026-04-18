@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Core\Traits\HasLifecycleStatus;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -22,6 +23,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Tool extends Model
 {
+    use HasLifecycleStatus;
     use HasSuggestions;
     use HasTranslations;
     use LogsActivity;
@@ -31,7 +33,7 @@ class Tool extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'url', 'pricing', 'status', 'short_description', 'description', 'is_featured'])
+            ->logOnly(['name', 'url', 'pricing', 'status', 'short_description', 'description', 'is_featured', 'lifecycle_status', 'lifecycle_date'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('tool')
@@ -72,6 +74,7 @@ class Tool extends Model
         'last_enriched_at', 'enrichment_version',
         'parent_tool_id', 'ecosystem_tag',
         'has_education_pricing', 'education_pricing_type', 'education_pricing_details', 'education_pricing_url',
+        'lifecycle_status', 'lifecycle_date', 'lifecycle_replacement_url', 'lifecycle_replacement_tool_id', 'lifecycle_notes',
     ];
 
     public function submitter(): BelongsTo
@@ -113,6 +116,7 @@ class Tool extends Model
         'target_audience' => 'array',
         'last_enriched_at' => 'datetime',
         'enrichment_version' => 'integer',
+        'lifecycle_date' => 'date',
     ];
 
     public function categories(): BelongsToMany
