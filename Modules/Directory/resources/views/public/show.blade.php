@@ -22,6 +22,123 @@
     ])
 @endsection
 
+@section('share_text')
+@php
+    $shareLines = [];
+
+    $shareLines[] = '🛠️ ' . $tool->name;
+
+    if (!empty($tool->short_description)) {
+        $shareLines[] = $tool->short_description;
+    }
+
+    $notreAvis = '';
+    if (!empty($tool->description)) {
+        if (preg_match('/##\s+Notre avis\s*\n([\s\S]+?)(?=\n##|\z)/i', $tool->description, $avisMatch)) {
+            $rawAvis = trim($avisMatch[1]);
+            $cleanAvis = preg_replace('/^#{1,6}\s+/m', '', $rawAvis);
+            $cleanAvis = preg_replace('/\*{1,2}([^*]+)\*{1,2}/', '$1', $cleanAvis);
+            $cleanAvis = preg_replace('/_{1,2}([^_]+)_{1,2}/', '$1', $cleanAvis);
+            $cleanAvis = preg_replace('/^-{3,}\s*$/m', '', $cleanAvis);
+            $cleanAvis = strip_tags(\Illuminate\Support\Str::markdown($cleanAvis));
+            $cleanAvis = trim(preg_replace('/\n{3,}/', "\n\n", $cleanAvis));
+            if (!empty($cleanAvis)) {
+                $notreAvis = $cleanAvis;
+            }
+        }
+    }
+    if (!empty($notreAvis)) {
+        $shareLines[] = '';
+        $shareLines[] = '📖 Notre avis :';
+        $shareLines[] = $notreAvis;
+    }
+
+    $prosRaw = $tool->pros;
+    $prosItems = [];
+    if (!empty($prosRaw)) {
+        if (is_array($prosRaw)) {
+            $prosItems = array_filter(array_map('trim', $prosRaw));
+        } elseif (is_string($prosRaw)) {
+            $decoded = json_decode($prosRaw, true);
+            if (is_array($decoded)) {
+                $prosItems = array_filter(array_map('trim', $decoded));
+            } else {
+                $stripped = strip_tags(\Illuminate\Support\Str::markdown($prosRaw));
+                $lines = preg_split('/\r?\n/', $stripped);
+                foreach ($lines as $line) {
+                    $line = preg_replace('/^[\s]*[-*•]\s*/', '', trim($line));
+                    if (!empty($line)) {
+                        $prosItems[] = $line;
+                    }
+                }
+            }
+        }
+    }
+    if (!empty($prosItems)) {
+        $shareLines[] = '';
+        $shareLines[] = '✅ Les plus :';
+        foreach ($prosItems as $pro) {
+            $shareLines[] = '• ' . $pro;
+        }
+    }
+
+    $consRaw = $tool->cons;
+    $consItems = [];
+    if (!empty($consRaw)) {
+        if (is_array($consRaw)) {
+            $consItems = array_filter(array_map('trim', $consRaw));
+        } elseif (is_string($consRaw)) {
+            $decoded = json_decode($consRaw, true);
+            if (is_array($decoded)) {
+                $consItems = array_filter(array_map('trim', $decoded));
+            } else {
+                $stripped = strip_tags(\Illuminate\Support\Str::markdown($consRaw));
+                $lines = preg_split('/\r?\n/', $stripped);
+                foreach ($lines as $line) {
+                    $line = preg_replace('/^[\s]*[-*•]\s*/', '', trim($line));
+                    if (!empty($line)) {
+                        $consItems[] = $line;
+                    }
+                }
+            }
+        }
+    }
+    if (!empty($consItems)) {
+        $shareLines[] = '';
+        $shareLines[] = '⚠️ Les moins :';
+        foreach ($consItems as $con) {
+            $shareLines[] = '• ' . $con;
+        }
+    }
+
+    if ($tool->has_education_pricing) {
+        $pricingType = $tool->education_pricing_type ?? '';
+        $pricingDetails = $tool->education_pricing_details ?? '';
+        $shareLines[] = '';
+        if (!empty($pricingDetails)) {
+            $shareLines[] = '🎓 Prix éducation : ' . $pricingType . ' — ' . $pricingDetails;
+        } else {
+            $shareLines[] = '🎓 Prix éducation disponible' . (!empty($pricingType) ? ' (' . $pricingType . ')' : '');
+        }
+    }
+
+    if (!empty($tool->url)) {
+        $shareLines[] = '';
+        $shareLines[] = '🔗 Site officiel : ' . $tool->url;
+    }
+
+    $shareLines[] = '📚 Fiche complète : ' . route('directory.show', $tool->slug);
+
+    $shareLines[] = '';
+    $shareLines[] = 'Via laveille.ai';
+
+    $text = implode("\n", $shareLines);
+
+    $text = str_replace("'", "\u{2019}", $text);
+@endphp
+{{ $text }}
+@endsection
+
 @auth
 @can('view_admin_panel')
 <button type="button" class="core-capture-fab" onclick="document.getElementById('core-capture-dialog').showModal()" title="Capture assistée écran" aria-label="Capture assistée écran">
