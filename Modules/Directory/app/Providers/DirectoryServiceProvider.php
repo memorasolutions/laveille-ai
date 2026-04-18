@@ -71,6 +71,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\ReenrichStaleCommand::class,
             \Modules\Directory\Console\RefreshPricingCommand::class,
             \Modules\Directory\Console\EnrichFormationsCommand::class,
+            \Modules\Directory\Console\FixHnSlugsCommand::class,
         ]);
     }
 
