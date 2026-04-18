@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
-use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Drivers\Gd\Driver as ImageGdDriver;
+use Intervention\Image\ImageManager;
 use Modules\Directory\Services\ScreenshotService;
 use Modules\Settings\Facades\Settings;
 
@@ -171,9 +172,11 @@ class DirectoryAdminController extends Controller
                 @copy($fullPath, "{$fullPath}.bak");
             }
 
-            $image = Image::read($request->file('screenshot')->getRealPath())
+            $manager = new ImageManager(new ImageGdDriver());
+            $image = $manager->read($request->file('screenshot')->getRealPath())
                 ->cover(1200, 630)
-                ->toJpeg(85);
+                ->toJpeg(85)
+                ->toString();
 
             file_put_contents($fullPath, $image);
 
