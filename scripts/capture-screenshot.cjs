@@ -236,14 +236,42 @@ function downloadFile(fileUrl, destPath) {
         } else {
             // CAPTURE NORMALE
             await page.screenshot({ path: outputPath, type: 'jpeg', quality: 85, fullPage: false });
-            await browser.close();
-            browser = null;
 
             // VALIDATION : taille fichier
             var fileSize = fs.statSync(outputPath).size;
             if (fileSize < MIN_FILE_SIZE) {
-                console.log(JSON.stringify({ success: false, error: 'Screenshot trop petit (' + Math.round(fileSize / 1024) + ' KB)', tooSmall: true, path: outputPath }));
+                // Screenshot trop petit → tenter og:image fallback avant de fermer le browser
+                var ogImage = null;
+                try {
+                    ogImage = await page.evaluate(function () {
+                        var el = document.querySelector('meta[property="og:image"]');
+                        return el ? el.getAttribute('content') : null;
+                    });
+                } catch (e) {
+                    ogImage = null;
+                }
+                await browser.close();
+                browser = null;
+
+                var ogSuccess = false;
+                if (ogImage) {
+                    try {
+                        await downloadFile(ogImage, outputPath);
+                        var ogSize = fs.statSync(outputPath).size;
+                        if (ogSize >= MIN_FILE_SIZE) {
+                            ogSuccess = true;
+                            console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: ogSize, ogUrl: ogImage }));
+                        }
+                    } catch (e) {
+                        ogSuccess = false;
+                    }
+                }
+                if (!ogSuccess) {
+                    console.log(JSON.stringify({ success: false, error: 'Screenshot trop petit (' + Math.round(fileSize / 1024) + ' KB)', tooSmall: true, path: outputPath }));
+                }
             } else {
+                await browser.close();
+                browser = null;
                 console.log(JSON.stringify({ success: true, path: outputPath, method: 'screenshot', size: fileSize }));
             }
         }
