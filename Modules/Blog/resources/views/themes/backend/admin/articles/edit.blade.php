@@ -48,6 +48,9 @@
 <form action="{{ route('admin.blog.articles.update', $article) }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
+    <div class="d-flex justify-content-end mb-2">
+        <x-core::autosave-indicator :save-url="route('admin.blog.articles.autosave', $article)" />
+    </div>
     <div class="row g-3">
         {{-- Colonne principale --}}
         <div class="col-xl-8">
