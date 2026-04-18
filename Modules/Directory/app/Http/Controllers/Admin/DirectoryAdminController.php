@@ -148,12 +148,9 @@ class DirectoryAdminController extends Controller
             return back()->with('error', __('Service de capture indisponible (Node.js ou script manquant).'));
         }
 
-        $service = new ScreenshotService;
-        if ($service->captureWithRetry($tool)) {
-            return back()->with('success', __('Screenshot capturé avec succès.'));
-        }
+        \Modules\Directory\Jobs\CaptureScreenshotJob::dispatch($tool);
 
-        return back()->with('error', __('Echec de la capture apres 3 tentatives.'));
+        return back()->with('success', __('Capture screenshot lancée en arrière-plan. Rafraîchissez la page dans 1-2 minutes.'));
     }
 
     public function setMainScreenshot(Tool $tool, int $screenshotId): RedirectResponse
