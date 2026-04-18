@@ -5,8 +5,8 @@
  */
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
+// Link inclus dans StarterKit v3.19+ — ne pas importer séparément (duplicate extension warning)
 
 function registerTiptapEditor() {
     if (window._tiptapFrontendRegistered) return
@@ -26,8 +26,7 @@ function registerTiptapEditor() {
             const editorInstance = new Editor({
                 element: el,
                 extensions: [
-                    StarterKit.configure({ codeBlock: false }),
-                    Link.configure({ openOnClick: false }),
+                    StarterKit.configure({ codeBlock: false, link: { openOnClick: false } }),
                     Placeholder.configure({ placeholder: config.placeholder || 'Écrivez votre message...' }),
                 ],
                 content: this.content,
