@@ -81,6 +81,65 @@
                     @enderror
                 </div>
 
+                {{-- Section Cycle de vie --}}
+                <div class="mb-4 p-3 border rounded bg-light">
+                    <h5 class="mb-3">Cycle de vie (statut outil)</h5>
+
+                    <div class="mb-3">
+                        <label for="lifecycle_status" class="form-label">Statut du cycle de vie</label>
+                        <select name="lifecycle_status" id="lifecycle_status" class="form-select @error('lifecycle_status') is-invalid @enderror">
+                            <option value="active" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'active' ? 'selected' : '' }}>Actif</option>
+                            <option value="beta" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'beta' ? 'selected' : '' }}>Bêta</option>
+                            <option value="paused" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'paused' ? 'selected' : '' }}>En pause</option>
+                            <option value="renamed" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'renamed' ? 'selected' : '' }}>Renommé</option>
+                            <option value="pivoted" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'pivoted' ? 'selected' : '' }}>Pivoté</option>
+                            <option value="acquired" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'acquired' ? 'selected' : '' }}>Acquis</option>
+                            <option value="closed" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'closed' ? 'selected' : '' }}>Fermé</option>
+                            <option value="scam" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'scam' ? 'selected' : '' }}>Arnaque</option>
+                        </select>
+                        <small class="form-text text-muted">Statut actuel de l'outil dans son cycle de vie.</small>
+                        @error('lifecycle_status')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lifecycle_date" class="form-label">Date du changement de statut</label>
+                        <input type="date" name="lifecycle_date" id="lifecycle_date" class="form-control @error('lifecycle_date') is-invalid @enderror" value="{{ old('lifecycle_date', $tool->lifecycle_date?->format('Y-m-d')) }}">
+                        <small class="form-text text-muted">Date à laquelle le statut a changé (fermeture, acquisition, etc.).</small>
+                        @error('lifecycle_date')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lifecycle_replacement_url" class="form-label">URL de remplacement</label>
+                        <input type="url" name="lifecycle_replacement_url" id="lifecycle_replacement_url" class="form-control @error('lifecycle_replacement_url') is-invalid @enderror" placeholder="https://..." value="{{ old('lifecycle_replacement_url', $tool->lifecycle_replacement_url) }}">
+                        <small class="form-text text-muted">Lien vers l'outil ou le service qui remplace celui-ci.</small>
+                        @error('lifecycle_replacement_url')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lifecycle_replacement_tool_id" class="form-label">ID de l'outil de remplacement</label>
+                        <input type="number" name="lifecycle_replacement_tool_id" id="lifecycle_replacement_tool_id" class="form-control @error('lifecycle_replacement_tool_id') is-invalid @enderror" placeholder="ID numérique (optionnel)" value="{{ old('lifecycle_replacement_tool_id', $tool->lifecycle_replacement_tool_id) }}">
+                        <small class="form-text text-muted">ID d'un outil existant dans le répertoire qui remplace celui-ci.</small>
+                        @error('lifecycle_replacement_tool_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lifecycle_notes" class="form-label">Notes sur le cycle de vie</label>
+                        <textarea name="lifecycle_notes" id="lifecycle_notes" rows="3" maxlength="2000" class="form-control @error('lifecycle_notes') is-invalid @enderror" placeholder="Contexte, raisons du changement de statut...">{{ old('lifecycle_notes', $tool->lifecycle_notes) }}</textarea>
+                        <small class="form-text text-muted">Informations complémentaires (max 2000 caractères).</small>
+                        @error('lifecycle_notes')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <label for="categories" class="form-label">Catégories</label>
                     <select class="form-select @error('categories') is-invalid @enderror" id="categories" name="categories[]" multiple>

@@ -115,6 +115,11 @@ class DirectoryAdminController extends Controller
             'featured_until' => 'nullable|date',
             'featured_order' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer',
+            'lifecycle_status' => 'nullable|in:active,beta,closed,acquired,renamed,pivoted,paused,scam',
+            'lifecycle_date' => 'nullable|date',
+            'lifecycle_replacement_url' => 'nullable|url|max:500',
+            'lifecycle_replacement_tool_id' => 'nullable|integer|exists:directory_tools,id',
+            'lifecycle_notes' => 'nullable|string|max:2000',
         ]);
 
         $locale = app()->getLocale();
@@ -131,6 +136,12 @@ class DirectoryAdminController extends Controller
         $tool->featured_until = $validated['featured_until'] ?? null;
         $tool->featured_order = $validated['featured_order'] ?? 0;
         $tool->sort_order = $validated['sort_order'] ?? 0;
+
+        $tool->lifecycle_status = $validated['lifecycle_status'] ?? $tool->lifecycle_status;
+        $tool->lifecycle_date = $validated['lifecycle_date'] ?? null;
+        $tool->lifecycle_replacement_url = $validated['lifecycle_replacement_url'] ?? null;
+        $tool->lifecycle_replacement_tool_id = $validated['lifecycle_replacement_tool_id'] ?? null;
+        $tool->lifecycle_notes = $validated['lifecycle_notes'] ?? null;
 
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('directory/logos', 'public');
