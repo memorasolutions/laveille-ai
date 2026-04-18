@@ -591,7 +591,7 @@
                 @php $ftHost = $ft->url ? parse_url($ft->url, PHP_URL_HOST) : ''; @endphp
                 <a href="{{ route('directory.show', $ft->slug) }}" style="flex-shrink:0;width:220px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
                     <div style="display:flex!important;align-items:center!important;gap:10px;margin-bottom:10px;">
-                        @if($ftHost)<img src="https://www.google.com/s2/favicons?domain={{ $ftHost }}&sz=32" alt="" width="24" height="24" loading="lazy" style="border-radius:4px;">@endif
+                        @if($ftHost)<img src="https://www.google.com/s2/favicons?domain={{ $ftHost }}&sz=32" alt="" width="24" height="24" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
                         <span style="font-weight:700;font-size:15px;">{{ $ft->name }}</span>
                     </div>
                     <p style="font-size:12px;color:#6b7280;margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($ft->short_description, 70) }}</p>
@@ -619,7 +619,7 @@
                     @php $tvHost = $tv->url ? parse_url($tv->url, PHP_URL_HOST) : ''; @endphp
                     <a href="{{ route('directory.show', $tv->slug) }}" style="flex-shrink:0;width:200px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;">
                         <div style="display:flex!important;align-items:center!important;gap:8px;margin-bottom:8px;">
-                            @if($tvHost)<img src="https://www.google.com/s2/favicons?domain={{ $tvHost }}&sz=32" alt="" width="20" height="20" loading="lazy" style="border-radius:4px;">@endif
+                            @if($tvHost)<img src="https://www.google.com/s2/favicons?domain={{ $tvHost }}&sz=32" alt="" width="20" height="20" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
                             <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $tv->name }}</span>
                         </div>
                         <div style="display:flex!important;align-items:center!important;gap:4px;margin-bottom:6px;">
@@ -657,7 +657,7 @@
                             <template x-if="!tool.screenshot">
                                 <div :style="'width:100%;height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,' + tool.gradientFrom + ' 0%,' + tool.gradientTo + ' 100%);'">
                                     <div style="text-align: center; color: rgba(255,255,255,0.9);">
-                                        <template x-if="tool.favicon"><img :src="tool.favicon" alt="" style="width: 40px; height: 40px; border-radius: 10px; margin-bottom: 6px; background: rgba(255,255,255,0.2); padding: 4px;" loading="lazy"></template>
+                                        <template x-if="tool.favicon"><img :src="tool.favicon" alt="" style="width: 40px; height: 40px; border-radius: 10px; margin-bottom: 6px; background: rgba(255,255,255,0.2); padding: 4px;" loading="lazy" onerror="this.style.display='none'"></template>
                                         <div style="font-family: var(--f-heading); font-weight: 700; font-size: 1rem; text-shadow: 0 1px 3px rgba(0,0,0,0.3);" x-text="tool.name"></div>
                                     </div>
                                 </div>
@@ -665,7 +665,7 @@
                         </a>
 
                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
-                            <template x-if="tool.favicon"><img :src="tool.favicon" alt="" class="rt-logo" loading="lazy" width="48" height="48"></template>
+                            <template x-if="tool.favicon"><img :src="tool.favicon" alt="" class="rt-logo" loading="lazy" width="48" height="48" onerror="this.style.display='none'"></template>
                             <div>
                                 <h3 class="rt-card-name"><a :href="tool.showUrl" x-text="tool.name"></a></h3>
                                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
