@@ -42,18 +42,25 @@ class FixHnSlugsCommand extends Command
             $originalNameFr = $tool->getTranslation('name', 'fr_CA');
             $currentSlugFr = $tool->getTranslation('slug', 'fr_CA');
 
-            $cleanedName = preg_replace('/^Show HN:\s*/i', '', $originalNameFr);
+            $nameHadHnPrefix = (bool) preg_match('/^Show\s*HN\s*[:\-–—]?\s*/iu', (string) $originalNameFr);
+            $cleanedName = preg_replace('/^Show\s*HN\s*[:\-–—]?\s*/iu', '', (string) $originalNameFr);
             $cleanedName = trim($cleanedName);
 
-            $parts = preg_split('/[–\-—:]/u', $cleanedName, 2);
-            $baseName = trim($parts[0] ?? $cleanedName);
+            if ($nameHadHnPrefix) {
+                foreach ([' – ', ' — ', ' : ', ' | ', '–', '—'] as $sep) {
+                    if (mb_strpos($cleanedName, $sep) !== false) {
+                        $cleanedName = trim(explode($sep, $cleanedName, 2)[0]);
+                        break;
+                    }
+                }
+            }
 
-            if ($baseName === '') {
+            if ($cleanedName === '') {
                 $this->warn("  #{$tool->id} skip (nom vide après nettoyage): '{$originalNameFr}'");
                 continue;
             }
 
-            $newName = $baseName;
+            $newName = $cleanedName;
             $newSlug = Str::slug($newName);
             $originalSlug = $newSlug;
             $counter = 1;
