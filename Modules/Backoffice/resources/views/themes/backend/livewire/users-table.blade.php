@@ -146,15 +146,16 @@
                             </div>
                         </td>
                         <td class="text-center">
-                            <div class="dropdown" x-data="{ open: false }" @click.outside="open = false">
-                                <button @click="open = !open"
-                                        class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center"
-                                        style="width:32px;height:32px">
-                                    <i data-lucide="more-vertical" class="icon-sm"></i>
+                            <div class="dropdown" x-data="{ open: false }" @click.outside="open = false" style="position:relative;">
+                                <button @click="open = !open" type="button"
+                                        aria-label="{{ __('Actions') }}" aria-haspopup="true" :aria-expanded="open"
+                                        class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
+                                        style="width:36px;height:36px;color:#374151;">
+                                    <i data-lucide="more-vertical" style="width:20px;height:20px;"></i>
                                 </button>
                                 <div class="dropdown-menu" :class="{ show: open }" x-show="open" x-cloak
                                      @click.outside="open = false"
-                                     style="min-width:140px">
+                                     style="min-width:160px;z-index:1060;position:absolute;right:0;">
                                     <a href="{{ route('admin.users.show', $user) }}"
                                        class="dropdown-item d-flex align-items-center gap-2">
                                         <i data-lucide="eye" class="icon-sm text-info"></i> {{ __('Voir') }}
