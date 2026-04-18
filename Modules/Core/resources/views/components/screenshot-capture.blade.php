@@ -169,18 +169,22 @@ if (!window.__screenshotCaptureComponentRegistered) {
                     });
 
                     console.log('[ScreenshotCapture] Upload response', response.status, 'redirected=', response.redirected);
-                    if (response.ok || response.redirected) {
+                    let payload = null;
+                    try { payload = await response.json(); } catch (_) {}
+                    console.log('[ScreenshotCapture] Response payload', payload);
+
+                    if (payload && payload.ok === true) {
                         this.status = 'success';
-                        this.message = 'Succès ! Rechargement automatique dans 2 secondes…';
+                        this.message = (payload.message || 'Succès !') + ' Rechargement dans 2 s…';
+                        setTimeout(() => { window.location.reload(); }, 2000);
+                    } else if (!payload && (response.ok || response.redirected)) {
+                        this.status = 'success';
+                        this.message = 'Succès. Rechargement dans 2 s…';
                         setTimeout(() => { window.location.reload(); }, 2000);
                     } else {
                         this.status = 'error';
-                        let errMsg = 'Erreur serveur (HTTP ' + response.status + ')';
-                        try {
-                            const data = await response.json();
-                            errMsg = data.message || data.error || errMsg;
-                        } catch (_) {}
-                        this.message = errMsg;
+                        this.message = (payload && (payload.message || payload.error))
+                            || ('Erreur serveur (HTTP ' + response.status + ')');
                     }
                 } catch (err) {
                     this.status = 'error';
