@@ -15,9 +15,7 @@
     $directUrlUtm = $directUrl . '?utm_source=' . urlencode($utmSource) . '&utm_medium=clipboard';
 
     $plain = $kind . ' : ' . $title . "\n";
-    if ($summary) {
-        $plain .= $summary . "\n";
-    }
+    if ($summary) { $plain .= $summary . "\n"; }
     $plain .= "\n";
     foreach ($sections as $section) {
         $icon = $section['icon'] ?? '';
@@ -27,17 +25,12 @@
             $plain .= ($icon ? $icon . ' ' : '') . ($label ? $label . ' : ' : '') . $content . "\n";
         }
     }
-    $plain .= "\n";
-    $plain .= '🔗 ' . $directUrlUtm . "\n";
-    if ($indexUrl) {
-        $plain .= '📚 ' . $indexLabel . ' : ' . $indexUrl . "\n";
-    }
+    $plain .= "\n" . '🔗 ' . $directUrlUtm . "\n";
+    if ($indexUrl) { $plain .= '📚 ' . $indexLabel . ' : ' . $indexUrl . "\n"; }
     $plain .= "\n" . 'Via laveille.ai';
 
     $html = '<strong>' . e($kind) . ' : ' . e($title) . '</strong><br>';
-    if ($summary) {
-        $html .= e($summary) . '<br>';
-    }
+    if ($summary) { $html .= e($summary) . '<br>'; }
     $html .= '<br>';
     foreach ($sections as $section) {
         $icon = $section['icon'] ?? '';
@@ -49,9 +42,7 @@
     }
     $html .= '<br>';
     $html .= '🔗 <a href="' . e($directUrlUtm) . '">' . e($directUrlUtm) . '</a><br>';
-    if ($indexUrl) {
-        $html .= '📚 <a href="' . e($indexUrl) . '">' . e($indexLabel) . '</a><br>';
-    }
+    if ($indexUrl) { $html .= '📚 <a href="' . e($indexUrl) . '">' . e($indexLabel) . '</a><br>'; }
     $html .= '<br>Via <a href="https://laveille.ai">laveille.ai</a>';
 
     $jsonLdData = [
@@ -63,14 +54,9 @@
     ];
     $jsonLd = json_encode($jsonLdData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG);
 
-    $jsFlags = JSON_UNESCAPED_UNICODE | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG;
-    $plainPayloadJs = json_encode($plain, $jsFlags);
-    $htmlPayloadJs = json_encode($html, $jsFlags);
-    $directUrlUtmJs = json_encode($directUrlUtm, $jsFlags);
-    $titleJs = json_encode($title, $jsFlags);
-
     $feedbackId = 'share-feedback-' . uniqid();
 @endphp
+
 <div style="position:relative; display:inline-block;">
     <script type="application/ld+json">
         {!! $jsonLd !!}
@@ -79,6 +65,10 @@
         type="button"
         class="aab-btn"
         style="min-height:44px; min-width:44px; display:inline-flex; align-items:center; cursor:pointer;"
+        data-payload-plain="{{ $plain }}"
+        data-payload-html="{{ $html }}"
+        data-share-url="{{ $directUrlUtm }}"
+        data-share-title="{{ $title }}"
         x-data="{
             feedback: null,
             busy: false,
@@ -86,10 +76,11 @@
                 if (this.busy) return;
                 this.busy = true;
                 this.feedback = null;
-                const payload = {!! $plainPayloadJs !!};
-                const payloadHtml = {!! $htmlPayloadJs !!};
-                const url = {!! $directUrlUtmJs !!};
-                const title = {!! $titleJs !!};
+                const el = this.$el;
+                const payload = el.dataset.payloadPlain || '';
+                const payloadHtml = el.dataset.payloadHtml || '';
+                const url = el.dataset.shareUrl || '';
+                const title = el.dataset.shareTitle || '';
 
                 if (navigator.share && typeof navigator.canShare === 'function') {
                     try {
@@ -140,7 +131,7 @@
         @click="share()"
         :aria-busy="busy"
         :disabled="busy"
-        aria-label="{{ addslashes($buttonLabel) }} {{ addslashes($kind) }} : {{ addslashes($title) }}"
+        aria-label="{{ $buttonLabel }} {{ $kind }} : {{ $title }}"
         aria-describedby="{{ $feedbackId }}"
     >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="width:18px; height:18px; flex-shrink:0; vertical-align:middle;">
