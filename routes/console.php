@@ -20,6 +20,9 @@ Schedule::command('horizon:snapshot')->everyFiveMinutes();
 // Activity log cleanup (30 days)
 Schedule::command('activitylog:clean')->weekly();
 
+// Favicon cache refresh (hebdo, rafraîchit domaines expirés — cache DB 30j succès / 7j échec)
+Schedule::command('favicons:refresh --expired-only --limit=50')->weekly()->withoutOverlapping();
+
 // Health checks
 Schedule::command('health:check')->everyMinute();
 
