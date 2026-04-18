@@ -20,6 +20,8 @@ class NewsImageService
     public function processFromUrl(string $url, int $articleId): ?string
     {
         try {
+            $url = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
             $response = Http::withoutVerifying()
                 ->timeout(15)
                 ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'])
