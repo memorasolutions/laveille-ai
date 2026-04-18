@@ -84,6 +84,7 @@ class DirectoryServiceProvider extends ServiceProvider
             $schedule->command('tools:enrich-pending --batch=3')->dailyAt('05:15');
             $schedule->command('tools:dispatch-enrichment --type=pending --limit=5')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('tools:dispatch-enrichment --type=metadata --limit=5')->everyFifteenMinutes()->withoutOverlapping();
+            $schedule->command('queue:work database --queue=screenshots --once --max-time=280 --timeout=270 --tries=1 --stop-when-empty')->everyThreeMinutes()->withoutOverlapping()->runInBackground();
             $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
             $schedule->command('resources:summarize-pending --batch=10')->dailyAt('05:30');
             $schedule->command('tools:discover-new')->dailyAt('04:00');
