@@ -35,14 +35,15 @@ class RssFetcherService
             $now = Carbon::now();
 
             foreach ($feed->get_items(0, 20) as $item) {
-                $guid = $item->get_id() ?: md5($item->get_permalink().$item->get_title());
+                $guid = mb_substr($item->get_id() ?: md5($item->get_permalink().$item->get_title()), 0, 240);
 
                 if (NewsArticle::where('guid', $guid)->exists()) {
                     continue;
                 }
 
                 $itemTitle = $item->get_title() ?? 'Sans titre';
-                $itemUrl = $item->get_permalink() ?? $source->url;
+                $itemFullUrl = $item->get_permalink() ?? $source->url;
+                $itemUrl = mb_substr($itemFullUrl, 0, 240);
 
                 if (self::isDuplicate($itemUrl, $itemTitle)) {
                     Log::info("News dedup: skipped duplicate '{$itemTitle}' from {$source->name}");
@@ -77,11 +78,11 @@ class RssFetcherService
                     'is_published' => false,
                 ]);
 
-                // Résoudre URL Google News vers article original
-                if (GoogleNewsResolver::isGoogleNewsUrl($article->url)) {
-                    $resolvedUrl = app(GoogleNewsResolver::class)->resolve($article->url);
-                    if ($resolvedUrl && $resolvedUrl !== $article->url) {
-                        $article->update(['resolved_url' => $resolvedUrl]);
+                // Résoudre URL Google News vers article original (utilise URL complète non-tronquée)
+                if (GoogleNewsResolver::isGoogleNewsUrl($itemFullUrl)) {
+                    $resolvedUrl = app(GoogleNewsResolver::class)->resolve($itemFullUrl);
+                    if ($resolvedUrl && $resolvedUrl !== $itemFullUrl) {
+                        $article->update(['resolved_url' => mb_substr($resolvedUrl, 0, 240)]);
                     }
                 }
                 $articleUrl = $article->resolved_url ?? $article->url;
