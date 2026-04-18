@@ -214,6 +214,34 @@
                     <h1 class="gl-term-title" style="margin: 0 0 0.5rem;" data-editable="name">{{ $term->name }}</h1>
                     @include('fronttheme::partials.article-action-bar', ['model' => $term, 'modelType' => 'Modules\\Dictionary\\Models\\Term'])
 
+                    @php
+                        $termTitle = $term->getTranslation('name', 'fr_CA', false) ?: $term->name;
+                        if ($term->acronym_full) {
+                            $termTitle .= ' — ' . $term->acronym_full;
+                        }
+                        $termSections = [];
+                        $analogy = $term->getTranslation('analogy', 'fr_CA', false);
+                        if ($analogy) {
+                            $termSections[] = ['icon' => '🧠', 'label' => 'En termes simples', 'content' => $analogy];
+                        }
+                        $didYouKnow = $term->getTranslation('did_you_know', 'fr_CA', false);
+                        if ($didYouKnow) {
+                            $termSections[] = ['icon' => '💡', 'label' => 'Le saviez-vous', 'content' => $didYouKnow];
+                        }
+                    @endphp
+                    <div style="margin-top: 0.5rem;">
+                        <x-core::smart-share
+                            :title="$termTitle"
+                            :summary="$term->getTranslation('definition', 'fr_CA', false) ?: ''"
+                            :sections="$termSections"
+                            :directUrl="route('dictionary.show', $term->getTranslation('slug', 'fr_CA', false) ?: $term->slug)"
+                            :indexUrl="route('dictionary.index')"
+                            indexLabel="Voir tout le glossaire"
+                            utmSource="share_term"
+                            kind="Terme du glossaire"
+                        />
+                    </div>
+
                     {{-- Acronym full form --}}
                     @if($term->acronym_full)
                         <p style="text-align: center; color: #6B7280; font-size: 0.95rem; font-style: italic; margin: 4px 0 12px; letter-spacing: 0.02em;">{{ $term->acronym_full }}</p>

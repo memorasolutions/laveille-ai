@@ -198,6 +198,31 @@
                     {{-- Share --}}
                     <div class="acr-show-share">
                         @include('fronttheme::partials.article-action-bar', ['model' => $acronym, 'modelType' => 'Modules\\Acronyms\\Models\\Acronym'])
+
+                        @php
+                            $acronymCode = $acronym->getTranslation('acronym', 'fr_CA', false) ?: $acronym->acronym;
+                            $acronymFull = $acronym->getTranslation('full_name', 'fr_CA', false) ?: $acronym->full_name;
+                            $acronymTitle = $acronymCode . ' — ' . $acronymFull;
+                            $acronymSections = [];
+                            if ($acronym->category) {
+                                $acronymSections[] = ['icon' => '📘', 'label' => 'Catégorie', 'content' => $acronym->category->name];
+                            }
+                            if ($acronym->domain) {
+                                $acronymSections[] = ['icon' => '🌐', 'label' => 'Domaine', 'content' => $acronym->domain];
+                            }
+                        @endphp
+                        <div style="margin-top: 0.5rem;">
+                            <x-core::smart-share
+                                :title="$acronymTitle"
+                                :summary="$acronym->getTranslation('description', 'fr_CA', false) ?: ''"
+                                :sections="$acronymSections"
+                                :directUrl="route('acronyms.show', $acronym->getTranslation('slug', 'fr_CA', false) ?: $acronym->slug)"
+                                :indexUrl="route('acronyms.index')"
+                                indexLabel="Voir tous les acronymes"
+                                utmSource="share_acronym"
+                                kind="Acronyme de l'éducation"
+                            />
+                        </div>
                     </div>
                 </article>
             </div>
