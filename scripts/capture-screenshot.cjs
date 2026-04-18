@@ -19,6 +19,10 @@ if (!url || !outputPath) {
 var COOKIE_HIDE = '.cookie-banner, .cookie-consent, #cookie-consent, .cc-window, .onetrust-banner-sdk, #CybotCookiebotDialog, [class*="cookie-banner"], [id*="cookie-banner"], #axeptio_overlay, .ax-widget-overlay, #didomi-notice, #didomi-popup, .didomi-popup-view, #tarteaucitronRoot, #tarteaucitronAlertBig, .qc-cmp2-container, #usercentrics-root, [class*="gdpr"], [class*="consent-banner"], [id*="gdpr"]';
 var COOKIE_CLICK = ['.cookie-accept', '#cookie-consent button', '.cc-btn', '.cc-dismiss', '.onetrust-accept-btn-handler', '#accept-cookies', 'button[id*="accept"]', 'button[class*="accept"]', '.ax-button--primary', '[data-qa="accept-button"]', '#didomi-notice-agree-button', '#tarteaucitronPersonalize2', '#tarteaucitronAllAllowed', 'button[mode="primary"]', '[data-testid="uc-accept-all-button"]', '[aria-label*="accept"]', '[class*="agree"]'];
 
+// Patterns 2026 : newsletter modals, chat widgets, promo overlays, generic modals
+var POPUP_HIDE = '.newsletter-modal, #email-signup, [class*="newsletter"][class*="modal"], #intercom-container, .intercom-lightweight-app, [class*="intercom"], .klaviyo-form, [class*="klaviyo"], .optinmonster, [class*="optinmonster"], [id*="drift"], [class*="drift-frame"], iframe[src*="intercom"], iframe[src*="drift.com"], iframe[src*="tawk.to"], iframe[src*="crisp"], .popup-overlay, .modal-backdrop, .mailerlite-popup, [class*="privy"], [class*="sumome"], #hellobar, .hellobar, [role="dialog"][aria-modal="true"]:not([class*="cookie"]):not([id*="cookie"]), dialog[open]';
+var POPUP_DISMISS = 'button[class*="close"], [aria-label*="close" i], [aria-label*="fermer" i], [aria-label*="dismiss" i], .modal-close, [class*="modal"] [class*="close"], button[class*="dismiss"], .popup-close, button[data-dismiss], [class*="reject"], [class*="no-thanks"], button[aria-label*="no thanks" i]';
+
 async function dismissCookies(page) {
     var hideStyle = COOKIE_HIDE + ' { display: none !important; visibility: hidden !important; opacity: 0 !important; }';
     var pass = async function () {
@@ -42,6 +46,23 @@ async function dismissCookies(page) {
             try { document.cookie = 'CookieConsent=yes; path=/'; } catch (e) {}
             try { document.cookie = 'OptanonAlertBoxClosed=' + ts + '; path=/'; } catch (e) {}
         }, Date.now());
+    } catch (e) {}
+}
+
+// Dismiss popups 2026 : newsletter, chat widgets, promo modals (click + remove iframes)
+async function dismissPopups(page) {
+    try { await page.addStyleTag({ content: POPUP_HIDE + ' { display:none!important;visibility:hidden!important;pointer-events:none!important; }' }); } catch (e) {}
+    try {
+        await page.evaluate(function (dismissSel) {
+            try {
+                document.querySelectorAll(dismissSel).forEach(function (el) {
+                    try { el.click(); } catch (e) {}
+                });
+            } catch (e) {}
+            try {
+                document.querySelectorAll('iframe[src*="intercom"], iframe[src*="drift"], iframe[src*="tawk"], iframe[src*="crisp"]').forEach(function (el) { el.remove(); });
+            } catch (e) {}
+        }, POPUP_DISMISS);
     } catch (e) {}
 }
 
@@ -86,6 +107,20 @@ function downloadFile(fileUrl, destPath) {
         // Stealth + idcac cookie dismiss before navigation
         await page.evaluateOnNewDocument(idcac.getInjectableScript());
 
+        // Auto-remove popups lazy-loaded 3s après window.load (patterns 2026)
+        await page.evaluateOnNewDocument(function () {
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    try {
+                        document.querySelectorAll('[class*="popup"], [class*="modal"]:not([class*="cookie"])').forEach(function (el) {
+                            el.style.display = 'none';
+                            el.style.visibility = 'hidden';
+                        });
+                    } catch (e) {}
+                }, 3000);
+            });
+        });
+
         // Navigate (catch timeout gracefully)
         try {
             await page.goto(url, { timeout: 30000, waitUntil: 'networkidle2' });
@@ -94,7 +129,16 @@ function downloadFile(fileUrl, destPath) {
         // Dismiss cookies (2 passes + ESC + localStorage pré-accept)
         await dismissCookies(page);
 
-        await new Promise(function (r) { setTimeout(r, 1000); });
+        // Wait 5s pour popups déclenchés 2-5s après load (BP 2026 #C timing)
+        await new Promise(function (r) { setTimeout(r, 5000); });
+
+        // Dismiss popups (newsletter/chat/modals) + retry 3x avec dismissCookies (BP 2026 #A+#C)
+        await dismissPopups(page);
+        for (var _retry = 0; _retry < 3; _retry++) {
+            await new Promise(function (r) { setTimeout(r, 1500); });
+            await dismissCookies(page);
+            await dismissPopups(page);
+        }
 
         // DETECTION : page bloquee?
         var blocked = false;
