@@ -63,13 +63,17 @@ if (!window.__screenshotCaptureComponentRegistered) {
             async capture() {
                 this.status = 'capturing';
                 this.message = '';
+                console.log('[ScreenshotCapture] Opening getDisplayMedia prompt...');
 
                 let stream;
                 try {
                     stream = await navigator.mediaDevices.getDisplayMedia({
                         video: { displaySurface: 'browser' },
                         audio: false,
+                        preferCurrentTab: false,
+                        selfBrowserSurface: 'exclude',
                     });
+                    console.log('[ScreenshotCapture] Stream obtained', stream);
                 } catch (err) {
                     this.status = 'error';
                     if (err.name === 'NotAllowedError') {
@@ -90,10 +94,11 @@ if (!window.__screenshotCaptureComponentRegistered) {
 
                 try {
                     const track = stream.getVideoTracks()[0];
+                    console.log('[ScreenshotCapture] Video track settings', track.getSettings());
+                    await new Promise(r => setTimeout(r, 300));
                     const imageCapture = new ImageCapture(track);
                     const bitmap = await imageCapture.grabFrame();
-
-                    stream.getTracks().forEach(t => t.stop());
+                    console.log('[ScreenshotCapture] Frame grabbed', bitmap.width, 'x', bitmap.height);
 
                     const canvas = this.$refs.canvas;
                     const ctx = canvas.getContext('2d');
@@ -124,17 +129,21 @@ if (!window.__screenshotCaptureComponentRegistered) {
                     bitmap.close();
 
                     canvas.toBlob((blob) => {
+                        stream.getTracks().forEach(t => t.stop());
                         if (blob) {
+                            console.log('[ScreenshotCapture] Blob created', blob.size, 'bytes');
                             this.upload(blob);
                         } else {
                             this.status = 'error';
                             this.message = 'Impossible de générer l\'image depuis le canvas.';
+                            console.error('[ScreenshotCapture] canvas.toBlob returned null');
                         }
                     }, 'image/jpeg', 0.9);
                 } catch (err) {
                     stream.getTracks().forEach(t => t.stop());
                     this.status = 'error';
                     this.message = err.message || 'Erreur lors du traitement de la capture.';
+                    console.error('[ScreenshotCapture] capture exception', err);
                 }
             },
 
@@ -159,9 +168,11 @@ if (!window.__screenshotCaptureComponentRegistered) {
                         },
                     });
 
+                    console.log('[ScreenshotCapture] Upload response', response.status, 'redirected=', response.redirected);
                     if (response.ok || response.redirected) {
                         this.status = 'success';
-                        this.message = 'Succès ! Rechargez la page pour voir le nouveau screenshot.';
+                        this.message = 'Succès ! Rechargement automatique dans 2 secondes…';
+                        setTimeout(() => { window.location.reload(); }, 2000);
                     } else {
                         this.status = 'error';
                         let errMsg = 'Erreur serveur (HTTP ' + response.status + ')';
