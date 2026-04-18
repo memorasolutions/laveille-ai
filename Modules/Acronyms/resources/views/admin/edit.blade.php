@@ -18,6 +18,9 @@
             <form action="{{ route('admin.acronyms.update', $acronym) }}" method="POST">
                 @csrf
                 @method('PUT')
+                <div class="d-flex justify-content-end mb-2">
+                    <x-core::autosave-indicator :save-url="route('admin.acronyms.autosave', $acronym)" />
+                </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">

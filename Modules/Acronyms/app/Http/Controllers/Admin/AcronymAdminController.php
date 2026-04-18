@@ -119,4 +119,34 @@ class AcronymAdminController extends Controller
 
         return redirect()->route('admin.acronyms.index')->with('success', __('Acronyme supprimé.'));
     }
+
+    /**
+     * Autosave draft for an acronym.
+     */
+    public function autosave(\Illuminate\Http\Request $request, \Modules\Acronyms\Models\Acronym $acronym): \Illuminate\Http\JsonResponse
+    {
+        abort_unless($request->user()?->can('update', $acronym) ?? true, 403);
+
+        $validated = $request->validate([
+            'acronym' => 'nullable|string',
+            'full_name' => 'nullable|string',
+            'description' => 'nullable|string',
+        ]);
+
+        $acronym->fill(array_filter($validated, fn ($v) => $v !== null));
+
+        if ($acronym->isDirty()) {
+            $acronym->saveQuietly();
+
+            return response()->json([
+                'success' => true,
+                'saved_at' => now()->toDateTimeString(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'saved_at' => null,
+        ]);
+    }
 }

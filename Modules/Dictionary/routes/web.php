@@ -49,5 +49,6 @@ Route::middleware(['web', 'auth'])->prefix('admin/dictionary')->name('admin.dict
     Route::post('/', [TermAdminController::class, 'store'])->name('store');
     Route::get('/{term}/edit', [TermAdminController::class, 'edit'])->name('edit');
     Route::put('/{term}', [TermAdminController::class, 'update'])->name('update');
+    Route::patch('/{term}/autosave', [TermAdminController::class, 'autosave'])->name('autosave');
     Route::delete('/{term}', [TermAdminController::class, 'destroy'])->name('destroy');
 });

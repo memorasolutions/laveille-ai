@@ -57,5 +57,6 @@ Route::middleware(['web', 'auth'])->prefix('admin/acronyms')->name('admin.acrony
     Route::post('/', [AcronymAdminController::class, 'store'])->name('store');
     Route::get('/{acronym}/edit', [AcronymAdminController::class, 'edit'])->name('edit');
     Route::put('/{acronym}', [AcronymAdminController::class, 'update'])->name('update');
+    Route::patch('/{acronym}/autosave', [AcronymAdminController::class, 'autosave'])->name('autosave');
     Route::delete('/{acronym}', [AcronymAdminController::class, 'destroy'])->name('destroy');
 });

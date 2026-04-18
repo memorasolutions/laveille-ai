@@ -56,6 +56,7 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     Route::post('/', [DirectoryAdminController::class, 'store'])->name('store');
     Route::get('/{tool}/edit', [DirectoryAdminController::class, 'edit'])->name('edit');
     Route::put('/{tool}', [DirectoryAdminController::class, 'update'])->name('update');
+    Route::patch('/{tool}/autosave', [DirectoryAdminController::class, 'autosave'])->name('autosave');
     Route::delete('/{tool}', [DirectoryAdminController::class, 'destroy'])->name('destroy');
     Route::post('/{tool}/capture-screenshot', [DirectoryAdminController::class, 'captureScreenshot'])->name('capture-screenshot');
     Route::post('/{tool}/upload-screenshot', [DirectoryAdminController::class, 'uploadScreenshot'])->name('upload-screenshot');

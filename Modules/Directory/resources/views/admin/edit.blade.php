@@ -17,6 +17,9 @@
             <form action="{{ route('admin.directory.update', $tool) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+                <div class="d-flex justify-content-end mb-2">
+                    <x-core::autosave-indicator :save-url="route('admin.directory.autosave', $tool)" />
+                </div>
                 <div class="mb-3">
                     <label for="name" class="form-label">Nom <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $tool->name) }}" required>

@@ -260,4 +260,36 @@ class DirectoryAdminController extends Controller
 
         return redirect()->route('admin.directory.index')->with('success', __('Outil supprimé.'));
     }
+
+    /**
+     * Autosave draft for a tool.
+     */
+    public function autosave(\Illuminate\Http\Request $request, \Modules\Directory\Models\Tool $tool): \Illuminate\Http\JsonResponse
+    {
+        abort_unless($request->user()?->can('update', $tool) ?? true, 403);
+
+        $validated = $request->validate([
+            'name' => 'nullable|string',
+            'description' => 'nullable|string',
+            'short_description' => 'nullable|string',
+            'url' => 'nullable|string',
+            'how_to_use' => 'nullable|string',
+        ]);
+
+        $tool->fill(array_filter($validated, fn ($v) => $v !== null));
+
+        if ($tool->isDirty()) {
+            $tool->saveQuietly();
+
+            return response()->json([
+                'success' => true,
+                'saved_at' => now()->toDateTimeString(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'saved_at' => null,
+        ]);
+    }
 }

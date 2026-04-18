@@ -95,4 +95,36 @@ class TermAdminController extends Controller
 
         return redirect()->route('admin.dictionary.index')->with('success', __('Terme supprimé.'));
     }
+
+    /**
+     * Autosave draft for a term.
+     */
+    public function autosave(\Illuminate\Http\Request $request, \Modules\Dictionary\Models\Term $term): \Illuminate\Http\JsonResponse
+    {
+        abort_unless($request->user()?->can('update', $term) ?? true, 403);
+
+        $validated = $request->validate([
+            'name' => 'nullable|string',
+            'definition' => 'nullable|string',
+            'analogy' => 'nullable|string',
+            'example' => 'nullable|string',
+            'did_you_know' => 'nullable|string',
+        ]);
+
+        $term->fill(array_filter($validated, fn ($v) => $v !== null));
+
+        if ($term->isDirty()) {
+            $term->saveQuietly();
+
+            return response()->json([
+                'success' => true,
+                'saved_at' => now()->toDateTimeString(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'saved_at' => null,
+        ]);
+    }
 }
