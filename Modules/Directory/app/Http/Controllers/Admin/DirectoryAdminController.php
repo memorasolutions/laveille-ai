@@ -154,11 +154,13 @@ class DirectoryAdminController extends Controller
         return back()->with('success', __('Capture screenshot lancée en arrière-plan. Rafraîchissez la page dans 2-5 minutes (job Puppeteer 180-270 s).'));
     }
 
-    public function uploadScreenshot(Request $request, Tool $tool): RedirectResponse
+    public function uploadScreenshot(Request $request, Tool $tool)
     {
         $request->validate([
             'screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
+
+        $wantsJson = $request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
 
         try {
             $slug = $tool->getTranslation('slug', 'fr_CA') ?: $tool->slug;
@@ -181,9 +183,18 @@ class DirectoryAdminController extends Controller
 
             $this->purgeCloudflareScreenshot($filePath);
 
-            return back()->with('success', __('Screenshot uploadé avec succès (redimensionné 1200×630, cache purgé).'));
+            $msg = __('Screenshot uploadé avec succès (redimensionné 1200×630, cache purgé).');
+
+            return $wantsJson
+                ? response()->json(['ok' => true, 'message' => $msg, 'screenshot_url' => asset($filePath).'?v='.$tool->updated_at->timestamp])
+                : back()->with('success', $msg);
         } catch (\Throwable $e) {
-            return back()->with('error', __('Échec upload : :msg', ['msg' => $e->getMessage()]));
+            \Illuminate\Support\Facades\Log::warning('[uploadScreenshot] fail tool='.$tool->id.' : '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $errMsg = __('Échec upload : :msg', ['msg' => $e->getMessage()]);
+
+            return $wantsJson
+                ? response()->json(['ok' => false, 'message' => $errMsg], 422)
+                : back()->with('error', $errMsg);
         }
     }
 
