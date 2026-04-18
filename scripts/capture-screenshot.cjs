@@ -66,6 +66,52 @@ async function dismissPopups(page) {
     } catch (e) {}
 }
 
+// Dismiss cookie banners par TEXTE du bouton (React/Next.js styled-components sans class stable)
+async function dismissByText(page) {
+    try {
+        return await page.evaluate(function () {
+            var patterns = [
+                'accept all', 'accept', 'agree', 'allow all', 'allow',
+                'accepter', 'tout accepter', "j'accepte", "d'accord",
+                'got it', 'ok', 'compris', 'continuer',
+                'save preferences', 'enregistrer', 'confirmer mon choix'
+            ];
+            var contextWords = /cookie|consent|privacy|rgpd|gdpr/i;
+            var candidates = document.querySelectorAll('button, a, [role="button"]');
+            var clicked = 0;
+            for (var i = 0; i < candidates.length; i++) {
+                try {
+                    var el = candidates[i];
+                    var rect = el.getBoundingClientRect();
+                    if (rect.width < 20 || rect.height < 10) continue;
+                    var style = window.getComputedStyle(el);
+                    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') continue;
+                    var txt = (el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+                    var matched = false;
+                    for (var p = 0; p < patterns.length; p++) {
+                        if (txt.indexOf(patterns[p]) !== -1) { matched = true; break; }
+                    }
+                    if (!matched) continue;
+                    var valid = false;
+                    var ancestor = el;
+                    for (var lvl = 0; lvl < 10 && ancestor && ancestor !== document.body; lvl++) {
+                        var aStyle = window.getComputedStyle(ancestor);
+                        if (aStyle.position === 'fixed' || aStyle.position === 'sticky') { valid = true; break; }
+                        if (ancestor.getAttribute('role') === 'dialog' || ancestor.getAttribute('aria-modal') === 'true') { valid = true; break; }
+                        var aTxt = (ancestor.textContent || '').toLowerCase();
+                        if (contextWords.test(aTxt)) { valid = true; break; }
+                        ancestor = ancestor.parentElement;
+                    }
+                    if (!valid) continue;
+                    el.click();
+                    clicked++;
+                } catch (e) { /* skip */ }
+            }
+            return clicked;
+        });
+    } catch (e) { return 0; }
+}
+
 // Detecter si la page est bloquee (Cloudflare, CAPTCHA, erreur)
 var BLOCKED_TITLES = ['just a moment', 'attention required', 'access denied', 'security check'];
 var BLOCKED_CONTENT = ['Performing security verification', 'Verify you are human', 'cf-turnstile', 'challenge-platform', 'ray ID', 'Enable JavaScript and cookies to continue', 'Checking your browser'];
@@ -132,12 +178,14 @@ function downloadFile(fileUrl, destPath) {
         // Wait 5s pour popups déclenchés 2-5s après load (BP 2026 #C timing)
         await new Promise(function (r) { setTimeout(r, 5000); });
 
-        // Dismiss popups (newsletter/chat/modals) + retry 3x avec dismissCookies (BP 2026 #A+#C)
+        // Dismiss popups + text-based cookie banners + retry 3x (BP 2026 #A+#C + React styled-components)
         await dismissPopups(page);
+        await dismissByText(page);
         for (var _retry = 0; _retry < 3; _retry++) {
             await new Promise(function (r) { setTimeout(r, 1500); });
             await dismissCookies(page);
             await dismissPopups(page);
+            await dismissByText(page);
         }
 
         // DETECTION : page bloquee?
