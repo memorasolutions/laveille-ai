@@ -64,6 +64,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\EnrichTutorialsSonarCommand::class,
             \Modules\Directory\Console\EnrichPendingCommand::class,
             \Modules\Directory\Console\EnrichMetadataCommand::class,
+            \Modules\Directory\Console\DispatchEnrichmentCommand::class,
             \Modules\Directory\Console\SummarizePendingCommand::class,
             \Modules\Directory\Console\GenerateAlternativesCommand::class,
             \Modules\Directory\Console\DiscoverNewToolsCommand::class,
@@ -81,6 +82,8 @@ class DirectoryServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
             $schedule->command('tools:enrich-pending --batch=3')->dailyAt('05:15');
+            $schedule->command('tools:dispatch-enrichment --type=pending --limit=5')->everyFifteenMinutes()->withoutOverlapping();
+            $schedule->command('tools:dispatch-enrichment --type=metadata --limit=5')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
             $schedule->command('resources:summarize-pending --batch=10')->dailyAt('05:30');
             $schedule->command('tools:discover-new')->dailyAt('04:00');
