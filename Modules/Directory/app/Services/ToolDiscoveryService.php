@@ -250,14 +250,12 @@ class ToolDiscoveryService
             return null;
         }
 
-        // Dédup par nom fuzzy
-        $nameNorm = strtolower(trim(preg_replace('/\s*(ai|tool|app)\s*$/i', '', $name)));
-        $existing = Tool::select('id', 'name')->get();
+        // Dédup par nom fuzzy (aliases inclus)
+        $nameNorm = preg_replace('/\s*(ai|tool|app)\s*$/i', '', $name);
+        $existing = Tool::select('id', 'name', 'aliases')->get();
 
         foreach ($existing as $tool) {
-            $existingName = strtolower(trim($tool->getTranslation('name', 'fr_CA', false) ?? ''));
-            similar_text($nameNorm, $existingName, $percent);
-            if ($percent > 85) {
+            if ($tool->matchesName($nameNorm) > 85) {
                 return null;
             }
         }

@@ -75,6 +75,7 @@ class Tool extends Model
         'parent_tool_id', 'ecosystem_tag',
         'has_education_pricing', 'education_pricing_type', 'education_pricing_details', 'education_pricing_url',
         'lifecycle_status', 'lifecycle_date', 'lifecycle_replacement_url', 'lifecycle_replacement_tool_id', 'lifecycle_notes',
+        'aliases',
     ];
 
     public function submitter(): BelongsTo
@@ -90,6 +91,37 @@ class Tool extends Model
     public function lifecycleReplacement(): BelongsTo
     {
         return $this->belongsTo(self::class, 'lifecycle_replacement_tool_id');
+    }
+
+    public function matchesName(string $candidate): int
+    {
+        $candidate = mb_strtolower(trim($candidate));
+        if ($candidate === '') {
+            return 0;
+        }
+
+        $names = [(string) ($this->getTranslation('name', 'fr_CA', false) ?? '')];
+
+        if (is_array($this->aliases)) {
+            foreach ($this->aliases as $alias) {
+                if (is_string($alias) && trim($alias) !== '') {
+                    $names[] = $alias;
+                }
+            }
+        }
+
+        $best = 0;
+
+        foreach ($names as $n) {
+            $n = mb_strtolower(trim($n));
+            if ($n === '') {
+                continue;
+            }
+            similar_text($candidate, $n, $percent);
+            $best = (int) max($best, (int) round($percent));
+        }
+
+        return $best;
     }
 
     public function childTools(): HasMany
@@ -122,6 +154,7 @@ class Tool extends Model
         'last_enriched_at' => 'datetime',
         'enrichment_version' => 'integer',
         'lifecycle_date' => 'date',
+        'aliases' => 'array',
     ];
 
     public function categories(): BelongsToMany
