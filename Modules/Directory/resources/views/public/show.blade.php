@@ -23,6 +23,29 @@
 @endsection
 
 @auth
+@can('view_admin_panel')
+<details class="core-admin-capture-panel">
+    <summary>📸 Capture assistée (écran)</summary>
+    <div class="core-admin-capture-panel__body">
+        <x-core::screenshot-capture
+            :uploadUrl="route('admin.directory.upload-screenshot', $tool)"
+            :enabled="\Modules\Settings\Facades\Settings::get('directory.assisted_screenshot_enabled', true)"
+            label=""
+            helpText="Ouvre le site cible dans un autre onglet, accepte les cookies, cadre. Reviens ici et clique Capturer. Upload auto 1200×630."
+        />
+    </div>
+</details>
+<style>
+    .core-admin-capture-panel { position: fixed; top: 140px; right: 16px; z-index: 8999; max-width: 380px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04); font-family: var(--f-body, system-ui, -apple-system, sans-serif); }
+    .core-admin-capture-panel > summary { padding: 10px 14px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23); list-style: none; border-radius: 10px; }
+    .core-admin-capture-panel > summary::-webkit-details-marker { display: none; }
+    .core-admin-capture-panel > summary::before { content: '▶'; display: inline-block; margin-right: 6px; font-size: 10px; transition: transform 0.2s ease; }
+    .core-admin-capture-panel[open] > summary::before { transform: rotate(90deg); }
+    .core-admin-capture-panel__body { padding: 0 12px 12px; }
+    @media (max-width: 767px) { .core-admin-capture-panel { top: 128px; right: 8px; max-width: calc(100vw - 16px); } }
+    @media print { .core-admin-capture-panel { display: none !important; } }
+</style>
+@endcan
 @include('core::components.admin-bar', [
     'label' => __('Outil admin'),
     'actions' => array_filter([
