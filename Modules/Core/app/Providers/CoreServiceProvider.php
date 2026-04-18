@@ -75,6 +75,7 @@ class CoreServiceProvider extends ServiceProvider
             \Modules\Core\Console\NewProjectCommand::class,
             \Modules\Core\Console\CleanupOldRecords::class,
             \Modules\Core\Console\AuditCommand::class,
+            \Modules\Core\Console\RefreshFaviconsCommand::class,
         ]);
     }
 
