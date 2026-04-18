@@ -151,7 +151,7 @@ class DirectoryAdminController extends Controller
 
         \Modules\Directory\Jobs\CaptureScreenshotJob::dispatch($tool);
 
-        return back()->with('success', __('Capture screenshot lancée en arrière-plan. Rafraîchissez la page dans 1-2 minutes.'));
+        return back()->with('success', __('Capture screenshot lancée en arrière-plan. Rafraîchissez la page dans 2-5 minutes (job Puppeteer 180-270 s).'));
     }
 
     public function uploadScreenshot(Request $request, Tool $tool): RedirectResponse
