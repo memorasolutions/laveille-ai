@@ -161,6 +161,9 @@
         {{ __('Retour au répertoire') }}
     </a>
 
+    {{-- LIFECYCLE BANNER (masqué si statut actif/beta) --}}
+    <x-core::lifecycle-banner :tool="$tool" />
+
     {{-- HEADER --}}
     <div class="rt-header">
         <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;">

@@ -87,6 +87,11 @@ class Tool extends Model
         return $this->belongsTo(self::class, 'parent_tool_id');
     }
 
+    public function lifecycleReplacement(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'lifecycle_replacement_tool_id');
+    }
+
     public function childTools(): HasMany
     {
         return $this->hasMany(self::class, 'parent_tool_id');

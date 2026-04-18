@@ -32,6 +32,14 @@
             'gradientFrom' => ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#C0392B','#16A085','#8E44AD','#2980B9','#D35400'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'hasEduPricing' => (bool) $tool->has_education_pricing,
+            'lifecycleStatus' => $tool->lifecycle_status ?? 'active',
+            'lifecycleLabel' => $tool->lifecycle_label ?? '',
+            'lifecycleColor' => $tool->lifecycle_color ?? '#6b7280',
+            'lifecycleIconFa' => (function ($icon) {
+                $map = ['fa-circle-check'=>'fa-check-circle','fa-flask'=>'fa-flask','fa-pause-circle'=>'fa-pause-circle','fa-tag'=>'fa-tag','fa-shuffle'=>'fa-random','fa-handshake'=>'fa-handshake-o','fa-circle-xmark'=>'fa-times-circle','fa-triangle-exclamation'=>'fa-exclamation-triangle'];
+                return $map[$icon] ?? $icon;
+            })($tool->lifecycle_icon ?? 'fa-circle-check'),
+            'isLifecycleActive' => (bool) $tool->is_lifecycle_active,
         ];
     })->values();
 
@@ -647,6 +655,14 @@
                     <article class="rt-card">
                         <template x-if="tool.isFeatured"><span class="rt-featured">{{ __('En vedette') }}</span></template>
 
+                        <template x-if="!tool.isLifecycleActive">
+                            <span :style="'position:absolute;top:12px;right:12px;z-index:4;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:11px;font-weight:600;color:#fff;border-radius:999px;white-space:nowrap;line-height:1.3;box-shadow:0 2px 6px rgba(0,0,0,.25);background-color:' + tool.lifecycleColor + 'F2;'"
+                                  :aria-label="'Statut : ' + tool.lifecycleLabel"
+                                  :title="tool.lifecycleLabel">
+                                <i :class="'fa ' + tool.lifecycleIconFa" aria-hidden="true" style="font-size:inherit"></i>
+                                <span x-text="tool.lifecycleLabel"></span>
+                            </span>
+                        </template>
                         <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
                             <template x-if="tool.screenshot">
                                 <div style="position: relative; height: 140px;">
