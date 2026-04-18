@@ -327,6 +327,9 @@
     </style>
     @endif
 
+    {{-- Barre incitation création compte membre (module activable, apparaît après consent cookies) --}}
+    <x-core::guest-cta-bar />
+
     {{-- Lightbox image réutilisable --}}
     <div x-data="{ open: false, src: '', alt: '' }"
          @lightbox.window="open = true; src = $event.detail.src; alt = $event.detail.alt || ''"
