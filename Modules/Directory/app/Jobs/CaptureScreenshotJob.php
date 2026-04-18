@@ -19,7 +19,10 @@ class CaptureScreenshotJob implements ShouldQueue
 
     public int $tries = 1;
 
-    public function __construct(public Tool $tool) {}
+    public function __construct(public Tool $tool)
+    {
+        $this->onQueue('screenshots');
+    }
 
     public function handle(ScreenshotService $service): void
     {

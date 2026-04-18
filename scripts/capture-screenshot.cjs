@@ -149,7 +149,8 @@ function downloadFile(fileUrl, destPath) {
         });
 
         var page = await browser.newPage();
-        await page.setViewport({ width: 1200, height: 630 });
+        // Viewport plus haut (1200x1400) + clip zone haute 630 : popups cookies bottom-banner exclues (idée 2026)
+        await page.setViewport({ width: 1200, height: 1400 });
 
         // Stealth + idcac cookie dismiss before navigation
         await page.evaluateOnNewDocument(idcac.getInjectableScript());
@@ -236,7 +237,7 @@ function downloadFile(fileUrl, destPath) {
             }
         } else {
             // CAPTURE NORMALE
-            await page.screenshot({ path: outputPath, type: 'jpeg', quality: 85, fullPage: false });
+            await page.screenshot({ path: outputPath, type: 'jpeg', quality: 85, fullPage: false, clip: { x: 0, y: 0, width: 1200, height: 630 } });
 
             // VALIDATION : taille fichier
             var fileSize = fs.statSync(outputPath).size;
