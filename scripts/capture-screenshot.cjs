@@ -9,7 +9,8 @@ puppeteer.use(StealthPlugin());
 
 var url = process.argv[2];
 var outputPath = process.argv[3];
-var MIN_FILE_SIZE = 20 * 1024; // 20 KB minimum = screenshot valide
+var MIN_FILE_SIZE = 20 * 1024; // 20 KB minimum screenshot Puppeteer
+var MIN_OG_SIZE = 5 * 1024;     // 5 KB minimum og:image (logos petits OK)
 
 if (!url || !outputPath) {
     console.log(JSON.stringify({ success: false, error: 'Usage: node capture-screenshot.cjs URL OUTPUT_PATH' }));
@@ -222,8 +223,8 @@ function downloadFile(fileUrl, destPath) {
             if (ogImage) {
                 try {
                     var bytes = await downloadFile(ogImage, outputPath);
-                    if (bytes >= MIN_FILE_SIZE) {
-                        console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', ogUrl: ogImage }));
+                    if (bytes >= MIN_OG_SIZE) {
+                        console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: bytes, ogUrl: ogImage }));
                     } else {
                         console.log(JSON.stringify({ success: false, error: 'og:image trop petite (' + Math.round(bytes / 1024) + ' KB)', blocked: true, tooSmall: true }));
                     }
@@ -258,7 +259,7 @@ function downloadFile(fileUrl, destPath) {
                     try {
                         await downloadFile(ogImage, outputPath);
                         var ogSize = fs.statSync(outputPath).size;
-                        if (ogSize >= MIN_FILE_SIZE) {
+                        if (ogSize >= MIN_OG_SIZE) {
                             ogSuccess = true;
                             console.log(JSON.stringify({ success: true, path: outputPath, method: 'og:image', size: ogSize, ogUrl: ogImage }));
                         }
