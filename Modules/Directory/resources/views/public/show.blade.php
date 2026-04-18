@@ -24,26 +24,32 @@
 
 @auth
 @can('view_admin_panel')
-<details class="core-admin-capture-panel">
-    <summary>📸 Capture assistée (écran)</summary>
-    <div class="core-admin-capture-panel__body">
-        <x-core::screenshot-capture
-            :uploadUrl="route('admin.directory.upload-screenshot', $tool)"
-            :enabled="\Modules\Settings\Facades\Settings::get('directory.assisted_screenshot_enabled', true)"
-            label=""
-            helpText="Ouvre le site cible dans un autre onglet, accepte les cookies, cadre. Reviens ici et clique Capturer. Upload auto 1200×630."
-        />
-    </div>
-</details>
+<button type="button" class="core-capture-fab" onclick="document.getElementById('core-capture-dialog').showModal()" title="Capture assistée écran" aria-label="Capture assistée écran">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+</button>
+<dialog id="core-capture-dialog" class="core-capture-dialog">
+    <form method="dialog" class="core-capture-dialog__close-form">
+        <button type="submit" class="core-capture-dialog__close" aria-label="Fermer">✕</button>
+    </form>
+    <h5 class="core-capture-dialog__title">📸 {{ __('Capture assistée (Screen Capture API)') }}</h5>
+    <x-core::screenshot-capture
+        :uploadUrl="route('admin.directory.upload-screenshot', $tool)"
+        :enabled="\Modules\Settings\Facades\Settings::get('directory.assisted_screenshot_enabled', true)"
+        label=""
+        helpText="Ouvre le site cible dans un autre onglet, accepte les cookies, cadre. Reviens ici et clique Capturer. Upload auto 1200×630."
+    />
+</dialog>
 <style>
-    .core-admin-capture-panel { position: fixed; top: 140px; right: 16px; z-index: 8999; max-width: 380px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04); font-family: var(--f-body, system-ui, -apple-system, sans-serif); }
-    .core-admin-capture-panel > summary { padding: 10px 14px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--c-dark, #1A1D23); list-style: none; border-radius: 10px; }
-    .core-admin-capture-panel > summary::-webkit-details-marker { display: none; }
-    .core-admin-capture-panel > summary::before { content: '▶'; display: inline-block; margin-right: 6px; font-size: 10px; transition: transform 0.2s ease; }
-    .core-admin-capture-panel[open] > summary::before { transform: rotate(90deg); }
-    .core-admin-capture-panel__body { padding: 0 12px 12px; }
-    @media (max-width: 767px) { .core-admin-capture-panel { top: 128px; right: 8px; max-width: calc(100vw - 16px); } }
-    @media print { .core-admin-capture-panel { display: none !important; } }
+    .core-capture-fab { position: fixed; bottom: 24px; right: 24px; z-index: 8990; width: 48px; height: 48px; border-radius: 50%; background: var(--c-primary, #0B7285); color: #fff; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.08); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .core-capture-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.18), 0 3px 6px rgba(0,0,0,0.10); }
+    .core-capture-dialog { max-width: 520px; width: calc(100% - 32px); border: none; border-radius: 14px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .core-capture-dialog::backdrop { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+    .core-capture-dialog__title { margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: var(--c-dark, #1A1D23); }
+    .core-capture-dialog__close-form { position: absolute; top: 12px; right: 12px; margin: 0; }
+    .core-capture-dialog__close { width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; border: none; color: #6b7280; font-size: 16px; cursor: pointer; line-height: 1; }
+    .core-capture-dialog__close:hover { background: #e5e7eb; color: #111827; }
+    @media (max-width: 767px) { .core-capture-fab { bottom: 16px; right: 16px; width: 44px; height: 44px; } }
+    @media print { .core-capture-fab, .core-capture-dialog { display: none !important; } }
 </style>
 @endcan
 @include('core::components.admin-bar', [
