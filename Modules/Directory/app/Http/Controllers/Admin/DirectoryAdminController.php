@@ -176,11 +176,32 @@ class DirectoryAdminController extends Controller
             file_put_contents($fullPath, $image);
 
             $tool->screenshot = $filePath;
+            $tool->updated_at = now();
             $tool->saveQuietly();
 
-            return back()->with('success', __('Screenshot uploadé avec succès (redimensionné 1200×630).'));
+            $this->purgeCloudflareScreenshot($filePath);
+
+            return back()->with('success', __('Screenshot uploadé avec succès (redimensionné 1200×630, cache purgé).'));
         } catch (\Throwable $e) {
             return back()->with('error', __('Échec upload : :msg', ['msg' => $e->getMessage()]));
+        }
+    }
+
+    private function purgeCloudflareScreenshot(string $filePath): void
+    {
+        try {
+            $zoneId = env('CLOUDFLARE_ZONE_ID');
+            $apiToken = env('CLOUDFLARE_API_TOKEN');
+            if (empty($zoneId) || empty($apiToken)) {
+                return;
+            }
+            \Illuminate\Support\Facades\Http::timeout(8)
+                ->withToken($apiToken)
+                ->post("https://api.cloudflare.com/client/v4/zones/{$zoneId}/purge_cache", [
+                    'files' => [config('app.url').'/'.ltrim($filePath, '/')],
+                ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Cloudflare purge failed: '.$e->getMessage());
         }
     }
 

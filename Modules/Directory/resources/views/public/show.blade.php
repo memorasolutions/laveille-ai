@@ -196,7 +196,8 @@
     {{-- Screenshot ou gradient fallback --}}
     @if($tool->screenshot)
         <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
-            <img src="{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
+            @php $__ssUrl = str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.$tool->updated_at->timestamp; @endphp
+            <img src="{{ $__ssUrl }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
         </div>
     @else
         <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; max-height: 400px; height: 280px; background: linear-gradient(135deg, var(--c-primary), var(--c-dark)); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
