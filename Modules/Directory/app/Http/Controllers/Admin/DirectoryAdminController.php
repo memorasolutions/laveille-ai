@@ -186,6 +186,10 @@ class DirectoryAdminController extends Controller
 
             $this->purgeCloudflareScreenshot($filePath);
 
+            if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
+                try { \Spatie\ResponseCache\Facades\ResponseCache::clear(); } catch (\Throwable $e) {}
+            }
+
             $msg = __('Screenshot uploadé avec succès (redimensionné 1200×630, cache purgé).');
 
             return $wantsJson

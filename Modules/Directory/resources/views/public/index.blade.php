@@ -23,7 +23,7 @@
             'categories' => $tool->categories->pluck('name')->toArray(),
             'categorySlugs' => $tool->categories->pluck('slug')->toArray(),
             'favicon' => $host ? "https://www.google.com/s2/favicons?domain={$host}&sz=64" : '',
-            'screenshot' => $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot)) : '',
+            'screenshot' => $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.$tool->updated_at->timestamp) : '',
             'showUrl' => route('directory.show', $tool->slug),
             'websiteType' => $tool->website_type ?? 'website',
             'launchYear' => $tool->launch_year ?? 0,
