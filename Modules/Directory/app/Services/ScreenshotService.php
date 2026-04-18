@@ -80,7 +80,8 @@ class ScreenshotService
             $method = $json['method'] ?? 'screenshot';
 
             // Protection : ne pas ecraser un bon screenshot (> 20 KB) par un plus petit
-            if ($existingSize > 20000 && $newSize < $existingSize * 0.5) {
+            // (sauf si method=og:image car fallback intentionnel lorsque Puppeteer rend page vide/popup)
+            if ($method !== 'og:image' && $existingSize > 20000 && $newSize < $existingSize * 0.5) {
                 Log::warning("Screenshot {$slug}: nouveau fichier ({$newSize}) beaucoup plus petit que l'existant ({$existingSize}) - conserve l'ancien");
                 @unlink($tempPath);
 
