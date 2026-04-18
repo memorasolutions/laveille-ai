@@ -167,7 +167,7 @@
     {{-- HEADER --}}
     <div class="rt-header">
         <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
-            @if($favicon)<img src="{{ $favicon }}" alt="" class="rt-logo" width="64" height="64" onerror="this.style.display='none'">@endif
+            @if($host)<x-core::smart-favicon :domain="$host" :size="64" class="rt-logo" />@endif
             <div style="flex: 1; min-width: 200px;">
                 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                     <h1 class="rt-name" style="margin:0;" data-editable="name">{{ $tool->name }}</h1>
@@ -1132,7 +1132,7 @@
                 @php $simHost = $sim->url ? parse_url($sim->url, PHP_URL_HOST) : ''; @endphp
                 <div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom: 12px;">
                     <a href="{{ route('directory.show', $sim->slug) }}" style="display: block; text-align: center; border: 1px solid #E5E7EB; border-radius: var(--r-base); padding: 16px; text-decoration: none; color: inherit; transition: all 0.2s; height: 100%;">
-                        @if($simHost)<img src="https://www.google.com/s2/favicons?domain={{ $simHost }}&sz=64" alt="" width="32" height="32" style="margin-bottom: 8px;" loading="lazy" onerror="this.style.display='none'">@endif
+                        @if($simHost)<x-core::smart-favicon :domain="$simHost" :size="32" class="" />@endif
                         <div style="font-family: var(--f-heading); font-weight: 700; font-size: 0.95rem;">{{ $sim->name }}</div>
                         <span class="rt-badge badge-{{ $sim->pricing }}" style="font-size: 0.6rem; margin-top: 6px;">{{ $pricingLabels[$sim->pricing] ?? ucfirst($sim->pricing) }}</span>
                     </a>
