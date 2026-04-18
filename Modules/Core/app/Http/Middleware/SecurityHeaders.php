@@ -24,7 +24,7 @@ class SecurityHeaders
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), display-capture=(self)');
+        $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), display-capture=(self)');
         $response->headers->set('Content-Security-Policy', "frame-src 'self' https://lookerstudio.google.com https://www.youtube-nocookie.com https://www.youtube.com https://js.stripe.com https://hooks.stripe.com https://googleads.g.doubleclick.net https://ep2.adtrafficquality.google https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.google.com");
 
         if (app()->environment('production')) {
