@@ -125,7 +125,7 @@
                     <div class="mt-2 text-end">
                         <small id="autosave-status" class="text-muted" style="transition:opacity .5s"></small>
                     </div>
-                    @if($article->status === 'published')
+                    @if((string) $article->status === 'published')
                         <form action="{{ route('admin.blog.articles.unpublish', $article->id) }}" method="POST" class="mt-2">
                             @csrf
                             <button type="submit" class="w-100 btn btn-outline-warning">Dépublier</button>

@@ -124,9 +124,9 @@
                             <select wire:change="changeStatus({{ $article->id }}, $event.target.value)"
                                     class="form-select form-select-sm w-auto"
                                     aria-label="Changer le statut">
-                                <option value="draft" @selected($article->status === 'draft')>{{ __('Brouillon') }}</option>
-                                <option value="published" @selected($article->status === 'published')>{{ __('Publié') }}</option>
-                                <option value="archived" @selected($article->status === 'archived')>{{ __('Archivé') }}</option>
+                                <option value="draft" @selected((string) $article->status === 'draft')>{{ __('Brouillon') }}</option>
+                                <option value="published" @selected((string) $article->status === 'published')>{{ __('Publié') }}</option>
+                                <option value="archived" @selected((string) $article->status === 'archived')>{{ __('Archivé') }}</option>
                             </select>
                         </td>
                         <td class="text-muted">{{ $article->blogCategory?->name ?? '–' }}</td>

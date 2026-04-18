@@ -57,9 +57,9 @@
                         <div class="mb-3">
                             <span class="small text-muted">{{ __('Statut') }}</span>
                             <div class="mt-1">
-                                @if($article->status === 'published')
+                                @if((string) $article->status === 'published')
                                     <span class="badge bg-success">{{ __('Publié') }}</span>
-                                @elseif($article->status === 'draft')
+                                @elseif((string) $article->status === 'draft')
                                     <span class="badge bg-warning text-dark">{{ __('Brouillon') }}</span>
                                 @else
                                     <span class="badge bg-secondary">{{ __('Archivé') }}</span>
