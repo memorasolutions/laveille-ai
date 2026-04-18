@@ -56,6 +56,11 @@
                 <a href="{{ route('admin.news.articles.index') }}" class="btn btn-secondary">{{ __('Annuler') }}</a>
             </div>
         </form>
+
+        <x-core::screenshot-capture
+            :uploadUrl="route('admin.news.articles.upload-image', $article)"
+            :enabled="\Modules\Settings\Facades\Settings::get('news.assisted_screenshot_enabled', true)"
+        />
     </div>
 </div>
 @endsection

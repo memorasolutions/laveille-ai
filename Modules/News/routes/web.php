@@ -43,4 +43,5 @@ Route::prefix('admin/news')
         Route::post('articles/{article}/rescore', [AdminNewsController::class, 'rescoreArticle'])->name('articles.rescore');
         Route::patch('articles/{article}/toggle', [AdminNewsController::class, 'toggleArticle'])->name('articles.toggle');
         Route::delete('articles/{article}', [AdminNewsController::class, 'destroyArticle'])->name('articles.destroy');
+        Route::post('articles/{article}/upload-image', [AdminNewsController::class, 'uploadArticleImage'])->name('articles.upload-image');
     });

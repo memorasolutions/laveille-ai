@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\News\Models\NewsArticle;
+use Intervention\Image\Drivers\Gd\Driver as ImageGdDriver;
+use Intervention\Image\ImageManager;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
 use Modules\News\Services\RssFetcherService;
@@ -199,5 +201,60 @@ class AdminNewsController extends Controller
         $article->delete();
 
         return back()->with('success', __('Article supprimé.'));
+    }
+
+    public function uploadArticleImage(Request $request, NewsArticle $article)
+    {
+        $request->validate([
+            'screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        $wantsJson = $request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
+
+        try {
+            $slug = $article->slug ?: (string) $article->id;
+            $filePath = "news-screenshots/{$slug}.jpg";
+            $fullPath = public_path($filePath);
+            $dir = dirname($fullPath);
+            if (! is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+
+            if (file_exists($fullPath)) {
+                @copy($fullPath, "{$fullPath}.bak");
+            }
+
+            $manager = new ImageManager(new ImageGdDriver());
+            $image = $manager->read($request->file('screenshot')->getRealPath())
+                ->cover(1200, 630)
+                ->toJpeg(85)
+                ->toString();
+
+            file_put_contents($fullPath, $image);
+
+            $article->image_url = '/' . $filePath;
+            $article->updated_at = now();
+            $article->saveQuietly();
+
+            if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
+                try {
+                    \Spatie\ResponseCache\Facades\ResponseCache::clear();
+                } catch (\Throwable $e) {
+                }
+            }
+
+            $msg = __('Image uploadée avec succès (redimensionnée 1200×630).');
+
+            return $wantsJson
+                ? response()->json(['ok' => true, 'message' => $msg, 'screenshot_url' => asset($filePath) . '?v=' . $article->updated_at->timestamp])
+                : back()->with('success', $msg);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('[uploadArticleImage] fail article=' . $article->id . ' : ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $errMsg = __('Échec upload : :msg', ['msg' => $e->getMessage()]);
+
+            return $wantsJson
+                ? response()->json(['ok' => false, 'message' => $errMsg], 422)
+                : back()->with('error', $errMsg);
+        }
     }
 }
