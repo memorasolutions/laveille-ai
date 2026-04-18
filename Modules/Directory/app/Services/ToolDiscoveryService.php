@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\Directory\Models\Tool;
+use Modules\Directory\Services\ToolNameCleanerService;
 
 class ToolDiscoveryService
 {
@@ -216,6 +217,12 @@ class ToolDiscoveryService
         $name = $toolData['name'] ?? null;
 
         if (! $url || ! $name) {
+            return null;
+        }
+
+        $name = ToolNameCleanerService::clean($name);
+
+        if ($name === '') {
             return null;
         }
 
