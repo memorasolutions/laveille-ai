@@ -125,6 +125,11 @@
                     <small class="text-muted ms-2">Capture le site avec Chromium headless (1200x630, cookie dismiss automatique)</small>
                 </div>
 
+                <x-core::screenshot-capture
+                    :uploadUrl="route('admin.directory.upload-screenshot', $tool)"
+                    :enabled="\Modules\Settings\Facades\Settings::get('directory.assisted_screenshot_enabled', true)"
+                />
+
                 <div class="mb-3 p-3" style="background:#f8f9fa;border-radius:8px;border:1px solid #e5e7eb;">
                     <h6 class="mb-2">{{ __('Uploader un screenshot manuel') }}</h6>
                     <p class="text-muted small mb-2">{{ __('Si Puppeteer ne capture pas bien (sites Cloudflare-protégés, SPA lents), upload un fichier propre. Sera redimensionné automatiquement en 1200×630.') }}</p>
