@@ -72,6 +72,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\RefreshPricingCommand::class,
             \Modules\Directory\Console\EnrichFormationsCommand::class,
             \Modules\Directory\Console\FixHnSlugsCommand::class,
+            \Modules\Directory\Console\ImportYoutubeResourcesCommand::class,
         ]);
     }
 
