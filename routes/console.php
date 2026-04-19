@@ -67,23 +67,9 @@ Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 // News - resolution URLs Google News non resolues (fallback periodique pour articles avec resolved_url=null)
 Schedule::command('news:reprocess --unresolved-only --limit=50')->dailyAt('04:30')->withoutOverlapping();
 
-// One-shot reprocess unresolved News (session 27, rattrapage backlog prod — retire apres exec via flag)
-Schedule::call(function () {
-    $flag = storage_path('app/news_reprocess_backlog_s27.flag');
-    if (file_exists($flag)) {
-        return;
-    }
-    try {
-        \Illuminate\Support\Facades\Artisan::call('news:reprocess', [
-            '--unresolved-only' => true,
-            '--limit' => 200,
-        ]);
-        $output = \Illuminate\Support\Facades\Artisan::output();
-        @file_put_contents($flag, now()->toIso8601String() . "\n" . $output);
-    } catch (\Throwable $e) {
-        @file_put_contents($flag . '.error', $e->getMessage());
-    }
-})->everyMinute();
+// News - rattrapage accelere backlog unresolved (toutes les 2h, max 10 articles, non bloquant)
+// Le daily 4:30 gere la routine, ce second run rattrape plus vite les nouveaux articles non resolus
+Schedule::command('news:reprocess --unresolved-only --limit=10')->cron('15 */2 * * *')->withoutOverlapping();
 
 // One-shot reassign Concentré category (corrige duplicate, retiré après exec)
 Schedule::call(function () {
