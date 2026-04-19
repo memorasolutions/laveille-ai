@@ -252,7 +252,12 @@
                             </label>
                         </div>
 
-                        <button type="submit" class="sp-btn-primary sp-btn-full" style="margin-top: 12px;">{{ __('Passer la commande') }}</button>
+                        <template x-if="!quoteFetched || !selectedCost || selectedCost <= 0">
+                            <div class="sp-alert sp-alert-warning" role="alert" style="background:#FEF3C7; border:1px solid #F59E0B; color:#92400E; padding:10px 14px; border-radius:6px; margin-top:12px; font-size:13px;">
+                                ⚠️ {{ __('Saisis ton code postal pour calculer les frais de livraison avant de passer à la caisse.') }}
+                            </div>
+                        </template>
+                        <button type="submit" class="sp-btn-primary sp-btn-full" style="margin-top: 12px;" :disabled="!quoteFetched || !selectedCost || selectedCost <= 0" :style="(!quoteFetched || !selectedCost || selectedCost <= 0) ? 'margin-top: 12px; opacity:0.5; cursor:not-allowed;' : 'margin-top: 12px;'">{{ __('Passer la commande') }}</button>
                         <p class="sp-legal-note">
                             {!! __('En passant commande, vous acceptez nos <a href=":url" target="_blank">conditions de vente</a>.', ['url' => route('legal.sales')]) !!}
                         </p>

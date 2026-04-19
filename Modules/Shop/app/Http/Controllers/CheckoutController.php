@@ -21,7 +21,7 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'shipping_cost' => 'required|numeric|min:0|max:100',
+            'shipping_cost' => 'required|numeric|min:1|max:100',
             'newsletter' => 'sometimes|boolean',
             'save_address' => 'sometimes|boolean',
             'shipping_address' => 'required|array',
@@ -51,6 +51,11 @@ class CheckoutController extends Controller
             default => 0,
         };
         $shippingCost = (float) $request->input('shipping_cost', 0);
+
+        if ($shippingCost <= 0) {
+            return back()->withInput()->withErrors(['shipping_cost' => __('Veuillez saisir un code postal valide pour calculer les frais de livraison.')]);
+        }
+
         $total = round($subtotal + $taxAmount + $shippingCost, 2);
 
         // Créer la commande
