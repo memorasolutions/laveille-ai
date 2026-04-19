@@ -4,6 +4,36 @@
 @section('title', $article->title . ' - ' . config('app.name'))
 @section('meta_description', Str::limit($article->excerpt ?? strip_tags($article->content), 160))
 @section('og_type', 'article')
+@section('share_text')
+@php
+    $shareLines = [];
+
+    $title = str_replace('\'', "\u{2019}", $article->title);
+    $shareLines[] = "📝 {$title}";
+
+    $excerpt = Str::limit(strip_tags($article->excerpt ?? $article->content), 200);
+    if ($excerpt) {
+        $excerpt = str_replace('\'', "\u{2019}", $excerpt);
+        $shareLines[] = $excerpt;
+    }
+
+    if (!empty($article->author?->name)) {
+        $authorName = str_replace('\'', "\u{2019}", $article->author->name);
+        $shareLines[] = "👤 {$authorName}";
+    }
+
+    if (!empty($article->category?->name)) {
+        $categoryName = str_replace('\'', "\u{2019}", $article->category->name);
+        $shareLines[] = "🏷️ {$categoryName}";
+    }
+
+    $shareLines[] = "🔗 " . request()->url();
+    $shareLines[] = "📚 Plus d\u{2019}articles : laveille.ai/blog";
+    $shareLines[] = "Via laveille.ai";
+
+    echo trim(implode("\n", $shareLines));
+@endphp
+@endsection
 @if($article->featured_image)
     @section('og_image', asset($article->featured_image))
 @endif

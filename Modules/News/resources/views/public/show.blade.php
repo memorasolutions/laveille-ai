@@ -4,12 +4,45 @@
 
 @section('title', ($article->seo_title ?? $article->title) . ' - ' . __('Actualités') . ' - ' . config('app.name'))
 @section('meta_description', $article->meta_description ?? Str::limit($article->summary ?? strip_tags($article->description), 155))
-@section('share_text'){{ $ss['hook'] ?? ($article->meta_description ?? '') }}
+@section('share_text')
+@php
+    $ss = $article->structured_summary ?? [];
+    $shareLines = [];
 
-{{ __('Pourquoi c\'est important') }} : {{ $ss['why_important'] ?? '' }}
+    $title = str_replace('\'', "\u{2019}", $article->seo_title ?? $article->title);
+    $shareLines[] = "📰 {$title}";
 
-📰 {{ request()->url() }}
-🔄 {{ __('Actualités mises à jour en continu sur laveille.ai') }}@endsection
+    $hookOrDesc = $ss['hook'] ?? $article->meta_description ?? '';
+    if ($hookOrDesc) {
+        $hookOrDesc = str_replace('\'', "\u{2019}", trim(strip_tags($hookOrDesc)));
+        $shareLines[] = $hookOrDesc;
+    }
+
+    if (!empty($ss['why_important'])) {
+        $whyImportant = str_replace('\'', "\u{2019}", $ss['why_important']);
+        $shareLines[] = "🧠 Pourquoi c\u{2019}est important : {$whyImportant}";
+    }
+
+    if (!empty($ss['key_number'])) {
+        $keyNumber = str_replace('\'', "\u{2019}", $ss['key_number']);
+        $shareLines[] = "🎯 Chiffre-clé : {$keyNumber}";
+    } elseif (!empty($ss['action_concrete'])) {
+        $actionConcrete = str_replace('\'', "\u{2019}", $ss['action_concrete']);
+        $shareLines[] = "🎯 Action concrète : {$actionConcrete}";
+    }
+
+    if (!empty($article->category_tag)) {
+        $categoryTag = str_replace('\'', "\u{2019}", $article->category_tag);
+        $shareLines[] = "🏷️ {$categoryTag}";
+    }
+
+    $shareLines[] = "🔗 " . request()->url();
+    $shareLines[] = "📚 Toute l\u{2019}actualité IA : laveille.ai";
+    $shareLines[] = "Via laveille.ai";
+
+    echo trim(implode("\n", $shareLines));
+@endphp
+@endsection
 @section('og_type', 'article')
 @if($article->image_url)
     @section('og_image', url($article->image_url))
