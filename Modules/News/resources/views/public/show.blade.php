@@ -14,7 +14,7 @@
     $whyImportant = $clean($ss['why_important'] ?? null);
     $keyNumber = $clean($ss['key_number'] ?? null);
     $actionConcrete = $clean($ss['action_concrete'] ?? null);
-    $categoryTag = $article->category_tag ? '#' . preg_replace('/[^a-z0-9]/i', '', $article->category_tag) : null;
+    $categoryTag = $article->category_tag ? '#' . preg_replace('/[^a-z0-9]/i', '', \Illuminate\Support\Str::ascii($article->category_tag)) : null;
 
     $lines = array_filter([
         "📰 {$title}",
