@@ -64,6 +64,23 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
+// One-shot seed Concentré hebdo S26 (task #8, retiré après création)
+Schedule::call(function () {
+    $flag = storage_path('app/concentre_hebdo_s26_seeded.flag');
+    if (file_exists($flag)) {
+        return;
+    }
+    try {
+        \Illuminate\Support\Facades\Artisan::call('db:seed', [
+            '--class' => 'Database\\Seeders\\Standalone\\WeeklyDigestSeederS26',
+            '--force' => true,
+        ]);
+        @file_put_contents($flag, now()->toIso8601String() . "\n" . \Illuminate\Support\Facades\Artisan::output());
+    } catch (\Throwable $e) {
+        @file_put_contents($flag . '.error', $e->getMessage() . "\n" . $e->getTraceAsString());
+    }
+})->everyMinute();
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
