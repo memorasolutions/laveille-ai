@@ -70,21 +70,22 @@ Schedule::call(function () {
     if (file_exists($flag)) {
         return;
     }
-    $startOfWeek = now()->subDays(7);
-    $articles = \Illuminate\Support\Facades\DB::table('news_articles')
-        ->where('published_at', '>=', $startOfWeek)
-        ->where('is_published', 1)
-        ->orderByRaw('(COALESCE(views_count, 0) * 0.6 + COALESCE(relevance_score, 0) * 10) DESC')
-        ->limit(15)
-        ->get(['id', 'slug', 'title', 'seo_title', 'meta_description', 'summary', 'category_tag', 'impact_level', 'structured_summary', 'image_url', 'url', 'published_at', 'views_count', 'relevance_score']);
-    @file_put_contents($flag, json_encode([
-        'articles' => $articles,
-        'week_start' => $startOfWeek->toDateString(),
-        'week_end' => now()->toDateString(),
-        'count' => $articles->count(),
-        'dumped_at' => now()->toIso8601String(),
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-})->everyMinute()->name('oneshot-news-top-week-s26')->withoutOverlapping();
+    try {
+        $start = now()->subDays(7)->toDateTimeString();
+        $articles = \Illuminate\Support\Facades\DB::table('news_articles')
+            ->where('published_at', '>=', $start)
+            ->orderByDesc('published_at')
+            ->limit(20)
+            ->get(['id', 'slug', 'title', 'seo_title', 'meta_description', 'summary', 'category_tag', 'impact_level', 'image_url', 'url', 'published_at', 'views_count']);
+        @file_put_contents($flag, json_encode([
+            'articles' => $articles,
+            'count' => $articles->count(),
+            'dumped_at' => now()->toIso8601String(),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    } catch (\Throwable $e) {
+        @file_put_contents($flag, json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]));
+    }
+})->everyMinute();
 
 // Custom scheduled tasks from database
 try {
