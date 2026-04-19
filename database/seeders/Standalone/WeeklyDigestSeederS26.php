@@ -4,7 +4,7 @@ namespace Database\Seeders\Standalone;
 
 use Illuminate\Database\Seeder;
 use Modules\Blog\Models\Article;
-use Modules\Blog\States\ArticleState\PublishedState;
+use Modules\Blog\States\PublishedArticleState;
 
 class WeeklyDigestSeederS26 extends Seeder
 {
@@ -99,7 +99,7 @@ HTML;
             'content' => ['fr_CA' => $content, 'fr' => $content],
             'excerpt' => ['fr_CA' => $excerpt, 'fr' => $excerpt],
             'featured_image' => 'images/blog/concentre-hebdo-2026-04-12-au-19.jpg',
-            'status' => PublishedState::class,
+            'status' => PublishedArticleState::class,
             'published_at' => now(),
             'category_id' => $categoryId,
             'is_featured' => true,
