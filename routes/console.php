@@ -64,29 +64,6 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
-// One-shot dump top news semaine S26 pour concentré hebdo (retiré session 27)
-Schedule::call(function () {
-    $flag = storage_path('app/news_top_week_s26.flag');
-    if (file_exists($flag)) {
-        return;
-    }
-    try {
-        $start = now()->subDays(7)->toDateTimeString();
-        $articles = \Illuminate\Support\Facades\DB::table('news_articles')
-            ->where('published_at', '>=', $start)
-            ->orderByDesc('published_at')
-            ->limit(20)
-            ->get(['id', 'slug', 'title', 'seo_title', 'meta_description', 'summary', 'category_tag', 'impact_level', 'image_url', 'url', 'published_at', 'views_count']);
-        @file_put_contents($flag, json_encode([
-            'articles' => $articles,
-            'count' => $articles->count(),
-            'dumped_at' => now()->toIso8601String(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    } catch (\Throwable $e) {
-        @file_put_contents($flag, json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]));
-    }
-})->everyMinute();
-
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
