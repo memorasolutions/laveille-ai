@@ -23,7 +23,7 @@ class WeeklyDigestSeederS26 extends Seeder
         $seoTitle = 'Concentré IA semaine du 12 au 19 avril 2026 — laveille.ai';
 
         $content = <<<'HTML'
-<p><strong>TL;DR — Ce qui a marqué la planète IA cette semaine (et pourquoi ça nous concerne) :</strong></p>
+<p><strong>L’essentiel — Ce qui a marqué la planète IA cette semaine (et pourquoi ça nous concerne) :</strong></p>
 <ul>
   <li>Wingman, l’agent IA autonome d’Emergent, arrive avec une approche « vibe coding » venue d’Inde.</li>
   <li>Adobe lance une IA conversationnelle et un assistant Firefly capable d’exécuter des tâches dans Creative Cloud.</li>

@@ -64,6 +64,32 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
+// One-shot replace TL;DR par L’essentiel dans Concentré hebdo S26 (retiré après exec)
+Schedule::call(function () {
+    $flag = storage_path('app/concentre_hebdo_s26_tldr_replaced.flag');
+    if (file_exists($flag)) {
+        return;
+    }
+    try {
+        $article = \Modules\Blog\Models\Article::whereJsonContains('slug->fr_CA', 'le-concentre-de-la-semaine-12-avril-au-19-avril-2026')->first();
+        if (!$article) {
+            @file_put_contents($flag . '.error', 'Article not found');
+            return;
+        }
+        foreach (['fr_CA', 'fr'] as $locale) {
+            $content = $article->getTranslation('content', $locale);
+            if ($content) {
+                $new = str_replace('TL;DR —', 'L’essentiel —', $content);
+                $article->setTranslation('content', $locale, $new);
+            }
+        }
+        $article->save();
+        @file_put_contents($flag, now()->toIso8601String() . "\nOK replaced");
+    } catch (\Throwable $e) {
+        @file_put_contents($flag . '.error', $e->getMessage());
+    }
+})->everyMinute();
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
