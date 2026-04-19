@@ -45,6 +45,15 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="review" class="form-label">Notre avis (éditorial) — markdown supporté</label>
+                    <textarea class="form-control @error('review') is-invalid @enderror" id="review" name="review" rows="8" placeholder="## Notre avis&#10;&#10;Écrivez ici l&#8217;avis éditorial de la rédaction en markdown…">{{ old('review', $tool->review) }}</textarea>
+                    @error('review')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <div class="form-text">Ce champ remplace l&#8217;extraction ## Notre avis du champ Description. Si vide, fallback sur extraction description.</div>
+                </div>
+
+                <div class="mb-3">
                     <label for="url" class="form-label">URL</label>
                     <input type="url" class="form-control @error('url') is-invalid @enderror" id="url" name="url" value="{{ old('url', $tool->url) }}">
                     @error('url')

@@ -33,7 +33,9 @@
     }
 
     $notreAvis = '';
-    if (!empty($tool->description)) {
+    if (!empty($tool->review)) {
+        $notreAvis = trim(strip_tags(\Illuminate\Support\Str::markdown($tool->review)));
+    } elseif (!empty($tool->description)) {
         if (preg_match('/##\s+Notre avis\s*\n([\s\S]+?)(?=\n##|\z)/i', $tool->description, $avisMatch)) {
             $rawAvis = trim($avisMatch[1]);
             $cleanAvis = preg_replace('/^#{1,6}\s+/m', '', $rawAvis);
@@ -416,6 +418,22 @@
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;" data-editable="description">{!! $descHtmlWithIds !!}</div>
             </div>
+
+            @if(!empty($tool->review))
+                @php
+                    $reviewHtml = Str::markdown($tool->review, ['html_input' => 'strip', 'allow_unsafe_links' => false]);
+                @endphp
+                <div style="background: #fff; padding: 32px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                    <h3 style="font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 20px;">
+                        📖 {{ __('Notre avis sur') }} {{ $tool->name }}
+                    </h3>
+                    <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
+                    <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;" data-editable="review">{!! $reviewHtml !!}</div>
+                    <div style="margin-top: 16px;">
+                        <span style="background: #EEF7FF; color: var(--c-primary); font-size: 0.85rem; padding: 4px 12px; border-radius: 12px; display: inline-block; font-weight: 600;">{{ __('Éditorial — Rédaction laveille.ai') }}</span>
+                    </div>
+                </div>
+            @endif
 
             {{-- How to use (masque si contenu trop court/generique) --}}
             @if($tool->how_to_use && Str::length($tool->how_to_use) > 200)

@@ -49,6 +49,7 @@ class DirectoryAdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'review' => 'nullable|string',
             'short_description' => 'nullable|string|max:255',
             'url' => 'nullable|url',
             'pricing' => 'required|in:free,freemium,paid,open_source,enterprise',
@@ -73,6 +74,7 @@ class DirectoryAdminController extends Controller
             'name' => [$locale => $validated['name'], 'fr' => $validated['name']],
             'slug' => [$locale => $slug, 'fr' => $slug],
             'description' => [$locale => $validated['description'] ?? '', 'fr' => $validated['description'] ?? ''],
+            'review' => [$locale => $validated['review'] ?? '', 'fr' => $validated['review'] ?? ''],
             'short_description' => [$locale => $validated['short_description'] ?? '', 'fr' => $validated['short_description'] ?? ''],
             'url' => $validated['url'],
             'pricing' => $validated['pricing'],
@@ -120,12 +122,14 @@ class DirectoryAdminController extends Controller
             'lifecycle_replacement_url' => 'nullable|url|max:500',
             'lifecycle_replacement_tool_id' => 'nullable|integer|exists:directory_tools,id',
             'lifecycle_notes' => 'nullable|string|max:2000',
+            'review' => 'nullable|string',
         ]);
 
         $locale = app()->getLocale();
         $tool->setTranslation('name', $locale, $validated['name']);
         $tool->setTranslation('name', 'fr', $validated['name']);
         $tool->setTranslation('description', $locale, $validated['description'] ?? '');
+        $tool->setTranslation('review', $locale, $validated['review'] ?? '');
         $tool->setTranslation('short_description', $locale, $validated['short_description'] ?? '');
         $tool->url = $validated['url'];
         $tool->affiliate_url = $validated['affiliate_url'] ?? null;
@@ -271,6 +275,7 @@ class DirectoryAdminController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string',
             'description' => 'nullable|string',
+            'review' => 'nullable|string',
             'short_description' => 'nullable|string',
             'url' => 'nullable|string',
             'how_to_use' => 'nullable|string',
