@@ -203,7 +203,7 @@
         <section class="wpo-blog-sponsored-section section-padding">
             <div class="container">
                 <div class="wpo-section-title">
-                    <h2>{{ __('Encore plus d\'articles') }}</h2>
+                    <h2>{{ __('Articles antérieurs') }}</h2>
                 </div>
                 <div class="row">
                     <div class="wpo-blog-sponsored-wrap">
