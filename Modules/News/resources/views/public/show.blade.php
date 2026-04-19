@@ -6,41 +6,32 @@
 @section('meta_description', $article->meta_description ?? Str::limit($article->summary ?? strip_tags($article->description), 155))
 @section('share_text')
 @php
+    // Refonte share_text News — pattern viral 2026 aligné Blog (sonar-pro hybride #3+#1+#5)
     $ss = $article->structured_summary ?? [];
-    $shareLines = [];
+    $clean = fn($str) => str_replace('\'', "\u{2019}", trim(strip_tags($str ?? '')));
+    $title = $clean($article->seo_title ?? $article->title);
+    $hook = $clean($ss['hook'] ?? $article->meta_description);
+    $whyImportant = $clean($ss['why_important'] ?? null);
+    $keyNumber = $clean($ss['key_number'] ?? null);
+    $actionConcrete = $clean($ss['action_concrete'] ?? null);
+    $categoryTag = $article->category_tag ? '#' . preg_replace('/[^a-z0-9]/i', '', $article->category_tag) : null;
 
-    $title = str_replace('\'', "\u{2019}", $article->seo_title ?? $article->title);
-    $shareLines[] = "📰 {$title}";
+    $lines = array_filter([
+        "📰 {$title}",
+        '',
+        $hook ?: null,
+        '',
+        $whyImportant ? "🧠 Pourquoi ça compte : {$whyImportant}" : null,
+        $keyNumber ? "🎯 Chiffre-clé : {$keyNumber}" : ($actionConcrete ? "🎯 À retenir : {$actionConcrete}" : null),
+        '',
+        '💬 Ton avis? On en parle en com.',
+        '🔗 ' . request()->url(),
+        $categoryTag,
+        '#IAQuebec #VeilleIA',
+        'Via @laveilleAI',
+    ], fn($line) => $line !== null);
 
-    $hookOrDesc = $ss['hook'] ?? $article->meta_description ?? '';
-    if ($hookOrDesc) {
-        $hookOrDesc = str_replace('\'', "\u{2019}", trim(strip_tags($hookOrDesc)));
-        $shareLines[] = $hookOrDesc;
-    }
-
-    if (!empty($ss['why_important'])) {
-        $whyImportant = str_replace('\'', "\u{2019}", $ss['why_important']);
-        $shareLines[] = "🧠 Pourquoi c\u{2019}est important : {$whyImportant}";
-    }
-
-    if (!empty($ss['key_number'])) {
-        $keyNumber = str_replace('\'', "\u{2019}", $ss['key_number']);
-        $shareLines[] = "🎯 Chiffre-clé : {$keyNumber}";
-    } elseif (!empty($ss['action_concrete'])) {
-        $actionConcrete = str_replace('\'', "\u{2019}", $ss['action_concrete']);
-        $shareLines[] = "🎯 Action concrète : {$actionConcrete}";
-    }
-
-    if (!empty($article->category_tag)) {
-        $categoryTag = str_replace('\'', "\u{2019}", $article->category_tag);
-        $shareLines[] = "🏷️ {$categoryTag}";
-    }
-
-    $shareLines[] = "🔗 " . request()->url();
-    $shareLines[] = "📚 Toute l\u{2019}actualité IA : laveille.ai";
-    $shareLines[] = "Via laveille.ai";
-
-    echo trim(implode("\n", $shareLines));
+    echo implode("\n", $lines);
 @endphp
 @endsection
 @section('og_type', 'article')
