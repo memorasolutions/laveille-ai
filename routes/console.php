@@ -64,6 +64,22 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
+// One-shot dump last shop order S26 audit (retiré session 27)
+Schedule::call(function () {
+    $flag = storage_path('app/shop_order_dump_s26.flag');
+    if (file_exists($flag)) {
+        return;
+    }
+    $order = \DB::table('shop_orders')->orderByDesc('id')->first();
+    $items = $order ? \DB::table('shop_order_items')->where('order_id', $order->id)->get() : collect();
+    $dump = [
+        'order' => $order,
+        'items' => $items,
+        'dumped_at' => now()->toIso8601String(),
+    ];
+    @file_put_contents($flag, json_encode($dump, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+})->everyMinute()->name('oneshot-shop-order-dump-s26')->withoutOverlapping();
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
