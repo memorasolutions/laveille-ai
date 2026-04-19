@@ -38,7 +38,7 @@
             <div class="panel-body">
                 <div style="display: flex !important; justify-content: space-between !important; margin-bottom: 8px; font-size: 13px;">
                     <span style="color: #777;">{{ __('Membre depuis') }}</span>
-                    <strong>{{ $user->created_at->format('d M Y') }}</strong>
+                    <strong>{{ $user->created_at->translatedFormat('d M Y') }}</strong>
                 </div>
             </div>
         </div>

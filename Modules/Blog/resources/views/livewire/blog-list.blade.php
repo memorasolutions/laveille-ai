@@ -28,7 +28,7 @@
                     <p class="text-gray-500 text-sm mb-4 line-clamp-3">{{ Str::limit($article->excerpt, 120) }}</p>
                     @endif
                     <div class="flex items-center justify-between text-xs text-gray-400">
-                        <span>{{ $article->published_at?->format('d M Y') }}</span>
+                        <span>{{ $article->published_at?->translatedFormat('d M Y') }}</span>
                         <a href="{{ route('blog.show', $article) }}" class="text-blue-600 font-medium hover:underline">
                             Lire →
                         </a>

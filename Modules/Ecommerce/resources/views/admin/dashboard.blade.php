@@ -111,7 +111,7 @@
                             <tr>
                                 <td class="ps-4">{{ $order->order_number }}</td>
                                 <td>{{ $order->user->name ?? __('Invité') }}</td>
-                                <td>{{ $order->created_at->format('d M Y') }}</td>
+                                <td>{{ $order->created_at->translatedFormat('d M Y') }}</td>
                                 <td>
                                     @php
                                         $badges = [

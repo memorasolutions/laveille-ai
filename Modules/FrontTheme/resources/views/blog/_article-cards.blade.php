@@ -11,7 +11,7 @@
             <ul>
                 <li><i class="fi flaticon-user"></i> {{ __('Par') }} <a href="#">{{ $article->getAuthorName() }}</a> </li>
                 <li><i class="fi flaticon-comment-white-oval-bubble"></i> {{ $article->comments_count ?? 0 }} {{ __('commentaires') }}</li>
-                <li><i class="fi flaticon-calendar"></i> {{ $article->published_at?->format('d M Y') }}</li>
+                <li><i class="fi flaticon-calendar"></i> {{ $article->published_at?->translatedFormat('d M Y') }}</li>
             </ul>
         </div>
         <div class="entry-details">

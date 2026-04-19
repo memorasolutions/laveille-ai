@@ -35,7 +35,7 @@
                                             <ul>
                                                 <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;"></li>
                                                 <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero1->slug) }}">{{ $hero1->getAuthorName() }}</a></li>
-                                                <li>{{ $hero1->published_at?->format('d M Y') }}</li>
+                                                <li>{{ $hero1->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -51,7 +51,7 @@
                                             <h2><a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->title }}</a></h2>
                                             <ul>
                                                 <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero2->slug) }}">{{ $hero2->getAuthorName() }}</a></li>
-                                                <li>{{ $hero2->published_at?->format('d M Y') }}</li>
+                                                <li>{{ $hero2->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -67,7 +67,7 @@
                                             <h2><a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->title }}</a></h2>
                                             <ul>
                                                 <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero3->slug) }}">{{ $hero3->getAuthorName() }}</a></li>
-                                                <li>{{ $hero3->published_at?->format('d M Y') }}</li>
+                                                <li>{{ $hero3->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -80,7 +80,7 @@
                                             <h2><a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->title }}</a></h2>
                                             <ul>
                                                 <li>{{ __('Par') }} <a href="{{ route('blog.show', $hero4->slug) }}">{{ $hero4->getAuthorName() }}</a></li>
-                                                <li>{{ $hero4->published_at?->format('d M Y') }}</li>
+                                                <li>{{ $hero4->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -150,7 +150,7 @@
                                                 <ul>
                                                     <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;" loading="lazy"></li>
                                                     <li>{{ __('Par') }} <a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->getAuthorName() }}</a></li>
-                                                    <li>{{ $highlight->published_at?->format('d M Y') }}</li>
+                                                    <li>{{ $highlight->published_at?->translatedFormat('d M Y') }}</li>
                                                 </ul>
                                                 <p>{{ Str::limit($highlight->excerpt ?? strip_tags($highlight->content), 100) }}</p>
                                             </div>
@@ -185,7 +185,7 @@
                                             @endif
                                         </div>
                                         <div class="details">
-                                            <span class="date">{{ $recent->published_at?->format('d M Y') }}</span>
+                                            <span class="date">{{ $recent->published_at?->translatedFormat('d M Y') }}</span>
                                             <h4><a href="{{ route('blog.show', $recent->slug) }}">{{ $recent->title }}</a></h4>
                                         </div>
                                     </div>
@@ -221,7 +221,7 @@
                                             <ul>
                                                 <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;"></li>
                                                 <li>{{ __('Par') }} <a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->getAuthorName() }}</a></li>
-                                                <li>{{ $sponsored->published_at?->format('d M Y') }}</li>
+                                                <li>{{ $sponsored->published_at?->translatedFormat('d M Y') }}</li>
                                             </ul>
                                         </div>
                                     </div>

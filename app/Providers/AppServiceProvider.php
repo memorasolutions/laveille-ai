@@ -41,6 +41,10 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // Force Carbon + setLocale FR (dates en français globalement)
+        \Carbon\Carbon::setLocale('fr');
+        setlocale(LC_TIME, 'fr_CA.UTF-8', 'fr_FR.UTF-8', 'fr_CA', 'fr_FR', 'fr');
+
         Model::automaticallyEagerLoadRelationships();
         Model::preventLazyLoading(! app()->isProduction());
 

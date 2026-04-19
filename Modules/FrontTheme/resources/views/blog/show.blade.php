@@ -134,7 +134,7 @@
                             <div class="entry-meta">
                                 <ul>
                                     <li><i class="fi flaticon-user"></i> {{ __('Par') }} <a href="{{ $article->isGuestPost() && $article->submitted_by ? route('directory.profile', $article->submitted_by) : '#' }}">{{ $article->getAuthorName() }}</a>@if($article->isGuestPost()) <span style="background: var(--c-primary); color: #fff; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 4px;">{{ __('Auteur invité') }}</span>@endif</li>
-                                    <li><i class="fi flaticon-calendar"></i> {{ $article->published_at?->format('d M Y') }}</li>
+                                    <li><i class="fi flaticon-calendar"></i> {{ $article->published_at?->translatedFormat('d M Y') }}</li>
                                     @if($article->blogCategory)
                                         <li><i class="fi flaticon-tag"></i> <a href="{{ route('blog.category', $article->blogCategory->slug) }}">{{ $article->blogCategory->name }}</a></li>
                                     @endif
@@ -287,7 +287,7 @@
                             </a>
                         @endif
                         <div class="panel-body">
-                            <small class="text-muted">{{ $related->published_at?->format('d M Y') }}</small>
+                            <small class="text-muted">{{ $related->published_at?->translatedFormat('d M Y') }}</small>
                             <h4 style="font-size: 15px; font-weight: 600; margin: 6px 0 8px; line-height: 1.4;">
                                 <a href="{{ route('blog.show', $related->slug) }}" style="color: inherit; text-decoration: none;">{{ $related->title }}</a>
                             </h4>

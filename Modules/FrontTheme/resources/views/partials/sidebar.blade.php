@@ -42,7 +42,7 @@
                             @endif
                         </div>
                         <div class="details">
-                            <span class="date">{{ $article->published_at?->format('d M Y') }}</span>
+                            <span class="date">{{ $article->published_at?->translatedFormat('d M Y') }}</span>
                             <h4><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h4>
                         </div>
                     </div>
