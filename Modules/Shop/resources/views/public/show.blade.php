@@ -161,7 +161,7 @@
                             </template>
                         </div>
                     </div>
-                    <input type="hidden" name="variant_label" :value="(currentVariant?.label || '') + (selectedSize ? ' - ' + selectedSize : '')">
+                    <input type="hidden" name="variant_label" :value="currentVariant?.label || ''">
                     <input type="hidden" name="variant_gelato_uid" :value="currentVariant?.gelato_uid || ''">
                     {{-- Sélecteur tailles avec prix par taille --}}
                     <template x-if="availableSizes.length > 0">
