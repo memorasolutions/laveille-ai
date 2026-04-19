@@ -64,30 +64,6 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
-// One-shot replace TL;DR par L’essentiel dans Concentré hebdo S26 (DB raw, retiré après exec)
-Schedule::call(function () {
-    $flag = storage_path('app/concentre_hebdo_s26_tldr_replaced.flag');
-    if (file_exists($flag)) {
-        return;
-    }
-    try {
-        $row = \Illuminate\Support\Facades\DB::table('blog_articles')
-            ->where('slug->fr_CA', 'le-concentre-de-la-semaine-12-avril-au-19-avril-2026')
-            ->first();
-        if (!$row) {
-            @file_put_contents($flag . '.error', 'Article not found via raw DB');
-            return;
-        }
-        $newContent = str_replace('TL;DR —', 'L’essentiel —', $row->content);
-        $updated = \Illuminate\Support\Facades\DB::table('blog_articles')
-            ->where('id', $row->id)
-            ->update(['content' => $newContent, 'updated_at' => now()]);
-        @file_put_contents($flag, now()->toIso8601String() . "\nUpdated row id={$row->id} affected={$updated}");
-    } catch (\Throwable $e) {
-        @file_put_contents($flag . '.error', $e->getMessage() . "\n" . $e->getTraceAsString());
-    }
-})->everyMinute();
-
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
