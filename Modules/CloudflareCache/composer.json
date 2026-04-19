@@ -1,0 +1,14 @@
+{
+    "name": "nwidart/cloudflarecache",
+    "description": "Module purge cache Cloudflare",
+    "authors": [{"name": "MEMORA solutions", "email": "info@memora.ca"}],
+    "extra": {"laravel": {"providers": [], "aliases": {}}},
+    "autoload": {
+        "psr-4": {
+            "Modules\\CloudflareCache\\": "app/",
+            "Modules\\CloudflareCache\\Database\\Factories\\": "database/factories/",
+            "Modules\\CloudflareCache\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {"psr-4": {"Modules\\CloudflareCache\\Tests\\": "tests/"}}
+}

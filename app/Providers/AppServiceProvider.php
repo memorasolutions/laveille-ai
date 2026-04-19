@@ -87,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
         Feature::define('module-webhooks', true);
         Feature::define('module-media', true);
         Feature::define('module-backup', true);
+        Feature::define('module-cloudflare-cache', true);
 
         // Kill switches automatisations critiques (activés par défaut — désactivables via Feature::deactivate() pour pause instantanée sans redeploy)
         Feature::define('cron.newsletter-send', true);

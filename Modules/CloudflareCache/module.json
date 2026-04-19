@@ -1,0 +1,9 @@
+{
+    "name": "CloudflareCache",
+    "alias": "cloudflarecache",
+    "description": "Purge automatique cache Cloudflare après modification contenu cacheable. Désactivable via modules_statuses.json sans impact.",
+    "keywords": ["cloudflare", "cache", "cdn", "purge"],
+    "priority": 0,
+    "providers": ["Modules\\CloudflareCache\\Providers\\CloudflareCacheServiceProvider"],
+    "files": []
+}
