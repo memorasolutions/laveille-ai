@@ -70,7 +70,7 @@
     </form>
     <h5 class="core-capture-dialog__title">📸 {{ __('Capture assistée (Screen Capture API)') }}</h5>
     <x-core::screenshot-capture
-        :uploadUrl="route('admin.news.articles.upload-image', $article->id)"
+        :uploadUrl="route('admin.news.articles.upload-image', $article)"
         :enabled="\Modules\Settings\Facades\Settings::get('news.assisted_screenshot_enabled', true)"
         label=""
         helpText="Ouvre l’article source dans un autre onglet, accepte les cookies, cadre sur l’image clé. Reviens ici et clique Capturer. Upload auto 1200×630 pour remplacer l’image de l’article."
