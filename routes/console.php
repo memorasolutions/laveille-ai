@@ -64,6 +64,14 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
+// One-shot migrate review S26 (retiré session 27 après confirmation)
+Schedule::call(function () {
+    if (! \Illuminate\Support\Facades\Schema::hasColumn('directory_tools', 'review')) {
+        \Illuminate\Support\Facades\Artisan::call('migrate --force');
+        @file_put_contents(storage_path('app/migrate_review_s26.flag'), now()->toIso8601String());
+    }
+})->everyMinute()->name('oneshot-migrate-review-s26')->withoutOverlapping();
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
