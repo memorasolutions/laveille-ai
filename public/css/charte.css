@@ -964,6 +964,10 @@ article h3 {
     a[href^="#"]:after, a[href^="javascript"]:after, a.btn:after, .sp-btn-primary:after { content: "" !important; }
 }
 
+/* === SIDEBAR CATEGORIES === Fix superposition compteur/texte (thème bloggar) */
+.blog-sidebar .category-widget ul a { padding-right: 50px !important; }
+.blog-sidebar .category-widget ul li span { background: #fff; padding-left: 6px; z-index: 2; }
+
 /* === WCAG 2.2 AA CONTRAST FIX === Override #777 (ratio 4.48:1) → #595959 (ratio 7:1) texte paragraphes blog */
 .wpo-blog-single-section p,
 .wpo-blog-single-section .entry-details p,
