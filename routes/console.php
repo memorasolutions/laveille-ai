@@ -70,8 +70,8 @@ Schedule::call(function () {
     if (file_exists($flag)) {
         return;
     }
-    $order = \DB::table('shop_orders')->orderByDesc('id')->first();
-    $items = $order ? \DB::table('shop_order_items')->where('order_id', $order->id)->get() : collect();
+    $order = \Illuminate\Support\Facades\DB::table('shop_orders')->orderByDesc('id')->first();
+    $items = $order ? \Illuminate\Support\Facades\DB::table('shop_order_items')->where('order_id', $order->id)->get() : collect();
     $dump = [
         'order' => $order,
         'items' => $items,
