@@ -224,7 +224,7 @@
                         @php $author = $article->isGuestPost() ? $article->submittedByUser : $article->user; @endphp
                         <div class="author-box" itemscope itemtype="https://schema.org/Person">
                             <div class="author-avatar">
-                                <img src="{{ $author?->avatar ? asset($author->avatar) : asset('images/logo.webp') }}"
+                                <img src="{{ $author?->avatar ? asset('storage/' . $author->avatar) : asset('images/logo.webp') }}"
                                      alt="{{ $author->name ?? __('Auteur') }}"
                                      itemprop="image"
                                      loading="lazy"
