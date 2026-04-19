@@ -64,27 +64,6 @@ Schedule::command('privacy:purge-expired')->dailyAt('02:30');
 // Short URLs - nettoyage liens expires + avertissements 30j
 Schedule::command('shorturl:cleanup-expired')->dailyAt('06:00');
 
-// One-shot seed Concentré hebdo S26 inline (task #8, retiré après création)
-Schedule::call(function () {
-    $flag = storage_path('app/concentre_hebdo_s26_seeded.flag');
-    if (file_exists($flag)) {
-        return;
-    }
-    try {
-        $seederPath = base_path('database/seeders/Standalone/WeeklyDigestSeederS26.php');
-        if (!file_exists($seederPath)) {
-            @file_put_contents($flag . '.error', 'Seeder file not found: ' . $seederPath);
-            return;
-        }
-        require_once $seederPath;
-        $seeder = new \Database\Seeders\Standalone\WeeklyDigestSeederS26();
-        $seeder->run();
-        @file_put_contents($flag, now()->toIso8601String() . "\n" . 'OK');
-    } catch (\Throwable $e) {
-        @file_put_contents($flag . '.error', $e->getMessage() . "\n" . $e->getTraceAsString());
-    }
-})->everyMinute();
-
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
