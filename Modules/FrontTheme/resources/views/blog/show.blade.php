@@ -31,7 +31,7 @@
             ...$bullets,
             '',
             $clean("👉 10 actus décryptées pour nous autres."),
-            $clean("💬 Laquelle t'a surpris·e? Partage ton top en com."),
+            $clean("💬 Laquelle t'a surpris·e? Partage ton top en commentaire."),
             "🔗 " . request()->url(),
             "#IAQuebec #VeilleIA",
             "Via @laveilleAI",

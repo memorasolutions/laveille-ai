@@ -24,7 +24,7 @@
         $whyImportant ? "🧠 Pourquoi ça compte : {$whyImportant}" : null,
         $keyNumber ? "🎯 Chiffre-clé : {$keyNumber}" : ($actionConcrete ? "🎯 À retenir : {$actionConcrete}" : null),
         '',
-        '💬 Ton avis? On en parle en com.',
+        '💬 Ton avis? On en parle en commentaire.',
         '🔗 ' . request()->url(),
         $categoryTag,
         '#IAQuebec #VeilleIA',
