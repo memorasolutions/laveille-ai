@@ -6,32 +6,60 @@
 @section('og_type', 'article')
 @section('share_text')
 @php
-    $shareLines = [];
+    // Détecte si c'est un Concentré hebdo (Template A) ou un article standard (Template B)
+    $isConcentre = Str::startsWith($article->slug, 'le-concentre-de-la-semaine') ||
+                   collect($article->tags ?? [])->contains(fn($tag) => in_array(strtolower($tag), ['concentré', 'hebdo', 'concentre-hebdo']));
 
-    $title = str_replace('\'', "\u{2019}", $article->title);
-    $shareLines[] = "📝 {$title}";
+    $clean = fn($str) => str_replace('\'', "\u{2019}", trim($str));
 
-    $excerpt = Str::limit(strip_tags($article->excerpt ?? $article->content), 200);
-    if ($excerpt) {
-        $excerpt = str_replace('\'', "\u{2019}", $excerpt);
-        $shareLines[] = $excerpt;
+    if ($isConcentre) {
+        // Template A — Concentré hebdo (curiosity gap #3 + liste #1 sonar-pro 2026)
+        $hook = $clean("🧠 La semaine IA qui a tout fait basculer au Québec");
+        $curiosity = $clean("GPT-5.4 qui bat Erdős, agents autonomes, Adobe qui redéfinit la création…");
+
+        preg_match_all('/<h2[^>]*>(.*?)<\/h2>/', $article->content, $h2Matches);
+        $bullets = collect($h2Matches[1] ?? [])
+            ->map(fn($h) => "• " . $clean(strip_tags($h)))
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        $lines = array_filter([
+            $hook,
+            $curiosity,
+            '',
+            ...$bullets,
+            '',
+            $clean("👉 10 actus décryptées pour nous autres."),
+            $clean("💬 Laquelle t'a surpris·e? Partage ton top en com."),
+            "🔗 " . request()->url(),
+            "#IAQuebec #VeilleIA",
+            "Via @laveilleAI",
+        ]);
+    } else {
+        // Template B — Article normal (curiosity + teaser + meta inline)
+        $title = $clean($article->title);
+        $excerpt = $article->excerpt ?? strip_tags($article->content);
+        $teaser = $clean(Str::limit($excerpt, 180));
+
+        $metaLine = null;
+        if (!empty($article->author?->name) || !empty($article->category?->name)) {
+            $author = $article->author?->name ? $clean($article->author->name) : null;
+            $category = $article->category?->name ? $clean($article->category->name) : null;
+            $metaLine = implode(' · ', array_filter([$author, $category]));
+        }
+
+        $lines = array_filter([
+            "💡 {$title}",
+            $teaser,
+            $metaLine,
+            "📖 Lecture 5-7 min : " . request()->url(),
+            "#IA #VeilleQuebec",
+            "Via @laveilleAI",
+        ]);
     }
 
-    if (!empty($article->author?->name)) {
-        $authorName = str_replace('\'', "\u{2019}", $article->author->name);
-        $shareLines[] = "👤 {$authorName}";
-    }
-
-    if (!empty($article->category?->name)) {
-        $categoryName = str_replace('\'', "\u{2019}", $article->category->name);
-        $shareLines[] = "🏷️ {$categoryName}";
-    }
-
-    $shareLines[] = "🔗 " . request()->url();
-    $shareLines[] = "📚 Plus d\u{2019}articles : laveille.ai/blog";
-    $shareLines[] = "Via laveille.ai";
-
-    echo trim(implode("\n", $shareLines));
+    echo implode("\n", $lines);
 @endphp
 @endsection
 @if($article->featured_image)
