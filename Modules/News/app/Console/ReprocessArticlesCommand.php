@@ -47,10 +47,10 @@ class ReprocessArticlesCommand extends Command
             $resolvedUrl = $article->resolved_url;
             if (GoogleNewsResolver::isGoogleNewsUrl($article->url) && ! $resolvedUrl) {
                 $resolvedUrl = app(GoogleNewsResolver::class)->resolve($article->url);
-                if ($resolvedUrl && $resolvedUrl !== $article->url && ! $this->option('dry-run')) {
+                if ($resolvedUrl && ! GoogleNewsResolver::isGoogleNewsUrl($resolvedUrl) && ! $this->option('dry-run')) {
                     $article->update(['resolved_url' => $resolvedUrl]);
                 }
-                $this->line("  resolved: " . ($resolvedUrl ? Str::limit($resolvedUrl, 60) : 'FAIL'));
+                $this->line("  resolved: " . ($resolvedUrl && ! GoogleNewsResolver::isGoogleNewsUrl($resolvedUrl) ? Str::limit($resolvedUrl, 60) : 'FAIL'));
             }
 
             // Extraction contenu

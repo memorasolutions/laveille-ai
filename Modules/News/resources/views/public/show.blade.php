@@ -257,13 +257,22 @@
                     </div>
                     @endif
 
-                    @php $externalUrl = $article->resolved_url ?: $article->url; @endphp
+                    @php
+                        $externalUrl = $article->resolved_url ?: $article->url;
+                        $isGoogleNewsUnresolved = str_contains(parse_url($externalUrl, PHP_URL_HOST) ?? '', 'news.google.com');
+                    @endphp
+                    @if(! $isGoogleNewsUnresolved)
                     <div style="text-align: center; margin: 2rem 0; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
                         <a href="{{ $externalUrl }}" target="_blank" rel="noopener" class="nw-cta">{{ __('Voir l\'article original') }} &rarr;</a>
                         @if($article->source?->language === 'en')
                             <a href="https://translate.google.com/translate?sl=en&tl=fr&u={{ urlencode($externalUrl) }}" target="_blank" rel="noopener" class="nw-cta" style="background: #4285F4;">{{ __('Lire en français') }} <i class="ti-world" style="margin-left: 4px;"></i></a>
                         @endif
                     </div>
+                    @else
+                    <div style="text-align: center; margin: 2rem 0; padding: 12px 16px; background: #f9fafb; border-radius: 8px; color: #6b7280; font-size: 14px;">
+                        {{ __('Source :') }} <strong>{{ $article->source?->name ?? __('Google News') }}</strong>
+                    </div>
+                    @endif
 
                     {{-- Navigation précédent/suivant --}}
                     @if($previousArticle || $nextArticle)

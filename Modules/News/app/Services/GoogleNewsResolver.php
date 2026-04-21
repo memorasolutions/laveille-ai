@@ -43,7 +43,7 @@ class GoogleNewsResolver
 
             Log::warning("Failed to resolve Google News URL: {$url}");
 
-            return $url;
+            return null;
         });
     }
 
