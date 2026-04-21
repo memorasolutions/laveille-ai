@@ -606,7 +606,7 @@
         @php
             $hasFeaturedEdu = $featuredTools->contains(fn($t) => $t->has_education_pricing || $t->pricing === 'education');
         @endphp
-        <div x-show="!search && (!eduFilter || {{ $hasFeaturedEdu ? 'true' : 'false' }})" x-transition style="background:linear-gradient(135deg,#f0fafb 0%,#e0f4f7 100%);border:1px solid #b2e0e6;border-radius:14px;padding:20px;margin-bottom:24px;">
+        <div x-show="!search && (!isEducationContext || {{ $hasFeaturedEdu ? 'true' : 'false' }})" x-transition style="background:linear-gradient(135deg,#f0fafb 0%,#e0f4f7 100%);border:1px solid #b2e0e6;border-radius:14px;padding:20px;margin-bottom:24px;">
             <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:14px;">
                 <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">{{ __('En vedette') }}</h3>
                 <span style="font-size:12px;color:#0B7285;font-weight:600;">{{ __('Sponsorise') }}</span>
@@ -614,7 +614,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
                 @foreach($featuredTools as $ft)
                 @php $ftHost = $ft->url ? parse_url($ft->url, PHP_URL_HOST) : ''; @endphp
-                <a href="{{ route('directory.show', $ft->slug) }}" x-show="!eduFilter || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                <a href="{{ route('directory.show', $ft->slug) }}" x-show="!isEducationContext || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
                     <div style="display:flex!important;align-items:center!important;gap:10px;margin-bottom:10px;">
                         @if($ftHost)<img src="https://www.google.com/s2/favicons?domain={{ $ftHost }}&sz=32" alt="" width="24" height="24" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
                         <span style="font-weight:700;font-size:15px;">{{ $ft->name }}</span>
