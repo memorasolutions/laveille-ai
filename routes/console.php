@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('backup:run')->dailyAt('03:00');
 Schedule::command('backup:clean')->dailyAt('04:00');
 
-// Horizon
-Schedule::command('horizon:snapshot')->everyFiveMinutes();
+// Horizon (skip si ext-redis absent — shared hosting sans Redis)
+Schedule::command('horizon:snapshot')->everyFiveMinutes()->when(fn () => extension_loaded('redis'));
 
 // Activity log cleanup (30 days)
 Schedule::command('activitylog:clean')->weekly();
@@ -26,8 +26,8 @@ Schedule::command('favicons:refresh --expired-only --limit=50')->weekly()->witho
 // Health checks
 Schedule::command('health:check')->everyMinute();
 
-// Telescope cleanup (48h)
-Schedule::command('telescope:prune --hours=48')->everyTwoHours();
+// Telescope cleanup (48h — skip si Telescope désactivé/non publié en prod)
+Schedule::command('telescope:prune --hours=48')->everyTwoHours()->when(fn () => (bool) config('telescope.enabled', false));
 
 // Queue maintenance
 Schedule::command('queue:prune-batches --hours=48')->cron('30 2 * * *');
