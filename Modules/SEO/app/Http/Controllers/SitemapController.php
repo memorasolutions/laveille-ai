@@ -86,6 +86,9 @@ class SitemapController
         // Annuaire (si module Directory actif)
         if (Route::has('directory.index') && class_exists(\Modules\Directory\Models\Tool::class)) {
             $sitemap->add(Url::create(route('directory.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
+            if (Route::has('directory.education-pricing')) {
+                $sitemap->add(Url::create(route('directory.education-pricing'))->setPriority(0.8)->setChangeFrequency('weekly'));
+            }
             \Modules\Directory\Models\Tool::published()->get()->each(function ($tool) use ($sitemap) {
                 $url = Url::create(route('directory.show', $tool->slug))
                     ->setLastModificationDate($tool->updated_at)

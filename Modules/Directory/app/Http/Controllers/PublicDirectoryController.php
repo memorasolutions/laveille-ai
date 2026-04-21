@@ -53,6 +53,19 @@ class PublicDirectoryController extends Controller
         return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections'));
     }
 
+    public function educationPricing(): View
+    {
+        $tools = Tool::published()
+            ->where(function ($q) {
+                $q->where('pricing', 'education')->orWhere('has_education_pricing', true);
+            })
+            ->with('categories')
+            ->orderByDesc('clicks_count')
+            ->get();
+
+        return view('directory::public.tarifs-education', compact('tools'));
+    }
+
     public function compare(string $categorySlug): View
     {
         $category = Category::where('slug->fr_CA', $categorySlug)->firstOrFail();

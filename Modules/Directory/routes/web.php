@@ -16,6 +16,7 @@ Route::middleware('web')->group(function () {
     Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
     Route::get('/collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
     Route::get('/annuaire', [PublicDirectoryController::class, 'index'])->name('directory.index');
+    Route::get('/tarifs-education', [PublicDirectoryController::class, 'educationPricing'])->name('directory.education-pricing');
     Route::get('/annuaire/classement', [LeaderboardController::class, 'index'])->name('directory.leaderboard');
     Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare');
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap');
