@@ -13,6 +13,9 @@ namespace Modules\Search\Services;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Modules\Core\Services\SearchRegistry;
 use Modules\Settings\Models\Setting;
 
 class SearchService
@@ -95,90 +98,57 @@ class SearchService
 
     public function searchFront(string $query, int $perPage = 10): array
     {
-        $results = [
-            'articles' => new LengthAwarePaginator([], 0, $perPage),
-            'news' => new LengthAwarePaginator([], 0, $perPage),
-            'tools' => new LengthAwarePaginator([], 0, $perPage),
-            'terms' => new LengthAwarePaginator([], 0, $perPage),
-            'acronyms' => new LengthAwarePaginator([], 0, $perPage),
-            'total' => 0,
-        ];
+        $registry = app(SearchRegistry::class);
+        $sections = [];
+        $total = 0;
 
-        if (class_exists(\Modules\Blog\Models\Article::class)) {
+        foreach ($registry->all() as $modelClass) {
             try {
-                $articles = \Modules\Blog\Models\Article::query()
-                    ->where(function (Builder $q) use ($query) {
-                        $q->where('title', 'LIKE', "%{$query}%")
-                            ->orWhere('content', 'LIKE', "%{$query}%")
-                            ->orWhere('excerpt', 'LIKE', "%{$query}%");
-                    })
-                    ->where('status', 'published')
-                    ->paginate($perPage);
-                $results['articles'] = $articles;
-                $results['total'] += $articles->total();
-            } catch (\Illuminate\Database\QueryException) {}
+                $modelInstance = new $modelClass();
+                $table = $modelInstance->getTable();
+                $fields = $modelClass::searchableFields();
+                $sectionKey = $modelClass::searchSectionKey();
+
+                $qb = $modelClass::query()->where(function (Builder $q) use ($fields, $query) {
+                    foreach ($fields as $field) {
+                        $q->orWhere($field, 'LIKE', "%{$query}%");
+                    }
+                });
+
+                if (method_exists($modelClass, 'scopePublished')) {
+                    $qb->published();
+                } elseif (Schema::hasColumn($table, 'is_published')) {
+                    $qb->where('is_published', true);
+                } elseif (Schema::hasColumn($table, 'status')) {
+                    $qb->where('status', 'published');
+                }
+
+                $paginator = $qb->paginate($perPage, ['*'], $sectionKey . '_page');
+                $count = $paginator->total();
+
+                if ($count > 0) {
+                    $sections[$sectionKey] = [
+                        'key' => $sectionKey,
+                        'label' => $modelClass::searchSectionLabel(),
+                        'icon' => $modelClass::searchSectionIcon(),
+                        'priority' => $modelClass::searchPriority(),
+                        'paginator' => $paginator,
+                        'count' => $count,
+                    ];
+                    $total += $count;
+                }
+            } catch (\Throwable $e) {
+                Log::warning('[SearchService] section failed', [
+                    'model' => $modelClass,
+                    'query' => $query,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
-        if (class_exists(\Modules\News\Models\NewsArticle::class)) {
-            try {
-                $news = \Modules\News\Models\NewsArticle::query()
-                    ->where(function (Builder $q) use ($query) {
-                        $q->where('title', 'LIKE', "%{$query}%")
-                            ->orWhere('seo_title', 'LIKE', "%{$query}%")
-                            ->orWhere('summary', 'LIKE', "%{$query}%")
-                            ->orWhere('description', 'LIKE', "%{$query}%");
-                    })
-                    ->where('is_published', true)
-                    ->paginate($perPage);
-                $results['news'] = $news;
-                $results['total'] += $news->total();
-            } catch (\Illuminate\Database\QueryException) {}
-        }
+        uasort($sections, fn ($a, $b) => $a['priority'] <=> $b['priority']);
 
-        if (class_exists(\Modules\Directory\Models\Tool::class)) {
-            try {
-                $tools = \Modules\Directory\Models\Tool::query()
-                    ->where(function (Builder $q) use ($query) {
-                        $q->where('name', 'LIKE', "%{$query}%")
-                            ->orWhere('short_description', 'LIKE', "%{$query}%")
-                            ->orWhere('description', 'LIKE', "%{$query}%");
-                    })
-                    ->where('status', 'published')
-                    ->paginate($perPage);
-                $results['tools'] = $tools;
-                $results['total'] += $tools->total();
-            } catch (\Illuminate\Database\QueryException) {}
-        }
-
-        if (class_exists(\Modules\Dictionary\Models\Term::class)) {
-            try {
-                $terms = \Modules\Dictionary\Models\Term::query()
-                    ->where(function (Builder $q) use ($query) {
-                        $q->where('name', 'LIKE', "%{$query}%")
-                            ->orWhere('definition', 'LIKE', "%{$query}%")
-                            ->orWhere('analogy', 'LIKE', "%{$query}%");
-                    })
-                    ->paginate($perPage);
-                $results['terms'] = $terms;
-                $results['total'] += $terms->total();
-            } catch (\Illuminate\Database\QueryException) {}
-        }
-
-        if (class_exists(\Modules\Acronyms\Models\Acronym::class)) {
-            try {
-                $acronyms = \Modules\Acronyms\Models\Acronym::query()
-                    ->where(function (Builder $q) use ($query) {
-                        $q->where('acronym', 'LIKE', "%{$query}%")
-                            ->orWhere('full_name', 'LIKE', "%{$query}%")
-                            ->orWhere('description', 'LIKE', "%{$query}%");
-                    })
-                    ->paginate($perPage);
-                $results['acronyms'] = $acronyms;
-                $results['total'] += $acronyms->total();
-            } catch (\Illuminate\Database\QueryException) {}
-        }
-
-        return $results;
+        return ['sections' => $sections, 'total' => $total];
     }
 
     public function searchModel(string $model, string $query, int $perPage = 15): LengthAwarePaginator
