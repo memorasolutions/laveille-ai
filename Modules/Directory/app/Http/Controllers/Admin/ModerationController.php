@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Modules\Directory\Http\Controllers\Admin;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Intervention\Image\Drivers\Gd\Driver as ImageGdDriver;
+use Intervention\Image\ImageManager;
 use Modules\Directory\Models\ToolReport;
 use Modules\Directory\Models\ToolResource;
 use Modules\Directory\Models\ToolReview;
@@ -98,6 +102,52 @@ class ModerationController extends Controller
         $resource->delete();
 
         return back()->with('success', __('Ressource supprimée (sans pénalité).'));
+    }
+
+    public function uploadResourceScreenshot(Request $request, int $id)
+    {
+        $resource = ToolResource::findOrFail($id);
+        $request->validate([
+            'screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+        $wantsJson = $request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
+        try {
+            $destinationPath = public_path('directory-resources-screenshots');
+            $filename = "{$resource->id}.jpg";
+            $fullPath = "{$destinationPath}/{$filename}";
+            $relativePath = "/directory-resources-screenshots/{$filename}";
+            if (! is_dir($destinationPath)) {
+                @mkdir($destinationPath, 0755, true);
+            }
+            if (file_exists($fullPath)) {
+                @copy($fullPath, "{$fullPath}.bak");
+            }
+            $manager = new ImageManager(new ImageGdDriver());
+            $image = $manager->read($request->file('screenshot')->getRealPath())
+                ->cover(1200, 630)
+                ->toJpeg(85)
+                ->toString();
+            file_put_contents($fullPath, $image);
+            $resource->thumbnail = $relativePath;
+            $resource->updated_at = now();
+            $resource->saveQuietly();
+            if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
+                try {
+                    \Spatie\ResponseCache\Facades\ResponseCache::clear();
+                } catch (\Throwable $e) {
+                }
+            }
+            $msg = __('Screenshot uploadé (redimensionné 1200×630).');
+            return $wantsJson
+                ? response()->json(['ok' => true, 'message' => $msg, 'thumbnail' => asset($relativePath) . '?v=' . $resource->updated_at->timestamp])
+                : back()->with('success', $msg);
+        } catch (\Throwable $e) {
+            Log::warning('[uploadResourceScreenshot] fail resource=' . $resource->id . ' : ' . $e->getMessage());
+            $errMsg = __('Échec upload : :msg', ['msg' => $e->getMessage()]);
+            return $wantsJson
+                ? response()->json(['ok' => false, 'message' => $errMsg], 422)
+                : back()->with('error', $errMsg);
+        }
     }
 
     public function resources(): View

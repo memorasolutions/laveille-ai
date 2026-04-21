@@ -898,6 +898,8 @@
                                 'approveUrl' => route('admin.directory.moderation.resource.approve', $res->id),
                                 'rejectUrl' => route('admin.directory.moderation.resource.reject', $res->id),
                                 'deleteUrl' => route('admin.directory.moderation.resource.delete', $res->id),
+                                'uploadScreenshotUrl' => route('admin.directory.moderation.resource.upload-screenshot', $res->id),
+                                'resourceIdForScreenshot' => $res->id,
                                 'isApproved' => $res->is_approved,
                             ])
                         @endcan

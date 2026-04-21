@@ -74,6 +74,7 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     Route::post('/moderation/resource/{id}/approve', [ModerationController::class, 'approveResource'])->name('moderation.resource.approve');
     Route::post('/moderation/resource/{id}/reject', [ModerationController::class, 'rejectResource'])->name('moderation.resource.reject');
     Route::post('/moderation/resource/{id}/delete', [ModerationController::class, 'deleteResource'])->name('moderation.resource.delete');
+    Route::post('/moderation/resource/{id}/upload-screenshot', [ModerationController::class, 'uploadResourceScreenshot'])->name('moderation.resource.upload-screenshot');
     Route::post('/moderation/report/{id}/resolve', [ModerationController::class, 'resolveReport'])->name('moderation.report.resolve');
     Route::post('/moderation/report/{id}/delete', [ModerationController::class, 'deleteReported'])->name('moderation.report.delete');
     Route::post('/moderation/suggestion/{id}/approve', [ModerationController::class, 'approveSuggestion'])->name('moderation.suggestion.approve');
