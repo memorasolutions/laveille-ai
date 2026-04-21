@@ -147,6 +147,15 @@ if (!window.__screenshotCaptureComponentRegistered) {
                 }
             },
 
+            finishAndReload() {
+                try {
+                    const dlg = this.$root.closest('dialog');
+                    if (dlg && typeof dlg.close === 'function' && dlg.open) dlg.close();
+                } catch (_) {}
+                try { window.focus(); } catch (_) {}
+                setTimeout(() => { window.location.reload(); }, 1500);
+            },
+
             async upload(blob) {
                 this.status = 'uploading';
 
@@ -176,11 +185,11 @@ if (!window.__screenshotCaptureComponentRegistered) {
                     if (payload && payload.ok === true) {
                         this.status = 'success';
                         this.message = (payload.message || 'Succès !') + ' Rechargement dans 2 s…';
-                        setTimeout(() => { window.location.reload(); }, 2000);
+                        this.finishAndReload();
                     } else if (!payload && (response.ok || response.redirected)) {
                         this.status = 'success';
                         this.message = 'Succès. Rechargement dans 2 s…';
-                        setTimeout(() => { window.location.reload(); }, 2000);
+                        this.finishAndReload();
                     } else {
                         this.status = 'error';
                         this.message = (payload && (payload.message || payload.error))

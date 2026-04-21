@@ -208,7 +208,7 @@
                     @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\News\\Models\\NewsArticle'])
 
                     @if($article->image_url)
-                        <img src="{{ $article->image_url }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
+                        <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
 
                     {{-- Lead : hook IA --}}
@@ -297,7 +297,7 @@
                             <div class="nw-related-card">
                                 <a href="{{ route('news.show', $related) }}">
                                     @if($related->image_url)
-                                        <img src="{{ $related->image_url }}" alt="{{ $related->seo_title ?? $related->title }}" class="nw-related-img" loading="lazy">
+                                        <img src="{{ $related->image_url }}{{ str_contains($related->image_url, 'http') ? '' : '?v='.($related->updated_at?->timestamp ?? time()) }}" alt="{{ $related->seo_title ?? $related->title }}" class="nw-related-img" loading="lazy">
                                     @endif
                                     <div class="nw-related-title">{{ $related->seo_title ?? $related->title }}</div>
                                     <div class="nw-related-meta">{{ $related->source->name ?? '' }} &middot; {{ $related->pub_date?->diffForHumans() }}</div>

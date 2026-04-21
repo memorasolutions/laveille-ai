@@ -180,7 +180,7 @@
                         <a href="{{ route('news.show', $article) }}" class="nw-card-link">
                             <div class="nw-card-img-wrap">
                                 @if($article->image_url)
-                                    <img src="{{ $article->image_url }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-card-img" loading="lazy">
+                                    <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-card-img" loading="lazy">
                                 @else
                                     <span class="nw-card-placeholder">{{ mb_strtoupper(mb_substr($article->category_tag ?? 'N', 0, 2)) }}</span>
                                 @endif

@@ -128,7 +128,7 @@
                         <div class="post format-standard-image">
                             @if($article->featured_image)
                                 <div class="entry-media">
-                                    <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}">
+                                    <img src="{{ asset($article->featured_image) }}?v={{ $article->updated_at?->timestamp ?? time() }}" alt="{{ $article->title }}">
                                 </div>
                             @endif
                             <div class="entry-meta">
@@ -283,7 +283,7 @@
                     <div class="panel panel-default" style="border-radius: 8px; overflow: hidden;">
                         @if($related->featured_image)
                             <a href="{{ route('blog.show', $related->slug) }}">
-                                <img src="{{ asset($related->featured_image) }}" alt="{{ $related->title }}" style="width: 100%; height: 150px; object-fit: cover;">
+                                <img src="{{ asset($related->featured_image) }}?v={{ $related->updated_at?->timestamp ?? time() }}" alt="{{ $related->title }}" style="width: 100%; height: 150px; object-fit: cover;">
                             </a>
                         @endif
                         <div class="panel-body">

@@ -2,7 +2,7 @@
     <div class="post format-standard-image">
         <div class="entry-media">
             @if($article->featured_image)
-                <img src="{{ asset($article->featured_image) }}" alt="{{ $article->title }}" loading="lazy">
+                <img src="{{ asset($article->featured_image) }}?v={{ $article->updated_at?->timestamp ?? time() }}" alt="{{ $article->title }}" loading="lazy">
             @else
                 <img src="{{ fronttheme_asset('images/blog/img-' . (($loop->index % 3) + 10) . '.jpg') }}" alt="{{ $article->title }}" loading="lazy">
             @endif
