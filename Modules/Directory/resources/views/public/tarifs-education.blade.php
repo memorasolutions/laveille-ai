@@ -10,13 +10,13 @@
 
 @push('styles')
 <style>
-.edu-hero { background: linear-gradient(135deg, #065f46, #059669); color: #fff; padding: 40px 28px; border-radius: var(--r-base); text-align: center; margin: 30px 0 40px; }
-.edu-hero h1 { font-family: var(--f-heading); font-size: 2rem; margin: 0 0 14px; font-weight: 800; }
-.edu-hero p { max-width: 720px; margin: 0 auto 22px; font-size: 1.05rem; line-height: 1.6; opacity: 0.95; }
-.edu-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 480px; margin: 0 auto; }
-.edu-stats div { background: rgba(255,255,255,0.15); padding: 16px; border-radius: var(--r-base); }
-.edu-stats strong { font-size: 1.6rem; display: block; line-height: 1.2; }
-.edu-stats small { font-size: 0.85rem; opacity: 0.9; }
+.edu-intro { background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #d1fae5; padding: 40px 32px; border-radius: var(--r-base); margin: 30px 0 40px; text-align: center; }
+.edu-intro h1 { font-family: var(--f-heading); font-size: 2rem; margin: 0 0 14px; font-weight: 800; color: #1a1a1a; }
+.edu-lede { color: #4b5563; line-height: 1.7; max-width: 720px; text-align: center; margin: 0 auto 28px; font-size: 1.05rem; }
+.edu-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 520px; margin: 0 auto; }
+.edu-stat { background: #ffffff; border: 1px solid #d1fae5; padding: 18px 20px; border-radius: var(--r-base); text-align: center; }
+.edu-stat-num { font-size: 1.8rem; font-weight: 800; color: #065f46; display: block; line-height: 1.1; font-family: var(--f-heading); }
+.edu-stat-label { font-size: 0.85rem; color: #4b5563; margin-top: 4px; display: block; }
 .edu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px; }
 .edu-card { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--r-base); padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
 .edu-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -40,12 +40,12 @@
 
 @section('content')
 <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-    <section class="edu-hero" aria-labelledby="edu-title">
+    <section class="edu-intro" aria-labelledby="edu-title">
         <h1 id="edu-title">🎓 Outils IA pour l'éducation au Québec</h1>
-        <p>Découvrez les outils d'intelligence artificielle offerts gratuitement ou à tarif préférentiel aux enseignants, étudiants et institutions éducatives. Sélection vérifiée pour la communauté scolaire québécoise.</p>
-        <div class="edu-stats">
-            <div><strong>{{ $tools->count() }}</strong><small>outils avec tarif éducation</small></div>
-            <div><strong>{{ $tools->where('pricing','education')->count() }}</strong><small>gratuits pour enseignants</small></div>
+        <p class="edu-lede">Découvrez les outils d'intelligence artificielle offerts gratuitement ou à tarif préférentiel aux enseignants, étudiants et institutions éducatives. Sélection vérifiée pour la communauté scolaire québécoise.</p>
+        <div class="edu-stats" role="list" aria-label="Statistiques éducation">
+            <div class="edu-stat" role="listitem"><span class="edu-stat-num">{{ $tools->count() }}</span><span class="edu-stat-label">outils avec tarif éducation</span></div>
+            <div class="edu-stat" role="listitem"><span class="edu-stat-num">{{ $tools->where('pricing','education')->count() }}</span><span class="edu-stat-label">gratuits pour enseignants</span></div>
         </div>
     </section>
 
