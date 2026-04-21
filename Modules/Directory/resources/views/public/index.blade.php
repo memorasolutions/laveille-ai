@@ -301,7 +301,7 @@
                  style="margin-bottom: 20px; background: rgba(11,114,133,0.08); border: 2px solid var(--c-primary); border-radius: var(--r-base); padding: 24px; max-width: 600px; margin-left: auto; margin-right: auto;">
                 <div style="font-size: 11px; color: #6B7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 1 sur 2 – URL du site') }}</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <input type="url" x-model="toolUrl" placeholder="https://chatgpt.com" aria-label="{{ __('URL du site a proposer') }}"
+                    <input type="url" x-model="toolUrl" autocomplete="url" placeholder="https://chatgpt.com" aria-label="{{ __('URL du site a proposer') }}"
                         style="flex: 1; min-width: 240px; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; background: #fff; color: var(--c-dark); outline: none;"
                         @keydown.enter="analyzeUrl()">
                     <button type="button" @click="analyzeUrl()" :disabled="scraping || !toolUrl"
@@ -362,7 +362,7 @@
             <div class="col-md-8">
                 <div style="margin-bottom: 14px;">
                     <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l outil') }} <span style="color: #B91C1C;">*</span></label>
-                    <input type="text" x-model="toolName" aria-label="{{ __('Nom de l outil') }}"
+                    <input type="text" x-model="toolName" required aria-required="true" aria-label="{{ __('Nom de l outil') }}"
                         style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark);">
                 </div>
                 <div style="margin-bottom: 14px;">
@@ -377,7 +377,7 @@
                 </div>
                 <div style="margin-bottom: 14px;">
                     <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Modele economique') }} <span style="color: #B91C1C;">*</span></label>
-                    <select x-model="toolPricing" aria-label="{{ __('Modele economique') }}"
+                    <select x-model="toolPricing" required aria-required="true" aria-label="{{ __('Modele economique') }}"
                         style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark);">
                         <option value="">{{ __('Choisir...') }}</option>
                         <option value="free">🆓 {{ __('Gratuit') }}</option>
@@ -497,7 +497,7 @@
         <div x-show="!authSent" style="margin-bottom: 14px;">
             <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Adresse courriel') }}</label>
             <div style="display: flex; gap: 8px;">
-                <input type="email" x-model="authEmail" placeholder="vous@exemple.com" aria-label="{{ __('Adresse courriel') }}"
+                <input type="email" x-model="authEmail" autocomplete="email" placeholder="vous@exemple.com" aria-label="{{ __('Adresse courriel') }}"
                     @keydown.enter="sendMagicLink()"
                     style="flex: 1; height: 42px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; outline: none; color: var(--c-dark);">
                 <button type="button" @click="sendMagicLink()" :disabled="authSending || !authEmail"
