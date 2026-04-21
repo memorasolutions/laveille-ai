@@ -646,7 +646,7 @@
                         </div>
                         <div style="display:flex!important;align-items:center!important;gap:4px;margin-bottom:6px;">
                             <span style="color:#ef4444;font-weight:700;font-size:13px;">👍 {{ $tv->community_votes_count }}</span>
-                            <span style="color:#9ca3af;font-size:11px;">{{ __('votes') }}</span>
+                            <span style="color:#6b7280;font-size:11px;">{{ __('votes') }}</span>
                         </div>
                         <p style="font-size:12px;color:#6b7280;margin:0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($tv->short_description, 60) }}</p>
                     </a>
