@@ -230,6 +230,28 @@ class DirectoryAdminController extends Controller
         return back()->with('success', __('Screenshot principal mis a jour.'));
     }
 
+    public function toggleFeatured(Request $request, Tool $tool): RedirectResponse
+    {
+        $request->validate(['duration_days' => 'nullable|integer|min:1|max:365']);
+
+        if ($tool->isSponsored()) {
+            $tool->deactivateSponsorship();
+            $msg = __(':name désactivé du sponsoring.', ['name' => $tool->name]);
+        } else {
+            $days = $request->integer('duration_days') ?: 30;
+            $tool->activateSponsorship($days);
+            $msg = __(':name activé en sponsorisé jusqu\'au :date.', ['name' => $tool->name, 'date' => $tool->featured_until->format('d/m/Y')]);
+        }
+
+        activity('directory')->performedOn($tool)->causedBy(auth()->user())->log('tool_featured_toggled');
+
+        if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
+            try { \Spatie\ResponseCache\Facades\ResponseCache::clear(); } catch (\Throwable $e) {}
+        }
+
+        return back()->with('success', $msg);
+    }
+
     public function destroy(Tool $tool): RedirectResponse
     {
         $tool->delete();

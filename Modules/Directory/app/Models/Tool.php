@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasLifecycleStatus;
+use Modules\Core\Traits\HasSponsorship;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -25,6 +26,7 @@ use Spatie\Translatable\HasTranslations;
 class Tool extends Model implements Searchable
 {
     use HasLifecycleStatus;
+    use HasSponsorship;
     use HasSuggestions;
     use HasTranslations;
     use LogsActivity;
