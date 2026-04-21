@@ -54,7 +54,7 @@
     .rt-search { position: relative; max-width: 600px; margin: 0 auto; }
     .rt-search-input { width: 100%; padding: 14px 20px 14px 48px; border-radius: var(--r-btn); border: 2px solid #E5E7EB; font-size: 17px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); outline: none; background: #fff; }
     .rt-search-input:focus { border-color: var(--c-primary); box-shadow: 0 4px 15px rgba(11,114,133,0.1); }
-    .rt-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #9CA3AF; width: 20px; height: 20px; }
+    .rt-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #6B7280; width: 20px; height: 20px; }
 
     .rt-pill { display: inline-flex; align-items: center; gap: 4px; padding: 7px 16px; border-radius: var(--r-btn); background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; }
     .rt-pill:hover { background: #E5E7EB; }
@@ -78,7 +78,7 @@
     .badge-open_source { background: #CCFBF1; color: #115E59; }
     .badge-enterprise { background: #EDE9FE; color: #5B21B6; }
     .rt-desc { color: #4B5563; font-size: 14px; line-height: 1.6; margin-bottom: 14px; flex-grow: 1; }
-    .rt-tag { font-size: 12px; color: #6b7280; background: #f3f4f6; padding: 2px 8px; border-radius: 4px; }
+    .rt-tag { font-size: 12px; color: #636b77; background: #f3f4f6; padding: 2px 8px; border-radius: 4px; }
     .rt-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 14px; border-top: 1px solid #F3F4F6; align-items: center; }
     .rt-btn-visit { background: var(--c-accent); color: #fff !important; border: none; padding: 7px 16px; border-radius: var(--r-btn); font-weight: 600; text-decoration: none !important; font-size: 13px; transition: opacity 0.2s; }
     .rt-btn-visit:hover { opacity: 0.9; color: #fff; }
@@ -111,7 +111,7 @@
 
     /* Filter bar + pricing dropdown */
     .rt-filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    .rt-filter-count { color: #9CA3AF; font-size: 0.85rem; margin-left: auto; }
+    .rt-filter-count { color: #6B7280; font-size: 0.85rem; margin-left: auto; }
     .rt-pricing-dropdown { position: absolute; top: 100%; left: 0; z-index: 50; background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); box-shadow: 0 8px 25px rgba(0,0,0,0.1); padding: 6px; min-width: 180px; margin-top: 4px; }
     .rt-pricing-dropdown button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; cursor: pointer; font-size: 14px; border-radius: 4px; color: var(--c-dark); }
     .rt-pricing-dropdown button:hover { background: #F3F4F6; }
@@ -262,7 +262,7 @@
             @endif
             @endauth
         </div>
-        <button type="button" @click="collectionToastShow = false" aria-label="{{ __('Fermer') }}" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #9CA3AF; line-height: 1; padding: 0;">×</button>
+        <button type="button" @click="collectionToastShow = false" aria-label="{{ __('Fermer') }}" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #6B7280; line-height: 1; padding: 0;">×</button>
     </div>
     <div class="rt-hero">
         <div class="container text-center">
@@ -332,7 +332,7 @@
                 <div x-show="scrapeError && duplicates.length === 0" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
 
                 <div style="text-align: right; margin-top: 8px;">
-                    <button type="button" @click="resetWizard()" style="background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
+                    <button type="button" @click="resetWizard()" style="background: none; border: none; color: #6B7280; cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
                 </div>
             </div>
 
@@ -350,7 +350,7 @@
          style="background: #fff; border: 2px solid #E5E7EB; border-radius: var(--r-base); padding: 28px; max-width: 800px; margin: -10px auto 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <div>
-                <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
+                <span style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
                 <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
                     {{ __('Complétez les informations pour') }} <strong x-text="toolName" style="color: var(--c-primary);"></strong>
                 </h3>
@@ -444,7 +444,7 @@
                                         <input type="checkbox" value="{{ $collection->id }}" x-model.number="selectedCollections" style="display: none;">
                                         <span x-show="selectedCollections.includes({{ $collection->id }})" style="color: var(--c-primary); font-size: 13px;">✓</span>
                                         <span>{{ $collection->name }}</span>
-                                        <span style="font-size: 10px; color: #9CA3AF; margin-left: 2px;" title="{{ $collection->is_public ? __('Publique') : __('Privée') }}">{{ $collection->is_public ? '🌐' : '🔒' }}</span>
+                                        <span style="font-size: 10px; color: #6B7280; margin-left: 2px;" title="{{ $collection->is_public ? __('Publique') : __('Privée') }}">{{ $collection->is_public ? '🌐' : '🔒' }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -463,7 +463,7 @@
                         <img :src="screenshotUrl" :alt="toolName" loading="lazy" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--r-base); border: 1px solid #E5E7EB;">
                     </div>
                 </template>
-                <div style="font-size: 12px; color: #9CA3AF; margin-top: 8px;">
+                <div style="font-size: 12px; color: #6B7280; margin-top: 8px;">
                     <span x-text="toolUrl" style="word-break: break-all;"></span>
                 </div>
             </div>
@@ -531,7 +531,7 @@
         <div x-show="authError" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="authError"></div>
 
         <div style="text-align: center; margin-top: 14px;">
-            <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
+            <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #6B7280; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
         </div>
     </div>
     </div>
@@ -701,7 +701,7 @@
                                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                     <span class="rt-badge" :class="'badge-' + tool.pricing" x-text="tool.pricingLabel"></span>
                                     <template x-if="tool.hasEduPricing"><span style="background:#ecfdf5;color:#065f46;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;">🎓 {{ __('Éducation') }}</span></template>
-                                    <template x-if="tool.launchYear > 0"><span style="color: #9CA3AF; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>
+                                    <template x-if="tool.launchYear > 0"><span style="color: #6B7280; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>
                                 </div>
                             </div>
                         </div>
