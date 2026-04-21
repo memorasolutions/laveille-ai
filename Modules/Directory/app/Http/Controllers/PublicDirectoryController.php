@@ -23,7 +23,11 @@ class PublicDirectoryController extends Controller
         $query = Tool::published()->with('categories', 'tags')->orderByDesc('clicks_count');
 
         if ($request->filled('pricing')) {
-            $query->where('pricing', $request->pricing);
+            if ($request->pricing === 'education') {
+                $query->where('has_education_pricing', true);
+            } else {
+                $query->where('pricing', $request->pricing);
+            }
         }
 
         if ($request->filled('q')) {
@@ -38,7 +42,7 @@ class PublicDirectoryController extends Controller
 
         $tools = $query->get();
         $categories = Category::orderBy('sort_order')->get();
-        $pricingOptions = ['free' => __('Gratuit'), 'freemium' => __('Freemium'), 'paid' => __('Payant'), 'open_source' => __('Open source'), 'enterprise' => __('Entreprise')];
+        $pricingOptions = ['free' => __('Gratuit'), 'freemium' => __('Freemium'), 'paid' => __('Payant'), 'open_source' => __('Open source'), 'enterprise' => __('Entreprise'), 'education' => __('🎓 Tarif éducation')];
 
         $featuredTools = Tool::published()->featured()->with('categories')->orderBy('sort_order')->get();
         $recentTools = Tool::published()->with('categories')->orderByDesc('created_at')->distinct()->limit((int) Settings::get('directory.recent_tools_limit', 6))->get();
