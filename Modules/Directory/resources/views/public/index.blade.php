@@ -154,6 +154,10 @@
     get hasMore() { return this.displayCount < this.filteredTools.length; },
     loadMore() { if (this.hasMore) this.displayCount += 30; },
 
+    get isEducationContext() {
+        return this.eduFilter || this.activePricing === 'education' || (new URLSearchParams(window.location.search)).get('pricing') === 'education';
+    },
+
     togglePricing(p) { this.activePricing = this.activePricing === p ? '' : p; },
     toggleCategory(c) { this.activeCategory = this.activeCategory === c ? '' : c; },
     setSort(s) {
@@ -735,10 +739,26 @@
         {{-- Empty --}}
         <div x-show="filteredTools.length === 0" x-cloak>
             <div class="rt-empty">
-                <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
-                <h3 style="font-family: var(--f-heading); color: var(--c-dark);">{{ __('Aucun outil trouvé') }}</h3>
-                <p>{{ __('Essayez de modifier vos filtres.') }}</p>
-                <button type="button" @click="resetAll()" class="btn" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);">{{ __('Réinitialiser') }}</button>
+                <template x-if="isEducationContext">
+                    <div>
+                        <div style="font-size: 40px; margin-bottom: 10px;">🎓</div>
+                        <h3 style="font-family: var(--f-heading); color: var(--c-dark);">{{ __('Aucun outil éducation trouvé pour l\'instant') }}</h3>
+                        <p>{{ __('Peu d\'outils ont une tarification éducation documentée. Vous en connaissez un ?') }}</p>
+                        @auth
+                            <button type="button" @click="resetAll(); wStep = 1;" class="btn" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);">{{ __('Proposer un outil') }}</button>
+                        @else
+                            <a href="{{ route('login') }}" class="btn" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn); display: inline-block; text-decoration: none;">{{ __('Connectez-vous pour proposer') }}</a>
+                        @endauth
+                    </div>
+                </template>
+                <template x-if="!isEducationContext">
+                    <div>
+                        <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
+                        <h3 style="font-family: var(--f-heading); color: var(--c-dark);">{{ __('Aucun outil trouvé') }}</h3>
+                        <p>{{ __('Essayez de modifier vos filtres.') }}</p>
+                        <button type="button" @click="resetAll()" class="btn" style="background: var(--c-primary); color: #fff; border-radius: var(--r-btn);">{{ __('Réinitialiser') }}</button>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
