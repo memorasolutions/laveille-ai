@@ -77,7 +77,7 @@
         left: 18px;
         top: 50%;
         transform: translateY(-50%);
-        color: #9CA3AF;
+        color: #6B7280;
         width: 20px;
         height: 20px;
     }
@@ -204,7 +204,7 @@
 
     .gl-category {
         font-size: 12px;
-        color: #9CA3AF;
+        color: #6B7280;
         margin-bottom: 12px;
     }
     .gl-category::before { content: "📁 "; }
@@ -387,7 +387,7 @@
                  style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 28px; max-width: 100%; margin-top: -24px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <div>
-                        <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
+                        <span style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
                         <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
                             {{ __('Complétez les informations pour') }} <strong x-text="termName" style="color: var(--c-primary);"></strong>
                         </h3>
@@ -436,7 +436,7 @@
                         </div>
                     </div>
 
-                    <p style="font-size: 12px; color: #9CA3AF; margin: 4px 0 0;">
+                    <p style="font-size: 12px; color: #6B7280; margin: 4px 0 0;">
                         {{ __('La communauté votera sur votre proposition dans la section Idées et votes.') }}
                     </p>
                 </form>
@@ -533,7 +533,7 @@
                             <span class="gl-badge" :class="'badge-' + term.type" x-text="term.typeName"></span>
                         </div>
                         <template x-if="term.acronymFull">
-                            <p style="color: #9CA3AF; font-size: 0.8rem; font-style: italic; margin: -6px 0 8px; line-height: 1.3;" x-text="term.acronymFull"></p>
+                            <p style="color: #6B7280; font-size: 0.8rem; font-style: italic; margin: -6px 0 8px; line-height: 1.3;" x-text="term.acronymFull"></p>
                         </template>
 
                         {{-- Badges catégorie + difficulté --}}
@@ -566,7 +566,7 @@
         {{-- Sentinel : charge plus au scroll --}}
         <div x-show="hasMore" x-intersect="loadMore()" class="text-center" style="padding: 24px 0;" role="status" aria-label="{{ __('Chargement en cours') }}">
             <div style="display: inline-block; width: 24px; height: 24px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
-            <p style="color: #9CA3AF; font-size: 13px; margin-top: 8px;">{{ __('Chargement...') }}</p>
+            <p style="color: #6B7280; font-size: 13px; margin-top: 8px;">{{ __('Chargement...') }}</p>
         </div>
 
         {{-- Empty state --}}

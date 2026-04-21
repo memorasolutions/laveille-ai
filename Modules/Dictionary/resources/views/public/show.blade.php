@@ -127,7 +127,7 @@
 
     /* Share */
     .gl-share { margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; }
-    .gl-share-label { font-weight: 600; color: #9CA3AF; margin-bottom: 12px; font-size: 0.85rem; }
+    .gl-share-label { font-weight: 600; color: #6B7280; margin-bottom: 12px; font-size: 0.85rem; }
     .gl-share-btn {
         display: inline-block; padding: 8px 16px; border: 1px solid #E5E7EB;
         border-radius: var(--r-btn); color: var(--c-dark); text-decoration: none !important;

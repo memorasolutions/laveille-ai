@@ -74,7 +74,7 @@
     .acr-link:hover { text-decoration: underline; }
 
     .acr-empty { text-align: center; padding: 60px 20px; color: #6B7280; }
-    .acr-counter { text-align: center; color: #9CA3AF; font-size: 13px; margin-bottom: 16px; }
+    .acr-counter { text-align: center; color: #6B7280; font-size: 13px; margin-bottom: 16px; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -170,7 +170,7 @@
                  style="background: #fff; border: 2px solid #E5E7EB; border-top: none; border-radius: 0 0 var(--r-base) var(--r-base); padding: 28px; max-width: 100%; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <div>
-                        <span style="font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
+                        <span style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
                         <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
                             {{ __('Complétez les informations pour') }} <strong x-text="acronym" style="color: var(--c-primary);"></strong>
                         </h3>
@@ -211,7 +211,7 @@
                             <p x-show="scrapeError" x-cloak x-text="scrapeError" style="color: #B91C1C; font-size: 11px; margin: 4px 0 0;"></p>
                         </div>
                         <div class="col-md-6" style="margin-bottom: 14px;">
-                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('URL du logo') }} <small style="color: #9CA3AF; font-weight: 400;">({{ __('auto-détecté') }})</small></label>
+                            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('URL du logo') }} <small style="color: #6B7280; font-weight: 400;">({{ __('auto-détecté') }})</small></label>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 <input type="url" name="logo_url" x-model="logo_url" placeholder="https://exemple.qc.ca/logo.png" aria-label="{{ __('URL du logo') }}"
                                     style="flex: 1; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none;"
@@ -253,7 +253,7 @@
                         </div>
                     </div>
 
-                    <p style="font-size: 12px; color: #9CA3AF; margin: 4px 0 0;">
+                    <p style="font-size: 12px; color: #6B7280; margin: 4px 0 0;">
                         {{ __('La communauté votera sur votre proposition dans la section Idées et votes.') }}
                     </p>
                 </form>
@@ -329,8 +329,8 @@
                                           $dispatch('open-auth-modal', {message:'{{ __('Connectez-vous pour voter.') }}'})
                                       @endauth
                                   ">
-                                <svg :style="vd ? 'color:#1877F2' : 'color:#9CA3AF'" width="14" height="14" viewBox="0 0 24 24" :fill="vd ? '#1877F2' : 'none'" stroke="currentColor" stroke-width="2"><path d="M7 22V11l5-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.1l-1.5 9A2 2 0 0 1 18 21H7z"/><path d="M2 13v8a1 1 0 0 0 1 1h3V12H3a1 1 0 0 0-1 1z"/></svg>
-                                <span x-show="vc > 0" x-text="vc" :style="vd ? 'color:#1877F2;font-weight:600' : 'color:#9CA3AF'" style="font-size:12px;"></span>
+                                <svg :style="vd ? 'color:#1877F2' : 'color:#6B7280'" width="14" height="14" viewBox="0 0 24 24" :fill="vd ? '#1877F2' : 'none'" stroke="currentColor" stroke-width="2"><path d="M7 22V11l5-9a2 2 0 0 1 2 2v4h5.5a2 2 0 0 1 2 2.1l-1.5 9A2 2 0 0 1 18 21H7z"/><path d="M2 13v8a1 1 0 0 0 1 1h3V12H3a1 1 0 0 0-1 1z"/></svg>
+                                <span x-show="vc > 0" x-text="vc" :style="vd ? 'color:#1877F2;font-weight:600' : 'color:#6B7280'" style="font-size:12px;"></span>
                             </span>
                             @endif
                             <span class="acr-link">{{ __('Voir la fiche') }} →</span>
@@ -343,7 +343,7 @@
         {{-- Sentinel : charge plus au scroll --}}
         <div x-show="hasMore" x-intersect="loadMore()" class="text-center" style="padding: 24px 0;" role="status" aria-label="{{ __('Chargement en cours') }}">
             <div style="display: inline-block; width: 24px; height: 24px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
-            <p style="color: #9CA3AF; font-size: 13px; margin-top: 8px;">{{ __('Chargement...') }}</p>
+            <p style="color: #6B7280; font-size: 13px; margin-top: 8px;">{{ __('Chargement...') }}</p>
         </div>
 
         {{-- Empty state --}}

@@ -20,7 +20,7 @@
         background: #fff; outline: none;
     }
     .nw-search-input:focus { border-color: var(--c-primary); }
-    .nw-search-icon { position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
+    .nw-search-icon { position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); color: #6b7280; pointer-events: none; }
     .nw-chips { display: flex; overflow-x: auto; gap: 0.5rem; padding: 0.125rem 0; scrollbar-width: none; }
     .nw-chips::-webkit-scrollbar { display: none; }
     .nw-chip {
@@ -65,7 +65,7 @@
     }
     .nw-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; }
     .nw-source-pill { background: #f3f4f6; color: #6b7280; font-size: 0.6875rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 4px; text-transform: uppercase; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .nw-date { font-size: 0.75rem; color: #9ca3af; display: flex; align-items: center; gap: 0.375rem; }
+    .nw-date { font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 0.375rem; }
     .nw-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .nw-dot-high { background: #10b981; }
     .nw-dot-mid { background: #3b82f6; }
@@ -74,8 +74,8 @@
     .nw-impact-high { border-left-color: #ef4444; }
     .nw-impact-mid { border-left-color: #f59e0b; }
     .nw-impact-low { border-left-color: #e5e7eb; }
-    .nw-empty { text-align: center; padding: 4rem 1rem; color: #9ca3af; }
-    .nw-follow-btn { background: none; border: none; padding: 2px; cursor: pointer; color: #9ca3af; transition: color 0.15s; display: inline-flex; align-items: center; flex-shrink: 0; }
+    .nw-empty { text-align: center; padding: 4rem 1rem; color: #6b7280; }
+    .nw-follow-btn { background: none; border: none; padding: 2px; cursor: pointer; color: #6b7280; transition: color 0.15s; display: inline-flex; align-items: center; flex-shrink: 0; }
     .nw-follow-btn:hover { color: var(--c-primary); }
     .nw-page-intro { color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem; }
     .nw-active-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }

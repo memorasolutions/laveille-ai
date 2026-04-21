@@ -83,7 +83,7 @@
     .acr-show-website:hover { background: var(--c-dark); color: #fff; text-decoration: none; }
 
     .acr-show-share { margin-top: 24px; padding-top: 20px; border-top: 1px solid #eee; }
-    .acr-show-share-label { font-weight: 600; color: #9CA3AF; margin-bottom: 12px; font-size: 0.85rem; text-align: center; }
+    .acr-show-share-label { font-weight: 600; color: #6B7280; margin-bottom: 12px; font-size: 0.85rem; text-align: center; }
 
     .acr-show-related-title {
         font-family: var(--f-heading); font-size: 1.4rem; font-weight: 700;
@@ -183,7 +183,7 @@
                             @endforeach
                         </div>
                     @else
-                        <p style="color: #9CA3AF; font-style: italic;">{{ __('Aucune description détaillée disponible pour cet acronyme.') }}</p>
+                        <p style="color: #6B7280; font-style: italic;">{{ __('Aucune description détaillée disponible pour cet acronyme.') }}</p>
                     @endif
 
                     {{-- Website --}}
@@ -236,7 +236,7 @@
                             <div class="acr-show-related-acr">{{ $related->acronym }}</div>
                             <div class="acr-show-related-name">{{ $related->full_name }}</div>
                             @if($related->category)
-                                <div style="margin-top: 6px; font-size: 11px; color: {{ $related->category->color ?? '#9CA3AF' }};">
+                                <div style="margin-top: 6px; font-size: 11px; color: {{ $related->category->color ?? '#6B7280' }};">
                                     {{ $related->category->icon }} {{ $related->category->name }}
                                 </div>
                             @endif

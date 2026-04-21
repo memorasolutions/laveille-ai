@@ -156,7 +156,7 @@
     .nw-related-card a:hover .nw-related-title { color: var(--c-primary); }
     .nw-related-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; }
     .nw-related-title { font-family: var(--f-heading); font-size: 0.9rem; font-weight: 600; line-height: 1.35; margin-bottom: 0.375rem; color: var(--c-dark); }
-    .nw-related-meta { font-size: 0.75rem; color: #9ca3af; }
+    .nw-related-meta { font-size: 0.75rem; color: #6b7280; }
     .nw-user-actions { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-top: 1px solid #e5e7eb; margin-top: 1.5rem; }
     @media (max-width: 767px) { .nw-related-card { max-width: 100%; } }
     .nw-summary-fallback {
