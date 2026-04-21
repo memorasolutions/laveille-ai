@@ -23,6 +23,9 @@ Schedule::command('activitylog:clean')->weekly();
 // Favicon cache refresh (hebdo, rafraîchit domaines expirés — cache DB 30j succès / 7j échec)
 Schedule::command('favicons:refresh --expired-only --limit=50')->weekly()->withoutOverlapping();
 
+// Sponsoring auto-expiry : desactive outils dont featured_until depasse (daily 02:45)
+Schedule::command('tools:expire-featured')->dailyAt('02:45')->withoutOverlapping();
+
 // Health checks
 Schedule::command('health:check')->everyMinute();
 
