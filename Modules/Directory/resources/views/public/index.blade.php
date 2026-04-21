@@ -140,7 +140,7 @@
         const s = this.search.toLowerCase();
         let t = this.tools.filter(t => {
             const matchSearch = !s || t.name.toLowerCase().includes(s) || t.shortDesc.toLowerCase().includes(s);
-            const matchPricing = !this.activePricing || t.pricing === this.activePricing;
+            const matchPricing = !this.activePricing || (this.activePricing === 'education' ? t.hasEduPricing : t.pricing === this.activePricing);
             const matchCat = !this.activeCategory || t.categorySlugs.includes(this.activeCategory);
             const matchEdu = !this.eduFilter || t.hasEduPricing;
             return matchSearch && matchPricing && matchCat && matchEdu;
