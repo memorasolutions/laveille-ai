@@ -113,6 +113,22 @@
         }
     }
 
+    if (isset($resources) && $resources->count() >= 1) {
+        $shareLines[] = '';
+        $shareLines[] = '📺 Tutoriels vidéo (' . $resources->count() . ') :';
+        $added = 0;
+        foreach ($resources->take(3) as $res) {
+            if (!empty($res->title)) {
+                $shareLines[] = '🎯 ' . $res->title;
+                $added++;
+            }
+        }
+        if ($resources->count() > 3) {
+            $others = $resources->count() - $added;
+            $shareLines[] = '… et ' . $others . ' autre' . ($others > 1 ? 's' : '');
+        }
+    }
+
     if ($tool->has_education_pricing) {
         $pricingType = $tool->education_pricing_type ?? '';
         $pricingDetails = $tool->education_pricing_details ?? '';
