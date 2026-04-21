@@ -77,7 +77,7 @@
                             @foreach($results['tools'] as $tool)
                             <div class="media" style="margin-bottom:16px;padding-bottom:16px;{{ !$loop->last ? 'border-bottom:1px solid #f0f0f0;' : '' }}">
                                 @if($tool->screenshot)
-                                <div class="media-left"><img src="{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot) }}" alt="{{ $tool->name }}" style="width:80px;height:80px;border-radius:6px;object-fit:cover;" loading="lazy"></div>
+                                <div class="media-left"><img src="{{ str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0') }}" alt="{{ $tool->name }}" style="width:80px;height:80px;border-radius:6px;object-fit:cover;" loading="lazy"></div>
                                 @endif
                                 <div class="media-body">
                                     <h4 style="margin:0 0 4px;font-size:15px;">

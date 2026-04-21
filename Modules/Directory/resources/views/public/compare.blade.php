@@ -83,7 +83,7 @@
                         <div class="tool-cell">
                             @php
                                 $screenshotSrc = $tool->screenshot
-                                    ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot))
+                                    ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
                                     : '';
                             @endphp
                             @if($screenshotSrc)

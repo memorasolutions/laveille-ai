@@ -325,7 +325,7 @@
                 <div class="row hp-row-flex">
                     @foreach($popularTools as $tool)
                     @php
-                        $screenshotSrc = $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot)) : '';
+                        $screenshotSrc = $tool->screenshot ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0')) : '';
                         $gradientColors = ['#0B7285','#064E5C','#E67E22','#D46A1F','#1A1D23','#2D3039'];
                         $gIdx = abs(crc32($tool->name)) % count($gradientColors);
                         $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source'];

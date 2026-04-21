@@ -4,7 +4,7 @@
 @php
     $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
     $screenshotSrc = $tool->screenshot
-        ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot))
+        ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
         : '';
     $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source', 'enterprise' => 'Enterprise'];
     $gradientColors = ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'];
