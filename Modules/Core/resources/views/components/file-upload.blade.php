@@ -19,9 +19,7 @@
     maxSizeBytes: {{ $maxSize }} * 1024 * 1024,
     error: '',
 
-    triggerInput() {
-        this.$refs.fileInput.click();
-    },
+    triggerInput() { this.$refs.fileInput.click(); },
 
     async handleFiles(fileList) {
         this.error = '';
@@ -81,9 +79,7 @@
         this.syncInput();
     },
 
-    removeCurrent() {
-        this.currentImage = '';
-    },
+    removeCurrent() { this.currentImage = ''; },
 
     syncInput() {
         const dt = new DataTransfer();
@@ -98,12 +94,10 @@
         this.handleFiles(e.dataTransfer.files);
     }
 }">
-
     @if($label)
         <label style="font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-weight: 600; font-size: 13px; color: var(--c-text-muted, #6E7687); display: block; margin-bottom: 6px;">{{ $label }}</label>
     @endif
 
-    {{-- Zone drag & drop --}}
     <div @click="triggerInput()"
          @dragover.prevent="isDragging = true"
          @dragleave.prevent="isDragging = false"
@@ -113,50 +107,37 @@
          role="button"
          tabindex="0"
          aria-label="{{ __('Zone de téléchargement') }}"
-         :style="isDragging
-            ? 'border: 2px dashed var(--c-primary, #0B7285); background: var(--c-primary-light, #F0FAFB); transform: scale(1.02); box-shadow: 0 0 0 4px rgba(11,114,133,0.1);'
-            : 'border: 2px dashed #D1D5DB; background: linear-gradient(180deg, #FAFBFC 0%, #F3F4F6 100%);'"
-         style="border-radius: {{ $compact ? '10px' : '16px' }}; padding: {{ $compact ? '20px 20px' : '32px 20px' }}; text-align: center; cursor: pointer; transition: all 0.25s ease; min-height: {{ $compact ? '90px' : '160px' }}; display: flex !important; flex-direction: {{ $compact ? 'row' : 'column' }} !important; align-items: center !important; justify-content: center !important; gap: {{ $compact ? '12px' : '0' }};">
+         class="core-upload-zone {{ $compact ? 'core-upload-zone--compact' : '' }}"
+         :class="{ 'core-upload-zone--dragging': isDragging }">
         @if(!$compact)
-        <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--c-primary-light, #F0FAFB); display: flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 12px;">
-            <i class="fa fa-cloud-upload" style="font-size: 28px; color: var(--c-primary, #0B7285);"></i>
+        <div class="core-upload-zone__icon">
+            <i class="fa fa-cloud-upload"></i>
         </div>
         @endif
-        <div style="{{ $compact ? 'text-align: left;' : '' }}">
+        <div class="core-upload-zone__body">
             @if($compact)
-                <i class="fa fa-cloud-upload" style="font-size: 20px; color: var(--c-primary, #0B7285); margin-right: 6px;"></i>
+                <i class="fa fa-cloud-upload core-upload-zone__icon-inline"></i>
             @endif
-            <p style="margin: 0; font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-size: {{ $compact ? '13px' : '15px' }}; font-weight: 700; color: var(--c-dark, #1A1D23); display: {{ $compact ? 'inline' : 'block' }};">
+            <p class="core-upload-zone__title">
                 {{ $compact ? __('Glissez ou') : __('Glissez votre fichier ici') }}
             </p>
             @if(!$compact)
-            <p style="margin: 6px 0 12px; font-size: 13px; color: var(--c-text-muted, #6E7687);">
-                {{ __('ou') }}
-            </p>
+            <p class="core-upload-zone__or">{{ __('ou') }}</p>
             @endif
-            <span style="background: var(--c-primary, #0B7285); color: #fff; padding: {{ $compact ? '5px 14px' : '8px 20px' }}; border-radius: var(--r-btn, 0.5rem); font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif); font-weight: 600; font-size: {{ $compact ? '12px' : '13px' }}; display: inline-block; {{ $compact ? 'margin-left: 4px;' : '' }}">
-                {{ __('Parcourir') }}
-            </span>
+            <span class="core-upload-zone__btn">{{ __('Parcourir') }}</span>
         </div>
     </div>
 
-    {{-- Input file réel (caché) --}}
-    <input type="file" name="{{ $name }}" x-ref="fileInput"
-           accept="{{ $accept }}" {{ $multiple ? 'multiple' : '' }}
-           @change="handleFiles($event.target.files)"
-           style="display: none;">
+    <input type="file" name="{{ $name }}" x-ref="fileInput" accept="{{ $accept }}" {{ $multiple ? 'multiple' : '' }} @change="handleFiles($event.target.files)" style="display: none;">
 
-    {{-- Erreur --}}
     <p x-show="error" x-text="error" x-cloak style="color: #DC2626; font-size: 13px; margin: 8px 0 0;"></p>
 
-    {{-- Preview image existante --}}
     <div x-show="currentImage && files.length === 0" x-cloak style="margin-top: 10px; display: flex !important; align-items: center !important; gap: 10px; background: #F9FAFB; padding: 8px 12px; border-radius: var(--r-base, 0.75rem);">
         <img :src="currentImage" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
         <span style="font-size: 13px; color: var(--c-text-muted, #6E7687);">{{ __('Image actuelle') }}</span>
         <button type="button" @click="removeCurrent()" style="margin-left: auto; background: none; border: none; color: #DC2626; cursor: pointer; font-size: 18px;" title="{{ __('Supprimer') }}">&times;</button>
     </div>
 
-    {{-- Preview nouveaux fichiers --}}
     <template x-for="(file, i) in files" :key="i">
         <div style="margin-top: 10px; display: flex !important; align-items: center !important; gap: 10px; background: #F9FAFB; padding: 8px 12px; border-radius: var(--r-base, 0.75rem); border: 1px solid #E5E7EB;">
             <img x-show="file.isImage" :src="file.url" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
@@ -175,3 +156,69 @@
         <p style="font-size: 12px; color: var(--c-text-muted, #6E7687); margin: 8px 0 0;">{{ $helpText }}</p>
     @endif
 </div>
+
+@once
+@push('styles')
+<style>
+.core-upload-zone {
+    border: 2px dashed #D1D5DB;
+    background: linear-gradient(180deg, #FAFBFC 0%, #F3F4F6 100%);
+    border-radius: 16px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+.core-upload-zone--compact {
+    border-radius: 10px;
+    padding: 20px 20px;
+    min-height: 90px;
+    flex-direction: row;
+    gap: 12px;
+}
+.core-upload-zone--dragging {
+    border-color: var(--c-primary, #0B7285);
+    background: var(--c-primary-light, #F0FAFB);
+    transform: scale(1.02);
+    box-shadow: 0 0 0 4px rgba(11,114,133,0.1);
+}
+.core-upload-zone__icon {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: var(--c-primary-light, #F0FAFB);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+}
+.core-upload-zone__icon i { font-size: 28px; color: var(--c-primary, #0B7285); }
+.core-upload-zone__icon-inline { font-size: 20px; color: var(--c-primary, #0B7285); margin-right: 6px; }
+.core-upload-zone--compact .core-upload-zone__body { text-align: left; }
+.core-upload-zone__title {
+    margin: 0;
+    font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif);
+    font-size: 15px; font-weight: 700;
+    color: var(--c-dark, #1A1D23);
+}
+.core-upload-zone--compact .core-upload-zone__title { font-size: 13px; display: inline; }
+.core-upload-zone__or {
+    margin: 6px 0 12px; font-size: 13px;
+    color: var(--c-text-muted, #6E7687);
+}
+.core-upload-zone__btn {
+    background: var(--c-primary, #0B7285); color: #fff;
+    padding: 8px 20px;
+    border-radius: var(--r-btn, 0.5rem);
+    font-family: var(--f-heading, 'Plus Jakarta Sans', system-ui, sans-serif);
+    font-weight: 600; font-size: 13px;
+    display: inline-block;
+}
+.core-upload-zone--compact .core-upload-zone__btn {
+    padding: 5px 14px; font-size: 12px; margin-left: 4px;
+}
+</style>
+@endpush
+@endonce
