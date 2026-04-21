@@ -89,7 +89,25 @@
                                 {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('between-posts') !!}
                             @endif
                         @empty
-                            <div class="alert alert-info">{{ __('Aucun article trouvé.') }}</div>
+                            @php
+                                $hasFilters = request()->hasAny(['search', 'tag']);
+                                $hasCategory = isset($currentCategory);
+                                $isBeyondFirstPage = $articles->currentPage() > 1;
+                            @endphp
+                            <div class="alert alert-info">
+                                @if ($isBeyondFirstPage)
+                                    {{ __('Cette page n\'existe pas.') }}
+                                    <a href="{{ request()->fullUrlWithoutQuery(['page']) }}" class="alert-link">{{ __('Retour première page') }}</a>
+                                @elseif ($hasFilters && $hasCategory && $currentCategory->published_articles_count > 0)
+                                    {{ __('Aucun article ne correspond à ces filtres combinés dans la catégorie :name.', ['name' => $currentCategory->name]) }}
+                                    <a href="{{ route('blog.index', ['category' => request('category')]) }}" class="alert-link">{{ __('Effacer les filtres (conserver la catégorie :name)', ['name' => $currentCategory->name]) }}</a>
+                                @elseif ($hasFilters && !$hasCategory)
+                                    {{ __('Aucun article ne correspond à votre recherche.') }}
+                                    <a href="{{ route('blog.index') }}" class="alert-link">{{ __('Voir tous les articles') }}</a>
+                                @else
+                                    {{ __('Aucun article trouvé.') }}
+                                @endif
+                            </div>
                         @endforelse
                     </div>
 
