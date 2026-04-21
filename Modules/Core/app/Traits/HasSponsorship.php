@@ -6,13 +6,13 @@ namespace Modules\Core\Traits;
 
 trait HasSponsorship
 {
-    public static function initializeHasSponsorship(): void
+    public function initializeHasSponsorship(): void
     {
-        static::$casts = array_merge([
+        $this->mergeCasts([
             'is_featured' => 'boolean',
             'featured_until' => 'datetime',
             'featured_order' => 'integer',
-        ], static::$casts ?? []);
+        ]);
     }
 
     /** Vérifie si l'entité est actuellement sponsorisée. */
