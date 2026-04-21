@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Directory\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -21,30 +22,13 @@ class PublicDirectoryController extends Controller
     public function index(Request $request): View
     {
         $query = Tool::published()->with('categories', 'tags')->orderByDesc('clicks_count');
+        $tools = $this->applyDirectoryFilters($query, $request)->get();
 
-        if ($request->filled('pricing')) {
-            if ($request->pricing === 'education') {
-                $query->where('has_education_pricing', true);
-            } else {
-                $query->where('pricing', $request->pricing);
-            }
-        }
-
-        if ($request->filled('q')) {
-            $search = $request->q;
-            $locale = app()->getLocale();
-            $query->where("name->{$locale}", 'like', "%{$search}%");
-        }
-
-        if ($request->filled('category')) {
-            $query->whereHas('categories', fn ($q) => $q->where('slug->'.app()->getLocale(), $request->category));
-        }
-
-        $tools = $query->get();
         $categories = Category::orderBy('sort_order')->get();
         $pricingOptions = ['free' => __('Gratuit'), 'freemium' => __('Freemium'), 'paid' => __('Payant'), 'open_source' => __('Open source'), 'enterprise' => __('Entreprise'), 'education' => __('🎓 Tarif éducation')];
 
-        $featuredTools = Tool::published()->featured()->with('categories')->orderBy('sort_order')->get();
+        $featuredQuery = Tool::published()->featured()->with('categories')->orderBy('sort_order');
+        $featuredTools = $this->applyDirectoryFilters($featuredQuery, $request)->get();
         $recentTools = Tool::published()->with('categories')->orderByDesc('created_at')->distinct()->limit((int) Settings::get('directory.recent_tools_limit', 6))->get();
         $recentIds = $recentTools->pluck('id')->toArray();
         $popularTools = Tool::published()->with('categories')->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit((int) Settings::get('directory.popular_tools_limit', 6))->get();
@@ -276,5 +260,28 @@ class PublicDirectoryController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => __('Merci ! L\'outil a été ajouté au répertoire.')]);
+    }
+
+    private function applyDirectoryFilters(Builder $query, Request $request): Builder
+    {
+        if ($request->filled('pricing')) {
+            if ($request->pricing === 'education') {
+                $query->where('has_education_pricing', true);
+            } else {
+                $query->where('pricing', $request->pricing);
+            }
+        }
+
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $locale = app()->getLocale();
+            $query->where("name->{$locale}", 'like', "%{$search}%");
+        }
+
+        if ($request->filled('category')) {
+            $query->whereHas('categories', fn ($q) => $q->where('slug->'.app()->getLocale(), $request->category));
+        }
+
+        return $query;
     }
 }
