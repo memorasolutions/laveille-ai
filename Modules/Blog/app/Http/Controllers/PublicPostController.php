@@ -32,6 +32,8 @@ class PublicPostController extends Controller
 
     public function index(Request $request): View
     {
+        $locale = app()->getLocale();
+
         $query = Article::query()
             ->published()
             ->with(['user', 'blogCategory', 'tagsRelation']);
@@ -55,7 +57,6 @@ class PublicPostController extends Controller
         $currentCategory = null;
         if ($request->filled('category')) {
             $categorySlug = $request->input('category');
-            $locale = app()->getLocale();
             $currentCategory = Category::where("slug->{$locale}", $categorySlug)
                 ->orWhere('slug', $categorySlug)
                 ->first();
@@ -66,12 +67,31 @@ class PublicPostController extends Controller
 
         $articles = $query->latest('published_at')->paginate((int) Settings::get('blog.articles_per_page', 10));
 
-        $categories = Category::withCount(['articles as published_articles_count' => function (Builder $q) {
+        $search = $request->input('search');
+        $tag = $request->input('tag');
+
+        $categoriesQuery = Category::withCount(['articles as published_articles_count' => function (Builder $q) use ($search, $tag) {
             $q->published();
-        }])
-            ->having('published_articles_count', '>', 0)
-            ->orderByDesc('published_articles_count')
-            ->get();
+            if ($search) {
+                $q->where(function (Builder $query) use ($search) {
+                    $query->where('title', 'like', "%{$search}%")
+                        ->orWhere('content', 'like', "%{$search}%")
+                        ->orWhere('excerpt', 'like', "%{$search}%");
+                });
+            }
+            if ($tag) {
+                $q->whereHas('tagsRelation', fn (Builder $query) => $query->where('slug', $tag));
+            }
+        }]);
+
+        if (!$search && !$tag) {
+            $categoriesQuery->having('published_articles_count', '>', 0)
+                ->orderByDesc('published_articles_count');
+        } else {
+            $categoriesQuery->orderBy("name->{$locale}");
+        }
+
+        $categories = $categoriesQuery->get();
 
         if ($request->ajax()) {
             return response()->json([
