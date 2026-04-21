@@ -71,5 +71,5 @@
     .tiptap blockquote { border-left: 3px solid #0B7285; padding-left: 12px; margin: 0.5em 0; color: #6b7280; font-style: italic; }
     .tiptap code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: monospace; }
     .tiptap a { color: #0B7285; text-decoration: underline; }
-    .tiptap p.is-editor-empty:first-child::before { content: '{{ $placeholder }}'; color: #9ca3af; pointer-events: none; float: left; height: 0; }
+    .tiptap p.is-editor-empty:first-child::before { content: '{{ $placeholder }}'; color: #6b7280; pointer-events: none; float: left; height: 0; }
 </style>

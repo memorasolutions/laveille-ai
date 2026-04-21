@@ -20,7 +20,7 @@
         .form-group{margin-bottom:20px}
         .form-group label{display:block;font-size:14px;font-weight:600;color:#374151;margin-bottom:7px}
         .form-group input[type="password"]{width:100%;padding:12px 14px;font-size:15px;font-family:inherit;color:#1a1a2e;background:#f9fafb;border:1.5px solid #d1d5db;border-radius:8px;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
-        .form-group input[type="password"]::placeholder{color:#9ca3af}
+        .form-group input[type="password"]::placeholder{color:#6b7280}
         .form-group input[type="password"]:focus{border-color:#0B7285;box-shadow:0 0 0 3px rgba(11,114,133,.12);background:#fff}
         .form-group input.is-invalid{border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.08)}
         .error-message{display:flex;align-items:flex-start;gap:6px;margin-top:8px;font-size:13px;color:#dc2626;line-height:1.4}
@@ -29,7 +29,7 @@
         .btn-submit:hover{background:#095c6a;box-shadow:0 2px 8px rgba(11,114,133,.25)}
         .btn-submit:active{transform:scale(.985)}
         .btn-submit:focus-visible{outline:2px solid #0B7285;outline-offset:2px}
-        .promo{margin-top:24px;text-align:center;font-size:13.5px;color:#9ca3af;line-height:1.55;padding:0 8px}
+        .promo{margin-top:24px;text-align:center;font-size:13.5px;color:#6b7280;line-height:1.55;padding:0 8px}
         .promo a{color:#0B7285;text-decoration:none;font-weight:600;transition:color .15s}
         .promo a:hover{color:#095c6a;text-decoration:underline}
         footer{margin-top:auto;padding-top:40px;text-align:center;font-size:13px;color:#b0b8c1}

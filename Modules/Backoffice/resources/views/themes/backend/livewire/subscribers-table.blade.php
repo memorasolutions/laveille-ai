@@ -98,7 +98,7 @@
                    class="form-control form-control-sm ps-4"
                    placeholder="{{ __('Rechercher par email ou nom...') }}"
                    aria-label="{{ __('Rechercher') }}">
-            <i data-lucide="search" class="position-absolute" style="left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#9ca3af;"></i>
+            <i data-lucide="search" class="position-absolute" style="left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#6b7280;"></i>
         </div>
         <select wire:model.live="filterStatus" class="form-select form-select-sm w-auto" aria-label="{{ __('Filtrer par statut') }}">
             <option value="">{{ __('Tous les statuts') }}</option>

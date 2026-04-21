@@ -35,7 +35,7 @@
 </td></tr>
 
 <!-- Separator -->
-<tr><td style="border-top:1px solid #e5e7eb;padding-top:20px;font-size:13px;color:#9ca3af;text-align:center;font-family:-apple-system,sans-serif;">
+<tr><td style="border-top:1px solid #e5e7eb;padding-top:20px;font-size:13px;color:#6b7280;text-align:center;font-family:-apple-system,sans-serif;">
 <p style="margin:0 0 5px;">{{ config('app.name') }} - {{ \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre veille IA au Quebec') }}</p>
 <p style="margin:0 0 10px;">{{ \Modules\Settings\Facades\Settings::get('contact.address', "L'Ancienne-Lorette, QC, Canada") }}</p>
 <a href="{{ $unsubscribeUrl }}" style="color:#6b7280;text-decoration:underline;">Se desabonner</a>

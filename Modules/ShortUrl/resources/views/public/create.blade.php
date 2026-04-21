@@ -362,7 +362,7 @@
                         📋
                     </button>
                     <button @click="removeFromHistory(index)"
-                        style="background: none; border: none; color: #9CA3AF; font-size: 14px; cursor: pointer; padding: 2px 6px;"
+                        style="background: none; border: none; color: #6B7280; font-size: 14px; cursor: pointer; padding: 2px 6px;"
                         title="{{ __('Retirer') }}">✕</button>
                 </div>
             </div>
@@ -405,7 +405,7 @@
     <template x-teleport="body">
         <div x-show="open" x-cloak x-transition.opacity style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex!important;align-items:center!important;justify-content:center!important;padding:20px;" @click.self="open = false">
             <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:28px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-                <button @click="open = false" style="position:absolute;top:12px;right:12px;background:none!important;border:none!important;font-size:20px;cursor:pointer;color:#9CA3AF;padding:4px;" aria-label="{{ __('Fermer') }}">✕</button>
+                <button @click="open = false" style="position:absolute;top:12px;right:12px;background:none!important;border:none!important;font-size:20px;cursor:pointer;color:#6B7280;padding:4px;" aria-label="{{ __('Fermer') }}">✕</button>
                 <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.2rem;margin:0 0 16px;color:var(--c-dark);">📊 {{ __('À quoi sert le suivi UTM ?') }}</h3>
                 <p style="color:#4B5563;line-height:1.7;margin-bottom:12px;">{{ __('Le suivi UTM, c\'est comme mettre une petite étiquette invisible au bout d\'une adresse web. Ça sert à savoir précisément d\'où viennent les gens qui cliquent sur vos liens.') }}</p>
                 <p style="color:#4B5563;line-height:1.7;margin-bottom:12px;">{{ __('Imaginons que vous partagez le même article sur Facebook et dans votre infolettre. Sans UTM, vous verrez que vous avez eu 100 visites, mais vous ne saurez pas quel canal a le mieux fonctionné. Avec les UTM, vous pourrez voir que 80 clics viennent de Facebook et 20 du courriel.') }}</p>
@@ -425,7 +425,7 @@
     <template x-teleport="body">
         <div x-show="open" x-cloak x-transition.opacity style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex!important;align-items:center!important;justify-content:center!important;padding:20px;" @click.self="open = false">
             <div style="background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;padding:28px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-                <button @click="open = false" style="position:absolute;top:12px;right:12px;background:none!important;border:none!important;font-size:20px;cursor:pointer;color:#9CA3AF;padding:4px;" aria-label="{{ __('Fermer') }}">✕</button>
+                <button @click="open = false" style="position:absolute;top:12px;right:12px;background:none!important;border:none!important;font-size:20px;cursor:pointer;color:#6B7280;padding:4px;" aria-label="{{ __('Fermer') }}">✕</button>
                 <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.2rem;margin:0 0 16px;color:var(--c-dark);">🌐 {{ __('Personnaliser l\'aperçu de partage') }}</h3>
                 <p style="color:#4B5563;line-height:1.7;margin-bottom:12px;">{{ __('Avez-vous déjà remarqué que lorsque vous collez un lien dans Facebook, LinkedIn ou même par SMS, une petite carte apparaît automatiquement avec une image, un titre et un court texte ?') }}</p>
                 <p style="color:#4B5563;line-height:1.7;margin-bottom:12px;">{{ __('Par défaut, les réseaux sociaux vont fouiller sur votre page pour essayer de deviner quoi afficher. Le problème, c\'est que le résultat est parfois un peu croche : l\'image est coupée ou le texte n\'est pas accrocheur.') }}</p>

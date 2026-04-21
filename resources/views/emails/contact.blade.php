@@ -21,6 +21,6 @@
     </div>
 
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-    <p style="color: #9ca3af; font-size: 12px;">{{ config('app.name') }} - {{ now()->format('d/m/Y H:i') }}</p>
+    <p style="color: #6b7280; font-size: 12px;">{{ config('app.name') }} - {{ now()->format('d/m/Y H:i') }}</p>
 </body>
 </html>

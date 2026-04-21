@@ -15,7 +15,7 @@
             --color-banner-text: #92400e;
             --color-badge-type-bg: #e5e7eb;
             --color-badge-type-text: #374151;
-            --color-status-draft: #9ca3af;
+            --color-status-draft: #6b7280;
             --color-status-pending: #3b82f6;
             --color-status-published: #10b981;
             --color-status-archived: #f97316;

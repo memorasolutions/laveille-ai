@@ -38,7 +38,7 @@
                    style="width:260px;"
                    placeholder="{{ __('Rechercher une clé ou valeur...') }}"
                    aria-label="{{ __('Rechercher') }}">
-            <i data-lucide="search" class="position-absolute" style="left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#9ca3af;"></i>
+            <i data-lucide="search" class="position-absolute" style="left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#6b7280;"></i>
         </div>
     </div>
 

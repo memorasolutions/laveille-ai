@@ -46,7 +46,7 @@
                     <span style="background:{{ $idea->status->color() }}20;color:{{ $idea->status->color() }};padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">{{ $idea->status->label() }}</span>
                 </div>
                 <p style="color:var(--c-text-muted);margin:0 0 8px;font-size:14px;">{{ Str::limit($idea->description, 200) }}</p>
-                <div style="font-size:12px;color:#9ca3af;">
+                <div style="font-size:12px;color:#6b7280;">
                     {{ __('Par') }} {{ $idea->user->name ?? __('Anonyme') }} — {{ $idea->comments_count ?? 0 }} {{ __('commentaire(s)') }} — {{ $idea->created_at->diffForHumans() }}
                 </div>
 

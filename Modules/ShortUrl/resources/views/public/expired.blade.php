@@ -13,7 +13,7 @@
         p { color: #6B7280; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
         .btn { display: inline-block; background: #0B7285; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; transition: background 0.2s; }
         .btn:hover { background: #095e6e; }
-        .footer { margin-top: 20px; font-size: 12px; color: #9CA3AF; }
+        .footer { margin-top: 20px; font-size: 12px; color: #6B7280; }
         .footer a { color: #0B7285; text-decoration: none; }
     </style>
 </head>

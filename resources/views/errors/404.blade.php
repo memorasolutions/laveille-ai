@@ -12,7 +12,7 @@
             {{ __('Notre IA a scanné tout le site, mais cette page semble avoir disparu dans une faille spatio-temporelle.') }}
         </p>
         <div style="border-top: 1px solid #E5E7EB; padding-top: 1.5rem;">
-            <p style="font-size: 0.85rem; color: #9CA3AF; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">{{ __('Quelques pistes pour vous retrouver') }}</p>
+            <p style="font-size: 0.85rem; color: #6B7280; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">{{ __('Quelques pistes pour vous retrouver') }}</p>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
                 <a href="{{ url('/') }}" style="text-decoration: none; color: var(--c-dark, #333); background: #F3F4F6; padding: 8px 16px; border-radius: 50px; font-size: 14px; font-weight: 600;">🏠 {{ __('Accueil') }}</a>
                 <a href="{{ url('/blog') }}" style="text-decoration: none; color: var(--c-dark, #333); background: #F3F4F6; padding: 8px 16px; border-radius: 50px; font-size: 14px; font-weight: 600;">📝 {{ __('Blog') }}</a>
