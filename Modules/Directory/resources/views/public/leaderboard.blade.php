@@ -79,7 +79,7 @@
                 <div style="width: 50px; height: 50px; background: #E0E7FF; color: #4F46E5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700;">{{ substr(auth()->user()->name, 0, 1) }}</div>
                 <div>
                     <div style="font-weight: 700; font-size: 16px; color: var(--c-dark);">{{ __('Votre position') }}</div>
-                    <span style="font-size: 13px; color: #9CA3AF;">{{ $myLvl['emoji'] }} {{ $myLvl['name'] }}</span>
+                    <span style="font-size: 13px; color: #6B7280;">{{ $myLvl['emoji'] }} {{ $myLvl['name'] }}</span>
                 </div>
             </div>
             <div style="text-align: right;">

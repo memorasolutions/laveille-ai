@@ -36,7 +36,7 @@
                                             <span style="background: var(--c-primary, #0B7285); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{ $section['count'] }} {{ __('entrées') }}</span>
                                         @endif
                                         @if($section['updated_at'])
-                                            <span style="color: #9CA3AF; font-size: 11px;">{{ __('Mis à jour') }} {{ \Carbon\Carbon::parse($section['updated_at'])->diffForHumans() }}</span>
+                                            <span style="color: #6B7280; font-size: 11px;">{{ __('Mis à jour') }} {{ \Carbon\Carbon::parse($section['updated_at'])->diffForHumans() }}</span>
                                         @endif
                                     </div>
                                 </div>

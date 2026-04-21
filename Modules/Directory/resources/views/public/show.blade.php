@@ -619,7 +619,7 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div style="width: 30px; height: 30px; background: #e0e7ff; color: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">{{ substr($review->user->name ?? '?', 0, 1) }}</div>
                         @if($review->user)<a href="{{ route('directory.profile', $review->user->id) }}" style="font-weight: 600; color: #374151; font-size: 13px; text-decoration: none;">{{ $review->user->name }}</a><span style="font-size: 11px; color: #6B7280; margin-left: 4px;">{{ $review->user->getLevelBadge() }}</span>@else<span style="font-weight: 600; color: #374151; font-size: 13px;">{{ __('Anonyme') }}</span>@endif
-                        <span style="color: #9ca3af; font-size: 12px;">{{ $review->created_at->diffForHumans() }}</span>
+                        <span style="color: #6b7280; font-size: 12px;">{{ $review->created_at->diffForHumans() }}</span>
                     </div>
                     <div style="display: flex; gap: 12px; align-items: center;">
                         @include('voting::components.vote-button', ['item' => $review, 'type' => 'review'])
@@ -713,7 +713,7 @@
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <strong style="font-size: 15px; color: #1f2937;">{{ $d->title ?: Str::limit(strip_tags($d->body), 50) }}</strong>
                             </div>
-                            <div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">
+                            <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">
                                 {{ $d->user->name ?? __('Anonyme') }} · {{ $d->created_at->diffForHumans() }}
                             </div>
                         </div>
@@ -722,7 +722,7 @@
                             @if($d->replies->count() > 0)
                             <span style="background: #f0fdf4; color: #059669; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{ $d->replies->count() }} {{ __('rép.') }}</span>
                             @endif
-                            <span x-text="expanded ? '▲' : '▼'" style="color: #9ca3af; font-size: 10px;"></span>
+                            <span x-text="expanded ? '▲' : '▼'" style="color: #6b7280; font-size: 10px;"></span>
                         </div>
                     </div>
                 </div>
@@ -751,7 +751,7 @@
                         <div style="background: #fff; border-radius: 8px; padding: 12px; margin-bottom: 6px; border: 1px solid #f3f4f6;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                                 <strong style="font-size: 13px; color: #374151;">{{ $r->user->name ?? __('Anonyme') }}</strong>
-                                <span style="font-size: 11px; color: #9ca3af;">{{ $r->created_at->diffForHumans() }}</span>
+                                <span style="font-size: 11px; color: #6b7280;">{{ $r->created_at->diffForHumans() }}</span>
                             </div>
                             <div style="margin: 0; color: #4b5563; font-size: 13px;" class="rt-description">{!! $r->body !!}</div>
                         </div>

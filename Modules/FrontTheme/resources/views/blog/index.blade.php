@@ -114,7 +114,7 @@
                     {{-- Sentinel : charge plus au scroll --}}
                     <div x-show="hasMore" x-intersect="loadMore()" class="text-center" style="padding: 30px 0;" role="status" aria-live="polite">
                         <div x-show="loading" style="display: inline-block; width: 28px; height: 28px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary, #0B7285); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
-                        <p x-show="loading" style="color: #9CA3AF; font-size: 13px; margin-top: 8px;">{{ __('Chargement des articles...') }}</p>
+                        <p x-show="loading" style="color: #6B7280; font-size: 13px; margin-top: 8px;">{{ __('Chargement des articles...') }}</p>
                     </div>
 
                     {{-- Pagination noscript fallback --}}
@@ -146,7 +146,7 @@
         .nw-chip.active { background: var(--c-primary); color: #fff; border-color: var(--c-primary); }
         .nw-chip.active:hover { opacity: 0.9; color: #fff; text-decoration: none; }
         .nw-chip-count { font-size: 0.6875rem; opacity: 0.8; }
-        .nw-follow-btn { background: none; border: none; padding: 2px; cursor: pointer; color: #9ca3af; transition: color 0.15s; display: inline-flex; align-items: center; flex-shrink: 0; }
+        .nw-follow-btn { background: none; border: none; padding: 2px; cursor: pointer; color: #6b7280; transition: color 0.15s; display: inline-flex; align-items: center; flex-shrink: 0; }
         .nw-follow-btn:hover { color: var(--c-primary); }
         @media (max-width: 640px) { .nw-filter-row { flex-direction: column; align-items: stretch; } .nw-filter-label { min-width: auto; } }
     </style>

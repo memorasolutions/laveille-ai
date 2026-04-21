@@ -46,7 +46,7 @@
 
         {{-- Footer --}}
         <div style="background: #F9FAFB; padding: 20px 32px; text-align: center; border-top: 1px solid #E5E7EB;">
-            <p style="color: #9CA3AF; font-size: 12px; margin: 0;">
+            <p style="color: #6B7280; font-size: 12px; margin: 0;">
                 {{ __('Cet email a été envoyé automatiquement par') }} {{ config('app.name') }} (laveille.ai)
             </p>
         </div>

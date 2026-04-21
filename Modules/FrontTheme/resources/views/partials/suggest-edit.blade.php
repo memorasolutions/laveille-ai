@@ -40,7 +40,7 @@
                     <textarea name="suggested_value" class="form-control" rows="3" maxlength="2000" style="border-radius: 8px; font-size: 14px;" placeholder="{{ __('Entrez la correction proposée...') }}" required></textarea>
                 </div>
                 <div style="margin-bottom: 12px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 4px;">{{ __('Pourquoi ?') }} <span style="color: #9CA3AF;">({{ __('optionnel') }})</span></label>
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 4px;">{{ __('Pourquoi ?') }} <span style="color: #6B7280;">({{ __('optionnel') }})</span></label>
                     <textarea name="reason" class="form-control" rows="2" maxlength="500" style="border-radius: 8px; font-size: 14px;" placeholder="{{ __('Source, erreur, etc.') }}"></textarea>
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 8px;">

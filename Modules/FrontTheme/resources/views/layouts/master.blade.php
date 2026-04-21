@@ -377,7 +377,7 @@
             +'<div style="font-size:2.5rem;margin-bottom:12px">📋</div>'
             +'<p style="margin:0 0 18px;font-size:15px;line-height:1.5;color:#333">{{ __("Texte copié!") }} {{ __("Collez-le dans votre") }} '+label+' '+platform+'.</p>'
             +'<button onclick="window.open(this.dataset.url,\'_blank\');document.getElementById(\'share-modal-overlay\').remove()" data-url="'+url+'" style="background:'+color+';color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600">{{ __("Ouvrir") }} '+platform+' →</button>'
-            +'<div style="margin-top:12px;font-size:12px;color:#9ca3af">{{ __("Ouverture automatique dans 2 secondes...") }}</div>'
+            +'<div style="margin-top:12px;font-size:12px;color:#6b7280">{{ __("Ouverture automatique dans 2 secondes...") }}</div>'
             +'</div>';
         o.addEventListener('click',function(e){if(e.target===o)o.remove()});
         document.body.appendChild(o);

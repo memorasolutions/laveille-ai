@@ -58,7 +58,7 @@
                             <span style="color:#ef4444;font-weight:700;">🔥{{ $u->streak_days }}j</span>
                         @endif
                     </div>
-                    <div style="font-weight:800;font-size:22px;color:{{ $colors[$podiumIndex] }};">{{ $pts }} <span style="font-size:11px;color:#9ca3af;">pts</span></div>
+                    <div style="font-weight:800;font-size:22px;color:{{ $colors[$podiumIndex] }};">{{ $pts }} <span style="font-size:11px;color:#6b7280;">pts</span></div>
                 </div>
             </div>
             @endif
@@ -74,7 +74,7 @@
                 @foreach($users->slice(3) as $key => $u)
                 @php $lvl = $getLevel($u->trust_level); $pts = $u->{$pointsField}; @endphp
                 <tr>
-                    <td style="vertical-align:middle;width:50px;font-weight:700;color:#9ca3af;text-align:center;">{{ $key + 1 }}</td>
+                    <td style="vertical-align:middle;width:50px;font-weight:700;color:#6b7280;text-align:center;">{{ $key + 1 }}</td>
                     <td style="vertical-align:middle;">
                         <div style="display:flex!important;align-items:center!important;gap:10px;">
                             <div style="width:34px;height:34px;background:#e0e7ff;color:#4f46e5;border-radius:50%;display:flex!important;align-items:center!important;justify-content:center!important;font-weight:700;font-size:14px;">{{ substr($u->name, 0, 1) }}</div>

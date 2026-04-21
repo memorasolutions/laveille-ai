@@ -279,7 +279,7 @@
                             <div x-show="open" x-cloak x-transition style="position:absolute;right:0;top:40px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);width:220px;z-index:9999;padding:8px 0;">
                                 <div style="padding:12px 16px;border-bottom:1px solid #f3f4f6;">
                                     <div style="font-weight:700;color:var(--c-dark);font-size:14px;">{{ auth()->user()->name }}</div>
-                                    <div style="font-size:11px;color:#9ca3af;">{{ auth()->user()->email }}</div>
+                                    <div style="font-size:11px;color:#6b7280;">{{ auth()->user()->email }}</div>
                                 </div>
                                 @include('auth::components.user-menu-links', ['variant' => 'dropdown'])
                                 @can('view_admin_panel')

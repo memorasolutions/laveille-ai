@@ -78,7 +78,7 @@
             <tbody>
                 @foreach($tools as $index => $tool)
                 <tr>
-                    <td style="color: #9ca3af; font-weight: 700;">{{ $index + 1 }}</td>
+                    <td style="color: #6b7280; font-weight: 700;">{{ $index + 1 }}</td>
                     <td>
                         <div class="tool-cell">
                             @php

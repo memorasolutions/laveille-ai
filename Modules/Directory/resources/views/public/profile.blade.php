@@ -24,7 +24,7 @@
             {{ strtoupper(substr($user->name, 0, 1)) }}
         </div>
         <h1 style="font-family: var(--f-heading); font-size: 1.8rem; font-weight: 800; color: var(--c-dark); margin: 8px 0 4px;">{{ $user->name }}</h1>
-        <p style="color: #9CA3AF; font-size: 14px; margin-bottom: 20px;">{{ __('Membre depuis') }} {{ $user->created_at->translatedFormat('F Y') }}</p>
+        <p style="color: #6B7280; font-size: 14px; margin-bottom: 20px;">{{ __('Membre depuis') }} {{ $user->created_at->translatedFormat('F Y') }}</p>
 
         {{-- Level --}}
         <div style="display: inline-flex; align-items: center; gap: 10px; background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: 50px; padding: 8px 20px; margin-bottom: 16px;">
@@ -63,7 +63,7 @@
     <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
         <h3 style="font-family: var(--f-heading); font-size: 1.2rem; font-weight: 700; color: var(--c-dark); margin: 0 0 16px;">🏅 {{ __('Badges') }}</h3>
         @if(empty($badges))
-            <p style="color: #9CA3AF; text-align: center; padding: 20px;">{{ __('Pas encore de badges. Contribuez pour en gagner !') }}</p>
+            <p style="color: #6B7280; text-align: center; padding: 20px;">{{ __('Pas encore de badges. Contribuez pour en gagner !') }}</p>
         @else
             <div class="row">
                 @foreach($badges as $key)
