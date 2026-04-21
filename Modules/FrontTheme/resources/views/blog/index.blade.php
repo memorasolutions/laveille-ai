@@ -98,7 +98,7 @@
                                 @if ($isBeyondFirstPage)
                                     {{ __('Cette page n\'existe pas.') }}
                                     <a href="{{ request()->fullUrlWithoutQuery(['page']) }}" class="alert-link">{{ __('Retour première page') }}</a>
-                                @elseif ($hasFilters && $hasCategory && $currentCategory->published_articles_count > 0)
+                                @elseif ($hasFilters && $hasCategory)
                                     {{ __('Aucun article ne correspond à ces filtres combinés dans la catégorie :name.', ['name' => $currentCategory->name]) }}
                                     <a href="{{ route('blog.index', ['category' => request('category')]) }}" class="alert-link">{{ __('Effacer les filtres (conserver la catégorie :name)', ['name' => $currentCategory->name]) }}</a>
                                 @elseif ($hasFilters && !$hasCategory)
