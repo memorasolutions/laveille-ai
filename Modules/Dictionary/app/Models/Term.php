@@ -12,11 +12,12 @@ namespace Modules\Dictionary\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
-class Term extends Model
+class Term extends Model implements Searchable
 {
     use HasSuggestions;
     use HasTranslations;
@@ -71,5 +72,45 @@ class Term extends Model
     public function scopeOfType($query, string $type)
     {
         return $query->where('type', $type);
+    }
+
+    public static function searchableFields(): array
+    {
+        return ['name', 'definition', 'analogy', 'example', 'did_you_know'];
+    }
+
+    public static function searchSectionKey(): string
+    {
+        return 'glossaire';
+    }
+
+    public static function searchSectionLabel(): string
+    {
+        return __('Glossaire');
+    }
+
+    public static function searchSectionIcon(): string
+    {
+        return '📚';
+    }
+
+    public static function searchPriority(): int
+    {
+        return 40;
+    }
+
+    public function searchableResultTitle(): string
+    {
+        return $this->name;
+    }
+
+    public function searchableResultExcerpt(): string
+    {
+        return \Illuminate\Support\Str::limit(strip_tags($this->definition ?: ''), 200);
+    }
+
+    public function searchableResultUrl(): string
+    {
+        return route('dictionary.show', $this->slug);
     }
 }

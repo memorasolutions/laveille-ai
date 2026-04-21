@@ -36,6 +36,7 @@ class AcronymsServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+        $this->app->tag([\Modules\Acronyms\Models\Acronym::class], 'searchable.models');
     }
 
     protected function registerCommands(): void

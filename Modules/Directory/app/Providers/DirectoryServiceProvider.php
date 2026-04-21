@@ -49,6 +49,7 @@ class DirectoryServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+        $this->app->tag([\Modules\Directory\Models\Tool::class], 'searchable.models');
     }
 
     /**

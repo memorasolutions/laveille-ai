@@ -15,13 +15,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasLifecycleStatus;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
-class Tool extends Model
+class Tool extends Model implements Searchable
 {
     use HasLifecycleStatus;
     use HasSuggestions;
@@ -223,5 +224,45 @@ class Tool extends Model
     public function averageRating(): float
     {
         return (float) $this->reviews()->approved()->avg('rating') ?: 0;
+    }
+
+    public static function searchableFields(): array
+    {
+        return ['name', 'short_description', 'description'];
+    }
+
+    public static function searchSectionKey(): string
+    {
+        return 'annuaire';
+    }
+
+    public static function searchSectionLabel(): string
+    {
+        return __('Annuaire');
+    }
+
+    public static function searchSectionIcon(): string
+    {
+        return '🛠️';
+    }
+
+    public static function searchPriority(): int
+    {
+        return 30;
+    }
+
+    public function searchableResultTitle(): string
+    {
+        return $this->name;
+    }
+
+    public function searchableResultExcerpt(): string
+    {
+        return \Illuminate\Support\Str::limit(strip_tags($this->description ?: $this->short_description ?: ''), 200);
+    }
+
+    public function searchableResultUrl(): string
+    {
+        return route('directory.show', $this->slug);
     }
 }

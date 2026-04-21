@@ -47,5 +47,6 @@ class BlogServiceProvider extends BaseModuleServiceProvider
 
         $this->app->singleton(BlogMetricProvider::class);
         $this->app->tag([BlogMetricProvider::class], 'metric_providers');
+        $this->app->tag([\Modules\Blog\Models\Article::class], 'searchable.models');
     }
 }

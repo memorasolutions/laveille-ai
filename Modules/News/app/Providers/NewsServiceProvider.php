@@ -40,6 +40,7 @@ class NewsServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+        $this->app->tag([\Modules\News\Models\NewsArticle::class], 'searchable.models');
     }
 
     /**

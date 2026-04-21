@@ -23,6 +23,7 @@ use Laravel\Scout\Searchable;
 use Mews\Purifier\Facades\Purifier;
 use Modules\Blog\Database\Factories\ArticleFactory;
 use Modules\Blog\States\ArticleState;
+use Modules\Core\Contracts\Searchable as SearchableContract;
 use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
 use Modules\Core\Traits\HasPreviewToken;
@@ -37,7 +38,7 @@ use Spatie\Translatable\HasTranslations;
 /**
  * @method static \Illuminate\Database\Eloquent\Builder<static> published()
  */
-class Article extends Model
+class Article extends Model implements SearchableContract
 {
     use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasStates, HasTranslations, LogsActivity, Searchable, SoftDeletes;
     use \Modules\SEO\Traits\NotifiesIndexNow;
@@ -226,5 +227,45 @@ class Article extends Model
     protected static function newFactory(): ArticleFactory
     {
         return ArticleFactory::new();
+    }
+
+    public static function searchableFields(): array
+    {
+        return ['title', 'content', 'excerpt'];
+    }
+
+    public static function searchSectionKey(): string
+    {
+        return 'blog';
+    }
+
+    public static function searchSectionLabel(): string
+    {
+        return __('Blog');
+    }
+
+    public static function searchSectionIcon(): string
+    {
+        return '📝';
+    }
+
+    public static function searchPriority(): int
+    {
+        return 20;
+    }
+
+    public function searchableResultTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function searchableResultExcerpt(): string
+    {
+        return \Illuminate\Support\Str::limit(strip_tags($this->content ?: $this->excerpt ?: ''), 200);
+    }
+
+    public function searchableResultUrl(): string
+    {
+        return route('blog.show', $this->slug);
     }
 }

@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Modules\Community\Traits\HasComments;
 use Modules\Community\Traits\HasReports;
+use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Voting\Traits\HasCommunityVotes;
 
-class NewsArticle extends Model
+class NewsArticle extends Model implements Searchable
 {
     use HasComments, HasReports, HasCommunityVotes;
     use LogsActivityStandard;
@@ -108,5 +109,45 @@ class NewsArticle extends Model
     public function scopeRecent(Builder $query): Builder
     {
         return $query->orderBy('pub_date', 'desc');
+    }
+
+    public static function searchableFields(): array
+    {
+        return ['title', 'seo_title', 'summary', 'description'];
+    }
+
+    public static function searchSectionKey(): string
+    {
+        return 'news';
+    }
+
+    public static function searchSectionLabel(): string
+    {
+        return __('Actualités');
+    }
+
+    public static function searchSectionIcon(): string
+    {
+        return '📰';
+    }
+
+    public static function searchPriority(): int
+    {
+        return 10;
+    }
+
+    public function searchableResultTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function searchableResultExcerpt(): string
+    {
+        return \Illuminate\Support\Str::limit(strip_tags($this->description ?: $this->summary ?: ''), 200);
+    }
+
+    public function searchableResultUrl(): string
+    {
+        return route('news.show', $this->slug);
     }
 }

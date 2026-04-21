@@ -38,6 +38,7 @@ class DictionaryServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+        $this->app->tag([\Modules\Dictionary\Models\Term::class], 'searchable.models');
     }
 
     /**

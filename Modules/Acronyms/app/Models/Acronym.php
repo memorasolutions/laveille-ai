@@ -10,11 +10,12 @@ namespace Modules\Acronyms\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
-class Acronym extends Model
+class Acronym extends Model implements Searchable
 {
     use \Modules\Core\Traits\HasModerationStatus;
     use HasSuggestions;
@@ -66,5 +67,45 @@ class Acronym extends Model
     public function scopeOfDomain($query, string $domain)
     {
         return $query->where('domain', $domain);
+    }
+
+    public static function searchableFields(): array
+    {
+        return ['acronym', 'full_name', 'description'];
+    }
+
+    public static function searchSectionKey(): string
+    {
+        return 'acronymes';
+    }
+
+    public static function searchSectionLabel(): string
+    {
+        return __('Acronymes');
+    }
+
+    public static function searchSectionIcon(): string
+    {
+        return '🔤';
+    }
+
+    public static function searchPriority(): int
+    {
+        return 50;
+    }
+
+    public function searchableResultTitle(): string
+    {
+        return $this->acronym;
+    }
+
+    public function searchableResultExcerpt(): string
+    {
+        return \Illuminate\Support\Str::limit(strip_tags($this->description ?: ''), 200);
+    }
+
+    public function searchableResultUrl(): string
+    {
+        return route('acronyms.show', $this->slug);
     }
 }
