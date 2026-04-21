@@ -5,7 +5,7 @@
 @section('meta_description', Str::limit($tool->short_description ?? strip_tags($tool->description), 160))
 @section('og_type', 'article')
 @if($tool->screenshot)
-    @section('og_image', str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot))
+    @section('og_image', str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
 @endif
 
 @push('styles')

@@ -36,7 +36,7 @@
 @endsection
 @section('og_type', 'article')
 @if($article->image_url)
-    @section('og_image', url($article->image_url))
+    @section('og_image', str_starts_with($article->image_url, 'http') ? $article->image_url : url($article->image_url).'?v='.($article->updated_at?->timestamp ?? '0'))
 @endif
 
 @section('breadcrumb')

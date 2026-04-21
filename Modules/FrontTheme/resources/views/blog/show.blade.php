@@ -63,7 +63,7 @@
 @endphp
 @endsection
 @if($article->featured_image)
-    @section('og_image', asset($article->featured_image))
+    @section('og_image', asset($article->featured_image).'?v='.($article->updated_at?->timestamp ?? '0'))
 @endif
 
 @php
