@@ -66,6 +66,15 @@
         </a>
         @endif
 
+        {{-- Capturer screenshot (Screen Capture API + upload fichier) --}}
+        @if($type === 'resources' && Route::has('admin.directory.moderation.resource.upload-screenshot'))
+        <button type="button"
+            @click.stop="document.getElementById('capture-dlg-{{ $item->id }}').showModal(); open = false;"
+            style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;font-size:13px;cursor:pointer;color:#7c3aed;" onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background='none'">
+            📸 {{ __('Capturer screenshot') }}
+        </button>
+        @endif
+
         {{-- Épingler --}}
         <form method="POST" action="{{ route('moderation.pin', [$type, $item->id]) }}" style="margin:0;">
             @csrf
@@ -119,4 +128,30 @@
         @endcan
     </div>
 </div>
+
+{{-- Dialog capture screenshot (Screen Capture API + upload file) --}}
+@if($type === 'resources' && Route::has('admin.directory.moderation.resource.upload-screenshot'))
+<dialog id="capture-dlg-{{ $item->id }}" style="border:0;padding:24px;border-radius:12px;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <form method="dialog" style="margin:0 0 8px;text-align:right;">
+        <button style="background:none;border:0;font-size:24px;color:#666;cursor:pointer;" aria-label="{{ __('Fermer') }}">&times;</button>
+    </form>
+    <h5 style="margin-top:0;">📸 {{ __('Capturer un screenshot du tutoriel') }}</h5>
+    <p class="text-muted small mb-2">{{ __('Option 1 : capture assistée via onglet partagé. Option 2 : upload fichier classique.') }}</p>
+
+    <x-core::screenshot-capture
+        :uploadUrl="route('admin.directory.moderation.resource.upload-screenshot', $item->id)"
+        label="{{ __('🎬 Capture onglet (Screen Capture API)') }}"
+        helpText="{{ __('Ouvre le tutoriel dans un autre onglet, accepte les cookies. Reviens ici et clique Capturer. Choisis l\'onglet à partager.') }}"
+    />
+
+    <hr style="margin:16px 0;">
+    <h6 class="mb-2">{{ __('📁 Upload fichier classique') }}</h6>
+    <form action="{{ route('admin.directory.moderation.resource.upload-screenshot', $item->id) }}" method="POST" enctype="multipart/form-data" style="margin:0;">
+        @csrf
+        <input type="file" name="screenshot" accept="image/jpeg,image/png,image/webp" required style="display:block;margin-bottom:8px;">
+        <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">{{ __('JPG/PNG/WebP, max 5 Mo. Redimensionné auto 1200×630.') }}</p>
+        <button type="submit" class="btn btn-primary btn-sm">{{ __('Uploader fichier') }}</button>
+    </form>
+</dialog>
+@endif
 @endcan
