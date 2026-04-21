@@ -12,7 +12,8 @@ use Intervention\Image\ImageManager;
 
 /**
  * Service centralisé upload screenshot.
- * Utilisé par News (uploadArticleImage) et Directory (uploadResourceScreenshot).
+ * Utilisé par News (uploadArticleImage), Directory moderation (uploadResourceScreenshot),
+ * Directory admin (uploadScreenshot outil).
  *
  * @author MEMORA solutions <info@memora.ca>
  */
@@ -21,10 +22,18 @@ class ScreenshotUploadService
     /**
      * Upload, resize (cover 1200x630), save file + update model column.
      *
+     * @param  bool  $prefixSlash  Si true (default), stocke le chemin colonne avec "/" leading. Si false, sans.
+     * @param  callable|null  $postUpload  Callback optionnel après saveQuietly, avant clear cache. Signature: fn(Model $model, string $fullPath, string $targetRelativePath): void
      * @return array{ok: bool, message: string, url: ?string, error: ?string}
      */
-    public function upload(UploadedFile $file, string $targetRelativePath, Model $model, string $targetColumn): array
-    {
+    public function upload(
+        UploadedFile $file,
+        string $targetRelativePath,
+        Model $model,
+        string $targetColumn,
+        bool $prefixSlash = true,
+        ?callable $postUpload = null
+    ): array {
         $fullPath = public_path($targetRelativePath);
         $directory = dirname($fullPath);
 
@@ -45,9 +54,23 @@ class ScreenshotUploadService
 
             file_put_contents($fullPath, $imageData);
 
-            $model->{$targetColumn} = '/' . ltrim($targetRelativePath, '/');
+            $storedPath = ltrim($targetRelativePath, '/');
+            $model->{$targetColumn} = $prefixSlash ? '/' . $storedPath : $storedPath;
             $model->updated_at = now();
             $model->saveQuietly();
+
+            if ($postUpload !== null) {
+                try {
+                    $postUpload($model, $fullPath, $targetRelativePath);
+                } catch (\Throwable $e) {
+                    Log::warning('[ScreenshotUploadService] postUpload callback failed', [
+                        'file' => $targetRelativePath,
+                        'model' => get_class($model),
+                        'model_id' => $model->id ?? null,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
                 try {

@@ -9,10 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\Core\Services\ScreenshotUploadService;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
-use Intervention\Image\Drivers\Gd\Driver as ImageGdDriver;
-use Intervention\Image\ImageManager;
 use Modules\Directory\Services\ScreenshotService;
 use Modules\Settings\Facades\Settings;
 
@@ -170,54 +169,32 @@ class DirectoryAdminController extends Controller
         return back()->with('success', __('Capture screenshot lancée en arrière-plan. Rafraîchissez la page dans 2-5 minutes (job Puppeteer 180-270 s).'));
     }
 
-    public function uploadScreenshot(Request $request, Tool $tool)
+    public function uploadScreenshot(Request $request, Tool $tool, ScreenshotUploadService $uploader)
     {
-        $request->validate([
-            'screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
-        ]);
+        $request->validate(['screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120']);
 
         $wantsJson = $request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
+        $slug = $tool->getTranslation('slug', 'fr_CA') ?: $tool->slug;
+        $filePath = "screenshots/{$slug}.jpg";
 
-        try {
-            $slug = $tool->getTranslation('slug', 'fr_CA') ?: $tool->slug;
-            $filePath = "screenshots/{$slug}.jpg";
-            $fullPath = public_path($filePath);
+        $result = $uploader->upload(
+            $request->file('screenshot'),
+            $filePath,
+            $tool,
+            'screenshot',
+            prefixSlash: false,
+            postUpload: fn ($model, $fullPath, $rel) => $this->purgeCloudflareScreenshot($rel),
+        );
 
-            if (file_exists($fullPath)) {
-                @copy($fullPath, "{$fullPath}.bak");
-            }
-
-            $manager = new ImageManager(new ImageGdDriver());
-            $image = $manager->read($request->file('screenshot')->getRealPath())
-                ->cover(1200, 630)
-                ->toJpeg(85)
-                ->toString();
-
-            file_put_contents($fullPath, $image);
-
-            $tool->screenshot = $filePath;
-            $tool->updated_at = now();
-            $tool->saveQuietly();
-
-            $this->purgeCloudflareScreenshot($filePath);
-
-            if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
-                try { \Spatie\ResponseCache\Facades\ResponseCache::clear(); } catch (\Throwable $e) {}
-            }
-
-            $msg = __('Screenshot uploadé avec succès (redimensionné 1200×630, cache purgé).');
-
+        if ($result['ok']) {
             return $wantsJson
-                ? response()->json(['ok' => true, 'message' => $msg, 'screenshot_url' => asset($filePath).'?v='.$tool->updated_at->timestamp])
-                : back()->with('success', $msg);
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('[uploadScreenshot] fail tool='.$tool->id.' : '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            $errMsg = __('Échec upload : :msg', ['msg' => $e->getMessage()]);
-
-            return $wantsJson
-                ? response()->json(['ok' => false, 'message' => $errMsg], 422)
-                : back()->with('error', $errMsg);
+                ? response()->json(['ok' => true, 'message' => $result['message'], 'screenshot_url' => $result['url']])
+                : back()->with('success', $result['message']);
         }
+
+        return $wantsJson
+            ? response()->json(['ok' => false, 'message' => $result['message']], 422)
+            : back()->with('error', $result['message']);
     }
 
     private function purgeCloudflareScreenshot(string $filePath): void
