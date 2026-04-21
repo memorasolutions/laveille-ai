@@ -546,7 +546,7 @@
             <div x-data="{ open: false }" style="position: relative; display: inline-block;">
                 <button type="button" class="rt-pill" :class="{ active: activePricing !== '' }" @click="open = !open">
                     <span x-show="!activePricing">💰 Tarification <i class="ti-angle-down"></i></span>
-                    <span x-show="activePricing" x-cloak x-text="({free:'🆓 Gratuit',freemium:'💎 Freemium',paid:'💰 Payant',open_source:'🔓 Open source',enterprise:'🏢 Enterprise'})[activePricing]"></span>
+                    <span x-show="activePricing" x-cloak x-text="({free:'🆓 Gratuit',freemium:'💎 Freemium',paid:'💰 Payant',open_source:'🔓 Open source',enterprise:'🏢 Enterprise',education:'🎓 Tarif éducation'})[activePricing]"></span>
                 </button>
                 <div x-show="open" @click.outside="open = false" x-cloak class="rt-pricing-dropdown">
                     @foreach($pricingOptions as $key => $label)
