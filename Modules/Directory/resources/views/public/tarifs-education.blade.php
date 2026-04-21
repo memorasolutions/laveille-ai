@@ -86,7 +86,7 @@
 
 @if($tools->isNotEmpty())
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"Outils IA éducation Québec","description":"Outils IA avec tarif préférentiel pour enseignants, étudiants et institutions éducatives au Québec","numberOfItems":{{ $tools->count() }},"itemListElement":[@foreach($tools as $i => $t){"@type":"ListItem","position":{{ $i+1 }},"item":{"@type":"Product","name":{!! json_encode($t->name) !!},"description":{!! json_encode($t->short_description ?? '') !!},"url":{!! json_encode(route('directory.show', $t->slug)) !!},"offers":{"@type":"Offer","audience":{"@type":"EducationalAudience","educationalRole":"Teacher"}}}}@if(!$loop->last),@endif @endforeach]}
+{"@@context":"https://schema.org","@@type":"ItemList","name":"Outils IA éducation Québec","description":"Outils IA avec tarif préférentiel pour enseignants, étudiants et institutions éducatives au Québec","numberOfItems":{{ $tools->count() }},"itemListElement":[@foreach($tools as $i => $t){"@@type":"ListItem","position":{{ $i+1 }},"item":{"@@type":"Product","name":{!! json_encode($t->name) !!},"description":{!! json_encode($t->short_description ?? '') !!},"url":{!! json_encode(route('directory.show', $t->slug)) !!},"offers":{"@@type":"Offer","audience":{"@@type":"EducationalAudience","educationalRole":"Teacher"}}}}@if(!$loop->last),@endif @endforeach]}
 </script>
 @endif
 @endsection
