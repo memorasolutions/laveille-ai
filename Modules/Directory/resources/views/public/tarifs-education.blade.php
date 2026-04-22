@@ -31,7 +31,6 @@
 .edu-btn-primary:hover { background: #047857; color: #fff; }
 .edu-btn-secondary { flex: 1; text-align: center; padding: 9px 14px; border: 1px solid #065f46; color: #065f46; border-radius: var(--r-btn); text-decoration: none; font-weight: 600; font-size: 0.88rem; }
 .edu-btn-secondary:hover { background: #f0fdf4; }
-.edu-empty { text-align: center; padding: 60px 24px; background: #f9fafb; border-radius: var(--r-base); border: 1px dashed #d1d5db; }
 .edu-cta-wrap { text-align: center; margin: 40px 0 20px; }
 .edu-cta { background: #065f46; color: #fff; padding: 14px 34px; border-radius: var(--r-btn); font-weight: 700; text-decoration: none; display: inline-block; font-size: 1rem; }
 .edu-cta:hover { background: #047857; color: #fff; }
@@ -72,11 +71,12 @@
         @endforeach
     </div>
     @else
-    <div class="edu-empty">
-        <div style="font-size: 52px; margin-bottom: 16px;" aria-hidden="true">🎓</div>
-        <h2 style="font-family: var(--f-heading); color: var(--c-dark);">Aucun outil éducation répertorié pour l'instant</h2>
-        <p style="color: #6b7280;">Soyez le premier à proposer un outil avec offre enseignant ou étudiant.</p>
-    </div>
+    <x-core::empty-state
+        icon="🎓"
+        :title="__('Aucun outil éducation répertorié pour l\'instant')"
+        variant="education"
+        :description="__('Soyez le premier à proposer un outil avec offre enseignant ou étudiant.')"
+    />
     @endif
 
     <div class="edu-cta-wrap">
