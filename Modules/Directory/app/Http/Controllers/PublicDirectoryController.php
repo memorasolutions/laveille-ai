@@ -21,7 +21,15 @@ class PublicDirectoryController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Tool::published()->with('categories', 'tags')->orderByDesc('clicks_count');
+        $query = Tool::published()->with('categories', 'tags');
+
+        $query = match (\Modules\Settings\Facades\Settings::get('directory.default_sort', 'random')) {
+            'popular' => $query->orderByDesc('clicks_count'),
+            'recent' => $query->orderByDesc('created_at'),
+            'name' => $query->orderBy('name->fr_CA'),
+            default => $query->inRandomOrder(),
+        };
+
         $tools = $this->applyDirectoryFilters($query, $request)->get();
 
         $categories = Category::orderBy('sort_order')->get();
