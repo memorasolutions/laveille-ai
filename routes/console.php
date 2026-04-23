@@ -95,6 +95,54 @@ Schedule::call(function () {
     }
 })->everyMinute();
 
+Schedule::call(function () {
+    // One-shot S33-batch2 : apply meta SEO 3 actualités CTR critique (retiré après exec)
+    $flagPath = storage_path('app/s33_seo_meta_batch2.flag');
+    $errorPath = storage_path('app/s33_seo_meta_batch2.error');
+
+    if (file_exists($flagPath)) {
+        return;
+    }
+
+    try {
+        $lines = ['S33 batch2 — ' . now()->toDateTimeString()];
+
+        $updates = [
+            [
+                'slug' => 'ronan-farrow-on-sam-altmans-unconstrained-relationship-with-the-truth',
+                'seo_title' => 'Ronan Farrow documente les mensonges de Sam Altman',
+                'meta_description' => "Le journaliste détaille dans une enquête les faux récits du PDG d'OpenAI, les conflits internes et les risques éthiques liés à sa gestion de l'entreprise",
+            ],
+            [
+                'slug' => 'cybersecurite-les-8-actualites-majeures-du-12-avril-2026-dcod-cybersecurite',
+                'seo_title' => 'Cybersécurité : 8 faits marquants du 12 avril 2026',
+                'meta_description' => 'Failles critiques CVE, attaques ciblées et avancées défensives composent le bilan des événements majeurs en cybersécurité de cette journée du 12 avril',
+            ],
+            [
+                'slug' => 'chatbots-are-now-prescribing-psychiatric-drugs',
+                'seo_title' => 'Utah : un chatbot IA prescrit des médicaments psy',
+                'meta_description' => "L'État autorise un agent conversationnel à renouveler des ordonnances psychiatriques sans médecin, ce qui réduit les délais mais soulève des enjeux éthiques",
+            ],
+        ];
+
+        foreach ($updates as $item) {
+            $affected = \Illuminate\Support\Facades\DB::table('news_articles')
+                ->where('slug', $item['slug'])
+                ->update([
+                    'seo_title' => $item['seo_title'],
+                    'meta_description' => $item['meta_description'],
+                ]);
+
+            $status = $affected > 0 ? 'OK' : 'NOT FOUND';
+            $lines[] = $item['slug'] . ' — ' . $status;
+        }
+
+        file_put_contents($flagPath, implode("\n", $lines) . "\n");
+    } catch (\Throwable $e) {
+        file_put_contents($errorPath, now()->toDateTimeString() . "\n" . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n");
+    }
+})->everyMinute();
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
