@@ -92,6 +92,25 @@
     .rt-empty { text-align: center; padding: 60px 20px; background: #F9FAFB; border-radius: var(--r-base); }
     [x-cloak] { display: none !important; }
 
+    /* Focus visible - WCAG 2.2 AAA (contrast 5.7:1 sur fond blanc) */
+    .rt-card a:focus-visible,
+    .rt-card-name a:focus-visible,
+    .rt-btn-visit:focus-visible,
+    .rt-btn-details:focus-visible,
+    .rt-pill:focus-visible,
+    .rt-sort-tab:focus-visible,
+    .rt-pricing-dropdown button:focus-visible {
+        outline: 3px solid #0B7285;
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+    .rt-search-input:focus-visible,
+    .rt-hl-card:focus-visible,
+    .rt-hl-arrow:focus-visible {
+        outline: 3px solid #0B7285;
+        outline-offset: 2px;
+    }
+
     /* Highlights section - slider */
     .rt-highlights { padding: 30px 0 10px; }
     .rt-hl-section { margin-bottom: 8px; }
@@ -547,19 +566,28 @@
         <div class="rt-filter-bar">
             <button type="button" class="rt-pill" :class="{ active: !activePricing && !activeCategory }" @click="resetAll()">{{ __('Tous') }}</button>
 
-            <div x-data="{ open: false }" style="position: relative; display: inline-block;">
-                <button type="button" class="rt-pill" :class="{ active: activePricing !== '' }" @click="open = !open">
+            <div x-data="{ open: false }" @keydown.escape="open = false; $refs.toggle.focus()" style="position: relative; display: inline-block;">
+                <button type="button" class="rt-pill" :class="{ active: activePricing !== '' }" @click="open = !open"
+                        x-ref="toggle"
+                        aria-haspopup="true"
+                        :aria-expanded="open.toString()"
+                        aria-controls="rt-pricing-menu">
                     <span x-show="!activePricing">💰 Tarification <i class="ti-angle-down"></i></span>
                     <span x-show="activePricing" x-cloak x-text="({free:'🆓 Gratuit',freemium:'💎 Freemium',paid:'💰 Payant',open_source:'🔓 Open source',enterprise:'🏢 Enterprise',education:'🎓 Tarif éducation'})[activePricing]"></span>
                 </button>
-                <div x-show="open" @click.outside="open = false" x-cloak class="rt-pricing-dropdown">
+                <div x-show="open" @click.outside="open = false" x-cloak
+                     id="rt-pricing-menu"
+                     role="menu"
+                     class="rt-pricing-dropdown">
                     @foreach($pricingOptions as $key => $label)
-                        <button type="button" @click="togglePricing('{{ $key }}'); open = false"
+                        <button type="button" role="menuitem"
+                                @click="togglePricing('{{ $key }}'); open = false; $refs.toggle.focus()"
                                 :class="{ 'active': activePricing === '{{ $key }}' }">
                             {{ $pricingEmojis[$key] ?? '' }} {{ $label }}
                         </button>
                     @endforeach
-                    <button type="button" @click="activePricing = ''; open = false" x-show="activePricing">
+                    <button type="button" role="menuitem"
+                            @click="activePricing = ''; open = false; $refs.toggle.focus()" x-show="activePricing">
                         <i class="ti-close"></i> {{ __('Effacer') }}
                     </button>
                 </div>
