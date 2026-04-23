@@ -349,7 +349,7 @@
          :style="open ? 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;' : 'display:none'">
         <div @click.stop style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
             <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
-            <h4 style="font-weight:700;color:var(--c-dark,#1a1a2e);margin:0 0 8px;font-size:17px;" x-text="title"></h4>
+            <h2 x-show="title" aria-live="polite" style="font-weight:700;color:var(--c-dark,#1a1a2e);margin:0 0 8px;font-size:17px;" x-text="title"></h2>
             <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.5;" x-text="message"></p>
             <div style="display:flex!important;gap:10px;justify-content:center!important;">
                 <button @click="open = false" style="padding:10px 24px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;font-size:14px;">{{ __('Annuler') }}</button>

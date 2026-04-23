@@ -351,7 +351,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <div>
                 <span style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
-                <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
+                <h2 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
                     {{ __('Complétez les informations pour') }} <strong x-text="toolName" style="color: var(--c-primary);"></strong>
                 </h3>
             </div>
@@ -690,7 +690,7 @@
                             <template x-if="!tool.screenshot">
                                 <div :style="'width:100%;height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,' + tool.gradientFrom + ' 0%,' + tool.gradientTo + ' 100%);'">
                                     <div style="text-align: center; color: rgba(255,255,255,0.9);">
-                                        <template x-if="tool.favicon"><img :src="tool.favicon" alt="" style="width: 40px; height: 40px; border-radius: 10px; margin-bottom: 6px; background: rgba(255,255,255,0.2); padding: 4px;" loading="lazy" onerror="this.style.display='none'"></template>
+                                        <template x-if="tool.favicon"><img :src="tool.favicon" alt="" aria-hidden="true" style="width: 40px; height: 40px; border-radius: 10px; margin-bottom: 6px; background: rgba(255,255,255,0.2); padding: 4px;" loading="lazy" onerror="this.style.display='none'"></template>
                                         <div style="font-family: var(--f-heading); font-weight: 700; font-size: 1rem; text-shadow: 0 1px 3px rgba(0,0,0,0.3);" x-text="tool.name"></div>
                                     </div>
                                 </div>
@@ -698,7 +698,7 @@
                         </a>
 
                         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
-                            <template x-if="tool.favicon"><img :src="tool.favicon" alt="" class="rt-logo" loading="lazy" width="48" height="48" onerror="this.style.display='none'"></template>
+                            <template x-if="tool.favicon"><img :src="tool.favicon" alt="" aria-hidden="true" class="rt-logo" loading="lazy" width="48" height="48" onerror="this.style.display='none'"></template>
                             <div>
                                 <h3 class="rt-card-name"><a :href="tool.showUrl" x-text="tool.name"></a></h3>
                                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
