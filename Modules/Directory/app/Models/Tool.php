@@ -77,6 +77,7 @@ class Tool extends Model implements Searchable
         'last_enriched_at', 'enrichment_version',
         'parent_tool_id', 'ecosystem_tag',
         'has_education_pricing', 'education_pricing_type', 'education_pricing_details', 'education_pricing_url',
+        'education_discount_type', 'education_target_audience', 'education_verification_required', 'education_official_url', 'education_last_checked_at',
         'lifecycle_status', 'lifecycle_date', 'lifecycle_replacement_url', 'lifecycle_replacement_tool_id', 'lifecycle_notes',
         'aliases',
         'review',
@@ -151,6 +152,9 @@ class Tool extends Model implements Searchable
     protected $casts = [
         'is_featured' => 'boolean',
         'has_education_pricing' => 'boolean',
+        'education_target_audience' => 'array',
+        'education_verification_required' => 'boolean',
+        'education_last_checked_at' => 'datetime',
         'featured_until' => 'datetime',
         'featured_order' => 'integer',
         'faq' => 'array',

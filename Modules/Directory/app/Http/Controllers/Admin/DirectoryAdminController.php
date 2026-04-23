@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Core\Services\ScreenshotUploadService;
 use Modules\Directory\Models\Category;
@@ -122,6 +123,12 @@ class DirectoryAdminController extends Controller
             'lifecycle_replacement_tool_id' => 'nullable|integer|exists:directory_tools,id',
             'lifecycle_notes' => 'nullable|string|max:2000',
             'review' => 'nullable|string',
+            'education_discount_type' => ['nullable', 'string', Rule::in(['teacher_free', 'teacher_discount', 'institution_discount', 'quote_only', 'university_license', 'student_discount'])],
+            'education_target_audience' => ['nullable', 'array'],
+            'education_target_audience.*' => ['string', Rule::in(['K12', 'higher_ed', 'district', 'homeschool', 'individual_teacher'])],
+            'education_verification_required' => ['nullable', 'boolean'],
+            'education_official_url' => ['nullable', 'url', 'max:500'],
+            'education_last_checked_at' => ['nullable', 'date'],
         ]);
 
         $locale = app()->getLocale();
@@ -145,6 +152,12 @@ class DirectoryAdminController extends Controller
         $tool->lifecycle_replacement_url = $validated['lifecycle_replacement_url'] ?? null;
         $tool->lifecycle_replacement_tool_id = $validated['lifecycle_replacement_tool_id'] ?? null;
         $tool->lifecycle_notes = $validated['lifecycle_notes'] ?? null;
+
+        $tool->education_discount_type = $validated['education_discount_type'] ?? null;
+        $tool->education_target_audience = $validated['education_target_audience'] ?? null;
+        $tool->education_verification_required = $request->boolean('education_verification_required');
+        $tool->education_official_url = $validated['education_official_url'] ?? null;
+        $tool->education_last_checked_at = $validated['education_last_checked_at'] ?? null;
 
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('directory/logos', 'public');

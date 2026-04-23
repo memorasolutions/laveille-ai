@@ -152,6 +152,10 @@
                     </div>
                 </div>
 
+                <div class="mb-4">
+                    @include('directory::admin.partials.education-phase2-fields', ['tool' => $tool])
+                </div>
+
                 <div class="mb-3">
                     <label for="categories" class="form-label">Catégories</label>
                     <select class="form-select @error('categories') is-invalid @enderror" id="categories" name="categories[]" multiple>
