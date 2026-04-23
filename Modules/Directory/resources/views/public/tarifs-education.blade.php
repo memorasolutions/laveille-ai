@@ -40,7 +40,7 @@
 .edu-filter-pill.is-active { background: #065f46; color: #fff; }
 .edu-discount-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #fff; }
 .edu-discount-badge--teacher_free { background: #065f46; }
-.edu-discount-badge--teacher_discount { background: #0f766e; }
+.edu-discount-badge--teacher_discount { background: #134e4a; }
 .edu-discount-badge--institution_discount { background: #1e40af; }
 .edu-discount-badge--quote_only { background: #374151; }
 .edu-discount-badge--university_license { background: #4c1d95; }
