@@ -95,37 +95,6 @@ Schedule::call(function () {
     }
 })->everyMinute();
 
-// One-shot S33 Phase 2 : apply migration education_advanced_fields (retiré après exec)
-Schedule::call(function () {
-    $flagPath = storage_path('app/s33_phase2_migrate.flag');
-    $errorPath = storage_path('app/s33_phase2_migrate.error');
-
-    if (file_exists($flagPath)) {
-        return;
-    }
-
-    try {
-        if (\Illuminate\Support\Facades\Schema::hasColumn('directory_tools', 'education_discount_type')) {
-            file_put_contents($flagPath, 'ALREADY EXISTS - ' . now()->toDateTimeString());
-            return;
-        }
-
-        \Illuminate\Support\Facades\Artisan::call('migrate', [
-            '--force' => true,
-            '--path' => 'Modules/Directory/database/migrations/2026_04_23_100000_add_education_advanced_fields_to_directory_tools.php',
-        ]);
-
-        if (\Illuminate\Support\Facades\Schema::hasColumn('directory_tools', 'education_discount_type')) {
-            file_put_contents($flagPath, 'APPLIED OK - ' . now()->toDateTimeString());
-        } else {
-            file_put_contents($flagPath, 'MIGRATE FAILED - ' . now()->toDateTimeString());
-            file_put_contents($errorPath, 'Migration executed but column education_discount_type still absent - ' . now()->toDateTimeString());
-        }
-    } catch (\Throwable $e) {
-        file_put_contents($errorPath, $e->getMessage() . "\n" . $e->getTraceAsString());
-    }
-})->everyMinute();
-
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
