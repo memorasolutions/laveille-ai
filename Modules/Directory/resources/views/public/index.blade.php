@@ -332,7 +332,7 @@
                 <div x-show="scrapeError && duplicates.length === 0" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
 
                 <div style="text-align: right; margin-top: 8px;">
-                    <button type="button" @click="resetWizard()" style="background: none; border: none; color: #6B7280; cursor: pointer; font-size: 12px;">{{ __('Annuler') }}</button>
+                    <button type="button" @click="resetWizard()" style="background: none; border: none; color: #0B7285; cursor: pointer; font-size: 12px; text-decoration: underline;">{{ __('Annuler') }}</button>
                 </div>
             </div>
 
