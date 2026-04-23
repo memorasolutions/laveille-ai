@@ -56,12 +56,12 @@
     .rt-search-input:focus { border-color: var(--c-primary); box-shadow: 0 4px 15px rgba(11,114,133,0.1); }
     .rt-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #6B7280; width: 20px; height: 20px; }
 
-    .rt-pill { display: inline-flex; align-items: center; gap: 4px; padding: 7px 16px; border-radius: var(--r-btn); background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; }
+    .rt-pill { display: inline-flex; align-items: center; gap: 4px; padding: 7px 16px; min-height: 44px; border-radius: var(--r-btn); background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; }
     .rt-pill:hover { background: #E5E7EB; }
     .rt-pill.active { background: var(--c-primary); color: #fff; }
 
     .rt-sort-bar { display: flex; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px; }
-    .rt-sort-tab { padding: 10px 16px; font-weight: 600; font-size: 0.9rem; color: #6B7280; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
+    .rt-sort-tab { padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; font-size: 0.9rem; color: #6B7280; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
     .rt-sort-tab:hover { color: var(--c-dark); }
     .rt-sort-active { color: var(--c-primary) !important; border-bottom-color: var(--c-primary) !important; }
 
@@ -80,9 +80,9 @@
     .rt-desc { color: #4B5563; font-size: 14px; line-height: 1.6; margin-bottom: 14px; flex-grow: 1; }
     .rt-tag { font-size: 12px; color: #636b77; background: #f3f4f6; padding: 2px 8px; border-radius: 4px; }
     .rt-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 14px; border-top: 1px solid #F3F4F6; align-items: center; }
-    .rt-btn-visit { background: var(--c-accent); color: #fff !important; border: none; padding: 7px 16px; border-radius: var(--r-btn); font-weight: 600; text-decoration: none !important; font-size: 13px; transition: opacity 0.2s; }
+    .rt-btn-visit { background: var(--c-accent); color: #fff !important; border: none; padding: 7px 16px; min-height: 44px; display: inline-flex; align-items: center; border-radius: var(--r-btn); font-weight: 600; text-decoration: none !important; font-size: 13px; transition: opacity 0.2s; }
     .rt-btn-visit:hover { opacity: 0.9; color: #fff; }
-    .rt-btn-details { color: var(--c-dark); font-weight: 600; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; padding: 2px 6px; }
+    .rt-btn-details { color: var(--c-dark); font-weight: 600; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 2px 6px; }
     .rt-btn-details:hover { color: var(--c-primary); }
     .rt-featured { position: absolute; top: 12px; right: 12px; background: #0B7285; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 12px; z-index: 2; letter-spacing: 0.3px; }
     .rt-stars { color: #F59E0B; font-size: 13px; font-weight: 700; }
@@ -132,7 +132,7 @@
     .rt-filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
     .rt-filter-count { color: #6B7280; font-size: 0.85rem; margin-left: auto; }
     .rt-pricing-dropdown { position: absolute; top: 100%; left: 0; z-index: 50; background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); box-shadow: 0 8px 25px rgba(0,0,0,0.1); padding: 6px; min-width: 180px; margin-top: 4px; }
-    .rt-pricing-dropdown button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; cursor: pointer; font-size: 14px; border-radius: 4px; color: var(--c-dark); }
+    .rt-pricing-dropdown button { display: flex; align-items: center; width: 100%; text-align: left; padding: 8px 12px; min-height: 44px; border: none; background: none; cursor: pointer; font-size: 14px; border-radius: 4px; color: var(--c-dark); }
     .rt-pricing-dropdown button:hover { background: #F3F4F6; }
     .rt-pricing-dropdown button.active { background: var(--c-primary); color: #fff; }
 
