@@ -61,17 +61,30 @@ class PublicDirectoryController extends Controller
         return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections'));
     }
 
-    public function educationPricing(): View
+    public function educationPricing(Request $request): View
     {
-        $tools = Tool::published()
+        $allowedAudiences = ['K12', 'higher_ed', 'district', 'homeschool', 'individual_teacher'];
+
+        $audience = $request->input('audience');
+
+        if ($audience && ! in_array($audience, $allowedAudiences, true)) {
+            $audience = null;
+        }
+
+        $query = Tool::published()
             ->where(function ($q) {
                 $q->where('pricing', 'education')->orWhere('has_education_pricing', true);
             })
             ->with('categories')
-            ->orderByDesc('clicks_count')
-            ->get();
+            ->orderByDesc('clicks_count');
 
-        return view('directory::public.tarifs-education', compact('tools'));
+        if ($audience) {
+            $query->whereJsonContains('education_target_audience', $audience);
+        }
+
+        $tools = $query->get();
+
+        return view('directory::public.tarifs-education', compact('tools', 'audience'));
     }
 
     public function compare(string $categorySlug): View

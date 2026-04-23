@@ -34,6 +34,21 @@
 .edu-cta-wrap { text-align: center; margin: 40px 0 20px; }
 .edu-cta { background: #065f46; color: #fff; padding: 14px 34px; border-radius: var(--r-btn); font-weight: 700; text-decoration: none; display: inline-block; font-size: 1rem; }
 .edu-cta:hover { background: #047857; color: #fff; }
+.edu-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 auto 30px; justify-content: center; max-width: 900px; }
+.edu-filter-pill { padding: 10px 16px; border-radius: 999px; border: 1px solid #065f46; color: #065f46; text-decoration: none; font-weight: 600; font-size: 0.88rem; background: #fff; min-height: 44px; display: inline-flex; align-items: center; }
+.edu-filter-pill:hover { background: #f0fdf4; color: #065f46; }
+.edu-filter-pill.is-active { background: #065f46; color: #fff; }
+.edu-discount-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #fff; }
+.edu-discount-badge--teacher_free { background: #065f46; }
+.edu-discount-badge--teacher_discount { background: #0f766e; }
+.edu-discount-badge--institution_discount { background: #1e40af; }
+.edu-discount-badge--quote_only { background: #374151; }
+.edu-discount-badge--university_license { background: #4c1d95; }
+.edu-discount-badge--student_discount { background: #7c2d12; }
+.edu-verify-pill { background: #fef3c7; color: #78350f; border: 1px solid #fde68a; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; display: inline-block; margin: 0 0 12px; }
+.edu-card-meta { margin: 0 0 12px; padding-top: 10px; border-top: 1px solid #f3f4f6; font-size: 0.78rem; color: #4b5563; display: flex; flex-direction: column; gap: 4px; }
+.edu-official-link { color: #065f46; text-decoration: underline; font-weight: 600; }
+.edu-official-link:hover { color: #047857; }
 </style>
 @endpush
 
@@ -48,6 +63,31 @@
         </div>
     </section>
 
+    @php
+        $audienceLabels = [
+            'K12' => 'Primaire-secondaire',
+            'higher_ed' => 'Enseignement supérieur',
+            'district' => 'Commissions scolaires',
+            'homeschool' => 'École à la maison',
+            'individual_teacher' => 'Enseignant individuel',
+        ];
+        $discountLabels = [
+            'teacher_free' => 'Gratuit enseignants',
+            'teacher_discount' => 'Remise enseignants',
+            'institution_discount' => 'Remise institution',
+            'quote_only' => 'Sur devis',
+            'university_license' => 'Licence universitaire',
+            'student_discount' => 'Remise étudiants',
+        ];
+    @endphp
+
+    <nav class="edu-filters" aria-label="Filtrer par public cible">
+        <a href="{{ route('directory.education-pricing') }}" class="edu-filter-pill @if(empty($audience)) is-active @endif" @if(empty($audience)) aria-current="page" @endif>Tous</a>
+        @foreach($audienceLabels as $key => $label)
+            <a href="{{ route('directory.education-pricing', ['audience' => $key]) }}" class="edu-filter-pill @if($audience === $key) is-active @endif" @if($audience === $key) aria-current="page" @endif>{{ $label }}</a>
+        @endforeach
+    </nav>
+
     @if($tools->isNotEmpty())
     <div class="edu-grid" role="list" aria-label="Outils IA éducation">
         @foreach($tools as $tool)
@@ -57,10 +97,27 @@
                     @if($host)
                         <img src="https://www.google.com/s2/favicons?domain={{ $host }}&sz=64" alt="" loading="lazy" onerror="this.style.display='none'">
                     @endif
-                    <span class="edu-badge">Éducation</span>
+                    @if($tool->education_discount_type && isset($discountLabels[$tool->education_discount_type]))
+                        <span class="edu-discount-badge edu-discount-badge--{{ $tool->education_discount_type }}">{{ $discountLabels[$tool->education_discount_type] }}</span>
+                    @else
+                        <span class="edu-badge">Éducation</span>
+                    @endif
                 </div>
                 <h3><a href="{{ route('directory.show', $tool->slug) }}">{{ $tool->name }}</a></h3>
                 <p>{{ Str::limit($tool->short_description, 140) }}</p>
+                @if($tool->education_verification_required)
+                    <span class="edu-verify-pill">⚠ Vérification requise</span>
+                @endif
+                @if($tool->education_official_url || $tool->education_last_checked_at)
+                    <div class="edu-card-meta">
+                        @if($tool->education_official_url)
+                            <a href="{{ $tool->education_official_url }}" class="edu-official-link" target="_blank" rel="noopener noreferrer">Voir l'offre officielle →</a>
+                        @endif
+                        @if($tool->education_last_checked_at)
+                            <div>Vérifié le {{ $tool->education_last_checked_at->locale('fr_CA')->translatedFormat('j F Y') }}</div>
+                        @endif
+                    </div>
+                @endif
                 <div class="edu-card-actions">
                     @if($tool->url)
                         <a href="{{ $tool->url }}" target="_blank" rel="noopener noreferrer" class="edu-btn-primary" aria-label="Visiter {{ $tool->name }}">Visiter</a>
