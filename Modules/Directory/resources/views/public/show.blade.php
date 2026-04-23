@@ -313,6 +313,14 @@
                     @endif
                 </div>
                 <p style="color: #4B5563; margin: 6px 0 0; font-size: 1rem;" data-editable="short_description">{{ $tool->short_description }}</p>
+                @if(!empty($tool->description))
+                    <button
+                        type="button"
+                        @click="setTab('info'); $nextTick(() => { const panel = document.getElementById('rt-panel-info'); if (panel) { panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); const heading = panel.querySelector('h3'); if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); } else { panel.setAttribute('tabindex', '-1'); panel.focus(); } } })"
+                        aria-label="{{ __('Lire la description complète de') }} {{ $tool->name }}"
+                        style="display: inline-block; background: none; border: none; cursor: pointer; color: var(--c-primary, #2563EB); font-size: 0.9rem; padding: 8px 0; min-height: 44px; text-decoration: underline; text-underline-offset: 2px; line-height: 1.4; margin-top: 4px;"
+                    >{{ __('Lire la suite') }} →</button>
+                @endif
                 @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool'])
             </div>
             @if($tool->url)
@@ -410,7 +418,7 @@
         </div>
 
         {{-- TAB: Informations --}}
-        <div class="rt-panel" x-show="tab==='info'" x-cloak style="padding: 24px;">
+        <div class="rt-panel" id="rt-panel-info" x-show="tab==='info'" x-cloak style="padding: 24px;">
 
             {{-- Offre éducation — composant Core réutilisable (DRY) --}}
             @include('core::components.education-pricing-card', ['tool' => $tool])
