@@ -353,7 +353,7 @@
             <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.5;" x-text="message"></p>
             <div style="display:flex!important;gap:10px;justify-content:center!important;">
                 <button @click="open = false" style="padding:10px 24px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;font-size:14px;">{{ __('Annuler') }}</button>
-                <button @click="if(window.__confirmAction){window.__confirmAction()};open = false" style="padding:10px 24px;border:none;border-radius:8px;background:#ef4444;color:#fff;cursor:pointer;font-weight:600;font-size:14px;">{{ __('Confirmer') }}</button>
+                <button @click="if(window.__confirmAction){window.__confirmAction()};open = false" style="padding:10px 24px;border:none;border-radius:8px;background:#991B1B;color:#fff;cursor:pointer;font-weight:600;font-size:14px;">{{ __('Confirmer') }}</button>
             </div>
         </div>
     </div>
