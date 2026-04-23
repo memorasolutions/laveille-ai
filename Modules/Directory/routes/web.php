@@ -69,6 +69,10 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     Route::get('/resources/{id}/edit', [ModerationController::class, 'editResource'])->name('resources.edit');
     Route::put('/resources/{id}', [ModerationController::class, 'updateResource'])->name('resources.update');
 
+    // Settings
+    Route::get('/settings', [DirectoryAdminController::class, 'settings'])->name('settings');
+    Route::post('/settings', [DirectoryAdminController::class, 'updateSettings'])->name('settings.update');
+
     // Moderation
     Route::get('/moderation', [ModerationController::class, 'index'])->name('moderation');
     Route::post('/moderation/review/{id}/approve', [ModerationController::class, 'approveReview'])->name('moderation.review.approve');

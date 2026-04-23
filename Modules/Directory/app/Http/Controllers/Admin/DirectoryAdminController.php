@@ -296,4 +296,31 @@ class DirectoryAdminController extends Controller
             'saved_at' => null,
         ]);
     }
+
+    public function settings(): View
+    {
+        $defaultSort = Settings::get('directory.default_sort', 'random');
+
+        $sortOptions = [
+            'random'  => __('Hasard (par défaut)'),
+            'popular' => __('Populaires (plus cliqués)'),
+            'recent'  => __('Récents (plus récents)'),
+            'name'    => __('Alphabétique (A-Z)'),
+        ];
+
+        return view('directory::admin.settings', compact('defaultSort', 'sortOptions'));
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'default_sort' => 'required|in:random,popular,recent,name',
+        ]);
+
+        Settings::set('directory.default_sort', $request->default_sort);
+
+        return redirect()
+            ->route('admin.directory.settings')
+            ->with('success', __('Ordre de tri par défaut mis à jour.'));
+    }
 }
