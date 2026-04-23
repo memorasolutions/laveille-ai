@@ -97,7 +97,7 @@ Schedule::call(function () {
 
 // S36 #B one-shot update acronym_categories color AAA (retiré après exec)
 Schedule::call(function () {
-    $flagFile = '/home/gmemora/s36_taskB_acronym.done';
+    $flagFile = storage_path('app/s36_taskB_acronym.done');
 
     if (file_exists($flagFile)) {
         return;
@@ -129,15 +129,15 @@ Schedule::call(function () {
             $logData['pro_new'] = '#9A3412';
         }
 
-        $logPath = '/home/gmemora/s36_taskB_acronym_colors_' . now()->format('Ymd_His') . '.log';
+        $logPath = storage_path('app/s36_taskB_acronym_colors_' . now()->format('Ymd_His') . '.log');
         file_put_contents($logPath, json_encode($logData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         file_put_contents($flagFile, now()->toIso8601String());
     } catch (\Throwable $e) {
-        $errorLogPath = '/home/gmemora/s36_taskB_acronym_colors_error_' . now()->format('Ymd_His') . '.log';
-        file_put_contents($errorLogPath, json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], JSON_PRETTY_PRINT));
+        $errorLogPath = storage_path('app/s36_taskB_acronym_colors_error_' . now()->format('Ymd_His') . '.log');
+        @file_put_contents($errorLogPath, json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], JSON_PRETTY_PRINT));
     }
-})->everyMinute()->withoutOverlapping()->name('s36_taskB_acronym_colors');
+})->everyMinute();
 
 // Custom scheduled tasks from database
 try {
