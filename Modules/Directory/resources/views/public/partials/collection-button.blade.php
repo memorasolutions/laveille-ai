@@ -85,11 +85,11 @@
             <div style="padding:10px 14px;border-bottom:1px solid #eee;font-size:13px;font-weight:600;color:#333;">
                 <i class="fa fa-folder-open" style="margin-right:6px;color:#888;"></i>{{ __('Mes collections') }}
             </div>
-            <div x-show="loading" style="padding:20px;text-align:center;color:#999;font-size:13px;">
+            <div x-show="loading" style="padding:20px;text-align:center;color:#595959;font-size:13px;">
                 <i class="fa fa-spinner fa-spin" style="margin-right:6px;"></i>{{ __('Chargement...') }}
             </div>
             <div x-show="!loading" style="max-height:220px;overflow-y:auto;">
-                <div x-show="collections.length === 0 && fetched" style="padding:16px 14px;text-align:center;color:#999;font-size:13px;">
+                <div x-show="collections.length === 0 && fetched" style="padding:16px 14px;text-align:center;color:#595959;font-size:13px;">
                     {{ __('Aucune collection. Créez-en une ci-dessous.') }}
                 </div>
                 <template x-for="collection in collections" :key="collection.id">
@@ -102,7 +102,7 @@
                             <i x-show="collection.has_tool" class="fa fa-check" style="color:#fff;font-size:11px;"></i>
                         </span>
                         <span x-text="collection.name" style="font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;"></span>
-                        <i x-show="togglingIds.includes(collection.id)" class="fa fa-spinner fa-spin" style="font-size:11px;color:#999;"></i>
+                        <i x-show="togglingIds.includes(collection.id)" class="fa fa-spinner fa-spin" style="font-size:11px;color:#595959;"></i>
                     </label>
                 </template>
             </div>

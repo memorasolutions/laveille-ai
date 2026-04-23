@@ -105,7 +105,7 @@
                 <div class="col-lg-12">
                     <div style="text-align: center; padding: 60px 20px; background: #f9f9f9; border-radius: 8px;">
                         <i class="ti-folder" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 15px;"></i>
-                        <p style="color: #999; font-size: 16px; margin-bottom: 15px;">{{ __('Vous n\'avez pas encore de collection.') }}</p>
+                        <p style="color: #595959; font-size: 16px; margin-bottom: 15px;">{{ __('Vous n\'avez pas encore de collection.') }}</p>
                         <button @click="showForm = true" class="btn" style="background-color: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 14px; cursor: pointer;">
                             <i class="ti-plus" style="margin-right: 5px;"></i> {{ __('Créer ma première collection') }}
                         </button>

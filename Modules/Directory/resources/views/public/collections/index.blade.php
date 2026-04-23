@@ -34,7 +34,7 @@
                                 {{ Str::limit($collection->description, 100) }}
                             </p>
                             <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f0f0f0; padding-top: 15px;">
-                                <span style="font-size: 13px; color: #999;">
+                                <span style="font-size: 13px; color: #595959;">
                                     <i class="ti-user" style="margin-right: 4px;"></i>
                                     {{ $collection->user->name }}
                                 </span>
@@ -56,7 +56,7 @@
                 <div class="col-lg-12">
                     <div style="text-align: center; padding: 60px 20px; background: #f9f9f9; border-radius: 8px;">
                         <i class="ti-folder" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 15px;"></i>
-                        <p style="color: #999; font-size: 16px; margin: 0;">{{ __('Aucune collection publique pour le moment.') }}</p>
+                        <p style="color: #595959; font-size: 16px; margin: 0;">{{ __('Aucune collection publique pour le moment.') }}</p>
                     </div>
                 </div>
             </div>

@@ -20,7 +20,7 @@
                         <span class="badge" style="background-color: var(--c-primary, #0B7285); color: #fff; font-size: 13px; padding: 5px 14px; border-radius: 12px;">
                             {{ $collection->tools->count() }} {{ __('outils') }}
                         </span>
-                        <span style="font-size: 14px; color: #999;">
+                        <span style="font-size: 14px; color: #595959;">
                             <i class="fa fa-user" style="margin-right: 4px;"></i>
                             {{ __('Par') }} <strong style="color: #555;">{{ $collection->user->name }}</strong>
                         </span>
@@ -103,7 +103,7 @@
         @else
             <div style="text-align: center; padding: 60px 20px; background: #f9f9f9; border-radius: 8px;">
                 <i class="fa fa-folder-open-o" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 15px;"></i>
-                <p style="color: #999; font-size: 16px; margin: 0;">{{ __('Cette collection est vide.') }}</p>
+                <p style="color: #595959; font-size: 16px; margin: 0;">{{ __('Cette collection est vide.') }}</p>
             </div>
         @endif
 
