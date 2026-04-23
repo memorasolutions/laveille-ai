@@ -106,7 +106,7 @@
         style="margin-top: 10px; font-size: 13px; padding: 8px 10px; border-radius: 6px;"
     ></div>
 
-    <p style="margin: 10px 0 0; font-size: 11px; color: #999; text-align: center; line-height: 1.3;">
+    <p style="margin: 10px 0 0; font-size: 11px; color: #595959; text-align: center; line-height: 1.3;">
         Pas de pourriel, désinscription en 1 clic.
     </p>
 </div>
