@@ -95,6 +95,50 @@ Schedule::call(function () {
     }
 })->everyMinute();
 
+// S36 #B one-shot update acronym_categories color AAA (retiré après exec)
+Schedule::call(function () {
+    $flagFile = '/home/gmemora/s36_taskB_acronym.done';
+
+    if (file_exists($flagFile)) {
+        return;
+    }
+
+    try {
+        $logData = [
+            'general_found' => false,
+            'general_old' => null,
+            'general_new' => null,
+            'pro_found' => false,
+            'pro_old' => null,
+            'pro_new' => null,
+        ];
+
+        $general = \Modules\Acronyms\Models\AcronymCategory::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.fr')) = ?", ['Formation générale et diplômes'])->first();
+        if ($general) {
+            $logData['general_found'] = true;
+            $logData['general_old'] = $general->color;
+            $general->update(['color' => '#065f46']);
+            $logData['general_new'] = '#065f46';
+        }
+
+        $pro = \Modules\Acronyms\Models\AcronymCategory::whereRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.fr')) = ?", ['Formation professionnelle et technique'])->first();
+        if ($pro) {
+            $logData['pro_found'] = true;
+            $logData['pro_old'] = $pro->color;
+            $pro->update(['color' => '#9A3412']);
+            $logData['pro_new'] = '#9A3412';
+        }
+
+        $logPath = '/home/gmemora/s36_taskB_acronym_colors_' . now()->format('Ymd_His') . '.log';
+        file_put_contents($logPath, json_encode($logData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        file_put_contents($flagFile, now()->toIso8601String());
+    } catch (\Throwable $e) {
+        $errorLogPath = '/home/gmemora/s36_taskB_acronym_colors_error_' . now()->format('Ymd_His') . '.log';
+        file_put_contents($errorLogPath, json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], JSON_PRETTY_PRINT));
+    }
+})->everyMinute()->withoutOverlapping()->name('s36_taskB_acronym_colors');
+
 // Custom scheduled tasks from database
 try {
     foreach (\Modules\Backoffice\Models\ScheduledTask::active()->get() as $task) {
