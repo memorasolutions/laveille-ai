@@ -268,7 +268,7 @@
             finally { this.authVerifying = false; }
         },
         resetWizard() { this.wStep = 0; this.toolUrl = ''; this.toolName = ''; this.toolDesc = ''; this.toolShortDesc = ''; this.toolPricing = ''; this.screenshotUrl = ''; this.duplicates = []; this.scrapeError = ''; this.selectedCollections = []; this.newCollectionName = ''; this.authEmail = ''; this.authCode = ''; this.authSent = false; this.authError = ''; }
-    }">
+    }" x-init="$watch('wStep', v => { $nextTick(() => { if (v === 1) document.querySelector('input[x-model=\'toolUrl\']')?.focus(); else if (v === 2) document.querySelector('input[x-model=\'toolName\']')?.focus(); else if (v === 3) { if (!authSent) document.querySelector('input[x-model=\'authEmail\']')?.focus(); else document.querySelector('input[x-model=\'authCode\']')?.focus(); } }) })">
     <div x-show="collectionToastShow" x-cloak x-transition.duration.300ms
          role="status" aria-live="polite"
          style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #fff; border-left: 4px solid var(--c-primary, #0B7285); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; max-width: 360px; font-size: 14px; color: #111827;">
@@ -348,7 +348,7 @@
                 </template>
 
                 {{-- Erreur --}}
-                <div x-show="scrapeError && duplicates.length === 0" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
+                <div x-show="scrapeError && duplicates.length === 0" x-cloak role="alert" aria-live="assertive" style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
 
                 <div style="text-align: right; margin-top: 8px;">
                     <button type="button" @click="resetWizard()" style="background: none; border: none; color: #0B7285; cursor: pointer; font-size: 12px; text-decoration: underline;">{{ __('Annuler') }}</button>
@@ -372,7 +372,7 @@
                 <span style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
                 <h2 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
                     {{ __('Complétez les informations pour') }} <strong x-text="toolName" style="color: var(--c-primary);"></strong>
-                </h3>
+                </h2>
             </div>
             <button type="button" @click="wStep = 1" style="background: none; border: none; color: var(--c-primary); cursor: pointer; font-size: 13px; font-weight: 600;">← {{ __('Retour') }}</button>
         </div>
@@ -489,7 +489,7 @@
         </div>
 
         {{-- Erreur --}}
-        <div x-show="scrapeError" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
+        <div x-show="scrapeError" x-cloak role="alert" aria-live="assertive" style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
             <button type="button" @click="resetWizard()" style="background: #F3F4F6; color: var(--c-dark); border: none; padding: 10px 20px; border-radius: var(--r-btn); font-weight: 600; font-size: 14px; cursor: pointer;">
@@ -547,7 +547,7 @@
         </div>
 
         {{-- Error --}}
-        <div x-show="authError" x-cloak style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="authError"></div>
+        <div x-show="authError" x-cloak role="alert" aria-live="assertive" style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="authError"></div>
 
         <div style="text-align: center; margin-top: 14px;">
             <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #6B7280; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
