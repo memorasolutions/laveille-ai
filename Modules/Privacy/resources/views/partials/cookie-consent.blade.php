@@ -96,7 +96,7 @@
 <div id="cc-host">
     {{-- FAB (visible seulement si consentement deja donne) --}}
     <button id="cc-fab" class="cc-fab {{ $hasCookie ? '' : 'cc-hidden' }}" type="button" aria-label="{{ $text['fab_label'] }}">
-        <img src="{{ asset('images/favicon.png') }}" alt="" style="width:16px;height:16px;" aria-hidden="true" role="presentation">
+        <img src="{{ asset('images/favicon.png') }}" alt="{{ $text['fab_label'] }}" style="width:16px;height:16px;" loading="lazy">
         <span class="cc-fab-text">{{ $text['fab_label'] }}</span>
     </button>
 
