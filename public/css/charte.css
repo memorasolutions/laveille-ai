@@ -259,11 +259,11 @@ a:hover { color: var(--c-primary); }
 }
 
 .wpo-breadcumb-area .wpo-breadcumb-wrap ul li a:hover {
-    color: var(--c-accent);
+    color: #FED7AA;
 }
 
 .wpo-breadcumb-area .wpo-breadcumb-wrap ul li:last-child span {
-    color: var(--c-accent);
+    color: #FED7AA;
 }
 
 /* ── 9. BLOG LISTING ── */
