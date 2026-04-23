@@ -69,7 +69,7 @@
         font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
         display: inline-flex; align-items: center; line-height: 1;
     }
-    .badge-type-acronym { background: #FEF3C7; color: #D97706; border: 1px solid #FFEDD5; }
+    .badge-type-acronym { background: #FEF3C7; color: #78350F; border: 1px solid #FFEDD5; }
     .badge-type-ai_term { background: #F0FDFA; color: #0F766E; border: 1px solid #CCFBF1; }
     .badge-type-explainer { background: #F3E8FF; color: #7E22CE; border: 1px solid #E9D5FF; }
 

@@ -64,7 +64,7 @@
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1;
     }
     .nw-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; }
-    .nw-source-pill { background: #f3f4f6; color: #6b7280; font-size: 0.6875rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 4px; text-transform: uppercase; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nw-source-pill { background: #f3f4f6; color: #374151; font-size: 0.6875rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 4px; text-transform: uppercase; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .nw-date { font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 0.375rem; }
     .nw-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .nw-dot-high { background: #10b981; }
@@ -104,7 +104,7 @@
                         @foreach(request()->except(['q', 'page']) as $key => $value)
                             @if($value)<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
                         @endforeach
-                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Rechercher un sujet...') }}" class="nw-search-input">
+                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Rechercher un sujet...') }}" aria-label="{{ __('Rechercher une actualité') }}" class="nw-search-input">
                         <span class="nw-search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
                     </form>
                 </div>
@@ -112,7 +112,7 @@
                     @foreach(request()->except(['sort', 'page']) as $key => $value)
                         @if($value)<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
                     @endforeach
-                    <select name="sort" onchange="this.form.submit()" class="nw-sort-select">
+                    <select name="sort" onchange="this.form.submit()" aria-label="{{ __('Trier les actualités') }}" class="nw-sort-select">
                         <option value="date" {{ ($filters['sort'] ?? 'date') === 'date' ? 'selected' : '' }}>{{ __('Plus récents') }}</option>
                         <option value="score" {{ ($filters['sort'] ?? 'date') === 'score' ? 'selected' : '' }}>{{ __('Meilleur score') }}</option>
                     </select>

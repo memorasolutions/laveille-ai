@@ -198,7 +198,7 @@
         white-space: nowrap;
         flex-shrink: 0;
     }
-    .badge-acronym { background: #FEF3C7; color: #D97706; }
+    .badge-acronym { background: #FEF3C7; color: #78350F; }
     .badge-ai_term { background: var(--c-primary-badge); color: var(--c-primary); }
     .badge-explainer { background: #F3E8FF; color: #7E22CE; }
 
