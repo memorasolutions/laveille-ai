@@ -329,7 +329,7 @@
                         $gradientColors = ['#0B7285','#064E5C','#E67E22','#D46A1F','#1A1D23','#2D3039'];
                         $gIdx = abs(crc32($tool->name)) % count($gradientColors);
                         $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source'];
-                        $pricingColors = ['free' => '#059669', 'freemium' => '#B45309', 'paid' => '#B91C1C', 'open_source' => '#6366F1'];
+                        $pricingColors = ['free' => '#065f46', 'freemium' => '#B45309', 'paid' => '#B91C1C', 'open_source' => '#6366F1'];
                     @endphp
                     <div class="col-md-3 col-sm-6 col-xs-12">
                         <a href="{{ route('directory.show', $tool->slug) }}" class="hp-card">
@@ -375,7 +375,7 @@
                     @foreach($featuredTerms as $term)
                     @php
                         $heroSrc = $term->hero_image ? (str_starts_with($term->hero_image, 'http') ? $term->hero_image : asset($term->hero_image)) : '';
-                        $diffColor = match($term->difficulty ?? 'beginner') { 'beginner' => '#059669', 'intermediate' => '#B45309', 'advanced' => '#B91C1C', default => '#6B7280' };
+                        $diffColor = match($term->difficulty ?? 'beginner') { 'beginner' => '#065f46', 'intermediate' => '#B45309', 'advanced' => '#B91C1C', default => '#6B7280' };
                         $diffLabel = match($term->difficulty ?? 'beginner') { 'beginner' => __('Débutant'), 'intermediate' => __('Intermédiaire'), 'advanced' => __('Avancé'), default => __('Débutant') };
                     @endphp
                     <div class="col-md-4 col-sm-6 col-xs-12">

@@ -24,7 +24,7 @@
      role="status"
      aria-live="polite">
     <div style="padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);"
-         :style="type === 'success' ? 'background: #059669; color: #fff;' : type === 'error' ? 'background: #DC2626; color: #fff;' : 'background: #0B7285; color: #fff;'">
+         :style="type === 'success' ? 'background: #065f46; color: #fff;' : type === 'error' ? 'background: #DC2626; color: #fff;' : 'background: #0B7285; color: #fff;'">
         <span x-show="type === 'success'" style="font-size: 18px;">✓</span>
         <span x-show="type === 'error'" style="font-size: 18px;">✕</span>
         <span x-show="type === 'info'" style="font-size: 18px;">ℹ</span>
