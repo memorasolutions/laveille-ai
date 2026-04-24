@@ -314,7 +314,7 @@
                                     </div>
                                 </template>
                             </div>
-                            <h3 class="acr-title" x-text="item.acronym"></h3>
+                            <h3 class="acr-title" role="heading" aria-level="2" x-text="item.acronym"></h3>
                         </div>
                         <div class="acr-fullname" x-text="item.full_name"></div>
                         <div class="acr-footer">

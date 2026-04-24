@@ -524,7 +524,7 @@
                             </a>
                         </template>
                         <div class="gl-card-top">
-                            <h3 class="gl-term-name">
+                            <h3 class="gl-term-name" role="heading" aria-level="2">
                                 <template x-if="!term.heroImage">
                                     <span x-text="term.icon" style="margin-right: 4px;"></span>
                                 </template>
