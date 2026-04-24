@@ -123,7 +123,7 @@
         justify-content: center;
         border-radius: 50%;
         background: #fff;
-        color: #6B7280;
+        color: #374151;
         font-weight: 600;
         font-size: 13px;
         border: 1px solid #E5E7EB;
@@ -131,9 +131,9 @@
         transition: all 0.2s;
     }
     .gl-az-btn:hover, .gl-az-btn.active {
-        background: var(--c-primary);
+        background: var(--c-primary-hover);
         color: #fff;
-        border-color: var(--c-primary);
+        border-color: var(--c-primary-hover);
     }
     .gl-az-tous {
         width: auto;
