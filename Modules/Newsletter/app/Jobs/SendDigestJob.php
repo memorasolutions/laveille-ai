@@ -71,6 +71,7 @@ class SendDigestJob implements ShouldQueue
                 'issue_id' => $this->issueId,
                 'error' => $result['error'],
             ]);
+            throw new \RuntimeException("Brevo echec envoi pour {$this->email}: " . ($result['error'] ?? 'unknown'));
         }
     }
 
