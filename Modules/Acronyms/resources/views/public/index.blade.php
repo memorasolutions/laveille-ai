@@ -320,7 +320,7 @@
                         <div class="acr-footer">
                             <span class="acr-badge" :style="'background:' + (item.cat_color || '#6B7280')" x-text="item.cat_name"></span>
                             @if(trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class))
-                            <span @click.prevent.stop style="display:inline-flex;align-items:center;gap:3px;cursor:pointer;"
+                            <span @click.prevent.stop style="display:inline-flex;align-items:center;justify-content:center;gap:3px;cursor:pointer;min-width:24px;min-height:24px;padding:4px 6px;border-radius:4px;"
                                   role="button"
                                   tabindex="0"
                                   :aria-label="(vd ? '{{ __('Retirer mon vote pour') }} ' : '{{ __('Voter pour') }} ') + item.acronym"
