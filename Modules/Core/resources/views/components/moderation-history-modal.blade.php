@@ -30,7 +30,7 @@
         {{-- Header --}}
         <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
             <h4 style="margin:0;font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:16px;">📜 {{ __('Historique de modération') }}</h4>
-            <button @click="open = false" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280;">&times;</button>
+            <button @click="open = false" style="background:none;border:none;font-size:20px;cursor:pointer;color:#374151;">&times;</button>
         </div>
 
         {{-- Body --}}
@@ -45,24 +45,24 @@
                 <div style="padding:10px 0;border-bottom:1px solid #f3f4f6;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
                         <strong style="font-size:13px;color:var(--c-dark);" x-text="entry.user"></strong>
-                        <span style="font-size:12px;color:#6b7280;" x-text="entry.date"></span>
+                        <span style="font-size:12px;color:#374151;" x-text="entry.date"></span>
                     </div>
                     <div style="font-size:13px;color:#4b5563;" x-text="entry.action"></div>
                     <template x-if="entry.properties && Object.keys(entry.properties).length > 0">
-                        <div style="margin-top:4px;padding:6px 8px;background:#f9fafb;border-radius:0.5rem;font-size:11px;color:#6b7280;font-family:monospace;" x-text="JSON.stringify(entry.properties)"></div>
+                        <div style="margin-top:4px;padding:6px 8px;background:#f9fafb;border-radius:0.5rem;font-size:11px;color:#374151;font-family:monospace;" x-text="JSON.stringify(entry.properties)"></div>
                     </template>
                 </div>
             </template>
 
             {{-- Vide --}}
-            <div x-show="!loading && history.length === 0" style="text-align:center;padding:24px;color:#6b7280;font-size:14px;">
+            <div x-show="!loading && history.length === 0" style="text-align:center;padding:24px;color:#374151;font-size:14px;">
                 {{ __('Aucun historique de modération.') }}
             </div>
         </div>
 
         {{-- Footer --}}
         <div style="padding:12px 20px;border-top:1px solid #e5e7eb;text-align:right;">
-            <button @click="open = false" style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:0.5rem;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;">{{ __('Fermer') }}</button>
+            <button @click="open = false" style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:0.5rem;background:#fff;cursor:pointer;font-weight:600;color:#374151;">{{ __('Fermer') }}</button>
         </div>
     </div>
 </div>

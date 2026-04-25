@@ -13,7 +13,7 @@
         <div @click.stop style="background:#fff;border-radius:16px;padding:24px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                 <h4 style="font-weight:700;color:var(--c-dark);margin:0;">{{ __('Signaler ce contenu') }}</h4>
-                <button @click="showReport = false" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280;">&times;</button>
+                <button @click="showReport = false" style="background:none;border:none;font-size:20px;cursor:pointer;color:#374151;">&times;</button>
             </div>
 
             <template x-if="!done">

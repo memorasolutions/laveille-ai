@@ -37,7 +37,7 @@
             </button>
         </form>
         @else
-        <div style="padding:8px 14px;font-size:13px;color:#6b7280;">✅ {{ __('Déjà approuvé') }}</div>
+        <div style="padding:8px 14px;font-size:13px;color:#374151;">✅ {{ __('Déjà approuvé') }}</div>
         @endif
 
         {{-- Rejeter --}}
@@ -87,7 +87,7 @@
         @can('view_moderation_history')
         <button @click="$dispatch('open-moderation-history', { type: '{{ $type }}', id: {{ $item->id }} })"
             type="button"
-            style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;font-size:13px;cursor:pointer;color:#6b7280;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
+            style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;font-size:13px;cursor:pointer;color:#374151;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='none'">
             📜 {{ __('Historique') }}
         </button>
         @endcan
@@ -149,7 +149,7 @@
     <form action="{{ route('admin.directory.moderation.resource.upload-screenshot', $item->id) }}" method="POST" enctype="multipart/form-data" style="margin:0;">
         @csrf
         <input type="file" name="screenshot" accept="image/jpeg,image/png,image/webp" required style="display:block;margin-bottom:8px;">
-        <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">{{ __('JPG/PNG/WebP, max 5 Mo. Redimensionné auto 1200×630.') }}</p>
+        <p style="font-size:12px;color:#374151;margin:0 0 12px;">{{ __('JPG/PNG/WebP, max 5 Mo. Redimensionné auto 1200×630.') }}</p>
         <button type="submit" class="btn btn-primary btn-sm">{{ __('Uploader fichier') }}</button>
     </form>
 </dialog>

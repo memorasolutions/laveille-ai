@@ -8,7 +8,7 @@
     {{ $board->slug === 'bugs' ? '🐛' : '💡' }} {{ $board->name }}
 </h2>
 @if($board->description)
-    <p style="color: #6B7280; margin: 0 0 20px;">{{ $board->description }}</p>
+    <p style="color: #374151; margin: 0 0 20px;">{{ $board->description }}</p>
 @endif
 
 {{-- Formulaire de soumission --}}
@@ -58,15 +58,15 @@
             @endif
         </div>
         @if($idea->description)
-            <p style="color: #6B7280; margin: 0 0 6px; font-size: 13px;">{{ Str::limit($idea->description, 200) }}</p>
+            <p style="color: #374151; margin: 0 0 6px; font-size: 13px;">{{ Str::limit($idea->description, 200) }}</p>
         @endif
-        <div style="font-size: 12px; color: #6B7280;">
+        <div style="font-size: 12px; color: #374151;">
             {{ __('Par') }} {{ $idea->user->name ?? __('Anonyme') }} — {{ $idea->created_at->diffForHumans() }}
         </div>
     </div>
 </div>
 @empty
-<div style="text-align: center; padding: 40px 20px; color: #6B7280;">
+<div style="text-align: center; padding: 40px 20px; color: #374151;">
     <div style="font-size: 3rem; margin-bottom: 12px;">{{ $board->slug === 'bugs' ? '🐛' : '💡' }}</div>
     <h4 style="color: var(--c-dark); margin: 0 0 8px;">{{ __('Aucune proposition') }}</h4>
     <p style="font-size: 14px;">{{ __('Soyez le premier à soumettre une idée !') }}</p>

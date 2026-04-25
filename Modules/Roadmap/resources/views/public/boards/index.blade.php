@@ -5,7 +5,7 @@
 @section('roadmap-content')
     <div style="text-align:center;margin-bottom:32px;">
         <h1 style="font-family:var(--f-heading);font-weight:800;font-size:2rem;color:var(--c-dark);margin-bottom:8px;">💡 {{ __('Propositions de la communauté') }}</h1>
-        <p style="color:#6b7280;font-size:1.1rem;">{{ __('Proposez vos idées, votez pour vos priorités et contribuez à faire évoluer la plateforme.') }}</p>
+        <p style="color:#374151;font-size:1.1rem;">{{ __('Proposez vos idées, votez pour vos priorités et contribuez à faire évoluer la plateforme.') }}</p>
     </div>
 
     {{-- CTA soumettre --}}
@@ -35,7 +35,7 @@
                     <div style="flex:1;">
                         <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.15rem;color:var(--c-dark);margin:0 0 8px;">{{ $board->name }}</h3>
                         @if($board->description)
-                            <p style="color:#6b7280;margin:0 0 12px;font-size:14px;line-height:1.5;">{{ Str::limit($board->description, 150) }}</p>
+                            <p style="color:#374151;margin:0 0 12px;font-size:14px;line-height:1.5;">{{ Str::limit($board->description, 150) }}</p>
                         @endif
                         <div style="display:flex!important;align-items:center!important;gap:10px;">
                             <span style="background:var(--c-primary-badge, #ddf4f8);color:var(--c-primary);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">{{ $board->ideas_count }} {{ __('propositions') }}</span>
