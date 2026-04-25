@@ -257,6 +257,24 @@
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
     @include('fronttheme::partials.toast')
+
+    @if(session('newsletter_success') || session('newsletter_confirmed') || session('newsletter_unsubscribed'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                @if(session('newsletter_success'))
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: @json(session('newsletter_success')), type: 'success' } }));
+                @endif
+                @if(session('newsletter_confirmed'))
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: @json(session('newsletter_confirmed')), type: 'success' } }));
+                @endif
+                @if(session('newsletter_unsubscribed'))
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: @json(session('newsletter_unsubscribed')), type: 'info' } }));
+                @endif
+            }, 200);
+        });
+    </script>
+    @endif
     <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
     <script src="/js/sw-register.js" defer></script>
     <script src="/js/newsletter-scroll-trigger.js?v={{ filemtime(public_path('js/newsletter-scroll-trigger.js')) }}" defer></script>
