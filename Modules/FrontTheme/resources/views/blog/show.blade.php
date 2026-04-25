@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', $article->title . ' - ' . config('app.name'))
+@section('title', ($article->meta['title'] ?? $article->title) . ' - ' . config('app.name'))
 @section('meta_description', Str::limit($article->excerpt ?? strip_tags($article->content), 160))
 @section('og_type', 'article')
 @section('share_text')
