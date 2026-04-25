@@ -222,7 +222,7 @@ body {
 }
 
 .auth-form-wrapper .auth-text-muted {
-    color: #6b7280;
+    color: #374151;
     font-size: 0.95rem;
 }
 
@@ -293,7 +293,7 @@ body {
 }
 
 .auth-form-wrapper .auth-subtitle {
-    color: #6b7280;
+    color: #374151;
     font-size: 1rem;
     margin-bottom: 2rem;
 }
@@ -313,7 +313,7 @@ body {
 }
 
 .auth-form-wrapper .toggle-password-btn:hover {
-    color: #6b7280;
+    color: #374151;
 }
 
 @media (max-width: 991.98px) {
