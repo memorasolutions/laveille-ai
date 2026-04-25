@@ -15,7 +15,7 @@
                         @endif
                         <div style="flex:1; min-width:0;">
                             <div style="font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $item['product_name'] }}</div>
-                            @if(!empty($item['variant_label']))<div style="font-size:11px; color:#6b7280;">{{ $item['variant_label'] }}</div>@endif
+                            @if(!empty($item['variant_label']))<div style="font-size:11px; color:#374151;">{{ $item['variant_label'] }}</div>@endif
                         </div>
                         <div style="font-size:13px; font-weight:600; margin-left:8px; white-space:nowrap;">{{ number_format($item['unit_price'] * $item['quantity'], 2, ',', ' ') }} $</div>
                     </div>
@@ -28,7 +28,7 @@
             </div>
             <a href="{{ route('shop.cart') }}" style="display:block; background:#0B7285; color:#fff; border-radius:8px; padding:10px; text-align:center; font-weight:600; text-decoration:none;">{{ __('Voir le panier') }}</a>
         @else
-            <div style="text-align:center; color:#6b7280; padding:20px 0;">
+            <div style="text-align:center; color:#374151; padding:20px 0;">
                 <p style="margin-bottom:12px;">{{ __('Votre panier est vide') }}</p>
                 <a href="{{ route('shop.index') }}" style="color:#0B7285; font-weight:600; text-decoration:none;">{{ __('Parcourir la boutique') }}</a>
             </div>
