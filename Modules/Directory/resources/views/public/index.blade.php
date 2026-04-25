@@ -34,7 +34,7 @@
             'hasEduPricing' => (bool) $tool->has_education_pricing,
             'lifecycleStatus' => $tool->lifecycle_status ?? 'active',
             'lifecycleLabel' => $tool->lifecycle_label ?? '',
-            'lifecycleColor' => $tool->lifecycle_color ?? '#6b7280',
+            'lifecycleColor' => $tool->lifecycle_color ?? '#374151',
             'lifecycleIconFa' => (function ($icon) {
                 $map = ['fa-circle-check'=>'fa-check-circle','fa-flask'=>'fa-flask','fa-pause-circle'=>'fa-pause-circle','fa-tag'=>'fa-tag','fa-shuffle'=>'fa-random','fa-handshake'=>'fa-handshake-o','fa-circle-xmark'=>'fa-times-circle','fa-triangle-exclamation'=>'fa-exclamation-triangle'];
                 return $map[$icon] ?? $icon;
@@ -54,14 +54,14 @@
     .rt-search { position: relative; max-width: 600px; margin: 0 auto; }
     .rt-search-input { width: 100%; padding: 14px 20px 14px 48px; border-radius: var(--r-btn); border: 2px solid #E5E7EB; font-size: 17px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); outline: none; background: #fff; }
     .rt-search-input:focus { border-color: var(--c-primary); box-shadow: 0 4px 15px rgba(11,114,133,0.1); }
-    .rt-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #6B7280; width: 20px; height: 20px; }
+    .rt-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #374151; width: 20px; height: 20px; }
 
     .rt-pill { display: inline-flex; align-items: center; gap: 4px; padding: 7px 16px; min-height: 44px; border-radius: var(--r-btn); background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; }
     .rt-pill:hover { background: #E5E7EB; }
     .rt-pill.active { background: var(--c-primary); color: #fff; }
 
     .rt-sort-bar { display: flex; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px; }
-    .rt-sort-tab { padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; font-size: 0.9rem; color: #6B7280; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
+    .rt-sort-tab { padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; font-size: 0.9rem; color: #374151; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
     .rt-sort-tab:hover { color: var(--c-dark); }
     .rt-sort-active { color: var(--c-primary) !important; border-bottom-color: var(--c-primary) !important; }
 
@@ -130,7 +130,7 @@
 
     /* Filter bar + pricing dropdown */
     .rt-filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    .rt-filter-count { color: #6B7280; font-size: 0.85rem; margin-left: auto; }
+    .rt-filter-count { color: #374151; font-size: 0.85rem; margin-left: auto; }
     .rt-pricing-dropdown { position: absolute; top: 100%; left: 0; z-index: 50; background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base); box-shadow: 0 8px 25px rgba(0,0,0,0.1); padding: 6px; min-width: 180px; margin-top: 4px; }
     .rt-pricing-dropdown button { display: flex; align-items: center; width: 100%; text-align: left; padding: 8px 12px; min-height: 44px; border: none; background: none; cursor: pointer; font-size: 14px; border-radius: 4px; color: var(--c-dark); }
     .rt-pricing-dropdown button:hover { background: #F3F4F6; }
@@ -281,12 +281,12 @@
             @endif
             @endauth
         </div>
-        <button type="button" @click="collectionToastShow = false" aria-label="{{ __('Fermer') }}" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #6B7280; line-height: 1; padding: 0;">×</button>
+        <button type="button" @click="collectionToastShow = false" aria-label="{{ __('Fermer') }}" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #374151; line-height: 1; padding: 0;">×</button>
     </div>
     <div class="rt-hero">
         <div class="container text-center">
             <h1>{{ __('Répertoire techno') }}</h1>
-            <p style="color: #6B7280; font-size: 1.1rem; margin-bottom: 16px;">
+            <p style="color: #374151; font-size: 1.1rem; margin-bottom: 16px;">
                 <strong x-text="tools.length" style="color: var(--c-primary);"></strong> {{ __('outils sélectionnés pour vous.') }}
             </p>
 
@@ -318,7 +318,7 @@
             {{-- Etape 1 : URL --}}
             <div x-show="wStep === 1" x-cloak x-transition.duration.300ms
                  style="margin-bottom: 20px; background: rgba(11,114,133,0.08); border: 2px solid var(--c-primary); border-radius: var(--r-base); padding: 24px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                <div style="font-size: 11px; color: #6B7280; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 1 sur 2 – URL du site') }}</div>
+                <div style="font-size: 11px; color: #374151; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 1 sur 2 – URL du site') }}</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <input type="url" x-model="toolUrl" autocomplete="url" placeholder="https://chatgpt.com" aria-label="{{ __('URL du site a proposer') }}"
                         style="flex: 1; min-width: 240px; height: 44px; padding: 0 14px; border: 2px solid #E5E7EB; border-radius: var(--r-base); font-size: 15px; background: #fff; color: var(--c-dark); outline: none;"
@@ -369,7 +369,7 @@
          style="background: #fff; border: 2px solid #E5E7EB; border-radius: var(--r-base); padding: 28px; max-width: 800px; margin: -10px auto 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <div>
-                <span style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
+                <span style="font-size: 11px; color: #374151; text-transform: uppercase; letter-spacing: 1px;">{{ __('Étape 2 sur 2 – Détails') }}</span>
                 <h2 style="font-family: var(--f-heading); color: var(--c-dark); margin: 4px 0 0; font-size: 16px;">
                     {{ __('Complétez les informations pour') }} <strong x-text="toolName" style="color: var(--c-primary);"></strong>
                 </h2>
@@ -415,7 +415,7 @@
                             🎓 {{ __('Cet outil offre un tarif spécial ou gratuit pour enseignants/étudiants') }}
                         </label>
                     </div>
-                    <p style="font-size: 12px; color: #6B7280; margin: 0 0 10px 0; line-height: 1.4;">
+                    <p style="font-size: 12px; color: #374151; margin: 0 0 10px 0; line-height: 1.4;">
                         💡 {{ __('Coche cette case si l\'outil propose un programme éducation (tarif réduit, gratuit avec courriel @.edu, etc.)') }}
                     </p>
 
@@ -445,9 +445,9 @@
                 <div style="margin-top: 6px; margin-bottom: 14px;">
                     <label style="display: block; font-weight: 600; color: var(--c-dark); font-size: 13px; margin-bottom: 4px;">
                         📂 {{ __('Ajouter à mes collections') }}
-                        <span style="font-weight: 400; font-size: 12px; color: #6B7280;">({{ __('optionnel') }})</span>
+                        <span style="font-weight: 400; font-size: 12px; color: #374151;">({{ __('optionnel') }})</span>
                     </label>
-                    <p style="font-size: 12px; color: #6B7280; margin: 0 0 10px 0; line-height: 1.4;">
+                    <p style="font-size: 12px; color: #374151; margin: 0 0 10px 0; line-height: 1.4;">
                         {{ __('Classe cet outil dans une ou plusieurs de tes collections (privées par défaut).') }}
                     </p>
                     @auth
@@ -463,7 +463,7 @@
                                         <input type="checkbox" value="{{ $collection->id }}" x-model.number="selectedCollections" style="display: none;">
                                         <span x-show="selectedCollections.includes({{ $collection->id }})" style="color: var(--c-primary); font-size: 13px;">✓</span>
                                         <span>{{ $collection->name }}</span>
-                                        <span style="font-size: 10px; color: #6B7280; margin-left: 2px;" title="{{ $collection->is_public ? __('Publique') : __('Privée') }}">{{ $collection->is_public ? '🌐' : '🔒' }}</span>
+                                        <span style="font-size: 10px; color: #374151; margin-left: 2px;" title="{{ $collection->is_public ? __('Publique') : __('Privée') }}">{{ $collection->is_public ? '🌐' : '🔒' }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -482,7 +482,7 @@
                         <img :src="screenshotUrl" :alt="toolName" loading="lazy" style="max-width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--r-base); border: 1px solid #E5E7EB;">
                     </div>
                 </template>
-                <div style="font-size: 12px; color: #6B7280; margin-top: 8px;">
+                <div style="font-size: 12px; color: #374151; margin-top: 8px;">
                     <span x-text="toolUrl" style="word-break: break-all;"></span>
                 </div>
             </div>
@@ -509,7 +509,7 @@
         <div style="text-align: center; margin-bottom: 16px;">
             <div style="font-size: 28px; margin-bottom: 8px;">🔐</div>
             <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 4px; font-size: 16px;">{{ __('Connexion requise') }}</h3>
-            <p style="color: #6B7280; font-size: 13px; margin: 0;">{{ __('Connectez-vous pour soumettre votre proposition. Votre formulaire est sauvegarde.') }}</p>
+            <p style="color: #374151; font-size: 13px; margin: 0;">{{ __('Connectez-vous pour soumettre votre proposition. Votre formulaire est sauvegarde.') }}</p>
         </div>
 
         {{-- Email input --}}
@@ -550,7 +550,7 @@
         <div x-show="authError" x-cloak role="alert" aria-live="assertive" style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="authError"></div>
 
         <div style="text-align: center; margin-top: 14px;">
-            <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #6B7280; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
+            <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #374151; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
         </div>
     </div>
     </div>
@@ -647,7 +647,7 @@
                         @if($ftHost)<img src="https://www.google.com/s2/favicons?domain={{ $ftHost }}&sz=32" alt="" width="24" height="24" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
                         <span style="font-weight:700;font-size:15px;">{{ $ft->name }}</span>
                     </div>
-                    <p style="font-size:12px;color:#6b7280;margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($ft->short_description, 70) }}</p>
+                    <p style="font-size:12px;color:#374151;margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($ft->short_description, 70) }}</p>
                     @if($ft->categories->isNotEmpty())
                         <span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ $ft->categories->first()->name }}</span>
                     @endif
@@ -677,9 +677,9 @@
                         </div>
                         <div style="display:flex!important;align-items:center!important;gap:4px;margin-bottom:6px;">
                             <span style="color:#ef4444;font-weight:700;font-size:13px;">👍 {{ $tv->community_votes_count }}</span>
-                            <span style="color:#6b7280;font-size:11px;">{{ __('votes') }}</span>
+                            <span style="color:#374151;font-size:11px;">{{ __('votes') }}</span>
                         </div>
-                        <p style="font-size:12px;color:#6b7280;margin:0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($tv->short_description, 60) }}</p>
+                        <p style="font-size:12px;color:#374151;margin:0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($tv->short_description, 60) }}</p>
                     </a>
                     @endforeach
                 </div>
@@ -732,7 +732,7 @@
                                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                     <span class="rt-badge" :class="'badge-' + tool.pricing" x-text="tool.pricingLabel"></span>
                                     <template x-if="tool.hasEduPricing"><span style="background:#ecfdf5;color:#065f46;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;">🎓 {{ __('Éducation') }}</span></template>
-                                    <template x-if="tool.launchYear > 0"><span style="color: #6B7280; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>
+                                    <template x-if="tool.launchYear > 0"><span style="color: #374151; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>
                                 </div>
                             </div>
                         </div>
