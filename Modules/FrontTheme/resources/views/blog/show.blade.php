@@ -93,6 +93,20 @@
     <meta name="llm:keywords" content="{{ e($article->title) }}, article, blog, IA, intelligence artificielle, francophone, Québec">
     <meta name="llm:url" content="{{ url('/blog/' . $article->slug) }}">
     <script type="application/ld+json">{!! $schemaJson !!}</script>
+    @if($article->faqs->where('is_published', true)->isNotEmpty())
+        <script type="application/ld+json">{!! json_encode([
+            chr(64).'context' => 'https://schema.org',
+            chr(64).'type' => 'FAQPage',
+            'mainEntity' => $article->faqs->where('is_published', true)->map(fn($faq) => [
+                chr(64).'type' => 'Question',
+                'name' => $faq->question,
+                'acceptedAnswer' => [
+                    chr(64).'type' => 'Answer',
+                    'text' => strip_tags($faq->answer),
+                ],
+            ])->values()->all(),
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endif
 @endpush
 
 @section('breadcrumb')
@@ -203,6 +217,8 @@
                                 {!! $articleContent !!}
                             </div>
                         </div>
+
+                        @include('fronttheme::blog.partials.faq-accordion')
 
                         @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
                             {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-bottom') !!}
