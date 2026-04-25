@@ -69,7 +69,7 @@
     .rt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); }
     .rt-logo { width: 48px; height: 48px; border-radius: 12px; background: #f9fafb; padding: 3px; border: 1px solid #e5e7eb; flex-shrink: 0; }
     .rt-card-name { font-family: var(--f-heading); font-size: 1.1rem; font-weight: 700; color: var(--c-dark); margin: 0 0 4px; }
-    .rt-card-name a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; min-height: 24px; min-width: 24px; padding: 2px 4px; }
+    .rt-card-name a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; padding: 2px 4px; }
     .rt-card-name a:hover { color: var(--c-primary); }
     .rt-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .badge-free { background: #D1FAE5; color: #065F46; }
@@ -708,7 +708,7 @@
                                 <span x-text="tool.lifecycleLabel"></span>
                             </span>
                         </template>
-                        <a :href="tool.showUrl" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
+                        <a :href="tool.showUrl" aria-hidden="true" tabindex="-1" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
                             <template x-if="tool.screenshot">
                                 <div style="position: relative; height: 140px;">
                                     <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
