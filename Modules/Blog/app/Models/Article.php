@@ -224,6 +224,11 @@ class Article extends Model implements SearchableContract
         return $this->hasMany(ArticleRevision::class)->orderByDesc('revision_number');
     }
 
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(Faq::class)->orderBy('position');
+    }
+
     protected static function newFactory(): ArticleFactory
     {
         return ArticleFactory::new();
