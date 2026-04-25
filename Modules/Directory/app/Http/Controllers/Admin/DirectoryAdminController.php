@@ -129,6 +129,12 @@ class DirectoryAdminController extends Controller
             'education_verification_required' => ['nullable', 'boolean'],
             'education_official_url' => ['nullable', 'url', 'max:500'],
             'education_last_checked_at' => ['nullable', 'date'],
+            'is_academic_discount' => ['nullable', 'boolean'],
+            'education_level' => ['nullable', 'array'],
+            'education_level.*' => ['string', 'in:primaire,secondaire,superieur'],
+            'privacy_compliance' => ['nullable', 'string', 'max:100'],
+            'learning_curve' => ['nullable', 'integer', 'between:1,5'],
+            'has_api_access' => ['nullable', 'boolean'],
         ]);
 
         $locale = app()->getLocale();
@@ -158,6 +164,12 @@ class DirectoryAdminController extends Controller
         $tool->education_verification_required = $request->boolean('education_verification_required');
         $tool->education_official_url = $validated['education_official_url'] ?? null;
         $tool->education_last_checked_at = $validated['education_last_checked_at'] ?? null;
+
+        $tool->is_academic_discount = $request->boolean('is_academic_discount');
+        $tool->education_level = $validated['education_level'] ?? null;
+        $tool->privacy_compliance = $validated['privacy_compliance'] ?? null;
+        $tool->learning_curve = $validated['learning_curve'] ?? null;
+        $tool->has_api_access = $request->boolean('has_api_access');
 
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('directory/logos', 'public');
