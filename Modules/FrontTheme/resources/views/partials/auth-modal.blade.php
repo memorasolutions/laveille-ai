@@ -76,13 +76,13 @@
             <div style="font-family: var(--f-heading); font-size: 18px; font-weight: 700; color: var(--c-dark);">
                 🔐 {{ __('Connexion rapide') }}
             </div>
-            <button type="button" @click="open = false" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #6B7280; line-height: 1;" aria-label="{{ __('Fermer') }}">&times;</button>
+            <button type="button" @click="open = false" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #374151; line-height: 1;" aria-label="{{ __('Fermer') }}">&times;</button>
         </div>
 
         {{-- Message dynamique --}}
-        <p x-show="message" x-text="message" style="margin: 0 0 8px; color: #6B7280; font-size: 14px;"></p>
-        <p x-show="!message" style="margin: 0 0 8px; color: #6B7280; font-size: 14px;">{{ __('Entrez votre courriel pour recevoir un code à 6 chiffres.') }}</p>
-        <p style="margin: 0 0 20px; color: #6B7280; font-size: 12px; line-height: 1.5;">
+        <p x-show="message" x-text="message" style="margin: 0 0 8px; color: #374151; font-size: 14px;"></p>
+        <p x-show="!message" style="margin: 0 0 8px; color: #374151; font-size: 14px;">{{ __('Entrez votre courriel pour recevoir un code à 6 chiffres.') }}</p>
+        <p style="margin: 0 0 20px; color: #374151; font-size: 12px; line-height: 1.5;">
             {{ __('Pas besoin de mot de passe ni d\'inscription. Entrez votre courriel, recevez un code par courriel, et c\'est tout !') }}
         </p>
 

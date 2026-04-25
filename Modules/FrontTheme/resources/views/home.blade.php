@@ -242,7 +242,7 @@
             .hp-section-alt { background: #F8FAFB; }
             .hp-header { margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #eee; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; }
             .hp-title { font-family: var(--f-heading); color: var(--c-dark); margin: 0; font-size: 1.5rem; font-weight: 700; }
-            .hp-subtitle { color: #6B7280; font-size: 13px; margin-top: 4px; }
+            .hp-subtitle { color: #374151; font-size: 13px; margin-top: 4px; }
             .hp-link-all { color: var(--c-primary); font-weight: 600; font-size: 14px; text-decoration: none; padding: 6px 12px; min-height: 24px; display: inline-flex !important; align-items: center !important; }
             .hp-link-all:hover { text-decoration: underline; color: var(--c-primary); }
             .hp-card { display: block; background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; overflow: hidden; text-decoration: none !important; color: var(--c-dark); transition: transform 0.2s, box-shadow 0.2s; height: 100%; margin-bottom: 20px; }
@@ -253,7 +253,7 @@
             .hp-card-img-text { font-family: var(--f-heading); font-size: 16px; font-weight: 700; color: #fff; text-align: center; padding: 10px; }
             .hp-card-body { padding: 16px; }
             .hp-card-body h3 { margin: 0 0 8px; font-size: 1rem; font-weight: 700; font-family: var(--f-heading); color: var(--c-dark); }
-            .hp-card-body p { color: #6B7280; font-size: 13px; line-height: 1.5; margin: 0 0 10px; }
+            .hp-card-body p { color: #374151; font-size: 13px; line-height: 1.5; margin: 0 0 10px; }
             .hp-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; }
             .hp-badges { display: flex !important; gap: 6px !important; flex-wrap: wrap !important; }
             .hp-row-flex { display: flex !important; flex-wrap: wrap !important; }
@@ -300,7 +300,7 @@
                                 <p>{{ Str::limit($nSs['hook'] ?? $newsItem->summary ?? strip_tags($newsItem->description), 90) }}</p>
                                 <div class="hp-badges">
                                     <span class="hp-badge" style="background: var(--c-primary);">{{ $newsItem->source->name ?? __('Source') }}</span>
-                                    <span style="font-size: 0.6875rem; color: #6B7280;">{{ $newsItem->pub_date?->diffForHumans() }}</span>
+                                    <span style="font-size: 0.6875rem; color: #374151;">{{ $newsItem->pub_date?->diffForHumans() }}</span>
                                 </div>
                             </div>
                         </a>

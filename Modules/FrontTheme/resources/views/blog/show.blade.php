@@ -291,7 +291,7 @@
                             <h4 style="font-size: 15px; font-weight: 600; margin: 6px 0 8px; line-height: 1.4;">
                                 <a href="{{ route('blog.show', $related->slug) }}" style="color: inherit; text-decoration: none;">{{ $related->title }}</a>
                             </h4>
-                            <p style="font-size: 13px; color: #6B7280; margin: 0;">{{ Str::limit($related->excerpt ?? strip_tags($related->content), 80) }}</p>
+                            <p style="font-size: 13px; color: #374151; margin: 0;">{{ Str::limit($related->excerpt ?? strip_tags($related->content), 80) }}</p>
                         </div>
                     </div>
                 </div>

@@ -28,15 +28,15 @@
             <div style="height: 100%; width: {{ $pct }}%; background: #16A34A; border-radius: 99px; transition: width 0.5s;"></div>
         </div>
         @if(!$isMax)
-        <div style="font-size: 10px; color: #6B7280; margin-top: 3px;">{{ __('Plus que') }} <strong>{{ $remaining }} pts</strong> {{ __('pour le prochain niveau') }}</div>
+        <div style="font-size: 10px; color: #374151; margin-top: 3px;">{{ __('Plus que') }} <strong>{{ $remaining }} pts</strong> {{ __('pour le prochain niveau') }}</div>
         @else
         <div style="font-size: 10px; color: #16A34A; margin-top: 3px; font-weight: 600;">{{ __('Niveau maximum !') }}</div>
         @endif
     </div>
     <div style="white-space: nowrap; flex-shrink: 0;">
         <span style="font-weight: 700; font-size: 14px; color: #15803D;">{{ $points }}</span>
-        @if(!$isMax)<span style="color: #6B7280; font-size: 11px;">/ {{ $nextThreshold }}</span>@endif
-        <span style="color: #6B7280; font-size: 11px;">pts</span>
+        @if(!$isMax)<span style="color: #374151; font-size: 11px;">/ {{ $nextThreshold }}</span>@endif
+        <span style="color: #374151; font-size: 11px;">pts</span>
     </div>
 </div>
 @endauth

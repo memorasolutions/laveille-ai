@@ -279,7 +279,7 @@
                             <div x-show="open" x-cloak x-transition style="position:absolute;right:0;top:40px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);width:220px;z-index:9999;padding:8px 0;">
                                 <div style="padding:12px 16px;border-bottom:1px solid #f3f4f6;">
                                     <div style="font-weight:700;color:var(--c-dark);font-size:14px;">{{ auth()->user()->name }}</div>
-                                    <div style="font-size:11px;color:#6b7280;">{{ auth()->user()->email }}</div>
+                                    <div style="font-size:11px;color:#374151;">{{ auth()->user()->email }}</div>
                                 </div>
                                 @include('auth::components.user-menu-links', ['variant' => 'dropdown'])
                                 @can('view_admin_panel')
@@ -300,7 +300,7 @@
                         <div x-data style="display:inline-block;margin-right:8px;vertical-align:middle;">
                             <button @click="$dispatch('open-auth-modal', { message: '' })" aria-label="{{ __('Se connecter') }}" style="background:none!important;border:none!important;cursor:pointer;padding:0;display:flex!important;align-items:center!important;gap:6px;outline:none!important;box-shadow:none!important;color:var(--c-dark);font-size:13px;font-weight:600;">
                                 <div style="width:32px;height:32px;border-radius:50%;background:#E5E7EB;display:flex!important;align-items:center!important;justify-content:center!important;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 </div>
                             </button>
                         </div>

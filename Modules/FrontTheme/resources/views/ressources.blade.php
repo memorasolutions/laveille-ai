@@ -15,7 +15,7 @@
         <div class="row">
             <div class="col col-lg-10 offset-lg-1">
                 <h2 style="font-family: var(--f-heading, inherit); font-weight: 700; margin: 0 0 8px;">{{ __('Ressources') }}</h2>
-                <p style="color: #6B7280; margin-bottom: 24px;">{{ __('Explorez toutes les ressources disponibles sur laveille.ai.') }}</p>
+                <p style="color: #374151; margin-bottom: 24px;">{{ __('Explorez toutes les ressources disponibles sur laveille.ai.') }}</p>
 
                 <div class="row" id="resource-cards">
                     @foreach($sections as $section)
@@ -30,13 +30,13 @@
                                 <div class="panel-body" style="padding: 20px;">
                                     <div style="font-size: 2.5rem; line-height: 1; margin-bottom: 10px;">{{ $section['icon'] }}</div>
                                     <h4 style="font-weight: 700; margin: 0 0 6px; color: var(--c-dark, #1a1a2e);">{{ $section['title'] }}</h4>
-                                    <p style="color: #6B7280; font-size: 13px; margin: 0 0 12px; line-height: 1.5;">{{ $section['description'] }}</p>
+                                    <p style="color: #374151; font-size: 13px; margin: 0 0 12px; line-height: 1.5;">{{ $section['description'] }}</p>
                                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                         @if($section['count'])
                                             <span style="background: var(--c-primary, #0B7285); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{ $section['count'] }} {{ __('entrées') }}</span>
                                         @endif
                                         @if($section['updated_at'])
-                                            <span style="color: #6B7280; font-size: 11px;">{{ __('Mis à jour') }} {{ \Carbon\Carbon::parse($section['updated_at'])->diffForHumans() }}</span>
+                                            <span style="color: #374151; font-size: 11px;">{{ __('Mis à jour') }} {{ \Carbon\Carbon::parse($section['updated_at'])->diffForHumans() }}</span>
                                         @endif
                                     </div>
                                 </div>

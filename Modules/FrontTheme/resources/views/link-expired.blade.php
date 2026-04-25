@@ -17,7 +17,7 @@
                 <h1 style="font-family: var(--f-heading); font-weight: 700; margin-bottom: 12px;">
                     {{ $reason === 'expired' ? __('Lien expiré') : __('Lien introuvable') }}
                 </h1>
-                <p style="color: #6B7280; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+                <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
                     @if($reason === 'expired')
                         {{ __('Ce lien court a expiré ou a été désactivé par son propriétaire. Il n\'est plus accessible.') }}
                     @else

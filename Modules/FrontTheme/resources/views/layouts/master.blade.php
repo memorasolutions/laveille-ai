@@ -207,7 +207,7 @@
                 @if(is_array($cartAdded) && !empty($cartAdded['image']))<img src="{{ asset($cartAdded['image']) }}" alt="" style="width: 50px; height: 50px; border-radius: 6px; margin-right: 12px; object-fit: cover;">@endif
                 <div>
                     <div style="font-size: 14px; font-weight: 700;">{{ is_array($cartAdded) ? ($cartAdded['name'] ?? '') : __('Produit') }}</div>
-                    @if(is_array($cartAdded) && !empty($cartAdded['variant']))<div style="font-size: 12px; color: #6b7280;">{{ $cartAdded['variant'] }}</div>@endif
+                    @if(is_array($cartAdded) && !empty($cartAdded['variant']))<div style="font-size: 12px; color: #374151;">{{ $cartAdded['variant'] }}</div>@endif
                     @if(is_array($cartAdded) && !empty($cartAdded['price']))<div style="font-size: 15px; font-weight: 700; color: #0B7285;">{{ number_format($cartAdded['price'], 2, ',', ' ') }} $</div>@endif
                 </div>
             </div>
@@ -318,7 +318,7 @@
     .share-x{background:#000!important;color:#fff!important;}
     .share-li{background:#0A66C2!important;color:#fff!important;}
     .share-msg{background:#0099FF!important;color:#fff!important;}
-    .share-copy{background:#fff!important;color:#6b7280!important;}
+    .share-copy{background:#fff!important;color:#374151!important;}
     @media(max-width:991px){
         .share-sidebar{display:none!important;}
         .share-bottom{display:flex!important;position:fixed!important;bottom:0;left:0;right:0;z-index:999;background:#fff!important;border-top:1px solid #e5e7eb!important;padding:8px 0!important;justify-content:center!important;gap:16px;box-shadow:0 -2px 8px rgba(0,0,0,0.08)!important;}
@@ -350,9 +350,9 @@
         <div @click.stop style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
             <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
             <template x-if="title"><h2 aria-live="polite" style="font-weight:700;color:var(--c-dark,#1a1a2e);margin:0 0 8px;font-size:17px;" x-text="title"></h2></template>
-            <p style="color:#6b7280;font-size:14px;margin:0 0 20px;line-height:1.5;" x-text="message"></p>
+            <p style="color:#374151;font-size:14px;margin:0 0 20px;line-height:1.5;" x-text="message"></p>
             <div style="display:flex!important;gap:10px;justify-content:center!important;">
-                <button @click="open = false" style="padding:10px 24px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#6b7280;font-size:14px;">{{ __('Annuler') }}</button>
+                <button @click="open = false" style="padding:10px 24px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#374151;font-size:14px;">{{ __('Annuler') }}</button>
                 <button @click="if(window.__confirmAction){window.__confirmAction()};open = false" style="padding:10px 24px;border:none;border-radius:8px;background:#991B1B;color:#fff;cursor:pointer;font-weight:600;font-size:14px;">{{ __('Confirmer') }}</button>
             </div>
         </div>
@@ -377,7 +377,7 @@
             +'<div style="font-size:2.5rem;margin-bottom:12px">📋</div>'
             +'<p style="margin:0 0 18px;font-size:15px;line-height:1.5;color:#333">{{ __("Texte copié!") }} {{ __("Collez-le dans votre") }} '+label+' '+platform+'.</p>'
             +'<button onclick="window.open(this.dataset.url,\'_blank\');document.getElementById(\'share-modal-overlay\').remove()" data-url="'+url+'" style="background:'+color+';color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600">{{ __("Ouvrir") }} '+platform+' →</button>'
-            +'<div style="margin-top:12px;font-size:12px;color:#6b7280">{{ __("Ouverture automatique dans 2 secondes...") }}</div>'
+            +'<div style="margin-top:12px;font-size:12px;color:#374151">{{ __("Ouverture automatique dans 2 secondes...") }}</div>'
             +'</div>';
         o.addEventListener('click',function(e){if(e.target===o)o.remove()});
         document.body.appendChild(o);
