@@ -214,6 +214,15 @@ class Tool extends Model implements Searchable
         });
     }
 
+    public static function pricingDistribution(): array
+    {
+        return self::published()->notArchived()
+            ->selectRaw('pricing, count(*) as cnt')
+            ->groupBy('pricing')
+            ->pluck('cnt', 'pricing')
+            ->toArray();
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(ToolReview::class, 'directory_tool_id');
