@@ -32,6 +32,7 @@ class RefreshPricingCommand extends Command
                 ->get();
         } else {
             $tools = Tool::published()->notArchived()
+                ->orderByRaw("FIELD(pricing, 'freemium', 'free_trial', 'paid', 'free', 'open_source', 'enterprise')")
                 ->orderBy('updated_at')
                 ->limit($batch)
                 ->get();
