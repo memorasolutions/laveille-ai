@@ -43,7 +43,7 @@
         ];
     })->values();
 
-    $pricingEmojis = ['free' => '🆓', 'freemium' => '💎', 'paid' => '💰', 'open_source' => '🔓', 'enterprise' => '🏢'];
+    $pricingEmojis = \Modules\Directory\Support\PricingCategories::emojis();
     $catCount = $categories->count();
 @endphp
 

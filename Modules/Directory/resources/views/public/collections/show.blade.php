@@ -44,8 +44,8 @@
                                 : asset($tool->screenshot) . '?v=' . ($tool->updated_at?->timestamp ?? '0');
                         }
                         $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : null;
-                        $pricingLabels = ['free' => __('Gratuit'), 'freemium' => __('Freemium'), 'paid' => __('Payant'), 'open_source' => __('Open source'), 'enterprise' => __('Entreprise')];
-                        $pricingColors = ['free' => ['#D1FAE5', '#065F46'], 'freemium' => ['#DBEAFE', '#1E40AF'], 'paid' => ['#FEF3C7', '#92400E'], 'open_source' => ['#CCFBF1', '#115E59'], 'enterprise' => ['#EDE9FE', '#5B21B6']];
+                        $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
+                        $pricingColors = \Modules\Directory\Support\PricingCategories::colors();
                     @endphp
                     <article style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:transform .25s, box-shadow .25s;"
                              onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 25px -5px rgba(0,0,0,0.1)';"

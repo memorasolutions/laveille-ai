@@ -280,7 +280,7 @@
 @php
     $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
     $favicon = $host ? "https://www.google.com/s2/favicons?domain={$host}&sz=64" : '';
-    $pricingLabels = ['free'=>__('Gratuit'),'freemium'=>__('Freemium'),'paid'=>__('Payant'),'open_source'=>__('Open source'),'enterprise'=>__('Entreprise')];
+    $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
     $reviews = $tool->reviews()->approved()->latest()->get();
     $discussions = $tool->discussions()->approved()->topLevel()->with('replies.user', 'user')->latest()->get();
     // $resources passé depuis le controller (FR-first, puis date)

@@ -6,7 +6,7 @@
     $screenshotSrc = $tool->screenshot
         ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
         : '';
-    $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source', 'enterprise' => 'Enterprise'];
+    $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
     $gradientColors = ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'];
     $gIdx = abs(crc32($tool->name)) % count($gradientColors);
 @endphp
