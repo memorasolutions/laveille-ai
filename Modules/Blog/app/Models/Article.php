@@ -199,6 +199,14 @@ class Article extends Model implements SearchableContract
         return $this->user->name ?? 'Admin';
     }
 
+    /**
+     * Récupère le titre SEO depuis les métadonnées.
+     */
+    public function getSeoTitleAttribute(): ?string
+    {
+        return $this->meta['title'] ?? null;
+    }
+
     public function scopePendingSubmissions($query)
     {
         return $query->where('submission_status', 'pending');
