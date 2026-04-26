@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\Core\Services\ScreenshotUploadService;
+use Modules\Directory\Models\ModerationLog;
+use Modules\Directory\Models\ToolPricingReport;
 use Modules\Directory\Models\ToolReport;
 use Modules\Directory\Models\ToolResource;
 use Modules\Directory\Models\ToolReview;
@@ -221,5 +223,66 @@ class ModerationController extends Controller
         }
 
         return back()->with('success', __('Suggestion rejetée.'));
+    }
+
+    public function pricingReports(Request $request): View
+    {
+        $reports = ToolPricingReport::with(['tool', 'user', 'reviewer'])
+            ->orderBy('status')
+            ->orderByDesc('created_at')
+            ->paginate(50)
+            ->withQueryString();
+
+        $pendingCount = ToolPricingReport::pending()->count();
+        $reviewedCount = ToolPricingReport::reviewed()->count();
+
+        return view('directory::admin.pricing-reports', compact('reports', 'pendingCount', 'reviewedCount'));
+    }
+
+    public function approvePricingReport(Request $request, int $id): RedirectResponse
+    {
+        $report = ToolPricingReport::findOrFail($id);
+        abort_if($report->status !== 'pending', 400, 'Already reviewed');
+
+        $request->validate(['admin_notes' => 'nullable|string|max:1000']);
+
+        $tool = $report->tool;
+        $oldPricing = $tool->pricing;
+        $tool->update(['pricing' => $report->reported_pricing, 'last_enriched_at' => now()]);
+
+        $report->update([
+            'status' => 'approved',
+            'admin_notes' => $request->admin_notes,
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        ModerationLog::create([
+            'tool_id' => $tool->id,
+            'moderator_id' => auth()->id(),
+            'action' => 'pricing_updated',
+            'old_status' => $oldPricing,
+            'new_status' => $report->reported_pricing,
+            'reason' => 'User report approved #'.$report->id,
+        ]);
+
+        return redirect()->route('admin.directory.pricing-reports')->with('success', __('Signalement approuvé. Tarification mise à jour.'));
+    }
+
+    public function rejectPricingReport(Request $request, int $id): RedirectResponse
+    {
+        $report = ToolPricingReport::findOrFail($id);
+        abort_if($report->status !== 'pending', 400, 'Already reviewed');
+
+        $request->validate(['admin_notes' => 'nullable|string|max:1000']);
+
+        $report->update([
+            'status' => 'rejected',
+            'admin_notes' => $request->admin_notes,
+            'reviewed_by' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('admin.directory.pricing-reports')->with('success', __('Signalement rejeté.'));
     }
 }

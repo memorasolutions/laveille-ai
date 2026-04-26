@@ -89,4 +89,9 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     Route::post('/moderation/report/{id}/delete', [ModerationController::class, 'deleteReported'])->name('moderation.report.delete');
     Route::post('/moderation/suggestion/{id}/approve', [ModerationController::class, 'approveSuggestion'])->name('moderation.suggestion.approve');
     Route::post('/moderation/suggestion/{id}/reject', [ModerationController::class, 'rejectSuggestion'])->name('moderation.suggestion.reject');
+
+    // Pricing reports moderation
+    Route::get('/pricing-reports', [ModerationController::class, 'pricingReports'])->name('pricing-reports');
+    Route::post('/pricing-reports/{id}/approve', [ModerationController::class, 'approvePricingReport'])->name('pricing-reports.approve');
+    Route::post('/pricing-reports/{id}/reject', [ModerationController::class, 'rejectPricingReport'])->name('pricing-reports.reject');
 });
