@@ -32,9 +32,15 @@ class DirectoryAdminController extends Controller
             $query->where('status', $request->status);
         }
 
+        $statusCounts = [];
+        foreach (\Modules\Directory\Enums\ToolStatus::cases() as $statusCase) {
+            $statusCounts[$statusCase->value] = Tool::where('status', $statusCase->value)->count();
+        }
+        $statusCounts['draft'] = Tool::where('status', 'draft')->count();
+
         $tools = $query->orderByDesc('created_at')->paginate((int) Settings::get('directory.admin_per_page', 20))->withQueryString();
 
-        return view('directory::admin.index', compact('tools'));
+        return view('directory::admin.index', compact('tools', 'statusCounts'));
     }
 
     public function create(): View

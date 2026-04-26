@@ -19,9 +19,22 @@
     <a href="{{ route('admin.directory.index', ['source' => 'community']) }}" class="btn btn-sm {{ request('source') === 'community' ? 'btn-primary' : 'btn-outline-secondary' }}">👥 {{ __('Soumis par la communauté') }}</a>
     <a href="{{ route('admin.directory.index', ['source' => 'admin']) }}" class="btn btn-sm {{ request('source') === 'admin' ? 'btn-primary' : 'btn-outline-secondary' }}">🛡️ {{ __('Ajoutés par l\'admin') }}</a>
     <span class="border-start mx-1"></span>
-    <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => 'published'])) }}" class="btn btn-sm {{ request('status') === 'published' ? 'btn-success' : 'btn-outline-secondary' }}">{{ __('Publiés') }}</a>
-    <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => 'pending'])) }}" class="btn btn-sm {{ request('status') === 'pending' ? 'btn-warning' : 'btn-outline-secondary' }}">{{ __('En attente') }}</a>
-    <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => 'draft'])) }}" class="btn btn-sm {{ request('status') === 'draft' ? 'btn-secondary' : 'btn-outline-secondary' }}">{{ __('Brouillons') }}</a>
+    @foreach(\Modules\Directory\Enums\ToolStatus::cases() as $statusCase)
+        @php
+            $statusValue = $statusCase->value;
+            $isActive = request('status') === $statusValue;
+            $btnClass = match($statusValue) {
+                'published' => $isActive ? 'btn-success' : 'btn-outline-secondary',
+                'pending' => $isActive ? 'btn-warning' : 'btn-outline-secondary',
+                'rejected' => $isActive ? 'btn-danger' : 'btn-outline-secondary',
+                'archived' => $isActive ? 'btn-dark' : 'btn-outline-secondary',
+                default => $isActive ? 'btn-primary' : 'btn-outline-secondary',
+            };
+            $count = $statusCounts[$statusValue] ?? 0;
+        @endphp
+        <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => $statusValue])) }}" class="btn btn-sm {{ $btnClass }}">{{ __($statusCase->label()) }} <span class="badge bg-light text-dark ms-1">{{ $count }}</span></a>
+    @endforeach
+    <a href="{{ route('admin.directory.index', array_merge(request()->except('status'), ['status' => 'draft'])) }}" class="btn btn-sm {{ request('status') === 'draft' ? 'btn-secondary' : 'btn-outline-secondary' }}">{{ __('Brouillons') }} <span class="badge bg-light text-dark ms-1">{{ $statusCounts['draft'] ?? 0 }}</span></a>
 </div>
 
 <div class="card">
