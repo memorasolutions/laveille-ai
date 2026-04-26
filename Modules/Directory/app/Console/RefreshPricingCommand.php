@@ -88,6 +88,18 @@ class RefreshPricingCommand extends Command
                         'category' => $category,
                         'evidence' => $evidence,
                     ]);
+
+                    \Modules\Directory\Models\ToolPricingReport::create([
+                        'tool_id' => $tool->id,
+                        'user_id' => null,
+                        'reported_pricing' => $category,
+                        'current_pricing_snapshot' => $tool->pricing,
+                        'evidence_url' => null,
+                        'user_notes' => 'Auto-flagged low confidence: ' . $confidence,
+                        'status' => 'pending',
+                        'admin_notes' => 'Evidence: ' . $evidence,
+                    ]);
+
                     $lowConfidence++;
                     continue;
                 }
