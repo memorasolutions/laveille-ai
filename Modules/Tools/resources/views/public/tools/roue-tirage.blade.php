@@ -138,14 +138,14 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
                                 <div class="rw-drawer open">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h4 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ __('Paramètres') }}</h4>
-                                        <button @click="showDrawer = false; document.body.style.overflow = ''" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280;">&times;</button>
+                                        <button @click="showDrawer = false; document.body.style.overflow = ''" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #374151;">&times;</button>
                                     </div>
 
                                     @php $acc = 'cursor:pointer;font-family:var(--f-heading);font-weight:700;color:var(--c-dark);font-size:0.9rem;padding:10px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;'; @endphp
 
                                     {{-- Presets --}}
                                     <div class="rw-drawer-section">
-                                        <div @click="openSection = openSection === 'presets' ? null : 'presets'" style="{{ $acc }}">{{ __('Presets') }} <span x-text="openSection === 'presets' ? '▲' : '▼'" style="font-size:0.7rem;color:#6b7280;"></span></div>
+                                        <div @click="openSection = openSection === 'presets' ? null : 'presets'" style="{{ $acc }}">{{ __('Presets') }} <span x-text="openSection === 'presets' ? '▲' : '▼'" style="font-size:0.7rem;color:#374151;"></span></div>
                                         <div x-show="openSection === 'presets'" x-transition style="padding: 8px 0;">
                                             <div class="d-flex flex-wrap gap-1">
                                                 <template x-for="(p, i) in presets" :key="i">
@@ -168,7 +168,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
 
                                     {{-- Gestion des listes --}}
                                     <div class="rw-drawer-section">
-                                        <div @click="openSection = openSection === 'lists' ? null : 'lists'" style="{{ $acc }}">{{ __('Gestion des listes') }} <span x-text="openSection === 'lists' ? '▲' : '▼'" style="font-size:0.7rem;color:#6b7280;"></span></div>
+                                        <div @click="openSection = openSection === 'lists' ? null : 'lists'" style="{{ $acc }}">{{ __('Gestion des listes') }} <span x-text="openSection === 'lists' ? '▲' : '▼'" style="font-size:0.7rem;color:#374151;"></span></div>
                                         <div x-show="openSection === 'lists'" x-transition style="padding: 8px 0;">
                                             <div class="d-flex flex-wrap gap-1">
                                                 <button class="ct-btn ct-btn-outline ct-btn-sm" @click="saveCurrentList()" style="border-radius: var(--r-btn); font-size: 0.75rem;">{{ __('Sauvegarder') }}</button>
@@ -184,7 +184,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
 
                                     {{-- Apparence --}}
                                     <div class="rw-drawer-section">
-                                        <div @click="openSection = openSection === 'appearance' ? null : 'appearance'" style="{{ $acc }}">{{ __('Apparence') }} <span x-text="openSection === 'appearance' ? '▲' : '▼'" style="font-size:0.7rem;color:#6b7280;"></span></div>
+                                        <div @click="openSection = openSection === 'appearance' ? null : 'appearance'" style="{{ $acc }}">{{ __('Apparence') }} <span x-text="openSection === 'appearance' ? '▲' : '▼'" style="font-size:0.7rem;color:#374151;"></span></div>
                                         <div x-show="openSection === 'appearance'" x-transition style="padding: 8px 0;">
                                             <label style="font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; display: block;">{{ __('Palette de couleurs') }}</label>
                                             <select class="form-control" x-model="paletteName" @change="drawWheel()" style="font-size: 0.85rem; margin-bottom: 10px;" aria-label="Palette de couleurs">
@@ -203,7 +203,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
 
                                     {{-- Comportement --}}
                                     <div class="rw-drawer-section">
-                                        <div @click="openSection = openSection === 'behavior' ? null : 'behavior'" style="{{ $acc }}">{{ __('Comportement') }} <span x-text="openSection === 'behavior' ? '▲' : '▼'" style="font-size:0.7rem;color:#6b7280;"></span></div>
+                                        <div @click="openSection = openSection === 'behavior' ? null : 'behavior'" style="{{ $acc }}">{{ __('Comportement') }} <span x-text="openSection === 'behavior' ? '▲' : '▼'" style="font-size:0.7rem;color:#374151;"></span></div>
                                         <div x-show="openSection === 'behavior'" x-transition style="padding: 8px 0;">
                                             <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0 0 10px; font-size: 0.85rem;">
                                                 <input type="checkbox" class="rw-check" x-model="eliminationMode">
@@ -234,13 +234,13 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
 
                                     {{-- Poids --}}
                                     <div class="rw-drawer-section">
-                                        <div @click="openSection = openSection === 'weights' ? null : 'weights'" style="{{ $acc }}">{{ __('Poids (probabilités)') }} <span x-text="openSection === 'weights' ? '▲' : '▼'" style="font-size:0.7rem;color:#6b7280;"></span></div>
+                                        <div @click="openSection = openSection === 'weights' ? null : 'weights'" style="{{ $acc }}">{{ __('Poids (probabilités)') }} <span x-text="openSection === 'weights' ? '▲' : '▼'" style="font-size:0.7rem;color:#374151;"></span></div>
                                         <div x-show="openSection === 'weights'" x-transition style="padding: 8px 0;">
                                             <div style="max-height: 180px; overflow-y: auto; font-size: 0.75rem;">
                                                 <template x-for="(item, i) in items" :key="'dw'+i">
                                                     <div class="d-flex align-items-center gap-1 mb-1">
                                                         <span x-text="item" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
-                                                        <span style="color: #6b7280;">x</span>
+                                                        <span style="color: #374151;">x</span>
                                                         <input type="number" min="1" max="10" :value="weights[i] || 1" @input="weights[i] = parseInt($event.target.value) || 1; drawWheel()" class="form-control weight-input" style="border-radius: var(--r-btn);">
                                                     </div>
                                                 </template>
@@ -251,7 +251,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
 
                                     {{-- Son et effets --}}
                                     <div class="rw-drawer-section">
-                                        <div @click="openSection = openSection === 'audio' ? null : 'audio'" style="{{ $acc }}">{{ __('Son et effets') }} <span x-text="openSection === 'audio' ? '▲' : '▼'" style="font-size:0.7rem;color:#6b7280;"></span></div>
+                                        <div @click="openSection = openSection === 'audio' ? null : 'audio'" style="{{ $acc }}">{{ __('Son et effets') }} <span x-text="openSection === 'audio' ? '▲' : '▼'" style="font-size:0.7rem;color:#374151;"></span></div>
                                         <div x-show="openSection === 'audio'" x-transition style="padding: 8px 0;">
                                             <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0 0 8px; font-size: 0.85rem;">
                                                 <input type="checkbox" class="rw-check" x-model="soundEnabled" @change="localStorage.setItem('rw_sound', soundEnabled)">

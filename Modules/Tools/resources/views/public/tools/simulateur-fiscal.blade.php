@@ -188,7 +188,7 @@ function fiscalSim(cfg) {
                                     <div class="p-2 rounded text-center" style="background: #D1FAE5; border: 2px solid #059669;">
                                         <small class="text-muted d-block" style="font-size: 0.7rem;">{{ __('Revenu net') }}</small>
                                         <strong style="color: #059669; font-size: 1.3rem;" x-text="fmt(net)"></strong>
-                                        <div style="font-size: 0.65rem; color: #6b7280;">
+                                        <div style="font-size: 0.65rem; color: #374151;">
                                             <span x-text="fmt(monthly) + '/{{ __('mois') }}'"></span> · <span x-text="rate + ' %'"></span>
                                         </div>
                                     </div>
@@ -354,7 +354,7 @@ function fiscalSim(cfg) {
                                     </div>
                                     {{-- Tableau Québec --}}
                                     <table style="width: 100%; margin-top: 8px; font-size: 0.75rem; border-collapse: collapse;">
-                                        <thead><tr style="border-bottom: 1px solid #dee2e6; color: #6b7280;">
+                                        <thead><tr style="border-bottom: 1px solid #dee2e6; color: #374151;">
                                             <th style="width: 20px; padding: 4px;"></th>
                                             <th style="padding: 4px; text-align: left;">{{ __('Taux') }}</th>
                                             <th style="padding: 4px; text-align: left;">{{ __('Tranche') }}</th>
@@ -432,7 +432,7 @@ function fiscalSim(cfg) {
                                     </div>
                                     {{-- Tableau Fédéral --}}
                                     <table style="width: 100%; margin-top: 8px; font-size: 0.75rem; border-collapse: collapse;">
-                                        <thead><tr style="border-bottom: 1px solid #dee2e6; color: #6b7280;">
+                                        <thead><tr style="border-bottom: 1px solid #dee2e6; color: #374151;">
                                             <th style="width: 20px; padding: 4px;"></th>
                                             <th style="padding: 4px; text-align: left;">{{ __('Taux') }}</th>
                                             <th style="padding: 4px; text-align: left;">{{ __('Tranche') }}</th>
@@ -580,7 +580,7 @@ function fiscalSim(cfg) {
                         <li>{{ __('18 % de votre revenu gagné de l\'année précédente') }}</li>
                         <li>{{ __('32 490 $ (plafond annuel fixé par l\'ARC pour 2025)') }}</li>
                     </ul>
-                    <p class="mb-0 mt-2" style="font-size: 0.8rem; color: #6b7280;">{{ __('Les droits de cotisation inutilisés des années précédentes s\'accumulent et s\'ajoutent à votre plafond. Ce simulateur utilise 18 % du revenu entré comme estimation simplifiée.') }}</p>
+                    <p class="mb-0 mt-2" style="font-size: 0.8rem; color: #374151;">{{ __('Les droits de cotisation inutilisés des années précédentes s\'accumulent et s\'ajoutent à votre plafond. Ce simulateur utilise 18 % du revenu entré comme estimation simplifiée.') }}</p>
                 </div>
 
                 <div class="mb-3 p-3 rounded" style="background: #fef3c7; border-left: 3px solid #f59e0b;">
