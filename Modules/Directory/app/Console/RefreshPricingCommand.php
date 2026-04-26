@@ -27,11 +27,11 @@ class RefreshPricingCommand extends Command
         $resetSuspects = (bool) $this->option('reset-suspects');
 
         if ($resetSuspects) {
-            $tools = Tool::published()
+            $tools = Tool::published()->notArchived()
                 ->where('last_enriched_at', '>=', '2026-04-15')
                 ->get();
         } else {
-            $tools = Tool::published()
+            $tools = Tool::published()->notArchived()
                 ->orderBy('updated_at')
                 ->limit($batch)
                 ->get();

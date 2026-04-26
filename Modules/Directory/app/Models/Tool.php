@@ -206,6 +206,14 @@ class Tool extends Model implements Searchable
             ->orderByDesc('clicks_count');
     }
 
+    public function scopeNotArchived($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('lifecycle_status', '!=', 'archived')
+                ->orWhereNull('lifecycle_status');
+        });
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(ToolReview::class, 'directory_tool_id');
