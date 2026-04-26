@@ -16,6 +16,16 @@ class OpenRouterService
         ]);
     }
 
+    public function classifyPricing(string $userPrompt): string
+    {
+        $messages = [
+            ['role' => 'system', 'content' => 'You are a pricing classifier. Output ONLY valid JSON matching the requested schema. Never include preamble, markdown fences, or explanations outside the JSON.'],
+            ['role' => 'user', 'content' => $userPrompt],
+        ];
+
+        return $this->call('qwen/qwen3-max', $messages);
+    }
+
     public function generate(string $prompt, string $systemPrompt = ''): string
     {
         $messages = [];
