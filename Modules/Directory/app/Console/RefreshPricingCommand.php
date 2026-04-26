@@ -14,7 +14,7 @@ class RefreshPricingCommand extends Command
 {
     use HasKillSwitch;
 
-    protected $signature = 'directory:refresh-pricing {--batch=5} {--reset-suspects} {--confidence-threshold=0.6}';
+    protected $signature = 'directory:refresh-pricing {--batch=5} {--reset-suspects} {--confidence-threshold=0.6} {--dry-run}';
     protected $description = 'Refresh pricing categories using LLM structured output';
 
     public function handle(OpenRouterService $openRouterService): int
@@ -26,6 +26,7 @@ class RefreshPricingCommand extends Command
         $batch = (int) $this->option('batch');
         $resetSuspects = (bool) $this->option('reset-suspects');
         $confidenceThreshold = (float) $this->option('confidence-threshold');
+        $dryRun = (bool) $this->option('dry-run');
 
         if ($resetSuspects) {
             $tools = Tool::published()->notArchived()
@@ -90,26 +91,34 @@ class RefreshPricingCommand extends Command
                         'evidence' => $evidence,
                     ]);
 
-                    \Modules\Directory\Models\ToolPricingReport::create([
-                        'tool_id' => $tool->id,
-                        'user_id' => null,
-                        'reported_pricing' => $category,
-                        'current_pricing_snapshot' => $tool->pricing,
-                        'evidence_url' => null,
-                        'user_notes' => 'Auto-flagged low confidence: ' . $confidence,
-                        'status' => 'pending',
-                        'admin_notes' => 'Evidence: ' . $evidence,
-                    ]);
+                    if (!$dryRun) {
+                        \Modules\Directory\Models\ToolPricingReport::create([
+                            'tool_id' => $tool->id,
+                            'user_id' => null,
+                            'reported_pricing' => $category,
+                            'current_pricing_snapshot' => $tool->pricing,
+                            'evidence_url' => null,
+                            'user_notes' => 'Auto-flagged low confidence: ' . $confidence,
+                            'status' => 'pending',
+                            'admin_notes' => 'Evidence: ' . $evidence,
+                        ]);
+                    } else {
+                        Log::info("DRY-RUN would create ToolPricingReport for tool {$tool->id}");
+                    }
 
                     $lowConfidence++;
                     continue;
                 }
 
                 $oldPricing = $tool->pricing;
-                $tool->update([
-                    'pricing' => $category,
-                    'last_enriched_at' => now(),
-                ]);
+                if (!$dryRun) {
+                    $tool->update([
+                        'pricing' => $category,
+                        'last_enriched_at' => now(),
+                    ]);
+                } else {
+                    Log::info("DRY-RUN would update tool {$tool->id} from {$oldPricing} to {$category}");
+                }
 
                 Log::info("Updated pricing for tool {$tool->id}", [
                     'tool_name' => $toolName,
