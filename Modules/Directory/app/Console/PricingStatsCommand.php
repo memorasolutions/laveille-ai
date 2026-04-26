@@ -26,9 +26,8 @@ class PricingStatsCommand extends Command
         $autoFlagged = ToolPricingReport::pending()->autoFlagged()->count();
         $userSubmitted = ToolPricingReport::pending()->userSubmitted()->count();
 
-        $cutoff90 = now()->subDays(90);
-        $drifted90 = Tool::published()->notArchived()->where(fn ($q) => $q->where('last_enriched_at', '<', $cutoff90)->orWhereNull('last_enriched_at'))->count();
-        $neverChecked = Tool::published()->notArchived()->whereNull('last_enriched_at')->count();
+        $drifted90 = Tool::driftCount(90);
+        $neverChecked = Tool::neverCheckedCount();
 
         $this->info("Files de revision pending:");
         $this->table(['Type', 'Count'], [
