@@ -374,6 +374,8 @@ class DirectoryAdminController extends Controller
                        ->paginate(50)
                        ->withQueryString();
 
-        return view('directory::admin.pricing-drift', compact('tools', 'totalDrifted', 'neverChecked', 'criticalDrift'));
+        $distribution = Tool::pricingDistribution();
+
+        return view('directory::admin.pricing-drift', compact('tools', 'totalDrifted', 'neverChecked', 'criticalDrift', 'distribution'));
     }
 }

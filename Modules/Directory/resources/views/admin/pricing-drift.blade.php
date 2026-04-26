@@ -13,6 +13,25 @@
         </a>
     </div>
 
+    @if(!empty($distribution))
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">
+                    <i data-lucide="pie-chart" class="me-2"></i>
+                    Distribution tarification
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach($distribution as $pricingKey => $count)
+                        <div class="badge bg-light text-dark border px-3 py-2">
+                            <strong>{{ ucfirst(str_replace('_', ' ', $pricingKey)) }}</strong>
+                            <span class="badge bg-primary ms-1">{{ $count }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card border-0 shadow-sm">
