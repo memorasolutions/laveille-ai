@@ -223,6 +223,25 @@ class Tool extends Model implements Searchable
             ->toArray();
     }
 
+    public static function driftCount(int $days = 90): int
+    {
+        $cutoff = now()->subDays($days);
+
+        return self::published()->notArchived()
+            ->where(function ($q) use ($cutoff) {
+                $q->where('last_enriched_at', '<', $cutoff)
+                    ->orWhereNull('last_enriched_at');
+            })
+            ->count();
+    }
+
+    public static function neverCheckedCount(): int
+    {
+        return self::published()->notArchived()
+            ->whereNull('last_enriched_at')
+            ->count();
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(ToolReview::class, 'directory_tool_id');

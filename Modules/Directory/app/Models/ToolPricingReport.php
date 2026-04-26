@@ -68,4 +68,9 @@ class ToolPricingReport extends Model
     {
         return $query->whereNotNull('user_id');
     }
+
+    public static function pendingCount(): int
+    {
+        return self::pending()->count();
+    }
 }
