@@ -93,7 +93,7 @@ class RefreshPricingCommand extends Command
                     continue;
                 }
 
-                $allowedPricings = ['free', 'freemium', 'paid', 'open_source', 'enterprise'];
+                $allowedPricings = \Modules\Directory\Support\PricingCategories::values();
                 if (! in_array($newPricing, $allowedPricings, true)) {
                     $this->warn("  Pricing invalide rejeté : \"{$newPricing}\"");
                     $errors++;

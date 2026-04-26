@@ -33,7 +33,7 @@ class PublicDirectoryController extends Controller
         $tools = $this->applyDirectoryFilters($query, $request)->get();
 
         $categories = Category::orderBy('sort_order')->get();
-        $pricingOptions = ['free' => __('Gratuit'), 'freemium' => __('Freemium'), 'paid' => __('Payant'), 'open_source' => __('Open source'), 'enterprise' => __('Entreprise'), 'education' => __('🎓 Tarif éducation')];
+        $pricingOptions = \Modules\Directory\Support\PricingCategories::optionsWithEducation();
 
         $featuredQuery = Tool::published()->featured()->with('categories')->orderBy('sort_order');
         $featuredTools = $this->applyDirectoryFilters($featuredQuery, $request)->get();
@@ -92,7 +92,7 @@ class PublicDirectoryController extends Controller
         $category = Category::where('slug->fr_CA', $categorySlug)->firstOrFail();
         $tools = $category->tools()->published()->with('categories')->orderByDesc('clicks_count')->get();
         $allCategories = Category::orderBy('sort_order')->has('tools')->get();
-        $pricingLabels = ['free' => __('Gratuit'), 'freemium' => 'Freemium', 'paid' => __('Payant'), 'open_source' => 'Open source', 'enterprise' => 'Enterprise'];
+        $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
 
         return view('directory::public.compare', compact('category', 'tools', 'allCategories', 'pricingLabels'));
     }

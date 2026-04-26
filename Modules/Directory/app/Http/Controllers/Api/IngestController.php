@@ -31,7 +31,7 @@ class IngestController
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'short_description' => ['nullable', 'string', 'max:500'],
-            'pricing' => ['required', Rule::in(['free', 'freemium', 'paid', 'open_source', 'enterprise'])],
+            'pricing' => ['required', Rule::in(\Modules\Directory\Support\PricingCategories::values())],
             'screenshot' => ['nullable', 'url', 'max:500'],
             'source' => ['nullable', 'string', 'max:100'],
             'tutorials' => ['nullable', 'array'],
