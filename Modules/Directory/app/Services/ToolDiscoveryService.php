@@ -48,6 +48,62 @@ class ToolDiscoveryService
         return $out;
     }
 
+    public static function isUrlExcluded(string $url): bool
+    {
+        $parsed = parse_url($url);
+        if (!$parsed || !isset($parsed['host'])) {
+            return true;
+        }
+
+        $host = strtolower($parsed['host']);
+        $path = isset($parsed['path']) ? strtolower($parsed['path']) : '';
+
+        $blockedHosts = [
+            'news.ycombinator.com',
+            'hn.algolia.com',
+            'news.google.com',
+            'reddit.com',
+            'youtube.com',
+            'youtu.be',
+            'vimeo.com',
+            'github.io',
+            'framer.website',
+            'vercel.app',
+            'netlify.app',
+            'notion.site',
+            'medium.com',
+            'substack.com',
+            'dev.to',
+            'hashnode.dev',
+        ];
+
+        foreach ($blockedHosts as $blockedHost) {
+            if (str_contains($host, $blockedHost)) {
+                return true;
+            }
+        }
+
+        $blockedPathPatterns = [
+            '/blog/',
+            '/article/',
+            '/articles/',
+            '/papers/',
+            '/research/',
+            '/watch',
+            '/vibes/',
+            '/post/',
+            '/posts/',
+        ];
+
+        foreach ($blockedPathPatterns as $pattern) {
+            if (str_contains($path, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function discoverAll(): array
     {
         $allTools = [];
@@ -227,6 +283,10 @@ class ToolDiscoveryService
         }
 
         $url = self::cleanUrl($url);
+
+        if (self::isUrlExcluded($url)) {
+            return null;
+        }
 
         // Dédup par domaine (sauf plateformes d'agrégation)
         $host = parse_url($url, PHP_URL_HOST);
