@@ -13,6 +13,42 @@
         </a>
     </div>
 
+    @if(($autoFlaggedPending ?? 0) > 0 || ($userSubmittedPending ?? 0) > 0)
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0">
+                        <i data-lucide="inbox" class="me-2"></i>
+                        Files de révision
+                    </h6>
+                    <a href="{{ route('admin.directory.pricing-reports') }}" class="btn btn-sm btn-outline-primary">
+                        Voir les rapports
+                    </a>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i data-lucide="cpu" class="text-warning me-2" width="20" height="20"></i>
+                            <div>
+                                <small class="text-muted">Auto-flag systeme</small>
+                                <h5 class="mb-0 fw-bold">{{ $autoFlaggedPending ?? 0 }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i data-lucide="user" class="text-info me-2" width="20" height="20"></i>
+                            <div>
+                                <small class="text-muted">Soumis par utilisateurs</small>
+                                <h5 class="mb-0 fw-bold">{{ $userSubmittedPending ?? 0 }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @if(!empty($distribution))
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">

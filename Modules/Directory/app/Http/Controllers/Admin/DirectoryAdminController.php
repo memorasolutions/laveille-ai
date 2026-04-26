@@ -13,6 +13,7 @@ use Illuminate\View\View;
 use Modules\Core\Services\ScreenshotUploadService;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
+use Modules\Directory\Models\ToolPricingReport;
 use Modules\Directory\Services\ScreenshotService;
 use Modules\Settings\Facades\Settings;
 
@@ -375,7 +376,9 @@ class DirectoryAdminController extends Controller
                        ->withQueryString();
 
         $distribution = Tool::pricingDistribution();
+        $autoFlaggedPending = ToolPricingReport::pending()->autoFlagged()->count();
+        $userSubmittedPending = ToolPricingReport::pending()->userSubmitted()->count();
 
-        return view('directory::admin.pricing-drift', compact('tools', 'totalDrifted', 'neverChecked', 'criticalDrift', 'distribution'));
+        return view('directory::admin.pricing-drift', compact('tools', 'totalDrifted', 'neverChecked', 'criticalDrift', 'distribution', 'autoFlaggedPending', 'userSubmittedPending'));
     }
 }
