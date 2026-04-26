@@ -63,7 +63,7 @@ class RefreshPricingCommand extends Command
 
             try {
                 $response = $openRouter->search(
-                    "Quel est le pricing actuel de {$toolName} ({$toolUrl}) en ".now()->format('F Y').' ? Répondre UNIQUEMENT : free, freemium, paid, ou open-source. Puis le détail des plans et prix.'
+                    "Quel est le pricing actuel de {$toolName} ({$toolUrl}) en ".now()->format('F Y').' ? Répondre UNIQUEMENT par un seul mot parmi : free, freemium, paid, open_source. Puis le détail des plans et prix.'
                 );
 
                 if (empty($response)) {
@@ -74,7 +74,9 @@ class RefreshPricingCommand extends Command
                 }
 
                 $firstLine = mb_strtolower(trim(strtok($response, "\n")));
-                $validTypes = ['free', 'freemium', 'paid', 'open-source'];
+                $firstLine = str_replace('open-source', 'open_source', $firstLine);
+
+                $validTypes = ['open_source', 'freemium', 'paid', 'free'];
 
                 $newPricing = null;
                 foreach ($validTypes as $type) {
@@ -86,6 +88,14 @@ class RefreshPricingCommand extends Command
 
                 if (! $newPricing) {
                     $this->warn("  Pricing non parsé : \"{$firstLine}\"");
+                    $errors++;
+
+                    continue;
+                }
+
+                $allowedPricings = ['free', 'freemium', 'paid', 'open_source', 'enterprise'];
+                if (! in_array($newPricing, $allowedPricings, true)) {
+                    $this->warn("  Pricing invalide rejeté : \"{$newPricing}\"");
                     $errors++;
 
                     continue;

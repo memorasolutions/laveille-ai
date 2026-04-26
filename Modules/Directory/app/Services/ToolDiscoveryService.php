@@ -381,15 +381,15 @@ class ToolDiscoveryService
         $raw = strtolower(trim($raw));
 
         $mapping = [
-            'free' => 'free',
+            'free + paid' => 'freemium',
             'open source' => 'open_source',
             'open_source' => 'open_source',
             'opensource' => 'open_source',
-            'paid' => 'paid',
-            'premium' => 'paid',
-            'freemium' => 'freemium',
-            'free + paid' => 'freemium',
             'enterprise' => 'enterprise',
+            'freemium' => 'freemium',
+            'premium' => 'paid',
+            'paid' => 'paid',
+            'free' => 'free',
         ];
 
         foreach ($mapping as $key => $value) {
