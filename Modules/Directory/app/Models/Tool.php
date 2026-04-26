@@ -170,6 +170,19 @@ class Tool extends Model implements Searchable
         'aliases' => 'array',
     ];
 
+    public function setPricingAttribute($value): void
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['pricing'] = null;
+            return;
+        }
+
+        $normalized = mb_strtolower(trim((string) $value));
+        $normalized = str_replace(['open-source', 'open source', 'opensource'], 'open_source', $normalized);
+
+        $this->attributes['pricing'] = $normalized;
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'directory_category_tool', 'directory_tool_id', 'directory_category_id');
