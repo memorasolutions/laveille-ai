@@ -371,6 +371,11 @@
             <div class="col-md-4 col-sm-4 col-xs-12" style="margin-bottom: 12px;">
                 <div style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; font-weight: 600;">💰 {{ __('Tarification') }}</div>
                 <span class="rt-badge badge-{{ $tool->pricing }}" style="font-size: 12px; padding: 4px 10px;">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
+                @auth
+                    <button type="button" class="btn btn-sm btn-link p-0 mt-1 d-block" style="font-size: 11px; color: #6B7280;" data-bs-toggle="modal" data-bs-target="#pricingReportModal" aria-label="{{ __('Signaler une tarification incorrecte') }}">
+                        <i data-lucide="flag" style="width: 12px; height: 12px;"></i> {{ __('Signaler une tarification incorrecte') }}
+                    </button>
+                @endauth
             </div>
             <div class="col-md-4 col-sm-4 col-xs-6" style="margin-bottom: 12px;">
                 <div style="font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; font-weight: 600;">🌐 {{ __('Type') }}</div>
@@ -1313,6 +1318,45 @@
     @include('directory::public.partials.related-collections')
 </div>
 </section>
+@auth
+<div class="modal fade" id="pricingReportModal" tabindex="-1" aria-labelledby="pricingReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('directory.pricing-report', $tool->getTranslation('slug', 'fr_CA')) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pricingReportModalLabel">{{ __('Signaler une tarification incorrecte') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Fermer') }}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reported_pricing" class="form-label">{{ __('Tarification signalée') }}</label>
+                        <select name="reported_pricing" id="reported_pricing" class="form-select" required>
+                            <option value="">{{ __('Sélectionnez une option') }}</option>
+                            @foreach(\Modules\Directory\Support\PricingCategories::labels() as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="evidence_url" class="form-label">{{ __('URL justificative (optionnel)') }}</label>
+                        <input type="url" name="evidence_url" id="evidence_url" class="form-control" maxlength="500" placeholder="https://exemple.com/preuve">
+                    </div>
+                    <div class="mb-3">
+                        <label for="user_notes" class="form-label">{{ __('Remarques supplémentaires (optionnel)') }}</label>
+                        <textarea name="user_notes" id="user_notes" class="form-control" rows="3" maxlength="1000" placeholder="{{ __('Décrivez brièvement pourquoi vous signalez cette tarification...') }}"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('Envoyer le signalement') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endauth
+
 @endsection
 
 @push('scripts')

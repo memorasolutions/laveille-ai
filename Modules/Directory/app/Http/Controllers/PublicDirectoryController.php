@@ -6,15 +6,19 @@ namespace Modules\Directory\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Core\Services\MetaScraperService;
 use Modules\Core\Services\TranslationService;
 use Modules\Directory\Models\Category;
 use Modules\Directory\Models\Tool;
+use Modules\Directory\Models\ToolPricingReport;
 use Modules\Directory\Services\DuplicateDetectorService;
+use Modules\Directory\Support\PricingCategories;
 use Modules\Settings\Facades\Settings;
 
 class PublicDirectoryController extends Controller
@@ -294,6 +298,32 @@ class PublicDirectoryController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => __('Merci ! L\'outil a été ajouté au répertoire.')]);
+    }
+
+    public function storePricingReport(Request $request, string $slug): RedirectResponse
+    {
+        $tool = Tool::query()
+            ->where('slug->fr_CA', $slug)
+            ->orWhere('slug', $slug)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'reported_pricing' => ['required', 'string', Rule::in(PricingCategories::values())],
+            'evidence_url' => ['nullable', 'url', 'max:500'],
+            'user_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        ToolPricingReport::create([
+            'tool_id' => $tool->id,
+            'user_id' => auth()->id(),
+            'reported_pricing' => $validated['reported_pricing'],
+            'current_pricing_snapshot' => $tool->pricing,
+            'evidence_url' => $validated['evidence_url'] ?? null,
+            'user_notes' => $validated['user_notes'] ?? null,
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', __('Merci pour votre signalement. Il sera examiné par un administrateur.'));
     }
 
     private function applyDirectoryFilters(Builder $query, Request $request): Builder

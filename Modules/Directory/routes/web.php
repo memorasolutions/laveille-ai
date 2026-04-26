@@ -37,6 +37,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/annuaire/api/scrape-detect', [PublicDirectoryController::class, 'scrapeAndDetect'])->name('directory.scrape-detect')->middleware('throttle:5,1');
     Route::post('/annuaire/proposer', [PublicDirectoryController::class, 'storeSubmission'])->name('directory.submit')->middleware('throttle:3,60');
+    Route::post('/annuaire/{slug}/pricing-report', [PublicDirectoryController::class, 'storePricingReport'])->name('directory.pricing-report')->middleware('throttle:3,60');
     Route::post('/annuaire/{slug}/reviews', [CommunityController::class, 'storeReview'])->name('directory.reviews.store');
     Route::post('/annuaire/{slug}/discussions', [CommunityController::class, 'storeDiscussion'])->name('directory.discussions.store');
     Route::post('/annuaire/{slug}/resources', [CommunityController::class, 'storeResource'])->name('directory.resources.store')->middleware('throttle:5,60');
