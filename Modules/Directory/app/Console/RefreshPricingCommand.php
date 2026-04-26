@@ -14,7 +14,7 @@ class RefreshPricingCommand extends Command
 {
     use HasKillSwitch;
 
-    protected $signature = 'directory:refresh-pricing {--batch=5} {--reset-suspects}';
+    protected $signature = 'directory:refresh-pricing {--batch=5} {--reset-suspects} {--confidence-threshold=0.6}';
     protected $description = 'Refresh pricing categories using LLM structured output';
 
     public function handle(OpenRouterService $openRouterService): int
@@ -25,6 +25,7 @@ class RefreshPricingCommand extends Command
 
         $batch = (int) $this->option('batch');
         $resetSuspects = (bool) $this->option('reset-suspects');
+        $confidenceThreshold = (float) $this->option('confidence-threshold');
 
         if ($resetSuspects) {
             $tools = Tool::published()->notArchived()
@@ -82,7 +83,7 @@ class RefreshPricingCommand extends Command
                     throw new \JsonException("Invalid category: {$category}");
                 }
 
-                if ($confidence < 0.6) {
+                if ($confidence < $confidenceThreshold) {
                     Log::info("Low confidence for tool {$tool->id}: {$confidence}", [
                         'tool_name' => $toolName,
                         'category' => $category,
