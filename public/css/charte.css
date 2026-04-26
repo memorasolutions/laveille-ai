@@ -972,8 +972,8 @@ article h3 {
 .wpo-blog-single-section p,
 .wpo-blog-single-section .entry-details p,
 .wpo-blog-single-section .post p,
-.wpo-blog-single-section .author-content p,
-body p { color: #595959; }
+.wpo-blog-single-section .author-content p { color: #595959; }
+/* Retrait de `body p` pour éviter d'écraser les couleurs héritées ou inline (ex: mini-cart) – L39-V3 */
 
 .wpo-blog-single-section .entry-details strong,
 .wpo-blog-single-section .post strong { color: #1a1a1a; }
