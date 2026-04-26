@@ -116,8 +116,50 @@ class ArticleController extends Controller
 
         $article->update($validated);
 
+        $this->syncFaqs($article, $request->input('faqs', []));
+
         return redirect()->route('admin.blog.articles.index')
             ->with('success', 'Article mis à jour.');
+    }
+
+    private function syncFaqs(Article $article, array $faqsInput): void
+    {
+        $locale = 'fr_CA';
+        $keepIds = [];
+
+        foreach (array_values($faqsInput) as $position => $faqData) {
+            $question = trim((string) ($faqData['question'] ?? ''));
+            $answer   = trim((string) ($faqData['answer'] ?? ''));
+
+            if ($question === '' && $answer === '') {
+                continue;
+            }
+
+            $isPublished = ! empty($faqData['is_published']);
+            $faqId       = isset($faqData['id']) && $faqData['id'] !== '' ? (int) $faqData['id'] : null;
+
+            if ($faqId) {
+                $faq = $article->faqs()->find($faqId);
+                if ($faq) {
+                    $faq->setTranslation('question', $locale, $question);
+                    $faq->setTranslation('answer', $locale, $answer);
+                    $faq->position     = $position;
+                    $faq->is_published = $isPublished;
+                    $faq->save();
+                    $keepIds[] = $faq->id;
+                }
+            } else {
+                $newFaq = $article->faqs()->create([
+                    'question'     => [$locale => $question],
+                    'answer'       => [$locale => $answer],
+                    'position'     => $position,
+                    'is_published' => $isPublished,
+                ]);
+                $keepIds[] = $newFaq->id;
+            }
+        }
+
+        $article->faqs()->whereNotIn('id', $keepIds)->delete();
     }
 
     public function destroy(Article $article): RedirectResponse

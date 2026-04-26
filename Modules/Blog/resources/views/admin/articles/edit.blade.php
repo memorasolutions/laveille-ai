@@ -49,6 +49,15 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">FAQ de l'article</h6>
+                </div>
+                <div class="card-body">
+                    @include('blog::admin.articles.partials.faqs-repeater', ['article' => $article])
+                </div>
+            </div>
         </div>
 
         <div class="col-md-4">
