@@ -354,4 +354,26 @@ class DirectoryAdminController extends Controller
             ->route('admin.directory.settings')
             ->with('success', __('Ordre de tri par défaut mis à jour.'));
     }
+
+    public function pricingDrift(Request $request): View
+    {
+        $cutoff90 = now()->subDays(90);
+        $cutoff180 = now()->subDays(180);
+
+        $query = Tool::published()
+            ->where(function ($q) use ($cutoff90) {
+                $q->where('last_enriched_at', '<', $cutoff90)
+                  ->orWhereNull('last_enriched_at');
+            });
+
+        $totalDrifted = (clone $query)->count();
+        $neverChecked = Tool::published()->whereNull('last_enriched_at')->count();
+        $criticalDrift = Tool::published()->where('last_enriched_at', '<', $cutoff180)->count();
+
+        $tools = $query->orderBy('last_enriched_at', 'asc')
+                       ->paginate(50)
+                       ->withQueryString();
+
+        return view('directory::admin.pricing-drift', compact('tools', 'totalDrifted', 'neverChecked', 'criticalDrift'));
+    }
 }

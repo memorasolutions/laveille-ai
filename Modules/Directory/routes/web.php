@@ -64,6 +64,9 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     Route::post('/{tool}/set-main-screenshot/{screenshotId}', [DirectoryAdminController::class, 'setMainScreenshot'])->name('set-main-screenshot');
     Route::post('/tool/{tool}/toggle-featured', [DirectoryAdminController::class, 'toggleFeatured'])->name('tool.toggle-featured');
 
+    // Dashboard derive tarifaire (lecture seule)
+    Route::get('/pricing-drift', [DirectoryAdminController::class, 'pricingDrift'])->name('pricing-drift');
+
     // Resources CRUD (admin)
     Route::get('/resources', [ModerationController::class, 'resources'])->name('resources');
     Route::get('/resources/{id}/edit', [ModerationController::class, 'editResource'])->name('resources.edit');
