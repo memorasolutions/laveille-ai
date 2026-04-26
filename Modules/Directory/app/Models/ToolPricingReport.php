@@ -58,4 +58,14 @@ class ToolPricingReport extends Model
     {
         return $query->where('tool_id', $toolId);
     }
+
+    public function scopeAutoFlagged($query)
+    {
+        return $query->whereNull('user_id');
+    }
+
+    public function scopeUserSubmitted($query)
+    {
+        return $query->whereNotNull('user_id');
+    }
 }
