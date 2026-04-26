@@ -359,17 +359,16 @@ class DirectoryAdminController extends Controller
     public function pricingDrift(Request $request): View
     {
         $cutoff90 = now()->subDays(90);
-        $cutoff180 = now()->subDays(180);
 
-        $query = Tool::published()
+        $query = Tool::published()->notArchived()
             ->where(function ($q) use ($cutoff90) {
                 $q->where('last_enriched_at', '<', $cutoff90)
                   ->orWhereNull('last_enriched_at');
             });
 
-        $totalDrifted = (clone $query)->count();
-        $neverChecked = Tool::published()->whereNull('last_enriched_at')->count();
-        $criticalDrift = Tool::published()->where('last_enriched_at', '<', $cutoff180)->count();
+        $totalDrifted = Tool::driftCount(90);
+        $neverChecked = Tool::neverCheckedCount();
+        $criticalDrift = Tool::driftCount(180);
 
         $tools = $query->orderBy('last_enriched_at', 'asc')
                        ->paginate(50)
