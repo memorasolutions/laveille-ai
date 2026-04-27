@@ -136,7 +136,7 @@ class GlossaireBatchS67Seeder extends Seeder
                     'type' => $data['type'],
                     'difficulty' => $data['difficulty'],
                     'icon' => $data['icon'],
-                    'hero_image' => 'images/glossaire/' . $data['slug'] . '.png',
+                    'hero_image' => null,
                     'dictionary_category_id' => $categoryId,
                     'is_published' => true,
                     'sort_order' => $data['sort_order'],
