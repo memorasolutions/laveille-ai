@@ -141,7 +141,10 @@ return [
         ],
 
         'emergency' => [
+            'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
+            'level' => 'emergency',
+            'replace_placeholders' => true,
         ],
 
     ],
