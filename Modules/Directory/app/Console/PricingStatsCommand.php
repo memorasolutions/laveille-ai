@@ -16,7 +16,8 @@ class PricingStatsCommand extends Command
     {
         $this->info("=== Statistiques pricing ===");
 
-        $distribution = Tool::pricingDistribution();
+        $metrics = Tool::healthMetrics();
+        $distribution = $metrics['distribution'];
         $rows = [];
         foreach ($distribution as $k => $v) {
             $rows[] = [$k, $v];
@@ -26,9 +27,6 @@ class PricingStatsCommand extends Command
         $autoFlagged = ToolPricingReport::pending()->autoFlagged()->count();
         $userSubmitted = ToolPricingReport::pending()->userSubmitted()->count();
 
-        $drifted90 = Tool::driftCount(90);
-        $neverChecked = Tool::neverCheckedCount();
-
         $this->info("Files de revision pending:");
         $this->table(['Type', 'Count'], [
             ['Auto-flag systeme', $autoFlagged],
@@ -37,8 +35,8 @@ class PricingStatsCommand extends Command
 
         $this->info("Outils avec derive (>= 90j ou jamais verifies):");
         $this->table(['Metrique', 'Count'], [
-            ['Total derive', $drifted90],
-            ['Jamais verifies', $neverChecked]
+            ['Total derive', $metrics['drift_90']],
+            ['Jamais verifies', $metrics['never_checked']]
         ]);
 
         return self::SUCCESS;
