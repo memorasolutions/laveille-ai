@@ -11,9 +11,12 @@ declare(strict_types=1);
 namespace Modules\Tools\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Tools\Models\Concerns\Shareable;
 
 class Tool extends Model
 {
+    use Shareable;
+
     protected $fillable = [
         'name',
         'slug',

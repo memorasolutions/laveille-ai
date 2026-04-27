@@ -1,4 +1,5 @@
 <!-- Partiel de bouton de partage avec Alpine.js, Bootstrap inline, SVG Lucide et gestion clipboard/share API -->
+@php $shareData = $tool->getShareData(); @endphp
 <div style="position:relative; display:inline-block;" x-data="{
     feedback: null,
     busy: false,
@@ -6,11 +7,10 @@
         if (this.busy) return;
         this.busy = true;
 
-        const title = '{{ e($tool->name) }} | Outil gratuit IA';
-        const description = '{{ e(\Illuminate\Support\Str::limit($tool->description ?? '', 200)) }}';
-        const url = 'https://laveille.ai/outils/{{ $tool->slug }}?utm_source=share&utm_medium=clipboard';
-        const keywords = this.extractKeywords('{{ e($tool->name) }}');
-        const clipboardText = `🚀 ${title}\n\n${description}\n\n✨ Pratique pour ${keywords}\n🔗 ${url}\n\n#LaVeilleDeStef #IAQuebec #OutilsIA`;
+        const title = {{ \Illuminate\Support\Js::from($shareData['title']) }};
+        const description = {{ \Illuminate\Support\Js::from($shareData['description']) }};
+        const url = {{ \Illuminate\Support\Js::from($shareData['url']) }};
+        const clipboardText = {{ \Illuminate\Support\Js::from($shareData['clipboard_text']) }};
 
         if (navigator.share && navigator.canShare && navigator.canShare({ title, text: description, url })) {
             navigator.share({ title, text: description, url })
@@ -45,17 +45,6 @@
             this.feedback = null;
             this.busy = false;
         }, 2500);
-    },
-    extractKeywords(name) {
-        const stopwords = new Set(['de', 'la', 'le', 'les', 'du', 'des', 'et', 'ou', 'pour', 'avec', 'sans', 'un', 'une', 'l', 'd']);
-        const words = name
-            .toLowerCase()
-            .split(/[^a-z0-9àâäéèêëïîôöùûüÿç\s]+/)
-            .map(w => w.trim())
-            .filter(w => w && !stopwords.has(w));
-        return words.length > 0
-            ? words.slice(0, 3).join(', ')
-            : 'productivite, efficacite, innovation';
     }
 }">
     <button

@@ -1,10 +1,12 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
+@php $shareData = $tool->getShareData(); @endphp
 @section('title', $tool->name . ' - ' . __('Outils') . ' - ' . config('app.name'))
-@section('meta_description', Str::limit(strip_tags($tool->description ?? ''), 160))
-@section('og_type', 'article')
-@section('og_image', $ogImage)
+@section('meta_description', $shareData['meta_description'])
+@section('og_type', $shareData['og_type'])
+@section('og_image', $shareData['og_image'])
+@section('share_text', $shareData['share_text'])
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

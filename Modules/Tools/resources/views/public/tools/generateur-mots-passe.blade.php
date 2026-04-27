@@ -1,6 +1,10 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
-@section('og_image', $ogImage)
+@php $shareData = $tool->getShareData(); @endphp
+@section('meta_description', $shareData['meta_description'])
+@section('og_type', $shareData['og_type'])
+@section('og_image', $shareData['og_image'])
+@section('share_text', $shareData['share_text'])
 @section('title', $tool->name . ' - ' . config('app.name'))
 @section('meta_description', 'Générateur de mots de passe sécurisé et phrases de passe. Contrôle granulaire, entropie, crypto sécurisé, passphrase diceware. Gratuit.')
 @section('breadcrumb')

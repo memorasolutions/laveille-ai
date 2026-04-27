@@ -33,12 +33,7 @@ class PublicToolController extends Controller
             $viewName = 'tools::public.show';
         }
 
-        $ogImage = asset('images/og-image.png');
-        if ($tool->featured_image && file_exists(public_path($tool->featured_image))) {
-            $ogImage = asset($tool->featured_image).'?v='.filemtime(public_path($tool->featured_image));
-        }
-
-        $data = compact('tool', 'ogImage');
+        $data = compact('tool');
 
         // Charger le fichier JSON de config si disponible pour cet outil
         $jsonPath = module_path('Tools', "resources/data/{$slug}.json");
