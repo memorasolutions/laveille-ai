@@ -4,6 +4,7 @@
 @section('title', $tool->name . ' - ' . __('Outils') . ' - ' . config('app.name'))
 @section('meta_description', Str::limit(strip_tags($tool->description ?? ''), 160))
 @section('og_type', 'article')
+@section('og_image', $ogImage)
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [

@@ -1,5 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
+@section('og_image', $ogImage)
 @section('title', $tool->name . ' - ' . config('app.name'))
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
