@@ -16,6 +16,7 @@
                             <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                             <div class="d-flex gap-1">
                                 @include('tools::partials.fullscreen-btn')
+                                @include('tools::partials.share-btn', ['tool' => $tool])
                             </div>
                         </div>
                         <p class="text-muted mb-3">{{ __('Génération sécurisée locale. Aucune donnée n\'est envoyée à un serveur.') }}</p>

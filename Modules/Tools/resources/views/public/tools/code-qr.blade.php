@@ -18,6 +18,7 @@
                             </div>
                             <div class="d-flex gap-1">
                                 @include('tools::partials.fullscreen-btn')
+                                @include('tools::partials.share-btn', ['tool' => $tool])
                                 <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#qrHelpModal').modal('show')" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;flex-shrink:0;" title="{{ __('Aide') }}">?</button>
                             </div>
                         </div>

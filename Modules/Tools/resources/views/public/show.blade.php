@@ -19,7 +19,10 @@
                 <div class="col-lg-10 col-12">
                     <div class="card shadow-sm" style="border-radius: var(--r-base);">
                         <div class="card-body p-4 p-md-5">
-                            <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ $tool->name }}</h1>
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ $tool->name }}</h1>
+                                @include('tools::partials.share-btn', ['tool' => $tool])
+                            </div>
                             <p class="text-muted mb-4">{{ $tool->description }}</p>
                             <div class="alert alert-info">
                                 {{ __('Cet outil sera bientôt disponible.') }}

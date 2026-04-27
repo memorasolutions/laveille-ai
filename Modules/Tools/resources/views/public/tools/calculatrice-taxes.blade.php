@@ -53,6 +53,7 @@
                             <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
                             <div class="d-flex gap-1">
                                 @include('tools::partials.fullscreen-btn')
+                                @include('tools::partials.share-btn', ['tool' => $tool])
                             </div>
                         </div>
                         <p class="text-muted mb-4">{{ __('Calculez les taxes de vente (TPS, TVQ, TVP, TVH) pour toutes les provinces et territoires du Canada. Inclut pourboire et division de facture.') }}</p>
