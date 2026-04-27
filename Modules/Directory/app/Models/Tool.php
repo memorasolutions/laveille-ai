@@ -251,6 +251,18 @@ class Tool extends Model implements Searchable
             ->toArray();
     }
 
+    public static function healthMetrics(): array
+    {
+        return [
+            'distribution' => self::pricingDistribution(),
+            'status' => self::countByStatus(),
+            'drift_90' => self::driftCount(90),
+            'drift_180' => self::driftCount(180),
+            'never_checked' => self::neverCheckedCount(),
+            'pending_reports' => \Modules\Directory\Models\ToolPricingReport::pendingCount(),
+        ];
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(ToolReview::class, 'directory_tool_id');
