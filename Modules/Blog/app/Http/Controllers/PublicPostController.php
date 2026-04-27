@@ -12,6 +12,7 @@ namespace Modules\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Blog\Models\Article;
@@ -30,7 +31,7 @@ class PublicPostController extends Controller
         );
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $locale = app()->getLocale();
 
