@@ -242,6 +242,15 @@ class Tool extends Model implements Searchable
             ->count();
     }
 
+    public static function countByStatus(): array
+    {
+        return self::query()
+            ->selectRaw('status, count(*) as cnt')
+            ->groupBy('status')
+            ->pluck('cnt', 'status')
+            ->toArray();
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(ToolReview::class, 'directory_tool_id');
