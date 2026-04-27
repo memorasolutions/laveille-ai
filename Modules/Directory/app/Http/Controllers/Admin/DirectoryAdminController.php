@@ -366,15 +366,16 @@ class DirectoryAdminController extends Controller
                   ->orWhereNull('last_enriched_at');
             });
 
-        $totalDrifted = Tool::driftCount(90);
-        $neverChecked = Tool::neverCheckedCount();
-        $criticalDrift = Tool::driftCount(180);
+        $healthMetrics = Tool::healthMetrics();
+        $totalDrifted = $healthMetrics['drift_90'];
+        $neverChecked = $healthMetrics['never_checked'];
+        $criticalDrift = $healthMetrics['drift_180'];
+        $distribution = $healthMetrics['distribution'];
 
         $tools = $query->orderBy('last_enriched_at', 'asc')
                        ->paginate(50)
                        ->withQueryString();
 
-        $distribution = Tool::pricingDistribution();
         $autoFlaggedPending = ToolPricingReport::pending()->autoFlagged()->count();
         $userSubmittedPending = ToolPricingReport::pending()->userSubmitted()->count();
 
