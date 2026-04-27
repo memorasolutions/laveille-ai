@@ -145,6 +145,12 @@ class RefreshPricingCommand extends Command
             'low_confidence' => $lowConfidence,
         ]);
 
+        if (!$dryRun && ($modified > 0 || $lowConfidence > 0)) {
+            Tool::flushHealthMetricsCache();
+        } elseif ($dryRun) {
+            Log::info('DRY-RUN cache flush skipped');
+        }
+
         $this->info("Verified: {$verified}, Modified: {$modified}, Errors: {$errors}, Low Confidence: {$lowConfidence}");
 
         return self::SUCCESS;

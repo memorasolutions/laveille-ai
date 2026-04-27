@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasLifecycleStatus;
 use Modules\Core\Traits\HasSponsorship;
@@ -251,16 +252,27 @@ class Tool extends Model implements Searchable
             ->toArray();
     }
 
+    public const HEALTH_METRICS_TTL = 300;
+
+    public const HEALTH_METRICS_CACHE_KEY = 'tool.health_metrics';
+
     public static function healthMetrics(): array
     {
-        return [
-            'distribution' => self::pricingDistribution(),
-            'status' => self::countByStatus(),
-            'drift_90' => self::driftCount(90),
-            'drift_180' => self::driftCount(180),
-            'never_checked' => self::neverCheckedCount(),
-            'pending_reports' => \Modules\Directory\Models\ToolPricingReport::pendingCount(),
-        ];
+        return Cache::remember(self::HEALTH_METRICS_CACHE_KEY, self::HEALTH_METRICS_TTL, function () {
+            return [
+                'distribution' => self::pricingDistribution(),
+                'status' => self::countByStatus(),
+                'drift_90' => self::driftCount(90),
+                'drift_180' => self::driftCount(180),
+                'never_checked' => self::neverCheckedCount(),
+                'pending_reports' => \Modules\Directory\Models\ToolPricingReport::pendingCount(),
+            ];
+        });
+    }
+
+    public static function flushHealthMetricsCache(): void
+    {
+        Cache::forget(self::HEALTH_METRICS_CACHE_KEY);
     }
 
     public function reviews(): HasMany
