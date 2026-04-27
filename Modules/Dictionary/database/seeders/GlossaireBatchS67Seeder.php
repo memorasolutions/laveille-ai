@@ -90,7 +90,7 @@ class GlossaireBatchS67Seeder extends Seeder
                 'icon' => '🕵️',
                 'sort_order' => 206,
                 'definition' => "Le Shadow AI désigne l'usage non autorisé d'outils d'intelligence artificielle (comme ChatGPT ou Gemini) par des employés, sans supervision ni contrôle de l'équipe informatique. Ce phénomène expose l'entreprise à des fuites de données, des violations de la Loi 25 ou du RGPD, et à des risques liés à la propriété intellectuelle.",
-                'analogy' => "C'est l'équivalent numérique d'un employé qui installe un coffre-fort non homologué dans les locaux.",
+                'analogy' => "C'est l'équivalent moderne des clés USB personnelles branchées en cachette sur les postes de travail.",
                 'example' => "Un comptable d'une PME montréalaise utilise ChatGPT pour résumer des états financiers confidentiels, exposant des données clients.",
                 'did_you_know' => "Près de 50% des employés de PME québécoises utilisent des outils IA personnels au travail sans en informer leur direction.",
                 'acronym_full' => null,
