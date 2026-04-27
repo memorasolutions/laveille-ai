@@ -29,8 +29,10 @@ Schedule::command('tools:expire-featured')->dailyAt('02:45')->withoutOverlapping
 // Health checks
 Schedule::command('health:check')->everyMinute();
 
-// Telescope cleanup (48h — skip si Telescope désactivé/non publié en prod)
-Schedule::command('telescope:prune --hours=48')->everyTwoHours()->when(fn () => (bool) config('telescope.enabled', false));
+// Telescope cleanup (48h — skip si package non installé OU désactivé en prod)
+if (class_exists(\Laravel\Telescope\Telescope::class)) {
+    Schedule::command('telescope:prune --hours=48')->everyTwoHours()->when(fn () => (bool) config('telescope.enabled', false));
+}
 
 // Queue maintenance
 Schedule::command('queue:prune-batches --hours=48')->cron('30 2 * * *');
