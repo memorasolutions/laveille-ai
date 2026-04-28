@@ -27,10 +27,11 @@ class UpdateDefiW18Command extends Command
 
         $content = $issue->content ?? [];
 
-        // Terme IA W18 = Gartner Hype Cycle (slug "gartner" ou "gartner-hype-cycle")
-        $gartnerTerm = \Modules\Dictionary\Models\Term::where('slug', 'gartner')
-            ->orWhere('slug', 'gartner-hype-cycle')
-            ->first();
+        // Terme IA W18 = Gartner (id 183 confirmé prod, fallback like %gartner% si id introuvable)
+        $gartnerTerm = \Modules\Dictionary\Models\Term::find(183);
+        if (! $gartnerTerm) {
+            $gartnerTerm = \Modules\Dictionary\Models\Term::where('slug', 'like', '%gartner%')->first();
+        }
         if ($gartnerTerm) {
             $content['term_id'] = $gartnerTerm->id;
         }
