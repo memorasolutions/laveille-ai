@@ -218,6 +218,36 @@
                     </table>
                 </td></tr>
                 @endif
+                @if(is_array($weeklyPrompt) && ($weeklyPrompt['best_practices'] ?? null) && is_array($weeklyPrompt['best_practices']))
+                @php $bp = $weeklyPrompt['best_practices']; @endphp
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        <tr><td align="center" style="padding-bottom:10px;"><strong style="color:#e2e8f0;font-size:14px;">{{ $bp['title'] ?? '📊 Algorithme LinkedIn 2026 — ce qui marche vraiment' }}</strong></td></tr>
+                        <tr>
+                            <td width="50%" valign="top" style="padding-right:6px;" class="stack-col">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#1e3a2e;border-radius:6px;">
+                                    <tr><td style="padding:14px;color:#d1fae5;font-size:13px;line-height:1.6;">
+                                        <strong style="color:#34d399;font-size:14px;">✅ {{ $bp['to_do_label'] ?? 'À FAIRE' }}</strong>
+                                        @foreach(($bp['to_do'] ?? []) as $idx => $item)
+                                        <br/><br/>{{ $idx + 1 }}. {!! e($item) !!}
+                                        @endforeach
+                                    </td></tr>
+                                </table>
+                            </td>
+                            <td width="50%" valign="top" style="padding-left:6px;" class="stack-col">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#3a1e1e;border-radius:6px;">
+                                    <tr><td style="padding:14px;color:#fecaca;font-size:13px;line-height:1.6;">
+                                        <strong style="color:#f87171;font-size:14px;">❌ {{ $bp['to_avoid_label'] ?? 'À ÉVITER' }}</strong>
+                                        @foreach(($bp['to_avoid'] ?? []) as $idx => $item)
+                                        <br/><br/>{{ $idx + 1 }}. {!! e($item) !!}
+                                        @endforeach
+                                    </td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td></tr>
+                @endif
                 <tr><td align="center" style="padding-bottom:8px;font-size:13px;color:#94a3b8;">Copiez ce prompt et collez-le dans ChatGPT, Claude ou Gemini pour voir le résultat.</td></tr>
                 <tr><td align="center">
                     <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>

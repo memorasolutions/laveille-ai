@@ -29,6 +29,7 @@ class NewsletterServiceProvider extends BaseModuleServiceProvider
         $this->commands([
             \Modules\Newsletter\Console\DigestCommand::class,
             \Modules\Newsletter\Console\ProcessWorkflowsCommand::class,
+            \Modules\Newsletter\Console\UpdateDefiW18Command::class,
         ]);
 
         Event::listen(Registered::class, [WorkflowTriggerListener::class, 'handleRegistered']);
