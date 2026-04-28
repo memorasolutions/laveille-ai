@@ -32,7 +32,7 @@ class NewsArticle extends Model implements Searchable
         'summary', 'image_url', 'author', 'pub_date', 'is_published',
         'relevance_score', 'score_justification', 'structured_summary',
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
-        'short_url_id', 'views_count',
+        'short_url_id', 'views_count', 'canonical_url', 'is_potential_duplicate_of', 'dedup_score', 'dedup_reason',
     ];
 
     protected $casts = [
@@ -40,6 +40,8 @@ class NewsArticle extends Model implements Searchable
         'is_published' => 'boolean',
         'structured_summary' => 'array',
         'relevance_score' => 'integer',
+        'is_potential_duplicate_of' => 'integer',
+        'dedup_score' => 'float',
     ];
 
     protected static function booted(): void
@@ -81,6 +83,16 @@ class NewsArticle extends Model implements Searchable
         return $this->belongsTo(NewsSource::class, 'news_source_id');
     }
 
+    public function originalArticle(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'is_potential_duplicate_of');
+    }
+
+    public function duplicates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(self::class, 'is_potential_duplicate_of');
+    }
+
     public function shortUrl(): ?BelongsTo
     {
         if (! class_exists(\Modules\ShortUrl\Models\ShortUrl::class)) {
@@ -109,6 +121,11 @@ class NewsArticle extends Model implements Searchable
     public function scopeRecent(Builder $query): Builder
     {
         return $query->orderBy('pub_date', 'desc');
+    }
+
+    public function scopePotentialDuplicates(Builder $query): Builder
+    {
+        return $query->whereNotNull('is_potential_duplicate_of');
     }
 
     public static function searchableFields(): array
