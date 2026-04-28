@@ -63,7 +63,7 @@
                                             <a href="{{ route('admin.newsletter.templates.edit', $template) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
                                                 <i data-lucide="pencil"></i>
                                             </a>
-                                            <form method="POST" action="{{ route('admin.newsletter.templates.destroy', $template) }}" onsubmit="return confirm('Supprimer ce template ?')">
+                                            <form method="POST" action="{{ route('admin.newsletter.templates.destroy', $template) }}" data-confirm="Supprimer ce template ?">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                                     <i data-lucide="trash-2"></i>

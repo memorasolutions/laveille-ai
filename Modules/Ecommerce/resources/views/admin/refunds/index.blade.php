@@ -62,14 +62,14 @@
                                 <td class="text-end">
                                     @if($refund->status === 'pending')
                                     <div class="d-flex justify-content-end gap-2">
-                                        <form action="{{ route('admin.ecommerce.refunds.approve', $refund) }}" method="POST" onsubmit="return confirm('Approuver ce remboursement ?');">
+                                        <form action="{{ route('admin.ecommerce.refunds.approve', $refund) }}" method="POST" data-confirm="Approuver ce remboursement ?">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-outline-success btn-icon" title="Approuver">
                                                 <i data-lucide="check"></i>
                                             </button>
                                         </form>
-                                        <form action="{{ route('admin.ecommerce.refunds.reject', $refund) }}" method="POST" onsubmit="return confirm('Refuser ce remboursement ?');">
+                                        <form action="{{ route('admin.ecommerce.refunds.reject', $refund) }}" method="POST" data-confirm="Refuser ce remboursement ?">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-outline-danger btn-icon" title="Refuser">

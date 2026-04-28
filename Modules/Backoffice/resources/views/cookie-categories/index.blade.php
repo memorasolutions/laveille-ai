@@ -43,7 +43,7 @@
                         <td>
                             <a href="{{ route('admin.cookie-categories.edit', $category) }}" class="btn btn-sm btn-outline-primary me-1">Modifier</a>
                             @unless($category->required)
-                            <form action="{{ route('admin.cookie-categories.destroy', $category) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette catégorie ?')">
+                            <form action="{{ route('admin.cookie-categories.destroy', $category) }}" method="POST" class="d-inline" data-confirm="Supprimer cette catégorie ?">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>

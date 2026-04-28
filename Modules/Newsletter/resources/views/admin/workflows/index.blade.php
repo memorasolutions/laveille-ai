@@ -62,7 +62,7 @@
                                             <a href="{{ route('admin.newsletter.workflows.edit', $workflow) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
                                                 <i data-lucide="pencil"></i>
                                             </a>
-                                            <form method="POST" action="{{ route('admin.newsletter.workflows.destroy', $workflow) }}" onsubmit="return confirm('Supprimer ce workflow ?')">
+                                            <form method="POST" action="{{ route('admin.newsletter.workflows.destroy', $workflow) }}" data-confirm="Supprimer ce workflow ?">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                                     <i data-lucide="trash-2"></i>

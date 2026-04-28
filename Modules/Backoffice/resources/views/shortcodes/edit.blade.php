@@ -70,7 +70,7 @@
             </div>
         </form>
 
-        <form method="POST" action="{{ route('admin.shortcodes.destroy', $shortcode) }}" onsubmit="return confirm('Supprimer ce shortcode ?')" class="mt-4">
+        <form method="POST" action="{{ route('admin.shortcodes.destroy', $shortcode) }}" data-confirm="Supprimer ce shortcode ?" class="mt-4">
             @csrf
             @method('DELETE')
             <button type="submit" class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700">

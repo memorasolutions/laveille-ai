@@ -70,7 +70,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <a href="{{ route('admin.newsletter.digest.preview', $issue) }}" class="btn btn-outline-secondary" target="_blank">Voir l'aperçu email</a>
                 @if($issue->status !== 'sent')
-                <form action="{{ route('admin.newsletter.digest.send', $issue) }}" method="POST" onsubmit="return confirm('Envoyer cette newsletter à tous les abonnés maintenant ?');">
+                <form action="{{ route('admin.newsletter.digest.send', $issue) }}" method="POST" data-confirm="Envoyer cette newsletter à tous les abonnés maintenant ?">
                     @csrf
                     <button type="submit" class="btn btn-success">Envoyer maintenant</button>
                 </form>

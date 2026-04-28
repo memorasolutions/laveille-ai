@@ -107,7 +107,7 @@
                                             </button>
                                             <form action="{{ route('admin.redirects.destroy', $redirect) }}"
                                                   method="POST" class="d-inline"
-                                                  onsubmit="return confirm('Supprimer cette redirection ?')">
+                                                  data-confirm="Supprimer cette redirection ?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-danger btn-sm">

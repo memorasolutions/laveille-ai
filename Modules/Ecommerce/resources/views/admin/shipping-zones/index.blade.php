@@ -58,7 +58,7 @@
                                         <a href="{{ route('admin.ecommerce.shipping-zones.edit', $zone) }}" class="btn btn-sm btn-outline-primary btn-icon" title="Modifier">
                                             <i data-lucide="edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.ecommerce.shipping-zones.destroy', $zone) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Supprimer cette zone ?');">
+                                        <form action="{{ route('admin.ecommerce.shipping-zones.destroy', $zone) }}" method="POST" class="d-inline-block" data-confirm="Supprimer cette zone ?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger btn-icon" title="Supprimer">

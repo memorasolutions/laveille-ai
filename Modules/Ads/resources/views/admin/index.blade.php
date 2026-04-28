@@ -45,7 +45,7 @@
                         </td>
                         <td class="text-end">
                             <a href="{{ route('admin.ads.edit', $ad) }}" class="btn btn-outline-primary btn-icon btn-sm"><i data-feather="edit"></i></a>
-                            <form action="{{ route('admin.ads.destroy', $ad) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette publicité ?')">
+                            <form action="{{ route('admin.ads.destroy', $ad) }}" method="POST" class="d-inline" data-confirm="Supprimer cette publicité ?">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-outline-danger btn-icon btn-sm"><i data-feather="trash-2"></i></button>
                             </form>

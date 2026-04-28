@@ -62,7 +62,7 @@
                                             <a href="{{ route('admin.booking.intake-questions.edit', $question) }}" class="btn btn-outline-primary" title="Modifier">
                                                 <i data-lucide="edit-2"></i>
                                             </a>
-                                            <form action="{{ route('admin.booking.intake-questions.destroy', $question) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cette question ?');">
+                                            <form action="{{ route('admin.booking.intake-questions.destroy', $question) }}" method="POST" class="d-inline" data-confirm="Supprimer cette question ?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-danger" title="Supprimer">

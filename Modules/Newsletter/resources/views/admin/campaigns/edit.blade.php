@@ -63,7 +63,7 @@
                 <h6 class="mb-0 text-danger">Zone dangereuse</h6>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('admin.newsletter.campaigns.destroy', $campaign) }}" onsubmit="return confirm('Supprimer cette campagne ?');">
+                <form method="POST" action="{{ route('admin.newsletter.campaigns.destroy', $campaign) }}" data-confirm="Supprimer cette campagne ?">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-outline-danger btn-sm w-100">Supprimer la campagne</button>

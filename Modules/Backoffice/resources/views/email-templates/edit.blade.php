@@ -55,7 +55,7 @@
                         </div>
                     </form>
 
-                    <form method="POST" action="{{ route('admin.email-templates.reset', $emailTemplate) }}" class="mt-3" x-data onsubmit="return confirm('Restaurer ce template aux valeurs par défaut ?')">
+                    <form method="POST" action="{{ route('admin.email-templates.reset', $emailTemplate) }}" class="mt-3" x-data data-confirm="Restaurer ce template aux valeurs par défaut ?">
                         @csrf
                         <button type="submit" class="btn btn-outline-danger rounded-2">Restaurer les valeurs par défaut</button>
                     </form>

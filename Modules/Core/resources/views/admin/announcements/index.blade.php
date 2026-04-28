@@ -93,7 +93,7 @@
                                             </a>
                                             <form action="{{ route('admin.announcements.destroy', $announcement) }}"
                                                   method="POST" class="d-inline"
-                                                  onsubmit="return confirm('Supprimer cette annonce ?')">
+                                                  data-confirm="Supprimer cette annonce ?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-danger btn-sm">

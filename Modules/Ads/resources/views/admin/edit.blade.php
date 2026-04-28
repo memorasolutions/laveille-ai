@@ -15,7 +15,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="card-title m-0">{{ __('Modifier la publicité') }}</h6>
-                    <form action="{{ route('admin.ads.destroy', $ad) }}" method="POST" onsubmit="return confirm('Supprimer cette publicité ?')">
+                    <form action="{{ route('admin.ads.destroy', $ad) }}" method="POST" data-confirm="Supprimer cette publicité ?">
                         @csrf @method('DELETE')
                         <button class="btn btn-outline-danger btn-sm">{{ __('Supprimer') }}</button>
                     </form>

@@ -153,7 +153,7 @@
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form method="POST" action="{{ route('admin.short-urls.destroy', $shortUrl) }}"
-                                                  onsubmit="return confirm('Supprimer ce lien court ?');">
+                                                  data-confirm="Supprimer ce lien court ?">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="dropdown-item text-danger">

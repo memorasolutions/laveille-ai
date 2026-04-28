@@ -59,7 +59,7 @@
                                         <a href="{{ route('admin.booking.webhooks.edit', $webhook) }}" class="btn btn-outline-primary" title="Modifier">
                                             <i data-lucide="edit-2"></i>
                                         </a>
-                                        <form action="{{ route('admin.booking.webhooks.destroy', $webhook) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ce webhook ?')">
+                                        <form action="{{ route('admin.booking.webhooks.destroy', $webhook) }}" method="POST" class="d-inline" data-confirm="Supprimer ce webhook ?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger" title="Supprimer">

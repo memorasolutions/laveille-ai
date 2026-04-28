@@ -101,7 +101,7 @@
                             <a href="{{ route('admin.users.show', $user) }}" class="text-gray-600 hover:underline dark:text-gray-400">Voir</a>
                             <a href="{{ route('admin.users.edit', $user) }}" class="text-indigo-600 hover:underline dark:text-indigo-400">Modifier</a>
                             @if($user->id !== auth()->id())
-                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Supprimer cet utilisateur ?')">
+                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" data-confirm="Supprimer cet utilisateur ?">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline dark:text-red-400">Supprimer</button>
                                 </form>
