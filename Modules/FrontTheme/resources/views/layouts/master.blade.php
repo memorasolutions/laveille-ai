@@ -360,21 +360,46 @@
         <img :src="src" :alt="alt" @click.stop style="max-width:95%;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 0 40px rgba(0,0,0,0.5);cursor:default;">
     </div>
 
-    {{-- Modale confirmation réutilisable (remplace confirm() natif) --}}
-    <div x-data="{ open: false, title: '', message: '' }"
-         @confirm-action.window="open = true; title = $event.detail.title || 'Confirmer'; message = $event.detail.message || ''; if ($event.detail.action) window.__confirmAction = $event.detail.action"
-         @click.self="open = false"
-         :style="open ? 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;' : 'display:none'">
-        <div @click.stop style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
-            <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
-            <template x-if="title"><h2 aria-live="polite" style="font-weight:700;color:var(--c-dark,#1a1a2e);margin:0 0 8px;font-size:17px;" x-text="title"></h2></template>
-            <p style="color:#374151;font-size:14px;margin:0 0 20px;line-height:1.5;" x-text="message"></p>
-            <div style="display:flex!important;gap:10px;justify-content:center!important;">
-                <button @click="open = false" style="padding:10px 24px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;color:#374151;font-size:14px;">{{ __('Annuler') }}</button>
-                <button @click="if(window.__confirmAction){window.__confirmAction()};open = false" style="padding:10px 24px;border:none;border-radius:8px;background:#991B1B;color:#fff;cursor:pointer;font-weight:600;font-size:14px;">{{ __('Confirmer') }}</button>
-            </div>
-        </div>
-    </div>
+    {{-- Composants globaux confirm-modal + alert-toast (S71 Phase 2) --}}
+    <x-core::confirm-modal name="global" />
+    <x-core::alert-toast />
+
+    {{-- Délégué global : <form data-confirm="message"> ou <a/button data-confirm="message" data-href="..."> --}}
+    <script>
+    (function(){
+      function dispatch(message, callback){
+        window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: message, callback: callback } }));
+      }
+      // Forms : intercepte submit
+      document.addEventListener('submit', function(e){
+        var form = e.target.closest('form[data-confirm]');
+        if (!form || form.dataset.confirmed === '1') return;
+        e.preventDefault();
+        dispatch(form.dataset.confirm, function(){ form.dataset.confirmed = '1'; form.submit(); });
+      }, true);
+      // Liens/boutons : intercepte click + suit href
+      document.addEventListener('click', function(e){
+        var el = e.target.closest('[data-confirm]:not(form):not([type="submit"])');
+        if (!el || el.dataset.confirmed === '1') return;
+        e.preventDefault();
+        dispatch(el.dataset.confirm, function(){
+          el.dataset.confirmed = '1';
+          if (el.tagName === 'A' && el.href) window.location.href = el.href;
+          else if (el.dataset.href) window.location.href = el.dataset.href;
+          else el.click();
+        });
+      }, true);
+      // Bridge legacy event @confirm-action.window pour rétro-compat
+      window.addEventListener('confirm-action', function(e){
+        var d = e.detail || {};
+        dispatch(d.message || '', d.action);
+      });
+      // Helper global toast
+      window.toast = function(message, variant, duration){
+        window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: message, variant: variant || 'success', duration: duration || 4000 } }));
+      };
+    })();
+    </script>
     {{-- Speculation Rules API — prefetch/prerender navigation instantanee --}}
     <script type="speculationrules">
     {
