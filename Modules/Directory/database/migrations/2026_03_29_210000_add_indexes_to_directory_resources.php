@@ -11,6 +11,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         $indexes = collect(DB::select('SHOW INDEX FROM directory_resources'))->pluck('Key_name')->unique()->toArray();
         Schema::table('directory_resources', function (Blueprint $table) use ($indexes) {
             if (!in_array('idx_dr_tool_approved', $indexes)) {

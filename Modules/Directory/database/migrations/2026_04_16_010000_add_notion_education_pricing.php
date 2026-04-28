@@ -7,6 +7,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         DB::table('directory_tools')
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(slug, '$.\"fr_CA\"')) = ?", ['notion-ai'])
             ->update([
@@ -22,6 +25,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         DB::table('directory_tools')
             ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(slug, '$.\"fr_CA\"')) = ?", ['notion-ai'])
             ->update([
