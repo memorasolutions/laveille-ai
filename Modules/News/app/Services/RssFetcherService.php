@@ -78,6 +78,39 @@ class RssFetcherService
                     'is_published' => false,
                 ]);
 
+                // Step 3b OBSERVATION ONLY : DedupService cascade S70 détection cross-source faux-négatifs
+                if (class_exists(\Modules\News\Services\DedupService::class)) {
+                    try {
+                        $candidates = NewsArticle::where('created_at', '>=', Carbon::now()->subDays(3))
+                            ->where('id', '!=', $article->id)
+                            ->select('id', 'title', 'url', 'resolved_url', 'pub_date')
+                            ->limit(50)
+                            ->get();
+                        foreach ($candidates as $candidate) {
+                            $signals = [];
+                            $result = \Modules\News\Services\DedupService::isLikelyDuplicate(
+                                ['url' => $itemFullUrl, 'title' => $itemTitle, 'published_at' => $article->pub_date?->toIso8601String()],
+                                ['url' => $candidate->resolved_url ?? $candidate->url, 'title' => $candidate->title, 'published_at' => $candidate->pub_date?->toIso8601String()],
+                                $signals
+                            );
+                            if ($result['is_duplicate']) {
+                                Log::info(sprintf(
+                                    'DEDUP-OBSERVE: article #%d "%s" matched #%d "%s" (score=%.3f, reason=%s) [observation only, no DB write]',
+                                    $article->id,
+                                    Str::limit($itemTitle, 60),
+                                    $candidate->id,
+                                    Str::limit($candidate->title, 60),
+                                    $result['score'],
+                                    $result['reason']
+                                ));
+                                break;
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('DEDUP-OBSERVE error: ' . $e->getMessage());
+                    }
+                }
+
                 // Résoudre URL Google News vers article original (utilise URL complète non-tronquée)
                 if (GoogleNewsResolver::isGoogleNewsUrl($itemFullUrl)) {
                     $resolvedUrl = app(GoogleNewsResolver::class)->resolve($itemFullUrl);
