@@ -46,7 +46,7 @@
 
                                     <div class="mt-4">
                                         <form method="POST" action="{{ route('booking.portal.cancel', [$customer->portal_token, $appointment->id]) }}"
-                                              onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?')">
+                                              data-confirm="Êtes-vous sûr de vouloir annuler ce rendez-vous ?">
                                             @csrf
                                             <button type="submit" class="btn btn-outline-danger btn-sm w-100">
                                                 Annuler le rendez-vous

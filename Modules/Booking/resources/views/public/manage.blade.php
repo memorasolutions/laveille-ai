@@ -43,7 +43,7 @@
                 @if(! in_array($appointment->status, ['cancelled', 'completed']))
                 <hr>
                 <h6 class="text-danger mb-3">Annuler ce rendez-vous</h6>
-                <form action="{{ route('booking.cancel', $appointment->cancel_token) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler ?')">
+                <form action="{{ route('booking.cancel', $appointment->cancel_token) }}" method="POST" data-confirm="Êtes-vous sûr de vouloir annuler ?">
                     @csrf
                     <div class="mb-3">
                         <textarea name="reason" class="form-control" rows="2" placeholder="Raison de l'annulation (optionnel)"></textarea>
