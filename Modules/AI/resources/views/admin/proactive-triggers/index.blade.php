@@ -82,7 +82,7 @@
                                 data-is-active="{{ $trigger->is_active ? '1' : '0' }}">
                                 <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
                             </button>
-                            <form action="{{ route('admin.ai.proactive-triggers.destroy', $trigger) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Êtes-vous sûr ?') }}')">
+                            <form action="{{ route('admin.ai.proactive-triggers.destroy', $trigger) }}" method="POST" class="d-inline" data-confirm="{{ __('Êtes-vous sûr ?') }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-outline-danger">

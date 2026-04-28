@@ -181,7 +181,7 @@
                                 <a href="{{ route('admin.ai.conversations.show', $conversation) }}" class="btn btn-outline-primary" title="{{ __('Voir') }}">
                                     <i data-lucide="eye" style="width:14px;height:14px;"></i>
                                 </a>
-                                <form action="{{ route('admin.ai.conversations.destroy', $conversation) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Fermer cette conversation ?') }}');">
+                                <form action="{{ route('admin.ai.conversations.destroy', $conversation) }}" method="POST" class="d-inline" data-confirm="{{ __('Fermer cette conversation ?') }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-outline-danger" title="{{ __('Fermer') }}">

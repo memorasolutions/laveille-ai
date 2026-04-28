@@ -65,7 +65,7 @@
                                 <i data-lucide="{{ $channel->is_active ? 'pause' : 'play' }}" style="width:14px;height:14px;"></i>
                             </button>
                         </form>
-                        <form method="POST" action="{{ route('admin.ai.channels.destroy', $channel) }}" class="d-inline" onsubmit="return confirm('{{ __('Supprimer ce canal ?') }}')">
+                        <form method="POST" action="{{ route('admin.ai.channels.destroy', $channel) }}" class="d-inline" data-confirm="{{ __('Supprimer ce canal ?') }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger">

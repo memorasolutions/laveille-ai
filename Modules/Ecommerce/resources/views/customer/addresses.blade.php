@@ -44,7 +44,7 @@
                 @if($address->phone)<p class="mb-0 mt-1 text-muted"><i data-lucide="phone" class="icon-sm me-1"></i>{{ $address->phone }}</p>@endif
             </div>
             <div class="card-footer d-flex gap-2">
-                <form action="{{ route('customer.addresses.destroy', $address) }}" method="POST" onsubmit="return confirm('{{ __('Supprimer cette adresse ?') }}')">
+                <form action="{{ route('customer.addresses.destroy', $address) }}" method="POST" data-confirm="{{ __('Supprimer cette adresse ?') }}">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-outline-danger"><i data-lucide="trash-2" class="icon-sm"></i></button>
                 </form>

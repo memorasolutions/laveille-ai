@@ -132,7 +132,7 @@
                                     </a>
                                     <hr class="dropdown-divider">
                                     <form action="{{ route('admin.shortcodes.destroy', $shortcode) }}" method="POST"
-                                          onsubmit="return confirm('{{ __('Supprimer ce shortcode ?') }}')">
+                                          data-confirm="{{ __('Supprimer ce shortcode ?') }}">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
                                             <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}

@@ -85,7 +85,7 @@
                                 <a href="{{ route('admin.contact-messages.show', $msg) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Voir') }}">
                                     <i data-lucide="eye"></i>
                                 </a>
-                                <form action="{{ route('admin.contact-messages.destroy', $msg) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer ce message ?') }}');">
+                                <form action="{{ route('admin.contact-messages.destroy', $msg) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ce message ?') }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer ce message ?') }}')) this.closest('form').submit()">

@@ -147,7 +147,7 @@
                                         <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                     </a>
                                     <form action="{{ route('admin.blog.articles.destroy', $article) }}" method="POST"
-                                          onsubmit="return confirm('{{ __('Supprimer cet article ?') }}')">
+                                          data-confirm="{{ __('Supprimer cet article ?') }}">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                                 class="dropdown-item d-flex align-items-center gap-2 text-danger">

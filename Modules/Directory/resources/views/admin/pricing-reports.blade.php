@@ -93,13 +93,13 @@
                                 </td>
                                 <td>
                                     @if($report->status === 'pending')
-                                        <form action="{{ route('admin.directory.pricing-reports.approve', $report) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Confirmer l\'approbation de ce signalement ?') }}')">
+                                        <form action="{{ route('admin.directory.pricing-reports.approve', $report) }}" method="POST" class="d-inline" data-confirm="{{ __('Confirmer l\'approbation de ce signalement ?') }}">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" aria-label="{{ __('Approuver') }}">
                                                 <i data-lucide="check"></i>
                                             </button>
                                         </form>
-                                        <form action="{{ route('admin.directory.pricing-reports.reject', $report) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Confirmer le rejet de ce signalement ?') }}')">
+                                        <form action="{{ route('admin.directory.pricing-reports.reject', $report) }}" method="POST" class="d-inline" data-confirm="{{ __('Confirmer le rejet de ce signalement ?') }}">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-danger" aria-label="{{ __('Rejeter') }}">
                                                 <i data-lucide="x"></i>

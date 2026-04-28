@@ -49,7 +49,7 @@
                                     @csrf @method('PATCH')
                                     <button type="submit" class="btn btn-outline-warning btn-sm">{{ $source->active ? __('Désactiver') : __('Activer') }}</button>
                                 </form>
-                                <form action="{{ route('admin.news.sources.destroy', $source) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette source et tous ses articles ?') }}')">
+                                <form action="{{ route('admin.news.sources.destroy', $source) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette source et tous ses articles ?') }}">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm">{{ __('Supprimer') }}</button>
                                 </form>

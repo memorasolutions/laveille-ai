@@ -97,7 +97,7 @@
                 <hr class="my-4">
 
                 <form method="POST" action="{{ route('admin.email-templates.reset', $emailTemplate) }}"
-                    onsubmit="return confirm('{{ __('Restaurer ce template aux valeurs par défaut ?') }}')">
+                    data-confirm="{{ __('Restaurer ce template aux valeurs par défaut ?') }}">
                     @csrf
                     <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-2">
                         <i data-lucide="rotate-ccw" class="icon-sm"></i>

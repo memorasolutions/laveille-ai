@@ -60,7 +60,7 @@
                                         <a href="{{ route('admin.roadmap.boards.edit', $board) }}" class="btn btn-outline-primary" title="{{ __('Modifier') }}">
                                             <i data-lucide="pencil"></i>
                                         </a>
-                                        <form action="{{ route('admin.roadmap.boards.destroy', $board) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Êtes-vous sûr de vouloir supprimer ce tableau ?') }}');">
+                                        <form action="{{ route('admin.roadmap.boards.destroy', $board) }}" method="POST" class="d-inline" data-confirm="{{ __('Êtes-vous sûr de vouloir supprimer ce tableau ?') }}">
                                             @method('DELETE')
                                             @csrf
                                             <button type="submit" class="btn btn-outline-danger" title="{{ __('Supprimer') }}">

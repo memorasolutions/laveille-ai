@@ -166,7 +166,7 @@
                                     </a>
                                     @if($user->id !== auth()->id())
                                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                              onsubmit="return confirm('{{ __('Confirmer la suppression ?') }}')">
+                                              data-confirm="{{ __('Confirmer la suppression ?') }}">
                                             @csrf @method('DELETE')
                                             <button type="submit"
                                                     class="dropdown-item d-flex align-items-center gap-2 text-danger">
@@ -176,7 +176,7 @@
                                     @endif
                                     @if(auth()->user()->hasRole('super_admin') && !$user->hasRole('super_admin') && $user->id !== auth()->id())
                                         <form action="{{ route('admin.users.impersonate', $user) }}" method="POST"
-                                              onsubmit="return confirm('{{ __('Impersoner') }} {{ $user->name }} ?')">
+                                              data-confirm="{{ __('Impersoner') }} {{ $user->name }} ?">
                                             @csrf
                                             <button type="submit"
                                                     class="dropdown-item d-flex align-items-center gap-2 text-body">

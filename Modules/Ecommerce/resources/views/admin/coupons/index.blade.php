@@ -68,7 +68,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <a href="{{ route('admin.ecommerce.coupons.edit', $coupon) }}" class="btn btn-sm btn-light"><i data-lucide="edit-2" class="icon-sm"></i></a>
-                            <form action="{{ route('admin.ecommerce.coupons.destroy', $coupon) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer ce coupon ?') }}')">
+                            <form action="{{ route('admin.ecommerce.coupons.destroy', $coupon) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ce coupon ?') }}">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-light text-danger"><i data-lucide="trash-2" class="icon-sm"></i></button>
                             </form>

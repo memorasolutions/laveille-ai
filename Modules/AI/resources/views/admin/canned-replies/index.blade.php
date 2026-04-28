@@ -75,7 +75,7 @@
                         <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $reply->id }}">
                             <i data-lucide="pencil" style="width:14px;height:14px;"></i>
                         </button>
-                        <form action="{{ route('admin.ai.canned-replies.destroy', $reply) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette réponse?') }}')">
+                        <form action="{{ route('admin.ai.canned-replies.destroy', $reply) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette réponse?') }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-outline-danger btn-sm">

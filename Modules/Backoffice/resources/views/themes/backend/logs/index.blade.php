@@ -31,7 +31,7 @@
                 @endforeach
             </div>
             <form action="{{ route('admin.logs.clear') }}" method="POST"
-                  onsubmit="return confirm('{{ __('Vider tous les journaux ?') }}')">
+                  data-confirm="{{ __('Vider tous les journaux ?') }}">
                 @csrf
                 <button type="submit"
                         class="btn btn-danger btn-sm d-inline-flex align-items-center gap-2">

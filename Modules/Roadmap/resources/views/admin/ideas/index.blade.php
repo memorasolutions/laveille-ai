@@ -83,7 +83,7 @@
                                         <a href="{{ route('admin.roadmap.ideas.show', $idea) }}" class="btn btn-outline-info" title="{{ __('Voir') }}">
                                             <i data-lucide="eye"></i>
                                         </a>
-                                        <form action="{{ route('admin.roadmap.ideas.destroy', $idea) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette idée ?') }}');">
+                                        <form action="{{ route('admin.roadmap.ideas.destroy', $idea) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette idée ?') }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger" title="{{ __('Supprimer') }}">

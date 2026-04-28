@@ -82,7 +82,7 @@
                                     <td class="py-3 px-4 text-muted small">{{ $token->last_used_at ? $token->last_used_at->diffForHumans() : __('Jamais') }}</td>
                                     <td class="py-3 px-4">
                                         <form action="{{ route('admin.profile.tokens.destroy', $token->id) }}" method="POST"
-                                              onsubmit="return confirm('{{ __('Révoquer ce token ?') }}')">
+                                              data-confirm="{{ __('Révoquer ce token ?') }}">
                                             @csrf @method('DELETE')
                                             <button type="submit"
                                                     class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2">

@@ -87,7 +87,7 @@
                                         <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
                                     </a>
                                     <form action="{{ route('admin.seo.destroy', $tag) }}" method="POST"
-                                          onsubmit="return confirm('{{ __('Supprimer ce tag SEO ?') }}')">
+                                          data-confirm="{{ __('Supprimer ce tag SEO ?') }}">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                                 class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">

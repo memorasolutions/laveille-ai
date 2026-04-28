@@ -79,7 +79,7 @@
                                 <form action="{{ route('admin.health.incidents.destroy', $incident) }}"
                                       method="POST"
                                       class="d-inline"
-                                      onsubmit="return confirm('{{ __('Êtes-vous sûr de vouloir supprimer cet incident ?') }}');">
+                                      data-confirm="{{ __('Êtes-vous sûr de vouloir supprimer cet incident ?') }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}">

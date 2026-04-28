@@ -66,7 +66,7 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSlaModal{{ $sla->id }}">
                             <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
                         </button>
-                        <form method="POST" action="{{ route('admin.ai.sla.destroy', $sla) }}" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette politique SLA ?') }}');">
+                        <form method="POST" action="{{ route('admin.ai.sla.destroy', $sla) }}" class="d-inline" data-confirm="{{ __('Supprimer cette politique SLA ?') }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger">

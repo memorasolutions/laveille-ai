@@ -69,7 +69,7 @@
                                             </button>
                                         </form>
                                         @endif
-                                        <form action="{{ route('admin.ecommerce.reviews.reject', $review) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cet avis ?') }}')">
+                                        <form action="{{ route('admin.ecommerce.reviews.reject', $review) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cet avis ?') }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger btn-sm" title="{{ __('Supprimer') }}">

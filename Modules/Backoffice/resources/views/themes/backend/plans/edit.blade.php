@@ -141,7 +141,7 @@
         <hr class="my-4">
 
         <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
-              onsubmit="return confirm('{{ __('Supprimer ce plan ? Cette action est irréversible.') }}')">
+              data-confirm="{{ __('Supprimer ce plan ? Cette action est irréversible.') }}">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-2">

@@ -114,7 +114,7 @@
                                     <i data-lucide="pencil" class="icon-sm text-success"></i> {{ __('Modifier') }}
                                 </a>
                                 <form action="{{ route('admin.blog.categories.destroy', $category) }}" method="POST"
-                                      onsubmit="return confirm('{{ __('Supprimer cette catégorie ?') }}')">
+                                      data-confirm="{{ __('Supprimer cette catégorie ?') }}">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                             class="dropdown-item d-flex align-items-center gap-2 text-danger">

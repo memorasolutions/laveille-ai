@@ -169,7 +169,7 @@
                         </button>
                     </form>
 
-                    <form action="{{ route('admin.roadmap.ideas.destroy', $idea) }}" method="POST" onsubmit="return confirm('{{ __('Supprimer cette idée ?') }}');">
+                    <form action="{{ route('admin.roadmap.ideas.destroy', $idea) }}" method="POST" data-confirm="{{ __('Supprimer cette idée ?') }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger w-100">

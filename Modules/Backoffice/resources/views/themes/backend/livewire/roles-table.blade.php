@@ -86,7 +86,7 @@
                                     </a>
                                     @unless(in_array($role->name, ['super_admin', 'admin']))
                                         <form action="{{ route('admin.roles.destroy', $role) }}" method="POST"
-                                              onsubmit="return confirm('{{ __('Confirmer la suppression ?') }}')">
+                                              data-confirm="{{ __('Confirmer la suppression ?') }}">
                                             @csrf @method('DELETE')
                                             <button type="submit"
                                                     class="dropdown-item d-flex align-items-center gap-2 text-danger">

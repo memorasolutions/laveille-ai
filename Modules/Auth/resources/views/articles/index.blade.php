@@ -86,7 +86,7 @@
                                     </a>
                                     @endif
                                     <form method="POST" action="{{ route('user.articles.destroy', $article) }}"
-                                          onsubmit="return confirm('{{ __('Supprimer cet article ?') }}')" class="d-inline">
+                                          data-confirm="{{ __('Supprimer cet article ?') }}" class="d-inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger rounded-2">
                                             <i data-lucide="trash-2"></i>

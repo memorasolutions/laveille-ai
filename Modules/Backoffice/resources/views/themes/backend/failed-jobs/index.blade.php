@@ -26,7 +26,7 @@
             </h4>
             @if($failedJobs->isNotEmpty())
                 <form action="{{ route('admin.failed-jobs.destroy-all') }}" method="POST"
-                      onsubmit="return confirm('{{ __('Supprimer tous les jobs échoués ?') }}')">
+                      data-confirm="{{ __('Supprimer tous les jobs échoués ?') }}">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-2">

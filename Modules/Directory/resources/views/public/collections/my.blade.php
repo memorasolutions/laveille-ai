@@ -85,7 +85,7 @@
                                 <a href="{{ route('collections.show', $collection->slug) }}" class="btn btn-sm" style="background-color: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 4px; padding: 6px 16px; font-size: 13px; flex: 1; text-align: center;">
                                     <i class="ti-eye" style="margin-right: 4px;"></i> {{ __('Voir') }}
                                 </a>
-                                <form action="{{ route('collections.destroy', $collection) }}" method="POST" onsubmit="return confirm('{{ __('Supprimer cette collection ?') }}')" style="margin: 0;">
+                                <form action="{{ route('collections.destroy', $collection) }}" method="POST" data-confirm="{{ __('Supprimer cette collection ?') }}" style="margin: 0;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm" style="background-color: #fff; color: #e74c3c; border: 1px solid #e74c3c; border-radius: 4px; padding: 6px 14px; font-size: 13px; cursor: pointer;">

@@ -155,7 +155,7 @@
                 @endif
 
                 <form method="POST" action="{{ route('user.account.delete') }}"
-                      onsubmit="return confirm('{{ __('Êtes-vous sûr ? Cette action est IRRÉVERSIBLE.') }}');">
+                      data-confirm="{{ __('Êtes-vous sûr ? Cette action est IRRÉVERSIBLE.') }}">
                     @csrf
                     <input type="hidden" name="_method" value="DELETE">
                     <div style="margin-bottom: 15px;">

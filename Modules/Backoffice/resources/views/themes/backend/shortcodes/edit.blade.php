@@ -163,7 +163,7 @@
         <hr class="my-4">
 
         <form method="POST" action="{{ route('admin.shortcodes.destroy', $shortcode) }}"
-            onsubmit="return confirm('{{ __("Supprimer ce shortcode ?") }}')">
+            data-confirm="{{ __("Supprimer ce shortcode ?") }}">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-2">

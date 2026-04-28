@@ -66,7 +66,7 @@
                     <a href="mailto:{{ $contactMessage->email }}?subject=Re: {{ urlencode($contactMessage->subject) }}" class="btn btn-primary btn-sm w-100 mb-2">
                         <i data-lucide="reply"></i> {{ __('Répondre par email') }}
                     </a>
-                    <form action="{{ route('admin.contact-messages.destroy', $contactMessage) }}" method="POST" onsubmit="return confirm('{{ __('Supprimer ce message ?') }}');">
+                    <form action="{{ route('admin.contact-messages.destroy', $contactMessage) }}" method="POST" data-confirm="{{ __('Supprimer ce message ?') }}">
                         @csrf
                         @method('DELETE')
                         <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="if(confirm('{{ __('Supprimer ce message ?') }}')) this.closest('form').submit()">

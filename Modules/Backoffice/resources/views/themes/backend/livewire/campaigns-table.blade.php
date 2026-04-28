@@ -95,7 +95,7 @@
                                  style="z-index:50;min-width:140px;">
                                 @if($campaign->isDraft())
                                     <form method="POST" action="{{ route('admin.newsletter.campaigns.send', $campaign) }}"
-                                          onsubmit="return confirm('{{ __('Envoyer cette campagne à tous les abonnés actifs ?') }}')">
+                                          data-confirm="{{ __('Envoyer cette campagne à tous les abonnés actifs ?') }}">
                                         @csrf
                                         <button type="submit"
                                                 class="dropdown-item d-flex align-items-center gap-2 text-success">

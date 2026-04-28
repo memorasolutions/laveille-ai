@@ -105,7 +105,7 @@
                     </td>
                     <td title="{{ $survey->comment }}">{{ Str::limit($survey->comment, 40) ?: '-' }}</td>
                     <td>
-                        <form action="{{ route('admin.ai.csat.destroy', $survey) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Êtes-vous sûr ?') }}')">
+                        <form action="{{ route('admin.ai.csat.destroy', $survey) }}" method="POST" class="d-inline" data-confirm="{{ __('Êtes-vous sûr ?') }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger">

@@ -66,7 +66,7 @@
                             </td>
                             <td class="text-end">
                                 <form action="{{ route('user.api-tokens.destroy', $token->id) }}" method="POST" class="d-inline"
-                                      onsubmit="return confirm('{{ __('Révoquer ce token définitivement ?') }}');">
+                                      data-confirm="{{ __('Révoquer ce token définitivement ?') }}">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger rounded-2">
                                         <i data-lucide="trash-2"></i>

@@ -24,7 +24,7 @@
                     {{ __('Exporter CSV') }}
                 </a>
                 <form action="{{ route('admin.activity-logs.purge') }}" method="POST"
-                      onsubmit="return confirm('{{ __('Supprimer les entrées de plus de 30 jours ?') }}')">
+                      data-confirm="{{ __('Supprimer les entrées de plus de 30 jours ?') }}">
                     @csrf @method('DELETE')
                     <button type="submit"
                             class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-2">

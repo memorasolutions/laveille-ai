@@ -51,7 +51,7 @@
                         <a href="{{ route('admin.faqs.edit', $faq) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
                             <i data-lucide="edit"></i>
                         </a>
-                        <form action="{{ route('admin.faqs.destroy', $faq) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette question ?') }}');">
+                        <form action="{{ route('admin.faqs.destroy', $faq) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette question ?') }}">
                             @csrf
                             @method('DELETE')
                             <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}" onclick="if(confirm('{{ __('Supprimer cette question ?') }}')) this.closest('form').submit()">

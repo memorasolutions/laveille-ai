@@ -163,7 +163,7 @@
         <hr class="my-4">
 
         <form method="POST" action="{{ route('admin.seo.destroy', $metaTag) }}"
-              onsubmit="return confirm('{{ __('Supprimer ce tag SEO ?') }}');">
+              data-confirm="{{ __('Supprimer ce tag SEO ?') }}">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-2">

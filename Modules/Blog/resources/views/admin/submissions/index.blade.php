@@ -41,11 +41,11 @@
                     <td>{{ $article->created_at?->format('d/m/Y H:i') }}</td>
                     <td class="text-end">
                         @if($article->submission_status === 'pending')
-                            <form action="{{ route('admin.blog.submissions.approve', $article) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Approuver et publier cet article ?') }}')">
+                            <form action="{{ route('admin.blog.submissions.approve', $article) }}" method="POST" class="d-inline" data-confirm="{{ __('Approuver et publier cet article ?') }}">
                                 @csrf
                                 <button class="btn btn-sm btn-success"><i data-lucide="check" class="icon-sm"></i> {{ __('Approuver') }}</button>
                             </form>
-                            <form action="{{ route('admin.blog.submissions.reject', $article) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Refuser cet article ?') }}')">
+                            <form action="{{ route('admin.blog.submissions.reject', $article) }}" method="POST" class="d-inline" data-confirm="{{ __('Refuser cet article ?') }}">
                                 @csrf
                                 <button class="btn btn-sm btn-outline-danger"><i data-lucide="x" class="icon-sm"></i></button>
                             </form>

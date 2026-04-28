@@ -56,7 +56,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <a href="{{ route('admin.ecommerce.categories.edit', $category) }}" class="btn btn-sm btn-light"><i data-lucide="edit-2" class="icon-sm"></i></a>
-                            <form action="{{ route('admin.ecommerce.categories.destroy', $category) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette catégorie ?') }}')">
+                            <form action="{{ route('admin.ecommerce.categories.destroy', $category) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette catégorie ?') }}">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-light text-danger"><i data-lucide="trash-2" class="icon-sm"></i></button>
                             </form>

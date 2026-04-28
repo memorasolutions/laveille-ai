@@ -70,7 +70,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <a href="{{ route('admin.ecommerce.products.edit', $product) }}" class="btn btn-sm btn-light"><i data-lucide="edit-2" class="icon-sm"></i></a>
-                            <form action="{{ route('admin.ecommerce.products.destroy', $product) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer ce produit ?') }}')">
+                            <form action="{{ route('admin.ecommerce.products.destroy', $product) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ce produit ?') }}">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-light text-danger"><i data-lucide="trash-2" class="icon-sm"></i></button>
                             </form>

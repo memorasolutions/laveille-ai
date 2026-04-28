@@ -76,7 +76,7 @@
                                         <a href="{{ route('admin.ecommerce.promotions.edit', $promotion) }}" class="btn btn-outline-primary btn-sm" title="{{ __('Modifier') }}">
                                             <i data-lucide="pencil"></i>
                                         </a>
-                                        <form action="{{ route('admin.ecommerce.promotions.destroy', $promotion) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer cette promotion ?') }}')">
+                                        <form action="{{ route('admin.ecommerce.promotions.destroy', $promotion) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer cette promotion ?') }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger btn-sm" title="{{ __('Supprimer') }}">

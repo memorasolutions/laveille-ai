@@ -87,7 +87,7 @@
                                 </a>
                                 @unless($category->required)
                                     <form action="{{ route('admin.cookie-categories.destroy', $category) }}" method="POST" class="d-inline"
-                                        onsubmit="return confirm('{{ __('Supprimer cette catégorie ?') }}')">
+                                        data-confirm="{{ __('Supprimer cette catégorie ?') }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1">

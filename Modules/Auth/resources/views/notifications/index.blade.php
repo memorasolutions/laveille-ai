@@ -27,7 +27,7 @@
         @endif
         @if($notifications->total() > 0)
             <form method="POST" action="{{ route('user.notifications.destroyAll') }}" style="display: inline;"
-                  onsubmit="return confirm('{{ __('Supprimer toutes les notifications ?') }}')">
+                  data-confirm="{{ __('Supprimer toutes les notifications ?') }}">
                 @csrf
                 <input type="hidden" name="_method" value="DELETE">
                 <a href="javascript:void(0)" onclick="this.closest('form').submit()" class="btn btn-danger btn-sm" style="-webkit-appearance:none;text-decoration:none;">
@@ -90,7 +90,7 @@
                             </form>
                         @endif
                         <form method="POST" action="{{ route('user.notifications.destroy', $notification->id) }}" style="display: inline;"
-                              onsubmit="return confirm('{{ __('Supprimer cette notification ?') }}')">
+                              data-confirm="{{ __('Supprimer cette notification ?') }}">
                             @csrf
                             <input type="hidden" name="_method" value="DELETE">
                             <a href="javascript:void(0)" onclick="this.closest('form').submit()" class="btn btn-danger btn-xs" title="{{ __('Supprimer') }}" style="-webkit-appearance:none;text-decoration:none;">

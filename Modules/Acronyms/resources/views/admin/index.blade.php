@@ -39,7 +39,7 @@
                     <td class="text-end">
                         <a href="{{ route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())) }}" target="_blank" class="btn btn-sm btn-outline-secondary"><i data-lucide="eye" class="icon-sm"></i></a>
                         <a href="{{ route('admin.acronyms.edit', $acronym) }}" class="btn btn-sm btn-outline-primary"><i data-lucide="pencil" class="icon-sm"></i></a>
-                        <form action="{{ route('admin.acronyms.destroy', $acronym) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Supprimer ?') }}')">
+                        <form action="{{ route('admin.acronyms.destroy', $acronym) }}" method="POST" class="d-inline" data-confirm="{{ __('Supprimer ?') }}">
                             @csrf @method('DELETE')
                             <button class="btn btn-sm btn-outline-danger"><i data-lucide="trash-2" class="icon-sm"></i></button>
                         </form>

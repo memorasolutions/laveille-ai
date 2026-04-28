@@ -48,7 +48,7 @@
         <div style="background: #fff; border: 1px solid var(--c-danger); border-radius: 6px; padding: 16px; height: 100%;">
             <h4 style="font-weight: 600; margin: 0 0 10px; color: var(--c-danger); font-size: 15px;">{{ __('Supprimer mon compte') }}</h4>
             <p style="color: #777; margin: 0 0 12px; font-size: 14px;">{{ __('Cette action est irréversible. Toutes vos données seront anonymisées ou supprimées.') }}</p>
-            <form method="POST" action="{{ route('user.account.delete') }}" onsubmit="return confirm('{{ __('Êtes-vous sûr ? Cette action est irréversible.') }}')">
+            <form method="POST" action="{{ route('user.account.delete') }}" data-confirm="{{ __('Êtes-vous sûr ? Cette action est irréversible.') }}">
                 @csrf @method('DELETE')
                 <div style="margin-bottom: 8px;">
                     <input type="password" name="password" required
