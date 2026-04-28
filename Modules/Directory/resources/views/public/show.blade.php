@@ -1098,7 +1098,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit.prevent="submitting = true; fetch($el.action, {method:'POST',headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else{alert('Erreur lors de la soumission');submitting=false}}).catch(()=>{alert('Erreur réseau');submitting=false})">
+                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit.prevent="submitting = true; fetch($el.action, {method:'POST',headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur lors de la soumission', variant: 'danger', duration: 4000 } }));submitting=false}}).catch(()=>{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur réseau', variant: 'danger', duration: 4000 } }));submitting=false})">
                         @csrf
                         <input type="hidden" name="type" :value="type">
                         <input type="hidden" name="video_id" :value="videoId">
@@ -1209,7 +1209,7 @@
                     fileName: null,
                     dragging: false,
                     compressAndSet(file) {
-                        if (!file || !file.type.startsWith('image/')) { alert('{{ __('Format non supporté. Utilisez JPG, PNG ou WebP.') }}'); return; }
+                        if (!file || !file.type.startsWith('image/')) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: '{{ __('Format non supporté. Utilisez JPG, PNG ou WebP.') }}', variant: 'warning', duration: 4000 } })); return; }
                         const maxW = 1920, quality = 0.85;
                         const reader = new FileReader();
                         reader.onload = (e) => {
@@ -1221,7 +1221,7 @@
                                 canvas.height = img.height * scale;
                                 canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                                 canvas.toBlob((blob) => {
-                                    if (blob.size > 5 * 1024 * 1024) { alert('{{ __('Image trop lourde même après compression (max 5 Mo)') }}'); return; }
+                                    if (blob.size > 5 * 1024 * 1024) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: '{{ __('Image trop lourde même après compression (max 5 Mo)') }}', variant: 'warning', duration: 4000 } })); return; }
                                     this.preview = URL.createObjectURL(blob);
                                     this.fileName = file.name || 'screenshot.jpg';
                                     const dt = new DataTransfer();

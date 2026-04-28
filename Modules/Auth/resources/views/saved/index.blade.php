@@ -90,10 +90,12 @@
 <script>
 document.querySelectorAll('.js-delete-saved').forEach(function(btn) {
     btn.addEventListener('click', function() {
-        if (!confirm('{{ __("Supprimer cette sauvegarde?") }}')) return;
-        var row = this.closest('[x-show]');
-        fetch(this.dataset.api, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
-            .then(function() { if (row) row.remove(); });
+        var el = this;
+        window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: '{{ __("Supprimer cette sauvegarde?") }}', callback: function() {
+            var row = el.closest('[x-show]');
+            fetch(el.dataset.api, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'Accept': 'application/json' } })
+                .then(function() { if (row) row.remove(); });
+        } } }));
     });
 });
 </script>
