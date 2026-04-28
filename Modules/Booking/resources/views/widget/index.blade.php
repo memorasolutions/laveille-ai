@@ -14,6 +14,12 @@
         .service-card.selected { border-color: {{ $color }}; }
         .btn-booking { background-color: {{ $color }}; border-color: {{ $color }}; color: #fff; }
         .btn-booking:hover { opacity: 0.9; color: #fff; }
+        .bk-toast-wrap { position: fixed; top: 16px; right: 16px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .bk-toast { padding: 12px 16px; border-radius: 8px; color: #fff; font-size: 14px; min-width: 240px; max-width: 360px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); pointer-events: auto; opacity: 0; transform: translateY(-8px); transition: opacity .25s, transform .25s; }
+        .bk-toast.show { opacity: 1; transform: translateY(0); }
+        .bk-toast.error { background-color: #991B1B; }
+        .bk-toast.warning { background-color: #92400E; }
+        .bk-toast.info { background-color: #1E3A8A; }
     </style>
 </head>
 <body class="bg-light">
@@ -118,6 +124,28 @@
 var selectedService = null;
 var slots = @json($availableSlots);
 
+(function(){
+    var wrap = document.createElement('div');
+    wrap.className = 'bk-toast-wrap';
+    wrap.setAttribute('role', 'region');
+    wrap.setAttribute('aria-label', 'Notifications');
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(wrap); });
+    window.showToast = function(message, variant){
+        variant = variant || 'error';
+        var el = document.createElement('div');
+        el.className = 'bk-toast ' + variant;
+        el.setAttribute('role', variant === 'error' || variant === 'warning' ? 'alert' : 'status');
+        el.setAttribute('aria-live', variant === 'error' || variant === 'warning' ? 'assertive' : 'polite');
+        el.textContent = message;
+        wrap.appendChild(el);
+        requestAnimationFrame(function(){ el.classList.add('show'); });
+        setTimeout(function(){
+            el.classList.remove('show');
+            setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+        }, 3500);
+    };
+})();
+
 function goStep(n) {
     document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('step' + n).classList.add('active');
@@ -125,9 +153,11 @@ function goStep(n) {
 }
 
 function nextStep(n) {
-    if (n === 2 && !selectedService) return alert('Veuillez choisir un service.');
-    if (n === 3 && (!document.getElementById('dateSelect').value || !document.getElementById('timeSelect').value))
-        return alert('Veuillez choisir une date et une heure.');
+    if (n === 2 && !selectedService) { showToast('Veuillez choisir un service.', 'warning'); return; }
+    if (n === 3 && (!document.getElementById('dateSelect').value || !document.getElementById('timeSelect').value)) {
+        showToast('Veuillez choisir une date et une heure.', 'warning');
+        return;
+    }
     goStep(n);
 }
 
@@ -177,8 +207,8 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
             document.getElementById('step3').style.display = 'none';
             document.getElementById('success').style.display = 'block';
             resize();
-        } else { alert('Erreur. Veuillez réessayer.'); }
-    }).catch(function() { alert('Erreur réseau.'); });
+        } else { showToast('Erreur. Veuillez réessayer.', 'error'); }
+    }).catch(function() { showToast('Erreur réseau.', 'error'); });
 });
 
 function resize() {
