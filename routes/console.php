@@ -53,6 +53,9 @@ Schedule::command('notifications:send-digest --frequency=weekly')->weeklyOn(1, '
 // Newsletter digest (preview mardi, envoi mercredi)
 Schedule::command('newsletter:digest --preview')->weeklyOn(2, '09:00');
 Schedule::command('newsletter:digest --send --force')->weeklyOn(3, '09:00');
+// Newsletter double opt-in : rappel J+1 09:00, purge J+7 09:30 (mark unsubscribed_at)
+Schedule::command('newsletter:remind-pending')->dailyAt('09:00')->withoutOverlapping();
+Schedule::command('newsletter:purge-unconfirmed')->dailyAt('09:30')->withoutOverlapping();
 
 // Queue worker pour jobs newsletter (shared hosting — pas de daemon)
 Schedule::command('queue:work --queue=newsletters --stop-when-empty --max-time=55')->everyMinute();
