@@ -26,7 +26,19 @@ class UpdateDefiW18Command extends Command
         }
 
         $content = $issue->content ?? [];
+
+        // Terme IA W18 = Gartner Hype Cycle (slug "gartner" ou "gartner-hype-cycle")
+        $gartnerTerm = \Modules\Dictionary\Models\Term::where('slug', 'gartner')
+            ->orWhere('slug', 'gartner-hype-cycle')
+            ->first();
+        if ($gartnerTerm) {
+            $content['term_id'] = $gartnerTerm->id;
+        }
+
         $content['weekly_prompt'] = [
+            'intro' => 'Ce prompt te génère ton premier post LinkedIn percutant en moins de 2 minutes — copie, personnalise, publie.',
+            'cta_intro' => '💡 Pour construire d\'autres prompts personnalisés (au-delà de ce défi), utilise notre constructeur de prompts :',
+            'cta_label' => 'Découvrir le constructeur de prompts →',
             'prompt' => "Écris un post LinkedIn percutant en deux parties :\n\n1. Hook (max 210 caractères) : intrigue avec « problème > promesse » ou anecdote perso.\n2. Corps (300-500 caractères) : raconte une petite victoire ou leçon de la semaine en tant que [Prénom], entrepreneur(e) à [Ville du Québec] dans [mon secteur].\n\nUtilise un ton humain, une touche d'autodérision, des paragraphes aérés (1-2 lignes max), et 1-2 emojis sobres.\n\nTermine par un CTA qualitatif (ex. : « Raconte-moi ton cas »).\n\nPas de lien, pas de jargon, aligné sur mes piliers éditoriaux.",
             'technique' => "🎯 Hook calibré 210 caractères = LinkedIn affiche tout sans clic « voir plus » (dwell time max). Corps aéré 300-500 chars = sweet spot 2026. CTA qualitatif (pas « Mettez ❤️ ») = génère des commentaires (15× plus de poids qu'un like dans l'algo LinkedIn 2026).",
             'best_practices' => [

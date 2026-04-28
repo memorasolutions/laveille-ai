@@ -199,6 +199,9 @@
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Défi de la semaine</span></td></tr>
+                @if(is_array($weeklyPrompt) && ($weeklyPrompt['intro'] ?? null))
+                <tr><td align="center" style="padding-bottom:10px;font-size:14px;color:#cbd5e1;line-height:1.5;font-style:italic;">{!! e($weeklyPrompt['intro']) !!}</td></tr>
+                @endif
                 <tr><td align="center" style="padding-bottom:6px;font-size:16px;color:#e2e8f0;">Essayez ce prompt cette semaine :</td></tr>
                 <tr><td align="center" style="padding-bottom:14px;font-size:12px;color:#94a3b8;">Remplacez les <span style="color:#fbbf24;font-weight:bold;">[textes en jaune]</span> par vos propres informations, puis copiez le tout.</td></tr>
                 <tr><td style="padding-bottom:14px;">
@@ -249,8 +252,11 @@
                 </td></tr>
                 @endif
                 <tr><td align="center" style="padding-bottom:8px;font-size:13px;color:#94a3b8;">Copiez ce prompt et collez-le dans ChatGPT, Claude ou Gemini pour voir le résultat.</td></tr>
+                @if(is_array($weeklyPrompt) && ($weeklyPrompt['cta_intro'] ?? null))
+                <tr><td align="center" style="padding-bottom:10px;font-size:13px;color:#94a3b8;line-height:1.5;">{!! e($weeklyPrompt['cta_intro']) !!}</td></tr>
+                @endif
                 <tr><td align="center">
-                    <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Construire mon prompt &rarr;</a>
+                    <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ (is_array($weeklyPrompt) && ! empty($weeklyPrompt['cta_label'])) ? $weeklyPrompt['cta_label'] : 'Construire mon prompt →' }}</a>
                 </td></tr>
             </table>
         </td>
