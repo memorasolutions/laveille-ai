@@ -24,6 +24,55 @@
     </div>
 </div>
 
+{{-- Widget statistiques --}}
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 text-muted small mb-1">
+                    <i data-lucide="link" style="width:16px;height:16px;"></i>
+                    {{ __('Total liens') }}
+                </div>
+                <div class="fw-bold fs-3">{{ number_format($stats['total']) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 text-success small mb-1">
+                    <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+                    {{ __('Actifs') }}
+                </div>
+                <div class="fw-bold fs-3">{{ number_format($stats['active']) }}</div>
+                <div class="text-muted small">{{ number_format($stats['inactive']) }} {{ __('inactifs') }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 text-warning small mb-1">
+                    <i data-lucide="alert-triangle" style="width:16px;height:16px;"></i>
+                    {{ __('Expirés') }}
+                </div>
+                <div class="fw-bold fs-3">{{ number_format($stats['expired']) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-2 text-primary small mb-1">
+                    <i data-lucide="mouse-pointer-click" style="width:16px;height:16px;"></i>
+                    {{ __('Total clics') }}
+                </div>
+                <div class="fw-bold fs-3">{{ number_format($stats['total_clicks']) }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body p-0">
         @if($shortUrls->isEmpty())

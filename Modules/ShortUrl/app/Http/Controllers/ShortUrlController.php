@@ -31,7 +31,15 @@ class ShortUrlController
             ->orderByDesc('created_at')
             ->paginate((int) Settings::get('shorturl.admin_per_page', 20));
 
-        return view('shorturl::admin.index', compact('shortUrls'));
+        $stats = [
+            'total' => ShortUrl::count(),
+            'active' => ShortUrl::where('is_active', true)->count(),
+            'inactive' => ShortUrl::where('is_active', false)->count(),
+            'expired' => ShortUrl::whereNotNull('expires_at')->where('expires_at', '<', now())->count(),
+            'total_clicks' => (int) ShortUrl::sum('clicks_count'),
+        ];
+
+        return view('shorturl::admin.index', compact('shortUrls', 'stats'));
     }
 
     public function create(): View
