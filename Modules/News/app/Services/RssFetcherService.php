@@ -94,8 +94,8 @@ class RssFetcherService
                                 $signals
                             );
                             if ($result['is_duplicate']) {
-                                Log::info(sprintf(
-                                    'DEDUP-OBSERVE: article #%d "%s" matched #%d "%s" (score=%.3f, reason=%s) [observation only, no DB write]',
+                                Log::error(sprintf(
+                                    'DEDUP-OBSERVE: article #%d "%s" matched #%d "%s" (score=%.3f, reason=%s) [OBSERVATION ONLY - no DB write]',
                                     $article->id,
                                     Str::limit($itemTitle, 60),
                                     $candidate->id,
