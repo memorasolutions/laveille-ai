@@ -655,7 +655,7 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 var file = event.target.files[0];
                 if (!file) return;
-                if (file.size > 512000) { alert('Le fichier dépasse 500 Ko. Choisissez une image plus petite.'); event.target.value = ''; return; }
+                if (file.size > 512000) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Le fichier dépasse 500 Ko. Choisissez une image plus petite.', variant: 'warning', duration: 4000 } })); event.target.value = ''; return; }
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     var img = new Image();

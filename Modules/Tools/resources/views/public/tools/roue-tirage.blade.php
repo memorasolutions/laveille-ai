@@ -696,10 +696,10 @@ document.addEventListener('alpine:init', function() {
                 reader.readAsText(file);
             },
             saveCurrentList: function() {
-                var name = prompt('Nom pour cette liste :');
-                if (!name) return;
+                var name = 'Liste ' + new Date().toLocaleDateString('fr-CA') + ' ' + new Date().toLocaleTimeString('fr-CA');
                 this.savedLists.push({ name: name, items: this.names });
                 localStorage.setItem('rw_saved', JSON.stringify(this.savedLists));
+                window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Liste sauvegardée : ' + name, variant: 'success', duration: 3000 } }));
             },
             deleteSaved: function(index) {
                 this.savedLists.splice(index, 1);

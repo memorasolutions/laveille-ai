@@ -444,12 +444,15 @@ document.addEventListener('alpine:init', function() {
                 var self = this;
                 var preset = this.presets[index];
                 if (this.isAuthenticated && preset.id) {
-                    if (!confirm('Supprimer cette configuration?')) return;
-                    fetch('/api/team-presets/' + preset.id, { method: 'DELETE', headers: this._headers() })
-                        .then(function() { self.presets.splice(index, 1); });
+                    window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: 'Supprimer cette configuration ?', callback: function() {
+                        fetch('/api/team-presets/' + preset.id, { method: 'DELETE', headers: self._headers() })
+                            .then(function() { self.presets.splice(index, 1); });
+                    } } }));
                 } else {
-                    this.presets.splice(index, 1);
-                    localStorage.setItem('tg_presets', JSON.stringify(this.presets));
+                    window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: 'Supprimer cette configuration locale ?', callback: function() {
+                        self.presets.splice(index, 1);
+                        localStorage.setItem('tg_presets', JSON.stringify(self.presets));
+                    } } }));
                 }
             }
         };
