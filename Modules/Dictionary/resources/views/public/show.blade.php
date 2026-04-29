@@ -4,8 +4,8 @@
 @section('title', $term->name . ' - ' . __('Glossaire IA') . ' - ' . config('app.name'))
 @section('meta_description', Str::limit($term->analogy ?? strip_tags($term->definition), 160))
 @section('og_type', 'article')
-@if(!empty($term->hero_image) && file_exists(public_path('storage/' . $term->hero_image)))
-    @section('og_image', asset('storage/' . $term->hero_image).'?v='.($term->updated_at?->timestamp ?? '0'))
+@if(!empty($term->hero_image) && file_exists(public_path(str_replace('.png', '.webp', $term->hero_image))))
+    @section('og_image', asset(str_replace('.png', '.webp', $term->hero_image)).'?v='.($term->updated_at?->timestamp ?? '0'))
 @endif
 
 @php
