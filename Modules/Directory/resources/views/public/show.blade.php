@@ -286,6 +286,16 @@
     // $resources passé depuis le controller (FR-first, puis date)
     $resources = $resources ?? $tool->resources()->where('is_approved', true)->orderByRaw("FIELD(language, 'fr', 'en') ASC")->orderByDesc('created_at')->get();
     $screenshots = $tool->screenshots()->approved()->orderByDesc('votes_count')->get();
+    $_parseToolList = function (?string $raw): array {
+        if (empty(trim((string) $raw))) return [];
+        if (str_contains($raw, "\n")) {
+            $items = preg_split('/\r?\n/', trim($raw));
+            $items = array_map(fn($i) => trim(preg_replace('/^[-*•]\s*/', '', trim($i))), $items);
+            return array_values(array_filter($items, fn($i) => $i !== ''));
+        }
+        $items = array_map('trim', explode(',', $raw));
+        return array_values(array_filter($items, fn($i) => $i !== ''));
+    };
 @endphp
 
 <section class="section-padding" style="padding-top: 10px;">
@@ -487,7 +497,7 @@
                 </h3>
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="row" style="display: flex; flex-wrap: wrap;">
-                    @foreach(array_filter(explode(',', $tool->core_features)) as $f)
+                    @foreach($_parseToolList($tool->core_features) as $f)
                     <div class="col-md-4 col-sm-6" style="margin-bottom: 16px; display: flex;">
                         <div style="background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04); width: 100%; display: flex; align-items: center; gap: 10px;">
                             <span style="background: #ecfdf5; color: #059669; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0;">✅</span>
@@ -507,7 +517,7 @@
                 </h3>
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="row" style="display: flex; flex-wrap: wrap;">
-                    @foreach(array_filter(explode(',', $tool->use_cases)) as $i => $u)
+                    @foreach($_parseToolList($tool->use_cases) as $i => $u)
                     <div class="col-md-6" style="margin-bottom: 16px; display: flex;">
                         <div style="background: #F8FAFB; padding: 22px; border-radius: 12px; border: 1px solid #e2e8f0; width: 100%; position: relative; overflow: hidden;">
                             <span style="position: absolute; top: -8px; right: 0; font-size: 64px; font-weight: 900; color: #f1f5f9; line-height: 1;">{{ $i + 1 }}</span>
@@ -533,7 +543,7 @@
                                 <span style="background: #166534; color: #fff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px;">✓</span>
                                 {{ __('Les plus') }}
                             </h4>
-                            @foreach(array_filter(explode(',', $tool->pros ?? '')) as $p)
+                            @foreach($_parseToolList($tool->pros) as $p)
                             <div style="margin-bottom: 10px; color: #14532d; display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.4;">
                                 <span style="color: #16a34a; flex-shrink: 0; font-size: 16px; line-height: 1;">✅</span> {{ trim($p) }}
                             </div>
@@ -546,7 +556,7 @@
                                 <span style="background: #991b1b; color: #fff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px;">✕</span>
                                 {{ __('Les moins') }}
                             </h4>
-                            @foreach(array_filter(explode(',', $tool->cons ?? '')) as $c)
+                            @foreach($_parseToolList($tool->cons) as $c)
                             <div style="margin-bottom: 10px; color: #7f1d1d; display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.4;">
                                 <span style="color: #dc2626; flex-shrink: 0; font-size: 16px; line-height: 1;">❌</span> {{ trim($c) }}
                             </div>
