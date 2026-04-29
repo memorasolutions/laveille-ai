@@ -1098,7 +1098,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit.prevent="submitting = true; fetch($el.action, {method:'POST',headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur lors de la soumission', variant: 'danger', duration: 4000 } }));submitting=false}}).catch(()=>{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur réseau', variant: 'danger', duration: 4000 } }));submitting=false})">
+                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit.prevent="submitting = true; fetch($el.action, {method:'POST',headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else if(r.status===429){window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Trop de tentatives. Patientez 60 secondes avant de réessayer.', variant: 'warning', duration: 5000 } }));submitting=false}else{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur lors de la soumission', variant: 'danger', duration: 4000 } }));submitting=false}}).catch(()=>{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur réseau', variant: 'danger', duration: 4000 } }));submitting=false})">
                         @csrf
                         <input type="hidden" name="type" :value="type">
                         <input type="hidden" name="video_id" :value="videoId">

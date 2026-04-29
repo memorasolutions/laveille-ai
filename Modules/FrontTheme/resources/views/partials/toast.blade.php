@@ -12,6 +12,15 @@
         clearTimeout(timeout);
         timeout = setTimeout(() => show = false, 3000);
      "
+     @toast-show.window="
+        message = $event.detail.message || '';
+        const v = $event.detail.variant || 'info';
+        type = (v === 'danger' || v === 'warning') ? 'error' : (v === 'success' ? 'success' : 'info');
+        show = true;
+        clearTimeout(timeout);
+        const dur = $event.detail.duration || 3000;
+        timeout = setTimeout(() => show = false, dur);
+     "
      x-show="show"
      x-transition:enter="transition ease-out duration-300"
      x-transition:enter-start="opacity-0 translate-y-4"
