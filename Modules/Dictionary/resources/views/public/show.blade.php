@@ -8,6 +8,26 @@
     @section('og_image', asset('storage/' . $term->hero_image).'?v='.($term->updated_at?->timestamp ?? '0'))
 @endif
 
+@php
+    $_shareTermTitle = $term->name . ($term->acronym_full ? ' — ' . $term->acronym_full : '');
+    $_shareSummary = mb_strimwidth($term->getTranslation('definition', 'fr_CA', false) ?: '', 0, 280, '…');
+    $_shareAnalogy = $term->getTranslation('analogy', 'fr_CA', false);
+    $_shareDidYouKnow = $term->getTranslation('did_you_know', 'fr_CA', false);
+    $_shareKind = match ($term->type) {
+        'acronym' => "Acronyme de l'éducation",
+        'ai_term' => "Terme d'IA",
+        'explainer' => 'Vulgarisation',
+        default => 'Terme',
+    };
+    $_shareDirectUrl = route('dictionary.show', $term->getTranslation('slug', 'fr_CA', false) ?: $term->slug);
+    $_shareIndexUrl = route('dictionary.index');
+    $_shareUtmUrl = $_shareDirectUrl . '?utm_source=share_dictionary&utm_medium=clipboard';
+    $_shareAnalogyPart = $_shareAnalogy ? "\n🧠 En termes simples : " . mb_strimwidth($_shareAnalogy, 0, 150, '…') : '';
+    $_shareDidYouKnowPart = $_shareDidYouKnow ? "\n💡 Le saviez-vous : " . mb_strimwidth($_shareDidYouKnow, 0, 150, '…') : '';
+    $_shareText = "🔍 {$_shareKind} : {$_shareTermTitle}\n\n{$_shareSummary}{$_shareAnalogyPart}{$_shareDidYouKnowPart}\n\n🔗 {$_shareUtmUrl}\n📚 Voir tous les termes du glossaire : {$_shareIndexUrl}\n\n#IA #Glossaire #LaVeille\n\nVia laveille.ai";
+@endphp
+@section('share_text', $_shareText)
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', [
         'breadcrumbTitle' => $term->name,
@@ -229,21 +249,7 @@
                             $termSections[] = ['icon' => '💡', 'label' => 'Le saviez-vous', 'content' => $didYouKnow];
                         }
                     @endphp
-                    {{-- Partage social : smart-share component (S74 reactive) --}}
-                    <div style="margin-top: 0.5rem;">
-                        <x-core::smart-share
-                            :title="$termTitle"
-                            :summary="$term->getTranslation('definition', 'fr_CA', false) ?: ''"
-                            :sections="$termSections"
-                            :directUrl="route('dictionary.show', $term->getTranslation('slug', 'fr_CA', false) ?: $term->slug)"
-                            :indexUrl="route('dictionary.index')"
-                            indexLabel="Voir tous les termes du glossaire"
-                            utmSource="share_dictionary"
-                            :kind="$term->type === 'acronym' ? 'Acronyme de l\'éducation' : ($term->type === 'ai_term' ? 'Terme d\'IA' : ($term->type === 'explainer' ? 'Vulgarisation' : 'Terme'))"
-                            :socialFormat="true"
-                            :hashtags="['IA', 'Glossaire', 'LaVeille']"
-                        />
-                    </div>
+                    {{-- Partage social : utilise barre flottante master.blade.php (S75 Wave 3 - rich payload via @section('share_text')) --}}
 
                     {{-- Acronym full form --}}
                     @if($term->acronym_full)
