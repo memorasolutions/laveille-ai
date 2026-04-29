@@ -8,42 +8,81 @@
     'utmSource' => 'share',
     'kind' => 'Terme',
     'buttonLabel' => 'Partager',
+    'socialFormat' => false,
+    'hashtags' => ['IA', 'LaVeille'],
 ])
 
 @if($title && $directUrl)
 @php
     $directUrlUtm = $directUrl . '?utm_source=' . urlencode($utmSource) . '&utm_medium=clipboard';
 
-    $plain = $kind . ' : ' . $title . "\n";
-    if ($summary) { $plain .= $summary . "\n"; }
-    $plain .= "\n";
-    foreach ($sections as $section) {
-        $icon = $section['icon'] ?? '';
-        $label = $section['label'] ?? '';
-        $content = $section['content'] ?? '';
-        if ($content) {
-            $plain .= ($icon ? $icon . ' ' : '') . ($label ? $label . ' : ' : '') . $content . "\n";
+    if ($socialFormat) {
+        $plain = "🔍 {$kind} : {$title}\n\n";
+        if ($summary) { $plain .= mb_strimwidth($summary, 0, 280, '…') . "\n\n"; }
+        $sectionCount = 0;
+        foreach ($sections as $section) {
+            if ($sectionCount >= 2) break;
+            $icon = $section['icon'] ?? '';
+            $label = $section['label'] ?? '';
+            $content = $section['content'] ?? '';
+            if ($content) {
+                $plain .= ($icon ? $icon . ' ' : '') . ($label ? $label . ' : ' : '') . mb_strimwidth($content, 0, 150, '…') . "\n";
+                $sectionCount++;
+            }
         }
-    }
-    $plain .= "\n" . '🔗 ' . $directUrlUtm . "\n";
-    if ($indexUrl) { $plain .= '📚 ' . $indexLabel . ' : ' . $indexUrl . "\n"; }
-    $plain .= "\n" . 'Via laveille.ai';
+        $plain .= "\n🔗 {$directUrlUtm}\n";
+        if ($indexUrl) { $plain .= "📚 {$indexLabel} : {$indexUrl}\n"; }
+        $plain .= "\n#" . implode(' #', $hashtags) . "\n\nVia laveille.ai";
 
-    $html = '<strong>' . e($kind) . ' : ' . e($title) . '</strong><br>';
-    if ($summary) { $html .= e($summary) . '<br>'; }
-    $html .= '<br>';
-    foreach ($sections as $section) {
-        $icon = $section['icon'] ?? '';
-        $label = $section['label'] ?? '';
-        $content = $section['content'] ?? '';
-        if ($content) {
-            $html .= ($icon ? e($icon) . ' ' : '') . ($label ? '<strong>' . e($label) . '</strong> : ' : '') . e($content) . '<br>';
+        $html = '<strong>🔍 ' . e($kind) . ' : ' . e($title) . '</strong><br><br>';
+        if ($summary) { $html .= e(mb_strimwidth($summary, 0, 280, '…')) . '<br><br>'; }
+        $sectionCount = 0;
+        foreach ($sections as $section) {
+            if ($sectionCount >= 2) break;
+            $icon = $section['icon'] ?? '';
+            $label = $section['label'] ?? '';
+            $content = $section['content'] ?? '';
+            if ($content) {
+                $html .= ($icon ? e($icon) . ' ' : '') . ($label ? '<strong>' . e($label) . '</strong> : ' : '') . e(mb_strimwidth($content, 0, 150, '…')) . '<br>';
+                $sectionCount++;
+            }
         }
+        $html .= '<br>🔗 <a href="' . e($directUrlUtm) . '">' . e($directUrlUtm) . '</a><br>';
+        if ($indexUrl) { $html .= '📚 <a href="' . e($indexUrl) . '">' . e($indexLabel) . '</a><br>'; }
+        $html .= '<br>#' . implode(' #', array_map(fn($h) => e($h), $hashtags)) . '<br><br>';
+        $html .= 'Via <a href="https://laveille.ai">laveille.ai</a>';
+    } else {
+        $plain = $kind . ' : ' . $title . "\n";
+        if ($summary) { $plain .= $summary . "\n"; }
+        $plain .= "\n";
+        foreach ($sections as $section) {
+            $icon = $section['icon'] ?? '';
+            $label = $section['label'] ?? '';
+            $content = $section['content'] ?? '';
+            if ($content) {
+                $plain .= ($icon ? $icon . ' ' : '') . ($label ? $label . ' : ' : '') . $content . "\n";
+            }
+        }
+        $plain .= "\n" . '🔗 ' . $directUrlUtm . "\n";
+        if ($indexUrl) { $plain .= '📚 ' . $indexLabel . ' : ' . $indexUrl . "\n"; }
+        $plain .= "\n" . 'Via laveille.ai';
+
+        $html = '<strong>' . e($kind) . ' : ' . e($title) . '</strong><br>';
+        if ($summary) { $html .= e($summary) . '<br>'; }
+        $html .= '<br>';
+        foreach ($sections as $section) {
+            $icon = $section['icon'] ?? '';
+            $label = $section['label'] ?? '';
+            $content = $section['content'] ?? '';
+            if ($content) {
+                $html .= ($icon ? e($icon) . ' ' : '') . ($label ? '<strong>' . e($label) . '</strong> : ' : '') . e($content) . '<br>';
+            }
+        }
+        $html .= '<br>';
+        $html .= '🔗 <a href="' . e($directUrlUtm) . '">' . e($directUrlUtm) . '</a><br>';
+        if ($indexUrl) { $html .= '📚 <a href="' . e($indexUrl) . '">' . e($indexLabel) . '</a><br>'; }
+        $html .= '<br>Via <a href="https://laveille.ai">laveille.ai</a>';
     }
-    $html .= '<br>';
-    $html .= '🔗 <a href="' . e($directUrlUtm) . '">' . e($directUrlUtm) . '</a><br>';
-    if ($indexUrl) { $html .= '📚 <a href="' . e($indexUrl) . '">' . e($indexLabel) . '</a><br>'; }
-    $html .= '<br>Via <a href="https://laveille.ai">laveille.ai</a>';
 
     $jsonLdData = [
         '@context' => 'https://schema.org',

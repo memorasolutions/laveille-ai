@@ -240,6 +240,8 @@
                             indexLabel="Voir tous les termes du glossaire"
                             utmSource="share_dictionary"
                             :kind="$term->type === 'acronym' ? 'Acronyme de l\'éducation' : ($term->type === 'ai_term' ? 'Terme d\'IA' : ($term->type === 'explainer' ? 'Vulgarisation' : 'Terme'))"
+                            :socialFormat="true"
+                            :hashtags="['IA', 'Glossaire', 'LaVeille']"
                         />
                     </div>
 
