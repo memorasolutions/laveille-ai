@@ -4,7 +4,7 @@
 @section('title', $term->name . ' - ' . __('Glossaire IA') . ' - ' . config('app.name'))
 @section('meta_description', Str::limit($term->analogy ?? strip_tags($term->definition), 160))
 @section('og_type', 'article')
-@if(!empty($term->hero_image))
+@if(!empty($term->hero_image) && file_exists(public_path('storage/' . $term->hero_image)))
     @section('og_image', asset('storage/' . $term->hero_image).'?v='.($term->updated_at?->timestamp ?? '0'))
 @endif
 
@@ -24,7 +24,7 @@
     $_shareUtmUrl = $_shareDirectUrl . '?utm_source=share_dictionary&utm_medium=clipboard';
     $_shareAnalogyPart = $_shareAnalogy ? "\n🧠 En termes simples : " . mb_strimwidth($_shareAnalogy, 0, 150, '…') : '';
     $_shareDidYouKnowPart = $_shareDidYouKnow ? "\n💡 Le saviez-vous : " . mb_strimwidth($_shareDidYouKnow, 0, 150, '…') : '';
-    $_shareText = "🔍 {$_shareKind} : {$_shareTermTitle}\n\n{$_shareSummary}{$_shareAnalogyPart}{$_shareDidYouKnowPart}\n\n🔗 {$_shareUtmUrl}\n📚 Voir tous les termes du glossaire : {$_shareIndexUrl}\n\n#IA #Glossaire #LaVeille\n\nVia laveille.ai";
+    $_shareText = "🔍 {$_shareKind} : {$_shareTermTitle}\n\n{$_shareSummary}{$_shareAnalogyPart}{$_shareDidYouKnowPart}\n\n🔗 {$_shareUtmUrl}\n\n#IA #Glossaire #LaVeille\n\nVia laveille.ai";
 @endphp
 @section('share_text', $_shareText)
 
