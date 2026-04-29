@@ -229,8 +229,19 @@
                             $termSections[] = ['icon' => '💡', 'label' => 'Le saviez-vous', 'content' => $didYouKnow];
                         }
                     @endphp
-                    {{-- Partage social : barre flottante globale master.blade.php (sidebar gauche desktop + barre bas mobile)
-                         Pas de smart-share ici - doublon avec la barre globale (S67 retrait) --}}
+                    {{-- Partage social : smart-share component (S74 reactive) --}}
+                    <div style="margin-top: 0.5rem;">
+                        <x-core::smart-share
+                            :title="$termTitle"
+                            :summary="$term->getTranslation('definition', 'fr_CA', false) ?: ''"
+                            :sections="$termSections"
+                            :directUrl="route('dictionary.show', $term->getTranslation('slug', 'fr_CA', false) ?: $term->slug)"
+                            :indexUrl="route('dictionary.index')"
+                            indexLabel="Voir tous les termes du glossaire"
+                            utmSource="share_dictionary"
+                            :kind="$term->type === 'acronym' ? 'Acronyme de l\'éducation' : ($term->type === 'ai_term' ? 'Terme d\'IA' : ($term->type === 'explainer' ? 'Vulgarisation' : 'Terme'))"
+                        />
+                    </div>
 
                     {{-- Acronym full form --}}
                     @if($term->acronym_full)
