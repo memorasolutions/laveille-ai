@@ -27,7 +27,7 @@ class BrevoService
         ];
     }
 
-    public function sendCampaignEmail(string $to, string $name, string $subject, string $htmlContent): array
+    public function sendCampaignEmail(string $to, ?string $name, string $subject, string $htmlContent): array
     {
         if (! $this->isConfigured()) {
             return $this->errorResponse('Brevo API key is missing.');
@@ -37,7 +37,7 @@ class BrevoService
 
         return $this->sendRequest('post', '/smtp/email', [
             'sender' => $this->sender,
-            'to' => [['email' => $to, 'name' => $name]],
+            'to' => [['email' => $to, 'name' => ! empty($name) ? $name : explode('@', $to)[0]]],
             'subject' => $subject,
             'htmlContent' => $htmlContent,
             'headers' => [
