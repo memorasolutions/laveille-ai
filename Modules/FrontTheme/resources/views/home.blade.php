@@ -95,6 +95,8 @@
         </div>
         <!-- end of wpo-blog-hero -->
 
+        @include('fronttheme::partials.newsletter-hero-banner')
+
         <!-- start of wpo-breacking-news -->
         @if($latestNews->isNotEmpty())
         <div class="wpo-breacking-news section-padding">

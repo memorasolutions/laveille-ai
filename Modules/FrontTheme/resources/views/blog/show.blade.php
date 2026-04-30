@@ -220,7 +220,7 @@
 
                         @include('fronttheme::blog.partials.faq-accordion')
 
-                        @include('fronttheme::partials.newsletter-widget', ['variant' => 'inline-article'])
+                        @include('fronttheme::partials.newsletter-native-cta')
 
                         @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
                             {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-bottom') !!}

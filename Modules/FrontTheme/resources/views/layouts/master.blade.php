@@ -218,6 +218,8 @@
         </div>
         @endif
 
+        @include('fronttheme::partials.newsletter-sticky-bar')
+
         <main id="main-content">
         @yield('content')
         </main>
