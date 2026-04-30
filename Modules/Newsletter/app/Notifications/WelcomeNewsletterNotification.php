@@ -64,7 +64,7 @@ class WelcomeNewsletterNotification extends TemplatedNotification
             ->line('Vos données sont conservées jusqu’à votre désabonnement.')
             ->line('Vous avez le droit d’accéder à vos données, de les rectifier ou de demander leur suppression en cliquant sur le lien de désabonnement ci-dessous ou en nous contactant à l’adresse suivante : '.$dpoEmail.'.')
             ->line('Ce traitement est encadré par la Loi 25 (Québec) et le Règlement général sur la protection des données (RGPD) de l’Union européenne.')
-            ->line('Si vous ne souhaitez plus recevoir nos courriels, [cliquez ici pour vous désabonner]('.$unsubUrl.').')
+            ->line(new \Illuminate\Support\HtmlString('Si vous ne souhaitez plus recevoir nos courriels, <a href="'.e($unsubUrl).'">cliquez ici pour vous désabonner</a>.'))
             ->salutation('À bientôt !');
     }
 }
