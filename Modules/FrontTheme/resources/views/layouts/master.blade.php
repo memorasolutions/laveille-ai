@@ -99,16 +99,28 @@
     <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/animate.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/owl.carousel.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/owl.theme.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/slick.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/slick-theme.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/swiper.min.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/owl.transitions.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/jquery.fancybox.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/odometer-theme-default.css') }}" rel="stylesheet">
-    <link href="{{ fronttheme_asset('css/component.css') }}" rel="stylesheet">
+    <link href="{{ fronttheme_asset('css/animate.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/owl.carousel.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/owl.theme.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/slick.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/slick-theme.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/swiper.min.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/owl.transitions.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/jquery.fancybox.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/odometer-theme-default.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="{{ fronttheme_asset('css/component.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="{{ fronttheme_asset('css/animate.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/owl.carousel.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/owl.theme.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/slick.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/slick-theme.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/swiper.min.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/owl.transitions.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/jquery.fancybox.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/odometer-theme-default.css') }}" rel="stylesheet">
+        <link href="{{ fronttheme_asset('css/component.css') }}" rel="stylesheet">
+    </noscript>
     <link href="{{ fronttheme_asset('sass/style.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/responsive.css') }}" rel="stylesheet">
     <link rel="preload" href="/fonts/dm-sans/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
