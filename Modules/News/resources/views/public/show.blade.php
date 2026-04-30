@@ -35,8 +35,15 @@
 @endphp
 @endsection
 @section('og_type', 'article')
-@if($article->image_url)
-    @section('og_image', str_starts_with($article->image_url, 'http') ? $article->image_url : url($article->image_url).'?v='.($article->updated_at?->timestamp ?? '0'))
+{{-- og:image fallback chain : .jpg (prioritaire) → image_url originale → absent (externes inchangées) --}}
+@if(!empty($article->image_url) && !str_starts_with($article->image_url, 'http'))
+    @php
+        $_jpgPath = preg_replace('/\.[^.]*$/', '.jpg', $article->image_url);
+        $_ogImagePath = file_exists(public_path(ltrim($_jpgPath, '/'))) ? $_jpgPath : $article->image_url;
+    @endphp
+    @section('og_image', url($_ogImagePath).'?v='.($article->updated_at?->timestamp ?? '0'))
+@elseif(!empty($article->image_url))
+    @section('og_image', $article->image_url)
 @endif
 
 @section('breadcrumb')
