@@ -29,7 +29,7 @@
                             <div class="col-lg-4 col-md-6 col-12 mb-4">
                                 <div class="card h-100 shadow-sm" style="border-radius: var(--r-base); overflow: hidden; transition: transform 0.2s;">
                                     @if($tool->featured_image && file_exists(public_path($tool->featured_image)))
-                                        <img src="{{ asset($tool->featured_image) }}?v={{ filemtime(public_path($tool->featured_image)) }}" class="card-img-top" alt="{{ $tool->name }}" style="height: 180px; object-fit: cover;" loading="lazy">
+                                        <img src="{{ asset($tool->featured_image) }}?v={{ filemtime(public_path($tool->featured_image)) }}" class="card-img-top" alt="{{ $tool->name }}" width="320" height="180" style="height: 180px; object-fit: cover;" loading="lazy" decoding="async" fetchpriority="{{ $loop->index < 3 ? 'high' : 'low' }}">
                                     @else
                                         <div style="height: 180px; background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover)); display: flex; align-items: center; justify-content: center;">
                                             <span style="font-size: 48px; color: rgba(255,255,255,0.3);">{{ $tool->icon ?? '🔧' }}</span>
