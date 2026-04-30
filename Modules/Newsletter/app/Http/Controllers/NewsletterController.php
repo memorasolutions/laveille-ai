@@ -37,7 +37,7 @@ class NewsletterController extends Controller
                 ->notify(new WelcomeNewsletterNotification($subscriber));
         }
 
-        $message = __('Vérifiez votre courriel pour confirmer votre abonnement !');
+        $message = __('Vérifiez votre courriel pour confirmer votre abonnement ! Pensez à regarder dans vos courriers indésirables (spams) si vous ne le voyez pas dans quelques minutes.');
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
