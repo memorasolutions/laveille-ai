@@ -125,6 +125,10 @@ test('step log tracks execution', function () {
 });
 
 test('workflow auto assigns tenant', function () {
+    if (! \Illuminate\Support\Facades\Schema::hasTable('tenants')) {
+        $this->markTestSkipped('Module Tenancy désactivé – table tenants absente');
+    }
+
     $tenant = Tenant::factory()->create();
     app(TenantService::class)->switchTo($tenant);
 
@@ -134,6 +138,10 @@ test('workflow auto assigns tenant', function () {
 });
 
 test('workflow scoped to tenant', function () {
+    if (! \Illuminate\Support\Facades\Schema::hasTable('tenants')) {
+        $this->markTestSkipped('Module Tenancy désactivé – table tenants absente');
+    }
+
     $tenant1 = Tenant::factory()->create();
     $tenant2 = Tenant::factory()->create();
 
