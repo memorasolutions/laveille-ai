@@ -1,20 +1,28 @@
-<div id="newsletter-sticky-bar" x-data="{ dismissed: false, checkDismissal() { const dismissedAt = localStorage.getItem('newsletter_sticky_dismissed_at'); if (dismissedAt && (Date.now() - parseInt(dismissedAt)) < 30*24*60*60*1000) { this.dismissed = true; } } }" x-init="checkDismissal()" x-show="!dismissed" x-cloak style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999; height: 44px; padding: 8px 16px; background: linear-gradient(to right, #0B7285, #095a69); color: white; font-size: 0.875rem; box-sizing: border-box;">
-    <div style="display: flex; justify-content: space-between; align-items: center; height: 100%;">
-        <div class="sticky-bar-text" style="display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-            <span aria-hidden="true">📬</span>
-            <span>{{ __('Rejoignez 50+ pros - Veille IA Québec hebdo, 5 min/semaine') }}</span>
+<div id="newsletter-sticky-bar"
+     x-data="{ dismissed: false, checkDismissal() { const d = localStorage.getItem('newsletter_sticky_dismissed_at'); if (d && (Date.now() - parseInt(d)) < 30*24*60*60*1000) { this.dismissed = true; } } }"
+     x-init="checkDismissal()"
+     x-cloak
+     x-show="!dismissed"
+     role="region"
+     aria-label="{{ __('Bandeau infolettre') }}"
+     style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999; height: 36px; background: #FAFAF7; border-bottom: 1px solid #E5E7EB; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; height: 100%; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+            <span aria-hidden="true" style="color: #0B7285; font-size: 14px; line-height: 1;">▸</span>
+            <span class="sticky-badge" style="background: #E0F2FE; color: #0B7285; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 6px; border-radius: 3px; white-space: nowrap;">{{ __('Veille IA') }}</span>
+            <span class="sticky-text-full" style="color: #18181B; font-size: 13px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ __('Veille IA sans buzz : pour stratèges québécois.') }}</span>
+            <span class="sticky-text-short" style="color: #18181B; font-size: 13px; font-weight: 400; display: none;">{{ __('Veille IA sans buzz') }}</span>
         </div>
-        <div>
-            <a href="#newsletter-hero" style="background-color: #F97316; color: white; text-decoration: none; padding: 4px 12px; border-radius: 4px; font-weight: 600; white-space: nowrap;">{{ __('S’inscrire gratuit') }}</a>
+        <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+            <a href="#newsletter-hero" style="color: #0B7285; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; transition: color 150ms ease;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#0B7285'">{{ __('Recevoir hebdo →') }}</a>
+            <button type="button" @click="dismissed = true; localStorage.setItem('newsletter_sticky_dismissed_at', Date.now().toString());" aria-label="{{ __('Fermer le bandeau infolettre') }}" style="background: none; border: none; color: #6B7280; font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; transition: color 150ms ease;" onmouseover="this.style.color='#18181B'" onmouseout="this.style.color='#6B7280'">&times;</button>
         </div>
-        <button type="button" aria-label="{{ __('Fermer la barre') }}" @click="dismissed = true; localStorage.setItem('newsletter_sticky_dismissed_at', Date.now().toString());" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-            &times;
-        </button>
     </div>
 </div>
 <style>
-    @media (max-width: 768px) {
-        #newsletter-sticky-bar .sticky-bar-text span:not(:first-child) { display: none; }
-        #newsletter-sticky-bar .sticky-bar-text { gap: 4px; }
+    @media (max-width: 640px) {
+        #newsletter-sticky-bar .sticky-badge { display: none !important; }
+        #newsletter-sticky-bar .sticky-text-full { display: none !important; }
+        #newsletter-sticky-bar .sticky-text-short { display: inline !important; }
     }
 </style>
