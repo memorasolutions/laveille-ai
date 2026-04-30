@@ -69,4 +69,19 @@ class NewsletterController extends Controller
 
         return redirect('/')->with('newsletter_unsubscribed', 'Vous avez été désabonné avec succès.');
     }
+
+    public function unsubscribeOneClick(string $token): \Illuminate\Http\Response
+    {
+        $subscriber = Subscriber::where('token', $token)->first();
+
+        if ($subscriber && $subscriber->unsubscribed_at === null) {
+            $subscriber->update(['unsubscribed_at' => now()]);
+            \Illuminate\Support\Facades\Log::info('RFC8058 one-click unsubscribe', [
+                'email' => $subscriber->email,
+                'token' => $token,
+            ]);
+        }
+
+        return response('', 204);
+    }
 }

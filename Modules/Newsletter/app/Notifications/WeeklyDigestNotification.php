@@ -8,9 +8,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Modules\Newsletter\Notifications\Concerns\HasOneClickUnsubscribe;
 
 class WeeklyDigestNotification extends Notification
 {
+    use HasOneClickUnsubscribe;
     use Queueable;
 
     public function __construct(
@@ -36,7 +38,7 @@ class WeeklyDigestNotification extends Notification
         $unsubscribeUrl = route('newsletter.unsubscribe', ['token' => $notifiable->token ?? 'preview']);
         $subject = 'La veille IA #'.$this->weekNumber.' — '.($this->highlight?->seo_title ?? $this->highlight?->title ?? 'Votre veille hebdomadaire');
 
-        return (new MailMessage)
+        $mailMessage = (new MailMessage)
             ->subject($subject)
             ->view('newsletter::emails.digest-weekly', [
                 'subject' => $subject,
@@ -52,5 +54,7 @@ class WeeklyDigestNotification extends Notification
                 'unsubscribeUrl' => $unsubscribeUrl,
                 'weekNumber' => $this->weekNumber,
             ]);
+
+        return $this->applyOneClickUnsubscribe($mailMessage, $notifiable->token ?? null);
     }
 }

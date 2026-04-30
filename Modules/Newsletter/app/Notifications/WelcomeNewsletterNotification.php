@@ -13,15 +13,23 @@ namespace Modules\Newsletter\Notifications;
 use Illuminate\Notifications\Messages\MailMessage;
 use Modules\Core\Notifications\TemplatedNotification;
 use Modules\Newsletter\Models\Subscriber;
+use Modules\Newsletter\Notifications\Concerns\HasOneClickUnsubscribe;
 
 class WelcomeNewsletterNotification extends TemplatedNotification
 {
+    use HasOneClickUnsubscribe;
+
     public function __construct(private readonly Subscriber $subscriber) {}
 
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
         return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return $this->applyOneClickUnsubscribe(parent::toMail($notifiable), $this->subscriber->token);
     }
 
     protected function getTemplateSlug(): string
