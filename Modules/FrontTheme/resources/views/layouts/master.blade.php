@@ -14,7 +14,22 @@
     @endif
     <style>[x-cloak] { display: none !important; }</style>
     @if(env('ADSENSE_CLIENT_ID'))
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ env('ADSENSE_CLIENT_ID') }}" crossorigin="anonymous"></script>
+    <script>
+    (function(){
+      var loadAdsense = function() {
+        var s = document.createElement('script');
+        s.async = true;
+        s.crossOrigin = 'anonymous';
+        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ env('ADSENSE_CLIENT_ID') }}';
+        document.head.appendChild(s);
+      };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadAdsense, { timeout: 3000 });
+      } else {
+        setTimeout(loadAdsense, 2500);
+      }
+    })();
+    </script>
     @endif
     @if(env('GA_MEASUREMENT_ID') && env('PRIVACY_GA_ENABLED', false))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('GA_MEASUREMENT_ID') }}"></script>
