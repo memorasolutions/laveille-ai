@@ -96,6 +96,9 @@
     {{-- RSS désactivé (décision utilisateur 2026-04-04) --}}
     @stack('head')
     @include('fronttheme::partials.critical-css')
+    <link rel="preload" as="style" href="{{ fronttheme_asset('css/bootstrap.min.css') }}">
+    <link rel="preload" as="style" href="{{ fronttheme_asset('sass/style.css') }}">
+    <link rel="preload" as="style" href="{{ asset('css/charte.css') }}?v={{ filemtime(public_path('css/charte.css')) }}">
     <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/bootstrap.min.css') }}" rel="stylesheet">
