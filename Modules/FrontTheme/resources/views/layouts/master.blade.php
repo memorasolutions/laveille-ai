@@ -278,7 +278,7 @@
     @endif
 
     <!-- All JavaScript files -->
-    <script src="{{ fronttheme_asset('js/jquery.min.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="{{ fronttheme_asset('js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ fronttheme_asset('js/modernizr.custom.js') }}"></script>
     <script src="{{ fronttheme_asset('js/jquery.dlmenu.js') }}"></script>
