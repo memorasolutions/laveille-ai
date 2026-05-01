@@ -104,8 +104,14 @@
                     <div class="invalid-feedback" x-show="errors['answer-' + index]" x-text="errors['answer-' + index]"></div>
                   </div>
                   <div class="col-12 col-md-1 d-flex">
-                    <button type="button" class="btn btn-outline-danger w-100" @click="removePair(index)" :disabled="pairs.length <= 1" :aria-label="'{{ __('Supprimer paire') }} ' + (index + 1)">
-                      <i class="fas fa-trash"></i>
+                    <button type="button" class="crossword-pair-delete" @click="removePair(index)" :disabled="pairs.length <= 1" :aria-label="'{{ __('Supprimer la paire') }} ' + (index + 1)" :title="'{{ __('Supprimer la paire') }} ' + (index + 1)">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -264,6 +270,33 @@
   .cell-inactive {
     background-color: var(--c-dark, #1A1D23);
     border: 1px solid var(--c-dark, #1A1D23);
+  }
+  .crossword-pair-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #E5E7EB;
+    background: transparent;
+    color: #6E7687;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+  }
+  .crossword-pair-delete:hover:not(:disabled),
+  .crossword-pair-delete:focus-visible:not(:disabled) {
+    color: #DC2626;
+    border-color: #DC2626;
+    background-color: rgba(220, 38, 38, 0.06);
+  }
+  .crossword-pair-delete:focus-visible {
+    outline: 2px solid #DC2626;
+    outline-offset: 2px;
+  }
+  .crossword-pair-delete:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
   }
   @media print {
     .no-print, header, footer, nav, .breadcrumb-container, .navbar, .modal { display: none !important; }
