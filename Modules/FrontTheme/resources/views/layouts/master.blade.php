@@ -184,6 +184,8 @@
 <body>
 <a href="#main-content" class="skip-link" aria-label="Skip to main content — Aller au contenu principal">{{ __('Aller au contenu principal') }}</a>
 
+@include('fronttheme::partials.newsletter-sticky-bar')
+
     <!-- start page-wrapper -->
     <div class="page-wrapper">
         <!-- preloader : overlay flou + logo animé -->
@@ -247,8 +249,6 @@
             </div>
         </div>
         @endif
-
-        @include('fronttheme::partials.newsletter-sticky-bar')
 
         <main id="main-content">
         @yield('content')
