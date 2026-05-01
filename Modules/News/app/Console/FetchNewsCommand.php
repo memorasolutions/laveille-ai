@@ -111,7 +111,7 @@ class FetchNewsCommand extends Command
                                 $signals
                             );
                             if ($check['is_duplicate']) {
-                                \Illuminate\Support\Facades\Log::info(sprintf('DEDUP-SKIP: article #%d "%s" doublon de #%d (score=%.3f, reason=%s) [IA evitee]', $article->id, mb_substr($article->title, 0, 60), $cand->id, $check['score'], $check['reason']));
+                                \Illuminate\Support\Facades\Log::error(sprintf('DEDUP-SKIP: article #%d "%s" doublon de #%d (score=%.3f, reason=%s) [IA evitee]', $article->id, mb_substr($article->title, 0, 60), $cand->id, $check['score'], $check['reason']));
                                 $article->update(['is_published' => false, 'summary' => '[doublon detecte - IA evitee]', 'feed_type' => $feedType]);
                                 $this->line("  ⊕ Doublon skip IA : {$article->title}");
                                 $totalFiltered++;

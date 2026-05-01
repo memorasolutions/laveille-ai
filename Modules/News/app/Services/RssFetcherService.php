@@ -46,7 +46,7 @@ class RssFetcherService
                 $itemUrl = mb_substr($itemFullUrl, 0, 240);
 
                 if (self::isDuplicate($itemUrl, $itemTitle)) {
-                    Log::info("News dedup: skipped duplicate '{$itemTitle}' from {$source->name}");
+                    Log::error("News dedup: skipped duplicate '{$itemTitle}' from {$source->name}");
 
                     continue;
                 }
