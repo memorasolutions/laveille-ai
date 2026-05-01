@@ -48,16 +48,20 @@
               </div>
             @endauth
 
-            {{-- Thème (Bonification #2 - Phase 2) --}}
+            {{-- Thème : suggestion IA gratuite (gemma 3 27b free) --}}
             <div class="mb-4">
               <label for="theme" class="form-label fw-medium">{{ __('Thème de la grille (optionnel)') }}</label>
-              <div class="d-flex gap-2">
-                <input type="text" id="theme" class="form-control" x-model="metadata.theme" placeholder="{{ __('Ex: Marketing B2B, Histoire du Québec...') }}" aria-label="{{ __('Thème de la grille') }}" maxlength="100">
-                <button type="button" class="ct-btn ct-btn-outline" disabled aria-disabled="true" title="{{ __('Bientôt disponible Phase 2') }}">
-                  <i class="fas fa-magic me-1"></i> {{ __('Pré-remplir IA') }}
+              <div class="d-flex gap-2 flex-wrap">
+                <input type="text" id="theme" class="form-control flex-fill" x-model="metadata.theme" @keydown.enter.prevent="suggestPairs()" placeholder="{{ __('Ex: Marketing B2B, Histoire du Québec, Cuisine...') }}" aria-label="{{ __('Thème de la grille') }}" maxlength="100" :disabled="suggestingPairs">
+                <button type="button" class="ct-btn ct-btn-outline" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" :aria-label="'{{ __('Pré-remplir 10 paires avec l\'IA gratuite') }}'">
+                  <span x-show="!suggestingPairs"><i class="fas fa-magic me-1"></i> {{ __('Pré-remplir IA') }}</span>
+                  <span x-show="suggestingPairs"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> {{ __('Génération...') }}</span>
                 </button>
               </div>
-              <small class="text-muted">{{ __('Suggestions IA bientôt disponibles (Phase 2).') }}</small>
+              <small class="text-muted">{{ __('Suggestions IA gratuites (modèle ouvert, peut prendre 5-15s). Vos paires existantes seront remplacées.') }}</small>
+              <div x-show="suggestError" x-cloak class="alert alert-warning mt-2 mb-0 small" role="alert">
+                <strong>{{ __('Suggestions') }}:</strong> <span x-text="suggestError"></span>
+              </div>
             </div>
 
             {{-- Métadonnées --}}
@@ -293,6 +297,8 @@ function crosswordGenerator() {
     saveName: '',
     errors: {},
     generationError: null,
+    suggestingPairs: false,
+    suggestError: null,
 
     init() {
       const draft = localStorage.getItem('crossword_draft');
@@ -356,6 +362,40 @@ function crosswordGenerator() {
     canGenerate() {
       const validPairs = this.pairs.filter(p => p.clue && p.clue.trim() && p.answer && p.answer.trim().length >= 2 && /^[a-zA-ZàâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ]+$/.test(p.answer.trim()));
       return validPairs.length >= 2 && Object.keys(this.errors).length === 0;
+    },
+
+    async suggestPairs() {
+      const theme = (this.metadata.theme || '').trim();
+      if (!theme || this.suggestingPairs) return;
+      this.suggestingPairs = true;
+      this.suggestError = null;
+
+      try {
+        const response = await fetch('{{ url("/outils/mots-croises/ai-suggest-pairs") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({theme: theme, count: 10})
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success && Array.isArray(data.pairs) && data.pairs.length > 0) {
+          this.pairs = data.pairs.map(p => ({clue: p.clue, answer: (p.answer || '').toUpperCase()}));
+          this.errors = {};
+          this.saveDraft();
+          this.dispatchToast('{{ __('Paires générées :') }} ' + data.pairs.length, 'success');
+        } else {
+          this.suggestError = (data && data.error) || '{{ __('Aucune suggestion. Essayez un thème plus précis.') }}';
+        }
+      } catch (error) {
+        console.error('Suggest error', error);
+        this.suggestError = '{{ __('Erreur réseau. Réessayez dans quelques secondes.') }}';
+      } finally {
+        this.suggestingPairs = false;
+      }
     },
 
     async generate() {

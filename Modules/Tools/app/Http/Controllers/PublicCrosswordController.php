@@ -10,11 +10,41 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use InvalidArgumentException;
 use Modules\Tools\Models\SavedCrosswordPreset;
+use Modules\Tools\Services\CrosswordAiSuggestionService;
 use Modules\Tools\Services\CrosswordGeneratorService;
 
 class PublicCrosswordController
 {
-    public function __construct(private CrosswordGeneratorService $generator) {}
+    public function __construct(
+        private CrosswordGeneratorService $generator,
+        private CrosswordAiSuggestionService $aiSuggester,
+    ) {}
+
+    public function aiSuggestPairs(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'theme' => 'required|string|max:100',
+            'count' => 'nullable|integer|min:5|max:15',
+        ]);
+
+        $pairs = $this->aiSuggester->generatePairsForTheme(
+            $validated['theme'],
+            (int) ($validated['count'] ?? 10),
+        );
+
+        if (empty($pairs)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Impossible de générer des suggestions pour ce thème. Réessayez avec un thème plus précis.',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'pairs' => $pairs,
+            'count' => count($pairs),
+        ]);
+    }
 
     public function generate(Request $request): JsonResponse
     {
