@@ -43,6 +43,7 @@ class OrderShippedNotification extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
+            'title' => 'Commande #' . $this->order->id . ' expédiée',
             'order_id' => $this->order->id,
             'status' => $this->order->status,
             'tracking_url' => $this->trackingUrl,

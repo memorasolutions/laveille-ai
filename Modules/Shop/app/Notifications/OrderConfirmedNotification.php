@@ -40,6 +40,7 @@ class OrderConfirmedNotification extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
+            'title' => 'Commande #' . $this->order->id . ' confirmée',
             'order_id' => $this->order->id,
             'status' => $this->order->status,
             'message' => 'Votre commande #' . $this->order->id . ' a été confirmée.',
