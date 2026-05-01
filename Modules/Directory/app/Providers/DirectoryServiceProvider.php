@@ -65,6 +65,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\EnrichTutorialsSonarCommand::class,
             \Modules\Directory\Console\EnrichPendingCommand::class,
             \Modules\Directory\Console\EnrichMetadataCommand::class,
+            \Modules\Directory\Console\EnrichRichFieldsCommand::class,
             \Modules\Directory\Console\DispatchEnrichmentCommand::class,
             \Modules\Directory\Console\SummarizePendingCommand::class,
             \Modules\Directory\Console\GenerateAlternativesCommand::class,
