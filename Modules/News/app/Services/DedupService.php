@@ -134,13 +134,16 @@ final class DedupService
         }
 
         if ($withinWindow && $titleA !== '' && $titleB !== '') {
+            $jaccard = self::jaccardKeywords($titleA, $titleB);
+            $entCount = self::keyEntitiesIntersectionCount($titleA, $titleB);
+
             if (self::titleSimilarity($titleA, $titleB) > 0.85) {
                 $signals['title_fuzzy_high'] = true;
             }
-            if (self::jaccardKeywords($titleA, $titleB) >= 0.40) {
+            if ($jaccard >= 0.40) {
                 $signals['jaccard_high'] = true;
             }
-            if (self::keyEntitiesIntersectionCount($titleA, $titleB) >= 3) {
+            if ($entCount >= 3 || ($entCount >= 2 && $jaccard >= 0.40)) {
                 $signals['key_entities_match'] = true;
             }
         }
@@ -151,13 +154,26 @@ final class DedupService
 
         $coreKeys = ['normalized_url_match' => 1, 'canonical_match' => 1, 'title_fuzzy_high' => 1, 'jaccard_high' => 1, 'key_entities_match' => 1];
         $core = array_intersect_key($signals, $coreKeys);
-        $isDup = count($core) >= 2
-            || isset($signals['normalized_url_match'])
-            || isset($signals['canonical_match']);
+        $isDup = isset($signals['normalized_url_match'])
+            || isset($signals['canonical_match'])
+            || isset($signals['key_entities_match'])
+            || count($core) >= 2;
 
         $totalPossible = 6;
         $score = round(count($signals) / $totalPossible, 3);
-        $reason = count($core) >= 2 ? 'multi_core' : (count($signals) === 1 ? array_key_first($signals) : (isset($signals['normalized_url_match']) ? 'normalized_url_match' : (isset($signals['canonical_match']) ? 'canonical_match' : 'none')));
+        if (isset($signals['normalized_url_match'])) {
+            $reason = 'normalized_url_match';
+        } elseif (isset($signals['canonical_match'])) {
+            $reason = 'canonical_match';
+        } elseif (count($core) >= 2) {
+            $reason = 'multi_core';
+        } elseif (isset($signals['key_entities_match'])) {
+            $reason = 'key_entities_match';
+        } elseif (count($signals) === 1) {
+            $reason = array_key_first($signals);
+        } else {
+            $reason = 'none';
+        }
 
         return [
             'is_duplicate' => $isDup,
