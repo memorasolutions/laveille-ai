@@ -1,4 +1,4 @@
-<section id="newsletter-hero" class="newsletter-hero-banner" style="padding: 48px 24px; background: linear-gradient(to bottom, #FFF8F1, #FFFDF9);">
+<section id="newsletter-hero" class="newsletter-hero-banner" style="padding: 48px 24px; background: linear-gradient(to bottom, #FFF8F1, #FFFDF9); scroll-margin-top: 100px;">
     <div style="max-width: 800px; margin: 0 auto; text-align: center;">
         <h2 style="font-size: 1.8rem; margin-bottom: 12px;">{{ __('Veille IA Québec - chaque dimanche dans votre boîte') }}</h2>
         <p style="font-size: 1.1rem; margin-bottom: 24px;">{{ __('Rejoignez 50+ professionnels qui suivent la transformation IA du Québec - 5 min de lecture hebdo, 0 spam, gratuit') }}</p>
