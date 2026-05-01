@@ -61,7 +61,7 @@
               <label for="theme" class="form-label fw-medium">{{ __('Thème de la grille (optionnel)') }}</label>
               <div class="d-flex gap-2 flex-wrap">
                 <input type="text" id="theme" class="form-control flex-fill" x-model="metadata.theme" @keydown.enter.prevent="suggestPairs()" placeholder="{{ __('Ex: Marketing B2B, Histoire du Québec, Cuisine...') }}" aria-label="{{ __('Thème de la grille') }}" maxlength="100" :disabled="suggestingPairs">
-                <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" :aria-label="'{{ __('Pré-remplir 10 paires avec l\'IA gratuite') }}'">
+                <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" aria-label="{{ __('Pré-remplir 10 paires avec IA gratuite') }}">
                   <template x-if="!suggestingPairs">
                     <span class="d-inline-flex align-items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/><path d="m11 4 1 4 4 1-4 1-1 4-1-4-4-1 4-1z"/></svg>
