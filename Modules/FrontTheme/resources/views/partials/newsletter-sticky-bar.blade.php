@@ -5,7 +5,7 @@
      x-show="!dismissed"
      role="region"
      aria-label="{{ __('Bandeau infolettre') }}"
-     style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999; height: 36px; background: #FAFAF7; border-bottom: 1px solid #E5E7EB; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+     style="position: fixed; top: 49px; left: 0; right: 0; z-index: 9999; height: 36px; background: #FAFAF7; border-bottom: 1px solid #E5E7EB; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; height: 100%; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
             <span aria-hidden="true" style="color: #0B7285; font-size: 14px; line-height: 1;">▸</span>
