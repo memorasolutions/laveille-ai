@@ -19,28 +19,68 @@ class NewsImageService
 
     public function processFromUrl(string $url, int $articleId): ?string
     {
+        $maxBytes = 5 * 1024 * 1024; // 5 MB
+        $maxPixels = 4000;
+        $previousMemoryLimit = ini_get('memory_limit');
+
         try {
             $url = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
+            $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+            // 1. HEAD pre-check Content-Length pour bloquer les gros fichiers AVANT download complet
+            try {
+                $head = Http::withoutVerifying()
+                    ->timeout(8)
+                    ->withHeaders(['User-Agent' => $userAgent])
+                    ->withOptions(['allow_redirects' => ['max' => 5]])
+                    ->head($url);
+                $declaredSize = (int) $head->header('Content-Length');
+                if ($declaredSize > 0 && $declaredSize > $maxBytes) {
+                    Log::warning("NewsImage: declined oversized image {$declaredSize} bytes (max {$maxBytes}) for article {$articleId} {$url}");
+                    return null;
+                }
+            } catch (\Throwable $headException) {
+                // HEAD non supporté par certains CDN, on tente le GET avec garde
+            }
+
             $response = Http::withoutVerifying()
                 ->timeout(15)
-                ->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'])
+                ->withHeaders(['User-Agent' => $userAgent])
                 ->withOptions(['allow_redirects' => ['max' => 5]])
                 ->get($url);
 
             if (! $response->successful()) {
                 Log::warning("NewsImage: download failed {$url} (article {$articleId})");
-
                 return null;
             }
 
             $content = $response->body();
+            $size = strlen($content);
 
-            if (strlen($content) < 5120) {
-                Log::warning("NewsImage: image too small (".strlen($content)." bytes) {$url}");
-
+            if ($size < 5120) {
+                Log::warning("NewsImage: image too small ({$size} bytes) {$url}");
                 return null;
             }
+
+            // 2. Garde post-download (sécurité si HEAD a menti)
+            if ($size > $maxBytes) {
+                Log::warning("NewsImage: image too large ({$size} bytes, max {$maxBytes}) for article {$articleId} {$url}");
+                return null;
+            }
+
+            // 3. Check dimensions sans décodage pixels complet
+            $info = @getimagesizefromstring($content);
+            if (is_array($info)) {
+                [$w, $h] = $info;
+                if ($w > $maxPixels || $h > $maxPixels) {
+                    Log::warning("NewsImage: image dimensions too large ({$w}x{$h}, max {$maxPixels}px) for article {$articleId}");
+                    return null;
+                }
+            }
+
+            // 4. Bump memory_limit selectif autour du decode/encode (filet de securite)
+            ini_set('memory_limit', '512M');
 
             $manager = new ImageManager(new Driver());
             $image = $manager->read($content);
@@ -54,8 +94,9 @@ class NewsImageService
             return "/storage/{$path}";
         } catch (\Throwable $e) {
             Log::warning("NewsImage: exception for article {$articleId} - ".$e->getMessage());
-
             return null;
+        } finally {
+            ini_set('memory_limit', $previousMemoryLimit);
         }
     }
 
