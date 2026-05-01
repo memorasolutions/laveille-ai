@@ -9,10 +9,8 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Core\Contracts\MetricProviderInterface;
 use Modules\Core\DataTransferObjects\MetricWidget;
 use Modules\Core\Services\MetricAggregatorService;
-use Modules\Ecommerce\Providers\EcommerceMetricProvider;
 
 uses(RefreshDatabase::class);
 
@@ -41,39 +39,9 @@ test('MetricWidget toArray filters null values', function () {
         ->not->toHaveKey('icon');
 });
 
-test('EcommerceMetricProvider implements interface', function () {
-    $provider = app(EcommerceMetricProvider::class);
-
-    expect($provider)->toBeInstanceOf(MetricProviderInterface::class)
-        ->and($provider->getMetricName())->toBe('ecommerce');
-});
-
-test('EcommerceMetricProvider returns 5 widgets', function () {
-    $provider = app(EcommerceMetricProvider::class);
-    $widgets = $provider->getWidgets();
-
-    expect($widgets)->toHaveCount(5);
-    expect($widgets[0])->toBeInstanceOf(MetricWidget::class);
-});
-
-test('EcommerceMetricProvider returns metrics array', function () {
-    $provider = app(EcommerceMetricProvider::class);
-    $metrics = $provider->getMetrics(now()->startOfMonth(), now()->endOfMonth());
-
-    expect($metrics)->toHaveKeys(['revenue', 'orders_count', 'avg_order', 'products_active', 'refund_rate']);
-});
-
-test('MetricAggregatorService discovers tagged providers', function () {
-    $aggregator = app(MetricAggregatorService::class);
-    $providers = $aggregator->getRegisteredProviders();
-
-    expect($providers)->toContain('ecommerce');
-});
-
 test('MetricAggregatorService getAllWidgets collects from all providers', function () {
     $aggregator = app(MetricAggregatorService::class);
     $widgets = $aggregator->getAllWidgets();
 
-    expect($widgets)->not->toBeEmpty();
-    expect($widgets[0])->toBeInstanceOf(MetricWidget::class);
+    expect($widgets)->toBeArray();
 });

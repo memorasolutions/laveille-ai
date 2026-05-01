@@ -31,7 +31,6 @@ return [
             'ABTest',
             'Blog',
             'Booking',
-            'Ecommerce',
             'Export',
             'Faq',
             'FormBuilder',
@@ -55,7 +54,6 @@ return [
         'modules_disabled' => [
             'ABTest',
             'Booking',
-            'Ecommerce',
             'Export',
             'FormBuilder',
             'Import',
@@ -81,7 +79,6 @@ return [
             'Api',
             'Blog',
             'Booking',
-            'Ecommerce',
             'Export',
             'Faq',
             'FormBuilder',

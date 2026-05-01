@@ -1,0 +1,10 @@
+{
+    "name": "modules/ecommerce",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Ecommerce\\": "app/",
+            "Modules\\Ecommerce\\Database\\": "database/",
+            "Modules\\Ecommerce\\Tests\\": "tests/"
+        }
+    }
+}

@@ -12,11 +12,6 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 dataset('auditable_models', [
-    'Order' => fn () => \Modules\Ecommerce\Models\Order::class,
-    'Product' => fn () => \Modules\Ecommerce\Models\Product::class,
-    'ProductVariant' => fn () => \Modules\Ecommerce\Models\ProductVariant::class,
-    'Coupon (Ecommerce)' => fn () => \Modules\Ecommerce\Models\Coupon::class,
-    'Refund' => fn () => \Modules\Ecommerce\Models\Refund::class,
     'Article' => fn () => \Modules\Blog\Models\Article::class,
     'Category (Blog)' => fn () => \Modules\Blog\Models\Category::class,
     'StaticPage' => fn () => \Modules\Pages\Models\StaticPage::class,

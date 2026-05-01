@@ -1,0 +1,174 @@
+<?php
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project memora/laravel-saas-boilerplate
+ */
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
+use Modules\Core\Http\Middleware\EnsureIsAdmin;
+use Modules\Core\Http\Middleware\SetBackofficeTheme;
+use Modules\Ecommerce\Http\Controllers\Admin\CategoryController;
+use Modules\Ecommerce\Http\Controllers\Admin\CouponController;
+use Modules\Ecommerce\Http\Controllers\Admin\DashboardController;
+use Modules\Ecommerce\Http\Controllers\Admin\OrderController;
+use Modules\Ecommerce\Http\Controllers\Admin\ProductController;
+use Modules\Ecommerce\Http\Controllers\Admin\ProductImportExportController;
+use Modules\Ecommerce\Http\Controllers\Admin\PromotionController;
+use Modules\Ecommerce\Http\Controllers\Admin\RefundController;
+use Modules\Ecommerce\Http\Controllers\Admin\ReviewController;
+use Modules\Ecommerce\Http\Controllers\Admin\SalesAnalyticsController;
+use Modules\Ecommerce\Http\Controllers\Admin\ShippingZoneController;
+use Modules\Ecommerce\Http\Controllers\Customer\CustomerAddressController;
+use Modules\Ecommerce\Http\Controllers\Customer\CustomerPortalController;
+
+Route::prefix('admin/ecommerce')
+    ->name('admin.ecommerce.')
+    ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
+    ->group(function () {
+        // Dashboard
+        Route::get('/', [DashboardController::class, 'index'])
+            ->name('dashboard')
+            ->middleware('permission:view_ecommerce');
+
+        // Products
+        Route::middleware('permission:view_products')->group(function () {
+            Route::get('products', [ProductController::class, 'index'])->name('products.index');
+        });
+
+        Route::middleware('permission:create_products')->group(function () {
+            Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
+            Route::post('products', [ProductController::class, 'store'])->name('products.store');
+        });
+
+        Route::middleware('permission:update_products')->group(function () {
+            Route::get('products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+            Route::put('products/{product}', [ProductController::class, 'update'])->name('products.update');
+        });
+
+        Route::delete('products/{product}', [ProductController::class, 'destroy'])
+            ->name('products.destroy')
+            ->middleware('permission:delete_products');
+
+        // Categories
+        Route::middleware('permission:view_products')->group(function () {
+            Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+        });
+
+        Route::middleware('permission:create_products')->group(function () {
+            Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
+            Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+        });
+
+        Route::middleware('permission:update_products')->group(function () {
+            Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+            Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        });
+
+        Route::delete('categories/{category}', [CategoryController::class, 'destroy'])
+            ->name('categories.destroy')
+            ->middleware('permission:delete_products');
+
+        // Orders
+        Route::middleware('permission:view_ecommerce_orders')->group(function () {
+            Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        });
+
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])
+            ->name('orders.update-status')
+            ->middleware('permission:update_ecommerce_orders');
+
+        Route::get('orders/{order}/invoice', [OrderController::class, 'invoice'])
+            ->name('orders.invoice')
+            ->middleware('permission:view_ecommerce_orders');
+
+        // Coupons
+        Route::middleware('permission:view_coupons')->group(function () {
+            Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');
+        });
+
+        Route::middleware('permission:create_coupons')->group(function () {
+            Route::get('coupons/create', [CouponController::class, 'create'])->name('coupons.create');
+            Route::post('coupons', [CouponController::class, 'store'])->name('coupons.store');
+        });
+
+        Route::middleware('permission:update_coupons')->group(function () {
+            Route::get('coupons/{coupon}/edit', [CouponController::class, 'edit'])->name('coupons.edit');
+            Route::put('coupons/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
+        });
+
+        Route::delete('coupons/{coupon}', [CouponController::class, 'destroy'])
+            ->name('coupons.destroy')
+            ->middleware('permission:delete_coupons');
+
+        // Promotions
+        Route::middleware('permission:view_coupons')->group(function () {
+            Route::get('promotions', [PromotionController::class, 'index'])->name('promotions.index');
+        });
+
+        Route::middleware('permission:create_coupons')->group(function () {
+            Route::get('promotions/create', [PromotionController::class, 'create'])->name('promotions.create');
+            Route::post('promotions', [PromotionController::class, 'store'])->name('promotions.store');
+        });
+
+        Route::middleware('permission:update_coupons')->group(function () {
+            Route::get('promotions/{promotion}/edit', [PromotionController::class, 'edit'])->name('promotions.edit');
+            Route::put('promotions/{promotion}', [PromotionController::class, 'update'])->name('promotions.update');
+        });
+
+        Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy'])
+            ->name('promotions.destroy')
+            ->middleware('permission:delete_coupons');
+
+        // Reviews
+        Route::middleware('permission:view_ecommerce')->group(function () {
+            Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+            Route::patch('reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
+            Route::delete('reviews/{review}', [ReviewController::class, 'reject'])->name('reviews.reject');
+        });
+
+        // Refunds
+        Route::middleware('permission:view_ecommerce_orders')->group(function () {
+            Route::get('refunds', [RefundController::class, 'index'])->name('refunds.index');
+            Route::patch('refunds/{refund}/approve', [RefundController::class, 'approve'])->name('refunds.approve');
+            Route::patch('refunds/{refund}/reject', [RefundController::class, 'reject'])->name('refunds.reject');
+        });
+
+        // Import/Export
+        Route::middleware('permission:view_products')->group(function () {
+            Route::get('import-export', [ProductImportExportController::class, 'index'])->name('import-export.index');
+            Route::get('import-export/export', [ProductImportExportController::class, 'export'])->name('import-export.export');
+            Route::post('import-export/import', [ProductImportExportController::class, 'import'])->name('import-export.import');
+        });
+
+        // Analytics
+        Route::get('analytics', [SalesAnalyticsController::class, 'index'])
+            ->name('analytics')
+            ->middleware('permission:view_ecommerce');
+
+        // Shipping zones
+        Route::middleware('permission:manage_settings')->group(function () {
+            Route::resource('shipping-zones', ShippingZoneController::class)->except(['show']);
+        });
+    });
+
+// Customer portal (authenticated users, no admin required)
+Route::prefix('account')
+    ->name('customer.')
+    ->middleware(['web', 'auth'])
+    ->group(function () {
+        Route::get('/', [CustomerPortalController::class, 'dashboard'])->name('dashboard');
+        Route::get('/orders', [CustomerPortalController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [CustomerPortalController::class, 'orderShow'])->name('orders.show');
+        Route::get('/downloads', [CustomerPortalController::class, 'downloads'])->name('downloads');
+
+        // Addresses
+        Route::get('/addresses', [CustomerAddressController::class, 'index'])->name('addresses');
+        Route::post('/addresses', [CustomerAddressController::class, 'store'])->name('addresses.store');
+        Route::put('/addresses/{address}', [CustomerAddressController::class, 'update'])->name('addresses.update');
+        Route::delete('/addresses/{address}', [CustomerAddressController::class, 'destroy'])->name('addresses.destroy');
+    });
