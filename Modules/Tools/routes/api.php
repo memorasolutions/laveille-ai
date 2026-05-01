@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\SavedPromptController;
 use Modules\Tools\Http\Controllers\SavedDrawPresetController;
+use Modules\Tools\Http\Controllers\SavedCrosswordPresetController;
 use Modules\Tools\Http\Controllers\SavedQrPresetController;
 use Modules\Tools\Http\Controllers\SavedWheelPresetController;
 use Modules\Tools\Http\Controllers\SavedTeamPresetController;
@@ -39,4 +40,9 @@ Route::middleware(['web', 'auth', 'throttle:60,1'])->group(function () {
     Route::post('/wheel-presets', [SavedWheelPresetController::class, 'store'])->name('api.wheel-presets.store');
     Route::put('/wheel-presets/{id}', [SavedWheelPresetController::class, 'update'])->name('api.wheel-presets.update');
     Route::delete('/wheel-presets/{id}', [SavedWheelPresetController::class, 'destroy'])->name('api.wheel-presets.destroy');
+
+    Route::get('/crossword-presets', [SavedCrosswordPresetController::class, 'index'])->name('api.crossword-presets.index');
+    Route::post('/crossword-presets', [SavedCrosswordPresetController::class, 'store'])->name('api.crossword-presets.store');
+    Route::put('/crossword-presets/{publicId}', [SavedCrosswordPresetController::class, 'update'])->name('api.crossword-presets.update');
+    Route::delete('/crossword-presets/{publicId}', [SavedCrosswordPresetController::class, 'destroy'])->name('api.crossword-presets.destroy');
 });

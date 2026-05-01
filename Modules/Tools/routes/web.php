@@ -10,10 +10,18 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
+use Modules\Tools\Http\Controllers\PublicCrosswordController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 
 Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index');
+
+    // Mots croisés - routes API spécifiques (la fiche est gérée par PublicToolController via slug DB)
+    Route::post('/outils/mots-croises/generate', [PublicCrosswordController::class, 'generate'])
+        ->middleware('throttle:30,60')
+        ->name('tools.crossword.generate');
+    Route::get('/jeu/{publicId}', [PublicCrosswordController::class, 'play'])->name('tools.crossword.play');
+
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])->name('tools.show');
 });
 
