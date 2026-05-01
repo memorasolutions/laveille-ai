@@ -94,6 +94,37 @@ class FetchNewsCommand extends Command
                     break;
                 }
 
+                // DEDUP-SKIP : evite resume IA sur doublons cross-source
+                if (env('NEWS_DEDUP_SKIP_ENABLED', true) && class_exists(\Modules\News\Services\DedupService::class)) {
+                    $isDuplicate = false;
+                    try {
+                        $candidates = NewsArticle::where('id', '!=', $article->id)
+                            ->where('news_source_id', '!=', $article->news_source_id)
+                            ->where('created_at', '>=', now()->subDays(2))
+                            ->whereNotNull('structured_summary')
+                            ->get(['id', 'title', 'url', 'published_at', 'news_source_id']);
+                        foreach ($candidates as $cand) {
+                            $signals = [];
+                            $check = \Modules\News\Services\DedupService::isLikelyDuplicate(
+                                ['url' => $article->url, 'title' => $article->title, 'published_at' => $article->published_at, 'source_language' => $source->language],
+                                ['url' => $cand->url, 'title' => $cand->title, 'published_at' => $cand->published_at, 'source_language' => $source->language],
+                                $signals
+                            );
+                            if ($check['is_duplicate']) {
+                                \Illuminate\Support\Facades\Log::info(sprintf('DEDUP-SKIP: article #%d "%s" doublon de #%d (score=%.3f, reason=%s) [IA evitee]', $article->id, mb_substr($article->title, 0, 60), $cand->id, $check['score'], $check['reason']));
+                                $article->update(['is_published' => false, 'summary' => '[doublon detecte - IA evitee]', 'feed_type' => $feedType]);
+                                $this->line("  ⊕ Doublon skip IA : {$article->title}");
+                                $totalFiltered++;
+                                $isDuplicate = true;
+                                break;
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::warning('DEDUP-SKIP error: ' . $e->getMessage());
+                    }
+                    if ($isDuplicate) { continue; }
+                }
+
                 // Score + résumé IA (1 seul appel)
                 $result = $summarizer->scoreAndSummarize($article->title, $article->description, $source->language);
 
