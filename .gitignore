@@ -75,3 +75,5 @@ stripe-*.yml
 logo-white-canvas.txt
 .images/
 .claude/scheduled_tasks.lock
+.backups/
+.articles/
