@@ -82,20 +82,30 @@ final class DedupService
         if (!is_array($tokens)) {
             return [];
         }
+        $knownAcronyms = ['IA', 'AI', 'API', 'GPT', 'LLM', 'ML', 'NLP', 'OCR', 'RAG', 'CPU', 'GPU', 'IoT', 'SaaS', 'SDK', '5G', '6G'];
+        $stopEntities = ['the','this','that','these','those','from','with','for','and','or','but','is','are','was','were','be','been','been','being','have','has','had','do','does','did','can','could','will','would','should','may','might','must','shall','to','of','in','on','at','by','as','it','its','his','her','their','our','your','my','we','they','he','she','you','an','any','some','all','each','every','no','not','only','also','just','race','keep','running','wild','credit','cards','simple','models','evolution','encoders','more','most','less','least','very','really','quite','still','again','always','never','today','tomorrow','yesterday','now','then','here','there','where','when','what','who','why','how','introducing','new','launches','launch','announces','reveals','says','wants','puts','keeps','takes','gets','make','makes','made','goes','going','le','la','les','un','une','des','du','dans','pour','sur','et','ou','mais','sa','son','ses','cette','par','avec','sans','au','aux','si','que','qui','comment','pourquoi'];
         $entities = [];
-        $knownAcronyms = ['IA', 'AI', 'API', 'GPT', 'LLM', 'ML', 'NLP', 'OCR', 'RAG', 'CPU', 'GPU', 'IoT', 'SaaS', 'SDK'];
         foreach ($tokens as $tok) {
             $clean = preg_replace('/[^\p{L}\p{N}]/u', '', $tok);
-            if ($clean === '' || mb_strlen($clean) < 2) {
+            if ($clean === '') {
                 continue;
             }
-            if (in_array(mb_strtoupper($clean), $knownAcronyms, true)) {
-                $entities[] = mb_strtoupper($clean);
+            $upper = mb_strtoupper($clean);
+            $lower = mb_strtolower(Str::ascii($clean));
+            if (in_array($upper, $knownAcronyms, true)) {
+                $entities[] = $upper;
                 continue;
             }
-            $first = mb_substr($clean, 0, 1);
-            if ($first === mb_strtoupper($first) && $first !== mb_strtolower($first)) {
-                $entities[] = mb_strtolower(Str::ascii($clean));
+            if (mb_strlen($clean) < 4) {
+                continue;
+            }
+            if (in_array($lower, $stopEntities, true)) {
+                continue;
+            }
+            $firstChar = mb_substr($clean, 0, 1);
+            $isCapitalized = $firstChar === mb_strtoupper($firstChar) && $firstChar !== mb_strtolower($firstChar);
+            if ($isCapitalized) {
+                $entities[] = $lower;
             }
         }
         return array_values(array_unique($entities));
