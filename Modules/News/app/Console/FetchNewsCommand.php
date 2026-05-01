@@ -102,12 +102,12 @@ class FetchNewsCommand extends Command
                             ->where('news_source_id', '!=', $article->news_source_id)
                             ->where('created_at', '>=', now()->subDays(2))
                             ->whereNotNull('structured_summary')
-                            ->get(['id', 'title', 'url', 'published_at', 'news_source_id']);
+                            ->get(['id', 'title', 'url', 'pub_date', 'news_source_id']);
                         foreach ($candidates as $cand) {
                             $signals = [];
                             $check = \Modules\News\Services\DedupService::isLikelyDuplicate(
-                                ['url' => $article->url, 'title' => $article->title, 'published_at' => $article->published_at, 'source_language' => $source->language],
-                                ['url' => $cand->url, 'title' => $cand->title, 'published_at' => $cand->published_at, 'source_language' => $source->language],
+                                ['url' => $article->url, 'title' => $article->title, 'published_at' => $article->pub_date?->toIso8601String(), 'source_language' => $source->language],
+                                ['url' => $cand->url, 'title' => $cand->title, 'published_at' => $cand->pub_date?->toIso8601String(), 'source_language' => $source->language],
                                 $signals
                             );
                             if ($check['is_duplicate']) {

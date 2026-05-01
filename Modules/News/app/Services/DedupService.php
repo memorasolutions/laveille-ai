@@ -59,6 +59,55 @@ final class DedupService
         return round($percent / 100, 3);
     }
 
+    public static function jaccardKeywords(string $a, string $b): float
+    {
+        $tokens = function (string $s): array {
+            $clean = strtolower(preg_replace('/[^\p{L}\p{N}\s]/u', ' ', Str::ascii($s)));
+            $stop = ['le','la','les','un','une','des','de','du','dans','pour','sur','et','ou','a','au','aux','en','par','avec','sans','ses','sa','son','ce','cette','que','qui','est','sont','the','a','an','to','of','in','on','for','and','or','is','are','was','were','be','by','with','from','as','it','its','this','that','these','those','can','will','has','have','had','new','newest','says','say','just','now','today','tomorrow'];
+            return array_values(array_unique(array_diff(array_filter(explode(' ', $clean)), $stop)));
+        };
+        $tokA = $tokens($a);
+        $tokB = $tokens($b);
+        if (empty($tokA) || empty($tokB)) {
+            return 0.0;
+        }
+        $inter = array_intersect($tokA, $tokB);
+        $union = array_unique(array_merge($tokA, $tokB));
+        return count($union) > 0 ? round(count($inter) / count($union), 3) : 0.0;
+    }
+
+    public static function extractKeyEntities(string $title): array
+    {
+        $tokens = preg_split('/\s+/', trim($title));
+        if (!is_array($tokens)) {
+            return [];
+        }
+        $entities = [];
+        $knownAcronyms = ['IA', 'AI', 'API', 'GPT', 'LLM', 'ML', 'NLP', 'OCR', 'RAG', 'CPU', 'GPU', 'IoT', 'SaaS', 'SDK'];
+        foreach ($tokens as $tok) {
+            $clean = preg_replace('/[^\p{L}\p{N}]/u', '', $tok);
+            if ($clean === '' || mb_strlen($clean) < 2) {
+                continue;
+            }
+            if (in_array(mb_strtoupper($clean), $knownAcronyms, true)) {
+                $entities[] = mb_strtoupper($clean);
+                continue;
+            }
+            $first = mb_substr($clean, 0, 1);
+            if ($first === mb_strtoupper($first) && $first !== mb_strtolower($first)) {
+                $entities[] = mb_strtolower(Str::ascii($clean));
+            }
+        }
+        return array_values(array_unique($entities));
+    }
+
+    public static function keyEntitiesIntersectionCount(string $a, string $b): int
+    {
+        $entA = self::extractKeyEntities($a);
+        $entB = self::extractKeyEntities($b);
+        return count(array_intersect($entA, $entB));
+    }
+
     public static function isLikelyDuplicate(array $newArticle, array $candidate, array &$signals = []): array
     {
         $signals = [];
@@ -75,22 +124,40 @@ final class DedupService
             $signals['canonical_match'] = true;
         }
 
-        $langMatch = ($newArticle['source_language'] ?? null) === ($candidate['source_language'] ?? null);
-        if ($langMatch && !empty($newArticle['published_at']) && !empty($candidate['published_at'])) {
+        $titleA = $newArticle['title'] ?? '';
+        $titleB = $candidate['title'] ?? '';
+
+        $withinWindow = true;
+        if (!empty($newArticle['published_at']) && !empty($candidate['published_at'])) {
             $diff = abs(Carbon::parse($newArticle['published_at'])->timestamp - Carbon::parse($candidate['published_at'])->timestamp);
-            if ($diff < 21600 && self::titleSimilarity($newArticle['title'] ?? '', $candidate['title'] ?? '') > 0.95) {
+            $withinWindow = $diff < 86400;
+        }
+
+        if ($withinWindow && $titleA !== '' && $titleB !== '') {
+            if (self::titleSimilarity($titleA, $titleB) > 0.85) {
                 $signals['title_fuzzy_high'] = true;
+            }
+            if (self::jaccardKeywords($titleA, $titleB) >= 0.40) {
+                $signals['jaccard_high'] = true;
+            }
+            if (self::keyEntitiesIntersectionCount($titleA, $titleB) >= 3) {
+                $signals['key_entities_match'] = true;
             }
         }
 
-        if ($langMatch) {
+        if (($newArticle['source_language'] ?? null) === ($candidate['source_language'] ?? null)) {
             $signals['source_lang_match'] = true;
         }
 
-        $core = array_intersect_key($signals, ['normalized_url_match' => 1, 'canonical_match' => 1, 'title_fuzzy_high' => 1]);
-        $isDup = count($signals) >= 2 && count($core) >= 1;
-        $score = round(count($signals) / 4, 3);
-        $reason = count($signals) >= 2 ? 'multi_signal' : (count($signals) === 1 ? array_key_first($signals) : 'none');
+        $coreKeys = ['normalized_url_match' => 1, 'canonical_match' => 1, 'title_fuzzy_high' => 1, 'jaccard_high' => 1, 'key_entities_match' => 1];
+        $core = array_intersect_key($signals, $coreKeys);
+        $isDup = count($core) >= 2
+            || isset($signals['normalized_url_match'])
+            || isset($signals['canonical_match']);
+
+        $totalPossible = 6;
+        $score = round(count($signals) / $totalPossible, 3);
+        $reason = count($core) >= 2 ? 'multi_core' : (count($signals) === 1 ? array_key_first($signals) : (isset($signals['normalized_url_match']) ? 'normalized_url_match' : (isset($signals['canonical_match']) ? 'canonical_match' : 'none')));
 
         return [
             'is_duplicate' => $isDup,

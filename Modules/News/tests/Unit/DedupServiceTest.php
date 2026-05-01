@@ -57,3 +57,92 @@ test('isLikelyDuplicate detects multi-signal duplicate via canonical and title f
         ->and($result['signals'])->toHaveKey('canonical_match')
         ->and($result['signals'])->toHaveKey('source_lang_match');
 });
+
+test('extractKeyEntities captures capitalized words and known acronyms', function () {
+    $entities = DedupService::extractKeyEntities('Microsoft puts an AI legal agent inside Word for contract review');
+    expect($entities)->toContain('microsoft')
+        ->and($entities)->toContain('word')
+        ->and($entities)->toContain('AI');
+});
+
+test('jaccardKeywords excludes french and english stopwords', function () {
+    $a = 'Microsoft lance un nouvel agent IA dans Word pour les contrats';
+    $b = 'Microsoft a lance un agent IA dans Word pour les documents';
+    expect(DedupService::jaccardKeywords($a, $b))->toBeGreaterThan(0.5);
+});
+
+test('keyEntitiesIntersectionCount finds shared brand entities cross language', function () {
+    $a = 'Microsoft puts an AI legal agent inside Word for contract review';
+    $b = 'Microsoft veut que les avocats utilisent son nouvel agent IA dans Word';
+    expect(DedupService::keyEntitiesIntersectionCount($a, $b))->toBeGreaterThanOrEqual(3);
+});
+
+test('isLikelyDuplicate detects Microsoft Word legal agent cross source via entities and similarity', function () {
+    $newArticle = [
+        'url' => 'https://thedecoder.com/microsoft-word-legal-agent',
+        'title' => 'Microsoft puts an AI legal agent inside Word for contract review',
+        'published_at' => '2026-05-01 09:15:00',
+        'source_language' => 'en',
+    ];
+    $candidate = [
+        'url' => 'https://theverge.com/microsoft-legal-agent-word',
+        'title' => 'Microsoft wants lawyers to trust its new AI agent in Word documents',
+        'published_at' => '2026-05-01 08:15:00',
+        'source_language' => 'en',
+    ];
+    $result = DedupService::isLikelyDuplicate($newArticle, $candidate);
+    expect($result['is_duplicate'])->toBeTrue()
+        ->and($result['signals'])->toHaveKey('key_entities_match')
+        ->and($result['reason'])->toBe('multi_core');
+});
+
+test('isLikelyDuplicate avoids false positive on short generic titles with one shared entity', function () {
+    $newArticle = [
+        'url' => 'https://a.com/apple-news',
+        'title' => 'Apple announces something today',
+        'published_at' => '2026-05-01 10:00:00',
+        'source_language' => 'en',
+    ];
+    $candidate = [
+        'url' => 'https://b.com/apple-tax',
+        'title' => 'Apple sued over App Store fees',
+        'published_at' => '2026-05-01 11:00:00',
+        'source_language' => 'en',
+    ];
+    $result = DedupService::isLikelyDuplicate($newArticle, $candidate);
+    expect($result['is_duplicate'])->toBeFalse();
+});
+
+test('isLikelyDuplicate avoids false positive on different topics same brand', function () {
+    $newArticle = [
+        'url' => 'https://a.com/google-search',
+        'title' => 'Google updates Search ranking algorithm',
+        'published_at' => '2026-05-01 10:00:00',
+        'source_language' => 'en',
+    ];
+    $candidate = [
+        'url' => 'https://b.com/google-pixel',
+        'title' => 'Google announces Pixel 11 launch event',
+        'published_at' => '2026-05-01 11:00:00',
+        'source_language' => 'en',
+    ];
+    $result = DedupService::isLikelyDuplicate($newArticle, $candidate);
+    expect($result['is_duplicate'])->toBeFalse();
+});
+
+test('isLikelyDuplicate respects 24h temporal window', function () {
+    $newArticle = [
+        'url' => 'https://a.com/x',
+        'title' => 'Microsoft launches AI agent in Word for legal review',
+        'published_at' => '2026-05-01 10:00:00',
+        'source_language' => 'en',
+    ];
+    $candidate = [
+        'url' => 'https://b.com/y',
+        'title' => 'Microsoft launches AI agent in Word for legal review',
+        'published_at' => '2026-04-25 10:00:00',
+        'source_language' => 'en',
+    ];
+    $result = DedupService::isLikelyDuplicate($newArticle, $candidate);
+    expect($result['is_duplicate'])->toBeFalse();
+});
