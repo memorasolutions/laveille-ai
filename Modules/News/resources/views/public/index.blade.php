@@ -21,8 +21,22 @@
     }
     .nw-search-input:focus { border-color: var(--c-primary); }
     .nw-search-icon { position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); color: #6b7280; pointer-events: none; }
-    .nw-chips { display: flex; overflow-x: auto; gap: 0.5rem; padding: 0.125rem 0; scrollbar-width: none; }
+    .nw-chips { display: flex; gap: 0.5rem; padding: 0.125rem 0; scrollbar-width: none; }
     .nw-chips::-webkit-scrollbar { display: none; }
+    @media (min-width: 1024px) {
+        .nw-chips { flex-wrap: wrap; row-gap: 0.5rem; }
+    }
+    @media (max-width: 1023px) {
+        .nw-chips {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-right: 24px;
+            -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+            mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
+            scroll-snap-type: x proximity;
+        }
+        .nw-chip { scroll-snap-align: start; }
+    }
     .nw-chip {
         display: inline-flex; align-items: center; gap: 0.25rem;
         padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.8125rem;
