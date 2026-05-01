@@ -20,13 +20,21 @@
             <p class="text-muted mb-4">{{ $tool->description }}</p>
 
             <div class="d-flex flex-wrap gap-2 mb-4 no-print">
-              <button type="button" class="ct-btn ct-btn-outline" @click="print()" :disabled="!grid" aria-label="{{ __('Imprimer la grille') }}">
-                <i class="fas fa-print me-1"></i> {{ __('Imprimer') }}
+              <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="print()" :disabled="!grid" aria-label="{{ __('Imprimer la grille') }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>{{ __('Imprimer') }}</span>
               </button>
               @auth
-                <button type="button" class="ct-btn ct-btn-primary" @click="save()" :disabled="saving || !grid" aria-label="{{ __('Sauvegarder dans mon compte') }}">
-                  <span x-show="!saving"><i class="fas fa-save me-1"></i> {{ __('Sauvegarder') }}</span>
-                  <span x-show="saving"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> {{ __('Sauvegarde...') }}</span>
+                <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" @click="save()" :disabled="saving || !grid" aria-label="{{ __('Sauvegarder dans mon compte') }}">
+                  <template x-if="!saving">
+                    <span class="d-inline-flex align-items-center gap-2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                      <span>{{ __('Sauvegarder') }}</span>
+                    </span>
+                  </template>
+                  <template x-if="saving">
+                    <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Sauvegarde...') }}</span></span>
+                  </template>
                 </button>
               @endauth
             </div>
@@ -53,9 +61,16 @@
               <label for="theme" class="form-label fw-medium">{{ __('Thème de la grille (optionnel)') }}</label>
               <div class="d-flex gap-2 flex-wrap">
                 <input type="text" id="theme" class="form-control flex-fill" x-model="metadata.theme" @keydown.enter.prevent="suggestPairs()" placeholder="{{ __('Ex: Marketing B2B, Histoire du Québec, Cuisine...') }}" aria-label="{{ __('Thème de la grille') }}" maxlength="100" :disabled="suggestingPairs">
-                <button type="button" class="ct-btn ct-btn-outline" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" :aria-label="'{{ __('Pré-remplir 10 paires avec l\'IA gratuite') }}'">
-                  <span x-show="!suggestingPairs"><i class="fas fa-magic me-1"></i> {{ __('Pré-remplir IA') }}</span>
-                  <span x-show="suggestingPairs"><span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> {{ __('Génération...') }}</span>
+                <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" :aria-label="'{{ __('Pré-remplir 10 paires avec l\'IA gratuite') }}'">
+                  <template x-if="!suggestingPairs">
+                    <span class="d-inline-flex align-items-center gap-2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/><path d="m11 4 1 4 4 1-4 1-1 4-1-4-4-1 4-1z"/></svg>
+                      <span>{{ __('Pré-remplir IA') }}</span>
+                    </span>
+                  </template>
+                  <template x-if="suggestingPairs">
+                    <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Génération...') }}</span></span>
+                  </template>
                 </button>
               </div>
               <small class="text-muted">{{ __('Suggestions IA gratuites (modèle ouvert, peut prendre 5-15s). Vos paires existantes seront remplacées.') }}</small>
@@ -117,16 +132,24 @@
                 </div>
               </template>
 
-              <button type="button" class="ct-btn ct-btn-outline mt-2" @click="addPair()" aria-label="{{ __('Ajouter une nouvelle paire') }}">
-                <i class="fas fa-plus me-1"></i> {{ __('Ajouter une paire') }}
+              <button type="button" class="ct-btn ct-btn-outline mt-2 d-inline-flex align-items-center gap-2" @click="addPair()" aria-label="{{ __('Ajouter une nouvelle paire') }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>{{ __('Ajouter une paire') }}</span>
               </button>
             </div>
 
             {{-- Bouton générer --}}
             <div class="d-grid gap-2 mb-4">
-              <button type="button" class="ct-btn ct-btn-primary ct-btn-lg" @click="generate()" :disabled="generating || !canGenerate()" aria-label="{{ __('Générer la grille') }}">
-                <span x-show="!generating"><i class="fas fa-cogs me-2"></i> {{ __('Générer la grille') }}</span>
-                <span x-show="generating"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> {{ __('Génération en cours...') }}</span>
+              <button type="button" class="ct-btn ct-btn-primary ct-btn-lg d-inline-flex align-items-center justify-content-center gap-2" @click="generate()" :disabled="generating || !canGenerate()" aria-label="{{ __('Générer la grille') }}">
+                <template x-if="!generating">
+                  <span class="d-inline-flex align-items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+                    <span>{{ __('Générer la grille') }}</span>
+                  </span>
+                </template>
+                <template x-if="generating">
+                  <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Génération en cours...') }}</span></span>
+                </template>
               </button>
               <small class="text-muted text-center" x-show="!canGenerate() && !generating">{{ __('Saisissez au moins 2 paires valides pour générer la grille.') }}</small>
             </div>
@@ -216,8 +239,9 @@
 
             {{-- Brouillon --}}
             <div class="mt-4 pt-3 border-top no-print">
-              <small class="text-muted">
-                <i class="fas fa-info-circle me-1"></i> {{ __('Brouillon sauvegardé dans votre navigateur.') }}
+              <small class="text-muted d-inline-flex align-items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                {{ __('Brouillon sauvegardé dans votre navigateur.') }}
                 <button type="button" class="btn btn-sm btn-link p-0 ms-2" @click="if(confirm('{{ __('Effacer le brouillon ?') }}')) clearDraft()">{{ __('Effacer le brouillon') }}</button>
               </small>
             </div>
