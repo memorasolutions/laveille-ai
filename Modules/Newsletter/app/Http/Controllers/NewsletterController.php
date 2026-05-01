@@ -23,8 +23,10 @@ class NewsletterController extends Controller
     public function subscribe(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
-            'email' => 'required|email|max:255',
+            'email' => 'required|email:rfc,dns|max:255',
             'name' => 'nullable|string|max:100',
+        ], [
+            'email.email' => __('L\'adresse courriel n\'est pas valide ou son domaine n\'existe pas.'),
         ]);
 
         $subscriber = Subscriber::firstOrCreate(
