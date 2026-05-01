@@ -88,6 +88,7 @@ class DirectoryServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
             $schedule->command('tools:enrich-pending --batch=3')->dailyAt('05:15');
+            $schedule->command('tools:enrich-rich-fields --batch=20')->dailyAt('05:45')->withoutOverlapping();
             $schedule->command('tools:dispatch-enrichment --type=pending --limit=5')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('tools:dispatch-enrichment --type=metadata --limit=5')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('queue:work database --queue=screenshots --once --max-time=280 --timeout=270 --tries=1 --stop-when-empty')->everyThreeMinutes()->withoutOverlapping()->runInBackground();
