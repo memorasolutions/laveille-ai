@@ -31,11 +31,14 @@
             flex-wrap: nowrap;
             overflow-x: auto;
             padding-right: 24px;
+            min-width: 0;
+            max-width: 100%;
+            width: 100%;
             -webkit-mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
             mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
             scroll-snap-type: x proximity;
         }
-        .nw-chip { scroll-snap-align: start; }
+        .nw-chip { scroll-snap-align: start; flex-shrink: 0; }
     }
     .nw-chip {
         display: inline-flex; align-items: center; gap: 0.25rem;
