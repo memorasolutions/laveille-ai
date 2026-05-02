@@ -8,22 +8,32 @@
 @php $playUrl = url('/jeu/'.$preset->public_id); @endphp
 
 <style>
-.cell-wrapper{position:relative;width:100%;height:100%}
-.cell-active input{width:100%;height:100%;border:none;text-align:center;font-size:1.1rem;font-weight:600;text-transform:uppercase;background:transparent;color:#1A1D23}
-.cell-active input:focus{outline:2px solid #095462;outline-offset:-2px}
-.cell-correct{background-color:#d1fae5!important;color:#065f46!important}
-.cell-wrong{background-color:#fee2e2!important;color:#991b1b!important}
-.timer-display{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;color:#095462}
-.completion-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1050;display:flex;align-items:center;justify-content:center;padding:1rem}
-.completion-modal-card{background:#fff;padding:2rem;border-radius:12px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.clue-link{background:none;border:none;padding:.5rem;text-align:left;cursor:pointer;color:#1A1D23;min-height:44px;display:flex;align-items:flex-start;gap:.5rem;width:100%;border-radius:4px}
-.clue-link:hover,.clue-link:focus-visible{background-color:#e6f4f8;outline:2px solid #095462;outline-offset:2px}
-.clue-number{font-weight:700;color:#095462;flex-shrink:0;min-width:1.5rem}
-.clue-text{flex:1}
-.cw-status-bar{display:flex;flex-wrap:wrap;align-items:center;gap:1rem;padding:1rem;background:#f8fafc;border-radius:8px;margin-bottom:1.5rem}
-.cw-action-btn{min-height:44px;min-width:44px}
-.cw-loader{padding:3rem;text-align:center;color:#6E7687}
+.cw-grid-wrap .crossword-grid td{width:44px;height:44px;min-width:44px;min-height:44px}
+.cell-wrapper{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.cell-active input{width:100%;height:100%;min-width:44px;min-height:44px;border:none;text-align:center;font-size:1.25rem;font-weight:700;text-transform:uppercase;background:transparent;color:#1A1D23;padding:0;display:block}
+.cell-active input:focus-visible{outline:3px solid #053d4a;outline-offset:-3px;background:#fff7ed}
+.cell-correct{background-color:#bbf7d0!important;color:#064e3b!important}
+.cell-wrong{background-color:#fecaca!important;color:#5b0c0c!important}
+.cell-active .number{position:absolute;top:1px;left:2px;font-size:.6rem;font-weight:700;color:#053d4a;line-height:1;z-index:1;pointer-events:none}
+.timer-display{font-size:1.75rem;font-weight:800;font-variant-numeric:tabular-nums;color:#053d4a}
+.cw-status-text{color:#1A1D23;font-weight:600}
+.cw-status-text .num{color:#053d4a;font-weight:800}
+.completion-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1050;display:flex;align-items:center;justify-content:center;padding:1rem}
+.completion-modal-card{background:#fff;padding:2rem;border-radius:16px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.completion-modal-card .completion-msg{color:#1A1D23;font-weight:500}
+.clue-link{background:none;border:none;padding:.6rem .75rem;text-align:left;cursor:pointer;color:#1A1D23;min-height:44px;display:flex;align-items:flex-start;gap:.6rem;width:100%;border-radius:6px;font-weight:500}
+.clue-link:hover,.clue-link:focus-visible{background-color:#e0f2f1;outline:2px solid #053d4a;outline-offset:2px}
+.clue-number{font-weight:800;color:#053d4a;flex-shrink:0;min-width:1.6rem}
+.clue-text{flex:1;line-height:1.4}
+.cw-status-bar{display:flex;flex-wrap:wrap;align-items:center;gap:1.25rem;padding:1.25rem 1.5rem;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;margin-bottom:1.5rem}
+.cw-action-btn{min-height:44px;min-width:44px;font-weight:600}
+.cw-cta-create{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;background:#053d4a;color:#fff!important;border-radius:8px;text-decoration:none!important;font-weight:600;min-height:44px;min-width:44px}
+.cw-cta-create:hover,.cw-cta-create:focus-visible{background:#032327;outline:3px solid #1A1D23;outline-offset:2px}
+.cw-subtitle{color:#1A1D23;font-weight:500}
+.cw-loader{padding:3rem;text-align:center;color:#1A1D23}
+.cw-clues-section h2{color:#053d4a}
 @media print{.no-print{display:none!important}.cw-status-bar{display:none}}
+@media (max-width:768px){.cw-grid-wrap .crossword-grid td{width:38px;height:38px;min-width:38px;min-height:38px}.cell-active input{min-width:38px;min-height:38px;font-size:1.1rem}}
 </style>
 
 <section class="page-section py-5">
@@ -33,8 +43,8 @@
 
         <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2 no-print">
           <div>
-            <h1 class="h3 mb-1">{{ $preset->name }}</h1>
-            <p class="text-muted mb-0 small">{{ __('Mode joueur — résolvez la grille en ligne') }}</p>
+            <h1 class="h3 mb-1" style="color:#1A1D23">{{ $preset->name }}</h1>
+            <p class="cw-subtitle mb-0 small">{{ __('Mode joueur — résolvez la grille en ligne') }}</p>
           </div>
           <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="window.print()" :disabled="!grid" aria-label="{{ __('Imprimer la grille') }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -61,13 +71,13 @@
           <div>
             <div class="cw-status-bar no-print" role="region" aria-label="{{ __('Statut de la partie') }}">
               <div class="d-flex align-items-center gap-2">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#095462" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span class="timer-display" aria-live="polite" :aria-label="'{{ __('Temps écoulé') }} ' + formatTime(timer)" x-text="formatTime(timer)"></span>
               </div>
-              <div class="d-flex align-items-center gap-2 small text-muted" aria-live="polite">
-                <span><strong x-text="correctCount"></strong> / <strong x-text="totalActiveCells"></strong> {{ __('cases') }}</span>
-                <span aria-hidden="true">·</span>
-                <span><strong x-text="hintsUsed"></strong> {{ __('indice(s)') }}</span>
+              <div class="d-flex align-items-center gap-2 cw-status-text" aria-live="polite">
+                <span><strong class="num" x-text="correctCount"></strong> / <strong class="num" x-text="totalActiveCells"></strong> {{ __('cases') }}</span>
+                <span aria-hidden="true" style="color:#1A1D23">·</span>
+                <span><strong class="num" x-text="hintsUsed"></strong> {{ __('indice(s)') }}</span>
               </div>
               <div class="d-flex gap-2 ms-auto flex-wrap">
                 <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="useHint()" :disabled="completed || emptyCellCount === 0" :aria-label="'{{ __('Révéler une lettre') }} (' + hintsUsed + ' utilisés)'">
@@ -82,7 +92,7 @@
             </div>
 
             <div class="row">
-              <div class="col-lg-7 mb-4 mb-lg-0">
+              <div class="col-lg-7 mb-4 mb-lg-0 cw-grid-wrap">
                 <div class="table-responsive d-flex justify-content-center">
                   <table class="crossword-grid" :aria-label="'{{ __('Grille de mots croisés') }} ' + grid.rows + 'x' + grid.cols">
                     <tbody>
@@ -117,7 +127,7 @@
                 </div>
               </div>
 
-              <div class="col-lg-5">
+              <div class="col-lg-5 cw-clues-section">
                 <div class="row">
                   <div class="col-md-12 mb-4">
                     <h2 class="h6 fw-bold mb-2">
@@ -174,9 +184,9 @@
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0CA678" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
               <h2 id="completion-title" class="h4 mb-0">{{ __('Grille complétée !') }}</h2>
             </div>
-            <p class="mb-1">{{ __('Temps') }} : <strong x-text="formatTime(finalTime)"></strong></p>
-            <p class="mb-1">{{ __('Indices utilisés') }} : <strong x-text="hintsUsed"></strong></p>
-            <p class="mb-3 text-muted small" x-text="completionMessage"></p>
+            <p class="mb-1 completion-msg">{{ __('Temps') }} : <strong style="color:#053d4a" x-text="formatTime(finalTime)"></strong></p>
+            <p class="mb-1 completion-msg">{{ __('Indices utilisés') }} : <strong style="color:#053d4a" x-text="hintsUsed"></strong></p>
+            <p class="mb-3 completion-msg" style="font-style:italic" x-text="completionMessage"></p>
             <div class="d-flex flex-column flex-sm-row gap-2">
               <button type="button" class="ct-btn ct-btn-primary cw-action-btn" @click="resetGame(); completed = false" aria-label="{{ __('Recommencer la partie') }}">
                 {{ __('Recommencer') }}
@@ -195,8 +205,11 @@
       </div>
     </div>
 
-    <div class="text-center mt-3 small text-muted no-print">
-      <a href="{{ url('/outils/mots-croises') }}" class="text-decoration-none">{{ __('Créer ma propre grille de mots croisés') }}</a>
+    <div class="text-center mt-4 no-print">
+      <a href="{{ url('/outils/mots-croises') }}" class="cw-cta-create">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>{{ __('Créer ma propre grille de mots croisés') }}</span>
+      </a>
     </div>
 
   </div>
@@ -267,7 +280,7 @@ document.addEventListener('alpine:init', () => {
         if (clue && answer) pairs.push({ clue, answer });
       }
       if (pairs.length < 2) {
-        this.loadError = '{{ __("Cette grille ne contient pas assez de paires valides.") }}';
+        this.loadError = @json(__('Cette grille ne contient pas assez de paires valides.'));
         this.loading = false;
         return;
       }
@@ -284,7 +297,7 @@ document.addEventListener('alpine:init', () => {
       .then(r => r.json())
       .then(data => {
         if (!data || !data.success || !data.grid) {
-          this.loadError = '{{ __("Échec de la génération de la grille.") }}';
+          this.loadError = @json(__('Échec de la génération de la grille.'));
           return;
         }
         this.grid = data.grid;
@@ -295,7 +308,7 @@ document.addEventListener('alpine:init', () => {
         this.$nextTick(() => this.checkCompletion());
       })
       .catch(err => {
-        this.loadError = '{{ __("Erreur réseau lors du chargement de la grille.") }}';
+        this.loadError = @json(__('Erreur réseau lors du chargement de la grille.'));
       })
       .finally(() => {
         this.loading = false;
@@ -453,13 +466,13 @@ document.addEventListener('alpine:init', () => {
         this.stopTimer();
         const noHints = this.hintsUsed === 0;
         if (noHints && this.finalTime < 180) {
-          this.completionMessage = '{{ __("Excellent ! Sans aucune aide et en moins de 3 minutes.") }}';
+          this.completionMessage = @json(__('Excellent ! Sans aucune aide et en moins de 3 minutes.'));
         } else if (noHints) {
-          this.completionMessage = '{{ __("Bravo, sans aucune aide.") }}';
+          this.completionMessage = @json(__('Bravo, sans aucune aide.'));
         } else if (this.hintsUsed <= 2) {
-          this.completionMessage = '{{ __("Bien joué, peu d\'indices utilisés.") }}';
+          this.completionMessage = @json(__('Bien joué, peu d\'indices utilisés.'));
         } else {
-          this.completionMessage = '{{ __("Grille complétée. Réessayez avec moins d\'indices !") }}';
+          this.completionMessage = @json(__('Grille complétée. Réessayez avec moins d\'indices !'));
         }
         this.saveDraft();
       }
