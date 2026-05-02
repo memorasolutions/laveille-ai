@@ -51,9 +51,47 @@
                 </div>
               </div>
             @else
-              <div class="alert mb-4" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; color: #0369a1;">
-                <a href="{{ route('login') }}" style="color: #0369a1; font-weight: 600; text-decoration: underline;">{{ __('Connectez-vous') }}</a> {{ __('pour sauvegarder vos grilles dans votre compte.') }}
-              </div>
+              <section class="cw-guest-card mb-4" aria-labelledby="cw-guest-title">
+                <div class="cw-guest-header">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <h2 id="cw-guest-title" class="h5 mb-0">{{ __('Créez un compte gratuit pour aller plus loin') }}</h2>
+                  <span class="cw-guest-pill">{{ __('Gratuit, 30 sec') }}</span>
+                </div>
+                <p class="cw-guest-intro">{{ __('Pas de mot de passe, pas d\'inscription compliquée. Un courriel suffit pour débloquer :') }}</p>
+                <ul class="cw-guest-list">
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <div><strong>{{ __('Sauvegardez vos grilles') }}</strong> {{ __('et retrouvez-les sur n\'importe quel appareil.') }}</div>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                    <div><strong>{{ __('Partagez vos grilles publiques') }}</strong> {{ __('via un lien /jeu/... que vos collègues, élèves ou amis peuvent jouer en ligne.') }}</div>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 9V5a3 3 0 0 0-6 0v4"/><rect x="2" y="9" width="20" height="13" rx="2"/></svg>
+                    <div><strong>{{ __('Mettez vos articles en favoris') }}</strong> {{ __('pour les retrouver dans votre tableau de bord.') }}</div>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <div><strong>{{ __('Recevez les alertes IA hebdomadaires') }}</strong> {{ __('sur les sujets qui vous intéressent (sans spam).') }}</div>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="7 11 12 6 17 11"/><polyline points="7 17 12 12 17 17"/></svg>
+                    <div><strong>{{ __('Votez pour vos outils IA préférés') }}</strong> {{ __('dans l\'annuaire et influencez le classement de la communauté.') }}</div>
+                  </li>
+                  <li>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <div><strong>{{ __('Suggérez des modifications') }}</strong> {{ __('et proposez de nouvelles idées dans la roadmap publique.') }}</div>
+                  </li>
+                </ul>
+                <div class="cw-guest-actions">
+                  <button type="button" class="cw-guest-cta" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour sauvegarder vos grilles et débloquer tous les avantages d\'un compte gratuit.') }}' })" aria-label="{{ __('Créer un compte gratuit pour sauvegarder mes grilles') }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <span>{{ __('Créer mon compte gratuit') }}</span>
+                  </button>
+                  <small class="cw-guest-note">{{ __('Aucune carte de crédit. Désabonnement en 1 clic.') }}</small>
+                </div>
+              </section>
             @endauth
 
             {{-- Bloc explicatif "Comment ça fonctionne" --}}
@@ -268,6 +306,106 @@
 </section>
 
 <style>
+  .cw-guest-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2f1 100%);
+    border: 1px solid #053d4a;
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    color: #1A1D23;
+  }
+  .cw-guest-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin-bottom: .75rem;
+  }
+  .cw-guest-header h2 {
+    color: #053d4a;
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+  }
+  .cw-guest-pill {
+    background: #053d4a;
+    color: #ffffff;
+    font-size: .7rem;
+    font-weight: 700;
+    padding: .25rem .65rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .cw-guest-intro {
+    color: #1A1D23;
+    margin-bottom: 1rem;
+    font-size: .95rem;
+  }
+  .cw-guest-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+    display: grid;
+    gap: .65rem;
+  }
+  .cw-guest-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    color: #1A1D23;
+    line-height: 1.45;
+    font-size: .92rem;
+  }
+  .cw-guest-list li svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .cw-guest-list li strong {
+    color: #053d4a;
+    font-weight: 700;
+  }
+  .cw-guest-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: .75rem;
+    border-top: 1px solid rgba(5, 61, 74, .15);
+  }
+  .cw-guest-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    background: #053d4a;
+    color: #ffffff;
+    border: none;
+    padding: .8rem 1.4rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: .95rem;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background .15s, transform .1s;
+  }
+  .cw-guest-cta:hover {
+    background: #032327;
+  }
+  .cw-guest-cta:focus-visible {
+    outline: 3px solid #1A1D23;
+    outline-offset: 3px;
+  }
+  .cw-guest-cta:active {
+    transform: scale(.98);
+  }
+  .cw-guest-note {
+    color: #475569;
+    font-size: .8rem;
+  }
+  @media (max-width: 576px) {
+    .cw-guest-card { padding: 1.25rem 1rem; }
+    .cw-guest-actions { flex-direction: column; align-items: stretch; }
+    .cw-guest-cta { justify-content: center; }
+  }
   .crossword-grid {
     table-layout: fixed;
     border-collapse: collapse;
