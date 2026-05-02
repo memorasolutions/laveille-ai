@@ -13,23 +13,13 @@ use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
 use Modules\Tools\Http\Controllers\PublicCrosswordController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 use Modules\Tools\Http\Controllers\UserCrosswordController;
+use Modules\Tools\Http\Middleware\EnsureCrosswordTester;
 
-// S80 : restriction tester unique sur l'outil mots-croisés (phase tests, accès Stéphane only)
-$crosswordTesterOnly = function ($request, $next) {
-    if (optional(auth()->user())->email !== 'chatgptpro@gomemora.com') {
-        if ($request->expectsJson()) {
-            return response()->json(['error' => 'Outil en construction. Accès réservé pendant la phase de tests.'], 403);
-        }
-        return response()->view('tools::public.tools.mots-croises-construction', [], 403);
-    }
-    return $next($request);
-};
-
-Route::middleware('web')->group(function () use ($crosswordTesterOnly) {
+Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index');
 
-    // Mots croisés - routes API spécifiques + fiche (toutes wrappées par tester guard)
-    Route::middleware([$crosswordTesterOnly])->group(function () {
+    // Mots croisés - routes API spécifiques + fiche (S80 #48 : restreintes au tester pendant tests)
+    Route::middleware([EnsureCrosswordTester::class])->group(function () {
         // Fiche outil (intercepte le slug avant le catch-all /outils/{slug})
         Route::get('/outils/mots-croises', [PublicToolController::class, 'show'])
             ->defaults('slug', 'mots-croises')
@@ -64,7 +54,7 @@ Route::middleware('web')->group(function () use ($crosswordTesterOnly) {
 });
 
 // Espace user authentifie : mes mots croises sauvegardes (sous tester guard également)
-Route::middleware(['web', 'auth', $crosswordTesterOnly])->group(function () {
+Route::middleware(['web', 'auth', EnsureCrosswordTester::class])->group(function () {
     Route::get('/user/mots-croises', [UserCrosswordController::class, 'index'])->name('user.crosswords.index');
     Route::get('/user/mots-croises/{publicId}/edit', [UserCrosswordController::class, 'edit'])->name('user.crosswords.edit');
 });
