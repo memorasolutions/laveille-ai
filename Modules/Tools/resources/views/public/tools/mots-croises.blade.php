@@ -71,12 +71,12 @@
             </section>
 
             {{-- Métadonnées --}}
-            <div class="row g-2 mb-4">
-              <div class="col-md-6">
+            <div class="row g-3 mb-4">
+              <div class="col-md-7">
                 <label for="gridTitle" class="form-label fw-medium">{{ __('Titre de la grille') }}</label>
                 <input type="text" id="gridTitle" class="form-control" x-model="metadata.title" placeholder="{{ __('Ex: Capitales du monde') }}" aria-label="{{ __('Titre de la grille') }}" maxlength="100">
               </div>
-              <div class="col-md-3">
+              <div class="col-md-5">
                 <label for="difficulty" class="form-label fw-medium">{{ __('Difficulté') }}</label>
                 <select id="difficulty" class="form-select" x-model="metadata.difficulty" aria-label="{{ __('Niveau de difficulté') }}">
                   <option value="Facile">{{ __('Facile') }}</option>
@@ -84,12 +84,17 @@
                   <option value="Difficile">{{ __('Difficile') }}</option>
                 </select>
               </div>
-              <div class="col-md-3 d-flex align-items-end">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="isPublic" x-model="metadata.is_public">
-                  <label class="form-check-label" for="isPublic">{{ __('Grille publique') }}</label>
+              @auth
+              <div class="col-12">
+                <div class="form-check form-switch d-inline-flex align-items-center gap-2 m-0" style="padding-left:2.5em">
+                  <input class="form-check-input" type="checkbox" role="switch" id="isPublic" x-model="metadata.is_public" style="width:2.5em;height:1.4em;cursor:pointer">
+                  <label class="form-check-label" for="isPublic" style="cursor:pointer;color:#1A1D23">
+                    <strong>{{ __('Rendre la grille publique') }}</strong>
+                    <span class="d-block small" style="color:#475569">{{ __('Génère un lien partageable /jeu/... que d\'autres pourront jouer en ligne.') }}</span>
+                  </label>
                 </div>
               </div>
+              @endauth
             </div>
 
             {{-- Mots à placer --}}
