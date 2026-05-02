@@ -27,8 +27,27 @@
                 @if($user->bio)
                     <p style="color: #999; font-style: italic; font-size: 13px; margin: 0 0 10px;">{{ $user->bio }}</p>
                 @endif
+                @php
+                    $roleLabels = [
+                        'super_admin' => 'Super-administrateur',
+                        'admin' => 'Administrateur',
+                        'editor' => 'Rédacteur',
+                        'author' => 'Auteur',
+                        'directory_moderator' => 'Modérateur annuaire',
+                        'news_moderator' => 'Modérateur actualités',
+                        'blog_moderator' => 'Modérateur blogue',
+                        'shop_manager' => 'Gestionnaire boutique',
+                        'newsletter_manager' => 'Gestionnaire infolettre',
+                        'support' => 'Support',
+                        'user' => 'Membre',
+                        'subscriber' => 'Abonné',
+                    ];
+                @endphp
                 @foreach($user->getRoleNames() as $role)
-                    <span style="display:inline-block;background:#095462;color:#FFFFFF;font-size:11px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin:0 4px 4px 0;line-height:1.4;">{{ ucfirst($role) }}</span>
+                    @php
+                        $label = $roleLabels[strtolower($role)] ?? ucwords(str_replace(['_', '-'], ' ', $role));
+                    @endphp
+                    <span style="display:inline-block;background:#095462;color:#FFFFFF;font-size:11px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin:0 4px 4px 0;line-height:1.4;">{{ $label }}</span>
                 @endforeach
             </div>
         </div>
