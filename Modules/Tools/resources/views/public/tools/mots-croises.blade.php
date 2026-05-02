@@ -181,10 +181,33 @@
                 </div>
               </template>
 
-              <button type="button" class="ct-btn ct-btn-outline mt-2 d-inline-flex align-items-center gap-2" @click="addPair()" aria-label="{{ __('Ajouter un nouveau mot') }}">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>{{ __('Ajouter un mot') }}</span>
-              </button>
+              <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="addPair()" aria-label="{{ __('Ajouter un nouveau mot') }}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span>{{ __('Ajouter un mot') }}</span>
+                </button>
+                <div class="position-relative" x-data="{ dataMenuOpen: false }">
+                  <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px" @click="dataMenuOpen = !dataMenuOpen" :aria-expanded="dataMenuOpen" aria-haspopup="menu" aria-label="{{ __('Données : importer, exporter, modèle CSV') }}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+                    <span>{{ __('Données CSV') }}</span>
+                  </button>
+                  <div x-show="dataMenuOpen" x-cloak @click.outside="dataMenuOpen=false" @keydown.escape.window="dataMenuOpen=false" role="menu"
+                       style="position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:#fff;border:1px solid #053d4a;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:280px;padding:.5rem;display:flex;flex-direction:column;gap:.15rem">
+                    <button type="button" role="menuitem" class="cw-menu-item" @click="openImportCsv(); dataMenuOpen=false">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      <span><strong>{{ __('Importer CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Remplir tous les mots à partir d\'un fichier') }}</span></span>
+                    </button>
+                    <a role="menuitem" class="cw-menu-item" href="{{ route('tools.crossword.csv-template') }}" download @click="dataMenuOpen=false" style="text-decoration:none;color:inherit">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+                      <span><strong>{{ __('Télécharger modèle CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Démo avec en-têtes Indice;Mot') }}</span></span>
+                    </a>
+                    <button type="button" role="menuitem" class="cw-menu-item" @click="exportCsv(); dataMenuOpen=false" :disabled="!pairs.some(p => p.clue && p.answer)">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      <span><strong>{{ __('Exporter mes mots en CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Sauvegarder les paires saisies') }}</span></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {{-- Bouton générer --}}
@@ -247,14 +270,6 @@
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                           <span><strong>{{ __('Exporter CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Sauvegarder vos paires') }}</span></span>
                         </button>
-                        <button type="button" role="menuitem" class="cw-menu-item" @click="openImportCsv(); menuOpen=false">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                          <span><strong>{{ __('Importer CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Remplace les paires actuelles') }}</span></span>
-                        </button>
-                        <a role="menuitem" class="cw-menu-item" href="{{ route('tools.crossword.csv-template') }}" download @click="menuOpen=false" style="text-decoration:none;color:inherit">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-                          <span><strong>{{ __('Modèle CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Démo avec en-têtes corrects') }}</span></span>
-                        </a>
                         <hr class="my-1" style="border-color:#e2e8f0">
                         <button type="button" role="menuitem" class="cw-menu-item" @click="showSolutions = !showSolutions; menuOpen=false">
                           <template x-if="!showSolutions"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></template>
