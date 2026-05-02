@@ -28,7 +28,7 @@
                     <p style="color: #999; font-style: italic; font-size: 13px; margin: 0 0 10px;">{{ $user->bio }}</p>
                 @endif
                 @foreach($user->getRoleNames() as $role)
-                    <span class="label label-primary" style="margin-right: 3px;">{{ ucfirst($role) }}</span>
+                    <span style="display:inline-block;background:#095462;color:#FFFFFF;font-size:11px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin:0 4px 4px 0;line-height:1.4;">{{ ucfirst($role) }}</span>
                 @endforeach
             </div>
         </div>
