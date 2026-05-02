@@ -95,7 +95,7 @@
         </div>
         <!-- end of wpo-blog-hero -->
 
-        @include('fronttheme::partials.newsletter-hero-banner')
+        {{-- newsletter-hero-banner retire de l'accueil S79+ (trop intrusif). Reste affiche dans le sticky-bar global + native-cta articles. --}}
 
         <!-- start of wpo-breacking-news -->
         @if($latestNews->isNotEmpty())
