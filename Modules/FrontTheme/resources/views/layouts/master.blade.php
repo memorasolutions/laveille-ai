@@ -291,20 +291,14 @@
     @include('fronttheme::partials.toast')
 
     @if(session('newsletter_success') || session('newsletter_confirmed') || session('newsletter_unsubscribed'))
+    @php
+        $newsletterMsg = session('newsletter_success') ?? session('newsletter_confirmed') ?? session('newsletter_unsubscribed');
+        $newsletterVariant = session('newsletter_unsubscribed') ? 'info' : 'success';
+    @endphp
     <script>
-        // Délai 1500ms pour s'assurer qu'Alpine + <x-core::alert-toast> sont initialisés
-        // (Alpine charge en defer + x-init s'exécute après mount)
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                @if(session('newsletter_success'))
-                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_success')), variant: 'success', duration: 6000 } }));
-                @endif
-                @if(session('newsletter_confirmed'))
-                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_confirmed')), variant: 'success', duration: 6000 } }));
-                @endif
-                @if(session('newsletter_unsubscribed'))
-                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_unsubscribed')), variant: 'info', duration: 6000 } }));
-                @endif
+                window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json($newsletterMsg), variant: @json($newsletterVariant), duration: 6000 } }));
             }, 1500);
         });
     </script>
