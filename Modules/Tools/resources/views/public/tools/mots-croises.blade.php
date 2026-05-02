@@ -232,6 +232,33 @@
               <strong>{{ __('Erreur') }}:</strong> <span x-text="generationError"></span>
             </div>
 
+            {{-- Modal Import CSV (HORS template x-if grid : doit exister DOM avant 1re génération) --}}
+            <div x-show="csvImportOpen" x-cloak @click.self="csvImportOpen=false" @keydown.escape.window="csvImportOpen=false" role="dialog" aria-modal="true" aria-labelledby="csv-import-title" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1050;display:flex;align-items:center;justify-content:center;padding:1rem">
+              <div style="background:#fff;border-radius:12px;padding:1.5rem;max-width:600px;width:100%;max-height:90vh;overflow:auto">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h2 id="csv-import-title" class="h5 mb-0" style="color:#053d4a">📤 {{ __('Importer un fichier CSV') }}</h2>
+                  <button type="button" class="btn btn-link p-0" @click="csvImportOpen=false" aria-label="{{ __('Fermer') }}" style="font-size:1.5rem;color:#475569;text-decoration:none">&times;</button>
+                </div>
+                <p class="small mb-3" style="color:#475569">{{ __('Format attendu : 2 colonnes Indice;Mot (séparateur ; ou ,). En-tête optionnelle. Max 50 lignes. Téléchargez le') }} <a href="{{ route('tools.crossword.csv-template') }}" download style="color:#053d4a;font-weight:600">{{ __('modèle CSV') }}</a> {{ __('si besoin.') }}</p>
+                <div class="mb-3">
+                  <label class="form-label" style="font-weight:600;color:#1A1D23">{{ __('Coller le contenu CSV') }}</label>
+                  <textarea x-model="csvImportText" rows="8" class="form-control" placeholder="Indice;Mot&#10;Capitale du Quebec;QUEBEC&#10;Framework PHP majeur;LARAVEL" style="font-family:monospace;font-size:.85rem"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" style="font-weight:600;color:#1A1D23">{{ __('OU choisir un fichier') }}</label>
+                  <input type="file" accept=".csv,text/csv" @change="csvImportFile = $event.target.files[0]" class="form-control">
+                </div>
+                <div x-show="csvImportError" x-cloak class="alert alert-danger small mb-3" role="alert" x-text="csvImportError"></div>
+                <div class="d-flex gap-2 justify-content-end">
+                  <button type="button" class="ct-btn ct-btn-outline" @click="csvImportOpen=false">{{ __('Annuler') }}</button>
+                  <button type="button" class="ct-btn ct-btn-primary" @click="doImportCsv()" :disabled="csvImporting || (!csvImportText && !csvImportFile)">
+                    <span x-show="!csvImporting">{{ __('Importer et remplacer') }}</span>
+                    <span x-show="csvImporting" x-cloak><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __('Import...') }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {{-- Grille générée --}}
             <template x-if="grid && grid.cells && grid.cells.length > 0">
               <div class="mb-5">
@@ -296,33 +323,6 @@
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                {{-- Modal Import CSV --}}
-                <div x-show="csvImportOpen" x-cloak @click.self="csvImportOpen=false" @keydown.escape.window="csvImportOpen=false" role="dialog" aria-modal="true" aria-labelledby="csv-import-title" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1050;display:flex;align-items:center;justify-content:center;padding:1rem">
-                  <div style="background:#fff;border-radius:12px;padding:1.5rem;max-width:600px;width:100%;max-height:90vh;overflow:auto">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                      <h2 id="csv-import-title" class="h5 mb-0" style="color:#053d4a">📤 {{ __('Importer un fichier CSV') }}</h2>
-                      <button type="button" class="btn btn-link p-0" @click="csvImportOpen=false" aria-label="{{ __('Fermer') }}" style="font-size:1.5rem;color:#475569;text-decoration:none">&times;</button>
-                    </div>
-                    <p class="small mb-3" style="color:#475569">{{ __('Format attendu : 2 colonnes Indice;Mot (séparateur ; ou ,). En-tête optionnelle. Max 50 lignes. Téléchargez le') }} <a href="{{ route('tools.crossword.csv-template') }}" download style="color:#053d4a;font-weight:600">{{ __('modèle CSV') }}</a> {{ __('si besoin.') }}</p>
-                    <div class="mb-3">
-                      <label class="form-label" style="font-weight:600;color:#1A1D23">{{ __('Coller le contenu CSV') }}</label>
-                      <textarea x-model="csvImportText" rows="8" class="form-control" placeholder="Indice;Mot&#10;Capitale du Quebec;QUEBEC&#10;Framework PHP majeur;LARAVEL" style="font-family:monospace;font-size:.85rem"></textarea>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label" style="font-weight:600;color:#1A1D23">{{ __('OU choisir un fichier') }}</label>
-                      <input type="file" accept=".csv,text/csv" @change="csvImportFile = $event.target.files[0]" class="form-control">
-                    </div>
-                    <div x-show="csvImportError" x-cloak class="alert alert-danger small mb-3" role="alert" x-text="csvImportError"></div>
-                    <div class="d-flex gap-2 justify-content-end">
-                      <button type="button" class="ct-btn ct-btn-outline" @click="csvImportOpen=false">{{ __('Annuler') }}</button>
-                      <button type="button" class="ct-btn ct-btn-primary" @click="doImportCsv()" :disabled="csvImporting || (!csvImportText && !csvImportFile)">
-                        <span x-show="!csvImporting">{{ __('Importer et remplacer') }}</span>
-                        <span x-show="csvImporting" x-cloak><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __('Import...') }}</span>
-                      </button>
                     </div>
                   </div>
                 </div>
