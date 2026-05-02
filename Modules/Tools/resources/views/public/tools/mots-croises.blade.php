@@ -289,12 +289,31 @@
                   </div>
                 </div>
 
-                {{-- Mots non placés --}}
+                {{-- Suggestion regenerer si <100% mots places --}}
                 <template x-if="unplaced.length > 0">
-                  <div class="alert alert-warning mt-4" role="alert">
-                    <strong>{{ __('Mots non placés') }}:</strong>
-                    <span x-text="unplaced.map(u => u.answer).join(', ')"></span>
-                    <div class="small">{{ __('Aucune intersection possible avec les autres mots. Modifiez les indices/réponses ou ajoutez des mots partageant des lettres.') }}</div>
+                  <div class="alert mt-4 d-flex align-items-start gap-3" role="status" style="background:#e0f2f1;border:1px solid #053d4a;color:#1A1D23">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                    <div style="flex:1;min-width:0">
+                      <strong style="color:#053d4a" x-text="words.length + ' / ' + (words.length + unplaced.length) + ' {{ __('mots placés') }}'"></strong>
+                      <div class="small mt-1">
+                        <strong>{{ __('Mots non placés') }} :</strong> <span x-text="unplaced.map(u => u.answer).join(', ')"></span>
+                      </div>
+                      <div class="small mt-2">
+                        💡 {{ __('Chaque génération est différente. Cliquez sur') }} <strong>« {{ __('Autre disposition') }} »</strong> {{ __('pour essayer un autre agencement et potentiellement placer plus de mots. Si certains restent toujours non placés, modifiez les mots/indices pour qu\'ils partagent des lettres communes.') }}
+                      </div>
+                      <button type="button" class="ct-btn ct-btn-primary mt-3 d-inline-flex align-items-center gap-2" style="min-height:44px" @click="regenerate()" :disabled="regenerating || generating">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                        <span x-text="regenerating ? '{{ __('Recalcul...') }}' : '{{ __('Essayer une autre disposition') }}'"></span>
+                      </button>
+                    </div>
+                  </div>
+                </template>
+                <template x-if="unplaced.length === 0 && words.length > 0">
+                  <div class="alert mt-4 d-flex align-items-center gap-3" role="status" style="background:#d1fae5;border:1px solid #065f46;color:#065f46">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div>
+                      <strong x-text="'{{ __('Parfait, tous les mots placés !') }} (' + words.length + '/' + words.length + ')'"></strong>
+                    </div>
                   </div>
                 </template>
 
