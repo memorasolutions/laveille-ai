@@ -50,10 +50,7 @@
             <h1 class="h3 mb-1" style="color:#1A1D23">{{ $preset->name }}</h1>
             <p class="cw-subtitle mb-0 small">{{ __('Mode joueur — résolvez la grille en ligne') }}</p>
           </div>
-          <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="window.print()" :disabled="!grid" aria-label="{{ __('Imprimer la grille') }}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            <span>{{ __('Imprimer') }}</span>
-          </button>
+          {{-- Bouton 'Imprimer' retire S79 #43 - le createur peut telecharger le PDF (vierge ou corrige) depuis /outils/mots-croises menu Plus d'options. --}}
         </div>
 
         <template x-if="loading">

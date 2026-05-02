@@ -20,10 +20,7 @@
             <p class="text-muted mb-4">{{ $tool->description }}</p>
 
             <div class="d-flex flex-wrap gap-2 mb-4 no-print">
-              <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="print()" :disabled="!grid" aria-label="{{ __('Imprimer la grille') }}">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                <span>{{ __('Imprimer') }}</span>
-              </button>
+              {{-- Bouton 'Imprimer' retire S79 #43 - remplace par export PDF dedie (vierge + corrige) dans le menu Plus d'options apres generation. --}}
               @auth
                 <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" @click="save()" :disabled="saving || !grid" aria-label="{{ __('Sauvegarder dans mon compte') }}">
                   <template x-if="!saving">
