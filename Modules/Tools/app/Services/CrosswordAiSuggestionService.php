@@ -137,9 +137,11 @@ final class CrosswordAiSuggestionService
     {
         $apiKey = config('directory.openrouter_api_key') ?: env('OPENROUTER_API_KEY');
         if (! $apiKey) {
-            Log::warning('CrosswordAiSuggestionService : OPENROUTER_API_KEY manquante');
+            Log::error('CrosswordAi call: OPENROUTER_API_KEY manquante');
             return '';
         }
+
+        Log::error("CrosswordAi call: début appel model=$model");
 
         try {
             $response = Http::timeout(45)
@@ -155,17 +157,22 @@ final class CrosswordAiSuggestionService
                     'max_tokens' => 1500,
                 ]);
 
+            $status = $response->status();
+            Log::error("CrosswordAi call: model=$model status=$status");
+
             if ($response->successful()) {
-                return (string) ($response->json('choices.0.message.content') ?? '');
+                $content = (string) ($response->json('choices.0.message.content') ?? '');
+                Log::error("CrosswordAi call: model=$model content_len=".mb_strlen($content)." preview=".mb_substr($content, 0, 100));
+                return $content;
             }
 
-            Log::warning('CrosswordAiSuggestionService : erreur API', [
+            Log::error('CrosswordAi call: erreur API', [
                 'model' => $model,
-                'status' => $response->status(),
+                'status' => $status,
                 'body' => mb_substr((string) $response->body(), 0, 500),
             ]);
         } catch (\Throwable $e) {
-            Log::warning('CrosswordAiSuggestionService : exception', [
+            Log::error('CrosswordAi call: exception', [
                 'model' => $model,
                 'error' => $e->getMessage(),
             ]);
