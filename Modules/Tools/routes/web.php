@@ -23,7 +23,9 @@ Route::middleware('web')->group(function () {
     Route::post('/outils/mots-croises/ai-suggest-pairs', [PublicCrosswordController::class, 'aiSuggestPairs'])
         ->middleware('throttle:10,60')
         ->name('tools.crossword.ai-suggest-pairs');
-    Route::get('/jeu/{publicId}', [PublicCrosswordController::class, 'play'])->name('tools.crossword.play');
+    Route::get('/jeumc/{publicId}', [PublicCrosswordController::class, 'play'])->name('tools.crossword.play');
+    // Backward compatibility : ancien path /jeu/{publicId} -> redirect 301 vers /jeumc/ (S79+ libère /jeu/ pour outils interactifs futurs)
+    Route::get('/jeu/{publicId}', fn (string $publicId) => redirect('/jeumc/'.$publicId, 301));
 
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])->name('tools.show');
 });

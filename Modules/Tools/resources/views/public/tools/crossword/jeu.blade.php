@@ -5,7 +5,7 @@
 @section('og_type', 'article')
 
 @section('content')
-@php $playUrl = url('/jeu/'.$preset->public_id); @endphp
+@php $playUrl = url('/jeumc/'.$preset->public_id); @endphp
 
 <style>
 .crossword-grid{table-layout:fixed;border-collapse:collapse;margin:1rem auto;background:#fff}

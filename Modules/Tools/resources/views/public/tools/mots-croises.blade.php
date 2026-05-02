@@ -124,13 +124,24 @@
               </div>
               @auth
               <div class="col-12">
-                <div class="form-check form-switch d-inline-flex align-items-center gap-2 m-0" style="padding-left:2.5em">
-                  <input class="form-check-input" type="checkbox" role="switch" id="isPublic" x-model="metadata.is_public" style="width:2.5em;height:1.4em;cursor:pointer">
-                  <label class="form-check-label" for="isPublic" style="cursor:pointer;color:#1A1D23">
-                    <strong>{{ __('Rendre la grille publique') }}</strong>
-                    <span class="d-block small" style="color:#475569">{{ __('Génère un lien partageable /jeu/... que d\'autres pourront jouer en ligne.') }}</span>
-                  </label>
-                </div>
+                <button type="button"
+                        class="ct-btn d-inline-flex align-items-start gap-3 text-start"
+                        style="min-height:44px;padding:.75rem 1.25rem;max-width:100%;white-space:normal"
+                        :class="metadata.is_public ? 'ct-btn-primary' : 'ct-btn-outline'"
+                        @click="metadata.is_public = !metadata.is_public; saveDraft()"
+                        :aria-pressed="metadata.is_public"
+                        :aria-label="metadata.is_public ? '{{ __('Rendre la grille privée') }}' : '{{ __('Rendre la grille publique') }}'">
+                  <template x-if="!metadata.is_public">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0;margin-top:2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  </template>
+                  <template x-if="metadata.is_public">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  </template>
+                  <span style="flex:1;min-width:0">
+                    <strong x-text="metadata.is_public ? '{{ __('Grille publique') }} ✓' : '{{ __('Rendre la grille publique') }}'"></strong>
+                    <span class="d-block small" style="color:inherit;opacity:.85;font-weight:400" x-text="metadata.is_public ? '{{ __('Lien partageable /jeumc/... actif - cliquez pour rendre privée.') }}' : '{{ __('Génère un lien partageable /jeumc/... que d\'autres pourront jouer en ligne.') }}'"></span>
+                  </span>
+                </button>
               </div>
               @endauth
             </div>
@@ -826,7 +837,7 @@ function crosswordGenerator() {
           const preset = await response.json();
           this.dispatchToast("{{ __('Grille sauvegardée avec succès.') }}", 'success');
           if (this.metadata.is_public && preset.public_id) {
-            const playUrl = window.location.origin + '/jeu/' + preset.public_id;
+            const playUrl = window.location.origin + '/jeumc/' + preset.public_id;
             console.log('Lien public', playUrl);
           }
         } else {
