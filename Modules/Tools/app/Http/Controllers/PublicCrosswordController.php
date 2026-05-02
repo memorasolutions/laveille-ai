@@ -72,7 +72,7 @@ class PublicCrosswordController
             ->first();
 
         if (! $preset) {
-            return redirect()->route('tools.crossword.index')
+            return redirect('/outils/mots-croises')
                 ->with('error', 'Cette grille n\'existe pas ou n\'est pas publique.');
         }
 

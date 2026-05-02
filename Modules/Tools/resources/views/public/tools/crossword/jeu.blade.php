@@ -53,7 +53,7 @@
           <div class="alert alert-warning" role="alert">
             <strong>{{ __('Impossible de charger la grille.') }}</strong>
             <span x-text="loadError"></span>
-            <a href="{{ route('tools.crossword.index') }}" class="alert-link">{{ __('Retour aux mots croisés') }}</a>
+            <a href="{{ url('/outils/mots-croises') }}" class="alert-link">{{ __('Retour aux mots croisés') }}</a>
           </div>
         </template>
 
@@ -196,7 +196,7 @@
     </div>
 
     <div class="text-center mt-3 small text-muted no-print">
-      <a href="{{ route('tools.crossword.index') }}" class="text-decoration-none">{{ __('Créer ma propre grille de mots croisés') }}</a>
+      <a href="{{ url('/outils/mots-croises') }}" class="text-decoration-none">{{ __('Créer ma propre grille de mots croisés') }}</a>
     </div>
 
   </div>
