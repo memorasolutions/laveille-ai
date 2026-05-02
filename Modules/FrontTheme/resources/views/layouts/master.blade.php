@@ -295,15 +295,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 @if(session('newsletter_success'))
-                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: @json(session('newsletter_success')), type: 'success' } }));
+                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_success')), variant: 'success', duration: 6000 } }));
                 @endif
                 @if(session('newsletter_confirmed'))
-                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: @json(session('newsletter_confirmed')), type: 'success' } }));
+                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_confirmed')), variant: 'success', duration: 6000 } }));
                 @endif
                 @if(session('newsletter_unsubscribed'))
-                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: @json(session('newsletter_unsubscribed')), type: 'info' } }));
+                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_unsubscribed')), variant: 'info', duration: 6000 } }));
                 @endif
-            }, 200);
+            }, 400);
         });
     </script>
     @endif
