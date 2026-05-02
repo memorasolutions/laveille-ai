@@ -292,6 +292,8 @@
 
     @if(session('newsletter_success') || session('newsletter_confirmed') || session('newsletter_unsubscribed'))
     <script>
+        // Délai 1500ms pour s'assurer qu'Alpine + <x-core::alert-toast> sont initialisés
+        // (Alpine charge en defer + x-init s'exécute après mount)
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 @if(session('newsletter_success'))
@@ -303,7 +305,7 @@
                 @if(session('newsletter_unsubscribed'))
                     window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_unsubscribed')), variant: 'info', duration: 6000 } }));
                 @endif
-            }, 400);
+            }, 1500);
         });
     </script>
     @endif
