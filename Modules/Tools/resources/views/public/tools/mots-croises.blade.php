@@ -56,28 +56,59 @@
               </div>
             @endauth
 
-            {{-- Thème : suggestion IA gratuite (gemma 3 27b free) --}}
-            <div class="mb-4">
-              <label for="theme" class="form-label fw-medium">{{ __('Thème de la grille (optionnel)') }}</label>
-              <div class="d-flex gap-2 flex-wrap">
-                <input type="text" id="theme" class="form-control flex-fill" x-model="metadata.theme" @keydown.enter.prevent="suggestPairs()" placeholder="{{ __('Ex: Marketing B2B, Histoire du Québec, Cuisine...') }}" aria-label="{{ __('Thème de la grille') }}" maxlength="100" :disabled="suggestingPairs">
-                <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" aria-label="{{ __('Pré-remplir 10 paires avec IA gratuite') }}">
-                  <template x-if="!suggestingPairs">
-                    <span class="d-inline-flex align-items-center gap-2">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/><path d="m11 4 1 4 4 1-4 1-1 4-1-4-4-1 4-1z"/></svg>
-                      <span>{{ __('Pré-remplir IA') }}</span>
-                    </span>
-                  </template>
-                  <template x-if="suggestingPairs">
-                    <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Génération...') }}</span></span>
-                  </template>
-                </button>
+            {{-- Card "Démarrage rapide IA" - workflow 3 étapes --}}
+            <section class="ai-quickstart mb-4" aria-labelledby="ai-quickstart-title">
+              <header class="ai-quickstart-header">
+                <h2 id="ai-quickstart-title" class="ai-quickstart-title">
+                  <svg class="ai-quickstart-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/><path d="m11 4 1 4 4 1-4 1-1 4-1-4-4-1 4-1z"/></svg>
+                  {{ __('Démarrage rapide avec l\'IA') }}
+                  <span class="ai-quickstart-badge">{{ __('Gratuit') }}</span>
+                </h2>
+                <p class="ai-quickstart-subtitle">{{ __('Générez 10 paires automatiquement en quelques secondes, puis modifiez-les.') }}</p>
+              </header>
+
+              <ol class="ai-quickstart-steps">
+                <li class="ai-quickstart-step">
+                  <span class="ai-quickstart-step-num" aria-hidden="true">1</span>
+                  <div class="ai-quickstart-step-body">
+                    <strong>{{ __('Décrivez votre thème') }}</strong>
+                    <input type="text" id="theme" class="form-control mt-2" x-model="metadata.theme" @keydown.enter.prevent="suggestPairs()" placeholder="{{ __('Ex : Marketing B2B, Histoire du Québec, Cuisine italienne, IA générative...') }}" aria-label="{{ __('Thème de la grille') }}" maxlength="100" :disabled="suggestingPairs">
+                  </div>
+                </li>
+                <li class="ai-quickstart-step">
+                  <span class="ai-quickstart-step-num" aria-hidden="true">2</span>
+                  <div class="ai-quickstart-step-body">
+                    <strong>{{ __('Générez 10 paires') }}</strong>
+                    <p class="ai-quickstart-step-desc">{{ __('Notre IA gratuite (modèle ouvert) propose 10 paires indice/réponse adaptées à votre thème.') }}</p>
+                    <button type="button" class="ai-quickstart-cta d-inline-flex align-items-center gap-2" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" aria-label="{{ __('Pré-remplir 10 paires avec IA gratuite') }}">
+                      <template x-if="!suggestingPairs">
+                        <span class="d-inline-flex align-items-center gap-2">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/><path d="m11 4 1 4 4 1-4 1-1 4-1-4-4-1 4-1z"/></svg>
+                          <span>{{ __('Générer 10 paires avec l\'IA') }}</span>
+                        </span>
+                      </template>
+                      <template x-if="suggestingPairs">
+                        <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Génération en cours, 5 à 15 secondes...') }}</span></span>
+                      </template>
+                    </button>
+                    <small class="ai-quickstart-warning d-block mt-2">⚠️ {{ __('Les paires actuelles seront remplacées par celles générées.') }}</small>
+                  </div>
+                </li>
+                <li class="ai-quickstart-step">
+                  <span class="ai-quickstart-step-num" aria-hidden="true">3</span>
+                  <div class="ai-quickstart-step-body">
+                    <strong>{{ __('Ajustez les paires obtenues') }}</strong>
+                    <p class="ai-quickstart-step-desc">{{ __('Modifiez les indices, supprimez ou ajoutez des paires selon votre besoin avant de générer la grille.') }}</p>
+                  </div>
+                </li>
+              </ol>
+
+              <div x-show="suggestError" x-cloak class="ai-quickstart-error" role="alert">
+                <strong>{{ __('Aïe') }} :</strong> <span x-text="suggestError"></span>
               </div>
-              <small class="text-muted">{{ __('Suggestions IA gratuites (modèle ouvert, peut prendre 5-15s). Vos paires existantes seront remplacées.') }}</small>
-              <div x-show="suggestError" x-cloak class="alert alert-warning mt-2 mb-0 small" role="alert">
-                <strong>{{ __('Suggestions') }}:</strong> <span x-text="suggestError"></span>
-              </div>
-            </div>
+            </section>
+
+            <p class="text-muted small mb-4">{{ __('Vous préférez créer votre grille manuellement ? Ignorez la section ci-dessus et remplissez directement les paires plus bas.') }}</p>
 
             {{-- Métadonnées --}}
             <div class="row g-2 mb-4">
@@ -294,6 +325,120 @@
   .cell-inactive {
     background-color: var(--c-dark, #1A1D23);
     border: 1px solid var(--c-dark, #1A1D23);
+  }
+  /* Card Démarrage IA - workflow 3 étapes */
+  .ai-quickstart {
+    background: linear-gradient(135deg, rgba(11,114,133,0.04) 0%, rgba(255,140,66,0.04) 100%);
+    border: 1px solid rgba(11,114,133,0.18);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .ai-quickstart-header { margin-bottom: 20px; }
+  .ai-quickstart-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px 0;
+    font-family: var(--f-heading, system-ui);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--c-dark, #1A1D23);
+    flex-wrap: wrap;
+  }
+  .ai-quickstart-icon { color: #FF8C42; flex-shrink: 0; }
+  .ai-quickstart-badge {
+    display: inline-block;
+    background: #16A34A;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ai-quickstart-subtitle {
+    margin: 0;
+    color: var(--c-text-muted, #6E7687);
+    font-size: 0.95rem;
+  }
+  .ai-quickstart-steps {
+    list-style: none;
+    counter-reset: ai-step;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 16px;
+  }
+  .ai-quickstart-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .ai-quickstart-step-num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #0B7285;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 50%;
+    font-size: 0.95rem;
+  }
+  .ai-quickstart-step-body { flex: 1; min-width: 0; }
+  .ai-quickstart-step-body strong {
+    display: block;
+    color: var(--c-dark, #1A1D23);
+    font-size: 1rem;
+  }
+  .ai-quickstart-step-desc {
+    margin: 4px 0 8px 0;
+    color: var(--c-text-muted, #6E7687);
+    font-size: 0.9rem;
+  }
+  .ai-quickstart-cta {
+    background: #0B7285;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    min-height: 44px;
+  }
+  .ai-quickstart-cta:hover:not(:disabled) {
+    background: #095462;
+  }
+  .ai-quickstart-cta:focus-visible {
+    outline: 2px solid #0B7285;
+    outline-offset: 2px;
+  }
+  .ai-quickstart-cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .ai-quickstart-warning {
+    color: #92400E;
+    font-size: 0.85rem;
+  }
+  .ai-quickstart-error {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-radius: 8px;
+    color: #991B1B;
+    font-size: 0.9rem;
+  }
+  @media (max-width: 640px) {
+    .ai-quickstart { padding: 16px; }
+    .ai-quickstart-step { gap: 12px; }
+    .ai-quickstart-step-num { width: 28px; height: 28px; font-size: 0.85rem; }
   }
   .crossword-pair-delete {
     display: inline-flex;
