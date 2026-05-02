@@ -261,6 +261,24 @@
                           <template x-if="showSolutions"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></template>
                           <span><strong x-text="showSolutions ? '{{ __('Masquer solutions') }}' : '{{ __('Afficher solutions') }}'"></strong><span class="d-block small" style="color:#475569">{{ __('Bascule lettres dans la grille') }}</span></span>
                         </button>
+                        <hr class="my-1" style="border-color:#e2e8f0">
+                        <div style="padding:.4rem .75rem">
+                          <div class="small fw-bold mb-2" style="color:#053d4a;text-transform:uppercase;letter-spacing:.04em;font-size:.7rem">{{ __('Cases noires') }}</div>
+                          <div role="radiogroup" :aria-label="'{{ __('Apparence des cases noires') }}'" class="d-flex gap-2 flex-wrap">
+                            <button type="button" role="radio" :aria-checked="inactiveStyle === 'black'" :class="inactiveStyle === 'black' ? 'cw-style-active' : ''" class="cw-style-opt" @click="inactiveStyle='black'; localStorage.setItem('cw_inactive_style','black')" :title="'{{ __('Noir plein (par défaut)') }}'">
+                              <span class="cw-style-swatch" style="background:#1A1D23"></span>
+                              <span>{{ __('Noir') }}</span>
+                            </button>
+                            <button type="button" role="radio" :aria-checked="inactiveStyle === 'gray'" :class="inactiveStyle === 'gray' ? 'cw-style-active' : ''" class="cw-style-opt" @click="inactiveStyle='gray'; localStorage.setItem('cw_inactive_style','gray')" :title="'{{ __('Gris (économie encre partielle)') }}'">
+                              <span class="cw-style-swatch" style="background:#9ca3af"></span>
+                              <span>{{ __('Gris') }}</span>
+                            </button>
+                            <button type="button" role="radio" :aria-checked="inactiveStyle === 'border'" :class="inactiveStyle === 'border' ? 'cw-style-active' : ''" class="cw-style-opt" @click="inactiveStyle='border'; localStorage.setItem('cw_inactive_style','border')" :title="'{{ __('Bordure seule (économie encre maximale)') }}'">
+                              <span class="cw-style-swatch" style="background:#fff;border:2px solid #1A1D23"></span>
+                              <span>{{ __('Bordure') }}</span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -299,7 +317,7 @@
                       <template x-for="(row, rowIndex) in grid.cells" :key="rowIndex">
                         <tr>
                           <template x-for="(cell, colIndex) in row" :key="colIndex">
-                            <td :class="cell !== null ? 'cell-active' : 'cell-inactive'" :aria-label="cell !== null ? ('{{ __('Case') }} ' + (rowIndex + 1) + '-' + (colIndex + 1) + (cell.number ? ', {{ __('numéro') }} ' + cell.number : '')) : '{{ __('Case noire') }}'">
+                            <td :class="cell !== null ? 'cell-active' : ('cell-inactive cell-inactive-' + inactiveStyle)" :aria-label="cell !== null ? ('{{ __('Case') }} ' + (rowIndex + 1) + '-' + (colIndex + 1) + (cell.number ? ', {{ __('numéro') }} ' + cell.number : '')) : '{{ __('Case noire') }}'">
                               <template x-if="cell !== null">
                                 <span>
                                   <span class="number" x-show="cell.number" x-text="cell.number"></span>
@@ -549,10 +567,16 @@
     color: var(--c-dark, #1A1D23);
     text-transform: uppercase;
   }
-  .cell-inactive {
-    background-color: var(--c-dark, #1A1D23);
-    border: 1px solid var(--c-dark, #1A1D23);
-  }
+  .cell-inactive { border: 1.5px solid #1A1D23 !important; }
+  .cell-inactive.cell-inactive-black { background-color: #1A1D23 !important; }
+  .cell-inactive.cell-inactive-gray { background-color: #9ca3af !important; }
+  .cell-inactive.cell-inactive-border { background-color: #ffffff !important; }
+  /* Style options selecteur dans menu */
+  .cw-style-opt { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .4rem .5rem; background: #f8fafc; border: 2px solid transparent; border-radius: 6px; cursor: pointer; min-width: 64px; min-height: 44px; font-size: .75rem; color: #1A1D23; font-weight: 600; }
+  .cw-style-opt:hover { background: #e0f2f1; }
+  .cw-style-opt.cw-style-active { border-color: #053d4a; background: #e0f2f1; color: #053d4a; }
+  .cw-style-opt:focus-visible { outline: 2px solid #053d4a; outline-offset: 2px; }
+  .cw-style-swatch { display: inline-block; width: 22px; height: 22px; border-radius: 4px; border: 1px solid #1A1D23; }
   /* Card Démarrage IA - workflow 3 étapes */
   .ai-quickstart {
     background: linear-gradient(135deg, rgba(11,114,133,0.04) 0%, rgba(255,140,66,0.04) 100%);
@@ -727,6 +751,7 @@ function crosswordGenerator() {
     csvImportFile: null,
     csvImporting: false,
     csvImportError: '',
+    inactiveStyle: localStorage.getItem('cw_inactive_style') || 'black',
     generating: false,
     regenerating: false,
     saving: false,
@@ -911,7 +936,7 @@ function crosswordGenerator() {
         const res = await fetch('{{ url("/outils/mots-croises") }}/' + endpoint, {
           method: 'POST',
           headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'application/pdf'},
-          body: JSON.stringify({pairs: this._validPairs(), seed: seed, title: this.metadata.title || 'Mots croises'})
+          body: JSON.stringify({pairs: this._validPairs(), seed: seed, title: this.metadata.title || 'Mots croises', inactive_style: this.inactiveStyle})
         });
         if (!res.ok) { this.dispatchToast("{{ __('Erreur lors de la generation du PDF.') }}", 'danger'); return; }
         const blob = await res.blob();

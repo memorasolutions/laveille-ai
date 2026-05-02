@@ -90,6 +90,7 @@ class PublicCrosswordController
             'pairs.*.answer' => 'required|string|min:2|max:30',
             'seed' => 'nullable|integer|min:0|max:2147483647',
             'title' => 'nullable|string|max:120',
+            'inactive_style' => 'nullable|in:black,gray,border',
         ]);
 
         try {
@@ -98,9 +99,10 @@ class PublicCrosswordController
                 return response()->json(['success' => false, 'error' => 'Aucun mot placable.'], 422);
             }
             $title = $validated['title'] ?? 'Mots croisés';
+            $inactiveStyle = $validated['inactive_style'] ?? 'black';
             $bin = $blank
-                ? $this->pdf->renderBlank($result, $title)
-                : $this->pdf->renderSolution($result, $title.' — Corrigé');
+                ? $this->pdf->renderBlank($result, $title, null, $inactiveStyle)
+                : $this->pdf->renderSolution($result, $title.' — Corrigé', null, $inactiveStyle);
             $filename = strtolower(preg_replace('/[^a-z0-9_-]/i', '-', $title)).'-'.($blank ? 'vierge' : 'corrige').'.pdf';
 
             return response($bin, 200, [

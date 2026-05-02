@@ -17,7 +17,8 @@ h1 { font-size: 14pt; color: #053d4a; margin: 0 0 14px 0; text-align: center; fo
 table.cw-grid { table-layout: fixed; border-collapse: collapse; margin: 0 auto; }
 table.cw-grid td { width: 28px; height: 28px; padding: 0; text-align: center; vertical-align: middle; border: 1px solid #1A1D23; position: relative; }
 table.cw-grid td.cell-active { background: #ffffff; }
-table.cw-grid td.cell-inactive { background: #1A1D23; border-color: #1A1D23; }
+@php $bg = ['black' => '#1A1D23', 'gray' => '#9ca3af', 'border' => '#ffffff'][$inactiveStyle ?? 'black'] ?? '#1A1D23'; @endphp
+table.cw-grid td.cell-inactive { background: {{ $bg }}; border: 1px solid #1A1D23; }
 table.cw-grid td .num { position: absolute; top: 1px; left: 2px; font-size: 6pt; font-weight: bold; color: #053d4a; line-height: 1; }
 .cw-clues { width: 100%; margin-top: 14px; }
 .cw-clues-col { display: inline-block; width: 49%; vertical-align: top; padding: 0 4px; }
