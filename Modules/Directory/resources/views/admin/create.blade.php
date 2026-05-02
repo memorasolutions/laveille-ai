@@ -88,7 +88,7 @@
                         <input type="url" class="form-control @error('screenshot') is-invalid @enderror" id="screenshot" name="screenshot" x-model="screenshotUrl" value="{{ old('screenshot') }}" placeholder="https://...">
                         <button type="button" class="btn btn-outline-secondary" @click="
                             const urlField = document.getElementById('url');
-                            if (!urlField || !urlField.value) { alert('Entrez d abord l URL du site.'); return; }
+                            if (!urlField || !urlField.value) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Entrez d abord l URL du site.', variant: 'warning', duration: 4000 } })); return; }
                             capturing = true;
                             fetch('/api/scrape-meta', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }, body: JSON.stringify({ url: urlField.value }) })
                             .then(r => r.json()).then(d => { screenshotUrl = d.og_image || ''; }).catch(() => {}).finally(() => capturing = false);

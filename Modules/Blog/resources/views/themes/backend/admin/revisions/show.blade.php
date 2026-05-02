@@ -37,11 +37,11 @@
             <i data-lucide="arrow-left" class="icon-sm"></i>
             {{ __('Retour à l\'historique') }}
         </a>
-        <form action="{{ route('admin.blog.articles.revisions.restore', [$article, $revision]) }}" method="POST">
+        <form action="{{ route('admin.blog.articles.revisions.restore', [$article, $revision]) }}" method="POST" x-data>
             @csrf
-            <button type="submit"
+            <button type="button"
                     class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-2"
-                    onclick="return confirm('{{ __('Restaurer cette version ?') }}')">
+                    @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Restaurer cette version ?')), action: () => $el.closest('form').submit() })">
                 <i data-lucide="undo-2" class="icon-sm"></i>
                 {{ __('Restaurer cette révision') }}
             </button>

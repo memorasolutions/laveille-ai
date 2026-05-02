@@ -89,14 +89,14 @@
                                aria-label="{{ __('Modifier l\'équipe') }} {{ $team->name }}">
                                 <i data-lucide="pencil"></i>
                             </a>
-                            <form action="{{ route('admin.teams.destroy', $team) }}" method="POST" class="d-inline">
+                            <form action="{{ route('admin.teams.destroy', $team) }}" method="POST" class="d-inline" x-data>
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit"
+                                <button type="button"
                                         class="btn btn-sm btn-outline-danger"
                                         title="{{ __('Supprimer l\'équipe') }}"
                                         aria-label="{{ __('Supprimer l\'équipe') }} {{ $team->name }}"
-                                        onclick="return confirm('{{ __('Supprimer l\'équipe') }} « {{ addslashes($team->name) }} » ? {{ __('Cette action est irréversible.') }}')">
+                                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer l\'équipe') . ' « ' . $team->name . ' » ? ' . __('Cette action est irréversible.')), action: () => $el.closest('form').submit() })">
                                     <i data-lucide="trash-2"></i>
                                 </button>
                             </form>

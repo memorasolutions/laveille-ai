@@ -146,10 +146,11 @@
                                     aria-label="{{ __('Prolonger ce lien') }}">{{ __('Prolonger') }}</button>
                             </form>
                         </template>
-                        <form :action="link.delete_url" method="POST" style="display: inline;">
+                        <form :action="link.delete_url" method="POST" style="display: inline;" x-data>
                             @csrf
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" onclick="return confirm('{{ __('Supprimer ce lien ?') }}')"
+                            <button type="button"
+                                @click="$dispatch('open-confirm-global', { message: @js(__('Supprimer ce lien ?')), callback: () => $el.closest('form').submit() })"
                                 style="-webkit-appearance: none; background: transparent; color: #DC2626; border: 1px solid #FECACA; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; line-height: 1.2;"
                                 aria-label="{{ __('Supprimer ce lien') }}">{{ __('Supprimer') }}</button>
                         </form>

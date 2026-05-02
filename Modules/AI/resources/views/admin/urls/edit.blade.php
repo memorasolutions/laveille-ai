@@ -60,10 +60,10 @@
             <span class="badge {{ $statusBadge }}">{{ $statusLabel }}</span>
         </div>
         <div class="col-auto">
-            <form action="{{ route('admin.ai.urls.scrape', $url) }}" method="POST" class="d-inline">
+            <form action="{{ route('admin.ai.urls.scrape', $url) }}" method="POST" class="d-inline" x-data>
                 @csrf
                 <button type="button" class="btn btn-sm btn-outline-secondary"
-                        onclick="if(confirm('{{ __('Lancer le scraping de cette URL maintenant ?') }}')) this.closest('form').submit()">
+                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Lancer le scraping de cette URL maintenant ?')), action: () => $el.closest('form').submit() })">
                     <i data-lucide="refresh-cw"></i> {{ __('Lancer le scraping') }}
                 </button>
             </form>
@@ -247,11 +247,11 @@
                 <i data-lucide="alert-triangle" class="me-1"></i>{{ __('Zone de danger') }}
             </h6>
             <p class="text-muted small mb-3">{{ __('La suppression est définitive. Tous les documents indexés depuis cette URL seront également supprimés.') }}</p>
-            <form action="{{ route('admin.ai.urls.destroy', $url) }}" method="POST">
+            <form action="{{ route('admin.ai.urls.destroy', $url) }}" method="POST" x-data>
                 @csrf
                 @method('DELETE')
                 <button type="button" class="btn btn-outline-danger btn-sm"
-                        onclick="if(confirm('{{ __('Supprimer définitivement cette source URL et tous ses documents indexés ?') }}')) this.closest('form').submit()">
+                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer définitivement cette source URL et tous ses documents indexés ?')), action: () => $el.closest('form').submit() })">
                     <i data-lucide="trash-2"></i> {{ __('Supprimer cette source URL') }}
                 </button>
             </form>

@@ -70,11 +70,11 @@
                                         <i data-lucide="git-compare" class="icon-sm"></i>
                                         {{ __('Comparer') }}
                                     </a>
-                                    <form action="{{ route('admin.blog.articles.revisions.restore', [$article, $revision]) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('admin.blog.articles.revisions.restore', [$article, $revision]) }}" method="POST" class="d-inline" x-data>
                                         @csrf
-                                        <button type="submit"
+                                        <button type="button"
                                                 class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1"
-                                                onclick="return confirm('{{ __('Restaurer cette version ?') }}')">
+                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Restaurer cette version ?')), action: () => $el.closest('form').submit() })">
                                             <i data-lucide="undo-2" class="icon-sm"></i>
                                             {{ __('Restaurer') }}
                                         </button>

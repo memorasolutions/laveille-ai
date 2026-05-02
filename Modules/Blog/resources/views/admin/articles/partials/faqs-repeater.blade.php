@@ -68,7 +68,7 @@
                         ↓ Descendre
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-danger ms-auto"
-                            @click="if (confirm('Supprimer cette question ?')) { faqs.splice(index, 1); }">
+                            @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer cette question ?')), action: () => faqs.splice(index, 1) })">
                         Supprimer
                     </button>
                 </div>

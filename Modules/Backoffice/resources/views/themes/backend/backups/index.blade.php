@@ -42,7 +42,7 @@
         <span class="fw-medium text-body">
             <span x-text="selected.length"></span> {{ __('sélectionnée(s)') }}
         </span>
-        <button type="button" @click="if(confirm('{{ __('Supprimer les sauvegardes sélectionnées ?') }}')) {
+        <button type="button" @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer les sauvegardes sélectionnées ?')), action: () => {
             const form = document.getElementById('bulkDeleteForm');
             form.querySelectorAll('input[name=\'paths[]\']').forEach(el => el.remove());
             selected.forEach(path => {
@@ -51,7 +51,7 @@
                 form.appendChild(input);
             });
             form.submit();
-        }" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1">
+        } })" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1">
             <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer la sélection') }}
         </button>
         <button type="button" @click="selected = []" class="btn btn-sm btn-light d-inline-flex align-items-center gap-1">
@@ -112,11 +112,11 @@
                                             </li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
-                                                <form method="POST" action="{{ route('admin.backups.delete') }}">
+                                                <form method="POST" action="{{ route('admin.backups.delete') }}" x-data>
                                                     @csrf @method('DELETE')
                                                     <input type="hidden" name="path" value="{{ $backup['path'] }}">
-                                                    <button type="submit"
-                                                            onclick="return confirm('{{ __('Supprimer cette sauvegarde ?') }}')"
+                                                    <button type="button"
+                                                            @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer cette sauvegarde ?')), action: () => $el.closest('form').submit() })"
                                                             class="dropdown-item text-danger d-flex align-items-center gap-2">
                                                         <i data-lucide="trash-2" class="icon-sm"></i>
                                                         {{ __('Supprimer') }}

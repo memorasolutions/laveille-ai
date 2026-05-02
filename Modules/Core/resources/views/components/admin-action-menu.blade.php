@@ -20,11 +20,11 @@
             @if(isset($action['divider']) && $action['divider'])
                 <div style="border-top: 1px solid #f3f4f6; margin: 4px 0;"></div>
             @elseif(isset($action['method']) && $action['method'] !== 'GET')
-                <form action="{{ $action['url'] }}" method="POST" style="margin: 0;">
+                <form action="{{ $action['url'] }}" method="POST" style="margin: 0;" x-data>
                     @csrf
                     @if($action['method'] !== 'POST') @method($action['method']) @endif
-                    <button type="submit"
-                            @if(isset($action['confirm'])) onclick="return confirm('{{ $action['confirm'] }}')" @endif
+                    <button type="{{ isset($action['confirm']) ? 'button' : 'submit' }}"
+                            @if(isset($action['confirm'])) @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js($action['confirm']), action: () => $el.closest('form').submit() })" @endif
                             style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 14px; border: none; background: none; cursor: pointer; font-size: 13px; color: {{ isset($action['danger']) && $action['danger'] ? '#DC2626' : '#374151' }}; text-align: left;"
                             onmouseover="this.style.background='{{ isset($action['danger']) && $action['danger'] ? '#FEF2F2' : '#F9FAFB' }}'"
                             onmouseout="this.style.background='transparent'">

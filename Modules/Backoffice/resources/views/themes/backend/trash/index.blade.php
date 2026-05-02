@@ -74,10 +74,10 @@
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
-                                            <form action="{{ route('admin.trash.force-delete-article', $article->id) }}" method="POST">
+                                            <form action="{{ route('admin.trash.force-delete-article', $article->id) }}" method="POST" x-data>
                                                 @csrf @method('DELETE')
-                                                <button type="submit"
-                                                        onclick="return confirm('{{ __('Supprimer définitivement ?') }}')"
+                                                <button type="button"
+                                                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer définitivement ?')), action: () => $el.closest('form').submit() })"
                                                         class="dropdown-item text-danger d-flex align-items-center gap-2">
                                                     <i data-lucide="trash-2" class="icon-sm"></i>
                                                     {{ __('Supprimer') }}
@@ -153,10 +153,10 @@
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
-                                            <form action="{{ route('admin.trash.force-delete-comment', $comment->id) }}" method="POST">
+                                            <form action="{{ route('admin.trash.force-delete-comment', $comment->id) }}" method="POST" x-data>
                                                 @csrf @method('DELETE')
-                                                <button type="submit"
-                                                        onclick="return confirm('{{ __('Supprimer définitivement ?') }}')"
+                                                <button type="button"
+                                                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer définitivement ?')), action: () => $el.closest('form').submit() })"
                                                         class="dropdown-item text-danger d-flex align-items-center gap-2">
                                                     <i data-lucide="trash-2" class="icon-sm"></i>
                                                     {{ __('Supprimer') }}

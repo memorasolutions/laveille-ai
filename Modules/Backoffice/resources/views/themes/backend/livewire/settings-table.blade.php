@@ -89,11 +89,11 @@
                                        class="d-flex align-items-center gap-2 px-3 py-2 small text-body text-decoration-none">
                                         <i data-lucide="pencil" class="text-success" style="width:14px;height:14px;"></i> {{ __('Modifier') }}
                                     </a>
-                                    <form action="{{ route('admin.settings.destroy', $setting) }}" method="POST">
+                                    <form action="{{ route('admin.settings.destroy', $setting) }}" method="POST" x-data>
                                         @csrf @method('DELETE')
-                                        <button type="submit"
+                                        <button type="button"
                                                 class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start"
-                                                onclick="return confirm('{{ __('Confirmer la suppression ?') }}')">
+                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Confirmer la suppression ?')), action: () => $el.closest('form').submit() })">
                                             <i data-lucide="trash-2" style="width:14px;height:14px;"></i> {{ __('Supprimer') }}
                                         </button>
                                     </form>

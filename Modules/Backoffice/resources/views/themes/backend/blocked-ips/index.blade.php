@@ -122,10 +122,10 @@
                                     <div x-show="open" x-transition
                                          class="position-absolute end-0 mt-1 bg-white rounded border shadow-sm z-3 py-1"
                                          style="min-width:160px;">
-                                        <form action="{{ route('admin.blocked-ips.destroy', $ip) }}" method="POST">
+                                        <form action="{{ route('admin.blocked-ips.destroy', $ip) }}" method="POST" x-data>
                                             @csrf @method('DELETE')
-                                            <button type="submit"
-                                                    onclick="return confirm('{{ __('Débloquer cette IP ?') }}')"
+                                            <button type="button"
+                                                    @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Débloquer cette IP ?')), action: () => $el.closest('form').submit() })"
                                                     class="dropdown-item d-flex align-items-center gap-2 text-success">
                                                 <i data-lucide="shield-check" style="width:16px;height:16px;"></i>
                                                 {{ __('Débloquer') }}

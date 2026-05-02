@@ -145,14 +145,14 @@
                             @if(!$isOwner)
                                 <form action="{{ route('admin.teams.members.remove', [$team, $member]) }}"
                                       method="POST"
-                                      class="d-inline">
+                                      class="d-inline" x-data>
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
+                                    <button type="button"
                                             class="btn btn-sm btn-outline-danger"
                                             aria-label="{{ __('Retirer') }} {{ $member->name }} {{ __('de l\'équipe') }}"
                                             title="{{ __('Retirer ce membre') }}"
-                                            onclick="return confirm('{{ __('Retirer') }} {{ addslashes($member->name) }} {{ __('de l\'équipe ?') }}')">
+                                            @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Retirer') . ' ' . $member->name . ' ' . __('de l\'équipe ?')), action: () => $el.closest('form').submit() })">
                                         <i data-lucide="user-minus"></i>
                                     </button>
                                 </form>
@@ -239,14 +239,14 @@
                         <td class="text-end">
                             <form action="{{ route('admin.teams.invitations.cancel', [$team, $invitation]) }}"
                                   method="POST"
-                                  class="d-inline">
+                                  class="d-inline" x-data>
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit"
+                                <button type="button"
                                         class="btn btn-sm btn-outline-danger"
                                         aria-label="{{ __('Annuler l\'invitation pour') }} {{ $invitation->email }}"
                                         title="{{ __('Annuler l\'invitation') }}"
-                                        onclick="return confirm('{{ __('Annuler l\'invitation envoyée à') }} {{ addslashes($invitation->email) }} ?')">
+                                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Annuler l\'invitation envoyée à') . ' ' . $invitation->email . ' ?'), action: () => $el.closest('form').submit() })">
                                     <i data-lucide="x"></i>
                                 </button>
                             </form>

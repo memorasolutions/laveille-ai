@@ -78,7 +78,7 @@
                     type: 'text', is_required: 0, sort_order: this.fields.length + 1, options: ''
                 });
             },
-            removeField(i) { if(confirm('Supprimer ce champ ?')) this.fields.splice(i, 1); }
+            removeField(i) { window.dispatchEvent(new CustomEvent('confirm-action', { detail: { title: @json(__('Confirmer')), message: @json(__('Supprimer ce champ ?')), action: () => this.fields.splice(i, 1) } })); }
         }">
             <div class="card">
                 <div class="card-body">

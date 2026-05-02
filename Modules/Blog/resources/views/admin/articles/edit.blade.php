@@ -196,14 +196,14 @@ window.generateYouTubeSummary = function() {
     .then(function(data) {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="sparkles"></i> Générer le résumé IA';
-        if (data.error) { alert(data.error); return; }
+        if (data.error) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: data.error, variant: 'danger', duration: 5000 } })); return; }
         document.getElementById('yt-summary-result').classList.remove('d-none');
         document.getElementById('yt-summary-content').innerHTML = data.summary;
     })
     .catch(function() {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="sparkles"></i> Générer le résumé IA';
-        alert('Erreur lors de la génération du résumé.');
+        window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur lors de la génération du résumé.', variant: 'danger', duration: 5000 } }));
     });
 };
 

@@ -182,10 +182,14 @@ function toggleItemBody(btn) {
 }
 
 function removeItem(btn) {
-    if (confirm('Supprimer cet élément ?')) {
-        btn.closest('.menu-item').remove();
-        checkEmpty();
-    }
+    window.dispatchEvent(new CustomEvent('confirm-action', { detail: {
+        title: @json(__('Confirmer')),
+        message: @json(__('Supprimer cet élément ?')),
+        action: () => {
+            btn.closest('.menu-item').remove();
+            checkEmpty();
+        }
+    }}));
 }
 
 function checkEmpty() {
@@ -257,7 +261,7 @@ function appendItem(data) {
 function addCustomItem() {
     const title = document.getElementById('addTitle').value.trim();
     const url = document.getElementById('addUrl').value.trim();
-    if (!title) { alert('Le titre est requis.'); return; }
+    if (!title) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Le titre est requis.')), variant: 'warning', duration: 4000 } })); return; }
     appendItem({ title, url: url || '#', type: 'custom', target: '_self', enabled: true });
     document.getElementById('addTitle').value = '';
     document.getElementById('addUrl').value = '#';

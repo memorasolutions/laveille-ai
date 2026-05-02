@@ -245,20 +245,31 @@
 @push('custom-scripts')
 <script>
 function healthFix(check, btn) {
-    if (!confirm('{{ __("Lancer la correction automatique ?") }}')) return;
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> {{ __("Correction...") }}';
-    fetch('{{ route("admin.health.fix") }}', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        body: JSON.stringify({ check: check })
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) { location.reload(); }
-        else { alert(data.message); btn.disabled = false; btn.innerHTML = '<i data-lucide="wrench" class="icon-sm"></i> {{ __("Corriger") }}'; lucide.createIcons(); }
-    })
-    .catch(() => { alert('{{ __("Erreur réseau") }}'); btn.disabled = false; });
+    window.dispatchEvent(new CustomEvent('confirm-action', { detail: {
+        title: @json(__('Confirmer')),
+        message: @json(__('Lancer la correction automatique ?')),
+        action: () => {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> {{ __("Correction...") }}';
+            fetch('{{ route("admin.health.fix") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ check: check })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) { location.reload(); }
+                else {
+                    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: data.message, variant: 'danger', duration: 5000 } }));
+                    btn.disabled = false; btn.innerHTML = '<i data-lucide="wrench" class="icon-sm"></i> {{ __("Corriger") }}'; lucide.createIcons();
+                }
+            })
+            .catch(() => {
+                window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Erreur réseau')), variant: 'danger', duration: 5000 } }));
+                btn.disabled = false;
+            });
+        }
+    }}));
 }
 function healthExplain(check) {
     var modal = new bootstrap.Modal(document.getElementById('healthExplainModal'));

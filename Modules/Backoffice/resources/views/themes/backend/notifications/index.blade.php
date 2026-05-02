@@ -113,10 +113,10 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                         <li>
-                                            <form action="{{ route('admin.notifications.destroy', $notification->id) }}" method="POST">
+                                            <form action="{{ route('admin.notifications.destroy', $notification->id) }}" method="POST" x-data>
                                                 @csrf @method('DELETE')
-                                                <button type="submit"
-                                                        onclick="return confirm('{{ __('Supprimer cette notification ?') }}')"
+                                                <button type="button"
+                                                        @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer cette notification ?')), action: () => $el.closest('form').submit() })"
                                                         class="dropdown-item text-danger d-flex align-items-center gap-2">
                                                     <i data-lucide="trash-2"></i>
                                                     {{ __('Supprimer') }}

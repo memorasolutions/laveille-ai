@@ -125,11 +125,11 @@
                                     <a href="{{ route('admin.ai.knowledge.edit', $document) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
                                         <i data-lucide="edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.ai.knowledge.destroy', $document) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('admin.ai.knowledge.destroy', $document) }}" method="POST" class="d-inline" x-data>
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}"
-                                                onclick="if(confirm('{{ __('Supprimer ce document de la base de connaissances ?') }}')) this.closest('form').submit()">
+                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer ce document de la base de connaissances ?')), action: () => $el.closest('form').submit() })">
                                             <i data-lucide="trash-2"></i>
                                         </button>
                                     </form>

@@ -142,21 +142,21 @@
                             </td>
                             <td class="align-middle text-end">
                                 <div class="d-flex gap-1 justify-content-end">
-                                    <form action="{{ route('admin.ai.urls.scrape', $url) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('admin.ai.urls.scrape', $url) }}" method="POST" class="d-inline" x-data>
                                         @csrf
                                         <button type="button" class="btn btn-sm btn-outline-secondary" title="{{ __('Lancer le scraping') }}"
-                                                onclick="if(confirm('{{ __('Lancer le scraping de cette URL ?') }}')) this.closest('form').submit()">
+                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Lancer le scraping de cette URL ?')), action: () => $el.closest('form').submit() })">
                                             <i data-lucide="refresh-cw"></i>
                                         </button>
                                     </form>
                                     <a href="{{ route('admin.ai.urls.edit', $url) }}" class="btn btn-sm btn-outline-primary" title="{{ __('Modifier') }}">
                                         <i data-lucide="edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.ai.urls.destroy', $url) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('admin.ai.urls.destroy', $url) }}" method="POST" class="d-inline" x-data>
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="btn btn-sm btn-outline-danger" title="{{ __('Supprimer') }}"
-                                                onclick="if(confirm('{{ __('Supprimer cette source URL et tous ses documents indexés ?') }}')) this.closest('form').submit()">
+                                                @click="$dispatch('confirm-action', { title: @js(__('Confirmer')), message: @js(__('Supprimer cette source URL et tous ses documents indexés ?')), action: () => $el.closest('form').submit() })">
                                             <i data-lucide="trash-2"></i>
                                         </button>
                                     </form>
