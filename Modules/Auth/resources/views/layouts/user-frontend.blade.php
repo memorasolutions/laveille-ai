@@ -20,7 +20,8 @@
             </button>
         </div>
 
-        {{-- Sidebar desktop (toujours visible) --}}
+        @auth
+        {{-- Sidebar desktop (toujours visible si authentifie) --}}
         <div class="col-md-3 user-space-desktop-only">
             @include('auth::layouts.partials.user-sidebar')
         </div>
@@ -29,6 +30,7 @@
         <div class="col-xs-12 user-space-mobile-only" x-show="sidebarOpen" x-transition x-cloak>
             @include('auth::layouts.partials.user-sidebar')
         </div>
+        @endauth
 
         {{-- Contenu principal --}}
         <div class="col-md-9">
