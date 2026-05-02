@@ -142,13 +142,23 @@ final class CrosswordGeneratorService
 
     private function normalizeAnswer(string $answer): string
     {
-        return mb_strtoupper(trim($answer));
+        // Trim, uppercase, remove accents, remove spaces, keep only A-Z.
+        $upper = mb_strtoupper(trim($answer));
+        $noAccents = strtr($upper, [
+            'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A',
+            'Ç' => 'C',
+            'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E',
+            'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I',
+            'Ñ' => 'N',
+            'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O',
+            'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U',
+            'Ý' => 'Y', 'Ÿ' => 'Y',
+            'Œ' => 'OE', 'Æ' => 'AE',
+        ]);
+
+        return preg_replace('/[^A-Z]/', '', $noAccents);
     }
 
-    /**
-     * Split UTF-8 string en array de "lettres" (1 char visible = 1 entrée).
-     * Gère accents é è à ê â ç ï ô ù û correctement.
-     */
     private function splitLetters(string $word): array
     {
         return mb_str_split($word);
@@ -189,8 +199,10 @@ final class CrosswordGeneratorService
             if ($answerLen > self::MAX_WORD_LENGTH) {
                 throw new InvalidArgumentException("Paire #{$position} : la réponse ne peut dépasser ".self::MAX_WORD_LENGTH.' caractères.');
             }
-            if (! preg_match('/^[a-zA-ZàâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ]+$/u', $answer)) {
-                throw new InvalidArgumentException("Paire #{$position} : la réponse ne peut contenir que des lettres (accents permis).");
+            // Verifier qu'apres normalisation (uppercase + sans accent + sans espace) il reste des lettres A-Z.
+            $normalized = $this->normalizeAnswer($answer);
+            if ($normalized === '' || ! preg_match('/^[A-Z]+$/', $normalized)) {
+                throw new InvalidArgumentException("Paire #{$position} : la réponse doit contenir uniquement des lettres (accents et espaces sont retirés automatiquement).");
             }
         }
     }

@@ -362,7 +362,7 @@ document.addEventListener('alpine:init', () => {
 
     setCell(row, col, value) {
       const key = row + '-' + col;
-      const v = (value || '').toUpperCase().replace(/[^A-ZÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ]/gu, '').slice(0, 1);
+      const v = (value || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z]/g, '').slice(0, 1);
       this.userInput = { ...this.userInput, [key]: v };
       this.debounceSave();
       this.$nextTick(() => this.checkCompletion());
