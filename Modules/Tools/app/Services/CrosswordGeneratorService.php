@@ -40,17 +40,29 @@ final class CrosswordGeneratorService
 
         $first = $normalizedPairs[0];
         $center = (int) (self::MAX_GRID_SIZE / 2);
-        $startCol = $center - (int) (count($first['letters']) / 2);
+        $rowOffset = mt_rand(-3, 3);
+        $colOffset = mt_rand(-3, 3);
+        $startRow = max(2, min(self::MAX_GRID_SIZE - 3, $center + $rowOffset));
+        $startCol = $center - (int) (count($first['letters']) / 2) + $colOffset;
+        $startCol = max(2, min(self::MAX_GRID_SIZE - count($first['letters']) - 2, $startCol));
+        $firstOrientation = mt_rand(0, 1) === 1 ? 'horizontal' : 'vertical';
 
-        if ($startCol < 0 || $startCol + count($first['letters']) > self::MAX_GRID_SIZE) {
+        if ($firstOrientation === 'vertical') {
+            $startRow = max(2, min(self::MAX_GRID_SIZE - count($first['letters']) - 2, $startRow));
+            $startCol = max(2, min(self::MAX_GRID_SIZE - 3, $startCol));
+        }
+
+        if ($startCol < 0 || $startRow < 0
+            || ($firstOrientation === 'horizontal' && $startCol + count($first['letters']) > self::MAX_GRID_SIZE)
+            || ($firstOrientation === 'vertical' && $startRow + count($first['letters']) > self::MAX_GRID_SIZE)) {
             throw new RuntimeException('Premier mot trop long pour la grille.');
         }
 
-        $this->placeWord($grid, $first['letters'], $center, $startCol, 'horizontal');
+        $this->placeWord($grid, $first['letters'], $startRow, $startCol, $firstOrientation);
         $placedWords[] = [
             'number' => 0,
-            'orientation' => 'horizontal',
-            'row' => $center,
+            'orientation' => $firstOrientation,
+            'row' => $startRow,
             'col' => $startCol,
             'answer' => $first['answer'],
             'clue' => $first['clue'],
@@ -68,7 +80,8 @@ final class CrosswordGeneratorService
 
             shuffle($candidates);
             usort($candidates, fn ($a, $b) => $b['score'] <=> $a['score']);
-            $best = $candidates[0];
+            $topPool = array_slice($candidates, 0, min(3, count($candidates)));
+            $best = $topPool[mt_rand(0, count($topPool) - 1)];
 
             $this->placeWord($grid, $pair['letters'], $best['row'], $best['col'], $best['orientation']);
             $placedWords[] = [
