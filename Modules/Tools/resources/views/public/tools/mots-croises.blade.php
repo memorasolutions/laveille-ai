@@ -218,33 +218,78 @@
                     <span class="badge" style="background:#053d4a;color:#fff" x-text="words.length + ' / ' + (words.length + unplaced.length) + ' {{ __('mots placés') }}'"></span>
                     <span x-show="gridStats" x-cloak class="badge" style="background:#e0f2f1;color:#053d4a;border:1px solid #053d4a" :title="'{{ __('Densité de la grille (cases utilisées vs surface totale)') }}'" x-text="gridStats ? '{{ __('Densité') }} ' + Math.round(gridStats.compactness * 100) + ' %' : ''"></span>
                   </h2>
-                  <div class="d-flex align-items-center flex-wrap gap-2 no-print">
-                    <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px" @click="regenerate()" :disabled="regenerating || generating" :aria-label="'{{ __('Régénérer une autre disposition de la grille') }}'">
+                  <div class="d-flex align-items-center flex-wrap gap-2 no-print" x-data="{ menuOpen: false }">
+                    <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px" @click="regenerate()" :disabled="regenerating || generating">
                       <template x-if="!regenerating">
-                        <span class="d-inline-flex align-items-center gap-2">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-                          <span>{{ __('Autre disposition') }}</span>
-                        </span>
+                        <span class="d-inline-flex align-items-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>{{ __('Autre disposition') }}</span></span>
                       </template>
                       <template x-if="regenerating">
                         <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Recalcul...') }}</span></span>
                       </template>
                     </button>
-                    <button type="button"
-                            class="ct-btn d-inline-flex align-items-center gap-2"
-                            style="min-height:44px"
-                            :class="showSolutions ? 'ct-btn-primary' : 'ct-btn-outline'"
-                            @click="showSolutions = !showSolutions"
-                            :aria-pressed="showSolutions"
-                            :aria-label="showSolutions ? '{{ __('Masquer les solutions') }}' : '{{ __('Afficher les solutions') }}'">
-                      <template x-if="!showSolutions">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      </template>
-                      <template x-if="showSolutions">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                      </template>
-                      <span x-text="showSolutions ? '{{ __('Masquer solutions') }}' : '{{ __('Afficher solutions') }}'"></span>
-                    </button>
+                    <div class="position-relative">
+                      <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px" @click="menuOpen = !menuOpen" :aria-expanded="menuOpen" aria-haspopup="menu" aria-label="{{ __('Plus d\'options : PDF, CSV, solutions') }}">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span>{{ __('Plus d\'options') }}</span>
+                      </button>
+                      <div x-show="menuOpen" x-cloak @click.outside="menuOpen=false" @keydown.escape.window="menuOpen=false" role="menu"
+                           style="position:absolute;top:calc(100% + 6px);right:0;z-index:200;background:#fff;border:1px solid #053d4a;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:280px;padding:.5rem;display:flex;flex-direction:column;gap:.15rem">
+                        <button type="button" role="menuitem" class="cw-menu-item" @click="downloadPdfBlank(); menuOpen=false" :disabled="!grid">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                          <span><strong>{{ __('PDF vierge') }}</strong><span class="d-block small" style="color:#475569">{{ __('Pour impression élève') }}</span></span>
+                        </button>
+                        <button type="button" role="menuitem" class="cw-menu-item" @click="downloadPdfSolution(); menuOpen=false" :disabled="!grid">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="12" cy="15" r="2"/></svg>
+                          <span><strong>{{ __('PDF corrigé') }}</strong><span class="d-block small" style="color:#475569">{{ __('Avec lettres révélées (prof)') }}</span></span>
+                        </button>
+                        <hr class="my-1" style="border-color:#e2e8f0">
+                        <button type="button" role="menuitem" class="cw-menu-item" @click="exportCsv(); menuOpen=false" :disabled="!pairs.some(p => p.clue && p.answer)">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          <span><strong>{{ __('Exporter CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Sauvegarder vos paires') }}</span></span>
+                        </button>
+                        <button type="button" role="menuitem" class="cw-menu-item" @click="openImportCsv(); menuOpen=false">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                          <span><strong>{{ __('Importer CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Remplace les paires actuelles') }}</span></span>
+                        </button>
+                        <a role="menuitem" class="cw-menu-item" href="{{ route('tools.crossword.csv-template') }}" download @click="menuOpen=false" style="text-decoration:none;color:inherit">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+                          <span><strong>{{ __('Modèle CSV') }}</strong><span class="d-block small" style="color:#475569">{{ __('Démo avec en-têtes corrects') }}</span></span>
+                        </a>
+                        <hr class="my-1" style="border-color:#e2e8f0">
+                        <button type="button" role="menuitem" class="cw-menu-item" @click="showSolutions = !showSolutions; menuOpen=false">
+                          <template x-if="!showSolutions"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></template>
+                          <template x-if="showSolutions"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></template>
+                          <span><strong x-text="showSolutions ? '{{ __('Masquer solutions') }}' : '{{ __('Afficher solutions') }}'"></strong><span class="d-block small" style="color:#475569">{{ __('Bascule lettres dans la grille') }}</span></span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {{-- Modal Import CSV --}}
+                <div x-show="csvImportOpen" x-cloak @click.self="csvImportOpen=false" @keydown.escape.window="csvImportOpen=false" role="dialog" aria-modal="true" aria-labelledby="csv-import-title" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1050;display:flex;align-items:center;justify-content:center;padding:1rem">
+                  <div style="background:#fff;border-radius:12px;padding:1.5rem;max-width:600px;width:100%;max-height:90vh;overflow:auto">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h2 id="csv-import-title" class="h5 mb-0" style="color:#053d4a">📤 {{ __('Importer un fichier CSV') }}</h2>
+                      <button type="button" class="btn btn-link p-0" @click="csvImportOpen=false" aria-label="{{ __('Fermer') }}" style="font-size:1.5rem;color:#475569;text-decoration:none">&times;</button>
+                    </div>
+                    <p class="small mb-3" style="color:#475569">{{ __('Format attendu : 2 colonnes Indice;Mot (séparateur ; ou ,). En-tête optionnelle. Max 50 lignes. Téléchargez le') }} <a href="{{ route('tools.crossword.csv-template') }}" download style="color:#053d4a;font-weight:600">{{ __('modèle CSV') }}</a> {{ __('si besoin.') }}</p>
+                    <div class="mb-3">
+                      <label class="form-label" style="font-weight:600;color:#1A1D23">{{ __('Coller le contenu CSV') }}</label>
+                      <textarea x-model="csvImportText" rows="8" class="form-control" placeholder="Indice;Mot&#10;Capitale du Quebec;QUEBEC&#10;Framework PHP majeur;LARAVEL" style="font-family:monospace;font-size:.85rem"></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label" style="font-weight:600;color:#1A1D23">{{ __('OU choisir un fichier') }}</label>
+                      <input type="file" accept=".csv,text/csv" @change="csvImportFile = $event.target.files[0]" class="form-control">
+                    </div>
+                    <div x-show="csvImportError" x-cloak class="alert alert-danger small mb-3" role="alert" x-text="csvImportError"></div>
+                    <div class="d-flex gap-2 justify-content-end">
+                      <button type="button" class="ct-btn ct-btn-outline" @click="csvImportOpen=false">{{ __('Annuler') }}</button>
+                      <button type="button" class="ct-btn ct-btn-primary" @click="doImportCsv()" :disabled="csvImporting || (!csvImportText && !csvImportFile)">
+                        <span x-show="!csvImporting">{{ __('Importer et remplacer') }}</span>
+                        <span x-show="csvImporting" x-cloak><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> {{ __('Import...') }}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -447,6 +492,26 @@
     .cw-guest-actions { flex-direction: column; align-items: stretch; }
     .cw-guest-cta { justify-content: center; }
   }
+  .cw-menu-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    padding: .6rem .75rem;
+    background: none;
+    border: none;
+    text-align: left;
+    color: #1A1D23;
+    border-radius: 6px;
+    cursor: pointer;
+    min-height: 44px;
+    width: 100%;
+    font-size: .92rem;
+  }
+  .cw-menu-item svg { flex-shrink: 0; margin-top: 2px; color: #053d4a; }
+  .cw-menu-item:hover, .cw-menu-item:focus-visible { background: #e0f2f1; outline: 2px solid #053d4a; outline-offset: -2px; }
+  .cw-menu-item:disabled { opacity: .5; cursor: not-allowed; }
+  .cw-menu-item:disabled:hover { background: none; outline: none; }
+  .cw-menu-item strong { font-weight: 700; color: #053d4a; }
   .crossword-grid {
     table-layout: fixed;
     border-collapse: collapse;
@@ -657,6 +722,11 @@ function crosswordGenerator() {
     unplaced: [],
     gridStats: null,
     showSolutions: false,
+    csvImportOpen: false,
+    csvImportText: '',
+    csvImportFile: null,
+    csvImporting: false,
+    csvImportError: '',
     generating: false,
     regenerating: false,
     saving: false,

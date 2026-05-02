@@ -23,6 +23,20 @@ Route::middleware('web')->group(function () {
     Route::post('/outils/mots-croises/ai-suggest-pairs', [PublicCrosswordController::class, 'aiSuggestPairs'])
         ->middleware('throttle:10,60')
         ->name('tools.crossword.ai-suggest-pairs');
+    Route::post('/outils/mots-croises/pdf-blank', [PublicCrosswordController::class, 'pdfBlank'])
+        ->middleware('throttle:30,60')
+        ->name('tools.crossword.pdf-blank');
+    Route::post('/outils/mots-croises/pdf-solution', [PublicCrosswordController::class, 'pdfSolution'])
+        ->middleware('throttle:30,60')
+        ->name('tools.crossword.pdf-solution');
+    Route::post('/outils/mots-croises/csv-export', [PublicCrosswordController::class, 'csvExport'])
+        ->middleware('throttle:30,60')
+        ->name('tools.crossword.csv-export');
+    Route::post('/outils/mots-croises/csv-import', [PublicCrosswordController::class, 'csvImport'])
+        ->middleware('throttle:30,60')
+        ->name('tools.crossword.csv-import');
+    Route::get('/outils/mots-croises/csv-template', [PublicCrosswordController::class, 'csvTemplate'])
+        ->name('tools.crossword.csv-template');
     Route::get('/jeumc/{publicId}', [PublicCrosswordController::class, 'play'])->name('tools.crossword.play');
     // Backward compatibility : ancien path /jeu/{publicId} -> redirect 301 vers /jeumc/ (S79+ libère /jeu/ pour outils interactifs futurs)
     Route::get('/jeu/{publicId}', fn (string $publicId) => redirect('/jeumc/'.$publicId, 301));
