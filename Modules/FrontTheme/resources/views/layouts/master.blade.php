@@ -264,6 +264,7 @@
         @include('fronttheme::partials.footer')
 
         @include('fronttheme::partials.newsletter-scroll-trigger')
+        @include('fronttheme::partials.newsletter-modal')
         @include('fronttheme::partials.auth-modal')
         @auth
             @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::find('Core')?->isEnabled())

@@ -14,7 +14,7 @@
             <span class="sticky-text-short" style="color: #18181B; font-size: 13px; font-weight: 400; display: none;">{{ __('Veille IA sans buzz') }}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
-            <a href="{{ route('home') }}#newsletter-hero" style="color: #0B7285; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; transition: color 150ms ease;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#0B7285'">{{ __('Recevoir hebdo →') }}</a>
+            <button type="button" data-bs-toggle="modal" data-bs-target="#newsletterModal" aria-label="{{ __('Ouvrir le formulaire d\'inscription à l\'infolettre hebdomadaire') }}" style="color: #0B7285; background: none; border: none; padding: 0; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; transition: color 150ms ease;" onmouseover="this.style.color='#F97316'" onmouseout="this.style.color='#0B7285'">{{ __('Recevoir hebdo →') }}</button>
             <button type="button" @click="dismissed = true; localStorage.setItem('newsletter_sticky_dismissed_at', Date.now().toString());" aria-label="{{ __('Fermer le bandeau infolettre') }}" style="background: none; border: none; color: #6B7280; font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; transition: color 150ms ease;" onmouseover="this.style.color='#18181B'" onmouseout="this.style.color='#6B7280'">&times;</button>
         </div>
     </div>
