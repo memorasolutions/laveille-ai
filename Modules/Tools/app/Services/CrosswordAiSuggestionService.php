@@ -70,33 +70,64 @@ final class CrosswordAiSuggestionService
     private function parsePairs(string $response): array
     {
         if (! preg_match('/\{.*\}/s', $response, $matches)) {
+            Log::error('CrosswordAi parsePairs: aucun JSON dans réponse', ['response_preview' => mb_substr($response, 0, 200)]);
             return [];
         }
         $decoded = json_decode($matches[0], true);
         if (! is_array($decoded) || ! isset($decoded['pairs']) || ! is_array($decoded['pairs'])) {
+            Log::error('CrosswordAi parsePairs: JSON invalide ou clef pairs manquante', [
+                'json_error' => json_last_error_msg(),
+                'preview' => mb_substr($matches[0], 0, 200),
+            ]);
             return [];
         }
 
         $valid = [];
+        $rejected = [];
         foreach ($decoded['pairs'] as $pair) {
             if (! is_array($pair) || ! isset($pair['clue'], $pair['answer'])) {
+                $rejected[] = 'no_clue_or_answer_key';
                 continue;
             }
             $clue = trim((string) $pair['clue']);
-            $answer = mb_strtoupper(trim((string) $pair['answer']));
+            // Normalisation answer : uppercase, retirer accents espaces parasites
+            $rawAnswer = trim((string) $pair['answer']);
+            $answer = mb_strtoupper($rawAnswer);
+            // Retirer espaces internes (gemma peut renvoyer "NEW YORK")
+            $answer = preg_replace('/\s+/u', '', $answer);
 
-            if ($clue === '' || mb_strlen($clue) > 250) {
+            if ($clue === '') {
+                $rejected[] = 'empty_clue';
+                continue;
+            }
+            if (mb_strlen($clue) > 250) {
+                $rejected[] = 'clue_too_long';
                 continue;
             }
             $answerLen = mb_strlen($answer);
-            if ($answerLen < 2 || $answerLen > 30) {
+            if ($answerLen < 2) {
+                $rejected[] = "answer_too_short:$rawAnswer";
                 continue;
             }
-            if (! preg_match('/^[A-ZÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ]+$/u', $answer)) {
+            if ($answerLen > 30) {
+                $rejected[] = "answer_too_long:$rawAnswer";
+                continue;
+            }
+            // Regex large : toute lettre unicode majuscule (\p{Lu}) ou tiret-cadrat exclu
+            if (! preg_match('/^\p{Lu}+$/u', $answer)) {
+                $rejected[] = "answer_invalid_chars:$answer";
                 continue;
             }
 
             $valid[] = ['clue' => $clue, 'answer' => $answer];
+        }
+
+        if (! empty($rejected)) {
+            Log::error('CrosswordAi parsePairs: rejets', [
+                'valid_count' => count($valid),
+                'rejected_count' => count($rejected),
+                'rejected_reasons' => array_slice($rejected, 0, 10),
+            ]);
         }
 
         return $valid;
