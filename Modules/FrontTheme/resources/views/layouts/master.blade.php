@@ -292,8 +292,10 @@
 
     @if(session('newsletter_success') || session('newsletter_confirmed') || session('newsletter_unsubscribed'))
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
+        // Dispatch après Alpine init (event alpine:initialized) pour s'assurer que
+        // <x-core::alert-toast> a bien attaché son listener via x-init
+        (function() {
+            const dispatchToasts = function() {
                 @if(session('newsletter_success'))
                     window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_success')), variant: 'success', duration: 6000 } }));
                 @endif
@@ -303,8 +305,17 @@
                 @if(session('newsletter_unsubscribed'))
                     window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(session('newsletter_unsubscribed')), variant: 'info', duration: 6000 } }));
                 @endif
-            }, 400);
-        });
+            };
+            if (window.Alpine) {
+                // Alpine déjà chargé : dispatch après court délai pour x-init
+                setTimeout(dispatchToasts, 200);
+            } else {
+                // Alpine pas encore : attendre alpine:initialized
+                document.addEventListener('alpine:initialized', function() {
+                    setTimeout(dispatchToasts, 100);
+                });
+            }
+        })();
     </script>
     @endif
     <script src="/js/infinite-scroll.js?v={{ filemtime(public_path('js/infinite-scroll.js')) }}" defer></script>
