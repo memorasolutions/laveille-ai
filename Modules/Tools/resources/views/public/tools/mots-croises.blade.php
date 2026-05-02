@@ -632,6 +632,13 @@ function crosswordGenerator() {
     },
 
     regenerate() {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'crossword_reroll', {
+          event_category: 'tools',
+          event_label: 'mots-croises',
+          words_count: this.pairs.filter(p => p.clue.trim() && p.answer.trim()).length
+        });
+      }
       this.generate(null, true);
     },
 
