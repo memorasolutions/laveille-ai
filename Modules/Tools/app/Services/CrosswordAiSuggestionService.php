@@ -21,11 +21,14 @@ final class CrosswordAiSuggestionService
     /**
      * Modèles gratuits ordonnés (priorité décroissante).
      * Tous garantis $0 par requête.
+     * NB : gemma-3 ne supporte PAS system prompt -> on merge tout en user.
      */
     private array $freeModels = [
-        'google/gemma-3-27b-it:free',
         'meta-llama/llama-3.3-70b-instruct:free',
-        'mistralai/mistral-small-3.2-24b-instruct:free',
+        'qwen/qwen-2.5-72b-instruct:free',
+        'google/gemma-3-27b-it:free',
+        'microsoft/phi-4:free',
+        'nousresearch/hermes-3-llama-3.1-405b:free',
     ];
 
     public function generatePairsForTheme(string $theme, int $count = 10): array
@@ -48,10 +51,13 @@ final class CrosswordAiSuggestionService
             ."Exemple pour thème \"Capitales du monde\" : "
             .'{"pairs":[{"clue":"Capitale de la France","answer":"PARIS"},{"clue":"Capitale du Japon","answer":"TOKYO"}]}';
 
+        // Merge system+user en 1 user message (gemma-3 et certains modèles
+        // free ne supportent pas le rôle system).
+        $mergedPrompt = "Tu réponds UNIQUEMENT avec du JSON valide, sans backticks markdown ni texte d'introduction.\n\n".$prompt;
+
         foreach ($this->freeModels as $model) {
             $response = $this->call($model, [
-                ['role' => 'system', 'content' => 'Tu réponds UNIQUEMENT avec du JSON valide, sans backticks markdown ni texte d\'introduction.'],
-                ['role' => 'user', 'content' => $prompt],
+                ['role' => 'user', 'content' => $mergedPrompt],
             ]);
 
             if ($response === '') {
