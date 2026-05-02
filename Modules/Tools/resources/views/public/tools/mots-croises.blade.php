@@ -56,59 +56,19 @@
               </div>
             @endauth
 
-            {{-- Card "Démarrage rapide IA" - workflow 3 étapes --}}
-            <section class="ai-quickstart mb-4" aria-labelledby="ai-quickstart-title">
-              <header class="ai-quickstart-header">
-                <h2 id="ai-quickstart-title" class="ai-quickstart-title">
-                  <svg class="ai-quickstart-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/><path d="m11 4 1 4 4 1-4 1-1 4-1-4-4-1 4-1z"/></svg>
-                  {{ __('Démarrage rapide avec l\'IA') }}
-                  <span class="ai-quickstart-badge">{{ __('Gratuit') }}</span>
-                </h2>
-                <p class="ai-quickstart-subtitle">{{ __('Générez 10 paires automatiquement en quelques secondes, puis modifiez-les.') }}</p>
-              </header>
-
-              <ol class="ai-quickstart-steps">
-                <li class="ai-quickstart-step">
-                  <span class="ai-quickstart-step-num" aria-hidden="true">1</span>
-                  <div class="ai-quickstart-step-body">
-                    <strong>{{ __('Décrivez votre thème') }}</strong>
-                    <input type="text" id="theme" class="form-control mt-2" x-model="metadata.theme" @keydown.enter.prevent="suggestPairs()" placeholder="{{ __('Ex : Marketing B2B, Histoire du Québec, Cuisine italienne, IA générative...') }}" aria-label="{{ __('Thème de la grille') }}" maxlength="100" :disabled="suggestingPairs">
-                  </div>
-                </li>
-                <li class="ai-quickstart-step">
-                  <span class="ai-quickstart-step-num" aria-hidden="true">2</span>
-                  <div class="ai-quickstart-step-body">
-                    <strong>{{ __('Générez 10 paires') }}</strong>
-                    <p class="ai-quickstart-step-desc">{{ __('Notre IA gratuite (modèle ouvert) propose 10 paires indice/réponse adaptées à votre thème.') }}</p>
-                    <button type="button" class="ai-quickstart-cta d-inline-flex align-items-center gap-2" @click="suggestPairs()" :disabled="suggestingPairs || !metadata.theme.trim()" aria-label="{{ __('Pré-remplir 10 paires avec IA gratuite') }}">
-                      <template x-if="!suggestingPairs">
-                        <span class="d-inline-flex align-items-center gap-2">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/><path d="m11 4 1 4 4 1-4 1-1 4-1-4-4-1 4-1z"/></svg>
-                          <span>{{ __('Générer 10 paires avec l\'IA') }}</span>
-                        </span>
-                      </template>
-                      <template x-if="suggestingPairs">
-                        <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Génération en cours, 5 à 15 secondes...') }}</span></span>
-                      </template>
-                    </button>
-                    <small class="ai-quickstart-warning d-block mt-2">⚠️ {{ __('Les paires actuelles seront remplacées par celles générées.') }}</small>
-                  </div>
-                </li>
-                <li class="ai-quickstart-step">
-                  <span class="ai-quickstart-step-num" aria-hidden="true">3</span>
-                  <div class="ai-quickstart-step-body">
-                    <strong>{{ __('Ajustez les paires obtenues') }}</strong>
-                    <p class="ai-quickstart-step-desc">{{ __('Modifiez les indices, supprimez ou ajoutez des paires selon votre besoin avant de générer la grille.') }}</p>
-                  </div>
-                </li>
-              </ol>
-
-              <div x-show="suggestError" x-cloak class="ai-quickstart-error" role="alert">
-                <strong>{{ __('Aïe') }} :</strong> <span x-text="suggestError"></span>
-              </div>
+            {{-- Bloc explicatif "Comment ça fonctionne" --}}
+            <section class="cw-howto mb-4" aria-labelledby="cw-howto-title">
+              <h2 id="cw-howto-title" class="h5 mb-2 d-flex align-items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                {{ __('Comment ça fonctionne') }}
+              </h2>
+              <p class="mb-2">{{ __('Pour chaque mot caché à placer dans la grille, écrivez :') }}</p>
+              <ul class="mb-2">
+                <li><strong>{{ __('Le mot') }}</strong> {{ __('(la réponse cachée, ex : LARAVEL)') }}</li>
+                <li><strong>{{ __('Son indice') }}</strong> {{ __('(la définition que verront les joueurs, ex : Framework PHP majeur)') }}</li>
+              </ul>
+              <p class="mb-0 small" style="color:#1A1D23"><strong>{{ __('Astuce') }} :</strong> {{ __('plus vos mots partagent de lettres communes, mieux ils s\'entrecroiseront dans la grille.') }}</p>
             </section>
-
-            <p class="text-muted small mb-4">{{ __('Vous préférez créer votre grille manuellement ? Ignorez la section ci-dessus et remplissez directement les paires plus bas.') }}</p>
 
             {{-- Métadonnées --}}
             <div class="row g-2 mb-4">
@@ -132,29 +92,29 @@
               </div>
             </div>
 
-            {{-- Paires --}}
+            {{-- Mots à placer --}}
             <div class="mb-4">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <h2 class="h5 mb-0">{{ __('Paires indice/réponse') }}</h2>
-                <span class="badge bg-secondary" x-text="pairs.length + ' ' + (pairs.length === 1 ? '{{ __('paire') }}' : '{{ __('paires') }}')"></span>
+                <h2 class="h5 mb-0">{{ __('Mots à placer') }}</h2>
+                <span class="badge bg-secondary" x-text="pairs.length + ' ' + (pairs.length === 1 ? '{{ __('mot') }}' : '{{ __('mots') }}')"></span>
               </div>
-              <p class="text-muted small mb-3 d-flex align-items-start gap-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                <span>{{ __('Au moins 2 paires sont nécessaires pour générer une grille (les mots doivent partager des lettres pour s\'entrecroiser).') }}</span>
+              <p class="small mb-3 d-flex align-items-start gap-2" style="color:#1A1D23">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>{{ __('Au moins 2 mots sont nécessaires. Les mots doivent partager des lettres pour s\'entrecroiser dans la grille.') }}</span>
               </p>
 
               <template x-for="(pair, index) in pairs" :key="index">
                 <div class="row g-2 align-items-start mb-2">
                   <div class="col-12 col-md-6">
-                    <input :id="'clue-' + index" type="text" class="form-control" :class="{'is-invalid': errors['clue-' + index]}" x-model="pairs[index].clue" @input="validatePair(index); saveDraft()" maxlength="250" :placeholder="'{{ __('Indice') }} #' + (index + 1)" :aria-label="'{{ __('Indice paire') }} ' + (index + 1)">
+                    <input :id="'clue-' + index" type="text" class="form-control" :class="{'is-invalid': errors['clue-' + index]}" x-model="pairs[index].clue" @input="validatePair(index); saveDraft()" maxlength="250" :placeholder="'{{ __('Indice') }} #' + (index + 1)" :aria-label="'{{ __('Indice du mot') }} ' + (index + 1)">
                     <div class="invalid-feedback" x-show="errors['clue-' + index]" x-text="errors['clue-' + index]"></div>
                   </div>
                   <div class="col-12 col-md-5">
-                    <input :id="'answer-' + index" type="text" class="form-control text-uppercase" :class="{'is-invalid': errors['answer-' + index]}" :value="pairs[index].answer" @input="pairs[index].answer = $event.target.value.toUpperCase(); validatePair(index); saveDraft()" maxlength="30" :placeholder="'{{ __('Réponse') }} #' + (index + 1)" :aria-label="'{{ __('Réponse paire') }} ' + (index + 1)">
+                    <input :id="'answer-' + index" type="text" class="form-control text-uppercase" :class="{'is-invalid': errors['answer-' + index]}" :value="pairs[index].answer" @input="pairs[index].answer = $event.target.value.toUpperCase(); validatePair(index); saveDraft()" maxlength="30" :placeholder="'{{ __('Mot') }} #' + (index + 1)" :aria-label="'{{ __('Mot') }} ' + (index + 1)">
                     <div class="invalid-feedback" x-show="errors['answer-' + index]" x-text="errors['answer-' + index]"></div>
                   </div>
                   <div class="col-12 col-md-1 d-flex">
-                    <button type="button" class="crossword-pair-delete" @click="removePair(index)" :disabled="pairs.length <= 1" :aria-label="'{{ __('Supprimer la paire') }} ' + (index + 1)" :title="'{{ __('Supprimer la paire') }} ' + (index + 1)">
+                    <button type="button" class="crossword-pair-delete" @click="removePair(index)" :disabled="pairs.length <= 1" :aria-label="'{{ __('Supprimer le mot') }} ' + (index + 1)" :title="'{{ __('Supprimer le mot') }} ' + (index + 1)">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <path d="M3 6h18"/>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
@@ -167,9 +127,9 @@
                 </div>
               </template>
 
-              <button type="button" class="ct-btn ct-btn-outline mt-2 d-inline-flex align-items-center gap-2" @click="addPair()" aria-label="{{ __('Ajouter une nouvelle paire') }}">
+              <button type="button" class="ct-btn ct-btn-outline mt-2 d-inline-flex align-items-center gap-2" @click="addPair()" aria-label="{{ __('Ajouter un nouveau mot') }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>{{ __('Ajouter une paire') }}</span>
+                <span>{{ __('Ajouter un mot') }}</span>
               </button>
             </div>
 
@@ -186,7 +146,7 @@
                   <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Génération en cours...') }}</span></span>
                 </template>
               </button>
-              <small class="text-muted text-center" x-show="!canGenerate() && !generating">{{ __('Saisissez au moins 2 paires valides pour générer la grille.') }}</small>
+              <small class="text-muted text-center" x-show="!canGenerate() && !generating">{{ __('Saisissez au moins 2 mots valides pour générer la grille.') }}</small>
             </div>
 
             {{-- Erreur génération --}}
