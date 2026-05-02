@@ -35,8 +35,8 @@ class PublicCrosswordController
         if (empty($pairs)) {
             return response()->json([
                 'success' => false,
-                'error' => 'Impossible de générer des suggestions pour ce thème. Réessayez avec un thème plus précis.',
-            ], 422);
+                'error' => 'Tous les modèles IA gratuits sont temporairement saturés. Réessayez dans 1-2 minutes, ou saisissez vos paires manuellement plus bas.',
+            ], 503);
         }
 
         return response()->json([

@@ -20,15 +20,17 @@ final class CrosswordAiSuggestionService
 
     /**
      * Modèles gratuits ordonnés (priorité décroissante).
-     * Tous garantis $0 par requête.
+     * Tous garantis $0 par requête (suffix :free OpenRouter).
      * NB : gemma-3 ne supporte PAS system prompt -> on merge tout en user.
+     * NB : modèles :free souvent rate-limited - cascade large pour résilience.
      */
     private array $freeModels = [
+        'deepseek/deepseek-chat-v3-0324:free',
         'meta-llama/llama-3.3-70b-instruct:free',
-        'qwen/qwen-2.5-72b-instruct:free',
         'google/gemma-3-27b-it:free',
-        'microsoft/phi-4:free',
         'nousresearch/hermes-3-llama-3.1-405b:free',
+        'deepseek/deepseek-r1:free',
+        'google/gemini-2.0-flash-exp:free',
     ];
 
     public function generatePairsForTheme(string $theme, int $count = 10): array
