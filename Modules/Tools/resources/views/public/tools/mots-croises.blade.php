@@ -896,6 +896,89 @@ function crosswordGenerator() {
       this.generate(null, true);
     },
 
+    _validPairs() {
+      return this.pairs.filter(p => p.clue.trim() && p.answer.trim()).map(p => ({clue: p.clue.trim(), answer: p.answer.trim().toUpperCase()}));
+    },
+
+    async downloadPdfBlank() { return this._downloadPdf('pdf-blank', 'mots-croises-vierge.pdf'); },
+    async downloadPdfSolution() { return this._downloadPdf('pdf-solution', 'mots-croises-corrige.pdf'); },
+
+    async _downloadPdf(endpoint, filename) {
+      if (!this.grid) return;
+      const csrf = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+      const seed = this.gridStats?.seed || null;
+      try {
+        const res = await fetch('{{ url("/outils/mots-croises") }}/' + endpoint, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'application/pdf'},
+          body: JSON.stringify({pairs: this._validPairs(), seed: seed, title: this.metadata.title || 'Mots croises'})
+        });
+        if (!res.ok) { this.dispatchToast("{{ __('Erreur lors de la generation du PDF.') }}", 'danger'); return; }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
+      } catch (e) { console.error(e); this.dispatchToast("{{ __('Erreur reseau PDF.') }}", 'danger'); }
+    },
+
+    async exportCsv() {
+      const valid = this._validPairs();
+      if (valid.length === 0) return;
+      const csrf = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+      try {
+        const res = await fetch('{{ route('tools.crossword.csv-export') }}', {
+          method:'POST',
+          headers:{'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'text/csv'},
+          body: JSON.stringify({pairs: valid})
+        });
+        if (!res.ok) { this.dispatchToast("{{ __('Erreur export CSV.') }}", 'danger'); return; }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'mots-croises.csv';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
+      } catch (e) { console.error(e); }
+    },
+
+    openImportCsv() {
+      this.csvImportText = '';
+      this.csvImportFile = null;
+      this.csvImportError = '';
+      this.csvImportOpen = true;
+    },
+
+    async doImportCsv() {
+      this.csvImporting = true;
+      this.csvImportError = '';
+      const csrf = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+      try {
+        const fd = new FormData();
+        if (this.csvImportFile) fd.append('file', this.csvImportFile);
+        if (this.csvImportText.trim()) fd.append('csv', this.csvImportText);
+        const res = await fetch('{{ route('tools.crossword.csv-import') }}', {
+          method:'POST',
+          headers:{'X-CSRF-TOKEN': csrf, 'Accept':'application/json'},
+          body: fd
+        });
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.pairs) && data.pairs.length >= 2) {
+          this.pairs = data.pairs.map(p => ({clue: p.clue, answer: p.answer.toUpperCase()}));
+          this.csvImportOpen = false;
+          this.saveDraft();
+          this.dispatchToast(data.count + " {{ __('paires importees avec succes.') }}", 'success');
+        } else {
+          this.csvImportError = data.error || "{{ __('Import echoue. Verifiez le format Indice;Mot.') }}";
+        }
+      } catch (e) {
+        this.csvImportError = "{{ __('Erreur reseau.') }}";
+      } finally {
+        this.csvImporting = false;
+      }
+    },
+
     async save() {
       if (!this.isAuthenticated || !this.grid) return;
       const name = this.saveName.trim() || this.metadata.title.trim() || ('{{ __('Grille') }} ' + new Date().toLocaleDateString('fr-CA'));
