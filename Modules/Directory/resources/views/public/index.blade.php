@@ -32,6 +32,7 @@
             'gradientFrom' => ['#0B7285','#1a365d','#8E44AD','#E67E22','#2ECC71','#E74C3C','#3498DB','#F39C12'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#C0392B','#16A085','#8E44AD','#2980B9','#D35400'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'hasEduPricing' => (bool) $tool->has_education_pricing,
+            'tutorialsCount' => $tool->tutorials_count ?? 0,
             'lifecycleStatus' => $tool->lifecycle_status ?? 'active',
             'lifecycleLabel' => $tool->lifecycle_label ?? '',
             'lifecycleColor' => $tool->lifecycle_color ?? '#374151',
@@ -729,10 +730,20 @@
                             <template x-if="tool.favicon"><img :src="tool.favicon" alt="" aria-hidden="true" class="rt-logo" loading="lazy" width="48" height="48" onerror="this.style.display='none'"></template>
                             <div>
                                 <h3 class="rt-card-name"><a :href="tool.showUrl" x-text="tool.name"></a></h3>
-                                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
                                     <span class="rt-badge" :class="'badge-' + tool.pricing" x-text="tool.pricingLabel"></span>
                                     <template x-if="tool.hasEduPricing"><span style="background:#ecfdf5;color:#065f46;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;">🎓 {{ __('Éducation') }}</span></template>
                                     <template x-if="tool.launchYear > 0"><span style="color: #374151; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>
+                                    <template x-if="tool.tutorialsCount > 0">
+                                        <a :href="tool.showUrl + '#tutoriels'"
+                                           :aria-label="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutoriels disponibles') }}' : '{{ __('tutoriel disponible') }}')"
+                                           :title="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutoriels disponibles') }}' : '{{ __('tutoriel disponible') }}')"
+                                           style="display:inline-flex;align-items:center;gap:4px;color:#053d4a;font-size:0.75rem;font-weight:700;text-decoration:none;background:#e0f2f1;padding:2px 8px;border-radius:4px;line-height:1.3;border:1px solid #b2dfdb;min-height:22px;"
+                                           onmouseover="this.style.background='#b2dfdb';" onmouseout="this.style.background='#e0f2f1';">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                            <span x-text="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutos') }}' : '{{ __('tuto') }}')"></span>
+                                        </a>
+                                    </template>
                                 </div>
                             </div>
                         </div>

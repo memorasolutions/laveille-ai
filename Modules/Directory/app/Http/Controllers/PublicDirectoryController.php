@@ -25,7 +25,11 @@ class PublicDirectoryController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Tool::published()->with('categories', 'tags');
+        $query = Tool::published()->with('categories', 'tags')
+            ->withCount(['resources as tutorials_count' => function ($q) {
+                $q->where('is_approved', 1)
+                  ->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
+            }]);
 
         $query = match (\Modules\Settings\Facades\Settings::get('directory.default_sort', 'random')) {
             'popular' => $query->orderByDesc('clicks_count'),
