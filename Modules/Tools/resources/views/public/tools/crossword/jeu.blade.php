@@ -8,6 +8,10 @@
 @php $playUrl = url('/jeu/'.$preset->public_id); @endphp
 
 <style>
+.crossword-grid{table-layout:fixed;border-collapse:collapse;margin:1rem auto;background:#fff}
+.crossword-grid td{padding:0;text-align:center;vertical-align:middle;box-sizing:border-box}
+.cell-active{background-color:#ffffff;border:2px solid #1A1D23;position:relative}
+.cell-inactive{background-color:#1A1D23;border:2px solid #1A1D23}
 .cw-grid-wrap .crossword-grid td{width:44px;height:44px;min-width:44px;min-height:44px}
 .cell-wrapper{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
 .cell-active input{width:100%;height:100%;min-width:44px;min-height:44px;border:none;text-align:center;font-size:1.25rem;font-weight:700;text-transform:uppercase;background:transparent;color:#1A1D23;padding:0;display:block}
