@@ -139,7 +139,7 @@
                   </template>
                   <span style="flex:1;min-width:0">
                     <strong x-text="metadata.is_public ? '{{ __('Grille publique') }} ✓' : '{{ __('Rendre la grille publique') }}'"></strong>
-                    <span class="d-block small" style="color:inherit;opacity:.85;font-weight:400" x-text="metadata.is_public ? '{{ __('Lien partageable /jeumc/... actif - cliquez pour rendre privée.') }}' : '{{ __('Génère un lien partageable /jeumc/... que d\'autres pourront jouer en ligne.') }}'"></span>
+                    <span class="d-block small" style="color:inherit;opacity:.85;font-weight:400" x-text="metadata.is_public ? @json(__('Lien partageable /jeumc/... actif - cliquez pour rendre privée.')) : @json(__('Génère un lien partageable /jeumc/... que les autres pourront jouer en ligne.'))"></span>
                   </span>
                 </button>
               </div>

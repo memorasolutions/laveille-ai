@@ -88,23 +88,28 @@
 <script>
 document.addEventListener('alpine:init', () => {
   Alpine.data('userCrosswords', () => ({
-    async confirmDelete(publicId, name) {
-      if (!confirm(`{{ __('Supprimer définitivement la grille') }} « ${name} » ?\n{{ __('Cette action est irréversible.') }}`)) return;
-      try {
-        const csrf = document.querySelector('meta[name=csrf-token]').getAttribute('content');
-        const res = await fetch('/api/crossword-presets/' + publicId, {
-          method: 'DELETE',
-          headers: {'X-CSRF-TOKEN': csrf, 'Accept': 'application/json'}
-        });
-        if (res.ok) {
-          window.location.reload();
-        } else {
-          alert("{{ __('Erreur lors de la suppression. Réessayez.') }}");
-        }
-      } catch (e) {
-        console.error(e);
-        alert("{{ __('Erreur réseau.') }}");
-      }
+    confirmDelete(publicId, name) {
+      const message = @json(__('Supprimer définitivement la grille')) + ' « ' + name + ' » ?\n' + @json(__('Cette action est irréversible.'));
+      window.dispatchEvent(new CustomEvent('open-confirm-global', {
+        detail: { message: message, callback: async () => {
+          try {
+            const csrf = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+            const res = await fetch('/api/crossword-presets/' + publicId, {
+              method: 'DELETE',
+              headers: {'X-CSRF-TOKEN': csrf, 'Accept': 'application/json'}
+            });
+            if (res.ok) {
+              window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Grille supprimée.')), variant: 'success', duration: 3000 }}));
+              setTimeout(() => window.location.reload(), 800);
+            } else {
+              window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Erreur lors de la suppression. Réessayez.')), variant: 'danger', duration: 5000 }}));
+            }
+          } catch (e) {
+            console.error(e);
+            window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Erreur réseau.')), variant: 'danger', duration: 5000 }}));
+          }
+        }}
+      }));
     }
   }));
 });

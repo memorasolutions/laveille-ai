@@ -11,7 +11,7 @@
     @if(session('status'))
         <div class="alert alert-success" style="border-radius:8px">{{ session('status') }}</div>
     @endif
-    @if($errors->any())
+    @if(isset($errors) && $errors->any())
         <div class="alert alert-danger" style="border-radius:8px">{{ $errors->first() }}</div>
     @endif
 
