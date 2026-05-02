@@ -87,9 +87,17 @@ class NewsImageService
             $image->cover(1200, 630);
 
             $webpContent = $image->toWebp(80)->toString();
-
             $path = "news/images/{$articleId}.webp";
             $this->disk()->put($path, $webpContent);
+
+            // Generation .jpg simultanee pour og:image fallback Facebook (qui ne supporte pas WebP).
+            // Cf. handoff S79 #19 : Facebook crawler exige image/jpeg pour la miniature de partage.
+            try {
+                $jpgContent = $image->toJpeg(85)->toString();
+                $this->disk()->put("news/images/{$articleId}.jpg", $jpgContent);
+            } catch (\Throwable $e) {
+                Log::warning("NewsImage: jpg fallback gen failed article {$articleId} - ".$e->getMessage());
+            }
 
             return "/storage/{$path}";
         } catch (\Throwable $e) {
@@ -190,9 +198,18 @@ class NewsImageService
                 $gradient->annotateImage($drawSub, $w / 2, 580, 0, 'laveille.ai');
             }
 
-            $gradient->setImageFormat('webp');
+            // Genere .webp + .jpg simultanement (cf. S79 #19 fallback Facebook).
             $gradient->setCompressionQuality(85);
+            $gradient->setImageFormat('webp');
             $gradient->writeImage($outputPath);
+
+            $jpgPath = preg_replace('/\.webp$/', '.jpg', $outputPath);
+            try {
+                $gradient->setImageFormat('jpeg');
+                $gradient->writeImage($jpgPath);
+            } catch (\Throwable $e) {
+                Log::warning("NewsImage gradient jpg failed article {$articleId}: ".$e->getMessage());
+            }
             $gradient->destroy();
 
             return "/storage/news/images/{$articleId}.webp";
