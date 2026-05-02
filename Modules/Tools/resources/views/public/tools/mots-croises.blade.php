@@ -417,7 +417,7 @@
               <small class="text-muted d-inline-flex align-items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                 {{ __('Brouillon sauvegardé dans votre navigateur.') }}
-                <button type="button" class="btn btn-sm btn-link p-0 ms-2" @click="if(confirm('{{ __('Effacer le brouillon ?') }}')) clearDraft()">{{ __('Effacer le brouillon') }}</button>
+                <button type="button" class="btn btn-sm btn-link p-0 ms-2" @click="$dispatch('open-confirm-global', { message: @js(__('Effacer définitivement le brouillon ?')), callback: () => clearDraft() })">{{ __('Effacer le brouillon') }}</button>
               </small>
             </div>
 
@@ -793,13 +793,14 @@ function crosswordGenerator() {
         try {
           const data = JSON.parse(draft);
           if ((data.pairs && data.pairs.length > 0 && (data.pairs[0].clue || data.pairs[0].answer)) || data.metadata?.title) {
-            if (confirm("{{ __('Brouillon trouvé. Reprendre ?') }}")) {
-              this.pairs = data.pairs && data.pairs.length >= 2 ? data.pairs : [{clue: '', answer: ''}, {clue: '', answer: ''}];
-              this.metadata = Object.assign({title: '', difficulty: 'Moyen', is_public: false, theme: ''}, data.metadata || {});
-              this.saveName = data.saveName || '';
-            } else {
-              localStorage.removeItem('crossword_draft');
-            }
+            // Auto-restore silencieux du brouillon (regle anti-popup native S79 #41).
+            // L'utilisateur peut effacer via le bouton 'Effacer le brouillon' visible.
+            this.pairs = data.pairs && data.pairs.length >= 2 ? data.pairs : [{clue: '', answer: ''}, {clue: '', answer: ''}];
+            this.metadata = Object.assign({title: '', difficulty: 'Moyen', is_public: false, theme: ''}, data.metadata || {});
+            this.saveName = data.saveName || '';
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Brouillon de votre dernier essai restauré.')), variant: 'info', duration: 4000 }}));
+            }, 600);
           }
         } catch (e) {
           console.error('Invalid draft', e);
