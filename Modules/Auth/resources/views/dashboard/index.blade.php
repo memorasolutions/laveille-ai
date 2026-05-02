@@ -65,6 +65,11 @@
             <i class="fa fa-bookmark"></i> {{ __('Mes favoris') }}
         </a>
     @endif
+    @if(Route::has('user.crosswords.index'))
+        <a href="{{ route('user.crosswords.index') }}" class="btn btn-default" style="margin-right: 5px; margin-bottom: 5px;">
+            <i class="fa fa-puzzle-piece"></i> {{ __('Mes mots croisés') }}
+        </a>
+    @endif
     @if(auth()->user()->hasAnyRole(['admin', 'super_admin']) && Route::has('admin.dashboard'))
         <a href="{{ route('admin.dashboard') }}" class="btn btn-primary" style="margin-bottom: 5px;">
             <i class="fa fa-shield"></i> {{ __('Administration') }}

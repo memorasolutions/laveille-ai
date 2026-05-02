@@ -777,6 +777,13 @@ function crosswordGenerator() {
     suggestError: null,
 
     init() {
+      // Preload depuis preset (?preset=publicId) si user authentifie redirige depuis /user/mots-croises
+      const params = new URLSearchParams(window.location.search);
+      const presetId = params.get('preset');
+      if (presetId) {
+        this.loadPreset(presetId);
+        return;
+      }
       const draft = localStorage.getItem('crossword_draft');
       if (draft) {
         try {
@@ -800,6 +807,35 @@ function crosswordGenerator() {
     addPair() {
       this.pairs.push({clue: '', answer: ''});
       this.saveDraft();
+    },
+
+    async loadPreset(publicId) {
+      try {
+        const res = await fetch('/api/crossword-presets', {headers: {'Accept':'application/json'}});
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+        const preset = list.find(p => p.public_id === publicId);
+        if (!preset) {
+          this.dispatchToast("{{ __('Grille introuvable ou non autorisée.') }}", 'danger');
+          return;
+        }
+        const lines = (preset.config_text || '').split(/\r\n|\n|\r/).map(l => l.trim()).filter(Boolean);
+        const pairs = [];
+        for (const line of lines) {
+          const idx = line.indexOf(' / ');
+          if (idx === -1) continue;
+          pairs.push({clue: line.substring(0, idx).trim(), answer: line.substring(idx+3).trim().toUpperCase()});
+        }
+        if (pairs.length < 2) pairs.push({clue:'', answer:''}, {clue:'', answer:''});
+        this.pairs = pairs;
+        const params = preset.params || {};
+        this.metadata = Object.assign({title: preset.name || '', difficulty: 'Moyen', is_public: !!preset.is_public, theme: ''}, params);
+        this.saveName = preset.name || '';
+        this.dispatchToast("{{ __('Grille chargée :') }} " + (preset.name || ''), 'success');
+      } catch (e) {
+        console.error('loadPreset', e);
+      }
     },
 
     removePair(i) {

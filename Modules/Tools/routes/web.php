@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
 use Modules\Tools\Http\Controllers\PublicCrosswordController;
 use Modules\Tools\Http\Controllers\PublicToolController;
+use Modules\Tools\Http\Controllers\UserCrosswordController;
 
 Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index');
@@ -42,6 +43,12 @@ Route::middleware('web')->group(function () {
     Route::get('/jeu/{publicId}', fn (string $publicId) => redirect('/jeumc/'.$publicId, 301));
 
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])->name('tools.show');
+});
+
+// Espace user authentifie : mes mots croises sauvegardes
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/user/mots-croises', [UserCrosswordController::class, 'index'])->name('user.crosswords.index');
+    Route::get('/user/mots-croises/{publicId}/edit', [UserCrosswordController::class, 'edit'])->name('user.crosswords.edit');
 });
 
 Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
