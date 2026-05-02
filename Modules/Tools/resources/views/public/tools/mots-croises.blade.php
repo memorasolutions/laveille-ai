@@ -159,13 +159,27 @@
               <div class="mb-5">
                 <hr class="my-4">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                  <h2 class="h5 mb-0">
+                  <h2 class="h5 mb-0 d-flex align-items-center flex-wrap gap-2">
                     {{ __('Grille générée') }}
-                    <span class="badge bg-success ms-2" x-text="words.length + ' / ' + (words.length + unplaced.length) + ' {{ __('mots placés') }}'"></span>
+                    <span class="badge" style="background:#053d4a;color:#fff" x-text="words.length + ' / ' + (words.length + unplaced.length) + ' {{ __('mots placés') }}'"></span>
+                    <span x-show="gridStats" x-cloak class="badge" style="background:#e0f2f1;color:#053d4a;border:1px solid #053d4a" :title="'{{ __('Densité de la grille (cases utilisées vs surface totale)') }}'" x-text="gridStats ? '{{ __('Densité') }} ' + Math.round(gridStats.compactness * 100) + ' %' : ''"></span>
                   </h2>
-                  <div class="form-check form-switch no-print">
-                    <input class="form-check-input" type="checkbox" id="showSolutions" x-model="showSolutions">
-                    <label class="form-check-label" for="showSolutions">{{ __('Afficher les solutions') }}</label>
+                  <div class="d-flex align-items-center flex-wrap gap-2 no-print">
+                    <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px" @click="regenerate()" :disabled="regenerating || generating" :aria-label="'{{ __('Régénérer une autre disposition de la grille') }}'">
+                      <template x-if="!regenerating">
+                        <span class="d-inline-flex align-items-center gap-2">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                          <span>{{ __('Autre disposition') }}</span>
+                        </span>
+                      </template>
+                      <template x-if="regenerating">
+                        <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Recalcul...') }}</span></span>
+                      </template>
+                    </button>
+                    <div class="form-check form-switch m-0">
+                      <input class="form-check-input" type="checkbox" id="showSolutions" x-model="showSolutions">
+                      <label class="form-check-label" for="showSolutions">{{ __('Afficher les solutions') }}</label>
+                    </div>
                   </div>
                 </div>
 
@@ -457,8 +471,10 @@ function crosswordGenerator() {
     grid: null,
     words: [],
     unplaced: [],
+    gridStats: null,
     showSolutions: false,
     generating: false,
+    regenerating: false,
     saving: false,
     saveName: '',
     errors: {},
@@ -564,15 +580,25 @@ function crosswordGenerator() {
       }
     },
 
-    async generate() {
+    async generate(seed = null, isRegenerate = false) {
       if (!this.canGenerate()) return;
-      this.generating = true;
+      if (isRegenerate) {
+        this.regenerating = true;
+      } else {
+        this.generating = true;
+        this.grid = null;
+        this.words = [];
+        this.unplaced = [];
+        this.gridStats = null;
+      }
       this.generationError = null;
-      this.grid = null;
-      this.words = [];
-      this.unplaced = [];
 
       try {
+        const body = {
+          pairs: this.pairs.filter(p => p.clue.trim() && p.answer.trim()).map(p => ({clue: p.clue.trim(), answer: p.answer.trim().toUpperCase()}))
+        };
+        if (seed !== null) body.seed = seed;
+
         const response = await fetch('{{ url("/outils/mots-croises/generate") }}', {
           method: 'POST',
           headers: {
@@ -580,9 +606,7 @@ function crosswordGenerator() {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Accept': 'application/json'
           },
-          body: JSON.stringify({
-            pairs: this.pairs.filter(p => p.clue.trim() && p.answer.trim()).map(p => ({clue: p.clue.trim(), answer: p.answer.trim().toUpperCase()}))
-          })
+          body: JSON.stringify(body)
         });
 
         const data = await response.json();
@@ -590,8 +614,11 @@ function crosswordGenerator() {
           this.grid = data.grid;
           this.words = data.words;
           this.unplaced = data.unplaced || [];
+          this.gridStats = data.stats || null;
           this.showSolutions = false;
-          this.dispatchToast("{{ __('Grille générée avec succès.') }}", 'success');
+          if (!isRegenerate) {
+            this.dispatchToast("{{ __('Grille générée avec succès.') }}", 'success');
+          }
         } else {
           this.generationError = data.error || data.message || "{{ __('Impossible de générer la grille avec ces mots. Vérifiez qu\'ils partagent des lettres communes.') }}";
         }
@@ -600,7 +627,12 @@ function crosswordGenerator() {
         this.generationError = "{{ __('Erreur réseau. Réessayez.') }}";
       } finally {
         this.generating = false;
+        this.regenerating = false;
       }
+    },
+
+    regenerate() {
+      this.generate(null, true);
     },
 
     async save() {

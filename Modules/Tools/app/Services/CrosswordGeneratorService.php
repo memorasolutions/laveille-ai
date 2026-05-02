@@ -13,11 +13,14 @@ final class CrosswordGeneratorService
     public const MIN_WORD_LENGTH = 2;
     public const MAX_WORD_LENGTH = 30;
 
-    public function generate(array $pairs): array
+    public function generate(array $pairs, ?int $seed = null): array
     {
         $startTime = microtime(true);
 
         $this->validatePairs($pairs);
+
+        $usedSeed = $seed !== null ? max(1, $seed) : mt_rand(1, PHP_INT_MAX - 1);
+        mt_srand($usedSeed);
 
         $normalizedPairs = [];
         foreach ($pairs as $pair) {
@@ -28,6 +31,7 @@ final class CrosswordGeneratorService
             ];
         }
 
+        shuffle($normalizedPairs);
         usort($normalizedPairs, fn ($a, $b) => count($b['letters']) <=> count($a['letters']));
 
         $grid = array_fill(0, self::MAX_GRID_SIZE, array_fill(0, self::MAX_GRID_SIZE, null));
@@ -62,6 +66,7 @@ final class CrosswordGeneratorService
                 continue;
             }
 
+            shuffle($candidates);
             usort($candidates, fn ($a, $b) => $b['score'] <=> $a['score']);
             $best = $candidates[0];
 
@@ -88,6 +93,7 @@ final class CrosswordGeneratorService
                     'total_count' => count($pairs),
                     'duration_ms' => (int) ((microtime(true) - $startTime) * 1000),
                     'compactness' => 0.0,
+                    'seed' => $usedSeed,
                 ],
             ];
         }
@@ -116,6 +122,7 @@ final class CrosswordGeneratorService
                 'total_count' => count($pairs),
                 'duration_ms' => (int) ((microtime(true) - $startTime) * 1000),
                 'compactness' => $compactness,
+                'seed' => $usedSeed,
             ],
         ];
     }

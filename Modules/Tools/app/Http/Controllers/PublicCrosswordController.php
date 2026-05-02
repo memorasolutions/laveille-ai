@@ -52,10 +52,11 @@ class PublicCrosswordController
             'pairs' => 'required|array|min:2|max:50',
             'pairs.*.clue' => 'required|string|max:250',
             'pairs.*.answer' => 'required|string|min:2|max:30',
+            'seed' => 'nullable|integer|min:0|max:2147483647',
         ]);
 
         try {
-            $result = $this->generator->generate($validated['pairs']);
+            $result = $this->generator->generate($validated['pairs'], $validated['seed'] ?? null);
             return response()->json($result);
         } catch (InvalidArgumentException $e) {
             return response()->json([
