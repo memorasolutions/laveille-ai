@@ -134,10 +134,14 @@
 
             {{-- Paires --}}
             <div class="mb-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
                 <h2 class="h5 mb-0">{{ __('Paires indice/réponse') }}</h2>
                 <span class="badge bg-secondary" x-text="pairs.length + ' ' + (pairs.length === 1 ? '{{ __('paire') }}' : '{{ __('paires') }}')"></span>
               </div>
+              <p class="text-muted small mb-3 d-flex align-items-start gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>{{ __('Au moins 2 paires sont nécessaires pour générer une grille (les mots doivent partager des lettres pour s\'entrecroiser).') }}</span>
+              </p>
 
               <template x-for="(pair, index) in pairs" :key="index">
                 <div class="row g-2 align-items-start mb-2">
