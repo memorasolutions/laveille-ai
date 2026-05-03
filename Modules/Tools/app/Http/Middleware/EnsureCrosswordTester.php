@@ -15,18 +15,17 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * S80 #48 : restreint l'outil mots-croisés au tester unique (Stéphane) pendant la phase de tests intensifs.
- * Visiteurs anonymes ou autres users authentifiés voient une page sobre 'En construction' (HTTP 403).
+ * S80 #48 + hotfix #49 : restreint l'outil mots-croisés aux admins (permission view_admin_panel)
+ * pendant la phase de tests intensifs. Visiteurs anonymes ou users non-admin voient une page
+ * sobre 'En construction' (HTTP 403). Cohérent avec EnsureIsAdmin Memora.
  */
 class EnsureCrosswordTester
 {
-    private const TESTER_EMAIL = 'chatgptpro@gomemora.com';
-
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
-        if ($user && $user->email === self::TESTER_EMAIL) {
+        if ($user && $user->can('view_admin_panel')) {
             return $next($request);
         }
 
