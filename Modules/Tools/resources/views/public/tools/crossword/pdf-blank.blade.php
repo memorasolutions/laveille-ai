@@ -71,24 +71,27 @@ table.cw-grid td .num { position: absolute; top: 1px; left: 2px; font-size: 6pt;
 </div>
 @endif
 
-<div class="cw-clues">
-<div class="cw-clues-col">
-<h2>Horizontaux &rarr;</h2>
-<ul>
+{{-- S80 #62 : table layout au lieu de display:inline-block (mal supporté DomPDF, empile les colonnes) --}}
+<table class="cw-clues" style="width:100%;margin-top:14px;border-collapse:collapse;">
+<tr>
+<td style="width:50%;vertical-align:top;padding:0 8px 0 0;">
+<h2 style="font-size:11pt;color:#053d4a;margin:0 0 6px 0;padding-bottom:3px;border-bottom:1px solid #053d4a;">Horizontaux &rarr;</h2>
+<ul style="list-style:none;padding:0;margin:0;">
 @foreach(collect($words)->where('orientation','horizontal')->sortBy('number') as $w)
-<li><b>{{ $w['number'] }}.</b> {{ $w['clue'] }}</li>
+<li style="font-size:9.5pt;margin-bottom:5px;line-height:1.35;"><b style="color:#053d4a;">{{ $w['number'] }}.</b> {{ $w['clue'] }}</li>
 @endforeach
 </ul>
-</div>
-<div class="cw-clues-col">
-<h2>Verticaux &darr;</h2>
-<ul>
+</td>
+<td style="width:50%;vertical-align:top;padding:0 0 0 8px;">
+<h2 style="font-size:11pt;color:#053d4a;margin:0 0 6px 0;padding-bottom:3px;border-bottom:1px solid #053d4a;">Verticaux &darr;</h2>
+<ul style="list-style:none;padding:0;margin:0;">
 @foreach(collect($words)->where('orientation','vertical')->sortBy('number') as $w)
-<li><b>{{ $w['number'] }}.</b> {{ $w['clue'] }}</li>
+<li style="font-size:9.5pt;margin-bottom:5px;line-height:1.35;"><b style="color:#053d4a;">{{ $w['number'] }}.</b> {{ $w['clue'] }}</li>
 @endforeach
 </ul>
-</div>
-</div>
+</td>
+</tr>
+</table>
 
 <div class="cw-footer">
 <div class="left">
