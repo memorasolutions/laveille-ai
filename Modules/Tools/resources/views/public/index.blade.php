@@ -26,7 +26,7 @@
 
                     <div class="row">
                         @forelse($tools as $tool)
-                            @php $isUnderConstruction = in_array($tool->slug, ['mots-croises']); @endphp
+                            @php $isUnderConstruction = in_array($tool->slug, []); /* S80 #63 : mots-croises ouvert au public */ @endphp
                             <div class="col-lg-4 col-md-6 col-12 mb-4">
                                 <div class="card h-100 shadow-sm position-relative" style="border-radius: var(--r-base); overflow: hidden; transition: transform 0.2s;{{ $isUnderConstruction ? ' opacity: 0.85;' : '' }}">
                                     @if($isUnderConstruction)
