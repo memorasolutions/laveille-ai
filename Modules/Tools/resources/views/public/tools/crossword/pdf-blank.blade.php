@@ -41,7 +41,7 @@ table.cw-grid td .num { position: absolute; top: 1px; left: 2px; font-size: 6pt;
 <div class="cw-header">
 <div class="brand">
 <div class="brand-name">laveille.ai</div>
-<div class="brand-tag">Mots croises generateur — IA & techno Quebec</div>
+<div class="brand-tag">Générateur de mots croisés — IA & techno Québec</div>
 </div>
 <div class="meta">
 {{ $generatedAt }}
@@ -93,7 +93,7 @@ table.cw-grid td .num { position: absolute; top: 1px; left: 2px; font-size: 6pt;
 <div class="cw-footer">
 <div class="left">
 @if($playUrl)Jouer en ligne : {{ $playUrl }} &middot; @endif
-Genere par laveille.ai/outils/mots-croises
+Généré par laveille.ai/outils/mots-croises
 </div>
 <div class="right">{{ $generatedAt }}</div>
 </div>

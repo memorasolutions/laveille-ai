@@ -42,7 +42,7 @@ table.cw-grid td .letter { display: inline-block; padding-top: 3px; }
 <div class="cw-header">
 <div class="brand">
 <div class="brand-name">laveille.ai</div>
-<div class="brand-tag">Mots croises generateur — IA & techno Quebec</div>
+<div class="brand-tag">Générateur de mots croisés — IA & techno Québec</div>
 </div>
 <div class="meta">{{ $generatedAt }}</div>
 </div>
@@ -92,7 +92,7 @@ table.cw-grid td .letter { display: inline-block; padding-top: 3px; }
 <div class="cw-footer">
 <div class="left">
 @if($playUrl)Jouer en ligne : {{ $playUrl }} &middot; @endif
-Genere par laveille.ai/outils/mots-croises
+Généré par laveille.ai/outils/mots-croises
 </div>
 <div class="right">{{ $generatedAt }}</div>
 </div>
