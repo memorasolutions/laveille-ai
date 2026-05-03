@@ -831,9 +831,13 @@ function crosswordGenerator() {
             this.pairs = data.pairs && data.pairs.length >= 2 ? data.pairs : [{clue: '', answer: ''}, {clue: '', answer: ''}];
             this.metadata = Object.assign({title: '', difficulty: 'Moyen', is_public: false, theme: ''}, data.metadata || {});
             this.saveName = data.saveName || '';
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Brouillon de votre dernier essai restauré.')), variant: 'info', duration: 4000 }}));
-            }, 600);
+            // Guard contre double dispatch (S80 #59 : init() peut être appelé 2× par Alpine si x-show réinitialise le composant)
+            if (!window._cwDraftToastShown) {
+              window._cwDraftToastShown = true;
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: @json(__('Brouillon de votre dernier essai restauré.')), variant: 'info', duration: 4000 }}));
+              }, 600);
+            }
           }
         } catch (e) {
           console.error('Invalid draft', e);
@@ -1029,13 +1033,8 @@ function crosswordGenerator() {
           method: 'POST',
           headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'application/pdf, application/json'},
           credentials: 'same-origin',
-          redirect: 'manual',
           body: JSON.stringify({pairs: this._validPairs(), seed: seed, title: this.metadata.title || '', inactive_style: this.inactiveStyle})
         });
-        if (res.type === 'opaqueredirect' || res.status === 0) {
-          this.dispatchToast("{{ __('Session expirée. Rechargez la page (Ctrl+Shift+R) puis réessayez.') }}", 'danger');
-          return;
-        }
         if (!res.ok) {
           let msg = "{{ __('Erreur lors de la génération du PDF.') }}";
           try { const j = await res.json(); if (j.error) msg = j.error; } catch(_){}
