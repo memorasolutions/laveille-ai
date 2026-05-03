@@ -99,14 +99,23 @@ class PublicCrosswordController
             'url' => $request->fullUrl(),
         ]);
 
-        $validated = $request->validate([
-            'pairs' => 'required|array|min:2|max:50',
-            'pairs.*.clue' => 'required|string|max:250',
-            'pairs.*.answer' => 'required|string|min:2|max:30',
-            'seed' => 'nullable|integer|min:0|max:2147483647',
-            'title' => 'nullable|string|max:120',
-            'inactive_style' => 'nullable|in:black,gray,border',
-        ]);
+        try {
+            $validated = $request->validate([
+                'pairs' => 'required|array|min:2|max:50',
+                'pairs.*.clue' => 'required|string|max:250',
+                'pairs.*.answer' => 'required|string|min:2|max:30',
+                'seed' => 'nullable|integer|min:0|max:2147483647',
+                'title' => 'nullable|string|max:120',
+                'inactive_style' => 'nullable|in:black,gray,border',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            Log::channel('crossword')->error('pdfResponse validation FAIL', [
+                'errors' => $ve->errors(),
+                'first_pair_sample' => is_array($request->input('pairs')) ? ($request->input('pairs.0') ?? null) : null,
+            ]);
+            // Force JSON response 422 même si Accept != json (sinon Laravel redirect 302 back, fetch suit, reçoit HTML)
+            return response()->json(['success' => false, 'errors' => $ve->errors(), 'error' => 'Données invalides : '.collect($ve->errors())->flatten()->first()], 422);
+        }
 
         try {
             $result = $this->generator->generate($validated['pairs'], $validated['seed'] ?? null);

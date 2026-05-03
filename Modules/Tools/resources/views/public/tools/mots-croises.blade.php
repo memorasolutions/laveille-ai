@@ -1031,7 +1031,8 @@ function crosswordGenerator() {
       try {
         const res = await fetch('{{ url("/outils/mots-croises") }}/' + endpoint, {
           method: 'POST',
-          headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'application/pdf, application/json'},
+          // X-Requested-With force Laravel expectsJson() = true → ValidationException retourne JSON 422 au lieu de redirect 302 back (#51 root cause)
+          headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'application/pdf, application/json', 'X-Requested-With': 'XMLHttpRequest'},
           credentials: 'same-origin',
           body: JSON.stringify({pairs: this._validPairs(), seed: seed, title: this.metadata.title || '', inactive_style: this.inactiveStyle})
         });
