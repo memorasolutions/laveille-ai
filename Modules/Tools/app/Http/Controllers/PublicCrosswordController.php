@@ -58,7 +58,7 @@ class PublicCrosswordController
             'pairs' => 'required|array|min:2|max:50',
             'pairs.*.clue' => 'required|string|max:250',
             'pairs.*.answer' => 'required|string|min:2|max:30',
-            'seed' => 'nullable|integer|min:0|max:2147483647',
+            'seed' => 'nullable|integer|min:0', // S80 #51 : retiré max INT32, le service CrosswordGeneratorService clamp à 2147483647 si supérieur (cohérent mt_srand 32-bit)
         ]);
 
         try {
@@ -104,7 +104,7 @@ class PublicCrosswordController
                 'pairs' => 'required|array|min:2|max:50',
                 'pairs.*.clue' => 'required|string|max:250',
                 'pairs.*.answer' => 'required|string|min:2|max:30',
-                'seed' => 'nullable|integer|min:0|max:2147483647',
+                'seed' => 'nullable|integer|min:0', // S80 #51 : retiré max INT32, le service CrosswordGeneratorService clamp à 2147483647 si supérieur (cohérent mt_srand 32-bit)
                 'title' => 'nullable|string|max:120',
                 'inactive_style' => 'nullable|in:black,gray,border',
             ]);
