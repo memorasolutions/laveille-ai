@@ -98,12 +98,19 @@ class PublicCrosswordController
             if (empty($result['success'])) {
                 return response()->json(['success' => false, 'error' => 'Aucun mot placable.'], 422);
             }
-            $title = $validated['title'] ?? 'Mots croisés';
+            $userTitle = trim((string) ($validated['title'] ?? ''));
+            // Détection titre générique : vide OU 'Mots croisés/croises' avec ou sans accents
+            $normalized = strtolower(strtr($userTitle, ['é' => 'e', 'è' => 'e', 'ê' => 'e', 'É' => 'e']));
+            $isGeneric = $userTitle === '' || in_array($normalized, ['mots croises', 'mot croises'], true);
+            $title = $isGeneric ? 'Mots croisés' : $userTitle;
             $inactiveStyle = $validated['inactive_style'] ?? 'black';
             $bin = $blank
                 ? $this->pdf->renderBlank($result, $title, null, $inactiveStyle)
                 : $this->pdf->renderSolution($result, $title.' — Corrigé', null, $inactiveStyle);
-            $filename = strtolower(preg_replace('/[^a-z0-9_-]/i', '-', $title)).'-'.($blank ? 'vierge' : 'corrige').'.pdf';
+            $titleForFile = $isGeneric
+                ? 'mots-croises-'.now()->format('Y-m-d')
+                : trim(strtolower(preg_replace('/[^a-z0-9_-]/i', '-', $userTitle)), '-');
+            $filename = 'laveille-'.$titleForFile.'-'.($blank ? 'vierge' : 'corrige').'.pdf';
 
             return response($bin, 200, [
                 'Content-Type' => 'application/pdf',
