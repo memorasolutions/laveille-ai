@@ -12,45 +12,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use InvalidArgumentException;
 use Modules\Tools\Models\SavedCrosswordPreset;
-use Modules\Tools\Services\CrosswordAiSuggestionService;
 use Modules\Tools\Services\CrosswordCsvService;
 use Modules\Tools\Services\CrosswordGeneratorService;
 use Modules\Tools\Services\CrosswordPdfService;
 
+// S80 cleanup : CrosswordAiSuggestionService injection + aiSuggestPairs() méthode retirées (bouton UI retiré S79, dead code)
 class PublicCrosswordController
 {
     public function __construct(
         private CrosswordGeneratorService $generator,
-        private CrosswordAiSuggestionService $aiSuggester,
         private CrosswordPdfService $pdf,
         private CrosswordCsvService $csv,
     ) {}
-
-    public function aiSuggestPairs(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'theme' => 'required|string|max:100',
-            'count' => 'nullable|integer|min:5|max:15',
-        ]);
-
-        $pairs = $this->aiSuggester->generatePairsForTheme(
-            $validated['theme'],
-            (int) ($validated['count'] ?? 10),
-        );
-
-        if (empty($pairs)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Tous les modèles IA gratuits sont temporairement saturés. Réessayez dans 1-2 minutes, ou saisissez vos paires manuellement plus bas.',
-            ], 503);
-        }
-
-        return response()->json([
-            'success' => true,
-            'pairs' => $pairs,
-            'count' => count($pairs),
-        ]);
-    }
 
     public function generate(Request $request): JsonResponse
     {

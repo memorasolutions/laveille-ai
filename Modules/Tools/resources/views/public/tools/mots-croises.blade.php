@@ -806,8 +806,6 @@ function crosswordGenerator() {
     saveName: '',
     errors: {},
     generationError: null,
-    suggestingPairs: false,
-    suggestError: null,
     activeTab: 'config', // S80 #47 onglets : 'config' ou 'grille' (grille auto-switch apres generate)
 
     init() {
@@ -918,39 +916,7 @@ function crosswordGenerator() {
       return validPairs.length >= 2 && Object.keys(this.errors).length === 0;
     },
 
-    async suggestPairs() {
-      const theme = (this.metadata.theme || '').trim();
-      if (!theme || this.suggestingPairs) return;
-      this.suggestingPairs = true;
-      this.suggestError = null;
-
-      try {
-        const response = await fetch('{{ url("/outils/mots-croises/ai-suggest-pairs") }}', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({theme: theme, count: 10})
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success && Array.isArray(data.pairs) && data.pairs.length > 0) {
-          this.pairs = data.pairs.map(p => ({clue: p.clue, answer: (p.answer || '').toUpperCase()}));
-          this.errors = {};
-          this.saveDraft();
-          this.dispatchToast('{{ __('Paires générées :') }} ' + data.pairs.length, 'success');
-        } else {
-          this.suggestError = (data && data.error) || '{{ __('Aucune suggestion. Essayez un thème plus précis.') }}';
-        }
-      } catch (error) {
-        console.error('Suggest error', error);
-        this.suggestError = '{{ __('Erreur réseau. Réessayez dans quelques secondes.') }}';
-      } finally {
-        this.suggestingPairs = false;
-      }
-    },
+    // S80 cleanup : suggestPairs() retirée (bouton UI retiré S79, dead code orphelin)
 
     async generate(seed = null, isRegenerate = false) {
       if (!this.canGenerate()) return;

@@ -28,9 +28,7 @@ Route::middleware('web')->group(function () {
         Route::post('/outils/mots-croises/generate', [PublicCrosswordController::class, 'generate'])
             ->middleware('throttle:30,60')
             ->name('tools.crossword.generate');
-        Route::post('/outils/mots-croises/ai-suggest-pairs', [PublicCrosswordController::class, 'aiSuggestPairs'])
-            ->middleware('throttle:10,60')
-            ->name('tools.crossword.ai-suggest-pairs');
+        // S80 cleanup : route ai-suggest-pairs retirée (bouton UI retiré S79, dead code)
         Route::post('/outils/mots-croises/pdf-blank', [PublicCrosswordController::class, 'pdfBlank'])
             ->middleware('throttle:30,60')
             ->name('tools.crossword.pdf-blank');
