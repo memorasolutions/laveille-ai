@@ -41,6 +41,13 @@ jobs:
             --exclude='error_log' \
             ./ gmemora@server.memora.pro:/home/gmemora/public_html/apps_diverses/laveille.ai/
 
+      - name: Run pending migrations (additive only, --force pour skip prompt prod)
+        run: |
+          # Pattern fix L15 LucidNest 2026-05-03 : sans cette étape, migrations s'accumulent
+          # silencieusement en pending → bombe à retardement quand l'app touche les nouvelles
+          # columns/tables. ADDITIVE only, --force = skip prompt prod, idempotent.
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan migrate --force" || true
+
       - name: Clear caches on server
         run: |
           ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan view:clear && php artisan responsecache:clear" || true
