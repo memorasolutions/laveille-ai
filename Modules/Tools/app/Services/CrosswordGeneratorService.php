@@ -19,7 +19,8 @@ final class CrosswordGeneratorService
 
         $this->validatePairs($pairs);
 
-        $usedSeed = $seed !== null ? max(1, $seed) : mt_rand(1, PHP_INT_MAX - 1);
+        // S80 #51 : limiter à INT32 max pour cohérence avec validation seed dans PublicCrosswordController (sinon round-trip client→serveur rejette PDF download)
+        $usedSeed = $seed !== null ? max(1, min(2147483647, (int) $seed)) : mt_rand(1, 2147483647);
         mt_srand($usedSeed);
 
         $normalizedPairs = [];
