@@ -582,7 +582,6 @@
     table-layout: fixed;
     border-collapse: collapse;
     margin: 1rem auto;
-    border: 2.5px solid #1A1D23; /* S55 : bordure externe convention presse */
   }
   .crossword-grid td {
     width: 36px;

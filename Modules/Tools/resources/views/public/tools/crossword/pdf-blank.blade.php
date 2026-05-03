@@ -15,7 +15,7 @@ body { font-family: DejaVu Sans, sans-serif; color: #1A1D23; font-size: 11pt; li
 h1 { font-size: 14pt; color: #053d4a; margin: 0 0 14px 0; text-align: center; font-weight: bold; }
 /* S80 #55 — Hybride : bordure externe grille + cases actives bordurées + cases inactives sans bordure (sauf BLACK statu quo). POTENTIAL-EXTRACT S81 */
 .cw-grid-wrap { text-align: center; margin: 0 auto 16px auto; }
-table.cw-grid { table-layout: fixed; border-collapse: collapse; margin: 0 auto; border: 2pt solid #1A1D23; }
+table.cw-grid { table-layout: fixed; border-collapse: collapse; margin: 0 auto; }
 table.cw-grid td { width: 28px; height: 28px; padding: 0; text-align: center; vertical-align: middle; position: relative; }
 table.cw-grid td.cell-active { background: #ffffff; border: 0.75pt solid #1A1D23; }
 @php
