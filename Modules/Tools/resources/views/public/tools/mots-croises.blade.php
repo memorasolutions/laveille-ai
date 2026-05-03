@@ -92,7 +92,7 @@
             @endauth
 
             {{-- S80 #47 Onglets Bootstrap : reduit longueur percue (1176 lignes -> 2 onglets). FIRST-USE: extract to <x-core::tabs> if reused in 1 other tool (regle DRY user 2026-05-02 21:10). --}}
-            <ul class="nav nav-tabs mb-3" role="tablist" style="border-bottom:2px solid #053d4a;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch">
+            <ul class="nav nav-tabs mb-3" role="tablist" style="border-bottom:2px solid #053d4a;flex-wrap:wrap">
               <li class="nav-item" role="presentation">
                 <button type="button" role="tab" class="nav-link" :class="activeTab === 'config' ? 'active' : ''" @click="activeTab = 'config'; localStorage.setItem('cw_active_tab', 'config')" :aria-selected="activeTab === 'config'" style="font-weight:600;color:#053d4a;border-color:transparent;border-bottom:3px solid transparent" :style="activeTab === 'config' ? 'border-bottom-color:#053d4a !important;background:rgba(11,114,133,.08)' : ''">
                   <span class="d-inline-flex align-items-center gap-2">
