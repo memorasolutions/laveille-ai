@@ -47,7 +47,7 @@ table.cw-grid td .letter { display: inline-block; padding-top: 3px; }
 <div class="meta">{{ $generatedAt }}</div>
 </div>
 
-<div class="solution-banner">Version corrigee — reponses revelees</div>
+<div class="solution-banner">Version corrigée — réponses révélées</div>
 
 <h1>{{ $title }}</h1>
 
