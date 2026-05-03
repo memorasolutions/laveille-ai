@@ -34,9 +34,12 @@
 }"
 x-init="window.addEventListener('toast-show', (e) => {
     const detail = e.detail || {};
+    // S80 #58 : mapper 'danger' → 'error' (alias Bootstrap-style cross-module compat)
+    let variant = detail.variant || 'success';
+    if (variant === 'danger') variant = 'error';
     addToast({
         id: Date.now() + Math.random(),
-        variant: detail.variant || 'success',
+        variant: variant,
         message: detail.message || '',
         duration: typeof detail.duration === 'number' ? detail.duration : 4000
     });
