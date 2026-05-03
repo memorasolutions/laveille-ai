@@ -988,17 +988,37 @@ function crosswordGenerator() {
       try {
         const res = await fetch('{{ url("/outils/mots-croises") }}/' + endpoint, {
           method: 'POST',
-          headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'application/pdf'},
-          body: JSON.stringify({pairs: this._validPairs(), seed: seed, title: this.metadata.title || 'Mots croises', inactive_style: this.inactiveStyle})
+          headers: {'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf, 'Accept':'application/pdf, application/json'},
+          credentials: 'same-origin',
+          redirect: 'manual',
+          body: JSON.stringify({pairs: this._validPairs(), seed: seed, title: this.metadata.title || '', inactive_style: this.inactiveStyle})
         });
-        if (!res.ok) { this.dispatchToast("{{ __('Erreur lors de la generation du PDF.') }}", 'danger'); return; }
+        if (res.type === 'opaqueredirect' || res.status === 0) {
+          this.dispatchToast("{{ __('Session expirée. Rechargez la page (Ctrl+Shift+R) puis réessayez.') }}", 'danger');
+          return;
+        }
+        if (!res.ok) {
+          let msg = "{{ __('Erreur lors de la génération du PDF.') }}";
+          try { const j = await res.json(); if (j.error) msg = j.error; } catch(_){}
+          this.dispatchToast(msg, 'danger'); return;
+        }
+        const ct = res.headers.get('content-type') || '';
+        if (!ct.includes('application/pdf')) {
+          this.dispatchToast("{{ __('Réponse serveur invalide (pas un PDF). Rechargez la page (Ctrl+Shift+R).') }}", 'danger');
+          console.error('PDF download: unexpected content-type', ct);
+          return;
+        }
+        // Filename depuis Content-Disposition serveur (#52), fallback sur filename param
+        const cd = res.headers.get('content-disposition') || '';
+        const m = cd.match(/filename="?([^";]+)"?/i);
+        const finalName = m ? m[1] : filename;
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = filename;
+        a.href = url; a.download = finalName;
         document.body.appendChild(a); a.click();
         setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 200);
-      } catch (e) { console.error(e); this.dispatchToast("{{ __('Erreur reseau PDF.') }}", 'danger'); }
+      } catch (e) { console.error(e); this.dispatchToast("{{ __('Erreur réseau PDF.') }}", 'danger'); }
     },
 
     async exportCsv() {
