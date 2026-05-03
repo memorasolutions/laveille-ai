@@ -22,7 +22,7 @@
             <div class="d-flex flex-wrap gap-2 mb-4 no-print">
               {{-- Bouton 'Imprimer' retire S79 #43 - remplace par export PDF dedie (vierge + corrige) dans le menu Plus d'options apres generation. --}}
               @auth
-                <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" @click="save()" :disabled="saving || !grid" aria-label="{{ __('Sauvegarder dans mon compte') }}">
+                <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" @click="save()" :disabled="saving" :class="!grid ? 'opacity-75' : ''" :title="!grid ? '{{ __('Générez d\'abord la grille avant de sauvegarder') }}' : '{{ __('Sauvegarder dans mon compte') }}'" aria-label="{{ __('Sauvegarder dans mon compte') }}">
                   <template x-if="!saving">
                     <span class="d-inline-flex align-items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -1078,7 +1078,22 @@ function crosswordGenerator() {
     },
 
     async save() {
-      if (!this.isAuthenticated || !this.grid) return;
+      // Validation explicite avec messages clairs (#54)
+      if (!this.isAuthenticated) {
+        this.dispatchToast("{{ __('Connectez-vous pour sauvegarder votre grille.') }}", 'warning');
+        return;
+      }
+      if (!this.grid) {
+        this.dispatchToast("{{ __('Générez d\'abord la grille avant de sauvegarder. Saisissez vos mots puis cliquez sur « Générer la grille ».') }}", 'warning', 6000);
+        return;
+      }
+      // Avertissement non-bloquant si grille incomplète (mots non placés)
+      const placedCount = (this.words || []).length;
+      const totalCount = placedCount + (this.unplaced || []).length;
+      if (totalCount > 0 && placedCount < totalCount) {
+        const missing = totalCount - placedCount;
+        this.dispatchToast("{{ __('Attention') }} : " + missing + " {{ __('mot(s) sur') }} " + totalCount + " {{ __('non placé(s). La sauvegarde se poursuit, mais pensez à ajouter des lettres communes pour une grille complète.') }}", 'info', 7000);
+      }
       const name = this.saveName.trim() || this.metadata.title.trim() || ('{{ __('Grille') }} ' + new Date().toLocaleDateString('fr-CA'));
       this.saving = true;
       try {
@@ -1150,10 +1165,10 @@ function crosswordGenerator() {
       this.generationError = null;
     },
 
-    dispatchToast(message, variant) {
-      window.dispatchEvent(new CustomEvent('toast-show', {
-        detail: { message: message, variant: variant || 'info' }
-      }));
+    dispatchToast(message, variant, duration) {
+      const detail = { message: message, variant: variant || 'info' };
+      if (duration) detail.duration = duration;
+      window.dispatchEvent(new CustomEvent('toast-show', { detail: detail }));
     }
   };
 }
