@@ -91,6 +91,30 @@
               </section>
             @endauth
 
+            {{-- S80 #47 Onglets Bootstrap : reduit longueur percue (1176 lignes -> 2 onglets). FIRST-USE: extract to <x-core::tabs> if reused in 1 other tool (regle DRY user 2026-05-02 21:10). --}}
+            <ul class="nav nav-tabs mb-3" role="tablist" style="border-bottom:2px solid #053d4a;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch">
+              <li class="nav-item" role="presentation">
+                <button type="button" role="tab" class="nav-link" :class="activeTab === 'config' ? 'active' : ''" @click="activeTab = 'config'; localStorage.setItem('cw_active_tab', 'config')" :aria-selected="activeTab === 'config'" style="font-weight:600;color:#053d4a;border-color:transparent;border-bottom:3px solid transparent" :style="activeTab === 'config' ? 'border-bottom-color:#053d4a !important;background:rgba(11,114,133,.08)' : ''">
+                  <span class="d-inline-flex align-items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span>{{ __('Configuration & mots') }}</span>
+                  </span>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button type="button" role="tab" class="nav-link" :class="activeTab === 'grille' ? 'active' : ''" @click="if(grid) { activeTab = 'grille'; localStorage.setItem('cw_active_tab', 'grille'); }" :disabled="!grid" :aria-selected="activeTab === 'grille'" :title="!grid ? '{{ __('Générez d\'abord la grille pour activer cet onglet') }}' : ''" style="font-weight:600;color:#053d4a;border-color:transparent;border-bottom:3px solid transparent" :style="activeTab === 'grille' ? 'border-bottom-color:#053d4a !important;background:rgba(11,114,133,.08)' : (!grid ? 'opacity:.5;cursor:not-allowed' : '')">
+                  <span class="d-inline-flex align-items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                    <span>{{ __('Grille générée') }}</span>
+                    <template x-if="grid"><span class="badge" style="background:#053d4a;color:#fff;font-size:.65rem;padding:2px 6px;border-radius:999px" x-text="(words?.length || 0) + '/' + ((words?.length || 0) + (unplaced?.length || 0))"></span></template>
+                  </span>
+                </button>
+              </li>
+            </ul>
+
+            <div class="tab-content">
+            <div class="tab-pane fade" :class="activeTab === 'config' ? 'show active' : ''" role="tabpanel" x-show="activeTab === 'config'">
+
             {{-- Bloc explicatif "Comment ça fonctionne" --}}
             <section class="cw-howto mb-4" aria-labelledby="cw-howto-title">
               <h2 id="cw-howto-title" class="h5 mb-2 d-flex align-items-center gap-2">
@@ -232,6 +256,8 @@
               <strong>{{ __('Erreur') }}:</strong> <span x-text="generationError"></span>
             </div>
 
+            </div>{{-- /tab-pane config --}}
+
             {{-- Modal Import CSV (HORS template x-if grid : doit exister DOM avant 1re génération) - S80 #46 utilise .popup-overlay global (display:grid place-items:center robuste vs flex inline cassé par x-show) --}}
             <div x-show="csvImportOpen" x-cloak x-transition.opacity @click.self="csvImportOpen=false" @keydown.escape.window="csvImportOpen=false" role="dialog" aria-modal="true" aria-labelledby="csv-import-title" class="popup-overlay">
               <div class="popup-content">
@@ -258,6 +284,8 @@
                 </div>
               </div>
             </div>
+
+            <div class="tab-pane fade" :class="activeTab === 'grille' ? 'show active' : ''" role="tabpanel" x-show="activeTab === 'grille'">
 
             {{-- Grille générée --}}
             <template x-if="grid && grid.cells && grid.cells.length > 0">
@@ -409,6 +437,9 @@
               </div>
             </template>
 
+            </div>{{-- /tab-pane grille --}}
+            </div>{{-- /tab-content --}}
+
             {{-- Brouillon --}}
             <div class="mt-4 pt-3 border-top no-print">
               <small class="text-muted d-inline-flex align-items-center gap-2">
@@ -546,10 +577,12 @@
   .cw-menu-item:disabled { opacity: .5; cursor: not-allowed; }
   .cw-menu-item:disabled:hover { background: none; outline: none; }
   .cw-menu-item strong { font-weight: 700; color: #053d4a; }
+  /* S80 #55 — Option #3 Hybride : bordure externe grille + bordures cases actives uniquement (sauf mode BLACK statu quo). POTENTIAL-EXTRACT: dupliqué dans pdf-blank.blade.php + pdf-solution.blade.php — extraire en partial _grid_styles.blade.php S81 si stable. */
   .crossword-grid {
     table-layout: fixed;
     border-collapse: collapse;
     margin: 1rem auto;
+    border: 2.5px solid #1A1D23; /* S55 : bordure externe convention presse */
   }
   .crossword-grid td {
     width: 36px;
@@ -583,10 +616,10 @@
     color: var(--c-dark, #1A1D23);
     text-transform: uppercase;
   }
-  .cell-inactive { border: 1.5px solid #1A1D23 !important; }
-  .cell-inactive.cell-inactive-black { background-color: #1A1D23 !important; }
-  .cell-inactive.cell-inactive-gray { background-color: #9ca3af !important; }
-  .cell-inactive.cell-inactive-border { background-color: #ffffff !important; }
+  /* Cases inactives : pas de bordure par défaut (mode gray + border = îlots), exception mode BLACK statu quo */
+  .cell-inactive.cell-inactive-black { background-color: #1A1D23 !important; border: 1.5px solid #1A1D23 !important; }
+  .cell-inactive.cell-inactive-gray { background-color: #9ca3af !important; border: 0 !important; }
+  .cell-inactive.cell-inactive-border { background-color: #ffffff !important; border: 0 !important; }
   /* Style options selecteur dans menu */
   .cw-style-opt { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .4rem .5rem; background: #f8fafc; border: 2px solid transparent; border-radius: 6px; cursor: pointer; min-width: 64px; min-height: 44px; font-size: .75rem; color: #1A1D23; font-weight: 600; }
   .cw-style-opt:hover { background: #e0f2f1; }
@@ -776,8 +809,12 @@ function crosswordGenerator() {
     generationError: null,
     suggestingPairs: false,
     suggestError: null,
+    activeTab: 'config', // S80 #47 onglets : 'config' ou 'grille' (grille auto-switch apres generate)
 
     init() {
+      // S80 #47 onglets : restaurer dernier onglet, mais forcer 'config' si pas de grille (sera basculer auto post-generate)
+      this.activeTab = localStorage.getItem('cw_active_tab') || 'config';
+      if (!this.grid) this.activeTab = 'config';
       // Preload depuis preset (?preset=publicId) si user authentifie redirige depuis /user/mots-croises
       const params = new URLSearchParams(window.location.search);
       const presetId = params.get('preset');
@@ -948,6 +985,9 @@ function crosswordGenerator() {
           this.unplaced = data.unplaced || [];
           this.gridStats = data.stats || null;
           this.showSolutions = false;
+          // S80 #47 onglets : auto-switch vers 'grille' apres generation reussie
+          this.activeTab = 'grille';
+          try { localStorage.setItem('cw_active_tab', 'grille'); } catch (_) {}
           if (!isRegenerate) {
             this.dispatchToast("{{ __('Grille générée avec succès.') }}", 'success');
           }
