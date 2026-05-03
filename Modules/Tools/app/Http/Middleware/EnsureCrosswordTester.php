@@ -12,6 +12,7 @@ namespace Modules\Tools\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -24,8 +25,20 @@ class EnsureCrosswordTester
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
+        $allowed = $user && $user->can('view_admin_panel');
 
-        if ($user && $user->can('view_admin_panel')) {
+        // S80 #58 debug : tracer chaque passage middleware
+        Log::channel('crossword')->info('EnsureCrosswordTester check', [
+            'allowed' => $allowed,
+            'user_email' => optional($user)->email,
+            'user_id' => optional($user)->id,
+            'method' => $request->method(),
+            'path' => $request->path(),
+            'expects_json' => $request->expectsJson(),
+            'accept' => $request->header('Accept'),
+        ]);
+
+        if ($allowed) {
             return $next($request);
         }
 

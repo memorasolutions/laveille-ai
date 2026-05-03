@@ -81,6 +81,15 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // S80 #58 — canal dédié crossword pour isoler debug PDF/grid (à conserver tant que l'outil est en construction)
+        'crossword' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/crossword.log'),
+            'level' => 'debug',
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

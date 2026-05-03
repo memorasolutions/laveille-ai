@@ -84,6 +84,21 @@ class PublicCrosswordController
 
     private function pdfResponse(Request $request, bool $blank): Response|JsonResponse
     {
+        // S80 #58 debug : canal dédié crossword pour tracer chaque appel.
+        Log::channel('crossword')->info('pdfResponse HIT', [
+            'blank' => $blank,
+            'user_email' => optional($request->user())->email,
+            'user_id' => optional($request->user())->id,
+            'accept' => $request->header('Accept'),
+            'content_type' => $request->header('Content-Type'),
+            'has_csrf_header' => $request->hasHeader('X-CSRF-TOKEN'),
+            'csrf_match' => $request->hasHeader('X-CSRF-TOKEN') && $request->header('X-CSRF-TOKEN') === csrf_token(),
+            'pairs_count' => is_array($request->input('pairs')) ? count($request->input('pairs')) : 0,
+            'title' => $request->input('title'),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+        ]);
+
         $validated = $request->validate([
             'pairs' => 'required|array|min:2|max:50',
             'pairs.*.clue' => 'required|string|max:250',
@@ -118,7 +133,11 @@ class PublicCrosswordController
                 'Cache-Control' => 'no-store',
             ]);
         } catch (\Throwable $e) {
-            Log::error('CrosswordPdf error', ['msg' => $e->getMessage()]);
+            Log::channel('crossword')->error('pdfResponse exception', [
+                'msg' => $e->getMessage(),
+                'class' => get_class($e),
+                'file' => $e->getFile().':'.$e->getLine(),
+            ]);
             return response()->json(['success' => false, 'error' => $e->getMessage()], 422);
         }
     }
