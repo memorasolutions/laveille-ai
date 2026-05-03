@@ -22,7 +22,7 @@
             <div class="d-flex flex-wrap gap-2 mb-4 no-print">
               {{-- Bouton 'Imprimer' retire S79 #43 - remplace par export PDF dedie (vierge + corrige) dans le menu Plus d'options apres generation. --}}
               @auth
-                <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" @click="save()" :disabled="saving" :class="!grid ? 'opacity-75' : ''" :title="!grid ? '{{ __('Générez d\'abord la grille avant de sauvegarder') }}' : '{{ __('Sauvegarder dans mon compte') }}'" aria-label="{{ __('Sauvegarder dans mon compte') }}">
+                <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" @click="save()" :disabled="saving" :class="!grid ? 'opacity-75' : ''" :title="!grid ? @js(__('Générez d\'abord la grille avant de sauvegarder')) : @js(__('Sauvegarder dans mon compte'))" aria-label="{{ __('Sauvegarder dans mon compte') }}">
                   <template x-if="!saving">
                     <span class="d-inline-flex align-items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -102,7 +102,7 @@
                 </button>
               </li>
               <li class="nav-item" role="presentation">
-                <button type="button" role="tab" class="nav-link" :class="activeTab === 'grille' ? 'active' : ''" @click="if(grid) { activeTab = 'grille'; localStorage.setItem('cw_active_tab', 'grille'); }" :disabled="!grid" :aria-selected="activeTab === 'grille'" :title="!grid ? '{{ __('Générez d\'abord la grille pour activer cet onglet') }}' : ''" style="font-weight:600;color:#053d4a;border-color:transparent;border-bottom:3px solid transparent" :style="activeTab === 'grille' ? 'border-bottom-color:#053d4a !important;background:rgba(11,114,133,.08)' : (!grid ? 'opacity:.5;cursor:not-allowed' : '')">
+                <button type="button" role="tab" class="nav-link" :class="activeTab === 'grille' ? 'active' : ''" @click="if(grid) { activeTab = 'grille'; localStorage.setItem('cw_active_tab', 'grille'); }" :disabled="!grid" :aria-selected="activeTab === 'grille'" :title="!grid ? @js(__('Générez d\'abord la grille pour activer cet onglet')) : ''" style="font-weight:600;color:#053d4a;border-color:transparent;border-bottom:3px solid transparent" :style="activeTab === 'grille' ? 'border-bottom-color:#053d4a !important;background:rgba(11,114,133,.08)' : (!grid ? 'opacity:.5;cursor:not-allowed' : '')">
                   <span class="d-inline-flex align-items-center gap-2">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
                     <span>{{ __('Grille générée') }}</span>
