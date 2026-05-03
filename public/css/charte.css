@@ -28,6 +28,41 @@
     --r-btn: 0.5rem;
 }
 
+/* ── 0. ANTI-SCROLL HORIZONTAL GLOBAL (S80 #47) ── */
+/* overflow-x: clip > overflow-x: hidden : ne casse pas position:sticky enfants. Support Chrome 90+, Safari 16+, Firefox 81+. */
+html, body {
+    overflow-x: clip;
+    max-width: 100%;
+}
+img, video, iframe, svg, embed, object {
+    max-width: 100%;
+    height: auto;
+}
+.table-responsive { max-width: 100%; overflow-x: auto; }
+.crossword-grid { max-width: 100%; overflow-x: auto; }
+
+/* ── 0b. POPUP OVERLAY GLOBAL (S80 #46) ── */
+/* Classe unique pour toute modale custom Alpine x-show. Display:grid + place-items:center robuste vs conflit Alpine display:none/block (vs flex). */
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1050;
+    padding: 1rem;
+}
+.popup-overlay > .popup-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
 /* ── 1. TYPOGRAPHIE GLOBALE ── */
 
 body {

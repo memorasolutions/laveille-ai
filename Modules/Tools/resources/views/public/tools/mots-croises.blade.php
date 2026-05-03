@@ -232,9 +232,9 @@
               <strong>{{ __('Erreur') }}:</strong> <span x-text="generationError"></span>
             </div>
 
-            {{-- Modal Import CSV (HORS template x-if grid : doit exister DOM avant 1re génération) --}}
-            <div x-show="csvImportOpen" x-cloak @click.self="csvImportOpen=false" @keydown.escape.window="csvImportOpen=false" role="dialog" aria-modal="true" aria-labelledby="csv-import-title" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1050;display:flex;align-items:center;justify-content:center;padding:1rem">
-              <div style="background:#fff;border-radius:12px;padding:1.5rem;max-width:600px;width:100%;max-height:90vh;overflow:auto">
+            {{-- Modal Import CSV (HORS template x-if grid : doit exister DOM avant 1re génération) - S80 #46 utilise .popup-overlay global (display:grid place-items:center robuste vs flex inline cassé par x-show) --}}
+            <div x-show="csvImportOpen" x-cloak x-transition.opacity @click.self="csvImportOpen=false" @keydown.escape.window="csvImportOpen=false" role="dialog" aria-modal="true" aria-labelledby="csv-import-title" class="popup-overlay">
+              <div class="popup-content">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <h2 id="csv-import-title" class="h5 mb-0" style="color:#053d4a">📤 {{ __('Importer un fichier CSV') }}</h2>
                   <button type="button" class="btn btn-link p-0" @click="csvImportOpen=false" aria-label="{{ __('Fermer') }}" style="font-size:1.5rem;color:#475569;text-decoration:none">&times;</button>
