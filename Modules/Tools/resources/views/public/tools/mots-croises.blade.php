@@ -324,20 +324,19 @@
               </div>
             </div>
 
-            {{-- Bouton générer --}}
+            {{-- Bouton générer (S81 #69 : texte adaptatif + cliquable même si <2 mots → toast clair) --}}
             <div class="d-grid gap-2 mb-4">
-              <button type="button" class="ct-btn ct-btn-primary ct-btn-lg d-inline-flex align-items-center justify-content-center gap-2" @click="generate()" :disabled="generating || !canGenerate()" aria-label="{{ __('Générer la grille') }}">
+              <button type="button" class="ct-btn ct-btn-primary ct-btn-lg d-inline-flex align-items-center justify-content-center gap-2" @click="generate()" :disabled="generating" :class="!canGenerate() ? 'opacity-75' : ''" :aria-label="generateBtnLabel()">
                 <template x-if="!generating">
                   <span class="d-inline-flex align-items-center gap-2">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7z"/><path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5z"/></svg>
-                    <span>{{ __('Générer la grille') }}</span>
+                    <span x-text="generateBtnLabel()"></span>
                   </span>
                 </template>
                 <template x-if="generating">
                   <span class="d-inline-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span>{{ __('Génération en cours...') }}</span></span>
                 </template>
               </button>
-              <small class="text-muted text-center" x-show="!canGenerate() && !generating">{{ __('Saisissez au moins 2 mots valides pour générer la grille.') }}</small>
             </div>
 
             {{-- Erreur génération --}}
@@ -1051,15 +1050,47 @@ function crosswordGenerator() {
       }
     },
 
+    // S81 #69 : compte les paires valides (clue + answer 2+ lettres alpha)
+    validPairsCount() {
+      return this.pairs.filter(p => p.clue && p.clue.trim() && p.answer && p.answer.trim().length >= 2 && /^[a-zA-ZàâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ]+$/.test(p.answer.trim())).length;
+    },
+
     canGenerate() {
-      const validPairs = this.pairs.filter(p => p.clue && p.clue.trim() && p.answer && p.answer.trim().length >= 2 && /^[a-zA-ZàâäéèêëïîôöùûüÿçÀÂÄÉÈÊËÏÎÔÖÙÛÜŸÇ]+$/.test(p.answer.trim()));
-      return validPairs.length >= 2 && Object.keys(this.errors).length === 0;
+      return this.validPairsCount() >= 2 && Object.keys(this.errors).length === 0;
+    },
+
+    // S81 #69 : label adaptatif sur bouton Générer (UX 2026 inclusive — explique pourquoi disabled directement sur le bouton)
+    generateBtnLabel() {
+      const valid = this.validPairsCount();
+      if (valid >= 2 && Object.keys(this.errors).length === 0) {
+        return @js(__('Générer la grille'));
+      }
+      if (Object.keys(this.errors).length > 0) {
+        return @js(__('Corrigez les erreurs avant de générer'));
+      }
+      const missing = 2 - valid;
+      return missing === 1
+        ? @js(__('Encore 1 mot valide à saisir'))
+        : @js(__('Saisissez 2 mots valides minimum'));
     },
 
     // S80 cleanup : suggestPairs() retirée (bouton UI retiré S79, dead code orphelin)
 
     async generate(seed = null, isRegenerate = false) {
-      if (!this.canGenerate()) return;
+      // S81 #69 : si pas valide, toast clair au lieu de silent return
+      if (!this.canGenerate()) {
+        const valid = this.validPairsCount();
+        if (Object.keys(this.errors).length > 0) {
+          this.dispatchToast(@js(__('Corrigez les erreurs (champs en rouge) avant de générer la grille.')), 'warning', 5000);
+        } else {
+          const missing = 2 - valid;
+          const msg = missing === 1
+            ? @js(__('Il manque 1 mot valide pour générer la grille (au moins 2 requis).'))
+            : @js(__('Il faut au moins 2 mots valides pour générer la grille. Saisissez vos mots dans les champs ci-dessus.'));
+          this.dispatchToast(msg, 'warning', 5500);
+        }
+        return;
+      }
       if (isRegenerate) {
         this.regenerating = true;
       } else {
