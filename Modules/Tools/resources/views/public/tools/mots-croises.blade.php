@@ -243,13 +243,13 @@
                       <span aria-hidden="true">↗</span>
                       <span>{{ __('Ouvrir Claude') }}</span>
                     </a>
-                    <a class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" :href="aiGeminiUrl()" target="_blank" rel="noopener" style="min-height:44px" :class="!aiTheme.trim() ? 'opacity-50' : ''">
-                      <span aria-hidden="true">↗</span>
-                      <span>{{ __('Ouvrir Gemini') }}</span>
-                    </a>
+                    {{-- S81 #67 : bouton 'Ouvrir Gemini' retiré (deeplink ?q= non supporté par Google en 2026, sonar-pro option 5 90/100). User Gemini : copier le prompt puis coller manuellement. --}}
                   </div>
                   <p class="small mt-3 mb-0" style="color:#475569">
                     <strong>{{ __('Étape suivante') }}</strong> : {{ __('une fois votre IA vous a renvoyé le CSV, copiez-le, allez dans le bouton ') }}<strong>{{ __('Données CSV') }}</strong>{{ __(' plus bas, cliquez ') }}<strong>{{ __('Importer CSV') }}</strong>{{ __(' et collez le contenu dans la zone de texte.') }}
+                  </p>
+                  <p class="small mt-2 mb-0" style="color:#475569;font-style:italic">
+                    {{ __('Vous préférez Gemini ?') }} {{ __('Copiez le prompt avec le bouton ci-dessus, puis collez-le dans') }} <a href="https://gemini.google.com/app" target="_blank" rel="noopener" style="color:#053d4a;font-weight:600">gemini.google.com</a>.
                   </p>
                 </div>
               </div>
@@ -294,6 +294,11 @@
                 <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="addPair()" aria-label="{{ __('Ajouter un nouveau mot') }}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   <span>{{ __('Ajouter un mot') }}</span>
+                </button>
+                {{-- S81 #68 : bouton reset paires + confirm modal Memora (règle anti-popup native #41) --}}
+                <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" @click="resetPairs()" aria-label="{{ __('Tout effacer les mots') }}" :disabled="!hasAnyPairContent()" :class="!hasAnyPairContent() ? 'opacity-50' : ''">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                  <span>{{ __('Tout effacer') }}</span>
                 </button>
                 <div class="position-relative" x-data="{ dataMenuOpen: false }">
                   <button type="button" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px" @click="dataMenuOpen = !dataMenuOpen" :aria-expanded="dataMenuOpen" aria-haspopup="menu" aria-label="{{ __('Données : importer, exporter, modèle CSV') }}">
@@ -576,9 +581,13 @@
     color: #ffffff;
     font-size: .7rem;
     font-weight: 700;
-    padding: .25rem .65rem;
+    padding: .35rem .75rem;
     border-radius: 999px;
     text-transform: uppercase;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     letter-spacing: .04em;
   }
   .cw-guest-intro {
@@ -959,6 +968,25 @@ function crosswordGenerator() {
     addPair() {
       this.pairs.push({clue: '', answer: ''});
       this.saveDraft();
+    },
+
+    // S81 #68 : true si au moins une paire a contenu (pour activer bouton "Tout effacer")
+    hasAnyPairContent() {
+      return (this.pairs || []).some(p => (p.clue || '').trim() || (p.answer || '').trim());
+    },
+
+    // S81 #68 : reset toutes les paires avec confirmation modale Memora (règle anti-popup native #41)
+    resetPairs() {
+      if (!this.hasAnyPairContent()) return;
+      this.$dispatch('open-confirm-global', {
+        message: @js(__('Effacer toutes les paires saisies ? Cette action est irréversible.')),
+        callback: () => {
+          this.pairs = [{clue: '', answer: ''}, {clue: '', answer: ''}];
+          this.errors = {};
+          this.saveDraft();
+          this.dispatchToast(@js(__('Toutes les paires ont été effacées.')), 'info');
+        }
+      });
     },
 
     async loadPreset(publicId) {
