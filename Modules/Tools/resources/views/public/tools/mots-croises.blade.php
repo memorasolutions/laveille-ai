@@ -176,7 +176,7 @@
               <button type="button" class="ct-btn ct-btn-outline w-100 d-flex align-items-center justify-content-between" style="min-height:44px" @click="aiBuilderOpen = !aiBuilderOpen" :aria-expanded="aiBuilderOpen" aria-controls="ai-builder-panel">
                 <span class="d-inline-flex align-items-center gap-2">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L9.5 9 2 12l7.5 3 2.5 7 2.5-7 7.5-3-7.5-3z"/></svg>
-                  <span><strong>{{ __('Générer mes mots avec mon IA') }}</strong> <span class="d-block d-sm-inline small" style="color:#475569;font-weight:400">— {{ __('100 % gratuit, utilise votre ChatGPT, Claude ou Gemini') }}</span></span>
+                  <span><strong>{{ __('Générer mes mots avec mon IA') }}</strong> <span class="d-block d-sm-inline small" style="opacity:.75;font-weight:400">— {{ __('100 % gratuit, utilise votre ChatGPT, Claude ou Gemini') }}</span></span>
                 </span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" :style="aiBuilderOpen ? 'transform:rotate(180deg)' : ''"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
