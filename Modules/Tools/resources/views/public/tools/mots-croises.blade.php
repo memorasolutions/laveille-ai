@@ -171,6 +171,90 @@
               @endauth
             </div>
 
+            {{-- S81 #65 Form-to-Prompt BYO-AI : générer prompt zero-shot CoT pour copier dans son IA → user récupère CSV → import via menu Données CSV --}}
+            <div class="mb-4">
+              <button type="button" class="ct-btn ct-btn-outline w-100 d-flex align-items-center justify-content-between" style="min-height:44px" @click="aiBuilderOpen = !aiBuilderOpen" :aria-expanded="aiBuilderOpen" aria-controls="ai-builder-panel">
+                <span class="d-inline-flex align-items-center gap-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L9.5 9 2 12l7.5 3 2.5 7 2.5-7 7.5-3-7.5-3z"/></svg>
+                  <span><strong>{{ __('Générer mes mots avec mon IA') }}</strong> <span class="d-block d-sm-inline small" style="color:#475569;font-weight:400">— {{ __('100 % gratuit, utilise votre ChatGPT, Claude ou Gemini') }}</span></span>
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" :style="aiBuilderOpen ? 'transform:rotate(180deg)' : ''"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div x-show="aiBuilderOpen" x-cloak x-transition id="ai-builder-panel" class="card mt-2" style="border-radius:var(--r-base);border:1px solid #e2e8f0">
+                <div class="card-body p-3 p-md-4">
+                  <p class="small mb-3" style="color:#475569">
+                    {{ __('Remplissez le formulaire ci-dessous pour générer un prompt sur mesure. Copiez-le, collez-le dans votre IA préférée (ChatGPT, Claude, Gemini, etc.). Votre IA vous renverra un fichier CSV. Collez-le ensuite dans le bouton ') }}<strong>{{ __('Données CSV → Importer CSV') }}</strong>{{ __(' plus bas.') }}
+                  </p>
+                  <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                      <label for="aiTheme" class="form-label fw-medium">{{ __('Thème') }} <span style="color:#DC2626">*</span></label>
+                      <input type="text" id="aiTheme" class="form-control" x-model="aiTheme" placeholder="{{ __('Ex: Capitales du monde, Vocabulaire IA, Histoire du Québec') }}" maxlength="120">
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <label for="aiNbWords" class="form-label fw-medium">{{ __('Nombre de mots') }}</label>
+                      <input type="number" id="aiNbWords" class="form-control" x-model.number="aiNbWords" min="5" max="50" step="1">
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <label for="aiLevel" class="form-label fw-medium">{{ __('Niveau') }}</label>
+                      <select id="aiLevel" class="form-control" x-model="aiLevel">
+                        <option value="primaire">{{ __('Primaire') }}</option>
+                        <option value="secondaire">{{ __('Secondaire') }}</option>
+                        <option value="adulte" selected>{{ __('Adulte') }}</option>
+                        <option value="expert">{{ __('Expert / spécialiste') }}</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4 col-6">
+                      <label for="aiLang" class="form-label fw-medium">{{ __('Langue') }}</label>
+                      <select id="aiLang" class="form-control" x-model="aiLang">
+                        <option value="fr" selected>{{ __('Français') }}</option>
+                        <option value="en">{{ __('Anglais') }}</option>
+                        <option value="es">{{ __('Espagnol') }}</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4 col-6">
+                      <label for="aiClueStyle" class="form-label fw-medium">{{ __('Style des indices') }}</label>
+                      <select id="aiClueStyle" class="form-control" x-model="aiClueStyle">
+                        <option value="court">{{ __('Court (1-5 mots)') }}</option>
+                        <option value="definition" selected>{{ __('Définition (~10 mots)') }}</option>
+                        <option value="long">{{ __('Long et descriptif') }}</option>
+                        <option value="devinette">{{ __('Devinette créative') }}</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4 col-12">
+                      <label for="aiTarget" class="form-label fw-medium">{{ __('Cible (optionnel)') }}</label>
+                      <input type="text" id="aiTarget" class="form-control" x-model="aiTarget" placeholder="{{ __('Ex: élèves Quebec, profs, grand public') }}" maxlength="100">
+                    </div>
+                  </div>
+                  <label for="aiPromptOutput" class="form-label fw-medium d-flex justify-content-between align-items-center">
+                    <span>{{ __('Prompt généré pour votre IA') }}</span>
+                    <small style="color:#475569;font-weight:400" x-text="aiPromptText().length + ' {{ __('caractères') }}'"></small>
+                  </label>
+                  <textarea id="aiPromptOutput" class="form-control" rows="10" readonly x-text="aiPromptText()" style="font-family:monospace;font-size:.82rem;background:#F8FAFB;line-height:1.5"></textarea>
+                  <div class="d-flex flex-column flex-sm-row gap-2 mt-3">
+                    <button type="button" class="ct-btn ct-btn-accent flex-fill d-inline-flex align-items-center justify-content-center gap-2" @click="copyAiPrompt()" style="min-height:44px" :disabled="!aiTheme.trim()">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <span x-text="aiPromptCopied ? '{{ __('Copié ✓') }}' : '{{ __('Copier le prompt') }}'"></span>
+                    </button>
+                    <a class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" :href="aiChatGPTUrl()" target="_blank" rel="noopener" style="min-height:44px" :class="!aiTheme.trim() ? 'opacity-50' : ''">
+                      <span aria-hidden="true">↗</span>
+                      <span>{{ __('Ouvrir ChatGPT') }}</span>
+                    </a>
+                    <a class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" :href="aiClaudeUrl()" target="_blank" rel="noopener" style="min-height:44px" :class="!aiTheme.trim() ? 'opacity-50' : ''">
+                      <span aria-hidden="true">↗</span>
+                      <span>{{ __('Ouvrir Claude') }}</span>
+                    </a>
+                    <a class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" :href="aiGeminiUrl()" target="_blank" rel="noopener" style="min-height:44px" :class="!aiTheme.trim() ? 'opacity-50' : ''">
+                      <span aria-hidden="true">↗</span>
+                      <span>{{ __('Ouvrir Gemini') }}</span>
+                    </a>
+                  </div>
+                  <p class="small mt-3 mb-0" style="color:#475569">
+                    <strong>{{ __('Étape suivante') }}</strong> : {{ __('une fois votre IA vous a renvoyé le CSV, copiez-le, allez dans le bouton ') }}<strong>{{ __('Données CSV') }}</strong>{{ __(' plus bas, cliquez ') }}<strong>{{ __('Importer CSV') }}</strong>{{ __(' et collez le contenu dans la zone de texte.') }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {{-- Mots à placer --}}
             <div class="mb-4">
               <div class="d-flex justify-content-between align-items-center mb-2">
@@ -355,13 +439,23 @@
                   </div>
                 </div>
 
+                {{-- S81 #65 WCAG 2.2 AAA : role=grid + aria-rowindex/colindex + nav clavier flèches + focus visible --}}
                 <div class="table-responsive d-flex justify-content-center">
-                  <table class="crossword-grid" :aria-label="'{{ __('Grille de mots croisés') }} ' + grid.rows + 'x' + grid.cols">
+                  <table class="crossword-grid" role="grid" :aria-label="'{{ __('Grille de mots croisés') }} ' + grid.rows + ' {{ __('lignes par') }} ' + grid.cols + ' {{ __('colonnes') }}'" :aria-rowcount="grid.rows" :aria-colcount="grid.cols">
+                    <caption class="visually-hidden">{{ __('Grille interactive de mots croisés. Utilisez les touches fléchées pour naviguer entre les cases.') }}</caption>
                     <tbody>
                       <template x-for="(row, rowIndex) in grid.cells" :key="rowIndex">
-                        <tr>
+                        <tr role="row" :aria-rowindex="rowIndex + 1">
                           <template x-for="(cell, colIndex) in row" :key="colIndex">
-                            <td :class="cell !== null ? 'cell-active' : ('cell-inactive cell-inactive-' + inactiveStyle)" :aria-label="cell !== null ? ('{{ __('Case') }} ' + (rowIndex + 1) + '-' + (colIndex + 1) + (cell.number ? ', {{ __('numéro') }} ' + cell.number : '')) : '{{ __('Case noire') }}'">
+                            <td role="gridcell"
+                                :data-cell-row="rowIndex"
+                                :data-cell-col="colIndex"
+                                :tabindex="(rowIndex === gridFocusRow && colIndex === gridFocusCol) ? 0 : -1"
+                                :aria-colindex="colIndex + 1"
+                                :class="cell !== null ? 'cell-active' : ('cell-inactive cell-inactive-' + inactiveStyle)"
+                                :aria-label="cell !== null ? ('{{ __('Case active ligne') }} ' + (rowIndex + 1) + ' {{ __('colonne') }} ' + (colIndex + 1) + (cell.number ? ', {{ __('départ du mot numéro') }} ' + cell.number : '') + (showSolutions && cell.letter ? ', {{ __('lettre') }} ' + cell.letter : '')) : ('{{ __('Case inactive ligne') }} ' + (rowIndex + 1) + ' {{ __('colonne') }} ' + (colIndex + 1))"
+                                @keydown="gridKeyNav(rowIndex, colIndex, $event)"
+                                @focus="gridFocusRow = rowIndex; gridFocusCol = colIndex">
                               <template x-if="cell !== null">
                                 <span>
                                   <span class="number" x-show="cell.number" x-text="cell.number"></span>
@@ -619,6 +713,10 @@
   .cell-inactive.cell-inactive-black { background-color: #1A1D23 !important; border: 1.5px solid #1A1D23 !important; }
   .cell-inactive.cell-inactive-gray { background-color: #9ca3af !important; border: 0 !important; }
   .cell-inactive.cell-inactive-border { background-color: #ffffff !important; border: 0 !important; }
+  /* S81 #65 WCAG 2.2 AAA focus visible : outline 3px contraste élevé */
+  .crossword-grid td:focus { outline: 3px solid #C2410C !important; outline-offset: 2px !important; z-index: 5; position: relative; }
+  .crossword-grid td:focus-visible { outline: 3px solid #C2410C !important; outline-offset: 2px !important; }
+  .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
   /* Style options selecteur dans menu */
   .cw-style-opt { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .4rem .5rem; background: #f8fafc; border: 2px solid transparent; border-radius: 6px; cursor: pointer; min-width: 64px; min-height: 44px; font-size: .75rem; color: #1A1D23; font-weight: 600; }
   .cw-style-opt:hover { background: #e0f2f1; }
@@ -807,6 +905,20 @@ function crosswordGenerator() {
     errors: {},
     generationError: null,
     activeTab: 'config', // S80 #47 onglets : 'config' ou 'grille' (grille auto-switch apres generate)
+
+    // S81 #65 Form-to-Prompt BYO-AI : générer prompt zero-shot CoT pour IA externe (zéro coût backend)
+    aiBuilderOpen: false,
+    aiTheme: '',
+    aiNbWords: 12,
+    aiLevel: 'adulte',
+    aiLang: 'fr',
+    aiClueStyle: 'definition',
+    aiTarget: '',
+    aiPromptCopied: false,
+
+    // S81 #65 WCAG AAA grille : focus position pour navigation clavier flèches
+    gridFocusRow: 0,
+    gridFocusCol: 0,
 
     init() {
       // S80 #47 onglets : restaurer dernier onglet, mais forcer 'config' si pas de grille (sera basculer auto post-generate)
@@ -1168,6 +1280,110 @@ function crosswordGenerator() {
       this.words = [];
       this.unplaced = [];
       this.generationError = null;
+    },
+
+    // S81 #65 Form-to-Prompt : génère le prompt zero-shot CoT à partir du form
+    aiPromptText() {
+      const theme = (this.aiTheme || '').trim() || '__VOTRE THÈME ICI__';
+      const n = Math.max(5, Math.min(50, parseInt(this.aiNbWords) || 12));
+      const langMap = { fr: 'français', en: 'anglais', es: 'espagnol' };
+      const lang = langMap[this.aiLang] || 'français';
+      const levelMap = {
+        primaire: 'élèves du primaire (8-12 ans), vocabulaire simple et courant',
+        secondaire: 'élèves du secondaire (12-17 ans), vocabulaire de niveau scolaire',
+        adulte: 'adultes éduqués, vocabulaire général',
+        expert: 'experts du domaine, vocabulaire technique et précis',
+      };
+      const level = levelMap[this.aiLevel] || levelMap.adulte;
+      const styleMap = {
+        court: 'Très court (1 à 5 mots), comme un mot-clé ou synonyme',
+        definition: 'Définition concise (8 à 15 mots) qui décrit clairement le mot',
+        long: 'Description détaillée (15 à 25 mots) avec contexte',
+        devinette: 'Devinette créative et amusante avec jeu sur les sens',
+      };
+      const style = styleMap[this.aiClueStyle] || styleMap.definition;
+      const target = (this.aiTarget || '').trim();
+      const targetLine = target ? `Cible spécifique : ${target}.\n` : '';
+
+      return `Tu es expert créateur de mots croisés en ${lang}, niveau ${level}.
+${targetLine}
+THÈME : "${theme}"
+NOMBRE DE PAIRES À GÉNÉRER : ${n}
+STYLE DES INDICES : ${style}
+
+RAISONNE étape par étape (ne montre pas le raisonnement, seulement le résultat final) :
+1. Liste mentalement 20 mots forts du thème (3 à 12 lettres, en ${lang}, sans accents ni espaces).
+2. Sélectionne les ${n} meilleurs en privilégiant la variété de longueurs ET les lettres communes (E, A, S, N, R, T, I, L, O, U, C, D, P, M) qui faciliteront les croisements.
+3. Pour chaque mot, rédige un indice cohérent avec le style choisi.
+
+CONTRAINTES ABSOLUES :
+- Réponses en MAJUSCULES, sans accents, sans espaces (ex: QUEBEC, pas Québec ; LAVEILLE, pas "La Veille")
+- Longueur réponse : entre 3 et 12 lettres
+- Indice : maximum 100 caractères, ${this.aiLang === 'fr' ? 'en français correct (accents permis)' : 'in proper '+lang}
+- Pas de réponses identiques ou variantes proches (ex: pas CHAT et CHATS ensemble)
+
+FORMAT DE SORTIE (CRITIQUE) :
+Réponds UNIQUEMENT avec un bloc CSV strict, sans commentaires avant ou après. Première ligne = en-tête. Séparateur = point-virgule (;). Pas de guillemets autour des valeurs.
+
+Exemple exact à reproduire :
+
+Indice;Mot
+Capitale du Québec;QUEBEC
+Langage de programmation web;PHP
+Animal qui aboie;CHIEN
+
+Maintenant, génère ${n} paires sur le thème "${theme}".`;
+    },
+
+    aiChatGPTUrl() {
+      return 'https://chat.openai.com/?q=' + encodeURIComponent(this.aiPromptText());
+    },
+    aiClaudeUrl() {
+      return 'https://claude.ai/new?q=' + encodeURIComponent(this.aiPromptText());
+    },
+    aiGeminiUrl() {
+      return 'https://gemini.google.com/app?q=' + encodeURIComponent(this.aiPromptText());
+    },
+
+    async copyAiPrompt() {
+      if (!this.aiTheme.trim()) {
+        this.dispatchToast("{{ __('Saisissez d\'abord un thème.') }}", 'warning');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(this.aiPromptText());
+        this.aiPromptCopied = true;
+        setTimeout(() => { this.aiPromptCopied = false; }, 2500);
+        this.dispatchToast("{{ __('Prompt copié ! Collez-le dans votre IA.') }}", 'success');
+      } catch (e) {
+        // Fallback : sélection textarea
+        const ta = document.getElementById('aiPromptOutput');
+        if (ta) { ta.select(); document.execCommand('copy'); }
+        this.dispatchToast("{{ __('Prompt copié (fallback).') }}", 'info');
+      }
+    },
+
+    // S81 #65 WCAG AAA : navigation clavier flèches sur la grille générée (focus de cell en cell)
+    gridKeyNav(rowIndex, colIndex, event) {
+      if (!this.grid || !this.grid.cells) return;
+      const rows = this.grid.rows;
+      const cols = this.grid.cols;
+      let r = rowIndex, c = colIndex;
+      switch (event.key) {
+        case 'ArrowUp': r = Math.max(0, r - 1); event.preventDefault(); break;
+        case 'ArrowDown': r = Math.min(rows - 1, r + 1); event.preventDefault(); break;
+        case 'ArrowLeft': c = Math.max(0, c - 1); event.preventDefault(); break;
+        case 'ArrowRight': c = Math.min(cols - 1, c + 1); event.preventDefault(); break;
+        case 'Home': c = 0; event.preventDefault(); break;
+        case 'End': c = cols - 1; event.preventDefault(); break;
+        default: return;
+      }
+      this.gridFocusRow = r;
+      this.gridFocusCol = c;
+      this.$nextTick(() => {
+        const target = document.querySelector('[data-cell-row="' + r + '"][data-cell-col="' + c + '"]');
+        if (target) target.focus();
+      });
     },
 
     dispatchToast(message, variant, duration) {
