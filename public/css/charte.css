@@ -954,6 +954,11 @@ article h3 {
 .ct-btn-outline { background: transparent; border: 2px solid var(--c-primary); color: var(--c-primary); }
 .ct-btn-outline:hover { background: var(--c-primary); color: #fff; }
 
+/* S81 #70 : variante 'locked' pour boutons action principale en attente de prérequis (outline + cadenas, pas de hover-fill, cursor:not-allowed) */
+.ct-btn-locked { background: transparent; border: 2px dashed #94A3B8; color: #64748B; }
+.ct-btn-locked:hover { background: transparent; color: #64748B; }
+.ct-btn-locked:focus-visible { outline: 3px solid #C2410C; outline-offset: 2px; }
+
 .ct-btn-danger { background: var(--c-danger); color: #fff; }
 .ct-btn-danger:hover { background: var(--c-danger-hover); color: #fff; }
 

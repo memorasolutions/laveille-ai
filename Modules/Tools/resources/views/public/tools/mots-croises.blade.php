@@ -277,7 +277,7 @@
                     <div class="invalid-feedback" x-show="errors['answer-' + index]" x-text="errors['answer-' + index]"></div>
                   </div>
                   <div class="col-12 col-md-1 d-flex">
-                    <button type="button" class="crossword-pair-delete" @click="removePair(index)" :disabled="pairs.length <= 1" :aria-label="'{{ __('Supprimer le mot') }} ' + (index + 1)" :title="'{{ __('Supprimer le mot') }} ' + (index + 1)">
+                    <button type="button" class="crossword-pair-delete" @click="removePair(index)" x-show="pairs.length > 2" :aria-label="'{{ __('Supprimer le mot') }} ' + (index + 1)" :title="'{{ __('Supprimer le mot') }} ' + (index + 1)">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <path d="M3 6h18"/>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
@@ -326,10 +326,16 @@
 
             {{-- Bouton générer (S81 #69 : texte adaptatif + cliquable même si <2 mots → toast clair) --}}
             <div class="d-grid gap-2 mb-4">
-              <button type="button" class="ct-btn ct-btn-primary ct-btn-lg d-inline-flex align-items-center justify-content-center gap-2" @click="generate()" :disabled="generating" :class="!canGenerate() ? 'opacity-75' : ''" :aria-label="generateBtnLabel()">
+              {{-- S81 #70 : style adaptatif outline+cadenas si !canGenerate (sonar-pro 95/100) — pleine couleur si OK --}}
+              <button type="button" class="ct-btn ct-btn-lg d-inline-flex align-items-center justify-content-center gap-2" :class="canGenerate() ? 'ct-btn-primary' : 'ct-btn-locked'" @click="generate()" :disabled="generating" :aria-label="generateBtnLabel()" :aria-disabled="!canGenerate()" :style="!canGenerate() ? 'cursor:not-allowed' : ''">
                 <template x-if="!generating">
                   <span class="d-inline-flex align-items-center gap-2">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7z"/><path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5z"/></svg>
+                    <template x-if="canGenerate()">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7z"/><path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5z"/></svg>
+                    </template>
+                    <template x-if="!canGenerate()">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </template>
                     <span x-text="generateBtnLabel()"></span>
                   </span>
                 </template>
