@@ -8,16 +8,15 @@
 @php $playUrl = $preset->share_url; @endphp
 
 <style>
-/* 2026-05-05 #100 : taille cellule responsive via CSS clamp() depuis --cols/--rows set via Alpine bind. Min 22px AAA-near, max 44px target size. */
-.cw-grid-wrap{--cols:10;--rows:10;width:100%;max-width:100%;overflow-x:auto}
-.cw-grid-wrap .crossword-grid{--cell:clamp(22px,min(calc((100vw - 60px) / var(--cols)),calc((85vh - 220px) / var(--rows)),44px),44px)}
-.crossword-grid{table-layout:fixed;border-collapse:collapse;margin:1rem auto;background:#fff}
-.crossword-grid td{padding:0;text-align:center;vertical-align:middle;box-sizing:border-box}
+/* 2026-05-05 #121 : grille 100% largeur container, hauteur cellule = largeur (carrée) via aspect-ratio. Min 22px AAA, pas de max. */
+.cw-grid-wrap{--cols:10;--rows:10;width:100%;max-width:100%}
+.crossword-grid{table-layout:fixed;border-collapse:collapse;margin:1rem auto;background:#fff;width:100%;max-width:100%}
+.crossword-grid td{padding:0;text-align:center;vertical-align:middle;box-sizing:border-box;aspect-ratio:1/1}
 .cell-active{background-color:#ffffff;border:2px solid #1A1D23;position:relative}
 .cell-inactive{background-color:#1A1D23;border:2px solid #1A1D23}
-.cw-grid-wrap .crossword-grid td{width:var(--cell);height:var(--cell);min-width:22px;min-height:22px}
+.cw-grid-wrap .crossword-grid td{min-width:22px;min-height:22px}
 .cell-wrapper{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-.cell-active input{width:100%;height:100%;min-width:22px;min-height:22px;border:none;text-align:center;font-size:calc(var(--cell, 44px) * 0.5);font-weight:700;text-transform:uppercase;background:transparent;color:#1A1D23;padding:0;display:block}
+.cell-active input{width:100%;height:100%;min-width:22px;min-height:22px;border:none;text-align:center;font-size:clamp(0.9rem, 2vw, 1.4rem);font-weight:700;text-transform:uppercase;background:transparent;color:#1A1D23;padding:0;display:block}
 .cell-active input:focus-visible{outline:3px solid #053d4a;outline-offset:-3px;background:#fff7ed}
 .cell-correct{background-color:#bbf7d0!important;color:#064e3b!important}
 .cell-wrong{background-color:#fecaca!important;color:#5b0c0c!important}
