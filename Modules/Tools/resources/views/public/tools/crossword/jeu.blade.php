@@ -8,10 +8,11 @@
 @php $playUrl = $preset->share_url; @endphp
 
 <style>
-/* 2026-05-05 #121 : grille 100% largeur container, hauteur cellule = largeur (carrée) via aspect-ratio. Min 22px AAA, pas de max. */
+/* 2026-05-05 #122 v3 : grille TOUJOURS 100% largeur container + ratio var(--cols)/var(--rows) préservé OBLIGATOIRE. Cells carrées garanties. */
 .cw-grid-wrap{--cols:10;--rows:10;width:100%;max-width:100%}
-.crossword-grid{table-layout:fixed;border-collapse:collapse;margin:1rem auto;background:#fff;width:100%;max-width:100%}
-.crossword-grid td{padding:0;text-align:center;vertical-align:middle;box-sizing:border-box;aspect-ratio:1/1}
+.cw-grid-wrap .table-responsive{width:100%;aspect-ratio:calc(var(--cols)) / calc(var(--rows));display:block !important;margin:1rem 0;overflow:visible}
+.crossword-grid{table-layout:fixed;border-collapse:collapse;background:#fff;width:100%;height:100%}
+.crossword-grid td{padding:0;text-align:center;vertical-align:middle;box-sizing:border-box;width:auto;height:auto}
 .cell-active{background-color:#ffffff;border:2px solid #1A1D23;position:relative}
 .cell-inactive{background-color:#1A1D23;border:2px solid #1A1D23}
 .cw-grid-wrap .crossword-grid td{min-width:22px;min-height:22px}
