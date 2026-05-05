@@ -10,6 +10,8 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
 @endsection
 @section('content')
+{{-- 2026-05-05 #106 : helper WCAG contrast global (window.WcagContrast.ratio) - DRY pour QR personnalisé + futurs outils --}}
+@include('core::partials.wcag-contrast-helper')
 <section class="wpo-blog-single-section section-padding">
   <div class="container">
     <div class="row justify-content-center">
@@ -309,12 +311,13 @@
                           </div>
                         </div>
 
-                        <div class="mb-3" x-data="{ get ratio() { const fg=this.$root.qrFg, bg=this.$root.qrBg; const hexRgb=(h)=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}; const lum=(rgb)=>{const ll=(c)=>{const s=c/255;return s<=0.03928?s/12.92:Math.pow((s+0.055)/1.055,2.4);};return 0.2126*ll(rgb[0])+0.7152*ll(rgb[1])+0.0722*ll(rgb[2]);}; const l1=lum(hexRgb(fg)), l2=lum(hexRgb(bg)); const r=(Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05); return Math.round(r*100)/100; } }">
-                          <span class="small fw-bold" :style="ratio >= 7 ? 'color:#047857' : (ratio >= 4.5 ? 'color:#92400e' : 'color:#b91c1c')">
-                            {{ __('Contraste') }} : <span x-text="ratio"></span>:1
-                            <span x-show="ratio >= 7" x-cloak>{{ __('AAA ✓') }}</span>
-                            <span x-show="ratio >= 4.5 && ratio < 7" x-cloak>{{ __('AA ⚠') }}</span>
-                            <span x-show="ratio < 4.5" x-cloak>{{ __('FAIL ✗ — QR illisible') }}</span>
+                        {{-- 2026-05-05 #106 : utilise window.WcagContrast.ratio() depuis core::partials.wcag-contrast-helper (DRY) --}}
+                        <div class="mb-3">
+                          <span class="small fw-bold" :style="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 7 ? 'color:#047857' : ((window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 4.5 ? 'color:#92400e' : 'color:#b91c1c')">
+                            {{ __('Contraste') }} : <span x-text="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1)"></span>:1
+                            <span x-show="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 7" x-cloak>{{ __('AAA ✓') }}</span>
+                            <span x-show="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 4.5 && (window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) < 7" x-cloak>{{ __('AA ⚠') }}</span>
+                            <span x-show="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) < 4.5" x-cloak>{{ __('FAIL ✗ — QR illisible') }}</span>
                           </span>
                         </div>
 
