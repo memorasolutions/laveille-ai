@@ -156,53 +156,56 @@
               </div>
               @auth
               <div class="col-12">
-                <button type="button"
-                        class="ct-btn d-inline-flex align-items-start gap-3 text-start w-100"
-                        style="min-height:44px;padding:.75rem 1.25rem;max-width:100%;white-space:normal"
-                        :class="metadata.is_public ? 'ct-btn-primary' : 'ct-btn-outline'"
-                        @click="togglePublic()"
-                        :aria-pressed="metadata.is_public"
-                        :aria-label="metadata.is_public ? '{{ __('Rendre la grille privée') }}' : '{{ __('Rendre la grille publique') }}'">
-                  <template x-if="!metadata.is_public">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0;margin-top:2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  </template>
-                  <template x-if="metadata.is_public">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                  </template>
-                  <span style="flex:1;min-width:0">
-                    <strong x-text="metadata.is_public ? '{{ __('Grille publique') }} ✓' : '{{ __('Rendre la grille publique') }}'"></strong>
-                    @php
-                        $msgPublic = __('Lien partageable /jeumc/... actif - cliquez pour rendre privée.');
-                        $msgPrivate = __('Génère un lien partageable /jeumc/... que les autres pourront jouer en ligne.');
-                    @endphp
-                    <span class="d-block small" style="color:inherit;opacity:.85;font-weight:400" x-data="{ msgPublic: {{ \Illuminate\Support\Js::from($msgPublic) }}, msgPrivate: {{ \Illuminate\Support\Js::from($msgPrivate) }} }" x-text="metadata.is_public ? msgPublic : msgPrivate"></span>
+                {{-- 2026-05-05 #132 : switch Bootstrap form-switch avec label dynamique 🔒 Privée / 🌐 Publique - etat visuel evident --}}
+                @php
+                    $msgPublic = __('Lien partageable /jeumc/... actif. Cliquez pour rendre privée.');
+                    $msgPrivate = __('Génère un lien partageable /jeumc/... que les autres pourront jouer en ligne.');
+                @endphp
+                <label class="d-flex align-items-center gap-3 p-3 mb-0"
+                       :style="metadata.is_public ? 'background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;cursor:pointer' : 'background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;cursor:pointer'"
+                       :aria-label="metadata.is_public ? '{{ __('Grille publique - cliquez pour rendre privée') }}' : '{{ __('Grille privée - cliquez pour rendre publique') }}'"
+                       x-data="{ msgPublic: {{ \Illuminate\Support\Js::from($msgPublic) }}, msgPrivate: {{ \Illuminate\Support\Js::from($msgPrivate) }} }">
+                  <input class="form-check-input mt-0" type="checkbox" role="switch"
+                         :checked="metadata.is_public"
+                         @change="togglePublic()"
+                         style="width:3em;height:1.5em;flex-shrink:0;cursor:pointer;margin:0;background-color:#fff;border:1px solid #94a3b8"
+                         :aria-checked="metadata.is_public ? 'true' : 'false'"
+                         aria-label="{{ __('Rendre la grille publique') }}">
+                  <span style="flex:1;min-width:0;color:#1e293b">
+                    <strong style="font-size:1rem" x-text="metadata.is_public ? '🌐 {{ __('Grille publique') }}' : '🔒 {{ __('Grille privée') }}'"></strong>
+                    <span class="d-block small mt-1" style="opacity:.8;font-weight:400" x-text="metadata.is_public ? msgPublic : msgPrivate"></span>
                   </span>
-                </button>
+                </label>
 
-                {{-- 2026-05-05 #101 : alerte doublon publique --}}
+                {{-- 2026-05-05 #101 + #133 + #134 : alerte doublon publique - hierarchie claire, 1 action recommandee --}}
                 <div x-show="duplicateInfo" x-cloak x-transition class="mt-3 p-3" role="alert" aria-live="polite" style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;color:#78350f">
                   <div class="d-flex align-items-start gap-2 mb-2">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                     <div style="flex:1;min-width:0">
                       <strong>{{ __('Grille publique identique détectée') }}</strong>
                       <p class="small mb-2 mt-1" x-text="duplicateInfo?.message"></p>
-                      <div class="d-flex flex-wrap gap-2">
-                        <a x-show="duplicateInfo?.url" :href="duplicateInfo?.url" target="_blank" rel="noopener" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
-                          <span>{{ __('Voir la grille existante') }}</span>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                        </a>
-                        {{-- 2026-05-05 #113 : bouton "Modifier ma grille existante" si même user --}}
-                        <a x-show="duplicateInfo?.is_own && duplicateInfo?.edit_url" :href="duplicateInfo?.edit_url" class="ct-btn ct-btn-accent d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
+                      <p class="small mb-2 mt-1" style="color:#78350f"><strong>{{ __('Recommandé :') }}</strong> {{ __('modifiez la grille existante au lieu d\'en créer un doublon.') }}</p>
+                      {{-- #134 : couleur teal primary sur action recommandee, outline sur preview, liens texte sur secondaires --}}
+                      <div class="d-flex flex-wrap align-items-center gap-2">
+                        {{-- Action principale recommandee : modifier la grille existante (teal primary, anciennement rouge accent) --}}
+                        <a x-show="duplicateInfo?.is_own && duplicateInfo?.edit_url" :href="duplicateInfo?.edit_url" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                           <span>{{ __('Modifier la grille existante') }}</span>
                         </a>
-                        {{-- 2026-05-05 #118 : lien vers /user/saved?type=crossword pour gérer ses grilles --}}
-                        <a x-show="duplicateInfo?.is_own && duplicateInfo?.user_saved_url" :href="duplicateInfo?.user_saved_url" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                          <span>{{ __('Voir mes grilles sauvegardées') }}</span>
+                        {{-- Preview secondaire --}}
+                        <a x-show="duplicateInfo?.url" :href="duplicateInfo?.url" target="_blank" rel="noopener" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
+                          <span>{{ __('Aperçu') }}</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                         </a>
-                        <button type="button" @click="duplicateInfo = null" class="ct-btn ct-btn-outline" style="min-height:44px;font-size:.875rem" aria-label="{{ __('Fermer l\'alerte') }}">
-                          {{ __('Modifier mes paires') }}
-                        </button>
+                      </div>
+                      {{-- Options secondaires en liens texte --}}
+                      <div class="mt-2 small d-flex flex-wrap gap-3">
+                        <a x-show="duplicateInfo?.is_own && duplicateInfo?.user_saved_url" :href="duplicateInfo?.user_saved_url" style="color:#78350f;text-decoration:underline">
+                          {{ __('Voir mes grilles sauvegardées') }}
+                        </a>
+                        <a href="#" @click.prevent="duplicateInfo = null" style="color:#78350f;text-decoration:underline" aria-label="{{ __('Fermer l\'alerte et modifier mes paires') }}">
+                          {{ __('Modifier mes paires pour créer une variante') }}
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -1130,6 +1133,11 @@ function crosswordGenerator() {
             this.pairs = data.pairs && data.pairs.length >= 2 ? data.pairs : [{clue: '', answer: ''}, {clue: '', answer: ''}];
             this.metadata = Object.assign({title: '', difficulty: 'Moyen', is_public: false, theme: ''}, data.metadata || {});
             this.saveName = data.saveName || '';
+            // 2026-05-05 #131 : restaurer le lien partage public si la grille etait deja publique (visible en permanence sans re-toggle).
+            this.publicShareUrl = data.publicShareUrl || '';
+            this.currentPresetPublicId = data.currentPresetPublicId || '';
+            this.currentCustomSlug = data.currentCustomSlug || '';
+            if (this.currentCustomSlug) { this.customSlugInput = this.currentCustomSlug; this.customSlugAvailable = true; }
             // Guard contre double dispatch (S80 #59 : init() peut être appelé 2× par Alpine si x-show réinitialise le composant)
             if (!window._cwDraftToastShown) {
               window._cwDraftToastShown = true;
@@ -1239,6 +1247,8 @@ function crosswordGenerator() {
           this.currentPresetPublicId = '';
           this.currentCustomSlug = '';
         }
+        // 2026-05-05 #131 : persister immediatement dans draft pour reload-safe.
+        this.saveDraft();
         this.dispatchToast("{{ __('Grille chargée :') }} " + (preset.name || ''), 'success');
       } catch (e) {
         console.error('loadPreset', e);
@@ -1603,6 +1613,8 @@ function crosswordGenerator() {
             this.currentPresetPublicId = '';
             this.currentCustomSlug = '';
           }
+          // 2026-05-05 #131 : persister le lien partage dans draft pour qu'il reste visible apres reload.
+          this.saveDraft();
         } else if (response.status === 409) {
           // 2026-05-05 #101 anti-doublons : grille publique identique existe déjà.
           const dup = await response.json().catch(() => ({}));
@@ -1616,7 +1628,7 @@ function crosswordGenerator() {
           };
           // Force grille en privée tant que conflit pas résolu (sécurité user)
           this.metadata.is_public = false;
-          this.dispatchToast(dup.message || "{{ __('Grille publique identique existe déjà.') }}", 'warning', 8000);
+          // 2026-05-05 #133 : pas de toast doublon - l'encart jaune persistant suffit (1 seul canal de notification).
         } else {
           const errorData = await response.json().catch(() => ({}));
           this.dispatchToast(errorData.message || "{{ __('Erreur lors de la sauvegarde.') }}", 'danger');
@@ -1640,7 +1652,11 @@ function crosswordGenerator() {
         localStorage.setItem('crossword_draft', JSON.stringify({
           pairs: this.pairs,
           metadata: this.metadata,
-          saveName: this.saveName
+          saveName: this.saveName,
+          // 2026-05-05 #131 : persister le panneau lien public pour qu'il reste visible apres reload sans re-toggle.
+          publicShareUrl: this.publicShareUrl || '',
+          currentPresetPublicId: this.currentPresetPublicId || '',
+          currentCustomSlug: this.currentCustomSlug || ''
         }));
       } catch (e) { /* localStorage full or disabled */ }
     },
@@ -1655,6 +1671,11 @@ function crosswordGenerator() {
       this.words = [];
       this.unplaced = [];
       this.generationError = null;
+      // 2026-05-05 #131 : reset aussi le panneau lien partage.
+      this.publicShareUrl = '';
+      this.currentPresetPublicId = '';
+      this.currentCustomSlug = '';
+      this.customSlugInput = '';
     },
 
     // S81 #65 Form-to-Prompt : génère le prompt zero-shot CoT à partir du form
