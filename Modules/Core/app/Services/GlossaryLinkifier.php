@@ -32,6 +32,23 @@ class GlossaryLinkifier
     public const MAX_LINKS_PER_PAGE = 12;
 
     /**
+     * 2026-05-05 #145 WSD : stop-list FR baseline (verbes/noms communs polysémiques).
+     * Si terme glossaire matche un mot de cette liste ET que sa strategy est 'loose',
+     * on escalade automatiquement vers 'case_sensitive' (le terme glossaire doit etre tel quel).
+     * Editeur peut toujours forcer 'loose' via match_strategy='loose' explicite (ignore stop-list).
+     */
+    public const STOP_LIST_FR = [
+        // Verbes courants polysémiques avec termes IA
+        'transformer', 'générer', 'modeler', 'agent', 'agents',
+        'modèle', 'modèles', 'vision', 'attention', 'mémoire',
+        'apprentissage', 'plateforme', 'plateformes', 'architecture',
+        'fonction', 'fonctions', 'classe', 'classes', 'objet', 'objets',
+        'instance', 'instances', 'token', 'tokens', 'fenêtre', 'fenêtres',
+        'cadre', 'cadres', 'interface', 'interfaces', 'pipeline', 'pipelines',
+        'service', 'services', 'composant', 'composants', 'module', 'modules',
+    ];
+
+    /**
      * 2026-05-05 #141 b : tracking cumulatif inter-appels.
      * Une page peut appeler @glossarize() plusieurs fois (hook, key_points, why_important, etc.).
      * On veut first-occurrence GLOBAL et accumulation des matched terms pour Schema.org.
@@ -124,19 +141,23 @@ class GlossaryLinkifier
             if (class_exists(\Modules\Dictionary\Models\Term::class)) {
                 try {
                     \Modules\Dictionary\Models\Term::published()
-                        ->select(['id', 'name', 'slug', 'definition', 'type'])
+                        ->select(['id', 'name', 'slug', 'definition', 'type', 'match_strategy'])
                         ->get()
                         ->each(function ($t) use (&$terms, $locale) {
                             $name = $t->getTranslation('name', $locale, false) ?: $t->name;
                             $slug = $t->getTranslation('slug', $locale, false) ?: $t->slug;
                             $def = $t->getTranslation('definition', $locale, false) ?: $t->definition;
                             if (! $name || ! $slug || mb_strlen($name) < self::MIN_LENGTH) return;
+                            $strategy = $t->match_strategy ?? 'loose';
+                            if ($strategy === 'never_auto') return; // 2026-05-05 #145 : opt-out
+                            $strategy = self::escalateStrategyIfStopList($name, $strategy); // auto-escalade vers case_sensitive si polysémique
                             $terms[] = [
                                 'name' => $name,
                                 'slug' => $slug,
                                 'definition' => Str::limit(strip_tags((string) $def), 180),
                                 'type' => 'glossary',
                                 'url' => '/glossaire/'.$slug,
+                                'match_strategy' => $strategy,
                             ];
                         });
                 } catch (\Throwable $e) {
@@ -148,7 +169,7 @@ class GlossaryLinkifier
             if (class_exists(\Modules\Acronyms\Models\Acronym::class)) {
                 try {
                     \Modules\Acronyms\Models\Acronym::published()
-                        ->select(['id', 'acronym', 'full_name', 'slug', 'description'])
+                        ->select(['id', 'acronym', 'full_name', 'slug', 'description', 'match_strategy'])
                         ->get()
                         ->each(function ($a) use (&$terms, $locale) {
                             $acro = $a->getTranslation('acronym', $locale, false) ?: $a->acronym;
@@ -156,6 +177,8 @@ class GlossaryLinkifier
                             $slug = $a->getTranslation('slug', $locale, false) ?: $a->slug;
                             $desc = $a->getTranslation('description', $locale, false) ?: $a->description;
                             if (! $slug) return;
+                            $strategy = $a->match_strategy ?? 'case_sensitive';
+                            if ($strategy === 'never_auto') return;
                             $url = '/acronymes-education/'.$slug;
                             $shortDesc = Str::limit(strip_tags((string) $desc), 180);
                             // Acronyme exact (ex "OBVIA") : strict casse + min 2 chars
@@ -166,17 +189,19 @@ class GlossaryLinkifier
                                     'definition' => $full ? "{$full} : {$shortDesc}" : $shortDesc,
                                     'type' => 'acronym',
                                     'url' => $url,
-                                    'case_sensitive' => true,
+                                    'match_strategy' => $strategy,
                                 ];
                             }
                             // Forme longue (ex "Observatoire de l'IA et du numérique")
                             if ($full && mb_strlen($full) >= self::MIN_LENGTH) {
+                                $fullStrategy = self::escalateStrategyIfStopList($full, $strategy === 'case_sensitive' ? 'loose' : $strategy);
                                 $terms[] = [
                                     'name' => $full,
                                     'slug' => $slug,
                                     'definition' => $shortDesc,
                                     'type' => 'acronym_full',
                                     'url' => $url,
+                                    'match_strategy' => $fullStrategy,
                                 ];
                             }
                         });
@@ -190,6 +215,23 @@ class GlossaryLinkifier
 
             return $terms;
         });
+    }
+
+    /**
+     * 2026-05-05 #145 WSD : auto-escalade strategy vers case_sensitive si terme dans STOP_LIST_FR.
+     * Editeur peut forcer 'loose' explicite pour ignorer (ex : terme en minuscule légitime).
+     * 'exact_phrase' et 'never_auto' ne sont jamais downgradés.
+     */
+    protected static function escalateStrategyIfStopList(string $name, string $currentStrategy): string
+    {
+        if ($currentStrategy !== 'loose') {
+            return $currentStrategy;
+        }
+        $lowered = mb_strtolower($name);
+        if (in_array($lowered, self::STOP_LIST_FR, true)) {
+            return 'case_sensitive';
+        }
+        return 'loose';
     }
 
     /**
@@ -254,11 +296,13 @@ class GlossaryLinkifier
             if ($skipSlug && $term['slug'] === $skipSlug) continue;
 
             $name = $term['name'];
-            $caseSensitive = $term['case_sensitive'] ?? false;
+            // 2026-05-05 #145 WSD : applique la match_strategy
+            $strategy = $term['match_strategy'] ?? ($term['case_sensitive'] ?? false ? 'case_sensitive' : 'loose');
 
             // Word boundary match avec accents UTF-8
             $pattern = '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'(?![\p{L}\p{N}])/u';
-            if (! $caseSensitive) $pattern .= 'i';
+            if ($strategy === 'loose') $pattern .= 'i';
+            // case_sensitive ET exact_phrase : pas de flag i (casse exacte)
 
             if (! preg_match($pattern, $text, $m, PREG_OFFSET_CAPTURE)) continue;
 

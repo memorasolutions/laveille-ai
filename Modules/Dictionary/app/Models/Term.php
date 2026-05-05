@@ -54,6 +54,7 @@ class Term extends Model implements Searchable
         'type',
         'dictionary_category_id',
         'is_published',
+        'match_strategy', // 2026-05-05 #145 WSD : loose | case_sensitive | exact_phrase | never_auto
         'sort_order',
     ];
 

@@ -47,6 +47,7 @@ class Acronym extends Model implements Searchable
         'domain',
         'acronym_category_id',
         'is_published',
+        'match_strategy', // 2026-05-05 #145 WSD : loose | case_sensitive (défaut) | exact_phrase | never_auto
         'sort_order',
     ];
 
