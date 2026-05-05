@@ -122,7 +122,8 @@
             </div>
 
             <div class="row">
-              <div class="col-lg-7 mb-4 mb-lg-0 cw-grid-wrap" :style="`--cols: ${grid.cols}; --rows: ${grid.rows};`">
+              {{-- 2026-05-05 #125 : grille col-12 pleine largeur + indices 50/50 sous (pas latéral) --}}
+              <div class="col-12 mb-4 cw-grid-wrap" :style="`--cols: ${grid.cols}; --rows: ${grid.rows};`">
                 <div class="table-responsive d-flex justify-content-center">
                   <table class="crossword-grid" :aria-label="'{{ __('Grille de mots croisés') }} ' + grid.rows + 'x' + grid.cols">
                     <tbody>
@@ -157,7 +158,7 @@
                 </div>
               </div>
 
-              <div class="col-lg-5 cw-clues-section">
+              <div class="col-12 cw-clues-section">
                 <div class="row">
                   {{-- 2026-05-05 #123 : 2 colonnes Horizontaux | Verticaux côte à côte sur tablette+ --}}
                   <div class="col-sm-6 mb-4">
