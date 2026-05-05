@@ -174,21 +174,102 @@ class PublicCrosswordController
         ]);
     }
 
-    public function play(string $publicId): View|RedirectResponse
+    public function play(string $identifier): View|RedirectResponse
     {
-        $preset = SavedCrosswordPreset::where('public_id', $publicId)
-            ->where('is_public', true)
-            ->first();
+        // 2026-05-05 #97 Phase 1 : accepte custom_slug OU public_id (BC garantie).
+        // Priorité custom_slug puis fallback public_id.
+        $preset = SavedCrosswordPreset::findByShareIdentifier($identifier);
 
-        if (! $preset) {
+        if (! $preset || ! $preset->is_public) {
             return redirect('/outils/mots-croises')
                 ->with('error', 'Cette grille n\'existe pas ou n\'est pas publique.');
+        }
+
+        // 2026-05-05 #97 : si l'utilisateur arrive via le public_id mais qu'un custom_slug existe,
+        // redirect 301 vers l'URL canonique (slug) — meilleur SEO + cohérence.
+        if ($preset->custom_slug && $identifier === $preset->public_id) {
+            return redirect('/jeumc/'.$preset->custom_slug, 301);
+        }
+
+        // 2026-05-05 #94 : tracking play_count rate-limité 1×/session pour éviter inflation
+        if (\Schema::hasColumn('saved_crossword_presets', 'play_count')) {
+            $sessionKey = 'cw_played_'.$preset->public_id;
+            if (! session()->has($sessionKey)) {
+                $preset->incrementQuietly('play_count');
+                session()->put($sessionKey, now()->timestamp);
+            }
         }
 
         return view('tools::public.tools.crossword.jeu', [
             'preset' => $preset,
             'pageTitle' => $preset->name.' — Jouer en ligne',
             'pageDescription' => 'Résolvez la grille de mots croisés "'.$preset->name.'" en ligne sur laveille.ai.',
+        ]);
+    }
+
+    /**
+     * 2026-05-05 #94 : page index publique des grilles avec recherche, filtres, tri, pagination.
+     */
+    public function index(Request $request): View
+    {
+        $search = trim((string) $request->input('q', ''));
+        $difficulty = trim((string) $request->input('difficulty', ''));
+        $sort = $request->input('sort', 'recent');
+        $period = $request->input('period', '');
+
+        $query = SavedCrosswordPreset::query()
+            ->where('is_public', true)
+            ->with('user:id,name');
+
+        if ($search !== '') {
+            $needle = '%'.$search.'%';
+            $query->where(function ($q) use ($needle) {
+                $q->where('name', 'like', $needle)
+                    ->orWhere('params', 'like', $needle);
+            });
+        }
+
+        if ($difficulty !== '' && in_array($difficulty, ['Facile', 'Moyen', 'Difficile'], true)) {
+            $query->where('params', 'like', '%"difficulty":"'.$difficulty.'"%');
+        }
+
+        if ($period === '7d') {
+            $query->where('updated_at', '>=', now()->subDays(7));
+        } elseif ($period === '30d') {
+            $query->where('updated_at', '>=', now()->subDays(30));
+        }
+
+        $hasPlayCount = \Schema::hasColumn('saved_crossword_presets', 'play_count');
+
+        switch ($sort) {
+            case 'popular':
+                if ($hasPlayCount) {
+                    $query->orderByDesc('play_count')->orderByDesc('updated_at');
+                } else {
+                    $query->orderByDesc('updated_at');
+                }
+                break;
+            case 'oldest':
+                $query->orderBy('created_at');
+                break;
+            case 'recent':
+            default:
+                $query->orderByDesc('updated_at');
+        }
+
+        $presets = $query->paginate(12)->withQueryString();
+
+        $totalPublic = SavedCrosswordPreset::where('is_public', true)->count();
+
+        return view('tools::public.tools.crossword.index', [
+            'presets' => $presets,
+            'search' => $search,
+            'difficulty' => $difficulty,
+            'sort' => $sort,
+            'period' => $period,
+            'totalPublic' => $totalPublic,
+            'pageTitle' => 'Grilles de mots croisés à jouer en ligne',
+            'pageDescription' => 'Découvrez '.$totalPublic.' grilles de mots croisés gratuites créées par la communauté laveille.ai. Recherche par thème, niveau et popularité.',
         ]);
     }
 }

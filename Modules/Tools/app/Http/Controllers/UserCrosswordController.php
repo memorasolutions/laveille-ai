@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Tools\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Tools\Models\SavedCrosswordPreset;
 
@@ -34,5 +36,55 @@ class UserCrosswordController
             ->firstOrFail();
 
         return redirect('/outils/mots-croises?preset='.$preset->public_id);
+    }
+
+    /**
+     * 2026-05-05 #97 Phase 1 : POST mise à jour custom_slug.
+     * Route : POST /user/mots-croises/{publicId}/slug
+     * Répond JSON si XHR, redirect back sinon.
+     */
+    public function updateSlug(Request $request, string $publicId): \Symfony\Component\HttpFoundation\Response
+    {
+        $preset = SavedCrosswordPreset::where('user_id', auth()->id())
+            ->where('public_id', $publicId)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'custom_slug' => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:50',
+                'regex:/^[a-z0-9-]+$/',
+                Rule::unique('saved_crossword_presets', 'custom_slug')->ignore($preset->id)->whereNull('deleted_at'),
+                Rule::notIn(SavedCrosswordPreset::RESERVED_SLUGS),
+            ],
+        ], [
+            'custom_slug.regex' => 'Le lien personnalisé doit contenir uniquement des lettres minuscules, chiffres et tirets.',
+            'custom_slug.unique' => 'Ce lien est déjà pris. Choisissez-en un autre.',
+            'custom_slug.not_in' => 'Ce lien est réservé. Choisissez-en un autre.',
+            'custom_slug.min' => 'Le lien personnalisé doit faire au moins 3 caractères.',
+            'custom_slug.max' => 'Le lien personnalisé ne peut pas dépasser 50 caractères.',
+        ]);
+
+        $preset->custom_slug = $validated['custom_slug'] ?? null;
+        $preset->save();
+
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'custom_slug' => $preset->custom_slug,
+                'share_url' => $preset->share_url,
+                'message' => $preset->custom_slug
+                    ? 'Lien personnalisé enregistré.'
+                    : 'Lien personnalisé retiré.',
+            ]);
+        }
+
+        $message = $preset->custom_slug
+            ? 'Lien personnalisé mis à jour : '.$preset->share_url
+            : 'Lien personnalisé retiré.';
+
+        return back()->with('success', $message);
     }
 }

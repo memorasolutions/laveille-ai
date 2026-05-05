@@ -42,9 +42,15 @@ Route::middleware('web')->group(function () {
         ->name('tools.crossword.csv-import');
     Route::get('/outils/mots-croises/csv-template', [PublicCrosswordController::class, 'csvTemplate'])
         ->name('tools.crossword.csv-template');
-    Route::get('/jeumc/{publicId}', [PublicCrosswordController::class, 'play'])->name('tools.crossword.play');
-    // Backward compatibility : ancien path /jeu/{publicId} -> redirect 301 vers /jeumc/ (S79+ libère /jeu/ pour outils interactifs futurs)
-    Route::get('/jeu/{publicId}', fn (string $publicId) => redirect('/jeumc/'.$publicId, 301));
+    // 2026-05-05 #94 : index publique grilles partagées (sans publicId) — DOIT venir AVANT /jeumc/{identifier}
+    Route::get('/jeumc', [PublicCrosswordController::class, 'index'])->name('tools.crossword.public-index');
+    // 2026-05-05 #97 Phase 1 : {identifier} accepte custom_slug OU public_id (BC garantie via Model::findByShareIdentifier)
+    Route::get('/jeumc/{identifier}', [PublicCrosswordController::class, 'play'])
+        ->where('identifier', '[a-zA-Z0-9_-]+')
+        ->name('tools.crossword.play');
+    // Backward compatibility : ancien path /jeu/{identifier} -> redirect 301 vers /jeumc/ (S79+ libère /jeu/ pour outils interactifs futurs)
+    Route::get('/jeu/{identifier}', fn (string $identifier) => redirect('/jeumc/'.$identifier, 301))
+        ->where('identifier', '[a-zA-Z0-9_-]+');
 
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])->name('tools.show');
 });
@@ -53,6 +59,10 @@ Route::middleware('web')->group(function () {
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/user/mots-croises', [UserCrosswordController::class, 'index'])->name('user.crosswords.index');
     Route::get('/user/mots-croises/{publicId}/edit', [UserCrosswordController::class, 'edit'])->name('user.crosswords.edit');
+    // 2026-05-05 #97 Phase 1 : POST mise à jour custom_slug (lien personnalisé)
+    Route::post('/user/mots-croises/{publicId}/slug', [UserCrosswordController::class, 'updateSlug'])
+        ->where('publicId', '[a-zA-Z0-9_-]+')
+        ->name('user.crosswords.update-slug');
 });
 
 Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tools\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -12,14 +13,39 @@ class SavedCrosswordPreset extends Model
 {
     use SoftDeletes;
 
+    /**
+     * Slugs réservés interdits pour custom_slug.
+     * Inclut : segments routes existants + actions futures + collisions /jeumc/.
+     */
+    public const RESERVED_SLUGS = [
+        'index', 'admin', 'api', 'nouveau', 'creer', 'create', 'mes-grilles',
+        'populaires', 'recents', 'themes', 'share', 'qr', 'edit', 'json',
+        'csv-template', 'csv-import', 'csv-export', 'generate',
+        'pdf-blank', 'pdf-solution', 'embed', 'preview', 'login', 'logout',
+    ];
+
     protected $table = 'saved_crossword_presets';
 
-    protected $fillable = ['user_id', 'name', 'config_text', 'params', 'is_public'];
+    protected $fillable = ['user_id', 'name', 'config_text', 'params', 'is_public', 'play_count', 'custom_slug', 'qr_options'];
 
     protected $casts = [
         'params' => 'array',
+        'qr_options' => 'array',
         'is_public' => 'boolean',
+        'play_count' => 'integer',
     ];
+
+    /**
+     * Mutator : normalise custom_slug (lowercase, ASCII, alphanum + hyphen, collapse `--`).
+     */
+    protected function customSlug(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => $value
+                ? trim(preg_replace('/-{2,}/', '-', preg_replace('/[^a-z0-9-]/', '', strtolower(Str::ascii(str_replace(' ', '-', $value))))), '-') ?: null
+                : null,
+        );
+    }
 
     protected static function booted(): void
     {
@@ -46,5 +72,66 @@ class SavedCrosswordPreset extends Model
     public function scopePublic($query)
     {
         return $query->where('is_public', true);
+    }
+
+    /**
+     * 2026-05-05 #97 : retourne l'identifiant à utiliser dans /jeumc/{...} (slug si défini, sinon public_id).
+     */
+    public function getShareSlugAttribute(): string
+    {
+        return $this->custom_slug ?: $this->public_id;
+    }
+
+    /**
+     * 2026-05-05 #97 : URL publique préférée (slug custom si défini).
+     */
+    public function getShareUrlAttribute(): string
+    {
+        return url('/jeumc/'.$this->share_slug);
+    }
+
+    /**
+     * 2026-05-05 #97 : trouve un preset par slug custom OU public_id (anti-collision : custom_slug d'abord).
+     */
+    public static function findByShareIdentifier(string $identifier): ?self
+    {
+        return static::where('custom_slug', $identifier)
+            ->orWhere('public_id', $identifier)
+            ->first();
+    }
+
+    /**
+     * 2026-05-05 #94 : difficulté lue depuis params JSON (défaut "Moyen").
+     */
+    public function getDifficultyAttribute(): string
+    {
+        return (string) ($this->params['difficulty'] ?? 'Moyen');
+    }
+
+    /**
+     * 2026-05-05 #94 : thème optionnel lu depuis params (peut être vide).
+     */
+    public function getThemeAttribute(): string
+    {
+        return (string) ($this->params['theme'] ?? '');
+    }
+
+    /**
+     * 2026-05-05 #94 : nombre de paires extrait du config_text JSON ou format legacy.
+     */
+    public function getWordCountAttribute(): int
+    {
+        $cfg = $this->config_text ?? '';
+        // Format JSON moderne (S80+)
+        if (str_starts_with(trim($cfg), '{')) {
+            $data = @json_decode($cfg, true);
+            if (is_array($data) && isset($data['pairs']) && is_array($data['pairs'])) {
+                return count($data['pairs']);
+            }
+        }
+        // Format legacy (1 ligne par paire "indice / mot")
+        $lines = array_filter(array_map('trim', preg_split("/\r\n|\n|\r/", $cfg) ?: []));
+
+        return count(array_filter($lines, fn ($l) => str_contains($l, ' / ')));
     }
 }

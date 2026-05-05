@@ -17,7 +17,14 @@
         <div class="card shadow-sm" style="border-radius: var(--r-base);">
           <div class="card-body p-4 p-md-5" x-data="crosswordGenerator()" x-init="init()">
             <h1 class="h2 mb-2" style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ $tool->name }}</h1>
-            <p class="text-muted mb-4">{{ $tool->description }}</p>
+            <p class="text-muted mb-2">{{ $tool->description }}</p>
+            {{-- 2026-05-05 #94 : lien vers index publique --}}
+            <p class="mb-4">
+              <a href="{{ url('/jeumc') }}" class="d-inline-flex align-items-center gap-2" style="color:#053d4a;font-weight:600;text-decoration:none;padding:.4rem .75rem;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:6px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                {{ __('Voir toutes les grilles publiques') }}
+              </a>
+            </p>
 
             <div class="d-flex flex-wrap gap-2 mb-4 no-print">
               {{-- Bouton 'Imprimer' retire S79 #43 - remplace par export PDF dedie (vierge + corrige) dans le menu Plus d'options apres generation. --}}
@@ -146,7 +153,7 @@
               @auth
               <div class="col-12">
                 <button type="button"
-                        class="ct-btn d-inline-flex align-items-start gap-3 text-start"
+                        class="ct-btn d-inline-flex align-items-start gap-3 text-start w-100"
                         style="min-height:44px;padding:.75rem 1.25rem;max-width:100%;white-space:normal"
                         :class="metadata.is_public ? 'ct-btn-primary' : 'ct-btn-outline'"
                         @click="metadata.is_public = !metadata.is_public; saveDraft()"
@@ -167,6 +174,77 @@
                     <span class="d-block small" style="color:inherit;opacity:.85;font-weight:400" x-data="{ msgPublic: {{ \Illuminate\Support\Js::from($msgPublic) }}, msgPrivate: {{ \Illuminate\Support\Js::from($msgPrivate) }} }" x-text="metadata.is_public ? msgPublic : msgPrivate"></span>
                   </span>
                 </button>
+
+                {{-- A1+A2 (2026-05-05) : panneau lien public visible après save quand grille publique --}}
+                <div x-show="publicShareUrl" x-cloak x-transition class="mt-3 p-3" style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    <strong style="color:#047857">{{ __('Lien partageable de la grille') }}</strong>
+                  </div>
+                  <div class="d-flex flex-wrap gap-2 align-items-stretch mb-2">
+                    <input type="text" readonly x-model="publicShareUrl" @click="$event.target.select()" class="form-control" style="flex:1;min-width:240px;background:#fff;font-family:monospace;font-size:.875rem" aria-label="{{ __('URL de partage du jeu') }}">
+                    <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" @click="copyShareLink()" :aria-label="shareLinkCopied ? '{{ __('Lien copié') }}' : '{{ __('Copier le lien') }}'">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      <span x-text="shareLinkCopied ? '{{ __('Copié ✓') }}' : '{{ __('Copier') }}'"></span>
+                    </button>
+                    <a :href="publicShareUrl" target="_blank" rel="noopener" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" :aria-label="'{{ __('Ouvrir la grille dans un nouvel onglet') }}'">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      <span>{{ __('Ouvrir') }}</span>
+                    </a>
+                    <button type="button" x-show="canNativeShare" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" @click="nativeShare()" :aria-label="'{{ __('Partager la grille') }}'">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                      <span>{{ __('Partager') }}</span>
+                    </button>
+                  </div>
+                  <details class="mt-2">
+                    <summary style="cursor:pointer;color:#047857;font-weight:600;font-size:.875rem">{{ __('Afficher le QR code') }}</summary>
+                    <div class="mt-2 d-flex align-items-center gap-3 flex-wrap">
+                      <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=10&data=' + encodeURIComponent(publicShareUrl)" alt="{{ __('QR code de la grille') }}" loading="lazy" width="180" height="180" style="border:1px solid #d1fae5;border-radius:8px;background:#fff">
+                      <p class="small mb-0" style="color:#047857;flex:1;min-width:200px">{{ __('Scannez ce QR code avec un téléphone pour ouvrir directement la grille en ligne. Idéal pour vos affiches en classe ou présentations.') }}</p>
+                    </div>
+                  </details>
+
+                  {{-- 2026-05-05 #97 Phase 1 : édition lien personnalisé (custom_slug) --}}
+                  <details class="mt-2" x-show="currentPresetPublicId">
+                    <summary style="cursor:pointer;color:#047857;font-weight:600;font-size:.875rem">{{ __('Personnaliser le lien (slug)') }}</summary>
+                    <div class="mt-2">
+                      <p class="small mb-2" style="color:#047857">{{ __('Remplacez l\'identifiant aléatoire par un mot lisible (ex: ia-quebec). 3-50 caractères, minuscules, chiffres et tirets.') }}</p>
+                      <div class="d-flex flex-wrap gap-2 align-items-stretch mb-2">
+                        <span class="d-inline-flex align-items-center" style="color:#047857;font-family:monospace;font-size:.875rem">https://laveille.ai/jeumc/</span>
+                        <input type="text"
+                               x-model="customSlugInput"
+                               @input="customSlugInput = $event.target.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/-{2,}/g,'-').slice(0,50); customSlugError = ''"
+                               x-init="customSlugInput = currentCustomSlug"
+                               x-effect="customSlugInput = currentCustomSlug"
+                               class="form-control"
+                               style="flex:1;min-width:180px;background:#fff;font-family:monospace;font-size:.875rem;min-height:44px"
+                               maxlength="50"
+                               placeholder="ex: ia-quebec"
+                               aria-label="{{ __('Identifiant personnalisé du lien') }}">
+                        <button type="button"
+                                class="ct-btn ct-btn-primary d-inline-flex align-items-center justify-content-center gap-2"
+                                style="min-height:44px"
+                                :disabled="customSlugSaving"
+                                @click="saveCustomSlug()"
+                                :aria-label="customSlugSaving ? '{{ __('Enregistrement...') }}' : '{{ __('Enregistrer le lien personnalisé') }}'">
+                          <span x-text="customSlugSaving ? '{{ __('Enregistrement...') }}' : '{{ __('Enregistrer') }}'"></span>
+                        </button>
+                        <button type="button"
+                                x-show="currentCustomSlug"
+                                class="ct-btn ct-btn-outline"
+                                style="min-height:44px"
+                                @click="customSlugInput = ''; saveCustomSlug()"
+                                :aria-label="'{{ __('Retirer le lien personnalisé') }}'">
+                          <span>{{ __('Retirer') }}</span>
+                        </button>
+                      </div>
+                      <p x-show="customSlugError" x-cloak class="small mb-0" style="color:#b91c1c" x-text="customSlugError" role="alert"></p>
+                      <p class="small mb-0" style="color:#047857;opacity:.8">
+                        {{ __('Mots réservés interdits : index, admin, api, nouveau, creer, mes-grilles, populaires, recents, themes, share, qr, edit.') }}
+                      </p>
+                    </div>
+                  </details>
+                </div>
               </div>
               @endauth
             </div>
@@ -243,7 +321,11 @@
                       <span aria-hidden="true">↗</span>
                       <span>{{ __('Ouvrir Claude') }}</span>
                     </a>
-                    {{-- S81 #67 : bouton 'Ouvrir Gemini' retiré (deeplink ?q= non supporté par Google en 2026, sonar-pro option 5 90/100). User Gemini : copier le prompt puis coller manuellement. --}}
+                    <a class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" :href="aiPerplexityUrl()" target="_blank" rel="noopener" style="min-height:44px" :class="!aiTheme.trim() ? 'opacity-50' : ''">
+                      <span aria-hidden="true">↗</span>
+                      <span>{{ __('Ouvrir Perplexity') }}</span>
+                    </a>
+                    {{-- S81 #67 (re-confirmé 2026-05-05) : bouton 'Ouvrir Gemini' retiré — deeplink ?q= toujours non supporté par Google (test live : textbox reste vide, aucune recherche déclenchée). User Gemini : copier le prompt puis coller manuellement. --}}
                   </div>
                   <p class="small mt-3 mb-0" style="color:#475569">
                     <strong>{{ __('Étape suivante') }}</strong> : {{ __('une fois votre IA vous a renvoyé le CSV, copiez-le, allez dans le bouton ') }}<strong>{{ __('Données CSV') }}</strong>{{ __(' plus bas, cliquez ') }}<strong>{{ __('Importer CSV') }}</strong>{{ __(' et collez le contenu dans la zone de texte.') }}
@@ -930,6 +1012,16 @@ function crosswordGenerator() {
     aiTarget: '',
     aiPromptCopied: false,
 
+    // 2026-05-05 A1+A2 : panneau lien public après save
+    publicShareUrl: '',
+    currentPresetPublicId: '', // 2026-05-05 #97 Phase 1 : id pour POST update slug
+    currentCustomSlug: '',     // 2026-05-05 #97 Phase 1 : valeur actuelle slug custom
+    customSlugInput: '',       // 2026-05-05 #97 Phase 1 : modèle pour formulaire édition slug
+    customSlugSaving: false,
+    customSlugError: '',
+    shareLinkCopied: false,
+    canNativeShare: typeof navigator !== 'undefined' && typeof navigator.share === 'function',
+
     // S81 #65 WCAG AAA grille : focus position pour navigation clavier flèches
     gridFocusRow: 0,
     gridFocusCol: 0,
@@ -1304,8 +1396,20 @@ function crosswordGenerator() {
           const preset = await response.json();
           this.dispatchToast("{{ __('Grille sauvegardée avec succès.') }}", 'success');
           if (this.metadata.is_public && preset.public_id) {
-            const playUrl = window.location.origin + '/jeumc/' + preset.public_id;
-            console.log('Lien public', playUrl);
+            // 2026-05-05 #97 Phase 1 : utilise custom_slug si défini, sinon public_id
+            const identifier = preset.custom_slug || preset.public_id;
+            this.publicShareUrl = window.location.origin + '/jeumc/' + identifier;
+            this.currentPresetPublicId = preset.public_id;
+            this.currentCustomSlug = preset.custom_slug || '';
+            // Scroll vers le panneau lien (visible après transition Alpine)
+            this.$nextTick(() => {
+              const el = document.querySelector('input[aria-label="{{ __('URL de partage du jeu') }}"]');
+              if (el) el.scrollIntoView({behavior: 'smooth', block: 'center'});
+            });
+          } else {
+            this.publicShareUrl = '';
+            this.currentPresetPublicId = '';
+            this.currentCustomSlug = '';
           }
         } else {
           const errorData = await response.json().catch(() => ({}));
@@ -1406,7 +1510,12 @@ Maintenant, génère ${n} paires sur le thème "${theme}".`;
     aiClaudeUrl() {
       return 'https://claude.ai/new?q=' + encodeURIComponent(this.aiPromptText());
     },
+    aiPerplexityUrl() {
+      // 2026-05-05 : Perplexity supporte ?q= et lance la recherche directement (test live OK)
+      return 'https://www.perplexity.ai/?q=' + encodeURIComponent(this.aiPromptText());
+    },
     aiGeminiUrl() {
+      // 2026-05-05 : Gemini ?q= toujours non supporté (textbox reste vide). Conserve la fonction au cas où Google active plus tard ; pas exposée comme bouton public.
       return 'https://gemini.google.com/app?q=' + encodeURIComponent(this.aiPromptText());
     },
 
@@ -1425,6 +1534,66 @@ Maintenant, génère ${n} paires sur le thème "${theme}".`;
         const ta = document.getElementById('aiPromptOutput');
         if (ta) { ta.select(); document.execCommand('copy'); }
         this.dispatchToast("{{ __('Prompt copié (fallback).') }}", 'info');
+      }
+    },
+
+    // 2026-05-05 A1+A2 : copie + partage natif du lien public
+    async copyShareLink() {
+      if (!this.publicShareUrl) return;
+      try {
+        await navigator.clipboard.writeText(this.publicShareUrl);
+        this.shareLinkCopied = true;
+        setTimeout(() => { this.shareLinkCopied = false; }, 2500);
+        this.dispatchToast("{{ __('Lien copié dans le presse-papier.') }}", 'success');
+      } catch (e) {
+        this.dispatchToast("{{ __('Impossible de copier — sélectionnez et copiez manuellement.') }}", 'warning');
+      }
+    },
+    async nativeShare() {
+      if (!this.publicShareUrl || !navigator.share) return;
+      try {
+        await navigator.share({
+          title: this.metadata.title || this.saveName || "{{ __('Mots croisés') }}",
+          text: "{{ __('Essaie cette grille de mots croisés sur laveille.ai') }}",
+          url: this.publicShareUrl,
+        });
+      } catch (e) {
+        // user cancelled
+      }
+    },
+
+    // 2026-05-05 #97 Phase 1 : POST custom_slug (ou retrait si vide).
+    async saveCustomSlug() {
+      if (!this.currentPresetPublicId) return;
+      this.customSlugSaving = true;
+      this.customSlugError = '';
+      try {
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const response = await fetch('/user/mots-croises/' + this.currentPresetPublicId + '/slug', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ custom_slug: this.customSlugInput || null }),
+        });
+        if (response.ok || response.redirected) {
+          this.currentCustomSlug = this.customSlugInput || '';
+          const identifier = this.currentCustomSlug || this.currentPresetPublicId;
+          this.publicShareUrl = window.location.origin + '/jeumc/' + identifier;
+          this.dispatchToast(this.currentCustomSlug ? "{{ __('Lien personnalisé enregistré.') }}" : "{{ __('Lien personnalisé retiré.') }}", 'success');
+        } else if (response.status === 422) {
+          const data = await response.json().catch(() => ({}));
+          const firstError = data.errors ? Object.values(data.errors)[0]?.[0] : null;
+          this.customSlugError = firstError || data.message || "{{ __('Lien invalide ou déjà pris.') }}";
+        } else {
+          this.customSlugError = "{{ __('Erreur serveur. Réessayez plus tard.') }}";
+        }
+      } catch (err) {
+        this.customSlugError = "{{ __('Erreur réseau lors de l\'enregistrement.') }}";
+      } finally {
+        this.customSlugSaving = false;
       }
     },
 
