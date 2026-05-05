@@ -31,7 +31,15 @@ class GlossaryLinkifier
     public const MIN_LENGTH = 4; // skip ≤3 chars (faux positifs IA, ML, AI)
     public const MAX_LINKS_PER_PAGE = 12;
 
-    protected static array $matchedThisCall = [];
+    /**
+     * 2026-05-05 #141 b : tracking cumulatif inter-appels.
+     * Une page peut appeler @glossarize() plusieurs fois (hook, key_points, why_important, etc.).
+     * On veut first-occurrence GLOBAL et accumulation des matched terms pour Schema.org.
+     * Reset automatique au prochain cycle de requête (singleton naturel Laravel).
+     */
+    protected static array $matchedThisRequest = [];
+    protected static array $seenThisRequest = [];
+    protected static int $linkCountThisRequest = 0;
 
     /**
      * Auto-linkify un HTML : injecte des liens vers Dictionary/Acronyms.
@@ -50,12 +58,7 @@ class GlossaryLinkifier
             return $html;
         }
 
-        // Reset matched terms for this call
-        self::$matchedThisCall = [];
-
-        // Track first occurrence to enforce single-link-per-term
-        $seenInThisCall = [];
-        $linkCount = 0;
+        // Tracking cumulatif inter-appels (par requête HTTP)
 
         try {
             $dom = new \DOMDocument;
@@ -74,7 +77,7 @@ class GlossaryLinkifier
             return $html;
         }
 
-        self::walkAndReplace($dom, $root, $terms, $seenInThisCall, $linkCount, $maxLinks, $skipSlug);
+        self::walkAndReplace($dom, $root, $terms, self::$seenThisRequest, self::$linkCountThisRequest, $maxLinks, $skipSlug);
 
         // Extract inner HTML from glx-root wrapper
         $output = '';
@@ -93,7 +96,17 @@ class GlossaryLinkifier
      */
     public static function getLastMatchedTerms(): array
     {
-        return array_values(self::$matchedThisCall);
+        return array_values(self::$matchedThisRequest);
+    }
+
+    /**
+     * Reset state (utile pour Octane / jobs queue / tests).
+     */
+    public static function resetState(): void
+    {
+        self::$matchedThisRequest = [];
+        self::$seenThisRequest = [];
+        self::$linkCountThisRequest = 0;
     }
 
     /**
@@ -269,9 +282,9 @@ class GlossaryLinkifier
 
             if ($after !== '') $fragment[] = $dom->createTextNode($after);
 
-            // Mark seen
+            // Mark seen (cumulatif inter-appels via static)
             $seen[$term['slug'].'|'.$term['type']] = true;
-            self::$matchedThisCall[$term['slug']] = $term;
+            self::$matchedThisRequest[$term['slug']] = $term;
             $linkCount++;
 
             return $fragment;
