@@ -142,7 +142,7 @@
                                          :data-col="colIndex"
                                          :value="userInput[rowIndex+'-'+colIndex] || ''"
                                          @input="setCell(rowIndex, colIndex, $event.target.value)"
-                                         @focus="startTimer()"
+                                         @focus="startTimer(); setDirectionFromCell(rowIndex, colIndex)"
                                          @keydown="handleKey($event, rowIndex, colIndex)"
                                          :class="{'cell-correct': isCorrect(rowIndex, colIndex), 'cell-wrong': isWrong(rowIndex, colIndex)}"
                                          :aria-label="'{{ __('Case ligne') }} ' + (rowIndex+1) + ' {{ __('colonne') }} ' + (colIndex+1) + (cell.number ? ', {{ __('numéro') }} ' + cell.number : '') + (isCorrect(rowIndex, colIndex) ? ', {{ __('correcte') }}' : '') + (isWrong(rowIndex, colIndex) ? ', {{ __('incorrecte') }}' : '')">
@@ -159,7 +159,8 @@
 
               <div class="col-lg-5 cw-clues-section">
                 <div class="row">
-                  <div class="col-md-12 mb-4">
+                  {{-- 2026-05-05 #123 : 2 colonnes Horizontaux | Verticaux côte à côte sur tablette+ --}}
+                  <div class="col-sm-6 mb-4">
                     <h2 class="h6 fw-bold mb-2">
                       <span aria-hidden="true">→</span> {{ __('Horizontaux') }}
                     </h2>
@@ -177,7 +178,7 @@
                       </template>
                     </ul>
                   </div>
-                  <div class="col-md-12">
+                  <div class="col-sm-6">
                     <h2 class="h6 fw-bold mb-2">
                       <span aria-hidden="true">↓</span> {{ __('Verticaux') }}
                     </h2>
@@ -584,6 +585,27 @@ document.addEventListener('alpine:init', () => {
         this.saveDraft();
         // C1 : confetti animation (skip si abandon)
         if (!this.abandoned) this.triggerConfetti();
+      }
+    },
+
+    // 2026-05-05 #124 : auto-détecter direction quand user clique directement une case (sans passer par indice)
+    setDirectionFromCell(r, c) {
+      const candidates = (this.words || []).filter(w => {
+        if (w.orientation === 'horizontal') return w.row === r && c >= w.col && c < w.col + w.length;
+        return w.col === c && r >= w.row && r < w.row + w.length;
+      });
+      if (candidates.length === 1) {
+        this.currentDirection = candidates[0].orientation;
+        this.currentWord = candidates[0];
+      } else if (candidates.length > 1) {
+        // Intersection : si direction actuelle valide pour cette case, garder ; sinon prendre 1er
+        const validCurrent = candidates.find(w => w.orientation === this.currentDirection);
+        if (!validCurrent) {
+          this.currentDirection = candidates[0].orientation;
+          this.currentWord = candidates[0];
+        } else {
+          this.currentWord = validCurrent;
+        }
       }
     },
 
