@@ -195,6 +195,11 @@
                         <a x-show="duplicateInfo?.is_own && duplicateInfo?.edit_url" :href="duplicateInfo?.edit_url" class="ct-btn ct-btn-accent d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
                           <span>{{ __('Modifier la grille existante') }}</span>
                         </a>
+                        {{-- 2026-05-05 #118 : lien vers /user/saved?type=crossword pour gérer ses grilles --}}
+                        <a x-show="duplicateInfo?.is_own && duplicateInfo?.user_saved_url" :href="duplicateInfo?.user_saved_url" class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                          <span>{{ __('Voir mes grilles sauvegardées') }}</span>
+                        </a>
                         <button type="button" @click="duplicateInfo = null" class="ct-btn ct-btn-outline" style="min-height:44px;font-size:.875rem" aria-label="{{ __('Fermer l\'alerte') }}">
                           {{ __('Modifier mes paires') }}
                         </button>
@@ -1579,6 +1584,7 @@ function crosswordGenerator() {
             message: dup.message || '',
             is_own: !!dup.duplicate_is_own,
             edit_url: dup.duplicate_edit_url || '',
+            user_saved_url: dup.duplicate_user_saved_url || '',
           };
           // Force grille en privée tant que conflit pas résolu (sécurité user)
           this.metadata.is_public = false;

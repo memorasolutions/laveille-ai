@@ -39,6 +39,7 @@ class SavedCrosswordPresetController
                     'duplicate_name' => $duplicate->name,
                     'duplicate_is_own' => $isOwn,
                     'duplicate_edit_url' => $isOwn ? url('/outils/mots-croises?preset='.$duplicate->public_id) : null,
+                    'duplicate_user_saved_url' => $isOwn ? url('/user/saved?type=crossword') : null,
                     'message' => $msg,
                 ], 409);
             }
@@ -82,6 +83,7 @@ class SavedCrosswordPresetController
                     'duplicate_name' => $duplicate->name,
                     'duplicate_is_own' => $isOwn,
                     'duplicate_edit_url' => $isOwn ? url('/outils/mots-croises?preset='.$duplicate->public_id) : null,
+                    'duplicate_user_saved_url' => $isOwn ? url('/user/saved?type=crossword') : null,
                     'message' => $msg,
                 ], 409);
             }

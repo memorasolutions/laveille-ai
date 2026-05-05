@@ -9,7 +9,7 @@
 </h2>
 <p style="color: var(--c-text-muted); margin: 0 0 20px;">{{ __('Vos configurations d\'outils sauvegardées.') }}</p>
 
-<div x-data="{ filter: 'all' }">
+<div x-data="{ filter: (new URLSearchParams(window.location.search).get('type') || 'all') }">
 
     {{-- Chips filtres --}}
     @if($items->count() > 0)
