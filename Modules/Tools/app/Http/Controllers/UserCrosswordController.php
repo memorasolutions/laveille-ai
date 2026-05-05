@@ -87,4 +87,48 @@ class UserCrosswordController
 
         return back()->with('success', $message);
     }
+
+    /**
+     * 2026-05-05 #97 Phase 2 : POST mise à jour qr_options (couleurs, logo, dot style, ECC).
+     * Route : POST /user/mots-croises/{publicId}/qr-options
+     */
+    public function updateQrOptions(Request $request, string $publicId): \Symfony\Component\HttpFoundation\Response
+    {
+        $preset = SavedCrosswordPreset::where('user_id', auth()->id())
+            ->where('public_id', $publicId)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'foreground' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'background' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'ecc' => ['nullable', 'in:L,M,Q,H'],
+            'dot_style' => ['nullable', 'in:square,rounded,dots'],
+            'logo' => ['nullable', 'boolean'],
+        ], [
+            'foreground.regex' => 'Couleur foreground invalide (format #RRGGBB).',
+            'background.regex' => 'Couleur background invalide (format #RRGGBB).',
+        ]);
+
+        // Filter null/empty et stocker uniquement champs renseignés.
+        $opts = array_filter([
+            'foreground' => $validated['foreground'] ?? null,
+            'background' => $validated['background'] ?? null,
+            'ecc' => $validated['ecc'] ?? null,
+            'dot_style' => $validated['dot_style'] ?? null,
+            'logo' => isset($validated['logo']) ? ((bool) $validated['logo'] ? '1' : '0') : null,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $preset->qr_options = $opts ?: null;
+        $preset->save();
+
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'qr_options' => $preset->qr_options,
+                'message' => 'Options QR enregistrées.',
+            ]);
+        }
+
+        return back()->with('success', 'Options QR enregistrées.');
+    }
 }

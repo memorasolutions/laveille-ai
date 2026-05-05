@@ -11,6 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Modules\Core\Services\QrCodeService;
 use Modules\Tools\Models\SavedCrosswordPreset;
 use Modules\Tools\Services\CrosswordCsvService;
 use Modules\Tools\Services\CrosswordGeneratorService;
@@ -205,6 +206,68 @@ class PublicCrosswordController
             'pageTitle' => $preset->name.' — Jouer en ligne',
             'pageDescription' => 'Résolvez la grille de mots croisés "'.$preset->name.'" en ligne sur laveille.ai.',
         ]);
+    }
+
+    /**
+     * 2026-05-05 #97 Phase 2 : QR code PNG personnalisable pour grille publique.
+     * Route : GET /jeumc/{identifier}/qr.png?fg=&bg=&logo=0|1&ecc=&style=&size=&download=0|1
+     * Cache 1h (immutable params dans URL).
+     */
+    public function qrPng(Request $request, string $identifier, QrCodeService $qr): Response
+    {
+        $preset = SavedCrosswordPreset::findByShareIdentifier($identifier);
+        if (! $preset || ! $preset->is_public) {
+            abort(404);
+        }
+
+        $stored = is_array($preset->qr_options) ? $preset->qr_options : [];
+
+        // Priorité : query params > qr_options DB > defaults service.
+        $opts = [
+            'foreground' => $this->normalizeHex($request->query('fg', $stored['foreground'] ?? null)),
+            'background' => $this->normalizeHex($request->query('bg', $stored['background'] ?? null)),
+            'ecc' => strtoupper((string) $request->query('ecc', $stored['ecc'] ?? 'M')),
+            'dot_style' => (string) $request->query('style', $stored['dot_style'] ?? 'square'),
+            'size' => (int) $request->query('size', $stored['size'] ?? 400),
+            'logo_path' => null,
+        ];
+        $opts = array_filter($opts, fn ($v) => $v !== null && $v !== '');
+
+        $logo = $request->query('logo', $stored['logo'] ?? '0');
+        if ($logo === '1' || $logo === 'true' || $logo === true) {
+            $logoFile = public_path('images/logo-avatar.png');
+            if (is_file($logoFile)) {
+                $opts['logo_path'] = $logoFile;
+            }
+        }
+
+        try {
+            $url = url('/jeumc/'.$preset->share_slug);
+            $png = $qr->generate($url, $opts);
+        } catch (\InvalidArgumentException $e) {
+            // Fallback options par défaut si paramètres user invalides (contraste KO).
+            $png = $qr->generate(url('/jeumc/'.$preset->share_slug), []);
+        }
+
+        $headers = [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'public, max-age=3600',
+            'X-Content-Type-Options' => 'nosniff',
+        ];
+        if ($request->boolean('download')) {
+            $headers['Content-Disposition'] = 'attachment; filename="qr-laveille-'.$preset->share_slug.'.png"';
+        }
+
+        return response($png, 200, $headers);
+    }
+
+    private function normalizeHex(?string $value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+        $value = '#'.ltrim($value, '#');
+        return preg_match('/^#[0-9a-fA-F]{6}$/', $value) ? strtolower($value) : null;
     }
 
     /**

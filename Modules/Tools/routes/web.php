@@ -44,6 +44,10 @@ Route::middleware('web')->group(function () {
         ->name('tools.crossword.csv-template');
     // 2026-05-05 #94 : index publique grilles partagées (sans publicId) — DOIT venir AVANT /jeumc/{identifier}
     Route::get('/jeumc', [PublicCrosswordController::class, 'index'])->name('tools.crossword.public-index');
+    // 2026-05-05 #97 Phase 2 : QR PNG personnalisable — DOIT venir AVANT /jeumc/{identifier} fallback
+    Route::get('/jeumc/{identifier}/qr.png', [PublicCrosswordController::class, 'qrPng'])
+        ->where('identifier', '[a-zA-Z0-9_-]+')
+        ->name('tools.crossword.qr');
     // 2026-05-05 #97 Phase 1 : {identifier} accepte custom_slug OU public_id (BC garantie via Model::findByShareIdentifier)
     Route::get('/jeumc/{identifier}', [PublicCrosswordController::class, 'play'])
         ->where('identifier', '[a-zA-Z0-9_-]+')
@@ -63,6 +67,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/user/mots-croises/{publicId}/slug', [UserCrosswordController::class, 'updateSlug'])
         ->where('publicId', '[a-zA-Z0-9_-]+')
         ->name('user.crosswords.update-slug');
+    // 2026-05-05 #97 Phase 2 : POST mise à jour qr_options (couleurs, logo, ECC, dot_style)
+    Route::post('/user/mots-croises/{publicId}/qr-options', [UserCrosswordController::class, 'updateQrOptions'])
+        ->where('publicId', '[a-zA-Z0-9_-]+')
+        ->name('user.crosswords.update-qr-options');
 });
 
 Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {

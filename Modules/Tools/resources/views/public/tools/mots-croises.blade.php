@@ -244,6 +244,88 @@
                       </p>
                     </div>
                   </details>
+
+                  {{-- 2026-05-05 #97 Phase 2 : personnalisation QR code (couleurs, logo, ECC, dot style) --}}
+                  <details class="mt-2" x-show="currentPresetPublicId">
+                    <summary style="cursor:pointer;color:#047857;font-weight:600;font-size:.875rem">{{ __('Personnaliser le QR code') }}</summary>
+                    <div class="mt-3 d-flex flex-wrap gap-3 align-items-start">
+                      <div class="d-flex flex-column align-items-center" style="flex:0 0 auto">
+                        <img :src="'/jeumc/' + (currentCustomSlug || currentPresetPublicId) + '/qr.png?fg=' + qrFg.replace('#','') + '&bg=' + qrBg.replace('#','') + '&ecc=' + qrEcc + '&style=' + qrDotStyle + '&logo=' + (qrIncludeLogo ? '1' : '0') + '&size=240&_b=' + qrPreviewBust"
+                             alt="{{ __('Aperçu QR code personnalisé') }}" width="240" height="240"
+                             style="border:1px solid #d1fae5;border-radius:8px;background:#fff;min-width:240px;min-height:240px"
+                             loading="lazy">
+                        <div class="d-flex gap-2 mt-2 flex-wrap" style="max-width:240px">
+                          <a :href="'/jeumc/' + (currentCustomSlug || currentPresetPublicId) + '/qr.png?fg=' + qrFg.replace('#','') + '&bg=' + qrBg.replace('#','') + '&ecc=' + qrEcc + '&style=' + qrDotStyle + '&logo=' + (qrIncludeLogo ? '1' : '0') + '&size=600&download=1'"
+                             class="ct-btn ct-btn-primary d-inline-flex align-items-center justify-content-center gap-2 flex-grow-1"
+                             style="min-height:44px"
+                             download
+                             aria-label="{{ __('Télécharger le QR code en PNG haute résolution') }}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span>{{ __('Télécharger') }}</span>
+                          </a>
+                          <button type="button" :disabled="qrSaving" @click="saveQrOptions()" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2 flex-grow-1" style="min-height:44px" :aria-label="qrSaving ? '{{ __('Enregistrement...') }}' : '{{ __('Enregistrer ces options QR comme défaut') }}'">
+                            <span x-text="qrSaving ? '{{ __('Enreg...') }}' : '{{ __('Enregistrer') }}'"></span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div style="flex:1;min-width:240px">
+                        <label class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Style prédéfini') }}</label>
+                        <div class="d-flex gap-2 flex-wrap mb-3">
+                          <button type="button" @click="qrFg='#0B7285'; qrBg='#FFFFFF'" :class="{'ct-btn-primary': qrFg==='#0B7285' && qrBg==='#FFFFFF', 'ct-btn-outline': !(qrFg==='#0B7285' && qrBg==='#FFFFFF')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Teal') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#0B7285;border:1px solid #fff"></span>Teal</button>
+                          <button type="button" @click="qrFg='#1A1D23'; qrBg='#FFFFFF'" :class="{'ct-btn-primary': qrFg==='#1A1D23' && qrBg==='#FFFFFF', 'ct-btn-outline': !(qrFg==='#1A1D23' && qrBg==='#FFFFFF')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Noir') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#1A1D23;border:1px solid #fff"></span>Noir</button>
+                          <button type="button" @click="qrFg='#C2410C'; qrBg='#FFFFFF'" :class="{'ct-btn-primary': qrFg==='#C2410C' && qrBg==='#FFFFFF', 'ct-btn-outline': !(qrFg==='#C2410C' && qrBg==='#FFFFFF')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Orange') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#C2410C;border:1px solid #fff"></span>Orange</button>
+                          <button type="button" @click="qrFg='#FFFFFF'; qrBg='#064E5C'" :class="{'ct-btn-primary': qrFg==='#FFFFFF' && qrBg==='#064E5C', 'ct-btn-outline': !(qrFg==='#FFFFFF' && qrBg==='#064E5C')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Inversé') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#064E5C;border:1px solid #fff"></span>Inversé</button>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                          <div class="col-6">
+                            <label for="qr-fg" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Couleur QR') }}</label>
+                            <input type="color" id="qr-fg" x-model="qrFg" class="form-control form-control-color" style="min-height:44px;width:100%" aria-label="{{ __('Couleur du QR code') }}">
+                          </div>
+                          <div class="col-6">
+                            <label for="qr-bg" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Fond') }}</label>
+                            <input type="color" id="qr-bg" x-model="qrBg" class="form-control form-control-color" style="min-height:44px;width:100%" aria-label="{{ __('Couleur de fond du QR code') }}">
+                          </div>
+                        </div>
+
+                        <div class="mb-3" x-data="{ get ratio() { const fg=this.$root.qrFg, bg=this.$root.qrBg; const hexRgb=(h)=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}; const lum=(rgb)=>{const ll=(c)=>{const s=c/255;return s<=0.03928?s/12.92:Math.pow((s+0.055)/1.055,2.4);};return 0.2126*ll(rgb[0])+0.7152*ll(rgb[1])+0.0722*ll(rgb[2]);}; const l1=lum(hexRgb(fg)), l2=lum(hexRgb(bg)); const r=(Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05); return Math.round(r*100)/100; } }">
+                          <span class="small fw-bold" :style="ratio >= 7 ? 'color:#047857' : (ratio >= 4.5 ? 'color:#92400e' : 'color:#b91c1c')">
+                            {{ __('Contraste') }} : <span x-text="ratio"></span>:1
+                            <span x-show="ratio >= 7" x-cloak>{{ __('AAA ✓') }}</span>
+                            <span x-show="ratio >= 4.5 && ratio < 7" x-cloak>{{ __('AA ⚠') }}</span>
+                            <span x-show="ratio < 4.5" x-cloak>{{ __('FAIL ✗ — QR illisible') }}</span>
+                          </span>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="qr-style" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Forme des modules') }}</label>
+                          <select id="qr-style" x-model="qrDotStyle" class="form-select" style="min-height:44px" aria-label="{{ __('Forme des modules QR') }}">
+                            <option value="square">{{ __('Carré (classique)') }}</option>
+                            <option value="rounded">{{ __('Arrondi') }}</option>
+                            <option value="dots">{{ __('Points') }}</option>
+                          </select>
+                        </div>
+
+                        <div class="mb-3">
+                          <label for="qr-ecc" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Niveau de correction') }}</label>
+                          <select id="qr-ecc" x-model="qrEcc" class="form-select" style="min-height:44px" aria-label="{{ __('Niveau de correction d\'erreur ECC') }}">
+                            <option value="L">{{ __('Bas (L) - 7%') }}</option>
+                            <option value="M">{{ __('Moyen (M) - 15%') }}</option>
+                            <option value="Q">{{ __('Élevé (Q) - 25%') }}</option>
+                            <option value="H">{{ __('Maximum (H) - 30%') }}</option>
+                          </select>
+                          <p class="form-text small mb-0" style="color:#047857;opacity:.8">{{ __('Plus élevé = QR plus dense mais plus tolérant aux dommages.') }}</p>
+                        </div>
+
+                        <div class="form-check mb-2" style="min-height:44px;display:flex;align-items:center">
+                          <input type="checkbox" id="qr-logo" x-model="qrIncludeLogo" @change="qrIncludeLogo && (qrEcc='Q')" class="form-check-input" style="margin-right:.5rem">
+                          <label for="qr-logo" class="form-check-label small" style="color:#047857;font-weight:500">{{ __('Inclure logo laveille.ai au centre') }}</label>
+                        </div>
+                        <p x-show="qrIncludeLogo" x-cloak class="form-text small mb-0" style="color:#047857;opacity:.8">{{ __('Niveau de correction ECC Q (25%) auto-activé pour compenser l\'espace du logo.') }}</p>
+                      </div>
+                    </div>
+                  </details>
                 </div>
               </div>
               @endauth
@@ -1019,6 +1101,14 @@ function crosswordGenerator() {
     customSlugInput: '',       // 2026-05-05 #97 Phase 1 : modèle pour formulaire édition slug
     customSlugSaving: false,
     customSlugError: '',
+    // 2026-05-05 #97 Phase 2 : QR personnalisation
+    qrFg: '#0B7285',
+    qrBg: '#FFFFFF',
+    qrEcc: 'M',
+    qrDotStyle: 'square',
+    qrIncludeLogo: false,
+    qrSaving: false,
+    qrPreviewBust: 0,
     shareLinkCopied: false,
     canNativeShare: typeof navigator !== 'undefined' && typeof navigator.share === 'function',
 
@@ -1594,6 +1684,34 @@ Maintenant, génère ${n} paires sur le thème "${theme}".`;
         this.customSlugError = "{{ __('Erreur réseau lors de l\'enregistrement.') }}";
       } finally {
         this.customSlugSaving = false;
+      }
+    },
+
+    // 2026-05-05 #97 Phase 2 : POST qr_options.
+    async saveQrOptions() {
+      if (!this.currentPresetPublicId) return;
+      this.qrSaving = true;
+      try {
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const response = await fetch('/user/mots-croises/' + this.currentPresetPublicId + '/qr-options', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+          body: JSON.stringify({ foreground: this.qrFg, background: this.qrBg, ecc: this.qrEcc, dot_style: this.qrDotStyle, logo: this.qrIncludeLogo }),
+        });
+        if (response.ok) {
+          this.qrPreviewBust = Date.now();
+          this.dispatchToast("{{ __('Options QR enregistrées.') }}", 'success');
+        } else if (response.status === 422) {
+          const data = await response.json().catch(() => ({}));
+          const firstError = data.errors ? Object.values(data.errors)[0]?.[0] : null;
+          this.dispatchToast(firstError || "{{ __('Options QR invalides.') }}", 'danger');
+        } else {
+          this.dispatchToast("{{ __('Erreur serveur QR.') }}", 'danger');
+        }
+      } catch (err) {
+        this.dispatchToast("{{ __('Erreur réseau QR.') }}", 'danger');
+      } finally {
+        this.qrSaving = false;
       }
     },
 
