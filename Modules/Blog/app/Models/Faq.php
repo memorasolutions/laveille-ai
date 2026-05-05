@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Traits\HasPublishedState;
 use Spatie\Translatable\HasTranslations;
 
 class Faq extends Model
 {
+    use HasPublishedState;
     use HasTranslations;
     use SoftDeletes;
 
@@ -37,10 +39,7 @@ class Faq extends Model
         return $this->belongsTo(Article::class);
     }
 
-    public function scopePublished(Builder $query): Builder
-    {
-        return $query->where('is_published', true);
-    }
+    // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).
 
     public function scopeOrdered(Builder $query): Builder
     {

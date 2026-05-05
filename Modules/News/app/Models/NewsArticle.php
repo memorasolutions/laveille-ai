@@ -11,12 +11,14 @@ use Illuminate\Support\Str;
 use Modules\Community\Traits\HasComments;
 use Modules\Community\Traits\HasReports;
 use Modules\Core\Contracts\Searchable;
+use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Voting\Traits\HasCommunityVotes;
 
 class NewsArticle extends Model implements Searchable
 {
     use HasComments, HasReports, HasCommunityVotes;
+    use HasPublishedState;
     use LogsActivityStandard;
     use \Modules\SEO\Traits\NotifiesIndexNow;
 
@@ -113,10 +115,7 @@ class NewsArticle extends Model implements Searchable
         return $shortUrl?->getShortUrl();
     }
 
-    public function scopePublished(Builder $query): Builder
-    {
-        return $query->where('is_published', true);
-    }
+    // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).
 
     public function scopeRecent(Builder $query): Builder
     {

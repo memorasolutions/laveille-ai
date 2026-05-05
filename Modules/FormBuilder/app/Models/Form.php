@@ -15,12 +15,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Modules\Core\Traits\HasPublishedState;
 use Modules\FormBuilder\Database\Factories\FormFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
 
 class Form extends Model
 {
-    use BelongsToTenant, HasFactory;
+    use BelongsToTenant, HasFactory, HasPublishedState;
 
     /** @var list<string> */
     protected $fillable = [
@@ -64,10 +65,7 @@ class Form extends Model
         return $this->hasMany(FormSubmission::class);
     }
 
-    public function scopePublished(Builder $query): Builder
-    {
-        return $query->where('is_published', true);
-    }
+    // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).
 
     protected static function newFactory(): FormFactory
     {

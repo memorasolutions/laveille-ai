@@ -11,6 +11,7 @@ namespace Modules\Acronyms\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Contracts\Searchable;
+use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
@@ -18,6 +19,7 @@ use Spatie\Translatable\HasTranslations;
 class Acronym extends Model implements Searchable
 {
     use \Modules\Core\Traits\HasModerationStatus;
+    use HasPublishedState;
     use HasSuggestions;
     use HasTranslations;
     use LogsActivityStandard;
@@ -60,10 +62,7 @@ class Acronym extends Model implements Searchable
         return $this->belongsTo(AcronymCategory::class, 'acronym_category_id');
     }
 
-    public function scopePublished($query)
-    {
-        return $query->where('is_published', true);
-    }
+    // 2026-05-05 #146 : scopePublished mutualise via HasPublishedState (DRY Core).
 
     public function scopeOfDomain($query, string $domain)
     {
