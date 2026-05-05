@@ -24,16 +24,22 @@ class SavedCrosswordPresetController
             'is_public' => 'boolean',
         ]);
 
-        // 2026-05-05 #101 : si is_public, vérifier doublon avant création.
+        // 2026-05-05 #101+#113 : si is_public, vérifier doublon (chez quiconque, incluant le même user).
         if (! empty($validated['is_public'])) {
             $duplicate = $this->findPublicDuplicateByConfig($validated['config_text']);
-            if ($duplicate && $duplicate->user_id !== auth()->id()) {
+            if ($duplicate) {
+                $isOwn = $duplicate->user_id === auth()->id();
+                $msg = $isOwn
+                    ? 'Vous avez déjà publié une grille identique : « '.$duplicate->name.' ». Modifiez celle-ci au lieu d\'en créer un doublon, ou changez vos paires.'
+                    : 'Une grille publique identique existe déjà : « '.$duplicate->name.' ». Vous pouvez la partager directement, ou modifier vos paires pour en créer une variante.';
                 return response()->json([
                     'success' => false,
                     'duplicate' => true,
                     'duplicate_url' => url('/jeumc/'.($duplicate->custom_slug ?: $duplicate->public_id)),
                     'duplicate_name' => $duplicate->name,
-                    'message' => 'Une grille publique identique existe déjà : '.$duplicate->name.'. Vous pouvez la partager directement, ou modifier vos paires pour en créer une variante.',
+                    'duplicate_is_own' => $isOwn,
+                    'duplicate_edit_url' => $isOwn ? url('/outils/mots-croises?preset='.$duplicate->public_id) : null,
+                    'message' => $msg,
                 ], 409);
             }
         }
@@ -59,18 +65,24 @@ class SavedCrosswordPresetController
             'is_public' => 'boolean',
         ]);
 
-        // 2026-05-05 #101 : si bascule en public, vérifier doublon (sauf chez le même user).
+        // 2026-05-05 #101+#113 : si bascule en public, vérifier doublon (chez quiconque, incluant le même user).
         $willBePublic = $validated['is_public'] ?? $preset->is_public;
         $configText = $validated['config_text'] ?? $preset->config_text;
         if ($willBePublic) {
             $duplicate = $this->findPublicDuplicateByConfig($configText, $preset->id);
-            if ($duplicate && $duplicate->user_id !== auth()->id()) {
+            if ($duplicate) {
+                $isOwn = $duplicate->user_id === auth()->id();
+                $msg = $isOwn
+                    ? 'Vous avez déjà publié une grille identique : « '.$duplicate->name.' ». Modifiez celle-ci au lieu d\'en créer un doublon, ou changez vos paires.'
+                    : 'Une grille publique identique existe déjà : « '.$duplicate->name.' ». Vous pouvez la partager directement, ou modifier vos paires pour en créer une variante.';
                 return response()->json([
                     'success' => false,
                     'duplicate' => true,
                     'duplicate_url' => url('/jeumc/'.($duplicate->custom_slug ?: $duplicate->public_id)),
                     'duplicate_name' => $duplicate->name,
-                    'message' => 'Une grille publique identique existe déjà : '.$duplicate->name.'. Vous pouvez la partager directement, ou modifier vos paires pour en créer une variante.',
+                    'duplicate_is_own' => $isOwn,
+                    'duplicate_edit_url' => $isOwn ? url('/outils/mots-croises?preset='.$duplicate->public_id) : null,
+                    'message' => $msg,
                 ], 409);
             }
         }

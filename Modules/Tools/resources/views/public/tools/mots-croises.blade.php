@@ -191,8 +191,12 @@
                           <span>{{ __('Voir la grille existante') }}</span>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                         </a>
+                        {{-- 2026-05-05 #113 : bouton "Modifier ma grille existante" si même user --}}
+                        <a x-show="duplicateInfo?.is_own && duplicateInfo?.edit_url" :href="duplicateInfo?.edit_url" class="ct-btn ct-btn-accent d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
+                          <span>{{ __('Modifier la grille existante') }}</span>
+                        </a>
                         <button type="button" @click="duplicateInfo = null" class="ct-btn ct-btn-outline" style="min-height:44px;font-size:.875rem" aria-label="{{ __('Fermer l\'alerte') }}">
-                          {{ __('Modifier ma grille') }}
+                          {{ __('Modifier mes paires') }}
                         </button>
                       </div>
                     </div>
@@ -1188,13 +1192,13 @@ function crosswordGenerator() {
           this.publicShareUrl = window.location.origin + '/jeumc/' + identifier;
           this.currentPresetPublicId = preset.public_id;
           this.currentCustomSlug = preset.custom_slug || '';
-          // Pré-remplir options QR depuis qr_options DB
-          if (preset.qr_options && typeof preset.qr_options === 'object') {
-            this.qrFg = preset.qr_options.foreground || this.qrFg;
-            this.qrBg = preset.qr_options.background || this.qrBg;
-            this.qrEcc = preset.qr_options.ecc || this.qrEcc;
-            this.qrDotStyle = preset.qr_options.dot_style || this.qrDotStyle;
-            this.qrIncludeLogo = preset.qr_options.logo === '1' || preset.qr_options.logo === true;
+          // 2026-05-05 #114 : pré-remplir customSlugInput depuis slug existant ou auto-suggéré + déclencher check unicité
+          if (preset.custom_slug) {
+            this.customSlugInput = preset.custom_slug;
+            this.customSlugAvailable = true;
+          } else if (this.saveName && window.SlugHelper) {
+            this.customSlugInput = window.SlugHelper.slugify(this.saveName);
+            this.$nextTick(() => this.checkSlugAvailability(this.customSlugInput));
           }
         } else {
           this.publicShareUrl = '';
@@ -1572,6 +1576,8 @@ function crosswordGenerator() {
             url: dup.duplicate_url || '',
             name: dup.duplicate_name || '',
             message: dup.message || '',
+            is_own: !!dup.duplicate_is_own,
+            edit_url: dup.duplicate_edit_url || '',
           };
           // Force grille en privée tant que conflit pas résolu (sécurité user)
           this.metadata.is_public = false;
