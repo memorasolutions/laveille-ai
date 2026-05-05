@@ -291,6 +291,22 @@
                 <strong x-text="tools.length" style="color: var(--c-primary);"></strong> {{ __('outils sélectionnés pour vous.') }}
             </p>
 
+            {{-- 2026-05-05 #137 : toggle outils archives (cache par defaut, accessible via lien) --}}
+            @if(($archivedCount ?? 0) > 0)
+                @if($showArchived ?? false)
+                    <p style="color:#374151;font-size:0.85rem;margin-bottom:12px;">
+                        <span style="display:inline-block;background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:4px;font-weight:600;font-size:0.75rem;">{{ __('Affichage archivés activé') }}</span>
+                        <a href="{{ route('directory.index') }}" style="color:var(--c-primary);text-decoration:underline;margin-left:8px;">{{ __('Cacher les archivés') }}</a>
+                    </p>
+                @else
+                    <p style="color:#6b7280;font-size:0.8rem;margin-bottom:12px;">
+                        <a href="{{ route('directory.index') }}?show_archived=1" style="color:#6b7280;text-decoration:underline;" title="{{ __('Outils archivés en avril 2026 — contenu HN/blog/vidéo crawlé à tort, pas de vrais outils SaaS') }}">
+                            🗄️ {{ __('Voir les') }} {{ $archivedCount }} {{ __('outils archivés') }}
+                        </a>
+                    </p>
+                @endif
+            @endif
+
             {{-- Bouton proposer (visible etape 0) — auth requise --}}
             <div x-show="wStep === 0 && !submitted" style="margin-bottom: 20px;">
                 @auth

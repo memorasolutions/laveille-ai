@@ -25,7 +25,11 @@ class PublicDirectoryController extends Controller
 {
     public function index(Request $request): View
     {
+        // 2026-05-05 #137 : cache outils archived par defaut (S43 cleanup HN/blog/video crawler errone). Toggle ?show_archived=1 pour les afficher.
+        $showArchived = $request->boolean('show_archived');
+
         $query = Tool::published()->with('categories', 'tags')
+            ->when(! $showArchived, fn ($q) => $q->notArchived())
             ->withCount(['resources as tutorials_count' => function ($q) {
                 $q->where('is_approved', 1)
                   ->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
@@ -47,21 +51,28 @@ class PublicDirectoryController extends Controller
         $tutorialsCountClosure = fn ($q) => $q->where('is_approved', 1)->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
 
         $featuredQuery = Tool::published()->featured()->with('categories')
+            ->when(! $showArchived, fn ($q) => $q->notArchived())
             ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
             ->orderBy('sort_order');
         $featuredTools = $this->applyDirectoryFilters($featuredQuery, $request)->get();
         $recentTools = Tool::published()->with('categories')
+            ->when(! $showArchived, fn ($q) => $q->notArchived())
             ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
             ->orderByDesc('created_at')->distinct()->limit((int) Settings::get('directory.recent_tools_limit', 6))->get();
         $recentIds = $recentTools->pluck('id')->toArray();
         $popularTools = Tool::published()->with('categories')
+            ->when(! $showArchived, fn ($q) => $q->notArchived())
             ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
             ->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit((int) Settings::get('directory.popular_tools_limit', 6))->get();
+
+        // 2026-05-05 #137 : count des outils archived pour afficher dans le toggle
+        $archivedCount = Tool::published()->where('lifecycle_status', 'archived')->count();
 
         // Plus votés par la communauté (si module Voting actif)
         $topVoted = collect();
         if (trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class)) {
             $topVoted = Tool::published()->with('categories')
+                ->when(! $showArchived, fn ($q) => $q->notArchived())
                 ->withCount(['communityVotes', 'resources as tutorials_count' => $tutorialsCountClosure])
                 ->having('community_votes_count', '>', 0)
                 ->orderByDesc('community_votes_count')
@@ -75,7 +86,7 @@ class PublicDirectoryController extends Controller
                 ->get(['id', 'name', 'slug', 'is_public']);
         }
 
-        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections'));
+        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections', 'showArchived', 'archivedCount'));
     }
 
     public function educationPricing(Request $request): View
