@@ -41,6 +41,30 @@ class CoreServiceProvider extends ServiceProvider
         // Middleware de vérification de bannissement
         $router = $this->app['router'];
         $router->aliasMiddleware('banned', \Modules\Core\Http\Middleware\CheckBanned::class);
+
+        // 2026-05-05 #141 : auto-linking glossaire/acronymes
+        $this->registerGlossaryLinkifier();
+    }
+
+    /**
+     * 2026-05-05 #141 : Blade @glossarize + cache flush events.
+     */
+    protected function registerGlossaryLinkifier(): void
+    {
+        // Blade directive : @glossarize($html [, ['skip_slug' => 'X']])
+        Blade::directive('glossarize', function ($expression) {
+            return "<?php echo \Modules\Core\Services\GlossaryLinkifier::linkify($expression); ?>";
+        });
+
+        // Cache flush sur changement Term ou Acronym (via Model events natifs Eloquent)
+        if (class_exists(\Modules\Dictionary\Models\Term::class)) {
+            \Modules\Dictionary\Models\Term::saved(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
+            \Modules\Dictionary\Models\Term::deleted(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
+        }
+        if (class_exists(\Modules\Acronyms\Models\Acronym::class)) {
+            \Modules\Acronyms\Models\Acronym::saved(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
+            \Modules\Acronyms\Models\Acronym::deleted(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
+        }
     }
 
     /**

@@ -6,54 +6,73 @@
 @section('og_type', 'article')
 @section('share_text')
 @php
-    // Détecte si c'est un Concentré hebdo (Template A) ou un article standard (Template B)
-    $isConcentre = Str::startsWith($article->slug, 'le-concentre-de-la-semaine') ||
-                   collect($article->tags ?? [])->contains(fn($tag) => in_array(strtolower($tag), ['concentré', 'hebdo', 'concentre-hebdo']));
+    $clean = fn($str) => str_replace("'", "\u{2019}", trim((string) $str));
 
-    $clean = fn($str) => str_replace('\'', "\u{2019}", trim($str));
+    // Detection concentre (multi-critere robuste)
+    $catName = strtolower((string) ($article->blogCategory?->name ?? $article->category?->name ?? ''));
+    $catSlug = strtolower((string) ($article->blogCategory?->slug ?? $article->category?->slug ?? ''));
+    $isConcentre = Str::startsWith($article->slug, ['concentre-', 'le-concentre-'])
+        || in_array($catName, ['le concentré', 'le concentre', 'concentré', 'concentre'], true)
+        || in_array($catSlug, ['le-concentre', 'concentre'], true)
+        || collect($article->tags ?? [])->contains(fn($tag) => in_array(strtolower((string) $tag), ['concentré', 'concentre', 'hebdo', 'concentre-hebdo'], true));
 
     if ($isConcentre) {
-        // Template A — Concentré hebdo (curiosity gap #3 + liste #1 sonar-pro 2026)
-        $hook = $clean("🧠 La semaine IA qui a tout fait basculer au Québec");
-        $curiosity = $clean("GPT-5.4 qui bat Erdős, agents autonomes, Adobe qui redéfinit la création…");
+        // Template A — Concentre hebdo : 100% derive du contenu reel (parsing dynamique)
+        $hook = "🧠 " . $clean($article->title);
 
-        preg_match_all('/<h2[^>]*>(.*?)<\/h2>/', $article->content, $h2Matches);
-        $bullets = collect($h2Matches[1] ?? [])
-            ->map(fn($h) => "• " . $clean(strip_tags($h)))
-            ->take(5)
+        // Tagline : excerpt ou premier paragraphe stripped
+        $excerptRaw = (string) ($article->excerpt ?? '');
+        if (mb_strlen($excerptRaw) < 50 && $article->content) {
+            preg_match('/<p[^>]*>(.*?)<\/p>/is', (string) $article->content, $pm);
+            $excerptRaw = $pm[1] ?? strip_tags((string) $article->content);
+        }
+        $tagline = $clean(mb_strimwidth(strip_tags((string) $excerptRaw), 0, 220, '…'));
+
+        // TOUTES les h2 (vrai compte sections)
+        preg_match_all('/<h2[^>]*>(.*?)<\/h2>/is', (string) $article->content, $h2Matches);
+        $sections = collect($h2Matches[1] ?? [])
+            ->map(fn($h) => trim(strip_tags((string) $h)))
+            ->filter(fn($h) => $h !== '')
             ->values()
-            ->toArray();
+            ->all();
+
+        $bullets = array_map(fn($s) => "• " . $clean($s), $sections);
+        $count = count($sections);
+        $countLabel = $count > 0
+            ? "👉 {$count} " . ($count === 1 ? 'actu décryptée' : 'actus décryptées') . " pour nous autres."
+            : "👉 À découvrir sur laveille.ai.";
 
         $lines = array_filter([
             $hook,
-            $curiosity,
+            '',
+            $tagline,
             '',
             ...$bullets,
             '',
-            $clean("👉 10 actus décryptées pour nous autres."),
+            $countLabel,
             $clean("💬 Laquelle t'a surpris·e? Partage ton top en commentaire."),
             "🔗 " . request()->url(),
             "#IAQuebec #VeilleIA",
             "Via @laveilleAI",
-        ]);
+        ], fn($line) => $line !== null && $line !== false);
     } else {
         // Template B — Article normal (curiosity + teaser + meta inline)
         $title = $clean($article->title);
-        $excerpt = $article->excerpt ?? strip_tags($article->content);
+        $excerpt = $article->excerpt ?? strip_tags((string) $article->content);
         $teaser = $clean(Str::limit($excerpt, 180));
 
         $metaLine = null;
-        if (!empty($article->author?->name) || !empty($article->category?->name)) {
-            $author = $article->author?->name ? $clean($article->author->name) : null;
-            $category = $article->category?->name ? $clean($article->category->name) : null;
-            $metaLine = implode(' · ', array_filter([$author, $category]));
+        if (!empty($article->user?->name) || !empty($article->blogCategory?->name)) {
+            $authorName = $article->user?->name ? $clean($article->user->name) : null;
+            $categoryName = $article->blogCategory?->name ? $clean($article->blogCategory->name) : null;
+            $metaLine = implode(' · ', array_filter([$authorName, $categoryName]));
         }
 
         $lines = array_filter([
             "💡 {$title}",
             $teaser,
             $metaLine,
-            "📖 Lecture 5-7 min : " . request()->url(),
+            "📖 Lecture sur laveille.ai : " . request()->url(),
             "#IA #VeilleQuebec",
             "Via @laveilleAI",
         ]);
@@ -214,8 +233,10 @@
                                         $articleContent = \App\Helpers\AeoHelper::chunkContent($articleContent);
                                     }
                                 @endphp
-                                {!! $articleContent !!}
+                                {{-- 2026-05-05 #141 : auto-link glossaire/acronymes pour SEO/AEO/GEO --}}
+                                @glossarize($articleContent)
                             </div>
+                            @include('core::partials.glossary-jsonld')
                         </div>
 
                         @include('fronttheme::blog.partials.faq-accordion')

@@ -259,9 +259,11 @@
 
                     {{-- Description originale (seulement si pas de résumé structuré) --}}
                     @if($article->description && !$ss)
+                    {{-- 2026-05-05 #141 : auto-link glossaire/acronymes pour SEO/AEO/GEO --}}
                     <div class="nw-desc">
-                        {!! nl2br(e($article->description)) !!}
+                        @glossarize(nl2br(e($article->description)))
                     </div>
+                    @include('core::partials.glossary-jsonld')
                     @endif
 
                     @php
