@@ -32,7 +32,7 @@
                             <div class="d-flex gap-2 align-items-center">
                                 <input type="text" class="form-control form-control-sm flex-fill" x-model="saveName" placeholder="{{ __('Nommer ce prompt pour le retrouver...') }}" aria-label="{{ __('Titre du prompt') }}" style="border-radius: 8px;">
                                 <button class="ct-btn ct-btn-primary ct-btn-sm" @click="addToHistory()" :disabled="!isValid || saving" style="white-space:nowrap;"
-                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre a jour') }}' : '{{ __('Sauvegarder') }}')"></button>
+                                        x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2 mb-0" style="font-size: 0.8rem; color: var(--c-text-muted);">
                                 {{ __('Retrouvez vos prompts dans') }} <a href="{{ route('user.saved') }}?tab=prompts" style="color: var(--c-primary); text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
@@ -42,7 +42,7 @@
                             </template>
                             <template x-if="hasLocalData">
                                 <div class="small mt-2 mb-0" style="font-size: 0.8rem; color: var(--c-text-muted);">
-                                    {{ __('Des prompts de votre navigateur ont ete trouves.') }}
+                                    {{ __('Des prompts de votre navigateur ont été trouvés.') }}
                                     <button class="ct-btn ct-btn-outline ct-btn-xs ms-1" @click="importLocalStorage()">{{ __('Importer') }}</button>
                                 </div>
                             </template>
@@ -404,9 +404,9 @@
 
 @push('scripts')
 @php
-$defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Redacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pedagogue'],['value'=>'developpeur','label'=>'Developpeur senior'],['value'=>'consultant','label'=>'Consultant en strategie'],['value'=>'graphiste','label'=>'Graphiste creatif'],['value'=>'analyste','label'=>'Analyste de donnees'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Specialiste en ressources humaines']];
-$defaultVerbs = ['Redige','Analyse','Cree','Genere','Explique','Compare','Resume','Traduis','Optimise','Evalue','Developpe','Concois','Planifie','Diagnostique'];
-$defaultAudiences = [['value'=>'pro','label'=>'Professionnels du secteur'],['value'=>'debutants','label'=>'Debutants'],['value'=>'entrepreneurs','label'=>'Entrepreneurs et dirigeants'],['value'=>'etudiants','label'=>'Etudiants universitaires'],['value'=>'grand_public','label'=>'Grand public'],['value'=>'techniques','label'=>'Collegues techniques'],['value'=>'direction','label'=>'Direction generale']];
+$defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines']];
+$defaultVerbs = ['Rédige','Analyse','Crée','Génère','Explique','Compare','Résume','Traduis','Optimise','Évalue','Développe','Conçois','Planifie','Diagnostique'];
+$defaultAudiences = [['value'=>'pro','label'=>'Professionnels du secteur'],['value'=>'debutants','label'=>'Débutants'],['value'=>'entrepreneurs','label'=>'Entrepreneurs et dirigeants'],['value'=>'etudiants','label'=>'Étudiants universitaires'],['value'=>'grand_public','label'=>'Grand public'],['value'=>'techniques','label'=>'Collègues techniques'],['value'=>'direction','label'=>'Direction générale']];
 $pbPersonas = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.personas', $defaultPersonas) : $defaultPersonas;
 $pbVerbs = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.verbs', $defaultVerbs) : $defaultVerbs;
 $pbAudiences = class_exists(\Modules\Settings\Facades\Settings::class) ? \Modules\Settings\Facades\Settings::get('tools.prompt_builder.audiences', $defaultAudiences) : $defaultAudiences;
@@ -703,7 +703,7 @@ document.addEventListener('alpine:init', function() {
                         self.saving = false;
                         window.dispatchEvent(new CustomEvent('toast', { detail: { message: '{{ __("Prompt sauvegardé") }}' } }));
                     })
-                    .catch(function() { self.saving = false; self.saveError = '{{ __("Erreur de sauvegarde. Reessayez.") }}'; setTimeout(function() { self.saveError = ''; }, 4000); });
+                    .catch(function() { self.saving = false; self.saveError = '{{ __("Erreur de sauvegarde. Réessayez.") }}'; setTimeout(function() { self.saveError = ''; }, 4000); });
                 } else {
                     this.$dispatch('open-auth-modal');
                 }
