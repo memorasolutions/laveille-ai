@@ -14,8 +14,8 @@
 <a href="{{ route('directory.show', $tool->slug) }}" class="rt-hl-card" title="{{ $tool->name }}" style="position:relative;">
     {{-- 2026-05-05 #135 : badge YouTube rouge tutos sur card highlight --}}
     @if(($tool->tutorials_count ?? 0) > 0)
-        <span style="position:absolute;top:6px;right:6px;z-index:3;display:inline-flex;align-items:center;gap:3px;background:#FF0000;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.2);" title="{{ $tool->tutorials_count }} {{ $tool->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+        <span style="position:absolute;top:6px;right:6px;z-index:3;display:inline-flex;align-items:center;gap:3px;background:#0B7285;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.2);" title="{{ $tool->tutorials_count }} {{ $tool->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
             <span>{{ $tool->tutorials_count }}</span>
         </span>
     @endif

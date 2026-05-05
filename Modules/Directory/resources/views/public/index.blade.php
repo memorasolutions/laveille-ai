@@ -662,8 +662,8 @@
                 <a href="{{ route('directory.show', $ft->slug) }}" x-show="!isEducationContext || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;">
                     {{-- 2026-05-05 #135 : badge YouTube rouge avec count tutos (visible coin haut-droit) --}}
                     @if(($ft->tutorials_count ?? 0) > 0)
-                        <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;background:#FF0000;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;line-height:1.3;box-shadow:0 1px 3px rgba(0,0,0,.15);" title="{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutoriels disponibles') : __('tutoriel disponible') }}">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                        <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;background:#0B7285;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;line-height:1.3;box-shadow:0 1px 3px rgba(0,0,0,.15);" title="{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutoriels disponibles') : __('tutoriel disponible') }}">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                             <span>{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutos') : __('tuto') }}</span>
                         </span>
                     @endif
@@ -697,8 +697,8 @@
                     <a href="{{ route('directory.show', $tv->slug) }}" style="flex-shrink:0;width:200px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;position:relative;">
                         {{-- 2026-05-05 #135 : badge YouTube rouge tutos --}}
                         @if(($tv->tutorials_count ?? 0) > 0)
-                            <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;background:#FF0000;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;" title="{{ $tv->tutorials_count }} {{ $tv->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">
-                                <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                            <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;background:#0B7285;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;" title="{{ $tv->tutorials_count }} {{ $tv->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">
+                                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                                 <span>{{ $tv->tutorials_count }}</span>
                             </span>
                         @endif
@@ -770,9 +770,9 @@
                                         <a :href="tool.showUrl + '#tutoriels'"
                                            :aria-label="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutoriels disponibles') }}' : '{{ __('tutoriel disponible') }}')"
                                            :title="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutoriels disponibles') }}' : '{{ __('tutoriel disponible') }}')"
-                                           style="display:inline-flex;align-items:center;gap:4px;color:#fff;font-size:0.75rem;font-weight:700;text-decoration:none;background:#FF0000;padding:3px 8px;border-radius:4px;line-height:1.3;min-height:22px;box-shadow:0 1px 3px rgba(0,0,0,.15);"
-                                           onmouseover="this.style.background='#CC0000';" onmouseout="this.style.background='#FF0000';">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                           style="display:inline-flex;align-items:center;gap:4px;color:#fff;font-size:0.75rem;font-weight:700;text-decoration:none;background:#0B7285;padding:3px 8px;border-radius:4px;line-height:1.3;min-height:22px;box-shadow:0 1px 3px rgba(0,0,0,.15);"
+                                           onmouseover="this.style.background='#064E5C';" onmouseout="this.style.background='#0B7285';">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                                             <span x-text="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutos') }}' : '{{ __('tuto') }}')"></span>
                                         </a>
                                     </template>
