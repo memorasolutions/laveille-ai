@@ -1666,18 +1666,18 @@ RAISONNE étape par étape (ne montre pas le raisonnement, seulement le résulta
 CONTRAINTES ABSOLUES :
 - Réponses en MAJUSCULES, sans accents, sans espaces (ex: QUEBEC, pas Québec ; LAVEILLE, pas "La Veille")
 - Longueur réponse : entre 3 et 12 lettres
-- Indice : maximum 100 caractères, ${this.aiLang === 'fr' ? 'en français correct (accents permis)' : 'in proper '+lang}
+- Indice : maximum 100 caractères, ${this.aiLang === 'fr' ? 'EN FRANÇAIS CORRECT AVEC TOUS LES ACCENTS OBLIGATOIRES (é, è, ê, à, â, ç, ù, û, î, ï, ô, ö, ë, ü). Écris « Québec » et non « Quebec », « créé » et non « cree », « à propos » et non « a propos ». L\'absence d\'un accent dans un mot qui en porte un est considérée comme une faute' : 'in proper '+lang}
 - Pas de réponses identiques ou variantes proches (ex: pas CHAT et CHATS ensemble)
 
 FORMAT DE SORTIE (CRITIQUE) :
 Réponds UNIQUEMENT avec un bloc CSV strict, sans commentaires avant ou après. Première ligne = en-tête. Séparateur = point-virgule (;). Pas de guillemets autour des valeurs.
 
-Exemple exact à reproduire :
+Exemple exact à reproduire (notez les accents dans les indices : « Québec », « créé », « à ») :
 
 Indice;Mot
 Capitale du Québec;QUEBEC
-Langage de programmation web;PHP
-Animal qui aboie;CHIEN
+Langage de programmation web créé en 1995;PHP
+Animal qui aboie, fidèle compagnon de l'humain;CHIEN
 
 Maintenant, génère ${n} paires sur le thème "${theme}".`;
     },
