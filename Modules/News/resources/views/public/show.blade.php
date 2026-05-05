@@ -218,9 +218,9 @@
                         <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
 
-                    {{-- Lead : hook IA --}}
+                    {{-- Lead : hook IA + auto-link glossaire 2026-05-05 #141 --}}
                     @if($ss && isset($ss['hook']))
-                        <p class="nw-lead">{{ $ss['hook'] }}</p>
+                        <p class="nw-lead">@glossarize(e($ss['hook']))</p>
                     @endif
 
                     {{-- Résumé structuré --}}
@@ -229,14 +229,14 @@
                         <h3 class="nw-section-heading">{{ __('Points clés') }}</h3>
                         <ul class="nw-key-list">
                             @foreach($ss['key_points'] as $point)
-                                <li>{{ $point }}</li>
+                                <li>@glossarize(e($point))</li>
                             @endforeach
                         </ul>
                         @endif
 
                         @if(isset($ss['why_important']))
                         <h3 class="nw-section-heading">{{ __('Pourquoi c\'est important') }}</h3>
-                        <div class="nw-why"><p>{{ $ss['why_important'] }}</p></div>
+                        <div class="nw-why"><p>@glossarize(e($ss['why_important']))</p></div>
                         @endif
 
                         @if(!empty($ss['audience']))
@@ -245,7 +245,7 @@
                     @elseif($article->summary)
                         <div class="nw-summary-fallback">
                             <strong style="display: block; margin-bottom: 0.5rem; color: var(--c-primary); font-size: 0.875rem;">{{ __('Résumé IA') }}</strong>
-                            <p>{{ $article->summary }}</p>
+                            <p>@glossarize(e($article->summary))</p>
                         </div>
                     @endif
 
@@ -253,18 +253,19 @@
                     @if($ss && isset($ss['faq_question']))
                     <div class="nw-faq">
                         <h3>{{ $ss['faq_question'] }}</h3>
-                        <p>{{ $ss['faq_answer'] }}</p>
+                        <p>@glossarize(e($ss['faq_answer']))</p>
                     </div>
                     @endif
 
                     {{-- Description originale (seulement si pas de résumé structuré) --}}
                     @if($article->description && !$ss)
-                    {{-- 2026-05-05 #141 : auto-link glossaire/acronymes pour SEO/AEO/GEO --}}
                     <div class="nw-desc">
                         @glossarize(nl2br(e($article->description)))
                     </div>
-                    @include('core::partials.glossary-jsonld')
                     @endif
+
+                    {{-- Schema.org JSON-LD DefinedTermSet (couvre les zones glossarized ci-dessus) --}}
+                    @include('core::partials.glossary-jsonld')
 
                     @php
                         $externalUrl = $article->resolved_url ?: $article->url;
