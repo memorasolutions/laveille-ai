@@ -1183,14 +1183,15 @@ function crosswordGenerator() {
         // 2026-05-05 #129 : détecter format JSON moderne S80+ ({pairs:[{clue,answer}]}) en plus du format legacy 'indice / mot'
         const cfg = (preset.config_text || '').trim();
         let pairs = [];
+        let savedPayload = null;
         if (cfg.startsWith('{')) {
           try {
-            const data = JSON.parse(cfg);
-            if (data && Array.isArray(data.pairs)) {
-              pairs = data.pairs.filter(p => p && p.clue && p.answer)
+            savedPayload = JSON.parse(cfg);
+            if (savedPayload && Array.isArray(savedPayload.pairs)) {
+              pairs = savedPayload.pairs.filter(p => p && p.clue && p.answer)
                 .map(p => ({ clue: String(p.clue).trim(), answer: String(p.answer).toUpperCase().trim() }));
             }
-          } catch (e) { /* fallback legacy */ }
+          } catch (e) { savedPayload = null; }
         }
         if (pairs.length === 0) {
           const lines = cfg.split(/\r\n|\n|\r/).map(l => l.trim()).filter(Boolean);
@@ -1205,6 +1206,20 @@ function crosswordGenerator() {
         const params = preset.params || {};
         this.metadata = Object.assign({title: preset.name || '', difficulty: 'Moyen', is_public: !!preset.is_public, theme: ''}, params);
         this.saveName = preset.name || '';
+        // 2026-05-05 #130 : restaurer grid+words+unplaced sauvegardés pour conserver la disposition originale.
+        // Pour changer la disposition, l'utilisateur clique le bouton "Régénérer la disposition".
+        if (savedPayload && savedPayload.grid && Array.isArray(savedPayload.words) && savedPayload.words.length > 0) {
+          this.grid = savedPayload.grid;
+          this.words = savedPayload.words;
+          this.unplaced = Array.isArray(savedPayload.unplaced) ? savedPayload.unplaced : [];
+          this.generationError = '';
+          this.activeTab = 'grille';
+        } else {
+          this.grid = null;
+          this.words = [];
+          this.unplaced = [];
+          this.activeTab = 'config';
+        }
         // 2026-05-05 #100 fix : si grille publique chargée, set publicShareUrl + currentPresetPublicId pour afficher panneau Lien+QR+slug+QR-custom
         if (preset.is_public && preset.public_id) {
           const identifier = preset.custom_slug || preset.public_id;
