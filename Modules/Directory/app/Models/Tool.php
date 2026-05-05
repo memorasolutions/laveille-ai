@@ -83,6 +83,7 @@ class Tool extends Model implements Searchable
         'lifecycle_status', 'lifecycle_date', 'lifecycle_replacement_url', 'lifecycle_replacement_tool_id', 'lifecycle_notes',
         'aliases',
         'review',
+        'tutorials_last_scanned_at', // 2026-05-05 #138 : fix critique - sans ca, tools:enrich-tutorials re-scannait toujours les memes 10 outils.
     ];
 
     public function submitter(): BelongsTo
