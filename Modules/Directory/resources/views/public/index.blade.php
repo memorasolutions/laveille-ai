@@ -643,7 +643,14 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
                 @foreach($featuredTools as $ft)
                 @php $ftHost = $ft->url ? parse_url($ft->url, PHP_URL_HOST) : ''; @endphp
-                <a href="{{ route('directory.show', $ft->slug) }}" x-show="!isEducationContext || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                <a href="{{ route('directory.show', $ft->slug) }}" x-show="!isEducationContext || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;">
+                    {{-- 2026-05-05 #135 : badge YouTube rouge avec count tutos (visible coin haut-droit) --}}
+                    @if(($ft->tutorials_count ?? 0) > 0)
+                        <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;background:#FF0000;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;line-height:1.3;box-shadow:0 1px 3px rgba(0,0,0,.15);" title="{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutoriels disponibles') : __('tutoriel disponible') }}">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                            <span>{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutos') : __('tuto') }}</span>
+                        </span>
+                    @endif
                     <div style="display:flex!important;align-items:center!important;gap:10px;margin-bottom:10px;">
                         @if($ftHost)<img src="https://www.google.com/s2/favicons?domain={{ $ftHost }}&sz=32" alt="" width="24" height="24" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
                         <span style="font-weight:700;font-size:15px;">{{ $ft->name }}</span>
@@ -671,7 +678,14 @@
                 <div style="display:flex!important;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
                     @foreach($topVoted as $tv)
                     @php $tvHost = $tv->url ? parse_url($tv->url, PHP_URL_HOST) : ''; @endphp
-                    <a href="{{ route('directory.show', $tv->slug) }}" style="flex-shrink:0;width:200px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;">
+                    <a href="{{ route('directory.show', $tv->slug) }}" style="flex-shrink:0;width:200px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;position:relative;">
+                        {{-- 2026-05-05 #135 : badge YouTube rouge tutos --}}
+                        @if(($tv->tutorials_count ?? 0) > 0)
+                            <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;background:#FF0000;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;" title="{{ $tv->tutorials_count }} {{ $tv->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">
+                                <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                                <span>{{ $tv->tutorials_count }}</span>
+                            </span>
+                        @endif
                         <div style="display:flex!important;align-items:center!important;gap:8px;margin-bottom:8px;">
                             @if($tvHost)<img src="https://www.google.com/s2/favicons?domain={{ $tvHost }}&sz=32" alt="" width="20" height="20" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
                             <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $tv->name }}</span>
@@ -712,7 +726,8 @@
                         <a :href="tool.showUrl" aria-hidden="true" tabindex="-1" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
                             <template x-if="tool.screenshot">
                                 <div style="position: relative; height: 140px;">
-                                    <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
+                                    <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;"
+                                         onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
                                     <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);"></div>
                                 </div>
                             </template>
@@ -734,12 +749,13 @@
                                     <span class="rt-badge" :class="'badge-' + tool.pricing" x-text="tool.pricingLabel"></span>
                                     <template x-if="tool.hasEduPricing"><span style="background:#ecfdf5;color:#065f46;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;">🎓 {{ __('Éducation') }}</span></template>
                                     <template x-if="tool.launchYear > 0"><span style="color: #374151; font-size: 0.75rem;" x-text="'🚀 ' + tool.launchYear"></span></template>
+                                    {{-- 2026-05-05 #135 : badge rouge YouTube branded - visibilite max, coherent avec featured/topVoted --}}
                                     <template x-if="tool.tutorialsCount > 0">
                                         <a :href="tool.showUrl + '#tutoriels'"
                                            :aria-label="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutoriels disponibles') }}' : '{{ __('tutoriel disponible') }}')"
                                            :title="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutoriels disponibles') }}' : '{{ __('tutoriel disponible') }}')"
-                                           style="display:inline-flex;align-items:center;gap:4px;color:#053d4a;font-size:0.75rem;font-weight:700;text-decoration:none;background:#e0f2f1;padding:2px 8px;border-radius:4px;line-height:1.3;border:1px solid #b2dfdb;min-height:22px;"
-                                           onmouseover="this.style.background='#b2dfdb';" onmouseout="this.style.background='#e0f2f1';">
+                                           style="display:inline-flex;align-items:center;gap:4px;color:#fff;font-size:0.75rem;font-weight:700;text-decoration:none;background:#FF0000;padding:3px 8px;border-radius:4px;line-height:1.3;min-height:22px;box-shadow:0 1px 3px rgba(0,0,0,.15);"
+                                           onmouseover="this.style.background='#CC0000';" onmouseout="this.style.background='#FF0000';">
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><polygon points="6 4 20 12 6 20 6 4"/></svg>
                                             <span x-text="tool.tutorialsCount + ' ' + (tool.tutorialsCount > 1 ? '{{ __('tutos') }}' : '{{ __('tuto') }}')"></span>
                                         </a>

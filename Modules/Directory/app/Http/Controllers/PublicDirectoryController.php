@@ -43,17 +43,26 @@ class PublicDirectoryController extends Controller
         $categories = Category::orderBy('sort_order')->get();
         $pricingOptions = \Modules\Directory\Support\PricingCategories::optionsWithEducation();
 
-        $featuredQuery = Tool::published()->featured()->with('categories')->orderBy('sort_order');
+        // 2026-05-05 #135 : eager-load tutorials_count pour featured + topVoted + recent + popular (DRY closure)
+        $tutorialsCountClosure = fn ($q) => $q->where('is_approved', 1)->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
+
+        $featuredQuery = Tool::published()->featured()->with('categories')
+            ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
+            ->orderBy('sort_order');
         $featuredTools = $this->applyDirectoryFilters($featuredQuery, $request)->get();
-        $recentTools = Tool::published()->with('categories')->orderByDesc('created_at')->distinct()->limit((int) Settings::get('directory.recent_tools_limit', 6))->get();
+        $recentTools = Tool::published()->with('categories')
+            ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
+            ->orderByDesc('created_at')->distinct()->limit((int) Settings::get('directory.recent_tools_limit', 6))->get();
         $recentIds = $recentTools->pluck('id')->toArray();
-        $popularTools = Tool::published()->with('categories')->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit((int) Settings::get('directory.popular_tools_limit', 6))->get();
+        $popularTools = Tool::published()->with('categories')
+            ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
+            ->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit((int) Settings::get('directory.popular_tools_limit', 6))->get();
 
         // Plus votés par la communauté (si module Voting actif)
         $topVoted = collect();
         if (trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class)) {
             $topVoted = Tool::published()->with('categories')
-                ->withCount('communityVotes')
+                ->withCount(['communityVotes', 'resources as tutorials_count' => $tutorialsCountClosure])
                 ->having('community_votes_count', '>', 0)
                 ->orderByDesc('community_votes_count')
                 ->limit((int) Settings::get('directory.top_voted_tools_limit', 6))->get();
