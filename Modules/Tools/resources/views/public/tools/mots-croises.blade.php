@@ -199,23 +199,25 @@
                   </div>
                 </div>
 
-                {{-- A1+A2 (2026-05-05) : panneau lien public visible après save quand grille publique --}}
+                {{-- A1+A2 (2026-05-05) + #112 : panneau lien public avec preview LIVE pendant frappe slug --}}
                 <div x-show="publicShareUrl" x-cloak x-transition class="mt-3 p-3" style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px">
-                  <div class="d-flex align-items-center gap-2 mb-2">
+                  <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                     <strong style="color:#047857">{{ __('Lien partageable de la grille') }}</strong>
+                    {{-- 2026-05-05 #112 : badge "non enregistré" pendant preview live slug --}}
+                    <span x-show="displaySlugIsDirty" x-cloak class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:4px" :title="'{{ __('Cliquez Enregistrer dans « Personnaliser le lien (slug) » pour activer ce lien.') }}'">{{ __('aperçu — non enregistré') }}</span>
                   </div>
                   <div class="d-flex flex-wrap gap-2 align-items-stretch mb-2">
-                    <input type="text" readonly x-model="publicShareUrl" @click="$event.target.select()" class="form-control" style="flex:1;min-width:240px;background:#fff;font-family:monospace;font-size:.875rem" aria-label="{{ __('URL de partage du jeu') }}">
-                    <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" @click="copyShareLink()" :aria-label="shareLinkCopied ? '{{ __('Lien copié') }}' : '{{ __('Copier le lien') }}'">
+                    <input type="text" readonly :value="displayShareUrl" @click="$event.target.select()" class="form-control" style="flex:1;min-width:240px;background:#fff;font-family:monospace;font-size:.875rem" aria-label="{{ __('URL de partage du jeu') }}">
+                    <button type="button" class="ct-btn ct-btn-primary d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" :disabled="displaySlugIsDirty" @click="copyShareLink()" :aria-label="shareLinkCopied ? '{{ __('Lien copié') }}' : '{{ __('Copier le lien') }}'" :title="displaySlugIsDirty ? '{{ __('Enregistrez le slug avant de copier') }}' : ''">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                       <span x-text="shareLinkCopied ? '{{ __('Copié ✓') }}' : '{{ __('Copier') }}'"></span>
                     </button>
-                    <a :href="publicShareUrl" target="_blank" rel="noopener" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" :aria-label="'{{ __('Ouvrir la grille dans un nouvel onglet') }}'">
+                    <a :href="displaySlugIsDirty ? 'javascript:void(0)' : displayShareUrl" :target="displaySlugIsDirty ? '_self' : '_blank'" rel="noopener" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" :class="{'opacity-50': displaySlugIsDirty, 'pe-none': displaySlugIsDirty}" :aria-disabled="displaySlugIsDirty ? 'true' : 'false'" :aria-label="'{{ __('Ouvrir la grille dans un nouvel onglet') }}'" :title="displaySlugIsDirty ? '{{ __('Enregistrez le slug avant d\'ouvrir') }}' : ''">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                       <span>{{ __('Ouvrir') }}</span>
                     </a>
-                    <button type="button" x-show="canNativeShare" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" @click="nativeShare()" :aria-label="'{{ __('Partager la grille') }}'">
+                    <button type="button" x-show="canNativeShare" :disabled="displaySlugIsDirty" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2" style="min-height:44px;min-width:44px" @click="nativeShare()" :aria-label="'{{ __('Partager la grille') }}'">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                       <span>{{ __('Partager') }}</span>
                     </button>
@@ -223,7 +225,7 @@
                   <details class="mt-2">
                     <summary style="cursor:pointer;color:#047857;font-weight:600;font-size:.875rem">{{ __('Afficher le QR code') }}</summary>
                     <div class="mt-2 d-flex align-items-center gap-3 flex-wrap">
-                      <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=10&data=' + encodeURIComponent(publicShareUrl) + (qrCacheBust ? '&_=' + qrCacheBust : '')" alt="{{ __('QR code de la grille') }}" loading="lazy" width="180" height="180" style="border:1px solid #d1fae5;border-radius:8px;background:#fff">
+                      <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=10&data=' + encodeURIComponent(displayShareUrl) + (qrCacheBust ? '&_=' + qrCacheBust : '')" alt="{{ __('QR code de la grille') }}" loading="lazy" width="180" height="180" style="border:1px solid #d1fae5;border-radius:8px;background:#fff">
                       <p class="small mb-0" style="color:#047857;flex:1;min-width:200px">{{ __('Scannez ce QR code avec un téléphone pour ouvrir directement la grille en ligne. Idéal pour vos affiches en classe ou présentations.') }}</p>
                     </div>
                   </details>
@@ -278,10 +280,13 @@
 
                   {{-- 2026-05-05 #109 : « Personnaliser le QR code » → outil dédié /outils/code-qr (uniformité avec ShortUrl, DRY) --}}
                   <div class="mt-3 pt-2" style="border-top:1px solid #c7e9ee" x-show="currentPresetPublicId">
-                    <a :href="'/outils/code-qr?url=' + encodeURIComponent(publicShareUrl) + '&t=' + encodeURIComponent(saveName || metadata.title || 'Mots croisés')"
+                    <a :href="'/outils/code-qr?url=' + encodeURIComponent(displayShareUrl) + '&t=' + encodeURIComponent(saveName || metadata.title || 'Mots croisés')"
                        target="_blank" rel="noopener"
                        class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2"
+                       :class="{'opacity-50 pe-none': displaySlugIsDirty}"
                        style="min-height:44px;font-size:.875rem"
+                       :aria-disabled="displaySlugIsDirty ? 'true' : 'false'"
+                       :title="displaySlugIsDirty ? '{{ __('Enregistrez le slug avant de personnaliser le QR') }}' : ''"
                        aria-label="{{ __('Personnaliser ce QR code dans le générateur de QR (couleurs, logo, formats)') }}">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3" rx="0.5"/><rect x="18" y="14" width="3" height="3" rx="0.5"/><rect x="14" y="18" width="3" height="3" rx="0.5"/></svg>
                       <span>{{ __('Personnaliser ce QR code') }}</span>
@@ -1080,6 +1085,20 @@ function crosswordGenerator() {
     gridFocusRow: 0,
     gridFocusCol: 0,
 
+    // 2026-05-05 #112 : URL preview live (utilise customSlugInput pendant frappe, sinon état BD)
+    get displayShareUrl() {
+      if (!this.publicShareUrl) return '';
+      const previewIdentifier = (this.customSlugInput && this.customSlugInput.length >= 3)
+        ? this.customSlugInput
+        : (this.currentCustomSlug || this.currentPresetPublicId);
+      return window.location.origin + '/jeumc/' + previewIdentifier;
+    },
+    // 2026-05-05 #112 : true si l'utilisateur a tapé un slug différent de l'enregistré
+    get displaySlugIsDirty() {
+      if (!this.customSlugInput || this.customSlugInput.length < 3) return false;
+      return this.customSlugInput !== (this.currentCustomSlug || '');
+    },
+
     init() {
       // S80 #47 onglets : restaurer dernier onglet, mais forcer 'config' si pas de grille (sera basculer auto post-generate)
       this.activeTab = localStorage.getItem('cw_active_tab') || 'config';
@@ -1301,6 +1320,14 @@ function crosswordGenerator() {
           try { localStorage.setItem('cw_active_tab', 'grille'); } catch (_) {}
           if (!isRegenerate) {
             this.dispatchToast("{{ __('Grille générée avec succès.') }}", 'success');
+          }
+          // 2026-05-05 #111 : si grille publique togglée AVANT génération, auto-publier maintenant
+          if (this.metadata.is_public && this.isAuthenticated && !this.publicShareUrl && !this.saving) {
+            const name = (this.saveName || '').trim() || (this.metadata.title || '').trim();
+            if (name) {
+              this.dispatchToast("{{ __('Publication...') }}", 'info', 2000);
+              setTimeout(() => { this.save(); }, 300);
+            }
           }
         } else {
           this.generationError = data.error || data.message || "{{ __('Impossible de générer la grille avec ces mots. Vérifiez qu\'ils partagent des lettres communes.') }}";
