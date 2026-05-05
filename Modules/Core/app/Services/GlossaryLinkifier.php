@@ -141,7 +141,7 @@ class GlossaryLinkifier
             if (class_exists(\Modules\Dictionary\Models\Term::class)) {
                 try {
                     \Modules\Dictionary\Models\Term::published()
-                        ->select(['id', 'name', 'slug', 'definition', 'type', 'match_strategy'])
+                        ->select(['id', 'name', 'slug', 'definition', 'type', 'match_strategy', 'aliases'])
                         ->get()
                         ->each(function ($t) use (&$terms, $locale) {
                             $name = $t->getTranslation('name', $locale, false) ?: $t->name;
@@ -150,26 +150,37 @@ class GlossaryLinkifier
                             if (! $name || ! $slug || mb_strlen($name) < self::MIN_LENGTH) return;
                             $strategy = $t->match_strategy ?? 'loose';
                             if ($strategy === 'never_auto') return; // 2026-05-05 #145 : opt-out
-                            $strategy = self::escalateStrategyIfStopList($name, $strategy); // auto-escalade vers case_sensitive si polysémique
+                            $strategy = self::escalateStrategyIfStopList($name, $strategy); // auto-escalade si polysémique
+                            $shortDef = Str::limit(strip_tags((string) $def), 180);
+                            $url = '/glossaire/'.$slug;
+                            // 2026-05-05 #150+#151 : entry pour le terme principal + entries pour chaque alias
                             $terms[] = [
-                                'name' => $name,
-                                'slug' => $slug,
-                                'definition' => Str::limit(strip_tags((string) $def), 180),
-                                'type' => 'glossary',
-                                'url' => '/glossaire/'.$slug,
-                                'match_strategy' => $strategy,
+                                'name' => $name, 'slug' => $slug, 'definition' => $shortDef,
+                                'type' => 'glossary', 'url' => $url, 'match_strategy' => $strategy,
                             ];
+                            // Aliases (variations comme "tokens", "Tokens", etc.) - heritent strategy
+                            $aliases = is_array($t->aliases) ? $t->aliases : (is_string($t->aliases) ? json_decode($t->aliases, true) : []);
+                            if (is_array($aliases)) {
+                                foreach ($aliases as $alias) {
+                                    if (! is_string($alias) || mb_strlen($alias) < 2) continue;
+                                    $terms[] = [
+                                        'name' => $alias, 'slug' => $slug, 'definition' => $shortDef,
+                                        'type' => 'glossary', 'url' => $url,
+                                        'match_strategy' => self::escalateStrategyIfStopList($alias, $strategy),
+                                    ];
+                                }
+                            }
                         });
                 } catch (\Throwable $e) {
                     Log::warning('GlossaryLinkifier - Term load fail', ['e' => $e->getMessage()]);
                 }
             }
 
-            // Acronyms (matche acronym ET full_name)
+            // Acronyms (matche acronym ET full_name + aliases)
             if (class_exists(\Modules\Acronyms\Models\Acronym::class)) {
                 try {
                     \Modules\Acronyms\Models\Acronym::published()
-                        ->select(['id', 'acronym', 'full_name', 'slug', 'description', 'match_strategy'])
+                        ->select(['id', 'acronym', 'full_name', 'slug', 'description', 'match_strategy', 'aliases'])
                         ->get()
                         ->each(function ($a) use (&$terms, $locale) {
                             $acro = $a->getTranslation('acronym', $locale, false) ?: $a->acronym;
@@ -184,25 +195,30 @@ class GlossaryLinkifier
                             // Acronyme exact (ex "OBVIA") : strict casse + min 2 chars
                             if ($acro && mb_strlen($acro) >= 2) {
                                 $terms[] = [
-                                    'name' => $acro,
-                                    'slug' => $slug,
+                                    'name' => $acro, 'slug' => $slug,
                                     'definition' => $full ? "{$full} : {$shortDesc}" : $shortDesc,
-                                    'type' => 'acronym',
-                                    'url' => $url,
-                                    'match_strategy' => $strategy,
+                                    'type' => 'acronym', 'url' => $url, 'match_strategy' => $strategy,
                                 ];
                             }
                             // Forme longue (ex "Observatoire de l'IA et du numérique")
                             if ($full && mb_strlen($full) >= self::MIN_LENGTH) {
                                 $fullStrategy = self::escalateStrategyIfStopList($full, $strategy === 'case_sensitive' ? 'loose' : $strategy);
                                 $terms[] = [
-                                    'name' => $full,
-                                    'slug' => $slug,
-                                    'definition' => $shortDesc,
-                                    'type' => 'acronym_full',
-                                    'url' => $url,
-                                    'match_strategy' => $fullStrategy,
+                                    'name' => $full, 'slug' => $slug, 'definition' => $shortDesc,
+                                    'type' => 'acronym_full', 'url' => $url, 'match_strategy' => $fullStrategy,
                                 ];
+                            }
+                            // 2026-05-05 #151 : aliases (variations) avec strategy heritee
+                            $aliases = is_array($a->aliases) ? $a->aliases : (is_string($a->aliases) ? json_decode($a->aliases, true) : []);
+                            if (is_array($aliases)) {
+                                foreach ($aliases as $alias) {
+                                    if (! is_string($alias) || mb_strlen($alias) < 2) continue;
+                                    $terms[] = [
+                                        'name' => $alias, 'slug' => $slug, 'definition' => $shortDesc,
+                                        'type' => 'acronym_alias', 'url' => $url,
+                                        'match_strategy' => self::escalateStrategyIfStopList($alias, $strategy),
+                                    ];
+                                }
                             }
                         });
                 } catch (\Throwable $e) {
@@ -218,9 +234,9 @@ class GlossaryLinkifier
     }
 
     /**
-     * 2026-05-05 #145 WSD : auto-escalade strategy vers case_sensitive si terme dans STOP_LIST_FR.
-     * Editeur peut forcer 'loose' explicite pour ignorer (ex : terme en minuscule légitime).
-     * 'exact_phrase' et 'never_auto' ne sont jamais downgradés.
+     * 2026-05-05 #145 WSD : auto-escalade strategy si terme dans STOP_LIST_FR.
+     * Escalade vers partial_case_sensitive (#150) qui matche 1ère lettre tolérante mais reste strict.
+     * Plus permissif que case_sensitive tout en évitant les faux positifs verbe/nom.
      */
     protected static function escalateStrategyIfStopList(string $name, string $currentStrategy): string
     {
@@ -229,9 +245,36 @@ class GlossaryLinkifier
         }
         $lowered = mb_strtolower($name);
         if (in_array($lowered, self::STOP_LIST_FR, true)) {
-            return 'case_sensitive';
+            return 'partial_case_sensitive';
         }
         return 'loose';
+    }
+
+    /**
+     * 2026-05-05 #150 : construit pattern regex partial_case_sensitive.
+     * Pour chaque mot du nom, la 1ère lettre devient [Aa] (tolérante), le reste reste strict.
+     * Ex: 'Score Elo' → '[Ss]core [Ee]lo' qui matche 'Score Elo', 'score Elo', mais pas 'score elo' (E strict après normalisation pos 0 du mot).
+     *
+     * Wait: le match interne est strict mais la 1ère lettre du 2e mot ('E' de 'Elo') est aussi position 0 d'un mot.
+     * Donc 'Elo' → '[Ee]lo' qui matche 'Elo' ET 'elo'. Le user voulait que Elo reste strict.
+     * Solution affinée : seule la 1ère lettre du PREMIER mot devient tolérante, les autres mots strict.
+     */
+    protected static function buildPartialCasePattern(string $name): string
+    {
+        if (mb_strlen($name) === 0) return '';
+
+        // 1ère lettre tolérante (case-insensitive sur le 1er char), reste du nom strict
+        $firstChar = mb_substr($name, 0, 1);
+        $rest = mb_substr($name, 1);
+        $firstLower = mb_strtolower($firstChar);
+        $firstUpper = mb_strtoupper($firstChar);
+
+        // Si la 1ère lettre n'a pas de variation casse (chiffre, accent neutre), utilise tel quel
+        if ($firstLower === $firstUpper) {
+            return preg_quote($name, '/');
+        }
+
+        return '['.$firstLower.$firstUpper.']'.preg_quote($rest, '/');
     }
 
     /**
@@ -299,9 +342,14 @@ class GlossaryLinkifier
             // 2026-05-05 #145 WSD : applique la match_strategy
             $strategy = $term['match_strategy'] ?? ($term['case_sensitive'] ?? false ? 'case_sensitive' : 'loose');
 
-            // Word boundary match avec accents UTF-8
-            $pattern = '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'(?![\p{L}\p{N}])/u';
-            if ($strategy === 'loose') $pattern .= 'i';
+            // 2026-05-05 #150 : partial_case_sensitive = 1ère lettre de chaque mot tolérante, reste strict.
+            // Ex: 'Score Elo' matche 'Score Elo' ET 'score Elo' MAIS pas 'score elo' (E majuscule strict).
+            if ($strategy === 'partial_case_sensitive') {
+                $pattern = '/(?<![\p{L}\p{N}])'.self::buildPartialCasePattern($name).'(?![\p{L}\p{N}])/u';
+            } else {
+                $pattern = '/(?<![\p{L}\p{N}])'.preg_quote($name, '/').'(?![\p{L}\p{N}])/u';
+                if ($strategy === 'loose') $pattern .= 'i';
+            }
             // case_sensitive ET exact_phrase : pas de flag i (casse exacte)
 
             if (! preg_match($pattern, $text, $m, PREG_OFFSET_CAPTURE)) continue;
