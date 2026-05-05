@@ -89,6 +89,58 @@ class UserCrosswordController
     }
 
     /**
+     * 2026-05-05 #108 : check unicité slug async pour feedback inline.
+     * Route : GET /api/crossword-presets/check-slug?slug=xxx&exclude=publicId
+     * Retourne {available: bool, suggestion: string|null}.
+     */
+    public function checkSlug(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $slug = trim((string) $request->query('slug', ''));
+        $excludePublicId = trim((string) $request->query('exclude', ''));
+
+        // Normalisation côté serveur (sécurité = même règle que mutator)
+        $slug = trim(preg_replace('/-{2,}/', '-', preg_replace('/[^a-z0-9-]/', '', strtolower(\Illuminate\Support\Str::ascii(str_replace(' ', '-', $slug))))), '-');
+
+        if (strlen($slug) < 3) {
+            return response()->json(['available' => false, 'suggestion' => null, 'reason' => 'too_short']);
+        }
+        if (strlen($slug) > 50) {
+            return response()->json(['available' => false, 'suggestion' => null, 'reason' => 'too_long']);
+        }
+        if (in_array($slug, SavedCrosswordPreset::RESERVED_SLUGS, true)) {
+            return response()->json(['available' => false, 'suggestion' => $slug.'-grille', 'reason' => 'reserved']);
+        }
+
+        $query = SavedCrosswordPreset::where('custom_slug', $slug);
+        if ($excludePublicId !== '') {
+            $query->where('public_id', '!=', $excludePublicId);
+        }
+        $taken = $query->exists();
+
+        if (! $taken) {
+            return response()->json(['available' => true, 'suggestion' => null]);
+        }
+
+        // Génère suggestion : slug-2, slug-3, ... ou slug-2026 (année courante).
+        $suggestion = null;
+        for ($i = 2; $i <= 9; $i++) {
+            $candidate = $slug.'-'.$i;
+            if (! SavedCrosswordPreset::where('custom_slug', $candidate)->exists()) {
+                $suggestion = $candidate;
+                break;
+            }
+        }
+        if (! $suggestion) {
+            $candidate = $slug.'-'.now()->year;
+            if (! SavedCrosswordPreset::where('custom_slug', $candidate)->exists()) {
+                $suggestion = $candidate;
+            }
+        }
+
+        return response()->json(['available' => false, 'suggestion' => $suggestion, 'reason' => 'taken']);
+    }
+
+    /**
      * 2026-05-05 #97 Phase 2 : POST mise à jour qr_options (couleurs, logo, dot style, ECC).
      * Route : POST /user/mots-croises/{publicId}/qr-options
      */

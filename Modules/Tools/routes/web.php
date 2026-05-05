@@ -67,6 +67,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/user/mots-croises/{publicId}/slug', [UserCrosswordController::class, 'updateSlug'])
         ->where('publicId', '[a-zA-Z0-9_-]+')
         ->name('user.crosswords.update-slug');
+    // 2026-05-05 #108 : GET check unicité slug (async feedback)
+    Route::get('/api/crossword-presets/check-slug', [UserCrosswordController::class, 'checkSlug'])
+        ->name('user.crosswords.check-slug');
     // 2026-05-05 #97 Phase 2 : POST mise à jour qr_options (couleurs, logo, ECC, dot_style)
     Route::post('/user/mots-croises/{publicId}/qr-options', [UserCrosswordController::class, 'updateQrOptions'])
         ->where('publicId', '[a-zA-Z0-9_-]+')

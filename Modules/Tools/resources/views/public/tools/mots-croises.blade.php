@@ -10,8 +10,10 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
 @endsection
 @section('content')
-{{-- 2026-05-05 #106 : helper WCAG contrast global (window.WcagContrast.ratio) - DRY pour QR personnalisé + futurs outils --}}
+{{-- 2026-05-05 #106 : helper WCAG contrast global (window.WcagContrast.ratio) - DRY --}}
 @include('core::partials.wcag-contrast-helper')
+{{-- 2026-05-05 #108 : helper slugify global (window.SlugHelper.slugify) - DRY --}}
+@include('core::partials.slug-helper')
 <section class="wpo-blog-single-section section-padding">
   <div class="container">
     <div class="row justify-content-center">
@@ -221,32 +223,31 @@
                   <details class="mt-2">
                     <summary style="cursor:pointer;color:#047857;font-weight:600;font-size:.875rem">{{ __('Afficher le QR code') }}</summary>
                     <div class="mt-2 d-flex align-items-center gap-3 flex-wrap">
-                      <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=10&data=' + encodeURIComponent(publicShareUrl)" alt="{{ __('QR code de la grille') }}" loading="lazy" width="180" height="180" style="border:1px solid #d1fae5;border-radius:8px;background:#fff">
+                      <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=10&data=' + encodeURIComponent(publicShareUrl) + (qrCacheBust ? '&_=' + qrCacheBust : '')" alt="{{ __('QR code de la grille') }}" loading="lazy" width="180" height="180" style="border:1px solid #d1fae5;border-radius:8px;background:#fff">
                       <p class="small mb-0" style="color:#047857;flex:1;min-width:200px">{{ __('Scannez ce QR code avec un téléphone pour ouvrir directement la grille en ligne. Idéal pour vos affiches en classe ou présentations.') }}</p>
                     </div>
                   </details>
 
-                  {{-- 2026-05-05 #97 Phase 1 : édition lien personnalisé (custom_slug) --}}
+                  {{-- 2026-05-05 #108 : édition lien personnalisé (custom_slug) avec auto-normalisation + check unicité async + suggestion --}}
                   <details class="mt-2" x-show="currentPresetPublicId">
                     <summary style="cursor:pointer;color:#047857;font-weight:600;font-size:.875rem">{{ __('Personnaliser le lien (slug)') }}</summary>
                     <div class="mt-2">
-                      <p class="small mb-2" style="color:#047857">{{ __('Remplacez l\'identifiant aléatoire par un mot lisible (ex: ia-quebec). 3-50 caractères, minuscules, chiffres et tirets.') }}</p>
+                      <p class="small mb-2" style="color:#047857">{{ __('Auto-rempli depuis le titre. Vous pouvez le modifier (3-50 caractères, accents/espaces convertis automatiquement).') }}</p>
                       <div class="d-flex flex-wrap gap-2 align-items-stretch mb-2">
                         <span class="d-inline-flex align-items-center" style="color:#047857;font-family:monospace;font-size:.875rem">https://laveille.ai/jeumc/</span>
                         <input type="text"
                                x-model="customSlugInput"
-                               @input="customSlugInput = $event.target.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/-{2,}/g,'-').slice(0,50); customSlugError = ''"
-                               x-init="customSlugInput = currentCustomSlug"
-                               x-effect="customSlugInput = currentCustomSlug"
+                               @input.debounce.400ms="customSlugInput = window.SlugHelper ? window.SlugHelper.slugify($event.target.value).slice(0,50) : $event.target.value.toLowerCase().replace(/[^a-z0-9-]/g,'').replace(/-{2,}/g,'-').slice(0,50); customSlugError = ''; checkSlugAvailability(customSlugInput)"
+                               x-effect="if (currentCustomSlug && !customSlugInput) customSlugInput = currentCustomSlug"
                                class="form-control"
                                style="flex:1;min-width:180px;background:#fff;font-family:monospace;font-size:.875rem;min-height:44px"
                                maxlength="50"
-                               placeholder="ex: ia-quebec"
+                               :placeholder="window.SlugHelper ? window.SlugHelper.slugify(saveName || metadata.title || 'ma-grille') : 'ma-grille'"
                                aria-label="{{ __('Identifiant personnalisé du lien') }}">
                         <button type="button"
                                 class="ct-btn ct-btn-primary d-inline-flex align-items-center justify-content-center gap-2"
                                 style="min-height:44px"
-                                :disabled="customSlugSaving"
+                                :disabled="customSlugSaving || customSlugAvailable === false"
                                 @click="saveCustomSlug()"
                                 :aria-label="customSlugSaving ? '{{ __('Enregistrement...') }}' : '{{ __('Enregistrer le lien personnalisé') }}'">
                           <span x-text="customSlugSaving ? '{{ __('Enregistrement...') }}' : '{{ __('Enregistrer') }}'"></span>
@@ -260,6 +261,14 @@
                           <span>{{ __('Retirer') }}</span>
                         </button>
                       </div>
+                      {{-- Feedback inline disponibilité --}}
+                      <p x-show="customSlugInput && customSlugInput.length >= 3" x-cloak class="small mb-1" style="font-size:.8rem">
+                        <span x-show="customSlugChecking" style="color:#047857">{{ __('Vérification...') }}</span>
+                        <span x-show="!customSlugChecking && customSlugAvailable === true" style="color:#047857">✓ {{ __('Disponible') }}</span>
+                        <span x-show="!customSlugChecking && customSlugAvailable === false" style="color:#b91c1c">
+                          ✗ {{ __('Déjà pris') }}<template x-if="customSlugSuggestion"><span style="color:#047857">. {{ __('Suggestion :') }} <button type="button" class="ct-btn ct-btn-outline ct-btn-xs" style="font-size:.75rem;padding:2px 8px" @click="customSlugInput = customSlugSuggestion; customSlugAvailable = true" x-text="customSlugSuggestion"></button></span></template>
+                        </span>
+                      </p>
                       <p x-show="customSlugError" x-cloak class="small mb-0" style="color:#b91c1c" x-text="customSlugError" role="alert"></p>
                       <p class="small mb-0" style="color:#047857;opacity:.8">
                         {{ __('Mots réservés interdits : index, admin, api, nouveau, creer, mes-grilles, populaires, recents, themes, share, qr, edit.') }}
@@ -267,88 +276,19 @@
                     </div>
                   </details>
 
-                  {{-- 2026-05-05 #97 Phase 2 : personnalisation QR code (couleurs, logo, ECC, dot style) --}}
-                  <details class="mt-2" x-show="currentPresetPublicId">
-                    <summary style="cursor:pointer;color:#047857;font-weight:600;font-size:.875rem">{{ __('Personnaliser le QR code') }}</summary>
-                    <div class="mt-3 d-flex flex-wrap gap-3 align-items-start">
-                      <div class="d-flex flex-column align-items-center" style="flex:0 0 auto">
-                        <img :src="'/jeumc/' + (currentCustomSlug || currentPresetPublicId) + '/qr.png?fg=' + qrFg.replace('#','') + '&bg=' + qrBg.replace('#','') + '&ecc=' + qrEcc + '&style=' + qrDotStyle + '&logo=' + (qrIncludeLogo ? '1' : '0') + '&size=240&_b=' + qrPreviewBust"
-                             alt="{{ __('Aperçu QR code personnalisé') }}" width="240" height="240"
-                             style="border:1px solid #d1fae5;border-radius:8px;background:#fff;min-width:240px;min-height:240px"
-                             loading="lazy">
-                        <div class="d-flex gap-2 mt-2 flex-wrap" style="max-width:240px">
-                          <a :href="'/jeumc/' + (currentCustomSlug || currentPresetPublicId) + '/qr.png?fg=' + qrFg.replace('#','') + '&bg=' + qrBg.replace('#','') + '&ecc=' + qrEcc + '&style=' + qrDotStyle + '&logo=' + (qrIncludeLogo ? '1' : '0') + '&size=600&download=1'"
-                             class="ct-btn ct-btn-primary d-inline-flex align-items-center justify-content-center gap-2 flex-grow-1"
-                             style="min-height:44px"
-                             download
-                             aria-label="{{ __('Télécharger le QR code en PNG haute résolution') }}">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            <span>{{ __('Télécharger') }}</span>
-                          </a>
-                          <button type="button" :disabled="qrSaving" @click="saveQrOptions()" class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2 flex-grow-1" style="min-height:44px" :aria-label="qrSaving ? '{{ __('Enregistrement...') }}' : '{{ __('Enregistrer ces options QR comme défaut') }}'">
-                            <span x-text="qrSaving ? '{{ __('Enreg...') }}' : '{{ __('Enregistrer') }}'"></span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div style="flex:1;min-width:240px">
-                        <label class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Style prédéfini') }}</label>
-                        <div class="d-flex gap-2 flex-wrap mb-3">
-                          <button type="button" @click="qrFg='#0B7285'; qrBg='#FFFFFF'" :class="{'ct-btn-primary': qrFg==='#0B7285' && qrBg==='#FFFFFF', 'ct-btn-outline': !(qrFg==='#0B7285' && qrBg==='#FFFFFF')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Teal') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#0B7285;border:1px solid #fff"></span>Teal</button>
-                          <button type="button" @click="qrFg='#1A1D23'; qrBg='#FFFFFF'" :class="{'ct-btn-primary': qrFg==='#1A1D23' && qrBg==='#FFFFFF', 'ct-btn-outline': !(qrFg==='#1A1D23' && qrBg==='#FFFFFF')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Noir') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#1A1D23;border:1px solid #fff"></span>Noir</button>
-                          <button type="button" @click="qrFg='#C2410C'; qrBg='#FFFFFF'" :class="{'ct-btn-primary': qrFg==='#C2410C' && qrBg==='#FFFFFF', 'ct-btn-outline': !(qrFg==='#C2410C' && qrBg==='#FFFFFF')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Orange') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#C2410C;border:1px solid #fff"></span>Orange</button>
-                          <button type="button" @click="qrFg='#FFFFFF'; qrBg='#064E5C'" :class="{'ct-btn-primary': qrFg==='#FFFFFF' && qrBg==='#064E5C', 'ct-btn-outline': !(qrFg==='#FFFFFF' && qrBg==='#064E5C')}" class="ct-btn d-inline-flex align-items-center gap-2" style="min-height:36px;padding:.4rem .75rem;font-size:.8rem" aria-label="{{ __('Preset Inversé') }}"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#064E5C;border:1px solid #fff"></span>Inversé</button>
-                        </div>
-
-                        <div class="row g-2 mb-3">
-                          <div class="col-6">
-                            <label for="qr-fg" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Couleur QR') }}</label>
-                            <input type="color" id="qr-fg" x-model="qrFg" class="form-control form-control-color" style="min-height:44px;width:100%" aria-label="{{ __('Couleur du QR code') }}">
-                          </div>
-                          <div class="col-6">
-                            <label for="qr-bg" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Fond') }}</label>
-                            <input type="color" id="qr-bg" x-model="qrBg" class="form-control form-control-color" style="min-height:44px;width:100%" aria-label="{{ __('Couleur de fond du QR code') }}">
-                          </div>
-                        </div>
-
-                        {{-- 2026-05-05 #106 : utilise window.WcagContrast.ratio() depuis core::partials.wcag-contrast-helper (DRY) --}}
-                        <div class="mb-3">
-                          <span class="small fw-bold" :style="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 7 ? 'color:#047857' : ((window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 4.5 ? 'color:#92400e' : 'color:#b91c1c')">
-                            {{ __('Contraste') }} : <span x-text="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1)"></span>:1
-                            <span x-show="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 7" x-cloak>{{ __('AAA ✓') }}</span>
-                            <span x-show="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) >= 4.5 && (window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) < 7" x-cloak>{{ __('AA ⚠') }}</span>
-                            <span x-show="(window.WcagContrast?.ratio(qrFg, qrBg) ?? 1) < 4.5" x-cloak>{{ __('FAIL ✗ — QR illisible') }}</span>
-                          </span>
-                        </div>
-
-                        <div class="mb-3">
-                          <label for="qr-style" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Forme des modules') }}</label>
-                          <select id="qr-style" x-model="qrDotStyle" class="form-select" style="min-height:44px" aria-label="{{ __('Forme des modules QR') }}">
-                            <option value="square">{{ __('Carré (classique)') }}</option>
-                            <option value="rounded">{{ __('Arrondi') }}</option>
-                            <option value="dots">{{ __('Points') }}</option>
-                          </select>
-                        </div>
-
-                        <div class="mb-3">
-                          <label for="qr-ecc" class="form-label small fw-bold" style="color:#047857;text-transform:uppercase;letter-spacing:.4px;font-size:.7rem">{{ __('Niveau de correction') }}</label>
-                          <select id="qr-ecc" x-model="qrEcc" class="form-select" style="min-height:44px" aria-label="{{ __('Niveau de correction d\'erreur ECC') }}">
-                            <option value="L">{{ __('Bas (L) - 7%') }}</option>
-                            <option value="M">{{ __('Moyen (M) - 15%') }}</option>
-                            <option value="Q">{{ __('Élevé (Q) - 25%') }}</option>
-                            <option value="H">{{ __('Maximum (H) - 30%') }}</option>
-                          </select>
-                          <p class="form-text small mb-0" style="color:#047857;opacity:.8">{{ __('Plus élevé = QR plus dense mais plus tolérant aux dommages.') }}</p>
-                        </div>
-
-                        <div class="form-check mb-2" style="min-height:44px;display:flex;align-items:center">
-                          <input type="checkbox" id="qr-logo" x-model="qrIncludeLogo" @change="qrIncludeLogo && (qrEcc='Q')" class="form-check-input" style="margin-right:.5rem">
-                          <label for="qr-logo" class="form-check-label small" style="color:#047857;font-weight:500">{{ __('Inclure logo laveille.ai au centre') }}</label>
-                        </div>
-                        <p x-show="qrIncludeLogo" x-cloak class="form-text small mb-0" style="color:#047857;opacity:.8">{{ __('Niveau de correction ECC Q (25%) auto-activé pour compenser l\'espace du logo.') }}</p>
-                      </div>
-                    </div>
-                  </details>
+                  {{-- 2026-05-05 #109 : « Personnaliser le QR code » → outil dédié /outils/code-qr (uniformité avec ShortUrl, DRY) --}}
+                  <div class="mt-3 pt-2" style="border-top:1px solid #c7e9ee" x-show="currentPresetPublicId">
+                    <a :href="'/outils/code-qr?url=' + encodeURIComponent(publicShareUrl) + '&t=' + encodeURIComponent(saveName || metadata.title || 'Mots croisés')"
+                       target="_blank" rel="noopener"
+                       class="ct-btn ct-btn-outline d-inline-flex align-items-center gap-2"
+                       style="min-height:44px;font-size:.875rem"
+                       aria-label="{{ __('Personnaliser ce QR code dans le générateur de QR (couleurs, logo, formats)') }}">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3" rx="0.5"/><rect x="18" y="14" width="3" height="3" rx="0.5"/><rect x="14" y="18" width="3" height="3" rx="0.5"/></svg>
+                      <span>{{ __('Personnaliser ce QR code') }}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                    <p class="small mb-0 mt-1" style="color:#047857;opacity:.8;font-size:.75rem">{{ __('Couleurs, logo, formats avancés disponibles dans le générateur de QR de laveille.ai.') }}</p>
+                  </div>
                 </div>
               </div>
               @endauth
@@ -1127,14 +1067,10 @@ function crosswordGenerator() {
     customSlugInput: '',       // 2026-05-05 #97 Phase 1 : modèle pour formulaire édition slug
     customSlugSaving: false,
     customSlugError: '',
-    // 2026-05-05 #97 Phase 2 : QR personnalisation
-    qrFg: '#0B7285',
-    qrBg: '#FFFFFF',
-    qrEcc: 'M',
-    qrDotStyle: 'square',
-    qrIncludeLogo: false,
-    qrSaving: false,
-    qrPreviewBust: 0,
+    customSlugAvailable: null, // 2026-05-05 #108 : null=not checked, true=available, false=taken
+    customSlugSuggestion: '',  // 2026-05-05 #108 : suggestion auto si pris
+    customSlugChecking: false, // 2026-05-05 #108 : indicateur loading async
+    qrCacheBust: 0,            // 2026-05-05 #110 : bust QR api.qrserver.com après changement slug
     // 2026-05-05 #101 : anti-doublons grille publique
     duplicateInfo: null,
     shareLinkCopied: false,
@@ -1488,7 +1424,7 @@ function crosswordGenerator() {
       }
     },
 
-    // 2026-05-05 #105 : toggle is_public avec auto-save si conditions remplies (sinon message clair).
+    // 2026-05-05 #105+#107 : toggle is_public avec auto-generate + auto-save (UX 1-clic).
     async togglePublic() {
       const wasPublic = !!this.metadata.is_public;
       this.metadata.is_public = !wasPublic;
@@ -1496,30 +1432,47 @@ function crosswordGenerator() {
       // Si l'utilisateur tente de rendre publique...
       if (this.metadata.is_public) {
         if (!this.isAuthenticated) {
-          this.metadata.is_public = false; // revert
+          this.metadata.is_public = false;
           this.dispatchToast("{{ __('Connectez-vous pour publier votre grille.') }}", 'warning');
           this.$dispatch('open-auth-modal');
           return;
         }
+        // 2026-05-05 #107 : auto-generate la grille si absente et que les paires sont valides (UX simplifiée).
         if (!this.grid) {
-          this.metadata.is_public = false; // revert
-          this.dispatchToast("{{ __('Générez d\'abord la grille (cliquez « Générer la grille ») puis activez le partage public.') }}", 'warning', 6000);
-          return;
+          const validPairs = this._validPairs();
+          if (!validPairs || validPairs.length < 2) {
+            this.metadata.is_public = false;
+            this.dispatchToast("{{ __('Saisissez au moins 2 paires (indice / mot) avant de publier votre grille.') }}", 'warning', 6000);
+            return;
+          }
+          this.dispatchToast("{{ __('Génération de la grille...') }}", 'info', 3000);
+          await this.generate();
+          await new Promise(r => setTimeout(r, 100)); // laisser Alpine settle this.grid
+          if (!this.grid) {
+            this.metadata.is_public = false;
+            this.dispatchToast("{{ __('Échec de la génération. Vérifiez vos paires et réessayez.') }}", 'danger', 6000);
+            return;
+          }
         }
         const name = (this.saveName || '').trim() || (this.metadata.title || '').trim();
         if (!name) {
-          this.metadata.is_public = false; // revert
+          // 2026-05-05 #108 : auto-default le nom depuis title (placeholder déjà en place dans UI). Sinon demander.
+          this.metadata.is_public = false;
           this.dispatchToast("{{ __('Donnez un nom à votre grille avant de la publier.') }}", 'warning', 6000);
           this.$nextTick(() => {
-            const el = document.querySelector('input[aria-label="{{ __('Titre du prompt') }}"], input[x-model="saveName"]');
+            const el = document.querySelector('input[x-model="saveName"]');
             if (el) { el.focus(); el.scrollIntoView({behavior:'smooth', block:'center'}); }
           });
           return;
         }
+        // 2026-05-05 #108 : auto-pré-remplir customSlugInput depuis le nom si vide
+        if (!this.customSlugInput && window.SlugHelper) {
+          this.customSlugInput = window.SlugHelper.slugify(name);
+        }
         // Conditions remplies : auto-save pour persister + récupérer publicShareUrl + afficher panneau.
+        this.dispatchToast("{{ __('Publication...') }}", 'info', 2000);
         await this.save();
       } else if (wasPublic && this.currentPresetPublicId) {
-        // Passage à privée d'une grille déjà publique : auto-save pour persister.
         await this.save();
         this.dispatchToast("{{ __('Grille passée en privée. Le lien public est désactivé.') }}", 'info');
       }
@@ -1766,7 +1719,11 @@ Maintenant, génère ${n} paires sur le thème "${theme}".`;
         if (response.ok || response.redirected) {
           this.currentCustomSlug = this.customSlugInput || '';
           const identifier = this.currentCustomSlug || this.currentPresetPublicId;
+          // 2026-05-05 #110 : live update URL + bust cache QR (api.qrserver.com pourrait cache l'ancien)
           this.publicShareUrl = window.location.origin + '/jeumc/' + identifier;
+          this.qrCacheBust = Date.now();
+          this.customSlugAvailable = true;
+          this.customSlugError = '';
           this.dispatchToast(this.currentCustomSlug ? "{{ __('Lien personnalisé enregistré.') }}" : "{{ __('Lien personnalisé retiré.') }}", 'success');
         } else if (response.status === 422) {
           const data = await response.json().catch(() => ({}));
@@ -1782,32 +1739,27 @@ Maintenant, génère ${n} paires sur le thème "${theme}".`;
       }
     },
 
-    // 2026-05-05 #97 Phase 2 : POST qr_options.
-    async saveQrOptions() {
-      if (!this.currentPresetPublicId) return;
-      this.qrSaving = true;
-      try {
-        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const response = await fetch('/user/mots-croises/' + this.currentPresetPublicId + '/qr-options', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-          body: JSON.stringify({ foreground: this.qrFg, background: this.qrBg, ecc: this.qrEcc, dot_style: this.qrDotStyle, logo: this.qrIncludeLogo }),
-        });
-        if (response.ok) {
-          this.qrPreviewBust = Date.now();
-          this.dispatchToast("{{ __('Options QR enregistrées.') }}", 'success');
-        } else if (response.status === 422) {
-          const data = await response.json().catch(() => ({}));
-          const firstError = data.errors ? Object.values(data.errors)[0]?.[0] : null;
-          this.dispatchToast(firstError || "{{ __('Options QR invalides.') }}", 'danger');
-        } else {
-          this.dispatchToast("{{ __('Erreur serveur QR.') }}", 'danger');
-        }
-      } catch (err) {
-        this.dispatchToast("{{ __('Erreur réseau QR.') }}", 'danger');
-      } finally {
-        this.qrSaving = false;
+    // 2026-05-05 #109 : saveQrOptions retiré — le panneau QR custom inline est remplacé par lien vers /outils/code-qr.
+    // 2026-05-05 #108 : check unicité slug async avec debounce 400ms (helper window.SlugHelper).
+    async checkSlugAvailability(slug) {
+      if (!slug || slug.length < 3) {
+        this.customSlugAvailable = null;
+        this.customSlugSuggestion = '';
+        return;
       }
+      this.customSlugChecking = true;
+      try {
+        const params = new URLSearchParams({ slug, exclude: this.currentPresetPublicId || '' });
+        const res = await fetch('/api/crossword-presets/check-slug?' + params.toString(), {
+          headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          this.customSlugAvailable = !!data.available;
+          this.customSlugSuggestion = data.suggestion || '';
+        }
+      } catch (e) { /* silent */ }
+      finally { this.customSlugChecking = false; }
     },
 
     // S81 #65 WCAG AAA : navigation clavier flèches sur la grille générée (focus de cell en cell)
