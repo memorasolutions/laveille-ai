@@ -74,6 +74,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/user/mots-croises/{publicId}/qr-options', [UserCrosswordController::class, 'updateQrOptions'])
         ->where('publicId', '[a-zA-Z0-9_-]+')
         ->name('user.crosswords.update-qr-options');
+    // 2026-05-05 #116 : toggle public/privée par le propriétaire (depuis /jeumc card)
+    Route::post('/user/mots-croises/{publicId}/toggle-public', [UserCrosswordController::class, 'togglePublic'])
+        ->where('publicId', '[a-zA-Z0-9_-]+')
+        ->name('user.crosswords.toggle-public');
 });
 
 Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {

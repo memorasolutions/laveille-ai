@@ -221,6 +221,33 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             {{ __('Jouer') }}
                         </a>
+                        {{-- 2026-05-05 #116 : actions propriétaire (modifier + rendre privée) si auth + owner --}}
+                        @auth
+                            @if(auth()->id() === $preset->user_id)
+                            @php
+                                $togglePrivateUrl = url('/user/mots-croises/'.$preset->public_id.'/toggle-public');
+                                $confirmTogglePrivate = __('Rendre privée la grille « :name » ? Le lien public sera désactivé immédiatement.', ['name' => $preset->name]);
+                            @endphp
+                            <div class="d-flex gap-2 mt-2 flex-wrap">
+                                <a href="{{ url('/outils/mots-croises?preset='.$preset->public_id) }}"
+                                   class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2"
+                                   style="min-height:36px;font-size:.75rem;flex:1"
+                                   aria-label="{{ __('Modifier ma grille') }} {{ $preset->name }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    <span>{{ __('Modifier ma grille') }}</span>
+                                </a>
+                                <button type="button"
+                                        class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2"
+                                        style="min-height:36px;font-size:.75rem;flex:1"
+                                        onclick="window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: @js($confirmTogglePrivate), callback: () => { var tk=document.querySelector('meta[name=csrf-token]')?.content; fetch(@js($togglePrivateUrl),{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>r.json()).then(d=>{ if(d.success){ document.querySelectorAll('.cwi-card').forEach(c=>{ if(c.contains(event.target)) c.style.display='none'; }); window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:d.message||@js(__('Grille passée en privée.')),variant:'success'}})); } else { window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:d.message||@js(__('Erreur.')),variant:'error'}})); } }); } } }))"
+                                        aria-label="{{ __('Rendre la grille privée') }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    <span>{{ __('Rendre privée') }}</span>
+                                </button>
+                            </div>
+                            @endif
+                        @endauth
+
                         {{-- 2026-05-05 #115 : modération admin (suppression via modale Memora confirm-global) --}}
                         @can('view_admin_panel')
                         @php

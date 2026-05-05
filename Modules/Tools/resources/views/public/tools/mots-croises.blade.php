@@ -1109,7 +1109,8 @@ function crosswordGenerator() {
       if (!this.grid) this.activeTab = 'config';
       // Preload depuis preset (?preset=publicId) si user authentifie redirige depuis /user/mots-croises
       const params = new URLSearchParams(window.location.search);
-      const presetId = params.get('preset');
+      // 2026-05-05 #117 : accepte ?preset= (existant) OU ?edit= (cohérent avec /user/saved pattern)
+      const presetId = params.get('preset') || params.get('edit');
       if (presetId) {
         this.loadPreset(presetId);
         return;

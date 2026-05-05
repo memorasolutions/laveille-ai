@@ -145,6 +145,27 @@ class UserCrosswordController
      * Route : POST /user/mots-croises/{publicId}/qr-options
      */
     /**
+     * 2026-05-05 #116 : toggle is_public (rendre privée) par le propriétaire depuis /jeumc.
+     */
+    public function togglePublic(Request $request, string $publicId): \Illuminate\Http\JsonResponse
+    {
+        $preset = SavedCrosswordPreset::where('user_id', auth()->id())
+            ->where('public_id', $publicId)
+            ->firstOrFail();
+
+        $preset->is_public = ! $preset->is_public;
+        $preset->save();
+
+        return response()->json([
+            'success' => true,
+            'is_public' => $preset->is_public,
+            'message' => $preset->is_public
+                ? 'Grille rendue publique.'
+                : 'Grille passée en privée. Le lien public est désactivé.',
+        ]);
+    }
+
+    /**
      * 2026-05-05 #115 : suppression admin (modération) d'une grille publique depuis /jeumc.
      * Soft delete via Eloquent SoftDeletes. Log via activitylog si dispo.
      * Route : POST /admin/jeumc/{publicId}/moderate-delete (middleware EnsureIsAdmin)
