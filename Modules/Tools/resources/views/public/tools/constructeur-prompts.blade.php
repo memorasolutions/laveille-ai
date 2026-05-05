@@ -269,7 +269,7 @@
                                     <span><strong>{{ __('Canvas / artefact') }}</strong> — {{ __('force un espace de travail dédié') }}</span>
                                 </label>
                                 <div x-show="constraintCanvas" class="ms-4 mt-1 mb-1 p-2 rounded" style="background: #f0f9ff; border-left: 3px solid var(--c-primary);">
-                                    <div class="d-flex flex-wrap gap-2 align-items-end">
+                                    <div class="d-flex flex-wrap gap-2 align-items-end mb-2">
                                         <div>
                                             <label class="form-label" style="font-size: 0.75rem;">{{ __('IA cible') }}</label>
                                             <select class="form-control form-control-sm" x-model="canvasAI" style="width: auto;" aria-label="{{ __('IA cible') }}">
@@ -277,22 +277,33 @@
                                                 <option value="claude">Claude</option>
                                                 <option value="gemini">Gemini</option>
                                                 <option value="mistral">Mistral</option>
-                                                <option value="custom">{{ __('Personnalisé') }}</option>
                                             </select>
                                         </div>
-                                        <div x-show="canvasAI !== 'custom'">
-                                            <label class="form-label" style="font-size: 0.75rem;">{{ __('Format de sortie') }}</label>
-                                            <select class="form-control form-control-sm" x-model="canvasFormat" style="width: auto;" aria-label="{{ __('Format Canvas') }}">
-                                                <option value="">{{ __('-- Aucun --') }}</option>
-                                                <template x-for="f in canvasFormats" :key="f">
-                                                    <option :value="f" x-text="f"></option>
-                                                </template>
-                                            </select>
-                                        </div>
-                                        <div x-show="canvasAI === 'custom'">
-                                            <label class="form-label" style="font-size: 0.75rem;">{{ __('Format personnalisé') }}</label>
-                                            <input type="text" class="form-control form-control-sm" x-model="canvasCustomFormat" placeholder="{{ __('Ex: LaTeX, YAML, CSV...') }}" style="width: 150px;" aria-label="{{ __('Format personnalisé') }}">
-                                        </div>
+                                    </div>
+                                    {{-- 2026-05-05 #104 : toggle universel preset/custom pour les 4 IA --}}
+                                    <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection du format') }}">
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem;">
+                                            <input type="radio" name="formatMode" value="preset" x-model="formatMode">
+                                            <span>{{ __('Format prédéfini') }}</span>
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.8rem;">
+                                            <input type="radio" name="formatMode" value="custom" x-model="formatMode">
+                                            <span>{{ __('Format personnalisé') }}</span>
+                                        </label>
+                                    </div>
+                                    <div x-show="formatMode === 'preset'">
+                                        <label class="form-label" style="font-size: 0.75rem;">{{ __('Format de sortie') }}</label>
+                                        <select class="form-control form-control-sm" x-model="canvasFormat" style="max-width: 280px;" aria-label="{{ __('Format Canvas prédéfini') }}">
+                                            <option value="">{{ __('-- Aucun --') }}</option>
+                                            <template x-for="f in canvasFormats" :key="f">
+                                                <option :value="f" x-text="f"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div x-show="formatMode === 'custom'">
+                                        <label class="form-label" style="font-size: 0.75rem;">{{ __('Format personnalisé') }}</label>
+                                        <input type="text" class="form-control form-control-sm" x-model="canvasCustomFormat" placeholder="{{ __('Ex: LaTeX, YAML, BibTeX, AsciiDoc, Apache config, MJML email...') }}" style="max-width: 380px;" aria-label="{{ __('Format personnalisé libre') }}">
+                                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">{{ __('Décrivez le format souhaité dans vos propres mots — disponible pour les 4 IA.') }}</small>
                                     </div>
                                 </div>
                                 <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem;">
@@ -439,13 +450,14 @@ document.addEventListener('alpine:init', function() {
             canvasAI: 'chatgpt',
             canvasFormat: '',
             canvasCustomFormat: '',
+            // 2026-05-05 #104 : formats officiels mai 2026 (sources Anthropic Oct 2025, OpenAI 2026, Google AI 2025-2026, Mistral)
             canvasFormatMap: {
-                chatgpt: ['Markdown', 'DOCX', 'HTML', 'Code', 'Tableau'],
-                claude: ['Markdown', 'HTML', 'SVG', 'Code', 'Mermaid', 'React'],
-                gemini: ['Markdown', 'HTML', 'Code', 'JSON'],
-                mistral: ['Markdown', 'HTML', 'Code'],
-                custom: ['Markdown', 'HTML', 'DOCX', 'Code', 'JSON', 'LaTeX', 'CSV']
+                chatgpt: ['Markdown', 'PDF', 'DOCX (Word)', 'Code (Python/JS/SQL)', 'Tableau interactif', 'Python exécutable'],
+                claude: ['Markdown', 'HTML', 'SVG', 'React (.jsx)', 'Mermaid', 'Code', 'DOCX (Word)', 'PDF', 'XLSX (tableur)', 'PPTX (slides)'],
+                gemini: ['Google Docs', 'Google Slides', 'PDF', 'Code (Colab)', 'App embarquée', 'Quiz/Infographie', 'Markdown'],
+                mistral: ['Markdown', 'HTML', 'Code', 'Diagramme'],
             },
+            formatMode: 'preset', // 2026-05-05 #104 : 'preset' (liste prédéfinie selon IA) ou 'custom' (champ texte libre universel)
             get canvasFormats() { return this.canvasFormatMap[this.canvasAI] || []; },
             constraintChainOfThought: false,
             constraintAskIfUnclear: false,
@@ -542,10 +554,11 @@ document.addEventListener('alpine:init', function() {
                 if (this.constraintAntiAI) constraints.push('Écriture naturelle et humaine : varie la longueur des phrases, utilise des expressions authentiques et des transitions fluides. Évite les formulations génériques (« dans un monde en constante évolution »), les listes à puces systématiques et les répétitions de structure.');
                 if (this.constraintTypo) constraints.push('Typographie française stricte : majuscules en début de phrase et noms propres uniquement, pas de tiret cadratin (utilise le tiret court), ponctuation correcte, accents toujours présents.');
                 if (this.constraintCanvas) {
-                    var canvasNames = { chatgpt: 'Canvas', claude: 'artefact', gemini: 'espace de travail', mistral: 'espace de travail', custom: 'espace de travail dédié' };
+                    var canvasNames = { chatgpt: 'Canvas', claude: 'artefact', gemini: 'espace de travail', mistral: 'espace de travail' };
                     var canvasName = canvasNames[this.canvasAI] || 'espace de travail';
                     var canvasLine = 'Crée un nouveau ' + canvasName + ' pour ta réponse.';
-                    var fmt = this.canvasAI === 'custom' ? this.canvasCustomFormat : this.canvasFormat;
+                    // 2026-05-05 #104 : format custom universel (formatMode) - dispo pour les 4 IA
+                    var fmt = this.formatMode === 'custom' ? this.canvasCustomFormat : this.canvasFormat;
                     if (fmt) canvasLine += ' Format de sortie : ' + fmt + '.';
                     constraints.push(canvasLine);
                 }
@@ -589,7 +602,7 @@ document.addEventListener('alpine:init', function() {
             },
 
             get wizardParams() {
-                return { personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat };
+                return { personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, audienceType: this.audienceType, audiencePreset: this.audiencePreset, audienceCustom: this.audienceCustom, format: this.format, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat };
             },
             _headers: function() {
                 return { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json', 'Content-Type': 'application/json' };
@@ -634,8 +647,14 @@ document.addEventListener('alpine:init', function() {
                                     if (p.technique) self.technique = p.technique;
                                     if (p.constraintAntiAI !== undefined) self.constraintAntiAI = p.constraintAntiAI;
                                     if (p.constraintCanvas) self.constraintCanvas = p.constraintCanvas;
-                                    if (p.canvasAI) self.canvasAI = p.canvasAI;
+                                    if (p.canvasAI) {
+                                        // 2026-05-05 #104 : migration anciens prompts canvasAI='custom' → canvasAI='chatgpt' + formatMode='custom'
+                                        if (p.canvasAI === 'custom') { self.canvasAI = 'chatgpt'; self.formatMode = 'custom'; }
+                                        else self.canvasAI = p.canvasAI;
+                                    }
                                     if (p.canvasFormat) self.canvasFormat = p.canvasFormat;
+                                    if (p.canvasCustomFormat) self.canvasCustomFormat = p.canvasCustomFormat;
+                                    if (p.formatMode) self.formatMode = p.formatMode;
                                     self.saveName = found.name;
                                     self.step = 4;
                                     self._editingId = found.id;
