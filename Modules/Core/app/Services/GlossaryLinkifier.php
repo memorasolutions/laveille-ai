@@ -277,7 +277,10 @@ class GlossaryLinkifier
             $a->setAttribute('class', 'glossary-link');
             $a->setAttribute('data-tooltip', $term['definition']);
             $a->setAttribute('title', $term['definition']);
-            $a->setAttribute('aria-label', $name.' — '.($term['type'] === 'acronym' || $term['type'] === 'acronym_full' ? 'voir acronyme' : 'voir glossaire'));
+            $a->setAttribute('aria-label', $name.' — '.($term['type'] === 'acronym' || $term['type'] === 'acronym_full' ? 'voir acronyme (nouvel onglet)' : 'voir glossaire (nouvel onglet)'));
+            // 2026-05-05 #141 : ouvre dans nouvel onglet pour preserver la lecture en cours
+            $a->setAttribute('target', '_blank');
+            $a->setAttribute('rel', 'noopener noreferrer');
             $fragment[] = $a;
 
             if ($after !== '') $fragment[] = $dom->createTextNode($after);
