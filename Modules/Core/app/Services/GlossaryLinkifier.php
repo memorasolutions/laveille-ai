@@ -275,8 +275,8 @@ class GlossaryLinkifier
             $a->appendChild($dom->createTextNode($matchedText));
             $a->setAttribute('href', $term['url']);
             $a->setAttribute('class', 'glossary-link');
+            // 2026-05-05 #142 : data-tooltip lu par CSS pur, retire title= pour eviter double tooltip natif lent
             $a->setAttribute('data-tooltip', $term['definition']);
-            $a->setAttribute('title', $term['definition']);
             $a->setAttribute('aria-label', $name.' — '.($term['type'] === 'acronym' || $term['type'] === 'acronym_full' ? 'voir acronyme (nouvel onglet)' : 'voir glossaire (nouvel onglet)'));
             // 2026-05-05 #141 : ouvre dans nouvel onglet pour preserver la lecture en cours
             $a->setAttribute('target', '_blank');
