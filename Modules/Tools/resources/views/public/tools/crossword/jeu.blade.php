@@ -18,6 +18,14 @@
 .cell-active input:focus-visible{outline:3px solid #053d4a;outline-offset:-3px;background:#fff7ed}
 .cell-correct{background-color:#bbf7d0!important;color:#064e3b!important}
 .cell-wrong{background-color:#fecaca!important;color:#5b0c0c!important}
+.cell-pulse{animation:cellPulse 0.6s ease-out 2}
+@keyframes cellPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08);box-shadow:0 0 0 4px rgba(220,38,38,0.4)}}
+.cw-toggle-autocheck{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .75rem;background:#fff;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;font-weight:500;font-size:.875rem;min-height:36px}
+.cw-toggle-autocheck input{margin:0}
+.cw-action-secondary{padding:.5rem .8rem;background:#fef3c7;border:1px solid #fbbf24;color:#78350f;border-radius:6px;cursor:pointer;font-weight:500;min-height:40px;font-size:.875rem;display:inline-flex;align-items:center;gap:.4rem}
+.cw-action-secondary:hover,.cw-action-secondary:focus-visible{background:#fde68a;outline:2px solid #d97706;outline-offset:2px}
+.cw-action-danger{padding:.5rem .8rem;background:#fee2e2;border:1px solid #f87171;color:#7f1d1d;border-radius:6px;cursor:pointer;font-weight:500;min-height:40px;font-size:.875rem;display:inline-flex;align-items:center;gap:.4rem}
+.cw-action-danger:hover,.cw-action-danger:focus-visible{background:#fecaca;outline:2px solid #dc2626;outline-offset:2px}
 .cell-active .number{position:absolute;top:1px;left:2px;font-size:.6rem;font-weight:700;color:#053d4a;line-height:1;z-index:1;pointer-events:none}
 .timer-display{font-size:1.75rem;font-weight:800;font-variant-numeric:tabular-nums;color:#053d4a}
 .cw-status-text{color:#1A1D23;font-weight:600}
@@ -75,15 +83,33 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#053d4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span class="timer-display" aria-live="polite" :aria-label="'{{ __('Temps écoulé') }} ' + formatTime(timer)" x-text="formatTime(timer)"></span>
               </div>
-              <div class="d-flex align-items-center gap-2 cw-status-text" aria-live="polite">
+              <div class="d-flex align-items-center gap-2 cw-status-text flex-wrap" aria-live="polite">
                 <span><strong class="num" x-text="correctCount"></strong> / <strong class="num" x-text="totalActiveCells"></strong> {{ __('cases') }}</span>
                 <span aria-hidden="true" style="color:#1A1D23">·</span>
                 <span><strong class="num" x-text="hintsUsed"></strong> {{ __('indice(s)') }}</span>
+                <span aria-hidden="true" style="color:#1A1D23" x-show="errorsCount > 0">·</span>
+                <span x-show="errorsCount > 0" :title="'{{ __('Erreurs cumulées sur la partie') }}'"><strong class="num" style="color:#b91c1c" x-text="errorsCount"></strong> {{ __('erreur(s)') }}</span>
               </div>
+              <label class="cw-toggle-autocheck" :title="autoCheck ? '{{ __('Validation immédiate activée — case rouge si erreur') }}' : '{{ __('Validation manuelle — clic Vérifier requis') }}'">
+                <input type="checkbox" x-model="autoCheck" aria-label="{{ __('Activer la validation automatique des cases') }}">
+                <span>{{ __('Auto-check') }}</span>
+              </label>
               <div class="d-flex gap-2 ms-auto flex-wrap">
+                <button type="button" class="cw-action-secondary" @click="checkGrid()" :disabled="completed" aria-label="{{ __('Vérifier la grille — anime les cases erronées') }}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>{{ __('Vérifier') }}</span>
+                </button>
                 <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="useHint()" :disabled="completed || emptyCellCount === 0" :aria-label="'{{ __('Révéler une lettre') }} (' + hintsUsed + ' utilisés)'">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-7 7c0 3 2 5 2 7h10c0-2 2-4 2-7a7 7 0 0 0-7-7z"/></svg>
                   <span>{{ __('Indice') }}</span>
+                </button>
+                <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="revealCurrentWord()" :disabled="completed || !currentWord" :aria-label="'{{ __('Révéler le mot complet en cours') }}'">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span>{{ __('Révéler le mot') }}</span>
+                </button>
+                <button type="button" class="cw-action-danger" @click="confirmReveal()" :disabled="completed" aria-label="{{ __('Abandonner et révéler la solution complète') }}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+                  <span>{{ __('Abandonner') }}</span>
                 </button>
                 <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="resetGame()" aria-label="{{ __('Effacer toutes les réponses et recommencer') }}">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
@@ -187,13 +213,19 @@
             </div>
             <p class="mb-1 completion-msg">{{ __('Temps') }} : <strong style="color:#053d4a" x-text="formatTime(finalTime)"></strong></p>
             <p class="mb-1 completion-msg">{{ __('Indices utilisés') }} : <strong style="color:#053d4a" x-text="hintsUsed"></strong></p>
+            <p class="mb-1 completion-msg" x-show="errorsCount > 0">{{ __('Erreurs cumulées') }} : <strong style="color:#b91c1c" x-text="errorsCount"></strong></p>
             <p class="mb-3 completion-msg" style="font-style:italic" x-text="completionMessage"></p>
-            <div class="d-flex flex-column flex-sm-row gap-2">
+            <div class="d-flex flex-column flex-sm-row gap-2 flex-wrap">
               <button type="button" class="ct-btn ct-btn-primary cw-action-btn" @click="resetGame(); completed = false" aria-label="{{ __('Recommencer la partie') }}">
                 {{ __('Recommencer') }}
               </button>
-              <button type="button" class="ct-btn ct-btn-outline cw-action-btn" @click="copyShareUrl()" aria-label="{{ __('Copier le lien de partage') }}">
-                <span x-show="!copyDone">{{ __('Partager') }}</span>
+              <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="copyWordleShare()" aria-label="{{ __('Copier mon résultat au format partageable') }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                <span x-show="!wordleShareCopied">{{ __('Partager mon résultat') }}</span>
+                <span x-show="wordleShareCopied" x-cloak>{{ __('Copié ✓') }}</span>
+              </button>
+              <button type="button" class="ct-btn ct-btn-outline cw-action-btn" @click="copyShareUrl()" aria-label="{{ __('Copier le lien de la grille') }}">
+                <span x-show="!copyDone">{{ __('Lien grille') }}</span>
                 <span x-show="copyDone" x-cloak>{{ __('Lien copié !') }}</span>
               </button>
               <button type="button" class="ct-btn ct-btn-outline cw-action-btn ms-sm-auto" @click="completed = false" aria-label="{{ __('Fermer') }}">
@@ -215,6 +247,9 @@
 
   </div>
 </section>
+
+{{-- C1 : canvas-confetti CDN pour animation completion (5 KB, 0$ coût, async no-block) --}}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" async></script>
 
 <script>
 document.addEventListener('alpine:init', () => {
@@ -239,9 +274,20 @@ document.addEventListener('alpine:init', () => {
     copyDone: false,
     completionMessage: '',
 
+    // 2026-05-05 Tier S+A : auto-check toggle, erreurs, mot courant, revealed cells (sans erreur counter), Wordle share
+    autoCheck: localStorage.getItem('cw_autocheck') !== '0',
+    errorsCount: 0,
+    revealedCells: {},      // {key: true} pour cases revelees via hint/word/reveal-puzzle
+    currentWord: null,
+    currentDirection: 'horizontal', // 2026-05-05 #95 : respecter orientation initiale (pas de swap auto h↔v)
+    abandoned: false,
+    wordleShareCopied: false,
+
     init() {
       this.loadDraft();
       this.parseAndGenerate();
+      // 2026-05-05 : persister autoCheck dans localStorage
+      this.$watch('autoCheck', () => this.persistAutoCheck());
     },
 
     loadDraft() {
@@ -360,6 +406,12 @@ document.addEventListener('alpine:init', () => {
     setCell(row, col, value) {
       const key = row + '-' + col;
       const v = (value || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z]/g, '').slice(0, 1);
+      // B4 : compter les erreurs au moment de la saisie (uniquement nouvelles entrées différentes de la lettre attendue)
+      const cell = this.grid && this.grid.cells[row] && this.grid.cells[row][col];
+      const previous = this.userInput[key];
+      if (cell && v && v !== previous && v !== cell.letter && this.autoCheck) {
+        this.errorsCount++;
+      }
       this.userInput = { ...this.userInput, [key]: v };
       this.debounceSave();
       this.$nextTick(() => this.checkCompletion());
@@ -367,28 +419,40 @@ document.addEventListener('alpine:init', () => {
     },
 
     advanceCursor(row, col) {
+      // 2026-05-05 #95 : avance dans la direction courante UNIQUEMENT — pas de swap auto h↔v
+      if (this.currentDirection === 'vertical') {
+        const below = document.querySelector('input[data-row="'+(row+1)+'"][data-col="'+col+'"]');
+        if (below) below.focus();
+        return;
+      }
       const next = document.querySelector('input[data-row="'+row+'"][data-col="'+(col+1)+'"]');
-      if (next) { next.focus(); return; }
-      const below = document.querySelector('input[data-row="'+(row+1)+'"][data-col="'+col+'"]');
-      if (below) below.focus();
+      if (next) next.focus();
     },
 
     handleKey(e, row, col) {
       if (e.key === 'Backspace' && !e.target.value) {
+        // 2026-05-05 #95 : recule dans la direction courante UNIQUEMENT
+        if (this.currentDirection === 'vertical') {
+          const above = document.querySelector('input[data-row="'+(row-1)+'"][data-col="'+col+'"]');
+          if (above) above.focus();
+          return;
+        }
         const prev = document.querySelector('input[data-row="'+row+'"][data-col="'+(col-1)+'"]');
-        if (prev) { prev.focus(); return; }
-        const above = document.querySelector('input[data-row="'+(row-1)+'"][data-col="'+col+'"]');
-        if (above) above.focus();
+        if (prev) prev.focus();
       } else if (e.key === 'ArrowRight') {
+        this.currentDirection = 'horizontal';
         const n = document.querySelector('input[data-row="'+row+'"][data-col="'+(col+1)+'"]');
         if (n) { e.preventDefault(); n.focus(); }
       } else if (e.key === 'ArrowLeft') {
+        this.currentDirection = 'horizontal';
         const n = document.querySelector('input[data-row="'+row+'"][data-col="'+(col-1)+'"]');
         if (n) { e.preventDefault(); n.focus(); }
       } else if (e.key === 'ArrowDown') {
+        this.currentDirection = 'vertical';
         const n = document.querySelector('input[data-row="'+(row+1)+'"][data-col="'+col+'"]');
         if (n) { e.preventDefault(); n.focus(); }
       } else if (e.key === 'ArrowUp') {
+        this.currentDirection = 'vertical';
         const n = document.querySelector('input[data-row="'+(row-1)+'"][data-col="'+col+'"]');
         if (n) { e.preventDefault(); n.focus(); }
       }
@@ -404,6 +468,8 @@ document.addEventListener('alpine:init', () => {
 
     isWrong(row, col) {
       if (!this.grid || !this.grid.cells) return false;
+      // Si auto-check désactivé, ne rien afficher en rouge (mode honor system)
+      if (!this.autoCheck) return false;
       const cell = this.grid.cells[row] && this.grid.cells[row][col];
       if (!cell) return false;
       const v = this.userInput[row+'-'+col];
@@ -465,8 +531,10 @@ document.addEventListener('alpine:init', () => {
         this.completed = true;
         this.finalTime = this.timer;
         this.stopTimer();
-        const noHints = this.hintsUsed === 0;
-        if (noHints && this.finalTime < 180) {
+        const noHints = this.hintsUsed === 0 && !this.abandoned;
+        if (this.abandoned) {
+          this.completionMessage = @json(__('Solution révélée. Recommencez pour vous mesurer à la grille !'));
+        } else if (noHints && this.finalTime < 180) {
           this.completionMessage = @json(__('Excellent ! Sans aucune aide et en moins de 3 minutes.'));
         } else if (noHints) {
           this.completionMessage = @json(__('Bravo, sans aucune aide.'));
@@ -476,10 +544,16 @@ document.addEventListener('alpine:init', () => {
           this.completionMessage = @json(__('Grille complétée. Réessayez avec moins d\'indices !'));
         }
         this.saveDraft();
+        // C1 : confetti animation (skip si abandon)
+        if (!this.abandoned) this.triggerConfetti();
       }
     },
 
     focusWord(word) {
+      // B2 : track current word pour révéler-mot
+      this.currentWord = word;
+      // 2026-05-05 #95 : verrouille la direction sur l'orientation du mot choisi
+      this.currentDirection = word.orientation;
       const r = word.row;
       const c = word.col;
       const input = document.querySelector('input[data-row="'+r+'"][data-col="'+c+'"]');
@@ -495,6 +569,9 @@ document.addEventListener('alpine:init', () => {
       this.timer = 0;
       this.hintsUsed = 0;
       this.finalTime = 0;
+      this.errorsCount = 0;
+      this.revealedCells = {};
+      this.abandoned = false;
       this.stopTimer();
       this.startTimeStamp = null;
       this.saveDraft();
@@ -517,6 +594,164 @@ document.addEventListener('alpine:init', () => {
       }
       this.copyDone = true;
       setTimeout(() => { this.copyDone = false; }, 2500);
+    },
+
+    // 2026-05-05 Tier S+A : nouvelles fonctions UX
+    persistAutoCheck() {
+      try { localStorage.setItem('cw_autocheck', this.autoCheck ? '1' : '0'); } catch (e) {}
+    },
+
+    // A3 : vérifier la grille — flash pulse rouge sur cases erronées (force auto-check temporairement)
+    checkGrid() {
+      if (!this.grid || !this.grid.cells) return;
+      const wrongCells = [];
+      for (let r = 0; r < this.grid.cells.length; r++) {
+        for (let c = 0; c < this.grid.cells[r].length; c++) {
+          const cell = this.grid.cells[r][c];
+          if (!cell) continue;
+          const v = this.userInput[r+'-'+c];
+          if (v && v !== cell.letter) wrongCells.push({r, c});
+        }
+      }
+      if (wrongCells.length === 0) {
+        const empty = this.emptyCellCount;
+        if (empty === 0) {
+          this.checkCompletion();
+        } else {
+          alert(@json(__('Aucune erreur détectée. Continue, il reste des cases vides.')) + ' (' + empty + ' ' + @json(__('cases vides')) + ')');
+        }
+        return;
+      }
+      // Animer les cases wrong
+      wrongCells.forEach(({r, c}) => {
+        const inp = document.querySelector('input[data-row="'+r+'"][data-col="'+c+'"]');
+        if (inp) {
+          const wrap = inp.closest('.cell-active');
+          if (wrap) {
+            wrap.classList.remove('cell-pulse');
+            void wrap.offsetWidth; // force reflow
+            wrap.classList.add('cell-pulse');
+            setTimeout(() => wrap.classList.remove('cell-pulse'), 1600);
+          }
+        }
+      });
+    },
+
+    // B2 : révéler le mot complet en cours
+    revealCurrentWord() {
+      if (!this.currentWord || this.completed) return;
+      const w = this.currentWord;
+      const dr = w.orientation === 'vertical' ? 1 : 0;
+      const dc = w.orientation === 'horizontal' ? 1 : 0;
+      let revealed = 0;
+      for (let i = 0; i < w.answer.length; i++) {
+        const r = w.row + dr * i;
+        const c = w.col + dc * i;
+        const key = r + '-' + c;
+        if (this.userInput[key] !== w.answer[i]) {
+          this.userInput[key] = w.answer[i];
+          this.revealedCells[key] = true;
+          revealed++;
+        }
+      }
+      this.userInput = {...this.userInput};
+      this.hintsUsed += revealed;
+      this.debounceSave();
+      this.$nextTick(() => this.checkCompletion());
+    },
+
+    // B3 : abandonner / révéler la solution complète
+    confirmReveal() {
+      if (this.completed) return;
+      if (!confirm(@json(__('Révéler la solution complète et terminer la partie ?')))) return;
+      if (!this.grid || !this.grid.cells) return;
+      for (let r = 0; r < this.grid.cells.length; r++) {
+        for (let c = 0; c < this.grid.cells[r].length; c++) {
+          const cell = this.grid.cells[r][c];
+          if (!cell) continue;
+          const key = r + '-' + c;
+          if (this.userInput[key] !== cell.letter) {
+            this.userInput[key] = cell.letter;
+            this.revealedCells[key] = true;
+          }
+        }
+      }
+      this.userInput = {...this.userInput};
+      this.abandoned = true;
+      this.$nextTick(() => this.checkCompletion());
+    },
+
+    // B4 + watcher input : compter erreurs cumulatives au moment de la saisie
+    onCellInput(r, c, value) {
+      const cell = this.grid && this.grid.cells[r] && this.grid.cells[r][c];
+      if (!cell || !value) return;
+      if (this.autoCheck && value.toUpperCase() !== cell.letter) {
+        this.errorsCount++;
+      }
+    },
+
+    // C1 : confetti animation au completed
+    triggerConfetti() {
+      if (typeof window.confetti !== 'function') return;
+      const duration = 2500;
+      const end = Date.now() + duration;
+      (function frame() {
+        window.confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#0F766E', '#FFF7ED', '#C2410C'] });
+        window.confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#0F766E', '#FFF7ED', '#C2410C'] });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    },
+
+    // C2 : texte partage Wordle-style
+    wordleShareText() {
+      const t = this.formatTime(this.finalTime || this.timer);
+      const total = this.totalActiveCells;
+      const hints = this.hintsUsed;
+      const errors = this.errorsCount;
+      const url = @json($playUrl);
+      const grid = [];
+      // Build mini emoji grid : ⬜ pour case correcte, 🟨 pour case revealed (hint), 🟧 pour erreur cumulée (subtil)
+      const correctNoReveal = total - Object.keys(this.revealedCells).length;
+      const blocks = [];
+      for (let i = 0; i < correctNoReveal; i++) blocks.push('🟩');
+      for (let i = 0; i < Object.keys(this.revealedCells).length; i++) blocks.push('🟨');
+      // Wrap each line at 10 blocks
+      const lines = [];
+      for (let i = 0; i < blocks.length; i += 10) lines.push(blocks.slice(i, i+10).join(''));
+      const gridStr = lines.join('\n');
+
+      const titleName = @json($preset->name);
+      let text = '🧩 Mots-croisés — ' + titleName + '\n';
+      text += '⏱ ' + t + ' · 💡 ' + hints + ' indices';
+      if (errors > 0) text += ' · ❌ ' + errors + ' erreurs';
+      text += (this.abandoned ? ' · 🏳️ abandon' : '') + '\n\n';
+      text += gridStr + '\n\n';
+      text += '🔗 ' + url + '\n#MotsCroises #LaVeilleAI';
+      return text;
+    },
+    async copyWordleShare() {
+      const text = this.wordleShareText();
+      try {
+        await navigator.clipboard.writeText(text);
+        this.wordleShareCopied = true;
+        setTimeout(() => { this.wordleShareCopied = false; }, 2500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e2) {}
+        document.body.removeChild(ta);
+        this.wordleShareCopied = true;
+        setTimeout(() => { this.wordleShareCopied = false; }, 2500);
+      }
+    },
+    async nativeShareWordle() {
+      if (!navigator.share) { return this.copyWordleShare(); }
+      const text = this.wordleShareText();
+      try {
+        await navigator.share({ title: 'Mots-croisés laveille.ai', text, url: @json($playUrl) });
+      } catch (e) {}
     }
   }));
 });
