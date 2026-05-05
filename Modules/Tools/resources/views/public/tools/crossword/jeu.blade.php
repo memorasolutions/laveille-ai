@@ -320,18 +320,53 @@ document.addEventListener('alpine:init', () => {
     },
 
     parseAndGenerate() {
-      const lines = (this.configText || '').split('\n').map(l => l.trim()).filter(Boolean);
-      const pairs = [];
-      for (const line of lines) {
-        const idx = line.indexOf(' / ');
-        if (idx === -1) continue;
-        const clue = line.substring(0, idx).trim();
-        const answer = line.substring(idx + 3).trim();
-        if (clue && answer) pairs.push({ clue, answer });
+      const cfg = (this.configText || '').trim();
+      let pairs = [];
+      let preGrid = null;
+      let preWords = null;
+
+      // 2026-05-05 #119 : détecter format JSON moderne S80+ {pairs:[],grid,words,unplaced}
+      if (cfg.startsWith('{')) {
+        try {
+          const data = JSON.parse(cfg);
+          if (data && Array.isArray(data.pairs)) {
+            pairs = data.pairs.filter(p => p && p.clue && p.answer).map(p => ({ clue: String(p.clue), answer: String(p.answer) }));
+          }
+          // Si grille déjà générée stockée, l'utiliser directement (évite appel API)
+          if (data && data.grid && Array.isArray(data.words)) {
+            preGrid = data.grid;
+            preWords = data.words;
+          }
+        } catch (e) { /* fallback sur format legacy */ }
       }
+
+      // Fallback format legacy "indice / mot" ligne par ligne
+      if (pairs.length === 0) {
+        const lines = cfg.split('\n').map(l => l.trim()).filter(Boolean);
+        for (const line of lines) {
+          const idx = line.indexOf(' / ');
+          if (idx === -1) continue;
+          const clue = line.substring(0, idx).trim();
+          const answer = line.substring(idx + 3).trim();
+          if (clue && answer) pairs.push({ clue, answer });
+        }
+      }
+
       if (pairs.length < 2) {
         this.loadError = @json(__('Cette grille ne contient pas assez de paires valides.'));
         this.loading = false;
+        return;
+      }
+
+      // 2026-05-05 #119 : si grille pré-calculée disponible, l'utiliser directement (skip API)
+      if (preGrid && preWords) {
+        this.grid = preGrid;
+        this.words = preWords;
+        this.horizontalWords = this.words.filter(w => w.orientation === 'horizontal');
+        this.verticalWords = this.words.filter(w => w.orientation === 'vertical');
+        this.cleanUserInput();
+        this.loading = false;
+        this.$nextTick(() => this.checkCompletion());
         return;
       }
       const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
