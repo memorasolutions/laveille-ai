@@ -26,7 +26,7 @@ class SavedCrosswordPreset extends Model
 
     protected $table = 'saved_crossword_presets';
 
-    protected $fillable = ['user_id', 'name', 'config_text', 'params', 'is_public', 'play_count', 'custom_slug', 'qr_options'];
+    protected $fillable = ['user_id', 'name', 'config_text', 'params', 'is_public', 'play_count', 'custom_slug', 'qr_options', 'fingerprint'];
 
     protected $casts = [
         'params' => 'array',
@@ -55,6 +55,13 @@ class SavedCrosswordPreset extends Model
                     $id = Str::random(12);
                 } while (static::where('public_id', $id)->exists());
                 $preset->public_id = $id;
+            }
+        });
+
+        // 2026-05-05 #101 : auto-set fingerprint à chaque sauvegarde (création + update si config_text changé).
+        static::saving(function (self $preset) {
+            if ($preset->isDirty('config_text') || empty($preset->fingerprint)) {
+                $preset->fingerprint = static::computeFingerprint((string) $preset->config_text);
             }
         });
     }
@@ -97,6 +104,73 @@ class SavedCrosswordPreset extends Model
     {
         return static::where('custom_slug', $identifier)
             ->orWhere('public_id', $identifier)
+            ->first();
+    }
+
+    /**
+     * 2026-05-05 #101 : calcule fingerprint SHA256 des paires triées normalisées.
+     * Détecte grilles équivalentes (mêmes paires clue→answer) indépendamment de l'ordre / casse / accents.
+     */
+    public static function computeFingerprint(string $configText): string
+    {
+        $configText = trim($configText);
+        $rawPairs = [];
+
+        // Format JSON moderne (S80+) : {"pairs":[{"clue":"x","answer":"y"}]}
+        if (str_starts_with($configText, '{')) {
+            $data = @json_decode($configText, true);
+            if (is_array($data) && isset($data['pairs']) && is_array($data['pairs'])) {
+                foreach ($data['pairs'] as $p) {
+                    if (is_array($p) && isset($p['clue'], $p['answer'])) {
+                        $rawPairs[] = [(string) $p['clue'], (string) $p['answer']];
+                    }
+                }
+            }
+        }
+
+        // Format legacy 1 ligne par paire "indice / mot"
+        if (empty($rawPairs)) {
+            $lines = preg_split('/\r\n|\n|\r/', $configText) ?: [];
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (! str_contains($line, ' / ')) {
+                    continue;
+                }
+                [$clue, $answer] = array_map('trim', explode(' / ', $line, 2));
+                if ($clue !== '' && $answer !== '') {
+                    $rawPairs[] = [$clue, $answer];
+                }
+            }
+        }
+
+        $normPairs = [];
+        foreach ($rawPairs as [$clue, $answer]) {
+            $clueNorm = mb_strtolower(Str::ascii($clue));
+            $answerNorm = mb_strtoupper(Str::ascii($answer));
+            $clueNorm = preg_replace('/\s+/', ' ', trim($clueNorm));
+            $answerNorm = preg_replace('/[^A-Z]/', '', $answerNorm);
+            if ($clueNorm !== '' && $answerNorm !== '') {
+                $normPairs[] = $clueNorm.'|'.$answerNorm;
+            }
+        }
+        sort($normPairs);
+
+        return hash('sha256', implode("\n", $normPairs));
+    }
+
+    /**
+     * 2026-05-05 #101 : trouve un duplicate public chez un autre user (mêmes paires).
+     * Ignore le preset courant et retourne le premier match public.
+     */
+    public function findPublicDuplicate(): ?self
+    {
+        if (! $this->fingerprint) {
+            return null;
+        }
+
+        return static::where('fingerprint', $this->fingerprint)
+            ->where('is_public', true)
+            ->where('id', '!=', $this->id)
             ->first();
     }
 

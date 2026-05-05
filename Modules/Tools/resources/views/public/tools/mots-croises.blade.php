@@ -175,6 +175,26 @@
                   </span>
                 </button>
 
+                {{-- 2026-05-05 #101 : alerte doublon publique --}}
+                <div x-show="duplicateInfo" x-cloak x-transition class="mt-3 p-3" role="alert" aria-live="polite" style="background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;color:#78350f">
+                  <div class="d-flex align-items-start gap-2 mb-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <div style="flex:1;min-width:0">
+                      <strong>{{ __('Grille publique identique détectée') }}</strong>
+                      <p class="small mb-2 mt-1" x-text="duplicateInfo?.message"></p>
+                      <div class="d-flex flex-wrap gap-2">
+                        <a x-show="duplicateInfo?.url" :href="duplicateInfo?.url" target="_blank" rel="noopener" class="ct-btn ct-btn-primary d-inline-flex align-items-center gap-2" style="min-height:44px;font-size:.875rem">
+                          <span>{{ __('Voir la grille existante') }}</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        </a>
+                        <button type="button" @click="duplicateInfo = null" class="ct-btn ct-btn-outline" style="min-height:44px;font-size:.875rem" aria-label="{{ __('Fermer l\'alerte') }}">
+                          {{ __('Modifier ma grille') }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {{-- A1+A2 (2026-05-05) : panneau lien public visible après save quand grille publique --}}
                 <div x-show="publicShareUrl" x-cloak x-transition class="mt-3 p-3" style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px">
                   <div class="d-flex align-items-center gap-2 mb-2">
@@ -614,8 +634,8 @@
                 </div>
 
                 {{-- S81 #65 WCAG 2.2 AAA : role=grid + aria-rowindex/colindex + nav clavier flèches + focus visible --}}
-                <div class="table-responsive d-flex justify-content-center">
-                  <table class="crossword-grid" role="grid" :aria-label="'{{ __('Grille de mots croisés') }} ' + grid.rows + ' {{ __('lignes par') }} ' + grid.cols + ' {{ __('colonnes') }}'" :aria-rowcount="grid.rows" :aria-colcount="grid.cols">
+                <div class="table-responsive d-flex justify-content-center cw-grid-wrap-editor" :style="`--cols: ${grid.cols};`">
+                  <table class="crossword-grid" role="grid" :style="`--cols: ${grid.cols}; --rows: ${grid.rows};`" :aria-label="'{{ __('Grille de mots croisés') }} ' + grid.rows + ' {{ __('lignes par') }} ' + grid.cols + ' {{ __('colonnes') }}'" :aria-rowcount="grid.rows" :aria-colcount="grid.cols">
                     <caption class="visually-hidden">{{ __('Grille interactive de mots croisés. Utilisez les touches fléchées pour naviguer entre les cases.') }}</caption>
                     <tbody>
                       <template x-for="(row, rowIndex) in grid.cells" :key="rowIndex">
@@ -850,16 +870,19 @@
   .cw-menu-item:disabled:hover { background: none; outline: none; }
   .cw-menu-item strong { font-weight: 700; color: #053d4a; }
   /* S80 #55 — Option #3 Hybride : bordure externe grille + bordures cases actives uniquement (sauf mode BLACK statu quo). POTENTIAL-EXTRACT: dupliqué dans pdf-blank.blade.php + pdf-solution.blade.php — extraire en partial _grid_styles.blade.php S81 si stable. */
+  /* 2026-05-05 #100 : grille éditeur - clamp largeur uniquement (hauteur = scroll OK pour création) */
+  .cw-grid-wrap-editor { --cols: 10; max-width: 100%; overflow-x: auto; }
+  .cw-grid-wrap-editor .crossword-grid { --cell: clamp(20px, calc((100vw - 80px) / var(--cols)), 36px); }
   .crossword-grid {
     table-layout: fixed;
     border-collapse: collapse;
     margin: 1rem auto;
   }
   .crossword-grid td {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
+    width: var(--cell, 36px);
+    height: var(--cell, 36px);
+    min-width: 18px;
+    min-height: 18px;
     padding: 0;
     text-align: center;
     vertical-align: middle;
@@ -1109,6 +1132,8 @@ function crosswordGenerator() {
     qrIncludeLogo: false,
     qrSaving: false,
     qrPreviewBust: 0,
+    // 2026-05-05 #101 : anti-doublons grille publique
+    duplicateInfo: null,
     shareLinkCopied: false,
     canNativeShare: typeof navigator !== 'undefined' && typeof navigator.share === 'function',
 
@@ -1199,6 +1224,25 @@ function crosswordGenerator() {
         const params = preset.params || {};
         this.metadata = Object.assign({title: preset.name || '', difficulty: 'Moyen', is_public: !!preset.is_public, theme: ''}, params);
         this.saveName = preset.name || '';
+        // 2026-05-05 #100 fix : si grille publique chargée, set publicShareUrl + currentPresetPublicId pour afficher panneau Lien+QR+slug+QR-custom
+        if (preset.is_public && preset.public_id) {
+          const identifier = preset.custom_slug || preset.public_id;
+          this.publicShareUrl = window.location.origin + '/jeumc/' + identifier;
+          this.currentPresetPublicId = preset.public_id;
+          this.currentCustomSlug = preset.custom_slug || '';
+          // Pré-remplir options QR depuis qr_options DB
+          if (preset.qr_options && typeof preset.qr_options === 'object') {
+            this.qrFg = preset.qr_options.foreground || this.qrFg;
+            this.qrBg = preset.qr_options.background || this.qrBg;
+            this.qrEcc = preset.qr_options.ecc || this.qrEcc;
+            this.qrDotStyle = preset.qr_options.dot_style || this.qrDotStyle;
+            this.qrIncludeLogo = preset.qr_options.logo === '1' || preset.qr_options.logo === true;
+          }
+        } else {
+          this.publicShareUrl = '';
+          this.currentPresetPublicId = '';
+          this.currentCustomSlug = '';
+        }
         this.dispatchToast("{{ __('Grille chargée :') }} " + (preset.name || ''), 'success');
       } catch (e) {
         console.error('loadPreset', e);
@@ -1501,6 +1545,17 @@ function crosswordGenerator() {
             this.currentPresetPublicId = '';
             this.currentCustomSlug = '';
           }
+        } else if (response.status === 409) {
+          // 2026-05-05 #101 anti-doublons : grille publique identique existe déjà.
+          const dup = await response.json().catch(() => ({}));
+          this.duplicateInfo = {
+            url: dup.duplicate_url || '',
+            name: dup.duplicate_name || '',
+            message: dup.message || '',
+          };
+          // Force grille en privée tant que conflit pas résolu (sécurité user)
+          this.metadata.is_public = false;
+          this.dispatchToast(dup.message || "{{ __('Grille publique identique existe déjà.') }}", 'warning', 8000);
         } else {
           const errorData = await response.json().catch(() => ({}));
           this.dispatchToast(errorData.message || "{{ __('Erreur lors de la sauvegarde.') }}", 'danger');

@@ -5,16 +5,19 @@
 @section('og_type', 'article')
 
 @section('content')
-@php $playUrl = url('/jeumc/'.$preset->public_id); @endphp
+@php $playUrl = $preset->share_url; @endphp
 
 <style>
+/* 2026-05-05 #100 : taille cellule responsive via CSS clamp() depuis --cols/--rows set via Alpine bind. Min 22px AAA-near, max 44px target size. */
+.cw-grid-wrap{--cols:10;--rows:10;width:100%;max-width:100%;overflow-x:auto}
+.cw-grid-wrap .crossword-grid{--cell:clamp(22px,min(calc((100vw - 60px) / var(--cols)),calc((85vh - 220px) / var(--rows)),44px),44px)}
 .crossword-grid{table-layout:fixed;border-collapse:collapse;margin:1rem auto;background:#fff}
 .crossword-grid td{padding:0;text-align:center;vertical-align:middle;box-sizing:border-box}
 .cell-active{background-color:#ffffff;border:2px solid #1A1D23;position:relative}
 .cell-inactive{background-color:#1A1D23;border:2px solid #1A1D23}
-.cw-grid-wrap .crossword-grid td{width:44px;height:44px;min-width:44px;min-height:44px}
+.cw-grid-wrap .crossword-grid td{width:var(--cell);height:var(--cell);min-width:22px;min-height:22px}
 .cell-wrapper{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-.cell-active input{width:100%;height:100%;min-width:44px;min-height:44px;border:none;text-align:center;font-size:1.25rem;font-weight:700;text-transform:uppercase;background:transparent;color:#1A1D23;padding:0;display:block}
+.cell-active input{width:100%;height:100%;min-width:22px;min-height:22px;border:none;text-align:center;font-size:calc(var(--cell, 44px) * 0.5);font-weight:700;text-transform:uppercase;background:transparent;color:#1A1D23;padding:0;display:block}
 .cell-active input:focus-visible{outline:3px solid #053d4a;outline-offset:-3px;background:#fff7ed}
 .cell-correct{background-color:#bbf7d0!important;color:#064e3b!important}
 .cell-wrong{background-color:#fecaca!important;color:#5b0c0c!important}
@@ -45,7 +48,7 @@
 .cw-loader{padding:3rem;text-align:center;color:#1A1D23}
 .cw-clues-section h2{color:#053d4a}
 @media print{.no-print{display:none!important}.cw-status-bar{display:none}}
-@media (max-width:768px){.cw-grid-wrap .crossword-grid td{width:38px;height:38px;min-width:38px;min-height:38px}.cell-active input{min-width:38px;min-height:38px;font-size:1.1rem}}
+/* 2026-05-05 #100 : la formule clamp() gère déjà le mobile - règle simplifiée pour tablette éventuelle */
 </style>
 
 <section class="page-section py-5">
@@ -119,7 +122,7 @@
             </div>
 
             <div class="row">
-              <div class="col-lg-7 mb-4 mb-lg-0 cw-grid-wrap">
+              <div class="col-lg-7 mb-4 mb-lg-0 cw-grid-wrap" :style="`--cols: ${grid.cols}; --rows: ${grid.rows};`">
                 <div class="table-responsive d-flex justify-content-center">
                   <table class="crossword-grid" :aria-label="'{{ __('Grille de mots croisés') }} ' + grid.rows + 'x' + grid.cols">
                     <tbody>
