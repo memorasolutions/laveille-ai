@@ -1180,12 +1180,25 @@ function crosswordGenerator() {
           this.dispatchToast("{{ __('Grille introuvable ou non autorisée.') }}", 'danger');
           return;
         }
-        const lines = (preset.config_text || '').split(/\r\n|\n|\r/).map(l => l.trim()).filter(Boolean);
-        const pairs = [];
-        for (const line of lines) {
-          const idx = line.indexOf(' / ');
-          if (idx === -1) continue;
-          pairs.push({clue: line.substring(0, idx).trim(), answer: line.substring(idx+3).trim().toUpperCase()});
+        // 2026-05-05 #129 : détecter format JSON moderne S80+ ({pairs:[{clue,answer}]}) en plus du format legacy 'indice / mot'
+        const cfg = (preset.config_text || '').trim();
+        let pairs = [];
+        if (cfg.startsWith('{')) {
+          try {
+            const data = JSON.parse(cfg);
+            if (data && Array.isArray(data.pairs)) {
+              pairs = data.pairs.filter(p => p && p.clue && p.answer)
+                .map(p => ({ clue: String(p.clue).trim(), answer: String(p.answer).toUpperCase().trim() }));
+            }
+          } catch (e) { /* fallback legacy */ }
+        }
+        if (pairs.length === 0) {
+          const lines = cfg.split(/\r\n|\n|\r/).map(l => l.trim()).filter(Boolean);
+          for (const line of lines) {
+            const idx = line.indexOf(' / ');
+            if (idx === -1) continue;
+            pairs.push({clue: line.substring(0, idx).trim(), answer: line.substring(idx+3).trim().toUpperCase()});
+          }
         }
         if (pairs.length < 2) pairs.push({clue:'', answer:''}, {clue:'', answer:''});
         this.pairs = pairs;
