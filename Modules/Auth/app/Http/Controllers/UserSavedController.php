@@ -61,8 +61,19 @@ class UserSavedController extends Controller
             $items = $items->merge(
                 \Modules\Tools\Models\SavedCrosswordPreset::forUser($user->id)->latest()->get()
                     ->map(function ($p) {
-                        $lines = preg_split('/\r\n|\n|\r/', trim((string) $p->config_text));
-                        $pairsCount = collect($lines)->filter(fn ($l) => str_contains($l, ' / '))->count();
+                        // 2026-05-05 #127 : compteur compatible JSON moderne S80+ ET format legacy
+                        $cfg = trim((string) $p->config_text);
+                        $pairsCount = 0;
+                        if (str_starts_with($cfg, '{')) {
+                            $data = @json_decode($cfg, true);
+                            if (is_array($data) && isset($data['pairs']) && is_array($data['pairs'])) {
+                                $pairsCount = count($data['pairs']);
+                            }
+                        }
+                        if ($pairsCount === 0) {
+                            $lines = preg_split('/\r\n|\n|\r/', $cfg);
+                            $pairsCount = collect($lines)->filter(fn ($l) => str_contains($l, ' / '))->count();
+                        }
                         $diff = (string) ($p->params['difficulty'] ?? 'Moyen');
                         $public = $p->is_public ? __('publique') : __('privée');
                         return (object) [
