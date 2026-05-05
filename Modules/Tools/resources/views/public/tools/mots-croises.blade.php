@@ -156,7 +156,7 @@
                         class="ct-btn d-inline-flex align-items-start gap-3 text-start w-100"
                         style="min-height:44px;padding:.75rem 1.25rem;max-width:100%;white-space:normal"
                         :class="metadata.is_public ? 'ct-btn-primary' : 'ct-btn-outline'"
-                        @click="metadata.is_public = !metadata.is_public; saveDraft()"
+                        @click="togglePublic()"
                         :aria-pressed="metadata.is_public"
                         :aria-label="metadata.is_public ? '{{ __('Rendre la grille privée') }}' : '{{ __('Rendre la grille publique') }}'">
                   <template x-if="!metadata.is_public">
@@ -1482,6 +1482,43 @@ function crosswordGenerator() {
         this.csvImportError = "{{ __('Erreur reseau.') }}";
       } finally {
         this.csvImporting = false;
+      }
+    },
+
+    // 2026-05-05 #105 : toggle is_public avec auto-save si conditions remplies (sinon message clair).
+    async togglePublic() {
+      const wasPublic = !!this.metadata.is_public;
+      this.metadata.is_public = !wasPublic;
+      this.saveDraft();
+      // Si l'utilisateur tente de rendre publique...
+      if (this.metadata.is_public) {
+        if (!this.isAuthenticated) {
+          this.metadata.is_public = false; // revert
+          this.dispatchToast("{{ __('Connectez-vous pour publier votre grille.') }}", 'warning');
+          this.$dispatch('open-auth-modal');
+          return;
+        }
+        if (!this.grid) {
+          this.metadata.is_public = false; // revert
+          this.dispatchToast("{{ __('Générez d\'abord la grille (cliquez « Générer la grille ») puis activez le partage public.') }}", 'warning', 6000);
+          return;
+        }
+        const name = (this.saveName || '').trim() || (this.metadata.title || '').trim();
+        if (!name) {
+          this.metadata.is_public = false; // revert
+          this.dispatchToast("{{ __('Donnez un nom à votre grille avant de la publier.') }}", 'warning', 6000);
+          this.$nextTick(() => {
+            const el = document.querySelector('input[aria-label="{{ __('Titre du prompt') }}"], input[x-model="saveName"]');
+            if (el) { el.focus(); el.scrollIntoView({behavior:'smooth', block:'center'}); }
+          });
+          return;
+        }
+        // Conditions remplies : auto-save pour persister + récupérer publicShareUrl + afficher panneau.
+        await this.save();
+      } else if (wasPublic && this.currentPresetPublicId) {
+        // Passage à privée d'une grille déjà publique : auto-save pour persister.
+        await this.save();
+        this.dispatchToast("{{ __('Grille passée en privée. Le lien public est désactivé.') }}", 'info');
       }
     },
 
