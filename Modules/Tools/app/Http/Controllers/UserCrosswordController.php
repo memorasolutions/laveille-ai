@@ -144,6 +144,34 @@ class UserCrosswordController
      * 2026-05-05 #97 Phase 2 : POST mise à jour qr_options (couleurs, logo, dot style, ECC).
      * Route : POST /user/mots-croises/{publicId}/qr-options
      */
+    /**
+     * 2026-05-05 #115 : suppression admin (modération) d'une grille publique depuis /jeumc.
+     * Soft delete via Eloquent SoftDeletes. Log via activitylog si dispo.
+     * Route : POST /admin/jeumc/{publicId}/moderate-delete (middleware EnsureIsAdmin)
+     */
+    public function moderateDelete(Request $request, string $publicId): \Illuminate\Http\JsonResponse
+    {
+        $preset = SavedCrosswordPreset::where('public_id', $publicId)->firstOrFail();
+        $name = $preset->name;
+        $userId = $preset->user_id;
+        $preset->delete(); // soft delete
+
+        // Log activitylog si dispo
+        if (class_exists(\Spatie\Activitylog\Facades\Activity::class)) {
+            try {
+                activity('crossword-moderation')
+                    ->performedOn($preset)
+                    ->withProperties(['name' => $name, 'public_id' => $publicId, 'owner_user_id' => $userId])
+                    ->log('Grille mots-croisés supprimée par modération admin');
+            } catch (\Throwable $e) { /* silent */ }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Grille « '.$name.' » supprimée.',
+        ]);
+    }
+
     public function updateQrOptions(Request $request, string $publicId): \Symfony\Component\HttpFoundation\Response
     {
         $preset = SavedCrosswordPreset::where('user_id', auth()->id())

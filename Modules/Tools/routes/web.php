@@ -83,4 +83,8 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     Route::get('tools/{tool}/edit', [ToolAdminController::class, 'edit'])->name('tools.edit');
     Route::put('tools/{tool}', [ToolAdminController::class, 'update'])->name('tools.update');
     Route::post('tools/{tool}/toggle', [ToolAdminController::class, 'toggleActive'])->name('tools.toggle');
+    // 2026-05-05 #115 : modération admin grilles mots-croisés (suppression depuis /jeumc)
+    Route::post('jeumc/{publicId}/moderate-delete', [UserCrosswordController::class, 'moderateDelete'])
+        ->where('publicId', '[a-zA-Z0-9_-]+')
+        ->name('jeumc.moderate-delete');
 });

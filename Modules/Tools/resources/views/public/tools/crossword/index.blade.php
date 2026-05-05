@@ -221,6 +221,21 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             {{ __('Jouer') }}
                         </a>
+                        {{-- 2026-05-05 #115 : modération admin (suppression via modale Memora confirm-global) --}}
+                        @can('view_admin_panel')
+                        @php
+                            $deleteUrl = url('/admin/jeumc/'.$preset->public_id.'/moderate-delete');
+                            $confirmMessage = __('Supprimer la grille « :name » de :author ? Action de modération réversible (soft delete).', ['name' => $preset->name, 'author' => $authorName]);
+                        @endphp
+                        <button type="button"
+                                class="ct-btn ct-btn-outline d-inline-flex align-items-center justify-content-center gap-2"
+                                style="min-height:36px;font-size:.75rem;margin-top:.5rem;border-color:#dc2626;color:#dc2626"
+                                onclick="window.dispatchEvent(new CustomEvent('open-confirm-global', { detail: { message: @js($confirmMessage), callback: () => { var btn=this; var tk=document.querySelector('meta[name=csrf-token]')?.content; fetch(@js($deleteUrl),{method:'POST',headers:{'X-CSRF-TOKEN':tk,'Accept':'application/json'}}).then(r=>r.json()).then(d=>{ if(d.success){ document.querySelectorAll('.cwi-card').forEach(c=>{ if(c.contains(event.target)) c.style.display='none'; }); window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:d.message||@js(__('Grille supprimée.')),variant:'success'}})); } else { window.dispatchEvent(new CustomEvent('toast-show',{detail:{message:d.message||@js(__('Erreur de suppression.')),variant:'error'}})); } }); } } }))"
+                                aria-label="{{ __('Modérer : supprimer cette grille') }}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>{{ __('Modérer (admin)') }}</span>
+                        </button>
+                        @endcan
                     </article>
                 @endforeach
             </div>
