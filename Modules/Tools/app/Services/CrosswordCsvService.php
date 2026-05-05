@@ -49,9 +49,17 @@ final class CrosswordCsvService
             $content = substr($content, 3);
         }
 
-        // Detecter separateur (priorite ; puis ,)
+        // Detecter separateur a partir de la PREMIERE LIGNE uniquement (l'en-tete).
+        // Bug fix 2026-05-04 : un CSV avec indices contenant des virgules legitimes
+        // ("Capitale de la France, ville de la Tour Eiffel...") faisait basculer le
+        // parser sur ',' alors que le vrai separateur est ';' indique par l'en-tete.
         $sep = self::SEPARATOR;
-        if (substr_count($content, ';') < substr_count($content, ',')) {
+        $firstLine = strtok($content, "\r\n") ?: $content;
+        if (str_contains($firstLine, ';')) {
+            $sep = ';';
+        } elseif (str_contains($firstLine, "\t")) {
+            $sep = "\t";
+        } elseif (str_contains($firstLine, ',')) {
             $sep = ',';
         }
 

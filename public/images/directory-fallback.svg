@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" role="img" aria-label="Aperçu de l'outil non disponible">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#134E4A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#C2410C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="340" fill="url(#bg)"/>
+  <g opacity="0.10" fill="#FFF7ED">
+    <circle cx="80" cy="60" r="6"/>
+    <circle cx="540" cy="80" r="4"/>
+    <circle cx="500" cy="280" r="8"/>
+    <circle cx="120" cy="290" r="5"/>
+    <circle cx="320" cy="40" r="3"/>
+  </g>
+  <g transform="translate(300 145)">
+    <rect x="-44" y="-44" width="88" height="88" rx="20" fill="#FFF7ED" opacity="0.95"/>
+    <g transform="translate(-22 -22)" stroke="#0F766E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M14 18a6 6 0 0 0 8 8l16-16a6 6 0 0 0-8-8L18 14"/>
+      <path d="M16 16l-8 8a4 4 0 0 0 0 6l4 4a4 4 0 0 0 6 0l8-8"/>
+      <circle cx="32" cy="12" r="2" fill="#C2410C" stroke="#C2410C"/>
+    </g>
+  </g>
+  <text x="300" y="232" font-family="-apple-system, system-ui, Segoe UI, Roboto, sans-serif" font-size="20" font-weight="700" text-anchor="middle" fill="#FFF7ED">Aperçu non disponible</text>
+  <text x="300" y="258" font-family="-apple-system, system-ui, Segoe UI, Roboto, sans-serif" font-size="13" font-weight="500" text-anchor="middle" fill="#FFF7ED" opacity="0.75">laveille.ai · annuaire IA</text>
+  <rect x="0" y="332" width="600" height="8" fill="url(#accent)"/>
+</svg>

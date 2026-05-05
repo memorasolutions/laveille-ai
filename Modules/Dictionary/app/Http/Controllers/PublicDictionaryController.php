@@ -53,6 +53,10 @@ class PublicDictionaryController extends Controller
             ->where('slug->'.app()->getLocale(), $slug)
             ->firstOrFail();
 
+        if (\Schema::hasColumn('dictionary_terms', 'views_count') && ! request()->isMethod('HEAD')) {
+            try { $term->incrementQuietly('views_count'); } catch (\Throwable $e) {}
+        }
+
         $relatedTerms = Term::published()
             ->where('id', '!=', $term->id)
             ->where('dictionary_category_id', $term->dictionary_category_id)

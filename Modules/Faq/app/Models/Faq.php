@@ -13,6 +13,7 @@ namespace Modules\Faq\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\HasScheduledPublishing;
 use Modules\Faq\Database\Factories\FaqFactory;
 use Modules\Tenancy\Traits\BelongsToTenant;
@@ -21,7 +22,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Faq extends Model
 {
-    use BelongsToTenant, HasFactory, HasScheduledPublishing, LogsActivity;
+    use BelongsToTenant, HasFactory, HasPublishedState, HasScheduledPublishing, LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -44,10 +45,7 @@ class Faq extends Model
         'expired_at' => 'datetime',
     ];
 
-    public function scopePublished(Builder $query): void
-    {
-        $query->where('is_published', true);
-    }
+    // 2026-05-05 #144 : scopePublished mutualise via HasPublishedState (DRY Core).
 
     public function scopeByCategory(Builder $query, string $category): void
     {

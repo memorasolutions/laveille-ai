@@ -1,0 +1,27 @@
+# Persist screenshots generes en prod par CaptureScreenshotsCommand / ScreenshotService.
+# Local n'a que les seeds initiaux. Prod genere ~200+ screenshots a chaud.
+# RAISON 2026-05-04 : a deux reprises, un deploy local->prod (rsync ou git clone) a ecrase
+# les ~210 fichiers prod par les 16 du local. Ce .gitignore protege ces fichiers en
+# excluant tout sauf les seeds et lui-meme.
+
+# Tout ignorer par defaut
+*
+
+# Sauf le .gitignore lui-meme et les seeds initiaux trackes
+!.gitignore
+!beautifulai.jpg
+!capcut.jpg
+!characterai.jpg
+!chatgpt.jpg
+!deepl.jpg
+!fliki.jpg
+!grok.jpg
+!hugging-face.jpg
+!midjourney.jpg
+!notebooklm.jpg
+!notion-ai.jpg
+!perplexity.jpg
+!runwayml.jpg
+!sora.jpg
+!stable-diffusion.jpg
+!suno.jpg

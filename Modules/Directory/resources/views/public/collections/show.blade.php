@@ -53,7 +53,8 @@
                         <a href="{{ route('directory.show', $tool->slug) }}" style="display:block; text-decoration:none; color:inherit;">
                             @if($screenshotUrl)
                                 <div style="position:relative; height:140px; overflow:hidden;">
-                                    <img src="{{ $screenshotUrl }}" alt="{{ $tool->name }}" loading="lazy" style="width:100%; height:140px; object-fit:cover; display:block;">
+                                    <img src="{{ $screenshotUrl }}" alt="{{ $tool->name }}" loading="lazy" style="width:100%; height:140px; object-fit:cover; display:block;"
+                                         onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
                                     <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%);"></div>
                                 </div>
                             @else

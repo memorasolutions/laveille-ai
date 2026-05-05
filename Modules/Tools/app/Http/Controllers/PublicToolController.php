@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Modules\Tools\Http\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Modules\Tools\Models\Tool;
 
@@ -27,6 +29,8 @@ class PublicToolController extends Controller
     {
         $tool = Tool::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
+        $this->trackUsage($slug);
+
         $viewName = "tools::public.tools.{$slug}";
 
         if (! view()->exists($viewName)) {
@@ -42,5 +46,18 @@ class PublicToolController extends Controller
         }
 
         return view($viewName, $data);
+    }
+
+    private function trackUsage(string $slug): void
+    {
+        if (request()->isMethod('HEAD') || ! Schema::hasTable('public_tool_usages')) {
+            return;
+        }
+        try {
+            DB::statement(
+                'INSERT INTO public_tool_usages (slug, day, count, created_at, updated_at) VALUES (?, ?, 1, NOW(), NOW()) ON DUPLICATE KEY UPDATE count = count + 1, updated_at = NOW()',
+                [$slug, now()->toDateString()]
+            );
+        } catch (\Throwable $e) {}
     }
 }

@@ -77,6 +77,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\FixHnSlugsCommand::class,
             \Modules\Directory\Console\ImportYoutubeResourcesCommand::class,
             \Modules\Directory\Console\ExpireFeaturedToolsCommand::class,
+            \Modules\Directory\Console\CheckImagesCommand::class,
         ]);
     }
 

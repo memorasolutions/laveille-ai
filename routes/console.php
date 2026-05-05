@@ -26,6 +26,9 @@ Schedule::command('favicons:refresh --expired-only --limit=50')->weekly()->witho
 // Sponsoring auto-expiry : desactive outils dont featured_until depasse (daily 02:45)
 Schedule::command('tools:expire-featured')->dailyAt('02:45')->withoutOverlapping();
 
+// Audit images screenshot annuaire (hebdo dimanche 04:30 UTC) — log les 404, fix manuel via --auto-fix
+Schedule::command('tools:check-images')->weeklyOn(0, '04:30')->withoutOverlapping();
+
 // Health checks
 Schedule::command('health:check')->everyMinute();
 

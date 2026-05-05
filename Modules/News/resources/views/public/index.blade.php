@@ -21,6 +21,10 @@
     }
     .nw-search-input:focus { border-color: var(--c-primary); }
     .nw-search-icon { position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); color: #6b7280; pointer-events: none; }
+    @keyframes nw-spin { to { transform: translateY(-50%) rotate(360deg); } }
+    [x-cloak] { display: none !important; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    #nw-results-container.is-loading { opacity: 0.55; transition: opacity 150ms ease; }
     .nw-chips { display: flex; gap: 0.5rem; padding: 0.125rem 0; scrollbar-width: none; }
     .nw-chips::-webkit-scrollbar { display: none; }
     @media (min-width: 1024px) {
@@ -116,14 +120,20 @@
         <div class="nw-filters">
             {{-- Recherche + tri --}}
             <div class="nw-filter-row">
-                <div class="nw-search-wrap">
-                    <form method="GET" action="{{ route('news.index') }}">
+                <div class="nw-search-wrap" x-data="newsLiveSearch()" style="position: relative;">
+                    <form method="GET" action="{{ route('news.index') }}" @submit.prevent="autoSearch($event.target.q.value, true)">
                         @foreach(request()->except(['q', 'page']) as $key => $value)
                             @if($value)<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
                         @endforeach
-                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Rechercher un sujet...') }}" aria-label="{{ __('Rechercher une actualité') }}" class="nw-search-input">
-                        <span class="nw-search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Rechercher un sujet...') }}" aria-label="{{ __('Rechercher une actualité (recherche automatique dès 3 caractères)') }}" class="nw-search-input"
+                               x-on:input.debounce.400ms="autoSearch($event.target.value)"
+                               autocomplete="off">
+                        <span class="nw-search-icon" x-show="!loading"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+                        <span class="nw-search-icon" x-show="loading" x-cloak aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: nw-spin 0.7s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                        </span>
                     </form>
+                    <span class="visually-hidden" aria-live="polite" x-text="statusMessage"></span>
                 </div>
                 <form method="GET" action="{{ route('news.index') }}">
                     @foreach(request()->except(['sort', 'page']) as $key => $value)
@@ -175,6 +185,7 @@
         </div>
 
         {{-- Articles --}}
+        <div id="nw-results-container" aria-live="polite" aria-busy="false">
         @if($articles->isEmpty())
             <div class="nw-empty">
                 <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">{{ __('Aucune actualité ne correspond à vos critères.') }}</p>
@@ -232,6 +243,58 @@
                 {{ $articles->appends(request()->query())->links() }}
             </div>
         @endif
+        </div>{{-- /#nw-results-container --}}
     </div>
 </section>
+
+@push('scripts')
+<script>
+function newsLiveSearch() {
+    return {
+        loading: false,
+        statusMessage: '',
+        lastQuery: @json($filters['q'] ?? ''),
+        async autoSearch(value, force = false) {
+            const v = (value || '').trim();
+            if (!force) {
+                if (v.length > 0 && v.length < 3) return;
+                if (v === this.lastQuery) return;
+            }
+            this.lastQuery = v;
+            this.loading = true;
+            this.statusMessage = '{{ __('Recherche en cours…') }}';
+            const container = document.getElementById('nw-results-container');
+            if (container) { container.classList.add('is-loading'); container.setAttribute('aria-busy', 'true'); }
+
+            const url = new URL(window.location.href);
+            if (v) url.searchParams.set('q', v); else url.searchParams.delete('q');
+            url.searchParams.delete('page');
+
+            try {
+                const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' }, credentials: 'same-origin' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const fresh = doc.getElementById('nw-results-container');
+                if (fresh && container) {
+                    container.innerHTML = fresh.innerHTML;
+                    window.history.pushState({}, '', url.toString());
+                    const cardCount = container.querySelectorAll('.nw-card').length;
+                    this.statusMessage = cardCount > 0
+                        ? cardCount + ' {{ __('résultats trouvés') }}'
+                        : '{{ __('Aucun résultat') }}';
+                }
+            } catch (e) {
+                console.error('[news search] failed:', e);
+                this.statusMessage = '{{ __('Erreur de recherche, appuyez sur Entrée pour réessayer.') }}';
+            } finally {
+                this.loading = false;
+                if (container) { container.classList.remove('is-loading'); container.setAttribute('aria-busy', 'false'); }
+            }
+        }
+    };
+}
+</script>
+@endpush
+
 @endsection

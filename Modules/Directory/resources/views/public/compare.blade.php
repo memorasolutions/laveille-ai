@@ -87,7 +87,8 @@
                                     : '';
                             @endphp
                             @if($screenshotSrc)
-                                <img src="{{ $screenshotSrc }}" alt="{{ $tool->name }}" class="tool-thumb" loading="lazy">
+                                <img src="{{ $screenshotSrc }}" alt="{{ $tool->name }}" class="tool-thumb" loading="lazy"
+                                     onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
                             @endif
                             <a href="{{ route('directory.show', $tool->slug) }}" class="tool-name">{{ $tool->name }}</a>
                         </div>
