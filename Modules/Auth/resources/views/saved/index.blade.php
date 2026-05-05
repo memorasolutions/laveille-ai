@@ -27,6 +27,7 @@
                 'draw' => ['icon' => '🎲', 'label' => __('Tirage de présentations'), 'color' => '#E67E22'],
                 'wheel' => ['icon' => '🎡', 'label' => __('Roue de tirage'), 'color' => '#ef4444'],
                 'qr' => ['icon' => '📱', 'label' => __('Générateur de code QR'), 'color' => '#6366f1'],
+                'crossword' => ['icon' => '🧩', 'label' => __('Mots croisés'), 'color' => '#0B7285'],
             ];
         @endphp
         @foreach($types as $type)
