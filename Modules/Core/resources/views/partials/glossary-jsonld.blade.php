@@ -34,12 +34,18 @@
 
             /* Tooltip Memora hybride glassmorphism (charte teal + trend 2026 NN/g) */
             /* Specs : min 240 / max 320 / padding 14x18 / font 0.875rem / delay 200ms / fade 200ms */
+            /* 2026-05-05 #154 : CSS variables pour smart-position au hover (anti-clipping viewport) */
+            a.glossary-link {
+                --tt-left: 50%;
+                --tt-translate-x: -50%;
+                --tt-arrow-left: 50%;
+            }
             a.glossary-link::after {
                 content: attr(data-tooltip);
                 position: absolute;
                 bottom: calc(100% + 12px);
-                left: 50%;
-                transform: translateX(-50%) translateY(6px);
+                left: var(--tt-left);
+                transform: translateX(var(--tt-translate-x)) translateY(6px);
                 /* Glassmorphism teal Memora : opacity 95% + backdrop-blur (trend 2026, +23% retention UXPressia) */
                 background: rgba(5, 61, 74, 0.96);
                 backdrop-filter: blur(10px) saturate(140%);
@@ -77,7 +83,7 @@
                 content: '';
                 position: absolute;
                 bottom: calc(100% + 6px);
-                left: 50%;
+                left: var(--tt-arrow-left);
                 transform: translateX(-50%) translateY(6px);
                 border: 6px solid transparent;
                 border-top-color: rgba(5, 61, 74, 0.96);
@@ -91,7 +97,12 @@
             }
             /* Apparition au hover/focus avec delay 200ms (compromise NN/g 500ms vs user voulait rapide) */
             a.glossary-link:hover::after,
-            a.glossary-link:focus-visible::after,
+            a.glossary-link:focus-visible::after {
+                opacity: 1;
+                visibility: visible;
+                transform: translateX(var(--tt-translate-x)) translateY(0);
+                transition-delay: 200ms;
+            }
             a.glossary-link:hover::before,
             a.glossary-link:focus-visible::before {
                 opacity: 1;
@@ -126,6 +137,63 @@
                 }
             }
         </style>
+        {{-- 2026-05-05 #154 : JS minimal smart-position tooltip (anti-clipping viewport horizontal) --}}
+        <script>
+        (function () {
+            'use strict';
+            const TT_MAX_WIDTH = 320; // doit matcher le CSS max-width
+            const TT_VIEWPORT_PADDING = 12; // marge minimum du bord viewport
+
+            function positionTooltip(link) {
+                const linkRect = link.getBoundingClientRect();
+                const linkCenterX = linkRect.left + linkRect.width / 2;
+                const ttHalf = TT_MAX_WIDTH / 2;
+                const viewW = window.innerWidth;
+
+                // Default centered
+                let leftValue = '50%';
+                let translateX = '-50%';
+
+                // Si le tooltip déborde à gauche (centre lien - half tooltip < padding)
+                if (linkCenterX - ttHalf < TT_VIEWPORT_PADDING) {
+                    // Aligne le tooltip à droite du lien (left = 0 par rapport au lien)
+                    // Mais on veut qu'il pointe vers le lien
+                    const offsetFromLink = TT_VIEWPORT_PADDING - linkRect.left;
+                    leftValue = offsetFromLink + 'px';
+                    translateX = '0';
+                }
+                // Si le tooltip déborde à droite (centre lien + half tooltip > viewW - padding)
+                else if (linkCenterX + ttHalf > viewW - TT_VIEWPORT_PADDING) {
+                    const offsetFromLink = (viewW - TT_VIEWPORT_PADDING - linkRect.right);
+                    leftValue = (linkRect.width + offsetFromLink) + 'px';
+                    translateX = '-100%';
+                }
+
+                link.style.setProperty('--tt-left', leftValue);
+                link.style.setProperty('--tt-translate-x', translateX);
+                // La flèche reste centrée sur le lien (toujours 50%)
+            }
+
+            function attachHandlers() {
+                document.querySelectorAll('a.glossary-link').forEach(link => {
+                    if (link.dataset.ttBound) return;
+                    link.dataset.ttBound = '1';
+                    link.addEventListener('mouseenter', () => positionTooltip(link));
+                    link.addEventListener('focus', () => positionTooltip(link));
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', attachHandlers);
+            } else {
+                attachHandlers();
+            }
+
+            // Re-bind si nouveaux liens ajoutés via Alpine/Livewire/etc
+            document.addEventListener('alpine:initialized', attachHandlers);
+            window.addEventListener('load', attachHandlers);
+        })();
+        </script>
     @endonce
     {{-- Schema.org JSON-LD : DefinedTermSet pour SEO/AEO/GEO (impact +12% featured snippets, +28% crawl, ×3 citations LLM) --}}
     <script type="application/ld+json">
