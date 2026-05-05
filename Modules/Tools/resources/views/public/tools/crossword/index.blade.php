@@ -57,8 +57,9 @@
 
     .cwi-card { background: #fff; border: 1px solid #e5e7eb; border-radius: var(--r-base); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
     .cwi-card:hover, .cwi-card:focus-within { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(11, 114, 133, 0.15); border-color: var(--c-primary); }
-    .cwi-card-thumb { width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover)); border-radius: var(--r-btn); display: flex; align-items: center; justify-content: center; color: #FFF7ED; font-family: var(--f-heading); font-weight: 800; font-size: 1.75rem; letter-spacing: 1.5px; flex-shrink: 0; position: relative; overflow: hidden; min-height: 44px; transition: filter 0.2s; }
-    .cwi-card-thumb:hover, .cwi-card-thumb:focus-visible { filter: brightness(1.08); }
+    /* 2026-05-05 #120 : WCAG 2.2 AAA - texte #fff (6.35:1 sur teal assombri) + text-shadow + assombrir au survol au lieu d'éclaircir */
+    .cwi-card-thumb { width: 100%; aspect-ratio: 16 / 9; background: linear-gradient(135deg, var(--c-primary), var(--c-primary-hover)); border-radius: var(--r-btn); display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--f-heading); font-weight: 800; font-size: 1.75rem; letter-spacing: 1.5px; flex-shrink: 0; position: relative; overflow: hidden; min-height: 44px; transition: filter 0.2s; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+    .cwi-card-thumb:hover, .cwi-card-thumb:focus-visible { filter: brightness(0.92); }
     .cwi-card-thumb::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(45deg, rgba(255,247,237,0.05) 25%, transparent 25%, transparent 50%, rgba(255,247,237,0.05) 50%, rgba(255,247,237,0.05) 75%, transparent 75%); background-size: 14px 14px; }
     .cwi-card-thumb span { position: relative; z-index: 1; text-align: center; line-height: 1.1; padding: 0.5rem; }
 
