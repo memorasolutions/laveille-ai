@@ -238,7 +238,7 @@
         font-size: 1.1rem;
         font-weight: 600;
     }
-    @media (max-width: 576px) {
+    @@media (max-width: 576px) {
         :root { --sudoku-cell: 36px; }
         .sudoku-key { min-width: 40px; min-height: 40px; }
     }
