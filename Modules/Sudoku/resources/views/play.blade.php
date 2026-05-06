@@ -305,7 +305,9 @@
 .sudoku-pause-overlay {
   position: absolute;
   inset: -8px;
-  display: flex !important;
+  /* #188 fix : pas de !important sur display, sinon x-show='paused'
+     (qui set display:none inline) est override -> overlay toujours visible. */
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 5;
@@ -314,6 +316,9 @@
   backdrop-filter: blur(8px);
   cursor: pointer;
   border-radius: 8px;
+}
+.sudoku-pause-overlay[style*="display: none"] {
+  /* Quand x-show=false force display:none, on respecte (pas d'override CSS) */
 }
 .sudoku-pause-content {
   text-align: center;
