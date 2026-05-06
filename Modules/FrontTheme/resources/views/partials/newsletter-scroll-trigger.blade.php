@@ -9,7 +9,7 @@
         right: 20px;
         max-width: 380px;
         display: none;
-        z-index: 9990;
+        z-index: 1040;
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 10px 40px rgba(0,0,0,.15);

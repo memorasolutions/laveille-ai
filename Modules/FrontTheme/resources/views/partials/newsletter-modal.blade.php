@@ -23,7 +23,9 @@
 
                     <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #374151; margin-bottom: 14px; cursor: pointer; line-height: 1.4;">
                         <input type="checkbox" name="consent" required style="margin-top: 2px; flex-shrink: 0;">
-                        {!! __('J\'accepte de recevoir l\'infolettre conformement a la <a href=":url" target="_blank" style="color: var(--c-primary); text-decoration: underline;">politique de confidentialite</a>.', ['url' => route('legal.privacy')]) !!}
+                        <span style="flex: 1 1 auto; min-width: 0;">
+                            {!! __('J\'accepte de recevoir l\'infolettre conformément à la <a href=":url" target="_blank" rel="noopener" onclick="event.stopPropagation();" style="color: var(--c-primary); text-decoration: underline;">politique de confidentialité</a>.', ['url' => route('legal.privacy')]) !!}
+                        </span>
                     </label>
 
                     <div id="newsletterModalMessage" class="alert d-none" style="border-radius: 8px; font-size: 14px;"></div>
@@ -53,6 +55,12 @@
 <script>
 $(function() {
     if ($('#newsletterModal').length === 0) return;
+
+    // #164 fix : cacher le scroll-trigger quand la modale s'ouvre (evite superposition z-index)
+    $('#newsletterModal').on('show.bs.modal', function() {
+        var st = document.getElementById('newsletterScrollTrigger');
+        if (st) st.style.display = 'none';
+    });
 
     $('#newsletterModalClose').on('click', function() { $('#newsletterModal').modal('hide'); })
         .on('mouseenter', function() { $(this).css('opacity','1'); })
