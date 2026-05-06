@@ -69,14 +69,14 @@
               </template>
             </div>
 
-            {{-- #191 : Badge sticky NOTES (visible quand mode actif, standard NYT 2026) --}}
+            {{-- #191 + #195 : Badge sticky mode notes (visible quand actif). Wording user-friendly --}}
             <div x-show="notesMode" x-transition.opacity
-                 class="alert mb-3 d-flex align-items-center gap-2 py-2"
+                 class="alert mb-3 d-flex align-items-center gap-2 py-2 flex-wrap"
                  role="status" aria-live="polite"
                  style="background:#dbeafe;border:1px solid #3b82f6;color:#1e40af;border-radius:8px;font-weight:600;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              <span>{{ __('Mode notes actif') }}</span>
-              <span class="ms-auto small" style="opacity:0.8;">{{ __('Les chiffres sont ajoutés comme candidats, pas validés.') }}</span>
+              <span>{{ __('Mode prise de notes') }}</span>
+              <span class="ms-auto small fw-normal" style="opacity:0.85;">{{ __('Vos chiffres s\'inscrivent en petit comme aide-mémoire — sans remplir la cellule. Désactivez « Notes » pour valider.') }}</span>
             </div>
 
             {{-- Layout 2 colonnes : grille + sidebar --}}
