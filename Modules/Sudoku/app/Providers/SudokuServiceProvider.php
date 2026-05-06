@@ -18,7 +18,10 @@ class SudokuServiceProvider extends ServiceProvider
         $this->loadViewsFrom(module_path('Sudoku', 'resources/views'), 'sudoku');
 
         Route::middleware('web')->group(module_path('Sudoku', 'routes/web.php'));
-        Route::middleware('api')->prefix('api')->group(module_path('Sudoku', 'routes/api.php'));
+        // #202 : ajout 'web' middleware sur API pour que la session cookie soit
+        // disponible (Auth::user() fonctionne dans SudokuConstructionGate).
+        // Sans web middleware, Auth::user() = null en API -> 503 pour admin connecte.
+        Route::middleware(['web', 'api'])->prefix('api')->group(module_path('Sudoku', 'routes/api.php'));
 
         if ($this->app->runningInConsole()) {
             $this->commands([
