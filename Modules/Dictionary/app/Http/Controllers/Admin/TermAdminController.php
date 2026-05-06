@@ -12,9 +12,12 @@ use Illuminate\View\View;
 use Modules\Dictionary\Models\Category;
 use Modules\Dictionary\Models\Term;
 use Modules\Settings\Facades\Settings;
+use Modules\Core\Traits\ParsesWsdAliases;
 
 class TermAdminController extends Controller
 {
+    use ParsesWsdAliases;
+
     public function index(): View
     {
         $terms = Term::with('category')->orderBy('name->'.app()->getLocale())->paginate((int) Settings::get('dictionary.terms_per_page', 20));
@@ -61,16 +64,7 @@ class TermAdminController extends Controller
         return redirect()->route('admin.dictionary.index')->with('success', __('Terme créé.'));
     }
 
-    /**
-     * 2026-05-06 #157 : convertit le textarea aliases (1 par ligne) en array nettoyé.
-     */
-    protected static function parseAliases(?string $raw): ?array
-    {
-        if (! $raw) return null;
-        $lines = preg_split('/\r\n|\n|\r/', trim($raw));
-        $aliases = array_values(array_filter(array_map('trim', $lines), fn ($l) => $l !== ''));
-        return empty($aliases) ? null : $aliases;
-    }
+    // 2026-05-06 #158 : parseAliases() mutualisé via trait Core/ParsesWsdAliases (DRY).
 
     public function edit(Term $term): View
     {

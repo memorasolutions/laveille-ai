@@ -58,24 +58,8 @@
                     @enderror
                 </div>
 
-                {{-- 2026-05-06 #157 : WSD match_strategy + aliases (auto-link glossaire) --}}
-                <div class="mb-3">
-                    <label for="match_strategy" class="form-label">Stratégie de correspondance</label>
-                    <select id="match_strategy" name="match_strategy" class="form-select">
-                        <option value="loose" @selected(old('match_strategy', 'loose') === 'loose')>Permissif (insensible casse)</option>
-                        <option value="partial_case_sensitive" @selected(old('match_strategy') === 'partial_case_sensitive')>Casse partielle (1re lettre tolérante)</option>
-                        <option value="case_sensitive" @selected(old('match_strategy') === 'case_sensitive')>Casse stricte</option>
-                        <option value="exact_phrase" @selected(old('match_strategy') === 'exact_phrase')>Phrase exacte</option>
-                        <option value="never_auto" @selected(old('match_strategy') === 'never_auto')>Jamais auto-link</option>
-                    </select>
-                    <div class="form-text">Définit comment les occurrences dans le texte sont détectées automatiquement.</div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="aliases" class="form-label">Alias</label>
-                    <textarea id="aliases" name="aliases" class="form-control" rows="4" placeholder="Une variation par ligne. Ex:&#10;Tokens&#10;tokenisation&#10;tokenization">{{ old('aliases', '') }}</textarea>
-                    <div class="form-text">Variations héritées de la même définition. Pluriels et casses alternatives, une par ligne.</div>
-                </div>
+                {{-- 2026-05-06 #158 : WSD fields via partial DRY Core --}}
+                @include('core::partials.admin.wsd-fields', ['currentStrategy' => null, 'currentAliases' => null])
 
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="is_published" name="is_published" value="1" @checked(old('is_published', true))>

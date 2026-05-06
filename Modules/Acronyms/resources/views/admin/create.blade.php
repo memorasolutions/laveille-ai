@@ -62,6 +62,9 @@
                     </div>
                 </div>
 
+                {{-- 2026-05-06 #158 : WSD fields via partial DRY Core (acronymes) --}}
+                @include('core::partials.admin.wsd-fields', ['currentStrategy' => 'case_sensitive', 'currentAliases' => null])
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i data-lucide="plus"></i> {{ __('Créer') }}</button>
                     <a href="{{ route('admin.acronyms.index') }}" class="btn btn-outline-secondary"><i data-lucide="arrow-left"></i> {{ __('Annuler') }}</a>

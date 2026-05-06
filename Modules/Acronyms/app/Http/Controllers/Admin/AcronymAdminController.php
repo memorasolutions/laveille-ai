@@ -15,10 +15,13 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Acronyms\Models\Acronym;
 use Modules\Acronyms\Models\AcronymCategory;
+use Modules\Core\Traits\ParsesWsdAliases;
 use Modules\Settings\Facades\Settings;
 
 class AcronymAdminController extends Controller
 {
+    use ParsesWsdAliases;
+
     public function index(): View
     {
         $acronyms = Acronym::with('category')->orderBy('acronym->'.app()->getLocale())->paginate((int) Settings::get('acronyms.admin_per_page', 20));
@@ -45,6 +48,9 @@ class AcronymAdminController extends Controller
             'acronym_category_id' => 'nullable|exists:acronym_categories,id',
             'is_published' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            // 2026-05-06 #158 : auto-link WSD
+            'match_strategy' => 'nullable|in:loose,partial_case_sensitive,case_sensitive,exact_phrase,never_auto',
+            'aliases' => 'nullable|string',
         ]);
 
         $slug = Str::slug($validated['acronym']);
@@ -61,6 +67,8 @@ class AcronymAdminController extends Controller
             'acronym_category_id' => $validated['acronym_category_id'] ?? null,
             'is_published' => $request->boolean('is_published'),
             'sort_order' => $validated['sort_order'] ?? 0,
+            'match_strategy' => $validated['match_strategy'] ?? 'case_sensitive',
+            'aliases' => self::parseAliases($validated['aliases'] ?? null),
         ]);
 
         return redirect()->route('admin.acronyms.index')->with('success', __('Acronyme créé.'));
@@ -85,6 +93,9 @@ class AcronymAdminController extends Controller
             'acronym_category_id' => 'nullable|exists:acronym_categories,id',
             'is_published' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            // 2026-05-06 #158 : auto-link WSD
+            'match_strategy' => 'nullable|in:loose,partial_case_sensitive,case_sensitive,exact_phrase,never_auto',
+            'aliases' => 'nullable|string',
         ]);
 
         $locale = app()->getLocale();
@@ -108,6 +119,8 @@ class AcronymAdminController extends Controller
         $acronym->acronym_category_id = $validated['acronym_category_id'] ?? null;
         $acronym->is_published = $request->boolean('is_published');
         $acronym->sort_order = $validated['sort_order'] ?? 0;
+        $acronym->match_strategy = $validated['match_strategy'] ?? 'case_sensitive';
+        $acronym->aliases = self::parseAliases($validated['aliases'] ?? null);
         $acronym->save();
 
         return redirect()->route('admin.acronyms.index')->with('success', __('Acronyme mis à jour.'));
@@ -149,4 +162,6 @@ class AcronymAdminController extends Controller
             'saved_at' => null,
         ]);
     }
+
+    // 2026-05-06 #158 : parseAliases() mutualisé via trait Core/ParsesWsdAliases (DRY).
 }
