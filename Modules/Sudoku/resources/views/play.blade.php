@@ -53,18 +53,18 @@
               @endauth
             </ul>
 
-            {{-- Pills 5 difficultes --}}
-            <div class="d-flex flex-wrap gap-2 mb-4" role="tablist" aria-label="{{ __('Niveau de difficulté') }}">
+            {{-- Pills 5 difficultes (compact pour tenir sur 1 ligne md+) --}}
+            <div class="sudoku-pills d-flex flex-wrap gap-2 mb-4" role="tablist" aria-label="{{ __('Niveau de difficulté') }}">
               <template x-for="(puzzle, idx) in puzzles" :key="'pill-'+idx">
                 <button type="button"
-                        class="btn rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2"
+                        class="sudoku-pill rounded-pill d-inline-flex align-items-center gap-2"
                         :class="{'shadow-sm': activeIdx===idx}"
                         @click="switchTo(idx)"
                         :aria-pressed="activeIdx===idx ? 'true' : 'false'"
                         :style="activeIdx===idx ? `border:2px solid ${puzzle.color}; background:${puzzle.color}; color:#fff` : `border:1px solid ${puzzle.color}; color:${puzzle.color}; background:transparent`">
-                  <span :style="activeIdx===idx ? `background:#fff; width:8px; height:8px; display:inline-block; border-radius:50%;` : `background:${puzzle.color}; width:8px; height:8px; display:inline-block; border-radius:50%;`"></span>
+                  <span :style="activeIdx===idx ? `background:#fff; width:6px; height:6px; display:inline-block; border-radius:50%;` : `background:${puzzle.color}; width:6px; height:6px; display:inline-block; border-radius:50%;`"></span>
                   <strong x-text="puzzle.label"></strong>
-                  <span class="badge" :style="activeIdx===idx ? `background:rgba(255,255,255,0.25); color:#fff` : `background:#f1f5f9; color:#475569`" x-text="puzzle.clues_count + ' indices'"></span>
+                  <span class="sudoku-pill-badge" :style="activeIdx===idx ? `background:rgba(255,255,255,0.25); color:#fff` : `background:#f1f5f9; color:#475569`" x-text="puzzle.clues_count"></span>
                 </button>
               </template>
             </div>
@@ -77,6 +77,8 @@
                     <template x-for="(value, c) in row" :key="'c'+r+'-'+c">
                       <div class="sudoku-cell"
                            :class="cellClass(r, c)"
+                           :data-row="r"
+                           :data-col="c"
                            role="gridcell"
                            :tabindex="originalGrid[r][c] === 0 ? 0 : -1"
                            :aria-label="cellAriaLabel(r, c)"
@@ -251,17 +253,37 @@
   z-index: 3;
 }
 .sudoku-key {
-  /* #174 fix : centrage vertical/horizontal (Bootstrap btn padding asymetrique
-     pousse le texte hors du centre). flex + padding 0. */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  /* #174 v2 fix : !important pour battre Bootstrap .btn padding override. */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   min-width: 44px;
   min-height: 44px;
-  padding: 0;
-  font-size: 1.1rem;
+  padding: 0 !important;
+  font-size: 1.1rem !important;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1 !important;
+}
+
+/* #175 : pills compactes pour tenir sur 1 ligne md+ */
+.sudoku-pill {
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.sudoku-pill:hover { transform: translateY(-1px); }
+.sudoku-pill-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+@@media (max-width: 767px) {
+  .sudoku-pill { padding: 4px 10px; font-size: 0.8rem; }
+  .sudoku-pill strong { font-size: 0.85rem; }
 }
 @@media (max-width: 576px) {
   .sudoku-grid { --sudoku-cell: 34px; }
