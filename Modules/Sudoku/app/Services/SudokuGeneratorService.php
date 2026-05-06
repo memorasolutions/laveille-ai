@@ -16,22 +16,24 @@ namespace Modules\Sudoku\Services;
 class SudokuGeneratorService
 {
     /**
-     * #200 (2026-05-06) : plages descendues -3 indices par niveau (user feedback
-     * 'trop d'indices'). Plage 'Aggressive Pro'. Limite math 17 mini preserve
-     * pour Diabolical (McGuire 2012).
+     * #201 (2026-05-06) : nombre FIXE d'indices par niveau (user feedback
+     * 'diminuer le nombre d'indices par niveau, pas random'). Valeur basse
+     * de la plage = defi max constant. Diabolical = 17 limite math McGuire 2012.
      *
-     * Easy : 32-37 (vs 35-40 #173, plus stimulant pour Memora audience tech)
-     * Medium : 25-31 (vs 28-34)
-     * Hard : 21-27 (vs 24-30)
-     * Expert : 18-23 (vs 20-26)
-     * Diabolical : 17-19 (vs 17-22, niveau hardcore challenge)
+     * Easy : 32 (challenge debutant +)
+     * Medium : 25
+     * Hard : 21
+     * Expert : 18
+     * Diabolical : 17 (limite math, plus bas impossible solution unique)
+     *
+     * Format [N, N] preserve random_int signature sans changer generate().
      */
     protected const DIFFICULTY_RANGES = [
-        'easy' => [32, 37],
-        'medium' => [25, 31],
-        'hard' => [21, 27],
-        'expert' => [18, 23],
-        'diabolical' => [17, 19],
+        'easy' => [32, 32],
+        'medium' => [25, 25],
+        'hard' => [21, 21],
+        'expert' => [18, 18],
+        'diabolical' => [17, 17],
     ];
 
     public function generate(string $difficulty): array
