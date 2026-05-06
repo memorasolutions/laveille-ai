@@ -13,13 +13,9 @@ namespace Modules\Backoffice\Livewire;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Modules\Blog\Models\Comment;
+use Modules\Community\Models\Comment;
 use Modules\Settings\Facades\Settings;
-use Modules\Blog\States\ApprovedCommentState;
-use Modules\Blog\States\PendingCommentState;
-use Modules\Blog\States\SpamCommentState;
 use Modules\Core\Traits\HasBulkActions;
-use Spatie\ModelStates\Exceptions\CouldNotPerformTransition;
 
 class CommentsTable extends Component
 {
@@ -52,29 +48,21 @@ class CommentsTable extends Component
 
     public function changeStatus(int $commentId, string $status): void
     {
-        $stateMap = [
-            'pending' => PendingCommentState::class,
-            'approved' => ApprovedCommentState::class,
-            'spam' => SpamCommentState::class,
-        ];
-
-        if (! isset($stateMap[$status])) {
+        // #177 : pivot vers community_comments (Modules\Community\Models\Comment).
+        // Plus de Spatie ModelStates - simple update enum.
+        if (! in_array($status, ['pending', 'approved', 'rejected', 'spam'], true)) {
             return;
         }
 
         $comment = Comment::findOrFail($commentId);
+        $comment->update(['status' => $status]);
 
-        try {
-            $comment->status->transitionTo($stateMap[$status]);
-            $this->dispatch('toast', type: 'success', message: "Commentaire #{$comment->id} → {$status}.");
-        } catch (CouldNotPerformTransition) {
-            $this->dispatch('toast', type: 'error', message: "Transition vers « {$status} » non autorisée.");
-        }
+        $this->dispatch('toast', type: 'success', message: "Commentaire #{$comment->id} → {$status}.");
     }
 
     public function delete(int $id): void
     {
-        Comment::withTrashed()->find($id)?->forceDelete();
+        Comment::find($id)?->delete();
     }
 
     protected function getBulkActions(): array
@@ -88,36 +76,27 @@ class CommentsTable extends Component
 
     protected function handleBulkAction(string $action, array $ids): void
     {
-        $stateMap = [
-            'approve' => ApprovedCommentState::class,
-            'spam' => SpamCommentState::class,
+        $statusMap = [
+            'approve' => 'approved',
+            'spam' => 'spam',
         ];
 
         if ($action === 'delete') {
-            Comment::withTrashed()->whereIn('id', $ids)->forceDelete();
-
+            Comment::whereIn('id', $ids)->delete();
             return;
         }
 
-        if (isset($stateMap[$action])) {
-            foreach (Comment::whereIn('id', $ids)->get() as $comment) {
-                try {
-                    $comment->status->transitionTo($stateMap[$action]);
-                } catch (CouldNotPerformTransition) {
-                    // Skip comments that can't transition
-                }
-            }
+        if (isset($statusMap[$action])) {
+            Comment::whereIn('id', $ids)->update(['status' => $statusMap[$action]]);
         }
     }
 
     protected function getBulkPageIds(): array
     {
         return Comment::query()
-            ->withTrashed()
             ->when($this->search, fn ($q) => $q->where(fn ($q2) => $q2
                 ->where('content', 'like', '%'.$this->search.'%')
                 ->orWhere('guest_name', 'like', '%'.$this->search.'%')
-                ->orWhere('guest_email', 'like', '%'.$this->search.'%')
             ))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()
@@ -129,12 +108,12 @@ class CommentsTable extends Component
 
     public function render(): \Illuminate\View\View
     {
-        $comments = Comment::with(['article', 'author'])
-            ->withTrashed()
+        // #177 : community_comments est polymorphic (commentable_type/id).
+        // with('commentable') eager-load article/dictionary/etc selon type.
+        $comments = Comment::with(['commentable', 'user'])
             ->when($this->search, fn ($q) => $q->where(fn ($q2) => $q2
                 ->where('content', 'like', '%'.$this->search.'%')
                 ->orWhere('guest_name', 'like', '%'.$this->search.'%')
-                ->orWhere('guest_email', 'like', '%'.$this->search.'%')
             ))
             ->when($this->filterStatus, fn ($q) => $q->where('status', $this->filterStatus))
             ->latest()

@@ -62,4 +62,35 @@ class Comment extends Model
     {
         return $query->where('status', 'pending');
     }
+
+    /**
+     * #177 (2026-05-06) compat admin : la vue admin/blog/comments utilise
+     * $comment->article et $comment->author. On expose ces alias via accessors
+     * sans toucher la vue.
+     */
+    public function getArticleAttribute()
+    {
+        if ($this->commentable_type === \Modules\Blog\Models\Article::class) {
+            return $this->commentable;
+        }
+        return null;
+    }
+
+    public function getAuthorAttribute()
+    {
+        return $this->user;
+    }
+
+    public function getGuestEmailAttribute()
+    {
+        // community_comments n'a pas de guest_email, retourne null pour compat vue
+        return null;
+    }
+
+    public function authorName(): string
+    {
+        if ($this->user) return (string) $this->user->name;
+        if ($this->guest_name) return (string) $this->guest_name;
+        return __('Anonyme');
+    }
 }
