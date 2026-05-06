@@ -211,6 +211,23 @@
               </div>
             </div>
 
+            {{-- #205 Modal switch niveau (anti-popup natif) --}}
+            <div class="modal fade" id="switchLevelModal" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius:12px;border:none;">
+                  <div class="modal-header"><h5 class="modal-title">{{ __('Changer de niveau ?') }}</h5></div>
+                  <div class="modal-body">
+                    <p>{{ __('Vous avez une progression en cours sur') }} <strong x-text="puzzles[activeIdx]?.label"></strong>.</p>
+                    <p class="mb-0">{{ __('Votre progression actuelle sera sauvegardée localement (vous la retrouverez si vous revenez à ce niveau). Continuer vers') }} <strong x-text="pendingSwitchIdx !== null ? puzzles[pendingSwitchIdx]?.label : ''"></strong> ?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="cancelSwitch()">{{ __('Annuler') }}</button>
+                    <button type="button" class="btn btn-primary" @click="confirmSwitch()" style="background:#053d4a;border-color:#053d4a;">{{ __('Changer de niveau') }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {{-- Modal nouvelle grille (#197 - anti-popup natif) --}}
             <div class="modal fade" id="restartModal" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
@@ -442,27 +459,62 @@ document.addEventListener('alpine:init', () => {
     pseudo: '',
     submitting: false,
     regenerating: false,
+    pendingSwitchIdx: null,
     resultMessage: '',
     resultIsSuccess: false,
     winModalEl: null,
     restartModalEl: null,
+    switchModalEl: null,
     errorsCells: new Set(),
 
     init() {
       this.pseudo = localStorage.getItem('sudoku_pseudo') || '';
-      // #185 fix : modaux hors scope x-data card-body (places au niveau <section>),
-      // donc this.$refs.winModal est undefined. Utiliser getElementById direct.
       const winEl = document.getElementById('winModal');
       const restartEl = document.getElementById('restartModal');
+      const switchEl = document.getElementById('switchLevelModal');
       this.winModalEl = winEl ? new bootstrap.Modal(winEl) : null;
       this.restartModalEl = restartEl ? new bootstrap.Modal(restartEl) : null;
+      this.switchModalEl = switchEl ? new bootstrap.Modal(switchEl) : null;
       this.restoreLocalState();
       this.startTimer();
       this.startAutosave();
     },
 
+    // #205 : detecte si grille en cours (timer > 0 OU cellule saisie par user)
+    hasProgress() {
+      if (this.timer > 0 && !this.completed) return true;
+      for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
+        if (this.originalGrid[r][c] === 0 && this.grid[r][c] !== 0) return true;
+        if (this.notes[r][c] && this.notes[r][c].length > 0) return true;
+      }
+      return false;
+    },
+
     switchTo(idx) {
       if (this.activeIdx === idx) return;
+      // #205 : si progression en cours, confirmation avant switch
+      if (this.hasProgress()) {
+        this.pendingSwitchIdx = idx;
+        this.switchModalEl?.show();
+        return;
+      }
+      this._doSwitch(idx);
+    },
+
+    confirmSwitch() {
+      if (this.pendingSwitchIdx === null) return;
+      const idx = this.pendingSwitchIdx;
+      this.pendingSwitchIdx = null;
+      this._doSwitch(idx);
+      this.switchModalEl?.hide();
+    },
+
+    cancelSwitch() {
+      this.pendingSwitchIdx = null;
+      this.switchModalEl?.hide();
+    },
+
+    _doSwitch(idx) {
       this.saveLocalState();
       this.activeIdx = idx;
       this.currentPuzzleId = this.puzzles[idx].id;
