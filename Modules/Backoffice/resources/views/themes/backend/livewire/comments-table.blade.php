@@ -85,9 +85,12 @@
                     </td>
                     <td>
                         @if($comment->article)
-                            <a href="{{ route('admin.blog.articles.index') }}" target="_blank"
-                               class="text-primary small">
+                            {{-- #194 : lien vers l'article frontend (pas admin index) --}}
+                            <a href="{{ route('blog.show', $comment->article->slug) }}#comments" target="_blank" rel="noopener"
+                               class="text-primary small d-inline-flex align-items-center gap-1"
+                               title="{{ $comment->article->title }}">
                                 {{ \Illuminate\Support\Str::limit($comment->article->title, 30) }}
+                                <i data-lucide="external-link" style="width:14px;height:14px;opacity:0.7;"></i>
                             </a>
                         @else
                             <span class="text-muted small">{{ __('Article supprimé') }}</span>
@@ -124,7 +127,10 @@
                                             <dt class="col-sm-3 text-muted">{{ __('Article') }}</dt>
                                             <dd class="col-sm-9">
                                                 @if($comment->article)
-                                                    {{ $comment->article->title }}
+                                                    <a href="{{ route('blog.show', $comment->article->slug) }}#comments" target="_blank" rel="noopener" class="d-inline-flex align-items-center gap-1">
+                                                        {{ $comment->article->title }}
+                                                        <i data-lucide="external-link" style="width:14px;height:14px;opacity:0.7;"></i>
+                                                    </a>
                                                 @else
                                                     <em class="text-muted">{{ __('Article supprimé / Type non-article') }}</em>
                                                 @endif
