@@ -5,6 +5,11 @@
 
     {{-- Formulaire principal --}}
     <div class="p-3 rounded mb-4" style="background: var(--c-primary-light);">
+        @if($showSuccess)
+            <div class="alert alert-success mb-3" role="status" aria-live="polite">
+                <strong>✓</strong> {{ $successMessage }}
+            </div>
+        @endif
         @guest
             <div class="mb-2">
                 <input type="text" wire:model="guestName" class="form-control" placeholder="{{ __('Votre nom') }}">

@@ -20,6 +20,10 @@ class CommentsThread extends Component
 
     public string $guestName = '';
 
+    public bool $showSuccess = false;
+
+    public string $successMessage = '';
+
     public function mount(string $commentableType, int $commentableId): void
     {
         $this->commentableType = $commentableType;
@@ -56,6 +60,12 @@ class CommentsThread extends Component
         ]);
 
         $this->reset('newComment', 'guestName', 'replyingTo');
+
+        // #165 fix : feedback visiteur (sinon "rien ne se produit" perçu)
+        $this->showSuccess = true;
+        $this->successMessage = Auth::check()
+            ? __('Commentaire publié.')
+            : __('Merci ! Votre commentaire est en attente de modération.');
     }
 
     public function reply(int $parentId): void
