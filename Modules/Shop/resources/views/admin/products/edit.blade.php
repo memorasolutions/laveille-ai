@@ -6,7 +6,7 @@
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">{{ __('Editer') }} : {{ $product->name }}</h4>
-                <form method="POST" action="{{ route('admin.shop.products.update', $product) }}">
+                <form method="POST" action="{{ route('admin.shop.products.update', $product) }}" enctype="multipart/form-data">
                     @csrf @method('PUT')
                     @include('shop::admin.products._form', ['product' => $product])
                     <button type="submit" class="btn btn-primary me-2">{{ __('Mettre à jour') }}</button>

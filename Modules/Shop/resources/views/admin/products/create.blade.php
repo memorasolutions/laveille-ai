@@ -6,7 +6,7 @@
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">{{ __('Nouveau produit') }}</h4>
-                <form method="POST" action="{{ route('admin.shop.products.store') }}">
+                <form method="POST" action="{{ route('admin.shop.products.store') }}" enctype="multipart/form-data">
                     @csrf
                     @include('shop::admin.products._form')
                     <button type="submit" class="btn btn-primary me-2">{{ __('Sauvegarder') }}</button>

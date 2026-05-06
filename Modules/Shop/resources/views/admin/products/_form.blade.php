@@ -52,6 +52,60 @@
     <input type="text" class="form-control" id="gelato_product_id" name="gelato_product_id" value="{{ old('gelato_product_id', $p?->gelato_product_id) }}">
 </div>
 
+@php
+    $meta = $p?->metadata ?? [];
+    $printUrl = $meta['print_file_url'] ?? '';
+    $svm = $meta['store_variant_map'] ?? [];
+    $hasStoreMap = ! empty($svm);
+    $hasDesign = ! empty($printUrl);
+    $designStatus = $hasStoreMap || $hasDesign ? 'OK' : 'MANQUANT';
+@endphp
+
+<div class="card mt-4 mb-3 border-{{ $designStatus === 'OK' ? 'success' : 'danger' }}">
+    <div class="card-header bg-{{ $designStatus === 'OK' ? 'success' : 'danger' }} text-white d-flex justify-content-between align-items-center">
+        <strong>{{ __('Design d\'impression Gelato') }}</strong>
+        <span class="badge bg-light text-dark">{{ $designStatus }}</span>
+    </div>
+    <div class="card-body">
+        @if(! $hasStoreMap && ! $hasDesign)
+            <div class="alert alert-danger mb-3">
+                <strong>{{ __('Aucun design configure.') }}</strong>
+                {{ __('Toute commande de ce produit sera REFUSEE par le guard. Renseignez une URL d\'impression OU uploadez un fichier ci-dessous.') }}
+            </div>
+        @elseif($hasStoreMap)
+            <div class="alert alert-success mb-3 small">
+                <strong>{{ count($svm) }} variants mappes</strong> {{ __('vers le store Gelato (storeProductVariantId).') }}
+                {{ __('Si store Gelato publie, le design du store est utilise automatiquement.') }}
+            </div>
+        @endif
+
+        <div class="mb-3">
+            <label for="metadata_print_file_url" class="form-label">{{ __('URL du fichier d\'impression (PNG transparent, haute resolution)') }}</label>
+            <input type="url" class="form-control @error('metadata.print_file_url') is-invalid @enderror"
+                   id="metadata_print_file_url" name="metadata[print_file_url]"
+                   value="{{ old('metadata.print_file_url', $printUrl) }}"
+                   placeholder="https://laveille.ai/images/shop/design-mon-produit.png">
+            <div class="form-text">{{ __('URL absolue accessible publiquement. Sera verifiee en HEAD a la sauvegarde.') }}</div>
+            @error('metadata.print_file_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="print_file_upload" class="form-label">{{ __('OU uploader un fichier directement') }}</label>
+            <input type="file" class="form-control @error('print_file_upload') is-invalid @enderror"
+                   id="print_file_upload" name="print_file_upload" accept="image/png,image/jpeg">
+            <div class="form-text">{{ __('PNG ou JPG, max 10 Mo. Sera sauvegarde dans /images/shop/ et l\'URL ci-dessus sera remplie automatiquement.') }}</div>
+            @error('print_file_upload') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+
+        @if($hasDesign)
+            <div class="mb-2">
+                <small class="text-muted">{{ __('Apercu actuel :') }}</small><br>
+                <img src="{{ $printUrl }}" alt="design" style="max-width:200px;max-height:200px;border:1px solid #ddd;padding:4px;background:#f8f9fa;">
+            </div>
+        @endif
+    </div>
+</div>
+
 <script>
 document.getElementById('name')?.addEventListener('input', function() {
     const slug = this.value.toLowerCase()
