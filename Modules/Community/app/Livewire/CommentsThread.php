@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Modules\Community\Livewire;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Component;
 use Modules\Community\Models\Comment;
+use Modules\Community\Notifications\NewCommentPendingNotification;
 
 class CommentsThread extends Component
 {
@@ -49,7 +52,7 @@ class CommentsThread extends Component
         }
         $this->validate($rules);
 
-        Comment::create([
+        $comment = Comment::create([
             'commentable_type' => $this->commentableType,
             'commentable_id' => $this->commentableId,
             'user_id' => Auth::id(),
@@ -58,6 +61,20 @@ class CommentsThread extends Component
             'status' => Auth::check() ? 'approved' : 'pending',
             'parent_id' => $this->replyingTo,
         ]);
+
+        // #186 : notif email admin sur nouveau commentaire pending (visiteur).
+        // Pas de notif pour commentaires user authentifies (status=approved).
+        if ($comment->status === 'pending') {
+            $adminEmail = config('app.superadmin_email');
+            if ($adminEmail) {
+                try {
+                    Notification::route('mail', $adminEmail)
+                        ->notify(new NewCommentPendingNotification($comment));
+                } catch (\Throwable $e) {
+                    Log::error('NewCommentPendingNotification fail: '.$e->getMessage(), ['comment_id' => $comment->id]);
+                }
+            }
+        }
 
         $this->reset('newComment', 'guestName', 'replyingTo');
 
