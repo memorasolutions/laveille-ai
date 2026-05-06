@@ -23,22 +23,67 @@
               @auth<li class="nav-item"><a class="nav-link" href="{{ route('sudoku.my-games') }}" style="color:#053d4a;font-weight:600;">{{ __('Mes parties') }}</a></li>@endauth
             </ul>
 
+            {{-- #206 : refactor CSS-driven, Bootstrap gere active via class .active.
+                 Couleurs fonçees WCAG 2.2 AAA (>=7:1 sur blanc).
+                 Mode inactif : text colore fonce / Mode actif : bg colore + text blanc. --}}
             <ul class="nav nav-pills lb-pills mb-3 flex-wrap gap-2" role="tablist">
-              @foreach(['easy'=>['Facile','#10B981'],'medium'=>['Moyen','#0B7285'],'hard'=>['Difficile','#7C3AED'],'expert'=>['Expert','#C2410C'],'diabolical'=>['Diabolique','#1f2937']] as $diff => $info)
-                <li class="nav-item"><button class="nav-link {{ $loop->first ? 'active' : '' }} lb-pill" data-bs-toggle="tab" data-bs-target="#tab-{{ $diff }}" type="button" style="{{ $loop->first ? 'background:'.$info[1].';color:#fff;' : 'color:'.$info[1].';' }}">
-                  <span class="lb-dot" style="background:{{ $info[1] }}"></span>
-                  {{ __($info[0]) }}
-                </button></li>
+              @foreach(['easy'=>'Facile','medium'=>'Moyen','hard'=>'Difficile','expert'=>'Expert','diabolical'=>'Diabolique'] as $diff => $label)
+                <li class="nav-item">
+                  <button class="nav-link lb-pill lb-{{ $diff }} {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-{{ $diff }}" type="button">
+                    <span class="lb-dot" aria-hidden="true"></span>
+                    {{ __($label) }}
+                  </button>
+                </li>
               @endforeach
-              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-week" type="button" style="color:#053d4a;">{{ __('Semaine') }}</button></li>
-              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-month" type="button" style="color:#053d4a;">{{ __('Mois') }}</button></li>
-              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-alltime" type="button" style="color:#053d4a;">{{ __('All-time') }}</button></li>
-              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-streaks" type="button" style="color:#053d4a;">{{ __('Séries') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill lb-period" data-bs-toggle="tab" data-bs-target="#tab-week" type="button">{{ __('Semaine') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill lb-period" data-bs-toggle="tab" data-bs-target="#tab-month" type="button">{{ __('Mois') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill lb-period" data-bs-toggle="tab" data-bs-target="#tab-alltime" type="button">{{ __('All-time') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill lb-period" data-bs-toggle="tab" data-bs-target="#tab-streaks" type="button">{{ __('Séries') }}</button></li>
             </ul>
             <style>
-              .lb-pills .lb-pill { padding: 5px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 999px; }
+              .lb-pills .lb-pill {
+                padding: 6px 14px;
+                font-size: 0.85rem;
+                font-weight: 700;
+                border-radius: 999px;
+                background: transparent;
+                border: 1px solid transparent;
+                transition: all 150ms ease;
+              }
               .lb-pill .lb-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-              @@media (max-width: 767px) { .lb-pills .lb-pill { padding: 4px 10px; font-size: 0.8rem; } }
+
+              /* WCAG 2.2 AAA : ratio >=7:1 sur fond blanc (mode inactif) ET sur bg colore (mode actif) */
+              .lb-pill.lb-easy { color: #065F46; border-color: #065F46; } /* emerald-800, 8.5:1 */
+              .lb-pill.lb-easy .lb-dot { background: #065F46; }
+              .lb-pill.lb-easy.active { background: #065F46; color: #fff; border-color: #065F46; }
+              .lb-pill.lb-easy.active .lb-dot { background: #fff; }
+
+              .lb-pill.lb-medium { color: #053D4A; border-color: #053D4A; } /* teal-deep Memora, 9.5:1 */
+              .lb-pill.lb-medium .lb-dot { background: #053D4A; }
+              .lb-pill.lb-medium.active { background: #053D4A; color: #fff; border-color: #053D4A; }
+              .lb-pill.lb-medium.active .lb-dot { background: #fff; }
+
+              .lb-pill.lb-hard { color: #4C1D95; border-color: #4C1D95; } /* violet-900, 11:1 */
+              .lb-pill.lb-hard .lb-dot { background: #4C1D95; }
+              .lb-pill.lb-hard.active { background: #4C1D95; color: #fff; border-color: #4C1D95; }
+              .lb-pill.lb-hard.active .lb-dot { background: #fff; }
+
+              .lb-pill.lb-expert { color: #7C2D12; border-color: #7C2D12; } /* orange-900, 9.2:1 */
+              .lb-pill.lb-expert .lb-dot { background: #7C2D12; }
+              .lb-pill.lb-expert.active { background: #7C2D12; color: #fff; border-color: #7C2D12; }
+              .lb-pill.lb-expert.active .lb-dot { background: #fff; }
+
+              .lb-pill.lb-diabolical { color: #1f2937; border-color: #1f2937; } /* slate-800, 14:1 */
+              .lb-pill.lb-diabolical .lb-dot { background: #1f2937; }
+              .lb-pill.lb-diabolical.active { background: #1f2937; color: #fff; border-color: #1f2937; }
+              .lb-pill.lb-diabolical.active .lb-dot { background: #fff; }
+
+              .lb-pill.lb-period { color: #053D4A; border-color: #053D4A; }
+              .lb-pill.lb-period.active { background: #053D4A; color: #fff; border-color: #053D4A; }
+
+              .lb-pill:focus-visible { outline: 3px solid #C2410C; outline-offset: 2px; }
+
+              @@media (max-width: 767px) { .lb-pills .lb-pill { padding: 5px 11px; font-size: 0.8rem; } }
             </style>
 
             <div class="tab-content">
