@@ -160,7 +160,10 @@
                         </span>
                       </button>
                       <button type="button" class="btn" @click="useHint()" :disabled="completed||paused" style="background:#0B7285;color:#fff;font-weight:600;">
-                        {{ __('Indice') }}
+                        <span class="d-inline-flex align-items-center gap-2 justify-content-center">
+                          <span>{{ __('Indice') }}</span>
+                          <span class="badge bg-light text-dark" x-text="'+' + hintPenaltySeconds() + 's'" style="font-size:0.7rem;"></span>
+                        </span>
                       </button>
                       <button type="button" class="btn btn-outline-secondary" @click="togglePause()" :disabled="completed">
                         <span x-text="paused ? '{{ __('Reprendre') }}' : '{{ __('Pause') }}'"></span>
@@ -591,6 +594,12 @@ document.addEventListener('alpine:init', () => {
       return true;
     },
 
+    // #204 : penalite temps par hint selon difficulte (NYT/MS standards 2026)
+    hintPenaltySeconds() {
+      const map = { easy: 10, medium: 15, hard: 20, expert: 30, diabolical: 45 };
+      return map[this.currentDifficulty] || 15;
+    },
+
     useHint() {
       if (this.completed || this.paused) return;
       for (let r = 0; r < 9; r++) {
@@ -600,9 +609,12 @@ document.addEventListener('alpine:init', () => {
               if (this.checkLocal(r, c, n)) {
                 this.grid[r][c] = n;
                 this.hintsUsed++;
+                // #204 : ajout penalite temps
+                const penalty = this.hintPenaltySeconds();
+                this.timer = this.timer + penalty;
                 this.selectedCell = { row: r, col: c };
-                this.statusMessage = 'Indice : (' + (r+1) + ',' + (c+1) + ') = ' + n + '.';
-                setTimeout(() => { this.statusMessage = ''; }, 3000);
+                this.statusMessage = 'Indice : (' + (r+1) + ',' + (c+1) + ') = ' + n + ' · +' + penalty + 's pénalité.';
+                setTimeout(() => { this.statusMessage = ''; }, 3500);
                 return;
               }
             }
