@@ -168,49 +168,50 @@
                 </div>
               </aside>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  {{-- Modal victoire (anti-popup natif - pattern Memora) --}}
-  <div class="modal fade" id="winModal" tabindex="-1" aria-labelledby="winModalLabel" aria-hidden="true" x-ref="winModal">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="border-radius:12px;border:none;">
-        <div class="modal-header" style="background:linear-gradient(135deg, #0B7285 0%, #053d4a 100%);color:#fff;border-bottom:none;">
-          <h5 class="modal-title" id="winModalLabel">🎉 {{ __('Bravo !') }}</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
-        </div>
-        <div class="modal-body p-4">
-          <p class="lead text-center">{{ __('Grille résolue en') }} <strong x-text="formatTime(timer)" style="color:#053d4a;"></strong></p>
-          <p class="text-center text-muted">{{ __('Erreurs') }} : <strong x-text="errorsCount"></strong> &middot; {{ __('Indices') }} : <strong x-text="hintsUsed"></strong></p>
-          <div class="mb-3">
-            <label for="pseudoInput" class="form-label">{{ __('Pseudo (pour le classement)') }}</label>
-            <input type="text" class="form-control" id="pseudoInput" maxlength="30" x-model="pseudo" placeholder="{{ __('Anonyme') }}">
-          </div>
-          <div x-show="resultMessage" :class="resultIsSuccess ? 'alert alert-success' : 'alert alert-danger'" x-text="resultMessage"></div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Plus tard') }}</button>
-          <button type="button" class="btn" @click="submitScore()" :disabled="submitting" style="background:#053d4a;color:#fff;font-weight:600;">
-            <span x-show="!submitting">{{ __('Soumettre score') }}</span>
-            <span x-show="submitting">{{ __('Envoi...') }}</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+            {{-- #189 fix : modaux DANS le scope x-data card-body pour que @click="restartGrid()" et @click="submitScore()" fonctionnent. --}}
+            {{-- Modal victoire (anti-popup natif - pattern Memora) --}}
+            <div class="modal fade" id="winModal" tabindex="-1" aria-labelledby="winModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius:12px;border:none;">
+                  <div class="modal-header" style="background:linear-gradient(135deg, #0B7285 0%, #053d4a 100%);color:#fff;border-bottom:none;">
+                    <h5 class="modal-title" id="winModalLabel">🎉 {{ __('Bravo !') }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                  </div>
+                  <div class="modal-body p-4">
+                    <p class="lead text-center">{{ __('Grille résolue en') }} <strong x-text="formatTime(timer)" style="color:#053d4a;"></strong></p>
+                    <p class="text-center text-muted">{{ __('Erreurs') }} : <strong x-text="errorsCount"></strong> &middot; {{ __('Indices') }} : <strong x-text="hintsUsed"></strong></p>
+                    <div class="mb-3">
+                      <label for="pseudoInput" class="form-label">{{ __('Pseudo (pour le classement)') }}</label>
+                      <input type="text" class="form-control" id="pseudoInput" maxlength="30" x-model="pseudo" placeholder="{{ __('Anonyme') }}">
+                    </div>
+                    <div x-show="resultMessage" :class="resultIsSuccess ? 'alert alert-success' : 'alert alert-danger'" x-text="resultMessage"></div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Plus tard') }}</button>
+                    <button type="button" class="btn" @click="submitScore()" :disabled="submitting" style="background:#053d4a;color:#fff;font-weight:600;">
+                      <span x-show="!submitting">{{ __('Soumettre score') }}</span>
+                      <span x-show="submitting">{{ __('Envoi...') }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-  {{-- Modal restart (anti-popup natif) --}}
-  <div class="modal fade" id="restartModal" tabindex="-1" aria-hidden="true" x-ref="restartModal">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="border-radius:12px;border:none;">
-        <div class="modal-header"><h5 class="modal-title">{{ __('Recommencer ?') }}</h5></div>
-        <div class="modal-body"><p>{{ __('Toute progression sur cette grille sera perdue. Confirmer ?') }}</p></div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
-          <button type="button" class="btn btn-danger" @click="restartGrid()">{{ __('Recommencer') }}</button>
+            {{-- Modal restart (anti-popup natif) --}}
+            <div class="modal fade" id="restartModal" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius:12px;border:none;">
+                  <div class="modal-header"><h5 class="modal-title">{{ __('Recommencer ?') }}</h5></div>
+                  <div class="modal-body"><p>{{ __('Toute progression sur cette grille sera perdue. Confirmer ?') }}</p></div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
+                    <button type="button" class="btn btn-danger" @click="restartGrid()">{{ __('Recommencer') }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
