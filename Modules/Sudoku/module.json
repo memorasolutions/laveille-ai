@@ -3,7 +3,7 @@
     "alias": "sudoku",
     "description": "Module Sudoku ultra complet avec leaderboards et streak quotidien",
     "keywords": ["sudoku","jeu","game","leaderboard","puzzle"],
-    "priority": 0,
+    "priority": 100,
     "providers": ["Modules\\Sudoku\\Providers\\SudokuServiceProvider"],
     "files": []
 }

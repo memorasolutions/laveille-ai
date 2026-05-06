@@ -39,6 +39,32 @@ class SudokuGeneratorService
         ];
     }
 
+    /**
+     * Genere un puzzle pour une difficulte aujourd'hui (date America/Toronto)
+     * et le persiste en DB. Idempotent via unique(date, difficulty).
+     */
+    public function generateForToday(string $difficulty): \Modules\Sudoku\Models\SudokuPuzzle
+    {
+        $date = now('America/Toronto')->toDateString();
+        $existing = \Modules\Sudoku\Models\SudokuPuzzle::where('date', $date)
+            ->where('difficulty', $difficulty)
+            ->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        $data = $this->generate($difficulty);
+
+        return \Modules\Sudoku\Models\SudokuPuzzle::create([
+            'difficulty' => $difficulty,
+            'date' => $date,
+            'grid_init' => $data['grid_init'],
+            'solution' => $data['solution'],
+            'clues_count' => $data['clues_count'],
+            'generation_time_ms' => $data['time_ms'],
+        ]);
+    }
+
     protected function generateSolvedGrid(): array
     {
         $grid = array_fill(0, 9, array_fill(0, 9, 0));
