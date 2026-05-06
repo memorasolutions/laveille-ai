@@ -93,7 +93,70 @@
                             <span class="text-muted small">{{ __('Article supprimé') }}</span>
                         @endif
                     </td>
-                    <td class="text-muted small">{{ \Illuminate\Support\Str::limit($comment->content, 80) }}</td>
+                    <td>
+                        {{-- #184 : snippet cliquable -> modal detail --}}
+                        <button type="button"
+                                class="btn btn-link p-0 text-start text-muted small text-decoration-none lh-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#commentDetail{{ $comment->id }}"
+                                title="{{ Str::limit($comment->content, 250) }}"
+                                style="white-space:normal;max-width:280px;">
+                            {{ Str::limit($comment->content, 80) }}
+                            <i data-lucide="eye" class="icon-sm ms-1 text-primary"></i>
+                        </button>
+                        {{-- Modal detail commentaire --}}
+                        <div class="modal fade" id="commentDetail{{ $comment->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content" style="border-radius:12px;border:none;">
+                                    <div class="modal-header" style="background:linear-gradient(135deg,#0B7285 0%,#053d4a 100%);color:#fff;border-bottom:none;">
+                                        <h5 class="modal-title">{{ __('Commentaire') }} #{{ $comment->id }}</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <dl class="row mb-3">
+                                            <dt class="col-sm-3 text-muted">{{ __('Auteur') }}</dt>
+                                            <dd class="col-sm-9 fw-semibold">
+                                                {{ $comment->authorName() }}
+                                                @if($comment->user_id) <span class="badge bg-primary ms-1">{{ __('Membre') }}</span>
+                                                @else <span class="badge bg-secondary ms-1">{{ __('Visiteur') }}</span>
+                                                @endif
+                                            </dd>
+                                            <dt class="col-sm-3 text-muted">{{ __('Article') }}</dt>
+                                            <dd class="col-sm-9">
+                                                @if($comment->article)
+                                                    {{ $comment->article->title }}
+                                                @else
+                                                    <em class="text-muted">{{ __('Article supprimé / Type non-article') }}</em>
+                                                @endif
+                                            </dd>
+                                            <dt class="col-sm-3 text-muted">{{ __('Statut') }}</dt>
+                                            <dd class="col-sm-9">
+                                                @php($badge = ['pending'=>'warning','approved'=>'success','spam'=>'danger','rejected'=>'dark'][$comment->status] ?? 'secondary')
+                                                <span class="badge bg-{{ $badge }}">{{ ucfirst((string) $comment->status) }}</span>
+                                            </dd>
+                                            <dt class="col-sm-3 text-muted">{{ __('Date') }}</dt>
+                                            <dd class="col-sm-9">{{ $comment->created_at->format('d/m/Y H:i:s') }}</dd>
+                                        </dl>
+                                        <hr>
+                                        <h6 class="text-muted small text-uppercase mb-2">{{ __('Contenu') }}</h6>
+                                        <div style="white-space:pre-wrap;background:#f8fafc;padding:1rem;border-radius:8px;border:1px solid #e2e8f0;">{{ $comment->content }}</div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Fermer') }}</button>
+                                        <button type="button" wire:click="changeStatus({{ $comment->id }}, 'approved')" class="btn btn-success" data-bs-dismiss="modal">
+                                            <i data-lucide="check-circle" class="icon-sm me-1"></i> {{ __('Approuver') }}
+                                        </button>
+                                        <button type="button" wire:click="changeStatus({{ $comment->id }}, 'spam')" class="btn btn-warning" data-bs-dismiss="modal">
+                                            <i data-lucide="alert-triangle" class="icon-sm me-1"></i> {{ __('Spam') }}
+                                        </button>
+                                        <button type="button" wire:click="delete({{ $comment->id }})" wire:confirm="{{ __('Supprimer définitivement ?') }}" class="btn btn-danger" data-bs-dismiss="modal">
+                                            <i data-lucide="trash-2" class="icon-sm me-1"></i> {{ __('Supprimer') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                     <td>
                         <select wire:change="changeStatus({{ $comment->id }}, $event.target.value)"
                                 class="form-select form-select-sm w-auto"
