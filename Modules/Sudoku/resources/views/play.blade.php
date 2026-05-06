@@ -401,8 +401,12 @@ document.addEventListener('alpine:init', () => {
 
     init() {
       this.pseudo = localStorage.getItem('sudoku_pseudo') || '';
-      this.winModalEl = new bootstrap.Modal(this.$refs.winModal);
-      this.restartModalEl = new bootstrap.Modal(this.$refs.restartModal);
+      // #185 fix : modaux hors scope x-data card-body (places au niveau <section>),
+      // donc this.$refs.winModal est undefined. Utiliser getElementById direct.
+      const winEl = document.getElementById('winModal');
+      const restartEl = document.getElementById('restartModal');
+      this.winModalEl = winEl ? new bootstrap.Modal(winEl) : null;
+      this.restartModalEl = restartEl ? new bootstrap.Modal(restartEl) : null;
       this.restoreLocalState();
       this.startTimer();
       this.startAutosave();
