@@ -16,17 +16,22 @@ namespace Modules\Sudoku\Services;
 class SudokuGeneratorService
 {
     /**
-     * #173 (2026-05-06) : plages alignees standard industriel Sudoku.com / NYT /
-     * Le Monde Jeux 2026 (sonar-pro recherche). Limite math 17 indices mini
-     * pour solution unique (McGuire 2012). Valeurs precedentes (Easy 43-46)
-     * etaient trop elevees -> grilles trop faciles ("monotone").
+     * #200 (2026-05-06) : plages descendues -3 indices par niveau (user feedback
+     * 'trop d'indices'). Plage 'Aggressive Pro'. Limite math 17 mini preserve
+     * pour Diabolical (McGuire 2012).
+     *
+     * Easy : 32-37 (vs 35-40 #173, plus stimulant pour Memora audience tech)
+     * Medium : 25-31 (vs 28-34)
+     * Hard : 21-27 (vs 24-30)
+     * Expert : 18-23 (vs 20-26)
+     * Diabolical : 17-19 (vs 17-22, niveau hardcore challenge)
      */
     protected const DIFFICULTY_RANGES = [
-        'easy' => [35, 40],
-        'medium' => [28, 34],
-        'hard' => [24, 30],
-        'expert' => [20, 26],
-        'diabolical' => [17, 22],
+        'easy' => [32, 37],
+        'medium' => [25, 31],
+        'hard' => [21, 27],
+        'expert' => [18, 23],
+        'diabolical' => [17, 19],
     ];
 
     public function generate(string $difficulty): array
