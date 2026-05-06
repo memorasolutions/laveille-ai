@@ -20,14 +20,27 @@ class PublicToolController extends Controller
 {
     public function index(): View
     {
-        $tools = Tool::active()->ordered()->get();
+        // #190 : tri par defaut popularite (views_count desc) puis sort_order asc
+        $tools = Tool::active()
+            ->orderByDesc('views_count')
+            ->orderBy('sort_order')
+            ->get();
 
-        return view('tools::public.index', compact('tools'));
+        // Categories disponibles (distinct non-null) avec counts
+        $categories = $tools->whereNotNull('category')->groupBy('category')
+            ->map(fn ($group) => $group->count())->toArray();
+
+        return view('tools::public.index', compact('tools', 'categories'));
     }
 
     public function show(string $slug): View
     {
         $tool = Tool::where('slug', $slug)->where('is_active', true)->firstOrFail();
+
+        // #190 : increment views_count (ignore HEAD + bots)
+        if (! request()->isMethod('HEAD') && Schema::hasColumn('tools', 'views_count')) {
+            try { Tool::where('id', $tool->id)->increment('views_count'); } catch (\Throwable $e) {}
+        }
 
         $this->trackUsage($slug);
 
