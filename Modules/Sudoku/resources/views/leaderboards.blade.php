@@ -20,7 +20,7 @@
             <ul class="nav nav-tabs mb-4" role="tablist" style="border-bottom:2px solid #053d4a;flex-wrap:wrap;">
               <li class="nav-item"><a class="nav-link" href="{{ route('sudoku.play') }}" style="color:#053d4a;font-weight:600;">{{ __('Jouer') }}</a></li>
               <li class="nav-item"><a class="nav-link active" href="{{ route('sudoku.leaderboards') }}" style="color:#053d4a;font-weight:600;border-bottom:3px solid #053d4a;background:rgba(11,114,133,.08);">{{ __('Classements') }}</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ route('sudoku.archive') }}" style="color:#053d4a;font-weight:600;">{{ __('Archive') }}</a></li>
+              @auth<li class="nav-item"><a class="nav-link" href="{{ route('sudoku.my-games') }}" style="color:#053d4a;font-weight:600;">{{ __('Mes parties') }}</a></li>@endauth
             </ul>
 
             <ul class="nav nav-pills mb-3 flex-wrap gap-2" role="tablist">

@@ -41,14 +41,16 @@
                   </span>
                 </a>
               </li>
+              @auth
               <li class="nav-item" role="presentation">
-                <a class="nav-link" href="{{ route('sudoku.archive') }}" style="color:#053d4a;font-weight:600;">
+                <a class="nav-link" href="{{ route('sudoku.my-games') }}" style="color:#053d4a;font-weight:600;">
                   <span class="d-inline-flex align-items-center gap-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-                    {{ __('Archive') }}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    {{ __('Mes parties') }}
                   </span>
                 </a>
               </li>
+              @endauth
             </ul>
 
             {{-- Pills 5 difficultes --}}
