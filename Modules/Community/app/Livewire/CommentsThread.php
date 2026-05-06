@@ -52,13 +52,21 @@ class CommentsThread extends Component
         }
         $this->validate($rules);
 
+        // #192 sanitization : strip tags HTML + flag liens externes
+        // Retire tous tags HTML (allowlist vide : ne garde QUE texte plain).
+        $cleanContent = trim(strip_tags($this->newComment));
+        // Detection URLs : http(s), www, ftp, ou domaines courts
+        $hasLinks = (bool) preg_match('#(?:https?://|ftp://|www\.|\b[a-z0-9-]+\.(?:com|fr|ca|io|net|org|co|ai)\b)#i', $cleanContent);
+
         $comment = Comment::create([
             'commentable_type' => $this->commentableType,
             'commentable_id' => $this->commentableId,
             'user_id' => Auth::id(),
             'guest_name' => Auth::check() ? null : $this->guestName,
-            'content' => $this->newComment,
-            'status' => Auth::check() ? 'approved' : 'pending',
+            'content' => $cleanContent,
+            // #192 : si lien detecte, force pending meme pour user authentifie
+            // (modération preventive anti-spam).
+            'status' => (Auth::check() && ! $hasLinks) ? 'approved' : 'pending',
             'parent_id' => $this->replyingTo,
         ]);
 
