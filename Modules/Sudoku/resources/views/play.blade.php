@@ -439,8 +439,12 @@ document.addEventListener('alpine:init', () => {
 
     startTimer() {
       clearInterval(this.timerId);
+      // #178 fix : assignment explicite this.timer = this.timer + 1
+      // (++ peut etre batched / not Alpine-reactive depuis setInterval callback).
       this.timerId = setInterval(() => {
-        if (!this.paused && !this.completed) this.timer++;
+        if (!this.paused && !this.completed) {
+          this.timer = this.timer + 1;
+        }
       }, 1000);
     },
 
@@ -481,7 +485,10 @@ document.addEventListener('alpine:init', () => {
         this.hintsUsed = data.hintsUsed || 0;
         this.errorsCount = data.errorsCount || 0;
         this.completed = !!data.completed;
-        this.paused = !!data.paused;
+        // #178 fix : ne PAS restaurer paused=true au reload (toujours redemarrer
+        // depasse en pause aurait timer fige). User reactive Pause manuellement
+        // si necessaire.
+        this.paused = false;
         if (data.grid) {
           this.statusMessage = 'Partie restauree.';
           setTimeout(() => { this.statusMessage = ''; }, 2500);
