@@ -16,24 +16,22 @@ namespace Modules\Sudoku\Services;
 class SudokuGeneratorService
 {
     /**
-     * #201 (2026-05-06) : nombre FIXE d'indices par niveau (user feedback
-     * 'diminuer le nombre d'indices par niveau, pas random'). Valeur basse
-     * de la plage = defi max constant. Diabolical = 17 limite math McGuire 2012.
+     * #203 (2026-05-06) : Standards 2026 sonar-pro (NYT/Sudoku.com/Conceptis
+     * /Le Monde convergent). Plage A 95/100. Diabolical 18 evite spike
+     * frustration 17 (rare <1% chez leaders, prouve McGuire 2012).
      *
-     * Easy : 32 (challenge debutant +)
-     * Medium : 25
-     * Hard : 21
-     * Expert : 18
-     * Diabolical : 17 (limite math, plus bas impossible solution unique)
-     *
-     * Format [N, N] preserve random_int signature sans changer generate().
+     * Easy : 32 (NYT 32 / Conceptis 33 / standard universel)
+     * Medium : 26 (Conceptis 26, transition fluide hidden pairs)
+     * Hard : 22 (Conceptis 22 / Brain Bashers 22, XY-Wings forces)
+     * Expert : 18 (consensus chains/forcing)
+     * Diabolical : 18 (vs 17 limite math = frustration spike rare 1%)
      */
     protected const DIFFICULTY_RANGES = [
         'easy' => [32, 32],
-        'medium' => [25, 25],
-        'hard' => [21, 21],
+        'medium' => [26, 26],
+        'hard' => [22, 22],
         'expert' => [18, 18],
-        'diabolical' => [17, 17],
+        'diabolical' => [18, 18],
     ];
 
     public function generate(string $difficulty): array
