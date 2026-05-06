@@ -47,5 +47,5 @@
     "News": true,
     "Shop": true,
     "CloudflareCache": true,
-    "Sudoku": true
+    "Sudoku": false
 }
