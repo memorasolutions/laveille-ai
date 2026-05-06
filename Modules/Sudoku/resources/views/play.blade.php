@@ -72,7 +72,8 @@
             {{-- Layout 2 colonnes : grille + sidebar --}}
             <div class="row g-4">
               <div class="col-lg-8 col-12">
-                <div class="sudoku-grid mx-auto" role="grid" :aria-label="'Grille Sudoku ' + currentDifficulty">
+                <div class="sudoku-grid-wrapper" style="position:relative;">
+                <div class="sudoku-grid mx-auto" role="grid" :aria-label="'Grille Sudoku ' + currentDifficulty" :class="{ 'sudoku-paused': paused }">
                   <template x-for="(row, r) in grid" :key="'r'+r">
                     <template x-for="(value, c) in row" :key="'c'+r+'-'+c">
                       <div class="sudoku-cell"
@@ -89,6 +90,17 @@
                     </template>
                   </template>
                 </div>
+
+                {{-- #179 Pause overlay anti-triche : cache la grille pendant pause --}}
+                <div class="sudoku-pause-overlay" x-show="paused" x-transition.opacity role="dialog" aria-label="{{ __('Partie en pause') }}" @click="togglePause()" style="display:none;">
+                  <div class="sudoku-pause-content">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+                    <h3 class="mt-2 mb-1" style="font-weight:700;color:#fff;">{{ __('Partie en pause') }}</h3>
+                    <p style="color:rgba(255,255,255,0.85);margin-bottom:1rem;">{{ __('Cliquez sur la grille ou « Reprendre » pour continuer.') }}</p>
+                    <button type="button" class="btn btn-light btn-sm fw-bold" @click.stop="togglePause()">{{ __('Reprendre') }}</button>
+                  </div>
+                </div>
+                </div>{{-- /sudoku-grid-wrapper --}}
 
                 {{-- Keypad --}}
                 <div class="mt-3 d-flex flex-wrap justify-content-center gap-2" id="numeric-keypad" aria-label="{{ __('Clavier numérique') }}">
@@ -245,6 +257,29 @@
 .sudoku-cell.peer-highlight {
   background: #e0f2fe;
 }
+/* #179 anti-triche : grille floutee + overlay pendant pause */
+.sudoku-paused {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+.sudoku-pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  background: rgba(5, 61, 74, 0.92);
+  cursor: pointer;
+  border-radius: 8px;
+}
+.sudoku-pause-content {
+  text-align: center;
+  color: #fff;
+  padding: 1.5rem;
+}
+.sudoku-pause-content svg { color: #fff; opacity: 0.95; }
 /* #172 fix : Alpine <template x-for> insere des markers commentaires qui cassent
    :nth-child. Utiliser data-col/data-row attribute selectors (positions explicites). */
 .sudoku-cell[data-col="2"],
