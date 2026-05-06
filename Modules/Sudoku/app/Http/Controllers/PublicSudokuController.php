@@ -31,18 +31,14 @@ class PublicSudokuController extends Controller
     }
 
     /**
-     * #170 : Mes parties — auth uniquement. Liste les SavedSudokuPreset du user
-     * avec lien pour reprendre la grille a son etat de sauvegarde.
+     * #170 + #171 : Mes parties Sudoku redirige vers le dashboard global de
+     * sauvegarde unifie /user/saved?type=sudoku (UserSavedController agrege
+     * tous les SavedXxxPreset avec filtre par type).
+     * #182 fix : la vue mes-parties.blade.php n'existait pas -> 500. Redirect
+     * propre coherent avec le pattern Memora.
      */
     public function mesParties(Request $request)
     {
-        $presets = SavedSudokuPreset::query()
-            ->forUser(Auth::id())
-            ->with('puzzle')
-            ->orderByDesc('last_saved_at')
-            ->limit(50)
-            ->get();
-
-        return View::make('sudoku::mes-parties', compact('presets'));
+        return redirect()->to('/user/saved?type=sudoku');
     }
 }

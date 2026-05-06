@@ -23,19 +23,23 @@
               @auth<li class="nav-item"><a class="nav-link" href="{{ route('sudoku.my-games') }}" style="color:#053d4a;font-weight:600;">{{ __('Mes parties') }}</a></li>@endauth
             </ul>
 
-            <ul class="nav nav-pills mb-3 flex-wrap gap-2" role="tablist">
+            <ul class="nav nav-pills lb-pills mb-3 flex-wrap gap-2" role="tablist">
               @foreach(['easy'=>['Facile','#10B981'],'medium'=>['Moyen','#0B7285'],'hard'=>['Difficile','#7C3AED'],'expert'=>['Expert','#C2410C'],'diabolical'=>['Diabolique','#1f2937']] as $diff => $info)
-                <li class="nav-item"><button class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-{{ $diff }}" type="button" style="font-weight:600;{{ $loop->first ? 'background:'.$info[1].';color:#fff;' : 'color:'.$info[1].';' }}">
-                  <span class="d-inline-block rounded-circle me-2" style="width:8px;height:8px;background:{{ $info[1] }}"></span>
+                <li class="nav-item"><button class="nav-link {{ $loop->first ? 'active' : '' }} lb-pill" data-bs-toggle="tab" data-bs-target="#tab-{{ $diff }}" type="button" style="{{ $loop->first ? 'background:'.$info[1].';color:#fff;' : 'color:'.$info[1].';' }}">
+                  <span class="lb-dot" style="background:{{ $info[1] }}"></span>
                   {{ __($info[0]) }}
                 </button></li>
               @endforeach
-              <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-week" type="button" style="color:#053d4a;font-weight:600;">{{ __('Semaine') }}</button></li>
-              <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-month" type="button" style="color:#053d4a;font-weight:600;">{{ __('Mois') }}</button></li>
-              <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-alltime" type="button" style="color:#053d4a;font-weight:600;">{{ __('All-time') }}</button></li>
-              <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-streaks" type="button" style="color:#053d4a;font-weight:600;">{{ __('Streaks') }}</button></li>
-              <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-countries" type="button" style="color:#053d4a;font-weight:600;">{{ __('Pays') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-week" type="button" style="color:#053d4a;">{{ __('Semaine') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-month" type="button" style="color:#053d4a;">{{ __('Mois') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-alltime" type="button" style="color:#053d4a;">{{ __('All-time') }}</button></li>
+              <li class="nav-item"><button class="nav-link lb-pill" data-bs-toggle="tab" data-bs-target="#tab-streaks" type="button" style="color:#053d4a;">{{ __('Séries') }}</button></li>
             </ul>
+            <style>
+              .lb-pills .lb-pill { padding: 5px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 999px; }
+              .lb-pill .lb-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+              @@media (max-width: 767px) { .lb-pills .lb-pill { padding: 4px 10px; font-size: 0.8rem; } }
+            </style>
 
             <div class="tab-content">
               @foreach(['easy','medium','hard','expert','diabolical'] as $diff)
@@ -75,22 +79,6 @@
                         </tr>
                       @empty
                         <tr><td colspan="5" class="text-center text-muted py-3">{{ __('Aucun streak enregistré.') }}</td></tr>
-                      @endforelse
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="tab-countries" role="tabpanel">
-                <div class="table-responsive">
-                  <table class="table table-hover align-middle">
-                    <thead>
-                      <tr style="color:#053d4a;"><th>{{ __('Pays') }}</th><th>{{ __('Parties classées') }}</th></tr>
-                    </thead>
-                    <tbody>
-                      @forelse($countries as $c)
-                        <tr><td>{{ $c->country }}</td><td>{{ $c->count }}</td></tr>
-                      @empty
-                        <tr><td colspan="2" class="text-center text-muted py-3">{{ __('Aucune donnée par pays.') }}</td></tr>
                       @endforelse
                     </tbody>
                   </table>
