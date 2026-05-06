@@ -177,6 +177,7 @@
                                     data-bs-toggle="dropdown"
                                     data-bs-display="dynamic"
                                     data-bs-auto-close="true"
+                                    data-bs-strategy="fixed"
                                     aria-expanded="false"
                                     aria-label="{{ __('Actions') }}">
                                 <i data-lucide="more-vertical" class="icon-md"></i>

@@ -88,8 +88,19 @@
             width: 18px !important;
             height: 18px !important;
         }
-        /* Dropdown actions : auto-flip-up si pres du bas viewport */
-        .dropdown-menu { z-index: 1050; }
+        /* #193 : dropdown z-index eleve + position fixed Popper escape stacking
+           context des .table-responsive (overflow:auto coupait le menu).
+           Bootstrap 5.3+ data-bs-strategy='fixed' positionne via viewport. */
+        .dropdown-menu {
+            z-index: 1080 !important;
+            min-width: 160px;
+        }
+        .dropdown-menu.show {
+            position: fixed !important;
+        }
+        /* Permet au dropdown de sortir des tables (vertical seulement, garde
+           scroll horizontal mobile). */
+        .table-responsive { overflow-y: visible !important; }
     </style>
 
     @livewireStyles
