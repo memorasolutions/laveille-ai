@@ -87,6 +87,13 @@ return [
             'transport' => 'array',
         ],
 
+        // #161 (2026-05-06) — transport custom Brevo (API HTTP) enregistré via
+        // Modules\Newsletter\Providers\NewsletterServiceProvider::boot() Mail::extend('brevo').
+        // Aucune SMTP key requise : reuse BREVO_API_KEY existant.
+        'brevo' => [
+            'transport' => 'brevo',
+        ],
+
         'failover' => [
             'transport' => 'failover',
             'mailers' => [

@@ -12,8 +12,10 @@ namespace Modules\Newsletter\Providers;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Modules\Core\Providers\BaseModuleServiceProvider;
 use Modules\Newsletter\Listeners\WorkflowTriggerListener;
+use Modules\Newsletter\Mail\Transport\BrevoApiTransport;
 use Modules\Newsletter\Services\BrevoService;
 
 class NewsletterServiceProvider extends BaseModuleServiceProvider
@@ -35,6 +37,11 @@ class NewsletterServiceProvider extends BaseModuleServiceProvider
         ]);
 
         Event::listen(Registered::class, [WorkflowTriggerListener::class, 'handleRegistered']);
+
+        // #161 (2026-05-06) — bascule globale Mail Laravel via API HTTP Brevo,
+        // contournement SMTP Gmail bloqué (cert mismatch cPanel autoconfig.server.memora.pro).
+        // MAIL_MAILER=brevo dans .env active ce transport. Reuse BREVO_API_KEY existant.
+        Mail::extend('brevo', fn () => $this->app->make(BrevoApiTransport::class));
     }
 
     public function register(): void
