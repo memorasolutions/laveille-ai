@@ -148,9 +148,9 @@
                           {{ __('Vérifier la grille') }}
                         </span>
                       </button>
-                      {{-- #180 : bouton Notes (toggle pencil marks) --}}
+                      {{-- #180 + #208 : bouton Notes (toggle pencil marks) - couleurs WCAG AAA --}}
                       <button type="button" class="btn" @click="notesMode = !notesMode" :disabled="completed||paused"
-                              :style="notesMode ? 'background:#C2410C;color:#fff;font-weight:700;' : 'background:#fff;color:#C2410C;border:1px solid #C2410C;font-weight:600;'"
+                              :style="notesMode ? 'background:#7C2D12;color:#fff;font-weight:700;' : 'background:#fff;color:#7C2D12;border:1px solid #7C2D12;font-weight:600;'"
                               :aria-pressed="notesMode ? 'true' : 'false'">
                         <span class="d-inline-flex align-items-center gap-2 justify-content-center">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -159,7 +159,7 @@
                           <span x-show="!notesMode" style="font-size:0.7rem;opacity:0.7;">(Maj+chiffre)</span>
                         </span>
                       </button>
-                      <button type="button" class="btn" @click="useHint()" :disabled="completed||paused" style="background:#0B7285;color:#fff;font-weight:600;">
+                      <button type="button" class="btn" @click="useHint()" :disabled="completed||paused" style="background:#053d4a;color:#fff;font-weight:600;">
                         <span class="d-inline-flex align-items-center gap-2 justify-content-center">
                           <span>{{ __('Indice') }}</span>
                           <span class="badge bg-light text-dark" x-text="'+' + hintPenaltySeconds() + 's'" style="font-size:0.7rem;"></span>
