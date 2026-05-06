@@ -1,0 +1,17 @@
+{
+    "name": "memora/sudoku-module",
+    "type": "metapackage",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Sudoku\\": "app/",
+            "Modules\\Sudoku\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Sudoku\\Providers\\SudokuServiceProvider"
+            ]
+        }
+    }
+}
