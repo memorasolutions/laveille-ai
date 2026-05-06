@@ -249,10 +249,17 @@
   z-index: 3;
 }
 .sudoku-key {
+  /* #174 fix : centrage vertical/horizontal (Bootstrap btn padding asymetrique
+     pousse le texte hors du centre). flex + padding 0. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 44px;
   min-height: 44px;
+  padding: 0;
   font-size: 1.1rem;
   font-weight: 600;
+  line-height: 1;
 }
 @@media (max-width: 576px) {
   .sudoku-grid { --sudoku-cell: 34px; }
