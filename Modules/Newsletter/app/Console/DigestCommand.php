@@ -13,6 +13,7 @@ use Modules\Newsletter\Jobs\SendDigestJob;
 use Modules\Newsletter\Models\NewsletterIssue;
 use Modules\Newsletter\Models\Subscriber;
 use Modules\Newsletter\Notifications\WeeklyDigestNotification;
+use Modules\Newsletter\Services\BrevoService;
 use Modules\Newsletter\Services\DigestContentService;
 use Modules\Settings\Models\Setting;
 
@@ -50,6 +51,11 @@ class DigestCommand extends Command
 
     /**
      * MODE TEST : envoie le brouillon existant à une adresse email spécifique.
+     *
+     * 2026-05-06 #160 fix : utilise BrevoService::sendCampaignEmail() (API HTTP Brevo) au lieu de
+     * Notification::route('mail') qui passait par SMTP Gmail bloqué (cert mismatch cPanel,
+     * autoconfig.server.memora.pro vs smtp.gmail.com). La newsletter régulière passe déjà par
+     * SendDigestJob → BrevoService, donc cohérent.
      */
     private function handleTestEmail(int $year, int $week, string $email): int
     {
@@ -61,17 +67,38 @@ class DigestCommand extends Command
             ? DigestContentService::gatherFromIssue($issue)
             : DigestContentService::gatherFreshContent();
 
-        Notification::route('mail', $email)->notify(
-            new WeeklyDigestNotification(
-                $data['highlight'] ?? null, $data['topNews'] ?? collect(),
-                $data['toolOfWeek'] ?? null, $data['featuredArticle'] ?? null,
-                null, (int) ($data['weekNumber'] ?? $week),
-                $data['aiTerm'] ?? null, $data['interactiveTool'] ?? null,
-                $data['weeklyPrompt'] ?? null, $data['editorial'] ?? null
-            )
-        );
+        $weekNumber = (int) ($data['weekNumber'] ?? $week);
+        $subject = '[TEST] La veille IA #'.$weekNumber.' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Test newsletter');
 
-        $this->components->info("Newsletter test W{$week} envoyée à {$email}");
+        $htmlContent = View::make('newsletter::emails.digest-weekly', [
+            'subject' => $subject,
+            'highlight' => $data['highlight'] ?? null,
+            'topNews' => $data['topNews'] ?? collect(),
+            'toolOfWeek' => $data['toolOfWeek'] ?? null,
+            'featuredArticle' => $data['featuredArticle'] ?? null,
+            'didYouKnow' => null,
+            'aiTerm' => $data['aiTerm'] ?? null,
+            'interactiveTool' => $data['interactiveTool'] ?? null,
+            'weeklyPrompt' => $data['weeklyPrompt'] ?? null,
+            'editorial' => $data['editorial'] ?? null,
+            'unsubscribeUrl' => '#test-mode-no-unsubscribe',
+            'weekNumber' => $weekNumber,
+        ])->render();
+
+        $brevo = app(BrevoService::class);
+        if (! $brevo->isConfigured()) {
+            $this->components->error('BrevoService non configuré. Vérifiez BREVO_API_KEY dans .env.');
+            return self::FAILURE;
+        }
+
+        $result = $brevo->sendCampaignEmail($email, null, $subject, $htmlContent);
+
+        if (! ($result['success'] ?? false)) {
+            $this->components->error("Échec envoi via Brevo : ".($result['error'] ?? 'erreur inconnue'));
+            return self::FAILURE;
+        }
+
+        $this->components->info("Newsletter test W{$weekNumber} envoyée à {$email} via Brevo (message_id: ".($result['message_id'] ?? 'n/a').")");
 
         return self::SUCCESS;
     }
