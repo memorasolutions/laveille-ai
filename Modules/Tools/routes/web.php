@@ -56,7 +56,10 @@ Route::middleware('web')->group(function () {
     Route::get('/jeu/{identifier}', fn (string $identifier) => redirect('/jeumc/'.$identifier, 301))
         ->where('identifier', '[a-zA-Z0-9_-]+');
 
-    Route::get('/outils/{slug}', [PublicToolController::class, 'show'])->name('tools.show');
+    // #163 : exclure 'sudoku' (route fournie par Modules/Sudoku/routes/web.php). Ajouter d'autres slugs au pattern si nouveaux modules outils dedies.
+    Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
+        ->where('slug', '^(?!sudoku$|sudoku/).+')
+        ->name('tools.show');
 });
 
 // Espace user authentifie : mes mots croises sauvegardes (S80 #63 : tester guard retiré, lockdown #48 ouvert au public)
