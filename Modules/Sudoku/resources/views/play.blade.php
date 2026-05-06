@@ -85,7 +85,16 @@
                            :aria-label="cellAriaLabel(r, c)"
                            @click="selectCell(r, c)"
                            @keydown="handleKey($event, r, c)">
-                        <span x-text="value === 0 ? '' : value"></span>
+                        <template x-if="value !== 0">
+                          <span x-text="value"></span>
+                        </template>
+                        <template x-if="value === 0 && notes[r] && notes[r][c] && notes[r][c].length > 0">
+                          <div class="sudoku-notes" aria-hidden="true">
+                            <template x-for="n in 9" :key="'n-'+r+'-'+c+'-'+n">
+                              <span x-text="notes[r][c].includes(n) ? n : ''"></span>
+                            </template>
+                          </div>
+                        </template>
                       </div>
                     </template>
                   </template>
@@ -132,6 +141,17 @@
                         <span class="d-inline-flex align-items-center gap-2 justify-content-center">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                           {{ __('Vérifier la grille') }}
+                        </span>
+                      </button>
+                      {{-- #180 : bouton Notes (toggle pencil marks) --}}
+                      <button type="button" class="btn" @click="notesMode = !notesMode" :disabled="completed||paused"
+                              :style="notesMode ? 'background:#C2410C;color:#fff;font-weight:700;' : 'background:#fff;color:#C2410C;border:1px solid #C2410C;font-weight:600;'"
+                              :aria-pressed="notesMode ? 'true' : 'false'">
+                        <span class="d-inline-flex align-items-center gap-2 justify-content-center">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                          <span>{{ __('Notes') }}</span>
+                          <span x-show="notesMode" class="badge bg-light text-dark">ON</span>
+                          <span x-show="!notesMode" style="font-size:0.7rem;opacity:0.7;">(Maj+chiffre)</span>
                         </span>
                       </button>
                       <button type="button" class="btn" @click="useHint()" :disabled="completed||paused" style="background:#0B7285;color:#fff;font-weight:600;">
@@ -257,6 +277,24 @@
 .sudoku-cell.peer-highlight {
   background: #e0f2fe;
 }
+/* #180 : mini-grille notes 3x3 dans cellules vides */
+.sudoku-notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  font-size: 0.55em;
+  color: #6b7280;
+  font-weight: 500;
+  line-height: 1;
+  pointer-events: none;
+}
+.sudoku-notes > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 /* #179 anti-triche : grille floutee + overlay pendant pause */
 .sudoku-paused {
   filter: blur(8px);
@@ -342,6 +380,8 @@ document.addEventListener('alpine:init', () => {
     currentDifficulty: puzzles[0].difficulty,
     originalGrid: JSON.parse(JSON.stringify(puzzles[0].grid_init)),
     grid: JSON.parse(JSON.stringify(puzzles[0].grid_init)),
+    notesMode: false,
+    notes: Array(9).fill(null).map(() => Array(9).fill(null).map(() => [])),
     selectedCell: { row: -1, col: -1 },
     timer: 0,
     timerId: null,
@@ -376,6 +416,8 @@ document.addEventListener('alpine:init', () => {
       this.currentDifficulty = this.puzzles[idx].difficulty;
       this.originalGrid = JSON.parse(JSON.stringify(this.puzzles[idx].grid_init));
       this.grid = JSON.parse(JSON.stringify(this.puzzles[idx].grid_init));
+      this.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => []));
+      this.notesMode = false;
       this.timer = 0;
       this.hintsUsed = 0;
       this.errorsCount = 0;
@@ -416,7 +458,18 @@ document.addEventListener('alpine:init', () => {
       if (row === -1 || this.originalGrid[row][col] !== 0) return;
       const num = parseInt(n, 10);
       if (isNaN(num) || num < 1 || num > 9) return;
+
+      // #180 : si notesMode actif, toggle note au lieu de poser le chiffre
+      if (this.notesMode) {
+        this.toggleNote(row, col, num);
+        return;
+      }
+
       this.grid[row][col] = num;
+      // #180 smart-elim : retirer ce chiffre des notes peers (row/col/box)
+      this.eliminateFromPeers(row, col, num);
+      // Clear notes de la cellule courante (chiffre validé remplace les notes)
+      if (this.notes[row][col].length > 0) this.notes[row][col] = [];
       const valid = this.checkLocal(row, col, num);
       if (!valid) {
         this.errorsCount++;
@@ -428,11 +481,53 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
+    toggleNote(row, col, n) {
+      if (this.originalGrid[row][col] !== 0) return;
+      // Si grille a un chiffre, le clear pour montrer notes
+      if (this.grid[row][col] !== 0) this.grid[row][col] = 0;
+      const cell = this.notes[row][col];
+      const idx = cell.indexOf(n);
+      if (idx >= 0) {
+        cell.splice(idx, 1);
+      } else {
+        cell.push(n);
+        cell.sort((a, b) => a - b);
+      }
+      // Trigger Alpine reactivity pour les nested arrays
+      this.notes[row] = [...this.notes[row]];
+    },
+
+    eliminateFromPeers(row, col, n) {
+      let changed = false;
+      // Ligne
+      for (let c = 0; c < 9; c++) {
+        const i = this.notes[row][c].indexOf(n);
+        if (i >= 0) { this.notes[row][c].splice(i, 1); changed = true; }
+      }
+      // Colonne
+      for (let r = 0; r < 9; r++) {
+        const i = this.notes[r][col].indexOf(n);
+        if (i >= 0) { this.notes[r][col].splice(i, 1); changed = true; }
+      }
+      // Box 3x3
+      const br = Math.floor(row/3)*3, bc = Math.floor(col/3)*3;
+      for (let r = br; r < br+3; r++) for (let c = bc; c < bc+3; c++) {
+        const i = this.notes[r][c].indexOf(n);
+        if (i >= 0) { this.notes[r][c].splice(i, 1); changed = true; }
+      }
+      if (changed) {
+        // Trigger Alpine reactivity
+        this.notes = this.notes.map(row => [...row]);
+      }
+    },
+
     clearCell() {
       if (this.completed || this.paused) return;
       const { row, col } = this.selectedCell;
       if (row === -1 || this.originalGrid[row][col] !== 0) return;
       this.grid[row][col] = 0;
+      this.notes[row][col] = [];
+      this.notes[row] = [...this.notes[row]];
       this.errorsCells.delete(row + '-' + col);
     },
 
@@ -501,6 +596,7 @@ document.addEventListener('alpine:init', () => {
       try {
         localStorage.setItem('sudoku_state_' + this.currentPuzzleId, JSON.stringify({
           grid: this.grid,
+          notes: this.notes,
           timer: this.timer,
           hintsUsed: this.hintsUsed,
           errorsCount: this.errorsCount,
@@ -516,6 +612,7 @@ document.addEventListener('alpine:init', () => {
         if (!raw) return;
         const data = JSON.parse(raw);
         if (data.grid) this.grid = data.grid;
+        if (data.notes && Array.isArray(data.notes) && data.notes.length === 9) this.notes = data.notes;
         this.timer = data.timer || 0;
         this.hintsUsed = data.hintsUsed || 0;
         this.errorsCount = data.errorsCount || 0;
@@ -537,6 +634,8 @@ document.addEventListener('alpine:init', () => {
 
     restartGrid() {
       this.grid = JSON.parse(JSON.stringify(this.originalGrid));
+      this.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => []));
+      this.notesMode = false;
       this.timer = 0;
       this.hintsUsed = 0;
       this.errorsCount = 0;
@@ -615,7 +714,14 @@ document.addEventListener('alpine:init', () => {
     },
 
     handleKey(e, r, c) {
-      if (e.key >= '1' && e.key <= '9') { e.preventDefault(); this.selectCell(r, c); this.inputValue(parseInt(e.key, 10)); }
+      if (e.key >= '1' && e.key <= '9') {
+        e.preventDefault();
+        this.selectCell(r, c);
+        const num = parseInt(e.key, 10);
+        // #180 : Shift+chiffre = toggle note (raccourci desktop)
+        if (e.shiftKey) this.toggleNote(r, c, num);
+        else this.inputValue(num);
+      }
       else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { e.preventDefault(); this.selectCell(r, c); this.clearCell(); }
       else if (e.key === 'ArrowUp' && r > 0) { e.preventDefault(); this.selectCell(r-1, c); }
       else if (e.key === 'ArrowDown' && r < 8) { e.preventDefault(); this.selectCell(r+1, c); }
