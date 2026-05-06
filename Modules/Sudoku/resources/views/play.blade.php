@@ -69,15 +69,7 @@
               </template>
             </div>
 
-            {{-- #191 + #195 + #196 : Badge sticky mode notes (rouge = alerte vs cadre bleu calme) --}}
-            <div x-show="notesMode" x-transition.opacity
-                 class="alert mb-3 d-flex align-items-center gap-2 py-2 flex-wrap"
-                 role="status" aria-live="polite"
-                 style="background:#fee2e2;border:1px solid #ef4444;color:#991b1b;border-radius:8px;font-weight:600;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              <span>{{ __('Mode prise de notes') }}</span>
-              <span class="ms-auto small fw-normal" style="opacity:0.85;">{{ __('Vos chiffres s\'inscrivent en petit comme aide-mémoire — sans remplir la cellule. Désactivez « Notes » pour valider.') }}</span>
-            </div>
+            {{-- #199 : badge mode notes retire (user feedback). Indication via cellule + keypad + icone seul. --}}
 
             {{-- Layout 2 colonnes : grille + sidebar --}}
             <div class="row g-4">
@@ -173,7 +165,12 @@
                       <button type="button" class="btn btn-outline-secondary" @click="togglePause()" :disabled="completed">
                         <span x-text="paused ? '{{ __('Reprendre') }}' : '{{ __('Pause') }}'"></span>
                       </button>
-                      <button type="button" class="btn btn-outline-secondary" @click="askRestart()">{{ __('Recommencer') }}</button>
+                      <button type="button" class="btn btn-outline-secondary" @click="askRestart()" :disabled="completed">
+                        <span class="d-inline-flex align-items-center gap-1 justify-content-center">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                          {{ __('Nouvelle grille') }}
+                        </span>
+                      </button>
                     </div>
 
                     <div id="sudoku-status" class="mt-3 text-center small" style="min-height:1.5em;color:#053d4a;" aria-live="polite" x-text="statusMessage"></div>
@@ -211,15 +208,18 @@
               </div>
             </div>
 
-            {{-- Modal restart (anti-popup natif) --}}
+            {{-- Modal nouvelle grille (#197 - anti-popup natif) --}}
             <div class="modal fade" id="restartModal" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="border-radius:12px;border:none;">
-                  <div class="modal-header"><h5 class="modal-title">{{ __('Recommencer ?') }}</h5></div>
-                  <div class="modal-body"><p>{{ __('Toute progression sur cette grille sera perdue. Confirmer ?') }}</p></div>
+                  <div class="modal-header"><h5 class="modal-title">{{ __('Nouvelle grille ?') }}</h5></div>
+                  <div class="modal-body"><p>{{ __('Une nouvelle grille du même niveau sera générée à la demande (gratuit, instantané). Votre progression actuelle sera perdue. Confirmer ?') }}</p></div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
-                    <button type="button" class="btn btn-danger" @click="restartGrid()">{{ __('Recommencer') }}</button>
+                    <button type="button" class="btn btn-danger" @click="restartGrid()" :disabled="regenerating">
+                      <span x-show="!regenerating">{{ __('Générer nouvelle grille') }}</span>
+                      <span x-show="regenerating">{{ __('Génération…') }}</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -253,9 +253,9 @@
   grid-template-columns: repeat(9, var(--sudoku-cell));
   grid-template-rows: repeat(9, var(--sudoku-cell));
   background: #1f2937;
-  /* #196 : cadre bleu en mode normal (calme), rouge en notes (alerte) */
-  border: 3px solid #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  /* #198 : cadre grille = default Memora (pas de couleur dynamique). Seule
+     la cellule selectionnee change de couleur selon notesMode. */
+  border: 3px solid #1f2937;
   gap: 1px;
   /* fit-content : largeur strictement = 9 cellules + 8 gaps + 6px border.
      Evite l'erreur de calc() qui oubliait les gaps internes -> bordure
@@ -281,16 +281,14 @@
   color: #053d4a;
   cursor: default;
 }
+/* #198 : cellule selectionnee bleue en mode normal */
 .sudoku-cell.is-selected {
-  outline: 3px solid #C2410C;
+  outline: 3px solid #3b82f6;
   outline-offset: -3px;
+  background: #eff6ff;
   z-index: 2;
 }
-/* #196 : mode notes -> cadre grille rouge (alerte) + cellule rouge clair */
-.sudoku-notes-mode {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35) !important;
-}
+/* #198 : cellule selectionnee rouge en mode notes (alerte tu n'es pas en saisie validee) */
 .sudoku-notes-mode .sudoku-cell.is-selected {
   outline: 3px solid #ef4444;
   background: #fef2f2;
@@ -369,9 +367,12 @@
 .sudoku-cell[data-row="2"],
 .sudoku-cell[data-row="5"] { border-bottom: 2px solid #1f2937; }
 .sudoku-cell:focus {
-  outline: 3px solid #C2410C;
+  outline: 3px solid #3b82f6;
   outline-offset: -3px;
   z-index: 3;
+}
+.sudoku-notes-mode .sudoku-cell:focus {
+  outline: 3px solid #ef4444;
 }
 .sudoku-key {
   /* #174 v2 fix : !important pour battre Bootstrap .btn padding override. */
@@ -437,6 +438,7 @@ document.addEventListener('alpine:init', () => {
     statusMessage: '',
     pseudo: '',
     submitting: false,
+    regenerating: false,
     resultMessage: '',
     resultIsSuccess: false,
     winModalEl: null,
@@ -680,20 +682,48 @@ document.addEventListener('alpine:init', () => {
       this.restartModalEl?.show();
     },
 
-    restartGrid() {
-      this.grid = JSON.parse(JSON.stringify(this.originalGrid));
-      this.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => []));
-      this.notesMode = false;
-      this.timer = 0;
-      this.hintsUsed = 0;
-      this.errorsCount = 0;
-      this.errorsCells.clear();
-      this.completed = false;
-      this.paused = false;
-      this.selectedCell = { row: -1, col: -1 };
-      try { localStorage.removeItem('sudoku_state_' + this.currentPuzzleId); } catch(e) {}
-      this.startTimer();
-      this.restartModalEl?.hide();
+    async restartGrid() {
+      // #197 : "Nouvelle grille" - genere fresh via API au lieu de juste reset.
+      if (this.regenerating) return;
+      this.regenerating = true;
+      try {
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+        const res = await fetch('/api/sudoku/regenerate/' + this.currentDifficulty, {
+          method: 'POST',
+          headers: { 'X-CSRF-TOKEN': csrf || '', 'Accept': 'application/json' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        // Update puzzle in state + clear localStorage de l'ancien puzzle
+        try { localStorage.removeItem('sudoku_state_' + this.currentPuzzleId); } catch(e) {}
+        this.puzzles[this.activeIdx] = {
+          ...this.puzzles[this.activeIdx],
+          id: data.puzzle_id,
+          grid_init: data.grid_init,
+          clues_count: data.clues_count,
+        };
+        this.currentPuzzleId = data.puzzle_id;
+        this.originalGrid = JSON.parse(JSON.stringify(data.grid_init));
+        this.grid = JSON.parse(JSON.stringify(data.grid_init));
+        this.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => []));
+        this.notesMode = false;
+        this.timer = 0;
+        this.hintsUsed = 0;
+        this.errorsCount = 0;
+        this.errorsCells.clear();
+        this.completed = false;
+        this.paused = false;
+        this.selectedCell = { row: -1, col: -1 };
+        this.statusMessage = 'Nouvelle grille générée.';
+        setTimeout(() => { this.statusMessage = ''; }, 2500);
+        this.startTimer();
+      } catch (e) {
+        this.statusMessage = 'Erreur génération : ' + e.message;
+        setTimeout(() => { this.statusMessage = ''; }, 3000);
+      } finally {
+        this.regenerating = false;
+        this.restartModalEl?.hide();
+      }
     },
 
     verifyComplete() {

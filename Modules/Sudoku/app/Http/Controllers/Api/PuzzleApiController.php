@@ -34,6 +34,31 @@ class PuzzleApiController extends Controller
         ]);
     }
 
+    /**
+     * #197 : regenere le puzzle du jour pour la difficulte donnee.
+     * Delete + recreate via SudokuGeneratorService. Throttle 6/min.
+     */
+    public function regenerate(Request $request, string $difficulty): JsonResponse
+    {
+        abort_unless(in_array($difficulty, self::ALLOWED, true), 400);
+
+        $existing = SudokuPuzzle::today()->ofDifficulty($difficulty)->first();
+        if ($existing) {
+            $existing->delete();
+        }
+        $puzzle = app(SudokuGeneratorService::class)->generateForToday($difficulty);
+
+        return response()->json([
+            'puzzle_id' => $puzzle->id,
+            'grid_init' => $puzzle->grid_init,
+            'clues_count' => $puzzle->clues_count,
+            'difficulty' => $puzzle->difficulty,
+            'difficulty_label' => $puzzle->getDifficultyLabel(),
+            'difficulty_color' => $puzzle->getDifficultyColor(),
+            'date' => $puzzle->date->toDateString(),
+        ]);
+    }
+
     public function byDate(Request $request, string $date, string $difficulty): JsonResponse
     {
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
