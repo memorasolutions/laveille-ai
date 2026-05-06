@@ -209,7 +209,11 @@
   background: #1f2937;
   border: 3px solid #1f2937;
   gap: 1px;
-  max-width: calc(9 * var(--sudoku-cell) + 6px);
+  /* fit-content : largeur strictement = 9 cellules + 8 gaps + 6px border.
+     Evite l'erreur de calc() qui oubliait les gaps internes -> bordure
+     droite coupee. */
+  width: fit-content;
+  max-width: 100%;
   user-select: none;
 }
 .sudoku-cell {
