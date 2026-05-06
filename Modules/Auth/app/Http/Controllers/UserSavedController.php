@@ -56,6 +56,46 @@ class UserSavedController extends Controller
             );
         }
 
+        // 2026-05-06 #170/#171 : parties sudoku sauvegardees (DRY pattern Memora)
+        if (class_exists(\Modules\Sudoku\Models\SavedSudokuPreset::class)) {
+            $items = $items->merge(
+                \Modules\Sudoku\Models\SavedSudokuPreset::forUser($user->id)
+                    ->with('puzzle')
+                    ->latest('last_saved_at')
+                    ->get()
+                    ->map(function ($p) {
+                        $puzzle = $p->puzzle;
+                        $difficultyLabel = $puzzle ? $puzzle->getDifficultyLabel() : '?';
+                        $puzzleDate = $puzzle ? \Carbon\Carbon::parse($puzzle->date)->isoFormat('LL') : '';
+                        $filled = 0;
+                        $total = 81;
+                        if (is_array($p->grid_state)) {
+                            foreach ($p->grid_state as $row) {
+                                if (is_array($row)) foreach ($row as $v) if ((int) $v !== 0) $filled++;
+                            }
+                        }
+                        $pct = $total > 0 ? (int) round($filled / $total * 100) : 0;
+                        $minutes = (int) floor(((int) $p->time_elapsed) / 60);
+                        $seconds = ((int) $p->time_elapsed) % 60;
+                        $timeStr = sprintf('%02d:%02d', $minutes, $seconds);
+
+                        return (object) [
+                            'id' => $p->id,
+                            'public_id' => (string) $p->id,
+                            'type' => 'sudoku',
+                            'name' => __('Sudoku').' '.$difficultyLabel.' — '.$puzzleDate,
+                            'preview' => $pct.'% '.__('rempli').' · '.$timeStr.' · '.((int) $p->errors_count).' '.__('erreurs').' · '.((int) $p->hints_used).' '.__('indices'),
+                            'tool_name' => __('Sudoku quotidien'),
+                            'tool_slug' => 'sudoku',
+                            'tool_icon' => '🔢',
+                            'tool_color' => '#053d4a',
+                            'api_path' => '/api/sudoku/preset/',
+                            'created_at' => $p->last_saved_at ?? $p->created_at,
+                        ];
+                    })
+            );
+        }
+
         // 2026-05-05 #117 : grilles mots-croisés sauvegardées (DRY pattern Memora)
         if (class_exists(\Modules\Tools\Models\SavedCrosswordPreset::class)) {
             $items = $items->merge(

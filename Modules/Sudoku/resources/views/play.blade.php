@@ -237,9 +237,12 @@
 .sudoku-cell.peer-highlight {
   background: #e0f2fe;
 }
-.sudoku-grid > :nth-child(3n):not(:nth-child(9n)) { border-right: 2px solid #1f2937; }
-.sudoku-grid > :nth-child(n+19):nth-child(-n+27),
-.sudoku-grid > :nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid #1f2937; }
+/* #172 fix : Alpine <template x-for> insere des markers commentaires qui cassent
+   :nth-child. Utiliser data-col/data-row attribute selectors (positions explicites). */
+.sudoku-cell[data-col="2"],
+.sudoku-cell[data-col="5"] { border-right: 2px solid #1f2937; }
+.sudoku-cell[data-row="2"],
+.sudoku-cell[data-row="5"] { border-bottom: 2px solid #1f2937; }
 .sudoku-cell:focus {
   outline: 3px solid #C2410C;
   outline-offset: -3px;
