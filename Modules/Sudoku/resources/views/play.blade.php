@@ -69,11 +69,21 @@
               </template>
             </div>
 
+            {{-- #191 : Badge sticky NOTES (visible quand mode actif, standard NYT 2026) --}}
+            <div x-show="notesMode" x-transition.opacity
+                 class="alert mb-3 d-flex align-items-center gap-2 py-2"
+                 role="status" aria-live="polite"
+                 style="background:#dbeafe;border:1px solid #3b82f6;color:#1e40af;border-radius:8px;font-weight:600;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>{{ __('Mode notes actif') }}</span>
+              <span class="ms-auto small" style="opacity:0.8;">{{ __('Les chiffres sont ajoutés comme candidats, pas validés.') }}</span>
+            </div>
+
             {{-- Layout 2 colonnes : grille + sidebar --}}
             <div class="row g-4">
               <div class="col-lg-8 col-12">
                 <div class="sudoku-grid-wrapper" style="position:relative;">
-                <div class="sudoku-grid mx-auto" role="grid" :aria-label="'Grille Sudoku ' + currentDifficulty" :class="{ 'sudoku-paused': paused }">
+                <div class="sudoku-grid mx-auto" role="grid" :aria-label="'Grille Sudoku ' + currentDifficulty" :class="{ 'sudoku-paused': paused, 'sudoku-notes-mode': notesMode }">
                   <template x-for="(row, r) in grid" :key="'r'+r">
                     <template x-for="(value, c) in row" :key="'c'+r+'-'+c">
                       <div class="sudoku-cell"
@@ -111,10 +121,13 @@
                 </div>
                 </div>{{-- /sudoku-grid-wrapper --}}
 
-                {{-- Keypad --}}
-                <div class="mt-3 d-flex flex-wrap justify-content-center gap-2" id="numeric-keypad" aria-label="{{ __('Clavier numérique') }}">
+                {{-- Keypad — bordure bleue quand notesMode (visuel #191) --}}
+                <div class="mt-3 d-flex flex-wrap justify-content-center gap-2" id="numeric-keypad" aria-label="{{ __('Clavier numérique') }}" :class="{ 'keypad-notes-mode': notesMode }">
                   <template x-for="n in 9" :key="'k'+n">
-                    <button type="button" class="btn btn-outline-secondary sudoku-key" @click="inputValue(n)" :disabled="completed||paused" :aria-label="'Saisir le chiffre ' + n" x-text="n"></button>
+                    <button type="button" class="btn sudoku-key"
+                            :class="notesMode ? 'btn-outline-primary' : 'btn-outline-secondary'"
+                            @click="inputValue(n)" :disabled="completed||paused"
+                            :aria-label="(notesMode ? '{{ __('Note') }} ' : '{{ __('Saisir le chiffre') }} ') + n" x-text="n"></button>
                   </template>
                   <button type="button" class="btn btn-outline-danger sudoku-key" @click="clearCell()" :disabled="completed||paused" aria-label="{{ __('Effacer la cellule') }}">&times;</button>
                 </div>
@@ -270,6 +283,27 @@
   outline: 3px solid #C2410C;
   outline-offset: -3px;
   z-index: 2;
+}
+/* #191 : mode notes -> cellule selectionnee bleue (vs orange saisie normale) */
+.sudoku-notes-mode .sudoku-cell.is-selected {
+  outline: 3px solid #3b82f6;
+  background: #eff6ff;
+}
+/* Cadre grille discret bleu en mode notes (idée user adaptée Memora) */
+.sudoku-notes-mode {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+/* Icone crayon coin haut-droit cellule selectionnee en mode notes */
+.sudoku-notes-mode .sudoku-cell.is-selected::after {
+  content: "✎";
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  font-size: 0.6em;
+  color: #3b82f6;
+  font-weight: 700;
+  pointer-events: none;
 }
 .sudoku-cell.is-error {
   background: #fee2e2 !important;
