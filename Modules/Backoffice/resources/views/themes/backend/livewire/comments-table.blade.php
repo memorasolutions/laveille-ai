@@ -105,21 +105,31 @@
                     </td>
                     <td class="text-muted small">{{ $comment->created_at->format('d/m/Y H:i') }}</td>
                     <td>
-                        <div class="position-relative d-inline-block" x-data="{ open: false }" @click.outside="open = false">
-                            <button @click="open = !open"
-                                    class="btn btn-sm btn-light rounded-circle d-inline-flex align-items-center justify-content-center"
-                                    style="width:32px;height:32px;">
-                                <i data-lucide="more-vertical" class="icon-sm"></i>
+                        {{-- #183 : Bootstrap dropdown standard avec auto-flip Popper.js +
+                             kebab 40x40 (WCAG target size). data-bs-display="dynamic"
+                             active flip up si pas assez de place en bas. --}}
+                        <div class="dropdown">
+                            <button type="button"
+                                    class="btn btn-light rounded-circle d-inline-flex align-items-center justify-content-center memora-kebab"
+                                    data-bs-toggle="dropdown"
+                                    data-bs-display="dynamic"
+                                    data-bs-auto-close="true"
+                                    aria-expanded="false"
+                                    aria-label="{{ __('Actions') }}">
+                                <i data-lucide="more-vertical" class="icon-md"></i>
                             </button>
-                            <div x-show="open" x-cloak
-                                 class="dropdown-menu show position-absolute end-0 mt-1 shadow"
-                                 style="z-index:50;min-width:140px;">
-                                <button wire:click="delete({{ $comment->id }})"
-                                        wire:confirm="{{ __('Supprimer définitivement ?') }}"
-                                        class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                            <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:160px;">
+                                <li><button type="button" wire:click="changeStatus({{ $comment->id }}, 'approved')" class="dropdown-item d-flex align-items-center gap-2 text-success">
+                                    <i data-lucide="check-circle" class="icon-sm"></i> {{ __('Approuver') }}
+                                </button></li>
+                                <li><button type="button" wire:click="changeStatus({{ $comment->id }}, 'spam')" class="dropdown-item d-flex align-items-center gap-2 text-warning">
+                                    <i data-lucide="alert-triangle" class="icon-sm"></i> {{ __('Spam') }}
+                                </button></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><button type="button" wire:click="delete({{ $comment->id }})" wire:confirm="{{ __('Supprimer définitivement ?') }}" class="dropdown-item d-flex align-items-center gap-2 text-danger">
                                     <i data-lucide="trash-2" class="icon-sm"></i> {{ __('Supprimer') }}
-                                </button>
-                            </div>
+                                </button></li>
+                            </ul>
                         </div>
                     </td>
                 </tr>

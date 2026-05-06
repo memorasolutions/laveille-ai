@@ -67,6 +67,29 @@
     <style>
         .sidebar .nav-link { min-height: 48px; padding-top: 10px; padding-bottom: 10px; display: flex; align-items: center; }
         .sidebar .sub-menu .nav-link { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+
+        /* #183 (2026-05-06) : kebab buttons admin tous standardisés WCAG target size 40x40
+           + dropdown auto-flip via Bootstrap data-bs-display="dynamic" partout. */
+        .memora-kebab,
+        .btn-light.rounded-circle:has(> i[data-lucide="more-vertical"]),
+        .btn-light.rounded-circle:has(> i[data-lucide="more-horizontal"]) {
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            min-height: 40px !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .memora-kebab i[data-lucide],
+        .btn-light.rounded-circle i[data-lucide="more-vertical"],
+        .btn-light.rounded-circle i[data-lucide="more-horizontal"] {
+            width: 18px !important;
+            height: 18px !important;
+        }
+        /* Dropdown actions : auto-flip-up si pres du bas viewport */
+        .dropdown-menu { z-index: 1050; }
     </style>
 
     @livewireStyles
