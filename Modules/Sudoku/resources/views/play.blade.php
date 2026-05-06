@@ -7,12 +7,14 @@
     <meta property="og:title" content="Sudoku quotidien - La veille">
     <meta property="og:description" content="5 grilles fraiches chaque jour, 5 niveaux, classements live.">
     <script type="application/ld+json">
+    @verbatim
     {
       "@context": "https://schema.org",
       "@type": "Game",
       "name": "Sudoku quotidien",
       "description": "Sudoku 9x9 avec 5 niveaux de difficulte, classements et streak.",
       "gamePlatform": "Web",
+    @endverbatim
       "url": "{{ route('sudoku.play') }}"
     }
     </script>
