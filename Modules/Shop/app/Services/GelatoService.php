@@ -59,19 +59,7 @@ class GelatoService
                 'customerReferenceId' => (string) ($order->user_id ?? $order->email),
                 'currency' => strtoupper(config('shop.currency', 'CAD')),
                 'items' => $order->items->map(function ($item) {
-                    $product = $item->product;
-                    $entry = [
-                        'itemReferenceId' => (string) $item->id,
-                        'productUid' => $item->gelato_variant_id,
-                        'quantity' => $item->quantity,
-                    ];
-
-                    // Fichier d'impression obligatoire pour la production
-                    if ($product && !empty($product->metadata['print_file_url'])) {
-                        $entry['files'] = [['type' => 'default', 'url' => $product->metadata['print_file_url']]];
-                    }
-
-                    return $entry;
+                    return $this->buildOrderItemPayload($item);
                 })->toArray(),
                 'shippingAddress' => [
                     'firstName' => $address['first_name'] ?? '',
@@ -98,6 +86,51 @@ class GelatoService
             Log::error('Gelato createOrder: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Construit le payload Gelato pour un OrderItem.
+     *
+     * Priorité 1 : storeProductVariantId (store Gelato publié = design source de vérité)
+     *   → Gelato utilise automatiquement le design uploadé dans le store, pas de fileUrl à fournir.
+     *   → Évite les régressions de design (ex : t-shirt #210 imprimé avec ancien fileUrl DB stale).
+     *
+     * Priorité 2 (fallback) : productUid + files custom (ancien comportement)
+     *   → Utilisé si store non publié, ou variant non synchronisé via shop:sync-gelato.
+     *   → Loggé en warning pour traçabilité.
+     */
+    private function buildOrderItemPayload($item): array
+    {
+        $product = $item->product;
+        $productUid = $item->gelato_variant_id;
+
+        $storeVariantId = $product->metadata['store_variant_map'][$productUid] ?? null;
+
+        if ($storeVariantId) {
+            return [
+                'itemReferenceId' => (string) $item->id,
+                'storeProductVariantId' => $storeVariantId,
+                'quantity' => $item->quantity,
+            ];
+        }
+
+        Log::warning('Gelato createOrder fallback : storeProductVariantId absent, utilisation productUid+files', [
+            'order_item_id' => $item->id,
+            'product_uid' => $productUid,
+            'product_id' => $product->id ?? null,
+        ]);
+
+        $entry = [
+            'itemReferenceId' => (string) $item->id,
+            'productUid' => $productUid,
+            'quantity' => $item->quantity,
+        ];
+
+        if ($product && !empty($product->metadata['print_file_url'])) {
+            $entry['files'] = [['type' => 'default', 'url' => $product->metadata['print_file_url']]];
+        }
+
+        return $entry;
     }
 
     public function getOrder(string $gelatoOrderId): array
