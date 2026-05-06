@@ -55,14 +55,18 @@ class SudokuPuzzle extends Model
         ][$this->difficulty] ?? $this->difficulty;
     }
 
+    /**
+     * #207 : couleurs assombries WCAG 2.2 AAA (>=7:1 sur fond blanc).
+     * Coherent avec leaderboards CSS classes lb-* et play pills.
+     */
     public function getDifficultyColor(): string
     {
         return [
-            'easy' => '#10B981',
-            'medium' => '#0B7285',
-            'hard' => '#7C3AED',
-            'expert' => '#C2410C',
-            'diabolical' => '#1f2937',
+            'easy' => '#065F46',       // emerald-800, 8.5:1
+            'medium' => '#053D4A',     // teal-deep Memora, 9.5:1
+            'hard' => '#4C1D95',       // violet-900, 11:1
+            'expert' => '#7C2D12',     // orange-900, 9.2:1
+            'diabolical' => '#1f2937', // slate-800, 14:1
         ][$this->difficulty] ?? '#6B7280';
     }
 }
