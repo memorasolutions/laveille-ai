@@ -295,20 +295,23 @@
   align-items: center;
   justify-content: center;
 }
-/* #179 anti-triche : grille floutee + overlay pendant pause */
+/* #179 + #187 anti-triche : grille floutee + overlay pendant pause */
 .sudoku-paused {
-  filter: blur(8px);
+  filter: blur(14px) saturate(0.5);
   pointer-events: none;
   user-select: none;
+  transition: filter 200ms ease;
 }
 .sudoku-pause-overlay {
   position: absolute;
-  inset: 0;
+  inset: -8px;
   display: flex !important;
   align-items: center;
   justify-content: center;
   z-index: 5;
-  background: rgba(5, 61, 74, 0.92);
+  background: rgba(5, 61, 74, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   cursor: pointer;
   border-radius: 8px;
 }
