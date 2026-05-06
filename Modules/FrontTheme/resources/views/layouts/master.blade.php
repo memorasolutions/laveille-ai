@@ -179,6 +179,8 @@
         .wpo-blog-sponsored-section .wpo-blog-img img { height: 180px; }
     </style>
     @stack('styles')
+    {{-- #165 fix : Livewire styles indispensables pour composants comme commentaires (community-comments-thread) --}}
+    @livewireStyles
 </head>
 
 <body>
@@ -289,6 +291,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
+    {{-- #165 fix : Livewire scripts indispensables pour composants front (commentaires, etc.) --}}
+    @livewireScripts
     @include('fronttheme::partials.toast')
 
     @if(session('newsletter_success') || session('newsletter_confirmed') || session('newsletter_unsubscribed'))
