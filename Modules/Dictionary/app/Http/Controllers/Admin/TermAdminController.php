@@ -39,6 +39,9 @@ class TermAdminController extends Controller
             'dictionary_category_id' => 'nullable|exists:dictionary_categories,id',
             'is_published' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            // 2026-05-06 #157 : auto-link WSD
+            'match_strategy' => 'nullable|in:loose,partial_case_sensitive,case_sensitive,exact_phrase,never_auto',
+            'aliases' => 'nullable|string',
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -51,9 +54,22 @@ class TermAdminController extends Controller
             'dictionary_category_id' => $validated['dictionary_category_id'],
             'is_published' => $request->boolean('is_published'),
             'sort_order' => $validated['sort_order'] ?? 0,
+            'match_strategy' => $validated['match_strategy'] ?? 'loose',
+            'aliases' => self::parseAliases($validated['aliases'] ?? null),
         ]);
 
         return redirect()->route('admin.dictionary.index')->with('success', __('Terme créé.'));
+    }
+
+    /**
+     * 2026-05-06 #157 : convertit le textarea aliases (1 par ligne) en array nettoyé.
+     */
+    protected static function parseAliases(?string $raw): ?array
+    {
+        if (! $raw) return null;
+        $lines = preg_split('/\r\n|\n|\r/', trim($raw));
+        $aliases = array_values(array_filter(array_map('trim', $lines), fn ($l) => $l !== ''));
+        return empty($aliases) ? null : $aliases;
     }
 
     public function edit(Term $term): View
@@ -73,6 +89,8 @@ class TermAdminController extends Controller
             'dictionary_category_id' => 'nullable|exists:dictionary_categories,id',
             'is_published' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            'match_strategy' => 'nullable|in:loose,partial_case_sensitive,case_sensitive,exact_phrase,never_auto',
+            'aliases' => 'nullable|string',
         ]);
 
         $locale = app()->getLocale();
@@ -84,6 +102,8 @@ class TermAdminController extends Controller
         $term->dictionary_category_id = $validated['dictionary_category_id'];
         $term->is_published = $request->boolean('is_published');
         $term->sort_order = $validated['sort_order'] ?? 0;
+        $term->match_strategy = $validated['match_strategy'] ?? 'loose';
+        $term->aliases = self::parseAliases($validated['aliases'] ?? null);
         $term->save();
 
         return redirect()->route('admin.dictionary.index')->with('success', __('Terme mis à jour.'));
