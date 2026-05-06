@@ -69,11 +69,11 @@
               </template>
             </div>
 
-            {{-- #191 + #195 : Badge sticky mode notes (visible quand actif). Wording user-friendly --}}
+            {{-- #191 + #195 + #196 : Badge sticky mode notes (rouge = alerte vs cadre bleu calme) --}}
             <div x-show="notesMode" x-transition.opacity
                  class="alert mb-3 d-flex align-items-center gap-2 py-2 flex-wrap"
                  role="status" aria-live="polite"
-                 style="background:#dbeafe;border:1px solid #3b82f6;color:#1e40af;border-radius:8px;font-weight:600;">
+                 style="background:#fee2e2;border:1px solid #ef4444;color:#991b1b;border-radius:8px;font-weight:600;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               <span>{{ __('Mode prise de notes') }}</span>
               <span class="ms-auto small fw-normal" style="opacity:0.85;">{{ __('Vos chiffres s\'inscrivent en petit comme aide-mémoire — sans remplir la cellule. Désactivez « Notes » pour valider.') }}</span>
@@ -121,15 +121,15 @@
                 </div>
                 </div>{{-- /sudoku-grid-wrapper --}}
 
-                {{-- Keypad — bordure bleue quand notesMode (visuel #191) --}}
+                {{-- Keypad — bordure rouge en notesMode, bleue en saisie normale (#196) --}}
                 <div class="mt-3 d-flex flex-wrap justify-content-center gap-2" id="numeric-keypad" aria-label="{{ __('Clavier numérique') }}" :class="{ 'keypad-notes-mode': notesMode }">
                   <template x-for="n in 9" :key="'k'+n">
                     <button type="button" class="btn sudoku-key"
-                            :class="notesMode ? 'btn-outline-primary' : 'btn-outline-secondary'"
+                            :class="notesMode ? 'btn-outline-danger' : 'btn-outline-primary'"
                             @click="inputValue(n)" :disabled="completed||paused"
                             :aria-label="(notesMode ? '{{ __('Note') }} ' : '{{ __('Saisir le chiffre') }} ') + n" x-text="n"></button>
                   </template>
-                  <button type="button" class="btn btn-outline-danger sudoku-key" @click="clearCell()" :disabled="completed||paused" aria-label="{{ __('Effacer la cellule') }}">&times;</button>
+                  <button type="button" class="btn btn-outline-secondary sudoku-key" @click="clearCell()" :disabled="completed||paused" aria-label="{{ __('Effacer la cellule') }}">&times;</button>
                 </div>
               </div>
 
@@ -253,7 +253,9 @@
   grid-template-columns: repeat(9, var(--sudoku-cell));
   grid-template-rows: repeat(9, var(--sudoku-cell));
   background: #1f2937;
-  border: 3px solid #1f2937;
+  /* #196 : cadre bleu en mode normal (calme), rouge en notes (alerte) */
+  border: 3px solid #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   gap: 1px;
   /* fit-content : largeur strictement = 9 cellules + 8 gaps + 6px border.
      Evite l'erreur de calc() qui oubliait les gaps internes -> bordure
@@ -284,15 +286,14 @@
   outline-offset: -3px;
   z-index: 2;
 }
-/* #191 : mode notes -> cellule selectionnee bleue (vs orange saisie normale) */
-.sudoku-notes-mode .sudoku-cell.is-selected {
-  outline: 3px solid #3b82f6;
-  background: #eff6ff;
-}
-/* Cadre grille discret bleu en mode notes (idée user adaptée Memora) */
+/* #196 : mode notes -> cadre grille rouge (alerte) + cellule rouge clair */
 .sudoku-notes-mode {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35) !important;
+}
+.sudoku-notes-mode .sudoku-cell.is-selected {
+  outline: 3px solid #ef4444;
+  background: #fef2f2;
 }
 /* Icone crayon coin haut-droit cellule selectionnee en mode notes */
 .sudoku-notes-mode .sudoku-cell.is-selected::after {
@@ -301,7 +302,7 @@
   top: 1px;
   right: 3px;
   font-size: 0.6em;
-  color: #3b82f6;
+  color: #ef4444;
   font-weight: 700;
   pointer-events: none;
 }
