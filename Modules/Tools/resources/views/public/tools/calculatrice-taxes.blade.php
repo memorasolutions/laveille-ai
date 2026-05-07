@@ -254,7 +254,36 @@
 @endsection
 
 @push('scripts')
+@php
+    $calcHelp = [
+        'province' => [
+            'title' => 'ⓘ Province / Territoire',
+            'body' => '<p>Choisissez votre province ou territoire canadien. Les taxes varient selon la région :</p>'
+                    . '<ul>'
+                    . '<li><strong>TPS (5 %) seule</strong> : Alberta, Yukon, Territoires du Nord-Ouest, Nunavut.</li>'
+                    . '<li><strong>TPS + TVQ</strong> : Québec (5 % + 9,975 % = 14,975 %).</li>'
+                    . '<li><strong>TPS + TVP</strong> : Colombie-Britannique (12 %), Manitoba (12 %), Saskatchewan (11 %).</li>'
+                    . '<li><strong>TVH unique</strong> : Ontario (13 %), Nouveau-Brunswick / Terre-Neuve / Île-du-Prince-Édouard (15 %), Nouvelle-Écosse (14 %).</li>'
+                    . '</ul>'
+                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">Taux mis à jour 2025 (Revenu Canada / Revenu Québec).</p>',
+        ],
+        'avant_taxes' => [
+            'title' => 'ⓘ Montant avant taxes',
+            'body' => '<p>Le montant <strong>avant taxes</strong> (sous-total HT) est le prix affiché du produit ou service, <strong>avant ajout</strong> de la TPS, TVQ, TVP ou TVH.</p>'
+                    . '<p><strong>Exemple Québec :</strong> vous achetez un article à 100 $ avant taxes. À la caisse, on ajoute 5 $ TPS et 9,98 $ TVQ. Vous payez 114,98 $ au total.</p>'
+                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">💡 Saisissez ce montant si vous connaissez le prix avant taxes — l autre champ se calcule automatiquement.</p>',
+        ],
+        'avec_taxes' => [
+            'title' => 'ⓘ Montant avec taxes',
+            'body' => '<p>Le montant <strong>avec taxes</strong> (TTC) est le total final que vous payez, <strong>incluant</strong> toutes les taxes applicables.</p>'
+                    . '<p><strong>Exemple Québec :</strong> vous payez 114,98 $ à la caisse. La calculatrice décompose : 100 $ avant taxes + 5 $ TPS + 9,98 $ TVQ.</p>'
+                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">💡 Saisissez ce montant pour faire le calcul inversé — l autre champ se calcule automatiquement.</p>'
+                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">🍽️ Si vous avez ajouté un pourboire à ce montant, cochez « Le total inclut un pourboire » pour décomposer pourboire, taxes et sous-total.</p>',
+        ],
+    ];
+@endphp
 <script>
+    window.HELP_CONTENT = {!! json_encode($calcHelp, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
     window.taxConfig = {
         tax_rates: {
             AB: {name: 'Alberta', gst: 5, pst: 0, total: 5},
