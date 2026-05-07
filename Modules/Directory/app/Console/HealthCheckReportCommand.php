@@ -33,6 +33,14 @@ class HealthCheckReportCommand extends Command
 
     public function handle(): int
     {
+        // S84 #31 — Lock file pour éviter envois multiples (incident user 3 emails dupliqués)
+        $lockFile = storage_path('app/health-check-report.lock');
+        if (file_exists($lockFile) && time() - filemtime($lockFile) < 3600) {
+            $this->warn('Lock file actif (<1h) — un autre run en cours ou récent. Skip pour éviter envoi dupliqué.');
+            return self::SUCCESS;
+        }
+        @file_put_contents($lockFile, (string) time());
+
         $query = Tool::published()
             ->whereNotNull('url')
             ->where('lifecycle_status', '!=', 'closed') // skip déjà marqués closed
