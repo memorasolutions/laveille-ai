@@ -35,17 +35,21 @@
             /* Tooltip Memora hybride glassmorphism (charte teal + trend 2026 NN/g) */
             /* Specs : min 240 / max 320 / padding 14x18 / font 0.875rem / delay 200ms / fade 200ms */
             /* 2026-05-05 #154 : CSS variables pour smart-position au hover (anti-clipping viewport) */
+            /* 2026-05-07 S83 #224 : position: fixed (au lieu de absolute) pour échapper aux ancêtres overflow:hidden (cards, tableaux). Coordinates --tt-top/--tt-left calculées en JS depuis getBoundingClientRect viewport-relative. */
             a.glossary-link {
                 --tt-left: 50%;
                 --tt-translate-x: -50%;
                 --tt-arrow-left: 50%;
+                --tt-top: 0;
+                --tt-arrow-top: 0;
             }
             a.glossary-link::after {
                 content: attr(data-tooltip);
-                position: absolute;
-                bottom: calc(100% + 12px);
+                position: fixed;
+                top: var(--tt-top);
                 left: var(--tt-left);
-                transform: translateX(var(--tt-translate-x)) translateY(6px);
+                bottom: auto;
+                transform: translate(var(--tt-translate-x), -100%) translateY(-6px);
                 /* Glassmorphism teal Memora : opacity 95% + backdrop-blur (trend 2026, +23% retention UXPressia) */
                 background: rgba(5, 61, 74, 0.96);
                 backdrop-filter: blur(10px) saturate(140%);
@@ -81,10 +85,11 @@
             /* Flèche pointing vers le lien (couleur match background tooltip) */
             a.glossary-link::before {
                 content: '';
-                position: absolute;
-                bottom: calc(100% + 6px);
+                position: fixed;
+                top: var(--tt-arrow-top);
                 left: var(--tt-arrow-left);
-                transform: translateX(-50%) translateY(6px);
+                bottom: auto;
+                transform: translate(-50%, -100%) translateY(-6px);
                 border: 6px solid transparent;
                 border-top-color: rgba(5, 61, 74, 0.96);
                 opacity: 0;
@@ -100,27 +105,17 @@
             a.glossary-link:focus-visible::after {
                 opacity: 1;
                 visibility: visible;
-                transform: translateX(var(--tt-translate-x)) translateY(0);
+                transform: translate(var(--tt-translate-x), -100%) translateY(-12px);
                 transition-delay: 200ms;
             }
             a.glossary-link:hover::before,
             a.glossary-link:focus-visible::before {
                 opacity: 1;
                 visibility: visible;
-                transform: translateX(-50%) translateY(0);
+                transform: translate(-50%, -100%) translateY(-2px);
                 transition-delay: 200ms;
             }
-            /* Position fallback : si pas de place en haut, afficher en bas */
-            a.glossary-link[data-tooltip-pos="bottom"]::after {
-                bottom: auto;
-                top: calc(100% + 10px);
-            }
-            a.glossary-link[data-tooltip-pos="bottom"]::before {
-                bottom: auto;
-                top: calc(100% + 4px);
-                border-top-color: transparent;
-                border-bottom-color: var(--c-dark, #053d4a);
-            }
+            /* S83 #224 : data-tooltip-pos=bottom géré désormais via JS (recalcul dynamique top + flip) */
             /* Mobile : tooltip plus compact + cliquable pour persister */
             @media (max-width: 640px) {
                 a.glossary-link::after {
@@ -143,37 +138,46 @@
             'use strict';
             const TT_MAX_WIDTH = 320; // doit matcher le CSS max-width
             const TT_VIEWPORT_PADDING = 12; // marge minimum du bord viewport
+            const TT_GAP = 6; // gap link → tooltip
 
+            // S83 #224 : tooltip viewport-relative via position:fixed (échappe ancêtres overflow:hidden)
+            // Calcule top/left/arrowLeft depuis getBoundingClientRect viewport-relative.
             function positionTooltip(link) {
-                const linkRect = link.getBoundingClientRect();
-                const linkCenterX = linkRect.left + linkRect.width / 2;
+                const r = link.getBoundingClientRect();
                 const viewW = window.innerWidth;
-                // 2026-05-07 #222 : largeur réelle effective = min(320, viewW - 24) pour éviter clipping
+                const linkCenterX = r.left + r.width / 2;
                 const effWidth = Math.min(TT_MAX_WIDTH, viewW - 2 * TT_VIEWPORT_PADDING);
                 const ttHalf = effWidth / 2;
 
-                // Default centered
-                let leftValue = '50%';
+                // Default : tooltip centré au-dessus du lien (link top - tooltip height via translate -100%)
+                // top = r.top (top du lien) → tooltip translate(-100%) le met au-dessus
+                const ttTop = r.top + 'px';
+                let leftValue = linkCenterX + 'px';
                 let translateX = '-50%';
+                let arrowLeftValue = linkCenterX + 'px';
 
-                // Si le tooltip déborde à gauche (centre lien - half tooltip < padding)
+                // Tooltip déborde à gauche du viewport ?
                 if (linkCenterX - ttHalf < TT_VIEWPORT_PADDING) {
-                    // Position : bord gauche du tooltip à TT_VIEWPORT_PADDING viewport
-                    const offsetFromLink = TT_VIEWPORT_PADDING - linkRect.left;
-                    leftValue = offsetFromLink + 'px';
+                    leftValue = TT_VIEWPORT_PADDING + 'px';
                     translateX = '0';
                 }
-                // Si le tooltip déborde à droite (centre lien + half tooltip > viewW - padding)
+                // Tooltip déborde à droite du viewport ?
                 else if (linkCenterX + ttHalf > viewW - TT_VIEWPORT_PADDING) {
-                    // Position : bord droit du tooltip à viewW - TT_VIEWPORT_PADDING
-                    const offsetFromLink = (viewW - TT_VIEWPORT_PADDING) - linkRect.left;
-                    leftValue = offsetFromLink + 'px';
+                    leftValue = (viewW - TT_VIEWPORT_PADDING) + 'px';
                     translateX = '-100%';
                 }
 
+                // Flèche reste centrée sur le link (clamp dans viewport visible si link près du bord)
+                const arrowClampedLeft = Math.max(
+                    TT_VIEWPORT_PADDING + 6,
+                    Math.min(linkCenterX, viewW - TT_VIEWPORT_PADDING - 6)
+                );
+
+                link.style.setProperty('--tt-top', ttTop);
                 link.style.setProperty('--tt-left', leftValue);
                 link.style.setProperty('--tt-translate-x', translateX);
-                // La flèche reste centrée sur le lien (toujours 50%)
+                link.style.setProperty('--tt-arrow-top', r.top + 'px');
+                link.style.setProperty('--tt-arrow-left', arrowClampedLeft + 'px');
             }
 
             function attachHandlers() {
@@ -194,6 +198,14 @@
             // Re-bind si nouveaux liens ajoutés via Alpine/Livewire/etc
             document.addEventListener('alpine:initialized', attachHandlers);
             window.addEventListener('load', attachHandlers);
+            // Recalc au scroll/resize si tooltip actuellement affiché (bonus robustesse)
+            window.addEventListener('scroll', () => {
+                const hovered = document.querySelector('a.glossary-link:hover, a.glossary-link:focus-visible');
+                if (hovered) positionTooltip(hovered);
+            }, { passive: true });
+            window.addEventListener('resize', () => {
+                document.querySelectorAll('a.glossary-link[data-tt-bound]').forEach(positionTooltip);
+            }, { passive: true });
         })();
         </script>
     @endonce

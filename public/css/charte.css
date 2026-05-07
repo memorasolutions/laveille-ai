@@ -28,6 +28,55 @@
     --r-btn: 0.5rem;
 }
 
+/* ── 0a. BYLINE BENTO EEAT (#218 S83 — cards blog Option A 95/100 NN/g+EEAT 2026) ── */
+/* Refonte byline avec avatar 40px + nom + rôle + dates dual + reading time */
+.entry-meta-eeat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.entry-author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.entry-author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+.entry-author-name {
+    font-weight: 600;
+    color: var(--c-dark);
+    font-size: 0.9rem;
+    line-height: 1.25;
+    font-family: var(--f-heading);
+}
+.entry-author-role {
+    font-size: 0.75rem;
+    color: var(--c-primary);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+}
+.entry-author-meta {
+    font-size: 0.75rem;
+    color: var(--c-text-muted);
+    line-height: 1.35;
+    margin-top: 2px;
+}
+.entry-author-meta time {
+    color: inherit;
+    font-variant-numeric: tabular-nums;
+}
+
 /* ── 0. ANTI-SCROLL HORIZONTAL GLOBAL (S80 #47) ── */
 /* overflow-x: clip > overflow-x: hidden : ne casse pas position:sticky enfants. Support Chrome 90+, Safari 16+, Firefox 81+. */
 html, body {
