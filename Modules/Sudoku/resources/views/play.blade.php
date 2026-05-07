@@ -74,19 +74,22 @@
                        :id="'sudoku-tip-' + idx"
                        role="tooltip"
                        class="sudoku-pill-tooltip"
-                       style="position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 50; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.10); padding: 12px 14px; min-width: 220px; max-width: 280px; font-size: 0.82rem; color: var(--c-text-secondary, #4a4f5c); line-height: 1.5; text-align: left;">
+                       style="position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 50; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.10); padding: 12px 14px; min-width: 240px; max-width: 300px; font-size: 0.82rem; color: var(--c-text-secondary, #4a4f5c); line-height: 1.5; text-align: left;">
                     <div style="font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 6px;" x-text="puzzle.label"></div>
+                    <div style="display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px;">
+                      <span aria-hidden="true" style="line-height: 1.5;">🧠</span>
+                      <span><strong>{{ __('Techniques') }} :</strong> <span x-text="getDifficultyTechniques(puzzle.difficulty)"></span></span>
+                    </div>
                     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                       <span aria-hidden="true">⏱</span>
                       <span><strong x-text="'+' + getDifficultyPenalty(puzzle.difficulty) + 's'"></strong> {{ __('par indice demandé') }}</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
                       <span aria-hidden="true">🔢</span>
-                      <span><strong x-text="puzzle.clues_count"></strong> {{ __('cases pré-remplies') }}</span>
+                      <span><strong x-text="puzzle.clues_count"></strong> {{ __('cases pré-remplies (signal approximatif)') }}</span>
                     </div>
-                    <div style="display: flex; align-items: flex-start; gap: 6px;">
-                      <span aria-hidden="true" style="line-height: 1.5;">🧠</span>
-                      <span x-text="getDifficultyTechniques(puzzle.difficulty)"></span>
+                    <div style="font-size: 0.73rem; color: var(--c-text-muted, #52586a); padding-top: 8px; border-top: 1px solid #f1f5f9; line-height: 1.45;">
+                      {{ __('💡 La difficulté dépend des techniques requises, pas seulement du nombre de cases pré-remplies. Standard NYT / Sudoku.com 2026.') }}
                     </div>
                   </div>
                 </div>
