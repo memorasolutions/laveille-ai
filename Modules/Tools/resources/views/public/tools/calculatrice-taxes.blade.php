@@ -182,6 +182,8 @@
                                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                             <button id="reset-btn" class="ct-btn ct-btn-outline" style="display: none;">{{ __('Nouveau calcul') }}</button>
                                             <button id="copy-result-btn" class="ct-btn ct-btn-outline" style="display: none;">{{ __('Copier le résultat') }}</button>
+                                            {{-- #15 S84 Option A : Partager mon calcul (Web Share API + URL deep-link) --}}
+                                            <button id="share-calc-btn" class="ct-btn ct-btn-primary" style="display: none;" title="{{ __('Partage un lien qui recrée ce calcul exact') }}">📤 {{ __('Partager mon calcul') }}</button>
                                             <button id="save-history-btn" class="ct-btn ct-btn-outline" style="display: none;">💾 {{ __('Sauvegarder') }}</button>
                                         </div>
                                     </div>
@@ -252,30 +254,119 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Helper DRY : extrait données calcul actuel du DOM
+    function getCalculationData() {
+        var province = document.getElementById('province');
+        var before = document.getElementById('amount-before-tax');
+        var tax1 = document.getElementById('tax1-amount');
+        var tax2 = document.getElementById('tax2-amount');
+        var after = document.getElementById('amount-after-tax');
+        var t1Label = document.getElementById('tax1-label');
+        var t2Label = document.getElementById('tax2-label');
+        var lines = [];
+        if (province && province.value) lines.push('Province: ' + province.options[province.selectedIndex].text);
+        if (before && before.value) lines.push('Avant taxes: ' + before.value + ' $');
+        if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
+        if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
+        if (after && after.value) lines.push('Total: ' + after.value + ' $');
+        return {
+            text: lines.join('\n'),
+            province: province ? province.value : '',
+            amount: before ? before.value : '',
+            hasData: !!(province && province.value && before && before.value)
+        };
+    }
+
+    // Construire URL deep-link qui reconstruit le calcul (#15 S84 Option A)
+    function buildShareUrl(data) {
+        var url = new URL(window.location.href);
+        url.searchParams.delete('p');
+        url.searchParams.delete('a');
+        if (data.province) url.searchParams.set('p', data.province);
+        if (data.amount) url.searchParams.set('a', data.amount);
+        return url.toString();
+    }
+
     // Copier résultat
     var copyBtn = document.getElementById('copy-result-btn');
     if (copyBtn) {
         copyBtn.style.display = '';
         copyBtn.addEventListener('click', function() {
-            var province = document.getElementById('province');
-            var before = document.getElementById('amount-before-tax');
-            var tax1 = document.getElementById('tax1-amount');
-            var tax2 = document.getElementById('tax2-amount');
-            var after = document.getElementById('amount-after-tax');
-            var t1Label = document.getElementById('tax1-label');
-            var t2Label = document.getElementById('tax2-label');
-            var lines = [];
-            if (province) lines.push('Province: ' + province.options[province.selectedIndex].text);
-            if (before && before.value) lines.push('Avant taxes: ' + before.value + ' $');
-            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value);
-            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value);
-            if (after && after.value) lines.push('Total: ' + after.value + ' $');
-            navigator.clipboard.writeText(lines.join('\n'));
+            var d = getCalculationData();
+            navigator.clipboard.writeText(d.text);
             this.textContent = '{{ __("Copié !") }}';
             var self = this;
             setTimeout(function() { self.textContent = '{{ __("Copier le résultat") }}'; }, 2000);
         });
     }
+
+    // #15 S84 Option A : Partager mon calcul (Web Share API + URL deep-link + fallback clipboard)
+    var shareCalcBtn = document.getElementById('share-calc-btn');
+    if (shareCalcBtn) {
+        shareCalcBtn.style.display = '';
+        shareCalcBtn.addEventListener('click', function() {
+            var d = getCalculationData();
+            if (!d.hasData) {
+                this.textContent = '⚠️ {{ __("Saisir un montant") }}';
+                var self0 = this;
+                setTimeout(function() { self0.innerHTML = '📤 {{ __("Partager mon calcul") }}'; }, 2000);
+                return;
+            }
+            var shareUrl = buildShareUrl(d);
+            var shareData = {
+                title: '{{ __("Estimation des taxes") }} — {{ config("app.name") }}',
+                text: d.text,
+                url: shareUrl
+            };
+            var self = this;
+            var resetLabel = function() {
+                setTimeout(function() { self.innerHTML = '📤 {{ __("Partager mon calcul") }}'; }, 2500);
+            };
+            // Détection support Web Share API (mobile principalement)
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                navigator.share(shareData)
+                    .then(function() {
+                        self.textContent = '✓ {{ __("Partagé !") }}';
+                        resetLabel();
+                    })
+                    .catch(function(err) {
+                        if (err && err.name === 'AbortError') return; // user cancelled
+                        // Fallback clipboard
+                        navigator.clipboard.writeText(d.text + '\n\n' + shareUrl);
+                        self.textContent = '🔗 {{ __("Lien copié !") }}';
+                        resetLabel();
+                    });
+            } else {
+                // Fallback desktop : copy résumé + URL clipboard
+                navigator.clipboard.writeText(d.text + '\n\n' + shareUrl);
+                self.textContent = '🔗 {{ __("Lien copié !") }}';
+                resetLabel();
+            }
+        });
+    }
+
+    // #15 S84 : Init au load — lire query params ?p=QC&a=100 pour reconstruire calcul
+    (function initFromUrl() {
+        try {
+            var params = new URLSearchParams(window.location.search);
+            var p = params.get('p');
+            var a = params.get('a');
+            if (p) {
+                var sel = document.getElementById('province');
+                if (sel) {
+                    sel.value = p;
+                    sel.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+            }
+            if (a) {
+                var amountInput = document.getElementById('amount-before-tax');
+                if (amountInput) {
+                    amountInput.value = a;
+                    amountInput.dispatchEvent(new Event('input', {bubbles: true}));
+                }
+            }
+        } catch (e) { /* silent fail */ }
+    })();
 
     // Historique localStorage
     var historyKey = 'tax_calc_history';
