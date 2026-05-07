@@ -327,9 +327,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // #16 S84 v2 : état mode courant (forward = HT→TTC, reverse = TTC→HT) + tipIncluded optionnel en mode reverse
-    var currentMode = 'forward';
+    // #16 S84 v3 : Bidirectionnel natif via engine activeField. Toggle pourboire optionnel.
     var tipIncluded = false;
+    function getActiveField() {
+        var st = window.simpleCalculator && window.simpleCalculator.state;
+        return st && st.activeField ? st.activeField : 'before';
+    }
 
     // Helper DRY : extrait données calcul actuel du DOM (mode-aware #16 S84 v2)
     function getCalculationData() {
@@ -347,60 +350,56 @@ document.addEventListener('DOMContentLoaded', function() {
         var lines = [];
         if (province && province.value) lines.push('Province: ' + province.options[province.selectedIndex].text);
 
-        if (currentMode === 'reverse') {
-            if (tipIncluded && rtPct && rtPct.value) {
-                if (after && after.value) lines.push('Total payé (incl. pourboire): ' + after.value + ' $');
-                lines.push('Pourboire: ' + rtPct.value + ' % (' + (rtTipAmt ? rtTipAmt.textContent : '0') + ')');
-                if (rtAfter) lines.push('Total avant pourboire (avec taxes): ' + rtAfter.textContent);
-                if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
-                if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
-                if (rtSub) lines.push('Sous-total avant taxes: ' + rtSub.textContent);
-                return {
-                    text: lines.join('\n'),
-                    mode: 'reverse',
-                    province: province ? province.value : '',
-                    amount: after ? after.value : '',
-                    tip: rtPct.value,
-                    hasData: !!(province && province.value && after && after.value)
-                };
-            }
-            // reverse simple (sans pourboire)
+        var activeField = getActiveField();
+        if (activeField === 'after' && tipIncluded && rtPct && rtPct.value) {
+            if (after && after.value) lines.push('Total payé (incl. pourboire): ' + after.value + ' $');
+            lines.push('Pourboire: ' + rtPct.value + ' % (' + (rtTipAmt ? rtTipAmt.textContent : '0') + ')');
+            if (rtAfter) lines.push('Total avant pourboire (avec taxes): ' + rtAfter.textContent);
+            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
+            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
+            if (rtSub) lines.push('Sous-total avant taxes: ' + rtSub.textContent);
+            return {
+                text: lines.join('\n'),
+                source: 'after',
+                province: province ? province.value : '',
+                amount: after ? after.value : '',
+                tip: rtPct.value,
+                hasData: !!(province && province.value && after && after.value)
+            };
+        }
+        if (activeField === 'after') {
             if (after && after.value) lines.push('Avec taxes (saisi): ' + after.value + ' $');
             if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
             if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
             if (before && before.value) lines.push('Avant taxes (calculé): ' + before.value + ' $');
             return {
                 text: lines.join('\n'),
-                mode: 'reverse',
+                source: 'after',
                 province: province ? province.value : '',
                 amount: after ? after.value : '',
                 hasData: !!(province && province.value && after && after.value)
             };
         }
-        // forward (défaut)
         if (before && before.value) lines.push('Avant taxes: ' + before.value + ' $');
         if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
         if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
         if (after && after.value) lines.push('Total: ' + after.value + ' $');
         return {
             text: lines.join('\n'),
-            mode: 'forward',
+            source: 'before',
             province: province ? province.value : '',
             amount: before ? before.value : '',
             hasData: !!(province && province.value && before && before.value)
         };
     }
 
-    // Construire URL deep-link qui reconstruit le calcul (#15 + #16 S84 v2)
+    // Construire URL deep-link (#15 + #16 v3)
     function buildShareUrl(data) {
         var url = new URL(window.location.href);
-        url.searchParams.delete('p');
-        url.searchParams.delete('a');
-        url.searchParams.delete('m');
-        url.searchParams.delete('t');
+        ['p','a','m','t','s'].forEach(function(k) { url.searchParams.delete(k); });
         if (data.province) url.searchParams.set('p', data.province);
         if (data.amount) url.searchParams.set('a', data.amount);
-        if (data.mode && data.mode !== 'forward') url.searchParams.set('m', data.mode);
+        if (data.source === 'after') url.searchParams.set('s', 'after');
         if (data.tip) url.searchParams.set('t', data.tip);
         return url.toString();
     }
@@ -463,10 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // #16 S84 v2 : 2 onglets (forward / reverse) + toggle pourboire optionnel inline en reverse
-    var modeBtns = document.querySelectorAll('.ct-mode-btn');
-    var modeHint = document.getElementById('ct-mode-hint');
-    var tipToggleWrapper = document.getElementById('ct-tip-toggle-wrapper');
+    // #16 S84 v3 : Bidirectionnel natif. Toggle pourboire toujours visible.
     var tipToggleBtn = document.getElementById('ct-tip-toggle-btn');
     var tipOptions = document.getElementById('ct-tip-options');
     var tipArrow = document.getElementById('ct-tip-toggle-arrow');
@@ -474,57 +470,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var rtPresetBtns = document.querySelectorAll('.rt-tip-preset');
     var rtResult = document.getElementById('rt-result');
 
-    var modeHints = {
-        'forward': '💡 {{ __("Calcul direct : saisissez le montant avant taxes pour voir TPS/TVQ et total.") }}',
-        'reverse': '💡 {{ __("Calcul inversé : saisissez le montant avec taxes pour décomposer sous-total et taxes. Cochez « pourboire inclus » si applicable.") }}'
-    };
-
-    function switchMode(newMode) {
-        currentMode = newMode;
-        modeBtns.forEach(function(b) {
-            var active = b.getAttribute('data-mode') === newMode;
-            b.setAttribute('aria-selected', active ? 'true' : 'false');
-            b.style.background = active ? 'var(--c-primary, #064E5A)' : 'transparent';
-            b.style.color = active ? '#fff' : '#333';
-        });
-        if (modeHint) modeHint.innerHTML = modeHints[newMode];
-
-        // Toggle pourboire visible uniquement en reverse
-        if (tipToggleWrapper) tipToggleWrapper.style.display = (newMode === 'reverse') ? 'block' : 'none';
-
-        // Si on quitte reverse, fermer le toggle pourboire et reset tipIncluded
-        if (newMode !== 'reverse') {
-            tipIncluded = false;
-            if (tipToggleBtn) tipToggleBtn.setAttribute('aria-expanded', 'false');
-            if (tipOptions) tipOptions.style.display = 'none';
-            if (tipArrow) tipArrow.style.transform = 'rotate(0deg)';
-            if (rtResult) rtResult.style.display = 'none';
-        }
-
-        if (newMode === 'reverse') {
-            var afterEl = document.getElementById('amount-after-tax');
-            if (afterEl) afterEl.focus();
-        } else {
-            var beforeEl = document.getElementById('amount-before-tax');
-            if (beforeEl) beforeEl.focus();
-        }
-    }
-
-    modeBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            switchMode(this.getAttribute('data-mode'));
-        });
-    });
-
     function getProvinceRates() {
         var sel = document.getElementById('province');
         if (!sel || !sel.value) return null;
         return (window.taxConfig && window.taxConfig.tax_rates) ? window.taxConfig.tax_rates[sel.value] : null;
     }
 
-    // Override : si tipIncluded actif en mode reverse, recompute reverse_tip et écrase l'engine
+    // Override : si tipIncluded ET activeField === 'after', recompute reverse_tip
     function recalcReverseTipOverride() {
-        if (currentMode !== 'reverse' || !tipIncluded) {
+        if (!tipIncluded || getActiveField() !== 'after') {
             if (rtResult) rtResult.style.display = 'none';
             return;
         }
@@ -632,30 +586,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Quand engine reverse simple recompute, override si tipIncluded actif
+    // Override déclenché si user saisit dans amount-after-tax avec tipIncluded
     var afterInputEl = document.getElementById('amount-after-tax');
     if (afterInputEl) {
         afterInputEl.addEventListener('input', function() {
-            if (tipIncluded && currentMode === 'reverse') {
-                setTimeout(recalcReverseTipOverride, 0);
-            }
+            if (tipIncluded) setTimeout(recalcReverseTipOverride, 0);
+        });
+    }
+    var beforeInputEl = document.getElementById('amount-before-tax');
+    if (beforeInputEl) {
+        beforeInputEl.addEventListener('input', function() {
+            if (rtResult) rtResult.style.display = 'none';
         });
     }
 
     var provSel = document.getElementById('province');
     if (provSel) {
         provSel.addEventListener('change', function() {
-            if (currentMode === 'reverse' && tipIncluded) setTimeout(recalcReverseTipOverride, 0);
+            if (tipIncluded && getActiveField() === 'after') setTimeout(recalcReverseTipOverride, 0);
         });
     }
 
-    // #15 + #16 S84 v2 : Init au load — lire ?p, ?a, ?m, ?t (rétrocompat ancien m=reverse_tip)
+    // #15 + #16 v3 : Init au load — lire ?p, ?a, ?s (source 'after' ou rien), ?t. Rétrocompat ?m=reverse|reverse_tip
     (function initFromUrl() {
         try {
             var params = new URLSearchParams(window.location.search);
             var p = params.get('p');
             var a = params.get('a');
             var m = params.get('m');
+            var s = params.get('s');
             var t = params.get('t');
             if (p) {
                 var sel = document.getElementById('province');
@@ -664,19 +623,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     sel.dispatchEvent(new Event('change', {bubbles: true}));
                 }
             }
-            // m=reverse_tip = ancien lien : bascule reverse + active toggle pourboire
-            var modeToSet = (m === 'reverse_tip') ? 'reverse' : (m === 'reverse' ? 'reverse' : 'forward');
-            if (modeToSet !== 'forward') switchMode(modeToSet);
+            var useAfter = (s === 'after') || (m === 'reverse') || (m === 'reverse_tip');
             if (a) {
-                var targetId = (modeToSet === 'reverse') ? 'amount-after-tax' : 'amount-before-tax';
+                var targetId = useAfter ? 'amount-after-tax' : 'amount-before-tax';
                 var amountInput = document.getElementById(targetId);
                 if (amountInput) {
+                    amountInput.focus();
                     amountInput.value = a;
                     amountInput.dispatchEvent(new Event('input', {bubbles: true}));
                 }
             }
-            if (t && modeToSet === 'reverse') {
-                // Ouvrir le toggle pourboire et remplir tip%
+            if (t && useAfter) {
                 if (tipToggleBtn) {
                     tipToggleBtn.setAttribute('aria-expanded', 'true');
                     if (tipOptions) tipOptions.style.display = 'block';
