@@ -397,9 +397,10 @@
         <img :src="src" :alt="alt" @click.stop style="max-width:95%;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 0 40px rgba(0,0,0,0.5);cursor:default;">
     </div>
 
-    {{-- Composants globaux confirm-modal + alert-toast (S71 Phase 2) --}}
+    {{-- Composants globaux confirm-modal + alert-toast (S71 Phase 2) + help-modal (S84 #16) --}}
     <x-core::confirm-modal name="global" />
     <x-core::alert-toast />
+    <x-core::help-modal />
 
     {{-- Délégué global : <form data-confirm="message"> ou <a/button data-confirm="message" data-href="..."> --}}
     <script>
