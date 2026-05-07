@@ -86,6 +86,14 @@
 #cc-host .cc-text,
 #cc-host .cc-link { color: var(--c-text-muted, #52586a) !important; opacity: 1 !important; }
 
+/* ── 0d. WCAG AAA OVERRIDE BLOGGAR P COLOR GLOBAL (#217 S84 Lot M3 — investigation S84-Volet D) ── */
+/* Bloggar critical-css.blade.php inline déclare `p { color: rgb(119,119,119) }` = #777 4.48:1 FAIL AA+AAA.
+   Cause racine documentée memory : règle directe sur sélecteur de type bat héritage parent (CSS inheritance lowest priority).
+   Override par cascade order : charte.css charge APRÈS critical-css inline → spécificité égale (0,0,0,1), charte gagne.
+   Pas de !important : préserve overrides inline `style="color:..."` et class plus spécifiques (.wpo-blog-hero-area p, etc.).
+   #4a4f5c = 8.19:1 PASS AAA sur blanc, 7.86:1 PASS AAA sur #F9FAFF. */
+p { color: var(--c-text-secondary, #4a4f5c); }
+
 /* ── 0. ANTI-SCROLL HORIZONTAL GLOBAL (S80 #47) ── */
 /* overflow-x: clip > overflow-x: hidden : ne casse pas position:sticky enfants. Support Chrome 90+, Safari 16+, Firefox 81+. */
 html, body {
