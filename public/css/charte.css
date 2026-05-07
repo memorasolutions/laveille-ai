@@ -13,8 +13,8 @@
     --c-primary-hover: #064E5C;
     --c-primary-light: #F0FAFB;
     --c-primary-badge: #DDF4F8;
-    --c-accent: #C2410C;
-    --c-accent-hover: #9A3412;
+    --c-accent: #9A2A06; /* #217 WCAG AAA 7.76:1 sur blanc (avant #C2410C 5.18:1 FAIL) */
+    --c-accent-hover: #771E04; /* #217 WCAG AAA hover plus foncé cohérent (10.65:1) */
     --c-accent-light: #FDF5ED;
     --c-dark: #1A1D23;
     --c-text-secondary: #4a4f5c;
