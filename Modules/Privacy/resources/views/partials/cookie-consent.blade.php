@@ -58,7 +58,7 @@
     .cc-text { font-size: 0.9rem; margin: 0 0 1rem 0; opacity: 0.9; }
     .cc-link { color: inherit; text-decoration: underline; }
     .cc-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .cc-btn { flex: 1; min-width: 0; padding: 0.6rem 1rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; text-align: center; transition: opacity 0.2s; white-space: nowrap; }
+    .cc-btn { flex: 1; min-width: 0; min-height: 44px; padding: 0.75rem 1rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; text-align: center; transition: opacity 0.2s; white-space: nowrap; } /* #217 WCAG AAA target size 44x44 - S83 (avant 38px) */
     .cc-btn:hover { opacity: 0.85; }
     .cc-btn:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
     .cc-btn-primary { background: var(--cc-btn-primary); color: var(--cc-btn-primary-text); }

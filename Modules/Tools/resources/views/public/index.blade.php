@@ -220,13 +220,13 @@
                 background: #f3f4f6;
                 color: #053D4A;
                 border: 1px solid #d1d5db;
-                padding: 8px 16px;
+                padding: 10px 16px;
                 border-radius: 999px;
                 font-size: 0.875rem;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 150ms ease;
-                min-height: 36px;
+                min-height: 44px; /* #217 WCAG AAA target size 44x44 - S83 (avant 36px) */
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;

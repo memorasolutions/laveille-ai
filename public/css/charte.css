@@ -968,7 +968,7 @@ article h3 {
 .ct-btn-ghost { background: transparent; color: var(--c-text-muted); }
 .ct-btn-ghost:hover { background: var(--c-surface); }
 
-.ct-btn-accent { background: var(--c-accent); color: #fff; }
+.ct-btn-accent { background: var(--c-accent); color: #fff; min-height: 44px; } /* #217 WCAG AAA target size 44x44 - S83 */
 .ct-btn-accent:hover { background: var(--c-accent-hover); color: #fff; }
 
 .ct-btn-sm { padding: 7px 14px; font-size: 13px; }
