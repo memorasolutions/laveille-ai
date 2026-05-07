@@ -146,6 +146,13 @@ class ScreenshotService
         }
 
         $path = "{$outputDir}/{$slug}.jpg";
+        // Anti-overwrite S79 : si screenshot existant >= 5KB, on ne le remplace pas par un fallback gradient
+        if (File::exists($path) && File::size($path) >= 5000) {
+            Log::info("generateFallbackGradient: SKIP existant {$slug} (".File::size($path).' bytes) — anti-overwrite S79');
+            $tool->screenshot = "screenshots/{$slug}.jpg";
+            $tool->saveQuietly();
+            return true;
+        }
         $w = 1200;
         $h = 630;
 
@@ -231,5 +238,41 @@ class ScreenshotService
     {
         return file_exists(env('BROWSERSHOT_NODE_PATH', '/usr/local/bin/node'))
             && file_exists(base_path('scripts/capture-screenshot.cjs'));
+    }
+
+    /**
+     * Garde-fou centralisé anti-overwrite (incident S79 — 221 fichiers écrasés).
+     * Refuse d'écraser un screenshot existant >= 5KB sauf si $force=true ou marqué auto-replaceable.
+     * Tout writer (capture, fallback, batch og:image, GD) DOIT passer par cette méthode.
+     *
+     * @param  string  $absolutePath  chemin absolu cible (public_path('screenshots/...'))
+     * @param  callable(string $tempPath): bool  $writer  reçoit un tempPath, retourne true si écriture OK
+     * @param  bool  $force  bypass de la protection (uniquement actions admin manuelles explicites)
+     * @return bool true si écrit (ou conservé existant), false si erreur
+     */
+    public static function safeWriteScreenshot(string $absolutePath, callable $writer, bool $force = false): bool
+    {
+        $minProtectedSize = 5000; // 5 KB — seuil incident S79
+        if (! $force && \Illuminate\Support\Facades\File::exists($absolutePath)
+            && \Illuminate\Support\Facades\File::size($absolutePath) >= $minProtectedSize) {
+            \Illuminate\Support\Facades\Log::info("safeWriteScreenshot: SKIP existant {$absolutePath} (".\Illuminate\Support\Facades\File::size($absolutePath).' bytes) — anti-overwrite S79');
+            return true; // Considéré comme succès (existant préservé)
+        }
+
+        // Écriture via tempPath puis move atomic
+        $tempPath = $absolutePath.'.tmp.'.bin2hex(random_bytes(4));
+        try {
+            $ok = $writer($tempPath);
+            if (! $ok || ! \Illuminate\Support\Facades\File::exists($tempPath)) {
+                @unlink($tempPath);
+                return false;
+            }
+            \Illuminate\Support\Facades\File::move($tempPath, $absolutePath);
+            return true;
+        } catch (Throwable $e) {
+            @unlink($tempPath);
+            \Illuminate\Support\Facades\Log::warning('safeWriteScreenshot exception: '.$e->getMessage());
+            return false;
+        }
     }
 }
