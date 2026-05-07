@@ -78,6 +78,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\ImportYoutubeResourcesCommand::class,
             \Modules\Directory\Console\ExpireFeaturedToolsCommand::class,
             \Modules\Directory\Console\CheckImagesCommand::class,
+            \Modules\Directory\Console\HealthCheckReportCommand::class,
         ]);
     }
 
