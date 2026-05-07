@@ -12,8 +12,21 @@
             $minRead = max(1, (int) ceil($words / 200));
             $isUpdated = $article->updated_at && $article->published_at && $article->updated_at->gt($article->published_at) && $article->updated_at->diffInDays($article->published_at) >= 1;
         @endphp
-        <div class="entry-meta-eeat">
-            <img src="{{ asset('images/logo-avatar.png') }}" alt="" class="entry-author-avatar" loading="lazy" decoding="async" width="40" height="40">
+        <div class="entry-meta-eeat" x-data="{ tipOpen: false }">
+            <div class="byline-bio-wrap" @mouseleave="tipOpen = false">
+                <img src="{{ asset('images/logo-avatar.png') }}" alt="" class="entry-author-avatar" loading="lazy" decoding="async" width="40" height="40"
+                     @mouseenter="tipOpen = true" @click.stop="tipOpen = !tipOpen" @keydown.escape="tipOpen = false"
+                     tabindex="0" role="button" :aria-expanded="tipOpen.toString()" aria-controls="byline-bio-{{ $article->id ?? $loop->index }}"
+                     aria-label="{{ __('Voir la bio de l\'auteur') }}">
+                <div x-show="tipOpen" x-transition.opacity x-cloak
+                     :id="'byline-bio-{{ $article->id ?? $loop->index }}'"
+                     role="tooltip"
+                     class="byline-bio-tooltip">
+                    <strong>{{ __(trans('fronttheme::authors.stephane-lapointe.name')) }}</strong>
+                    <p>{{ trans('fronttheme::authors.stephane-lapointe.bio') }}</p>
+                    <a href="{{ route('author.show', 'stephane-lapointe') }}">{{ __('En savoir plus →') }}</a>
+                </div>
+            </div>
             <div class="entry-author-info">
                 <div class="entry-author-name"><a href="{{ route('author.show', 'stephane-lapointe') }}">{{ $article->getAuthorName() }}</a></div>
                 <div class="entry-author-role">{{ __('Veille IA Québec') }}</div>

@@ -69,6 +69,55 @@
     color: var(--c-primary);
     text-decoration: underline;
 }
+
+/* ── 0a-bio. BYLINE BIO TOOLTIP (#218 S84 #3 — hover/click avatar blog cards EEAT 2026 NN/g) ── */
+.byline-bio-wrap {
+    position: relative;
+    display: inline-block;
+}
+.byline-bio-wrap .entry-author-avatar {
+    cursor: pointer;
+}
+.byline-bio-tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 50;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+    padding: 14px 16px;
+    min-width: 240px;
+    max-width: 300px;
+    font-size: 0.82rem;
+    color: var(--c-text-secondary, #4a4f5c);
+    line-height: 1.5;
+    text-align: left;
+}
+.byline-bio-tooltip strong {
+    display: block;
+    color: var(--c-dark, #1A1D23);
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    font-family: var(--f-heading, sans-serif);
+}
+.byline-bio-tooltip p {
+    margin: 0 0 10px 0;
+    color: var(--c-text-secondary, #4a4f5c);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.byline-bio-tooltip a {
+    color: var(--c-primary, #064E5A);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.82rem;
+}
+.byline-bio-tooltip a:hover,
+.byline-bio-tooltip a:focus {
+    text-decoration: underline;
+}
 .entry-author-role {
     font-size: 0.75rem;
     color: var(--c-primary);
