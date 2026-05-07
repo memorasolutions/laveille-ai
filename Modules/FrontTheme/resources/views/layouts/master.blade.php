@@ -242,11 +242,11 @@
                 <div>
                     <div style="font-size: 14px; font-weight: 700;">{{ is_array($cartAdded) ? ($cartAdded['name'] ?? '') : __('Produit') }}</div>
                     @if(is_array($cartAdded) && !empty($cartAdded['variant']))<div style="font-size: 12px; color: #374151;">{{ $cartAdded['variant'] }}</div>@endif
-                    @if(is_array($cartAdded) && !empty($cartAdded['price']))<div style="font-size: 15px; font-weight: 700; color: #0B7285;">{{ number_format($cartAdded['price'], 2, ',', ' ') }} $</div>@endif
+                    @if(is_array($cartAdded) && !empty($cartAdded['price']))<div style="font-size: 15px; font-weight: 700; color: var(--c-primary, #064E5A);">{{ number_format($cartAdded['price'], 2, ',', ' ') }} $</div>@endif
                 </div>
             </div>
             <div style="padding: 8px 16px; border-top: 1px solid #f1f5f9; display: flex; gap: 10px;">
-                <a href="{{ Route::has('shop.cart') ? route('shop.cart') : '#' }}" style="flex: 1; text-align: center; padding: 8px; background: #0B7285; color: #fff; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px;">{{ __('Voir le panier') }}</a>
+                <a href="{{ Route::has('shop.cart') ? route('shop.cart') : '#' }}" style="flex: 1; text-align: center; padding: 8px; background: var(--c-primary, #064E5A); color: #fff; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px;">{{ __('Voir le panier') }}</a>
                 <button @click="show = false" style="flex: 1; padding: 8px; background: #f1f5f9; color: #374151; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">{{ __('Continuer') }}</button>
             </div>
         </div>
