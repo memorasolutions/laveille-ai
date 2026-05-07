@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\Sudoku\Http\Controllers\Api\PuzzleApiController;
 use Modules\Sudoku\Http\Controllers\Api\SavedPresetApiController;
 use Modules\Sudoku\Http\Controllers\Api\ScoreApiController;
-use Modules\Sudoku\Http\Middleware\SudokuConstructionGate;
 
-Route::prefix('sudoku')->middleware(SudokuConstructionGate::class)->group(function () {
+Route::prefix('sudoku')->group(function () {
     Route::get('puzzle/{difficulty}', [PuzzleApiController::class, 'today']);
     Route::get('puzzle/{date}/{difficulty}', [PuzzleApiController::class, 'byDate'])
         ->where('date', '\d{4}-\d{2}-\d{2}');
