@@ -68,7 +68,10 @@
                             <main>
                                 <section class="main-calculator card">
                                     <div class="form-group">
-                                        <label for="province">{{ __('Province / Territoire') }}</label>
+                                        <label for="province">
+                                            {{ __('Province / Territoire') }}
+                                            <button type="button" class="ct-help-btn" data-help-key="province" aria-label="Aide Province">ⓘ</button>
+                                        </label>
                                         <select id="province" aria-label="Province" class="province-select">
                                             <option value="">{{ __('Sélectionnez une province') }}</option>
                                             <option value="QC" data-gst="5" data-pst="0" data-qst="9.975" data-hst="0" selected>Québec (14,975 %)</option>
@@ -87,12 +90,10 @@
                                         </select>
                                     </div>
 
-                                    {{-- #16 S84 Option A v2 : 2 onglets (Standard / Inversé) + toggle pourboire optionnel dans Inversé --}}
-                                    <div class="ct-mode-switch" role="tablist" aria-label="{{ __('Mode de calcul') }}" style="display: flex; gap: 0.25rem; margin-bottom: 1rem; padding: 0.25rem; background: #f1f3f5; border-radius: 10px; border: 1px solid #e2e6ea;">
-                                        <button type="button" class="ct-mode-btn" data-mode="forward" role="tab" aria-selected="true" aria-controls="ct-grid-forward" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: var(--c-primary, #064E5A); color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">📥 {{ __('Calcul direct') }}</button>
-                                        <button type="button" class="ct-mode-btn" data-mode="reverse" role="tab" aria-selected="false" aria-controls="ct-grid-reverse" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">🔄 {{ __('Calcul inversé') }}</button>
-                                    </div>
-                                    <p class="ct-mode-hint" id="ct-mode-hint" style="font-size: 0.8rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0;">💡 {{ __('Calcul direct : saisissez le montant avant taxes pour voir TPS/TVQ et total.') }}</p>
+                                    {{-- #16 S84 v3 : Bidirectionnel natif — saisi dans n'importe quel champ → autre se calcule automatiquement --}}
+                                    <p style="font-size: 0.85rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0; padding: 0.5rem 0.75rem; background: #f1f3f5; border-radius: 8px; border-left: 3px solid var(--c-primary, #064E5A);">
+                                        💡 Saisissez le montant <strong>avant</strong> OU <strong>avec taxes</strong> — l'autre champ se calcule automatiquement.
+                                    </p>
 
                                     {{-- Montants rapides --}}
                     <div class="quick-amounts" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
@@ -106,7 +107,10 @@
 
                     <div class="calculator-grid">
                                         <div class="form-group">
-                                            <label for="amount-before-tax">{{ __('Montant avant taxes') }}</label>
+                                            <label for="amount-before-tax">
+                                                {{ __('Montant avant taxes') }}
+                                                <button type="button" class="ct-help-btn" data-help-key="avant_taxes" aria-label="Aide Montant avant taxes">ⓘ</button>
+                                            </label>
                                             <div class="input-wrapper">
                                                 <span class="currency-symbol">$</span>
                                                 <input type="number" id="amount-before-tax" aria-label="Montant avant taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input">
@@ -134,7 +138,10 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="amount-after-tax">{{ __('Montant avec taxes') }}</label>
+                                            <label for="amount-after-tax">
+                                                {{ __('Montant avec taxes') }}
+                                                <button type="button" class="ct-help-btn" data-help-key="avec_taxes" aria-label="Aide Montant avec taxes">ⓘ</button>
+                                            </label>
                                             <div class="input-wrapper">
                                                 <span class="currency-symbol">$</span>
                                                 <input type="number" id="amount-after-tax" aria-label="Montant après taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input total-amount">
@@ -142,10 +149,10 @@
                                         </div>
                                     </div>
 
-                                    {{-- #16 S84 v2 : Toggle pourboire inline (visible uniquement en mode Inversé) --}}
-                                    <div class="ct-tip-toggle-wrapper" id="ct-tip-toggle-wrapper" style="display: none; margin-bottom: 0.5rem;">
+                                    {{-- #16 S84 v3 : Toggle pourboire toujours visible — actif si user saisit dans 'Montant avec taxes' --}}
+                                    <div class="ct-tip-toggle-wrapper" id="ct-tip-toggle-wrapper" style="margin-bottom: 0.5rem;">
                                         <button type="button" id="ct-tip-toggle-btn" class="ct-btn ct-btn-outline" aria-expanded="false" aria-controls="ct-tip-options" style="width: 100%; text-align: left; padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center;">
-                                            <span>🍽️ {{ __('Le total inclut un pourboire ?') }}</span>
+                                            <span>🍽️ Le « Montant avec taxes » saisi inclut un pourboire ?</span>
                                             <span id="ct-tip-toggle-arrow" style="transition: transform 0.2s; font-size: 0.9rem;">▼</span>
                                         </button>
                                         <div id="ct-tip-options" style="display: none; padding: 0.9rem; background: #f8f9fa; border-radius: 8px; margin-top: 0.4rem; border: 1px solid #e2e6ea;">
