@@ -4,27 +4,7 @@
 @section('meta_description', \Illuminate\Support\Str::limit($author['bio'], 160))
 
 @push('head')
-    <script type="application/ld+json">
-    {!! json_encode([
-        '@context' => 'https://schema.org',
-        '@type' => 'Person',
-        'name' => $author['name'],
-        'description' => $author['bio'],
-        'url' => route('author.show', $slug),
-        'image' => asset('images/logo-avatar.png'),
-        'jobTitle' => $author['role'],
-        'sameAs' => array_values(array_filter([
-            $author['linkedin'] ?? null,
-            $author['twitter'] ?? null,
-            $author['website'] ?? null,
-        ])),
-        'worksFor' => [
-            '@type' => 'Organization',
-            'name' => 'MEMORA solutions',
-            'url' => 'https://memora.solutions',
-        ],
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
-    </script>
+    <script type="application/ld+json">{!! $schemaJson !!}</script>
 @endpush
 
 @section('content')
