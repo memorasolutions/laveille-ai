@@ -3,6 +3,10 @@
 @section('title', $author['name'] . ' - Auteur - La veille')
 @section('meta_description', \Illuminate\Support\Str::limit($author['bio'], 160))
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $author['name'] ?? __('Auteur'), 'breadcrumbItems' => [__('Auteur'), $author['name'] ?? '']])
+@endsection
+
 @push('head')
     <script type="application/ld+json">{!! $schemaJson !!}</script>
 @endpush
