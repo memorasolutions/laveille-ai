@@ -59,6 +59,16 @@
     line-height: 1.25;
     font-family: var(--f-heading);
 }
+.entry-author-name a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+.entry-author-name a:hover,
+.entry-author-name a:focus {
+    color: var(--c-primary);
+    text-decoration: underline;
+}
 .entry-author-role {
     font-size: 0.75rem;
     color: var(--c-primary);

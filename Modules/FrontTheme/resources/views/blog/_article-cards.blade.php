@@ -15,7 +15,7 @@
         <div class="entry-meta-eeat">
             <img src="{{ asset('images/logo-avatar.png') }}" alt="" class="entry-author-avatar" loading="lazy" decoding="async" width="40" height="40">
             <div class="entry-author-info">
-                <div class="entry-author-name">{{ $article->getAuthorName() }}</div>
+                <div class="entry-author-name"><a href="{{ route('author.show', 'stephane-lapointe') }}">{{ $article->getAuthorName() }}</a></div>
                 <div class="entry-author-role">{{ __('Veille IA Québec') }}</div>
                 <div class="entry-author-meta">
                     <span>{{ __('Publié') }} <time datetime="{{ $article->published_at?->toIso8601String() }}">{{ $article->published_at?->translatedFormat('d M Y') }}</time></span>
