@@ -53,6 +53,7 @@
                             <div class="d-flex flex-wrap gap-2">
                                 <button class="ct-btn ct-btn-sm" :class="type === 'url' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'url'; renderQR()" style="border-radius: var(--r-btn);">URL</button>
                                 <button class="ct-btn ct-btn-sm" :class="type === 'text' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'text'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Texte') }}</button>
+                                <button class="ct-btn ct-btn-sm" :class="type === 'raw' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'raw'; renderQR()" style="border-radius: var(--r-btn);" title="{{ __('Données brutes - Mode Byte QR pur (firmware, config IoT, codes manufacturer)') }}">{{ __('Brut') }}</button>
                                 <button class="ct-btn ct-btn-sm" :class="type === 'wifi' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'wifi'; renderQR()" style="border-radius: var(--r-btn);">WiFi</button>
                                 <button class="ct-btn ct-btn-sm" :class="type === 'email' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'email'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Courriel') }}</button>
                                 <button class="ct-btn ct-btn-sm" :class="type === 'phone' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="type = 'phone'; renderQR()" style="border-radius: var(--r-btn);">{{ __('Téléphone') }}</button>
@@ -77,6 +78,39 @@
                         <div x-show="type === 'url' || type === 'text'" class="form-group mb-3">
                             <label class="form-label fw-medium" x-text="type === 'url' ? '{{ __('URL') }}' : '{{ __('Texte') }}'"></label>
                             <input type="text" class="form-control form-control-lg" x-model="input" @input="renderQR()" :placeholder="type === 'url' ? 'https://...' : '{{ __('Votre texte...') }}'" aria-label="{{ __('Contenu du QR') }}">
+                        </div>
+
+                        {{-- #13 S84 Option C : Données brutes (mode Byte QR pur, hex toggle) --}}
+                        <div x-show="type === 'raw'" class="form-group mb-3">
+                            <label class="form-label fw-medium d-flex align-items-center gap-2 flex-wrap">
+                                <span>{{ __('Données brutes') }}</span>
+                                <span style="font-size: 0.75rem; font-weight: 400; color: var(--c-text-muted, #52586a);">{{ __('(mode Byte QR pur, sans interprétation charset)') }}</span>
+                            </label>
+                            <div class="d-flex gap-2 mb-2" role="radiogroup" aria-label="{{ __('Mode données brutes') }}">
+                                <button type="button" class="ct-btn ct-btn-sm" :class="rawMode === 'hex' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="rawMode = 'hex'; renderQR()" style="border-radius: var(--r-btn);" :aria-pressed="rawMode === 'hex' ? 'true' : 'false'">{{ __('Hex (00-FF)') }}</button>
+                                <button type="button" class="ct-btn ct-btn-sm" :class="rawMode === 'text' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="rawMode = 'text'; renderQR()" style="border-radius: var(--r-btn);" :aria-pressed="rawMode === 'text' ? 'true' : 'false'">{{ __('Texte octets UTF-8') }}</button>
+                            </div>
+                            <div x-show="rawMode === 'hex'">
+                                <input type="text" class="form-control form-control-lg"
+                                       x-model="rawHex" @input="renderQR()"
+                                       placeholder="AA BB CC 01 02 0F"
+                                       aria-label="{{ __('Bytes hex') }}"
+                                       :class="rawHex && !isValidHex(rawHex) ? 'is-invalid' : ''"
+                                       style="font-family: var(--bs-font-monospace, monospace);">
+                                <small x-show="rawHex && !isValidHex(rawHex)" style="color: #B91C1C; font-size: 0.8rem;">{{ __('Format invalide. Caractères hex (0-9, A-F) et espaces uniquement, paires de 2.') }}</small>
+                                <small x-show="rawHex && isValidHex(rawHex)" style="color: var(--c-text-muted, #52586a); font-size: 0.8rem;" x-text="hexByteCount(rawHex) + ' {{ __('octets') }}'"></small>
+                            </div>
+                            <div x-show="rawMode === 'text'">
+                                <textarea class="form-control" rows="3"
+                                          x-model="rawText" @input="renderQR()"
+                                          placeholder="{{ __('Texte byte-for-byte UTF-8 sans normalisation Unicode') }}"
+                                          aria-label="{{ __('Texte octets') }}"
+                                          style="font-family: var(--bs-font-monospace, monospace);"></textarea>
+                                <small x-show="rawText" style="color: var(--c-text-muted, #52586a); font-size: 0.8rem;" x-text="textByteCount(rawText) + ' {{ __('octets UTF-8') }}'"></small>
+                            </div>
+                            <small style="display: block; margin-top: 8px; color: var(--c-text-muted, #52586a); font-size: 0.78rem; line-height: 1.4;">
+                                💡 {{ __('Usage : codes manufacturer, firmware, configuration IoT, GS1, protocoles propriétaires. Encodage Byte 8-bit ISO-8859-1 par défaut, ECI non utilisé.') }}
+                            </small>
                         </div>
 
                         <div x-show="type === 'wifi'">
@@ -524,6 +558,10 @@ document.addEventListener('alpine:init', function() {
         return {
             type: 'url',
             input: new URLSearchParams(window.location.search).get('url') || 'https://laveille.ai',
+            // #13 S84 Option C : Données brutes mode Byte QR pur
+            rawMode: 'hex',
+            rawHex: '',
+            rawText: '',
             ssid: '', wifiPass: '', encryption: 'WPA',
             emailTo: '', emailSubject: '', emailBody: '',
             phone: '', smsNumber: '', smsMessage: '',
@@ -596,8 +634,34 @@ document.addEventListener('alpine:init', function() {
                     case 'linkedin': return 'https://www.linkedin.com/in/' + this.socialUser;
                     case 'youtube': return 'https://www.youtube.com/' + this.socialUser;
                     case 'twitter': return 'https://x.com/' + this.socialUser;
+                    case 'raw': return this.rawData();
                     default: return this.input;
                 }
+            },
+
+            // #13 S84 Option C : helpers données brutes (mode Byte QR pur)
+            isValidHex: function(hex) {
+                if (!hex) return false;
+                const clean = hex.replace(/\s+/g, '');
+                return /^[0-9A-Fa-f]+$/.test(clean) && clean.length > 0 && clean.length % 2 === 0;
+            },
+            hexByteCount: function(hex) {
+                return Math.floor(hex.replace(/\s+/g, '').length / 2);
+            },
+            textByteCount: function(text) {
+                return new TextEncoder().encode(text).length;
+            },
+            rawData: function() {
+                if (this.rawMode === 'hex') {
+                    if (!this.isValidHex(this.rawHex)) return '';
+                    const clean = this.rawHex.replace(/\s+/g, '');
+                    let result = '';
+                    for (let i = 0; i < clean.length; i += 2) {
+                        result += String.fromCharCode(parseInt(clean.substr(i, 2), 16));
+                    }
+                    return result;
+                }
+                return this.rawText || '';
             },
 
             renderQR: function() {
