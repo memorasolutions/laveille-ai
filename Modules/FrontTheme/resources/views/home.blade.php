@@ -362,6 +362,71 @@
         </section>
         @endif
 
+        {{-- Section 1.5 : Outils interactifs gratuits (#15 S84 — push exposition GA4 30j sudoku 36:10 / mots-croises 17:42 record engagement vs reach faible 26/99 vues) --}}
+        <section class="hp-section hp-section-alt">
+            <div class="container">
+                <div class="hp-header">
+                    <div>
+                        <h2 class="hp-title">🎮 {{ __('Outils interactifs gratuits') }}</h2>
+                        <div class="hp-subtitle">{{ __('Apprenez en jouant — engagement record sur la plateforme') }}</div>
+                    </div>
+                    <a href="{{ route('tools.index') }}" class="hp-link-all">{{ __('Voir tous les outils') }} →</a>
+                </div>
+                <div class="row hp-row-flex">
+                    {{-- Sudoku quotidien (record 36:10 avg duration GA4 30j) --}}
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <a href="{{ Route::has('sudoku.play') ? route('sudoku.play') : url('/outils/sudoku') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
+                            <div class="hp-card-img" style="background: linear-gradient(135deg, var(--c-primary, #064E5A), #032E36); display: flex; align-items: center; justify-content: center; min-height: 160px;">
+                                <span style="font-size: 4rem;" aria-hidden="true">🧩</span>
+                            </div>
+                            <div class="hp-card-body" style="flex: 1; display: flex; flex-direction: column;">
+                                <h3>{{ __('Sudoku quotidien') }}</h3>
+                                <p style="flex: 1;">{{ __('5 niveaux générés à la demande, classements live, série quotidienne. Engagement record sur la plateforme.') }}</p>
+                                <div class="hp-badges">
+                                    <span class="hp-badge" style="background: #065f46;">{{ __('Gratuit') }}</span>
+                                    <span class="hp-badge" style="background: var(--c-primary, #064E5A);">{{ __('Mini-jeu') }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    {{-- Mots croisés IA (record 17:42 avg duration GA4 30j) --}}
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <a href="{{ url('/outils/mots-croises') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
+                            <div class="hp-card-img" style="background: linear-gradient(135deg, #9A2A06, #771E04); display: flex; align-items: center; justify-content: center; min-height: 160px;">
+                                <span style="font-size: 4rem;" aria-hidden="true">📝</span>
+                            </div>
+                            <div class="hp-card-body" style="flex: 1; display: flex; flex-direction: column;">
+                                <h3>{{ __('Générateur de mots croisés') }}</h3>
+                                <p style="flex: 1;">{{ __('Créez vos propres grilles personnalisées avec l\'IA. Export PDF, partage, jouer en ligne.') }}</p>
+                                <div class="hp-badges">
+                                    <span class="hp-badge" style="background: #065f46;">{{ __('Gratuit') }}</span>
+                                    <span class="hp-badge" style="background: #9A2A06;">{{ __('IA générative') }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    {{-- Constructeur de prompts (top page GA4 30j 516 vues) --}}
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <a href="{{ url('/outils/constructeur-prompts') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
+                            <div class="hp-card-img" style="background: linear-gradient(135deg, #4C1D95, #3B1577); display: flex; align-items: center; justify-content: center; min-height: 160px;">
+                                <span style="font-size: 4rem;" aria-hidden="true">⚙️</span>
+                            </div>
+                            <div class="hp-card-body" style="flex: 1; display: flex; flex-direction: column;">
+                                <h3>{{ __('Constructeur de prompts') }}</h3>
+                                <p style="flex: 1;">{{ __('Composez des prompts IA professionnels en un clic. Modèles testés, formats variés, copier-coller direct.') }}</p>
+                                <div class="hp-badges">
+                                    <span class="hp-badge" style="background: #065f46;">{{ __('Gratuit') }}</span>
+                                    <span class="hp-badge" style="background: #4C1D95;">{{ __('Productivité') }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         {{-- Section 2: Termes IA à découvrir --}}
         @if($featuredTerms->isNotEmpty())
         <section class="hp-section hp-section-alt">
