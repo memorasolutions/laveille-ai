@@ -93,6 +93,10 @@
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="fr-CA" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+    {{-- EEAT 2026 NN/g #218 S84 — signal auteur principal site (link rel=author) --}}
+    @if(Route::has('author.show'))
+        <link rel="author" href="{{ route('author.show', 'stephane-lapointe') }}">
+    @endif
     {{-- RSS désactivé (décision utilisateur 2026-04-04) --}}
     @stack('head')
     @include('fronttheme::partials.critical-css')
