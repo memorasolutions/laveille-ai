@@ -62,13 +62,16 @@ class HealthCheckReportCommand extends Command
         $bar = $this->output->createProgressBar($total);
         $bar->start();
 
+        // S84 #32 — User-Agent navigateur réaliste pour éviter blocages bot (Cloudflare, anti-bot, etc.)
         $client = new Client([
             'timeout' => self::TIMEOUT,
             'connect_timeout' => self::TIMEOUT,
             'allow_redirects' => ['max' => 5, 'strict' => false, 'protocols' => ['http', 'https']],
             'headers' => [
-                'User-Agent' => 'Mozilla/5.0 (compatible; LaVeilleHealthCheck/1.0; +https://laveille.ai)',
-                'Accept' => 'text/html,application/xhtml+xml',
+                'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language' => 'fr-CA,fr;q=0.9,en;q=0.8',
+                'Accept-Encoding' => 'gzip, deflate, br',
             ],
             'http_errors' => false,
             'verify' => false, // certains sites ont SSL invalides mais sont up
@@ -81,11 +84,18 @@ class HealthCheckReportCommand extends Command
             }
         };
 
+        $needsGetRetry = []; // S84 #32 : pour retry GET sur 405/403/501 (sites refusent HEAD)
         $pool = new Pool($client, $requests(), [
             'concurrency' => self::CONCURRENCY,
-            'fulfilled' => function ($response, $toolId) use (&$results, $bar, $tools) {
+            'fulfilled' => function ($response, $toolId) use (&$results, &$needsGetRetry, $bar, $tools) {
                 $code = $response->getStatusCode();
                 $tool = $tools->firstWhere('id', $toolId);
+                // 405 Method Not Allowed / 501 Not Implemented / 403 (parfois) : retry avec GET
+                if (in_array($code, [403, 405, 501])) {
+                    $needsGetRetry[$toolId] = $tool;
+                    $bar->advance();
+                    return;
+                }
                 $results[$toolId] = [
                     'tool' => $tool,
                     'status' => $code,
@@ -107,6 +117,45 @@ class HealthCheckReportCommand extends Command
             },
         ]);
         $pool->promise()->wait();
+
+        // S84 #32 — 2e passe : GET avec Range:bytes=0-1024 pour les sites refusant HEAD
+        if (! empty($needsGetRetry)) {
+            $this->newLine();
+            $this->info('Retry GET sur '.count($needsGetRetry).' outil(s) ayant refusé HEAD (405/403/501)...');
+            $getBar = $this->output->createProgressBar(count($needsGetRetry));
+            $getBar->start();
+            $getRequests = function () use ($needsGetRetry) {
+                foreach ($needsGetRetry as $toolId => $tool) {
+                    yield $toolId => new Request('GET', $tool->url, ['Range' => 'bytes=0-1024']);
+                }
+            };
+            $getPool = new Pool($client, $getRequests(), [
+                'concurrency' => self::CONCURRENCY,
+                'fulfilled' => function ($response, $toolId) use (&$results, $getBar, $needsGetRetry) {
+                    $code = $response->getStatusCode();
+                    $results[$toolId] = [
+                        'tool' => $needsGetRetry[$toolId],
+                        'status' => $code,
+                        'category' => $this->categorize($code),
+                        'error' => null,
+                    ];
+                    $getBar->advance();
+                },
+                'rejected' => function ($reason, $toolId) use (&$results, $getBar, $needsGetRetry) {
+                    $msg = $reason instanceof \Throwable ? $reason->getMessage() : (string) $reason;
+                    $results[$toolId] = [
+                        'tool' => $needsGetRetry[$toolId],
+                        'status' => 0,
+                        'category' => $this->categorizeError($msg),
+                        'error' => substr($msg, 0, 120),
+                    ];
+                    $getBar->advance();
+                },
+            ]);
+            $getPool->promise()->wait();
+            $getBar->finish();
+            $this->newLine();
+        }
         $bar->finish();
         $this->newLine(2);
 
