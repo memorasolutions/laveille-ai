@@ -24,16 +24,16 @@
             background: rgba(11, 114, 133, 0.2);
             display: flex; align-items: center; justify-content: center;
         }
-        .icon svg { width: 40px; height: 40px; color: #0B7285; }
+        .icon svg { width: 40px; height: 40px; color: #064E5A; }
         h1 { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 1.5rem; margin-bottom: 0.75rem; }
         p { font-size: 1rem; color: #94a3b8; line-height: 1.6; margin-bottom: 1.5rem; }
         .btn {
             display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.75rem 2rem; background: #0B7285; color: #fff;
+            padding: 0.75rem 2rem; background: #064E5A; color: #fff;
             border: none; border-radius: 0.5rem; font-size: 1rem;
             font-weight: 600; cursor: pointer; transition: background 0.2s;
         }
-        .btn:hover { background: #064E5C; }
+        .btn:hover { background: #032E36; }
     </style>
 </head>
 <body>

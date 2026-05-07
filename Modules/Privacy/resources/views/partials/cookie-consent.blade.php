@@ -28,20 +28,20 @@
     :root {
         --cc-bg: #ffffff;
         --cc-text: #1f2937;
-        --cc-btn-primary: #0B7285;
+        --cc-btn-primary: #064E5A;
         --cc-btn-primary-text: #ffffff;
         --cc-btn-secondary: #ECEEF2;
         --cc-btn-secondary-text: #1A1D23;
         --cc-border: #D5D9E0;
         --cc-overlay: rgba(0, 0, 0, 0.5);
         --cc-toggle-bg: #B8BDC9;
-        --cc-toggle-active: #0B7285;
+        --cc-toggle-active: #064E5A;
     }
     @media (prefers-color-scheme: dark) {
         :root {
             --cc-bg: #1A1D23;
             --cc-text: #F6F7F9;
-            --cc-btn-primary: #0B7285;
+            --cc-btn-primary: #064E5A;
             --cc-btn-primary-text: #ffffff;
             --cc-btn-secondary: #2D3039;
             --cc-btn-secondary-text: #F6F7F9;

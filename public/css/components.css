@@ -43,7 +43,7 @@
 }
 
 /* Types */
-.callout-conseil     { border-left-color: #0B7285; background: rgba(11, 114, 133, 0.06); }
+.callout-conseil     { border-left-color: #064E5A; background: rgba(11, 114, 133, 0.06); }
 .callout-conseil .callout-header { color: #064E5C; }
 
 .callout-retenir     { border-left-color: #E67E22; background: rgba(230, 126, 34, 0.06); }
@@ -73,7 +73,7 @@
 .callout-inconvenient { border-left-color: #B91C1C; background: rgba(185, 28, 28, 0.06); }
 .callout-inconvenient .callout-header { color: #991B1B; }
 
-.callout-perso       { border-left-color: #0B7285; background: rgba(11, 114, 133, 0.06); }
+.callout-perso       { border-left-color: #064E5A; background: rgba(11, 114, 133, 0.06); }
 .callout-perso .callout-header { color: #064E5C; }
 
 /* ── 2. TIMELINE ── */
