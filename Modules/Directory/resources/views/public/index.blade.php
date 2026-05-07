@@ -681,6 +681,47 @@
         </div>
         @endif
 
+        {{-- #14 S84 GA4 insight #E : Tendance cette semaine — pousser exposition vers fiches individuelles (record 29:33 avg vs index 6:15) --}}
+        {{-- Pattern Product Hunt / Futurepedia 2026 : rail horizontal Trending + badge temporel pour urgence/social proof --}}
+        @if(isset($popularTools) && $popularTools->count() >= 4)
+        <div x-show="!search" x-transition style="margin-bottom:28px;">
+            <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:12px;">
+                <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">🔥 {{ __('Tendance') }}</h3>
+                <span style="font-size:12px;color:var(--c-text-muted, #52586a);font-weight:600;">{{ __('Les plus consultés') }}</span>
+            </div>
+            <div style="display:flex!important;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">
+                @foreach($popularTools as $pt)
+                @php $ptHost = $pt->url ? parse_url($pt->url, PHP_URL_HOST) : ''; @endphp
+                <a href="{{ route('directory.show', $pt->slug) }}" style="flex-shrink:0;width:210px;scroll-snap-align:start;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;position:relative;">
+                    {{-- Badge YouTube tutos (pattern S84-L cohérence) --}}
+                    @if(($pt->tutorials_count ?? 0) > 0)
+                        <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:3px;background:var(--c-primary, #064E5A);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;line-height:1.2;" title="{{ $pt->tutorials_count }} {{ $pt->tutorials_count > 1 ? __('tutoriels') : __('tutoriel') }}">
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                            <span>{{ $pt->tutorials_count }}</span>
+                        </span>
+                    @endif
+                    <div style="display:flex!important;align-items:center!important;gap:8px;margin-bottom:8px;">
+                        @if($ptHost)<img src="https://www.google.com/s2/favicons?domain={{ $ptHost }}&sz=32" alt="" width="20" height="20" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
+                        <span style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--c-dark, #1A1D23);">{{ $pt->name }}</span>
+                    </div>
+                    @if(($pt->clicks_count ?? 0) > 0)
+                        <div style="display:flex!important;align-items:center!important;gap:4px;margin-bottom:6px;">
+                            <span style="color:#9A2A06;font-weight:700;font-size:12px;">📈 {{ number_format($pt->clicks_count, 0, ',', ' ') }}</span>
+                            <span style="color:var(--c-text-muted, #52586a);font-size:11px;">{{ __('vues') }}</span>
+                        </div>
+                    @endif
+                    <p style="font-size:12px;color:var(--c-text-secondary, #4a4f5c);margin:0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($pt->short_description, 60) }}</p>
+                    @if($pt->categories->isNotEmpty())
+                        <div style="margin-top:8px;">
+                            <span style="display:inline-block;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ $pt->categories->first()->name }}</span>
+                        </div>
+                    @endif
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Section trending : plus votés (masqué quand recherche active) --}}
         @if(isset($topVoted) && $topVoted->count() >= 5)
         <div style="margin-bottom:32px;" x-show="!search" x-transition>
