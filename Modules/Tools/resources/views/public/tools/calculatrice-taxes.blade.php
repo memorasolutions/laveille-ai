@@ -68,7 +68,11 @@
                             <main>
                                 <section class="main-calculator card">
                                     <div class="form-group">
-                                        <label for="province">{{ __('Province / Territoire') }}</label>
+                                        <label for="province">
+                                            {{ __('Province / Territoire') }}
+                                            <button type="button" class="ct-help-btn" aria-label="{{ __('Aide pour Province / Territoire') }}"
+                                                @click.prevent="$dispatch('open-help-modal', { title: 'ⓘ {{ __('Province / Territoire') }}', body: '<p>{{ __('Choisissez votre province ou territoire canadien. Les taxes varient :') }}</p><ul><li><strong>{{ __('TPS (5 %) seule') }}</strong> : Alberta, Yukon, Territoires du Nord-Ouest, Nunavut.</li><li><strong>{{ __('TPS + TVQ') }}</strong> : Québec (5 % + 9,975 %).</li><li><strong>{{ __('TPS + TVP') }}</strong> : Colombie-Britannique, Manitoba, Saskatchewan.</li><li><strong>{{ __('TVH unique') }}</strong> : Ontario (13 %), Nouveau-Brunswick, Terre-Neuve, Île-du-Prince-Édouard (15 %), Nouvelle-Écosse (14 %).</li></ul><p style=\'font-size:0.85rem; color: var(--c-text-muted, #52586a);\'>{{ __('Taux mis à jour 2025.') }}</p>' })">ⓘ</button>
+                                        </label>
                                         <select id="province" aria-label="Province" class="province-select">
                                             <option value="">{{ __('Sélectionnez une province') }}</option>
                                             <option value="QC" data-gst="5" data-pst="0" data-qst="9.975" data-hst="0" selected>Québec (14,975 %)</option>
@@ -87,12 +91,10 @@
                                         </select>
                                     </div>
 
-                                    {{-- #16 S84 Option A v2 : 2 onglets (Standard / Inversé) + toggle pourboire optionnel dans Inversé --}}
-                                    <div class="ct-mode-switch" role="tablist" aria-label="{{ __('Mode de calcul') }}" style="display: flex; gap: 0.25rem; margin-bottom: 1rem; padding: 0.25rem; background: #f1f3f5; border-radius: 10px; border: 1px solid #e2e6ea;">
-                                        <button type="button" class="ct-mode-btn" data-mode="forward" role="tab" aria-selected="true" aria-controls="ct-grid-forward" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: var(--c-primary, #064E5A); color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">📥 {{ __('Calcul direct') }}</button>
-                                        <button type="button" class="ct-mode-btn" data-mode="reverse" role="tab" aria-selected="false" aria-controls="ct-grid-reverse" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">🔄 {{ __('Calcul inversé') }}</button>
-                                    </div>
-                                    <p class="ct-mode-hint" id="ct-mode-hint" style="font-size: 0.8rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0;">💡 {{ __('Calcul direct : saisissez le montant avant taxes pour voir TPS/TVQ et total.') }}</p>
+                                    {{-- #16 S84 v3 : Bidirectionnel natif (engine activeField) — saisi dans n'importe quel champ → autre se calcule --}}
+                                    <p class="ct-mode-hint" style="font-size: 0.85rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0; padding: 0.5rem 0.75rem; background: #f1f3f5; border-radius: 8px; border-left: 3px solid var(--c-primary, #064E5A);">
+                                        💡 {{ __('Saisissez le montant') }} <strong>{{ __('avant') }}</strong> {{ __('OU') }} <strong>{{ __('avec taxes') }}</strong> — {{ __('l\'autre champ se calcule automatiquement.') }}
+                                    </p>
 
                                     {{-- Montants rapides --}}
                     <div class="quick-amounts" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
@@ -106,7 +108,11 @@
 
                     <div class="calculator-grid">
                                         <div class="form-group">
-                                            <label for="amount-before-tax">{{ __('Montant avant taxes') }}</label>
+                                            <label for="amount-before-tax">
+                                                {{ __('Montant avant taxes') }}
+                                                <button type="button" class="ct-help-btn" aria-label="{{ __('Aide pour Montant avant taxes') }}"
+                                                    @click.prevent="$dispatch('open-help-modal', { title: 'ⓘ {{ __('Montant avant taxes') }}', body: '<p>Le montant <strong>avant taxes</strong> (sous-total HT) est le prix affiché de l\'article ou du service, <strong>avant ajout</strong> de la TPS et de la TVQ/TVP/TVH.</p><p><strong>Exemple Québec :</strong> Vous achetez un article à 100 $ (avant taxes). À la caisse, on ajoute 5 $ TPS et 9,98 $ TVQ. Vous payez 114,98 $.</p><p style=\'font-size:0.85rem; color: var(--c-text-muted, #52586a);\'>💡 Saisissez ce montant si vous connaissez le prix avant taxes — l\'autre champ se calcule automatiquement.</p>' })">ⓘ</button>
+                                            </label>
                                             <div class="input-wrapper">
                                                 <span class="currency-symbol">$</span>
                                                 <input type="number" id="amount-before-tax" aria-label="Montant avant taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input">
@@ -134,7 +140,11 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="amount-after-tax">{{ __('Montant avec taxes') }}</label>
+                                            <label for="amount-after-tax">
+                                                {{ __('Montant avec taxes') }}
+                                                <button type="button" class="ct-help-btn" aria-label="{{ __('Aide pour Montant avec taxes') }}"
+                                                    @click.prevent="$dispatch('open-help-modal', { title: 'ⓘ {{ __('Montant avec taxes') }}', body: '<p>Le montant <strong>avec taxes</strong> (TTC) est le total final que vous payez, <strong>incluant</strong> la TPS et la TVQ/TVP/TVH.</p><p><strong>Exemple Québec :</strong> Vous payez 114,98 $ à la caisse. La calculatrice décompose : 100 $ avant taxes + 5 $ TPS + 9,98 $ TVQ.</p><p style=\'font-size:0.85rem; color: var(--c-text-muted, #52586a);\'>💡 Saisissez ce montant si vous connaissez le prix payé à la caisse — l\'autre champ se calcule automatiquement (calcul inversé).</p><p style=\'font-size:0.85rem; color: var(--c-text-muted, #52586a);\'>🍽️ Si vous avez ajouté un pourboire à ce montant, cochez « Le total inclut un pourboire ».</p>' })">ⓘ</button>
+                                            </label>
                                             <div class="input-wrapper">
                                                 <span class="currency-symbol">$</span>
                                                 <input type="number" id="amount-after-tax" aria-label="Montant après taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input total-amount">
@@ -142,10 +152,10 @@
                                         </div>
                                     </div>
 
-                                    {{-- #16 S84 v2 : Toggle pourboire inline (visible uniquement en mode Inversé) --}}
-                                    <div class="ct-tip-toggle-wrapper" id="ct-tip-toggle-wrapper" style="display: none; margin-bottom: 0.5rem;">
+                                    {{-- #16 S84 v3 : Toggle pourboire toujours visible — actif si user saisit dans 'avec taxes' --}}
+                                    <div class="ct-tip-toggle-wrapper" id="ct-tip-toggle-wrapper" style="margin-bottom: 0.5rem;">
                                         <button type="button" id="ct-tip-toggle-btn" class="ct-btn ct-btn-outline" aria-expanded="false" aria-controls="ct-tip-options" style="width: 100%; text-align: left; padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center;">
-                                            <span>🍽️ {{ __('Le total inclut un pourboire ?') }}</span>
+                                            <span>🍽️ {{ __('Le « Montant avec taxes » saisi inclut un pourboire ?') }}</span>
                                             <span id="ct-tip-toggle-arrow" style="transition: transform 0.2s; font-size: 0.9rem;">▼</span>
                                         </button>
                                         <div id="ct-tip-options" style="display: none; padding: 0.9rem; background: #f8f9fa; border-radius: 8px; margin-top: 0.4rem; border: 1px solid #e2e6ea;">
@@ -291,11 +301,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // #16 S84 v2 : état mode courant (forward = HT→TTC, reverse = TTC→HT) + tipIncluded optionnel en mode reverse
-    var currentMode = 'forward';
+    // #16 S84 v3 : Bidirectionnel natif (engine activeField). Toggle pourboire optionnel s'applique au champ 'avec taxes'.
     var tipIncluded = false;
 
-    // Helper DRY : extrait données calcul actuel du DOM (mode-aware #16 S84 v2)
+    // Détecte champ source (last edited by user)
+    function getActiveField() {
+        var st = window.simpleCalculator && window.simpleCalculator.state;
+        return st && st.activeField ? st.activeField : 'before';
+    }
+
+    // Helper DRY : extrait données calcul actuel du DOM (mode-aware via activeField)
     function getCalculationData() {
         var province = document.getElementById('province');
         var before = document.getElementById('amount-before-tax');
@@ -309,62 +324,65 @@ document.addEventListener('DOMContentLoaded', function() {
         var rtAfter = document.getElementById('rt-result-after-tax');
         var rtSub = document.getElementById('rt-result-subtotal');
         var lines = [];
+        var activeField = getActiveField();
         if (province && province.value) lines.push('Province: ' + province.options[province.selectedIndex].text);
 
-        if (currentMode === 'reverse') {
-            if (tipIncluded && rtPct && rtPct.value) {
-                if (after && after.value) lines.push('Total payé (incl. pourboire): ' + after.value + ' $');
-                lines.push('Pourboire: ' + rtPct.value + ' % (' + (rtTipAmt ? rtTipAmt.textContent : '0') + ')');
-                if (rtAfter) lines.push('Total avant pourboire (avec taxes): ' + rtAfter.textContent);
-                if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
-                if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
-                if (rtSub) lines.push('Sous-total avant taxes: ' + rtSub.textContent);
-                return {
-                    text: lines.join('\n'),
-                    mode: 'reverse',
-                    province: province ? province.value : '',
-                    amount: after ? after.value : '',
-                    tip: rtPct.value,
-                    hasData: !!(province && province.value && after && after.value)
-                };
-            }
-            // reverse simple (sans pourboire)
+        if (activeField === 'after' && tipIncluded && rtPct && rtPct.value) {
+            // Mode reverse + pourboire
+            if (after && after.value) lines.push('Total payé (incl. pourboire): ' + after.value + ' $');
+            lines.push('Pourboire: ' + rtPct.value + ' % (' + (rtTipAmt ? rtTipAmt.textContent : '0') + ')');
+            if (rtAfter) lines.push('Total avant pourboire (avec taxes): ' + rtAfter.textContent);
+            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
+            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
+            if (rtSub) lines.push('Sous-total avant taxes: ' + rtSub.textContent);
+            return {
+                text: lines.join('\n'),
+                source: 'after',
+                province: province ? province.value : '',
+                amount: after ? after.value : '',
+                tip: rtPct.value,
+                hasData: !!(province && province.value && after && after.value)
+            };
+        }
+        if (activeField === 'after') {
+            // Mode reverse simple
             if (after && after.value) lines.push('Avec taxes (saisi): ' + after.value + ' $');
             if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
             if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
             if (before && before.value) lines.push('Avant taxes (calculé): ' + before.value + ' $');
             return {
                 text: lines.join('\n'),
-                mode: 'reverse',
+                source: 'after',
                 province: province ? province.value : '',
                 amount: after ? after.value : '',
                 hasData: !!(province && province.value && after && after.value)
             };
         }
-        // forward (défaut)
+        // Mode forward (défaut, source = before)
         if (before && before.value) lines.push('Avant taxes: ' + before.value + ' $');
         if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
         if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
         if (after && after.value) lines.push('Total: ' + after.value + ' $');
         return {
             text: lines.join('\n'),
-            mode: 'forward',
+            source: 'before',
             province: province ? province.value : '',
             amount: before ? before.value : '',
             hasData: !!(province && province.value && before && before.value)
         };
     }
 
-    // Construire URL deep-link qui reconstruit le calcul (#15 + #16 S84 v2)
+    // Construire URL deep-link qui reconstruit le calcul (#15 + #16 S84 v3)
     function buildShareUrl(data) {
         var url = new URL(window.location.href);
         url.searchParams.delete('p');
         url.searchParams.delete('a');
         url.searchParams.delete('m');
         url.searchParams.delete('t');
+        url.searchParams.delete('s');
         if (data.province) url.searchParams.set('p', data.province);
         if (data.amount) url.searchParams.set('a', data.amount);
-        if (data.mode && data.mode !== 'forward') url.searchParams.set('m', data.mode);
+        if (data.source === 'after') url.searchParams.set('s', 'after');
         if (data.tip) url.searchParams.set('t', data.tip);
         return url.toString();
     }
@@ -427,10 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // #16 S84 v2 : 2 onglets (forward / reverse) + toggle pourboire optionnel inline en reverse
-    var modeBtns = document.querySelectorAll('.ct-mode-btn');
-    var modeHint = document.getElementById('ct-mode-hint');
-    var tipToggleWrapper = document.getElementById('ct-tip-toggle-wrapper');
+    // #16 S84 v3 : Bidirectionnel natif via engine activeField. Toggle pourboire toujours visible.
     var tipToggleBtn = document.getElementById('ct-tip-toggle-btn');
     var tipOptions = document.getElementById('ct-tip-options');
     var tipArrow = document.getElementById('ct-tip-toggle-arrow');
@@ -438,57 +453,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var rtPresetBtns = document.querySelectorAll('.rt-tip-preset');
     var rtResult = document.getElementById('rt-result');
 
-    var modeHints = {
-        'forward': '💡 {{ __("Calcul direct : saisissez le montant avant taxes pour voir TPS/TVQ et total.") }}',
-        'reverse': '💡 {{ __("Calcul inversé : saisissez le montant avec taxes pour décomposer sous-total et taxes. Cochez « pourboire inclus » si applicable.") }}'
-    };
-
-    function switchMode(newMode) {
-        currentMode = newMode;
-        modeBtns.forEach(function(b) {
-            var active = b.getAttribute('data-mode') === newMode;
-            b.setAttribute('aria-selected', active ? 'true' : 'false');
-            b.style.background = active ? 'var(--c-primary, #064E5A)' : 'transparent';
-            b.style.color = active ? '#fff' : '#333';
-        });
-        if (modeHint) modeHint.innerHTML = modeHints[newMode];
-
-        // Toggle pourboire visible uniquement en reverse
-        if (tipToggleWrapper) tipToggleWrapper.style.display = (newMode === 'reverse') ? 'block' : 'none';
-
-        // Si on quitte reverse, fermer le toggle pourboire et reset tipIncluded
-        if (newMode !== 'reverse') {
-            tipIncluded = false;
-            if (tipToggleBtn) tipToggleBtn.setAttribute('aria-expanded', 'false');
-            if (tipOptions) tipOptions.style.display = 'none';
-            if (tipArrow) tipArrow.style.transform = 'rotate(0deg)';
-            if (rtResult) rtResult.style.display = 'none';
-        }
-
-        if (newMode === 'reverse') {
-            var afterEl = document.getElementById('amount-after-tax');
-            if (afterEl) afterEl.focus();
-        } else {
-            var beforeEl = document.getElementById('amount-before-tax');
-            if (beforeEl) beforeEl.focus();
-        }
-    }
-
-    modeBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            switchMode(this.getAttribute('data-mode'));
-        });
-    });
-
     function getProvinceRates() {
         var sel = document.getElementById('province');
         if (!sel || !sel.value) return null;
         return (window.taxConfig && window.taxConfig.tax_rates) ? window.taxConfig.tax_rates[sel.value] : null;
     }
 
-    // Override : si tipIncluded actif en mode reverse, recompute reverse_tip et écrase l'engine
+    // Override : si tipIncluded ET activeField === 'after', recompute reverse_tip et écrase engine
     function recalcReverseTipOverride() {
-        if (currentMode !== 'reverse' || !tipIncluded) {
+        if (!tipIncluded || getActiveField() !== 'after') {
             if (rtResult) rtResult.style.display = 'none';
             return;
         }
@@ -596,30 +569,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Quand engine reverse simple recompute, override si tipIncluded actif
+    // Quand engine recompute (input dans n'importe quel champ), override si tipIncluded + activeField=after
     var afterInputEl = document.getElementById('amount-after-tax');
     if (afterInputEl) {
         afterInputEl.addEventListener('input', function() {
-            if (tipIncluded && currentMode === 'reverse') {
-                setTimeout(recalcReverseTipOverride, 0);
-            }
+            if (tipIncluded) setTimeout(recalcReverseTipOverride, 0);
+        });
+    }
+    var beforeInputEl = document.getElementById('amount-before-tax');
+    if (beforeInputEl) {
+        beforeInputEl.addEventListener('input', function() {
+            // Si user repasse en saisie 'before', cache le breakdown pourboire (override n'a plus de sens)
+            if (rtResult) rtResult.style.display = 'none';
         });
     }
 
     var provSel = document.getElementById('province');
     if (provSel) {
         provSel.addEventListener('change', function() {
-            if (currentMode === 'reverse' && tipIncluded) setTimeout(recalcReverseTipOverride, 0);
+            if (tipIncluded && getActiveField() === 'after') setTimeout(recalcReverseTipOverride, 0);
         });
     }
 
-    // #15 + #16 S84 v2 : Init au load — lire ?p, ?a, ?m, ?t (rétrocompat ancien m=reverse_tip)
+    // #15 + #16 S84 v3 : Init au load — lire ?p, ?a, ?s (source: 'after' ou 'before'), ?t. Rétrocompat ?m=reverse|reverse_tip
     (function initFromUrl() {
         try {
             var params = new URLSearchParams(window.location.search);
             var p = params.get('p');
             var a = params.get('a');
-            var m = params.get('m');
+            var m = params.get('m');     // legacy
+            var s = params.get('s');     // new: 'after' ou rien
             var t = params.get('t');
             if (p) {
                 var sel = document.getElementById('province');
@@ -628,18 +607,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     sel.dispatchEvent(new Event('change', {bubbles: true}));
                 }
             }
-            // m=reverse_tip = ancien lien : bascule reverse + active toggle pourboire
-            var modeToSet = (m === 'reverse_tip') ? 'reverse' : (m === 'reverse' ? 'reverse' : 'forward');
-            if (modeToSet !== 'forward') switchMode(modeToSet);
+            // Détermine le champ cible
+            var useAfter = (s === 'after') || (m === 'reverse') || (m === 'reverse_tip');
             if (a) {
-                var targetId = (modeToSet === 'reverse') ? 'amount-after-tax' : 'amount-before-tax';
+                var targetId = useAfter ? 'amount-after-tax' : 'amount-before-tax';
                 var amountInput = document.getElementById(targetId);
                 if (amountInput) {
+                    amountInput.focus();
                     amountInput.value = a;
                     amountInput.dispatchEvent(new Event('input', {bubbles: true}));
                 }
             }
-            if (t && modeToSet === 'reverse') {
+            if (t && useAfter) {
                 // Ouvrir le toggle pourboire et remplir tip%
                 if (tipToggleBtn) {
                     tipToggleBtn.setAttribute('aria-expanded', 'true');
