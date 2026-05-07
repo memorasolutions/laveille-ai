@@ -184,7 +184,32 @@
         if (s === 'free') { this.activePricing = 'free'; this.sortBy = 'all'; }
         else { this.sortBy = s; if (this.activePricing === 'free') this.activePricing = ''; }
     },
-    resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.eduFilter = false; this.sortBy = 'all'; }
+    resetAll() { this.search = ''; this.activePricing = ''; this.activeCategory = ''; this.eduFilter = false; this.sortBy = 'all'; },
+
+    // S84 #27 — Toggle vue cards/list + persistance localStorage
+    viewMode: (typeof window !== 'undefined' && localStorage.getItem('directory_view_mode')) || 'cards',
+    listSortField: 'name', listSortDir: 'asc',
+    setViewMode(m) {
+        this.viewMode = m;
+        try { localStorage.setItem('directory_view_mode', m); } catch(e) {}
+        if (m === 'list') this.displayCount = Math.max(this.displayCount, 100);
+    },
+    listSort(field) {
+        if (this.listSortField === field) { this.listSortDir = this.listSortDir === 'asc' ? 'desc' : 'asc'; }
+        else { this.listSortField = field; this.listSortDir = 'asc'; }
+    },
+    get listTools() {
+        const f = this.listSortField, d = this.listSortDir === 'asc' ? 1 : -1;
+        const t = [...this.filteredTools];
+        t.sort((a, b) => {
+            let va = a[f], vb = b[f];
+            if (f === 'name' || f === 'pricingLabel' || f === 'lifecycleLabel') { va = (va || '').toString().toLowerCase(); vb = (vb || '').toString().toLowerCase(); }
+            if (va < vb) return -1 * d;
+            if (va > vb) return 1 * d;
+            return 0;
+        });
+        return t.slice(0, this.displayCount);
+    }
 }">
 
     {{-- Hero + wizard wrapper --}}
@@ -765,8 +790,89 @@
             {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('directory-top') !!}
         @endif
 
-        {{-- Grid --}}
-        <div class="row row-flex">
+        {{-- S84 #27 — Toggle vue Cards/Liste --}}
+        <div class="rt-view-toggle" role="group" aria-label="{{ __('Mode d\'affichage') }}" style="display:flex;justify-content:flex-end;gap:0.4rem;margin-bottom:1rem;">
+            <button type="button" @click="setViewMode('cards')"
+                :aria-pressed="viewMode === 'cards' ? 'true' : 'false'"
+                :style="'display:inline-flex;align-items:center;gap:6px;padding:0.5rem 0.85rem;border-radius:8px;border:1.5px solid var(--c-primary, #064E5A);font-weight:600;font-size:0.85rem;cursor:pointer;transition:all 0.15s;' + (viewMode === 'cards' ? 'background:var(--c-primary, #064E5A);color:#fff;' : 'background:transparent;color:var(--c-primary, #064E5A);')">
+                📇 {{ __('Cartes') }}
+            </button>
+            <button type="button" @click="setViewMode('list')"
+                :aria-pressed="viewMode === 'list' ? 'true' : 'false'"
+                :style="'display:inline-flex;align-items:center;gap:6px;padding:0.5rem 0.85rem;border-radius:8px;border:1.5px solid var(--c-primary, #064E5A);font-weight:600;font-size:0.85rem;cursor:pointer;transition:all 0.15s;' + (viewMode === 'list' ? 'background:var(--c-primary, #064E5A);color:#fff;' : 'background:transparent;color:var(--c-primary, #064E5A);')">
+                📋 {{ __('Liste') }}
+            </button>
+        </div>
+
+        {{-- S84 #27 — Vue Liste type Google Sheets --}}
+        <div x-show="viewMode === 'list'" x-cloak style="overflow-x:auto;margin-bottom:2rem;border:1px solid #E5E7EB;border-radius:12px;background:#fff;">
+            <table class="rt-list-table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+                <caption class="sr-only">{{ __('Liste des outils du répertoire — triable par colonne') }}</caption>
+                <thead style="background:#F9FAFB;position:sticky;top:0;z-index:5;">
+                    <tr>
+                        <th scope="col" style="padding:10px 12px;text-align:left;font-weight:700;color:var(--c-dark, #1A1D23);width:48px;">{{ __('Logo') }}</th>
+                        <th scope="col" @click="listSort('name')" :aria-sort="listSortField === 'name' ? (listSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" style="padding:10px 12px;text-align:left;font-weight:700;color:var(--c-dark, #1A1D23);cursor:pointer;user-select:none;border-bottom:2px solid #E5E7EB;">
+                            {{ __('Nom') }} <span x-text="listSortField === 'name' ? (listSortDir === 'asc' ? '↑' : '↓') : '↕'" style="opacity:0.6;font-size:0.75rem;"></span>
+                        </th>
+                        <th scope="col" style="padding:10px 12px;text-align:left;font-weight:700;color:var(--c-dark, #1A1D23);border-bottom:2px solid #E5E7EB;">{{ __('Description') }}</th>
+                        <th scope="col" @click="listSort('pricingLabel')" :aria-sort="listSortField === 'pricingLabel' ? (listSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" style="padding:10px 12px;text-align:left;font-weight:700;color:var(--c-dark, #1A1D23);cursor:pointer;user-select:none;border-bottom:2px solid #E5E7EB;white-space:nowrap;">
+                            {{ __('Tarif') }} <span x-text="listSortField === 'pricingLabel' ? (listSortDir === 'asc' ? '↑' : '↓') : '↕'" style="opacity:0.6;font-size:0.75rem;"></span>
+                        </th>
+                        <th scope="col" @click="listSort('lifecycleLabel')" :aria-sort="listSortField === 'lifecycleLabel' ? (listSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" style="padding:10px 12px;text-align:left;font-weight:700;color:var(--c-dark, #1A1D23);cursor:pointer;user-select:none;border-bottom:2px solid #E5E7EB;white-space:nowrap;">
+                            {{ __('Statut') }} <span x-text="listSortField === 'lifecycleLabel' ? (listSortDir === 'asc' ? '↑' : '↓') : '↕'" style="opacity:0.6;font-size:0.75rem;"></span>
+                        </th>
+                        <th scope="col" @click="listSort('avgRating')" :aria-sort="listSortField === 'avgRating' ? (listSortDir === 'asc' ? 'ascending' : 'descending') : 'none'" style="padding:10px 12px;text-align:left;font-weight:700;color:var(--c-dark, #1A1D23);cursor:pointer;user-select:none;border-bottom:2px solid #E5E7EB;white-space:nowrap;">
+                            {{ __('Note') }} <span x-text="listSortField === 'avgRating' ? (listSortDir === 'asc' ? '↑' : '↓') : '↕'" style="opacity:0.6;font-size:0.75rem;"></span>
+                        </th>
+                        <th scope="col" style="padding:10px 12px;text-align:right;font-weight:700;color:var(--c-dark, #1A1D23);border-bottom:2px solid #E5E7EB;">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="tool in listTools" :key="tool.id">
+                        <tr style="border-bottom:1px solid #F3F4F6;transition:background 0.1s;" onmouseover="this.style.background='#FAFBFC'" onmouseout="this.style.background='transparent'">
+                            <td style="padding:8px 12px;">
+                                <template x-if="tool.favicon"><img :src="tool.favicon" :alt="tool.name + ' logo'" loading="lazy" width="32" height="32" style="border-radius:6px;" onerror="this.style.display='none'"></template>
+                            </td>
+                            <td style="padding:8px 12px;font-weight:600;">
+                                <a :href="tool.showUrl" x-text="tool.name" style="color:var(--c-primary, #064E5A);text-decoration:none;"></a>
+                                <template x-if="tool.isFeatured"><span style="margin-left:6px;font-size:0.7rem;background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:4px;">★</span></template>
+                            </td>
+                            <td style="padding:8px 12px;color:var(--c-text-muted, #52586a);max-width:380px;">
+                                <span x-text="tool.shortDesc" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"></span>
+                            </td>
+                            <td style="padding:8px 12px;white-space:nowrap;">
+                                <span class="rt-badge" :class="'badge-' + tool.pricing" x-text="tool.pricingLabel" style="font-size:0.7rem;"></span>
+                            </td>
+                            <td style="padding:8px 12px;white-space:nowrap;">
+                                <template x-if="tool.isLifecycleActive">
+                                    <span style="color:#16A34A;font-size:0.75rem;font-weight:600;">● {{ __('Actif') }}</span>
+                                </template>
+                                <template x-if="!tool.isLifecycleActive">
+                                    <span :style="'color:' + tool.lifecycleColor + ';font-size:0.75rem;font-weight:600;'" x-text="'● ' + tool.lifecycleLabel"></span>
+                                </template>
+                            </td>
+                            <td style="padding:8px 12px;white-space:nowrap;">
+                                <template x-if="tool.avgRating > 0">
+                                    <span style="color:#F59E0B;font-weight:700;">★ <span x-text="tool.avgRating"></span></span>
+                                </template>
+                                <template x-if="tool.avgRating === 0">
+                                    <span style="color:#9CA3AF;font-size:0.75rem;">—</span>
+                                </template>
+                            </td>
+                            <td style="padding:8px 12px;text-align:right;white-space:nowrap;">
+                                <a :href="tool.showUrl" style="display:inline-block;padding:4px 10px;background:#F3F4F6;color:var(--c-dark, #1A1D23);font-size:0.75rem;font-weight:600;border-radius:6px;text-decoration:none;margin-right:4px;">{{ __('Détails') }}</a>
+                                <template x-if="tool.url">
+                                    <a :href="tool.url" target="_blank" rel="noopener noreferrer nofollow" style="display:inline-block;padding:4px 10px;background:var(--c-primary, #064E5A);color:#fff;font-size:0.75rem;font-weight:600;border-radius:6px;text-decoration:none;">{{ __('Visiter') }} ↗</a>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Grid (Cards) --}}
+        <div class="row row-flex" x-show="viewMode === 'cards'">
             <template x-for="tool in visibleTools" :key="tool.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="rt-card">
