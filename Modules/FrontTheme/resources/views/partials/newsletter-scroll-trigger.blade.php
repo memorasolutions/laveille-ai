@@ -43,7 +43,7 @@
             font-size: 20px;
             line-height: 1;
             cursor: pointer;
-            color: #666;
+            color: var(--c-text-muted, #52586a);
             padding: 4px 8px;
             border-radius: 4px;
         "
@@ -52,7 +52,7 @@
     <h4 style="margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #1a1a1a;">
         Reste à jour en veille IA
     </h4>
-    <p style="margin: 0 0 14px; font-size: 13px; color: #666; line-height: 1.4;">
+    <p style="margin: 0 0 14px; font-size: 13px; color: var(--c-text-muted, #52586a); line-height: 1.4;">
         Reçois chaque semaine le meilleur de l'actualité IA, directement dans ta boîte.
     </p>
 
