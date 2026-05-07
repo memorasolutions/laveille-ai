@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.';
+    public const CACHE_KEY = 'glossary.terms.v2.'; // #222 bump : strip markdown inline
     public const CACHE_TTL = 3600; // 1h
     public const MIN_LENGTH = 4; // skip ≤3 chars (faux positifs IA, ML, AI)
     public const MAX_LINKS_PER_PAGE = 12;
@@ -151,7 +151,7 @@ class GlossaryLinkifier
                             $strategy = $t->match_strategy ?? 'loose';
                             if ($strategy === 'never_auto') return; // 2026-05-05 #145 : opt-out
                             $strategy = self::escalateStrategyIfStopList($name, $strategy); // auto-escalade si polysémique
-                            $shortDef = Str::limit(strip_tags((string) $def), 180);
+                            $shortDef = Str::limit(self::stripMarkdownInline(strip_tags((string) $def)), 180);
                             $url = '/glossaire/'.$slug;
                             // 2026-05-05 #150+#151 : entry pour le terme principal + entries pour chaque alias
                             $terms[] = [
@@ -191,7 +191,7 @@ class GlossaryLinkifier
                             $strategy = $a->match_strategy ?? 'case_sensitive';
                             if ($strategy === 'never_auto') return;
                             $url = '/acronymes-education/'.$slug;
-                            $shortDesc = Str::limit(strip_tags((string) $desc), 180);
+                            $shortDesc = Str::limit(self::stripMarkdownInline(strip_tags((string) $desc)), 180);
                             // Acronyme exact (ex "OBVIA") : strict casse + min 2 chars
                             if ($acro && mb_strlen($acro) >= 2) {
                                 $terms[] = [
@@ -285,6 +285,24 @@ class GlossaryLinkifier
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
         }
+    }
+
+    /**
+     * 2026-05-07 #222 : strip markdown inline pour tooltips data-tooltip CSS.
+     * Le tooltip CSS `content: attr(data-tooltip)` rend du texte brut, donc les **gras**,
+     * *italiques*, `code` et liens [txt](url) doivent être déballés en texte clair.
+     */
+    protected static function stripMarkdownInline(string $text): string
+    {
+        $text = preg_replace('/!\[([^\]]*)\]\([^\)]+\)/u', '$1', $text); // images ![alt](url) -> alt
+        $text = preg_replace('/\[([^\]]+)\]\([^\)]+\)/u', '$1', $text); // links [txt](url) -> txt
+        $text = preg_replace('/\*\*\*(.+?)\*\*\*/u', '$1', $text); // bold+italic
+        $text = preg_replace('/\*\*(.+?)\*\*/u', '$1', $text); // bold
+        $text = preg_replace('/(?<!\w)\*(.+?)\*(?!\w)/u', '$1', $text); // italic *...*
+        $text = preg_replace('/(?<!\w)_(.+?)_(?!\w)/u', '$1', $text); // italic _..._
+        $text = preg_replace('/`+([^`]+)`+/u', '$1', $text); // inline code
+
+        return $text;
     }
 
     /**

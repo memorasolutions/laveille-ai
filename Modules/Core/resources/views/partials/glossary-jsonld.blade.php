@@ -61,7 +61,7 @@
                 letter-spacing: 0.01em;
                 width: max-content;
                 min-width: 240px;
-                max-width: 320px;
+                max-width: min(320px, calc(100vw - 24px)); /* #222 anti-clipping viewport étroit */
                 text-align: left;
                 white-space: normal;
                 box-shadow:
@@ -147,8 +147,10 @@
             function positionTooltip(link) {
                 const linkRect = link.getBoundingClientRect();
                 const linkCenterX = linkRect.left + linkRect.width / 2;
-                const ttHalf = TT_MAX_WIDTH / 2;
                 const viewW = window.innerWidth;
+                // 2026-05-07 #222 : largeur réelle effective = min(320, viewW - 24) pour éviter clipping
+                const effWidth = Math.min(TT_MAX_WIDTH, viewW - 2 * TT_VIEWPORT_PADDING);
+                const ttHalf = effWidth / 2;
 
                 // Default centered
                 let leftValue = '50%';
@@ -156,16 +158,16 @@
 
                 // Si le tooltip déborde à gauche (centre lien - half tooltip < padding)
                 if (linkCenterX - ttHalf < TT_VIEWPORT_PADDING) {
-                    // Aligne le tooltip à droite du lien (left = 0 par rapport au lien)
-                    // Mais on veut qu'il pointe vers le lien
+                    // Position : bord gauche du tooltip à TT_VIEWPORT_PADDING viewport
                     const offsetFromLink = TT_VIEWPORT_PADDING - linkRect.left;
                     leftValue = offsetFromLink + 'px';
                     translateX = '0';
                 }
                 // Si le tooltip déborde à droite (centre lien + half tooltip > viewW - padding)
                 else if (linkCenterX + ttHalf > viewW - TT_VIEWPORT_PADDING) {
-                    const offsetFromLink = (viewW - TT_VIEWPORT_PADDING - linkRect.right);
-                    leftValue = (linkRect.width + offsetFromLink) + 'px';
+                    // Position : bord droit du tooltip à viewW - TT_VIEWPORT_PADDING
+                    const offsetFromLink = (viewW - TT_VIEWPORT_PADDING) - linkRect.left;
+                    leftValue = offsetFromLink + 'px';
                     translateX = '-100%';
                 }
 
