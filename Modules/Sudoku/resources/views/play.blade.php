@@ -53,19 +53,43 @@
               @endauth
             </ul>
 
-            {{-- Pills 5 difficultes (compact pour tenir sur 1 ligne md+) --}}
+            {{-- Pills 5 difficultes (#9 S84 Option F : tooltip hover premium NYT/Microsoft 2026 — label propre + info riche au hover) --}}
             <div class="sudoku-pills d-flex flex-wrap gap-2 mb-4" role="tablist" aria-label="{{ __('Niveau de difficulté') }}">
               <template x-for="(puzzle, idx) in puzzles" :key="'pill-'+idx">
-                <button type="button"
-                        class="sudoku-pill rounded-pill d-inline-flex align-items-center gap-2"
-                        :class="{'shadow-sm': activeIdx===idx}"
-                        @click="switchTo(idx)"
-                        :aria-pressed="activeIdx===idx ? 'true' : 'false'"
-                        :style="activeIdx===idx ? `border:2px solid ${puzzle.color}; background:${puzzle.color}; color:#fff` : `border:1px solid ${puzzle.color}; color:${puzzle.color}; background:transparent`">
-                  <span :style="activeIdx===idx ? `background:#fff; width:6px; height:6px; display:inline-block; border-radius:50%;` : `background:${puzzle.color}; width:6px; height:6px; display:inline-block; border-radius:50%;`"></span>
-                  <strong x-text="puzzle.label"></strong>
-                  <span class="sudoku-pill-badge" :style="activeIdx===idx ? `background:rgba(255,255,255,0.25); color:#fff` : `background:#f1f5f9; color:#475569`" x-text="puzzle.clues_count"></span>
-                </button>
+                <div style="position: relative;" @mouseleave="tooltipIdx = null">
+                  <button type="button"
+                          class="sudoku-pill rounded-pill d-inline-flex align-items-center gap-2"
+                          :class="{'shadow-sm': activeIdx===idx}"
+                          @click="switchTo(idx)"
+                          @mouseenter="tooltipIdx = idx"
+                          @focus="tooltipIdx = idx"
+                          @blur="tooltipIdx = null"
+                          :aria-describedby="'sudoku-tip-' + idx"
+                          :aria-pressed="activeIdx===idx ? 'true' : 'false'"
+                          :style="activeIdx===idx ? `border:2px solid ${puzzle.color}; background:${puzzle.color}; color:#fff` : `border:1px solid ${puzzle.color}; color:${puzzle.color}; background:transparent`">
+                    <span :style="activeIdx===idx ? `background:#fff; width:6px; height:6px; display:inline-block; border-radius:50%;` : `background:${puzzle.color}; width:6px; height:6px; display:inline-block; border-radius:50%;`"></span>
+                    <strong x-text="puzzle.label"></strong>
+                  </button>
+                  <div x-show="tooltipIdx === idx" x-transition.opacity
+                       :id="'sudoku-tip-' + idx"
+                       role="tooltip"
+                       class="sudoku-pill-tooltip"
+                       style="position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 50; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.10); padding: 12px 14px; min-width: 220px; max-width: 280px; font-size: 0.82rem; color: var(--c-text-secondary, #4a4f5c); line-height: 1.5; text-align: left;">
+                    <div style="font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 6px;" x-text="puzzle.label"></div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                      <span aria-hidden="true">⏱</span>
+                      <span><strong x-text="'+' + getDifficultyPenalty(puzzle.difficulty) + 's'"></strong> {{ __('par indice demandé') }}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                      <span aria-hidden="true">🔢</span>
+                      <span><strong x-text="puzzle.clues_count"></strong> {{ __('cases pré-remplies') }}</span>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; gap: 6px;">
+                      <span aria-hidden="true" style="line-height: 1.5;">🧠</span>
+                      <span x-text="getDifficultyTechniques(puzzle.difficulty)"></span>
+                    </div>
+                  </div>
+                </div>
               </template>
             </div>
 
@@ -466,6 +490,7 @@ document.addEventListener('alpine:init', () => {
     restartModalEl: null,
     switchModalEl: null,
     errorsCells: new Set(),
+    tooltipIdx: null,
 
     init() {
       this.pseudo = localStorage.getItem('sudoku_pseudo') || '';
@@ -648,8 +673,22 @@ document.addEventListener('alpine:init', () => {
 
     // #204 : penalite temps par hint selon difficulte (NYT/MS standards 2026)
     hintPenaltySeconds() {
+      return this.getDifficultyPenalty(this.currentDifficulty);
+    },
+    // #9 S84 Option F : helpers pour tooltip hover pills (NYT/Microsoft Sudoku 2026)
+    getDifficultyPenalty(difficulty) {
       const map = { easy: 10, medium: 15, hard: 20, expert: 30, diabolical: 45 };
-      return map[this.currentDifficulty] || 15;
+      return map[difficulty] || 15;
+    },
+    getDifficultyTechniques(difficulty) {
+      const map = {
+        easy: 'Singletons et scan basique. Idéal pour démarrer.',
+        medium: 'Paires nues et X-wing simples. Logique progressive.',
+        hard: 'Paires cachées et chaînes courtes. Vérification croisée.',
+        expert: 'Trios cachés, swordfish, chaînes longues. Analyse avancée.',
+        diabolical: 'Toutes techniques avancées + raisonnement par l’absurde.',
+      };
+      return map[difficulty] || map.medium;
     },
 
     useHint() {
