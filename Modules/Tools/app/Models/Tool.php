@@ -25,10 +25,13 @@ class Tool extends Model
         'featured_image',
         'is_active',
         'sort_order',
+        'category',
+        'views_count',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'views_count' => 'integer',
     ];
 
     public function scopeActive($query)
