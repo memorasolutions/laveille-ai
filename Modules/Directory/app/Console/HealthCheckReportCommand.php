@@ -77,25 +77,19 @@ class HealthCheckReportCommand extends Command
             'verify' => false, // certains sites ont SSL invalides mais sont up
         ]);
 
+        // S84 #32 v2 — GET direct avec Range:bytes=0-1024 (1 KB max DL) : universel + simple + ~1 KB par site
         $results = [];
         $requests = function () use ($tools) {
             foreach ($tools as $tool) {
-                yield $tool->id => new Request('HEAD', $tool->url);
+                yield $tool->id => new Request('GET', $tool->url, ['Range' => 'bytes=0-1024']);
             }
         };
 
-        $needsGetRetry = []; // S84 #32 : pour retry GET sur 405/403/501 (sites refusent HEAD)
         $pool = new Pool($client, $requests(), [
             'concurrency' => self::CONCURRENCY,
-            'fulfilled' => function ($response, $toolId) use (&$results, &$needsGetRetry, $bar, $tools) {
+            'fulfilled' => function ($response, $toolId) use (&$results, $bar, $tools) {
                 $code = $response->getStatusCode();
                 $tool = $tools->firstWhere('id', $toolId);
-                // 405 Method Not Allowed / 501 Not Implemented / 403 (parfois) : retry avec GET
-                if (in_array($code, [403, 405, 501])) {
-                    $needsGetRetry[$toolId] = $tool;
-                    $bar->advance();
-                    return;
-                }
                 $results[$toolId] = [
                     'tool' => $tool,
                     'status' => $code,
@@ -117,45 +111,6 @@ class HealthCheckReportCommand extends Command
             },
         ]);
         $pool->promise()->wait();
-
-        // S84 #32 — 2e passe : GET avec Range:bytes=0-1024 pour les sites refusant HEAD
-        if (! empty($needsGetRetry)) {
-            $this->newLine();
-            $this->info('Retry GET sur '.count($needsGetRetry).' outil(s) ayant refusé HEAD (405/403/501)...');
-            $getBar = $this->output->createProgressBar(count($needsGetRetry));
-            $getBar->start();
-            $getRequests = function () use ($needsGetRetry) {
-                foreach ($needsGetRetry as $toolId => $tool) {
-                    yield $toolId => new Request('GET', $tool->url, ['Range' => 'bytes=0-1024']);
-                }
-            };
-            $getPool = new Pool($client, $getRequests(), [
-                'concurrency' => self::CONCURRENCY,
-                'fulfilled' => function ($response, $toolId) use (&$results, $getBar, $needsGetRetry) {
-                    $code = $response->getStatusCode();
-                    $results[$toolId] = [
-                        'tool' => $needsGetRetry[$toolId],
-                        'status' => $code,
-                        'category' => $this->categorize($code),
-                        'error' => null,
-                    ];
-                    $getBar->advance();
-                },
-                'rejected' => function ($reason, $toolId) use (&$results, $getBar, $needsGetRetry) {
-                    $msg = $reason instanceof \Throwable ? $reason->getMessage() : (string) $reason;
-                    $results[$toolId] = [
-                        'tool' => $needsGetRetry[$toolId],
-                        'status' => 0,
-                        'category' => $this->categorizeError($msg),
-                        'error' => substr($msg, 0, 120),
-                    ];
-                    $getBar->advance();
-                },
-            ]);
-            $getPool->promise()->wait();
-            $getBar->finish();
-            $this->newLine();
-        }
         $bar->finish();
         $this->newLine(2);
 
