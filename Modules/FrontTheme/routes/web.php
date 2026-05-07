@@ -19,6 +19,12 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::get('/ressources', [ResourceHubController::class, 'index'])->name('resources.index')->middleware('cacheResponse:600');
     Route::get('/plan-du-site', [\Modules\FrontTheme\Http\Controllers\SitemapHtmlController::class, 'index'])->name('sitemap.html')->middleware('cacheResponse:3600');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+
+    // Page auteur EEAT 2026 NN/g (#218 S84 — Schema.org Person + sameAs LinkedIn)
+    Route::get('/auteur/{slug}', [\Modules\FrontTheme\Http\Controllers\AuthorController::class, 'show'])
+        ->where('slug', '[a-z0-9-]+')
+        ->name('author.show');
+
     Route::get('/lien-expire', function () {
         $reason = request('reason', 'notfound');
         return response()->view('fronttheme::link-expired', compact('reason'), $reason === 'expired' ? 410 : 404);
