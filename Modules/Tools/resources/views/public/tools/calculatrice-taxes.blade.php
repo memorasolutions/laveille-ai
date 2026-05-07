@@ -87,9 +87,17 @@
                                         </select>
                                     </div>
 
+                                    {{-- #16 S84 Option A : Segmented control 3 modes (forward / reverse / reverse+tip) --}}
+                                    <div class="ct-mode-switch" role="tablist" aria-label="{{ __('Mode de calcul') }}" style="display: flex; gap: 0.25rem; margin-bottom: 1rem; padding: 0.25rem; background: #f1f3f5; border-radius: 10px; border: 1px solid #e2e6ea;">
+                                        <button type="button" class="ct-mode-btn" data-mode="forward" role="tab" aria-selected="true" aria-controls="ct-grid-forward" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: var(--c-primary, #064E5A); color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">📥 {{ __('Standard') }}</button>
+                                        <button type="button" class="ct-mode-btn" data-mode="reverse" role="tab" aria-selected="false" aria-controls="ct-grid-reverse" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">📤 {{ __('Inversé') }}</button>
+                                        <button type="button" class="ct-mode-btn" data-mode="reverse_tip" role="tab" aria-selected="false" aria-controls="ct-grid-reverse-tip" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">🍽️ {{ __('Total + pourboire') }}</button>
+                                    </div>
+                                    <p class="ct-mode-hint" id="ct-mode-hint" style="font-size: 0.8rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0;">💡 {{ __('Saisissez le montant avant taxes pour voir TPS/TVQ et total.') }}</p>
+
                                     {{-- Montants rapides --}}
                     <div class="quick-amounts" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                        <span style="font-size: 0.85rem; color: #777; align-self: center;">{{ __('Montants rapides :') }}</span>
+                        <span style="font-size: 0.85rem; color: var(--c-text-muted, #52586a); align-self: center;">{{ __('Montants rapides :') }}</span>
                         <button type="button" class="quick-amt-btn" data-amount="10" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">10 $</button>
                         <button type="button" class="quick-amt-btn" data-amount="25" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">25 $</button>
                         <button type="button" class="quick-amt-btn" data-amount="50" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">50 $</button>
@@ -132,6 +140,37 @@
                                                 <span class="currency-symbol">$</span>
                                                 <input type="number" id="amount-after-tax" aria-label="Montant après taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input total-amount">
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- #16 S84 Mode 3 reverse_tip : section dédiée Total + Pourboire → décompose tout --}}
+                                    <div class="ct-reverse-tip-section" id="ct-reverse-tip-section" style="display: none; padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem;">
+                                        <div class="form-group" style="margin-bottom: 0.75rem;">
+                                            <label for="rt-total-with-tip">💰 {{ __('Total payé (incluant pourboire et taxes)') }}</label>
+                                            <div class="input-wrapper">
+                                                <span class="currency-symbol">$</span>
+                                                <input type="number" id="rt-total-with-tip" aria-label="Total payé avec pourboire" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input">
+                                            </div>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="rt-tip-percent">🍽️ {{ __('Pourcentage du pourboire') }}</label>
+                                            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+                                                <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="10" style="padding: 4px 12px; font-size: 0.85rem;">10 %</button>
+                                                <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="15" style="padding: 4px 12px; font-size: 0.85rem;">15 %</button>
+                                                <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="18" style="padding: 4px 12px; font-size: 0.85rem;">18 %</button>
+                                                <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="20" style="padding: 4px 12px; font-size: 0.85rem;">20 %</button>
+                                                <div class="input-wrapper" style="flex: 1; min-width: 100px;">
+                                                    <input type="number" id="rt-tip-percent" aria-label="Pourcentage personnalisé" placeholder="{{ __('Personnalisé') }}" step="0.5" min="0" max="100" inputmode="decimal" class="amount-input" style="padding-right: 2rem;">
+                                                    <span style="position: absolute; right: 0.6rem; color: #777;">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="rt-result" style="display: none; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #e2e6ea; font-size: 0.9rem;">
+                                            <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span>{{ __('Pourboire') }} (<span id="rt-result-tip-pct">0</span>%)</span><strong id="rt-result-tip-amount">0.00 $</strong></div>
+                                            <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span>{{ __('Total avant pourboire (avec taxes)') }}</span><strong id="rt-result-after-tax">0.00 $</strong></div>
+                                            <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span id="rt-result-tax1-label">TPS</span><strong id="rt-result-tax1">0.00 $</strong></div>
+                                            <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span id="rt-result-tax2-label">TVQ</span><strong id="rt-result-tax2">0.00 $</strong></div>
+                                            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px solid #e2e6ea; margin-top: 5px;"><span style="font-weight: 700;">{{ __('Sous-total avant taxes') }}</span><strong id="rt-result-subtotal" style="color: var(--c-primary, #064E5A); font-size: 1.05rem;">0.00 $</strong></div>
                                         </div>
                                     </div>
 
@@ -254,7 +293,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Helper DRY : extrait données calcul actuel du DOM
+    // #16 S84 : état mode courant (forward = défaut, reverse = TTC→HT, reverse_tip = total+pourboire→tout)
+    var currentMode = 'forward';
+
+    // Helper DRY : extrait données calcul actuel du DOM (mode-aware #16 S84)
     function getCalculationData() {
         var province = document.getElementById('province');
         var before = document.getElementById('amount-before-tax');
@@ -265,25 +307,69 @@ document.addEventListener('DOMContentLoaded', function() {
         var t2Label = document.getElementById('tax2-label');
         var lines = [];
         if (province && province.value) lines.push('Province: ' + province.options[province.selectedIndex].text);
+
+        if (currentMode === 'reverse_tip') {
+            var rtTotal = document.getElementById('rt-total-with-tip');
+            var rtPct = document.getElementById('rt-tip-percent');
+            var rtTipAmt = document.getElementById('rt-result-tip-amount');
+            var rtAfter = document.getElementById('rt-result-after-tax');
+            var rtSub = document.getElementById('rt-result-subtotal');
+            if (rtTotal && rtTotal.value) lines.push('Total payé (avec pourboire): ' + rtTotal.value + ' $');
+            if (rtPct && rtPct.value) lines.push('Pourboire: ' + rtPct.value + ' %');
+            if (rtTipAmt) lines.push('Pourboire ($): ' + rtTipAmt.textContent);
+            if (rtAfter) lines.push('Total avant pourboire (avec taxes): ' + rtAfter.textContent);
+            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
+            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
+            if (rtSub) lines.push('Sous-total avant taxes: ' + rtSub.textContent);
+            return {
+                text: lines.join('\n'),
+                mode: currentMode,
+                province: province ? province.value : '',
+                amount: rtTotal ? rtTotal.value : '',
+                tip: rtPct ? rtPct.value : '',
+                hasData: !!(province && province.value && rtTotal && rtTotal.value && rtPct && rtPct.value)
+            };
+        }
+
+        // Mode forward et reverse : champs existants
+        if (currentMode === 'reverse') {
+            if (after && after.value) lines.push('Avec taxes (saisi): ' + after.value + ' $');
+            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
+            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
+            if (before && before.value) lines.push('Avant taxes (calculé): ' + before.value + ' $');
+            return {
+                text: lines.join('\n'),
+                mode: currentMode,
+                province: province ? province.value : '',
+                amount: after ? after.value : '',
+                hasData: !!(province && province.value && after && after.value)
+            };
+        }
+        // forward (défaut)
         if (before && before.value) lines.push('Avant taxes: ' + before.value + ' $');
         if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
         if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
         if (after && after.value) lines.push('Total: ' + after.value + ' $');
         return {
             text: lines.join('\n'),
+            mode: currentMode,
             province: province ? province.value : '',
             amount: before ? before.value : '',
             hasData: !!(province && province.value && before && before.value)
         };
     }
 
-    // Construire URL deep-link qui reconstruit le calcul (#15 S84 Option A)
+    // Construire URL deep-link qui reconstruit le calcul (#15 + #16 S84)
     function buildShareUrl(data) {
         var url = new URL(window.location.href);
         url.searchParams.delete('p');
         url.searchParams.delete('a');
+        url.searchParams.delete('m');
+        url.searchParams.delete('t');
         if (data.province) url.searchParams.set('p', data.province);
         if (data.amount) url.searchParams.set('a', data.amount);
+        if (data.mode && data.mode !== 'forward') url.searchParams.set('m', data.mode);
+        if (data.mode === 'reverse_tip' && data.tip) url.searchParams.set('t', data.tip);
         return url.toString();
     }
 
@@ -345,12 +431,167 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // #15 S84 : Init au load — lire query params ?p=QC&a=100 pour reconstruire calcul
+    // #16 S84 Option A : Segmented control 3 modes (forward / reverse / reverse_tip)
+    var modeBtns = document.querySelectorAll('.ct-mode-btn');
+    var modeHint = document.getElementById('ct-mode-hint');
+    var rtSection = document.getElementById('ct-reverse-tip-section');
+    var modeHints = {
+        'forward': '💡 {{ __("Saisissez le montant avant taxes pour voir TPS/TVQ et total.") }}',
+        'reverse': '💡 {{ __("Saisissez le montant avec taxes — calcule automatiquement le sous-total et les taxes.") }}',
+        'reverse_tip': '💡 {{ __("Saisissez le total payé et le % du pourboire — décompose tout : pourboire, taxes, sous-total.") }}'
+    };
+
+    function switchMode(newMode) {
+        currentMode = newMode;
+        modeBtns.forEach(function(b) {
+            var active = b.getAttribute('data-mode') === newMode;
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+            b.style.background = active ? 'var(--c-primary, #064E5A)' : 'transparent';
+            b.style.color = active ? '#fff' : '#333';
+        });
+        if (modeHint) modeHint.innerHTML = modeHints[newMode];
+
+        var grid = document.querySelector('.calculator-grid');
+        var beforeGroup = document.getElementById('amount-before-tax')?.closest('.form-group');
+        var afterGroup = document.getElementById('amount-after-tax')?.closest('.form-group');
+        var taxGroup = document.querySelector('.tax-display-group');
+
+        if (newMode === 'reverse_tip') {
+            // Cache la grid standard, montre la section reverse_tip
+            if (grid) grid.style.display = 'none';
+            if (rtSection) rtSection.style.display = 'block';
+            recalcReverseTip();
+        } else {
+            if (grid) grid.style.display = '';
+            if (rtSection) rtSection.style.display = 'none';
+            // Mode forward : focus avant ; reverse : focus après
+            if (newMode === 'reverse') {
+                var afterEl = document.getElementById('amount-after-tax');
+                if (afterEl) { afterEl.focus(); }
+            } else {
+                var beforeEl = document.getElementById('amount-before-tax');
+                if (beforeEl) { beforeEl.focus(); }
+            }
+        }
+    }
+
+    modeBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            switchMode(this.getAttribute('data-mode'));
+        });
+    });
+
+    // Mode 3 reverse_tip : calc total+tip% → décompose pourboire + taxes + HT
+    var rtTotalEl = document.getElementById('rt-total-with-tip');
+    var rtPctEl = document.getElementById('rt-tip-percent');
+    var rtPresetBtns = document.querySelectorAll('.rt-tip-preset');
+    var rtResult = document.getElementById('rt-result');
+
+    function getProvinceTotalTaxRate() {
+        var sel = document.getElementById('province');
+        if (!sel || !sel.value) return null;
+        var rates = window.taxConfig && window.taxConfig.tax_rates ? window.taxConfig.tax_rates[sel.value] : null;
+        return rates ? rates : null;
+    }
+
+    function recalcReverseTip() {
+        var total = parseFloat((rtTotalEl && rtTotalEl.value || '').replace(',', '.'));
+        var tipPct = parseFloat((rtPctEl && rtPctEl.value || '').replace(',', '.'));
+        var rates = getProvinceTotalTaxRate();
+        if (!rates || isNaN(total) || total <= 0 || isNaN(tipPct) || tipPct < 0) {
+            if (rtResult) rtResult.style.display = 'none';
+            return;
+        }
+        // Étape 1 : retirer le pourboire (calculé sur le total avec taxes)
+        var subtotalWithTax = total / (1 + tipPct / 100);
+        var tipAmount = total - subtotalWithTax;
+        // Étape 2 : retirer les taxes (rate.total est en %)
+        var subtotal = subtotalWithTax / (1 + rates.total / 100);
+        var totalTax = subtotalWithTax - subtotal;
+        // Décomposition taxes (HST simple OU GST + QST/PST)
+        var tax1Label = '', tax1Amount = 0, tax2Label = '', tax2Amount = 0;
+        if (rates.hst) {
+            tax1Label = 'TVH/HST (' + rates.hst + ' %)';
+            tax1Amount = subtotal * rates.hst / 100;
+        } else {
+            if (rates.gst) {
+                tax1Label = 'TPS/GST (' + rates.gst + ' %)';
+                tax1Amount = subtotal * rates.gst / 100;
+            }
+            if (rates.qst) {
+                tax2Label = 'TVQ/QST (' + rates.qst + ' %)';
+                tax2Amount = subtotal * rates.qst / 100;
+            } else if (rates.pst) {
+                tax2Label = 'TVP/PST (' + rates.pst + ' %)';
+                tax2Amount = subtotal * rates.pst / 100;
+            }
+        }
+        // Affichage
+        var fmt = function(n) { return n.toFixed(2) + ' $'; };
+        document.getElementById('rt-result-tip-pct').textContent = tipPct;
+        document.getElementById('rt-result-tip-amount').textContent = fmt(tipAmount);
+        document.getElementById('rt-result-after-tax').textContent = fmt(subtotalWithTax);
+        document.getElementById('rt-result-tax1-label').textContent = tax1Label;
+        document.getElementById('rt-result-tax1').textContent = fmt(tax1Amount);
+        var t2Label = document.getElementById('rt-result-tax2-label');
+        var t2Amt = document.getElementById('rt-result-tax2');
+        if (tax2Label) {
+            t2Label.textContent = tax2Label;
+            t2Amt.textContent = fmt(tax2Amount);
+            t2Label.parentElement.style.display = 'flex';
+        } else {
+            t2Label.parentElement.style.display = 'none';
+        }
+        document.getElementById('rt-result-subtotal').textContent = fmt(subtotal);
+        if (rtResult) rtResult.style.display = 'block';
+
+        // Sync vers les champs principaux pour cohérence (pour réutilisation share/copy)
+        var beforeEl = document.getElementById('amount-before-tax');
+        var afterEl = document.getElementById('amount-after-tax');
+        var t1Display = document.getElementById('tax1-amount');
+        var t2Display = document.getElementById('tax2-amount');
+        var t1LabelEl = document.getElementById('tax1-label');
+        var t2LabelEl = document.getElementById('tax2-label');
+        if (beforeEl) beforeEl.value = subtotal.toFixed(2);
+        if (afterEl) afterEl.value = subtotalWithTax.toFixed(2);
+        if (t1Display) t1Display.value = tax1Amount.toFixed(2);
+        if (t2Display) t2Display.value = tax2Amount.toFixed(2);
+        if (t1LabelEl && tax1Label) t1LabelEl.textContent = tax1Label;
+        if (t2LabelEl && tax2Label) t2LabelEl.textContent = tax2Label;
+    }
+
+    if (rtTotalEl) rtTotalEl.addEventListener('input', recalcReverseTip);
+    if (rtPctEl) rtPctEl.addEventListener('input', recalcReverseTip);
+    rtPresetBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var v = this.getAttribute('data-tip');
+            if (rtPctEl) {
+                rtPctEl.value = v;
+                rtPctEl.dispatchEvent(new Event('input', {bubbles: true}));
+            }
+            rtPresetBtns.forEach(function(b) { b.classList.remove('active'); b.style.background = ''; b.style.color = ''; });
+            this.classList.add('active');
+            this.style.background = 'var(--c-primary, #064E5A)';
+            this.style.color = '#fff';
+        });
+    });
+
+    // Recalc reverse_tip si province change pendant le mode
+    var provSel = document.getElementById('province');
+    if (provSel) {
+        provSel.addEventListener('change', function() {
+            if (currentMode === 'reverse_tip') recalcReverseTip();
+        });
+    }
+
+    // #15 + #16 S84 : Init au load — lire ?p, ?a, ?m, ?t
     (function initFromUrl() {
         try {
             var params = new URLSearchParams(window.location.search);
             var p = params.get('p');
             var a = params.get('a');
+            var m = params.get('m');
+            var t = params.get('t');
             if (p) {
                 var sel = document.getElementById('province');
                 if (sel) {
@@ -358,11 +599,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     sel.dispatchEvent(new Event('change', {bubbles: true}));
                 }
             }
+            // Bascule mode AVANT de remplir le montant
+            if (m === 'reverse' || m === 'reverse_tip') {
+                switchMode(m);
+            }
             if (a) {
-                var amountInput = document.getElementById('amount-before-tax');
+                var targetId = (m === 'reverse_tip') ? 'rt-total-with-tip'
+                              : (m === 'reverse') ? 'amount-after-tax'
+                              : 'amount-before-tax';
+                var amountInput = document.getElementById(targetId);
                 if (amountInput) {
                     amountInput.value = a;
                     amountInput.dispatchEvent(new Event('input', {bubbles: true}));
+                }
+            }
+            if (t && m === 'reverse_tip') {
+                var pctEl = document.getElementById('rt-tip-percent');
+                if (pctEl) {
+                    pctEl.value = t;
+                    pctEl.dispatchEvent(new Event('input', {bubbles: true}));
                 }
             }
         } catch (e) { /* silent fail */ }
