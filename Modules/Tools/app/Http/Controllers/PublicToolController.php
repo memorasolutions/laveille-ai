@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Modules\Tools\Http\Controllers;
 
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -18,7 +19,7 @@ use Modules\Tools\Models\Tool;
 
 class PublicToolController extends Controller
 {
-    public function index(): View
+    public function index(): Response
     {
         // #190 : tri par defaut popularite (views_count desc) puis sort_order asc
         $tools = Tool::active()
@@ -30,7 +31,12 @@ class PublicToolController extends Controller
         $categories = $tools->whereNotNull('category')->groupBy('category')
             ->map(fn ($group) => $group->count())->toArray();
 
-        return view('tools::public.index', compact('tools', 'categories'));
+        // #219 : force revalidation navigateur (filtres Alpine pouvaient rester invisibles via cache stale)
+        return response()
+            ->view('tools::public.index', compact('tools', 'categories'))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     public function show(string $slug): View
