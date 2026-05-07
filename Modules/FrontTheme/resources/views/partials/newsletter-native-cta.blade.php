@@ -7,5 +7,5 @@
         <input type="email" name="email" required aria-label="{{ __('Votre adresse e-mail') }}" style="flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem;">
         <button type="submit" style="background-color: #F97316; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">{{ __('S’inscrire') }}</button>
     </form>
-    <p style="font-size: 0.75rem; color: #666; margin-top: 12px;">{{ __('Double opt-in. Loi 25 / RGPD. Désabonnement 1-clic.') }}</p>
+    <p style="font-size: 0.75rem; color: var(--c-text-muted, #52586a); margin-top: 12px;">{{ __('Double opt-in. Loi 25 / RGPD. Désabonnement 1-clic.') }}</p>
 </div>

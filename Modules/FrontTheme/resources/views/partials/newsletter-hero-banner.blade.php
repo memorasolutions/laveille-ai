@@ -86,6 +86,6 @@
             </div>
         </template>
 
-        <p style="font-size: 0.875rem; color: #666;">{{ __('Conforme Loi 25 + RGPD - Désabonnement 1-clic') }}</p>
+        <p style="font-size: 0.875rem; color: var(--c-text-muted, #52586a);">{{ __('Conforme Loi 25 + RGPD - Désabonnement 1-clic') }}</p>
     </div>
 </section>

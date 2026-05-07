@@ -21,7 +21,7 @@
                                     <a href="{{ url($section['url']) }}" style="color: #0B7285;">{{ $section['title'] }}</a>
                                 </h2>
                                 @if(!empty($section['description']))
-                                    <p style="margin: 4px 0 0; color: #666; font-size: 0.9rem;">{{ $section['description'] }}</p>
+                                    <p style="margin: 4px 0 0; color: var(--c-text-muted, #52586a); font-size: 0.9rem;">{{ $section['description'] }}</p>
                                 @endif
                             </div>
                             @if(!empty($section['items']))

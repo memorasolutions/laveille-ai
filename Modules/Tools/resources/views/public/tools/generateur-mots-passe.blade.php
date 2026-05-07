@@ -129,7 +129,7 @@
                                     </div>
                                     <template x-for="(h, i) in history" :key="i">
                                         <div class="d-flex align-items-center gap-2 mb-1">
-                                            <code class="flex-fill" style="font-size: 0.8rem; color: #666;" x-text="h"></code>
+                                            <code class="flex-fill" style="font-size: 0.8rem; color: var(--c-text-muted, #52586a);" x-text="h"></code>
                                             <button class="ct-btn ct-btn-outline ct-btn-sm" @click="copy(h)" style="font-size: 0.7rem;">📋</button>
                                         </div>
                                     </template>

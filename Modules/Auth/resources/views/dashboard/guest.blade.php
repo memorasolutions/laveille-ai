@@ -6,7 +6,7 @@
 @section('user-content')
 <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:36px">
     <h2 style="margin:0 0 8px;font-size:22px;text-align:center">{{ __('Bienvenue sur') }} <strong>laveille.ai</strong></h2>
-    <p style="text-align:center;color:#666;font-size:14px;margin:0 0 24px">{{ __('Pas de mot de passe requis — un code de connexion vous sera envoyé par courriel.') }}</p>
+    <p style="text-align:center;color:var(--c-text-muted, #52586a);font-size:14px;margin:0 0 24px">{{ __('Pas de mot de passe requis — un code de connexion vous sera envoyé par courriel.') }}</p>
 
     @if(session('status'))
         <div class="alert alert-success" style="border-radius:8px">{{ session('status') }}</div>
