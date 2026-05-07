@@ -152,7 +152,7 @@
                                     {{-- #16 S84 v3 : Toggle pourboire toujours visible — actif si user saisit dans 'Montant avec taxes' --}}
                                     <div class="ct-tip-toggle-wrapper" id="ct-tip-toggle-wrapper" style="margin-bottom: 0.5rem;">
                                         <button type="button" id="ct-tip-toggle-btn" class="ct-btn ct-btn-outline" aria-expanded="false" aria-controls="ct-tip-options" style="width: 100%; text-align: left; padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center;">
-                                            <span>🍽️ Le « Montant avec taxes » saisi inclut un pourboire ?</span>
+                                            <span>🍽️ Avec pourboire</span>
                                             <span id="ct-tip-toggle-arrow" style="transition: transform 0.2s; font-size: 0.9rem;">▼</span>
                                         </button>
                                         <div id="ct-tip-options" style="display: none; padding: 0.9rem; background: #f8f9fa; border-radius: 8px; margin-top: 0.4rem; border: 1px solid #e2e6ea;">
@@ -171,35 +171,12 @@
                                             </div>
                                             <div id="rt-result" style="display: none; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #e2e6ea; font-size: 0.9rem;">
                                                 <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span>{{ __('Pourboire') }} (<span id="rt-result-tip-pct">0</span>%)</span><strong id="rt-result-tip-amount">0.00 $</strong></div>
-                                                <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span>{{ __('Total avant pourboire (avec taxes)') }}</span><strong id="rt-result-after-tax">0.00 $</strong></div>
-                                                <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span id="rt-result-tax1-label">TPS</span><strong id="rt-result-tax1">0.00 $</strong></div>
-                                                <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span id="rt-result-tax2-label">TVQ</span><strong id="rt-result-tax2">0.00 $</strong></div>
-                                                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px solid #e2e6ea; margin-top: 5px;"><span style="font-weight: 700;">{{ __('Sous-total avant taxes') }}</span><strong id="rt-result-subtotal" style="color: var(--c-primary, #064E5A); font-size: 1.05rem;">0.00 $</strong></div>
+                                                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px solid #e2e6ea; margin-top: 5px;"><span id="rt-result-final-label" style="font-weight: 700;">{{ __('Total payé') }}</span><strong id="rt-result-final" style="color: var(--c-primary, #064E5A); font-size: 1.05rem;">0.00 $</strong></div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="section-divider" id="tip-divider" style="display: none;"></div>
-
-                                    <div class="tip-section" id="tip-section" style="display: none;">
-                                        <div class="tip-popup-trigger">
-                                            <button type="button" id="tip-popup-btn" class="ct-btn ct-btn-outline">{{ __('Ajouter un pourboire') }}</button>
-                                        </div>
-                                        <div class="tip-result" id="tip-display" style="display: none;">
-                                            <div class="result-row">
-                                                <span>{{ __('Pourboire') }} (<span id="tip-percentage">0</span>%)</span>
-                                                <span class="tip-amount">$0.00</span>
-                                            </div>
-                                            <div class="result-row total-row">
-                                                <span>{{ __('Total avec pourboire') }}</span>
-                                                <span class="total-with-tip">$0.00</span>
-                                            </div>
-                                            <div class="tip-actions">
-                                                <button type="button" id="tip-modify-btn" class="ct-btn ct-btn-outline">{{ __('Modifier') }}</button>
-                                                <button type="button" id="tip-remove-btn" class="ct-btn ct-btn-outline">{{ __('Supprimer') }}</button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {{-- #16 v3-D : Section pourboire popup retirée — toggle inline unique gère les 2 directions --}}
 
                                     <div class="section-divider" id="split-divider" style="display: none;"></div>
 
@@ -476,71 +453,63 @@ document.addEventListener('DOMContentLoaded', function() {
         return (window.taxConfig && window.taxConfig.tax_rates) ? window.taxConfig.tax_rates[sel.value] : null;
     }
 
-    // Override : si tipIncluded ET activeField === 'after', recompute reverse_tip
+    // Override unifié : ajoute pourboire selon activeField (forward = ajoute au TTC, reverse = décompose du TTC saisi)
     function recalcReverseTipOverride() {
-        if (!tipIncluded || getActiveField() !== 'after') {
-            if (rtResult) rtResult.style.display = 'none';
-            return;
-        }
         var rates = getProvinceRates();
+        var beforeEl = document.getElementById('amount-before-tax');
         var afterEl = document.getElementById('amount-after-tax');
-        var total = parseFloat((afterEl && afterEl.value || '').replace(',', '.'));
         var tipPct = parseFloat((rtPctEl && rtPctEl.value || '').replace(',', '.'));
-        if (!rates || isNaN(total) || total <= 0 || isNaN(tipPct) || tipPct < 0) {
+        if (!tipIncluded || !rates || isNaN(tipPct) || tipPct < 0) {
             if (rtResult) rtResult.style.display = 'none';
             return;
         }
-        // total = montant payé avec pourboire (saisi dans amount-after-tax)
-        var subtotalWithTax = total / (1 + tipPct / 100);
-        var tipAmount = total - subtotalWithTax;
-        var subtotal = subtotalWithTax / (1 + rates.total / 100);
-        // Décomposition taxes
-        var tax1Label = '', tax1Amount = 0, tax2Label = '', tax2Amount = 0;
-        if (rates.hst) {
-            tax1Label = 'TVH/HST (' + rates.hst + ' %)';
-            tax1Amount = subtotal * rates.hst / 100;
-        } else {
-            if (rates.gst) {
-                tax1Label = 'TPS/GST (' + rates.gst + ' %)';
-                tax1Amount = subtotal * rates.gst / 100;
-            }
-            if (rates.qst) {
-                tax2Label = 'TVQ/QST (' + rates.qst + ' %)';
-                tax2Amount = subtotal * rates.qst / 100;
-            } else if (rates.pst) {
-                tax2Label = 'TVP/PST (' + rates.pst + ' %)';
-                tax2Amount = subtotal * rates.pst / 100;
-            }
-        }
+        var direction = getActiveField();
+        var tipAmount = 0, finalAmount = 0, finalLabel = '';
         var fmt = function(n) { return n.toFixed(2) + ' $'; };
+        if (direction === 'before') {
+            // Forward + pourboire : HT saisi → TTC + pourboire = total payé
+            var subtotal = parseFloat((beforeEl && beforeEl.value || '').replace(',', '.'));
+            if (isNaN(subtotal) || subtotal <= 0) { if (rtResult) rtResult.style.display = 'none'; return; }
+            var subtotalWithTax = subtotal * (1 + rates.total / 100);
+            tipAmount = subtotalWithTax * tipPct / 100;
+            finalAmount = subtotalWithTax + tipAmount;
+            finalLabel = 'Total payé (avec pourboire)';
+        } else {
+            // Reverse + pourboire : TTC saisi inclut pourboire → décompose vers sous-total HT
+            var total = parseFloat((afterEl && afterEl.value || '').replace(',', '.'));
+            if (isNaN(total) || total <= 0) { if (rtResult) rtResult.style.display = 'none'; return; }
+            var subtotalWithTaxRev = total / (1 + tipPct / 100);
+            tipAmount = total - subtotalWithTaxRev;
+            var subtotalRev = subtotalWithTaxRev / (1 + rates.total / 100);
+            finalAmount = subtotalRev;
+            finalLabel = 'Sous-total avant taxes';
+
+            // Override champs principaux pour cohérence : avant taxes = vrai HT, taxes décomposées
+            var tax1Label = '', tax1Amount = 0, tax2Label = '', tax2Amount = 0;
+            if (rates.hst) {
+                tax1Label = 'TVH/HST (' + rates.hst + ' %)';
+                tax1Amount = subtotalRev * rates.hst / 100;
+            } else {
+                if (rates.gst) { tax1Label = 'TPS/GST (' + rates.gst + ' %)'; tax1Amount = subtotalRev * rates.gst / 100; }
+                if (rates.qst) { tax2Label = 'TVQ/QST (' + rates.qst + ' %)'; tax2Amount = subtotalRev * rates.qst / 100; }
+                else if (rates.pst) { tax2Label = 'TVP/PST (' + rates.pst + ' %)'; tax2Amount = subtotalRev * rates.pst / 100; }
+            }
+            var t1Display = document.getElementById('tax1-amount');
+            var t2Display = document.getElementById('tax2-amount');
+            var t1LabelEl = document.getElementById('tax1-label');
+            var t2LabelEl = document.getElementById('tax2-label');
+            if (beforeEl) beforeEl.value = subtotalRev.toFixed(2);
+            if (t1Display) t1Display.value = tax1Amount.toFixed(2);
+            if (t2Display) t2Display.value = tax2Amount.toFixed(2);
+            if (t1LabelEl && tax1Label) t1LabelEl.textContent = tax1Label;
+            if (t2LabelEl && tax2Label) t2LabelEl.textContent = tax2Label;
+        }
+
         document.getElementById('rt-result-tip-pct').textContent = tipPct;
         document.getElementById('rt-result-tip-amount').textContent = fmt(tipAmount);
-        document.getElementById('rt-result-after-tax').textContent = fmt(subtotalWithTax);
-        document.getElementById('rt-result-tax1-label').textContent = tax1Label;
-        document.getElementById('rt-result-tax1').textContent = fmt(tax1Amount);
-        var t2Lab = document.getElementById('rt-result-tax2-label');
-        var t2Amt = document.getElementById('rt-result-tax2');
-        if (tax2Label) {
-            t2Lab.textContent = tax2Label;
-            t2Amt.textContent = fmt(tax2Amount);
-            t2Lab.parentElement.style.display = 'flex';
-        } else {
-            t2Lab.parentElement.style.display = 'none';
-        }
-        document.getElementById('rt-result-subtotal').textContent = fmt(subtotal);
+        document.getElementById('rt-result-final-label').textContent = finalLabel;
+        document.getElementById('rt-result-final').textContent = fmt(finalAmount);
         if (rtResult) rtResult.style.display = 'block';
-
-        // Override champs principaux : amount-before-tax = vrai sous-total HT (avant pourboire ET taxes)
-        var beforeEl = document.getElementById('amount-before-tax');
-        var t1Display = document.getElementById('tax1-amount');
-        var t2Display = document.getElementById('tax2-amount');
-        var t1LabelEl = document.getElementById('tax1-label');
-        var t2LabelEl = document.getElementById('tax2-label');
-        if (beforeEl) beforeEl.value = subtotal.toFixed(2);
-        if (t1Display) t1Display.value = tax1Amount.toFixed(2);
-        if (t2Display) t2Display.value = tax2Amount.toFixed(2);
-        if (t1LabelEl && tax1Label) t1LabelEl.textContent = tax1Label;
-        if (t2LabelEl && tax2Label) t2LabelEl.textContent = tax2Label;
     }
 
     // Toggle pourboire ouvrir/fermer
@@ -552,13 +521,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tipOptions) tipOptions.style.display = newOpen ? 'block' : 'none';
             if (tipArrow) tipArrow.style.transform = newOpen ? 'rotate(180deg)' : 'rotate(0deg)';
             if (!newOpen) {
-                // Fermeture : reset pourboire et redéclenche le calcul reverse simple
+                // Fermeture : reset pourboire et redéclenche calcul de base selon activeField
                 tipIncluded = false;
                 if (rtResult) rtResult.style.display = 'none';
                 rtPresetBtns.forEach(function(b) { b.style.background = ''; b.style.color = ''; });
                 if (rtPctEl) rtPctEl.value = '';
-                var afterEl = document.getElementById('amount-after-tax');
-                if (afterEl && afterEl.value) afterEl.dispatchEvent(new Event('input', {bubbles: true}));
+                var src = (getActiveField() === 'after') ? document.getElementById('amount-after-tax') : document.getElementById('amount-before-tax');
+                if (src && src.value) src.dispatchEvent(new Event('input', {bubbles: true}));
             }
         });
     }
@@ -596,14 +565,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var beforeInputEl = document.getElementById('amount-before-tax');
     if (beforeInputEl) {
         beforeInputEl.addEventListener('input', function() {
-            if (rtResult) rtResult.style.display = 'none';
+            if (tipIncluded) setTimeout(recalcReverseTipOverride, 0);
+            else if (rtResult) rtResult.style.display = 'none';
         });
     }
 
     var provSel = document.getElementById('province');
     if (provSel) {
         provSel.addEventListener('change', function() {
-            if (tipIncluded && getActiveField() === 'after') setTimeout(recalcReverseTipOverride, 0);
+            if (tipIncluded) setTimeout(recalcReverseTipOverride, 0);
         });
     }
 
