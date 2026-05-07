@@ -90,10 +90,10 @@
                                     {{-- #16 S84 Option A : Segmented control 3 modes (forward / reverse / reverse+tip) --}}
                                     <div class="ct-mode-switch" role="tablist" aria-label="{{ __('Mode de calcul') }}" style="display: flex; gap: 0.25rem; margin-bottom: 1rem; padding: 0.25rem; background: #f1f3f5; border-radius: 10px; border: 1px solid #e2e6ea;">
                                         <button type="button" class="ct-mode-btn" data-mode="forward" role="tab" aria-selected="true" aria-controls="ct-grid-forward" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: var(--c-primary, #064E5A); color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">📥 {{ __('Standard') }}</button>
-                                        <button type="button" class="ct-mode-btn" data-mode="reverse" role="tab" aria-selected="false" aria-controls="ct-grid-reverse" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">📤 {{ __('Inversé') }}</button>
-                                        <button type="button" class="ct-mode-btn" data-mode="reverse_tip" role="tab" aria-selected="false" aria-controls="ct-grid-reverse-tip" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">🍽️ {{ __('Total + pourboire') }}</button>
+                                        <button type="button" class="ct-mode-btn" data-mode="reverse" role="tab" aria-selected="false" aria-controls="ct-grid-reverse" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">🔄 {{ __('Inversé') }}</button>
+                                        <button type="button" class="ct-mode-btn" data-mode="reverse_tip" role="tab" aria-selected="false" aria-controls="ct-grid-reverse-tip" style="flex: 1; padding: 0.55rem 0.75rem; border: 0; border-radius: 8px; background: transparent; color: #333; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.15s;">🍽️ {{ __('Inversé + pourboire') }}</button>
                                     </div>
-                                    <p class="ct-mode-hint" id="ct-mode-hint" style="font-size: 0.8rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0;">💡 {{ __('Saisissez le montant avant taxes pour voir TPS/TVQ et total.') }}</p>
+                                    <p class="ct-mode-hint" id="ct-mode-hint" style="font-size: 0.8rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0;">💡 {{ __('Calcul direct : saisissez le montant avant taxes pour voir TPS/TVQ et total.') }}</p>
 
                                     {{-- Montants rapides --}}
                     <div class="quick-amounts" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
@@ -436,9 +436,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var modeHint = document.getElementById('ct-mode-hint');
     var rtSection = document.getElementById('ct-reverse-tip-section');
     var modeHints = {
-        'forward': '💡 {{ __("Saisissez le montant avant taxes pour voir TPS/TVQ et total.") }}',
-        'reverse': '💡 {{ __("Saisissez le montant avec taxes — calcule automatiquement le sous-total et les taxes.") }}',
-        'reverse_tip': '💡 {{ __("Saisissez le total payé et le % du pourboire — décompose tout : pourboire, taxes, sous-total.") }}'
+        'forward': '💡 {{ __("Calcul direct : saisissez le montant avant taxes pour voir TPS/TVQ et total.") }}',
+        'reverse': '💡 {{ __("Calcul inversé : saisissez le montant avec taxes — décompose le sous-total et les taxes.") }}',
+        'reverse_tip': '💡 {{ __("Calcul inversé avec pourboire : saisissez le total payé et le % du pourboire — décompose pourboire, taxes et sous-total.") }}'
     };
 
     function switchMode(newMode) {
