@@ -164,6 +164,22 @@ class SitemapController
             $sitemap->add(Url::create(route('roadmap.boards.index'))->setPriority(0.6)->setChangeFrequency('weekly'));
         }
 
+        // Pages auteur EEAT 2026 (#218 S84 — Schema.org Person + sameAs)
+        if (Route::has('author.show')) {
+            $authors = (array) trans('fronttheme::authors');
+            if (is_array($authors)) {
+                foreach ($authors as $slug => $data) {
+                    if (is_string($slug) && is_array($data)) {
+                        $sitemap->add(
+                            Url::create(route('author.show', $slug))
+                                ->setPriority(0.7)
+                                ->setChangeFrequency('monthly')
+                        );
+                    }
+                }
+            }
+        }
+
         // News (si module News actif)
         if (Route::has('news.index')) {
             $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));
