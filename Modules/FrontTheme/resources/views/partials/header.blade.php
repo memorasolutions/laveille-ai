@@ -78,7 +78,7 @@
                                         @endforeach
                                     </div>
                                     <div style="border-top:1px solid #E5E7EB;margin-top:12px;padding-top:12px;text-align:center;">
-                                        <a href="{{ route('blog.index') }}" style="font-size:13px;font-weight:700;color:var(--c-primary, #0B7285);text-decoration:none!important;">{{ __('Voir tous les articles') }} →</a>
+                                        <a href="{{ route('blog.index') }}" style="font-size:13px;font-weight:700;color:var(--c-primary, #064E5A);text-decoration:none!important;">{{ __('Voir tous les articles') }} →</a>
                                     </div>
                                 </div>
                                 {{-- Fallback sub-menu mobile --}}
@@ -159,13 +159,13 @@
                                             @endif
                                             {{-- CTA Raccourcisseur --}}
                                             @if(Route::has('shorturl.create'))
-                                            <a href="{{ route('shorturl.create') }}" style="display:block;background:var(--c-primary-light, #F0FAFB);border:1px solid var(--c-primary, #0B7285);border-radius:10px;padding:14px;text-decoration:none!important;color:inherit;transition:background .15s;margin-top:8px;" onmouseover="this.style.background='#E0F2F4'" onmouseout="this.style.background='var(--c-primary-light, #F0FAFB)'">
+                                            <a href="{{ route('shorturl.create') }}" style="display:block;background:var(--c-primary-light, #F0FAFB);border:1px solid var(--c-primary, #064E5A);border-radius:10px;padding:14px;text-decoration:none!important;color:inherit;transition:background .15s;margin-top:8px;" onmouseover="this.style.background='#E0F2F4'" onmouseout="this.style.background='var(--c-primary-light, #F0FAFB)'">
                                                 <div style="display:flex!important;align-items:center!important;gap:8px;margin-bottom:6px;">
                                                     <span style="font-size:20px;">🔗</span>
-                                                    <div style="font-weight:700;font-size:14px;color:var(--c-primary, #0B7285);">{{ __('Raccourcir un lien') }}</div>
+                                                    <div style="font-weight:700;font-size:14px;color:var(--c-primary, #064E5A);">{{ __('Raccourcir un lien') }}</div>
                                                 </div>
                                                 <div style="font-size:12px;color:var(--c-text-muted, #6E7687);margin-bottom:8px;">veille.la — {{ __('gratuit, QR code, statistiques') }}</div>
-                                                <span style="display:inline-block;background:var(--c-primary, #0B7285);color:#fff;padding:5px 14px;border-radius:6px;font-weight:700;font-size:12px;">{{ __('Essayer') }} →</span>
+                                                <span style="display:inline-block;background:var(--c-primary, #064E5A);color:#fff;padding:5px 14px;border-radius:6px;font-weight:700;font-size:12px;">{{ __('Essayer') }} →</span>
                                             </a>
                                             @endif
                                         </div>

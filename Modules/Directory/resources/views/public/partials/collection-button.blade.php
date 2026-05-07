@@ -98,7 +98,7 @@
                            onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='transparent'"
                            :style="togglingIds.includes(collection.id) ? 'opacity:.5;pointer-events:none;' : ''">
                         <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px solid #ccc;border-radius:3px;flex-shrink:0;"
-                              :style="collection.has_tool ? 'background:var(--c-primary,#0B7285);border-color:var(--c-primary,#0B7285);' : ''">
+                              :style="collection.has_tool ? 'background:var(--c-primary, #064E5A);border-color:var(--c-primary, #064E5A);' : ''">
                             <i x-show="collection.has_tool" class="fa fa-check" style="color:#fff;font-size:11px;"></i>
                         </span>
                         <span x-text="collection.name" style="font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;"></span>
@@ -113,7 +113,7 @@
                            placeholder="{{ __('Nom de la collection...') }}" maxlength="100" :disabled="creating"
                            style="flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:3px;font-size:13px;outline:none;">
                     <button @click="createAndAdd()" :disabled="creating || !newName.trim()" type="button"
-                            style="padding:6px 12px;background:var(--c-primary,#0B7285);color:#fff;border:none;border-radius:3px;font-size:12px;cursor:pointer;white-space:nowrap;"
+                            style="padding:6px 12px;background:var(--c-primary, #064E5A);color:#fff;border:none;border-radius:3px;font-size:12px;cursor:pointer;white-space:nowrap;"
                             :style="(creating || !newName.trim()) ? 'opacity:.5;cursor:not-allowed;' : 'opacity:1;'">
                         <i x-show="!creating" class="fa fa-plus" style="margin-right:4px;"></i>
                         <i x-show="creating" class="fa fa-spinner fa-spin" style="margin-right:4px;"></i>

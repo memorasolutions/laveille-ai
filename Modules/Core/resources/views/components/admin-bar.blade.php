@@ -37,7 +37,7 @@
     .core-admin-bar { position: fixed; top: 80px; right: 16px; z-index: 9000; pointer-events: auto; font-family: var(--f-body, system-ui, -apple-system, sans-serif); }
     .core-admin-bar__inner { display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; padding: 8px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04); transition: box-shadow 0.2s ease; }
     .core-admin-bar__inner:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06); }
-    .core-admin-bar__icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--c-primary, #0B7285); color: #ffffff; flex-shrink: 0; }
+    .core-admin-bar__icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--c-primary, #064E5A); color: #ffffff; flex-shrink: 0; }
     .core-admin-bar__icon svg { width: 14px; height: 14px; }
     .core-admin-bar__label { font-size: 13px; font-weight: 600; color: var(--c-dark, #1A1D23); letter-spacing: -0.01em; white-space: nowrap; user-select: none; }
     .core-admin-bar__separator { width: 1px; height: 20px; background: rgba(0,0,0,0.08); border-radius: 1px; flex-shrink: 0; }

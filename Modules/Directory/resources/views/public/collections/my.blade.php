@@ -9,8 +9,8 @@
         <div class="row" style="margin-bottom: 30px;">
             <div class="col-lg-12">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="color: var(--c-primary, #0B7285); margin: 0;">{{ __('Mes collections') }}</h2>
-                    <button class="btn" @click="showForm = !showForm" style="background-color: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 14px; cursor: pointer;">
+                    <h2 style="color: var(--c-primary, #064E5A); margin: 0;">{{ __('Mes collections') }}</h2>
+                    <button class="btn" @click="showForm = !showForm" style="background-color: var(--c-primary, #064E5A); color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 14px; cursor: pointer;">
                         <i class="ti-plus" style="margin-right: 5px;"></i>
                         <span x-text="showForm ? '{{ __('Annuler') }}' : '{{ __('Créer une collection') }}'"></span>
                     </button>
@@ -42,7 +42,7 @@
                             </label>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <button type="submit" class="btn" style="background-color: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 4px; padding: 10px 28px; font-size: 14px;">{{ __('Créer') }}</button>
+                            <button type="submit" class="btn" style="background-color: var(--c-primary, #064E5A); color: #fff; border: none; border-radius: 4px; padding: 10px 28px; font-size: 14px;">{{ __('Créer') }}</button>
                             <button type="button" @click="showForm = false" class="btn" style="background-color: #f5f5f5; color: #555; border: 1px solid #ddd; border-radius: 4px; padding: 10px 28px; font-size: 14px;">{{ __('Annuler') }}</button>
                         </div>
                     </form>
@@ -79,10 +79,10 @@
                                 <p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 15px;">{{ Str::limit($collection->description, 100) }}</p>
                             @endif
                             <div style="margin-bottom: 18px;">
-                                <span class="badge" style="background-color: var(--c-primary, #0B7285); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 12px;">{{ $collection->tools_count }} {{ __('outils') }}</span>
+                                <span class="badge" style="background-color: var(--c-primary, #064E5A); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 12px;">{{ $collection->tools_count }} {{ __('outils') }}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
-                                <a href="{{ route('collections.show', $collection->slug) }}" class="btn btn-sm" style="background-color: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 4px; padding: 6px 16px; font-size: 13px; flex: 1; text-align: center;">
+                                <a href="{{ route('collections.show', $collection->slug) }}" class="btn btn-sm" style="background-color: var(--c-primary, #064E5A); color: #fff; border: none; border-radius: 4px; padding: 6px 16px; font-size: 13px; flex: 1; text-align: center;">
                                     <i class="ti-eye" style="margin-right: 4px;"></i> {{ __('Voir') }}
                                 </a>
                                 <form action="{{ route('collections.destroy', $collection) }}" method="POST" data-confirm="{{ __('Supprimer cette collection ?') }}" style="margin: 0;">
@@ -106,7 +106,7 @@
                     <div style="text-align: center; padding: 60px 20px; background: #f9f9f9; border-radius: 8px;">
                         <i class="ti-folder" style="font-size: 48px; color: #ccc; display: block; margin-bottom: 15px;"></i>
                         <p style="color: #595959; font-size: 16px; margin-bottom: 15px;">{{ __('Vous n\'avez pas encore de collection.') }}</p>
-                        <button @click="showForm = true" class="btn" style="background-color: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 14px; cursor: pointer;">
+                        <button @click="showForm = true" class="btn" style="background-color: var(--c-primary, #064E5A); color: #fff; border: none; border-radius: 4px; padding: 10px 22px; font-size: 14px; cursor: pointer;">
                             <i class="ti-plus" style="margin-right: 5px;"></i> {{ __('Créer ma première collection') }}
                         </button>
                     </div>

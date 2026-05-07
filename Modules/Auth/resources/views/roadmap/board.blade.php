@@ -27,7 +27,7 @@
             style="width: 100%; border: 1px solid #D1D5DB; border-radius: 8px; padding: 10px 12px; font-size: 14px; resize: vertical; margin-bottom: 10px;">{{ old('description') }}</textarea>
 
         <a href="javascript:void(0)" onclick="this.closest('form').submit()"
-            style="-webkit-appearance:none;text-decoration:none;display:inline-block;background:var(--c-primary, #0B7285);color:#fff;padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">
+            style="-webkit-appearance:none;text-decoration:none;display:inline-block;background:var(--c-primary, #064E5A);color:#fff;padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">
             {{ __('Soumettre') }}
         </a>
     </form>

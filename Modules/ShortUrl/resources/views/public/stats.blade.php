@@ -14,7 +14,7 @@
     {{-- Header --}}
     <div class="text-center" style="margin-bottom: 32px;">
         <a href="{{ $shortUrl->getShortUrl() }}" target="_blank"
-            style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 1.8rem; font-weight: 800; color: var(--c-primary, #0B7285); text-decoration: none; display: block; margin-bottom: 8px; word-break: break-all;">
+            style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 1.8rem; font-weight: 800; color: var(--c-primary, #064E5A); text-decoration: none; display: block; margin-bottom: 8px; word-break: break-all;">
             {{ $shortUrl->getShortUrl() }}
         </a>
         <div style="font-size: 14px; color: var(--c-text-muted, #6E7687); word-break: break-all; margin-bottom: 12px;">
@@ -36,7 +36,7 @@
     @endphp
     <div style="display: flex !important; flex-wrap: wrap !important; gap: 12px; margin-bottom: 32px;">
         <div style="flex: 1 !important; min-width: 120px; background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
-            <div style="font-size: 2rem; font-weight: 800; color: var(--c-primary, #0B7285);">{{ number_format($totalClicks) }}</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--c-primary, #064E5A);">{{ number_format($totalClicks) }}</div>
             <div style="font-size: 13px; color: var(--c-text-muted, #6E7687);">{{ __('Total clics') }}</div>
         </div>
         <div style="flex: 1 !important; min-width: 120px; background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
@@ -59,7 +59,7 @@
             @foreach(array_slice($clicksByDay, -30) as $day)
                 <div style="flex: 1 !important; min-width: 16px; max-width: 40px; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-end !important; height: 100%;" title="{{ $day['date'] }} — {{ $day['count'] }} {{ __('clics') }}">
                     <span style="font-size: 11px; font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 4px;">{{ $day['count'] }}</span>
-                    <div style="width: 100%; background: var(--c-primary, #0B7285); border-radius: 4px 4px 0 0; min-height: 4px; height: {{ ($day['count'] / $maxDaily) * 100 }}%; transition: height .3s;"></div>
+                    <div style="width: 100%; background: var(--c-primary, #064E5A); border-radius: 4px 4px 0 0; min-height: 4px; height: {{ ($day['count'] / $maxDaily) * 100 }}%; transition: height .3s;"></div>
                     <span style="font-size: 11px; color: var(--c-text-muted, #6E7687); margin-top: 4px; white-space: nowrap;">{{ \Carbon\Carbon::parse($day['date'])->format('d M') }}</span>
                 </div>
             @endforeach
@@ -82,7 +82,7 @@
                             <span style="color: var(--c-text-muted, #6E7687); font-weight: 600;">{{ $ref['count'] }}</span>
                         </div>
                         <div style="height: 6px; background: #F3F4F6; border-radius: 3px; overflow: hidden;">
-                            <div style="height: 100%; width: {{ ($ref['count'] / $maxRef) * 100 }}%; background: var(--c-primary, #0B7285); border-radius: 3px;"></div>
+                            <div style="height: 100%; width: {{ ($ref['count'] / $maxRef) * 100 }}%; background: var(--c-primary, #064E5A); border-radius: 3px;"></div>
                         </div>
                     </div>
                 @empty
@@ -107,7 +107,7 @@
                     @foreach(['desktop', 'mobile', 'tablet'] as $dtype)
                         @php $dcount = $devices->firstWhere('device_type', $dtype)['count'] ?? 0; @endphp
                         <div>
-                            <i class="fa {{ $deviceIcons[$dtype] }}" style="font-size: 28px; color: var(--c-primary, #0B7285); margin-bottom: 8px; display: block;"></i>
+                            <i class="fa {{ $deviceIcons[$dtype] }}" style="font-size: 28px; color: var(--c-primary, #064E5A); margin-bottom: 8px; display: block;"></i>
                             <div style="font-size: 1.3rem; font-weight: 800; color: var(--c-dark, #1A1D23);">{{ round(($dcount / $totalDev) * 100) }}%</div>
                             <div style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ $deviceNames[$dtype] }}</div>
                         </div>
@@ -133,8 +133,8 @@
     {{-- CTA --}}
     <div class="text-center" style="margin-top: 32px;">
         <a href="{{ route('shorturl.create') }}"
-            style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; text-decoration: none; transition: background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            style="display: inline-block; background: var(--c-primary, #064E5A); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; text-decoration: none; transition: background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
             🔗 {{ __('Raccourcir un autre lien') }}
         </a>
     </div>

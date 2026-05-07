@@ -9,7 +9,7 @@
         <h2 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark, #1A1D23); margin: 0 0 4px;">
             ✏️ {{ __('Modifier le lien') }}
         </h2>
-        <a href="{{ $shortUrl->getShortUrl() }}" target="_blank" style="font-size: 13px; color: var(--c-primary, #0B7285); font-weight: 600; text-decoration: none;">
+        <a href="{{ $shortUrl->getShortUrl() }}" target="_blank" style="font-size: 13px; color: var(--c-primary, #064E5A); font-weight: 600; text-decoration: none;">
             {{ $shortUrl->getShortUrl() }}
         </a>
     </div>
@@ -22,7 +22,7 @@
 {{-- Stats rapides --}}
 <div style="display: flex !important; gap: 12px; flex-wrap: wrap !important; margin-bottom: 24px;">
     <div style="background: #F0FAFB; border-radius: 10px; padding: 12px 20px; flex: 1 !important; min-width: 120px; text-align: center;">
-        <div style="font-size: 24px; font-weight: 800; color: var(--c-primary, #0B7285);">{{ number_format($shortUrl->clicks_count) }}</div>
+        <div style="font-size: 24px; font-weight: 800; color: var(--c-primary, #064E5A);">{{ number_format($shortUrl->clicks_count) }}</div>
         <div style="font-size: 12px; color: var(--c-text-muted, #6E7687);">{{ __('clics') }}</div>
     </div>
     <div style="background: #F9FAFB; border-radius: 10px; padding: 12px 20px; flex: 1 !important; min-width: 120px; text-align: center;">
@@ -387,8 +387,8 @@
     {{-- Submit --}}
     <div style="display: flex !important; justify-content: center !important; gap: 12px;">
         <button type="submit"
-            style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 12px 32px; border-radius: 10px; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; transition: background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            style="background: var(--c-primary, #064E5A); color: #fff; border: none; padding: 12px 32px; border-radius: 10px; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; transition: background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
             ✅ {{ __('Enregistrer les modifications') }}
         </button>
     </div>

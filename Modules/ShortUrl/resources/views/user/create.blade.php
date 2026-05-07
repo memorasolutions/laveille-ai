@@ -371,8 +371,8 @@
     {{-- Submit --}}
     <div style="display: flex !important; justify-content: center !important; gap: 12px;">
         <button type="submit"
-            style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 12px 32px; border-radius: 10px; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; transition: background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            style="background: var(--c-primary, #064E5A); color: #fff; border: none; padding: 12px 32px; border-radius: 10px; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; transition: background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
             🔗 {{ __('Créer le lien') }}
         </button>
     </div>

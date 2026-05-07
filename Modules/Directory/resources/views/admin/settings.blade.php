@@ -63,7 +63,7 @@
             <div>
                 <button
                     type="submit"
-                    style="display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1.5rem; font-size: 0.95rem; font-weight: 600; color: #fff; background: var(--c-primary, #0B7285); border: none; border-radius: 6px; min-height: 44px; cursor: pointer; transition: opacity 0.15s ease;"
+                    style="display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1.5rem; font-size: 0.95rem; font-weight: 600; color: #fff; background: var(--c-primary, #064E5A); border: none; border-radius: 6px; min-height: 44px; cursor: pointer; transition: opacity 0.15s ease;"
                     onmouseover="this.style.opacity='0.88'"
                     onmouseout="this.style.opacity='1'"
                 >

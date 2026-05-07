@@ -198,7 +198,7 @@
                 @keyframes preloaderBar{from{width:0}to{width:90%}}
                 #site-preloader img{opacity:0;animation:preloaderFadeIn 0.6s ease-out 0.1s forwards}
                 #site-preloader .pl-pulse{animation:preloaderPulse 1.5s infinite ease-in-out}
-                #site-preloader .pl-bar{height:100%;background:var(--c-primary,#0B7285);border-radius:99px;animation:preloaderBar 2s ease-out forwards}
+                #site-preloader .pl-bar{height:100%;background:var(--c-primary, #064E5A);border-radius:99px;animation:preloaderBar 2s ease-out forwards}
             </style>
             <img src="{{ asset('images/logo-horizontal.svg') }}" alt="{{ config('app.name') }}" style="height:50px;display:block;">
             <div style="width:180px;height:3px;background:#E5E7EB;border-radius:99px;overflow:hidden;margin-top:16px;">

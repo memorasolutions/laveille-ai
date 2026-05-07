@@ -12,14 +12,14 @@
     <div style="text-align:center;margin-bottom:28px;">
         @auth
         <a href="{{ route('roadmap.boards.show', $boards->first()) }}"
-            style="display:inline-block;background:var(--c-primary, #0B7285);color:#fff;padding:12px 28px;border-radius:10px;font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-weight:700;font-size:15px;text-decoration:none;transition:background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            style="display:inline-block;background:var(--c-primary, #064E5A);color:#fff;padding:12px 28px;border-radius:10px;font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-weight:700;font-size:15px;text-decoration:none;transition:background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
             ✍️ {{ __('Soumettre ma proposition') }}
         </a>
         @else
         <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour soumettre une proposition.') }}' })"
-            style="background:var(--c-primary, #0B7285);color:#fff;border:none;padding:12px 28px;border-radius:10px;font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-weight:700;font-size:15px;cursor:pointer;transition:background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            style="background:var(--c-primary, #064E5A);color:#fff;border:none;padding:12px 28px;border-radius:10px;font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-weight:700;font-size:15px;cursor:pointer;transition:background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
             🔐 {{ __('Se connecter pour proposer') }}
         </button>
         @endauth

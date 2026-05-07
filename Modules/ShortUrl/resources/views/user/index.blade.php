@@ -14,8 +14,8 @@
             <span style="font-size: 13px; color: var(--c-text-muted, #6E7687);" x-text="filteredLinks.length + ' {{ __('lien(s) sur') }} ' + allLinks.length" aria-live="polite"></span>
         </div>
         <a href="{{ route('shorturl.create') }}"
-            style="background: var(--c-primary, #0B7285); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; transition: background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            style="background: var(--c-primary, #064E5A); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; transition: background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
             + {{ __('Nouveau lien') }}
         </a>
     </div>
@@ -72,7 +72,7 @@
             <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 8px;">{{ __('Aucun lien pour le moment') }}</h3>
             <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 20px;">{{ __('Créez votre premier lien court pour commencer à suivre vos clics.') }}</p>
             <a href="{{ route('shorturl.create') }}"
-                style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; text-decoration: none;">
+                style="display: inline-block; background: var(--c-primary, #064E5A); color: #fff; padding: 12px 28px; border-radius: 10px; font-weight: 700; text-decoration: none;">
                 + {{ __('Créer un lien') }}
             </a>
         </div>
@@ -85,7 +85,7 @@
                     <div style="flex: 1 !important; min-width: 200px;">
                         <a href="#" @click.prevent="copyToClipboard(link.short_url, 'short-' + link.id)"
                             :title="'{{ __('Cliquer pour copier') }}'"
-                            style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-primary, #0B7285); text-decoration: none; word-break: break-all; cursor: pointer;">
+                            style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 1.1rem; color: var(--c-primary, #064E5A); text-decoration: none; word-break: break-all; cursor: pointer;">
                             <span x-show="copiedId !== 'short-' + link.id" x-text="link.short_url"></span>
                             <span x-show="copiedId === 'short-' + link.id" x-cloak style="color: #10B981;">{{ __('Copié !') }}</span>
                         </a>
@@ -136,7 +136,7 @@
                             style="border: 1px solid #D1D5DB; color: var(--c-dark, #1A1D23); padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
                             aria-label="{{ __('Voir les statistiques') }}">{{ __('Stats') }}</a>
                         <a :href="link.edit_url"
-                            style="background: var(--c-primary, #0B7285); color: #fff; padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
+                            style="background: var(--c-primary, #064E5A); color: #fff; padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; line-height: 1.2;"
                             aria-label="{{ __('Modifier ce lien') }}">{{ __('Modifier') }}</a>
                         <template x-if="link.can_extend">
                             <form :action="link.extend_url" method="POST" style="display: inline;">
@@ -164,7 +164,7 @@
             <div style="text-align: center; padding: 40px 20px; color: var(--c-text-muted, #6E7687); font-size: 15px;">
                 <p>{{ __('Aucun lien ne correspond à votre recherche.') }}</p>
                 <button type="button" @click="searchQuery = ''; activeTags = []"
-                    style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 8px;">
+                    style="background: var(--c-primary, #064E5A); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 8px;">
                     {{ __('Réinitialiser les filtres') }}
                 </button>
             </div>

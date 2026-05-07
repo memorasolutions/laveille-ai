@@ -61,7 +61,7 @@
                 $emoji = $emojiMap[$type] ?? '🔔';
             @endphp
             <li class="list-group-item"
-                style="{{ is_null($notification->read_at) ? 'background: #f0f7ff; border-left: 3px solid var(--c-primary, #0B7285);' : '' }}">
+                style="{{ is_null($notification->read_at) ? 'background: #f0f7ff; border-left: 3px solid var(--c-primary, #064E5A);' : '' }}">
                 <div style="display: flex !important; align-items: flex-start !important;">
                     <span style="font-size: 18px; margin-right: 12px; margin-top: 2px; flex-shrink: 0;">{{ $emoji }}</span>
                     <div style="flex: 1 !important; min-width: 0;">

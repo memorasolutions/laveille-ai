@@ -10,7 +10,7 @@
             /* Lien glossaire - charte Memora teal #0B7285 */
             a.glossary-link {
                 position: relative;
-                color: var(--c-primary, #0B7285);
+                color: var(--c-primary, #064E5A);
                 text-decoration: underline;
                 text-decoration-style: dotted;
                 text-decoration-thickness: 1px;
@@ -27,7 +27,7 @@
                 outline: none;
             }
             a.glossary-link:focus-visible {
-                outline: 2px solid var(--c-primary, #0B7285);
+                outline: 2px solid var(--c-primary, #064E5A);
                 outline-offset: 2px;
                 border-radius: 2px;
             }

@@ -64,6 +64,6 @@
 @push('styles')
 <style>
 .nw-chip { cursor: pointer; }
-.nw-chip.active { background: var(--c-primary, #0B7285); color: #fff; border-color: var(--c-primary); }
+.nw-chip.active { background: var(--c-primary, #064E5A); color: #fff; border-color: var(--c-primary); }
 </style>
 @endpush

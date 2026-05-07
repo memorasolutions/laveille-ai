@@ -12,12 +12,12 @@
         <div style="background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 30px; margin-bottom: 40px;">
             <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
                 <div style="flex: 1; min-width: 260px;">
-                    <h2 style="color: var(--c-primary, #0B7285); margin: 0 0 10px 0; font-size: 28px;">{{ $collection->name }}</h2>
+                    <h2 style="color: var(--c-primary, #064E5A); margin: 0 0 10px 0; font-size: 28px;">{{ $collection->name }}</h2>
                     @if($collection->description)
                         <p style="color: #666; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">{{ $collection->description }}</p>
                     @endif
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                        <span class="badge" style="background-color: var(--c-primary, #0B7285); color: #fff; font-size: 13px; padding: 5px 14px; border-radius: 12px;">
+                        <span class="badge" style="background-color: var(--c-primary, #064E5A); color: #fff; font-size: 13px; padding: 5px 14px; border-radius: 12px;">
                             {{ $collection->tools->count() }} {{ __('outils') }}
                         </span>
                         <span style="font-size: 14px; color: #595959;">
@@ -95,7 +95,7 @@
                                 @else
                                     <span>&nbsp;</span>
                                 @endif
-                                <a href="{{ route('directory.show', $tool->slug) }}" style="color:var(--c-primary, #0B7285); text-decoration:none; font-weight:600;">{{ __('Voir') }} →</a>
+                                <a href="{{ route('directory.show', $tool->slug) }}" style="color:var(--c-primary, #064E5A); text-decoration:none; font-weight:600;">{{ __('Voir') }} →</a>
                             </div>
                         </div>
                     </article>

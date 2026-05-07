@@ -47,7 +47,7 @@
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B7285" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                                        {{ __('DPO :') }} <strong>{{ $company['dpo_name'] }}</strong> — <a href="mailto:{{ $company['dpo_email'] }}" style="color: var(--c-primary, #0B7285);">{{ $company['dpo_email'] }}</a>
+                                        {{ __('DPO :') }} <strong>{{ $company['dpo_name'] }}</strong> — <a href="mailto:{{ $company['dpo_email'] }}" style="color: var(--c-primary, #064E5A);">{{ $company['dpo_email'] }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
 
                                 <div class="form-group">
                                     <a href="javascript:void(0)" onclick="this.closest('form').submit()"
-                                        style="-webkit-appearance:none;text-decoration:none;display:inline-block;background:var(--c-primary, #0B7285);color:#fff;padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">
+                                        style="-webkit-appearance:none;text-decoration:none;display:inline-block;background:var(--c-primary, #064E5A);color:#fff;padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">
                                         {{ __('Envoyer la demande') }}
                                     </a>
                                 </div>

@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="wpo-section-title" style="margin-bottom: 40px;">
-                    <h2 style="color: var(--c-primary, #0B7285);">Collections de la communauté</h2>
+                    <h2 style="color: var(--c-primary, #064E5A);">Collections de la communauté</h2>
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
                                         {{ $collection->name }}
                                     </a>
                                 </h4>
-                                <span class="badge" style="background-color: var(--c-primary, #0B7285); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 12px;">
+                                <span class="badge" style="background-color: var(--c-primary, #064E5A); color: #fff; font-size: 12px; padding: 4px 10px; border-radius: 12px;">
                                     {{ $collection->tools_count }} {{ __('outils') }}
                                 </span>
                             </div>
@@ -38,7 +38,7 @@
                                     <i class="ti-user" style="margin-right: 4px;"></i>
                                     {{ $collection->user->name }}
                                 </span>
-                                <a href="{{ route('collections.show', $collection->slug) }}" class="btn btn-sm" style="background-color: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 4px; padding: 6px 16px; font-size: 13px;">
+                                <a href="{{ route('collections.show', $collection->slug) }}" class="btn btn-sm" style="background-color: var(--c-primary, #064E5A); color: #fff; border: none; border-radius: 4px; padding: 6px 16px; font-size: 13px;">
                                     {{ __('Voir') }}
                                 </a>
                             </div>

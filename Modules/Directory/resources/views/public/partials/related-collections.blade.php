@@ -25,7 +25,7 @@
                 <a href="{{ route('collections.index') }}"
                    rel="nofollow"
                    aria-label="Voir toutes les collections"
-                   style="font-size:13px; color:var(--c-primary, #0B7285); text-decoration:none; font-weight:500"
+                   style="font-size:13px; color:var(--c-primary, #064E5A); text-decoration:none; font-weight:500"
                    onmouseover="this.style.textDecoration='underline'"
                    onmouseout="this.style.textDecoration='none'">
                     + Voir toutes les collections &rarr;
@@ -39,17 +39,17 @@
         @auth
             <a href="{{ route('collections.my') }}"
                aria-label="Aller à mes collections"
-               style="font-size:13px; font-weight:600; color:var(--c-primary, #0B7285); text-decoration:none; padding:6px 14px; border:1px solid var(--c-primary, #0B7285); border-radius:16px"
-               onmouseover="this.style.background='var(--c-primary, #0B7285)'; this.style.color='#fff'"
-               onmouseout="this.style.background='transparent'; this.style.color='var(--c-primary, #0B7285)'">
+               style="font-size:13px; font-weight:600; color:var(--c-primary, #064E5A); text-decoration:none; padding:6px 14px; border:1px solid var(--c-primary, #064E5A); border-radius:16px"
+               onmouseover="this.style.background='var(--c-primary, #064E5A)'; this.style.color='#fff'"
+               onmouseout="this.style.background='transparent'; this.style.color='var(--c-primary, #064E5A)'">
                 Mes collections
             </a>
         @else
             <a href="{{ Route::has('login') ? route('login') : '/login' }}"
                aria-label="Se connecter pour créer une collection"
-               style="font-size:13px; font-weight:600; color:var(--c-primary, #0B7285); text-decoration:none; padding:6px 14px; border:1px solid var(--c-primary, #0B7285); border-radius:16px"
-               onmouseover="this.style.background='var(--c-primary, #0B7285)'; this.style.color='#fff'"
-               onmouseout="this.style.background='transparent'; this.style.color='var(--c-primary, #0B7285)'">
+               style="font-size:13px; font-weight:600; color:var(--c-primary, #064E5A); text-decoration:none; padding:6px 14px; border:1px solid var(--c-primary, #064E5A); border-radius:16px"
+               onmouseover="this.style.background='var(--c-primary, #064E5A)'; this.style.color='#fff'"
+               onmouseout="this.style.background='transparent'; this.style.color='var(--c-primary, #064E5A)'">
                 Se connecter
             </a>
         @endauth

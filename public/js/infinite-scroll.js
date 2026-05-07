@@ -54,7 +54,7 @@
     var loading = false;
     var loader = document.createElement('div');
     loader.style.cssText = 'text-align:center;padding:20px;display:none;';
-    loader.innerHTML = '<div style="display:inline-block;width:30px;height:30px;border:3px solid #e5e7eb;border-top-color:var(--c-primary, #0B7285);border-radius:50%;animation:spin 0.8s linear infinite;"></div>';
+    loader.innerHTML = '<div style="display:inline-block;width:30px;height:30px;border:3px solid #e5e7eb;border-top-color:var(--c-primary, #064E5A);border-radius:50%;animation:spin 0.8s linear infinite;"></div>';
 
     // Ajouter le style d'animation si pas déjà présent
     if (!document.querySelector('#infinite-scroll-style')) {

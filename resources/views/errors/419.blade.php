@@ -12,8 +12,8 @@
             {{ __('Votre session a expiré, un peu comme un cookie oublié trop longtemps. Pour des raisons de sécurité, nous avons dû vous déconnecter.') }}
         </p>
         <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
-            <a href="{{ url()->current() }}" style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 12px 28px; border-radius: 50px; font-weight: 700; text-decoration: none;">🔄 {{ __('Rafraîchir la page') }}</a>
-            @if(Route::has('login'))<a href="{{ route('login') }}" style="color: var(--c-primary, #0B7285); font-weight: 600; text-decoration: none;">{{ __('Se reconnecter') }}</a>@endif
+            <a href="{{ url()->current() }}" style="display: inline-block; background: var(--c-primary, #064E5A); color: #fff; padding: 12px 28px; border-radius: 50px; font-weight: 700; text-decoration: none;">🔄 {{ __('Rafraîchir la page') }}</a>
+            @if(Route::has('login'))<a href="{{ route('login') }}" style="color: var(--c-primary, #064E5A); font-weight: 600; text-decoration: none;">{{ __('Se reconnecter') }}</a>@endif
         </div>
     </div>
 </div>

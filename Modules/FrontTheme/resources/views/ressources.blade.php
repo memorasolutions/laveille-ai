@@ -33,7 +33,7 @@
                                     <p style="color: #374151; font-size: 13px; margin: 0 0 12px; line-height: 1.5;">{{ $section['description'] }}</p>
                                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                                         @if($section['count'])
-                                            <span style="background: var(--c-primary, #0B7285); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{ $section['count'] }} {{ __('entrées') }}</span>
+                                            <span style="background: var(--c-primary, #064E5A); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">{{ $section['count'] }} {{ __('entrées') }}</span>
                                         @endif
                                         @if($section['updated_at'])
                                             <span style="color: #374151; font-size: 11px;">{{ __('Mis à jour') }} {{ \Carbon\Carbon::parse($section['updated_at'])->diffForHumans() }}</span>
@@ -60,7 +60,7 @@
                            });
                            navigator.clipboard.writeText(md).then(() => { feedback = '{{ __('Markdown copié!') }}'; show = true; setTimeout(() => show = false, 2000); });
                        "
-                       style="display: inline-block; background: var(--c-primary, #0B7285); color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; cursor: pointer;">
+                       style="display: inline-block; background: var(--c-primary, #064E5A); color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; cursor: pointer;">
                         {{ __('Copier en Markdown') }}
                     </a>
                     <a href="javascript:void(0)"
@@ -78,7 +78,7 @@
                        style="display: inline-block; background: #fff; color: var(--c-dark, #1a1a2e); border: 1px solid #D1D5DB; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; cursor: pointer; margin-left: 8px;">
                         {{ __('Copier en texte brut') }}
                     </a>
-                    <div x-show="show" x-transition style="margin-top: 12px; color: var(--c-primary, #0B7285); font-weight: 600;" x-text="feedback"></div>
+                    <div x-show="show" x-transition style="margin-top: 12px; color: var(--c-primary, #064E5A); font-weight: 600;" x-text="feedback"></div>
                 </div>
             </div>
         </div>

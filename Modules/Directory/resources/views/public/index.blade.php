@@ -272,13 +272,13 @@
     }" x-init="$watch('wStep', v => { $nextTick(() => { if (v === 1) document.querySelector('input[x-model=\'toolUrl\']')?.focus(); else if (v === 2) document.querySelector('input[x-model=\'toolName\']')?.focus(); else if (v === 3) { if (!authSent) document.querySelector('input[x-model=\'authEmail\']')?.focus(); else document.querySelector('input[x-model=\'authCode\']')?.focus(); } }) })">
     <div x-show="collectionToastShow" x-cloak x-transition.duration.300ms
          role="status" aria-live="polite"
-         style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #fff; border-left: 4px solid var(--c-primary, #0B7285); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; max-width: 360px; font-size: 14px; color: #111827;">
+         style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: #fff; border-left: 4px solid var(--c-primary, #064E5A); box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; max-width: 360px; font-size: 14px; color: #111827;">
         <span style="font-size: 20px;">✅</span>
         <div style="flex: 1;">
             <div style="font-weight: 700; margin-bottom: 2px;" x-text="collectionToastMessage"></div>
             @auth
             @if(Route::has('collections.my'))
-            <a href="{{ route('collections.my') }}" style="font-size: 12px; color: var(--c-primary, #0B7285); text-decoration: none; font-weight: 600;">{{ __('Voir mes collections') }} →</a>
+            <a href="{{ route('collections.my') }}" style="font-size: 12px; color: var(--c-primary, #064E5A); text-decoration: none; font-weight: 600;">{{ __('Voir mes collections') }} →</a>
             @endif
             @endauth
         </div>

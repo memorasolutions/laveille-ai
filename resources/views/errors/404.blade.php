@@ -5,7 +5,7 @@
 
 @section('content')
 <div style="display: flex; justify-content: center; align-items: center; min-height: 60vh; padding: 2rem;">
-    <div style="max-width: 600px; width: 100%; text-align: center; background: #fff; padding: 3rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border-top: 5px solid var(--c-primary, #0B7285);">
+    <div style="max-width: 600px; width: 100%; text-align: center; background: #fff; padding: 3rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border-top: 5px solid var(--c-primary, #064E5A);">
         <div style="font-size: 4rem; margin-bottom: 1rem;">🤖🔍</div>
         <h1 style="font-family: var(--f-heading, sans-serif); color: var(--c-dark, #1a1d23); font-size: 2rem; margin-bottom: 1rem;">{{ __('Page introuvable') }}</h1>
         <p style="color: #6B7280; font-size: 1.05rem; margin-bottom: 2rem; line-height: 1.6;">

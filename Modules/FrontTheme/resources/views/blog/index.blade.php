@@ -123,7 +123,7 @@
 
                     {{-- Sentinel : charge plus au scroll --}}
                     <div x-show="hasMore" x-intersect="loadMore()" class="text-center" style="padding: 30px 0;" role="status" aria-live="polite">
-                        <div x-show="loading" style="display: inline-block; width: 28px; height: 28px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary, #0B7285); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
+                        <div x-show="loading" style="display: inline-block; width: 28px; height: 28px; border: 3px solid #E5E7EB; border-top-color: var(--c-primary, #064E5A); border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
                         <p x-show="loading" style="color: #374151; font-size: 13px; margin-top: 8px;">{{ __('Chargement des articles...') }}</p>
                     </div>
 

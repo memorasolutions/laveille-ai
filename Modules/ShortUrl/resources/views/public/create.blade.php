@@ -28,7 +28,7 @@
             {{ __('Raccourcissez vos liens') }}
         </h1>
         <p style="font-size: 1.1rem; color: var(--c-text-muted, #6E7687);">
-            {{ __('Service gratuit propulsé par') }} <a href="https://laveille.ai" style="color:var(--c-primary, #0B7285);font-weight:700;text-decoration:none;">laveille.ai</a>
+            {{ __('Service gratuit propulsé par') }} <a href="https://laveille.ai" style="color:var(--c-primary, #064E5A);font-weight:700;text-decoration:none;">laveille.ai</a>
         </p>
     </div>
 
@@ -152,11 +152,11 @@
             <input type="url" x-model="url" x-ref="urlInput" @keydown.enter="shorten()"
                 placeholder="{{ __('Collez votre lien ici...') }}"
                 style="flex: 1 !important; height: 52px; border: 2px solid #D1D5DB; border-radius: 12px; padding: 0 16px; font-size: 16px; outline: none; transition: border-color .2s;"
-                onfocus="this.style.borderColor='var(--c-primary, #0B7285)'"
+                onfocus="this.style.borderColor='var(--c-primary, #064E5A)'"
                 onblur="this.style.borderColor='#D1D5DB'">
             <button @click="shorten()" :disabled="loading"
-                style="height: 52px; padding: 0 28px; background: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 0.5rem; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap; transition: background .2s;"
-                onmouseover="this.style.background='var(--c-primary-hover, #064E5C)'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+                style="height: 52px; padding: 0 28px; background: var(--c-primary, #064E5A); color: #fff; border: none; border-radius: 0.5rem; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap; transition: background .2s;"
+                onmouseover="this.style.background='var(--c-primary-hover, #064E5C)'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
                 <span x-show="!loading">⚡ {{ __('Raccourcir') }}</span>
                 <span x-show="loading" x-cloak>⏳</span>
             </button>
@@ -261,7 +261,7 @@
                 ✅ {{ __('Lien raccourci avec succès !') }}
             </p>
             <a :href="result?.short_url" target="_blank"
-                style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 1.5rem; font-weight: 800; color: var(--c-primary, #0B7285); text-decoration: none; word-break: break-all; display: block; margin-bottom: 16px;"
+                style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 1.5rem; font-weight: 800; color: var(--c-primary, #064E5A); text-decoration: none; word-break: break-all; display: block; margin-bottom: 16px;"
                 x-text="result?.short_url"></a>
 
             {{-- QR code preview inline --}}
@@ -312,7 +312,7 @@
                     <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #92400E;">
                         ⏰ {{ __('Ce lien expire dans 30 jours.') }}
                         <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Connectez-vous pour des liens permanents, un tableau de bord et plus de fonctionnalités.') }}' })"
-                            style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: 8px;">
+                            style="background: var(--c-primary, #064E5A); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-left: 8px;">
                             {{ __('Créer un compte gratuit') }}
                         </button>
                     </div>
@@ -327,8 +327,8 @@
         <h3 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark, #1A1D23); margin-bottom: 6px; font-size: 1.1rem;">{{ __('Envie de plus ?') }}</h3>
         <p style="color: var(--c-text-muted, #6E7687); margin-bottom: 14px; font-size: 13px;">{{ __('Liens permanents, slugs personnalises, analytics 90 jours, mot de passe, QR personnalise...') }}</p>
         <button type="button" @click="$dispatch('open-auth-modal', { message: '{{ __('Creez un compte gratuit pour debloquer toutes les fonctionnalites.') }}' })"
-            style="background: var(--c-primary, #0B7285); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .2s;"
-            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #0B7285)'">
+            style="background: var(--c-primary, #064E5A); color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .2s;"
+            onmouseover="this.style.background='#096474'" onmouseout="this.style.background='var(--c-primary, #064E5A)'">
             {{ __('Créer un compte gratuit') }}
         </button>
     </div>
@@ -346,7 +346,7 @@
             <div style="background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-wrap: wrap !important; gap: 8px;">
                 <div style="flex: 1 !important; min-width: 200px;">
                     <a :href="item.short_url" target="_blank"
-                        style="font-weight: 700; font-size: 14px; color: var(--c-primary, #0B7285); text-decoration: none;"
+                        style="font-weight: 700; font-size: 14px; color: var(--c-primary, #064E5A); text-decoration: none;"
                         x-text="item.short_url"></a>
                     <div style="font-size: 12px; color: var(--c-text-muted, #6E7687); margin-top: 2px;">
                         <span x-text="item.original_url?.substring(0, 50) + (item.original_url?.length > 50 ? '...' : '')"></span>
@@ -354,7 +354,7 @@
                 </div>
                 <div style="display: flex !important; gap: 6px; align-items: center !important;">
                     <a :href="'{{ url('/raccourcir') }}/' + item.slug + '/stats'"
-                        style="background: var(--c-primary, #0B7285); color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none;">
+                        style="background: var(--c-primary, #064E5A); color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none;">
                         📊 {{ __('Stats') }}
                     </a>
                     <button @click="navigator.clipboard.writeText(item.short_url)"
