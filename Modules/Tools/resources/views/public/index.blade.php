@@ -261,7 +261,7 @@
                 gap: 3px;
             }
             .tools-badge-trending { background: #DC2626; color: #fff; }
-            .tools-badge-new { background: #059669; color: #fff; }
+            .tools-badge-new { background: #065F46; color: #fff; } /* #217 S83 Lot 7 WCAG AAA 7.68:1 (avant #059669 3.77:1 FAIL) */
             .tools-card { transition: transform .2s ease, box-shadow .2s ease; }
             .tools-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08) !important; }
             #tools-search:focus { border-color: #053D4A; box-shadow: 0 0 0 3px rgba(5, 61, 74, .15); }

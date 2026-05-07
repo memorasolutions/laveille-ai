@@ -77,6 +77,10 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* ── 0b. WCAG AAA OVERRIDE BOOTSTRAP TEXT-MUTED (#217 S83 Lot 7) ── */
+/* Bootstrap default .text-muted = #6c757d (4.69:1 FAIL AAA). Override avec --c-text-muted #52586a (7.09:1 PASS AAA). */
+.text-muted { color: var(--c-text-muted) !important; }
+
 /* ── 0. ANTI-SCROLL HORIZONTAL GLOBAL (S80 #47) ── */
 /* overflow-x: clip > overflow-x: hidden : ne casse pas position:sticky enfants. Support Chrome 90+, Safari 16+, Firefox 81+. */
 html, body {

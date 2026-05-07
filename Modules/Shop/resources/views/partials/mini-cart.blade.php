@@ -24,13 +24,13 @@
             <hr style="border:0; height:1px; background:#e5e7eb; margin:0 0 12px;">
             <div style="display:flex; justify-content:space-between; font-weight:700; margin-bottom:12px;">
                 <span>{{ __('Sous-total') }}</span>
-                <span style="color:#0B7285;">{{ number_format($cartTotal ?? 0, 2, ',', ' ') }} $</span>
+                <span style="color: var(--c-primary, #064E5A);">{{ number_format($cartTotal ?? 0, 2, ',', ' ') }} $</span>
             </div>
-            <a href="{{ route('shop.cart') }}" style="display:block; background:#0B7285; color:#fff; border-radius:8px; padding:10px; text-align:center; font-weight:600; text-decoration:none;">{{ __('Voir le panier') }}</a>
+            <a href="{{ route('shop.cart') }}" style="display:block; background: var(--c-primary, #064E5A); color:#fff; border-radius:8px; padding:10px; text-align:center; font-weight:600; text-decoration:none;">{{ __('Voir le panier') }}</a>
         @else
             <div style="text-align:center; color:#374151; padding:20px 0;">
-                <p style="margin-bottom:12px;">{{ __('Votre panier est vide') }}</p>
-                <a href="{{ route('shop.index') }}" style="color:#0B7285; font-weight:600; text-decoration:none;">{{ __('Parcourir la boutique') }}</a>
+                <p style="margin-bottom:12px; color: var(--c-text-muted);">{{ __('Votre panier est vide') }}</p>
+                <a href="{{ route('shop.index') }}" style="color: var(--c-primary, #064E5A); font-weight:600; text-decoration:none;">{{ __('Parcourir la boutique') }}</a>
             </div>
         @endif
     </div>
