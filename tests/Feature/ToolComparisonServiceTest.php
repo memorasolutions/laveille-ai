@@ -149,28 +149,30 @@ it('compare-bar component renders animations + selection mode CSS', function () 
     expect($rendered)->toContain('prefers-reduced-motion');
 });
 
-it('compare-toggle icon variant uses 32x32 circle (post S89.5 refonte)', function () {
+it('compare-toggle icon variant has data-cmp-card-id + bounce hooks', function () {
     $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'Test', 'url' => 'https://example.com']), fn ($t) => $t->id = 999);
     $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
 
-    expect($rendered)->toContain('width: 32px');
-    expect($rendered)->toContain('height: 32px');
     expect($rendered)->toContain('data-cmp-card-id');
     expect($rendered)->toContain('bounce');
+    expect($rendered)->toContain('lv-cmp-toggle--icon');
 });
 
-it('compare-toggle pill variant also 44px min-height', function () {
-    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'Test', 'url' => 'https://example.com']), fn ($t) => $t->id = 999);
-    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'pill'])->render();
+it('compare-bar provides icon 32x32 + pill 44px CSS (relocated from compare-toggle)', function () {
+    $rendered = view('directory::components.compare-bar')->render();
 
+    // CSS variant icon (32x32 circle M3)
+    expect($rendered)->toContain('width: 32px');
+    expect($rendered)->toContain('height: 32px');
+    expect($rendered)->toContain('border-radius: 50%');
+    // CSS variant pill (44 min-height AAA)
     expect($rendered)->toContain('min-height: 44px');
 });
 
 // ─────────── S89.5 refonte selection state ───────────
 
-it('compare-toggle icon variant uses circle 32x32 absolute corner', function () {
-    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'T', 'url' => 'https://t.com']), fn ($t) => $t->id = 1);
-    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
+it('compare-bar declares circle 32x32 absolute corner CSS (post relocation)', function () {
+    $rendered = view('directory::components.compare-bar')->render();
 
     expect($rendered)->toContain('lv-cmp-toggle--icon');
     expect($rendered)->toContain('width: 32px');
@@ -186,9 +188,8 @@ it('compare-toggle icon variant has no square unicode checkbox', function () {
     expect($rendered)->not->toContain('☐');
 });
 
-it('rt-card is-selected has overlay with pointer-events none', function () {
-    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'T', 'url' => 'https://t.com']), fn ($t) => $t->id = 1);
-    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
+it('compare-bar declares rt-card is-selected overlay with pointer-events none', function () {
+    $rendered = view('directory::components.compare-bar')->render();
 
     expect($rendered)->toContain('.rt-card.is-selected');
     expect($rendered)->toContain('pointer-events: none');
