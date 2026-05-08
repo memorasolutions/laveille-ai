@@ -29,7 +29,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Helpers globaux Memora — chargés ici pour ne pas dépendre de
+        // composer dump-autoload en prod (PHP-FPM peut ne pas avoir composer accessible).
+        // require_once est idempotent + opcache → coût nul après 1er hit.
+        foreach ([
+            base_path('app/Helpers/version.php'),
+        ] as $helper) {
+            if (is_file($helper)) {
+                require_once $helper;
+            }
+        }
     }
 
     /**
