@@ -704,10 +704,12 @@
                     :aria-pressed="$store.compare.selectionMode ? 'true' : 'false'"
                     style="margin-left:auto;">🎯 <span x-text="$store.compare.selectionMode ? '{{ __('Sélection active') }}' : '{{ __('Mode sélection') }}'"></span></button>
             @if($categories->isNotEmpty())
-                <a href="{{ route('directory.compare', $categories->first()->slug) }}"
+                <a x-show="$store.compare.count >= 2"
+                   x-cloak
+                   x-transition.opacity
+                   :href="$store.compare.compareUrl"
                    class="rt-sort-tab"
-                   x-bind:href="$store.compare.count >= 2 ? $store.compare.compareUrl : '{{ route('directory.compare', $categories->first()->slug) }}'"
-                   style="text-decoration:none!important;">📊 {{ __('Comparer') }}<span x-show="$store.compare.count > 0" x-cloak x-text="' (' + $store.compare.count + ')'"></span></a>
+                   style="text-decoration:none!important;background:var(--c-primary,#064E5A);color:#fff;border-radius:8px;padding:8px 16px;font-weight:700;">📊 {{ __('Comparer') }}<span x-text="' (' + $store.compare.count + ')'"></span></a>
             @endif
         </div>
 

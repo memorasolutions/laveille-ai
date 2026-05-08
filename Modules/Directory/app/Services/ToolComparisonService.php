@@ -18,7 +18,8 @@ use Modules\Directory\Models\Tool;
 
 class ToolComparisonService
 {
-    public const MAX_TOOLS = 4;
+    public const MAX_TOOLS = 6;
+    public const MISMATCH_THRESHOLD_PCT = 50.0;
 
     /**
      * Schéma des critères groupés en sections (DRY : utilisé par vue + tests + futur API).
@@ -305,6 +306,97 @@ class ToolComparisonService
 
             return 'same';
         })->all();
+    }
+
+    /**
+     * Calcule la compatibilité de comparaison entre les outils sélectionnés.
+     *
+     * Retourne :
+     * - shared_categories  : Collection de Category communes à TOUS les outils
+     * - overlap_pct        : float 0-100, % d'outils qui partagent au moins 1 catégorie commune
+     * - is_mismatch        : bool true si overlap_pct < MISMATCH_THRESHOLD_PCT
+     * - dominant_category  : Category la plus représentée (pour suggestion "filtrer par X")
+     * - dominant_tool_ids  : array d'IDs qui appartiennent à dominant_category
+     */
+    public function computeMismatch(Collection $tools): array
+    {
+        if ($tools->count() < 2) {
+            return [
+                'shared_categories' => collect(),
+                'overlap_pct' => 100.0,
+                'is_mismatch' => false,
+                'dominant_category' => null,
+                'dominant_tool_ids' => [],
+            ];
+        }
+
+        $allCategoriesByTool = $tools->mapWithKeys(fn ($t) => [
+            $t->id => $t->categories->pluck('id')->all(),
+        ]);
+
+        // Catégories communes à TOUS les outils (intersection stricte)
+        $sharedCategoryIds = collect($allCategoriesByTool->first());
+        foreach ($allCategoriesByTool as $catIds) {
+            $sharedCategoryIds = $sharedCategoryIds->intersect($catIds);
+        }
+        $sharedCategoryIds = $sharedCategoryIds->values();
+
+        // Catégorie la plus représentée + outils qui y appartiennent
+        $categoryCounts = $tools->flatMap(fn ($t) => $t->categories->pluck('id'))->countBy();
+        $dominantCategoryId = $categoryCounts->isNotEmpty() ? $categoryCounts->sortDesc()->keys()->first() : null;
+
+        $dominantToolIds = [];
+        $dominantCategory = null;
+        if ($dominantCategoryId) {
+            $firstToolWithCategory = $tools->first(fn ($t) => $t->categories->pluck('id')->contains($dominantCategoryId));
+            if ($firstToolWithCategory) {
+                $dominantCategory = $firstToolWithCategory->categories->firstWhere('id', $dominantCategoryId);
+            }
+            $dominantToolIds = $tools
+                ->filter(fn ($t) => $t->categories->pluck('id')->contains($dominantCategoryId))
+                ->pluck('id')
+                ->all();
+        }
+
+        $overlapPct = $tools->count() > 0
+            ? round((count($dominantToolIds) / $tools->count()) * 100, 1)
+            : 0.0;
+
+        $sharedCategories = $sharedCategoryIds->isNotEmpty()
+            ? $tools->first()->categories->whereIn('id', $sharedCategoryIds->all())
+            : collect();
+
+        return [
+            'shared_categories' => $sharedCategories,
+            'overlap_pct' => $overlapPct,
+            'is_mismatch' => $overlapPct < self::MISMATCH_THRESHOLD_PCT,
+            'dominant_category' => $dominantCategory,
+            'dominant_tool_ids' => $dominantToolIds,
+        ];
+    }
+
+    /**
+     * Classifie chaque critère du schéma en "common" (≥50% des outils ont une valeur) ou "specific".
+     * Permet de regrouper visuellement « Communs » vs « Spécifiques ».
+     *
+     * @return array<string, array<string, string>> ['common' => ['accessor' => 'common'|'specific'], ...]
+     */
+    public function classifyCriteria(Collection $tools, array $schema): array
+    {
+        $classification = [];
+        foreach ($schema as $sectionKey => $section) {
+            foreach ($section['criteria'] as $critKey => $crit) {
+                $valuesPresent = $tools->filter(function ($tool) use ($crit) {
+                    $v = $this->getValue($tool, $crit['accessor']);
+
+                    return $v !== null && $v !== '' && $v !== [];
+                })->count();
+                $pct = $tools->count() > 0 ? ($valuesPresent / $tools->count()) * 100 : 0;
+                $classification[$sectionKey][$critKey] = $pct >= self::MISMATCH_THRESHOLD_PCT ? 'common' : 'specific';
+            }
+        }
+
+        return $classification;
     }
 
     /**

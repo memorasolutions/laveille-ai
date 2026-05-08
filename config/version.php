@@ -17,23 +17,24 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.1.0 · 2026-05-08 · Comparateur refonte sticky thead + slider arrows + mismatch detection + 6 outils max
  *   1.0.0 · 2026-05-08 · Initial production release (comparateur multi-outils livré)
  */
 
 return [
     'major' => 1,
-    'minor' => 0,
+    'minor' => 1,
     'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'comparator',
+    'codename' => 'sticky-compare',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.0.0',
+    'semver' => '1.1.0',
 ];

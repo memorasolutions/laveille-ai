@@ -30,7 +30,7 @@ it('returns criteria schema with 6 sections', function () {
 it('validates and dedup IDs limited to MAX_TOOLS', function () {
     $svc = new ToolComparisonService();
 
-    expect($svc->validateIds('1,2,3,4,5,6,7'))->toEqual([1, 2, 3, 4]);
+    expect($svc->validateIds('1,2,3,4,5,6,7,8,9'))->toEqual([1, 2, 3, 4, 5, 6]);
     expect($svc->validateIds([1, 2, 2, 3]))->toEqual([1, 2, 3]);
     expect($svc->validateIds('1,abc,2,-3,0,4'))->toEqual([1, 2, 4]);
     expect($svc->validateIds(''))->toEqual([]);
@@ -131,8 +131,8 @@ it('computeDiff year: newer=best by default', function () {
     expect($diff[2])->toBe('worst');
 });
 
-it('MAX_TOOLS constant equals 4', function () {
-    expect(ToolComparisonService::MAX_TOOLS)->toBe(4);
+it('MAX_TOOLS constant equals 6', function () {
+    expect(ToolComparisonService::MAX_TOOLS)->toBe(6);
 });
 
 // ─────────── S88 bonifs ───────────
@@ -182,9 +182,115 @@ it('lv_version returns vX.Y.Z prefixed', function () {
 it('lv_version with sha contains separator', function () {
     $v = lv_version(true);
     expect($v)->toStartWith('v');
-    // Avec SHA: "v1.0.0 · abcdef12" — sans SHA si pas de .git: "v1.0.0"
     if (lv_git_sha()) {
         expect($v)->toContain('·');
         expect($v)->toMatch('/v\d+\.\d+\.\d+ · [a-f0-9]{8}/');
     }
+});
+
+// ─────────── S89 refonte ───────────
+
+it('MAX_TOOLS bumped to 6 for slider support', function () {
+    expect(ToolComparisonService::MAX_TOOLS)->toBe(6);
+});
+
+it('MISMATCH_THRESHOLD_PCT exposed as 50.0', function () {
+    expect(ToolComparisonService::MISMATCH_THRESHOLD_PCT)->toBe(50.0);
+});
+
+it('validateIds caps at 6 tools', function () {
+    $svc = new ToolComparisonService();
+    expect($svc->validateIds('1,2,3,4,5,6,7,8'))->toEqual([1, 2, 3, 4, 5, 6]);
+});
+
+it('computeMismatch returns full overlap when tools share categories', function () {
+    $svc = new ToolComparisonService();
+
+    $cat = tap(new \Modules\Directory\Models\Category(['name' => 'LLM']), fn ($c) => $c->id = 100);
+    $tools = collect([
+        tap(new \Modules\Directory\Models\Tool(['name' => 'A']), function ($t) use ($cat) {
+            $t->id = 1;
+            $t->setRelation('categories', collect([$cat]));
+        }),
+        tap(new \Modules\Directory\Models\Tool(['name' => 'B']), function ($t) use ($cat) {
+            $t->id = 2;
+            $t->setRelation('categories', collect([$cat]));
+        }),
+    ]);
+
+    $result = $svc->computeMismatch($tools);
+    expect($result['overlap_pct'])->toBe(100.0);
+    expect($result['is_mismatch'])->toBeFalse();
+    expect($result['dominant_tool_ids'])->toEqual([1, 2]);
+});
+
+it('computeMismatch detects mismatch when tools have no shared categories', function () {
+    $svc = new ToolComparisonService();
+
+    $catLlm = tap(new \Modules\Directory\Models\Category(['name' => 'LLM']), fn ($c) => $c->id = 100);
+    $catImg = tap(new \Modules\Directory\Models\Category(['name' => 'Image']), fn ($c) => $c->id = 200);
+    $catAudio = tap(new \Modules\Directory\Models\Category(['name' => 'Audio']), fn ($c) => $c->id = 300);
+
+    $tools = collect([
+        tap(new \Modules\Directory\Models\Tool(['name' => 'LLM tool']), function ($t) use ($catLlm) {
+            $t->id = 1;
+            $t->setRelation('categories', collect([$catLlm]));
+        }),
+        tap(new \Modules\Directory\Models\Tool(['name' => 'Img tool']), function ($t) use ($catImg) {
+            $t->id = 2;
+            $t->setRelation('categories', collect([$catImg]));
+        }),
+        tap(new \Modules\Directory\Models\Tool(['name' => 'Audio tool']), function ($t) use ($catAudio) {
+            $t->id = 3;
+            $t->setRelation('categories', collect([$catAudio]));
+        }),
+    ]);
+
+    $result = $svc->computeMismatch($tools);
+    expect($result['overlap_pct'])->toBeLessThan(50.0);
+    expect($result['is_mismatch'])->toBeTrue();
+    expect($result['shared_categories']->count())->toBe(0);
+});
+
+it('classifyCriteria flags criteria as common or specific based on 50pct threshold', function () {
+    $svc = new ToolComparisonService();
+
+    // Tool A : has underlying_model, no opt_out_training
+    // Tool B : has both
+    // Tool C : has neither
+    $tools = collect([
+        tap(new \Modules\Directory\Models\Tool(['underlying_model' => 'GPT-4o', 'opt_out_training' => null]), fn ($t) => $t->id = 1),
+        tap(new \Modules\Directory\Models\Tool(['underlying_model' => 'Claude', 'opt_out_training' => 'yes']), fn ($t) => $t->id = 2),
+        tap(new \Modules\Directory\Models\Tool(['underlying_model' => null, 'opt_out_training' => null]), fn ($t) => $t->id = 3),
+    ]);
+
+    $schema = [
+        'capacites' => [
+            'label' => 'Cap', 'icon' => '🤖',
+            'criteria' => [
+                'underlying_model' => ['label' => 'Modèle', 'accessor' => 'underlying_model', 'type' => 'text', 'better' => 'neutral'],
+                'opt_out_training' => ['label' => 'Opt-out', 'accessor' => 'opt_out_training', 'type' => 'opt_out', 'better' => 'yes'],
+            ],
+        ],
+    ];
+
+    $result = $svc->classifyCriteria($tools, $schema);
+    // 2/3 outils ont underlying_model -> common (66%)
+    expect($result['capacites']['underlying_model'])->toBe('common');
+    // 1/3 outil a opt_out_training -> specific (33%)
+    expect($result['capacites']['opt_out_training'])->toBe('specific');
+});
+
+it('computeMismatch returns 100pct when only one tool', function () {
+    $svc = new ToolComparisonService();
+    $tools = collect([
+        tap(new \Modules\Directory\Models\Tool(['name' => 'Solo']), function ($t) {
+            $t->id = 1;
+            $t->setRelation('categories', collect());
+        }),
+    ]);
+
+    $result = $svc->computeMismatch($tools);
+    expect($result['overlap_pct'])->toBe(100.0);
+    expect($result['is_mismatch'])->toBeFalse();
 });

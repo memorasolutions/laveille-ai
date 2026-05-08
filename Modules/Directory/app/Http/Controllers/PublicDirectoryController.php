@@ -136,8 +136,10 @@ class PublicDirectoryController extends Controller
         $tools = $service->loadTools($ids);
         $criteria = $service->getCriteriaSchema();
         $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
+        $mismatch = $service->computeMismatch($tools);
+        $classification = $tools->count() >= 2 ? $service->classifyCriteria($tools, $criteria) : [];
 
-        return view('directory::public.compare', compact('tools', 'category', 'allCategories', 'pricingLabels', 'criteria', 'service'));
+        return view('directory::public.compare', compact('tools', 'category', 'allCategories', 'pricingLabels', 'criteria', 'service', 'mismatch', 'classification'));
     }
 
     public function show(string $slug): View

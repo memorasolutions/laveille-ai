@@ -223,7 +223,7 @@ document.addEventListener('alpine:init', () => {
         ids: [],
         names: {},
         thumbs: {},
-        max: 4,
+        max: 6,
         selectionMode: false,
         storageKey: 'laveille_compare_v1',
         modeKey: 'laveille_compare_mode_v1',
@@ -348,7 +348,7 @@ document.addEventListener('alpine:init', () => {
 @endonce
 
 <div class="lv-compare-bar"
-     :class="{ 'is-open': $store.compare.count > 0 }"
+     :class="{ 'is-open': $store.compare.count >= 2 }"
      x-data
      x-cloak
      role="region"
