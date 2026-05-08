@@ -77,7 +77,8 @@
     },
     "autoload": {
         "files": [
-            "app/Helpers/dates.php"
+            "app/Helpers/dates.php",
+            "app/Helpers/version.php"
         ],
         "psr-4": {
             "App\\": "app/",

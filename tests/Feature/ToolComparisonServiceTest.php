@@ -166,3 +166,25 @@ it('compare-toggle pill variant also 44px min-height', function () {
 
     expect($rendered)->toContain('min-height: 44px');
 });
+
+// ─────────── Versioning SemVer ───────────
+
+it('lv_semver returns SemVer string from config', function () {
+    expect(lv_semver())->toMatch('/^\d+\.\d+\.\d+$/');
+    expect(lv_semver())->toBe('1.0.0');
+});
+
+it('lv_version returns vX.Y.Z prefixed', function () {
+    expect(lv_version(false))->toStartWith('v');
+    expect(lv_version(false))->toBe('v1.0.0');
+});
+
+it('lv_version with sha contains separator', function () {
+    $v = lv_version(true);
+    expect($v)->toStartWith('v');
+    // Avec SHA: "v1.0.0 · abcdef12" — sans SHA si pas de .git: "v1.0.0"
+    if (lv_git_sha()) {
+        expect($v)->toContain('·');
+        expect($v)->toMatch('/v\d+\.\d+\.\d+ · [a-f0-9]{8}/');
+    }
+});
