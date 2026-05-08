@@ -174,7 +174,12 @@ class HealthCheckReportCommand extends Command
     {
         if ($code >= 200 && $code < 300) return 'ok';
         if ($code >= 300 && $code < 400) return 'redirect';
-        if ($code === 403 || $code === 503) return 'cloudflare_block'; // Cloudflare protection probable
+        // S84 #32 v3 — codes "faux positifs" : sites fonctionnent en navigateur mais refusent test programmatique
+        // 400 = Bad Request (Range header refusé par certains backends), 401 = Unauthorized (API/dashboard normal)
+        // 403 = Forbidden (Cloudflare/anti-bot), 405 = Method Not Allowed, 406 = Not Acceptable (header refusé)
+        // 429 = Too Many Requests (rate-limit), 451 = Unavailable For Legal, 503 = Service Unavailable (Cloudflare challenge)
+        if (in_array($code, [400, 401, 403, 405, 406, 429, 451, 503])) return 'cloudflare_block';
+        // 404 = vraie page d'accueil cassée (suspect), 410 = discontinued (suspect)
         if ($code >= 400 && $code < 500) return 'client_error';
         if ($code >= 500) return 'server_error';
         return 'unknown';
