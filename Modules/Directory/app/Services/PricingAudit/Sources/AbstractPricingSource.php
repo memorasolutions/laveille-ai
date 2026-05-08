@@ -53,12 +53,14 @@ abstract class AbstractPricingSource implements PricingSourceContract
         $raw = strtolower(trim($raw));
 
         return match (true) {
-            str_contains($raw, 'free trial') => 'free_trial',
-            str_contains($raw, 'open source') || str_contains($raw, 'open-source') => 'open_source',
-            str_contains($raw, 'enterprise') => 'enterprise',
+            // Tester d'abord les valeurs canoniques DB déjà normalisées (avec underscore).
+            $raw === 'free_trial' || str_contains($raw, 'free trial') => 'free_trial',
+            $raw === 'open_source' || str_contains($raw, 'open source') || str_contains($raw, 'open-source') => 'open_source',
+            $raw === 'freemium' => 'freemium',
+            $raw === 'enterprise' || str_contains($raw, 'enterprise') => 'enterprise',
             str_contains($raw, 'freemium') => 'freemium',
-            str_contains($raw, 'paid') || str_contains($raw, 'subscription') || str_contains($raw, 'payant') => 'paid',
-            str_contains($raw, 'free') || str_contains($raw, 'gratuit') => 'free',
+            $raw === 'paid' || str_contains($raw, 'paid') || str_contains($raw, 'subscription') || str_contains($raw, 'payant') => 'paid',
+            $raw === 'free' || str_contains($raw, 'free') || str_contains($raw, 'gratuit') => 'free',
             default => $raw,
         };
     }

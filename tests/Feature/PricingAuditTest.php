@@ -9,11 +9,15 @@ declare(strict_types=1);
  */
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolPricingAudit;
 use Modules\Directory\Services\PricingAudit\PricingAuditScheduler;
 use Modules\Directory\Services\PricingAudit\PricingSourceResult;
 use Modules\Directory\Services\PricingAudit\Sources\AbstractPricingSource;
+use Modules\Directory\Services\PricingAudit\Sources\BrowserFetchPricingSource;
+use Modules\Directory\Services\PricingAudit\Sources\PlaywrightScreenshotSource;
+use Modules\Directory\Services\PricingAudit\Sources\PpSearchPricingSource;
 use Modules\Directory\Services\PricingAudit\ToolPricingAuditor;
 
 // Stub source pour tests sans HTTP/IO réel
@@ -128,4 +132,153 @@ it('compare-bar still has v1.3.0 onboarding (regression check)', function () {
     $rendered = view('directory::components.compare-bar')->render();
     expect($rendered)->toContain('lv-cmp-onboarding');
     expect($rendered)->toContain('lv-cmp-popover');
+});
+
+it('BrowserFetchPricingSource sends a real Chrome UA + headers (S89 #58)', function () {
+    Http::fake([
+        '*' => Http::response('<html><body>Free plan and $20/mo</body></html>', 200, ['Content-Type' => 'text/html']),
+    ]);
+
+    $source = new BrowserFetchPricingSource();
+    $tool = new Tool(['url' => 'https://example.com', 'name' => 'Example']);
+    $tool->id = 999_999;
+
+    $result = $source->fetch($tool);
+
+    expect($result->isValid())->toBeTrue();
+    expect($result->realPricing)->toBe('freemium');
+
+    Http::assertSent(function ($request) {
+        $ua = $request->header('User-Agent')[0] ?? '';
+        $accept = $request->header('Accept')[0] ?? '';
+        return str_contains($ua, 'Chrome/') && str_contains($accept, 'text/html');
+    });
+});
+
+it('BrowserFetchPricingSource retries 3x on 503 and gives up cleanly (S89 #58)', function () {
+    Http::fake([
+        '*' => Http::response('upstream', 503),
+    ]);
+
+    $source = new BrowserFetchPricingSource();
+    $tool = new Tool(['url' => 'https://example.com', 'name' => 'Example']);
+    $tool->id = 999_998;
+
+    $result = $source->fetch($tool);
+
+    expect($result->isValid())->toBeFalse();
+    expect($result->error)->toContain('http 503');
+});
+
+it('BrowserFetchPricingSource gives up immediately on 403 (no retry on hard block)', function () {
+    Http::fake([
+        '*' => Http::response('blocked', 403),
+    ]);
+
+    $source = new BrowserFetchPricingSource();
+    $tool = new Tool(['url' => 'https://example.com', 'name' => 'Example']);
+    $tool->id = 999_997;
+
+    $result = $source->fetch($tool);
+
+    expect($result->isValid())->toBeFalse();
+    expect($result->error)->toContain('http 403 blocked');
+});
+
+it('PpSearchPricingSource direct API parses a clean JSON answer (S89 #60)', function () {
+    config(['directory.openrouter_api_key' => 'fake-test-key']);
+
+    Http::fake([
+        'openrouter.ai/api/v1/chat/completions' => Http::response([
+            'choices' => [
+                [
+                    'message' => [
+                        'content' => json_encode([
+                            'real_pricing' => 'freemium',
+                            'has_education_discount' => true,
+                            'education_url' => 'https://example.com/edu',
+                            'evidence_quote' => 'Free for students, Pro from $20/mo',
+                            'evidence_url' => 'https://example.com/pricing',
+                            'confidence' => 92,
+                        ]),
+                    ],
+                ],
+            ],
+        ], 200),
+    ]);
+
+    $source = new PpSearchPricingSource();
+    $tool = new Tool(['url' => 'https://example.com', 'name' => 'Example']);
+    $tool->id = 990_001;
+
+    $result = $source->fetch($tool);
+
+    expect($result->isValid())->toBeTrue();
+    expect($result->realPricing)->toBe('freemium');
+    expect($result->hasEducationDiscount)->toBeTrue();
+    expect($result->educationUrl)->toBe('https://example.com/edu');
+    expect($result->confidence)->toBe(92);
+});
+
+it('PpSearchPricingSource direct API extracts JSON from markdown fences (S89 #60)', function () {
+    config(['directory.openrouter_api_key' => 'fake-test-key']);
+
+    $fenced = "```json\n" . json_encode([
+        'real_pricing' => 'paid',
+        'has_education_discount' => false,
+        'evidence_quote' => 'Starts at $15/mo',
+        'evidence_url' => 'https://example.com',
+        'confidence' => 80,
+    ]) . "\n```";
+
+    Http::fake([
+        'openrouter.ai/api/v1/chat/completions' => Http::response([
+            'choices' => [['message' => ['content' => $fenced]]],
+        ], 200),
+    ]);
+
+    $source = new PpSearchPricingSource();
+    $tool = new Tool(['url' => 'https://example.com', 'name' => 'Example']);
+    $tool->id = 990_002;
+
+    $result = $source->fetch($tool);
+
+    expect($result->isValid())->toBeTrue();
+    expect($result->realPricing)->toBe('paid');
+    expect($result->hasEducationDiscount)->toBeFalse();
+});
+
+it('PlaywrightScreenshotSource is disabled by default (S89 #59 — guards Node-less prod)', function () {
+    config(['directory.pricing_audit.screenshot_enabled' => false]);
+
+    $source = new PlaywrightScreenshotSource();
+    $tool = new Tool(['url' => 'https://example.com', 'name' => 'Example']);
+    $tool->id = 990_010;
+
+    $result = $source->fetch($tool);
+
+    expect($result->isValid())->toBeFalse();
+    expect($result->error)->toContain('disabled');
+});
+
+it('PpSearchPricingSource precomputed mode still works (backward compat S89 #60)', function () {
+    $source = new PpSearchPricingSource();
+    $source->setPrecomputed([
+        12345 => [
+            'real_pricing' => 'free_trial',
+            'has_education_discount' => false,
+            'evidence_quote' => 'Pre-computed snapshot',
+            'evidence_url' => 'https://example.com',
+            'confidence' => 75,
+        ],
+    ]);
+
+    $tool = new Tool(['url' => 'https://example.com', 'name' => 'Example']);
+    $tool->id = 12345;
+
+    $result = $source->fetch($tool);
+
+    expect($result->isValid())->toBeTrue();
+    expect($result->realPricing)->toBe('free_trial');
+    expect($result->confidence)->toBe(75);
 });

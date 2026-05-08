@@ -18,4 +18,17 @@ return [
         'producthunt' => 'https://www.producthunt.com/feed',
         'hackernews_show' => 'https://hnrss.org/show',
     ],
+
+    /*
+     * Pricing audit (multi-source consensus) — drivers configurables.
+     *
+     * screenshot_enabled : active le PlaywrightScreenshotSource (Browsershot + Chromium).
+     *   PRÉ-REQUIS prod : Node.js + Chromium installés et BROWSERSHOT_NODE_PATH défini.
+     *   En cPanel partagé sans Node, laisser à false : audit fonctionne quand même via
+     *   BrowserFetch (poids 2) + PpSearch direct API (poids 1) + LLM (poids 1) → consensus 4/4.
+     *   Activer via DIRECTORY_PRICING_AUDIT_SCREENSHOT=true dans .env quand Node prod prêt.
+     */
+    'pricing_audit' => [
+        'screenshot_enabled' => (bool) env('DIRECTORY_PRICING_AUDIT_SCREENSHOT', false),
+    ],
 ];

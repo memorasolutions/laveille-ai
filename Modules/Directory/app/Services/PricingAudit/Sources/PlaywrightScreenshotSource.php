@@ -7,9 +7,14 @@ declare(strict_types=1);
  *
  * @project laveille.ai
  *
- * Driver : capture screenshot pricing page via spatie/browsershot (déjà installé).
+ * Driver : capture screenshot pricing page via spatie/browsershot.
  * Poids 2 (browser-rendered = JS support + visual evidence audit-trail).
  * Stocke storage/app/pricing-evidence/{tool_id}-{timestamp}.png.
+ *
+ * S89 (#59) : guard config('directory.pricing_audit.screenshot_enabled') car Node
+ * absent en prod cPanel partagé. Active via DIRECTORY_PRICING_AUDIT_SCREENSHOT=true
+ * une fois Node + Chromium déployés. En attendant, retourne 'disabled' propre (pas
+ * d'exception) pour ne pas polluer les batchs d'audit.
  */
 
 namespace Modules\Directory\Services\PricingAudit\Sources;
@@ -34,11 +39,18 @@ class PlaywrightScreenshotSource extends AbstractPricingSource
 
     protected function doFetch(Tool $tool): PricingSourceResult
     {
+        if (! config('directory.pricing_audit.screenshot_enabled', false)) {
+            return new PricingSourceResult(
+                sourceName: $this->name(),
+                weight: $this->weight(),
+                error: 'disabled (set DIRECTORY_PRICING_AUDIT_SCREENSHOT=true once Node prod ready)',
+            );
+        }
+
         if (empty($tool->url)) {
             return new PricingSourceResult($this->name(), $this->weight(), error: 'no url');
         }
 
-        // Browsershot peut lever Throwable si Node absent — délégué à AbstractPricingSource catch.
         if (! class_exists(Browsershot::class)) {
             return new PricingSourceResult($this->name(), $this->weight(), error: 'browsershot not installed');
         }

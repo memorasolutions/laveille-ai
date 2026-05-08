@@ -10,6 +10,10 @@ declare(strict_types=1);
  * Driver : fetch HTTP simple (Laravel Http) + parse keywords pricing.
  * Poids 2 (vendor first-party text content).
  * Limites : ne capte pas le JS-loaded pricing -> à compléter avec PlaywrightScreenshotSource.
+ *
+ * S89 (#58) : User-Agent Chrome desktop réaliste + headers Accept/Accept-Language
+ *             + 3 retries exponential backoff (250 / 750 / 2250 ms) sur 5xx/timeout
+ *             + jitter inter-URLs pour réduire taux de blocage Cloudflare anti-bot.
  */
 
 namespace Modules\Directory\Services\PricingAudit\Sources;
@@ -17,9 +21,20 @@ namespace Modules\Directory\Services\PricingAudit\Sources;
 use Illuminate\Support\Facades\Http;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Services\PricingAudit\PricingSourceResult;
+use Throwable;
 
 class BrowserFetchPricingSource extends AbstractPricingSource
 {
+    /** @var string UA Chrome desktop réaliste (rotation possible mais 1 fixé suffit pour la majorité). */
+    private const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+
+    private const TIMEOUT_SEC = 12;
+
+    private const MAX_ATTEMPTS = 3;
+
+    /** Backoff par tentative (sleep en ms entre attempts). */
+    private const BACKOFF_MS = [250, 750, 2250];
+
     public function name(): string
     {
         return 'browser';
@@ -37,23 +52,27 @@ class BrowserFetchPricingSource extends AbstractPricingSource
         }
 
         $candidateUrls = $this->candidatePricingUrls($tool->url);
-        $hits = [];
+        $hit = null;
+        $lastError = 'no candidate fetched';
 
-        foreach ($candidateUrls as $url) {
-            $response = Http::timeout(8)->withUserAgent('Mozilla/5.0 (compatible; LaVeilleAuditor/1.0)')->get($url);
-            if (! $response->successful()) {
-                continue;
+        foreach ($candidateUrls as $i => $url) {
+            // Jitter entre URLs (sauf la 1ère) pour éviter pattern bot-like rapide.
+            if ($i > 0) {
+                usleep(random_int(120_000, 380_000));
             }
-            $body = $response->body();
-            $hits[] = ['url' => $url, 'body' => $body];
-            break; // 1ère URL réussie suffit
+
+            [$body, $err] = $this->fetchWithRetry($url);
+            if ($body !== null) {
+                $hit = ['url' => $url, 'body' => $body];
+                break;
+            }
+            $lastError = $err;
         }
 
-        if (empty($hits)) {
-            return new PricingSourceResult($this->name(), $this->weight(), error: 'fetch failed');
+        if ($hit === null) {
+            return new PricingSourceResult($this->name(), $this->weight(), error: $lastError);
         }
 
-        $hit = $hits[0];
         $signals = $this->extractSignals($hit['body']);
 
         return new PricingSourceResult(
@@ -67,6 +86,63 @@ class BrowserFetchPricingSource extends AbstractPricingSource
             confidence: $signals['confidence'],
             rawPayload: substr($hit['body'], 0, 3000),
         );
+    }
+
+    /**
+     * Fetch single URL avec 3 retries exponential backoff.
+     * Retry sur : 5xx, 429, network exception. Pas de retry sur 4xx clients (sauf 429).
+     *
+     * @return array{0: ?string, 1: string} [body|null, error_message]
+     */
+    private function fetchWithRetry(string $url): array
+    {
+        $lastError = 'unknown';
+
+        for ($attempt = 0; $attempt < self::MAX_ATTEMPTS; $attempt++) {
+            if ($attempt > 0) {
+                $delay = self::BACKOFF_MS[$attempt - 1] ?? 2250;
+                usleep($delay * 1000);
+            }
+
+            try {
+                $response = Http::timeout(self::TIMEOUT_SEC)
+                    ->withHeaders([
+                        'User-Agent' => self::USER_AGENT,
+                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                        'Accept-Language' => 'en-US,en;q=0.9,fr-CA;q=0.7,fr;q=0.5',
+                        'Accept-Encoding' => 'gzip, deflate, br',
+                        'Cache-Control' => 'no-cache',
+                        'Pragma' => 'no-cache',
+                        'Sec-Fetch-Dest' => 'document',
+                        'Sec-Fetch-Mode' => 'navigate',
+                        'Sec-Fetch-Site' => 'none',
+                        'Sec-Fetch-User' => '?1',
+                        'Upgrade-Insecure-Requests' => '1',
+                    ])
+                    ->withOptions(['allow_redirects' => ['max' => 5, 'strict' => false]])
+                    ->get($url);
+
+                $status = $response->status();
+
+                if ($response->successful()) {
+                    return [$response->body(), 'ok'];
+                }
+
+                // Retry seulement sur 429, 5xx
+                if ($status === 429 || ($status >= 500 && $status < 600)) {
+                    $lastError = "http {$status} retry";
+                    continue;
+                }
+
+                // 4xx définitif (403 anti-bot, 404, etc.) -> pas de retry inutile
+                return [null, "http {$status} blocked"];
+            } catch (Throwable $e) {
+                $lastError = 'exception: ' . substr($e->getMessage(), 0, 80);
+                continue;
+            }
+        }
+
+        return [null, $lastError];
     }
 
     /**
