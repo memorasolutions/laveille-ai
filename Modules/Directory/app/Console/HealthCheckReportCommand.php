@@ -72,16 +72,26 @@ class HealthCheckReportCommand extends Command
         $bar = $this->output->createProgressBar($total);
         $bar->start();
 
-        // S84 #32 — User-Agent navigateur réaliste pour éviter blocages bot (Cloudflare, anti-bot, etc.)
+        // S84 #36 — Headers Chrome 126 macOS COMPLETS pour bypass partiel Cloudflare anti-bot
         $client = new Client([
             'timeout' => self::TIMEOUT,
             'connect_timeout' => self::TIMEOUT,
             'allow_redirects' => ['max' => 5, 'strict' => false, 'protocols' => ['http', 'https']],
             'headers' => [
                 'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
                 'Accept-Language' => 'fr-CA,fr;q=0.9,en;q=0.8',
                 'Accept-Encoding' => 'gzip, deflate, br',
+                'Sec-Fetch-Site' => 'none',
+                'Sec-Fetch-Mode' => 'navigate',
+                'Sec-Fetch-User' => '?1',
+                'Sec-Fetch-Dest' => 'document',
+                'Sec-Ch-Ua' => '"Chromium";v="126", "Not.A/Brand";v="24", "Google Chrome";v="126"',
+                'Sec-Ch-Ua-Mobile' => '?0',
+                'Sec-Ch-Ua-Platform' => '"macOS"',
+                'DNT' => '1',
+                'Upgrade-Insecure-Requests' => '1',
+                'Cache-Control' => 'max-age=0',
             ],
             'http_errors' => false,
             'verify' => false, // certains sites ont SSL invalides mais sont up
