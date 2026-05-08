@@ -204,6 +204,45 @@ it('compare-bar opens at count=1 and shows adaptive label', function () {
     expect($rendered)->toContain('canCompare');
 });
 
+// ─────────── v1.3.0 Option C ultra-intuitive ───────────
+
+it('compare-bar declares variant card CSS (textual button pattern Capterra)', function () {
+    $rendered = view('directory::components.compare-bar')->render();
+
+    expect($rendered)->toContain('lv-cmp-toggle--card');
+    expect($rendered)->toContain('min-height: 36px');
+    expect($rendered)->toContain('border: 2px solid var(--c-primary, #064E5A)');
+});
+
+it('compare-bar declares onboarding tooltip + popover CSS', function () {
+    $rendered = view('directory::components.compare-bar')->render();
+
+    expect($rendered)->toContain('lv-cmp-onboarding');
+    expect($rendered)->toContain('lvCmpPulse');
+    expect($rendered)->toContain('lv-cmp-popover');
+    expect($rendered)->toContain('lvCmpFadeIn');
+});
+
+it('store has onboarding + first pair flags + localStorage keys', function () {
+    $rendered = view('directory::components.compare-bar')->render();
+
+    expect($rendered)->toContain('onboardingKey');
+    expect($rendered)->toContain('firstPairKey');
+    expect($rendered)->toContain('laveille_compare_onboarded_v1');
+    expect($rendered)->toContain('laveille_compare_first_pair_seen_v1');
+    expect($rendered)->toContain('markOnboarded');
+    expect($rendered)->toContain('dismissFirstPairPopover');
+});
+
+it('popover triggers when count reaches 2 and firstPairSeen false', function () {
+    $rendered = view('directory::components.compare-bar')->render();
+
+    expect($rendered)->toContain('this.ids.length === 2 && !this.firstPairSeen');
+    expect($rendered)->toContain('showFirstPairPopover = true');
+    expect($rendered)->toContain('2 outils sélectionnés');
+    expect($rendered)->toContain('Comparer maintenant');
+});
+
 // ─────────── Versioning SemVer ───────────
 
 it('lv_semver returns SemVer string from config', function () {

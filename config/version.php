@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.3.0 · 2026-05-08 · UX ultra-intuitive : bouton textuel "+ Ajouter au comparateur" + onboarding tooltip + popover 2e sélection
  *   1.2.1 · 2026-05-08 · Fix CSS compare-toggle invisible (relocation @once vers compare-bar inclus partout)
  *   1.2.0 · 2026-05-08 · Card overlay selection state + circle checkbox 32x32 + floating bar adaptative count>=1
  *   1.1.2 · 2026-05-08 · Fix duplication section Tendance vs Populaires (DRY) + badge vues intégré
@@ -27,18 +28,18 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 2,
-    'patch' => 1,
+    'minor' => 3,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'card-selection',
+    'codename' => 'intuitive-compare',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.2.1',
+    'semver' => '1.3.0',
 ];

@@ -895,15 +895,14 @@
                             </td>
                             <td style="padding:8px 12px;text-align:right;white-space:nowrap;">
                                 <button type="button"
-                                        class="lv-cmp-toggle-row"
+                                        class="lv-cmp-toggle lv-cmp-toggle--card"
                                         :class="{ 'is-active': $store.compare.has(tool.id) }"
                                         :data-cmp-card-id="tool.id"
                                         @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
                                         :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
-                                        :aria-label="$store.compare.has(tool.id) ? '{{ __('Retirer du comparateur') }}' : '{{ __('Ajouter au comparateur') }}'"
-                                        title="{{ __('Comparer cet outil') }}"
-                                        style="width:28px;height:28px;min-width:28px;border-radius:50%;border:2px solid var(--c-primary,#064E5A);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-right:6px;vertical-align:middle;transition:background 0.15s,transform 0.15s;font-weight:800;color:#fff;font-size:14px;line-height:1;padding:0;">
-                                    <span x-show="$store.compare.has(tool.id)" x-cloak aria-hidden="true">✓</span>
+                                        style="margin-right:6px;font-size:11px;padding:4px 10px;min-height:28px;">
+                                    <span x-show="!$store.compare.has(tool.id)">+ {{ __('Comparer') }}</span>
+                                    <span x-show="$store.compare.has(tool.id)" x-cloak>✓</span>
                                 </button>
                                 <a :href="tool.showUrl" style="display:inline-block;padding:4px 10px;background:#F3F4F6;color:var(--c-dark, #1A1D23);font-size:0.75rem;font-weight:600;border-radius:6px;text-decoration:none;margin-right:4px;">{{ __('Détails') }}</a>
                                 <template x-if="tool.url">
@@ -918,25 +917,22 @@
 
         {{-- Grid (Cards) --}}
         <div class="row row-flex" x-show="viewMode === 'cards'">
-            <template x-for="tool in visibleTools" :key="tool.id">
+            <template x-for="(tool, idx) in visibleTools" :key="tool.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
                     <article class="rt-card"
                              :class="{ 'is-down': tool.isLifecycleDown, 'is-selected': $store.compare.has(tool.id) }"
-                             :aria-label="tool.isLifecycleDown ? tool.name + ' — ' + tool.lifecycleBannerMsg : tool.name"
-                             :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
-                             @click="if (!$event.target.closest('a, button, input, select, textarea, [role=button]')) { $store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id); }"
-                             style="cursor: pointer;">
-                        {{-- S89.5 : circle checkbox 32x32 absolute coin haut-droit (M3 chip selectable) --}}
-                        <button type="button"
-                                class="lv-cmp-toggle lv-cmp-toggle--icon"
-                                :class="{ 'is-active': $store.compare.has(tool.id) }"
-                                :data-cmp-card-id="tool.id"
-                                @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
-                                :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
-                                :aria-label="$store.compare.has(tool.id) ? '{{ __('Retirer du comparateur') }}' : '{{ __('Ajouter au comparateur') }}'"
-                                title="{{ __('Comparer cet outil') }}">
-                            <span x-show="$store.compare.has(tool.id)" x-cloak aria-hidden="true" style="color:#fff;">✓</span>
-                        </button>
+                             :aria-label="tool.isLifecycleDown ? tool.name + ' — ' + tool.lifecycleBannerMsg : tool.name">
+                        {{-- S89 v1.3.0 : onboarding tooltip pulse 1ère card uniquement, 1ère visite --}}
+                        <template x-if="idx === 0 && !$store.compare.onboardingShown && !$store.compare.has(tool.id) && $store.compare.count === 0">
+                            <div class="lv-cmp-onboarding" role="status" aria-live="polite">
+                                💡 {{ __('Sélectionne 2 outils ou plus pour les comparer côte à côte') }}
+                                <div>
+                                    <button type="button" class="lv-cmp-onboarding-dismiss" @click.stop="$store.compare.markOnboarded()">
+                                        {{ __('Compris') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
                         <template x-if="tool.isLifecycleDown">
                             <div class="rt-card-down-banner" :class="{'is-scam': tool.lifecycleStatus === 'scam'}" role="status">
                                 <i :class="'fa ' + tool.lifecycleIconFa" aria-hidden="true"></i>
@@ -1010,6 +1006,17 @@
                             <a :href="tool.showUrl" class="rt-btn-details" :aria-label="'{{ __('Détails de') }} ' + tool.name">{{ __('Détails') }}</a>
                             <template x-if="tool.url"><a :href="tool.url" target="_blank" rel="noopener noreferrer nofollow" class="rt-btn-visit" style="margin-left: auto;">{{ __('Visiter') }} →</a></template>
                         </div>
+                        {{-- v1.3.0 Option C : bouton textuel explicite (pattern Capterra 9.8/10) --}}
+                        <button type="button"
+                                class="lv-cmp-toggle lv-cmp-toggle--card"
+                                :class="{ 'is-active': $store.compare.has(tool.id) }"
+                                :data-cmp-card-id="tool.id"
+                                @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
+                                :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
+                                style="width:100%;margin-top:10px;">
+                            <span x-show="!$store.compare.has(tool.id)">+ {{ __('Ajouter au comparateur') }}</span>
+                            <span x-show="$store.compare.has(tool.id)" x-cloak>✓ {{ __('Dans le comparateur') }}</span>
+                        </button>
                     </article>
                 </div>
             </template>

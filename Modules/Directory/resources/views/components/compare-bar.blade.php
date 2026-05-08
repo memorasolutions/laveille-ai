@@ -302,6 +302,171 @@
     }
     .rt-card:focus-within .lv-cmp-toggle--icon { box-shadow: 0 4px 12px rgba(6, 78, 90, 0.25); }
 
+    /* ─── Variant card : bouton textuel pleine largeur dans .rt-actions (Option C ultra-intuitive) ─── */
+    .lv-cmp-toggle--card {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 14px;
+        min-height: 36px;
+        border-radius: 8px;
+        border: 2px solid var(--c-primary, #064E5A);
+        background: #fff;
+        color: var(--c-primary, #064E5A);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 12px;
+        text-decoration: none !important;
+        transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+        white-space: nowrap;
+    }
+    .lv-cmp-toggle--card:hover {
+        background: rgba(6, 78, 90, 0.06);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(6, 78, 90, 0.12);
+    }
+    .lv-cmp-toggle--card:focus-visible {
+        outline: 3px solid var(--c-accent, #9A2A06);
+        outline-offset: 2px;
+    }
+    .lv-cmp-toggle--card.is-active {
+        background: var(--c-primary, #064E5A);
+        color: #fff;
+    }
+    .lv-cmp-toggle--card.is-active:hover {
+        background: #053f49;
+        color: #fff;
+    }
+
+    /* ─── Onboarding tooltip pulse 1ère visite ─── */
+    .lv-cmp-onboarding {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        background: var(--c-dark, #1a1d23);
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.45;
+        max-width: 280px;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+        z-index: 50;
+        animation: lvCmpPulse 2.4s ease-in-out infinite;
+    }
+    .lv-cmp-onboarding::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid var(--c-dark, #1a1d23);
+    }
+    .lv-cmp-onboarding-dismiss {
+        background: var(--c-accent, #9A2A06);
+        color: #fff;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 8px;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+    }
+    .lv-cmp-onboarding-dismiss:hover { background: #B65D04; }
+    @keyframes lvCmpPulse {
+        0%, 100% { transform: translate(-50%, -100%) scale(1); }
+        50% { transform: translate(-50%, -100%) scale(1.04); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .lv-cmp-onboarding { animation: none; }
+    }
+
+    /* ─── Popover 2e sélection ─── */
+    .lv-cmp-popover-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(26, 29, 35, 0.45);
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: lvCmpFadeIn 0.18s ease-out;
+    }
+    .lv-cmp-popover {
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px 24px 22px;
+        max-width: 420px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+        border-top: 5px solid var(--c-primary, #064E5A);
+    }
+    .lv-cmp-popover h3 {
+        margin: 0 0 8px;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--c-dark, #1a1d23);
+        font-family: var(--f-heading, sans-serif);
+    }
+    .lv-cmp-popover p {
+        margin: 0 0 18px;
+        color: var(--c-text-muted, #52586a);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    .lv-cmp-popover-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .lv-cmp-popover-cta {
+        background: var(--c-primary, #064E5A);
+        color: #fff !important;
+        text-decoration: none !important;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 14px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .lv-cmp-popover-cta:hover { opacity: 0.9; color: #fff; }
+    .lv-cmp-popover-secondary {
+        background: #F0F4F8;
+        color: var(--c-dark, #1a1d23);
+        border: none;
+        padding: 12px 22px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 14px;
+        min-height: 44px;
+        cursor: pointer;
+    }
+    @keyframes lvCmpFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .lv-cmp-popover-overlay { animation: none; }
+    }
+
     /* ─── Toggle compact dans table list view ─── */
     .lv-cmp-toggle-row {
         width: 28px;
@@ -339,8 +504,13 @@ document.addEventListener('alpine:init', () => {
         thumbs: {},
         max: 6,
         selectionMode: false,
+        showFirstPairPopover: false,
+        firstPairSeen: false,
+        onboardingShown: false,
         storageKey: 'laveille_compare_v1',
         modeKey: 'laveille_compare_mode_v1',
+        firstPairKey: 'laveille_compare_first_pair_seen_v1',
+        onboardingKey: 'laveille_compare_onboarded_v1',
 
         init() {
             try {
@@ -352,8 +522,21 @@ document.addEventListener('alpine:init', () => {
                     this.thumbs = (data.thumbs && typeof data.thumbs === 'object') ? data.thumbs : {};
                 }
                 this.selectionMode = localStorage.getItem(this.modeKey) === '1';
+                this.firstPairSeen = localStorage.getItem(this.firstPairKey) === '1';
+                this.onboardingShown = localStorage.getItem(this.onboardingKey) === '1';
                 this.applyMode();
             } catch (e) { this.ids = []; this.names = {}; this.thumbs = {}; }
+        },
+
+        markOnboarded() {
+            this.onboardingShown = true;
+            try { localStorage.setItem(this.onboardingKey, '1'); } catch (e) {}
+        },
+
+        dismissFirstPairPopover() {
+            this.showFirstPairPopover = false;
+            this.firstPairSeen = true;
+            try { localStorage.setItem(this.firstPairKey, '1'); } catch (e) {}
         },
 
         save() {
@@ -408,6 +591,14 @@ document.addEventListener('alpine:init', () => {
                 this.ids.push(intId);
                 if (name) this.names[intId] = String(name).slice(0, 80);
                 if (thumb) this.thumbs[intId] = String(thumb).slice(0, 500);
+                // Première fois qu'on atteint 2 sélections : popover progress feedback
+                if (this.ids.length === 2 && !this.firstPairSeen) {
+                    this.showFirstPairPopover = true;
+                    // Auto-dismiss après 7s
+                    setTimeout(() => { if (this.showFirstPairPopover) this.dismissFirstPairPopover(); }, 7000);
+                }
+                // Premier ajout : marquer onboarding done
+                if (!this.onboardingShown) this.markOnboarded();
             }
             this.save();
         },
@@ -505,3 +696,31 @@ document.addEventListener('alpine:init', () => {
         </div>
     </div>
 </div>
+
+{{-- Popover progress feedback : 1ère fois count atteint 2 --}}
+<template x-data x-if="$store.compare.showFirstPairPopover">
+    <div class="lv-cmp-popover-overlay"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="lvCmpPopoverTitle"
+         @click.self="$store.compare.dismissFirstPairPopover()"
+         @keydown.escape.window="$store.compare.dismissFirstPairPopover()">
+        <div class="lv-cmp-popover">
+            <div style="font-size: 2.6rem; line-height: 1; margin-bottom: 8px;" aria-hidden="true">🎉</div>
+            <h3 id="lvCmpPopoverTitle">{{ __('2 outils sélectionnés !') }}</h3>
+            <p>{{ __('Tu peux maintenant les comparer côte à côte. Ajoute jusqu\'à 6 outils ou compare directement.') }}</p>
+            <div class="lv-cmp-popover-actions">
+                <a :href="$store.compare.compareUrl"
+                   class="lv-cmp-popover-cta"
+                   @click="$store.compare.dismissFirstPairPopover()">
+                    📊 {{ __('Comparer maintenant') }}
+                </a>
+                <button type="button"
+                        class="lv-cmp-popover-secondary"
+                        @click="$store.compare.dismissFirstPairPopover()">
+                    {{ __('Continuer la sélection') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
