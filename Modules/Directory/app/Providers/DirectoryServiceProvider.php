@@ -100,8 +100,11 @@ class DirectoryServiceProvider extends ServiceProvider
             $schedule->command('tools:reenrich-stale --batch=2 --months=3')->monthlyOn(1, '06:00');
             $schedule->command('tools:refresh-pricing --batch=5')->quarterly();
             $schedule->command('tools:enrich-formations --batch=5')->weeklyOn(0, '07:00');
-            // S84 #29 — health-check hebdo annuaire (rapport email admin, pas auto-mark)
-            $schedule->command('directory:health-check-report')->weeklyOn(0, '04:00')->withoutOverlapping();
+            // S84 #29 + #37 — health-check hebdo annuaire (samedi 04h America/Toronto, pas auto-mark)
+            $schedule->command('directory:health-check-report')
+                ->weeklyOn(6, '04:00')
+                ->timezone('America/Toronto')
+                ->withoutOverlapping();
         });
     }
 
