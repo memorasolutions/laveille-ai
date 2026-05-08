@@ -64,11 +64,11 @@ return [
         'only_on_failure' => false,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => env('HEALTH_NOTIFY_EMAIL', env('SUPER_ADMIN_EMAIL', env('MAIL_FROM_ADDRESS', 'noreply@laveille.ai'))),
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-                'name' => env('MAIL_FROM_NAME', 'Example'),
+                'address' => env('MAIL_FROM_ADDRESS', 'noreply@laveille.ai'),
+                'name' => env('MAIL_FROM_NAME', config('app.name', 'La veille')),
             ],
         ],
 
