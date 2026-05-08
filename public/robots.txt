@@ -51,6 +51,7 @@ Disallow: /
 
 # Fichiers SEO
 Sitemap: https://laveille.ai/sitemap.xml
+Sitemap: https://laveille.ai/news-sitemap.xml
 
 # Fichiers GEO/AEO (instructions pour les LLMs)
 # llms.txt: https://laveille.ai/llms.txt

@@ -6,7 +6,11 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
 use Modules\News\Http\Controllers\AdminNewsController;
+use Modules\News\Http\Controllers\NewsSitemapController;
 use Modules\News\Http\Controllers\PublicNewsController;
+
+// ── Sitemap Google News dédié (R6 v1.6.0, best practice mai 2026) ──
+Route::get('/news-sitemap.xml', [NewsSitemapController::class, 'index'])->name('news.sitemap');
 
 // ── Routes publiques ──
 Route::middleware('web')->group(function () {

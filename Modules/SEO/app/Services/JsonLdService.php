@@ -142,31 +142,131 @@ final class JsonLdService
         return $schema;
     }
 
+    /**
+     * Schema.org NewsArticle enrichi v1.6.0 (S89 R1+R2+R3+R4) — best practices mai 2026
+     *  - articleBody, wordCount, keywords, inLanguage, articleSection, isAccessibleForFree (R1)
+     *  - isBasedOn vers source externe pour curation transparente (R2, anti scaled-content-abuse)
+     *  - author = [Person Stéphane Lapointe + Organization source] avec sameAs/knowsAbout (R3, EEAT 2026)
+     *  - speakable schema sur le bloc TL;DR (R4)
+     */
     public static function newsArticle(object $article): array
     {
-        return [
-            '@type' => 'NewsArticle',
-            'headline' => $article->seo_title ?? $article->title,
-            'description' => $article->meta_description ?? \Illuminate\Support\Str::limit($article->summary ?? '', 155),
-            'image' => $article->image_url ? url($article->image_url) : asset('images/og-image.png'),
-            'datePublished' => $article->pub_date?->toIso8601String(),
-            'dateModified' => $article->updated_at->toIso8601String(),
-            'author' => [
-                '@type' => 'Organization',
-                'name' => $article->source->name ?? config('app.name'),
-            ],
-            'publisher' => [
-                '@type' => 'Organization',
-                'name' => config('app.name'),
-                'logo' => [
-                    '@type' => 'ImageObject',
-                    'url' => asset('images/favicon.png'),
+        $headline = $article->seo_title ?? $article->title;
+        $description = $article->meta_description ?? \Illuminate\Support\Str::limit($article->summary ?? '', 155);
+        $body = trim(strip_tags((string) ($article->description ?? '')));
+        $wordCount = $body !== '' ? str_word_count($body) : null;
+
+        $keywords = collect([
+            $article->category_tag ?? null,
+            'intelligence artificielle',
+            'IA',
+            'Québec',
+            'francophone',
+            $article->source->name ?? null,
+        ])->filter()->unique()->values()->implode(', ');
+
+        $authors = [
+            [
+                '@type' => 'Person',
+                'name' => 'Stéphane Lapointe',
+                'url' => url('/auteur/stephane-lapointe'),
+                'sameAs' => [
+                    'https://www.linkedin.com/in/lapointestephane/',
+                    'https://www.facebook.com/LaVeilleDeStef',
+                ],
+                'knowsAbout' => [
+                    'Intelligence artificielle',
+                    'Veille technologique',
+                    'Éducation Québec',
+                    'IA générative',
                 ],
             ],
+        ];
+        if (! empty($article->source->name)) {
+            $authors[] = [
+                '@type' => 'Organization',
+                'name' => $article->source->name,
+            ];
+        }
+
+        $data = [
+            '@type' => 'NewsArticle',
+            'headline' => $headline,
+            'description' => $description,
+            'image' => $article->image_url ? url($article->image_url) : asset('images/og-image.png'),
+            'datePublished' => $article->pub_date?->toIso8601String(),
+            'dateModified' => $article->updated_at?->toIso8601String(),
+            'inLanguage' => 'fr-CA',
+            'isAccessibleForFree' => true,
+            'author' => $authors,
+            'publisher' => self::newsMediaOrganization(),
             'mainEntityOfPage' => [
                 '@type' => 'WebPage',
                 '@id' => route('news.show', $article),
             ],
+        ];
+
+        if ($article->category_tag ?? null) {
+            $data['articleSection'] = (string) $article->category_tag;
+        }
+
+        if ($wordCount && $wordCount > 0) {
+            $data['articleBody'] = mb_substr($body, 0, 5000);
+            $data['wordCount'] = $wordCount;
+        }
+
+        if ($keywords !== '') {
+            $data['keywords'] = $keywords;
+        }
+
+        // R2 — isBasedOn : déclarer la source originale externe pour curation transparente
+        $sourceUrl = $article->resolved_url ?: ($article->url ?? null);
+        if ($sourceUrl) {
+            $data['isBasedOn'] = [[
+                '@type' => 'NewsArticle',
+                'url' => $sourceUrl,
+                'headline' => $article->title ?? null,
+                'publisher' => [
+                    '@type' => 'NewsMediaOrganization',
+                    'name' => $article->source->name ?? null,
+                ],
+            ]];
+        }
+
+        // R4 — Speakable : indique aux assistants vocaux quoi lire
+        $data['speakable'] = [
+            '@type' => 'SpeakableSpecification',
+            'cssSelector' => ['.nw-tldr', '.nw-show-title', '.nw-lead'],
+        ];
+
+        return $data;
+    }
+
+    /**
+     * NewsMediaOrganization — éditeur principal (renforce signal éditorial 2026 Google News).
+     */
+    public static function newsMediaOrganization(): array
+    {
+        return [
+            '@type' => 'NewsMediaOrganization',
+            'name' => config('app.name'),
+            'url' => config('app.url'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => asset('images/favicon.png'),
+            ],
+            'sameAs' => [
+                'https://www.facebook.com/LaVeilleDeStef',
+                'https://www.linkedin.com/in/lapointestephane/',
+            ],
+            'foundingDate' => '2026',
+            'founder' => [
+                '@type' => 'Person',
+                'name' => 'Stéphane Lapointe',
+                'url' => 'https://www.linkedin.com/in/lapointestephane/',
+            ],
+            'inLanguage' => 'fr-CA',
+            'areaServed' => ['CA-QC', 'CA', 'FR'],
         ];
     }
 

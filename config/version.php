@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.6.0 · 2026-05-08 · News SEO/AEO/GEO 2026 R1-R7 — JsonLdService enrichi (NewsMediaOrganization + Person/Org author + isBasedOn + speakable + articleBody/wordCount/keywords/inLanguage/articleSection) + TL;DR aside Speakable + H2 PAA + AiSummary tldr/quote/key_stat/expert + news-sitemap.xml dédié 72h
  *   1.5.0 · 2026-05-08 · Pricing audit S89 — BrowserFetch UA Chrome+retry (#58) + PpSearch direct OpenRouter (#60) + screenshot config flag (#59)
  *   1.4.1 · 2026-05-08 · Fix #57 image cassée glossaire (helper dictionary_hero_image_url + fallback .webp/.png)
  *   1.4.0 · 2026-05-08 · Audit pricing multi-source consensus + Playwright screenshot + SLA tiered + page admin review
@@ -31,18 +32,18 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 5,
+    'minor' => 6,
     'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'audit-trail',
+    'codename' => 'news-aeo-geo',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.5.0',
+    'semver' => '1.6.0',
 ];

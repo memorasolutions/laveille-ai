@@ -72,8 +72,13 @@ RÈGLES DE FIDÉLITÉ (OBLIGATOIRES) :
   "score_justification": "[1 phrase expliquant la note, en français]",
   "category": "[IA générative|Cybersécurité|Cloud|Robotique|Données|Startup|Éducation tech|Infrastructure|Autre]",
   "impact": "[Élevé|Moyen|Faible]",
+  "tldr": "[Réponse directe answer-first 30-40 mots qui répond à la question principale du lecteur. Style : qui-quoi-quand-pourquoi factuel. Pas d'accroche marketing.]",
   "hook": "[2-3 phrases résumant fidèlement le contenu avec les faits clés, 40-60 mots. Doit refléter le sujet précis de l'article.]",
+  "quote": "[Citation verbatim 15-25 mots tirée TEL QUEL du texte source si présente, sinon null. Garder ponctuation et formulation originale.]",
   "key_points": ["[fait détaillé 1 avec chiffres exacts du texte, 15-25 mots]", "[fait détaillé 2, 15-25 mots]", "[fait détaillé 3, 15-25 mots]", "[fait détaillé 4, 15-25 mots]"],
+  "key_stat": "[Un seul chiffre/pourcentage/montant atomique majeur du texte, 5-15 mots avec son unité (ex: '40 milliards de dollars investis en 2026'). Null si aucune statistique notable.]",
+  "expert_name": "[Nom propre d'expert/dirigeant cité dans le texte, ou null]",
+  "expert_role": "[Rôle/titre de l'expert (ex: 'PDG d'OpenAI'), ou null si pas d'expert]",
   "why_important": "[3-4 phrases : impact concret sur les professionnels, ce que ça change, pourquoi c'est pertinent, 50-80 mots]",
   "audience": ["[développeurs|entreprises|éducation|grand public]"],
   "seo_title": "[titre reformulé SEO accrocheur en français, max 60 caractères]",
@@ -87,6 +92,10 @@ Règles STRICTES :
 - Les key_points doivent être des phrases complètes avec des faits précis du texte
 - Le hook doit refléter le sujet spécifique de l'article, pas être générique
 - Score 7+ = pertinent pour une plateforme de veille IA/tech
+- tldr (R4 AEO 2026) = paragraphe d'ouverture answer-first 30-40 mots, posé en réponse directe (qui-quoi-quand-pourquoi). Doit pouvoir être cité tel quel par un assistant IA (Perplexity, ChatGPT) sans dépendre du reste de l'article.
+- quote (R7 GEO 2026 — Princeton +115% citations LLM) = extraite VERBATIM du texte source si présente. JAMAIS reformuler. Si aucune citation directe dans le texte, retourner null.
+- key_stat (R7 GEO 2026) = un seul chiffre atomique majeur avec son contexte (ex: « 71% des PME québécoises adopteront l'IA d'ici 2027 »). Null si aucune stat notable.
+- expert_name/expert_role (R7 EEAT 2026) = expert nommément cité avec son rôle. Null si pas d'expert.
 - JSON valide uniquement, aucun texte avant ou après
 
 Titre : {$title}

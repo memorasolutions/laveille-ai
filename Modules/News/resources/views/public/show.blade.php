@@ -171,6 +171,30 @@
         border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.75rem;
     }
     .nw-summary-fallback p { margin: 0; color: #1a365d; line-height: 1.6; }
+    /* R4 — Bloc TL;DR Speakable (AEO 2026 : answer-first paragraph 30-40 mots) */
+    .nw-tldr {
+        background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
+        border-left: 4px solid var(--c-primary); border-radius: 8px;
+        padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .nw-tldr::before {
+        content: 'EN BREF'; position: absolute; top: -10px; left: 1rem;
+        background: var(--c-primary); color: #fff; font-size: 0.7rem;
+        font-weight: 700; letter-spacing: 0.05em; padding: 2px 8px;
+        border-radius: 4px;
+    }
+    .nw-tldr p { margin: 0; font-size: 1rem; line-height: 1.6; color: #134e4a; font-weight: 500; }
+    /* R10 — Citation source extracted (rendu si quote présent) */
+    .nw-quote {
+        border-left: 3px solid #94a3b8; background: #f8fafc;
+        padding: 0.875rem 1.25rem; margin: 1.25rem 0;
+        font-style: italic; color: #475569;
+    }
+    .nw-quote cite { display: block; margin-top: 0.5rem; font-size: 0.8125rem; color: #64748b; font-style: normal; }
+    .nw-stat { display: inline-block; background: var(--c-primary); color: #fff; padding: 0.125rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.875rem; }
+    .nw-expert { font-size: 0.875rem; color: #475569; margin: 0.5rem 0 0; }
+    .nw-expert strong { color: var(--c-dark); }
 </style>
 @endpush
 
@@ -218,15 +242,32 @@
                         <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif
 
+                    {{-- R4 — TL;DR aside Speakable (AEO 2026 : answer-first 30-40 mots) --}}
+                    @if($ss && !empty($ss['tldr']))
+                        <aside class="nw-tldr" aria-label="{{ __('Résumé en bref') }}">
+                            <p>@glossarize(e($ss['tldr']))</p>
+                        </aside>
+                    @endif
+
                     {{-- Lead : hook IA + auto-link glossaire 2026-05-05 #141 --}}
                     @if($ss && isset($ss['hook']))
                         <p class="nw-lead">@glossarize(e($ss['hook']))</p>
                     @endif
 
+                    {{-- R10 — Citation verbatim extraite de la source externe (R7 AiSummary) --}}
+                    @if($ss && !empty($ss['quote']))
+                        <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
+                            « @glossarize(e($ss['quote'])) »
+                            @if(!empty($article->source?->name))
+                                <cite>— {{ $article->source->name }}</cite>
+                            @endif
+                        </blockquote>
+                    @endif
+
                     {{-- Résumé structuré --}}
                     @if($ss)
                         @if(!empty($ss['key_points']))
-                        <h3 class="nw-section-heading">{{ __('Points clés') }}</h3>
+                        <h3 class="nw-section-heading">{{ __('Que faut-il retenir ?') }}</h3>
                         <ul class="nw-key-list">
                             @foreach($ss['key_points'] as $point)
                                 <li>@glossarize(e($point))</li>
@@ -235,8 +276,17 @@
                         @endif
 
                         @if(isset($ss['why_important']))
-                        <h3 class="nw-section-heading">{{ __('Pourquoi c\'est important') }}</h3>
-                        <div class="nw-why"><p>@glossarize(e($ss['why_important']))</p></div>
+                        <h3 class="nw-section-heading">{{ __('Pourquoi cette nouvelle compte-t-elle ?') }}</h3>
+                        <div class="nw-why">
+                            <p>@glossarize(e($ss['why_important']))</p>
+                            @if(!empty($ss['key_stat']))
+                                <p style="margin-top: 0.75rem; margin-bottom: 0;"><span class="nw-stat">{{ $ss['key_stat'] }}</span></p>
+                            @endif
+                        </div>
+                        @endif
+
+                        @if(!empty($ss['expert_name']))
+                            <p class="nw-expert">💬 <strong>{{ $ss['expert_name'] }}</strong>@if(!empty($ss['expert_role'])), {{ $ss['expert_role'] }}@endif</p>
                         @endif
 
                         @if(!empty($ss['audience']))
