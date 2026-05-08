@@ -348,7 +348,7 @@ document.addEventListener('alpine:init', () => {
 @endonce
 
 <div class="lv-compare-bar"
-     :class="{ 'is-open': $store.compare.count >= 2 }"
+     :class="{ 'is-open': $store.compare.count >= 1 }"
      x-data
      x-cloak
      role="region"
@@ -380,8 +380,13 @@ document.addEventListener('alpine:init', () => {
             <a :href="$store.compare.compareUrl"
                class="lv-compare-cta"
                :aria-disabled="$store.compare.canCompare ? 'false' : 'true'"
-               @click="if (!$store.compare.canCompare) { $event.preventDefault(); window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: '{{ __('Sélectionnez au moins 2 outils pour comparer.') }}', variant: 'info', duration: 3000 } })); }">
-                📊 {{ __('Comparer') }}
+               @click="if (!$store.compare.canCompare) { $event.preventDefault(); }">
+                <template x-if="$store.compare.canCompare">
+                    <span>📊 {{ __('Comparer') }} (<span x-text="$store.compare.count"></span>)</span>
+                </template>
+                <template x-if="!$store.compare.canCompare">
+                    <span>{{ __('Sélectionnez au moins 2 outils') }}</span>
+                </template>
             </a>
         </div>
     </div>

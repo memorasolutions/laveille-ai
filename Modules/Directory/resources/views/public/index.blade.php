@@ -895,15 +895,15 @@
                             </td>
                             <td style="padding:8px 12px;text-align:right;white-space:nowrap;">
                                 <button type="button"
-                                        class="lv-cmp-toggle lv-cmp-toggle--icon"
-                                        style="margin-right:4px;vertical-align:middle;"
+                                        class="lv-cmp-toggle-row"
                                         :class="{ 'is-active': $store.compare.has(tool.id) }"
                                         :data-cmp-card-id="tool.id"
                                         @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
                                         :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
                                         :aria-label="$store.compare.has(tool.id) ? '{{ __('Retirer du comparateur') }}' : '{{ __('Ajouter au comparateur') }}'"
-                                        title="{{ __('Comparer cet outil') }}">
-                                    <span x-text="$store.compare.has(tool.id) ? '☑' : '☐'" aria-hidden="true"></span>
+                                        title="{{ __('Comparer cet outil') }}"
+                                        style="width:28px;height:28px;min-width:28px;border-radius:50%;border:2px solid var(--c-primary,#064E5A);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-right:6px;vertical-align:middle;transition:background 0.15s,transform 0.15s;font-weight:800;color:#fff;font-size:14px;line-height:1;padding:0;">
+                                    <span x-show="$store.compare.has(tool.id)" x-cloak aria-hidden="true">✓</span>
                                 </button>
                                 <a :href="tool.showUrl" style="display:inline-block;padding:4px 10px;background:#F3F4F6;color:var(--c-dark, #1A1D23);font-size:0.75rem;font-weight:600;border-radius:6px;text-decoration:none;margin-right:4px;">{{ __('Détails') }}</a>
                                 <template x-if="tool.url">
@@ -920,7 +920,23 @@
         <div class="row row-flex" x-show="viewMode === 'cards'">
             <template x-for="tool in visibleTools" :key="tool.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
-                    <article class="rt-card" :class="{'is-down': tool.isLifecycleDown}" :aria-label="tool.isLifecycleDown ? tool.name + ' — ' + tool.lifecycleBannerMsg : tool.name">
+                    <article class="rt-card"
+                             :class="{ 'is-down': tool.isLifecycleDown, 'is-selected': $store.compare.has(tool.id) }"
+                             :aria-label="tool.isLifecycleDown ? tool.name + ' — ' + tool.lifecycleBannerMsg : tool.name"
+                             :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
+                             @click="if (!$event.target.closest('a, button, input, select, textarea, [role=button]')) { $store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id); }"
+                             style="cursor: pointer;">
+                        {{-- S89.5 : circle checkbox 32x32 absolute coin haut-droit (M3 chip selectable) --}}
+                        <button type="button"
+                                class="lv-cmp-toggle lv-cmp-toggle--icon"
+                                :class="{ 'is-active': $store.compare.has(tool.id) }"
+                                :data-cmp-card-id="tool.id"
+                                @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
+                                :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
+                                :aria-label="$store.compare.has(tool.id) ? '{{ __('Retirer du comparateur') }}' : '{{ __('Ajouter au comparateur') }}'"
+                                title="{{ __('Comparer cet outil') }}">
+                            <span x-show="$store.compare.has(tool.id)" x-cloak aria-hidden="true" style="color:#fff;">✓</span>
+                        </button>
                         <template x-if="tool.isLifecycleDown">
                             <div class="rt-card-down-banner" :class="{'is-scam': tool.lifecycleStatus === 'scam'}" role="status">
                                 <i :class="'fa ' + tool.lifecycleIconFa" aria-hidden="true"></i>
@@ -992,16 +1008,6 @@
                         <div class="rt-actions">
                             <template x-if="tool.avgRating > 0"><span class="rt-stars">★ <span x-text="tool.avgRating"></span></span></template>
                             <a :href="tool.showUrl" class="rt-btn-details" :aria-label="'{{ __('Détails de') }} ' + tool.name">{{ __('Détails') }}</a>
-                            <button type="button"
-                                    class="lv-cmp-toggle lv-cmp-toggle--icon"
-                                    :class="{ 'is-active': $store.compare.has(tool.id) }"
-                                    :data-cmp-card-id="tool.id"
-                                    @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
-                                    :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
-                                    :aria-label="$store.compare.has(tool.id) ? '{{ __('Retirer du comparateur') }}' : '{{ __('Ajouter au comparateur') }}'"
-                                    title="{{ __('Comparer cet outil') }}">
-                                <span x-text="$store.compare.has(tool.id) ? '☑' : '☐'" aria-hidden="true"></span>
-                            </button>
                             <template x-if="tool.url"><a :href="tool.url" target="_blank" rel="noopener noreferrer nofollow" class="rt-btn-visit" style="margin-left: auto;">{{ __('Visiter') }} →</a></template>
                         </div>
                     </article>

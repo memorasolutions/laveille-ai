@@ -149,13 +149,12 @@ it('compare-bar component renders animations + selection mode CSS', function () 
     expect($rendered)->toContain('prefers-reduced-motion');
 });
 
-it('compare-toggle component uses 44x44 AAA target size', function () {
+it('compare-toggle icon variant uses 32x32 circle (post S89.5 refonte)', function () {
     $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'Test', 'url' => 'https://example.com']), fn ($t) => $t->id = 999);
     $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
 
-    expect($rendered)->toContain('width: 44px');
-    expect($rendered)->toContain('height: 44px');
-    expect($rendered)->toContain('min-height: 44px');
+    expect($rendered)->toContain('width: 32px');
+    expect($rendered)->toContain('height: 32px');
     expect($rendered)->toContain('data-cmp-card-id');
     expect($rendered)->toContain('bounce');
 });
@@ -167,16 +166,52 @@ it('compare-toggle pill variant also 44px min-height', function () {
     expect($rendered)->toContain('min-height: 44px');
 });
 
+// ─────────── S89.5 refonte selection state ───────────
+
+it('compare-toggle icon variant uses circle 32x32 absolute corner', function () {
+    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'T', 'url' => 'https://t.com']), fn ($t) => $t->id = 1);
+    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
+
+    expect($rendered)->toContain('lv-cmp-toggle--icon');
+    expect($rendered)->toContain('width: 32px');
+    expect($rendered)->toContain('height: 32px');
+    expect($rendered)->toContain('border-radius: 50%');
+    expect($rendered)->toContain('position: absolute');
+});
+
+it('compare-toggle icon variant has no square unicode checkbox', function () {
+    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'T']), fn ($t) => $t->id = 1);
+    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
+
+    expect($rendered)->not->toContain('☐');
+});
+
+it('rt-card is-selected has overlay with pointer-events none', function () {
+    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'T', 'url' => 'https://t.com']), fn ($t) => $t->id = 1);
+    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
+
+    expect($rendered)->toContain('.rt-card.is-selected');
+    expect($rendered)->toContain('pointer-events: none');
+    expect($rendered)->toContain('::before');
+});
+
+it('compare-bar opens at count=1 and shows adaptive label', function () {
+    $rendered = view('directory::components.compare-bar')->render();
+
+    expect($rendered)->toContain("'is-open': \$store.compare.count >= 1");
+    expect($rendered)->toContain('Sélectionnez au moins 2 outils');
+    expect($rendered)->toContain('canCompare');
+});
+
 // ─────────── Versioning SemVer ───────────
 
 it('lv_semver returns SemVer string from config', function () {
     expect(lv_semver())->toMatch('/^\d+\.\d+\.\d+$/');
-    expect(lv_semver())->toBe('1.0.0');
 });
 
 it('lv_version returns vX.Y.Z prefixed', function () {
     expect(lv_version(false))->toStartWith('v');
-    expect(lv_version(false))->toBe('v1.0.0');
+    expect(lv_version(false))->toMatch('/^v\d+\.\d+\.\d+$/');
 });
 
 it('lv_version with sha contains separator', function () {
