@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         // require_once est idempotent + opcache → coût nul après 1er hit.
         foreach ([
             base_path('app/Helpers/version.php'),
+            base_path('app/Helpers/dictionary.php'),
         ] as $helper) {
             if (is_file($helper)) {
                 require_once $helper;

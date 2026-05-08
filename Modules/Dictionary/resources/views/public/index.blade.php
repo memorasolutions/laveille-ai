@@ -39,8 +39,8 @@
             'categorySlug' => $term->category ? \Illuminate\Support\Str::slug($term->category->name) : '',
             'firstLetter' => strtoupper(\Illuminate\Support\Str::substr($term->name, 0, 1)),
             'url' => route('dictionary.show', $term->slug),
-            'heroImage' => $term->hero_image ? asset(str_replace('.png', '.webp', $term->hero_image)) : null,
-            'heroImageFallback' => $term->hero_image ? asset(str_replace('.png', '.webp', $term->hero_image)) : null,
+            'heroImage' => dictionary_hero_image_url($term->hero_image, false),
+            'heroImageWebp' => dictionary_hero_image_webp_url($term->hero_image),
         ];
     })->values();
 
@@ -518,8 +518,8 @@
                         <template x-if="term.heroImage">
                             <a :href="term.url" style="display: block; margin: -16px -18px 12px; overflow: hidden; border-radius: 8px 8px 0 0;">
                                 <picture>
-                                    <source :srcset="term.heroImage" type="image/webp">
-                                    <img :src="term.heroImageFallback" :alt="term.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
+                                    <source :srcset="term.heroImageWebp" type="image/webp">
+                                    <img :src="term.heroImage" :alt="term.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;">
                                 </picture>
                             </a>
                         </template>

@@ -230,17 +230,23 @@
                 <article class="gl-main-card">
 
                     {{-- Hero image --}}
-                    @if($term->hero_image)
+                    @php
+                        $_heroWebp = dictionary_hero_image_url($term->hero_image, true);
+                        $_heroFallback = dictionary_hero_image_url($term->hero_image, false);
+                    @endphp
+                    @if($_heroFallback)
                         <div class="gl-hero-image">
                             <picture>
-                                <source srcset="{{ asset(str_replace('.png', '.webp', $term->hero_image)) }}" type="image/webp">
-                                <img src="{{ asset(str_replace('.png', '.webp', $term->hero_image)) }}" alt="{{ $term->name }}" loading="lazy">
+                                @if($_heroWebp && str_ends_with($_heroWebp, '.webp'))
+                                    <source srcset="{{ $_heroWebp }}" type="image/webp">
+                                @endif
+                                <img src="{{ $_heroFallback }}" alt="{{ $term->name }}" loading="lazy">
                             </picture>
                         </div>
                     @endif
 
-                    {{-- Icon (only if no hero image) --}}
-                    @if($term->icon && !$term->hero_image)
+                    {{-- Icon (only if no hero image rendered) --}}
+                    @if($term->icon && !$_heroFallback)
                         <div class="gl-term-icon">{{ $term->icon }}</div>
                     @endif
 

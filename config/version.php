@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.4.1 · 2026-05-08 · Fix #57 image cassée glossaire (helper dictionary_hero_image_url + fallback .webp/.png)
  *   1.4.0 · 2026-05-08 · Audit pricing multi-source consensus + Playwright screenshot + SLA tiered + page admin review
  *   1.3.0 · 2026-05-08 · UX ultra-intuitive : bouton textuel "+ Ajouter au comparateur" + onboarding tooltip + popover 2e sélection
  *   1.2.1 · 2026-05-08 · Fix CSS compare-toggle invisible (relocation @once vers compare-bar inclus partout)
@@ -30,7 +31,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 4,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -42,5 +43,5 @@ return [
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.4.0',
+    'semver' => '1.4.1',
 ];
