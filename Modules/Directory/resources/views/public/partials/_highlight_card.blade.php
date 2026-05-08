@@ -29,6 +29,13 @@
     </div>
     <div class="rt-hl-body">
         <div class="rt-hl-name">{{ $tool->name }}</div>
-        <span class="rt-badge badge-{{ $tool->pricing }}">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <span class="rt-badge badge-{{ $tool->pricing }}">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
+            @if(($tool->clicks_count ?? 0) > 0)
+                <span style="display:inline-flex;align-items:center;gap:3px;color:var(--c-text-muted, #52586a);font-size:11px;font-weight:600;" title="{{ number_format($tool->clicks_count, 0, ',', ' ') }} {{ __('vues') }}">
+                    👁 {{ number_format($tool->clicks_count, 0, ',', ' ') }}
+                </span>
+            @endif
+        </div>
     </div>
 </a>
