@@ -115,14 +115,29 @@ class PublicDirectoryController extends Controller
         return view('directory::public.tarifs-education', compact('tools', 'audience'));
     }
 
-    public function compare(string $categorySlug): View
+    public function compare(\Illuminate\Http\Request $request, ?string $categorySlug = null): \Illuminate\Contracts\Support\Renderable
     {
-        $category = Category::where('slug->fr_CA', $categorySlug)->firstOrFail();
-        $tools = $category->tools()->published()->with('categories')->orderByDesc('clicks_count')->get();
+        $service = app(\Modules\Directory\Services\ToolComparisonService::class);
+        $rawIds = $request->query('ids', '');
+        $ids = $service->validateIds(is_array($rawIds) ? $rawIds : (string) $rawIds);
+
+        $category = null;
         $allCategories = Category::orderBy('sort_order')->has('tools')->get();
+
+        if (empty($ids) && $categorySlug) {
+            $category = Category::where('slug->fr_CA', $categorySlug)->firstOrFail();
+            $ids = $category->tools()->published()
+                ->orderByDesc('clicks_count')
+                ->limit(\Modules\Directory\Services\ToolComparisonService::MAX_TOOLS)
+                ->pluck('directory_tools.id')
+                ->all();
+        }
+
+        $tools = $service->loadTools($ids);
+        $criteria = $service->getCriteriaSchema();
         $pricingLabels = \Modules\Directory\Support\PricingCategories::labels();
 
-        return view('directory::public.compare', compact('category', 'tools', 'allCategories', 'pricingLabels'));
+        return view('directory::public.compare', compact('tools', 'category', 'allCategories', 'pricingLabels', 'criteria', 'service'));
     }
 
     public function show(string $slug): View

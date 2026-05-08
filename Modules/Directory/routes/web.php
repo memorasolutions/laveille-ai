@@ -18,6 +18,7 @@ Route::middleware('web')->group(function () {
     Route::get('/annuaire', [PublicDirectoryController::class, 'index'])->name('directory.index');
     Route::get('/tarifs-education', [PublicDirectoryController::class, 'educationPricing'])->name('directory.education-pricing');
     Route::get('/annuaire/classement', [LeaderboardController::class, 'index'])->name('directory.leaderboard');
+    Route::get('/annuaire/comparer', [PublicDirectoryController::class, 'compare'])->name('directory.compare-by-ids');
     Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare');
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap');
     Route::get('/membre/{id}', [ProfileController::class, 'show'])->name('directory.profile');

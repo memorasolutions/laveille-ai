@@ -1,111 +1,257 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
 @extends(fronttheme_layout())
 
-@section('title', 'Comparatif : ' . $category->name . ' - ' . config('app.name'))
-@section('meta_description', 'Comparez les meilleurs outils ' . $category->name . '. Tarifs, fonctionnalites et avis.')
+@php
+    $count = $tools->count();
+    $title = $count >= 2
+        ? __('Comparatif :').' '.$tools->pluck('name')->implode(' · ')
+        : ($category ? __('Comparatif :').' '.$category->name : __('Comparateur d\'outils IA'));
+@endphp
+
+@section('title', $title.' - '.config('app.name'))
+@section('meta_description', __('Comparez les outils IA côte-à-côte selon leur tarification, capacités, intégrations et confidentialité.'))
+@section('meta_robots', $count >= 2 ? 'index, follow' : 'noindex, follow')
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Comparatif : ' . $category->name])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Comparateur')])
 @endsection
 
 @push('styles')
 <style>
-    .cmp-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .cmp-table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border-radius: var(--r-base); box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 30px; }
-    .cmp-table th, .cmp-table td { padding: 12px 15px; vertical-align: middle; border-top: 1px solid #eee; text-align: left; }
-    .cmp-table thead th { font-weight: 700; background: #f8f9fa; border-top: none; border-bottom: 2px solid #e5e7eb; color: var(--c-dark); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .cmp-table tbody tr:hover { background: #f0f9fa; }
-    .cmp-table .tool-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
-    .cmp-table .tool-thumb { width: 80px; height: 50px; object-fit: cover; border-radius: 6px; }
-    .cmp-table .tool-name { font-weight: 700; color: var(--c-dark); text-decoration: none; font-size: 13px; }
-    .cmp-table .tool-name:hover { color: var(--c-primary); }
-    .cmp-table .tool-desc { color: #6b7280; font-size: 13px; line-height: 1.4; }
-    .cmp-table td:nth-child(2) { min-width: 120px; }
-    .cmp-btn { background: var(--c-primary); color: #fff !important; border: none; padding: 6px 14px; border-radius: var(--r-btn); font-size: 12px; font-weight: 600; text-decoration: none !important; transition: opacity 0.2s; white-space: nowrap; display: inline-block; }
-    .cmp-btn:hover { opacity: 0.85; color: #fff; }
-    .cmp-table td:last-child, .cmp-table th:last-child { min-width: 80px; text-align: center; }
+    .lv-cmp-page { padding: 30px 0 60px; }
+    .lv-cmp-back { display: inline-flex; align-items: center; gap: 6px; color: var(--c-primary, #064E5A); font-weight: 600; font-size: 14px; text-decoration: none !important; margin-bottom: 18px; }
+    .lv-cmp-back:hover { color: var(--c-dark, #1a1d23); }
+    .lv-cmp-header { margin-bottom: 24px; }
+    .lv-cmp-header h1 { font-family: var(--f-heading); font-weight: 800; color: var(--c-dark, #1a1d23); margin: 0 0 6px; font-size: 1.85rem; letter-spacing: -0.5px; }
+    .lv-cmp-header p { color: var(--c-text-muted, #52586a); margin: 0 0 14px; font-size: 1rem; }
+    .lv-cmp-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 28px; }
+    .lv-cmp-permalink-btn {
+        background: #F0F4F8; color: var(--c-dark, #1a1d23); border: 1px solid var(--c-border, #E5E7EB);
+        padding: 8px 16px; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; min-height: 40px;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .lv-cmp-permalink-btn:hover { background: #E5E7EB; }
+    .lv-cmp-permalink-btn:focus-visible { outline: 2px solid var(--c-primary, #064E5A); outline-offset: 2px; }
 
+    .lv-cmp-empty { background: #fff; border: 2px dashed var(--c-border, #E5E7EB); border-radius: 16px; padding: 50px 30px; text-align: center; }
+    .lv-cmp-empty .icon { font-size: 3rem; margin-bottom: 14px; }
+    .lv-cmp-empty h2 { color: var(--c-dark, #1a1d23); font-size: 1.4rem; margin: 0 0 10px; }
+    .lv-cmp-empty p { color: var(--c-text-muted, #52586a); margin: 0 0 22px; }
+    .lv-cmp-empty .btn { background: var(--c-primary, #064E5A); color: #fff; padding: 12px 24px; border-radius: 50px; text-decoration: none !important; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
+    .lv-cmp-empty .btn:hover { opacity: 0.9; }
 
-    .cmp-header { margin-bottom: 24px; }
-    .cmp-header h1 { font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0 0 6px; font-size: 1.8rem; }
-    .cmp-header p { color: #6b7280; margin: 0; }
+    .lv-cmp-tools-header { display: grid; gap: 16px; margin-bottom: 26px; }
+    .lv-cmp-tool-cell { background: #fff; border-radius: 14px; padding: 16px; border-top: 4px solid var(--c-primary, #064E5A); box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center; position: relative; }
+    .lv-cmp-tool-cell .remove-btn { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--c-text-muted, #52586a); font-size: 20px; cursor: pointer; line-height: 1; min-width: 28px; min-height: 28px; border-radius: 50%; }
+    .lv-cmp-tool-cell .remove-btn:hover { color: var(--c-accent, #9A2A06); background: #F0F4F8; }
+    .lv-cmp-tool-cell .remove-btn:focus-visible { outline: 2px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+    .lv-cmp-tool-cell img.thumb { width: 100%; max-width: 220px; height: 110px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+    .lv-cmp-tool-cell .tool-name { font-weight: 800; color: var(--c-dark, #1a1d23); font-size: 1.1rem; text-decoration: none !important; display: block; margin-bottom: 8px; }
+    .lv-cmp-tool-cell .tool-name:hover { color: var(--c-primary, #064E5A); }
+    .lv-cmp-tool-cell .visit-link { display: inline-block; background: var(--c-primary, #064E5A); color: #fff; padding: 8px 18px; border-radius: 50px; text-decoration: none !important; font-weight: 700; font-size: 13px; min-height: 38px; }
+    .lv-cmp-tool-cell .visit-link:hover { opacity: 0.9; color: #fff; }
 
-    .cmp-back { display: inline-flex; align-items: center; gap: 6px; color: var(--c-primary); font-weight: 600; font-size: 14px; text-decoration: none !important; margin-bottom: 20px; }
-    .cmp-back:hover { color: var(--c-dark); }
+    .lv-cmp-section { background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 18px; overflow: hidden; }
+    .lv-cmp-section-head { background: linear-gradient(135deg, #F0F4F8 0%, #E5E7EB 100%); padding: 14px 20px; font-weight: 800; color: var(--c-dark, #1a1d23); font-size: 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--c-border, #E5E7EB); }
+    .lv-cmp-section-head .icon { font-size: 1.2rem; }
+    .lv-cmp-table { width: 100%; border-collapse: collapse; }
+    .lv-cmp-table th, .lv-cmp-table td { padding: 12px 16px; vertical-align: top; text-align: left; border-bottom: 1px solid #F3F4F6; }
+    .lv-cmp-table tbody tr:last-child th, .lv-cmp-table tbody tr:last-child td { border-bottom: none; }
+    .lv-cmp-table th.criterion {
+        font-weight: 600; color: var(--c-text-muted, #52586a); font-size: 0.9rem;
+        white-space: normal; min-width: 180px; max-width: 240px;
+        background: #FAFBFC; border-right: 1px solid #F3F4F6;
+    }
+    .lv-cmp-table td.value { font-weight: 600; color: var(--c-dark, #1a1d23); font-size: 0.95rem; line-height: 1.5; }
+    .lv-cmp-table td.value.neutral { color: var(--c-dark, #1a1d23); }
+    .lv-cmp-table td.value.same { color: var(--c-text-muted, #52586a); }
+    .lv-cmp-table td.value.best {
+        background: rgba(6, 78, 90, 0.06);
+        color: #064E5A;
+        position: relative;
+        font-weight: 700;
+    }
+    .lv-cmp-table td.value.best::before {
+        content: '✓';
+        display: inline-block;
+        margin-right: 6px;
+        color: #064E5A;
+        font-weight: 900;
+    }
+    .lv-cmp-table td.value.worst {
+        background: rgba(154, 42, 6, 0.04);
+        color: #9A2A06;
+    }
+
+    .lv-cmp-mobile { display: none; }
 
     @media (max-width: 768px) {
-        .cmp-table td:nth-child(4), .cmp-table th:nth-child(4),
-        .cmp-table td:nth-child(5), .cmp-table th:nth-child(5) { display: none; }
-        .cmp-table .tool-thumb { width: 40px; height: 28px; margin-right: 6px; }
-        .cmp-table th, .cmp-table td { padding: 10px 8px; }
+        .lv-cmp-tools-header { grid-template-columns: 1fr 1fr !important; }
+        .lv-cmp-desktop { display: none; }
+        .lv-cmp-mobile { display: block; }
+        .lv-cmp-section-head { font-size: 0.95rem; padding: 12px 16px; }
+
+        .lv-cmp-mobile-card { padding: 14px 16px; border-bottom: 1px solid #F3F4F6; }
+        .lv-cmp-mobile-card:last-child { border-bottom: none; }
+        .lv-cmp-mobile-card .crit-label { color: var(--c-text-muted, #52586a); font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; }
+        .lv-cmp-mobile-card .tool-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-radius: 6px; }
+        .lv-cmp-mobile-card .tool-row.best { background: rgba(6, 78, 90, 0.06); padding: 8px 10px; color: #064E5A; font-weight: 700; }
+        .lv-cmp-mobile-card .tool-row.worst { background: rgba(154, 42, 6, 0.04); padding: 8px 10px; color: #9A2A06; }
+        .lv-cmp-mobile-card .tool-row .name { font-size: 0.85rem; font-weight: 700; flex: 0 0 auto; }
+        .lv-cmp-mobile-card .tool-row .val { font-size: 0.9rem; text-align: right; flex: 1 1 auto; min-width: 0; word-break: break-word; }
+    }
+
+    @media (max-width: 480px) {
+        .lv-cmp-tools-header { grid-template-columns: 1fr !important; }
+        .lv-cmp-tool-cell img.thumb { max-width: 180px; height: 90px; }
     }
 </style>
 @endpush
 
 @section('content')
-<div class="container" style="padding-top: 30px; padding-bottom: 40px;">
+<div class="container lv-cmp-page">
+    <a href="{{ route('directory.index') }}" class="lv-cmp-back">← {{ __('Retour au répertoire') }}</a>
 
-    <a href="{{ route('directory.index') }}" class="cmp-back"><i class="ti-arrow-left"></i> {{ __('Retour au repertoire') }}</a>
-
-    <div class="cmp-header">
-        <h1>{{ $category->icon ?? '' }} Comparatif : {{ $category->name }}</h1>
-        <p>{{ $tools->count() }} {{ __('outils compares') }}</p>
+    <div class="lv-cmp-header">
+        <h1>📊 {{ __('Comparateur d\'outils IA') }}</h1>
+        <p>
+            @if($count >= 2)
+                {{ trans_choice(':count outils côte-à-côte selon leur tarification, capacités IA, intégrations et confidentialité.|:count outils côte-à-côte selon leur tarification, capacités IA, intégrations et confidentialité.', $count, ['count' => $count]) }}
+            @elseif($count === 1)
+                {{ __('Sélectionnez au moins un autre outil pour démarrer la comparaison.') }}
+            @else
+                {{ __('Sélectionnez 2 à 4 outils dans le répertoire pour les comparer côte-à-côte.') }}
+            @endif
+        </p>
     </div>
+
+    @if($count === 0)
+        <div class="lv-cmp-empty">
+            <div class="icon" aria-hidden="true">🔍</div>
+            <h2>{{ __('Aucun outil sélectionné') }}</h2>
+            <p>{{ __('Parcourez l\'annuaire et cliquez sur ☐ pour ajouter un outil au comparateur.') }}</p>
+            <a href="{{ route('directory.index') }}" class="btn">{{ __('Parcourir l\'annuaire') }}</a>
+        </div>
+    @elseif($count === 1)
+        <div class="lv-cmp-empty">
+            <div class="icon" aria-hidden="true">➕</div>
+            <h2>{{ __('1 outil sélectionné — il en faut au moins 2') }}</h2>
+            <p>{{ __('Retournez à l\'annuaire et cochez au moins 1 outil supplémentaire.') }}</p>
+            <a href="{{ route('directory.index') }}" class="btn">{{ __('Continuer la sélection') }}</a>
+        </div>
+    @else
+    <div class="lv-cmp-toolbar"
+         x-data="{ copied: false, copyLink() { navigator.clipboard.writeText(window.location.href).then(() => { this.copied = true; setTimeout(() => this.copied = false, 2000); }); } }">
+        <button type="button" class="lv-cmp-permalink-btn" @click="copyLink()">
+            <span x-show="!copied">🔗 {{ __('Copier le lien partage') }}</span>
+            <span x-show="copied" x-cloak>✅ {{ __('Lien copié !') }}</span>
+        </button>
+        <button type="button" class="lv-cmp-permalink-btn" x-data @click="$store.compare.clear(); window.location.href = '{{ route('directory.index') }}';">
+            {{ __('🗑️ Vider la sélection') }}
+        </button>
+    </div>
+
+    {{-- Header outils (côte-à-côte) --}}
+    <div class="lv-cmp-tools-header" style="grid-template-columns: repeat({{ $count }}, 1fr);">
+        @foreach($tools as $tool)
+        <div class="lv-cmp-tool-cell" x-data>
+            <button type="button" class="remove-btn"
+                    @click="$store.compare.remove({{ (int) $tool->id }}); window.location.href = '{{ route('directory.compare-by-ids') }}?ids=' + $store.compare.ids.join(',');"
+                    aria-label="{{ __('Retirer') }} {{ $tool->name }}">×</button>
+            @php
+                $thumbSrc = $tool->screenshot
+                    ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
+                    : null;
+            @endphp
+            @if($thumbSrc)
+                <img src="{{ $thumbSrc }}" alt="" class="thumb" loading="lazy"
+                     onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
+            @endif
+            <a href="{{ route('directory.show', $tool->slug) }}" class="tool-name">{{ $tool->name }}</a>
+            @if($tool->url)
+                <a href="{{ $tool->url }}" target="_blank" rel="noopener noreferrer nofollow" class="visit-link">{{ __('Visiter') }} ↗</a>
+            @endif
+        </div>
+        @endforeach
+    </div>
+
+    {{-- Sections critères --}}
+    @foreach($criteria as $sectionKey => $section)
+        @php
+            $hasAnyValue = false;
+            foreach ($section['criteria'] as $critKey => $crit) {
+                foreach ($tools as $t) {
+                    $v = $service->getValue($t, $crit['accessor']);
+                    if ($v !== null && $v !== '' && $v !== []) { $hasAnyValue = true; break 2; }
+                }
+            }
+        @endphp
+        @if($hasAnyValue)
+        <section class="lv-cmp-section" aria-labelledby="cmp-section-{{ $sectionKey }}">
+            <div class="lv-cmp-section-head" id="cmp-section-{{ $sectionKey }}">
+                <span class="icon" aria-hidden="true">{{ $section['icon'] }}</span>
+                <span>{{ $section['label'] }}</span>
+            </div>
+
+            {{-- Desktop : table --}}
+            <div class="lv-cmp-desktop">
+                <table class="lv-cmp-table">
+                    <tbody>
+                        @foreach($section['criteria'] as $critKey => $crit)
+                            @php $diff = $service->computeDiff($tools, $crit); @endphp
+                            <tr>
+                                <th scope="row" class="criterion">{{ $crit['label'] }}</th>
+                                @foreach($tools as $tool)
+                                    @php
+                                        $raw = $service->getValue($tool, $crit['accessor']);
+                                        $formatted = $service->formatValue($raw, $crit['type']);
+                                        $cls = $diff[$tool->id] ?? 'neutral';
+                                    @endphp
+                                    <td class="value {{ $cls }}">{{ $formatted }}</td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Mobile : cards par critère --}}
+            <div class="lv-cmp-mobile">
+                @foreach($section['criteria'] as $critKey => $crit)
+                    @php $diff = $service->computeDiff($tools, $crit); @endphp
+                    <div class="lv-cmp-mobile-card">
+                        <div class="crit-label">{{ $crit['label'] }}</div>
+                        @foreach($tools as $tool)
+                            @php
+                                $raw = $service->getValue($tool, $crit['accessor']);
+                                $formatted = $service->formatValue($raw, $crit['type']);
+                                $cls = $diff[$tool->id] ?? 'neutral';
+                            @endphp
+                            <div class="tool-row {{ $cls }}">
+                                <span class="name">{{ $tool->name }}</span>
+                                <span class="val">{{ $formatted }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
+        </section>
+        @endif
+    @endforeach
+    @endif
+
+    @if($category && $count >= 2)
+        <p style="margin-top: 24px; color: var(--c-text-muted, #52586a); font-size: 0.9rem;">
+            {{ __('Pré-sélection automatique des :n outils les plus populaires de la catégorie « :cat »', ['n' => $count, 'cat' => $category->name]) }}
+        </p>
+    @endif
 
     @include('directory::public.partials._category_slider', [
         'categories' => $allCategories,
         'currentRoute' => 'compare',
-        'activeSlug' => $category->slug,
+        'activeSlug' => $category?->slug,
     ])
-
-    @if($tools->isEmpty())
-        <div style="text-align: center; padding: 60px 20px; background: #f9fafb; border-radius: var(--r-base);">
-            <p style="color: #6b7280;">{{ __('Aucun outil publie dans cette categorie.') }}</p>
-        </div>
-    @else
-    <div class="cmp-wrap">
-        <table class="cmp-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>{{ __('Outil') }}</th>
-                    <th>{{ __('Tarification') }}</th>
-                    <th>{{ __('Annee') }}</th>
-                    <th>{{ __('Description') }}</th>
-                    <th>{{ __('Fiche') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($tools as $index => $tool)
-                <tr>
-                    <td style="color: #6b7280; font-weight: 700;">{{ $index + 1 }}</td>
-                    <td>
-                        <div class="tool-cell">
-                            @php
-                                $screenshotSrc = $tool->screenshot
-                                    ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
-                                    : '';
-                            @endphp
-                            @if($screenshotSrc)
-                                <img src="{{ $screenshotSrc }}" alt="{{ $tool->name }}" class="tool-thumb" loading="lazy"
-                                     onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
-                            @endif
-                            <a href="{{ route('directory.show', $tool->slug) }}" class="tool-name">{{ $tool->name }}</a>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="rt-badge badge-{{ $tool->pricing }}">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
-                    </td>
-                    <td>{{ $tool->launch_year ?? '-' }}</td>
-                    <td class="tool-desc">{{ Str::limit($tool->short_description, 150) }}</td>
-                    <td>
-                        <a href="{{ route('directory.show', $tool->slug) }}" class="cmp-btn">Voir <i class="ti-arrow-right"></i></a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    @endif
 </div>
+
+<x-directory::compare-bar />
 @endsection
