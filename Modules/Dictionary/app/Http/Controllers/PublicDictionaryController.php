@@ -20,7 +20,12 @@ class PublicDictionaryController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Term::published()->orderBy('name->'.app()->getLocale());
+        // S89 #68 — tri alphabétique CASE-INSENSITIVE par défaut (uppercase + lowercase mêlés)
+        // orderBy MySQL sur JSON_EXTRACT est case-sensitive par défaut (binaire)
+        // ce qui plaçait AGI/AI Act/API avant Affinage. LOWER() force tri naturel.
+        $locale = app()->getLocale();
+        $query = Term::published()
+            ->orderByRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"".$locale."\"'))) ASC");
 
         if ($request->filled('type')) {
             $query->ofType($request->type);
