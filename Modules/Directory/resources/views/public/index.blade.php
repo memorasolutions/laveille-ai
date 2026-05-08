@@ -695,11 +695,50 @@
             <button type="button" class="rt-sort-tab" :class="sortBy === 'newest' && 'rt-sort-active'" @click="setSort('newest')">🆕 {{ __('Récents') }}</button>
             <button type="button" class="rt-sort-tab" :class="activePricing === 'free' && 'rt-sort-active'" @click="setSort('free')">🆓 {{ __('Gratuits') }}</button>
             <button type="button" class="rt-sort-tab" :class="eduFilter && 'rt-sort-active'" @click="eduFilter = !eduFilter" :style="eduFilter ? 'background:#ecfdf5;color:#065f46;border-color:#065f46;' : ''">🎓 {{ __('Éducation') }}</button>
+            <button type="button"
+                    class="rt-sort-tab"
+                    x-data
+                    @click="$store.compare.toggleMode()"
+                    :class="$store.compare.selectionMode && 'rt-sort-active'"
+                    :style="$store.compare.selectionMode ? 'background:rgba(6,78,90,0.08);color:var(--c-primary, #064E5A);border-color:var(--c-primary, #064E5A);' : ''"
+                    :aria-pressed="$store.compare.selectionMode ? 'true' : 'false'"
+                    style="margin-left:auto;">🎯 <span x-text="$store.compare.selectionMode ? '{{ __('Sélection active') }}' : '{{ __('Mode sélection') }}'"></span></button>
             @if($categories->isNotEmpty())
                 <a href="{{ route('directory.compare', $categories->first()->slug) }}"
                    class="rt-sort-tab"
                    x-bind:href="$store.compare.count >= 2 ? $store.compare.compareUrl : '{{ route('directory.compare', $categories->first()->slug) }}'"
-                   style="text-decoration:none!important;margin-left:auto;">📊 {{ __('Comparer') }}<span x-show="$store.compare.count > 0" x-cloak x-text="' (' + $store.compare.count + ')'"></span></a>
+                   style="text-decoration:none!important;">📊 {{ __('Comparer') }}<span x-show="$store.compare.count > 0" x-cloak x-text="' (' + $store.compare.count + ')'"></span></a>
+            @endif
+        </div>
+
+        {{-- Bandeau d'aide visible UNIQUEMENT en mode sélection --}}
+        <div class="lv-selection-help"
+             x-data
+             x-show="$store.compare.selectionMode"
+             x-cloak
+             x-transition.opacity
+             role="status"
+             aria-live="polite">
+            <div class="lv-selection-help-text">
+                @if($categories->isNotEmpty())
+                    <span x-show="$store.compare.count === 0">{{ __('🎯 Cochez 2 à 4 outils dans la liste, puis cliquez Comparer.') }}</span>
+                    <span x-show="$store.compare.count === 1" x-cloak>{{ __('Encore 1 outil minimum à sélectionner.') }} <span class="count">(<span x-text="$store.compare.count"></span>/<span x-text="$store.compare.max"></span>)</span></span>
+                    <span x-show="$store.compare.count >= 2" x-cloak><span class="count">(<span x-text="$store.compare.count"></span>/<span x-text="$store.compare.max"></span>)</span> {{ __('outils sélectionnés. Prêt à comparer ?') }}</span>
+                @endif
+            </div>
+            <a :href="$store.compare.compareUrl"
+               class="btn"
+               :aria-disabled="$store.compare.canCompare ? 'false' : 'true'"
+               @click="if (!$store.compare.canCompare) $event.preventDefault();">📊 {{ __('Comparer maintenant') }}</a>
+            @if($categories->isNotEmpty())
+                <button type="button"
+                        class="btn btn-secondary"
+                        x-show="$store.compare.count === 0"
+                        x-cloak
+                        @click="window.location.href = '{{ route('directory.compare', $categories->first()->slug) }}'"
+                        title="{{ __('Pré-remplir avec les 4 outils les plus populaires de la première catégorie') }}">
+                    + {{ __('Top 4 :cat', ['cat' => $categories->first()->name]) }}
+                </button>
             @endif
         </div>
 
@@ -896,7 +935,8 @@
                                         class="lv-cmp-toggle lv-cmp-toggle--icon"
                                         style="margin-right:4px;vertical-align:middle;"
                                         :class="{ 'is-active': $store.compare.has(tool.id) }"
-                                        @click.stop.prevent="$store.compare.toggle(tool.id, tool.name)"
+                                        :data-cmp-card-id="tool.id"
+                                        @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
                                         :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
                                         :aria-label="$store.compare.has(tool.id) ? '{{ __('Retirer du comparateur') }}' : '{{ __('Ajouter au comparateur') }}'"
                                         title="{{ __('Comparer cet outil') }}">
@@ -992,7 +1032,8 @@
                             <button type="button"
                                     class="lv-cmp-toggle lv-cmp-toggle--icon"
                                     :class="{ 'is-active': $store.compare.has(tool.id) }"
-                                    @click.stop.prevent="$store.compare.toggle(tool.id, tool.name)"
+                                    :data-cmp-card-id="tool.id"
+                                    @click.stop.prevent="$store.compare.toggle(tool.id, tool.name, tool.screenshot || tool.favicon); $store.compare.bounce(tool.id)"
                                     :aria-pressed="$store.compare.has(tool.id) ? 'true' : 'false'"
                                     :aria-label="$store.compare.has(tool.id) ? '{{ __('Retirer du comparateur') }}' : '{{ __('Ajouter au comparateur') }}'"
                                     title="{{ __('Comparer cet outil') }}">

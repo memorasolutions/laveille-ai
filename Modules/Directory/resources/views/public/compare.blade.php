@@ -40,8 +40,45 @@
     .lv-cmp-empty .btn { background: var(--c-primary, #064E5A); color: #fff; padding: 12px 24px; border-radius: 50px; text-decoration: none !important; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
     .lv-cmp-empty .btn:hover { opacity: 0.9; }
 
+    .lv-cmp-suggestions { margin-top: 30px; }
+    .lv-cmp-suggestions h3 { font-family: var(--f-heading); font-size: 1.2rem; color: var(--c-dark, #1a1d23); margin: 0 0 6px; font-weight: 800; }
+    .lv-cmp-suggestions .hint { color: var(--c-text-muted, #52586a); font-size: 0.95rem; margin: 0 0 18px; }
+    .lv-cmp-suggestions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 14px;
+    }
+    .lv-cmp-suggestion-chip {
+        background: #fff;
+        border: 1.5px solid var(--c-border, #E5E7EB);
+        border-radius: 12px;
+        padding: 16px 18px;
+        text-decoration: none !important;
+        color: var(--c-dark, #1a1d23);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+        min-height: 96px;
+    }
+    .lv-cmp-suggestion-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+        border-color: var(--c-primary, #064E5A);
+        color: var(--c-dark, #1a1d23);
+    }
+    .lv-cmp-suggestion-chip:focus-visible { outline: 3px solid var(--c-primary, #064E5A); outline-offset: 3px; }
+    .lv-cmp-suggestion-chip .emoji { font-size: 1.8rem; line-height: 1; }
+    .lv-cmp-suggestion-chip .title { font-weight: 800; font-size: 0.95rem; margin-top: 4px; }
+    .lv-cmp-suggestion-chip .subtitle { color: var(--c-text-muted, #52586a); font-size: 0.85rem; }
+
     .lv-cmp-tools-header { display: grid; gap: 16px; margin-bottom: 26px; }
-    .lv-cmp-tool-cell { background: #fff; border-radius: 14px; padding: 16px; border-top: 4px solid var(--c-primary, #064E5A); box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center; position: relative; }
+    .lv-cmp-tool-cell { background: #fff; border-radius: 14px; padding: 16px; border-top: 4px solid var(--c-primary, #064E5A); box-shadow: 0 2px 8px rgba(0,0,0,0.04); text-align: center; position: relative; cursor: grab; transition: transform 0.15s, box-shadow 0.15s; }
+    .lv-cmp-tool-cell:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+    .lv-cmp-tool-cell:focus-visible { outline: 3px solid var(--c-primary, #064E5A); outline-offset: 3px; }
+    .lv-cmp-tool-cell:active { cursor: grabbing; }
+    .lv-cmp-drag-ghost { opacity: 0.4; }
+    .lv-cmp-drag-chosen { box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
     .lv-cmp-tool-cell .remove-btn { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--c-text-muted, #52586a); font-size: 20px; cursor: pointer; line-height: 1; min-width: 28px; min-height: 28px; border-radius: 50%; }
     .lv-cmp-tool-cell .remove-btn:hover { color: var(--c-accent, #9A2A06); background: #F0F4F8; }
     .lv-cmp-tool-cell .remove-btn:focus-visible { outline: 2px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
@@ -132,6 +169,44 @@
             <p>{{ __('Parcourez l\'annuaire et cliquez sur ☐ pour ajouter un outil au comparateur.') }}</p>
             <a href="{{ route('directory.index') }}" class="btn">{{ __('Parcourir l\'annuaire') }}</a>
         </div>
+
+        {{-- Suggestions populaires --}}
+        <div class="lv-cmp-suggestions">
+            <h3>{{ __('💡 Comparatifs populaires') }}</h3>
+            <p class="hint">{{ __('Démarrez avec un de ces comparatifs prêts :') }}</p>
+            <div class="lv-cmp-suggestions-grid">
+                <a href="{{ route('directory.compare-by-ids') }}?ids=1,2,6" class="lv-cmp-suggestion-chip">
+                    <span class="emoji" aria-hidden="true">💬</span>
+                    <span class="title">{{ __('Chatbots IA généralistes') }}</span>
+                    <span class="subtitle">ChatGPT · Claude · Gemini</span>
+                </a>
+                <a href="{{ route('directory.compare-by-ids') }}?ids=3,75,19" class="lv-cmp-suggestion-chip">
+                    <span class="emoji" aria-hidden="true">🎨</span>
+                    <span class="title">{{ __('Génération d\'images') }}</span>
+                    <span class="subtitle">Midjourney · DALL-E · Leonardo</span>
+                </a>
+                <a href="{{ route('directory.compare-by-ids') }}?ids=4,46,44" class="lv-cmp-suggestion-chip">
+                    <span class="emoji" aria-hidden="true">💻</span>
+                    <span class="title">{{ __('Assistants de code') }}</span>
+                    <span class="subtitle">Cursor · Copilot · Codeium</span>
+                </a>
+                <a href="{{ route('directory.compare-by-ids') }}?ids=10,9,165" class="lv-cmp-suggestion-chip">
+                    <span class="emoji" aria-hidden="true">🎙️</span>
+                    <span class="title">{{ __('Audio et voix IA') }}</span>
+                    <span class="subtitle">ElevenLabs · Suno · Gemini TTS</span>
+                </a>
+                <a href="{{ route('directory.compare-by-ids') }}?ids=11,26,37" class="lv-cmp-suggestion-chip">
+                    <span class="emoji" aria-hidden="true">🎬</span>
+                    <span class="title">{{ __('Génération vidéo') }}</span>
+                    <span class="subtitle">Runway · Pika · Sora</span>
+                </a>
+                <a href="{{ route('directory.compare-by-ids') }}?ids=23,2,5" class="lv-cmp-suggestion-chip">
+                    <span class="emoji" aria-hidden="true">🇫🇷</span>
+                    <span class="title">{{ __('Outils respectueux vie privée') }}</span>
+                    <span class="subtitle">Mistral · Claude · Perplexity</span>
+                </a>
+            </div>
+        </div>
     @elseif($count === 1)
         <div class="lv-cmp-empty">
             <div class="icon" aria-hidden="true">➕</div>
@@ -151,10 +226,17 @@
         </button>
     </div>
 
-    {{-- Header outils (côte-à-côte) --}}
-    <div class="lv-cmp-tools-header" style="grid-template-columns: repeat({{ $count }}, 1fr);">
+    {{-- Header outils (côte-à-côte, drag-to-reorder) --}}
+    <p style="font-size:0.85rem;color:var(--c-text-muted,#52586a);margin-bottom:8px;">
+        <span aria-hidden="true">↔️</span> {{ __('Glissez les vignettes pour réorganiser l\'ordre des colonnes.') }}
+    </p>
+    <div class="lv-cmp-tools-header"
+         id="lvCmpToolsHeader"
+         style="grid-template-columns: repeat({{ $count }}, 1fr);"
+         role="list"
+         aria-label="{{ __('Outils sélectionnés (réorganisables)') }}">
         @foreach($tools as $tool)
-        <div class="lv-cmp-tool-cell" x-data>
+        <div class="lv-cmp-tool-cell" data-tool-id="{{ (int) $tool->id }}" role="listitem" tabindex="0" x-data>
             <button type="button" class="remove-btn"
                     @click="$store.compare.remove({{ (int) $tool->id }}); window.location.href = '{{ route('directory.compare-by-ids') }}?ids=' + $store.compare.ids.join(',');"
                     aria-label="{{ __('Retirer') }} {{ $tool->name }}">×</button>
@@ -255,3 +337,31 @@
 
 <x-directory::compare-bar />
 @endsection
+
+@push('scripts')
+@if($count >= 2)
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" integrity="sha384-Yq4VsBsEQHJDmyA6TpewE2lBC5dyECk7dlgT7ekxNIHJsi4lirh54SyPfAYK0M3a" crossorigin="anonymous" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const header = document.getElementById('lvCmpToolsHeader');
+    if (!header || typeof Sortable === 'undefined') return;
+    Sortable.create(header, {
+        animation: 220,
+        ghostClass: 'lv-cmp-drag-ghost',
+        chosenClass: 'lv-cmp-drag-chosen',
+        forceFallback: true,
+        fallbackOnBody: true,
+        onEnd: function () {
+            const ids = Array.from(header.querySelectorAll('[data-tool-id]'))
+                .map(el => el.dataset.toolId)
+                .filter(Boolean);
+            if (ids.length < 2) return;
+            const url = new URL(window.location.href);
+            url.searchParams.set('ids', ids.join(','));
+            window.location.href = url.toString();
+        },
+    });
+});
+</script>
+@endif
+@endpush

@@ -134,3 +134,35 @@ it('computeDiff year: newer=best by default', function () {
 it('MAX_TOOLS constant equals 4', function () {
     expect(ToolComparisonService::MAX_TOOLS)->toBe(4);
 });
+
+// ─────────── S88 bonifs ───────────
+
+it('compare-bar component renders animations + selection mode CSS', function () {
+    $rendered = view('directory::components.compare-bar')->render();
+
+    expect($rendered)->toContain('lvChipSlideIn');
+    expect($rendered)->toContain('lvBounce');
+    expect($rendered)->toContain('lv-selection-mode');
+    expect($rendered)->toContain('selectionMode');
+    expect($rendered)->toContain('toggleMode');
+    expect($rendered)->toContain('thumbs');
+    expect($rendered)->toContain('prefers-reduced-motion');
+});
+
+it('compare-toggle component uses 44x44 AAA target size', function () {
+    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'Test', 'url' => 'https://example.com']), fn ($t) => $t->id = 999);
+    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'icon'])->render();
+
+    expect($rendered)->toContain('width: 44px');
+    expect($rendered)->toContain('height: 44px');
+    expect($rendered)->toContain('min-height: 44px');
+    expect($rendered)->toContain('data-cmp-card-id');
+    expect($rendered)->toContain('bounce');
+});
+
+it('compare-toggle pill variant also 44px min-height', function () {
+    $tool = tap(new \Modules\Directory\Models\Tool(['name' => 'Test', 'url' => 'https://example.com']), fn ($t) => $t->id = 999);
+    $rendered = view('directory::components.compare-toggle', ['tool' => $tool, 'variant' => 'pill'])->render();
+
+    expect($rendered)->toContain('min-height: 44px');
+});
