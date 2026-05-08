@@ -69,6 +69,11 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     // Dashboard derive tarifaire (lecture seule)
     Route::get('/pricing-drift', [DirectoryAdminController::class, 'pricingDrift'])->name('pricing-drift');
 
+    // Pricing audits review (multi-source consensus + accept/reject)
+    Route::get('/pricing-audit', [\Modules\Directory\Http\Controllers\Admin\PricingAuditController::class, 'index'])->name('pricing-audit.index');
+    Route::post('/pricing-audit/{audit}/accept', [\Modules\Directory\Http\Controllers\Admin\PricingAuditController::class, 'accept'])->name('pricing-audit.accept');
+    Route::post('/pricing-audit/{audit}/reject', [\Modules\Directory\Http\Controllers\Admin\PricingAuditController::class, 'reject'])->name('pricing-audit.reject');
+
     // Resources CRUD (admin)
     Route::get('/resources', [ModerationController::class, 'resources'])->name('resources');
     Route::get('/resources/{id}/edit', [ModerationController::class, 'editResource'])->name('resources.edit');

@@ -72,6 +72,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\DiscoverNewToolsCommand::class,
             \Modules\Directory\Console\ReenrichStaleCommand::class,
             \Modules\Directory\Console\RefreshPricingCommand::class,
+            \Modules\Directory\Console\Commands\AuditPricingTieredCommand::class,
             \Modules\Directory\Console\PricingStatsCommand::class,
             \Modules\Directory\Console\EnrichFormationsCommand::class,
             \Modules\Directory\Console\FixHnSlugsCommand::class,
