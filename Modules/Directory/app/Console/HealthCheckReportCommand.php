@@ -33,6 +33,12 @@ class HealthCheckReportCommand extends Command
 
     public function handle(): int
     {
+        // S84 #38 — KILL SWITCH : command désactivé suite incident emails dupliqués (user 8+).
+        // Tout appel (CLI / web / cron / scheduler) retourne immédiatement sans aucune action.
+        // Pour réactiver : retirer ces 3 lignes + retirer comment du schedule dans DirectoryServiceProvider.
+        $this->info('[HealthCheckReport] DISABLED — kill switch S84 #38, no action.');
+        return self::SUCCESS;
+
         // S84 #31 — Lock file STRICT pour éviter envois multiples (incident user 3+ emails dupliqués)
         // Lock 1h : bloque tout 2e envoi dans l'heure, sauf --no-email qui passe (dry-run safe)
         $lockFile = storage_path('app/health-check-report.lock');
