@@ -376,8 +376,8 @@
                     {{-- Sudoku quotidien (record 36:10 avg duration GA4 30j) --}}
                     <div class="col-md-4 col-sm-6 col-xs-12">
                         <a href="{{ Route::has('sudoku.play') ? route('sudoku.play') : url('/outils/sudoku') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
-                            <div class="hp-card-img" style="background: linear-gradient(135deg, var(--c-primary, #064E5A), #032E36); display: flex; align-items: center; justify-content: center; min-height: 160px;">
-                                <span style="font-size: 4rem;" aria-hidden="true">🧩</span>
+                            <div class="hp-card-img" style="min-height: 160px; overflow: hidden; position: relative;">
+                                <img src="{{ asset('images/tools-preview/sudoku.jpg') }}" alt="{{ __('Aperçu Sudoku quotidien') }}" loading="lazy" style="width: 100%; height: 100%; min-height: 160px; object-fit: cover; display: block;">
                             </div>
                             <div class="hp-card-body" style="flex: 1; display: flex; flex-direction: column;">
                                 <h3>{{ __('Sudoku quotidien') }}</h3>
@@ -393,8 +393,8 @@
                     {{-- Mots croisés IA (record 17:42 avg duration GA4 30j) --}}
                     <div class="col-md-4 col-sm-6 col-xs-12">
                         <a href="{{ url('/outils/mots-croises') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
-                            <div class="hp-card-img" style="background: linear-gradient(135deg, #9A2A06, #771E04); display: flex; align-items: center; justify-content: center; min-height: 160px;">
-                                <span style="font-size: 4rem;" aria-hidden="true">📝</span>
+                            <div class="hp-card-img" style="min-height: 160px; overflow: hidden; position: relative;">
+                                <img src="{{ asset('images/tools-preview/mots-croises.jpg') }}" alt="{{ __('Aperçu Générateur de mots croisés') }}" loading="lazy" style="width: 100%; height: 100%; min-height: 160px; object-fit: cover; display: block;">
                             </div>
                             <div class="hp-card-body" style="flex: 1; display: flex; flex-direction: column;">
                                 <h3>{{ __('Générateur de mots croisés') }}</h3>
@@ -410,8 +410,8 @@
                     {{-- Constructeur de prompts (top page GA4 30j 516 vues) --}}
                     <div class="col-md-4 col-sm-6 col-xs-12">
                         <a href="{{ url('/outils/constructeur-prompts') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
-                            <div class="hp-card-img" style="background: linear-gradient(135deg, #4C1D95, #3B1577); display: flex; align-items: center; justify-content: center; min-height: 160px;">
-                                <span style="font-size: 4rem;" aria-hidden="true">⚙️</span>
+                            <div class="hp-card-img" style="min-height: 160px; overflow: hidden; position: relative;">
+                                <img src="{{ asset('images/tools-preview/constructeur-prompts.jpg') }}" alt="{{ __('Aperçu Constructeur de prompts') }}" loading="lazy" style="width: 100%; height: 100%; min-height: 160px; object-fit: cover; display: block;">
                             </div>
                             <div class="hp-card-body" style="flex: 1; display: flex; flex-direction: column;">
                                 <h3>{{ __('Constructeur de prompts') }}</h3>
