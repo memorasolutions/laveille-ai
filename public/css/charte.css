@@ -513,6 +513,15 @@ a:hover { color: var(--c-primary); }
 
 .wpo-subscribe-section {
     background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-hover) 100%);
+    /* S89 fix asymétrie : Bloggar force padding-top:0 → on rétablit padding symétrique */
+    padding-top: 80px !important;
+    padding-bottom: 80px !important;
+}
+@media (max-width: 767px) {
+    .wpo-subscribe-section {
+        padding-top: 50px !important;
+        padding-bottom: 50px !important;
+    }
 }
 
 .wpo-subscribe-section .subscribe-text h3 {
