@@ -188,6 +188,12 @@ class HealthCheckReportCommand extends Command
     private function categorizeError(string $msg): string
     {
         $msg = strtolower($msg);
+        // S84 #35 — SSL/TLS errors = faux positifs (handshake refusé côté serveur mais navigateur OK)
+        if (str_contains($msg, 'ssl') || str_contains($msg, 'tls') || str_contains($msg, 'tlsv1')
+            || str_contains($msg, 'certificate') || str_contains($msg, 'cipher')
+            || str_contains($msg, 'handshake')) {
+            return 'cloudflare_block';
+        }
         if (str_contains($msg, 'connection refused') || str_contains($msg, 'connection reset')) return 'refused';
         if (str_contains($msg, 'could not resolve') || str_contains($msg, 'name or service not known') || str_contains($msg, 'nxdomain')) return 'dns';
         if (str_contains($msg, 'timed out') || str_contains($msg, 'timeout')) return 'timeout';
