@@ -106,7 +106,7 @@
                             <option value="renamed" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'renamed' ? 'selected' : '' }}>Renommé</option>
                             <option value="pivoted" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'pivoted' ? 'selected' : '' }}>Pivoté</option>
                             <option value="acquired" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'acquired' ? 'selected' : '' }}>Acquis</option>
-                            <option value="closed" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'closed' ? 'selected' : '' }}>Fermé</option>
+                            <option value="closed" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'closed' ? 'selected' : '' }}>Plus en ligne</option>
                             <option value="scam" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'scam' ? 'selected' : '' }}>Arnaque</option>
                         </select>
                         <small class="form-text text-muted">Statut actuel de l'outil dans son cycle de vie.</small>

@@ -57,8 +57,8 @@ trait HasLifecycleStatus
                 'severity' => 2,
             ],
             self::STATUS_CLOSED => [
-                'label' => 'Fermé',
-                'color' => '#6b7280',
+                'label' => 'Plus en ligne',
+                'color' => '#52586a',
                 'icon' => 'fa-circle-xmark',
                 'severity' => 4,
             ],
@@ -97,6 +97,23 @@ trait HasLifecycleStatus
             self::STATUS_ACTIVE,
             self::STATUS_BETA,
         ], true);
+    }
+
+    public function getIsLifecycleDownAttribute(): bool
+    {
+        return in_array($this->lifecycle_status, [
+            self::STATUS_CLOSED,
+            self::STATUS_SCAM,
+        ], true);
+    }
+
+    public function getLifecycleBannerMessageAttribute(): string
+    {
+        return match ($this->lifecycle_status) {
+            self::STATUS_CLOSED => 'Cette plateforme a fermé ses portes',
+            self::STATUS_SCAM => 'Site signalé comme arnaque — évitez-le',
+            default => 'Statut : ' . $this->lifecycle_label,
+        };
     }
 
     public function scopeLifecycle(Builder $query, string $status): Builder

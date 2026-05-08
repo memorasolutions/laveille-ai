@@ -22,13 +22,13 @@
     $notes   = $tool->lifecycle_notes;
 
     $messages = [
-        'closed'   => 'Cet outil est fermé définitivement.',
-        'acquired' => 'Cet outil a été acquis par une autre entreprise.',
-        'renamed'  => 'Cet outil a été renommé.',
-        'pivoted'  => 'Cet outil a pivoté vers un nouveau positionnement.',
-        'paused'   => 'Cet outil est temporairement en pause.',
-        'scam'     => '⚠️ Cet outil est signalé comme arnaque. Évitez-le.',
-        'beta'     => 'Cet outil est en phase bêta — fonctionnalités en développement.',
+        'closed'   => 'Cette plateforme a fermé ses portes.',
+        'acquired' => 'Cette plateforme a été acquise par une autre entreprise.',
+        'renamed'  => 'Cette plateforme a été renommée.',
+        'pivoted'  => 'Cette plateforme a pivoté vers un nouveau positionnement.',
+        'paused'   => 'Cette plateforme est temporairement en pause.',
+        'scam'     => '⚠️ Cette plateforme est signalée comme arnaque — évitez-la.',
+        'beta'     => 'Cette plateforme est en phase bêta — fonctionnalités en développement.',
     ];
     $message = $messages[$status] ?? ('Statut : ' . $label);
 

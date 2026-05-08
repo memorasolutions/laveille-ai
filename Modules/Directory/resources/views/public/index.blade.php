@@ -41,6 +41,8 @@
                 return $map[$icon] ?? $icon;
             })($tool->lifecycle_icon ?? 'fa-circle-check'),
             'isLifecycleActive' => (bool) $tool->is_lifecycle_active,
+            'isLifecycleDown' => (bool) $tool->is_lifecycle_down,
+            'lifecycleBannerMsg' => $tool->lifecycle_banner_message ?? '',
         ];
     })->values();
 
@@ -110,6 +112,33 @@
     .rt-hl-arrow:focus-visible {
         outline: 3px solid #0B7285;
         outline-offset: 2px;
+    }
+
+    /* S84 #38 — Card "down" state (lifecycle closed/scam) : bandeau pleine largeur + grayscale */
+    .rt-card.is-down { padding-top: 44px; overflow: hidden; }
+    .rt-card.is-down > *:not(.rt-card-down-banner) {
+        filter: grayscale(0.75);
+        opacity: 0.65;
+        transition: filter 0.2s, opacity 0.2s;
+    }
+    .rt-card.is-down:hover > *:not(.rt-card-down-banner) {
+        filter: grayscale(0.4);
+        opacity: 0.85;
+    }
+    .rt-card-down-banner {
+        position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 10px 14px; min-height: 36px;
+        background: var(--c-text-secondary, #4a4f5c);
+        color: #fff; font-weight: 700; font-size: 13px;
+        letter-spacing: 0.2px; line-height: 1.3; text-align: center;
+        border-radius: var(--r-base) var(--r-base) 0 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .rt-card-down-banner.is-scam { background: var(--c-accent, #9A2A06); }
+    .rt-card-down-banner i { font-size: 14px; }
+    @media (prefers-reduced-motion: reduce) {
+        .rt-card.is-down > *:not(.rt-card-down-banner) { transition: none; }
     }
 
     /* Highlights section - slider */
@@ -829,7 +858,7 @@
                 </thead>
                 <tbody>
                     <template x-for="tool in listTools" :key="tool.id">
-                        <tr style="border-bottom:1px solid #F3F4F6;transition:background 0.1s;" onmouseover="this.style.background='#FAFBFC'" onmouseout="this.style.background='transparent'">
+                        <tr :style="'border-bottom:1px solid #F3F4F6;transition:background 0.1s, opacity 0.2s, filter 0.2s;' + (tool.isLifecycleDown ? 'opacity:0.6;filter:grayscale(0.7);background:#F9FAFB;' : '')" onmouseover="this.style.background='#FAFBFC'" onmouseout="this.style.background= (this.dataset.down === '1' ? '#F9FAFB' : 'transparent')" :data-down="tool.isLifecycleDown ? '1' : '0'">
                             <td style="padding:8px 12px;">
                                 <template x-if="tool.favicon"><img :src="tool.favicon" :alt="tool.name + ' logo'" loading="lazy" width="32" height="32" style="border-radius:6px;" onerror="this.style.display='none'"></template>
                             </td>
@@ -875,10 +904,17 @@
         <div class="row row-flex" x-show="viewMode === 'cards'">
             <template x-for="tool in visibleTools" :key="tool.id">
                 <div class="col-lg-4 col-md-6 col-xs-12">
-                    <article class="rt-card">
-                        <template x-if="tool.isFeatured"><span class="rt-featured">{{ __('En vedette') }}</span></template>
+                    <article class="rt-card" :class="{'is-down': tool.isLifecycleDown}" :aria-label="tool.isLifecycleDown ? tool.name + ' — ' + tool.lifecycleBannerMsg : tool.name">
+                        <template x-if="tool.isLifecycleDown">
+                            <div class="rt-card-down-banner" :class="{'is-scam': tool.lifecycleStatus === 'scam'}" role="status">
+                                <i :class="'fa ' + tool.lifecycleIconFa" aria-hidden="true"></i>
+                                <span x-text="tool.lifecycleBannerMsg"></span>
+                            </div>
+                        </template>
 
-                        <template x-if="!tool.isLifecycleActive">
+                        <template x-if="tool.isFeatured && !tool.isLifecycleDown"><span class="rt-featured">{{ __('En vedette') }}</span></template>
+
+                        <template x-if="!tool.isLifecycleActive && !tool.isLifecycleDown">
                             <span :style="'position:absolute;top:12px;right:12px;z-index:4;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:11px;font-weight:600;color:#fff;border-radius:999px;white-space:nowrap;line-height:1.3;box-shadow:0 2px 6px rgba(0,0,0,.25);background-color:' + tool.lifecycleColor + 'F2;'"
                                   :aria-label="'Statut : ' + tool.lifecycleLabel"
                                   :title="tool.lifecycleLabel">
