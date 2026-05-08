@@ -1,5 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('errors.layout')
-@section('code', '🤖💥')
+@section('emoji', '🤖💥')
+@section('code', '500')
 @section('title', __('Erreur système'))
-@section('message', __('Même les robots ont des mauvaises journées. Nos ingénieurs (humains) sont sur le coup. Réessayez dans un instant.'))
+@section('message', __('Notre IA a glissé dans le sable mouvant. Nos ingénieurs (humains) sont déjà sur le coup. Réessayez dans un instant.'))

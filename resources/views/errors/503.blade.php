@@ -1,157 +1,120 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr-CA">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('Maintenance en cours') }} - {{ config('app.name') }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{ __('Maintenance en cours') }} · {{ config('app.name', 'La veille de Stef') }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --c-primary: #064E5A;
+            --c-accent: #9A2A06;
+            --c-dark: #1a1d23;
+            --c-text-muted: #52586a;
+            --c-surface: #ffffff;
+            --c-bg: #F0F4F8;
+            --c-border: #E5E7EB;
         }
-
+        html { -webkit-text-size-adjust: 100%; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--c-bg);
+            color: var(--c-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #ffffff;
-            padding: 20px;
-            line-height: 1.6;
+            min-height: 100vh;
+            padding: 1.5rem;
+            line-height: 1.55;
         }
-
-        .container {
-            max-width: 800px;
+        .err-card {
+            max-width: 600px;
             width: 100%;
             text-align: center;
-            animation: fadeIn 1s ease-out;
+            background: var(--c-surface);
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            border-top: 5px solid var(--c-accent);
         }
-
-        .illustration {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 40px;
-            animation: rotate 20s linear infinite;
+        .err-emoji {
+            font-size: 3.25rem;
+            line-height: 1;
+            margin-bottom: 1rem;
+            display: block;
         }
-
-        .illustration svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        h1 {
-            font-size: 2.8rem;
+        .err-code {
+            font-size: 0.85rem;
             font-weight: 700;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, #ffffff, #e94560);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: var(--c-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+        }
+        .err-title {
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: var(--c-dark);
+            margin-bottom: 0.85rem;
             letter-spacing: -0.5px;
         }
-
-        .subtitle {
-            font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 30px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+        .err-message {
+            color: var(--c-text-muted);
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
         }
-
-        .pulse-dots {
+        .err-pulse {
             display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 10px;
+            gap: 6px;
+            margin-top: 0.5rem;
         }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            background-color: #e94560;
+        .err-pulse span {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            animation: pulse 1.5s infinite ease-in-out;
+            background: var(--c-accent);
+            animation: errPulse 1.4s infinite ease-in-out;
         }
-
-        .dot:nth-child(1) { animation-delay: 0s; }
-        .dot:nth-child(2) { animation-delay: 0.5s; }
-        .dot:nth-child(3) { animation-delay: 1s; }
-
-        footer {
-            margin-top: 60px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 20px;
-            width: 100%;
-            max-width: 600px;
+        .err-pulse span:nth-child(2) { animation-delay: 0.2s; }
+        .err-pulse span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes errPulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.15); }
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) {
+            .err-pulse span { animation: none; opacity: 0.7; }
         }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .err-footer {
+            margin-top: 2rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--c-border);
+            font-size: 0.8rem;
+            color: var(--c-text-muted);
         }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2.2rem; }
-            .subtitle { font-size: 1.1rem; padding: 0 10px; }
-            .illustration { width: 160px; height: 160px; }
-        }
-
         @media (max-width: 480px) {
-            h1 { font-size: 1.8rem; }
-            .subtitle { font-size: 1rem; }
-            .illustration { width: 140px; height: 140px; }
+            .err-card { padding: 2rem 1.5rem; }
+            .err-title { font-size: 1.5rem; }
+            .err-message { font-size: 1rem; }
+            .err-emoji { font-size: 2.75rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="illustration">
-            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="100" r="45" fill="none" stroke="#e94560" stroke-width="12"/>
-                <circle cx="100" cy="100" r="25" fill="#1a1a2e"/>
-                <circle cx="100" cy="100" r="12" fill="#e94560"/>
-                <rect x="92" y="40" width="16" height="20" fill="#e94560" rx="2"/>
-                <rect x="92" y="140" width="16" height="20" fill="#e94560" rx="2"/>
-                <rect x="40" y="92" width="20" height="16" fill="#e94560" rx="2"/>
-                <rect x="140" y="92" width="20" height="16" fill="#e94560" rx="2"/>
-                <rect x="56" y="56" width="14" height="14" fill="#e94560" rx="2" transform="rotate(45 63 63)"/>
-                <rect x="130" y="56" width="14" height="14" fill="#e94560" rx="2" transform="rotate(45 137 63)"/>
-                <rect x="56" y="130" width="14" height="14" fill="#e94560" rx="2" transform="rotate(45 63 137)"/>
-                <rect x="130" y="130" width="14" height="14" fill="#e94560" rx="2" transform="rotate(45 137 137)"/>
-            </svg>
+    <main class="err-card" role="main">
+        <span class="err-emoji" aria-hidden="true">🛠️</span>
+        <p class="err-code">{{ __('Erreur') }} 503</p>
+        <h1 class="err-title">{{ __('Maintenance en cours') }}</h1>
+        <p class="err-message">{{ $exception->getMessage() ?: __('On améliore la veille en coulisses. Le site revient très vite, promis.') }}</p>
+        <div class="err-pulse" aria-hidden="true">
+            <span></span><span></span><span></span>
         </div>
-
-        <h1>{{ __('Maintenance en cours') }}</h1>
-        <p class="subtitle">
-            {{ __('Nous améliorons votre expérience. Le site sera de retour très bientôt.') }}
-        </p>
-        <div class="pulse-dots">
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
+        <div class="err-footer">
+            {{ config('app.name', 'La veille de Stef') }} · {{ __('Veille IA Québec') }}
         </div>
-
-        <footer>
-            &copy; {{ date('Y') }} {{ config('app.name') }} - {{ __('Tous droits réservés') }}
-        </footer>
-    </div>
+    </main>
 </body>
 </html>
