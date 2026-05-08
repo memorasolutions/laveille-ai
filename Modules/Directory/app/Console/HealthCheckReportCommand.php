@@ -33,13 +33,23 @@ class HealthCheckReportCommand extends Command
 
     public function handle(): int
     {
-        // S84 #31 — Lock file pour éviter envois multiples (incident user 3 emails dupliqués)
+        // S84 #31 — Lock file STRICT pour éviter envois multiples (incident user 3+ emails dupliqués)
+        // Lock 1h : bloque tout 2e envoi dans l'heure, sauf --no-email qui passe (dry-run safe)
         $lockFile = storage_path('app/health-check-report.lock');
-        if (file_exists($lockFile) && time() - filemtime($lockFile) < 3600) {
-            $this->warn('Lock file actif (<1h) — un autre run en cours ou récent. Skip pour éviter envoi dupliqué.');
-            return self::SUCCESS;
+        $isDryRun = (bool) $this->option('no-email');
+        if (! $isDryRun && file_exists($lockFile)) {
+            $age = time() - filemtime($lockFile);
+            if ($age < 3600) {
+                $this->error("🔒 Lock file actif (âge {$age}s, max 3600s) — envoi BLOQUÉ pour éviter doublon.");
+                $this->warn('Pour forcer : supprime '.$lockFile.' manuellement (réservé sysadmin).');
+                Log::warning('[HealthCheckReport] Skip duplicate run', ['lock_age' => $age, 'lock_file' => $lockFile]);
+                return self::SUCCESS;
+            }
         }
-        @file_put_contents($lockFile, (string) time());
+        // Crée lock seulement si on va vraiment envoyer
+        if (! $isDryRun) {
+            @file_put_contents($lockFile, (string) time());
+        }
 
         $query = Tool::published()
             ->whereNotNull('url')
