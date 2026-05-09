@@ -25,6 +25,12 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         ->name('methodologie')
         ->middleware('cacheResponse:3600');
 
+    // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
+    Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])
+        ->name('rss.concentres');
+    Route::get('/rss/annuaire.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'annuaire'])
+        ->name('rss.annuaire');
+
     // Page auteur EEAT 2026 NN/g (#218 S84 — Schema.org Person + sameAs LinkedIn)
     Route::get('/auteur/{slug}', [\Modules\FrontTheme\Http\Controllers\AuthorController::class, 'show'])
         ->where('slug', '[a-z0-9-]+')

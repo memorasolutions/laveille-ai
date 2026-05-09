@@ -97,6 +97,13 @@
     @if(Route::has('author.show'))
         <link rel="author" href="{{ route('author.show', 'stephane-lapointe') }}">
     @endif
+    {{-- Flux RSS S90 #43 — découverte automatique par lecteurs RSS et agents IA --}}
+    @if(Route::has('rss.concentres'))
+        <link rel="alternate" type="application/rss+xml" title="La veille — Concentré IA hebdo" href="{{ route('rss.concentres') }}">
+    @endif
+    @if(Route::has('rss.annuaire'))
+        <link rel="alternate" type="application/rss+xml" title="La veille — Nouveautés répertoire" href="{{ route('rss.annuaire') }}">
+    @endif
     {{-- RSS désactivé (décision utilisateur 2026-04-04) --}}
     @stack('head')
     @include('fronttheme::partials.critical-css')

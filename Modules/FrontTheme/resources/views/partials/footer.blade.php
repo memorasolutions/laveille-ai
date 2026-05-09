@@ -41,6 +41,12 @@
                             @if(Route::has('shorturl.create'))
                                 <li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>
                             @endif
+                            @if(Route::has('rss.concentres'))
+                                <li><a href="{{ route('rss.concentres') }}" rel="alternate" title="{{ __('Flux RSS Concentré IA hebdo') }}">📡 {{ __('RSS — Concentré IA') }}</a></li>
+                            @endif
+                            @if(Route::has('rss.annuaire'))
+                                <li><a href="{{ route('rss.annuaire') }}" rel="alternate" title="{{ __('Flux RSS nouveaux outils du répertoire') }}">📡 {{ __('RSS — Nouveaux outils') }}</a></li>
+                            @endif
                         </ul>
                     </div>
                 </div>
