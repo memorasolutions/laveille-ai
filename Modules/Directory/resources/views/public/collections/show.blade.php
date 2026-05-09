@@ -4,6 +4,44 @@
 @section('title', $collection->name)
 @section('meta_description', $collection->description ?: 'Collection d\'outils ' . $collection->name . ' — ' . $collection->tools->count() . ' outils sélectionnés.')
 
+@push('head')
+{{-- Schema.org ItemList — best practice 2026 SEO/AI Overviews #43 S90 --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": @json($collection->name),
+  "description": @json($collection->description ?: 'Collection d\'outils — ' . $collection->tools->count() . ' outils sélectionnés.'),
+  "url": @json(url()->current()),
+  "numberOfItems": {{ $collection->tools->count() }},
+  "itemListOrder": "https://schema.org/ItemListOrderAscending",
+  "inLanguage": "fr-CA",
+  "author": {
+    "@type": "Person",
+    "name": @json($collection->user->name ?? 'Stéphane Lapointe'),
+    "url": @json(url('/auteur/stephane-lapointe'))
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "La veille",
+    "url": @json(url('/'))
+  },
+  "itemListElement": [
+@foreach($collection->tools as $idx => $tool)
+    {
+      "@type": "ListItem",
+      "position": {{ $idx + 1 }},
+      "url": @json(route('directory.show', $tool->slug)),
+      "name": @json($tool->name),
+      "description": @json(\Illuminate\Support\Str::limit(strip_tags($tool->getTranslation('short_description', 'fr_CA') ?: $tool->getTranslation('short_description', 'fr') ?: ''), 160))
+    }@if(!$loop->last),@endif
+
+@endforeach
+  ]
+}
+</script>
+@endpush
+
 @section('content')
 <section class="wpo-blog-pg-section section-padding">
     <div class="container">
