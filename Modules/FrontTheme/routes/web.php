@@ -31,6 +31,11 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::get('/rss/annuaire.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'annuaire'])
         ->name('rss.annuaire');
 
+    // Doc HTML API publique (S90 #43)
+    Route::view('/api', 'fronttheme::api-docs')
+        ->name('api.docs')
+        ->middleware('cacheResponse:3600');
+
     // Page auteur EEAT 2026 NN/g (#218 S84 — Schema.org Person + sameAs LinkedIn)
     Route::get('/auteur/{slug}', [\Modules\FrontTheme\Http\Controllers\AuthorController::class, 'show'])
         ->where('slug', '[a-z0-9-]+')
