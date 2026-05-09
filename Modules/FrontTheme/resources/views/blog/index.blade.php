@@ -62,7 +62,7 @@
                             finally { this.loading = false; }
                         }
                      }">
-                    @include('fronttheme::partials._section-author-byline')
+                    @include('fronttheme::partials.section-author-byline')
                     <div class="wpo-blog-content" x-ref="articles">
                         @forelse($articles as $article)
                             <div class="post format-standard-image">

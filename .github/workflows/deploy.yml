@@ -36,7 +36,8 @@ jobs:
             --exclude='public/build/' \
             --exclude='bootstrap/cache/' \
             --exclude='tests/' \
-            --exclude='_*.php' \
+            --exclude='public/_*.php' \
+            --exclude='/_*.php' \
             --exclude='*.log' \
             --exclude='error_log' \
             ./ gmemora@server.memora.pro:/home/gmemora/public_html/apps_diverses/laveille.ai/

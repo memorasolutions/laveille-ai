@@ -134,7 +134,7 @@
                 <div class="wpo-section-title">
                     <h2>{{ __('Articles à la une') }}</h2>
                 </div>
-                @include('fronttheme::partials._section-author-byline')
+                @include('fronttheme::partials.section-author-byline')
                 <div class="row">
                     <div class="col col-lg-8 col-12">
                         <!-- start wpo-blog-section -->
