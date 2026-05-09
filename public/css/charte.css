@@ -28,8 +28,66 @@
     --r-btn: 0.5rem;
 }
 
+/* ── 0b. SECTION AUTHOR BYLINE (#82 S90 — mono-auteur listing pattern Korben/NN/g 2026) ── */
+/* Remplace la byline avatar+nom répétée sur chaque carte. Affichée 1× au-dessus de la grille. */
+.section-author-byline {
+    display: flex;
+    align-items: center;
+    margin: 0 0 1.25rem 0;
+    padding: 0.625rem 0.875rem;
+    background: rgba(6, 78, 90, 0.04);
+    border-left: 3px solid var(--c-primary);
+    border-radius: 0.375rem;
+}
+.section-author-byline-link {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--c-dark);
+    text-decoration: none;
+    font-size: 0.875rem;
+    line-height: 1.3;
+    flex-wrap: wrap;
+}
+.section-author-byline-link:hover .section-author-byline-cta,
+.section-author-byline-link:focus-visible .section-author-byline-cta {
+    text-decoration: underline;
+}
+.section-author-byline-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.section-author-byline-text {
+    display: flex;
+    align-items: baseline;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+.section-author-byline-prefix { color: var(--c-text-muted); font-weight: 400; }
+.section-author-byline-name { font-weight: 600; color: var(--c-dark); }
+.section-author-byline-cta { color: var(--c-primary); font-weight: 500; }
+
+/* ── 0c. CARD META COMPACT (#82 S90 — remplace byline répétée sur cartes listing) ── */
+.card-meta-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--c-text-muted);
+    margin: 0.5rem 0 0.75rem 0;
+    line-height: 1.3;
+}
+.card-meta-compact-date { white-space: nowrap; }
+.card-meta-compact-sep { color: var(--c-text-muted); opacity: 0.5; }
+.card-meta-compact-readtime { white-space: nowrap; }
+
 /* ── 0a. BYLINE BENTO EEAT (#218 S83 — cards blog Option A 95/100 NN/g+EEAT 2026) ── */
-/* Refonte byline avec avatar 40px + nom + rôle + dates dual + reading time */
+/* GARDE pour page article single. Retiré des LISTINGS S90 #82 (Option D pp_search 2026). */
 .entry-meta-eeat {
     display: flex;
     align-items: center;

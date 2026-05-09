@@ -134,6 +134,7 @@
                 <div class="wpo-section-title">
                     <h2>{{ __('Articles à la une') }}</h2>
                 </div>
+                @include('fronttheme::partials._section-author-byline')
                 <div class="row">
                     <div class="col col-lg-8 col-12">
                         <!-- start wpo-blog-section -->
@@ -149,11 +150,9 @@
                                             </div>
                                             <div class="wpo-blog-content">
                                                 <h2><a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->title }}</a></h2>
-                                                <ul>
-                                                    <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;" loading="lazy"></li>
-                                                    <li>{{ __('Par') }} <a href="{{ route('blog.show', $highlight->slug) }}">{{ $highlight->getAuthorName() }}</a></li>
-                                                    <li>{{ $highlight->published_at?->translatedFormat('d M Y') }}</li>
-                                                </ul>
+                                                <div class="card-meta-compact">
+                                                    <time class="card-meta-compact-date" datetime="{{ $highlight->published_at?->toIso8601String() }}">{{ $highlight->published_at?->translatedFormat('d M Y') }}</time>
+                                                </div>
                                                 <p>{{ Str::limit($highlight->excerpt ?? strip_tags($highlight->content), 100) }}</p>
                                             </div>
                                         </div>
@@ -220,11 +219,9 @@
                                         </div>
                                         <div class="wpo-blog-content">
                                             <h2><a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->title }}</a></h2>
-                                            <ul>
-                                                <li><img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }}" style="width:30px;height:30px;border-radius:50%;"></li>
-                                                <li>{{ __('Par') }} <a href="{{ route('blog.show', $sponsored->slug) }}">{{ $sponsored->getAuthorName() }}</a></li>
-                                                <li>{{ $sponsored->published_at?->translatedFormat('d M Y') }}</li>
-                                            </ul>
+                                            <div class="card-meta-compact">
+                                                <time class="card-meta-compact-date" datetime="{{ $sponsored->published_at?->toIso8601String() }}">{{ $sponsored->published_at?->translatedFormat('d M Y') }}</time>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

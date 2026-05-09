@@ -18,6 +18,7 @@
         <div class="container">
             <div class="row">
                 <div class="col col-lg-8 col-12">
+                    @include('fronttheme::partials._section-author-byline')
                     <div class="wpo-blog-content">
                         @forelse($articles as $article)
                             <div class="post format-standard-image">
@@ -31,32 +32,12 @@
                                 @php
                                     $words = str_word_count(strip_tags($article->content ?? $article->excerpt ?? ''));
                                     $minRead = max(1, (int) ceil($words / 200));
-                                    $isUpdated = $article->updated_at && $article->published_at && $article->updated_at->gt($article->published_at) && $article->updated_at->diffInDays($article->published_at) >= 1;
                                 @endphp
-                                <div class="entry-meta-eeat" x-data="{ tipOpen: false }">
-                                    <div class="byline-bio-wrap" @mouseleave="tipOpen = false">
-                                        <img src="{{ asset('images/logo-avatar.png') }}" alt="" class="entry-author-avatar" loading="lazy" decoding="async" width="40" height="40"
-                                             @mouseenter="tipOpen = true" @click.stop="tipOpen = !tipOpen" @keydown.escape="tipOpen = false"
-                                             tabindex="0" role="button" :aria-expanded="tipOpen.toString()" aria-controls="byline-bio-cat-{{ $article->id ?? $loop->index }}"
-                                             aria-label="{{ __('Voir la bio de l\'auteur') }}">
-                                        <div x-show="tipOpen" x-transition.opacity x-cloak
-                                             :id="'byline-bio-cat-{{ $article->id ?? $loop->index }}'"
-                                             role="tooltip"
-                                             class="byline-bio-tooltip">
-                                            <strong>{{ trans('fronttheme::authors.stephane-lapointe.name') }}</strong>
-                                            <p>{{ trans('fronttheme::authors.stephane-lapointe.bio') }}</p>
-                                            <a href="{{ route('author.show', 'stephane-lapointe') }}">{{ __('En savoir plus →') }}</a>
-                                        </div>
-                                    </div>
-                                    <div class="entry-author-info">
-                                        <div class="entry-author-name"><a href="{{ route('author.show', 'stephane-lapointe') }}">{{ $article->getAuthorName() }}</a></div>
-                                        <div class="entry-author-role">{{ __('Veille IA Québec') }}</div>
-                                        <div class="entry-author-meta">
-                                            <span>{{ __('Publié') }} <time datetime="{{ $article->published_at?->toIso8601String() }}">{{ $article->published_at?->translatedFormat('d M Y') }}</time></span>
-                                            @if($isUpdated)<span> · {{ __('Mis à jour') }} <time datetime="{{ $article->updated_at?->toIso8601String() }}">{{ $article->updated_at?->translatedFormat('d M Y') }}</time></span>@endif
-                                            <span> · {{ $minRead }} {{ __('min lecture') }}</span>
-                                        </div>
-                                    </div>
+                                {{-- S90 #82 byline retirée des cartes (Option D pp_search 2026 mono-auteur). EEAT préservé : section header + page article + Schema.org Person --}}
+                                <div class="card-meta-compact">
+                                    <time class="card-meta-compact-date" datetime="{{ $article->published_at?->toIso8601String() }}">{{ $article->published_at?->translatedFormat('d M Y') }}</time>
+                                    <span class="card-meta-compact-sep">·</span>
+                                    <span class="card-meta-compact-readtime">{{ $minRead }} {{ __('min lecture') }}</span>
                                 </div>
                                 <div class="entry-details">
                                     <h3><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h3>
