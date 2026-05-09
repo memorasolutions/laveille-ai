@@ -18,7 +18,6 @@
         <div class="container">
             <div class="row">
                 <div class="col col-lg-8 col-12">
-                    @include('fronttheme::partials.section-author-byline')
                     <div class="wpo-blog-content">
                         @forelse($articles as $article)
                             <div class="post format-standard-image">
