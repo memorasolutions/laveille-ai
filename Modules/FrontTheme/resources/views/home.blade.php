@@ -358,6 +358,57 @@
         </section>
         @endif
 
+        {{-- Section CTA comparateur + collections (#43 S90 — exposition feature comparateur + 21 collections/stacks curatées) --}}
+        <section class="hp-section" aria-labelledby="cta-compare-title" style="padding: 36px 0;">
+            <div class="container">
+                <div style="background: linear-gradient(135deg, #064E5A 0%, #0B7285 100%); border-radius: 16px; padding: clamp(28px, 4vw, 44px) clamp(22px, 3vw, 38px); color: #fff; box-shadow: 0 12px 30px rgba(6, 78, 90, 0.25);">
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 22px; align-items: center;" class="cta-compare-grid">
+                        <div>
+                            <p style="margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; font-weight: 700; opacity: 0.85;">{{ __('Nouveau · 2026') }}</p>
+                            <h2 id="cta-compare-title" style="margin: 0 0 8px; font-weight: 800; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; letter-spacing: -0.3px;">
+                                {{ __('Comparez 6 outils IA côte à côte') }}
+                            </h2>
+                            <p style="margin: 0 0 14px; font-size: 15.5px; line-height: 1.55; opacity: 0.93;">
+                                {{ __("Sélectionnez vos candidats dans l'annuaire et obtenez un tableau comparatif instantané : pricing, programme éducation, fonctionnalités clés, alternatives. Idéal pour choisir la bonne stack avant d'engager des budgets.") }}
+                            </p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <a href="{{ route('directory.index') }}" style="display: inline-flex; align-items: center; gap: 6px; background: #fff; color: #064E5A; font-weight: 700; padding: 12px 22px; border-radius: 50px; text-decoration: none; min-height: 44px; line-height: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                    🔀 {{ __('Ouvrir le comparateur') }}
+                                </a>
+                                @if(Route::has('collections.index'))
+                                    <a href="{{ route('collections.index') }}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); color: #fff; font-weight: 700; padding: 12px 22px; border-radius: 50px; text-decoration: none; min-height: 44px; line-height: 20px; border: 1px solid rgba(255,255,255,0.25);">
+                                        📚 {{ __('21 collections & stacks curatés') }}
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px;">
+                            @php
+                                $featuredCollections = [
+                                    'top-outils-ia-enseignants-quebec' => '🎓 Top enseignants',
+                                    'stack-startup-saas-quebec' => '🚀 Stack startup SaaS',
+                                    'stack-etudiant-universitaire-quebec' => '📖 Stack étudiant',
+                                    'stack-developpeur-full-stack-2026' => '💻 Stack développeur',
+                                    'meilleurs-outils-ia-redaction-francais' => '✍️ Rédaction français',
+                                    'ia-creation-images-illustrations' => '🎨 Images & illustrations',
+                                ];
+                            @endphp
+                            @foreach($featuredCollections as $cslug => $clabel)
+                                <a href="{{ url('/collections/' . $cslug) }}" style="display: inline-block; background: rgba(255,255,255,0.18); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.25); transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.28)'" onmouseout="this.style.background='rgba(255,255,255,0.18)'">{{ $clabel }}</a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @push('styles')
+            <style>
+                @media (min-width: 992px) {
+                    .cta-compare-grid { grid-template-columns: 1.4fr 1fr !important; gap: 36px !important; }
+                }
+            </style>
+            @endpush
+        </section>
+
         {{-- Section 1.5 : Outils interactifs gratuits (#15 S84 — push exposition GA4 30j sudoku 36:10 / mots-croises 17:42 record engagement vs reach faible 26/99 vues) --}}
         <section class="hp-section hp-section-alt">
             <div class="container">
