@@ -9,36 +9,37 @@
 @endsection
 
 @push('head')
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Méthodologie & charte éditoriale — La veille",
-  "description": "Comment La veille évalue les outils IA, source les actualités et garantit son indépendance éditoriale.",
-  "datePublished": "2026-05-09",
-  "dateModified": "{{ now()->toIso8601String() }}",
-  "inLanguage": "fr-CA",
-  "author": {
-    "@type": "Person",
-    "name": "Stéphane Lapointe",
-    "url": "{{ url('/auteur/stephane-lapointe') }}",
-    "jobTitle": "Veille IA & Transformation numérique Québec"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "La veille",
-    "url": "{{ url('/') }}",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "{{ asset('images/logo-horizontal-white.svg') }}"
-    }
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "{{ url()->current() }}"
-  }
-}
-</script>
+@php
+    $methodologieJsonLd = json_encode([
+        chr(64).'context' => 'https://schema.org',
+        chr(64).'type' => 'Article',
+        'headline' => 'Méthodologie & charte éditoriale — La veille',
+        'description' => 'Comment La veille évalue les outils IA, source les actualités et garantit son indépendance éditoriale.',
+        'datePublished' => '2026-05-09',
+        'dateModified' => now()->toIso8601String(),
+        'inLanguage' => 'fr-CA',
+        'author' => [
+            chr(64).'type' => 'Person',
+            'name' => 'Stéphane Lapointe',
+            'url' => url('/auteur/stephane-lapointe'),
+            'jobTitle' => 'Veille IA & Transformation numérique Québec',
+        ],
+        'publisher' => [
+            chr(64).'type' => 'Organization',
+            'name' => 'La veille',
+            'url' => url('/'),
+            'logo' => [
+                chr(64).'type' => 'ImageObject',
+                'url' => asset('images/logo-horizontal-white.svg'),
+            ],
+        ],
+        'mainEntityOfPage' => [
+            chr(64).'type' => 'WebPage',
+            chr(64).'id' => url()->current(),
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+@endphp
+<script type="application/ld+json">{!! $methodologieJsonLd !!}</script>
 @endpush
 
 @section('content')

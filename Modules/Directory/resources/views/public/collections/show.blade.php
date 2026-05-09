@@ -5,41 +5,40 @@
 @section('meta_description', $collection->description ?: 'Collection d\'outils ' . $collection->name . ' — ' . $collection->tools->count() . ' outils sélectionnés.')
 
 @push('head')
-{{-- Schema.org ItemList — best practice 2026 SEO/AI Overviews #43 S90 --}}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "name": @json($collection->name),
-  "description": @json($collection->description ?: 'Collection d\'outils — ' . $collection->tools->count() . ' outils sélectionnés.'),
-  "url": @json(url()->current()),
-  "numberOfItems": {{ $collection->tools->count() }},
-  "itemListOrder": "https://schema.org/ItemListOrderAscending",
-  "inLanguage": "fr-CA",
-  "author": {
-    "@type": "Person",
-    "name": @json($collection->user->name ?? 'Stéphane Lapointe'),
-    "url": @json(url('/auteur/stephane-lapointe'))
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "La veille",
-    "url": @json(url('/'))
-  },
-  "itemListElement": [
-@foreach($collection->tools as $idx => $tool)
-    {
-      "@type": "ListItem",
-      "position": {{ $idx + 1 }},
-      "url": @json(route('directory.show', $tool->slug)),
-      "name": @json($tool->name),
-      "description": @json(\Illuminate\Support\Str::limit(strip_tags($tool->getTranslation('short_description', 'fr_CA') ?: $tool->getTranslation('short_description', 'fr') ?: ''), 160))
-    }@if(!$loop->last),@endif
-
-@endforeach
-  ]
-}
-</script>
+@php
+    // Schema.org ItemList — best practice 2026 SEO/AI Overviews #43 S90
+    $itemListJsonLd = json_encode([
+        chr(64).'context' => 'https://schema.org',
+        chr(64).'type' => 'ItemList',
+        'name' => $collection->name,
+        'description' => $collection->description ?: 'Collection d\'outils — ' . $collection->tools->count() . ' outils sélectionnés.',
+        'url' => url()->current(),
+        'numberOfItems' => $collection->tools->count(),
+        'itemListOrder' => 'https://schema.org/ItemListOrderAscending',
+        'inLanguage' => 'fr-CA',
+        'author' => [
+            chr(64).'type' => 'Person',
+            'name' => $collection->user->name ?? 'Stéphane Lapointe',
+            'url' => url('/auteur/stephane-lapointe'),
+        ],
+        'publisher' => [
+            chr(64).'type' => 'Organization',
+            'name' => 'La veille',
+            'url' => url('/'),
+        ],
+        'itemListElement' => $collection->tools->values()->map(function ($tool, $idx) {
+            $shortDesc = $tool->getTranslation('short_description', 'fr_CA') ?: $tool->getTranslation('short_description', 'fr') ?: '';
+            return [
+                chr(64).'type' => 'ListItem',
+                'position' => $idx + 1,
+                'url' => route('directory.show', $tool->slug),
+                'name' => $tool->name,
+                'description' => \Illuminate\Support\Str::limit(strip_tags($shortDesc), 160),
+            ];
+        })->all(),
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+@endphp
+<script type="application/ld+json">{!! $itemListJsonLd !!}</script>
 @endpush
 
 @section('content')
