@@ -124,8 +124,6 @@ class EditorialCollectionsSeeder extends Seeder
                     'tool_id' => (int) $toolId,
                     'position' => $position,
                     'added_at' => $now,
-                    'created_at' => $now,
-                    'updated_at' => $now,
                 ]);
                 $position++;
                 $added++;
