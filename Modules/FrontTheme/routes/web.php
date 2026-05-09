@@ -20,6 +20,11 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::get('/plan-du-site', [\Modules\FrontTheme\Http\Controllers\SitemapHtmlController::class, 'index'])->name('sitemap.html')->middleware('cacheResponse:3600');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 
+    // Page méthodologie & charte éditoriale EEAT 2026 (S90 #43)
+    Route::view('/methodologie', 'fronttheme::methodologie')
+        ->name('methodologie')
+        ->middleware('cacheResponse:3600');
+
     // Page auteur EEAT 2026 NN/g (#218 S84 — Schema.org Person + sameAs LinkedIn)
     Route::get('/auteur/{slug}', [\Modules\FrontTheme\Http\Controllers\AuthorController::class, 'show'])
         ->where('slug', '[a-z0-9-]+')

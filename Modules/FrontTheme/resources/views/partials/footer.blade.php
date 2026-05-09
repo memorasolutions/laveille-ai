@@ -54,6 +54,9 @@
                             @if(Route::has('faq.index'))
                                 <li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>
                             @endif
+                            @if(Route::has('methodologie'))
+                                <li><a href="{{ route('methodologie') }}">{{ __('Méthodologie') }}</a></li>
+                            @endif
                             <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
                             @if(Route::has('legal.privacy'))
                                 <li><a href="{{ route('legal.privacy') }}">{{ __('Confidentialité') }}</a></li>
