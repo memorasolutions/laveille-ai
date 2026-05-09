@@ -36,6 +36,7 @@
                     👁 {{ number_format($tool->clicks_count, 0, ',', ' ') }}
                 </span>
             @endif
+            <x-directory::tool-freshness-badge :tool="$tool" :compact="true" />
         </div>
     </div>
 </a>

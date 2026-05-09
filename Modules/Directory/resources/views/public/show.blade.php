@@ -342,6 +342,7 @@
             <span class="rt-badge" style="background: #F3E8FF; color: #7E22CE;">{{ ucfirst($tool->website_type ?? 'website') }}</span>
             @if($tool->launch_year)<span style="color: #6B7280; font-size: 0.8rem;">🚀 {{ $tool->launch_year }}</span>@endif
             <span style="color: #6B7280; font-size: 0.8rem;">{{ number_format($tool->clicks_count) }} {{ __('clics') }}</span>
+            <x-directory::tool-freshness-badge :tool="$tool" />
             {{-- Boutons partage inline retirés — remplacés par la floating share bar globale --}}
         </div>
         @if($tool->categories->isNotEmpty())

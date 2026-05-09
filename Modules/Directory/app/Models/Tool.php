@@ -85,6 +85,7 @@ class Tool extends Model implements Searchable
         'review',
         'tutorials_last_scanned_at', // 2026-05-05 #138 : fix critique - sans ca, tools:enrich-tutorials re-scannait toujours les memes 10 outils.
         'underlying_model', 'is_multimodal', 'output_types', 'opt_out_training', 'unique_value',
+        'last_change_detected_at', 'last_change_type', 'last_change_note', // S90 #43 freshness signals
     ];
 
     public function submitter(): BelongsTo
@@ -173,6 +174,7 @@ class Tool extends Model implements Searchable
         'aliases' => 'array',
         'is_multimodal' => 'boolean',
         'output_types' => 'array',
+        'last_change_detected_at' => 'datetime', // S90 #43 freshness signals
     ];
 
     public function setPricingAttribute($value): void
