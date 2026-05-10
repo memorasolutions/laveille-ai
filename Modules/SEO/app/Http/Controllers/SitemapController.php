@@ -211,6 +211,17 @@ class SitemapController
             $sitemap->add(Url::create(route('newsletter.archive'))->setPriority(0.5)->setChangeFrequency('monthly'));
         }
 
+        // Pages éditoriales et techniques S90 #43 (EEAT + transparence + API)
+        foreach ([
+            'methodologie' => ['priority' => 0.9, 'freq' => 'monthly'],     // Charte éditoriale (signal EEAT fort)
+            'api.docs'     => ['priority' => 0.6, 'freq' => 'monthly'],     // Doc API publique
+            'stats.public' => ['priority' => 0.5, 'freq' => 'weekly'],      // Compteurs vivants
+        ] as $routeName => $cfg) {
+            if (Route::has($routeName)) {
+                $sitemap->add(Url::create(route($routeName))->setPriority($cfg['priority'])->setChangeFrequency($cfg['freq']));
+            }
+        }
+
         return response($sitemap->render(), 200, ['Content-Type' => 'application/xml']);
     }
 }
