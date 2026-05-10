@@ -1,9 +1,13 @@
 # robots.txt — laveille.ai
-# SEO + GEO (Generative Engine Optimization)
+# SEO + GEO/AEO 2026 (Generative Engine Optimization)
+# Stratégie : opt-in maximal pour bots IA légitimes (training + search + agentic)
+# afin d'être cité dans ChatGPT, Claude, Perplexity, Gemini, Copilot.
+# Maintenu par Stéphane Lapointe (Memora solutions). Dernière révision : S90 #43.
 
-# Moteurs de recherche classiques
+# ── Moteurs de recherche classiques ──
 User-agent: *
 Allow: /
+Allow: /api/v1/directory/
 Disallow: /admin
 Disallow: /user
 Disallow: /login
@@ -11,23 +15,14 @@ Disallow: /dashboard
 Disallow: /s/
 Disallow: /api/
 
-# Bots IA autorises (GEO — pour etre cite dans les reponses IA)
+# ── Bots IA training (autorisés — pour intégration dans modèles futurs) ──
 User-agent: GPTBot
-Allow: /
-
-User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: ChatGPT-User
 Allow: /
 
 User-agent: ClaudeBot
 Allow: /
 
-User-agent: Claude-SearchBot
-Allow: /
-
-User-agent: PerplexityBot
+User-agent: anthropic-ai
 Allow: /
 
 User-agent: Google-Extended
@@ -36,23 +31,66 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-# Bots de scraping bloques (pas de citation, juste du scraping)
 User-agent: CCBot
-Disallow: /
+Allow: /
 
-User-agent: anthropic-ai
-Disallow: /
+User-agent: cohere-ai
+Allow: /
 
+User-agent: Diffbot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+# ── Bots IA search/agentic (autorisés — pour citations en temps réel) ──
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: GeminiBot
+Allow: /
+
+# ── Bots SEO professionnels (autorisés) ──
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# ── Bots scraping commerciaux non désirés ──
 User-agent: Bytespider
 Disallow: /
 
 User-agent: FacebookBot
 Disallow: /
 
-# Fichiers SEO
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+# ── Fichiers SEO ──
 Sitemap: https://laveille.ai/sitemap.xml
 Sitemap: https://laveille.ai/news-sitemap.xml
 
-# Fichiers GEO/AEO (instructions pour les LLMs)
-# llms.txt: https://laveille.ai/llms.txt
-# llms-full.txt: https://laveille.ai/llms-full.txt
+# ── Fichiers GEO/AEO (instructions pour les LLMs) ──
+# llms.txt + llms-full.txt disponibles à la racine
