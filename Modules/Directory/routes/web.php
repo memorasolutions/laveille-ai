@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Directory\Http\Controllers\Admin\DirectoryAdminController;
 use Modules\Directory\Http\Controllers\Admin\ModerationController;
+use Modules\Directory\Http\Controllers\CategorySubscriptionController;
 use Modules\Directory\Http\Controllers\CommunityController;
 use Modules\Directory\Http\Controllers\LeaderboardController;
 use Modules\Directory\Http\Controllers\ProfileController;
@@ -32,7 +33,16 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/user/collections', [CollectionController::class, 'store'])->name('collections.store');
     Route::delete('/user/collections/{collection}', [CollectionController::class, 'destroy'])->name('collections.destroy');
     Route::post('/api/collections/toggle-tool', [CollectionController::class, 'toggleTool'])->name('collections.toggle-tool');
+
+    // Alertes catégorie S90 #43 — souscription/désinscription AJAX
+    Route::post('/annuaire/categorie/{slug}/alerte', [CategorySubscriptionController::class, 'toggle'])
+        ->name('directory.category.alert.toggle')
+        ->middleware('throttle:30,1');
 });
+
+// Statut alerte catégorie (lecture, sans auth obligatoire — retourne authenticated:false)
+Route::middleware('web')->get('/annuaire/categorie/{slug}/alerte/statut', [CategorySubscriptionController::class, 'status'])
+    ->name('directory.category.alert.status');
 
 // Soumission + communauté (authenticated users)
 Route::middleware(['web', 'auth'])->group(function () {
