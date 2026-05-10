@@ -36,6 +36,11 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         ->name('api.docs')
         ->middleware('cacheResponse:3600');
 
+    // Stats publiques (S90 #43 — signal autorité + transparence type Plausible)
+    Route::get('/stats', [\Modules\FrontTheme\Http\Controllers\StatsController::class, 'index'])
+        ->name('stats.public')
+        ->middleware('cacheResponse:3600');
+
     // Page auteur EEAT 2026 NN/g (#218 S84 — Schema.org Person + sameAs LinkedIn)
     Route::get('/auteur/{slug}', [\Modules\FrontTheme\Http\Controllers\AuthorController::class, 'show'])
         ->where('slug', '[a-z0-9-]+')

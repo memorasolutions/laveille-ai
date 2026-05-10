@@ -50,6 +50,9 @@
                             @if(Route::has('api.docs'))
                                 <li><a href="{{ route('api.docs') }}" title="{{ __('API JSON publique') }}">🔌 {{ __('API publique') }}</a></li>
                             @endif
+                            @if(Route::has('stats.public'))
+                                <li><a href="{{ route('stats.public') }}" title="{{ __('Statistiques publiques temps réel') }}">📊 {{ __('Statistiques') }}</a></li>
+                            @endif
                         </ul>
                     </div>
                 </div>
