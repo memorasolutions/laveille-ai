@@ -48,6 +48,9 @@
 
     $pricingEmojis = \Modules\Directory\Support\PricingCategories::emojis();
     $catCount = $categories->count();
+
+    // S90 #43 Phase 2 — map slug → name pour bouton alerte réactif (filtre catégorie client-side)
+    $categoryNamesBySlug = $categories->pluck('name', 'slug')->toArray();
 @endphp
 
 @push('styles')
@@ -673,6 +676,99 @@
             'currentRoute' => 'index',
             'activeSlug' => null,
         ])
+
+        {{-- S90 #43 Phase 2 — Bouton alerte catégorie réactif (apparaît uniquement quand une catégorie est filtrée) --}}
+        <div
+            x-data="{
+                catNames: @js($categoryNamesBySlug),
+                loading: false,
+                authenticated: false,
+                subscribed: false,
+                message: '',
+                error: '',
+                loginUrl: @js(route('login')),
+                async refreshStatus() {
+                    if (!this.activeCategory) { this.subscribed = false; this.error = ''; this.message = ''; return; }
+                    this.loading = true; this.error = '';
+                    try {
+                        const res = await fetch('/annuaire/categorie/' + encodeURIComponent(this.activeCategory) + '/alerte/statut', { headers: { 'Accept': 'application/json' } });
+                        const data = await res.json();
+                        this.authenticated = !!data.authenticated;
+                        this.subscribed = !!data.subscribed;
+                    } catch (e) {
+                        this.error = '{{ __('Statut indisponible.') }}';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async toggleAlert() {
+                    if (!this.activeCategory) return;
+                    if (!this.authenticated) {
+                        window.location.href = this.loginUrl + '?redirect_to=' + encodeURIComponent(window.location.href);
+                        return;
+                    }
+                    this.loading = true; this.message = ''; this.error = '';
+                    try {
+                        const res = await fetch('/annuaire/categorie/' + encodeURIComponent(this.activeCategory) + '/alerte', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            credentials: 'same-origin',
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.subscribed = !!data.subscribed;
+                            this.message = data.message || '';
+                            setTimeout(() => { this.message = ''; }, 3500);
+                        } else {
+                            this.error = data.message || '{{ __('Erreur') }}';
+                            if (data.login_url) window.location.href = data.login_url + '?redirect_to=' + encodeURIComponent(window.location.href);
+                        }
+                    } catch (e) {
+                        this.error = '{{ __('Erreur réseau') }}';
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }"
+            x-init="$watch('activeCategory', () => refreshStatus()); refreshStatus()"
+            x-show="activeCategory"
+            x-cloak
+            x-transition.opacity
+            role="region"
+            aria-live="polite"
+            style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 18px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(6,78,90,0.04) 0%, rgba(154,42,6,0.03) 100%); border: 1px solid rgba(6,78,90,0.18); border-radius: var(--r-base);"
+        >
+            <span style="font-size: 14px; color: var(--c-dark); font-weight: 600;">
+                🔔 <span x-text="subscribed ? '{{ __('Vous êtes alerté pour') }} : ' : '{{ __('Recevoir un récap hebdo des nouveautés de cette catégorie ?') }}'"></span>
+                <strong x-text="catNames[activeCategory] || activeCategory" style="color: var(--c-primary, #064E5A);"></strong>
+            </span>
+            <button
+                type="button"
+                @click="toggleAlert()"
+                :disabled="loading"
+                :aria-pressed="subscribed"
+                x-bind:title="subscribed ? '{{ __('Désactiver les alertes') }}' : '{{ __('Activer les alertes hebdomadaires') }}'"
+                style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; border: 1.5px solid; margin-left: auto;"
+                :style="subscribed
+                    ? 'background: var(--c-primary, #064E5A); color: #fff; border-color: var(--c-primary, #064E5A);'
+                    : 'background: #fff; color: var(--c-primary, #064E5A); border-color: var(--c-primary, #064E5A);'"
+            >
+                <span x-show="!loading && !subscribed" aria-hidden="true">🔔</span>
+                <span x-show="!loading && subscribed" aria-hidden="true">✓</span>
+                <span x-show="loading" aria-hidden="true">⏳</span>
+                <span x-show="!loading && !authenticated">{{ __("Recevoir les alertes") }}</span>
+                <span x-show="!loading && authenticated && !subscribed">{{ __("M'alerter") }}</span>
+                <span x-show="!loading && authenticated && subscribed">{{ __('Alertes actives') }}</span>
+                <span x-show="loading">{{ __('Chargement…') }}</span>
+            </button>
+            <span x-show="message" x-cloak x-transition style="font-size: 13px; color: #14532d; font-weight: 600; flex-basis: 100%;" role="status" aria-live="polite" x-text="message"></span>
+            <span x-show="error" x-cloak style="font-size: 13px; color: #991b1b; font-weight: 600; flex-basis: 100%;" role="alert" x-text="error"></span>
+        </div>
 
         {{-- Bandeau résultats de recherche (visible seulement quand recherche active) --}}
         <div x-show="search" x-cloak x-transition style="background: var(--c-primary-light); border: 1px solid var(--c-primary); border-radius: var(--r-base); padding: 12px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
