@@ -448,7 +448,7 @@
                     <a href="https://laveille.ai" style="display:inline-block;background-color:#0B7285;color:#fff;padding:12px 28px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Visiter laveille.ai</a>
                 </td></tr>
                 <tr><td align="center" style="font-size:12px;color:#666;padding-bottom:10px;">
-                    <a href="https://www.facebook.com/LaVeilleAI" style="color:#666;text-decoration:none;">Facebook</a>
+                    <a href="{{ lv_social('facebook') }}" style="color:#666;text-decoration:none;">Facebook</a>
                     &nbsp;&middot;&nbsp;
                     <a href="https://www.linkedin.com/in/lapointestephane/" style="color:#666;text-decoration:none;">LinkedIn</a>
                     &nbsp;&middot;&nbsp;

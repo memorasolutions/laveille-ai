@@ -37,7 +37,7 @@ final class JsonLdService
                 'availableLanguage' => 'French',
             ],
             'sameAs' => [
-                'https://www.facebook.com/LaVeilleAI',
+                lv_social('facebook'),
                 'https://www.linkedin.com/in/lapointestephane/',
             ],
         ];
@@ -172,7 +172,7 @@ final class JsonLdService
                 'url' => url('/auteur/stephane-lapointe'),
                 'sameAs' => [
                     'https://www.linkedin.com/in/lapointestephane/',
-                    'https://www.facebook.com/LaVeilleAI',
+                    lv_social('facebook'),
                 ],
                 'knowsAbout' => [
                     'Intelligence artificielle',
@@ -256,7 +256,7 @@ final class JsonLdService
                 'url' => asset('images/favicon.png'),
             ],
             'sameAs' => [
-                'https://www.facebook.com/LaVeilleAI',
+                lv_social('facebook'),
                 'https://www.linkedin.com/in/lapointestephane/',
             ],
             'foundingDate' => '2026',

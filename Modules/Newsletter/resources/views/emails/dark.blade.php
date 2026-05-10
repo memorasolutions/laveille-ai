@@ -49,7 +49,7 @@
 
 <!-- Footer -->
 <tr><td style="padding:20px;text-align:center;font-size:12px;color:#475569;">
-<a href="{{ \Modules\Settings\Facades\Settings::get('social.facebook_page_url', 'https://www.facebook.com/LaVeilleAI') }}" style="color:#64748b;text-decoration:none;">Facebook</a> &nbsp;|&nbsp; <a href="{{ config('app.url') }}" style="color:#64748b;text-decoration:none;">Site web</a>
+<a href="{{ lv_social('facebook') }}" style="color:#64748b;text-decoration:none;">Facebook</a> &nbsp;|&nbsp; <a href="{{ config('app.url') }}" style="color:#64748b;text-decoration:none;">Site web</a>
 <p style="margin:10px 0 5px;">&copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits reserves.</p>
 <p style="margin:0 0 10px;">{{ \Modules\Settings\Facades\Settings::get('contact.address', "L'Ancienne-Lorette, QC, Canada") }}</p>
 <a href="{{ $unsubscribeUrl }}" style="color:#f97316;text-decoration:underline;">Se desabonner</a>

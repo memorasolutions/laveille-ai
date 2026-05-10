@@ -107,7 +107,7 @@
             <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url('/annuaire/classement')) }}" target="_blank" rel="noopener" style="background:#1877f2;color:#fff;border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;">
                 <i class="fa fa-facebook"></i> Facebook
             </a>
-            <a href="{{ \Modules\Settings\Facades\Settings::get('social.messenger_url', 'https://m.me/LaVeilleAI') }}" target="_blank" rel="noopener" style="background:#0084FF;color:#fff;border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;">
+            <a href="{{ lv_social('messenger') }}" target="_blank" rel="noopener" style="background:#0084FF;color:#fff;border:none;padding:10px 20px;border-radius:0.5rem;font-weight:600;font-size:13px;text-decoration:none;display:inline-block;">
                 <i class="fa fa-comment"></i> Messenger
             </a>
         </div>
