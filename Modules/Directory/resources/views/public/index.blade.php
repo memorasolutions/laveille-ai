@@ -677,7 +677,10 @@
             'activeSlug' => null,
         ])
 
-        {{-- S90 #43 Phase 2 — Bouton alerte catégorie réactif (apparaît uniquement quand une catégorie est filtrée) --}}
+        {{-- S90 #43 Phase 2 — Bouton alerte catégorie réactif (apparaît uniquement quand une catégorie est filtrée).
+             Désactivé tant que Phase 3 (cron weekly digest + email Brevo) n'est pas livrée.
+             Réactiver via DIRECTORY_CATEGORY_ALERTS_ENABLED=true dans .env. --}}
+        @if(config('directory.category_alerts.enabled', false))
         <div
             x-data="{
                 catNames: @js($categoryNamesBySlug),
@@ -769,6 +772,7 @@
             <span x-show="message" x-cloak x-transition style="font-size: 13px; color: #14532d; font-weight: 600; flex-basis: 100%;" role="status" aria-live="polite" x-text="message"></span>
             <span x-show="error" x-cloak style="font-size: 13px; color: #991b1b; font-weight: 600; flex-basis: 100%;" role="alert" x-text="error"></span>
         </div>
+        @endif
 
         {{-- Bandeau résultats de recherche (visible seulement quand recherche active) --}}
         <div x-show="search" x-cloak x-transition style="background: var(--c-primary-light); border: 1px solid var(--c-primary); border-radius: var(--r-base); padding: 12px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">

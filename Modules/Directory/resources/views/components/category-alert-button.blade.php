@@ -1,5 +1,9 @@
 @props(['categorySlug', 'categoryName' => null])
 
+{{-- S90 #43 — Désactivé tant que Phase 3 (cron weekly digest) n'est pas livrée.
+     Réactiver via DIRECTORY_CATEGORY_ALERTS_ENABLED=true. --}}
+@if(config('directory.category_alerts.enabled', false))
+
 @php
     /**
      * S90 #43 — Bouton d'alerte catégorie (Phase 2 retention).
@@ -95,3 +99,5 @@
     <span x-show="message" x-cloak x-transition style="font-size: 13px; color: #14532d; font-weight: 600;" role="status" aria-live="polite" x-text="message"></span>
     <span x-show="error" x-cloak style="font-size: 13px; color: #991b1b; font-weight: 600;" role="alert" x-text="error"></span>
 </div>
+
+@endif

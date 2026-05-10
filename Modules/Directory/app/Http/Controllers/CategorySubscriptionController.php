@@ -16,8 +16,17 @@ use Modules\Directory\Models\UserCategorySubscription;
  */
 class CategorySubscriptionController extends Controller
 {
+    private function ensureEnabled(): void
+    {
+        if (! (bool) config('directory.category_alerts.enabled', false)) {
+            abort(404);
+        }
+    }
+
     public function toggle(Request $request, string $slug): JsonResponse
     {
+        $this->ensureEnabled();
+
         if (! auth()->check()) {
             return response()->json([
                 'success' => false,
@@ -60,6 +69,8 @@ class CategorySubscriptionController extends Controller
 
     public function status(string $slug): JsonResponse
     {
+        $this->ensureEnabled();
+
         if (! auth()->check()) {
             return response()->json(['subscribed' => false, 'authenticated' => false]);
         }

@@ -31,4 +31,17 @@ return [
     'pricing_audit' => [
         'screenshot_enabled' => (bool) env('DIRECTORY_PRICING_AUDIT_SCREENSHOT', false),
     ],
+
+    /*
+     * S90 #43 — Alertes catégorie hebdomadaires.
+     *
+     * Phase 2 livrée (UI + DB + routes). Phase 3 (cron + email Brevo) NON livrée.
+     * Tant que Phase 3 n'est pas prête, l'UI reste cachée. Les routes/controller/DB
+     * sont en place mais dormantes (pas de chemin vers elles depuis l'UI publique).
+     *
+     * Pour réactiver quand Phase 3 sera prête : DIRECTORY_CATEGORY_ALERTS_ENABLED=true
+     */
+    'category_alerts' => [
+        'enabled' => (bool) env('DIRECTORY_CATEGORY_ALERTS_ENABLED', false),
+    ],
 ];
