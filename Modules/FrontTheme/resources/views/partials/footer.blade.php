@@ -98,7 +98,7 @@
                             @endif
                             {{-- Lien Propositions retiré du footer (décision utilisateur 2026-03-28) --}}
                             <li><a href="{{ lv_social('facebook') }}" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/1.png') }}" alt="Facebook" loading="lazy"></i> Facebook</a></li>
-                            <li><a href="{{ lv_social('messenger') }}" target="_blank" rel="noopener"><i><img src="{{ fronttheme_asset('images/ft-icon/2.png') }}" alt="Messenger" loading="lazy"></i> Messenger</a></li>
+                            <li><a href="{{ lv_social('messenger') }}" target="_blank" rel="noopener"><i><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="20" height="20" aria-hidden="true" focusable="false"><defs><linearGradient id="lvMsgrG" x1="9" y1="32" x2="27" y2="2" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0099FF"/><stop offset="1" stop-color="#A033FF"/></linearGradient></defs><path fill="url(#lvMsgrG)" d="M18 0C8.06 0 0 7.46 0 16.66c0 5.24 2.61 9.91 6.69 12.96V36l6.13-3.36c1.63.45 3.36.69 5.18.69 9.94 0 18-7.46 18-16.67S27.94 0 18 0z"/><path fill="#fff" d="M19.79 22.43l-4.59-4.91-8.95 4.91L15.06 12.7l4.7 4.91 8.84-4.91-8.81 9.73z"/></svg></i> Messenger</a></li>
                             @guest
                                 <li><a href="{{ route('login') }}" target="_blank" rel="noopener">🔑 {{ __('Se connecter') }}</a></li>
                             @endguest
