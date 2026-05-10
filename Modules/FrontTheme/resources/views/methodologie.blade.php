@@ -57,7 +57,7 @@
                 <p style="font-size: 18px; color: #4b5563; margin: 0; line-height: 1.55;">
                     {{ __("Comment La veille sélectionne les outils, source les actualités et garde son indépendance. Voici les règles que je m'impose pour que ce site reste utile et crédible.") }}
                 </p>
-                <p style="font-size: 13px; color: #6b7280; margin: 16px 0 0;">
+                <p style="font-size: 13px; color: var(--c-text-muted, #52586a); margin: 16px 0 0;">
                     📅 {{ __('Dernière mise à jour') }} : <time datetime="{{ now()->toDateString() }}">{{ now()->isoFormat('LL') }}</time>
                 </p>
             </header>

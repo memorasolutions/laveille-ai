@@ -42,7 +42,7 @@
                     <code style="margin-left: 8px; font-size: 14px;">/api/v1/directory/tools</code>
                     <p style="margin: 10px 0 6px; color: #4b5563; font-size: 14px;">{{ __('Liste paginée des outils publiés.') }}</p>
                     <details style="margin-top: 8px; font-size: 13px;"><summary style="cursor: pointer; font-weight: 600;">{{ __('Paramètres optionnels') }}</summary>
-                    <ul style="margin: 8px 0 0 20px; color: #6b7280;">
+                    <ul style="margin: 8px 0 0 20px; color: var(--c-text-muted, #52586a);">
                         <li><code>page</code> — numéro de page (défaut 1)</li>
                         <li><code>per_page</code> — résultats par page (défaut 30, max 100)</li>
                         <li><code>category</code> — filtrer par slug de catégorie</li>

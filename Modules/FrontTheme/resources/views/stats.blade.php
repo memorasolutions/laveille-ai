@@ -65,7 +65,7 @@
                     <div style="font-size: 32px; line-height: 1;" aria-hidden="true">{{ $c['emoji'] }}</div>
                     <div style="font-weight: 800; font-size: clamp(28px, 3.4vw, 38px); margin: 12px 0 4px; color: var(--c-primary, #064E5A); font-variant-numeric: tabular-nums; letter-spacing: -0.5px;">{{ number_format($c['value'], 0, ',', ' ') }}</div>
                     <div style="font-weight: 700; font-size: 15px; color: var(--c-dark, #1a1d23); margin-bottom: 4px;">{{ $c['label'] }}</div>
-                    <div style="font-size: 13px; color: #6b7280; margin-bottom: 14px;">{{ $c['sub'] }}</div>
+                    <div style="font-size: 13px; color: var(--c-text-muted, #52586a); margin-bottom: 14px;">{{ $c['sub'] }}</div>
                     @if(!empty($c['cta']))
                         <a href="{{ $c['cta'] }}" style="display: inline-block; font-size: 13px; color: var(--c-primary, #064E5A); font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor;">{{ $c['cta_label'] }} →</a>
                     @endif
