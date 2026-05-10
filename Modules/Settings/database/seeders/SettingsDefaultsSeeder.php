@@ -146,8 +146,8 @@ class SettingsDefaultsSeeder extends Seeder
             'seo.meta_description' => ['value' => 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.', 'type' => 'string', 'group' => 'seo'],
 
             // GROUPE 'social'
-            'social.facebook_page_url' => ['value' => 'https://www.facebook.com/LaVeilleDeStef', 'type' => 'string', 'group' => 'social'],
-            'social.messenger_url' => ['value' => 'https://m.me/LaVeilleDeStef', 'type' => 'string', 'group' => 'social'],
+            'social.facebook_page_url' => ['value' => 'https://www.facebook.com/LaVeilleAI', 'type' => 'string', 'group' => 'social'],
+            'social.messenger_url' => ['value' => 'https://m.me/LaVeilleAI', 'type' => 'string', 'group' => 'social'],
 
             // GROUPE 'contact'
             'contact.address' => ['value' => "L'Ancienne-Lorette, QC, Canada", 'type' => 'string', 'group' => 'contact'],

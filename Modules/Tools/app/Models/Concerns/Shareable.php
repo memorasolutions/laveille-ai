@@ -24,7 +24,7 @@ trait Shareable
             ? \Illuminate\Support\Str::limit(strip_tags($this->description), 200)
             : 'Outil IA gratuit laveille.ai';
         $url = url('/outils/' . $this->slug . '?utm_source=share&utm_medium=clipboard');
-        $hashtags = ['#LaVeilleDeStef', '#IAQuebec', '#OutilsIA'];
+        $hashtags = ['#LaVeilleAI', '#IAQuebec', '#OutilsIA'];
         $keywords = $this->extractKeywords();
         $clipboardText = "\xF0\x9F\x9A\x80 " . $title . "\n\n" . $description . "\n\n\xE2\x9C\xA8 Pratique pour " . $keywords . "\n\xF0\x9F\x94\x97 " . $url . "\n\n" . implode(' ', $hashtags);
         $ogImage = $this->featured_image && file_exists(public_path($this->featured_image))
