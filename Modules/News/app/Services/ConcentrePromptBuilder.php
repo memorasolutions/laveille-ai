@@ -112,7 +112,7 @@ class ConcentrePromptBuilder
         return NewsArticle::query()
             ->where('is_published', true)
             ->whereBetween('pub_date', [$weekStart->copy()->startOfDay(), $weekEnd->copy()->endOfDay()])
-            ->with('newsSource:id,name,url')
+            ->with('source:id,name,url')
             ->orderByDesc('pub_date')
             ->get(['id', 'news_source_id', 'title', 'slug', 'url', 'summary', 'pub_date', 'category_tag', 'image_url']);
     }

@@ -71,7 +71,7 @@ class ConcentreBuilderController extends Controller
                 'pub_date_short' => $a->pub_date?->isoFormat('D MMM HH:mm'),
                 'category_tag' => $a->category_tag,
                 'image_url' => $a->image_url,
-                'source_name' => $a->newsSource?->name,
+                'source_name' => $a->source?->name,
                 'favicon' => $a->url ? 'https://www.google.com/s2/favicons?domain=' . parse_url($a->url, PHP_URL_HOST) . '&sz=32' : null,
                 'already_used' => isset($alreadyUsedUrls['/actualites/' . $a->slug]),
             ])->values(),
