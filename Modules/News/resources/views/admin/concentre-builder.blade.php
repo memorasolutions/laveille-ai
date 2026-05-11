@@ -4,12 +4,21 @@
 <style>
     .cb-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; margin-bottom:18px; }
     .cb-news-item { display:flex; gap:12px; padding:10px 12px; border:1px solid #e5e7eb; border-left:6px solid #94a3b8; border-radius:8px; background:#fff; margin-bottom:8px; transition:background .15s; align-items:flex-start; position:relative; }
-    .cb-palette { display:none; position:absolute; top:6px; right:6px; background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:3px 6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); gap:4px; z-index:10; }
+    /* Palette absolute (cards disponibles, hover only) */
+    .cb-palette { display:none; position:absolute; top:6px; right:6px; background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:3px 6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); gap:4px; z-index:10; align-items:center; }
     .cb-news-item:hover .cb-palette, .cb-palette.is-open { display:inline-flex; }
-    .cb-palette button { width:18px; height:18px; border-radius:50%; border:1.5px solid #fff; outline:1px solid #cbd5e1; cursor:pointer; padding:0; transition:transform .1s; }
-    .cb-palette button:hover { transform:scale(1.25); }
-    .cb-palette button.is-active { outline:2px solid #064E5A; outline-offset:1px; }
-    .cb-color-trigger { width:14px; height:14px; border-radius:50%; cursor:pointer; flex-shrink:0; border:1.5px solid #fff; outline:1px solid #cbd5e1; align-self:center; }
+    /* Palette inline (cards sélectionnées, toujours visible, après handle) */
+    .cb-palette-inline { display:inline-flex !important; position:static; padding:0; border:none; box-shadow:none; background:transparent; gap:3px; flex-shrink:0; align-self:center; }
+    /* Boutons palette : cercles forcés (width = height, pas de flex stretch) */
+    .cb-palette button, .cb-palette-inline button {
+        width:18px !important; height:18px !important; min-width:18px; min-height:18px;
+        border-radius:50%; border:1.5px solid #fff; outline:1px solid #cbd5e1;
+        cursor:pointer; padding:0; transition:transform .1s;
+        display:inline-flex; align-items:center; justify-content:center;
+        flex-shrink:0; box-sizing:border-box;
+    }
+    .cb-palette button:hover, .cb-palette-inline button:hover { transform:scale(1.25); }
+    .cb-palette button.is-active, .cb-palette-inline button.is-active { outline:2px solid #064E5A; outline-offset:1px; }
     .cb-news-item:hover { background:#f9fafb; }
     .cb-news-item.is-selected { border-color:#0B7285; background:#ecfeff; padding:6px 10px; align-items:center; }
     .cb-news-item.is-selected .cb-title { font-size:13px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -204,7 +213,9 @@
                 <div id="cb-sortable" style="min-height:80px;">
                     <template x-for="(id, idx) in selectedIds" :key="'sel-' + id">
                         <div class="cb-news-item is-selected" :data-id="id" :style="'border-left-color:' + colorForItem(itemById(id))">
-                            <div class="cb-palette">
+                            <span class="cb-handle" title="Glisser pour réordonner">⋮⋮</span>
+                            <span class="cb-position-badge" x-text="idx + 1"></span>
+                            <div class="cb-palette-inline">
                                 <template x-for="c in colorPalette" :key="'sp-' + id + '-' + c.value">
                                     <button type="button"
                                             :style="c.value ? ('background:' + c.value) : 'background:#fff'"
@@ -215,8 +226,6 @@
                                     </button>
                                 </template>
                             </div>
-                            <span class="cb-handle" title="Glisser pour réordonner">⋮⋮</span>
-                            <span class="cb-position-badge" x-text="idx + 1"></span>
                             <div style="flex:1; min-width:0;">
                                 <div class="cb-title" x-text="itemById(id)?.title || '(introuvable)'"></div>
                                 <div class="cb-meta">
