@@ -26,10 +26,10 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v2.'; // #222 bump : strip markdown inline
+    public const CACHE_KEY = 'glossary.terms.v3.'; // #138 bump : auto-extract qualifiers + MAX_LINKS 24
     public const CACHE_TTL = 3600; // 1h
     public const MIN_LENGTH = 4; // skip ≤3 chars (faux positifs IA, ML, AI)
-    public const MAX_LINKS_PER_PAGE = 12;
+    public const MAX_LINKS_PER_PAGE = 24; // #138 bump 12→24 : concentrés 20 URLs ont besoin de plus
 
     /**
      * 2026-05-05 #145 WSD : stop-list FR baseline (verbes/noms communs polysémiques).
@@ -158,7 +158,7 @@ class GlossaryLinkifier
                                 'name' => $name, 'slug' => $slug, 'definition' => $shortDef,
                                 'type' => 'glossary', 'url' => $url, 'match_strategy' => $strategy,
                             ];
-                            // Aliases (variations comme "tokens", "Tokens", etc.) - heritent strategy
+                            // 2026-05-11 #138 : aliases manuels DB
                             $aliases = is_array($t->aliases) ? $t->aliases : (is_string($t->aliases) ? json_decode($t->aliases, true) : []);
                             if (is_array($aliases)) {
                                 foreach ($aliases as $alias) {
@@ -169,6 +169,15 @@ class GlossaryLinkifier
                                         'match_strategy' => self::escalateStrategyIfStopList($alias, $strategy),
                                     ];
                                 }
+                            }
+                            // 2026-05-11 #138 : auto-extract qualifier "X (Y)" → aliases dérivés
+                            foreach (self::extractQualifierAliases($name) as $autoAlias) {
+                                if (mb_strlen($autoAlias) < 2) continue;
+                                $terms[] = [
+                                    'name' => $autoAlias, 'slug' => $slug, 'definition' => $shortDef,
+                                    'type' => 'glossary', 'url' => $url,
+                                    'match_strategy' => self::escalateStrategyIfStopList($autoAlias, $strategy),
+                                ];
                             }
                         });
                 } catch (\Throwable $e) {
@@ -220,6 +229,17 @@ class GlossaryLinkifier
                                     ];
                                 }
                             }
+                            // 2026-05-11 #138 : auto-extract qualifier "X (Y)" sur full_name
+                            if ($full) {
+                                foreach (self::extractQualifierAliases($full) as $autoAlias) {
+                                    if (mb_strlen($autoAlias) < 2) continue;
+                                    $terms[] = [
+                                        'name' => $autoAlias, 'slug' => $slug, 'definition' => $shortDesc,
+                                        'type' => 'acronym_alias', 'url' => $url,
+                                        'match_strategy' => self::escalateStrategyIfStopList($autoAlias, $strategy === 'case_sensitive' ? 'loose' : $strategy),
+                                    ];
+                                }
+                            }
                         });
                 } catch (\Throwable $e) {
                     Log::warning('GlossaryLinkifier - Acronym load fail', ['e' => $e->getMessage()]);
@@ -231,6 +251,38 @@ class GlossaryLinkifier
 
             return $terms;
         });
+    }
+
+    /**
+     * 2026-05-11 #138 : extrait aliases auto depuis un nom "X (Y)".
+     *
+     * Retourne :
+     * - la base "X" (toujours utile : "Loi 25 (Québec)" → "Loi 25")
+     * - le qualifier "Y" UNIQUEMENT si c'est un acronyme tout-majuscule (CNN, RNN, GAN, XAI, NAS, APE)
+     *   ou un mot capitalisé ≤10 chars (ReAct). Évite "Québec", "mécanisme", phrases descriptives.
+     *
+     * @return array<int, string> liste d'aliases auto-dérivés (peut être vide)
+     */
+    public static function extractQualifierAliases(string $name): array
+    {
+        if (! preg_match('/^(.+?)\s*\(([^)]+)\)\s*$/u', $name, $m)) {
+            return [];
+        }
+        $base = trim($m[1]);
+        $qualifier = trim($m[2]);
+        $out = [];
+
+        if ($base !== '' && $base !== $name) {
+            $out[] = $base;
+        }
+        // Push qualifier seulement si acronyme propre (évite faux positifs)
+        if ($qualifier !== '' && (
+            preg_match('/^[A-Z]{2,8}$/u', $qualifier) ||           // CNN, RNN, GAN, XAI, NAS, APE
+            preg_match('/^[A-Z][a-zA-Z]{1,9}$/u', $qualifier)      // ReAct, Adam
+        )) {
+            $out[] = $qualifier;
+        }
+        return $out;
     }
 
     /**
@@ -282,8 +334,10 @@ class GlossaryLinkifier
      */
     public static function flushCache(): void
     {
+        // #138 flush toutes les versions cache (v2 + v3) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            Cache::forget('glossary.terms.v2.'.$loc);
         }
     }
 

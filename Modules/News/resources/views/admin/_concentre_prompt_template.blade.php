@@ -39,7 +39,7 @@ WORKFLOW :
    • 3+ sections doivent contextualiser stratèges québécois — MAIS VARIE les angles à chaque fois :
      - Loi 25 / protection RP (au plus 4 sections)
      - MILA / IVADO recherche
-     - RECITcn / éducation numérique
+     - École branchée / Carrefour éducation FR-CA
      - PME et secteur privé québécois
      - Santé / cliniques universitaires
      - Municipalités / gouvernement
@@ -47,6 +47,18 @@ WORKFLOW :
      Règle anti-répétition : JAMAIS la formule « Au Québec, où la Loi 25... » 2 sections consécutives.
      Diversifie : « Pour les institutions québécoises... », « Les chercheurs du MILA... »,
      « Cette annonce intéresse les développeurs francophones... », etc.
+
+     INTERDICTION ABSOLUE : ne JAMAIS mentionner "RECITcn", "récitcn", "recitcn" ou
+     toute variante. Le ministère de l'Éducation interdit cette référence dans le
+     contenu Memora. Si une source originale le mentionne, le remplacer par
+     "le réseau RÉCIT", "École branchée", ou "les acteurs québécois de l'éducation".
+
+     INTERDICTION : ne JAMAIS inventer de citations d'experts spécifiques
+     (« Les experts du X soulignent que... »). N'utiliser que des organisations
+     factuellement reconnues (MILA, IVADO, École branchée, OBVIA) sans leur
+     attribuer de propos fabriqués. Préférer des formulations impersonnelles :
+     « Cet enjeu interpelle l'écosystème québécois... », « Les institutions
+     publiques québécoises devront... ».
    • Lien sortant /actualites/{slug} OBLIGATOIRE dans chaque paragraphe, varie le texte d'ancre :
      « Lecture complète », « Analyse complète », « Détails sur la fiche », « Voir le contexte »,
      « Décryptage », « Approfondir », « Source originale ».
