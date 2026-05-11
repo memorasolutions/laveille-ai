@@ -29,7 +29,7 @@ class GlossaryLinkifier
     public const CACHE_KEY = 'glossary.terms.v8.'; // #158 bump cache après multi-occurrence par terme
     public const CACHE_TTL = 3600; // 1h
     public const MIN_LENGTH = 3; // #153 bump : 4→3 pour permettre TPU/GPU/NPU. Garde 2 chars rejetés via acronyme tout-cap check
-    public const MAX_LINKS_PER_PAGE = 60; // #158 bump 24→60 : permet tooltips multi-occurrences par terme sans saturer
+    public const MAX_LINKS_PER_PAGE = 120; // #158 bump 60→120 : articles longs (S90 concentré 20 URLs) saturent à 60. 120 couvre 80%+ occurrences
     public const MAX_OCCURRENCES_PER_TERM = 10; // #158 wrap jusqu'à 10× le même terme par page (vs 1× avant)
 
     /**
