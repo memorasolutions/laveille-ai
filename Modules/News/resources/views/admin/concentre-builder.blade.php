@@ -4,21 +4,37 @@
 <style>
     .cb-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; margin-bottom:18px; }
     .cb-news-item { display:flex; gap:12px; padding:10px 12px; border:1px solid #e5e7eb; border-left:6px solid #94a3b8; border-radius:8px; background:#fff; margin-bottom:8px; transition:background .15s; align-items:flex-start; position:relative; }
-    /* Palette absolute (cards disponibles, hover only) */
-    .cb-palette { display:none; position:absolute; top:6px; right:6px; background:#fff; border:1px solid #e5e7eb; border-radius:20px; padding:3px 6px; box-shadow:0 4px 12px rgba(0,0,0,0.1); gap:4px; z-index:10; align-items:center; }
-    .cb-news-item:hover .cb-palette, .cb-palette.is-open { display:inline-flex; }
-    /* Palette inline (cards sélectionnées, toujours visible, après handle) */
-    .cb-palette-inline { display:inline-flex !important; position:static; padding:0; border:none; box-shadow:none; background:transparent; gap:3px; flex-shrink:0; align-self:center; }
-    /* Boutons palette : cercles forcés (width = height, pas de flex stretch) */
-    .cb-palette button, .cb-palette-inline button {
-        width:18px !important; height:18px !important; min-width:18px; min-height:18px;
-        border-radius:50%; border:1.5px solid #fff; outline:1px solid #cbd5e1;
-        cursor:pointer; padding:0; transition:transform .1s;
+    /* Color dot trigger : pastille cliquable montrant la couleur actuelle */
+    .cb-color-dot {
+        width:22px; height:22px; min-width:22px; min-height:22px;
+        border-radius:50%; border:2px solid #fff; outline:1px solid #cbd5e1;
+        cursor:pointer; padding:0; flex-shrink:0; box-sizing:border-box;
         display:inline-flex; align-items:center; justify-content:center;
-        flex-shrink:0; box-sizing:border-box;
+        transition:transform .12s, outline .12s;
+        align-self:center;
     }
-    .cb-palette button:hover, .cb-palette-inline button:hover { transform:scale(1.25); }
-    .cb-palette button.is-active, .cb-palette-inline button.is-active { outline:2px solid #064E5A; outline-offset:1px; }
+    .cb-color-dot:hover { transform:scale(1.15); outline-color:#064E5A; }
+    .cb-color-dot:focus-visible { outline:2px solid #064E5A; outline-offset:1px; }
+    .cb-color-wrapper { position:relative; display:inline-flex; align-self:center; }
+    /* Popover des choix */
+    .cb-color-popover {
+        position:absolute; top:calc(100% + 6px); right:0;
+        background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+        padding:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12);
+        z-index:1000;
+        display:grid; grid-template-columns:repeat(4, 28px); gap:6px;
+        width:auto;
+    }
+    .cb-color-popover button {
+        width:28px; height:28px; min-width:28px; min-height:28px;
+        border-radius:50%; border:2px solid #fff; outline:1px solid #cbd5e1;
+        cursor:pointer; padding:0; flex-shrink:0; box-sizing:border-box;
+        display:inline-flex; align-items:center; justify-content:center;
+        transition:transform .12s;
+    }
+    .cb-color-popover button:hover { transform:scale(1.18); }
+    .cb-color-popover button.is-active { outline:2.5px solid #064E5A; outline-offset:1px; }
+    .cb-color-popover .cb-clear { background:#fff; color:#dc2626; font-size:14px; font-weight:700; line-height:1; }
     .cb-news-item:hover { background:#f9fafb; }
     .cb-news-item.is-selected { border-color:#0B7285; background:#ecfeff; padding:6px 10px; align-items:center; }
     .cb-news-item.is-selected .cb-title { font-size:13px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -149,17 +165,6 @@
                             </div>
                             <template x-for="item in group.items" :key="item.id">
                                 <div class="cb-news-item" :style="'border-left-color:' + colorForItem(item)">
-                                    <div class="cb-palette">
-                                        <template x-for="c in colorPalette" :key="'p-' + item.id + '-' + c.value">
-                                            <button type="button"
-                                                    :style="c.value ? ('background:' + c.value) : 'background:#fff'"
-                                                    :class="{ 'is-active': (manualColors[item.id] || '') === c.value }"
-                                                    :title="c.label"
-                                                    @click="setColor(item.id, c.value); $event.stopPropagation()">
-                                                <span x-show="!c.value" style="font-size:10px; line-height:1; color:#dc2626;">×</span>
-                                            </button>
-                                        </template>
-                                    </div>
                                     <img :src="item.favicon" loading="lazy" class="cb-fav" alt="" onerror="this.style.display='none'">
                                     <div style="flex:1; min-width:0;">
                                         <div class="cb-title" x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></div>
@@ -174,6 +179,20 @@
                                         <div class="cb-actions mt-2">
                                             <a :href="item.site_url" target="_blank" rel="noopener">🔗 Lire sur le site</a>
                                             <a :href="item.source_url" target="_blank" rel="noopener" x-show="item.source_url">↗ Source</a>
+                                        </div>
+                                    </div>
+                                    <div class="cb-color-wrapper" x-data="{ open: false }" @click.outside="open = false">
+                                        <button type="button" class="cb-color-dot" :style="'background:' + colorForItem(item)" @click="open = !open" :title="'Couleur : ' + (manualColors[item.id] ? 'manuelle' : 'auto cluster')" aria-label="Choisir une couleur"></button>
+                                        <div class="cb-color-popover" x-show="open" x-cloak x-transition.opacity.duration.150ms>
+                                            <template x-for="c in colorPalette" :key="'p-' + item.id + '-' + c.value">
+                                                <button type="button"
+                                                        :class="['cb-color-choice', c.value ? '' : 'cb-clear', (manualColors[item.id] || '') === c.value ? 'is-active' : '']"
+                                                        :style="c.value ? ('background:' + c.value) : ''"
+                                                        :title="c.label"
+                                                        @click="setColor(item.id, c.value); open = false">
+                                                    <span x-show="!c.value">×</span>
+                                                </button>
+                                            </template>
                                         </div>
                                     </div>
                                     <button class="cb-btn" type="button" style="font-size:12px; padding:6px 10px; min-height:32px;" @click="selectItem(item.id)">+ Ajouter</button>
@@ -215,16 +234,19 @@
                         <div class="cb-news-item is-selected" :data-id="id" :style="'border-left-color:' + colorForItem(itemById(id))">
                             <span class="cb-handle" title="Glisser pour réordonner">⋮⋮</span>
                             <span class="cb-position-badge" x-text="idx + 1"></span>
-                            <div class="cb-palette-inline">
-                                <template x-for="c in colorPalette" :key="'sp-' + id + '-' + c.value">
-                                    <button type="button"
-                                            :style="c.value ? ('background:' + c.value) : 'background:#fff'"
-                                            :class="{ 'is-active': (manualColors[id] || '') === c.value }"
-                                            :title="c.label"
-                                            @click="setColor(id, c.value); $event.stopPropagation()">
-                                        <span x-show="!c.value" style="font-size:10px; line-height:1; color:#dc2626;">×</span>
-                                    </button>
-                                </template>
+                            <div class="cb-color-wrapper" x-data="{ open: false }" @click.outside="open = false">
+                                <button type="button" class="cb-color-dot" :style="'background:' + colorForItem(itemById(id))" @click="open = !open" :title="'Couleur : ' + (manualColors[id] ? 'manuelle' : 'auto cluster')" aria-label="Choisir une couleur"></button>
+                                <div class="cb-color-popover" x-show="open" x-cloak x-transition.opacity.duration.150ms>
+                                    <template x-for="c in colorPalette" :key="'sp-' + id + '-' + c.value">
+                                        <button type="button"
+                                                :class="['cb-color-choice', c.value ? '' : 'cb-clear', (manualColors[id] || '') === c.value ? 'is-active' : '']"
+                                                :style="c.value ? ('background:' + c.value) : ''"
+                                                :title="c.label"
+                                                @click="setColor(id, c.value); open = false">
+                                            <span x-show="!c.value">×</span>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
                             <div style="flex:1; min-width:0;">
                                 <div class="cb-title" x-text="itemById(id)?.title || '(introuvable)'"></div>
