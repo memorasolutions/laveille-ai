@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v6.'; // #153 bump cache après MIN_LENGTH 4→3 pour acronymes
+    public const CACHE_KEY = 'glossary.terms.v7.'; // #153 bump cache après recursion bidirectionnelle before+after
     public const CACHE_TTL = 3600; // 1h
     public const MIN_LENGTH = 3; // #153 bump : 4→3 pour permettre TPU/GPU/NPU. Garde 2 chars rejetés via acronyme tout-cap check
     public const MAX_LINKS_PER_PAGE = 24; // #138 bump 12→24 : concentrés 20 URLs ont besoin de plus
@@ -515,10 +515,7 @@ class GlossaryLinkifier
             $before = substr($text, 0, $offset);
             $after = substr($text, $offset + strlen($matchedText));
 
-            // Build fragment
-            $fragment = [];
-            if ($before !== '') $fragment[] = $dom->createTextNode($before);
-
+            // Build <a> wrap
             $a = $dom->createElement('a');
             $a->appendChild($dom->createTextNode($matchedText));
             $a->setAttribute('href', $term['url']);
@@ -529,17 +526,26 @@ class GlossaryLinkifier
             // 2026-05-05 #141 : ouvre dans nouvel onglet pour preserver la lecture en cours
             $a->setAttribute('target', '_blank');
             $a->setAttribute('rel', 'noopener noreferrer');
-            $fragment[] = $a;
 
             // Mark seen (cumulatif inter-appels via static)
             $seen[$term['slug'].'|'.$term['type']] = true;
             self::$matchedThisRequest[$term['slug']] = $term;
             $linkCount++;
 
-            // 2026-05-11 #155 : récursion sur $after pour wraper plusieurs termes
-            // dans le MÊME text-node. Sans ça, on perdait toutes occurrences après
-            // le 1er match (cf bug user récurrent "Loi 25 sans tooltip" sur paragraphes
-            // contenant déjà MILA/IVADO/Loi 25 ensemble).
+            // 2026-05-11 #155+#153 : récursion BIDIRECTIONNELLE sur $before ET $after
+            // pour wraper TOUS les termes dans le MÊME text-node. Critique pour
+            // "Les GPU NVIDIA H100 et TPU Google..." où Google matchait en 1er
+            // (sort longueur DESC) et $before "Les GPU... TPU " perdait GPU+TPU.
+            $fragment = [];
+            if ($before !== '') {
+                $beforeFragment = self::matchInText($dom, $before, $terms, $seen, $linkCount, $maxLinks, $skipSlug);
+                if ($beforeFragment !== null) {
+                    $fragment = $beforeFragment;
+                } else {
+                    $fragment[] = $dom->createTextNode($before);
+                }
+            }
+            $fragment[] = $a;
             if ($after !== '') {
                 $afterFragment = self::matchInText($dom, $after, $terms, $seen, $linkCount, $maxLinks, $skipSlug);
                 if ($afterFragment !== null) {
