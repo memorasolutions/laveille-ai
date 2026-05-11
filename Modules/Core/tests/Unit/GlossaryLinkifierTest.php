@@ -47,5 +47,46 @@ it('handles edge case of empty qualifier', function () {
         ->toBe([]);
 });
 
-// Live integration test "Loi 25 → alias auto" volontairement omis ici (requiert bootstrap Laravel + DB).
-// Validé en smoke prod post-deploy via _glx_diag.php.
+// === #146 Phase A : aliases morphologiques FR ===
+
+it('generates plural -s for simple FR term', function () {
+    expect(GlossaryLinkifier::extractMorphologicalAliases('Tensor'))
+        ->toContain('Tensors')
+        ->toContain('tensors')
+        ->toContain('tensor');
+});
+
+it('generates -aux plural for -al ending', function () {
+    expect(GlossaryLinkifier::extractMorphologicalAliases('algorithme régional'))
+        ->toContain('algorithme régionaux');
+});
+
+it('generates -eaux for -eau ending', function () {
+    expect(GlossaryLinkifier::extractMorphologicalAliases('réseau'))
+        ->toContain('réseaux')
+        ->toContain('Réseau');
+});
+
+it('skips morpho for short acronyms (IA, ML, IoT)', function () {
+    expect(GlossaryLinkifier::extractMorphologicalAliases('CNN'))->toBe([]);
+    expect(GlossaryLinkifier::extractMorphologicalAliases('IoT'))->toBe([]);
+});
+
+it('does not double-pluralize already-plural terms', function () {
+    expect(GlossaryLinkifier::extractMorphologicalAliases('Skills'))
+        ->not->toContain('Skillss');
+});
+
+it('handles compound term "processus cognitif"', function () {
+    $aliases = GlossaryLinkifier::extractMorphologicalAliases('processus cognitif');
+    expect($aliases)
+        ->toContain('processus cognitifs')
+        ->toContain('Processus Cognitif');
+});
+
+it('generates lowercase + Titled + ucfirst variants', function () {
+    $aliases = GlossaryLinkifier::extractMorphologicalAliases('Anthropomorphisme');
+    expect($aliases)
+        ->toContain('anthropomorphisme')
+        ->toContain('Anthropomorphismes');
+});
