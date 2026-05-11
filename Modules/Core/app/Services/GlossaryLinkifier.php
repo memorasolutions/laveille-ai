@@ -26,10 +26,11 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v7.'; // #153 bump cache après recursion bidirectionnelle before+after
+    public const CACHE_KEY = 'glossary.terms.v8.'; // #158 bump cache après multi-occurrence par terme
     public const CACHE_TTL = 3600; // 1h
     public const MIN_LENGTH = 3; // #153 bump : 4→3 pour permettre TPU/GPU/NPU. Garde 2 chars rejetés via acronyme tout-cap check
-    public const MAX_LINKS_PER_PAGE = 24; // #138 bump 12→24 : concentrés 20 URLs ont besoin de plus
+    public const MAX_LINKS_PER_PAGE = 60; // #158 bump 24→60 : permet tooltips multi-occurrences par terme sans saturer
+    public const MAX_OCCURRENCES_PER_TERM = 10; // #158 wrap jusqu'à 10× le même terme par page (vs 1× avant)
 
     /**
      * 2026-05-05 #145 WSD : stop-list FR baseline (verbes/noms communs polysémiques).
@@ -415,9 +416,11 @@ class GlossaryLinkifier
      */
     public static function flushCache(): void
     {
-        // #153 flush toutes les versions cache (v2-v6) pour migration propre
+        // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            Cache::forget('glossary.terms.v7.'.$loc);
+            Cache::forget('glossary.terms.v6.'.$loc);
             Cache::forget('glossary.terms.v5.'.$loc);
             Cache::forget('glossary.terms.v4.'.$loc);
             Cache::forget('glossary.terms.v3.'.$loc);
@@ -491,7 +494,9 @@ class GlossaryLinkifier
     {
         foreach ($terms as $term) {
             if ($linkCount >= $maxLinks) return null;
-            if (isset($seen[$term['slug'].'|'.$term['type']])) continue;
+            // 2026-05-11 #158 : autorise jusqu'à MAX_OCCURRENCES_PER_TERM wraps du même terme par page
+            $seenKey = $term['slug'].'|'.$term['type'];
+            if (($seen[$seenKey] ?? 0) >= self::MAX_OCCURRENCES_PER_TERM) continue;
             if ($skipSlug && $term['slug'] === $skipSlug) continue;
 
             $name = $term['name'];
@@ -527,8 +532,8 @@ class GlossaryLinkifier
             $a->setAttribute('target', '_blank');
             $a->setAttribute('rel', 'noopener noreferrer');
 
-            // Mark seen (cumulatif inter-appels via static)
-            $seen[$term['slug'].'|'.$term['type']] = true;
+            // 2026-05-11 #158 : counter cumulatif inter-appels (autorise jusqu'à 10×/terme/page)
+            $seen[$seenKey] = ($seen[$seenKey] ?? 0) + 1;
             self::$matchedThisRequest[$term['slug']] = $term;
             $linkCount++;
 
