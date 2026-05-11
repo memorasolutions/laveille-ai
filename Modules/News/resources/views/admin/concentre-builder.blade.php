@@ -49,6 +49,21 @@
     })"
     x-init="init()"
 >
+    {{-- Bandeau brouillon restauré --}}
+    <div x-show="draftRestored" x-cloak x-transition style="background:#ecfeff; border:1px solid #0B7285; border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;" role="status">
+        <span style="font-size:14px; color:#064E5A;">
+            ✓ <strong>Brouillon restauré</strong> automatiquement
+            <span x-show="draftRestoredAt" x-cloak> (sauvegardé le <span x-text="draftRestoredAt"></span>)</span>.
+            Tu peux continuer où tu en étais.
+        </span>
+        <button type="button" @click="clearDraft()" style="background:#fff; border:1px solid #dc2626; color:#dc2626; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; min-height:32px;">🗑 Effacer le brouillon</button>
+    </div>
+
+    {{-- Indicateur sauvegarde flash --}}
+    <div x-show="savedFlash" x-cloak x-transition.opacity.duration.300ms style="position:fixed; bottom:20px; right:20px; background:#064E5A; color:#fff; padding:8px 14px; border-radius:20px; font-size:12px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:9999;" role="status" aria-live="polite">
+        💾 Sauvegardé
+    </div>
+
     {{-- Bandeau période --}}
     <div class="cb-card">
         <div class="cb-section-title">📅 Période du concentré</div>
@@ -227,6 +242,9 @@ function concentreBuilder(opts) {
         weekEnd: opts.defaultEnd,
         weekStartError: '',
         fetchError: '',
+        draftRestored: false,
+        draftRestoredAt: '',
+        savedFlash: false,
         newsItems: [],
         selectedIds: [],
         manualUrls: '',
@@ -245,6 +263,15 @@ function concentreBuilder(opts) {
             this.$nextTick(() => this.initSortable());
             this.$watch('selectedIds', () => this.saveLocal());
             this.$watch('manualUrls', () => this.saveLocal());
+            this.$watch('weekStart', () => this.saveLocal());
+            window.addEventListener('beforeunload', () => this.saveLocal());
+        },
+
+        clearDraft() {
+            try { localStorage.removeItem('cb_state_v1'); } catch (e) {}
+            this.draftRestored = false;
+            this.selectedIds = [];
+            this.manualUrls = '';
         },
 
         todayDate() { return new Date().toISOString().split('T')[0]; },
@@ -441,7 +468,11 @@ function concentreBuilder(opts) {
                     weekStart: this.weekStart,
                     selectedIds: this.selectedIds,
                     manualUrls: this.manualUrls,
+                    savedAt: new Date().toISOString(),
                 }));
+                this.savedFlash = true;
+                clearTimeout(this._flashTimer);
+                this._flashTimer = setTimeout(() => { this.savedFlash = false; }, 1500);
             } catch (e) {}
         },
 
@@ -450,14 +481,26 @@ function concentreBuilder(opts) {
                 const raw = localStorage.getItem('cb_state_v1');
                 if (!raw) return;
                 const s = JSON.parse(raw);
+                let hadAny = false;
                 if (s.weekStart && new Date(s.weekStart) >= new Date('2024-01-01')) {
                     this.weekStart = s.weekStart;
                     const end = new Date(this.weekStart + 'T00:00:00');
                     end.setUTCDate(end.getUTCDate() + 6);
                     this.weekEnd = end.toISOString().split('T')[0];
+                    hadAny = true;
                 }
-                if (Array.isArray(s.selectedIds)) this.selectedIds = s.selectedIds;
-                if (typeof s.manualUrls === 'string') this.manualUrls = s.manualUrls;
+                if (Array.isArray(s.selectedIds) && s.selectedIds.length > 0) {
+                    this.selectedIds = s.selectedIds;
+                    hadAny = true;
+                }
+                if (typeof s.manualUrls === 'string' && s.manualUrls.trim()) {
+                    this.manualUrls = s.manualUrls;
+                    hadAny = true;
+                }
+                if (hadAny) {
+                    this.draftRestored = true;
+                    this.draftRestoredAt = s.savedAt ? new Date(s.savedAt).toLocaleString('fr-CA') : '';
+                }
             } catch (e) {}
         },
     };
