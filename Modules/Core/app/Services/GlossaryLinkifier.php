@@ -26,9 +26,9 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v5.'; // #155 bump cache après fix matchInText récursif
+    public const CACHE_KEY = 'glossary.terms.v6.'; // #153 bump cache après MIN_LENGTH 4→3 pour acronymes
     public const CACHE_TTL = 3600; // 1h
-    public const MIN_LENGTH = 4; // skip ≤3 chars (faux positifs IA, ML, AI)
+    public const MIN_LENGTH = 3; // #153 bump : 4→3 pour permettre TPU/GPU/NPU. Garde 2 chars rejetés via acronyme tout-cap check
     public const MAX_LINKS_PER_PAGE = 24; // #138 bump 12→24 : concentrés 20 URLs ont besoin de plus
 
     /**
@@ -150,6 +150,11 @@ class GlossaryLinkifier
                             if (! $name || ! $slug || mb_strlen($name) < self::MIN_LENGTH) return;
                             $strategy = $t->match_strategy ?? 'loose';
                             if ($strategy === 'never_auto') return; // 2026-05-05 #145 : opt-out
+                            // 2026-05-11 #153 : acronymes courts (3-4 chars tout-cap) → force case_sensitive
+                            // pour éviter faux positifs en mode loose (ex "tpu" lowercase dans texte arbitraire).
+                            if (mb_strlen($name) <= 4 && preg_match('/^[A-Z0-9]{3,4}$/u', $name)) {
+                                $strategy = 'case_sensitive';
+                            }
                             $strategy = self::escalateStrategyIfStopList($name, $strategy); // auto-escalade si polysémique
                             $shortDef = Str::limit(self::stripMarkdownInline(strip_tags((string) $def)), 180);
                             $url = '/glossaire/'.$slug;
@@ -410,9 +415,10 @@ class GlossaryLinkifier
      */
     public static function flushCache(): void
     {
-        // #155 flush toutes les versions cache (v2-v5) pour migration propre
+        // #153 flush toutes les versions cache (v2-v6) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            Cache::forget('glossary.terms.v5.'.$loc);
             Cache::forget('glossary.terms.v4.'.$loc);
             Cache::forget('glossary.terms.v3.'.$loc);
             Cache::forget('glossary.terms.v2.'.$loc);
