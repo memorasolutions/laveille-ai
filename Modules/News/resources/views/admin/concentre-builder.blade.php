@@ -72,7 +72,8 @@
                 <strong x-text="newsItems.length"></strong> actualité<span x-show="newsItems.length > 1">s</span> publiée<span x-show="newsItems.length > 1">s</span> dans cette plage.
             </span>
             <span x-show="loading.news" x-cloak>⏳ Chargement des actualités…</span>
-            <span x-show="!loading.news && newsItems.length === 0" x-cloak style="color:#dc2626;">Aucune actualité publiée dans cette plage.</span>
+            <span x-show="!loading.news && newsItems.length === 0 && !fetchError" x-cloak style="color:#dc2626;">Aucune actualité publiée dans cette plage.</span>
+            <span x-show="fetchError" x-cloak style="color:#dc2626; font-weight:600;" x-text="'⚠ ' + fetchError"></span>
         </div>
     </div>
 
@@ -225,6 +226,7 @@ function concentreBuilder(opts) {
         weekStart: opts.defaultStart,
         weekEnd: opts.defaultEnd,
         weekStartError: '',
+        fetchError: '',
         newsItems: [],
         selectedIds: [],
         manualUrls: '',
@@ -275,14 +277,21 @@ function concentreBuilder(opts) {
 
         async fetchNews() {
             this.loading.news = true;
+            this.fetchError = '';
             try {
                 const url = this.endpoints.news + '?week_start=' + this.weekStart + '&week_end=' + this.weekEnd;
-                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const res = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                if (!res.ok) {
+                    let detail = '';
+                    try { const e = await res.json(); detail = e.error || e.message || ''; } catch (_) {}
+                    this.fetchError = 'HTTP ' + res.status + (detail ? ' — ' + detail : '');
+                    this.newsItems = [];
+                    return;
+                }
                 const data = await res.json();
                 this.newsItems = data.items || [];
             } catch (e) {
-                console.error(e);
+                this.fetchError = 'Erreur réseau : ' + e.message;
                 this.newsItems = [];
             } finally {
                 this.loading.news = false;

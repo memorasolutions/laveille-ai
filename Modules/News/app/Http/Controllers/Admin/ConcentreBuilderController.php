@@ -46,7 +46,8 @@ class ConcentreBuilderController extends Controller
         $start = Carbon::parse($validated['week_start']);
         $end = Carbon::parse($validated['week_end']);
 
-        if ($start->dayOfWeek !== Carbon::MONDAY || $end->dayOfWeek !== Carbon::SUNDAY || $end->diffInDays($start) !== 6) {
+        $dayDiff = (int) round(abs($end->diffInDays($start)));
+        if ($start->dayOfWeek !== Carbon::MONDAY || $end->dayOfWeek !== Carbon::SUNDAY || $dayDiff !== 6) {
             return response()->json([
                 'error' => 'La semaine doit aller du lundi au dimanche (7 jours).',
             ], 422);
