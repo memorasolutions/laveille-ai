@@ -113,8 +113,8 @@ class ConcentreBuilderController extends Controller
         if ($total < 3) {
             return response()->json(['error' => 'Sélectionne au moins 3 actualités/URLs.'], 422);
         }
-        if ($total > 12) {
-            return response()->json(['error' => 'Maximum 12 actualités/URLs par concentré.'], 422);
+        if ($total > 20) {
+            return response()->json(['error' => 'Maximum 20 actualités/URLs par concentré.'], 422);
         }
 
         try {

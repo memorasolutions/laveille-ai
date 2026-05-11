@@ -286,6 +286,10 @@
                 <span x-show="!loading.generate">⚡ Générer le prompt</span>
                 <span x-show="loading.generate" x-cloak>⏳ Génération…</span>
             </button>
+            <span :style="'display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:14px;font-size:12px;font-weight:700;color:#fff;background:' + selectionZone.color + ';'" :title="selectionZone.tip">
+                <span x-text="(selectedIds.length + manualUrlsArray.length) + ' / 20'"></span>
+                <span style="opacity:0.85;" x-text="'· ' + selectionZone.label"></span>
+            </span>
             <button class="cb-btn cb-btn-secondary" type="button" @click="copyToClipboard()" :disabled="!generatedPrompt" x-show="generatedPrompt" x-cloak>📋 Copier</button>
             <button class="cb-btn cb-btn-secondary" type="button" @click="downloadTxt()" :disabled="!generatedPrompt" x-show="generatedPrompt" x-cloak>💾 Télécharger .txt</button>
             <span x-show="copyOk" x-cloak x-transition style="color:#059669; font-size:13px; font-weight:600;">✓ Copié dans le presse-papier</span>
@@ -293,7 +297,7 @@
         </div>
         <pre class="cb-pre" x-show="generatedPrompt" x-cloak><code x-text="generatedPrompt"></code></pre>
         <div class="cb-empty" x-show="!generatedPrompt" x-cloak>
-            Le prompt apparaîtra ici après génération. Min. 3 et max. 12 actualités/URLs.
+            Le prompt apparaîtra ici après génération. <strong>Min. 3, max. 20</strong> actualités/URLs (sweet spot éditorial : 8-12).
         </div>
     </div>
 
@@ -587,7 +591,18 @@ function concentreBuilder(opts) {
 
         canGenerate() {
             const total = this.selectedIds.length + this.manualUrlsArray.length;
-            return total >= 3 && total <= 12;
+            return total >= 3 && total <= 20;
+        },
+
+        // Zone qualité éditoriale selon nombre d'items
+        get selectionZone() {
+            const t = this.selectedIds.length + this.manualUrlsArray.length;
+            if (t === 0) return { label: 'Vide', color: '#94a3b8', tip: 'Sélectionne 3 à 20 actualités.' };
+            if (t < 3) return { label: 'Trop court', color: '#dc2626', tip: 'Min. 3 pour générer le prompt.' };
+            if (t <= 7) return { label: 'Concentré court', color: '#eab308', tip: 'Article ~1000-1500 mots.' };
+            if (t <= 12) return { label: 'Sweet spot', color: '#22c55e', tip: 'Article ~1800-2500 mots (recommandé).' };
+            if (t <= 20) return { label: 'Concentré long', color: '#f97316', tip: 'Article ~3000-4000 mots, plus dense.' };
+            return { label: 'Au-dessus du max', color: '#dc2626', tip: 'Max. 20 actualités.' };
         },
 
         async generate() {
