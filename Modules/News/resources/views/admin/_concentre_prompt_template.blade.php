@@ -51,24 +51,31 @@ WORKFLOW :
      « Lecture complète », « Analyse complète », « Détails sur la fiche », « Voir le contexte »,
      « Décryptage », « Approfondir », « Source originale ».
 
-5. Génère featured_image — workflow hiérarchique :
+5. Génère featured_image — workflow Gemini Playwright FINAL (validé S90) :
 
-   PRIORITÉ 1 : Gemini Pro Playwright (compte user gratuit, IDÉAL) :
-   • Workflow MCP playwright (réf MEMORY feedback_miniatures_gemini_playwright) :
-     a) browser_navigate → https://gemini.google.com/app
-     b) browser_click sur "Créer une image"
-     c) browser_type le prompt image (cf format ci-dessous)
-     d) browser_wait_for ~35s
-     e) browser_evaluate canvas.toDataURL('image/png') → base64
-     f) sauvegarder .b64 → cwebp + sips → public/storage/news/concentres/{slug}.webp
+   ÉTAPES :
+   a) browser_navigate → https://gemini.google.com/app (session user persistante)
+   b) browser_click sur "🖼️ Créer une image"
+   c) browser_type le PROMPT IMAGE (cf format ci-dessous) avec submit:true (Enter)
+   d) browser_wait_for time:45 (génération Gemini)
+   e) Détecter et cliquer le bouton "Télécharger l'image en taille réelle"
+      (selector: button[aria-label="Télécharger l'image en taille réelle"])
+      → Playwright sauve automatiquement le PNG dans .playwright-mcp/Gemini-Generated-Image-*.png
+        (typiquement 2752×1536, 5-7 MB)
+   f) Conversion locale Bash :
+      sips -s format jpeg --resampleWidth 1200 --setProperty formatOptions 78 INPUT.png --out OUT.jpg
+      OU cwebp -q 85 -resize 1280 0 INPUT.png -o OUT.webp (préférable, ~95 KB)
+   g) Copier dans le repo : public/images/blog/concentre-hebdo-{Y-m-d}-au-{Y-m-d}.jpg
+   h) git add + commit + push → GitHub Actions rsync déploie en ~60-90s
+   i) UPDATE articles.featured_image via PHP self-delete OU via endpoint admin
+      POST /admin/concentre-builder/upload-image (multipart : image + week_start + week_end + article_id)
+      qui fait tout : save + UPDATE + cache:clear en une requête.
 
-   PRIORITÉ 2 (FALLBACK si Playwright KO / session expirée / pas de browser dispo) :
-   • RÉUTILISER l'image featured du dernier concentré publié (query articles WHERE category_id=6 ORDER BY published_at DESC LIMIT 1)
-   • Set featured_image = même path que le concentré précédent
-   • Ajouter tag « image-fallback » dans tags JSON pour audit
-   • NE PAS bloquer la publication pour absence d'image dédiée
+   FALLBACK si Gemini Playwright KO (session expirée, browser indispo) :
+   • Réutiliser featured_image du dernier concentré publié
+   • Ne PAS bloquer la publication
 
-   INTERDIT : multi-ai-mcp generate_image (1min.ai à 0 crédits constant).
+   INTERDIT : multi-ai-mcp generate_image (1min.ai à 0 crédits) | canvas.toDataURL + chunked b64 (complexe).
 
    STYLE STRICT charte Memora : isométrique 3D, fond clair gris-bleu, palette navy #064E5A + orange #9A2A06, AUCUN texte, aucun logo de marque tiers.
 

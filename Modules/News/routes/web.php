@@ -59,5 +59,6 @@ Route::prefix('admin/concentre-builder')
         Route::get('/', [ConcentreBuilderController::class, 'index'])->name('index');
         Route::get('/news', [ConcentreBuilderController::class, 'newsForWeek'])->name('news');
         Route::post('/generate', [ConcentreBuilderController::class, 'generate'])->name('generate');
+        Route::post('/upload-image', [ConcentreBuilderController::class, 'uploadImage'])->name('upload-image')->middleware('throttle:10,1');
         Route::get('/runs/{id}', [ConcentreBuilderController::class, 'showRun'])->name('runs.show');
     });

@@ -140,6 +140,60 @@ class ConcentreBuilderController extends Controller
         ]);
     }
 
+    /**
+     * Upload d'une image (téléchargée depuis Gemini Pro ou autre source).
+     * Sauvegarde sous public/images/blog/concentre-hebdo-{from}-au-{to}.{ext}.
+     * Si article_id fourni, UPDATE articles.featured_image directement.
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'week_start' => ['required', 'date_format:Y-m-d'],
+            'week_end' => ['required', 'date_format:Y-m-d'],
+            'article_id' => ['nullable', 'integer'],
+        ]);
+
+        $start = Carbon::parse($validated['week_start']);
+        $end = Carbon::parse($validated['week_end']);
+        $file = $request->file('image');
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+        if ($ext === 'jpeg') $ext = 'jpg';
+
+        $filename = sprintf('concentre-hebdo-%s-au-%s.%s', $start->format('Y-m-d'), $end->format('Y-m-d'), $ext);
+        $targetDir = public_path('images/blog');
+        if (! is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+        $target = $targetDir . '/' . $filename;
+        $file->move($targetDir, $filename);
+
+        $relativePath = 'images/blog/' . $filename;
+
+        // Optional : update article featured_image
+        $articleId = $validated['article_id'] ?? null;
+        $articleUpdated = false;
+        if ($articleId) {
+            $affected = \Illuminate\Support\Facades\DB::table('articles')
+                ->where('id', $articleId)
+                ->update([
+                    'featured_image' => $relativePath,
+                    'updated_at' => Carbon::now('America/Toronto')->toDateTimeString(),
+                ]);
+            $articleUpdated = $affected > 0;
+            \Illuminate\Support\Facades\Artisan::call('cache:clear');
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+        }
+
+        return response()->json([
+            'success' => true,
+            'path' => $relativePath,
+            'url' => asset($relativePath),
+            'bytes' => filesize($target),
+            'article_updated' => $articleUpdated,
+        ]);
+    }
+
     public function showRun(int $id): JsonResponse
     {
         $run = ConcentreBuilderRun::where('user_id', auth()->id())->findOrFail($id);
