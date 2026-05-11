@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Core\Http\Middleware\EnsureIsAdmin;
 use Modules\Core\Http\Middleware\SetBackofficeTheme;
+use Modules\News\Http\Controllers\Admin\ConcentreBuilderController;
 use Modules\News\Http\Controllers\AdminNewsController;
 use Modules\News\Http\Controllers\NewsSitemapController;
 use Modules\News\Http\Controllers\PublicNewsController;
@@ -48,4 +49,15 @@ Route::prefix('admin/news')
         Route::patch('articles/{article}/toggle', [AdminNewsController::class, 'toggleArticle'])->name('articles.toggle');
         Route::delete('articles/{article}', [AdminNewsController::class, 'destroyArticle'])->name('articles.destroy');
         Route::post('articles/{article}/upload-image', [AdminNewsController::class, 'uploadArticleImage'])->name('articles.upload-image');
+    });
+
+// ── Concentre Builder (admin, S90) ──
+Route::prefix('admin/concentre-builder')
+    ->name('admin.concentre.')
+    ->middleware(['web', 'auth', 'two.factor', EnsureIsAdmin::class, SetBackofficeTheme::class])
+    ->group(function () {
+        Route::get('/', [ConcentreBuilderController::class, 'index'])->name('index');
+        Route::get('/news', [ConcentreBuilderController::class, 'newsForWeek'])->name('news');
+        Route::post('/generate', [ConcentreBuilderController::class, 'generate'])->name('generate');
+        Route::get('/runs/{id}', [ConcentreBuilderController::class, 'showRun'])->name('runs.show');
     });

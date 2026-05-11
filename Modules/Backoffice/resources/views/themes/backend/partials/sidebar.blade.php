@@ -44,14 +44,14 @@
             {{-- ===== 2. CONTENU (Contenu + Marketing) ===== --}}
             @canany(['view_articles', 'view_pages', 'view_categories', 'view_media', 'view_faqs', 'view_menus', 'view_comments', 'view_testimonials', 'view_widgets', 'view_shortcodes', 'view_forms', 'view_newsletter', 'view_workflows'])
             <li class="nav-item nav-category">{{ __('Contenu') }}</li>
-            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.news.*', 'admin.formbuilder.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.news.*', 'admin.concentre.*', 'admin.formbuilder.*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#contentMenu" role="button"
-                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'true' : 'false' }}">
+                   aria-expanded="{{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.concentre.*', 'admin.formbuilder.*') ? 'true' : 'false' }}">
                     <i class="link-icon" data-lucide="file-text"></i>
                     <span class="link-title">{{ __('Contenu') }}</span>
                     <i class="link-arrow" data-lucide="chevron-down"></i>
                 </a>
-                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu">
+                <div class="collapse {{ request()->routeIs('admin.blog.*', 'admin.pages.*', 'admin.media.*', 'admin.faqs.*', 'admin.menus.*', 'admin.testimonials.*', 'admin.widgets.*', 'admin.shortcodes.*', 'admin.custom-fields.*', 'admin.newsletter.*', 'admin.concentre.*', 'admin.formbuilder.*') ? 'show' : '' }}" id="contentMenu">
                     <ul class="nav sub-menu">
                         @if(Route::has('admin.blog.articles.index'))
                         @can('view_articles')
@@ -66,6 +66,9 @@
                         @endif
                         @if(Route::has('admin.news.sources.index'))
                         <li class="nav-item"><a href="{{ route('admin.news.sources.index') }}" class="nav-link {{ request()->routeIs('admin.news.sources.*') ? 'active' : '' }}" {{ request()->routeIs('admin.news.sources.*') ? 'aria-current=page' : '' }}>{{ __('Sources RSS') }}</a></li>
+                        @endif
+                        @if(Route::has('admin.concentre.index'))
+                        <li class="nav-item"><a href="{{ route('admin.concentre.index') }}" class="nav-link {{ request()->routeIs('admin.concentre.*') ? 'active' : '' }}" {{ request()->routeIs('admin.concentre.*') ? 'aria-current=page' : '' }}>{{ __('Concentré IA — builder') }}</a></li>
                         @endif
                         @if(Route::has('admin.pages.index'))
                         @can('view_pages')
