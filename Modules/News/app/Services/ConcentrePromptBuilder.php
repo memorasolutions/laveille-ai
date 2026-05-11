@@ -114,6 +114,6 @@ class ConcentrePromptBuilder
             ->whereBetween('pub_date', [$weekStart->copy()->startOfDay(), $weekEnd->copy()->endOfDay()])
             ->with('source:id,name,url')
             ->orderByDesc('pub_date')
-            ->get(['id', 'news_source_id', 'title', 'slug', 'url', 'summary', 'pub_date', 'category_tag', 'image_url']);
+            ->get(['id', 'news_source_id', 'title', 'seo_title', 'slug', 'url', 'summary', 'pub_date', 'category_tag', 'image_url']);
     }
 }

@@ -62,7 +62,8 @@ class ConcentreBuilderController extends Controller
             'count' => $news->count(),
             'items' => $news->map(fn ($a) => [
                 'id' => $a->id,
-                'title' => $a->title,
+                'title' => $a->seo_title ?: $a->title, // FR traduit en priorité, sinon EN original
+                'title_original' => $a->title,
                 'slug' => $a->slug,
                 'site_url' => url('/actualites/' . $a->slug),
                 'source_url' => $a->url,
@@ -72,6 +73,7 @@ class ConcentreBuilderController extends Controller
                 'category_tag' => $a->category_tag,
                 'image_url' => $a->image_url,
                 'source_name' => $a->source?->name,
+                'source_language' => $a->source?->language ?? 'unknown',
                 'favicon' => $a->url ? 'https://www.google.com/s2/favicons?domain=' . parse_url($a->url, PHP_URL_HOST) . '&sz=32' : null,
                 'already_used' => isset($alreadyUsedUrls['/actualites/' . $a->slug]),
             ])->values(),

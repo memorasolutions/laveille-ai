@@ -100,8 +100,13 @@
                     📰 Actualités disponibles
                     <span class="cb-counter" x-text="availableItems.length + ' / ' + newsItems.length"></span>
                 </div>
-                <div class="mb-2 d-flex gap-2 align-items-center">
-                    <input type="search" class="form-control form-control-sm" placeholder="🔍 Rechercher dans les titres / résumés…" x-model="searchQuery" style="flex:1;">
+                <div class="mb-2 d-flex gap-2 align-items-center flex-wrap">
+                    <input type="search" class="form-control form-control-sm" placeholder="🔍 Rechercher dans les titres / résumés…" x-model="searchQuery" style="flex:1; min-width:200px;">
+                    <select class="form-select form-select-sm" x-model="languageFilter" style="width:auto;">
+                        <option value="">🌐 Toutes langues</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇬🇧 English</option>
+                    </select>
                     <button class="cb-btn cb-btn-secondary" type="button" style="font-size:12px; padding:6px 12px;" @click="selectAllVisible()" :disabled="filteredAvailable.length === 0">Tout cocher</button>
                 </div>
                 <div style="max-height:600px; overflow-y:auto;">
@@ -109,8 +114,9 @@
                         <div class="cb-news-item">
                             <img :src="item.favicon" loading="lazy" class="cb-fav" alt="" onerror="this.style.display='none'">
                             <div style="flex:1; min-width:0;">
-                                <div class="cb-title" x-text="item.title"></div>
+                                <div class="cb-title" x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></div>
                                 <div class="cb-meta">
+                                    <span x-text="item.source_language === 'fr' ? '🇫🇷' : (item.source_language === 'en' ? '🇬🇧' : '🌐')" :title="item.source_language === 'fr' ? 'Français' : (item.source_language === 'en' ? 'Anglais (titre FR si traduit)' : 'Langue inconnue')" style="margin-right:4px;"></span>
                                     <span x-text="item.source_name || 'Source inconnue'"></span> · <span x-text="item.pub_date_short"></span>
                                     <template x-if="item.already_used">
                                         <span class="cb-used-badge ms-1">🔁 déjà utilisée</span>
@@ -331,14 +337,18 @@ function concentreBuilder(opts) {
 
         get filteredAvailable() {
             const q = this.searchQuery?.toLowerCase().trim() || '';
-            if (!q) return this.availableItems;
-            return this.availableItems.filter(n =>
-                (n.title || '').toLowerCase().includes(q) ||
-                (n.summary || '').toLowerCase().includes(q)
-            );
+            const lang = this.languageFilter || '';
+            return this.availableItems.filter(n => {
+                if (lang && n.source_language !== lang) return false;
+                if (!q) return true;
+                return (n.title || '').toLowerCase().includes(q)
+                    || (n.title_original || '').toLowerCase().includes(q)
+                    || (n.summary || '').toLowerCase().includes(q);
+            });
         },
 
         searchQuery: '',
+        languageFilter: '',
 
         itemById(id) { return this.newsItems.find(n => n.id === id); },
 
