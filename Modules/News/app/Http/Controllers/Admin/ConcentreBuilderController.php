@@ -56,6 +56,12 @@ class ConcentreBuilderController extends Controller
         $news = $this->builder->listNewsForWeek($start, $end);
         $alreadyUsedUrls = $this->detectAlreadyUsed($start);
 
+        // Détection acteur pour groupage visuel
+        $news = $news->map(function ($a) {
+            $a->setAttribute('actor_cluster', $this->detectActorCluster(($a->seo_title ?: $a->title) . ' ' . ($a->summary ?? '')));
+            return $a;
+        });
+
         return response()->json([
             'week_start' => $start->toDateString(),
             'week_end' => $end->toDateString(),
@@ -74,6 +80,7 @@ class ConcentreBuilderController extends Controller
                 'image_url' => $a->image_url,
                 'source_name' => $a->source?->name,
                 'source_language' => $a->source?->language ?? 'unknown',
+                'actor_cluster' => $a->actor_cluster ?? null,
                 'favicon' => $a->url ? 'https://www.google.com/s2/favicons?domain=' . parse_url($a->url, PHP_URL_HOST) . '&sz=32' : null,
                 'already_used' => isset($alreadyUsedUrls['/actualites/' . $a->slug]),
             ])->values(),
@@ -142,6 +149,46 @@ class ConcentreBuilderController extends Controller
             'manual_urls' => $run->manual_urls,
             'generated_prompt' => $run->generated_prompt,
         ]);
+    }
+
+    /**
+     * Détecte l'acteur principal mentionné dans le contenu (groupage visuel).
+     * Heuristique regex sur titres/summaries, retourne le label cluster ou null.
+     */
+    private function detectActorCluster(string $haystack): ?string
+    {
+        $h = mb_strtolower($haystack);
+
+        // Liste ordonnée — plus spécifique avant plus générique
+        $clusters = [
+            'OpenAI' => '/\b(openai|chatgpt|gpt-?[345]|gpt[- ]?5|dall-?e|sora|whisper)\b/iu',
+            'Google' => '/\b(google|gemini|bard|deepmind|veo|imagen|notebooklm|alphafold)\b/iu',
+            'Anthropic' => '/\b(anthropic|claude)\b/iu',
+            'Microsoft' => '/\b(microsoft|copilot|azure ai|bing ai)\b/iu',
+            'Meta' => '/\b(meta ai|meta\b.*llama|\bllama\s?[234])\b/iu',
+            'Apple' => '/\b(apple intelligence|apple ai|siri)\b/iu',
+            'NVIDIA' => '/\b(nvidia|cuda|jensen huang|blackwell|hopper)\b/iu',
+            'xAI' => '/\b(xai|grok|elon musk\b.*ia|\bx\.ai)\b/iu',
+            'Mistral' => '/\b(mistral|le chat|mixtral)\b/iu',
+            'Perplexity' => '/\b(perplexity|sonar)\b/iu',
+            'Hugging Face' => '/\b(hugging\s?face|hf\b)\b/iu',
+            'DeepSeek' => '/\b(deepseek)\b/iu',
+            'Cohere' => '/\b(cohere|command-r)\b/iu',
+            'Stability AI' => '/\b(stability ai|stable diffusion|flux\b)\b/iu',
+            'Amazon' => '/\b(amazon|aws ai|bedrock|alexa)\b/iu',
+            'Tesla' => '/\b(tesla|autopilot|fsd|robotaxi)\b/iu',
+            'IBM' => '/\b(ibm|watson)\b/iu',
+            'Salesforce' => '/\b(salesforce|einstein)\b/iu',
+            'Adobe' => '/\b(adobe|firefly)\b/iu',
+        ];
+
+        foreach ($clusters as $label => $pattern) {
+            if (preg_match($pattern, $h)) {
+                return $label;
+            }
+        }
+
+        return null;
     }
 
     /**

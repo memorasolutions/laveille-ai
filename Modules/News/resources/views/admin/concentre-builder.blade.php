@@ -5,7 +5,13 @@
     .cb-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; margin-bottom:18px; }
     .cb-news-item { display:flex; gap:12px; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; margin-bottom:8px; transition:background .15s; align-items:flex-start; }
     .cb-news-item:hover { background:#f9fafb; }
-    .cb-news-item.is-selected { border-color:#0B7285; background:#ecfeff; }
+    .cb-news-item.is-selected { border-color:#0B7285; background:#ecfeff; padding:6px 10px; align-items:center; }
+    .cb-news-item.is-selected .cb-title { font-size:13px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .cb-news-item.is-selected .cb-meta { font-size:11px; margin-top:2px; }
+    .cb-drag-ghost { opacity:0.4; background:#fef3c7 !important; }
+    .cb-drag-chosen { box-shadow:0 6px 16px rgba(11,114,133,0.25); }
+    .cb-cluster-divider { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.6px; padding:8px 4px 4px; border-top:1px dashed #e5e7eb; margin-top:6px; }
+    .cb-cluster-divider:first-child { border-top:none; margin-top:0; padding-top:0; }
     .cb-news-item .cb-fav { width:24px; height:24px; flex-shrink:0; border-radius:4px; }
     .cb-news-item .cb-handle { cursor:grab; color:#94a3b8; padding:0 4px; user-select:none; font-size:18px; }
     .cb-news-item .cb-handle:active { cursor:grabbing; }
@@ -107,28 +113,39 @@
                         <option value="fr">🇫🇷 Français</option>
                         <option value="en">🇬🇧 English</option>
                     </select>
+                    <select class="form-select form-select-sm" x-model="sortMode" style="width:auto;" title="Mode de tri">
+                        <option value="cluster">🏷 Tri par acteur</option>
+                        <option value="date">📅 Tri par date</option>
+                    </select>
                     <button class="cb-btn cb-btn-secondary" type="button" style="font-size:12px; padding:6px 12px;" @click="selectAllVisible()" :disabled="filteredAvailable.length === 0">Tout cocher</button>
                 </div>
                 <div style="max-height:600px; overflow-y:auto;">
-                    <template x-for="item in filteredAvailable" :key="item.id">
-                        <div class="cb-news-item">
-                            <img :src="item.favicon" loading="lazy" class="cb-fav" alt="" onerror="this.style.display='none'">
-                            <div style="flex:1; min-width:0;">
-                                <div class="cb-title" x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></div>
-                                <div class="cb-meta">
-                                    <span x-text="item.source_language === 'fr' ? '🇫🇷' : (item.source_language === 'en' ? '🇬🇧' : '🌐')" :title="item.source_language === 'fr' ? 'Français' : (item.source_language === 'en' ? 'Anglais (titre FR si traduit)' : 'Langue inconnue')" style="margin-right:4px;"></span>
-                                    <span x-text="item.source_name || 'Source inconnue'"></span> · <span x-text="item.pub_date_short"></span>
-                                    <template x-if="item.already_used">
-                                        <span class="cb-used-badge ms-1">🔁 déjà utilisée</span>
-                                    </template>
-                                </div>
-                                <div class="cb-summary" x-text="item.summary" x-show="item.summary"></div>
-                                <div class="cb-actions mt-2">
-                                    <a :href="item.site_url" target="_blank" rel="noopener">🔗 Lire sur le site</a>
-                                    <a :href="item.source_url" target="_blank" rel="noopener" x-show="item.source_url">↗ Source</a>
-                                </div>
+                    <template x-for="group in groupedAvailable" :key="'g-' + (group.cluster || 'none')">
+                        <div>
+                            <div class="cb-cluster-divider" x-show="group.cluster && sortMode === 'cluster'" x-cloak>
+                                <span x-text="'🏷 ' + group.cluster + ' (' + group.items.length + ')'"></span>
                             </div>
-                            <button class="cb-btn" type="button" style="font-size:12px; padding:6px 10px; min-height:32px;" @click="selectItem(item.id)">+ Ajouter</button>
+                            <template x-for="item in group.items" :key="item.id">
+                                <div class="cb-news-item">
+                                    <img :src="item.favicon" loading="lazy" class="cb-fav" alt="" onerror="this.style.display='none'">
+                                    <div style="flex:1; min-width:0;">
+                                        <div class="cb-title" x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></div>
+                                        <div class="cb-meta">
+                                            <span x-text="item.source_language === 'fr' ? '🇫🇷' : (item.source_language === 'en' ? '🇬🇧' : '🌐')" :title="item.source_language === 'fr' ? 'Français' : (item.source_language === 'en' ? 'Anglais (titre FR si traduit)' : 'Langue inconnue')" style="margin-right:4px;"></span>
+                                            <span x-text="item.source_name || 'Source inconnue'"></span> · <span x-text="item.pub_date_short"></span>
+                                            <template x-if="item.already_used">
+                                                <span class="cb-used-badge ms-1">🔁 déjà utilisée</span>
+                                            </template>
+                                        </div>
+                                        <div class="cb-summary" x-text="item.summary" x-show="item.summary"></div>
+                                        <div class="cb-actions mt-2">
+                                            <a :href="item.site_url" target="_blank" rel="noopener">🔗 Lire sur le site</a>
+                                            <a :href="item.source_url" target="_blank" rel="noopener" x-show="item.source_url">↗ Source</a>
+                                        </div>
+                                    </div>
+                                    <button class="cb-btn" type="button" style="font-size:12px; padding:6px 10px; min-height:32px;" @click="selectItem(item.id)">+ Ajouter</button>
+                                </div>
+                            </template>
                         </div>
                     </template>
                     <div class="cb-empty" x-show="filteredAvailable.length === 0 && !loading.news" x-cloak>
@@ -161,13 +178,13 @@
                             <div style="flex:1; min-width:0;">
                                 <div class="cb-title" x-text="itemById(id)?.title || '(introuvable)'"></div>
                                 <div class="cb-meta">
+                                    <span x-text="itemById(id)?.source_language === 'fr' ? '🇫🇷' : (itemById(id)?.source_language === 'en' ? '🇬🇧' : '')"></span>
                                     <span x-text="itemById(id)?.source_name"></span> · <span x-text="itemById(id)?.pub_date_short"></span>
-                                </div>
-                                <div class="cb-actions mt-2">
-                                    <a :href="itemById(id)?.site_url" target="_blank" rel="noopener">🔗 Lire</a>
+                                    <span x-show="itemById(id)?.actor_cluster" x-cloak style="color:#0B7285; font-weight:600;"> · <span x-text="itemById(id)?.actor_cluster"></span></span>
                                 </div>
                             </div>
-                            <button class="cb-btn cb-btn-secondary" type="button" style="font-size:12px; padding:6px 10px; min-height:32px;" @click="removeItem(id)">× Retirer</button>
+                            <a :href="itemById(id)?.site_url" target="_blank" rel="noopener" title="Ouvrir dans un nouvel onglet" style="color:#0B7285; font-size:14px; padding:4px 8px; text-decoration:none;">🔗</a>
+                            <button type="button" @click="removeItem(id)" title="Retirer de la sélection" style="background:none; border:none; color:#dc2626; font-size:18px; cursor:pointer; padding:2px 8px; line-height:1;">×</button>
                         </div>
                     </template>
                 </div>
@@ -338,17 +355,46 @@ function concentreBuilder(opts) {
         get filteredAvailable() {
             const q = this.searchQuery?.toLowerCase().trim() || '';
             const lang = this.languageFilter || '';
-            return this.availableItems.filter(n => {
+            const filtered = this.availableItems.filter(n => {
                 if (lang && n.source_language !== lang) return false;
                 if (!q) return true;
                 return (n.title || '').toLowerCase().includes(q)
                     || (n.title_original || '').toLowerCase().includes(q)
                     || (n.summary || '').toLowerCase().includes(q);
             });
+
+            if (this.sortMode === 'cluster') {
+                // Trie : cluster alphabétique (sans cluster en bas) puis date desc dans chaque
+                return [...filtered].sort((a, b) => {
+                    const ca = a.actor_cluster || '￿';
+                    const cb = b.actor_cluster || '￿';
+                    if (ca !== cb) return ca.localeCompare(cb);
+                    return (b.pub_date || '').localeCompare(a.pub_date || '');
+                });
+            }
+            return filtered; // tri serveur par pub_date desc
+        },
+
+        // Renvoie une map [cluster|null → items[]] selon l'ordre du tri actuel
+        get groupedAvailable() {
+            const items = this.filteredAvailable;
+            if (this.sortMode !== 'cluster') return [{ cluster: null, items }];
+            const groups = [];
+            let last = null;
+            for (const it of items) {
+                const c = it.actor_cluster || 'Autres';
+                if (!last || last.cluster !== c) {
+                    last = { cluster: c, items: [] };
+                    groups.push(last);
+                }
+                last.items.push(it);
+            }
+            return groups;
         },
 
         searchQuery: '',
         languageFilter: '',
+        sortMode: 'cluster', // 'cluster' (par défaut, groupage acteur) | 'date'
 
         itemById(id) { return this.newsItems.find(n => n.id === id); },
 
@@ -376,9 +422,21 @@ function concentreBuilder(opts) {
             this.sortable = Sortable.create(el, {
                 handle: '.cb-handle',
                 animation: 150,
+                ghostClass: 'cb-drag-ghost',
+                chosenClass: 'cb-drag-chosen',
+                forceFallback: true,
+                fallbackTolerance: 5,
                 onEnd: (evt) => {
-                    const newOrder = Array.from(el.querySelectorAll('[data-id]')).map(d => parseInt(d.dataset.id, 10));
-                    this.selectedIds = newOrder;
+                    const oldIndex = evt.oldIndex;
+                    const newIndex = evt.newIndex;
+                    if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) return;
+                    // Splice array directement (évite race conditions Alpine/DOM)
+                    const arr = [...this.selectedIds];
+                    const [moved] = arr.splice(oldIndex, 1);
+                    arr.splice(newIndex, 0, moved);
+                    this.selectedIds = arr;
+                    // Force Alpine à re-render dans le bon ordre (Sortable a déjà bougé le DOM)
+                    this.$nextTick(() => this.initSortable());
                 },
             });
         },
