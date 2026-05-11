@@ -154,12 +154,12 @@ class NewsArticle extends Model implements Searchable
 
     public function searchableResultTitle(): string
     {
-        return $this->title;
+        return $this->seo_title ?: $this->title;
     }
 
     public function searchableResultExcerpt(): string
     {
-        return \Illuminate\Support\Str::limit(strip_tags($this->description ?: $this->summary ?: ''), 200);
+        return \Illuminate\Support\Str::limit(strip_tags($this->summary ?: $this->description ?: ''), 200);
     }
 
     public function searchableResultUrl(): string
