@@ -56,9 +56,11 @@ class ConcentreBuilderController extends Controller
         $news = $this->builder->listNewsForWeek($start, $end);
         $alreadyUsedUrls = $this->detectAlreadyUsed($start);
 
-        // Détection acteur pour groupage visuel
+        // Détection acteur + couleur pour groupage/triage visuel
         $news = $news->map(function ($a) {
-            $a->setAttribute('actor_cluster', $this->detectActorCluster(($a->seo_title ?: $a->title) . ' ' . ($a->summary ?? '')));
+            $cluster = $this->detectActorCluster(($a->seo_title ?: $a->title) . ' ' . ($a->summary ?? ''));
+            $a->setAttribute('actor_cluster', $cluster);
+            $a->setAttribute('cluster_color', $this->colorForCluster($cluster));
             return $a;
         });
 
@@ -81,6 +83,7 @@ class ConcentreBuilderController extends Controller
                 'source_name' => $a->source?->name,
                 'source_language' => $a->source?->language ?? 'unknown',
                 'actor_cluster' => $a->actor_cluster ?? null,
+                'cluster_color' => $a->cluster_color ?? '#94a3b8',
                 'favicon' => $a->url ? 'https://www.google.com/s2/favicons?domain=' . parse_url($a->url, PHP_URL_HOST) . '&sz=32' : null,
                 'already_used' => isset($alreadyUsedUrls['/actualites/' . $a->slug]),
             ])->values(),
@@ -149,6 +152,37 @@ class ConcentreBuilderController extends Controller
             'manual_urls' => $run->manual_urls,
             'generated_prompt' => $run->generated_prompt,
         ]);
+    }
+
+    /**
+     * Couleur déterministe pour chaque cluster acteur (triage visuel).
+     * Palette choisie pour contraste WCAG sur fond clair.
+     */
+    private function colorForCluster(?string $cluster): string
+    {
+        $palette = [
+            'OpenAI' => '#10a37f',        // vert OpenAI
+            'Google' => '#4285f4',        // bleu Google
+            'Anthropic' => '#cc785c',     // brique Anthropic
+            'Microsoft' => '#00a4ef',     // cyan Microsoft
+            'Meta' => '#0866ff',          // bleu Meta
+            'Apple' => '#1a1a1a',         // noir Apple
+            'NVIDIA' => '#76b900',        // vert NVIDIA
+            'xAI' => '#000000',           // noir xAI
+            'Mistral' => '#ff7000',       // orange Mistral
+            'Perplexity' => '#1fb8cd',    // turquoise Perplexity
+            'Hugging Face' => '#ffd21e',  // jaune HF
+            'DeepSeek' => '#4d6bfe',      // bleu DeepSeek
+            'Cohere' => '#39594d',        // vert foncé Cohere
+            'Stability AI' => '#7a5af8',  // violet Stability
+            'Amazon' => '#ff9900',        // orange Amazon
+            'Tesla' => '#cc0000',         // rouge Tesla
+            'IBM' => '#054ada',           // bleu IBM
+            'Salesforce' => '#00a1e0',    // cyan Salesforce
+            'Adobe' => '#fa0f00',         // rouge Adobe
+        ];
+
+        return $palette[$cluster] ?? '#94a3b8'; // gris pour "Autres"
     }
 
     /**
