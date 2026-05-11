@@ -194,6 +194,13 @@
                     🎯 Ordre du concentré (glissé-déposé)
                     <span class="cb-counter" x-text="selectedIds.length + manualUrlsArray.length + ' total'"></span>
                 </div>
+                <div class="mb-2 d-flex gap-2 align-items-center flex-wrap" x-show="selectedIds.length >= 2" x-cloak>
+                    <span style="font-size:12px; color:#6b7280; font-weight:600;">Re-trier rapidement :</span>
+                    <button type="button" class="cb-btn cb-btn-secondary" style="font-size:12px; padding:5px 10px; min-height:32px;" @click="sortSelected('cluster')" title="Grouper par acteur (OpenAI ensemble, Google ensemble, etc.)">🏷 Acteur</button>
+                    <button type="button" class="cb-btn cb-btn-secondary" style="font-size:12px; padding:5px 10px; min-height:32px;" @click="sortSelected('color')" title="Grouper par couleur attribuée">🎨 Couleur</button>
+                    <button type="button" class="cb-btn cb-btn-secondary" style="font-size:12px; padding:5px 10px; min-height:32px;" @click="sortSelected('date')" title="Plus récent d'abord">📅 Date</button>
+                    <span style="font-size:11px; color:#94a3b8; font-style:italic;">(tu peux ensuite ajuster au drag-drop)</span>
+                </div>
                 <div id="cb-sortable" style="min-height:80px;">
                     <template x-for="(id, idx) in selectedIds" :key="'sel-' + id">
                         <div class="cb-news-item is-selected" :data-id="id" :style="'border-left-color:' + colorForItem(itemById(id))">
@@ -467,6 +474,33 @@ function concentreBuilder(opts) {
             }
             this.manualColors = { ...this.manualColors }; // force reactivity
             this.saveLocal();
+        },
+
+        sortSelected(mode) {
+            const ids = [...this.selectedIds];
+            ids.sort((idA, idB) => {
+                const a = this.itemById(idA);
+                const b = this.itemById(idB);
+                if (!a || !b) return 0;
+                if (mode === 'cluster') {
+                    const ca = a.actor_cluster || '￿';
+                    const cb = b.actor_cluster || '￿';
+                    if (ca !== cb) return ca.localeCompare(cb);
+                    return (b.pub_date || '').localeCompare(a.pub_date || '');
+                }
+                if (mode === 'color') {
+                    const ca = this.colorForItem(a);
+                    const cb = this.colorForItem(b);
+                    if (ca !== cb) return ca.localeCompare(cb);
+                    return (b.pub_date || '').localeCompare(a.pub_date || '');
+                }
+                if (mode === 'date') {
+                    return (b.pub_date || '').localeCompare(a.pub_date || '');
+                }
+                return 0;
+            });
+            this.selectedIds = ids;
+            this.$nextTick(() => this.initSortable());
         },
 
         itemById(id) { return this.newsItems.find(n => n.id === id); },
