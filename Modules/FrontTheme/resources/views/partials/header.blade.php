@@ -48,10 +48,9 @@
                         <button class="menu-close"><i class="ti-close"></i></button>
                         <ul class="nav navbar-nav mb-2 mb-lg-0">
                             <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
-                            <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
                             @isset($categories)
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
-                                <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Catégories') }}</a>
+                                <a href="#" @click.prevent="megaOpen = !megaOpen" aria-haspopup="true" :aria-expanded="megaOpen">{{ __('Apprendre') }}</a>
                                 {{-- Mega menu catégories --}}
                                 <div x-show="megaOpen" x-cloak x-transition.opacity.duration.100ms
                                     style="position:absolute;left:0;top:100%;width:520px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;"
@@ -111,12 +110,7 @@
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Répertoire techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('directory_tools_count', 3600, fn () => class_exists(\Modules\Directory\Models\Tool::class) ? \Modules\Directory\Models\Tool::where('status', 'published')->count() : 0) }} {{ __('outils IA avec avis, tutoriels et discussions') }}</div></div>
                                             </a>
                                             @endif
-                                            @if(Route::has('tools.index'))
-                                            <a href="{{ route('tools.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🛠️</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Outils gratuits') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Calculatrices, générateurs et plus') }}</div></div>
-                                            </a>
-                                            @endif
+                                            {{-- #181 "Outils gratuits" déplacé vers mega menu "Jouer" --}}
                                             @if(Route::has('dictionary.index'))
                                             <a href="{{ route('dictionary.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">📚</span>
@@ -157,17 +151,7 @@
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Classement') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Top contributeurs') }}</div></div>
                                             </a>
                                             @endif
-                                            {{-- CTA Raccourcisseur --}}
-                                            @if(Route::has('shorturl.create'))
-                                            <a href="{{ route('shorturl.create') }}" style="display:block;background:var(--c-primary-light, #F0FAFB);border:1px solid var(--c-primary, #064E5A);border-radius:10px;padding:14px;text-decoration:none!important;color:inherit;transition:background .15s;margin-top:8px;" onmouseover="this.style.background='#E0F2F4'" onmouseout="this.style.background='var(--c-primary-light, #F0FAFB)'">
-                                                <div style="display:flex!important;align-items:center!important;gap:8px;margin-bottom:6px;">
-                                                    <span style="font-size:20px;">🔗</span>
-                                                    <div style="font-weight:700;font-size:14px;color:var(--c-primary, #064E5A);">{{ __('Raccourcir un lien') }}</div>
-                                                </div>
-                                                <div style="font-size:12px;color:var(--c-text-muted, #6E7687);margin-bottom:8px;">veille.la — {{ __('gratuit, QR code, statistiques') }}</div>
-                                                <span style="display:inline-block;background:var(--c-primary, #064E5A);color:#fff;padding:5px 14px;border-radius:6px;font-weight:700;font-size:12px;">{{ __('Essayer') }} →</span>
-                                            </a>
-                                            @endif
+                                            {{-- #181 CTA Raccourcisseur déplacé vers mega menu "Jouer" --}}
                                         </div>
                                     </div>
                                 </div>
@@ -175,15 +159,83 @@
                                 <ul class="sub-menu">
                                     @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>@endif
                                     @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>@endif
-                                    @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>@endif
                                     @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire IA') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">{{ __('Acronymes éducation') }}</a></li>@endif
                                     @if(Route::has('collections.index'))<li><a href="{{ route('collections.index') }}">{{ __('Collections') }}</a></li>@endif
                                     @if(Route::has('roadmap.boards.index'))<li><a href="{{ route('roadmap.boards.index') }}">{{ __('Propositions') }}</a></li>@endif
-                                    @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>@endif
                                 </ul>
                             </li>
-                            {{-- Lien raccourcir retiré — déjà dans le mega menu Ressources --}}
+                            {{-- #181 Mega menu "Jouer" — saga + avatar + outils interactifs + jeux + utilitaires --}}
+                            <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
+                                <a href="#" @click.prevent="megaOpen = !megaOpen" aria-haspopup="true" :aria-expanded="megaOpen">{{ __('Jouer') }}</a>
+                                <div x-show="megaOpen" x-cloak x-transition.opacity.duration.100ms
+                                    style="position:absolute;left:-200px;top:100%;width:600px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.12);padding:24px;z-index:9999;border:1px solid #E5E7EB;"
+                                    @click.outside="megaOpen = false"
+                                    role="menu" aria-label="{{ __('Menu Jouer') }}">
+                                    <div style="display:flex!important;gap:24px;">
+                                        <div style="flex:1!important;">
+                                            <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Aventures interactives') }}</div>
+                                            @if(Route::has('tools.quest.index'))
+                                            <a href="{{ route('tools.quest.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🎮</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Les Sentiers de l\'IA') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Quête narrative IA avec Loop') }}</div></div>
+                                            </a>
+                                            @endif
+                                            <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin:16px 0 12px;">{{ __('Exercer son cerveau') }}</div>
+                                            @if(Route::has('tools.show'))
+                                            <a href="{{ url('/outils/constructeur-prompts') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🧠</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Constructeur de prompts') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Maîtrisez l\'art du prompt IA') }}</div></div>
+                                            </a>
+                                            <a href="{{ url('/outils/comparateur') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🆚</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Comparateur d\'outils IA') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Comparez jusqu\'à 6 outils côte-à-côte') }}</div></div>
+                                            </a>
+                                            @endif
+                                        </div>
+                                        <div style="flex:1!important;">
+                                            <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Détente') }}</div>
+                                            <a href="{{ url('/outils/sudoku') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🧩</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Sudoku quotidien') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Une nouvelle grille chaque jour') }}</div></div>
+                                            </a>
+                                            <a href="{{ url('/outils/mots-croises') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🔤</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Mots croisés IA') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Générateur de grilles personnalisé') }}</div></div>
+                                            </a>
+                                            <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin:16px 0 12px;">{{ __('Utilitaires') }}</div>
+                                            @if(Route::has('shorturl.create'))
+                                            <a href="{{ route('shorturl.create') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🔗</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Raccourcir un lien') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('veille.la gratuit + QR') }}</div></div>
+                                            </a>
+                                            @endif
+                                            <a href="{{ url('/outils/simulateur-fiscal') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">💰</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Calculatrice taxes QC') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Simulateur fiscal Québec') }}</div></div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div style="border-top:1px solid #E5E7EB;margin-top:16px;padding-top:12px;text-align:center;">
+                                        @if(Route::has('tools.index'))
+                                        <a href="{{ route('tools.index') }}" style="font-size:13px;font-weight:700;color:var(--c-primary, #064E5A);text-decoration:none!important;">{{ __('Tous les outils') }} →</a>
+                                        @endif
+                                    </div>
+                                </div>
+                                {{-- Fallback sub-menu mobile --}}
+                                <ul class="sub-menu">
+                                    @if(Route::has('tools.quest.index'))<li><a href="{{ route('tools.quest.index') }}">{{ __('Les Sentiers de l\'IA') }}</a></li>@endif
+                                    <li><a href="{{ url('/outils/constructeur-prompts') }}">{{ __('Constructeur de prompts') }}</a></li>
+                                    <li><a href="{{ url('/outils/comparateur') }}">{{ __('Comparateur d\'outils IA') }}</a></li>
+                                    <li><a href="{{ url('/outils/sudoku') }}">{{ __('Sudoku quotidien') }}</a></li>
+                                    <li><a href="{{ url('/outils/mots-croises') }}">{{ __('Mots croisés IA') }}</a></li>
+                                    @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>@endif
+                                    <li><a href="{{ url('/outils/simulateur-fiscal') }}">{{ __('Calculatrice taxes') }}</a></li>
+                                    @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">{{ __('Tous les outils') }}</a></li>@endif
+                                </ul>
+                            </li>
+                            {{-- #181 "Pages" retiré du menu principal : tous les liens (À propos, FAQ, Contact, Confidentialité) déjà dans le footer --}}
+                            @if(false)
                             <li class="menu-item-has-children has-mega-menu" x-data="{ megaOpen: false }" @mouseenter="megaOpen = true" @mouseleave="megaOpen = false" style="position:relative;">
                                 <a href="#" @click.prevent="megaOpen = !megaOpen">{{ __('Pages') }}</a>
                                 {{-- Mega menu pages --}}
@@ -241,6 +293,7 @@
                                     @if(Route::has('blog.submissions.create'))<li><a href="{{ route('blog.submissions.create') }}">{{ __('Proposer un article') }}</a></li>@endif
                                 </ul>
                             </li>
+                            @endif
                         </ul>
                     </div><!-- end of nav-collapse -->
                 </div>
@@ -322,8 +375,32 @@
                                             <div class="widget-title"><h3>{{ __('Navigation') }}</h3></div>
                                             <ul>
                                                 <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
-                                                <li><a href="{{ route('blog.index') }}">{{ __('Blog') }}</a></li>
+                                                @if(Route::has('blog.index'))<li><a href="{{ route('blog.index') }}">📚 {{ __('Tous les articles') }}</a></li>@endif
+                                            </ul>
+                                        </div>
+                                        {{-- Apprendre (ex-Catégories) --}}
+                                        @isset($categories)
+                                        <div class="widget link-widget">
+                                            <div class="widget-title"><h3>{{ __('Apprendre') }}</h3></div>
+                                            <ul>
+                                                @foreach($categories as $cat)
+                                                    <li><a href="{{ route('blog.category', $cat->slug) }}">{{ ucfirst(mb_strtolower($cat->name)) }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        @endisset
+                                        {{-- Jouer (NEW #181) --}}
+                                        <div class="widget link-widget">
+                                            <div class="widget-title"><h3>{{ __('Jouer') }}</h3></div>
+                                            <ul>
+                                                @if(Route::has('tools.quest.index'))<li><a href="{{ route('tools.quest.index') }}">🎮 {{ __('Les Sentiers de l\'IA') }}</a></li>@endif
+                                                <li><a href="{{ url('/outils/constructeur-prompts') }}">🧠 {{ __('Constructeur de prompts') }}</a></li>
+                                                <li><a href="{{ url('/outils/comparateur') }}">🆚 {{ __('Comparateur d\'outils IA') }}</a></li>
+                                                <li><a href="{{ url('/outils/sudoku') }}">🧩 {{ __('Sudoku quotidien') }}</a></li>
+                                                <li><a href="{{ url('/outils/mots-croises') }}">🔤 {{ __('Mots croisés IA') }}</a></li>
                                                 @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">🔗 {{ __('Raccourcir un lien') }}</a></li>@endif
+                                                <li><a href="{{ url('/outils/simulateur-fiscal') }}">💰 {{ __('Calculatrice taxes QC') }}</a></li>
+                                                @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">🛠️ {{ __('Tous les outils') }}</a></li>@endif
                                             </ul>
                                         </div>
                                         {{-- Ressources --}}
@@ -332,19 +409,8 @@
                                             <ul>
                                                 @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                                 @if(Route::has('directory.index'))<li><a href="{{ route('directory.index') }}">🔍 {{ __('Répertoire techno') }}</a></li>@endif
-                                                @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">🛠️ {{ __('Outils gratuits') }}</a></li>@endif
                                                 @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA') }}</a></li>@endif
                                                 @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🎓 {{ __('Acronymes éducation') }}</a></li>@endif
-                                            </ul>
-                                        </div>
-                                        {{-- Pages --}}
-                                        <div class="widget link-widget">
-                                            <div class="widget-title"><h3>{{ __('Pages') }}</h3></div>
-                                            <ul>
-                                                @if(Route::has('page.show'))<li><a href="{{ route('page.show', 'a-propos') }}">{{ __('À propos') }}</a></li>@endif
-                                                @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">{{ __('FAQ') }}</a></li>@endif
-                                                <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
-                                                @if(Route::has('blog.submissions.create'))<li><a href="{{ route('blog.submissions.create') }}">✍️ {{ __('Proposer un article') }}</a></li>@endif
                                             </ul>
                                         </div>
                                     </div>
