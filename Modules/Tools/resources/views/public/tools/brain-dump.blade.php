@@ -112,28 +112,32 @@
     .bd-hero__intro { flex-direction: column; text-align: center; }
 }
 
-/* Tool actif */
-.bd-tool { background: #0c1427; color: #e2e8f0; padding: 2rem 1.5rem; border-radius: 16px; box-shadow: 0 12px 30px rgba(6,78,90,.15); }
-.bd-tool__label { display: inline-block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #3dc9d8; margin: 0 0 .85rem; }
-.bd-tool h2 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: #fff; font-size: 1.75rem; margin: 0 0 1rem; }
-.bd-timer { background: rgba(255,255,255,.05); border: 1px solid rgba(61,201,216,.3); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: center; }
-.bd-timer__display { font-family: 'Consolas', 'Menlo', monospace; font-size: 3rem; font-weight: 800; color: #3dc9d8; letter-spacing: 2px; margin: 0 0 .85rem; line-height: 1; }
+/* Tool actif — uniformité charte Memora (pattern constructeur-prompts) */
+.bd-tool { background: #fff; color: var(--c-dark); padding: 2rem 1.5rem; border-radius: 16px; box-shadow: 0 4px 16px rgba(6,78,90,.08); border: 1px solid #E5E7EB; }
+.bd-tool__label { display: inline-block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--c-primary, #0B7285); margin: 0 0 .85rem; }
+.bd-tool h2 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark); font-size: 1.75rem; margin: 0 0 .5rem; }
+.bd-tool__intro { color: var(--c-muted); margin: 0 0 1.5rem; font-size: .95rem; line-height: 1.5; }
+.bd-tool__intro strong { color: var(--c-dark); }
+.bd-timer { background: linear-gradient(135deg, rgba(11,114,133,.06) 0%, rgba(82,184,199,.10) 100%); border: 1px solid rgba(11,114,133,.18); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: center; }
+.bd-timer__display { font-family: 'Consolas', 'Menlo', monospace; font-size: 3rem; font-weight: 800; color: var(--c-primary, #0B7285); letter-spacing: 2px; margin: 0 0 .85rem; line-height: 1; }
 .bd-timer__controls { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
-.bd-timer__btn { padding: .65rem 1.25rem; min-height: 44px; background: #3dc9d8; color: #0c1427; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: .95rem; }
-.bd-timer__btn:hover { background: #5ddee9; }
-.bd-timer__btn--ghost { background: transparent; color: #3dc9d8; border: 1.5px solid #3dc9d8; }
-.bd-timer__btn--ghost:hover { background: #3dc9d8; color: #0c1427; }
-.bd-tool__partlabel { display: inline-block; background: #3dc9d8; color: #0c1427; padding: .25rem .75rem; border-radius: 4px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin: 1rem 0 .5rem; }
-.bd-tool__prenote { font-size: .9rem; color: #cbd5e1; margin: 0 0 .5rem; }
-.bd-tool__codeblock { background: #1e293b; border: 1px solid #3dc9d8; border-radius: 8px; padding: 1rem; font-family: 'Consolas', 'Menlo', monospace; font-size: .9rem; color: #e2e8f0; line-height: 1.55; white-space: normal; margin: 0 0 .5rem; }
-.bd-tool__codeblock .bd-token { color: #fbbf24; font-weight: 700; }
-.bd-tool__postnote { font-size: .85rem; color: #94a3b8; font-style: italic; margin: 0 0 1rem; }
-.bd-tool__copy { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .85rem; min-height: 38px; background: transparent; color: #3dc9d8; border: 1.5px solid #3dc9d8; border-radius: 6px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .15s ease; }
-.bd-tool__copy:hover { background: #3dc9d8; color: #0c1427; }
-.bd-tool .open-in-ai__label { color: #94a3b8; }
-.bd-tool .open-in-ai__btn { border-color: #3dc9d8; color: #3dc9d8; background: transparent; }
-.bd-tool .open-in-ai__btn:hover { background: #3dc9d8; color: #0c1427; }
-.bd-tool .open-in-ai__privacy { color: #94a3b8; }
+.bd-timer__btn { padding: .65rem 1.25rem; min-height: 44px; background: #064E5A; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: .95rem; transition: all .15s ease; }
+.bd-timer__btn:hover { background: #053640; transform: translateY(-1px); }
+.bd-timer__btn:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+.bd-timer__btn--ghost { background: transparent; color: #064E5A; border: 1.5px solid #064E5A; }
+.bd-timer__btn--ghost:hover { background: #064E5A; color: #fff; }
+.bd-tool__partlabel { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .85rem .35rem .35rem; border-radius: 999px; background: rgba(11,114,133,.08); color: var(--c-primary, #0B7285); font-size: .8125rem; font-weight: 700; margin: 1.25rem 0 .65rem; border: 1px solid rgba(11,114,133,.18); }
+.bd-tool__partlabel__num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: var(--c-primary, #0B7285); color: #fff; border-radius: 50%; font-weight: 800; font-size: .875rem; }
+.bd-tool__prenote { font-size: .95rem; color: #374151; margin: 0 0 .65rem; line-height: 1.5; }
+.bd-tool__codeblock { background: #F0F8F9; border: 1px solid rgba(11,114,133,.18); border-left: 4px solid var(--c-primary, #0B7285); border-radius: 8px; padding: 1rem 1.25rem; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: .95rem; color: var(--c-dark); line-height: 1.65; white-space: normal; margin: 0 0 .65rem; }
+.bd-tool__codeblock .bd-token { color: var(--c-accent, #9A2A06); font-weight: 700; }
+.bd-tool__postnote { font-size: .875rem; color: var(--c-muted); font-style: italic; margin: 0 0 1.25rem; }
+.bd-tool__copy { display: inline-flex; align-items: center; gap: .4rem; padding: .65rem 1.15rem; min-height: 44px; background: #064E5A; color: #fff; border: none; border-radius: 8px; font-size: .9rem; font-weight: 600; cursor: pointer; transition: all .15s ease; }
+.bd-tool__copy:hover { background: #053640; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6,78,90,.18); }
+.bd-tool__copy:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+.bd-tool__divider { border: 0; border-top: 1px dashed rgba(11,114,133,.25); margin: 1.5rem 0; }
+.bd-tool__tip { font-size: .9rem; color: #374151; margin: .65rem 0 0; line-height: 1.5; }
+.bd-tool__tip strong { color: var(--c-primary, #0B7285); }
 
 /* Sections content */
 .bd-section h2 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark); font-size: 1.875rem; margin: 0 0 .5rem; line-height: 1.2; }
@@ -242,7 +246,7 @@
             <div class="bd-tool">
                 <span class="bd-tool__label">Étape 2 — Prompt IA</span>
                 <h2 id="bd-tool-h2">Le prompt prêt à l'emploi</h2>
-                <p style="color:#cbd5e1;margin:0 0 1.25rem;font-size:.95rem;line-height:1.5;">Deux blocs à copier-coller dans la <strong style="color:#fff;">même conversation</strong> avec ton IA préférée, l'un après l'autre.</p>
+                <p class="bd-tool__intro">Deux blocs à copier-coller dans la <strong>même conversation</strong> avec ton IA préférée, l'un après l'autre.</p>
 
                 {{-- Minuteur 10 min --}}
                 <div class="bd-timer" role="timer" aria-live="polite" aria-atomic="true">
@@ -255,23 +259,27 @@
                 </div>
 
                 {{-- Partie 1 --}}
-                <span class="bd-tool__partlabel">Partie 1 — Transcription</span>
+                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">1</span> Partie 1 — Transcription</span>
                 <p class="bd-tool__prenote">Colle ce premier bloc + joins ta photo à la même conversation :</p>
                 <div class="bd-tool__codeblock" x-ref="part1" x-html="part1Html"></div>
                 <button type="button" class="bd-tool__copy" @click="copyPart(1)" x-text="copiedPart === 1 ? '✓ Copié !' : '📋 Copier la Partie 1'"></button>
                 <p class="bd-tool__postnote">↳ Valide ou corrige la transcription. Quand elle est bonne, passe à la Partie 2.</p>
 
+                <hr class="bd-tool__divider">
+
                 {{-- Partie 2 --}}
-                <span class="bd-tool__partlabel">Partie 2 — Analyse</span>
+                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">2</span> Partie 2 — Analyse</span>
                 <p class="bd-tool__prenote">Dans la même conversation, colle ensuite ce second bloc :</p>
                 <div class="bd-tool__codeblock" x-ref="part2" x-html="part2Html"></div>
                 <button type="button" class="bd-tool__copy" @click="copyPart(2)" x-text="copiedPart === 2 ? '✓ Copié !' : '📋 Copier la Partie 2'"></button>
                 <p class="bd-tool__postnote">↳ L'analyse s'appuie sur ton texte validé + justifie chaque étape — chain-of-thought 2026 best practice.</p>
 
+                <hr class="bd-tool__divider">
+
                 {{-- Open-in AI --}}
-                <div style="margin-top:1.5rem;">
+                <div>
                     <x-tools::open-in-ai :prompt="$openInAIPrompt ?? ''" :show-label="false" />
-                    <p style="font-size:.85rem;color:#cbd5e1;margin:.5rem 0 0;">Astuce : commence par <strong style="color:#3dc9d8;">copier la Partie 1</strong> ci-dessus, puis clique sur ton IA préférée — le bouton ouvre l'outil et tu n'as qu'à coller (Ctrl/Cmd + V).</p>
+                    <p class="bd-tool__tip">Astuce : commence par <strong>copier la Partie 1</strong> ci-dessus, puis clique sur ton IA préférée — le bouton ouvre l'outil et tu n'as qu'à coller (Ctrl/Cmd + V).</p>
                 </div>
             </div>
         </div>
