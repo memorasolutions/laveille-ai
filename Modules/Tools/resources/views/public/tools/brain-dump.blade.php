@@ -604,7 +604,7 @@ function brainDumpPage() {
         },
 
         // Prompts
-        part1: "Tu es un transcripteur OCR précis. Voici une photo d'un brain dump manuscrit que je viens de faire. Transcris-le fidèlement en texte simple, ligne par ligne, en respectant l'ordre. Ne reformule pas, ne corrige pas l'orthographe — donne-moi le brut. Si une ligne est illisible, indique [???] et continue.\n\n[joindre votre photo ici]",
+        part1: "Tu es un transcripteur OCR précis. La photo que je viens de joindre à ce message est un brain dump manuscrit que je viens de faire. Transcris-le fidèlement en texte simple, ligne par ligne, en respectant l'ordre. Ne reformule pas, ne corrige pas l'orthographe — donne-moi le brut. Si une ligne est illisible, indique [???] et continue.",
         get part1Html() { return this._renderPrompt(this.part1); },
         _renderPrompt(text) {
             var escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
