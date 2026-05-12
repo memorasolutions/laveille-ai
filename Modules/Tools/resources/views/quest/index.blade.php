@@ -3,6 +3,10 @@
 @section('title', $meta['title'] . ' — Quête narrative · La veille')
 @section('meta_description', 'Apprenez l\'intelligence artificielle en aventure interactive aux côtés de Loop, votre compagnon IA québécois.')
 
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Les Sentiers de l\'IA')])
+@endsection
+
 @push('robots')
 <meta name="robots" content="noindex, nofollow">
 @endpush
@@ -10,14 +14,14 @@
 @section('content')
 <style>
 [x-cloak] { display: none !important; }
-.quest-hub { --c-primary: #064E5A; --c-accent: #9A2A06; --c-bg: #F0F4F8; --c-surface: #fff; --c-dark: #1a1d23; --c-muted: #52586a; padding: 1.5rem 1rem 4rem; max-width: 1100px; margin: 0 auto; }
+.quest-hub { --c-primary: #064E5A; --c-accent: #9A2A06; --c-bg: #F0F4F8; --c-surface: #fff; --c-dark: #1a1d23; --c-muted: #52586a; padding: 1.5rem 0 4rem; }
 .quest-hub *, .quest-hub *::before, .quest-hub *::after { box-sizing: border-box; }
-.quest-hero { background: linear-gradient(135deg, #064E5A 0%, #0a6b7b 100%); color: #fff; border-radius: 20px; padding: 2.5rem 2rem; margin-bottom: 2rem; text-align: center; position: relative; overflow: hidden; }
-.quest-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(154,42,6,.18) 0%, transparent 50%); pointer-events: none; }
-.quest-hero__mascot { width: 100px; height: 100px; margin: 0 auto 1rem; animation: bobLoop 3.2s ease-in-out infinite; position: relative; z-index: 1; }
-@keyframes bobLoop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.quest-hero h1 { margin: 0 0 .35rem; font-size: 2.25rem; letter-spacing: -.5px; position: relative; z-index: 1; }
-.quest-hero p { margin: 0; opacity: .92; font-size: 1.0625rem; position: relative; z-index: 1; }
+.quest-hero { background: linear-gradient(135deg, #ffffff 0%, var(--c-bg) 100%); border-bottom: 1px solid #E5E7EB; padding: 32px 0 24px; margin: -1.5rem 0 2rem; text-align: center; }
+.quest-hero__inner { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+.quest-hero__mascot { width: 84px; height: 84px; animation: bobLoop 3.2s ease-in-out infinite; }
+@keyframes bobLoop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.quest-hero h1 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark); margin: 0 0 .35rem; font-size: 2.25rem; letter-spacing: -.5px; }
+.quest-hero p { margin: 0; color: #374151; font-size: 1.0625rem; max-width: 640px; }
 .quest-status { background: var(--c-surface); border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 16px rgba(6,78,90,.08); }
 .quest-status__connected { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
 .quest-status__email { color: var(--c-primary); font-weight: 600; }
@@ -70,30 +74,35 @@
 </style>
 
 <div class="quest-hub" x-data="{ email: @js($email), submitting: false, msg: '', msgType: '' }" x-cloak>
+    <header class="quest-hero">
+        <div class="container">
+            <div class="quest-hero__inner">
+                <svg class="quest-hero__mascot" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Loop, le robot mascotte">
+                    <circle cx="50" cy="55" r="38" fill="#dde6ef"/>
+                    <circle cx="50" cy="55" r="32" fill="#fff"/>
+                    <circle cx="42" cy="50" r="4.5" fill="#1a1d23"/>
+                    <circle cx="58" cy="50" r="4.5" fill="#1a1d23"/>
+                    <circle cx="43" cy="49" r="1.5" fill="#fff"/>
+                    <circle cx="59" cy="49" r="1.5" fill="#fff"/>
+                    <path d="M42 62 Q50 68 58 62" stroke="#9A2A06" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <line x1="50" y1="8" x2="50" y2="18" stroke="#9A2A06" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="50" cy="8" r="3" fill="#9A2A06"/>
+                    <rect x="14" y="48" width="10" height="14" rx="3" fill="#dde6ef"/>
+                    <rect x="76" y="48" width="10" height="14" rx="3" fill="#dde6ef"/>
+                </svg>
+                <h1>{{ $meta['title'] }}</h1>
+                <p>{{ $meta['tagline'] }}</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
     @if(session('quest_success'))
         <div class="flash flash--success" role="status">{{ session('quest_success') }}</div>
     @endif
     @if(session('quest_error'))
         <div class="flash flash--error" role="alert">{{ session('quest_error') }}</div>
     @endif
-
-    <header class="quest-hero">
-        <svg class="quest-hero__mascot" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Loop, le robot mascotte">
-            <circle cx="50" cy="55" r="38" fill="#dde6ef"/>
-            <circle cx="50" cy="55" r="32" fill="#fff"/>
-            <circle cx="42" cy="50" r="4.5" fill="#1a1d23"/>
-            <circle cx="58" cy="50" r="4.5" fill="#1a1d23"/>
-            <circle cx="43" cy="49" r="1.5" fill="#fff"/>
-            <circle cx="59" cy="49" r="1.5" fill="#fff"/>
-            <path d="M42 62 Q50 68 58 62" stroke="#9A2A06" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-            <line x1="50" y1="8" x2="50" y2="18" stroke="#9A2A06" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="50" cy="8" r="3" fill="#9A2A06"/>
-            <rect x="14" y="48" width="10" height="14" rx="3" fill="#dde6ef"/>
-            <rect x="76" y="48" width="10" height="14" rx="3" fill="#dde6ef"/>
-        </svg>
-        <h1>{{ $meta['title'] }}</h1>
-        <p>{{ $meta['tagline'] }}</p>
-    </header>
 
     <section class="quest-status" aria-label="Votre carnet de bord">
         <div x-show="!email" x-cloak>
@@ -176,6 +185,7 @@
         <p>📬 La saga continue chaque semaine via <a href="/">la newsletter La veille</a>.</p>
         <p style="font-size:.8rem;opacity:.7;">🔒 Loi 25 — Tes données restent chez toi. Aucun pisteur, aucun mot de passe.</p>
     </footer>
+    </div>{{-- /.container --}}
 </div>
 
 <script>
