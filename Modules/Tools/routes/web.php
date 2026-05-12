@@ -63,6 +63,25 @@ Route::middleware('web')->group(function () {
         ->middleware('throttle:30,60')
         ->name('tools.avatar.save');
 
+    // #174 Quête narrative IA — saga « Les Sentiers de l'IA »
+    Route::get('/quete', [\Modules\Tools\Http\Controllers\QuestController::class, 'index'])
+        ->name('tools.quest.index');
+    Route::post('/quete/login', [\Modules\Tools\Http\Controllers\QuestController::class, 'loginRequest'])
+        ->middleware('throttle:5,60')
+        ->name('tools.quest.login');
+    Route::get('/quete/auth/{token}', [\Modules\Tools\Http\Controllers\QuestController::class, 'authVerify'])
+        ->where('token', '[a-zA-Z0-9]{48}')
+        ->name('tools.quest.auth');
+    Route::post('/quete/logout', [\Modules\Tools\Http\Controllers\QuestController::class, 'logout'])
+        ->name('tools.quest.logout');
+    Route::get('/quete/{slug}', [\Modules\Tools\Http\Controllers\QuestController::class, 'chapter'])
+        ->where('slug', '[a-z0-9-]+')
+        ->name('tools.quest.chapter');
+    Route::post('/quete/{slug}/complete', [\Modules\Tools\Http\Controllers\QuestController::class, 'complete'])
+        ->where('slug', '[a-z0-9-]+')
+        ->middleware('throttle:30,60')
+        ->name('tools.quest.complete');
+
     // #163 : exclure 'sudoku' + #177 'avatar' (routes fournies par modules dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
         ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/).+')
