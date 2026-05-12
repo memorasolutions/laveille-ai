@@ -56,9 +56,16 @@ Route::middleware('web')->group(function () {
     Route::get('/jeu/{identifier}', fn (string $identifier) => redirect('/jeumc/'.$identifier, 301))
         ->where('identifier', '[a-zA-Z0-9_-]+');
 
-    // #163 : exclure 'sudoku' (route fournie par Modules/Sudoku/routes/web.php). Ajouter d'autres slugs au pattern si nouveaux modules outils dedies.
+    // #177 Avatar tool — admin-only durant construction (page "En construction" sinon)
+    Route::get('/outils/avatar', [\Modules\Tools\Http\Controllers\AvatarController::class, 'index'])
+        ->name('tools.avatar.index');
+    Route::post('/outils/avatar/save', [\Modules\Tools\Http\Controllers\AvatarController::class, 'save'])
+        ->middleware('throttle:30,60')
+        ->name('tools.avatar.save');
+
+    // #163 : exclure 'sudoku' + #177 'avatar' (routes fournies par modules dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
-        ->where('slug', '^(?!sudoku$|sudoku/).+')
+        ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/).+')
         ->name('tools.show');
 });
 
