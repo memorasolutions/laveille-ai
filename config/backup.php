@@ -34,6 +34,19 @@ return [
                 'exclude' => [
                     base_path('vendor'),
                     base_path('node_modules'),
+                    // Volatile dirs modifiés en permanence — cause ZipArchive::close() Unexpected length
+                    storage_path('logs'),
+                    storage_path('framework/cache'),
+                    storage_path('framework/sessions'),
+                    storage_path('framework/views'),
+                    storage_path('app/backup-temp'),
+                    storage_path('app/livewire-tmp'),
+                    base_path('.git'),
+                    base_path('.playwright-mcp'),
+                    base_path('tests/Browser/screenshots'),
+                    base_path('tests/Browser/console'),
+                    base_path('.idea'),
+                    base_path('.vscode'),
                 ],
 
                 /*
@@ -44,7 +57,7 @@ return [
                 /*
                  * Determines if it should avoid unreadable folders.
                  */
-                'ignore_unreadable_directories' => false,
+                'ignore_unreadable_directories' => true,
 
                 /*
                  * This path is used to make directories in resulting zip-file relative
@@ -191,13 +204,13 @@ return [
         /*
          * The number of attempts, in case the backup command encounters an exception
          */
-        'tries' => 1,
+        'tries' => 2,
 
         /*
          * The number of seconds to wait before attempting a new backup if the previous try failed
          * Set to `0` for none
          */
-        'retry_delay' => 0,
+        'retry_delay' => 30,
     ],
 
     /*
