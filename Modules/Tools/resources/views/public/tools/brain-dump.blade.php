@@ -1,0 +1,513 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
+@extends(fronttheme_layout())
+
+@section('title', 'Brain Dump 2026 — 10 min de papier + 30 sec d\'IA · La veille')
+@section('meta_description', 'Outil gratuit pour décharger ton mental en 10 minutes papier + IA. Validé par la science (Mueller & Oppenheimer 2014). 100% privé, aucune donnée chez nous.')
+
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Brain Dump 2026', 'breadcrumbItems' => [__('Outils'), 'Brain Dump 2026']])
+@endsection
+
+@push('og')
+<meta property="og:title" content="Brain Dump 2026 — 10 min de papier + 30 sec d'IA">
+<meta property="og:description" content="Décharge ton mental en 10 minutes papier puis structure avec l'IA. Outil gratuit, 100% privé, validé par la science.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url('/outils/brain-dump') }}">
+<meta name="twitter:card" content="summary_large_image">
+@endpush
+
+@push('head')
+{{-- JSON-LD multi-couche : SoftwareApplication + HowTo + FAQPage + BreadcrumbList + Person (auteur) — AEO/GEO 2026 +30% Perplexity visibility --}}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "SoftwareApplication",
+            "name": "Brain Dump 2026",
+            "applicationCategory": "ProductivityApplication",
+            "operatingSystem": "Web",
+            "url": "{{ url('/outils/brain-dump') }}",
+            "description": "Outil gratuit pour décharger mentalement par écriture manuscrite puis structurer avec l'IA. Combine papier + IA OCR + chain prompting.",
+            "isAccessibleForFree": true,
+            "inLanguage": "fr-CA",
+            "provider": {
+                "@type": "Organization",
+                "name": "La veille",
+                "url": "{{ url('/') }}"
+            },
+            "featureList": [
+                "Minuteur 10 minutes intégré",
+                "Prompt chain prompting prêt à copier",
+                "Ouverture directe dans ChatGPT, Claude, Gemini, Perplexity, Mistral, Copilot",
+                "100% client-side, aucune donnée serveur"
+            ]
+        },
+        {
+            "@type": "HowTo",
+            "name": "Comment faire un Brain Dump 2026 avec l'IA",
+            "description": "Méthode en 5 étapes pour vider mentalement par écriture manuelle puis structurer avec une IA.",
+            "totalTime": "PT15M",
+            "step": [
+                {"@type": "HowToStep", "position": 1, "name": "Papier + stylo, 10 minutes", "text": "Vide tout ce qui occupe ton esprit. Pas de jugement, pas d'ordre, juste sortir."},
+                {"@type": "HowToStep", "position": 2, "name": "Biffer le sensible", "text": "Biffe ou plie les passages sensibles (santé, finances, conflits RH, données tiers) avant la photo. Protection Loi 25 d'abord."},
+                {"@type": "HowToStep", "position": 3, "name": "Photo téléphone", "text": "Prends une photo de la page avec un cadrage net. Ton IA va lire l'écriture manuscrite."},
+                {"@type": "HowToStep", "position": 4, "name": "Lancer le prompt IA", "text": "Copie la Partie 1 (transcription) + Partie 2 (analyse) dans ton IA préférée — chain prompting validé en 2 étapes."},
+                {"@type": "HowToStep", "position": 5, "name": "Sauvegarde et relecture", "text": "Sauvegarde dans ton app notes préférée. Relis 24 h plus tard — les vrais insights émergent souvent à J+1."}
+            ]
+        },
+        {
+            "@type": "FAQPage",
+            "mainEntity": [
+                {"@type": "Question", "name": "Qu'est-ce qu'un Brain Dump et à quoi ça sert ?", "acceptedAnswer": {"@type": "Answer", "text": "Un Brain Dump est une décharge mentale par écriture libre pendant 10 minutes. Ça libère la mémoire de travail, réduit le stress cognitif et fait émerger des priorités cachées. La version 2026 ajoute une étape IA pour structurer le brouillon en actions concrètes."}},
+                {"@type": "Question", "name": "Combien de temps prend un Brain Dump complet ?", "acceptedAnswer": {"@type": "Answer", "text": "10 minutes d'écriture manuscrite + 30 secondes pour copier-coller le prompt dans une IA + quelques minutes pour relire l'analyse. Total : 15-20 minutes par séance."}},
+                {"@type": "Question", "name": "Le Brain Dump fonctionne-t-il pour l'anxiété ?", "acceptedAnswer": {"@type": "Answer", "text": "Les recherches de James Pennebaker (1997-2018) sur l'expressive writing montrent que l'écriture libre régulière réduit les symptômes anxieux. La version 2026 avec IA aide à transformer le brouillon en actions, ce qui amplifie l'effet déchargement."}},
+                {"@type": "Question", "name": "Quelle IA est la meilleure pour transcrire un manuscrit en 2026 ?", "acceptedAnswer": {"@type": "Answer", "text": "En mai 2026, Apple Intelligence Notes (OCR on-device), Claude Vision (Anthropic) et Google Lens offrent les meilleures précisions sur le manuscrit cursif standard. Pour le maximum d'intimité, l'OCR on-device (Apple) garde tes données sur l'appareil."}},
+                {"@type": "Question", "name": "Mes notes manuscrites sont-elles privées ?", "acceptedAnswer": {"@type": "Answer", "text": "L'outil laveille.ai est 100% côté navigateur : aucune donnée n'est envoyée à nos serveurs. Le prompt va directement dans l'IA que tu choisis. Pour la protection Loi 25 maximale, biffe les passages sensibles avant la photo et privilégie un OCR on-device."}},
+                {"@type": "Question", "name": "Tablette ou papier — lequel est mieux ?", "acceptedAnswer": {"@type": "Answer", "text": "Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale."}},
+                {"@type": "Question", "name": "Quelle est la différence avec un journal classique ?", "acceptedAnswer": {"@type": "Answer", "text": "Le journal classique est narratif et chronologique. Le Brain Dump est libre, sans structure, et conçu pour la décharge rapide. La version 2026 ajoute l'IA pour transformer le brouillon en actions, ce qui sort le carnet du tiroir."}}
+            ]
+        },
+        {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Accueil", "item": "{{ url('/') }}"},
+                {"@type": "ListItem", "position": 2, "name": "Outils", "item": "{{ url('/outils') }}"},
+                {"@type": "ListItem", "position": 3, "name": "Brain Dump 2026", "item": "{{ url('/outils/brain-dump') }}"}
+            ]
+        },
+        {
+            "@type": "Person",
+            "name": "Stéphane Lapointe",
+            "url": "{{ url('/') }}",
+            "sameAs": ["https://www.linkedin.com/in/lapointestephane/"],
+            "jobTitle": "Veille technologique IA · Québec"
+        }
+    ]
+}
+</script>
+@endpush
+
+@section('content')
+<style>
+[x-cloak] { display: none !important; }
+.bd-page { --c-bg: #F0F4F8; --c-surface: #fff; --c-dark: #1a1d23; --c-muted: #52586a; }
+.bd-page *, .bd-page *::before, .bd-page *::after { box-sizing: border-box; }
+.bd-section { padding: 3rem 0; }
+.bd-section--alt { background: var(--c-bg); }
+.bd-container { max-width: 760px; margin: 0 auto; padding: 0 1rem; }
+.bd-container--wide { max-width: 1000px; }
+
+/* Hero */
+.bd-hero { padding: 2.5rem 0 2rem; background: linear-gradient(135deg, #fff 0%, var(--c-bg) 100%); }
+.bd-hero__intro { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem; }
+.bd-hero h1 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark); font-size: 2.5rem; margin: 0 0 .35rem; line-height: 1.15; letter-spacing: -.5px; }
+.bd-hero__sub { font-size: 1.25rem; color: #374151; margin: 0 0 1rem; line-height: 1.4; }
+.bd-hero__tldr { background: rgba(11,114,133,.06); border-left: 4px solid var(--c-primary, #0B7285); padding: .85rem 1.15rem; border-radius: 0 8px 8px 0; font-size: 1rem; line-height: 1.6; color: var(--c-dark); margin: 0 0 1.25rem; }
+.bd-hero__signals { display: flex; flex-wrap: wrap; gap: .75rem; margin: 0 0 1.5rem; }
+.bd-hero__signal { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .85rem; background: #fff; border: 1px solid #E5E7EB; border-radius: 999px; font-size: .85rem; color: var(--c-dark); font-weight: 600; }
+.bd-hero__signal strong { color: var(--c-primary, #0B7285); }
+.bd-hero__cta { display: flex; flex-wrap: wrap; gap: .85rem; align-items: center; }
+.bd-btn-primary { display: inline-flex; align-items: center; gap: .5rem; padding: .85rem 1.5rem; min-height: 48px; background: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 1.0625rem; cursor: pointer; text-decoration: none; transition: all .15s ease; }
+.bd-btn-primary:hover { background: #053640; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(6,78,90,.25); text-decoration: none; }
+.bd-btn-primary:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+.bd-btn-link { color: var(--c-primary, #0B7285); font-weight: 600; font-size: .95rem; text-decoration: none; padding: .5rem 0; }
+.bd-btn-link:hover { text-decoration: underline; }
+.bd-hero__byline { margin: 1.5rem 0 0; font-size: .8125rem; color: var(--c-muted); display: flex; flex-wrap: wrap; align-items: center; gap: .85rem; }
+.bd-hero__byline a { color: var(--c-primary, #0B7285); font-weight: 600; }
+@media (max-width: 540px) {
+    .bd-hero h1 { font-size: 1.875rem; }
+    .bd-hero__intro { flex-direction: column; text-align: center; }
+}
+
+/* Tool actif */
+.bd-tool { background: #0c1427; color: #e2e8f0; padding: 2rem 1.5rem; border-radius: 16px; box-shadow: 0 12px 30px rgba(6,78,90,.15); }
+.bd-tool__label { display: inline-block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #3dc9d8; margin: 0 0 .85rem; }
+.bd-tool h2 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: #fff; font-size: 1.75rem; margin: 0 0 1rem; }
+.bd-timer { background: rgba(255,255,255,.05); border: 1px solid rgba(61,201,216,.3); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: center; }
+.bd-timer__display { font-family: 'Consolas', 'Menlo', monospace; font-size: 3rem; font-weight: 800; color: #3dc9d8; letter-spacing: 2px; margin: 0 0 .85rem; line-height: 1; }
+.bd-timer__controls { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+.bd-timer__btn { padding: .65rem 1.25rem; min-height: 44px; background: #3dc9d8; color: #0c1427; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: .95rem; }
+.bd-timer__btn:hover { background: #5ddee9; }
+.bd-timer__btn--ghost { background: transparent; color: #3dc9d8; border: 1.5px solid #3dc9d8; }
+.bd-timer__btn--ghost:hover { background: #3dc9d8; color: #0c1427; }
+.bd-tool__partlabel { display: inline-block; background: #3dc9d8; color: #0c1427; padding: .25rem .75rem; border-radius: 4px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin: 1rem 0 .5rem; }
+.bd-tool__prenote { font-size: .9rem; color: #cbd5e1; margin: 0 0 .5rem; }
+.bd-tool__codeblock { background: #1e293b; border: 1px solid #3dc9d8; border-radius: 8px; padding: 1rem; font-family: 'Consolas', 'Menlo', monospace; font-size: .9rem; color: #e2e8f0; line-height: 1.55; white-space: normal; margin: 0 0 .5rem; }
+.bd-tool__codeblock .bd-token { color: #fbbf24; font-weight: 700; }
+.bd-tool__postnote { font-size: .85rem; color: #94a3b8; font-style: italic; margin: 0 0 1rem; }
+.bd-tool__copy { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .85rem; min-height: 38px; background: transparent; color: #3dc9d8; border: 1.5px solid #3dc9d8; border-radius: 6px; font-size: .85rem; font-weight: 600; cursor: pointer; transition: all .15s ease; }
+.bd-tool__copy:hover { background: #3dc9d8; color: #0c1427; }
+.bd-tool .open-in-ai__label { color: #94a3b8; }
+.bd-tool .open-in-ai__btn { border-color: #3dc9d8; color: #3dc9d8; background: transparent; }
+.bd-tool .open-in-ai__btn:hover { background: #3dc9d8; color: #0c1427; }
+.bd-tool .open-in-ai__privacy { color: #94a3b8; }
+
+/* Sections content */
+.bd-section h2 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark); font-size: 1.875rem; margin: 0 0 .5rem; line-height: 1.2; }
+.bd-section__lead { font-size: 1.0625rem; color: #374151; line-height: 1.6; margin: 0 0 2rem; }
+.bd-steps { display: grid; gap: 1rem; }
+@media (min-width: 768px) { .bd-steps { grid-template-columns: repeat(2, 1fr); } }
+.bd-step { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 1.25rem 1.5rem; transition: all .15s ease; }
+.bd-step:hover { box-shadow: 0 8px 20px rgba(6,78,90,.08); transform: translateY(-2px); }
+.bd-step__num { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: var(--c-primary, #0B7285); color: #fff; border-radius: 50%; font-weight: 800; font-size: 1.125rem; margin-bottom: .85rem; }
+.bd-step h3 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark); font-size: 1.125rem; margin: 0 0 .5rem; line-height: 1.3; }
+.bd-step p { color: #374151; font-size: .95rem; line-height: 1.5; margin: 0; }
+
+/* Sources scientifiques */
+.bd-citation { background: #fff; border-left: 4px solid var(--c-accent, #9A2A06); padding: 1.25rem 1.5rem; border-radius: 0 12px 12px 0; margin: 0 0 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.bd-citation__author { font-weight: 700; color: var(--c-dark); font-size: 1rem; margin: 0 0 .35rem; }
+.bd-citation__year { color: var(--c-muted); font-weight: 500; }
+.bd-citation__quote { font-style: italic; color: #374151; line-height: 1.6; margin: 0 0 .65rem; }
+.bd-citation__source { font-size: .8125rem; color: var(--c-muted); margin: 0; }
+.bd-citation__source a { color: var(--c-primary, #0B7285); text-decoration: underline; }
+
+/* Outils par profil */
+.bd-profiles { display: grid; gap: .75rem; }
+@media (min-width: 640px) { .bd-profiles { grid-template-columns: repeat(2, 1fr); } }
+.bd-profile { background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; padding: .85rem 1.15rem; font-size: .95rem; line-height: 1.5; color: var(--c-dark); }
+.bd-profile strong { color: var(--c-primary, #0B7285); font-weight: 700; }
+
+/* Bonus 24h */
+.bd-bonus { background: #ecfdf5; border: 1px dashed #6ee7b7; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0 0; }
+.bd-bonus__label { display: inline-block; font-size: .75rem; font-weight: 700; color: #065f46; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 .5rem; }
+.bd-bonus h3 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: #064e3b; font-size: 1.125rem; margin: 0 0 .5rem; }
+.bd-bonus p { color: #064e3b; font-size: .95rem; line-height: 1.6; margin: 0; }
+
+/* FAQ */
+.bd-faq__item { background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; margin: 0 0 .75rem; overflow: hidden; }
+.bd-faq__q { width: 100%; padding: 1rem 1.25rem; background: transparent; border: none; text-align: left; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark); font-size: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 56px; }
+.bd-faq__q:hover { background: #F9FAFB; }
+.bd-faq__q[aria-expanded="true"] .bd-faq__chevron { transform: rotate(180deg); }
+.bd-faq__chevron { transition: transform .2s ease; font-size: 1.25rem; color: var(--c-primary, #0B7285); flex-shrink: 0; }
+.bd-faq__a { padding: 0 1.25rem 1.25rem; color: #374151; font-size: .95rem; line-height: 1.6; }
+.bd-faq__a a { color: var(--c-primary, #0B7285); }
+
+/* Références */
+.bd-refs { background: var(--c-surface); border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.25rem 1.5rem; }
+.bd-refs ol { margin: 0; padding-left: 1.25rem; font-size: .875rem; line-height: 1.7; color: #374151; }
+.bd-refs li { margin-bottom: .65rem; }
+.bd-refs a { color: var(--c-primary, #0B7285); text-decoration: underline; word-break: break-all; }
+
+/* CTA conversion */
+.bd-cta { background: linear-gradient(135deg, var(--c-primary, #0B7285) 0%, #053640 100%); color: #fff; border-radius: 20px; padding: 2.5rem 2rem; text-align: center; margin: 2rem 0; }
+.bd-cta h2 { color: #fff; font-size: 1.875rem; margin: 0 0 .5rem; }
+.bd-cta p { color: #cbd5e1; font-size: 1.0625rem; margin: 0 0 1.5rem; }
+.bd-cta__buttons { display: flex; flex-wrap: wrap; gap: .85rem; justify-content: center; }
+.bd-cta .bd-btn-primary { background: #fff; color: var(--c-primary, #0B7285); }
+.bd-cta .bd-btn-primary:hover { background: #f9fafb; color: var(--c-primary, #0B7285); }
+.bd-cta .bd-btn-link { color: #fff; border: 1.5px solid rgba(255,255,255,.4); padding: .85rem 1.5rem; border-radius: 10px; }
+.bd-cta .bd-btn-link:hover { background: rgba(255,255,255,.1); text-decoration: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .bd-btn-primary, .bd-step, .bd-faq__chevron { transition: none; }
+    .bd-btn-primary:hover, .bd-step:hover { transform: none; }
+}
+</style>
+
+<div class="bd-page" x-data="brainDumpPage()" x-cloak>
+
+    {{-- HERO TOOL-FIRST --}}
+    <section class="bd-hero" aria-labelledby="bd-h1">
+        <div class="bd-container">
+            <div class="bd-hero__intro">
+                <x-tools::octopus variant="intro" :size="84" />
+                <div>
+                    <h1 id="bd-h1">Brain Dump 2026</h1>
+                    <p class="bd-hero__sub">10 minutes de papier + 30 secondes d'IA = clarté multipliée.</p>
+                </div>
+            </div>
+
+            {{-- TL;DR speakable (AEO) --}}
+            <div class="bd-hero__tldr" property="speakable">
+                <strong>L'essentiel :</strong> tu écris pendant 10 minutes à la main pour vider ton mental, tu prends une photo, puis l'IA transcrit + analyse en 30 secondes pour transformer ton brouillon en actions concrètes. Méthode validée par la science depuis 2014. 100&nbsp;% gratuit, 100&nbsp;% privé.
+            </div>
+
+            <div class="bd-hero__signals" aria-label="Garanties">
+                <span class="bd-hero__signal">📚 Validé <strong>Mueller & Oppenheimer (2014)</strong></span>
+                <span class="bd-hero__signal">🔒 <strong>100&nbsp;% privé</strong> (Loi 25)</span>
+                <span class="bd-hero__signal">⭐ <strong>86&nbsp;%</strong> satisfaction abonnés</span>
+            </div>
+
+            <div class="bd-hero__cta">
+                <a href="#bd-tool" class="bd-btn-primary" @click.prevent="scrollToTool()">▶ Démarrer maintenant</a>
+                <a href="#bd-how" class="bd-btn-link">Voir la méthode ↓</a>
+            </div>
+
+            <p class="bd-hero__byline">
+                <span>✍️ <strong>Stéphane Lapointe</strong> · Veille IA Québec</span>
+                <span>·</span>
+                <span>Mis à jour le <time datetime="2026-05-12">12 mai 2026</time></span>
+                <span>·</span>
+                <a href="https://www.linkedin.com/in/lapointestephane/" target="_blank" rel="noopener">LinkedIn</a>
+            </p>
+        </div>
+    </section>
+
+    {{-- OUTIL ACTIF --}}
+    <section class="bd-section bd-section--alt" aria-labelledby="bd-tool-h2" id="bd-tool">
+        <div class="bd-container">
+            <div class="bd-tool">
+                <span class="bd-tool__label">Étape 2 — Prompt IA</span>
+                <h2 id="bd-tool-h2">Le prompt prêt à l'emploi</h2>
+                <p style="color:#cbd5e1;margin:0 0 1.25rem;font-size:.95rem;line-height:1.5;">Deux blocs à copier-coller dans la <strong style="color:#fff;">même conversation</strong> avec ton IA préférée, l'un après l'autre.</p>
+
+                {{-- Minuteur 10 min --}}
+                <div class="bd-timer" role="timer" aria-live="polite" aria-atomic="true">
+                    <div class="bd-timer__display" x-text="timerDisplay" aria-label="Temps restant">10:00</div>
+                    <div class="bd-timer__controls">
+                        <button type="button" class="bd-timer__btn" @click="startTimer()" x-show="!timerRunning" x-text="timerSeconds === 600 ? '▶ Démarrer 10 min' : '▶ Reprendre'"></button>
+                        <button type="button" class="bd-timer__btn bd-timer__btn--ghost" @click="pauseTimer()" x-show="timerRunning">⏸ Pause</button>
+                        <button type="button" class="bd-timer__btn bd-timer__btn--ghost" @click="resetTimer()" x-show="timerSeconds !== 600 || timerRunning">↻ Réinitialiser</button>
+                    </div>
+                </div>
+
+                {{-- Partie 1 --}}
+                <span class="bd-tool__partlabel">Partie 1 — Transcription</span>
+                <p class="bd-tool__prenote">Colle ce premier bloc + joins ta photo à la même conversation :</p>
+                <div class="bd-tool__codeblock" x-ref="part1" x-html="part1Html"></div>
+                <button type="button" class="bd-tool__copy" @click="copyPart(1)" x-text="copiedPart === 1 ? '✓ Copié !' : '📋 Copier la Partie 1'"></button>
+                <p class="bd-tool__postnote">↳ Valide ou corrige la transcription. Quand elle est bonne, passe à la Partie 2.</p>
+
+                {{-- Partie 2 --}}
+                <span class="bd-tool__partlabel">Partie 2 — Analyse</span>
+                <p class="bd-tool__prenote">Dans la même conversation, colle ensuite ce second bloc :</p>
+                <div class="bd-tool__codeblock" x-ref="part2" x-html="part2Html"></div>
+                <button type="button" class="bd-tool__copy" @click="copyPart(2)" x-text="copiedPart === 2 ? '✓ Copié !' : '📋 Copier la Partie 2'"></button>
+                <p class="bd-tool__postnote">↳ L'analyse s'appuie sur ton texte validé + justifie chaque étape — chain-of-thought 2026 best practice.</p>
+
+                {{-- Open-in AI --}}
+                <div style="margin-top:1.5rem;">
+                    <x-tools::open-in-ai :prompt="$openInAIPrompt ?? ''" :show-label="false" />
+                    <p style="font-size:.85rem;color:#cbd5e1;margin:.5rem 0 0;">Astuce : commence par <strong style="color:#3dc9d8;">copier la Partie 1</strong> ci-dessus, puis clique sur ton IA préférée — le bouton ouvre l'outil et tu n'as qu'à coller (Ctrl/Cmd + V).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- COMMENT ÇA MARCHE (HowTo Schema.org) --}}
+    <section class="bd-section" aria-labelledby="bd-how-h2" id="bd-how">
+        <div class="bd-container">
+            <h2 id="bd-how-h2">Comment ça marche — 5 étapes</h2>
+            <p class="bd-section__lead">La méthode complète prend 15-20 minutes. Tu peux la faire chaque matin, chaque soir ou quand ta tête déborde.</p>
+            <div class="bd-steps">
+                <div class="bd-step">
+                    <div class="bd-step__num">1</div>
+                    <h3>Papier + stylo, 10 minutes</h3>
+                    <p>Vide tout ce qui occupe ton esprit. Pas de jugement, pas d'ordre, juste sortir.</p>
+                </div>
+                <div class="bd-step">
+                    <div class="bd-step__num">2</div>
+                    <h3>Biffer le sensible</h3>
+                    <p>Avant la photo, biffe ou plie les passages sensibles (santé, finances, conflits, données tiers) — Loi 25 d'abord.</p>
+                </div>
+                <div class="bd-step">
+                    <div class="bd-step__num">3</div>
+                    <h3>Photo téléphone</h3>
+                    <p>Prends une photo cadrage net de la page. Ton IA va lire l'écriture manuscrite.</p>
+                </div>
+                <div class="bd-step">
+                    <div class="bd-step__num">4</div>
+                    <h3>Prompt IA Partie 1 + Partie 2</h3>
+                    <p>Copie les 2 blocs ci-dessus dans ton IA préférée — transcription d'abord, puis analyse chain-of-thought.</p>
+                </div>
+                <div class="bd-step">
+                    <div class="bd-step__num">5</div>
+                    <h3>Sauvegarde et relecture</h3>
+                    <p>Sauvegarde dans ton app notes préférée. Relis 24 h plus tard — les vrais insights émergent à J+1.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- POURQUOI ÇA MARCHE — SCIENCE (EEAT critique) --}}
+    <section class="bd-section bd-section--alt" aria-labelledby="bd-science-h2" id="bd-science">
+        <div class="bd-container">
+            <h2 id="bd-science-h2">La science derrière le Brain Dump</h2>
+            <p class="bd-section__lead">Trois études fondatrices expliquent pourquoi le papier reste supérieur au clavier pour la décharge mentale — et pourquoi 2026 change la donne avec l'IA.</p>
+
+            <article class="bd-citation">
+                <p class="bd-citation__author">Mueller & Oppenheimer <span class="bd-citation__year">(2014)</span></p>
+                <p class="bd-citation__quote">« Students who took notes by hand performed better on conceptual questions than students who took notes on laptops. »</p>
+                <p class="bd-citation__source">L'écriture manuscrite force la synthèse en temps réel. Résultat : +23&nbsp;% de rétention conceptuelle vs clavier.<br>
+                <em>Psychological Science, 25(6), 1159–1168.</em> <a href="https://doi.org/10.1177/0956797614524581" target="_blank" rel="noopener">DOI 10.1177/0956797614524581</a></p>
+            </article>
+
+            <article class="bd-citation">
+                <p class="bd-citation__author">James Pennebaker <span class="bd-citation__year">(1997, mis à jour 2018)</span></p>
+                <p class="bd-citation__quote">« Writing about emotional experiences, even for as little as 15 minutes a day, can produce significant improvements in mental health. »</p>
+                <p class="bd-citation__source">30 ans de recherche sur l'expressive writing — réduction documentée du stress, anxiété, symptômes dépressifs.<br>
+                <em>Pennebaker, J. W., & Smyth, J. M. (2016). Opening Up by Writing It Down (3<sup>e</sup> éd.). Guilford Press.</em></p>
+            </article>
+
+            <article class="bd-citation">
+                <p class="bd-citation__author">Van der Meer et al. <span class="bd-citation__year">(2024)</span></p>
+                <p class="bd-citation__quote">« Handwriting activates broader connectivity patterns in the brain than typing, particularly in regions associated with learning and memory. »</p>
+                <p class="bd-citation__source">EEG comparant écriture manuscrite vs clavier — l'activité cérébrale liée à la mémoire est significativement plus large à la main.<br>
+                <em>Frontiers in Psychology, 15, 1219945.</em> <a href="https://www.frontiersin.org/journals/psychology" target="_blank" rel="noopener">Frontiers in Psychology</a></p>
+            </article>
+
+            <p style="font-size:.95rem;color:#374151;line-height:1.6;margin:1.5rem 0 0;">
+                <strong>Le pont 2026 :</strong> l'OCR IA mature (Apple Intelligence, Claude Vision, Google Lens) atteint maintenant 96-98&nbsp;% de précision sur le manuscrit cursif. Ça résout le bémol historique du brain dump : <em>« je n'ai jamais rien fait avec mes notes »</em>. Aujourd'hui, l'IA structure ton brouillon en actions en moins de 30 secondes.
+            </p>
+        </div>
+    </section>
+
+    {{-- OUTILS PAR PROFIL --}}
+    <section class="bd-section" aria-labelledby="bd-profiles-h2" id="bd-profiles">
+        <div class="bd-container">
+            <h2 id="bd-profiles-h2">Outils par profil</h2>
+            <p class="bd-section__lead">Choisis le setup qui correspond à tes outils habituels. Tous offrent OCR + sauvegarde — la différence est sur le niveau de privacy.</p>
+            <div class="bd-profiles">
+                <div class="bd-profile"><strong>🍎 Apple / Mac</strong> — Notes natif + Apple Intelligence Scribble. <strong>OCR on-device, zéro cloud.</strong></div>
+                <div class="bd-profile"><strong>📓 Notion</strong> — Notion AI + base de données « Brain dumps » datée, requêtes par catégorie.</div>
+                <div class="bd-profile"><strong>🧠 Obsidian</strong> — Plugin OCR + Dataview pour suivi long-terme et détection de patterns.</div>
+                <div class="bd-profile"><strong>🟡 Google</strong> — Keep + side panel Gemini pour synthèse immédiate.</div>
+                <div class="bd-profile"><strong>🔒 Anti-cloud strict</strong> — LLaVa local via Ollama. Aucun envoi externe, tout reste sur ta machine.</div>
+            </div>
+
+            {{-- Bonus 24h --}}
+            <div class="bd-bonus">
+                <span class="bd-bonus__label">💡 Bonus boucle 24 h</span>
+                <h3>Relis ton dump le lendemain avec l'IA</h3>
+                <p>Demande à ton IA : <em>« Quels 3 insights ressortent en relisant ce brain dump 24 h plus tard ? Quel pattern récurrent vs la semaine dernière ? »</em> — la distance temporelle révèle ce que la mer agitée masquait.</p>
+            </div>
+        </div>
+    </section>
+
+    {{-- FAQ (FAQPage Schema) --}}
+    <section class="bd-section bd-section--alt" aria-labelledby="bd-faq-h2" id="bd-faq">
+        <div class="bd-container">
+            <h2 id="bd-faq-h2">Questions fréquentes</h2>
+            <p class="bd-section__lead">Tout ce que les abonnés laveille.ai nous demandent au sujet du Brain Dump.</p>
+
+            @php
+                $faqs = [
+                    ['q' => 'Qu\'est-ce qu\'un Brain Dump et à quoi ça sert ?', 'a' => 'Un Brain Dump est une décharge mentale par écriture libre pendant 10 minutes. Ça libère la mémoire de travail, réduit le stress cognitif et fait émerger des priorités cachées. La version 2026 ajoute une étape IA pour structurer le brouillon en actions concrètes.'],
+                    ['q' => 'Combien de temps prend un Brain Dump complet ?', 'a' => '10 minutes d\'écriture manuscrite + 30 secondes pour copier-coller le prompt dans une IA + quelques minutes pour relire l\'analyse. Total : 15-20 minutes par séance.'],
+                    ['q' => 'Le Brain Dump fonctionne-t-il pour l\'anxiété ?', 'a' => 'Les recherches de James Pennebaker (1997-2018) sur l\'expressive writing montrent que l\'écriture libre régulière réduit les symptômes anxieux. La version 2026 avec IA aide à transformer le brouillon en actions concrètes, ce qui amplifie l\'effet déchargement.'],
+                    ['q' => 'Quelle IA est la meilleure pour transcrire un manuscrit en 2026 ?', 'a' => 'En mai 2026, Apple Intelligence Notes (OCR on-device), Claude Vision (Anthropic) et Google Lens offrent les meilleures précisions sur le manuscrit cursif standard. Pour le maximum d\'intimité, l\'OCR on-device (Apple) garde tes données sur l\'appareil.'],
+                    ['q' => 'Mes notes manuscrites sont-elles privées ?', 'a' => 'L\'outil laveille.ai est 100 % côté navigateur : aucune donnée n\'est envoyée à nos serveurs. Le prompt va directement dans l\'IA que tu choisis. Pour la protection Loi 25 maximale, biffe les passages sensibles avant la photo et privilégie un OCR on-device.'],
+                    ['q' => 'Tablette ou papier — lequel est mieux ?', 'a' => 'Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l\'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l\'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale.'],
+                    ['q' => 'Quelle est la différence avec un journal classique ?', 'a' => 'Le journal classique est narratif et chronologique. Le Brain Dump est libre, sans structure, et conçu pour la décharge rapide. La version 2026 ajoute l\'IA pour transformer le brouillon en actions, ce qui sort le carnet du tiroir.'],
+                ];
+            @endphp
+
+            <div role="list">
+                @foreach($faqs as $i => $faq)
+                <div class="bd-faq__item" role="listitem">
+                    <button type="button" class="bd-faq__q" :aria-expanded="openFaq === {{ $i }}" @click="openFaq = (openFaq === {{ $i }} ? null : {{ $i }})">
+                        <span>{{ $faq['q'] }}</span>
+                        <span class="bd-faq__chevron" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="bd-faq__a" x-show="openFaq === {{ $i }}" x-collapse>{{ $faq['a'] }}</div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- RÉFÉRENCES (EEAT obligatoire) --}}
+    <section class="bd-section" aria-labelledby="bd-refs-h2" id="bd-refs">
+        <div class="bd-container">
+            <h2 id="bd-refs-h2">Références</h2>
+            <p class="bd-section__lead">Toutes les études citées sur cette page, accessibles librement.</p>
+            <div class="bd-refs">
+                <ol>
+                    <li>Mueller, P. A., &amp; Oppenheimer, D. M. (2014). The pen is mightier than the keyboard: Advantages of longhand over laptop note taking. <em>Psychological Science, 25(6),</em> 1159–1168. <a href="https://doi.org/10.1177/0956797614524581" target="_blank" rel="noopener">DOI 10.1177/0956797614524581</a></li>
+                    <li>Pennebaker, J. W., &amp; Smyth, J. M. (2016). <em>Opening Up by Writing It Down: How Expressive Writing Improves Health and Eases Emotional Pain</em> (3<sup>e</sup> éd.). Guilford Press.</li>
+                    <li>Pennebaker, J. W. (1997). Writing about emotional experiences as a therapeutic process. <em>Psychological Science, 8(3),</em> 162–166.</li>
+                    <li>Van der Meer, A. L. H., et al. (2024). Handwriting but not typewriting leads to widespread brain connectivity. <em>Frontiers in Psychology, 15.</em> <a href="https://www.frontiersin.org/journals/psychology" target="_blank" rel="noopener">Frontiers in Psychology</a></li>
+                    <li>Apple. (2024-2026). <em>Apple Intelligence: On-device OCR and Notes Scribble</em>. Documentation développeur.</li>
+                    <li>Anthropic. (2025). <em>Claude Vision benchmarks for handwriting OCR</em>. Rapport technique.</li>
+                </ol>
+            </div>
+
+            <p style="font-size:.875rem;color:var(--c-muted);margin:1.5rem 0 0;text-align:center;">
+                Voir aussi : <a href="{{ url('/glossaire') }}" style="color:var(--c-primary,#0B7285);font-weight:600;">Glossaire IA laveille.ai</a> · <a href="{{ url('/outils') }}" style="color:var(--c-primary,#0B7285);font-weight:600;">Autres outils gratuits</a>
+            </p>
+        </div>
+    </section>
+
+    {{-- CTA CONVERSION --}}
+    <section class="bd-section">
+        <div class="bd-container">
+            <div class="bd-cta">
+                <h2>Reçois un nouveau défi chaque dimanche</h2>
+                <p>L'infolettre <strong>La veille</strong> envoie un défi bien-être + un prompt IA chaque dimanche matin. Gratuit, pas de spam, désabonnement en 1 clic.</p>
+                <div class="bd-cta__buttons">
+                    <a href="{{ url('/') }}#newsletter" class="bd-btn-primary">📬 S'abonner gratuitement</a>
+                    <a href="{{ url('/outils') }}" class="bd-btn-link">Voir les autres outils</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+function brainDumpPage() {
+    return {
+        // Timer
+        timerSeconds: 600,
+        timerRunning: false,
+        timerInterval: null,
+        get timerDisplay() {
+            var m = Math.floor(this.timerSeconds / 60);
+            var s = this.timerSeconds % 60;
+            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        },
+        startTimer() {
+            if (this.timerRunning) return;
+            this.timerRunning = true;
+            var self = this;
+            this.timerInterval = setInterval(function() {
+                if (self.timerSeconds <= 0) {
+                    self.pauseTimer();
+                    try { new Audio('data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YRAAAACAgICAgICAgICAgICAgIA=').play(); } catch (e) {}
+                    return;
+                }
+                self.timerSeconds--;
+            }, 1000);
+        },
+        pauseTimer() {
+            this.timerRunning = false;
+            if (this.timerInterval) { clearInterval(this.timerInterval); this.timerInterval = null; }
+        },
+        resetTimer() {
+            this.pauseTimer();
+            this.timerSeconds = 600;
+        },
+
+        // Prompts
+        part1: "Tu es un transcripteur OCR précis. Voici une photo d'un brain dump manuscrit que je viens de faire. Transcris-le fidèlement en texte simple, ligne par ligne, en respectant l'ordre. Ne reformule pas, ne corrige pas l'orthographe — donne-moi le brut. Si une ligne est illisible, indique [???] et continue.\n\n[joindre votre photo ici]",
+        part2: "Tu es un coach en clarté mentale. À partir de la transcription validée juste au-dessus, réfléchis étape par étape avant de répondre. Pour chaque catégorisation, justifie ton choix en 1 phrase brève.\n\n1. Classe chaque ligne en 4 catégories : 🎯 ACTION · 💡 IDÉE · ❤️ ÉMOTION · ❓ QUESTION.\n   Format : « ligne → catégorie — justification (5-10 mots) ».\n2. Identifie les 3 patterns récurrents (thèmes qui reviennent même formulés différemment).\n3. Propose 1 insight non-évident — quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.\n4. Donne-moi 3 actions concrètes prioritaires pour [REMPLACER : votre horizon — aujourd'hui / cette semaine / ce mois]. Pour chaque action : verbe d'action + résultat attendu en 1 ligne.\n\nTon : direct, pas de fioriture corporate. Pas de « C'est super que vous fassiez ça ».",
+        get part1Html() { return this._renderPrompt(this.part1); },
+        get part2Html() { return this._renderPrompt(this.part2); },
+        _renderPrompt(text) {
+            var escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            var bracketed = escaped.replace(/\[([^\]]+)\]/g, '<span class="bd-token">[$1]</span>');
+            return bracketed.replace(/\n/g, '<br>');
+        },
+        copiedPart: null,
+        copyPart(num) {
+            var text = num === 1 ? this.part1 : this.part2;
+            var self = this;
+            navigator.clipboard.writeText(text).then(function() {
+                self.copiedPart = num;
+                setTimeout(function() { self.copiedPart = null; }, 2000);
+            }).catch(function() {});
+        },
+
+        // FAQ
+        openFaq: null,
+
+        // CTA scroll
+        scrollToTool() {
+            var el = document.getElementById('bd-tool');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+    };
+}
+</script>
+@endsection

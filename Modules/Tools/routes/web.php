@@ -82,6 +82,10 @@ Route::middleware('web')->group(function () {
         ->middleware('throttle:30,60')
         ->name('tools.quest.complete');
 
+    // #194 Brain Dump 2026 — landing tool-first SEO+AEO+GEO+EEAT (auto-route via PublicToolController si Tool DB entry "brain-dump" + view custom existante)
+    // Alias FR pur : /outils/vide-cerveau → redirect 301 → /outils/brain-dump
+    Route::get('/outils/vide-cerveau', fn () => redirect('/outils/brain-dump', 301));
+
     // #163 : exclure 'sudoku' + #177 'avatar' (routes fournies par modules dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
         ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/).+')
