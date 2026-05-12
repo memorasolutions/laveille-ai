@@ -139,6 +139,32 @@
 .bd-tool__tip { font-size: .9rem; color: #374151; margin: .65rem 0 0; line-height: 1.5; }
 .bd-tool__tip strong { color: var(--c-primary, #0B7285); }
 
+/* Mad Libs — chips inline cliquables (approche C+E mai 2026) */
+.bd-madlibs { background: #F0F8F9; border: 1px solid rgba(11,114,133,.18); border-left: 4px solid var(--c-primary, #0B7285); border-radius: 8px; padding: 1.25rem 1.5rem; font-size: .95rem; color: var(--c-dark); line-height: 1.85; margin: 0 0 .65rem; position: relative; }
+.bd-madlibs p { margin: 0 0 .65rem; }
+.bd-madlibs p:last-child { margin-bottom: 0; }
+.bd-madlibs__num { font-weight: 800; color: var(--c-primary, #0B7285); margin-right: .25rem; }
+.bd-chip { display: inline-flex; align-items: center; gap: .25rem; padding: .25rem .7rem; min-height: 32px; background: #fff; color: var(--c-primary, #0B7285); border: 1.5px dashed rgba(11,114,133,.5); border-radius: 6px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .15s ease; line-height: 1.2; vertical-align: baseline; }
+.bd-chip:hover { background: rgba(11,114,133,.08); border-color: var(--c-primary, #0B7285); border-style: solid; transform: translateY(-1px); }
+.bd-chip:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+.bd-chip[aria-expanded="true"] { background: var(--c-primary, #0B7285); color: #fff; border-color: var(--c-primary, #0B7285); border-style: solid; }
+.bd-chip__caret { font-size: .75rem; line-height: 1; }
+.bd-chip--mini { font-size: .85rem; padding: .15rem .55rem; min-height: 28px; }
+.bd-popover { position: absolute; z-index: 50; background: #fff; border: 1px solid rgba(11,114,133,.25); border-radius: 10px; padding: .85rem; box-shadow: 0 12px 28px rgba(6,78,90,.18); min-width: 220px; max-width: 320px; margin-top: .4rem; }
+.bd-popover__title { font-size: .75rem; font-weight: 700; color: var(--c-primary, #0B7285); text-transform: uppercase; letter-spacing: .5px; margin: 0 0 .5rem; }
+.bd-popover__opt { display: flex; align-items: center; gap: .5rem; padding: .5rem; border-radius: 6px; cursor: pointer; font-size: .9rem; color: var(--c-dark); min-height: 40px; }
+.bd-popover__opt:hover { background: rgba(11,114,133,.08); }
+.bd-popover__opt input[type="checkbox"], .bd-popover__opt input[type="radio"] { width: 18px; height: 18px; accent-color: var(--c-primary, #0B7285); flex-shrink: 0; }
+.bd-popover__opt input[type="number"] { width: 64px; padding: .35rem .5rem; border: 1.5px solid rgba(11,114,133,.3); border-radius: 6px; font-size: .95rem; font-weight: 700; text-align: center; color: var(--c-dark); }
+.bd-popover__opt input[type="number"]:focus { outline: 2px solid var(--c-primary, #0B7285); outline-offset: 0; border-color: var(--c-primary, #0B7285); }
+.bd-popover__hint { font-size: .75rem; color: var(--c-muted); font-style: italic; margin: .35rem 0 0; }
+.bd-madlibs__values { display: block; font-size: .85rem; font-weight: 600; color: var(--c-muted); margin-top: .25rem; line-height: 1.3; }
+@media (max-width: 540px) {
+    .bd-madlibs { line-height: 1.8; padding: 1rem 1.15rem; }
+    .bd-chip { font-size: .85rem; padding: .2rem .6rem; min-height: 32px; }
+    .bd-popover { left: .5rem; right: .5rem; min-width: auto; max-width: none; }
+}
+
 /* Sections content */
 .bd-section h2 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark); font-size: 1.875rem; margin: 0 0 .5rem; line-height: 1.2; }
 .bd-section__lead { font-size: 1.0625rem; color: #374151; line-height: 1.6; margin: 0 0 2rem; }
@@ -267,11 +293,101 @@
 
                 <hr class="bd-tool__divider">
 
-                {{-- Partie 2 --}}
-                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">2</span> Partie 2 — Analyse</span>
-                <p class="bd-tool__prenote">Dans la même conversation, colle ensuite ce second bloc :</p>
-                <div class="bd-tool__codeblock" x-ref="part2" x-html="part2Html"></div>
-                <button type="button" class="bd-tool__copy" @click="copyPart(2)" x-text="copiedPart === 2 ? '✓ Copié !' : '📋 Copier la Partie 2'"></button>
+                {{-- Partie 2 — Mad Libs avec chips inline cliquables --}}
+                <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">2</span> Partie 2 — Analyse (personnalisable)</span>
+                <p class="bd-tool__prenote">Adapte les <strong>5 réglages bleus</strong> selon ton contexte, puis copie le prompt :</p>
+
+                <div class="bd-madlibs" @click.outside="openChip = null">
+                    <p>Tu es un coach en clarté mentale. À partir de la transcription validée juste au-dessus, réfléchis étape par étape avant de répondre. Pour chaque catégorisation, justifie ton choix en 1 phrase brève.</p>
+
+                    <p><span class="bd-madlibs__num">1.</span> Classe chaque ligne en
+                        {{-- CHIP 1 : Catégories (multi-select) --}}
+                        <span style="position:relative;display:inline-block;">
+                            <button type="button" class="bd-chip" :aria-expanded="openChip === 'cat'" aria-label="Choisir les catégories"
+                                @click.stop="openChip = openChip === 'cat' ? null : 'cat'">
+                                <span x-text="categoriesText"></span>
+                                <span class="bd-chip__caret" aria-hidden="true">▾</span>
+                            </button>
+                            <div class="bd-popover" x-show="openChip === 'cat'" x-cloak x-transition>
+                                <p class="bd-popover__title">Catégories à utiliser</p>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.action"> 🎯 ACTION</label>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.idee"> 💡 IDÉE</label>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.emotion"> ❤️ ÉMOTION</label>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.question"> ❓ QUESTION</label>
+                                <p class="bd-popover__hint">Sélectionne celles à appliquer (min 2).</p>
+                            </div>
+                        </span>.
+                        Format : « ligne → catégorie — justification (5-10 mots) ».
+                    </p>
+
+                    <p><span class="bd-madlibs__num">2.</span> Identifie les
+                        {{-- CHIP 2 : Nombre patterns --}}
+                        <span style="position:relative;display:inline-block;">
+                            <button type="button" class="bd-chip bd-chip--mini" :aria-expanded="openChip === 'nbp'" aria-label="Nombre de patterns"
+                                @click.stop="openChip = openChip === 'nbp' ? null : 'nbp'">
+                                <span x-text="chips.nbPatterns"></span>
+                                <span class="bd-chip__caret" aria-hidden="true">▾</span>
+                            </button>
+                            <div class="bd-popover" x-show="openChip === 'nbp'" x-cloak x-transition>
+                                <p class="bd-popover__title">Nombre de patterns</p>
+                                <label class="bd-popover__opt"><input type="number" min="1" max="5" x-model.number="chips.nbPatterns"> entre 1 et 5</label>
+                            </div>
+                        </span>
+                        patterns récurrents (thèmes qui reviennent même formulés différemment).
+                    </p>
+
+                    <p><span class="bd-madlibs__num">3.</span> Propose 1 insight non-évident — quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.</p>
+
+                    <p><span class="bd-madlibs__num">4.</span> Donne-moi
+                        {{-- CHIP 3 : Nombre actions --}}
+                        <span style="position:relative;display:inline-block;">
+                            <button type="button" class="bd-chip bd-chip--mini" :aria-expanded="openChip === 'nba'" aria-label="Nombre d'actions"
+                                @click.stop="openChip = openChip === 'nba' ? null : 'nba'">
+                                <span x-text="chips.nbActions"></span>
+                                <span class="bd-chip__caret" aria-hidden="true">▾</span>
+                            </button>
+                            <div class="bd-popover" x-show="openChip === 'nba'" x-cloak x-transition>
+                                <p class="bd-popover__title">Nombre d'actions prioritaires</p>
+                                <label class="bd-popover__opt"><input type="number" min="1" max="5" x-model.number="chips.nbActions"> entre 1 et 5</label>
+                            </div>
+                        </span>
+                        actions concrètes prioritaires pour
+                        {{-- CHIP 4 : Horizon --}}
+                        <span style="position:relative;display:inline-block;">
+                            <button type="button" class="bd-chip" :aria-expanded="openChip === 'hor'" aria-label="Horizon temporel"
+                                @click.stop="openChip = openChip === 'hor' ? null : 'hor'">
+                                <span x-text="chips.horizon"></span>
+                                <span class="bd-chip__caret" aria-hidden="true">▾</span>
+                            </button>
+                            <div class="bd-popover" x-show="openChip === 'hor'" x-cloak x-transition>
+                                <p class="bd-popover__title">Horizon temporel</p>
+                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="aujourd'hui" x-model="chips.horizon"> aujourd'hui</label>
+                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="cette semaine" x-model="chips.horizon"> cette semaine</label>
+                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="ce mois" x-model="chips.horizon"> ce mois</label>
+                            </div>
+                        </span>.
+                        Pour chaque action : verbe d'action + résultat attendu en 1 ligne.
+                    </p>
+
+                    <p>Ton :
+                        {{-- CHIP 5 : Ton --}}
+                        <span style="position:relative;display:inline-block;">
+                            <button type="button" class="bd-chip" :aria-expanded="openChip === 'ton'" aria-label="Ton de la réponse"
+                                @click.stop="openChip = openChip === 'ton' ? null : 'ton'">
+                                <span x-text="toneLabel"></span>
+                                <span class="bd-chip__caret" aria-hidden="true">▾</span>
+                            </button>
+                            <div class="bd-popover" x-show="openChip === 'ton'" x-cloak x-transition>
+                                <p class="bd-popover__title">Ton de la réponse</p>
+                                <label class="bd-popover__opt"><input type="radio" name="tone" value="direct" x-model="chips.tone"> Direct (sans fioriture)</label>
+                                <label class="bd-popover__opt"><input type="radio" name="tone" value="bienveillant" x-model="chips.tone"> Bienveillant et encourageant</label>
+                                <label class="bd-popover__opt"><input type="radio" name="tone" value="exigeant" x-model="chips.tone"> Coach exigeant et challengeant</label>
+                            </div>
+                        </span>.
+                    </p>
+                </div>
+
+                <button type="button" class="bd-tool__copy" @click="copyPart(2)" x-text="copiedPart === 2 ? '✓ Copié !' : '📋 Copier le prompt'"></button>
                 <p class="bd-tool__postnote">↳ L'analyse s'appuie sur ton texte validé + justifie chaque étape — chain-of-thought 2026 best practice.</p>
 
                 <hr class="bd-tool__divider">
@@ -481,13 +597,57 @@ function brainDumpPage() {
 
         // Prompts
         part1: "Tu es un transcripteur OCR précis. Voici une photo d'un brain dump manuscrit que je viens de faire. Transcris-le fidèlement en texte simple, ligne par ligne, en respectant l'ordre. Ne reformule pas, ne corrige pas l'orthographe — donne-moi le brut. Si une ligne est illisible, indique [???] et continue.\n\n[joindre votre photo ici]",
-        part2: "Tu es un coach en clarté mentale. À partir de la transcription validée juste au-dessus, réfléchis étape par étape avant de répondre. Pour chaque catégorisation, justifie ton choix en 1 phrase brève.\n\n1. Classe chaque ligne en 4 catégories : 🎯 ACTION · 💡 IDÉE · ❤️ ÉMOTION · ❓ QUESTION.\n   Format : « ligne → catégorie — justification (5-10 mots) ».\n2. Identifie les 3 patterns récurrents (thèmes qui reviennent même formulés différemment).\n3. Propose 1 insight non-évident — quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.\n4. Donne-moi 3 actions concrètes prioritaires pour [REMPLACER : votre horizon — aujourd'hui / cette semaine / ce mois]. Pour chaque action : verbe d'action + résultat attendu en 1 ligne.\n\nTon : direct, pas de fioriture corporate. Pas de « C'est super que vous fassiez ça ».",
         get part1Html() { return this._renderPrompt(this.part1); },
-        get part2Html() { return this._renderPrompt(this.part2); },
         _renderPrompt(text) {
             var escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             var bracketed = escaped.replace(/\[([^\]]+)\]/g, '<span class="bd-token">[$1]</span>');
             return bracketed.replace(/\n/g, '<br>');
+        },
+
+        // Mad Libs Partie 2 — chips state
+        openChip: null,
+        chips: {
+            categories: { action: true, idee: true, emotion: true, question: true },
+            nbPatterns: 3,
+            nbActions: 3,
+            horizon: 'cette semaine',
+            tone: 'direct',
+        },
+        get categoriesText() {
+            var cats = [];
+            if (this.chips.categories.action) cats.push('🎯 ACTION');
+            if (this.chips.categories.idee) cats.push('💡 IDÉE');
+            if (this.chips.categories.emotion) cats.push('❤️ ÉMOTION');
+            if (this.chips.categories.question) cats.push('❓ QUESTION');
+            if (cats.length === 0) cats.push('🎯 ACTION');
+            return cats.join(' · ');
+        },
+        get categoriesCount() {
+            var n = 0;
+            if (this.chips.categories.action) n++;
+            if (this.chips.categories.idee) n++;
+            if (this.chips.categories.emotion) n++;
+            if (this.chips.categories.question) n++;
+            return n || 1;
+        },
+        get toneLabel() {
+            return { direct: 'direct', bienveillant: 'bienveillant', exigeant: 'exigeant' }[this.chips.tone] || 'direct';
+        },
+        get toneFullText() {
+            return {
+                direct: "direct, pas de fioriture corporate. Pas de « C'est super que vous fassiez ça »",
+                bienveillant: "bienveillant et encourageant, mais honnête. Pas de flatterie creuse",
+                exigeant: "coach exigeant et challengeant. Pousse-moi à aller plus loin, questionne mes évidences",
+            }[this.chips.tone];
+        },
+        get part2() {
+            return "Tu es un coach en clarté mentale. À partir de la transcription validée juste au-dessus, réfléchis étape par étape avant de répondre. Pour chaque catégorisation, justifie ton choix en 1 phrase brève.\n\n"
+                + "1. Classe chaque ligne en " + this.categoriesCount + " catégories : " + this.categoriesText + ".\n"
+                + "   Format : « ligne → catégorie — justification (5-10 mots) ».\n"
+                + "2. Identifie les " + this.chips.nbPatterns + " patterns récurrents (thèmes qui reviennent même formulés différemment).\n"
+                + "3. Propose 1 insight non-évident — quelque chose que je n'ai probablement pas vu en l'écrivant. Justifie en 1-2 phrases.\n"
+                + "4. Donne-moi " + this.chips.nbActions + " actions concrètes prioritaires pour " + this.chips.horizon + ". Pour chaque action : verbe d'action + résultat attendu en 1 ligne.\n\n"
+                + "Ton : " + this.toneFullText + ".";
         },
         copiedPart: null,
         copyPart(num) {
