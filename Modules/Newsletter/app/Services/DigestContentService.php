@@ -166,8 +166,9 @@ class DigestContentService
             $wellnessChallenge = self::getWellnessChallenge((int) $weekNumber);
         }
 
-        // #191 : si pas de weeklyPrompt mais le défi a un linked_prompt → utiliser celui-ci
-        if (! $weeklyPrompt && $wellnessChallenge && ! empty($wellnessChallenge['linked_prompt'])) {
+        // #191 : si le défi a un linked_prompt → il prend TOUJOURS priorité sur le weeklyPrompt sauvegardé
+        // (synergie défi+prompt = intent explicite, override le prompt générique d'un ancien snapshot)
+        if ($wellnessChallenge && ! empty($wellnessChallenge['linked_prompt'])) {
             $weeklyPrompt = $wellnessChallenge['linked_prompt'];
         }
 
