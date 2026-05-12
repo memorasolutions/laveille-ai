@@ -297,7 +297,7 @@
                 <span class="bd-tool__partlabel"><span class="bd-tool__partlabel__num">2</span> Partie 2 — Analyse (personnalisable)</span>
                 <p class="bd-tool__prenote">Adapte les <strong>5 réglages bleus</strong> selon ton contexte, puis copie le prompt :</p>
 
-                <div class="bd-madlibs" @click.outside="openChip = null">
+                <div class="bd-madlibs">
                     <p>Tu es un coach en clarté mentale. À partir de la transcription validée juste au-dessus, réfléchis étape par étape avant de répondre. Pour chaque catégorisation, justifie ton choix en 1 phrase brève.</p>
 
                     <p><span class="bd-madlibs__num">1.</span> Classe chaque ligne en
@@ -308,7 +308,7 @@
                                 <span x-text="categoriesText"></span>
                                 <span class="bd-chip__caret" aria-hidden="true">▾</span>
                             </button>
-                            <div class="bd-popover" x-show="openChip === 'cat'" x-cloak x-transition>
+                            <div class="bd-popover" x-show="openChip === 'cat'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Catégories à utiliser</p>
                                 <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.action"> 🎯 ACTION</label>
                                 <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.idee"> 💡 IDÉE</label>
@@ -328,7 +328,7 @@
                                 <span x-text="chips.nbPatterns"></span>
                                 <span class="bd-chip__caret" aria-hidden="true">▾</span>
                             </button>
-                            <div class="bd-popover" x-show="openChip === 'nbp'" x-cloak x-transition>
+                            <div class="bd-popover" x-show="openChip === 'nbp'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Nombre de patterns</p>
                                 <label class="bd-popover__opt"><input type="number" min="1" max="5" x-model.number="chips.nbPatterns"> entre 1 et 5</label>
                             </div>
@@ -346,7 +346,7 @@
                                 <span x-text="chips.nbActions"></span>
                                 <span class="bd-chip__caret" aria-hidden="true">▾</span>
                             </button>
-                            <div class="bd-popover" x-show="openChip === 'nba'" x-cloak x-transition>
+                            <div class="bd-popover" x-show="openChip === 'nba'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Nombre d'actions prioritaires</p>
                                 <label class="bd-popover__opt"><input type="number" min="1" max="5" x-model.number="chips.nbActions"> entre 1 et 5</label>
                             </div>
@@ -359,7 +359,7 @@
                                 <span x-text="chips.horizon"></span>
                                 <span class="bd-chip__caret" aria-hidden="true">▾</span>
                             </button>
-                            <div class="bd-popover" x-show="openChip === 'hor'" x-cloak x-transition>
+                            <div class="bd-popover" x-show="openChip === 'hor'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Horizon temporel</p>
                                 <label class="bd-popover__opt"><input type="radio" name="horizon" value="aujourd'hui" x-model="chips.horizon"> aujourd'hui</label>
                                 <label class="bd-popover__opt"><input type="radio" name="horizon" value="cette semaine" x-model="chips.horizon"> cette semaine</label>
@@ -377,7 +377,7 @@
                                 <span x-text="toneLabel"></span>
                                 <span class="bd-chip__caret" aria-hidden="true">▾</span>
                             </button>
-                            <div class="bd-popover" x-show="openChip === 'ton'" x-cloak x-transition>
+                            <div class="bd-popover" x-show="openChip === 'ton'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Ton de la réponse</p>
                                 <label class="bd-popover__opt"><input type="radio" name="tone" value="direct" x-model="chips.tone"> Direct (sans fioriture)</label>
                                 <label class="bd-popover__opt"><input type="radio" name="tone" value="bienveillant" x-model="chips.tone"> Bienveillant et encourageant</label>
