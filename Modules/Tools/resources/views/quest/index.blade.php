@@ -99,6 +99,8 @@
         <p class="quest-intro__text"><strong>{{ $meta['tagline'] }}</strong> — chaque chapitre, une histoire interactive avec Loop pour apprendre l'IA en jouant.</p>
     </aside>
 
+    {{-- #187 : afficher état carnet de bord seulement si pas auth site Laravel (UX cohérente — éviter "Connecte-toi" alors qu'on est déjà connecté en haut) --}}
+    @if(! ($isSiteAuth ?? false))
     <section class="quest-status" aria-label="Votre carnet de bord">
         <div x-show="!email" x-cloak>
             <h2 style="margin:0 0 .5rem;font-size:1.15rem;color:var(--c-dark);">📓 Connecte ton carnet de bord</h2>
@@ -120,6 +122,14 @@
             </form>
         </div>
     </section>
+    @else
+    <section class="quest-status quest-status__connected" aria-label="Votre carnet de bord">
+        <div>
+            <strong>📓 Carnet connecté :</strong> <span class="quest-status__email">{{ auth()->user()->email }}</span>
+            <div style="font-size:.85rem;color:var(--c-muted);margin-top:.25rem;">Ta progression se sauvegarde automatiquement grâce à ton compte La veille.</div>
+        </div>
+    </section>
+    @endif
 
     <h2 class="quest-section-title">📜 Chapitres de la saga</h2>
     <div class="quest-grid">

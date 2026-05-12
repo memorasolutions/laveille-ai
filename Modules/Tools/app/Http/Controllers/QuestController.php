@@ -28,6 +28,7 @@ class QuestController extends Controller
             'chapters' => config('tools.quest.chapters'),
             'badges' => config('tools.quest.badges'),
             'email' => $email,
+            'isSiteAuth' => auth()->check(),
             'progress' => $progress,
             'completedSlugs' => $progress?->completed_chapters ?? [],
             'currentChapterSlug' => $progress?->current_chapter ?? 'ch1-eveil-loop',
@@ -138,6 +139,12 @@ class QuestController extends Controller
 
     private function currentEmail(Request $request): ?string
     {
+        // #187 : priorise l'utilisateur Laravel authentifié (cohérence UX site-wide).
+        // Fallback sur le cookie quest_email (magic-link) pour les visiteurs non-inscrits au site.
+        if (auth()->check() && auth()->user()->email) {
+            return auth()->user()->email;
+        }
+
         return $request->cookie('quest_email') ?: null;
     }
 }
