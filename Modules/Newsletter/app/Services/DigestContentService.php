@@ -61,8 +61,14 @@ class DigestContentService
 
         $weekNumber = (int) now()->weekOfYear;
 
+        // #186 + #191 : défi bien-être hebdo + prompt synergique éventuel
+        $wellnessChallenge = self::getWellnessChallenge($weekNumber);
+
         $weeklyPrompt = null;
-        if ($aiTerm) {
+        // Si le défi a un prompt synergique linké, il prend priorité (sinon génération classique depuis aiTerm)
+        if ($wellnessChallenge && ! empty($wellnessChallenge['linked_prompt'])) {
+            $weeklyPrompt = $wellnessChallenge['linked_prompt'];
+        } elseif ($aiTerm) {
             $weeklyPrompt = self::generateWeeklyPrompt($aiTerm->name ?? '', $aiTerm->type ?? null);
         }
 
@@ -72,7 +78,37 @@ class DigestContentService
             $highlight?->summary ?? null
         );
 
-        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'weekNumber', 'editorial');
+        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'wellnessChallenge', 'weekNumber', 'editorial');
+    }
+
+    /**
+     * Retourne le défi bien-être pour une semaine donnée.
+     * Priorité : (1) entrée avec week_iso === $weekNumber ; (2) rotation modulo count.
+     * Retourne null si fichier config absent ou tableau vide.
+     */
+    public static function getWellnessChallenge(int $weekNumber): ?array
+    {
+        $configPath = base_path('Modules/Newsletter/config/wellness-challenges.php');
+        if (! is_file($configPath)) {
+            return null;
+        }
+
+        $challenges = require $configPath;
+        if (! is_array($challenges) || empty($challenges)) {
+            return null;
+        }
+
+        // Priorité 1 : défi pinné à une semaine ISO précise
+        foreach ($challenges as $c) {
+            if (isset($c['week_iso']) && (int) $c['week_iso'] === $weekNumber) {
+                return $c;
+            }
+        }
+
+        // Priorité 2 : rotation modulo
+        $count = count($challenges);
+
+        return $challenges[$weekNumber % $count];
     }
 
     /**
@@ -124,7 +160,18 @@ class DigestContentService
 
         $weekNumber = $issue->week_number;
 
-        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'weekNumber', 'editorial');
+        // #186 : wellnessChallenge reconstruit depuis snapshot OU re-lookup config si absent
+        $wellnessChallenge = $content['wellness_challenge'] ?? null;
+        if (! $wellnessChallenge) {
+            $wellnessChallenge = self::getWellnessChallenge((int) $weekNumber);
+        }
+
+        // #191 : si pas de weeklyPrompt mais le défi a un linked_prompt → utiliser celui-ci
+        if (! $weeklyPrompt && $wellnessChallenge && ! empty($wellnessChallenge['linked_prompt'])) {
+            $weeklyPrompt = $wellnessChallenge['linked_prompt'];
+        }
+
+        return compact('highlight', 'topNews', 'toolOfWeek', 'featuredArticle', 'aiTerm', 'interactiveTool', 'weeklyPrompt', 'wellnessChallenge', 'weekNumber', 'editorial');
     }
 
     /**

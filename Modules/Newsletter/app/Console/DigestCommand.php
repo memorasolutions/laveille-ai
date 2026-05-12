@@ -133,6 +133,7 @@ class DigestCommand extends Command
                         'term_id' => $data['aiTerm']?->id,
                         'interactive_tool_id' => $data['interactiveTool']?->id,
                         'weekly_prompt' => $data['weeklyPrompt'],
+                        'wellness_challenge' => $data['wellnessChallenge'] ?? null,
                         'editorial' => $data['editorial'] ?? null,
                     ],
                 ]
@@ -258,6 +259,7 @@ class DigestCommand extends Command
                         'term_id' => $data['aiTerm']?->id ?? null,
                         'interactive_tool_id' => $data['interactiveTool']?->id ?? null,
                         'weekly_prompt' => $data['weeklyPrompt'] ?? null,
+                        'wellness_challenge' => $data['wellnessChallenge'] ?? null,
                         'editorial' => $data['editorial'] ?? null,
                     ],
                 ]
