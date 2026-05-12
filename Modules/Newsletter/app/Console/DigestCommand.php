@@ -80,6 +80,7 @@ class DigestCommand extends Command
             'aiTerm' => $data['aiTerm'] ?? null,
             'interactiveTool' => $data['interactiveTool'] ?? null,
             'weeklyPrompt' => $data['weeklyPrompt'] ?? null,
+            'wellnessChallenge' => $data['wellnessChallenge'] ?? null,
             'editorial' => $data['editorial'] ?? null,
             'unsubscribeUrl' => '#test-mode-no-unsubscribe',
             'weekNumber' => $weekNumber,
@@ -148,7 +149,8 @@ class DigestCommand extends Command
                     $data['highlight'], $data['topNews'], $data['toolOfWeek'],
                     $data['featuredArticle'], null, $data['weekNumber'],
                     $data['aiTerm'], $data['interactiveTool'],
-                    $data['weeklyPrompt'], $data['editorial'] ?? null
+                    $data['weeklyPrompt'], $data['editorial'] ?? null,
+                    $data['wellnessChallenge'] ?? null
                 )
             );
             $this->components->info("Aperçu envoyé à $adminEmail");
@@ -239,6 +241,7 @@ class DigestCommand extends Command
             'aiTerm' => $data['aiTerm'] ?? null,
             'interactiveTool' => $data['interactiveTool'] ?? null,
             'weeklyPrompt' => $data['weeklyPrompt'] ?? null,
+            'wellnessChallenge' => $data['wellnessChallenge'] ?? null,
             'editorial' => $data['editorial'] ?? null,
             'unsubscribeUrl' => '{{UNSUBSCRIBE_URL}}',
             'weekNumber' => $data['weekNumber'],

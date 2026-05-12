@@ -65,7 +65,8 @@ class DigestDraftController extends Controller
                 $data['highlight'], $data['topNews'], $data['toolOfWeek'] ?? null,
                 $data['featuredArticle'] ?? null, null, $data['weekNumber'],
                 $data['aiTerm'] ?? null, $data['interactiveTool'] ?? null,
-                $data['weeklyPrompt'] ?? null, $data['editorial'] ?? null
+                $data['weeklyPrompt'] ?? null, $data['editorial'] ?? null,
+                $data['wellnessChallenge'] ?? null
             ));
         }
 
