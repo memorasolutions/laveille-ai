@@ -347,10 +347,23 @@
                         <div x-show="!isValid" class="alert alert-warning small p-2 mb-2" style="font-size: 0.8rem;">
                             {{ __('Remplissez la persona (étape 1) et la tâche (étape 2) pour générer votre prompt.') }}
                         </div>
-                        <div class="d-flex gap-2 mb-4 flex-wrap">
+                        <div class="d-flex gap-2 mb-2 flex-wrap">
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
                             <button class="ct-btn ct-btn-outline" @click="exportPrompt()" :disabled="!isValid">{{ __('Exporter .txt') }}</button>
+                        </div>
+                        {{-- #193 Open-in AI : copy + redirect (zéro coût, zéro données serveur, user va dans SON IA) --}}
+                        <div class="mb-4" x-show="isValid" x-cloak>
+                            <p class="text-muted mb-2" style="font-size:0.8rem;">{{ __('Ouvrir dans une IA (copie le prompt et ouvre l\'outil) :') }}</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="openInAI('chatgpt')" :disabled="!isValid" title="ChatGPT — chat.openai.com" style="font-size:.85rem;">💬 ChatGPT</button>
+                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="openInAI('claude')" :disabled="!isValid" title="Claude — claude.ai" style="font-size:.85rem;">🤖 Claude</button>
+                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="openInAI('gemini')" :disabled="!isValid" title="Gemini — gemini.google.com (copy + collez)" style="font-size:.85rem;">✨ Gemini</button>
+                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="openInAI('perplexity')" :disabled="!isValid" title="Perplexity — perplexity.ai" style="font-size:.85rem;">🔎 Perplexity</button>
+                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="openInAI('mistral')" :disabled="!isValid" title="Mistral Le Chat — chat.mistral.ai" style="font-size:.85rem;">🌬️ Mistral</button>
+                                <button class="ct-btn ct-btn-outline ct-btn-sm" @click="openInAI('copilot')" :disabled="!isValid" title="Copilot — copilot.microsoft.com" style="font-size:.85rem;">🟦 Copilot</button>
+                            </div>
+                            <p class="text-muted mt-2" style="font-size:0.75rem;">🔒 <em>{{ __('Aucune donnée n\'est envoyée à laveille.ai. Le prompt va directement dans votre IA préférée.') }}</em></p>
                         </div>
 
                         {{-- Historique (visible seulement pour les non-connectes, les connectes ont "Mes prompts") --}}
@@ -694,6 +707,26 @@ document.addEventListener('alpine:init', function() {
             },
 
             copyText: function(text) { navigator.clipboard.writeText(text); },
+
+            // #193 Open-in AI : copy prompt + redirect vers l'IA choisie. Zéro donnée serveur.
+            // URL pré-remplissage 2026 : ChatGPT/Claude/Perplexity/Mistral/Copilot supportent ?q=, Gemini = fallback copy + ouvre.
+            openInAI: function(provider) {
+                if (!this.prompt || !this.isValid) return;
+                var prompt = this.prompt;
+                navigator.clipboard.writeText(prompt).catch(function(){});
+                var maxLen = 2000;
+                var encoded = encodeURIComponent(prompt.length > maxLen ? prompt.substring(0, maxLen) : prompt);
+                var urls = {
+                    chatgpt: 'https://chat.openai.com/?q=' + encoded,
+                    claude: 'https://claude.ai/new?q=' + encoded,
+                    perplexity: 'https://www.perplexity.ai/?q=' + encoded,
+                    mistral: 'https://chat.mistral.ai/chat?q=' + encoded,
+                    copilot: 'https://copilot.microsoft.com/?q=' + encoded,
+                    gemini: 'https://gemini.google.com/app'
+                };
+                var url = urls[provider] || urls.chatgpt;
+                window.open(url, '_blank', 'noopener,noreferrer');
+            },
 
             addToHistory: function() {
                 if (this.saving) return;
