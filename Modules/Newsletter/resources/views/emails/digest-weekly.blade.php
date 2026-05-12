@@ -309,7 +309,15 @@
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;line-height:1.6;">
-                            {!! preg_replace('/\[([^\]]+)\]/', '<span style="color:#fbbf24;font-weight:bold;">[$1]</span>', e(is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt)) !!}
+                            @php
+                                $rawPrompt = is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt;
+                                // 1) Escape HTML, 2) markdown **bold** → <strong>, 3) [brackets] highlight, 4) nl2br
+                                $escaped = e($rawPrompt);
+                                $bolded = preg_replace('/\*\*([^*]+)\*\*/', '<strong style="color:#3dc9d8;">$1</strong>', $escaped);
+                                $bracketed = preg_replace('/\[([^\]]+)\]/', '<span style="color:#fbbf24;font-weight:bold;">[$1]</span>', $bolded);
+                                $broken = nl2br($bracketed, false);
+                            @endphp
+                            {!! $broken !!}
                         </td></tr>
                     </table>
                 </td></tr>
