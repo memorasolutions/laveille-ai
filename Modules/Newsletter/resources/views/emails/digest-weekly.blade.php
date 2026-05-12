@@ -300,27 +300,58 @@
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">@if($hasWellness ?? false){{ 'Étape 2 — Approfondir avec l\'IA' }}@else{{ 'Défi de la semaine' }}@endif</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">@if($hasWellness ?? false){{ 'Étape 2 — Prompt IA' }}@else{{ 'Défi de la semaine' }}@endif</span></td></tr>
                 @if(is_array($weeklyPrompt) && ($weeklyPrompt['intro'] ?? null))
-                <tr><td align="center" style="padding-bottom:10px;font-size:14px;color:#cbd5e1;line-height:1.5;font-style:italic;">{!! e($weeklyPrompt['intro']) !!}</td></tr>
+                <tr><td align="center" style="padding-bottom:14px;font-size:14px;color:#cbd5e1;line-height:1.5;font-style:italic;">{!! e($weeklyPrompt['intro']) !!}</td></tr>
                 @endif
+                {{-- Helper de rendu d'un bloc copy-paste plain text --}}
+                @php
+                    $renderCopyBlock = function($content) {
+                        $escaped = e($content);
+                        $bracketed = preg_replace('/\[([^\]]+)\]/', '<span style="color:#fbbf24;font-weight:bold;">[$1]</span>', $escaped);
+                        return nl2br($bracketed, false);
+                    };
+                @endphp
+                {{-- Option A 2026 : 2 sub-blocks "Partie 1 / Partie 2" copy-paste séparés, annotations hors bloc --}}
+                @if(is_array($weeklyPrompt) && ! empty($weeklyPrompt['parts']) && is_array($weeklyPrompt['parts']))
+                    <tr><td align="center" style="padding-bottom:14px;font-size:12px;color:#94a3b8;">Copiez chaque bloc dans ChatGPT, Claude ou Gemini. Remplacez les <span style="color:#fbbf24;font-weight:bold;">[textes en jaune]</span> par vos infos.</td></tr>
+                    @foreach($weeklyPrompt['parts'] as $idx => $part)
+                        @if(! empty($part['label']))
+                        <tr><td style="padding-bottom:6px;">
+                            <span style="display:inline-block;background-color:#3dc9d8;color:#0c1427;font-size:11px;font-weight:bold;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;">{{ $part['label'] }}</span>
+                        </td></tr>
+                        @endif
+                        @if(! empty($part['pre_note']))
+                        <tr><td style="padding-bottom:8px;font-size:13px;color:#cbd5e1;line-height:1.5;">{!! e($part['pre_note']) !!}</td></tr>
+                        @endif
+                        <tr><td style="padding-bottom:8px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-family:Consolas,'Liberation Mono',Menlo,Courier,monospace;font-size:13px;color:#e2e8f0;line-height:1.55;white-space:normal;">
+                                    {!! $renderCopyBlock($part['content'] ?? '') !!}
+                                </td></tr>
+                            </table>
+                        </td></tr>
+                        @if(! empty($part['post_note']))
+                        <tr><td style="padding-bottom:14px;font-size:13px;color:#94a3b8;line-height:1.5;font-style:italic;">↳ {!! e($part['post_note']) !!}</td></tr>
+                        @else
+                        <tr><td style="padding-bottom:14px;"></td></tr>
+                        @endif
+                    @endforeach
+                @else
+                {{-- Backward compat : prompt string ou champ legacy --}}
                 <tr><td align="center" style="padding-bottom:6px;font-size:16px;color:#e2e8f0;">Essayez ce prompt cette semaine :</td></tr>
                 <tr><td align="center" style="padding-bottom:14px;font-size:12px;color:#94a3b8;">Remplacez les <span style="color:#fbbf24;font-weight:bold;">[textes en jaune]</span> par vos propres informations, puis copiez le tout.</td></tr>
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-size:15px;color:#e2e8f0;line-height:1.6;">
+                        <tr><td style="background-color:#1e293b;border:1px solid #3dc9d8;border-radius:6px;padding:15px;font-family:Consolas,'Liberation Mono',Menlo,Courier,monospace;font-size:13px;color:#e2e8f0;line-height:1.55;">
                             @php
                                 $rawPrompt = is_array($weeklyPrompt) ? ($weeklyPrompt['prompt'] ?? '') : $weeklyPrompt;
-                                // 1) Escape HTML, 2) markdown **bold** → <strong>, 3) [brackets] highlight, 4) nl2br
-                                $escaped = e($rawPrompt);
-                                $bolded = preg_replace('/\*\*([^*]+)\*\*/', '<strong style="color:#3dc9d8;">$1</strong>', $escaped);
-                                $bracketed = preg_replace('/\[([^\]]+)\]/', '<span style="color:#fbbf24;font-weight:bold;">[$1]</span>', $bolded);
-                                $broken = nl2br($bracketed, false);
                             @endphp
-                            {!! $broken !!}
+                            {!! $renderCopyBlock($rawPrompt) !!}
                         </td></tr>
                     </table>
                 </td></tr>
+                @endif
                 @if(is_array($weeklyPrompt) && ($weeklyPrompt['technique'] ?? null))
                 <tr><td style="padding-bottom:14px;">
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
