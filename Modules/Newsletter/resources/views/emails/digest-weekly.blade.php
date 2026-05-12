@@ -193,12 +193,114 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- 3. DEFI DE LA SEMAINE (masqué dans welcome car W4 le remplace) --}}
+    {{-- 3. ATELIER DE LA SEMAINE — header unifié (Beehiiv 2026 : single-CTA unified +28% completion, Gestalt grouping) --}}
+    @if(($wellnessChallenge ?? null) || (($weeklyPrompt ?? null) && !($isWelcome ?? false)))
+    <tr>
+        <td align="center" style="padding:28px 30px 4px;background-color:#ffffff;" class="mobile-p">
+            <span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#0B7285;">Atelier de la semaine</span>
+            <h2 style="margin:8px 0 4px;font-size:22px;line-height:1.25;color:#1a1a2e;">Pratiquez l'IA cette semaine</h2>
+            <p style="margin:0;font-size:14px;color:#6b7280;">
+                @php
+                    $hasWellness = (bool) ($wellnessChallenge ?? null);
+                    $hasPrompt = ($weeklyPrompt ?? null) && !($isWelcome ?? false);
+                @endphp
+                @if($hasWellness && $hasPrompt){{ 'Un défi bien-être à essayer + un prompt à tester' }}
+                @elseif($hasWellness){{ 'Un défi bien-être à essayer' }}
+                @else{{ 'Un prompt à tester' }}@endif
+            </p>
+        </td>
+    </tr>
+    @endif
+
+    {{-- 3a. DEFI BIEN-ETRE (étape 1 : action concrète offline) --}}
+    @if($wellnessChallenge ?? null)
+    @php $wc = $wellnessChallenge; @endphp
+    <tr>
+        <td style="padding:20px 30px;background-color:#fef3e8;border-left:6px solid #f97316;" class="mobile-p">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr><td style="padding-bottom:10px;">
+                    <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#c2410c;font-weight:bold;">@if($hasPrompt ?? false){{ 'Étape 1 — Bien-être' }}@else{{ 'Défi bien-être' }}@endif</span>
+                    @if(! empty($wc['score']))
+                    <span style="display:inline-block;background-color:#fff;color:#c2410c;font-size:11px;font-weight:bold;padding:2px 8px;border-radius:10px;margin-left:8px;border:1px solid #fdba74;">★ {{ $wc['score'] }}% chez les abonnés</span>
+                    @endif
+                </td></tr>
+                <tr><td style="padding-bottom:10px;">
+                    <h3 style="margin:0;font-size:20px;line-height:1.2;color:#1a1a2e;">{{ $wc['title'] ?? '' }}</h3>
+                    @if(! empty($wc['subtitle']))
+                    <p style="margin:6px 0 0;font-size:14px;color:#7c2d12;font-style:italic;">{{ $wc['subtitle'] }}</p>
+                    @endif
+                </td></tr>
+                @if(! empty($wc['hook']))
+                <tr><td style="padding-bottom:14px;">
+                    <p style="margin:0;font-size:15px;color:#1f2937;line-height:1.6;">{!! $wc['hook'] !!}</p>
+                </td></tr>
+                @endif
+                @if(! empty($wc['steps']) && is_array($wc['steps']))
+                <tr><td style="padding-bottom:14px;">
+                    <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Les étapes</p>
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                        @foreach($wc['steps'] as $idx => $step)
+                        <tr><td style="padding:8px 0;border-bottom:{{ $loop->last ? '0' : '1px solid #fed7aa' }};">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td width="32" valign="top" style="font-size:18px;font-weight:bold;color:#f97316;">{{ $idx + 1 }}.</td>
+                                    <td valign="top" style="font-size:14px;color:#1f2937;line-height:1.5;">{!! $step !!}</td>
+                                </tr>
+                            </table>
+                        </td></tr>
+                        @endforeach
+                    </table>
+                </td></tr>
+                @endif
+                @if(! empty($wc['privacy']))
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#fee2e2;border-radius:6px;">
+                        <tr><td style="padding:12px 14px;">
+                            <span style="font-size:12px;font-weight:bold;color:#991b1b;">🔒 Privacy / Loi 25</span><br/>
+                            <span style="font-size:13px;color:#7f1d1d;line-height:1.5;">{!! $wc['privacy'] !!}</span>
+                        </td></tr>
+                    </table>
+                </td></tr>
+                @endif
+                @if(! empty($wc['tools']) && is_array($wc['tools']))
+                <tr><td style="padding-bottom:14px;">
+                    <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Outils par profil</p>
+                    @foreach($wc['tools'] as $tool)
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:6px;background-color:#fff;border-radius:4px;">
+                        <tr><td style="padding:8px 12px;font-size:13px;color:#1f2937;line-height:1.5;">
+                            <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> — {!! $tool['description'] ?? '' !!}
+                        </td></tr>
+                    </table>
+                    @endforeach
+                </td></tr>
+                @endif
+                @if(! empty($wc['bonus']))
+                <tr><td style="padding-bottom:{{ ($hasPrompt ?? false) ? '6px' : '14px' }};">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#ecfdf5;border-radius:6px;border:1px dashed #6ee7b7;">
+                        <tr><td style="padding:12px 14px;">
+                            <span style="font-size:12px;font-weight:bold;color:#065f46;">💡 Bonus boucle 24h</span><br/>
+                            <span style="font-size:13px;color:#064e3b;line-height:1.5;">{!! $wc['bonus'] !!}</span>
+                        </td></tr>
+                    </table>
+                </td></tr>
+                @endif
+                {{-- CTA bien-être supprimé en mode "atelier" pour single-CTA Beehiiv (le bouton final = construire mon prompt). Conservé en mode standalone. --}}
+                @if(! ($hasPrompt ?? false) && ! empty($wc['cta_url']) && ! empty($wc['cta_label']))
+                <tr><td align="center" style="padding-top:6px;">
+                    <a href="{{ $wc['cta_url'] }}" target="_blank" style="display:inline-block;background-color:#f97316;color:#fff;padding:11px 24px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $wc['cta_label'] }} &rarr;</a>
+                </td></tr>
+                @endif
+            </table>
+        </td>
+    </tr>
+    @endif
+
+    {{-- 3b. DEFI PROMPT (étape 2 : approfondir avec l'IA) — masqué dans welcome (W4 remplace) --}}
     @if(($weeklyPrompt ?? null) && !($isWelcome ?? false))
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">Défi de la semaine</span></td></tr>
+                <tr><td align="center" style="padding-bottom:14px;"><span style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;">@if($hasWellness ?? false){{ 'Étape 2 — Approfondir avec l\'IA' }}@else{{ 'Défi de la semaine' }}@endif</span></td></tr>
                 @if(is_array($weeklyPrompt) && ($weeklyPrompt['intro'] ?? null))
                 <tr><td align="center" style="padding-bottom:10px;font-size:14px;color:#cbd5e1;line-height:1.5;font-style:italic;">{!! e($weeklyPrompt['intro']) !!}</td></tr>
                 @endif
@@ -264,88 +366,7 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- 3.5. DEFI BIEN-ETRE (additif, render uniquement si $wellnessChallenge set) --}}
-    @if($wellnessChallenge ?? null)
-    @php $wc = $wellnessChallenge; @endphp
-    <tr>
-        <td style="padding:25px 30px;background-color:#fef3e8;border-left:6px solid #f97316;" class="mobile-p">
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr><td style="padding-bottom:10px;">
-                    <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#c2410c;font-weight:bold;">Défi bien-être de la semaine</span>
-                    @if(! empty($wc['score']))
-                    <span style="display:inline-block;background-color:#fff;color:#c2410c;font-size:11px;font-weight:bold;padding:2px 8px;border-radius:10px;margin-left:8px;border:1px solid #fdba74;">★ {{ $wc['score'] }}% chez les abonnés</span>
-                    @endif
-                </td></tr>
-                <tr><td style="padding-bottom:10px;">
-                    <h2 style="margin:0;font-size:22px;line-height:1.2;color:#1a1a2e;">{{ $wc['title'] ?? '' }}</h2>
-                    @if(! empty($wc['subtitle']))
-                    <p style="margin:6px 0 0;font-size:14px;color:#7c2d12;font-style:italic;">{{ $wc['subtitle'] }}</p>
-                    @endif
-                </td></tr>
-                @if(! empty($wc['hook']))
-                <tr><td style="padding-bottom:14px;">
-                    <p style="margin:0;font-size:15px;color:#1f2937;line-height:1.6;">{!! $wc['hook'] !!}</p>
-                </td></tr>
-                @endif
-                @if(! empty($wc['steps']) && is_array($wc['steps']))
-                <tr><td style="padding-bottom:14px;">
-                    <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Les étapes</p>
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                        @foreach($wc['steps'] as $idx => $step)
-                        <tr><td style="padding:8px 0;border-bottom:{{ $loop->last ? '0' : '1px solid #fed7aa' }};">
-                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                <tr>
-                                    <td width="32" valign="top" style="font-size:18px;font-weight:bold;color:#f97316;">{{ $idx + 1 }}.</td>
-                                    <td valign="top" style="font-size:14px;color:#1f2937;line-height:1.5;">{!! $step !!}</td>
-                                </tr>
-                            </table>
-                        </td></tr>
-                        @endforeach
-                    </table>
-                </td></tr>
-                @endif
-                @if(! empty($wc['privacy']))
-                <tr><td style="padding-bottom:14px;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#fee2e2;border-radius:6px;">
-                        <tr><td style="padding:12px 14px;">
-                            <span style="font-size:12px;font-weight:bold;color:#991b1b;">🔒 Privacy / Loi 25</span><br/>
-                            <span style="font-size:13px;color:#7f1d1d;line-height:1.5;">{!! $wc['privacy'] !!}</span>
-                        </td></tr>
-                    </table>
-                </td></tr>
-                @endif
-                @if(! empty($wc['tools']) && is_array($wc['tools']))
-                <tr><td style="padding-bottom:14px;">
-                    <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Outils par profil</p>
-                    @foreach($wc['tools'] as $tool)
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:6px;background-color:#fff;border-radius:4px;">
-                        <tr><td style="padding:8px 12px;font-size:13px;color:#1f2937;line-height:1.5;">
-                            <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> — {!! $tool['description'] ?? '' !!}
-                        </td></tr>
-                    </table>
-                    @endforeach
-                </td></tr>
-                @endif
-                @if(! empty($wc['bonus']))
-                <tr><td style="padding-bottom:14px;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#ecfdf5;border-radius:6px;border:1px dashed #6ee7b7;">
-                        <tr><td style="padding:12px 14px;">
-                            <span style="font-size:12px;font-weight:bold;color:#065f46;">💡 Bonus boucle 24h</span><br/>
-                            <span style="font-size:13px;color:#064e3b;line-height:1.5;">{!! $wc['bonus'] !!}</span>
-                        </td></tr>
-                    </table>
-                </td></tr>
-                @endif
-                @if(! empty($wc['cta_url']) && ! empty($wc['cta_label']))
-                <tr><td align="center" style="padding-top:6px;">
-                    <a href="{{ $wc['cta_url'] }}" target="_blank" style="display:inline-block;background-color:#f97316;color:#fff;padding:11px 24px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $wc['cta_label'] }} &rarr;</a>
-                </td></tr>
-                @endif
-            </table>
-        </td>
-    </tr>
-    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
-    @endif
+    {{-- 3.5 supprimé : fusionné dans §3 atelier-de-la-semaine (S92 #182 unification single-CTA Beehiiv 2026) --}}
 
     {{-- 4. ACTUALITES (5 avec miniatures alternees + résumés) --}}
     @if(($topNews ?? null) && $topNews->count())
