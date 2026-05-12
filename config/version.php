@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.10.0 · 2026-05-12 · #198 Brain Dump Partie 2 — refonte Mad Libs C+E (90/100 best practice 2026) — 5 chips inline cliquables (catégories multi-select / nbPatterns / nbActions / horizon / tone) avec popovers Alpine, prompt copié = rendu actuel substituant variables, WCAG AAA 32-44px target sizes, mobile popover full-width. + #196 uniformité bloc tool charte Memora (card blanc + ct-btn teal) + #195 Octopus intro.svg lisible (corps #0B7285 + tentacules #52B8C7 + pupilles #1a1d23).
  *   1.9.0 · 2026-05-12 · #194 Brain Dump 2026 — page dédiée /outils/brain-dump SEO+AEO+GEO+EEAT (Schema SoftwareApplication+HowTo+FAQPage+BreadcrumbList+Person, byline auteur, 3 citations scientifiques avec DOI, TL;DR speakable, charte Memora tokens, outil actif timer 10min + 2 prompts copy/Open-in AI 6 IAs) + alias FR /outils/vide-cerveau → 301
  *   1.8.0 · 2026-05-12 · #193 Octopus Prompt Builder Open-in AI — 6 boutons ChatGPT/Claude/Gemini/Perplexity/Mistral/Copilot (URL ?q= pré-rempli, fallback copy+redirect Gemini) + #182 atelier newsletter JIT (steps→prompt→ressources) + chain prompting CoT trigger + justification. Zéro coût opérationnel, zéro données serveur, zéro Loi 25 risk.
  *   1.7.0 · 2026-05-12 · #181 Menu navigation refonte action-oriented — Catégories→Apprendre + Blog/Pages retirés (footer) + Jouer mega menu NEW (Quête narrative, Constructeur, Comparateur, Sudoku, Mots croisés, Raccourcisseur, Calculatrice taxes QC) + WCAG AAA aria-haspopup/expanded/role=menu + mobile sidebar refactorée
@@ -35,18 +36,18 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 9,
+    'minor' => 10,
     'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'brain-dump',
+    'codename' => 'mad-libs',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.9.0',
+    'semver' => '1.10.0',
 ];
