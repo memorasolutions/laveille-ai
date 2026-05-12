@@ -398,8 +398,17 @@
                 @if(is_array($weeklyPrompt) && ($weeklyPrompt['cta_intro'] ?? null))
                 <tr><td align="center" style="padding-bottom:10px;font-size:13px;color:#94a3b8;line-height:1.5;">{!! e($weeklyPrompt['cta_intro']) !!}</td></tr>
                 @endif
+                @php
+                    // En mode synergie, prioriser le CTA du défi (lien outil dédié sur le site)
+                    $promptCtaUrl = (($hasWellness ?? false) && ! empty($wellnessChallenge['cta_url']))
+                        ? $wellnessChallenge['cta_url']
+                        : config('app.url').'/outils/constructeur-prompts';
+                    $promptCtaLabel = (($hasWellness ?? false) && ! empty($wellnessChallenge['cta_label']))
+                        ? $wellnessChallenge['cta_label']
+                        : ((is_array($weeklyPrompt) && ! empty($weeklyPrompt['cta_label'])) ? $weeklyPrompt['cta_label'] : 'Construire mon prompt →');
+                @endphp
                 <tr><td align="center">
-                    <a href="{{ config('app.url') }}/outils/constructeur-prompts" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ (is_array($weeklyPrompt) && ! empty($weeklyPrompt['cta_label'])) ? $weeklyPrompt['cta_label'] : 'Construire mon prompt →' }}</a>
+                    <a href="{{ $promptCtaUrl }}" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $promptCtaLabel }} &rarr;</a>
                 </td></tr>
             </table>
         </td>
