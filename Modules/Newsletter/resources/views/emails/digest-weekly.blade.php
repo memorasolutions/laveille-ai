@@ -212,7 +212,7 @@
     </tr>
     @endif
 
-    {{-- 3a. DEFI BIEN-ETRE (étape 1 : action concrète offline) --}}
+    {{-- 3a-top. DEFI BIEN-ETRE — header + intro + STEPS (1-5) seulement (JIT learning : prompt suit IMMÉDIATEMENT après) --}}
     @if($wellnessChallenge ?? null)
     @php $wc = $wellnessChallenge; @endphp
     <tr>
@@ -236,7 +236,7 @@
                 </td></tr>
                 @endif
                 @if(! empty($wc['steps']) && is_array($wc['steps']))
-                <tr><td style="padding-bottom:14px;">
+                <tr><td style="padding-bottom:0;">
                     <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Les étapes</p>
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                         @foreach($wc['steps'] as $idx => $step)
@@ -252,43 +252,45 @@
                     </table>
                 </td></tr>
                 @endif
-                @if(! empty($wc['privacy']))
-                <tr><td style="padding-bottom:14px;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#fee2e2;border-radius:6px;">
-                        <tr><td style="padding:12px 14px;">
-                            <span style="font-size:12px;font-weight:bold;color:#991b1b;">🔒 Privacy / Loi 25</span><br/>
-                            <span style="font-size:13px;color:#7f1d1d;line-height:1.5;">{!! $wc['privacy'] !!}</span>
-                        </td></tr>
-                    </table>
-                </td></tr>
-                @endif
-                @if(! empty($wc['tools']) && is_array($wc['tools']))
-                <tr><td style="padding-bottom:14px;">
-                    <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Outils par profil</p>
-                    @foreach($wc['tools'] as $tool)
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:6px;background-color:#fff;border-radius:4px;">
-                        <tr><td style="padding:8px 12px;font-size:13px;color:#1f2937;line-height:1.5;">
-                            <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> — {!! $tool['description'] ?? '' !!}
-                        </td></tr>
-                    </table>
-                    @endforeach
-                </td></tr>
-                @endif
-                @if(! empty($wc['bonus']))
-                <tr><td style="padding-bottom:{{ ($hasPrompt ?? false) ? '6px' : '14px' }};">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#ecfdf5;border-radius:6px;border:1px dashed #6ee7b7;">
-                        <tr><td style="padding:12px 14px;">
-                            <span style="font-size:12px;font-weight:bold;color:#065f46;">💡 Bonus boucle 24h</span><br/>
-                            <span style="font-size:13px;color:#064e3b;line-height:1.5;">{!! $wc['bonus'] !!}</span>
-                        </td></tr>
-                    </table>
-                </td></tr>
-                @endif
-                {{-- CTA bien-être supprimé en mode "atelier" pour single-CTA Beehiiv (le bouton final = construire mon prompt). Conservé en mode standalone. --}}
-                @if(! ($hasPrompt ?? false) && ! empty($wc['cta_url']) && ! empty($wc['cta_label']))
-                <tr><td align="center" style="padding-top:6px;">
-                    <a href="{{ $wc['cta_url'] }}" target="_blank" style="display:inline-block;background-color:#f97316;color:#fff;padding:11px 24px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $wc['cta_label'] }} &rarr;</a>
-                </td></tr>
+                {{-- Mode standalone (sans prompt) : CTA + privacy/tools/bonus restent ici --}}
+                @if(! ($hasPrompt ?? false))
+                    @if(! empty($wc['privacy']))
+                    <tr><td style="padding-top:14px;padding-bottom:14px;">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#fee2e2;border-radius:6px;">
+                            <tr><td style="padding:12px 14px;">
+                                <span style="font-size:12px;font-weight:bold;color:#991b1b;">🔒 Privacy / Loi 25</span><br/>
+                                <span style="font-size:13px;color:#7f1d1d;line-height:1.5;">{!! $wc['privacy'] !!}</span>
+                            </td></tr>
+                        </table>
+                    </td></tr>
+                    @endif
+                    @if(! empty($wc['tools']) && is_array($wc['tools']))
+                    <tr><td style="padding-bottom:14px;">
+                        <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Outils par profil</p>
+                        @foreach($wc['tools'] as $tool)
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:6px;background-color:#fff;border-radius:4px;">
+                            <tr><td style="padding:8px 12px;font-size:13px;color:#1f2937;line-height:1.5;">
+                                <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> — {!! $tool['description'] ?? '' !!}
+                            </td></tr>
+                        </table>
+                        @endforeach
+                    </td></tr>
+                    @endif
+                    @if(! empty($wc['bonus']))
+                    <tr><td style="padding-bottom:14px;">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#ecfdf5;border-radius:6px;border:1px dashed #6ee7b7;">
+                            <tr><td style="padding:12px 14px;">
+                                <span style="font-size:12px;font-weight:bold;color:#065f46;">💡 Bonus boucle 24h</span><br/>
+                                <span style="font-size:13px;color:#064e3b;line-height:1.5;">{!! $wc['bonus'] !!}</span>
+                            </td></tr>
+                        </table>
+                    </td></tr>
+                    @endif
+                    @if(! empty($wc['cta_url']) && ! empty($wc['cta_label']))
+                    <tr><td align="center" style="padding-top:6px;">
+                        <a href="{{ $wc['cta_url'] }}" target="_blank" style="display:inline-block;background-color:#f97316;color:#fff;padding:11px 24px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $wc['cta_label'] }} &rarr;</a>
+                    </td></tr>
+                    @endif
                 @endif
             </table>
         </td>
@@ -402,8 +404,56 @@
             </table>
         </td>
     </tr>
-    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
+
+    {{-- 3a-bottom. RESSOURCES DU DEFI (annexes orange) — privacy + tools + bonus, après le prompt (JIT) --}}
+    @if(($wellnessChallenge ?? null) && ($hasPrompt ?? false))
+    @php $wc = $wellnessChallenge; @endphp
+    @if(! empty($wc['privacy']) || ! empty($wc['tools']) || ! empty($wc['bonus']))
+    <tr>
+        <td style="padding:20px 30px;background-color:#fef3e8;border-left:6px solid #f97316;" class="mobile-p">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr><td style="padding-bottom:14px;">
+                    <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#c2410c;font-weight:bold;">Ressources du défi</span>
+                </td></tr>
+                @if(! empty($wc['privacy']))
+                <tr><td style="padding-bottom:14px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#fee2e2;border-radius:6px;">
+                        <tr><td style="padding:12px 14px;">
+                            <span style="font-size:12px;font-weight:bold;color:#991b1b;">🔒 Privacy / Loi 25</span><br/>
+                            <span style="font-size:13px;color:#7f1d1d;line-height:1.5;">{!! $wc['privacy'] !!}</span>
+                        </td></tr>
+                    </table>
+                </td></tr>
+                @endif
+                @if(! empty($wc['tools']) && is_array($wc['tools']))
+                <tr><td style="padding-bottom:14px;">
+                    <p style="margin:0 0 8px;font-size:13px;font-weight:bold;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Outils par profil</p>
+                    @foreach($wc['tools'] as $tool)
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:6px;background-color:#fff;border-radius:4px;">
+                        <tr><td style="padding:8px 12px;font-size:13px;color:#1f2937;line-height:1.5;">
+                            <strong style="color:#c2410c;">{{ $tool['profile'] ?? '' }}</strong> — {!! $tool['description'] ?? '' !!}
+                        </td></tr>
+                    </table>
+                    @endforeach
+                </td></tr>
+                @endif
+                @if(! empty($wc['bonus']))
+                <tr><td>
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#ecfdf5;border-radius:6px;border:1px dashed #6ee7b7;">
+                        <tr><td style="padding:12px 14px;">
+                            <span style="font-size:12px;font-weight:bold;color:#065f46;">💡 Bonus boucle 24h</span><br/>
+                            <span style="font-size:13px;color:#064e3b;line-height:1.5;">{!! $wc['bonus'] !!}</span>
+                        </td></tr>
+                    </table>
+                </td></tr>
+                @endif
+            </table>
+        </td>
+    </tr>
+    @endif
+    @endif
+    <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
 
     {{-- 3.5 supprimé : fusionné dans §3 atelier-de-la-semaine (S92 #182 unification single-CTA Beehiiv 2026) --}}
 
