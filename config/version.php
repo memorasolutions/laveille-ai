@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.9.0 · 2026-05-12 · #194 Brain Dump 2026 — page dédiée /outils/brain-dump SEO+AEO+GEO+EEAT (Schema SoftwareApplication+HowTo+FAQPage+BreadcrumbList+Person, byline auteur, 3 citations scientifiques avec DOI, TL;DR speakable, charte Memora tokens, outil actif timer 10min + 2 prompts copy/Open-in AI 6 IAs) + alias FR /outils/vide-cerveau → 301
  *   1.8.0 · 2026-05-12 · #193 Octopus Prompt Builder Open-in AI — 6 boutons ChatGPT/Claude/Gemini/Perplexity/Mistral/Copilot (URL ?q= pré-rempli, fallback copy+redirect Gemini) + #182 atelier newsletter JIT (steps→prompt→ressources) + chain prompting CoT trigger + justification. Zéro coût opérationnel, zéro données serveur, zéro Loi 25 risk.
  *   1.7.0 · 2026-05-12 · #181 Menu navigation refonte action-oriented — Catégories→Apprendre + Blog/Pages retirés (footer) + Jouer mega menu NEW (Quête narrative, Constructeur, Comparateur, Sudoku, Mots croisés, Raccourcisseur, Calculatrice taxes QC) + WCAG AAA aria-haspopup/expanded/role=menu + mobile sidebar refactorée
  *   1.6.0 · 2026-05-08 · News SEO/AEO/GEO 2026 R1-R7 — JsonLdService enrichi (NewsMediaOrganization + Person/Org author + isBasedOn + speakable + articleBody/wordCount/keywords/inLanguage/articleSection) + TL;DR aside Speakable + H2 PAA + AiSummary tldr/quote/key_stat/expert + news-sitemap.xml dédié 72h
@@ -34,18 +35,18 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 8,
+    'minor' => 9,
     'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'open-in-ai',
+    'codename' => 'brain-dump',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.8.0',
+    'semver' => '1.9.0',
 ];

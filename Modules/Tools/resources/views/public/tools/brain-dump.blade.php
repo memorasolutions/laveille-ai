@@ -392,7 +392,7 @@
                         <span>{{ $faq['q'] }}</span>
                         <span class="bd-faq__chevron" aria-hidden="true">▾</span>
                     </button>
-                    <div class="bd-faq__a" x-show="openFaq === {{ $i }}" x-collapse>{{ $faq['a'] }}</div>
+                    <div class="bd-faq__a" x-show="openFaq === {{ $i }}" x-cloak x-transition.duration.200ms>{{ $faq['a'] }}</div>
                 </div>
                 @endforeach
             </div>
