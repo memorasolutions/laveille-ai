@@ -1,4 +1,4 @@
-@extends('fronttheme::layouts.app')
+@extends(fronttheme_layout())
 
 @section('title', 'Avatar Studio (Beta admin) — La veille')
 @section('meta_description', 'Créateur d\'avatar cartoon personnalisé avec compatibilité WCAG AAA et touches du Québec.')
@@ -318,8 +318,8 @@
 </div>
 
 <script type="module">
-    import { createAvatar } from 'https://esm.sh/@dicebear/core@7';
-    import { bigSmile } from 'https://esm.sh/@dicebear/big-smile@7';
+    import { createAvatar } from 'https://esm.sh/@dicebear/core@9';
+    import { bigSmile } from 'https://esm.sh/@dicebear/collection@9';
 
     window.__avatarLib = { createAvatar, bigSmile };
     window.dispatchEvent(new CustomEvent('avatar-lib-ready'));

@@ -1,4 +1,4 @@
-@extends('fronttheme::layouts.app')
+@extends(fronttheme_layout())
 
 @section('title', 'Avatar Studio — En construction · La veille')
 @section('meta_description', 'Notre créateur d\'avatar cartoon arrive bientôt sur laveille.ai. Personnalisez votre compagnon de quête IA.')
