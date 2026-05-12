@@ -8,84 +8,76 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'Brain Dump 2026', 'breadcrumbItems' => [__('Outils'), 'Brain Dump 2026']])
 @endsection
 
-@push('og')
-<meta property="og:title" content="Brain Dump 2026 — 10 min de papier + 30 sec d'IA">
-<meta property="og:description" content="Décharge ton mental en 10 minutes papier puis structure avec l'IA. Outil gratuit, 100% privé, validé par la science.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ url('/outils/brain-dump') }}">
-<meta name="twitter:card" content="summary_large_image">
-@endpush
+@section('og_type', 'website')
+@section('share_text', 'Brain Dump 2026 — 10 min de papier + 30 sec d\'IA pour vider et structurer ton mental.')
 
-@push('head')
+@push('scripts')
 {{-- JSON-LD multi-couche : SoftwareApplication + HowTo + FAQPage + BreadcrumbList + Person (auteur) — AEO/GEO 2026 +30% Perplexity visibility --}}
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@graph": [
-        {
-            "@type": "SoftwareApplication",
-            "name": "Brain Dump 2026",
-            "applicationCategory": "ProductivityApplication",
-            "operatingSystem": "Web",
-            "url": "{{ url('/outils/brain-dump') }}",
-            "description": "Outil gratuit pour décharger mentalement par écriture manuscrite puis structurer avec l'IA. Combine papier + IA OCR + chain prompting.",
-            "isAccessibleForFree": true,
-            "inLanguage": "fr-CA",
-            "provider": {
-                "@type": "Organization",
-                "name": "La veille",
-                "url": "{{ url('/') }}"
-            },
-            "featureList": [
-                "Minuteur 10 minutes intégré",
-                "Prompt chain prompting prêt à copier",
-                "Ouverture directe dans ChatGPT, Claude, Gemini, Perplexity, Mistral, Copilot",
-                "100% client-side, aucune donnée serveur"
-            ]
-        },
-        {
-            "@type": "HowTo",
-            "name": "Comment faire un Brain Dump 2026 avec l'IA",
-            "description": "Méthode en 5 étapes pour vider mentalement par écriture manuelle puis structurer avec une IA.",
-            "totalTime": "PT15M",
-            "step": [
-                {"@type": "HowToStep", "position": 1, "name": "Papier + stylo, 10 minutes", "text": "Vide tout ce qui occupe ton esprit. Pas de jugement, pas d'ordre, juste sortir."},
-                {"@type": "HowToStep", "position": 2, "name": "Biffer le sensible", "text": "Biffe ou plie les passages sensibles (santé, finances, conflits RH, données tiers) avant la photo. Protection Loi 25 d'abord."},
-                {"@type": "HowToStep", "position": 3, "name": "Photo téléphone", "text": "Prends une photo de la page avec un cadrage net. Ton IA va lire l'écriture manuscrite."},
-                {"@type": "HowToStep", "position": 4, "name": "Lancer le prompt IA", "text": "Copie la Partie 1 (transcription) + Partie 2 (analyse) dans ton IA préférée — chain prompting validé en 2 étapes."},
-                {"@type": "HowToStep", "position": 5, "name": "Sauvegarde et relecture", "text": "Sauvegarde dans ton app notes préférée. Relis 24 h plus tard — les vrais insights émergent souvent à J+1."}
-            ]
-        },
-        {
-            "@type": "FAQPage",
-            "mainEntity": [
-                {"@type": "Question", "name": "Qu'est-ce qu'un Brain Dump et à quoi ça sert ?", "acceptedAnswer": {"@type": "Answer", "text": "Un Brain Dump est une décharge mentale par écriture libre pendant 10 minutes. Ça libère la mémoire de travail, réduit le stress cognitif et fait émerger des priorités cachées. La version 2026 ajoute une étape IA pour structurer le brouillon en actions concrètes."}},
-                {"@type": "Question", "name": "Combien de temps prend un Brain Dump complet ?", "acceptedAnswer": {"@type": "Answer", "text": "10 minutes d'écriture manuscrite + 30 secondes pour copier-coller le prompt dans une IA + quelques minutes pour relire l'analyse. Total : 15-20 minutes par séance."}},
-                {"@type": "Question", "name": "Le Brain Dump fonctionne-t-il pour l'anxiété ?", "acceptedAnswer": {"@type": "Answer", "text": "Les recherches de James Pennebaker (1997-2018) sur l'expressive writing montrent que l'écriture libre régulière réduit les symptômes anxieux. La version 2026 avec IA aide à transformer le brouillon en actions, ce qui amplifie l'effet déchargement."}},
-                {"@type": "Question", "name": "Quelle IA est la meilleure pour transcrire un manuscrit en 2026 ?", "acceptedAnswer": {"@type": "Answer", "text": "En mai 2026, Apple Intelligence Notes (OCR on-device), Claude Vision (Anthropic) et Google Lens offrent les meilleures précisions sur le manuscrit cursif standard. Pour le maximum d'intimité, l'OCR on-device (Apple) garde tes données sur l'appareil."}},
-                {"@type": "Question", "name": "Mes notes manuscrites sont-elles privées ?", "acceptedAnswer": {"@type": "Answer", "text": "L'outil laveille.ai est 100% côté navigateur : aucune donnée n'est envoyée à nos serveurs. Le prompt va directement dans l'IA que tu choisis. Pour la protection Loi 25 maximale, biffe les passages sensibles avant la photo et privilégie un OCR on-device."}},
-                {"@type": "Question", "name": "Tablette ou papier — lequel est mieux ?", "acceptedAnswer": {"@type": "Answer", "text": "Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale."}},
-                {"@type": "Question", "name": "Quelle est la différence avec un journal classique ?", "acceptedAnswer": {"@type": "Answer", "text": "Le journal classique est narratif et chronologique. Le Brain Dump est libre, sans structure, et conçu pour la décharge rapide. La version 2026 ajoute l'IA pour transformer le brouillon en actions, ce qui sort le carnet du tiroir."}}
-            ]
-        },
-        {
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                {"@type": "ListItem", "position": 1, "name": "Accueil", "item": "{{ url('/') }}"},
-                {"@type": "ListItem", "position": 2, "name": "Outils", "item": "{{ url('/outils') }}"},
-                {"@type": "ListItem", "position": 3, "name": "Brain Dump 2026", "item": "{{ url('/outils/brain-dump') }}"}
-            ]
-        },
-        {
-            "@type": "Person",
-            "name": "Stéphane Lapointe",
-            "url": "{{ url('/') }}",
-            "sameAs": ["https://www.linkedin.com/in/lapointestephane/"],
-            "jobTitle": "Veille technologique IA · Québec"
-        }
-    ]
-}
-</script>
+@php
+    $jsonLd = [
+        '@context' => 'https://schema.org',
+        '@graph' => [
+            [
+                '@type' => 'SoftwareApplication',
+                'name' => 'Brain Dump 2026',
+                'applicationCategory' => 'ProductivityApplication',
+                'operatingSystem' => 'Web',
+                'url' => url('/outils/brain-dump'),
+                'description' => "Outil gratuit pour décharger mentalement par écriture manuscrite puis structurer avec l'IA. Combine papier + IA OCR + chain prompting.",
+                'isAccessibleForFree' => true,
+                'inLanguage' => 'fr-CA',
+                'provider' => ['@type' => 'Organization', 'name' => 'La veille', 'url' => url('/')],
+                'featureList' => [
+                    'Minuteur 10 minutes intégré',
+                    'Prompt chain prompting prêt à copier',
+                    'Ouverture directe dans ChatGPT, Claude, Gemini, Perplexity, Mistral, Copilot',
+                    '100% client-side, aucune donnée serveur',
+                ],
+            ],
+            [
+                '@type' => 'HowTo',
+                'name' => "Comment faire un Brain Dump 2026 avec l'IA",
+                'description' => 'Méthode en 5 étapes pour vider mentalement par écriture manuelle puis structurer avec une IA.',
+                'totalTime' => 'PT15M',
+                'step' => [
+                    ['@type' => 'HowToStep', 'position' => 1, 'name' => 'Papier + stylo, 10 minutes', 'text' => "Vide tout ce qui occupe ton esprit. Pas de jugement, pas d'ordre, juste sortir."],
+                    ['@type' => 'HowToStep', 'position' => 2, 'name' => 'Biffer le sensible', 'text' => "Biffe ou plie les passages sensibles (santé, finances, conflits RH, données tiers) avant la photo. Protection Loi 25 d'abord."],
+                    ['@type' => 'HowToStep', 'position' => 3, 'name' => 'Photo téléphone', 'text' => "Prends une photo de la page avec un cadrage net. Ton IA va lire l'écriture manuscrite."],
+                    ['@type' => 'HowToStep', 'position' => 4, 'name' => 'Lancer le prompt IA', 'text' => "Copie la Partie 1 (transcription) + Partie 2 (analyse) dans ton IA préférée — chain prompting validé en 2 étapes."],
+                    ['@type' => 'HowToStep', 'position' => 5, 'name' => 'Sauvegarde et relecture', 'text' => "Sauvegarde dans ton app notes préférée. Relis 24 h plus tard — les vrais insights émergent souvent à J+1."],
+                ],
+            ],
+            [
+                '@type' => 'FAQPage',
+                'mainEntity' => [
+                    ['@type' => 'Question', 'name' => "Qu'est-ce qu'un Brain Dump et à quoi ça sert ?", 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Un Brain Dump est une décharge mentale par écriture libre pendant 10 minutes. Ça libère la mémoire de travail, réduit le stress cognitif et fait émerger des priorités cachées. La version 2026 ajoute une étape IA pour structurer le brouillon en actions concrètes."]],
+                    ['@type' => 'Question', 'name' => 'Combien de temps prend un Brain Dump complet ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "10 minutes d'écriture manuscrite + 30 secondes pour copier-coller le prompt dans une IA + quelques minutes pour relire l'analyse. Total : 15-20 minutes par séance."]],
+                    ['@type' => 'Question', 'name' => "Le Brain Dump fonctionne-t-il pour l'anxiété ?", 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Les recherches de James Pennebaker (1997-2018) sur l'expressive writing montrent que l'écriture libre régulière réduit les symptômes anxieux. La version 2026 avec IA aide à transformer le brouillon en actions, ce qui amplifie l'effet déchargement."]],
+                    ['@type' => 'Question', 'name' => 'Quelle IA est la meilleure pour transcrire un manuscrit en 2026 ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "En mai 2026, Apple Intelligence Notes (OCR on-device), Claude Vision (Anthropic) et Google Lens offrent les meilleures précisions sur le manuscrit cursif standard. Pour le maximum d'intimité, l'OCR on-device (Apple) garde tes données sur l'appareil."]],
+                    ['@type' => 'Question', 'name' => 'Mes notes manuscrites sont-elles privées ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "L'outil laveille.ai est 100% côté navigateur : aucune donnée n'est envoyée à nos serveurs. Le prompt va directement dans l'IA que tu choisis. Pour la protection Loi 25 maximale, biffe les passages sensibles avant la photo et privilégie un OCR on-device."]],
+                    ['@type' => 'Question', 'name' => 'Tablette ou papier — lequel est mieux ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Les recherches en neurosciences (Van der Meer et al., 2024, Frontiers in Psychology) suggèrent que l'écriture manuscrite sur papier active plus de zones cérébrales liées à la mémoire que l'écriture sur tablette. Mais une tablette avec stylet reste meilleure que le clavier pour la décharge mentale."]],
+                    ['@type' => 'Question', 'name' => 'Quelle est la différence avec un journal classique ?', 'acceptedAnswer' => ['@type' => 'Answer', 'text' => "Le journal classique est narratif et chronologique. Le Brain Dump est libre, sans structure, et conçu pour la décharge rapide. La version 2026 ajoute l'IA pour transformer le brouillon en actions, ce qui sort le carnet du tiroir."]],
+                ],
+            ],
+            [
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => url('/')],
+                    ['@type' => 'ListItem', 'position' => 2, 'name' => 'Outils', 'item' => url('/outils')],
+                    ['@type' => 'ListItem', 'position' => 3, 'name' => 'Brain Dump 2026', 'item' => url('/outils/brain-dump')],
+                ],
+            ],
+            [
+                '@type' => 'Person',
+                'name' => 'Stéphane Lapointe',
+                'url' => url('/'),
+                'sameAs' => ['https://www.linkedin.com/in/lapointestephane/'],
+                'jobTitle' => "Veille technologique IA · Québec",
+            ],
+        ],
+    ];
+@endphp
+<script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush
 
 @section('content')
