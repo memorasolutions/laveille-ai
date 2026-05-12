@@ -155,16 +155,15 @@
 .bd-popover__opt { display: flex; align-items: center; gap: .65rem; padding: .5rem .65rem; border-radius: 6px; cursor: pointer; font-size: .9rem; color: var(--c-dark); min-height: 40px; transition: background .12s ease; }
 .bd-popover__opt:hover { background: rgba(11,114,133,.08); }
 .bd-popover__opt:has(input:checked) { background: rgba(11,114,133,.12); font-weight: 700; color: var(--c-primary, #0B7285); }
-.bd-popover__opt input[type="checkbox"], .bd-popover__opt input[type="radio"] { appearance: none; -webkit-appearance: none; -moz-appearance: none; width: 22px; height: 22px; min-width: 22px; border: 2px solid var(--c-primary, #0B7285); background: #fff; cursor: pointer; flex-shrink: 0; position: relative; margin: 0; padding: 0; box-sizing: border-box; }
-.bd-popover__opt input[type="checkbox"] { border-radius: 4px; }
-.bd-popover__opt input[type="radio"] { border-radius: 50%; }
-.bd-popover__opt input[type="checkbox"]:checked,
-.bd-popover__opt input[type="radio"]:checked { background: var(--c-primary, #0B7285); border-color: var(--c-primary, #0B7285); }
-.bd-popover__opt input[type="checkbox"]:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%); color: #fff; font-size: 15px; font-weight: 900; line-height: 1; }
-.bd-popover__opt input[type="radio"]:checked::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: #fff; border-radius: 50%; }
-.bd-popover__opt input[type="checkbox"]:focus-visible,
-.bd-popover__opt input[type="radio"]:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
-.bd-popover__opt input[type="number"] { width: 64px; padding: .35rem .5rem; border: 1.5px solid rgba(11,114,133,.3); border-radius: 6px; font-size: .95rem; font-weight: 700; text-align: center; color: var(--c-dark); appearance: auto; -webkit-appearance: auto; }
+.bd-popover__opt input[type="checkbox"], .bd-popover__opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.bd-popover__opt .bd-check { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; min-width: 22px; border: 2px solid var(--c-primary, #0B7285); background: #fff; flex-shrink: 0; box-sizing: border-box; transition: background .12s ease; position: relative; }
+.bd-popover__opt .bd-check--box { border-radius: 4px; }
+.bd-popover__opt .bd-check--radio { border-radius: 50%; }
+.bd-popover__opt input:checked ~ .bd-check { background: var(--c-primary, #0B7285); border-color: var(--c-primary, #0B7285); }
+.bd-popover__opt input[type="checkbox"]:checked ~ .bd-check--box::after { content: '✓'; color: #fff; font-size: 15px; font-weight: 900; line-height: 1; }
+.bd-popover__opt input[type="radio"]:checked ~ .bd-check--radio::after { content: ''; width: 10px; height: 10px; background: #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.bd-popover__opt input:focus-visible ~ .bd-check { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
+.bd-popover__opt input[type="number"] { position: static; opacity: 1; width: 64px; height: auto; padding: .35rem .5rem; border: 1.5px solid rgba(11,114,133,.3); border-radius: 6px; font-size: .95rem; font-weight: 700; text-align: center; color: var(--c-dark); pointer-events: auto; }
 .bd-popover__opt input[type="number"]:focus { outline: 2px solid var(--c-primary, #0B7285); outline-offset: 0; border-color: var(--c-primary, #0B7285); }
 .bd-popover__hint { font-size: .75rem; color: var(--c-muted); font-style: italic; margin: .35rem 0 0; }
 .bd-madlibs__values { display: block; font-size: .85rem; font-weight: 600; color: var(--c-muted); margin-top: .25rem; line-height: 1.3; }
@@ -319,10 +318,10 @@
                             </button>
                             <div class="bd-popover" x-show="openChip === 'cat'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Catégories à utiliser</p>
-                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.action"> 🎯 ACTION</label>
-                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.idee"> 💡 IDÉE</label>
-                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.emotion"> ❤️ ÉMOTION</label>
-                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.question"> ❓ QUESTION</label>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.action"><span class="bd-check bd-check--box"></span> 🎯 ACTION</label>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.idee"><span class="bd-check bd-check--box"></span> 💡 IDÉE</label>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.emotion"><span class="bd-check bd-check--box"></span> ❤️ ÉMOTION</label>
+                                <label class="bd-popover__opt"><input type="checkbox" x-model="chips.categories.question"><span class="bd-check bd-check--box"></span> ❓ QUESTION</label>
                                 <p class="bd-popover__hint">Sélectionne celles à appliquer (min 2).</p>
                             </div>
                         </span>.
@@ -370,9 +369,9 @@
                             </button>
                             <div class="bd-popover" x-show="openChip === 'hor'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Horizon temporel</p>
-                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="aujourd'hui" x-model="chips.horizon"> aujourd'hui</label>
-                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="cette semaine" x-model="chips.horizon"> cette semaine</label>
-                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="ce mois" x-model="chips.horizon"> ce mois</label>
+                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="aujourd'hui" x-model="chips.horizon"><span class="bd-check bd-check--radio"></span> aujourd'hui</label>
+                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="cette semaine" x-model="chips.horizon"><span class="bd-check bd-check--radio"></span> cette semaine</label>
+                                <label class="bd-popover__opt"><input type="radio" name="horizon" value="ce mois" x-model="chips.horizon"><span class="bd-check bd-check--radio"></span> ce mois</label>
                             </div>
                         </span>.
                         Pour chaque action : verbe d'action + résultat attendu en 1 ligne.
@@ -388,9 +387,9 @@
                             </button>
                             <div class="bd-popover" x-show="openChip === 'ton'" x-cloak x-transition @click.outside="openChip = null">
                                 <p class="bd-popover__title">Ton de la réponse</p>
-                                <label class="bd-popover__opt"><input type="radio" name="tone" value="direct" x-model="chips.tone"> Direct (sans fioriture)</label>
-                                <label class="bd-popover__opt"><input type="radio" name="tone" value="bienveillant" x-model="chips.tone"> Bienveillant et encourageant</label>
-                                <label class="bd-popover__opt"><input type="radio" name="tone" value="exigeant" x-model="chips.tone"> Coach exigeant et challengeant</label>
+                                <label class="bd-popover__opt"><input type="radio" name="tone" value="direct" x-model="chips.tone"><span class="bd-check bd-check--radio"></span> Direct (sans fioriture)</label>
+                                <label class="bd-popover__opt"><input type="radio" name="tone" value="bienveillant" x-model="chips.tone"><span class="bd-check bd-check--radio"></span> Bienveillant et encourageant</label>
+                                <label class="bd-popover__opt"><input type="radio" name="tone" value="exigeant" x-model="chips.tone"><span class="bd-check bd-check--radio"></span> Coach exigeant et challengeant</label>
                             </div>
                         </span>.
                     </p>
