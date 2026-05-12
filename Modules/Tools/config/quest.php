@@ -16,8 +16,8 @@ return [
 
     'meta' => [
         'title' => 'Les Sentiers de l\'IA',
-        'tagline' => 'Apprenez l\'IA en aventure aux côtés de Loop',
-        'mascot_name' => 'Loop',
+        'tagline' => 'Apprenez l\'IA en aventure aux côtés d\'Octopus',
+        'mascot_name' => 'Octopus',
     ],
 
     'chapters' => [
