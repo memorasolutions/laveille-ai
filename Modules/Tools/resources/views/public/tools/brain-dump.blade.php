@@ -205,7 +205,7 @@
 .bd-citation__source { font-size: .8125rem; color: var(--c-muted); margin: 0; }
 .bd-citation__source a { color: var(--c-primary, #0B7285); text-decoration: underline; }
 
-/* Outils par profil */
+/* Quelle IA utiliser (5 cards) */
 .bd-profiles { display: grid; gap: .75rem; }
 @media (min-width: 640px) { .bd-profiles { grid-template-columns: repeat(2, 1fr); } }
 .bd-profile { background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; padding: .85rem 1.15rem; font-size: .95rem; line-height: 1.5; color: var(--c-dark); }
