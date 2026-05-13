@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.11.0 · 2026-05-13 · #201 Cmd+K command palette globale — modale Alpine WCAG (role=dialog + aria-modal + focus auto + return-focus) déclenchée par Cmd+K (macOS) / Ctrl+K (Windows/Linux) ou bouton loupe header, recherche live cross-module via endpoint JSON `/recherche/palette` (web throttle 60/min) servie par SearchService::searchFront() limité 6/section depuis SearchRegistry (Blog + Actualités + Glossaire + Annuaire + Acronymes), debounce 250 ms + AbortController, keyboard nav ↑↓/Enter/Esc, sections groupées avec icône+compteur, footer « Voir tous les résultats » → /recherche?q=, mobile fullscreen, modules désactivés ignorés (zéro régression). + #200 refonte menus navigation Option E hybride — 3 mega menus Outils (4 groupes Productivité/Création/Détente/Pratique) + Annuaire (5 fiches stars data-driven GA4) + Apprendre (Contenu éditorial + Référence) + mobile sidebar refondue.
  *   1.10.0 · 2026-05-12 · #198 Brain Dump Partie 2 — refonte Mad Libs C+E (90/100 best practice 2026) — 5 chips inline cliquables (catégories multi-select / nbPatterns / nbActions / horizon / tone) avec popovers Alpine, prompt copié = rendu actuel substituant variables, WCAG AAA 32-44px target sizes, mobile popover full-width. + #196 uniformité bloc tool charte Memora (card blanc + ct-btn teal) + #195 Octopus intro.svg lisible (corps #0B7285 + tentacules #52B8C7 + pupilles #1a1d23).
  *   1.9.0 · 2026-05-12 · #194 Brain Dump 2026 — page dédiée /outils/brain-dump SEO+AEO+GEO+EEAT (Schema SoftwareApplication+HowTo+FAQPage+BreadcrumbList+Person, byline auteur, 3 citations scientifiques avec DOI, TL;DR speakable, charte Memora tokens, outil actif timer 10min + 2 prompts copy/Open-in AI 6 IAs) + alias FR /outils/vide-cerveau → 301
  *   1.8.0 · 2026-05-12 · #193 Octopus Prompt Builder Open-in AI — 6 boutons ChatGPT/Claude/Gemini/Perplexity/Mistral/Copilot (URL ?q= pré-rempli, fallback copy+redirect Gemini) + #182 atelier newsletter JIT (steps→prompt→ressources) + chain prompting CoT trigger + justification. Zéro coût opérationnel, zéro données serveur, zéro Loi 25 risk.
@@ -36,7 +37,7 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 10,
+    'minor' => 11,
     'patch' => 0,
 
     /**
