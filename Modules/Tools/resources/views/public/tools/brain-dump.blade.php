@@ -685,8 +685,8 @@
     <section class="bd-section">
         <div class="bd-container">
             <div class="bd-cta">
-                <h2>Reçois un nouveau défi chaque dimanche</h2>
-                <p>L'infolettre <strong>La veille</strong> envoie un défi bien-être + un prompt IA chaque dimanche matin. Gratuit, pas de spam, désabonnement en 1 clic.</p>
+                <h2>Reçois un nouveau défi chaque mercredi</h2>
+                <p>L'infolettre <strong>La veille</strong> envoie un défi bien-être + un prompt IA chaque mercredi matin. Gratuit, pas de spam, désabonnement en 1 clic.</p>
                 <div class="bd-cta__buttons">
                     <a href="{{ url('/') }}#newsletter" class="bd-btn-primary">📬 S'abonner gratuitement</a>
                     <a href="{{ url('/outils') }}" class="bd-btn-link">Voir les autres outils</a>
