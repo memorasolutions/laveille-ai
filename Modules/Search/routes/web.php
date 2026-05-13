@@ -11,4 +11,7 @@ use Modules\Search\Http\Controllers\FrontSearchController;
 
 Route::middleware(['web'])->group(function () {
     Route::get('/recherche', [FrontSearchController::class, 'index'])->name('search.index');
+    Route::get('/recherche/palette', [FrontSearchController::class, 'paletteJson'])
+        ->middleware('throttle:60,1')
+        ->name('search.palette');
 });

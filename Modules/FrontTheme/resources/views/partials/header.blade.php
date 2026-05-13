@@ -481,18 +481,13 @@
                     <div class="header-right">
                         <div class="header-search-form-wrapper">
                             <div class="cart-search-contact">
-                                <button class="search-toggle-btn" aria-label="{{ __('Ouvrir la recherche') }}"><i
-                                        class="fi flaticon-magnifiying-glass"></i></button>
-                                <div class="header-search-form">
-                                    <form action="{{ route('blog.index') }}" method="GET">
-                                        <div>
-                                            <input type="text" name="search" class="form-control"
-                                                placeholder="{{ __('Rechercher...') }}" aria-label="{{ __('Rechercher sur le site') }}">
-                                            <button type="submit" aria-label="{{ __('Lancer la recherche') }}"><i
-                                                    class="fi flaticon-magnifiying-glass"></i></button>
-                                        </div>
-                                    </form>
-                                </div>
+                                <button
+                                    type="button"
+                                    class="search-toggle-btn"
+                                    aria-label="{{ __('Ouvrir la recherche (Ctrl+K)') }}"
+                                    title="{{ __('Rechercher (Ctrl+K)') }}"
+                                    onclick="window.dispatchEvent(new CustomEvent('open-search-palette'))"
+                                ><i class="fi flaticon-magnifiying-glass"></i></button>
                             </div>
                         </div>
                         {{-- Mini-cart (conditionnel — module Shop activé) --}}
@@ -609,3 +604,5 @@
     </nav>
 </header>
 <!-- end of header -->
+
+@include('fronttheme::partials.search-palette')
