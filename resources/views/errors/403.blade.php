@@ -1,5 +1,8 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('errors.layout')
+@section('mascot')
+    @include('errors.octopus._render', ['emotion' => 'thinking'])
+@endsection
 @section('emoji', '🚫')
 @section('code', '403')
 @section('title', __('Accès non autorisé'))

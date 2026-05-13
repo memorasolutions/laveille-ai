@@ -1,5 +1,8 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends('errors.layout')
+@section('mascot')
+    @include('errors.octopus._render', ['emotion' => 'surprised'])
+@endsection
 @section('emoji', '🤖💥')
 @section('code', '500')
 @section('title', __('Erreur système'))
