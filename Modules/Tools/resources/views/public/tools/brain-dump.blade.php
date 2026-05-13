@@ -97,7 +97,7 @@
 .bd-hero__tagline { font-size: 1.375rem; color: var(--c-dark); margin: 0; line-height: 1.35; font-weight: 600; max-width: 640px; }
 .bd-hero__tagline strong { color: var(--c-primary, #0B7285); }
 .bd-hero__demo { margin: 1.75rem 0; width: 100%; max-width: 720px; }
-.bd-hero__demo svg { width: 100%; height: auto; display: block; }
+.bd-hero__demo svg { width: 100% !important; height: auto !important; max-width: 720px; display: block; }
 .bd-hero__steps { display: grid; grid-template-columns: 1fr; gap: .85rem; margin: 0 0 1.5rem; }
 @media (min-width: 640px) { .bd-hero__steps { grid-template-columns: repeat(3, 1fr); } }
 .bd-hero__step { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: .35rem; }
@@ -263,7 +263,7 @@
 
             {{-- Visuel Before → After (SVG inline, sans dépendance, charte tokens) --}}
             <div class="bd-hero__demo" aria-hidden="true">
-                <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 720 240" width="720" height="240" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="bdPaper" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stop-color="#FFFCF0"/>
