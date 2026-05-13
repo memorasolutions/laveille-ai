@@ -110,7 +110,7 @@
                     {{ __("Les outils en évolution rapide (IA générative surtout) sont revérifiés régulièrement : URL, pricing, présence d'un programme éducation, statut du projet (actif / fermé / racheté). Les fiches affichent visuellement la date de dernière vérification et signalent les changements importants par un badge dédié.") }}
                 </p>
                 <p>
-                    {{ __("La veille publie également un Concentré IA hebdomadaire (chaque dimanche) qui résume les nouveautés vérifiées de la semaine. Les flux RSS permettent de suivre automatiquement les concentrés et les nouveautés du répertoire.") }}
+                    {{ __("La veille publie également un Concentré IA hebdomadaire (chaque lundi pour la semaine précédente) qui résume les nouveautés vérifiées. Les flux RSS permettent de suivre automatiquement les concentrés et les nouveautés du répertoire.") }}
                 </p>
 
                 <h2 style="font-weight: 800; font-size: 24px; margin: 32px 0 14px; color: var(--c-dark);">{{ __('5. Sources et références') }}</h2>

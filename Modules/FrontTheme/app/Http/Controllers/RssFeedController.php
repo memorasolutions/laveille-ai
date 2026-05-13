@@ -50,7 +50,7 @@ class RssFeedController extends Controller
         $xml = view('fronttheme::rss.concentres', [
             'articles' => $articles,
             'feedTitle' => 'La veille — Concentré IA hebdo',
-            'feedDescription' => 'Le résumé hebdomadaire des nouveautés IA et techno au Québec, par Stéphane Lapointe (Memora). Publié chaque dimanche.',
+            'feedDescription' => 'Le résumé hebdomadaire des nouveautés IA et techno au Québec, par Stéphane Lapointe (Memora). Publié chaque lundi pour la semaine précédente.',
             'feedUrl' => url('/rss/concentres.xml'),
             'siteUrl' => url('/'),
             'lastBuildDate' => now()->toRfc2822String(),
