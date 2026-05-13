@@ -3,6 +3,8 @@
     'title' => __('Aucun résultat trouvé'),
     'description' => null,
     'variant' => 'empty',
+    'octopus' => null,
+    'octopusSize' => 120,
 ])
 
 <section
@@ -10,7 +12,13 @@
     role="status"
     aria-live="polite"
 >
-    <span class="empty-state__icon" aria-hidden="true">{{ $icon }}</span>
+    @if($octopus)
+        <span class="empty-state__mascot" aria-hidden="true">
+            <x-tools::octopus :variant="$octopus" :size="$octopusSize" :animate="true" />
+        </span>
+    @else
+        <span class="empty-state__icon" aria-hidden="true">{{ $icon }}</span>
+    @endif
 
     <h3 class="empty-state__title">{{ $title }}</h3>
 
@@ -41,6 +49,8 @@
         box-sizing: border-box;
     }
     .empty-state__icon { font-size: 48px; line-height: 1; margin-bottom: 16px; display: block; }
+    .empty-state__mascot { display: block; margin-bottom: 12px; line-height: 1; }
+    .empty-state__mascot .octopus-mascot { display: block; margin: 0 auto; }
     .empty-state__title {
         color: var(--c-dark, #111827);
         font-family: var(--f-heading, system-ui, -apple-system, sans-serif);

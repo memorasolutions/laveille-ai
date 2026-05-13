@@ -51,11 +51,14 @@
         </div>
 
         <div id="search-palette-results" class="sp-results" aria-live="polite" aria-busy="false" x-bind:aria-busy="loading.toString()">
-            {{-- Empty state --}}
+            {{-- Empty state — invite à taper, avec Octopus loved (« je cherche pour toi ») --}}
             <template x-if="!query || query.length < 2">
                 <div class="sp-empty">
+                    <div class="sp-empty__mascot" aria-hidden="true">
+                        <x-tools::octopus variant="loved" :size="96" />
+                    </div>
                     <p class="sp-empty__title">{{ __('Commencez à taper') }}</p>
-                    <p class="sp-empty__hint">{{ __('Cherchez parmi les outils, le glossaire IA, les articles du blogue et plus.') }}</p>
+                    <p class="sp-empty__hint">{{ __('Octopus cherche pour vous parmi les outils, le glossaire IA, les articles et plus.') }}</p>
                     <ul class="sp-shortcuts">
                         <li><kbd>↑</kbd><kbd>↓</kbd> {{ __('naviguer') }}</li>
                         <li><kbd>⏎</kbd> {{ __('ouvrir') }}</li>
@@ -72,11 +75,14 @@
                 </div>
             </template>
 
-            {{-- No results --}}
+            {{-- No results — Octopus confused (« je n'ai rien trouvé ») --}}
             <template x-if="query && query.length >= 2 && !loading && total === 0">
                 <div class="sp-empty">
+                    <div class="sp-empty__mascot" aria-hidden="true">
+                        <x-tools::octopus variant="confused" :size="96" />
+                    </div>
                     <p class="sp-empty__title">{{ __('Aucun résultat pour') }} « <span x-text="query"></span> »</p>
-                    <p class="sp-empty__hint">{{ __('Essayez avec un synonyme ou un terme plus court.') }}</p>
+                    <p class="sp-empty__hint">{{ __('Octopus n\'a rien trouvé. Essayez avec un synonyme ou un terme plus court.') }}</p>
                 </div>
             </template>
 
@@ -180,8 +186,10 @@
     }
     .sp-results { overflow-y: auto; padding: 8px 6px 12px; }
     .sp-empty { padding: 28px 22px; text-align: center; }
-    .sp-empty__title { margin: 0 0 4px; font-weight: 700; color: #0b1220; }
-    .sp-empty__hint { margin: 0; color: #4b5563; font-size: 14px; }
+    .sp-empty__mascot { display: block; margin: 0 auto 12px; line-height: 1; }
+    .sp-empty__mascot .octopus-mascot { display: block; margin: 0 auto; }
+    .sp-empty__title { margin: 0 0 4px; font-weight: 700; color: #0b1220; font-size: 15px; }
+    .sp-empty__hint { margin: 0; color: #4b5563; font-size: 14px; line-height: 1.45; }
     .sp-shortcuts {
         list-style: none; padding: 16px 0 0; margin: 0;
         display: flex; gap: 18px; justify-content: center; flex-wrap: wrap;
