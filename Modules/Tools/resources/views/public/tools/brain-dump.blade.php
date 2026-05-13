@@ -210,6 +210,8 @@
 @media (min-width: 640px) { .bd-profiles { grid-template-columns: repeat(2, 1fr); } }
 .bd-profile { background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; padding: .85rem 1.15rem; font-size: .95rem; line-height: 1.5; color: var(--c-dark); }
 .bd-profile strong { color: var(--c-primary, #0B7285); font-weight: 700; }
+.bd-profile__note { margin: 1.25rem 0 0; padding: .85rem 1.15rem; background: var(--c-primary-light, #F0FAFB); border-left: 4px solid var(--c-primary, #0B7285); border-radius: 0 8px 8px 0; font-size: .9rem; line-height: 1.55; color: var(--c-dark); }
+.bd-profile__note strong { color: var(--c-primary, #0B7285); }
 
 /* Bonus 24h */
 .bd-bonus { background: #ecfdf5; border: 1px dashed #6ee7b7; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0 0; }
@@ -602,18 +604,19 @@
         </div>
     </section>
 
-    {{-- OUTILS PAR PROFIL --}}
+    {{-- QUELLE IA UTILISER ? — Direct dans l'IA, sans app OCR tierce (philosophie outil : montrer la force de l'IA) --}}
     <section class="bd-section" aria-labelledby="bd-profiles-h2" id="bd-profiles">
         <div class="bd-container">
-            <h2 id="bd-profiles-h2">Outils par profil</h2>
-            <p class="bd-section__lead">Choisis le setup qui correspond à tes outils habituels. Tous offrent OCR + sauvegarde — la différence est sur le niveau de privacy.</p>
+            <h2 id="bd-profiles-h2">Quelle IA utiliser ?</h2>
+            <p class="bd-section__lead">Pas besoin d'app OCR séparée. <strong>Toutes les grandes IA acceptent ta photo directement</strong> et la transcrivent. Voici les 5 meilleures en mai 2026 — à toi de choisir selon ton outil habituel.</p>
             <div class="bd-profiles">
-                <div class="bd-profile"><strong>🍎 Apple / Mac</strong> — Notes natif + Apple Intelligence Scribble. <strong>OCR on-device, zéro cloud.</strong></div>
-                <div class="bd-profile"><strong>📓 Notion</strong> — Notion AI + base de données « Brain dumps » datée, requêtes par catégorie.</div>
-                <div class="bd-profile"><strong>🧠 Obsidian</strong> — Plugin OCR + Dataview pour suivi long-terme et détection de patterns.</div>
-                <div class="bd-profile"><strong>🟡 Google</strong> — Keep + side panel Gemini pour synthèse immédiate.</div>
-                <div class="bd-profile"><strong>🔒 Anti-cloud strict</strong> — LLaVa local via Ollama. Aucun envoi externe, tout reste sur ta machine.</div>
+                <div class="bd-profile"><strong>💬 ChatGPT</strong> — Le plus populaire. Glisse-dépose ta photo dans la conversation, l'IA fait tout. Compte gratuit suffisant pour 1-2 brain dumps par jour.</div>
+                <div class="bd-profile"><strong>🟣 Claude (Anthropic)</strong> — Le plus précis pour le manuscrit cursif et la nuance contextuelle. Réponses plus longues et structurées. Compte gratuit disponible.</div>
+                <div class="bd-profile"><strong>✨ Gemini (Google)</strong> — Intégré à Google Workspace. Excellent si tu utilises déjà Gmail / Docs / Keep. 100 % gratuit avec un compte Google.</div>
+                <div class="bd-profile"><strong>🔵 Microsoft Copilot</strong> — Inclus dans Microsoft 365 si tu y es déjà abonné. Bon écosystème pour transférer ensuite vers OneNote / To Do.</div>
+                <div class="bd-profile"><strong>🟢 Perplexity</strong> — Si tu veux que l'IA enrichisse ton brain dump avec des sources web fraîches (utile quand tes notes mentionnent des sujets à creuser).</div>
             </div>
+            <p class="bd-profile__note">🔒 <strong>Privacy :</strong> dans tous les cas, ta photo va directement de ton appareil à l'IA — laveille.ai ne voit jamais rien. Pour la Loi 25 maximale : biffe les passages sensibles avant la photo et privilégie un compte payant (politiques de rétention plus strictes).</p>
 
             {{-- Bonus 24h --}}
             <div class="bd-bonus">
