@@ -64,6 +64,8 @@ Route::middleware('web')->group(function () {
         ->name('tools.avatar.save');
 
     // #174 Quête narrative IA — saga « Les Sentiers de l'IA »
+    // Module activable via QUEST_ENABLED (.env). Désactivé 2026-05-13 (ROI 0/1 user)
+    // — Octopus mascotte préservée (assets/octopus/* + composant x-tools::octopus utilisé dans Brain Dump).
     Route::get('/quete', [\Modules\Tools\Http\Controllers\QuestController::class, 'index'])
         ->name('tools.quest.index');
     // #189 Redirect 301 ch1 ancien slug (Loop) → nouveau (Octopus) — préserve bookmarks/SEO
