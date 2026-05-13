@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('quest_progress', function (Blueprint $table) {
             $table->id();
             $table->string('user_email')->index();
-            $table->string('current_chapter', 64)->default('ch1-eveil-loop');
+            $table->string('current_chapter', 64)->default('ch1-eveil-octopus');
             $table->json('completed_chapters')->nullable();
             $table->json('choices')->nullable();
             $table->json('badges')->nullable();

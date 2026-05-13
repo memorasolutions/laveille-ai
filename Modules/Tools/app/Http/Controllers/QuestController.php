@@ -31,7 +31,7 @@ class QuestController extends Controller
             'isSiteAuth' => auth()->check(),
             'progress' => $progress,
             'completedSlugs' => $progress?->completed_chapters ?? [],
-            'currentChapterSlug' => $progress?->current_chapter ?? 'ch1-eveil-loop',
+            'currentChapterSlug' => $progress?->current_chapter ?? 'ch1-eveil-octopus',
         ]);
     }
 
