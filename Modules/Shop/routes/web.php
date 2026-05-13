@@ -12,9 +12,10 @@ use Modules\Shop\Http\Controllers\Admin\ProductController;
 use Modules\Shop\Http\Controllers\Admin\ProductWizardController;
 use Modules\Shop\Http\Controllers\Admin\OrderController;
 use Modules\Shop\Http\Controllers\Admin\SettingsController;
+use Modules\Shop\Http\Middleware\ShopMaintenanceMode;
 
-// Routes publiques boutique
-Route::middleware('web')
+// Routes publiques boutique — protégées par ShopMaintenanceMode (kill switch admin only quand SHOP_MAINTENANCE=true)
+Route::middleware(['web', ShopMaintenanceMode::class])
     ->prefix(config('shop.routes.prefix', 'boutique'))
     ->group(function () {
         Route::get('/', [PublicShopController::class, 'index'])->name('shop.index');
@@ -32,8 +33,8 @@ Route::middleware('web')
         Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
     });
 
-// Estimation livraison (AJAX)
-Route::middleware('web')
+// Estimation livraison (AJAX) — protégée aussi (évite checkout via API pendant maintenance)
+Route::middleware(['web', ShopMaintenanceMode::class])
     ->post('/api/shop/shipping-quote', ShippingQuoteController::class)
     ->name('shop.shipping-quote');
 
