@@ -66,6 +66,8 @@ Route::middleware('web')->group(function () {
     // #174 Quête narrative IA — saga « Les Sentiers de l'IA »
     Route::get('/quete', [\Modules\Tools\Http\Controllers\QuestController::class, 'index'])
         ->name('tools.quest.index');
+    // #189 Redirect 301 ch1 ancien slug (Loop) → nouveau (Octopus) — préserve bookmarks/SEO
+    Route::permanentRedirect('/quete/ch1-eveil-loop', '/quete/ch1-eveil-octopus');
     Route::post('/quete/login', [\Modules\Tools\Http\Controllers\QuestController::class, 'loginRequest'])
         ->middleware('throttle:5,60')
         ->name('tools.quest.login');
