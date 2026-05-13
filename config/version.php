@@ -44,11 +44,11 @@ return [
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'mad-libs',
+    'codename' => 'command-palette',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.10.0',
+    'semver' => '1.11.0',
 ];
