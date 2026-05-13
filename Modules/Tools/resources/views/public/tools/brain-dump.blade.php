@@ -256,7 +256,7 @@
             <div class="bd-hero__signals" aria-label="Garanties">
                 <span class="bd-hero__signal">📚 Validé <strong>Mueller & Oppenheimer (2014)</strong></span>
                 <span class="bd-hero__signal">🔒 <strong>100&nbsp;% privé</strong> (Loi 25)</span>
-                <span class="bd-hero__signal">⭐ <strong>86&nbsp;%</strong> satisfaction abonnés</span>
+                <span class="bd-hero__signal">⚡ <strong>30&nbsp;sec</strong> avec l'IA</span>
             </div>
 
             <div class="bd-hero__cta">
