@@ -2,7 +2,7 @@
 @php($emotion = $emotion ?? 'confused')
 @switch($emotion)
     @case('confused')
-<svg id="Layer_2" role="img" aria-hidden="true" style="width:140px;height:140px;display:block;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91">
+<svg id="Layer_2" role="img" aria-hidden="true" width="100%" height="100%" style="display:block;max-width:160px;max-height:160px;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91" preserveAspectRatio="xMidYMid meet">
   <defs>
     <style>
       .cls-1 {
@@ -46,7 +46,7 @@
 
     @break
     @case('thinking')
-<svg id="Layer_2" role="img" aria-hidden="true" style="width:140px;height:140px;display:block;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91">
+<svg id="Layer_2" role="img" aria-hidden="true" width="100%" height="100%" style="display:block;max-width:160px;max-height:160px;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91" preserveAspectRatio="xMidYMid meet">
   <defs>
     <style>
       .cls-1 {
@@ -90,7 +90,7 @@
 
     @break
     @case('sleeping')
-<svg id="Layer_2" role="img" aria-hidden="true" style="width:140px;height:140px;display:block;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91">
+<svg id="Layer_2" role="img" aria-hidden="true" width="100%" height="100%" style="display:block;max-width:160px;max-height:160px;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91" preserveAspectRatio="xMidYMid meet">
   <defs>
     <style>
       .cls-1 {
@@ -134,7 +134,7 @@
 
     @break
     @case('surprised')
-<svg id="Layer_2" role="img" aria-hidden="true" style="width:140px;height:140px;display:block;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91">
+<svg id="Layer_2" role="img" aria-hidden="true" width="100%" height="100%" style="display:block;max-width:160px;max-height:160px;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91" preserveAspectRatio="xMidYMid meet">
   <defs>
     <style>
       .cls-1 {
@@ -178,7 +178,7 @@
 
     @break
     @case('happy')
-<svg id="Layer_2" role="img" aria-hidden="true" style="width:140px;height:140px;display:block;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91">
+<svg id="Layer_2" role="img" aria-hidden="true" width="100%" height="100%" style="display:block;max-width:160px;max-height:160px;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91" preserveAspectRatio="xMidYMid meet">
   <defs>
     <style>
       .cls-1 {
@@ -222,7 +222,7 @@
 
     @break
     @case('loved')
-<svg id="Layer_2" role="img" aria-hidden="true" style="width:140px;height:140px;display:block;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91">
+<svg id="Layer_2" role="img" aria-hidden="true" width="100%" height="100%" style="display:block;max-width:160px;max-height:160px;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91" preserveAspectRatio="xMidYMid meet">
   <defs>
     <style>
       .cls-1 {
@@ -266,7 +266,7 @@
 
     @break
     @default
-<svg id="Layer_2" role="img" aria-hidden="true" style="width:140px;height:140px;display:block;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91">
+<svg id="Layer_2" role="img" aria-hidden="true" width="100%" height="100%" style="display:block;max-width:160px;max-height:160px;margin:0 auto;" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 452.03 392.91" preserveAspectRatio="xMidYMid meet">
   <defs>
     <style>
       .cls-1 {
