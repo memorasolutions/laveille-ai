@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.13.0 · 2026-05-13 · #204 composant `<x-tools::octopus>` étendu 6 → 12 variants (compositions + émotions). `<x-core::empty-state>` enrichi prop `octopus` (remplace icône emoji). Search palette Cmd+K empty state initial = Octopus loved (« cherche pour vous »), no-results = Octopus confused (« n'a rien trouvé »). Consolidation 12 SVG dans Modules/Tools/resources/assets/octopus/ (dossier preview/ supprimé). #203 harmonisation 11 SVG aux tokens charte officielle (corps #0B7285 / tentacules #52B8C7 / pupilles #1a1d23 — intro.svg comme référence).
  *   1.12.0 · 2026-05-13 · #202 Octopus mascotte sur 7 pages erreur (403/404/405/419/429/500/503) — réutilisation stratégique post-désactivation quête. Partial paramétrisé errors.octopus._render avec 6 émotions SVG (4 nouvelles : confused/thinking/sleeping/surprised générées via qwen3-max openrouter-free 1.4s 0$ + 2 réservées happy/loved). Layout commun aux tokens charte officielle (#0B7285/#C2410C/#F8FAFB). Mapping par code : 404 confused, 403/503 thinking, 419/429 sleeping, 405 confused, 500 surprised. Microcopy ton FR-CA "Cette page s'est perdue dans les courants". + Désactivation /quete via QUEST_ENABLED=false (.env prod) + retrait liens menu (4 occurrences gated config('tools.quest.enabled')). Module préservé pour réactivation 1-flag.
  *   1.11.2 · 2026-05-13 · #189 fix charte /quete — chapter.blade.php + index.blade.php redéfinissaient des tokens locaux (--c-primary #064E5A / --c-accent #9A2A06 / --c-bg #F0F4F8) qui shadowaient les tokens charte officiels (#0B7285 / #C2410C / #F8FAFB). Refactor: héritage direct :root + --c-primary-hover + --c-primary-light + --c-primary-badge + --c-accent-light + --c-text-muted, fonts --f-heading (Plus Jakarta Sans) sur titres/chips/boutons + --f-body (DM Sans) sur corps, radius --r-base/--r-btn, focus-visible orange WCAG AAA SC 2.4.7. + redirect 301 /quete/ch1-eveil-loop → /quete/ch1-eveil-octopus + migration DB current_chapter.
  *   1.11.1 · 2026-05-13 · #189 réécriture ch1 narrative Loop → Octopus (cohérence mascotte) — pieuvre numérique 8 tentacules + clairière sous-marine + bulles-mots + tentacule lumineux. Concepts pédagogiques LLM/prédiction/hallucinations conservés. Délégation rédaction qwen3-max via openrouter-free.
@@ -40,18 +41,18 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 12,
+    'minor' => 13,
     'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'octopus-everywhere',
+    'codename' => 'octopus-empty-states',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.12.0',
+    'semver' => '1.13.0',
 ];
