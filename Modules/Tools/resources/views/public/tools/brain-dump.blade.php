@@ -90,26 +90,39 @@
 .bd-container { max-width: 760px; margin: 0 auto; padding: 0 1rem; }
 .bd-container--wide { max-width: 1000px; }
 
-/* Hero */
+/* Hero refonte v1.14.0 — clarté 5s (combo A+F best practices 2026) */
 .bd-hero { padding: 2.5rem 0 2rem; background: linear-gradient(135deg, #fff 0%, var(--c-bg) 100%); }
-.bd-hero__intro { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem; }
+.bd-hero__intro { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1rem; }
 .bd-hero h1 { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; color: var(--c-dark); font-size: 2.5rem; margin: 0 0 .35rem; line-height: 1.15; letter-spacing: -.5px; }
-.bd-hero__sub { font-size: 1.25rem; color: #374151; margin: 0 0 1rem; line-height: 1.4; }
-.bd-hero__tldr { background: rgba(11,114,133,.06); border-left: 4px solid var(--c-primary, #0B7285); padding: .85rem 1.15rem; border-radius: 0 8px 8px 0; font-size: 1rem; line-height: 1.6; color: var(--c-dark); margin: 0 0 1.25rem; }
-.bd-hero__signals { display: flex; flex-wrap: wrap; gap: .75rem; margin: 0 0 1.5rem; }
-.bd-hero__signal { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .85rem; background: #fff; border: 1px solid #E5E7EB; border-radius: 999px; font-size: .85rem; color: var(--c-dark); font-weight: 600; }
-.bd-hero__signal strong { color: var(--c-primary, #0B7285); }
-.bd-hero__cta { display: flex; flex-wrap: wrap; gap: .85rem; align-items: center; }
+.bd-hero__tagline { font-size: 1.375rem; color: var(--c-dark); margin: 0; line-height: 1.35; font-weight: 600; max-width: 640px; }
+.bd-hero__tagline strong { color: var(--c-primary, #0B7285); }
+.bd-hero__demo { margin: 1.75rem 0; width: 100%; max-width: 720px; }
+.bd-hero__demo svg { width: 100%; height: auto; display: block; }
+.bd-hero__steps { display: grid; grid-template-columns: 1fr; gap: .85rem; margin: 0 0 1.5rem; }
+@media (min-width: 640px) { .bd-hero__steps { grid-template-columns: repeat(3, 1fr); } }
+.bd-hero__step { background: #fff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: .35rem; }
+.bd-hero__step__head { display: flex; align-items: center; gap: .65rem; }
+.bd-hero__step__num { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--c-primary, #0B7285); color: #fff; border-radius: 50%; font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 800; font-size: .95rem; flex-shrink: 0; }
+.bd-hero__step__icon { font-size: 1.5rem; line-height: 1; }
+.bd-hero__step__title { font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-weight: 700; color: var(--c-dark); font-size: 1rem; margin: 0; }
+.bd-hero__step__desc { color: var(--c-text-secondary, #4a4f5c); font-size: .875rem; line-height: 1.45; margin: 0; }
+.bd-hero__cta { display: flex; flex-wrap: wrap; gap: .85rem; align-items: center; margin: 0 0 1.25rem; }
 .bd-btn-primary { display: inline-flex; align-items: center; gap: .5rem; padding: .85rem 1.5rem; min-height: 48px; background: var(--c-primary, #0B7285); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 1.0625rem; cursor: pointer; text-decoration: none; transition: all .15s ease; }
 .bd-btn-primary:hover { background: #053640; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(6,78,90,.25); text-decoration: none; }
 .bd-btn-primary:focus-visible { outline: 3px solid var(--c-accent, #9A2A06); outline-offset: 2px; }
 .bd-btn-link { color: var(--c-primary, #0B7285); font-weight: 600; font-size: .95rem; text-decoration: none; padding: .5rem 0; }
 .bd-btn-link:hover { text-decoration: underline; }
-.bd-hero__byline { margin: 1.5rem 0 0; font-size: .8125rem; color: var(--c-muted); display: flex; flex-wrap: wrap; align-items: center; gap: .85rem; }
+.bd-hero__signals { display: flex; flex-wrap: wrap; gap: .55rem; margin: 0 0 1rem; }
+.bd-hero__signal { display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .75rem; background: #fff; border: 1px solid #E5E7EB; border-radius: 999px; font-size: .8125rem; color: var(--c-dark); font-weight: 600; }
+.bd-hero__signal strong { color: var(--c-primary, #0B7285); }
+.bd-hero__byline { margin: 0; font-size: .8125rem; color: var(--c-text-muted, #52586a); display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; }
 .bd-hero__byline a { color: var(--c-primary, #0B7285); font-weight: 600; }
+.bd-hero__tldr { background: rgba(11,114,133,.06); border-left: 4px solid var(--c-primary, #0B7285); padding: .85rem 1.15rem; border-radius: 0 8px 8px 0; font-size: 1rem; line-height: 1.6; color: var(--c-dark); margin: 1.5rem 0 0; }
 @media (max-width: 540px) {
     .bd-hero h1 { font-size: 1.875rem; }
-    .bd-hero__intro { flex-direction: column; text-align: center; }
+    .bd-hero__tagline { font-size: 1.125rem; }
+    .bd-hero__intro { flex-direction: column; text-align: center; align-items: center; gap: .85rem; }
+    .bd-hero__step { padding: .85rem 1rem; }
 }
 
 /* Tool actif — uniformité charte Memora (pattern constructeur-prompts) */
@@ -237,40 +250,152 @@
 
 <div class="bd-page" x-data="brainDumpPage()" x-cloak>
 
-    {{-- HERO TOOL-FIRST --}}
+    {{-- HERO refonte v1.14.0 — combo A+F (visuel Before/After + 3 étapes icônes), clarté 5s, NN/g 2026 < 50 mots --}}
     <section class="bd-hero" aria-labelledby="bd-h1">
         <div class="bd-container">
             <div class="bd-hero__intro">
-                <x-tools::octopus variant="intro" :size="84" />
+                <x-tools::octopus variant="intro" :size="72" />
                 <div>
                     <h1 id="bd-h1">Brain Dump 2026</h1>
-                    <p class="bd-hero__sub">10 minutes de papier + 30 secondes d'IA = clarté multipliée.</p>
+                    <p class="bd-hero__tagline">Vide ton mental en <strong>10 min</strong> de papier. L'IA en fait des <strong>actions concrètes</strong> en 30 secondes.</p>
                 </div>
             </div>
 
-            {{-- TL;DR speakable (AEO) --}}
-            <div class="bd-hero__tldr" property="speakable">
-                <strong>L'essentiel :</strong> tu écris pendant 10 minutes à la main pour vider ton mental, tu prends une photo, puis l'IA transcrit + analyse en 30 secondes pour transformer ton brouillon en actions concrètes. Méthode validée par la science depuis 2014. 100&nbsp;% gratuit, 100&nbsp;% privé.
+            {{-- Visuel Before → After (SVG inline, sans dépendance, charte tokens) --}}
+            <div class="bd-hero__demo" aria-hidden="true">
+                <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="bdPaper" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FFFCF0"/>
+                            <stop offset="100%" stop-color="#F5EFD8"/>
+                        </linearGradient>
+                        <filter id="bdShadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0B7285" flood-opacity=".15"/>
+                        </filter>
+                    </defs>
+                    {{-- AVANT : feuille manuscrite chaotique --}}
+                    <g filter="url(#bdShadow)">
+                        <rect x="20" y="30" width="240" height="180" rx="6" fill="url(#bdPaper)" stroke="#D5C994" stroke-width="1"/>
+                        {{-- Lignes de cahier --}}
+                        <line x1="40" y1="60" x2="240" y2="60" stroke="#E8D8A8" stroke-width=".5"/>
+                        <line x1="40" y1="80" x2="240" y2="80" stroke="#E8D8A8" stroke-width=".5"/>
+                        <line x1="40" y1="100" x2="240" y2="100" stroke="#E8D8A8" stroke-width=".5"/>
+                        <line x1="40" y1="120" x2="240" y2="120" stroke="#E8D8A8" stroke-width=".5"/>
+                        <line x1="40" y1="140" x2="240" y2="140" stroke="#E8D8A8" stroke-width=".5"/>
+                        <line x1="40" y1="160" x2="240" y2="160" stroke="#E8D8A8" stroke-width=".5"/>
+                        <line x1="40" y1="180" x2="240" y2="180" stroke="#E8D8A8" stroke-width=".5"/>
+                        {{-- Marge rouge --}}
+                        <line x1="60" y1="30" x2="60" y2="210" stroke="#E8B4A8" stroke-width=".8"/>
+                        {{-- "Manuscrit" chaotique : lignes ondulées simulant l'écriture --}}
+                        <path d="M 65 55 Q 90 50, 110 56 T 165 55 T 220 53" stroke="#3a3a55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                        <path d="M 65 75 Q 88 70, 112 78 T 170 75 T 235 73" stroke="#3a3a55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                        <path d="M 65 95 Q 95 90, 125 98 T 210 95" stroke="#3a3a55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                        <path d="M 65 115 Q 90 110, 115 118 T 175 115 T 225 113" stroke="#3a3a55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                        <path d="M 65 135 Q 88 130, 110 138 T 165 135 T 215 133" stroke="#3a3a55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                        <path d="M 65 155 Q 92 150, 118 158 T 180 155 T 230 153" stroke="#3a3a55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                        <path d="M 65 175 Q 90 170, 113 178 T 170 175" stroke="#3a3a55" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                        {{-- Petit gribouillis annotation --}}
+                        <circle cx="200" cy="100" r="14" fill="none" stroke="#C2410C" stroke-width="2" stroke-dasharray="3,2"/>
+                        <path d="M 195 165 L 215 170 L 210 178" stroke="#C2410C" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <text x="140" y="205" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#52586a">Tes notes</text>
+                    </g>
+
+                    {{-- Flèche centrale "Transformation IA" --}}
+                    <g transform="translate(280, 120)">
+                        <circle cx="0" cy="0" r="32" fill="#0B7285"/>
+                        <text x="0" y="6" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="18" font-weight="800" fill="#fff">IA</text>
+                        <path d="M 35 0 L 65 0 M 55 -8 L 65 0 L 55 8" stroke="#0B7285" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <text x="50" y="-18" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0B7285">30 sec</text>
+                    </g>
+
+                    {{-- APRÈS : liste d'actions structurées --}}
+                    <g filter="url(#bdShadow)" transform="translate(360, 30)">
+                        <rect x="0" y="0" width="320" height="180" rx="10" fill="#fff" stroke="#DDF4F8" stroke-width="1.5"/>
+                        {{-- Header IA --}}
+                        <rect x="0" y="0" width="320" height="32" rx="10" fill="#F0FAFB"/>
+                        <rect x="0" y="22" width="320" height="10" fill="#F0FAFB"/>
+                        <circle cx="16" cy="16" r="6" fill="#0B7285"/>
+                        <text x="30" y="20" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="700" fill="#0B7285">Actions extraites par l'IA</text>
+                        {{-- Liste actions --}}
+                        <g transform="translate(16, 50)">
+                            <rect x="0" y="0" width="14" height="14" rx="3" fill="none" stroke="#C2410C" stroke-width="1.8"/>
+                            <line x1="22" y1="7" x2="280" y2="7" stroke="#1A1D23" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="22" y1="13" x2="210" y2="13" stroke="#52586a" stroke-width="1.2" stroke-linecap="round"/>
+                        </g>
+                        <g transform="translate(16, 82)">
+                            <rect x="0" y="0" width="14" height="14" rx="3" fill="none" stroke="#C2410C" stroke-width="1.8"/>
+                            <line x1="22" y1="7" x2="260" y2="7" stroke="#1A1D23" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="22" y1="13" x2="240" y2="13" stroke="#52586a" stroke-width="1.2" stroke-linecap="round"/>
+                        </g>
+                        <g transform="translate(16, 114)">
+                            <rect x="0" y="0" width="14" height="14" rx="3" fill="#0B7285" stroke="#0B7285" stroke-width="1.8"/>
+                            <path d="M 3 7 L 6 10 L 11 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="22" y1="7" x2="240" y2="7" stroke="#1A1D23" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+                            <line x1="22" y1="13" x2="190" y2="13" stroke="#52586a" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
+                        </g>
+                        <g transform="translate(16, 146)">
+                            <rect x="0" y="0" width="14" height="14" rx="3" fill="none" stroke="#C2410C" stroke-width="1.8"/>
+                            <line x1="22" y1="7" x2="270" y2="7" stroke="#1A1D23" stroke-width="1.5" stroke-linecap="round"/>
+                            <line x1="22" y1="13" x2="220" y2="13" stroke="#52586a" stroke-width="1.2" stroke-linecap="round"/>
+                        </g>
+                    </g>
+                </svg>
             </div>
 
-            <div class="bd-hero__signals" aria-label="Garanties">
-                <span class="bd-hero__signal">📚 Validé <strong>Mueller & Oppenheimer (2014)</strong></span>
-                <span class="bd-hero__signal">🔒 <strong>100&nbsp;% privé</strong> (Loi 25)</span>
-                <span class="bd-hero__signal">⚡ <strong>30&nbsp;sec</strong> avec l'IA</span>
-            </div>
+            {{-- 3 étapes "Comment ça marche" — clarté immédiate (pattern Stripe/Shopify 2026) --}}
+            <ol class="bd-hero__steps" aria-label="Comment ça marche en 3 étapes">
+                <li class="bd-hero__step">
+                    <div class="bd-hero__step__head">
+                        <span class="bd-hero__step__num">1</span>
+                        <span class="bd-hero__step__icon" aria-hidden="true">✍️</span>
+                    </div>
+                    <h2 class="bd-hero__step__title">Écris 10 min sur papier</h2>
+                    <p class="bd-hero__step__desc">Vide ton mental sans filtrer. Crayon, cahier, n'importe quoi.</p>
+                </li>
+                <li class="bd-hero__step">
+                    <div class="bd-hero__step__head">
+                        <span class="bd-hero__step__num">2</span>
+                        <span class="bd-hero__step__icon" aria-hidden="true">📸</span>
+                    </div>
+                    <h2 class="bd-hero__step__title">Photographie ta page</h2>
+                    <p class="bd-hero__step__desc">Une simple photo avec ton téléphone. Aucun upload chez nous.</p>
+                </li>
+                <li class="bd-hero__step">
+                    <div class="bd-hero__step__head">
+                        <span class="bd-hero__step__num">3</span>
+                        <span class="bd-hero__step__icon" aria-hidden="true">⚡</span>
+                    </div>
+                    <h2 class="bd-hero__step__title">Reçois tes actions</h2>
+                    <p class="bd-hero__step__desc">L'IA transcrit et te ressort une liste d'actions claires en 30 secondes.</p>
+                </li>
+            </ol>
 
+            {{-- CTA unique (NN/g 2026 : 1 CTA hero) --}}
             <div class="bd-hero__cta">
                 <a href="#bd-tool" class="bd-btn-primary" @click.prevent="scrollToTool()">▶ Démarrer maintenant</a>
-                <a href="#bd-how" class="bd-btn-link">Voir la méthode ↓</a>
+                <a href="#bd-how" class="bd-btn-link">Voir la méthode complète ↓</a>
             </div>
 
+            {{-- Signaux de confiance compacts --}}
+            <div class="bd-hero__signals" aria-label="Garanties">
+                <span class="bd-hero__signal">🔒 <strong>100&nbsp;% privé</strong> · Loi 25</span>
+                <span class="bd-hero__signal">📚 Validé <strong>Mueller & Oppenheimer 2014</strong></span>
+                <span class="bd-hero__signal">🆓 <strong>Gratuit</strong>, sans inscription</span>
+            </div>
+
+            {{-- Byline EEAT préservée mais compacte --}}
             <p class="bd-hero__byline">
                 <span>✍️ <strong>Stéphane Lapointe</strong> · Veille IA Québec</span>
                 <span>·</span>
-                <span>Mis à jour le <time datetime="2026-05-12">12 mai 2026</time></span>
+                <span>Mis à jour le <time datetime="2026-05-13">13 mai 2026</time></span>
                 <span>·</span>
                 <a href="https://www.linkedin.com/in/lapointestephane/" target="_blank" rel="noopener">LinkedIn</a>
             </p>
+
+            {{-- TL;DR speakable (AEO/GEO) — conservé pour Google AI Overviews mais visuellement secondaire --}}
+            <div class="bd-hero__tldr" property="speakable">
+                <strong>L'essentiel :</strong> tu écris pendant 10 minutes à la main pour vider ton mental, tu prends une photo, puis l'IA transcrit + analyse en 30 secondes pour transformer ton brouillon en actions concrètes. Méthode validée par la science depuis 2014. 100&nbsp;% gratuit, 100&nbsp;% privé.
+            </div>
         </div>
     </section>
 
