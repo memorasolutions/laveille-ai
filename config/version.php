@@ -17,6 +17,8 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.11.2 · 2026-05-13 · #189 fix charte /quete — chapter.blade.php + index.blade.php redéfinissaient des tokens locaux (--c-primary #064E5A / --c-accent #9A2A06 / --c-bg #F0F4F8) qui shadowaient les tokens charte officiels (#0B7285 / #C2410C / #F8FAFB). Refactor: héritage direct :root + --c-primary-hover + --c-primary-light + --c-primary-badge + --c-accent-light + --c-text-muted, fonts --f-heading (Plus Jakarta Sans) sur titres/chips/boutons + --f-body (DM Sans) sur corps, radius --r-base/--r-btn, focus-visible orange WCAG AAA SC 2.4.7. + redirect 301 /quete/ch1-eveil-loop → /quete/ch1-eveil-octopus + migration DB current_chapter.
+ *   1.11.1 · 2026-05-13 · #189 réécriture ch1 narrative Loop → Octopus (cohérence mascotte) — pieuvre numérique 8 tentacules + clairière sous-marine + bulles-mots + tentacule lumineux. Concepts pédagogiques LLM/prédiction/hallucinations conservés. Délégation rédaction qwen3-max via openrouter-free.
  *   1.11.0 · 2026-05-13 · #201 Cmd+K command palette globale — modale Alpine WCAG (role=dialog + aria-modal + focus auto + return-focus) déclenchée par Cmd+K (macOS) / Ctrl+K (Windows/Linux) ou bouton loupe header, recherche live cross-module via endpoint JSON `/recherche/palette` (web throttle 60/min) servie par SearchService::searchFront() limité 6/section depuis SearchRegistry (Blog + Actualités + Glossaire + Annuaire + Acronymes), debounce 250 ms + AbortController, keyboard nav ↑↓/Enter/Esc, sections groupées avec icône+compteur, footer « Voir tous les résultats » → /recherche?q=, mobile fullscreen, modules désactivés ignorés (zéro régression). + #200 refonte menus navigation Option E hybride — 3 mega menus Outils (4 groupes Productivité/Création/Détente/Pratique) + Annuaire (5 fiches stars data-driven GA4) + Apprendre (Contenu éditorial + Référence) + mobile sidebar refondue.
  *   1.10.0 · 2026-05-12 · #198 Brain Dump Partie 2 — refonte Mad Libs C+E (90/100 best practice 2026) — 5 chips inline cliquables (catégories multi-select / nbPatterns / nbActions / horizon / tone) avec popovers Alpine, prompt copié = rendu actuel substituant variables, WCAG AAA 32-44px target sizes, mobile popover full-width. + #196 uniformité bloc tool charte Memora (card blanc + ct-btn teal) + #195 Octopus intro.svg lisible (corps #0B7285 + tentacules #52B8C7 + pupilles #1a1d23).
  *   1.9.0 · 2026-05-12 · #194 Brain Dump 2026 — page dédiée /outils/brain-dump SEO+AEO+GEO+EEAT (Schema SoftwareApplication+HowTo+FAQPage+BreadcrumbList+Person, byline auteur, 3 citations scientifiques avec DOI, TL;DR speakable, charte Memora tokens, outil actif timer 10min + 2 prompts copy/Open-in AI 6 IAs) + alias FR /outils/vide-cerveau → 301
@@ -38,7 +40,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 11,
-    'patch' => 0,
+    'patch' => 2,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -50,5 +52,5 @@ return [
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.11.0',
+    'semver' => '1.11.2',
 ];
