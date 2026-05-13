@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<title>Octopus — Galerie variantes émotionnelles</title>
+<style>
+:root { --bg:#F8FAFB; --primary:#0B7285; --accent:#C2410C; --dark:#1A1D23; --muted:#52586a; --r:12px; }
+* { box-sizing: border-box; }
+body { background: var(--bg); font-family: 'DM Sans', system-ui, sans-serif; margin: 0; padding: 32px; color: var(--dark); }
+h1 { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0 0 4px; font-size: 28px; color: var(--primary); }
+.lead { color: var(--muted); margin: 0 0 32px; font-size: 15px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+.card { background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r); padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(15,23,42,.04); transition: transform .15s, box-shadow .15s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(11,114,133,.1); border-color: #DDF4F8; }
+.card svg, .card img { width: 100%; height: 180px; display: block; }
+.card h3 { margin: 14px 0 4px; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--dark); font-size: 16px; }
+.card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.card.is-existing { border-color: var(--primary); background: linear-gradient(135deg, #fff 70%, #F0FAFB); }
+.card.is-existing::before { content: "✓ Existante"; display: inline-block; background: var(--primary); color: #fff; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; margin-bottom: 8px; }
+.card.is-new::before { content: "✨ Nouvelle"; display: inline-block; background: var(--accent); color: #fff; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; margin-bottom: 8px; }
+section { margin-bottom: 40px; }
+section h2 { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--dark); margin: 0 0 16px; font-size: 20px; padding-left: 8px; border-left: 4px solid var(--accent); }
+</style>
+</head>
+<body>
+<h1>Octopus — Galerie variantes</h1>
+<p class="lead">6 émotions générées en SVG sur la base de <code>neutral.svg</code> (modifications yeux + bouche uniquement, corps + 8 tentacules inchangés).</p>
+
+<section>
+<h2>✓ Variantes existantes (déjà en production)</h2>
+<div class="grid">
+  <div class="card is-existing"><object data="../neutral.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Neutral</h3><p>Expression de base, regard frontal</p></div>
+  <div class="card is-existing"><object data="../intro.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Intro</h3><p>Salut initial, premier contact</p></div>
+  <div class="card is-existing"><object data="../confident.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Confident</h3><p>Posture assurée, expert</p></div>
+  <div class="card is-existing"><object data="../celebrating.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Celebrating</h3><p>Badge débloqué, joie</p></div>
+  <div class="card is-existing"><object data="../explorer.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Explorer</h3><p>Curieux, en exploration</p></div>
+  <div class="card is-existing"><object data="../share.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Share</h3><p>Partage, social proof</p></div>
+</div>
+</section>
+
+<section>
+<h2>✨ Variantes générées (démo qwen3-max + assemblage local)</h2>
+<div class="grid">
+  <div class="card is-new"><object data="thinking.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Thinking</h3><p>Un oeil mi-clos, réflexion en cours</p></div>
+  <div class="card is-new"><object data="sleeping.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Sleeping</h3><p>Yeux fermés en arcs, dort paisiblement</p></div>
+  <div class="card is-new"><object data="surprised.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Surprised</h3><p>Yeux écarquillés, bouche en O parfait</p></div>
+  <div class="card is-new"><object data="happy.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Happy</h3><p>Yeux en arc souriant + grand sourire</p></div>
+  <div class="card is-new"><object data="loved.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Loved</h3><p>Pupilles en cœur rouge ❤️</p></div>
+  <div class="card is-new"><object data="confused.svg" type="image/svg+xml" style="width:100%;height:180px;"></object><h3>Confused</h3><p>Sourcil arqué + bouche zigzag</p></div>
+</div>
+</section>
+
+<p class="lead" style="margin-top:24px;text-align:center;">
+Génération : qwen3-max via openrouter-free · Latence 1.4 s · Coût 0 $ · 100 % SVG vectoriel
+</p>
+</body>
+</html>
