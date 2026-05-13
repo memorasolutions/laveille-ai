@@ -49,6 +49,7 @@ class ShopServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\Shop\Console\SyncGelatoPricesCommand::class,
             \Modules\Shop\Console\SyncGelatoStoreCommand::class,
+            \Modules\Shop\Console\ResyncGelatoProductCommand::class,
             \Modules\Shop\Console\CleanupPendingOrdersCommand::class,
             \Modules\Shop\Console\SendAbandonmentRemindersCommand::class,
         ]);
