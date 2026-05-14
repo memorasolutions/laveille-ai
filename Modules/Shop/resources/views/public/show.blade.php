@@ -161,8 +161,10 @@
                             </template>
                         </div>
                     </div>
-                    <input type="hidden" name="variant_label" :value="currentVariant?.label || ''">
-                    <input type="hidden" name="variant_gelato_uid" :value="currentVariant?.gelato_uid || ''">
+                    <input type="hidden" name="variant_label" :value="(currentVariant?.label || '') + ' - ' + selectedSize">
+                    {{-- gelato_uid = product_uid de la combinaison couleur+taille sélectionnée (fallback : uid couleur) --}}
+                    <input type="hidden" name="variant_gelato_uid" :value="currentVariant?.product_uids?.[selectedSize] || currentVariant?.gelato_uid || ''">
+                    <input type="hidden" name="variant_gelato_id" :value="currentVariant?.variant_ids?.[selectedSize] || ''">
                     {{-- Sélecteur tailles avec prix par taille --}}
                     <template x-if="availableSizes.length > 0">
                         <div class="sp-variant-group">

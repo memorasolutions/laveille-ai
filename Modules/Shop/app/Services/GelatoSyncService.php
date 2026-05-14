@@ -75,16 +75,17 @@ class GelatoSyncService
     /**
      * Transforme la réponse Gelato en JSON variants utilisable par la vue Product.
      *
-     * Format de sortie attendu par show.blade.php (Alpine x-data):
+     * Format de sortie compatible show.blade.php (Alpine x-data) :
      *   [
      *     {
-     *       "color": "Blanc",
+     *       "color": "#FFFFFF",                        // HEX (dot couleur dans la vue)
      *       "color_slug": "white",
-     *       "color_hex": "#FFFFFF",
-     *       "size_prices": { "S": 20.99, "M": 20.99, ..., "5XL": 29.99 },
-     *       "variant_ids": { "S": "uuid", "M": "uuid", ... },
-     *       "product_uids": { "S": "apparel_product_...", ... },
-     *       "mockup_url": "https://...",
+     *       "label": "Blanc",                          // texte affiché
+     *       "size_prices": { "S": 20.99, ..., "5XL": 29.99 },
+     *       "variant_ids": { "S": "uuid-gelato", ... }, // gelato store variant id par taille
+     *       "product_uids": { "S": "apparel_...", ... },// gelato catalog product uid par taille
+     *       "images": ["mockup_url"],                  // array (compat vue galerie)
+     *       "gelato_uid": "<product_uid taille M>",     // fallback compat vue
      *       "sort_order": 0
      *     }
      *   ]
@@ -135,21 +136,28 @@ class GelatoSyncService
             $price = round($basePrice + (self::SIZE_SURCHARGE[$size] ?? 0), 2);
 
             if (! isset($grouped[$colorSlug])) {
+                $mockup = $imageByVariantId[$v['id']] ?? $primaryImage;
                 $grouped[$colorSlug] = [
-                    'color' => $colorOrder[$colorSlug]['label'] ?? $colorLabel,
+                    // `color` = HEX : la vue show.blade.php l'utilise directement comme background-color du dot
+                    'color' => self::COLOR_HEX_MAP[$colorSlug] ?? '#888888',
                     'color_slug' => $colorSlug,
-                    'color_hex' => self::COLOR_HEX_MAP[$colorSlug] ?? '#888888',
                     'label' => $colorOrder[$colorSlug]['label'] ?? $colorLabel,
                     'size_prices' => [],
                     'variant_ids' => [],
                     'product_uids' => [],
-                    'mockup_url' => $imageByVariantId[$v['id']] ?? $primaryImage,
+                    // `images` = array : compat galerie vue (currentVariant.images)
+                    'images' => $mockup ? [$mockup] : [],
+                    'gelato_uid' => '', // rempli plus bas avec le product_uid taille M (fallback)
                     'sort_order' => $colorOrder[$colorSlug]['order'] ?? 99,
                 ];
             }
             $grouped[$colorSlug]['size_prices'][$size] = $price;
             $grouped[$colorSlug]['variant_ids'][$size] = $v['id'];
             $grouped[$colorSlug]['product_uids'][$size] = $productUid;
+            // gelato_uid fallback = product_uid de la taille M (ou première taille rencontrée)
+            if ($size === 'M' || $grouped[$colorSlug]['gelato_uid'] === '') {
+                $grouped[$colorSlug]['gelato_uid'] = $productUid;
+            }
         }
 
         // Tri ordre Gelato puis tailles standard
