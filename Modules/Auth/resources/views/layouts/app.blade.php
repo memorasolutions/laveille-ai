@@ -22,9 +22,6 @@
     @endphp
     <link rel="shortcut icon" href="{{ $faviconUrl }}">
 
-    {{-- Splash screen --}}
-    <link href="{{ asset('build/nobleui/splash-screen.css') }}" rel="stylesheet">
-
     {{-- Plugin CSS --}}
     <link href="{{ asset('build/nobleui/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet">
     @stack('plugin-styles')
@@ -53,21 +50,6 @@
     @endif
 </head>
 <body class="sidebar-dark" data-base-url="{{ url('/') }}">
-
-    {{-- Splash screen --}}
-    <script>
-        if (!sessionStorage.getItem('user_loaded')) {
-            var splash = document.createElement("div");
-            splash.innerHTML = '<div class="splash-screen"><div class="logo"></div><div class="spinner"></div></div>';
-            document.body.insertBefore(splash, document.body.firstChild);
-            document.addEventListener("DOMContentLoaded", function() {
-                document.body.classList.add("loaded");
-                sessionStorage.setItem('user_loaded', '1');
-            });
-        } else {
-            document.body.classList.add("loaded");
-        }
-    </script>
 
     <div class="main-wrapper" id="app">
 

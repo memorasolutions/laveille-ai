@@ -19,9 +19,6 @@
     @endphp
     <link rel="shortcut icon" href="{{ $faviconUrl }}">
 
-    {{-- Splash screen --}}
-    <link href="{{ asset('build/nobleui/splash-screen.css') }}" rel="stylesheet">
-
     {{-- Plugin CSS --}}
     <link href="{{ asset('build/nobleui/plugins/perfect-scrollbar/perfect-scrollbar.css') }}" rel="stylesheet">
     @stack('plugin-styles')
@@ -125,28 +122,6 @@
     <a href="#main-content" class="visually-hidden-focusable position-fixed top-0 start-0 bg-primary text-white px-3 py-2 z-3 rounded-end-bottom fw-semibold" style="z-index:10001">
         {{ __('Aller au contenu') }}
     </a>
-
-    {{-- Splash screen --}}
-    <script>
-        (function() {
-            function markLoaded() {
-                document.body.classList.add("loaded");
-                sessionStorage.setItem('admin_loaded', '1');
-            }
-            if (sessionStorage.getItem('admin_loaded')) {
-                markLoaded();
-                return;
-            }
-            var splash = document.createElement("div");
-            splash.innerHTML = '<div class="splash-screen"><div class="logo"></div><div class="spinner"></div></div>';
-            document.body.insertBefore(splash, document.body.firstChild);
-            if (document.readyState === 'loading') {
-                document.addEventListener("DOMContentLoaded", markLoaded);
-            } else {
-                markLoaded();
-            }
-        })();
-    </script>
 
     <div class="main-wrapper" id="app">
         @include('backoffice::themes.backend.partials.sidebar')
