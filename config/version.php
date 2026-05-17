@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.15.1 · 2026-05-17 · #225 fix login bloqué — retrait `<script src="auth/plugins/preline/preline.js">` orphelin (404 console, fichier jamais déployé) dans Modules/Auth/resources/views/layouts/guest.blade.php + ajout `<meta name="mobile-web-app-capable" content="yes">` (deprecation warning Chrome, apple-mobile-web-app-capable conservé pour compat iOS Safari). Codename login-fix. Bloqueur user signalé S95 ; 415 Livewire résolu en parallèle via purge Cloudflare cache.
  *   1.15.0 · 2026-05-14 · #211 Boutique Phase 1 — audit t-shirt Gelato + correction désync majeure. Migration colonnes dédiées (gelato_store_product_id varchar 64 indexé, legacy_gelato_uid backup, gelato_synced_at). GelatoSyncService (fetch store API ecommerce.gelatoapis.com + transformToLocalVariants : 9 couleurs Gildan 5000 hex, size_prices avec SIZE_SURCHARGE 2XL+3/3XL+5/4XL+7/5XL+9, variant_ids + product_uids par taille). Command ciblée shop:gelato-resync {slug} {store_product_id} {--dry}. Fix gelato_product_id obsolète (gqa_classic/gpr_0-4 → gqa_heavy-weight/gpr_4-0). Fix vue show.blade.php : checkout hidden inputs variant_gelato_uid = product_uids[taille] (combo couleur+taille, bug pré-existant couleur-seule), variant_label inclut taille, variant_gelato_id ajouté. Résultat validé Playlright super admin : 9 dots hex exacts, 66 variants, 5XL = 29,99 $ surcharge OK. + #210 kill switch ShopMaintenanceMode (config shop.maintenance, bypass isSuperAdmin, JSON 503 AJAX / vue maintenance HTML 503, Octopus thinking). + #209 Concentré IA hebdo dimanche → lundi pour semaine précédente. + #208 jour newsletter Brain Dump dimanche → mercredi (cadence réelle).
  *   1.14.0 · 2026-05-13 · #206 refonte hero Brain Dump pour clarté 5 s (combo A+F sonar-pro 92/100). Tagline 24 mots vs 80, visuel SVG Before→After inline (papier manuscrit→bulle IA→liste actions cochables), 3 cards étapes numérotées (Écris/Photographie/Reçois), 1 CTA primary, signaux compacts, byline EEAT préservée. Fix sizing SVG via width/height attrs HTML + CSS !important (theme Bloggar override leçon S94). + #207 refonte section « Outils par profil » → « Quelle IA utiliser ? » (5 cards IA majeures ChatGPT/Claude/Gemini/Copilot/Perplexity, zéro app OCR tierce, philosophie force de l'IA directe). + #205 retire stat inventée « 86 % satisfaction abonnés » → « ⚡ 30 sec avec l'IA » (EEAT).
  *   1.13.0 · 2026-05-13 · #204 composant `<x-tools::octopus>` étendu 6 → 12 variants (compositions + émotions). `<x-core::empty-state>` enrichi prop `octopus` (remplace icône emoji). Search palette Cmd+K empty state initial = Octopus loved (« cherche pour vous »), no-results = Octopus confused (« n'a rien trouvé »). Consolidation 12 SVG dans Modules/Tools/resources/assets/octopus/ (dossier preview/ supprimé). #203 harmonisation 11 SVG aux tokens charte officielle (corps #0B7285 / tentacules #52B8C7 / pupilles #1a1d23 — intro.svg comme référence).
@@ -44,17 +45,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 15,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'boutique-gelato-sync',
+    'codename' => 'login-fix',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.15.0',
+    'semver' => '1.15.1',
 ];

@@ -11,6 +11,7 @@
     <link rel="manifest" href="{{ route('pwa.manifest') }}">
     <meta name="theme-color" content="{{ config('pwa.theme_color') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="{{ config('pwa.short_name') }}">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.png">
     @endif
@@ -80,6 +81,5 @@
 
     @livewireScripts
     @stack('scripts')
-    <script src="{{ asset('auth/plugins/preline/preline.js') }}"></script>
 </body>
 </html>
