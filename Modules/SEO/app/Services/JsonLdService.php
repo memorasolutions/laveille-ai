@@ -16,7 +16,13 @@ final class JsonLdService
     {
         return [
             '@type' => 'Organization',
+            '@id' => config('app.url').'/#organization',
             'name' => config('app.name'),
+            'alternateName' => [
+                'La veille de Stef',
+                'La veille IA',
+                'Veille IA Québec',
+            ],
             'url' => config('app.url'),
             'logo' => [
                 '@type' => 'ImageObject',
@@ -24,22 +30,26 @@ final class JsonLdService
                 'width' => 1200,
                 'height' => 630,
             ],
-            'description' => 'Plateforme communautaire de veille technologique en intelligence artificielle et education, orientee francophonie internationale et Quebec.',
+            'description' => 'Veille IA au Québec par Stéphane Lapointe. Actualités, outils, glossaire et concentrés hebdomadaires sur l\'intelligence artificielle, la conformité Loi 25 et la transformation numérique pour les organisations francophones.',
             'founder' => [
                 '@type' => 'Person',
-                'name' => 'Stephane Lapointe',
+                'name' => 'Stéphane Lapointe',
                 'url' => 'https://www.linkedin.com/in/lapointestephane/',
             ],
             'contactPoint' => [
                 '@type' => 'ContactPoint',
                 'telephone' => '+1-418-800-6656',
                 'contactType' => 'customer service',
-                'availableLanguage' => 'French',
+                'availableLanguage' => ['French', 'fr-CA'],
+                'areaServed' => ['CA-QC', 'CA', 'FR'],
             ],
-            'sameAs' => [
+            'areaServed' => ['CA-QC', 'CA', 'FR'],
+            'inLanguage' => 'fr-CA',
+            'sameAs' => array_values(array_filter([
                 lv_social('facebook'),
                 'https://www.linkedin.com/in/lapointestephane/',
-            ],
+                'https://memora.solutions',
+            ])),
         ];
     }
 
@@ -47,11 +57,29 @@ final class JsonLdService
     {
         return [
             '@type' => 'WebSite',
+            '@id' => config('app.url').'/#website',
             'name' => config('app.name'),
+            'alternateName' => [
+                'La veille de Stef',
+                'La veille IA',
+                'Veille IA Québec',
+                'veille ai',
+            ],
             'url' => config('app.url'),
+            'description' => 'Veille IA au Québec par Stéphane Lapointe. Actualités, outils, glossaire et concentrés hebdomadaires sur l\'intelligence artificielle, la conformité Loi 25 et la transformation numérique pour les organisations francophones.',
+            'inLanguage' => 'fr-CA',
+            'publisher' => [
+                '@type' => 'Organization',
+                '@id' => config('app.url').'/#organization',
+                'name' => config('app.name'),
+                'url' => config('app.url'),
+            ],
             'potentialAction' => [
                 '@type' => 'SearchAction',
-                'target' => config('app.url').'/blog?search={search_term_string}',
+                'target' => [
+                    '@type' => 'EntryPoint',
+                    'urlTemplate' => config('app.url').'/recherche?q={search_term_string}',
+                ],
                 'query-input' => 'required name=search_term_string',
             ],
         ];

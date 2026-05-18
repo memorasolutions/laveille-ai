@@ -1,8 +1,8 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 
-@section('title', config('app.name') . ' - ' . __('Veille IA, technologies et transformation numerique au Quebec'))
-@section('meta_description', __('Veille technologique collaborative sur l\'intelligence artificielle, les outils IA et la transformation numerique au Quebec. Articles, glossaire, repertoire et communaute.'))
+@section('title', config('app.name') . ' — ' . __('Veille IA, technologies et transformation numérique au Québec'))
+@section('meta_description', __('Veille IA au Québec par Stéphane Lapointe. Actualités, outils, glossaire et concentrés hebdomadaires sur l\'intelligence artificielle, la conformité Loi 25 et la transformation numérique pour les organisations francophones.'))
 
 @push('head')
 @if(class_exists(\Modules\SEO\Services\JsonLdService::class))
