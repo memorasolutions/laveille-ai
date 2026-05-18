@@ -161,3 +161,28 @@ test('composer autoload registers app/Helpers/jsonld.php', function () {
 
     expect($files)->toContain('app/Helpers/jsonld.php');
 });
+
+test('no Blade comment in critical files contains @directive that would leak as PHP', function () {
+    // Cause racine S95 P27 itération 2 : Blade comment {{-- ... @php ... --}} compile vers
+    // {{-- ... <?php ... --}} dans le source, le `<?php` étant alors interprété comme
+    // ouverture PHP réelle qui contamine toute la suite (les @endpush/@push suivants
+    // sont avalés). Symptôme : "Cannot end a section without first starting one".
+    //
+    // Règle : aucun @directive dans un commentaire Blade. Utiliser texte simple
+    // (« bloc PHP » au lieu de « @php block », « context » au lieu de « @context »).
+    $forbiddenInComments = ['@php', '@endphp', '@context', '@if', '@endif', '@foreach', '@endforeach', '@push', '@endpush', '@section', '@endsection'];
+
+    foreach (lv_jsonld_blade_files() as $path) {
+        $source = file_get_contents($path);
+        // Extract all Blade comments
+        preg_match_all('/\{\{--.*?--\}\}/s', $source, $matches);
+        foreach ($matches[0] as $comment) {
+            foreach ($forbiddenInComments as $directive) {
+                expect($comment)->not->toContain(
+                    $directive,
+                    "Blade comment contient {$directive} dans {$path} — risque de fuite PHP au compile.\nComment : " . $comment
+                );
+            }
+        }
+    }
+});

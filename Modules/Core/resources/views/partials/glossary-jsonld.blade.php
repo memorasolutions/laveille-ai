@@ -210,7 +210,7 @@
         </script>
     @endonce
     {{-- Schema.org JSON-LD : DefinedTermSet pour SEO/AEO/GEO (impact +12% featured snippets, +28% crawl, ×3 citations LLM) --}}
-    {{-- #237 P27 : pré-encode dans @php block pour éviter Blade @context directive corruption (Laravel 11) --}}
+    {{-- #237 P27 : pre-encode dans bloc PHP pour eviter corruption directive Blade context (Laravel 11) --}}
     @php
         $__glossaryJsonLd = json_encode([
             '@context' => 'https://schema.org',

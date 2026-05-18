@@ -10,7 +10,7 @@
 @endsection
 
 @push('head')
-{{-- #237 P27 : pré-encode dans @php block pour éviter Blade @context directive corruption (Laravel 11) --}}
+{{-- #237 P27 : pre-encode dans bloc PHP pour eviter corruption directive Blade context (Laravel 11) --}}
 @php
     $__crosswordJsonLd = json_encode([
         '@context' => 'https://schema.org',
