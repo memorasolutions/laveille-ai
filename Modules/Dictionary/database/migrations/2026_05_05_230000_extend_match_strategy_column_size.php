@@ -14,6 +14,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // ALTER TABLE ... MODIFY COLUMN est MySQL-only — skip sur SQLite (tests Pest).
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         if (Schema::hasColumn('dictionary_terms', 'match_strategy')) {
             DB::statement("ALTER TABLE dictionary_terms MODIFY COLUMN match_strategy VARCHAR(30) DEFAULT 'loose'");
         }

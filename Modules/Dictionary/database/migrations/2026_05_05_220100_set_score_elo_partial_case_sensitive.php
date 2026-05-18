@@ -16,6 +16,11 @@ return new class extends Migration
     {
         if (! Schema::hasColumn('dictionary_terms', 'match_strategy')) return;
 
+        // JSON_UNQUOTE/JSON_EXTRACT sont MySQL-only — skip sur SQLite (tests Pest).
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         // Termes a passer en partial_case_sensitive (au lieu de case_sensitive strict)
         $partialCaseTerms = [
             'score-elo', 'transformer', 'modèle', 'agent', 'vision',
@@ -32,6 +37,11 @@ return new class extends Migration
 
     public function down(): void
     {
+        // SQLite tests : pas de rollback DB (la migration up() est no-op sur SQLite).
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::table('dictionary_terms')
             ->where('match_strategy', 'partial_case_sensitive')
             ->update(['match_strategy' => 'case_sensitive']);

@@ -21,6 +21,11 @@ return new class extends Migration
             return;
         }
 
+        // JSON_UNQUOTE/JSON_EXTRACT sont MySQL-only — skip sur SQLite (tests Pest).
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         $ambiguousTerms = [
             'transformer', 'modèle', 'modeler', 'agent', 'vision',
             'attention', 'apprentissage', 'plateforme', 'architecture',
@@ -36,6 +41,11 @@ return new class extends Migration
 
     public function down(): void
     {
+        // SQLite tests : pas de rollback DB (la migration up() est no-op sur SQLite).
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         // Réversibilité : revient en 'loose' (la stop-list escalade quand même au runtime)
         DB::table('dictionary_terms')->where('match_strategy', 'case_sensitive')->update(['match_strategy' => 'loose']);
     }
