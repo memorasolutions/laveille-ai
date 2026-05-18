@@ -25,6 +25,20 @@ Route::middleware('web')->group(function () {
         ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
         ->name('newsletter.unsubscribe.oneclick');
 
+    // Unsubscribe v2 — survey + pause/frequency/resubscribe (token = auth, throttle anti-abus)
+    Route::post('/newsletter/feedback/{token}', [NewsletterController::class, 'saveFeedback'])
+        ->middleware('throttle:10,1')
+        ->name('newsletter.feedback');
+    Route::post('/newsletter/pause/{token}', [NewsletterController::class, 'pauseSubscription'])
+        ->middleware('throttle:10,1')
+        ->name('newsletter.pause');
+    Route::post('/newsletter/frequency/{token}', [NewsletterController::class, 'updateFrequency'])
+        ->middleware('throttle:10,1')
+        ->name('newsletter.frequency');
+    Route::post('/newsletter/resubscribe/{token}', [NewsletterController::class, 'resubscribe'])
+        ->middleware('throttle:10,1')
+        ->name('newsletter.resubscribe');
+
     // Version web de la newsletter (pour les clients email qui affichent mal le HTML)
     Route::get('/newsletter/bienvenue', [\Modules\Newsletter\Http\Controllers\NewsletterWebController::class, 'welcome'])
         ->name('newsletter.welcome')

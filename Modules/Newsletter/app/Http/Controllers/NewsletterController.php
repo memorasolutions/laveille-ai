@@ -64,12 +64,18 @@ class NewsletterController extends Controller
         $subscriber = Subscriber::where('token', $token)->first();
 
         if (! $subscriber) {
-            return redirect('/')->with('error', 'Lien invalide.');
+            return redirect('/')->with('error', __('Lien invalide.'));
         }
 
-        $subscriber->update(['unsubscribed_at' => now()]);
+        // Désabonnement immédiat à l'arrivée (legal compliance one-click).
+        // Idempotent : on garde la date d'origine si déjà désabonné.
+        if ($subscriber->unsubscribed_at === null) {
+            $subscriber->update(['unsubscribed_at' => now()]);
+        }
 
-        return redirect('/')->with('newsletter_unsubscribed', 'Vous avez été désabonné avec succès.');
+        return view('newsletter::unsubscribe-confirmed', [
+            'subscriber' => $subscriber->fresh(),
+        ]);
     }
 
     public function unsubscribeOneClick(string $token): \Illuminate\Http\Response
@@ -85,5 +91,116 @@ class NewsletterController extends Controller
         }
 
         return response('', 204);
+    }
+
+    public function saveFeedback(Request $request, string $token): JsonResponse|RedirectResponse
+    {
+        $subscriber = Subscriber::where('token', $token)->first();
+
+        if (! $subscriber) {
+            return $this->respondInvalidToken($request);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|in:too_frequent,not_relevant,no_value,life_change,other',
+            'feedback' => 'nullable|string|max:1000',
+        ]);
+
+        $subscriber->update([
+            'unsubscribe_reason' => $validated['reason'],
+            'unsubscribe_feedback' => $validated['feedback'] ?? null,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => __('Merci pour votre retour.')]);
+        }
+
+        return back()->with('newsletter_feedback_saved', __('Merci pour votre retour.'));
+    }
+
+    public function pauseSubscription(Request $request, string $token): JsonResponse|RedirectResponse
+    {
+        $subscriber = Subscriber::where('token', $token)->first();
+
+        if (! $subscriber) {
+            return $this->respondInvalidToken($request);
+        }
+
+        $validated = $request->validate([
+            'days' => 'required|integer|in:30,60,90',
+        ]);
+
+        $days = (int) $validated['days'];
+
+        // Pause ≠ désabo : on réactive et on positionne paused_until.
+        $subscriber->update([
+            'paused_until' => now()->addDays($days),
+            'unsubscribed_at' => null,
+        ]);
+
+        $message = __('Abonnement mis en pause pour :days jours.', ['days' => $days]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => $message]);
+        }
+
+        return back()->with('newsletter_paused', $message);
+    }
+
+    public function updateFrequency(Request $request, string $token): JsonResponse|RedirectResponse
+    {
+        $subscriber = Subscriber::where('token', $token)->first();
+
+        if (! $subscriber) {
+            return $this->respondInvalidToken($request);
+        }
+
+        $validated = $request->validate([
+            'frequency' => 'required|in:weekly,biweekly,monthly',
+        ]);
+
+        $subscriber->update([
+            'frequency_preference' => $validated['frequency'],
+            'unsubscribed_at' => null,
+        ]);
+
+        $message = __('Préférence de fréquence mise à jour.');
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => $message]);
+        }
+
+        return back()->with('newsletter_frequency_updated', $message);
+    }
+
+    public function resubscribe(Request $request, string $token): JsonResponse|RedirectResponse
+    {
+        $subscriber = Subscriber::where('token', $token)->first();
+
+        if (! $subscriber) {
+            return $this->respondInvalidToken($request);
+        }
+
+        $subscriber->update([
+            'unsubscribed_at' => null,
+            'paused_until' => null,
+        ]);
+
+        $message = __('Vous êtes à nouveau abonné. Heureux de vous revoir !');
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => $message]);
+        }
+
+        return back()->with('newsletter_resubscribed', $message);
+    }
+
+    private function respondInvalidToken(Request $request): JsonResponse|RedirectResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => false, 'message' => __('Lien invalide.')], 404);
+        }
+
+        return redirect('/')->with('error', __('Lien invalide.'));
     }
 }
