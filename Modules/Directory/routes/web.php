@@ -18,7 +18,19 @@ Route::middleware('web')->group(function () {
     Route::get('/collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
     Route::get('/annuaire', [PublicDirectoryController::class, 'index'])->name('directory.index');
     Route::get('/tarifs-education', [PublicDirectoryController::class, 'educationPricing'])->name('directory.education-pricing');
-    Route::get('/annuaire/classement', [LeaderboardController::class, 'index'])->name('directory.leaderboard');
+    // #232 (v1.17.2) — Classement gated par config('directory.leaderboard.enabled').
+    // Désactivé tant qu'un seul contributor (user solo). Quand off → redirect /annuaire + flash info.
+    // Quand on (DIRECTORY_LEADERBOARD_ENABLED=true .env) → comportement original. Route conservée pour
+    // garder l'URL stable (pas de 404 si liens externes existaient). Le nom de route reste défini pour
+    // que `Route::has('directory.leaderboard')` reste vrai (les gates @if dans menu/footer combinent
+    // Route::has + config flag pour ne PAS afficher le lien quand off).
+    Route::get('/annuaire/classement', function () {
+        if (! config('directory.leaderboard.enabled', false)) {
+            return redirect()->route('directory.index')->with('info', 'Le classement sera disponible quand plusieurs contributeurs participeront à l\'annuaire.');
+        }
+
+        return app(LeaderboardController::class)->index();
+    })->name('directory.leaderboard');
     Route::get('/annuaire/comparer', [PublicDirectoryController::class, 'compare'])->name('directory.compare-by-ids');
     Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare');
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap');

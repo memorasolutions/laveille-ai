@@ -176,7 +176,7 @@
                                                 <span style="font-size:18px;line-height:1;">🔍</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Tous les outils') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $directoryCount }} {{ __('avec avis + tutos') }}</div></div>
                                             </a>
-                                            @if(Route::has('directory.leaderboard'))
+                                            @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))
                                             <a href="{{ route('directory.leaderboard') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🏆</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Classement') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Top contributeurs') }}</div></div>
@@ -195,7 +195,7 @@
                                 <ul class="sub-menu">
                                     <li><a href="{{ route('directory.index') }}">🔍 {{ __('Tous les outils ('.$directoryCount.')') }}</a></li>
                                     @foreach($directoryStars as $star)<li><a href="{{ url('/annuaire/'.$star['slug']) }}">{{ $star['name'] }}</a></li>@endforeach
-                                    @if(Route::has('directory.leaderboard'))<li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>@endif
+                                    @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))<li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>@endif
                                     @if(Route::has('collections.index'))<li><a href="{{ route('collections.index') }}">📁 {{ __('Collections') }}</a></li>@endif
                                 </ul>
                             </li>
@@ -322,7 +322,7 @@
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Propositions') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Suggérez vos idées') }}</div></div>
                                             </a>
                                             @endif
-                                            @if(Route::has('directory.leaderboard'))
+                                            @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))
                                             <a href="{{ route('directory.leaderboard') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:12px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🏆</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Classement') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Top contributeurs') }}</div></div>
@@ -576,7 +576,7 @@
                                             <ul>
                                                 <li><a href="{{ route('directory.index') }}">🔍 <strong>{{ __('Tous les outils ('.$directoryCount.')') }}</strong></a></li>
                                                 @foreach($directoryStars as $star)<li><a href="{{ url('/annuaire/'.$star['slug']) }}">{{ $star['name'] }}</a></li>@endforeach
-                                                @if(Route::has('directory.leaderboard'))<li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>@endif
+                                                @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))<li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>@endif
                                                 @if(Route::has('collections.index'))<li><a href="{{ route('collections.index') }}">📁 {{ __('Collections') }}</a></li>@endif
                                             </ul>
                                         </div>

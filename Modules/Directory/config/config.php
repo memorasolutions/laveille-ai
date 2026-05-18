@@ -44,4 +44,21 @@ return [
     'category_alerts' => [
         'enabled' => (bool) env('DIRECTORY_CATEGORY_ALERTS_ENABLED', false),
     ],
+
+    /*
+     * #232 (v1.17.2) — Classement contributeurs annuaire.
+     *
+     * Désactivé tant qu'un seul contributor (user solo) — le classement est vide
+     * d'intérêt. Réactivation 1-flag dès que ≥3 contributeurs réguliers : passer
+     * DIRECTORY_LEADERBOARD_ENABLED=true (.env prod), ou retirer la clé pour
+     * retomber sur le défaut false.
+     *
+     * Effet quand false :
+     *   - Route /annuaire/classement → redirect 302 /annuaire + flash info
+     *   - Liens menu desktop + offcanvas mobile + footer cachés (pas même <li>)
+     *   - Pas de référence dans sitemap (jamais référencée à ce jour)
+     */
+    'leaderboard' => [
+        'enabled' => (bool) env('DIRECTORY_LEADERBOARD_ENABLED', false),
+    ],
 ];

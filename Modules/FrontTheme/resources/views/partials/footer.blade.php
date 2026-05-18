@@ -93,7 +93,7 @@
                     <div class="widget link-widget">
                         <div class="widget-title"><h3>{{ __('Communauté') }}</h3></div>
                         <ul>
-                            @if(Route::has('directory.leaderboard'))
+                            @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))
                                 <li><a href="{{ route('directory.leaderboard') }}">🏆 {{ __('Classement') }}</a></li>
                             @endif
                             {{-- Lien Propositions retiré du footer (décision utilisateur 2026-03-28) --}}
