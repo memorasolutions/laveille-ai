@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.17.1 · 2026-05-18 · #231 NBSP typographie FR site-wide — helper `lv_typo_fr()` autoload via composer.json `files[]` + `app/Providers/AppServiceProvider::register()` (idempotent, double layer prod-safe). Directive Blade `@typo($text)` + macro `Str::typoFr()` enregistrées dans `boot()`. Règles appliquées : (1) NBSP avant `? ! : ; »` (ponctuation double FR) ; (2) NBSP après `«` (guillemet ouvrant) ; (3) NBSP entre chiffre et unité (`%`, `$`, `€`, `°C`, `M$`, `M€`, `k€`, `k$`). Préservation 3 couches : (a) URL — pas de NBSP injecté dans `href="...?q=1"` ; (b) HTML — segmentation balises `<...>` / texte, balises laissées intactes ; (c) JSON — détection auto `{...}` ou `[...]`, walk récursif sur valeurs string uniquement, ré-encode JSON valide (préserve colonnes spatie/laravel-translatable `{"fr_CA":"..."}`). 19 tests Pest verts (40 assertions). Patch composant `<x-fronttheme::book-promo>` user-visible (title/subtitle/descriptions) → fix bug screenshot user `?` rejeté + `7\n%` séparés. Command Artisan `php artisan typo:apply-fr {--dry} {--table=*}` idempotente avec plan curated 8 tables (articles, ads_placements, directory_tools, dictionary_terms, news_articles, pages, faqs, testimonials). Codename typo-fr-nbsp.
  *   1.17.0 · 2026-05-18 · #230 remplace pub Nexus Neural par livre auteur « L'IA sans se faire poursuivre : guide pratique pour PME et professionnels — Édition 2026 ». Composant Blade réutilisable `<x-fronttheme::book-promo>` (DRY) avec 20 props (title/subtitle/author/cover_url_webp/cover_url_jpg/cta_url/schema/variant/etc.). Schema.org Book JSON-LD complet (Person Stéphane Lapointe + Organization MEMORA solutions + Offer Amazon CAD). WCAG 2.2 AA (min-height 44px CTA, focus-visible orange #C2410C, alt SEO descriptif Loi 25/RGPD/AI Act/PME). 4 images optimisées dans `public/images/books/` : webp 600 ~52KB, jpg 600 ~121KB (fallback compat réseaux sociaux), webp 300 ~21KB (mobile thumbnail), og 1200×630 ~54KB (Facebook/LinkedIn/Twitter cards). Responsive flex-row desktop / flex-column mobile <640px. Alpine.js x-collapse description longue toggle. CTA target=_blank + rel="noopener sponsored". Enhancement `AdsRenderer::render()` détecte `<x-` dans `ad_code` et compile via `Blade::render()` (pattern réutilisable pour toute pub à base de composant). DB ads : id=1 renommé `nexus-neural` → `book-author`, id=2 `article-inline` (auto-injection après 3e paragraphe articles) — les 2 utilisent `<x-fronttheme::book-promo variant="inline" />`. Migration `2026_05_18_120000_replace_nexus_neural_ads_with_book_promo.php` propage le changement DB en prod. 11 tests Pest verts (28 assertions). Codename book-promo-component.
  *   1.16.2 · 2026-05-18 · #229 fix popup newsletter /blog — bouton fermeture 14×26 → 44×44 px (WCAG 2.5.5 AAA) + cible touch mobile fiable + ESC handler explicite (delegation $(document)) + click backdrop ferme + data-bs-dismiss="modal" fallback Bootstrap natif + delegation click closeBtn (résiste au re-render DOM) + modal-dialog-scrollable + max-height calc(100vh - 40px) + overflow-y:auto !important sur modal-content (fix Bootstrap 5.0.1 cascade qui forçait overflow:hidden) + box-sizing:border-box inputs + font-size 16px (anti-zoom iOS) + media query mobile <480px margin/max-width adaptés. Cause racine confirmée Playwright prod 375×667 : modal débordait bottom 672>667, X 14×26 inatteignable touch, modal-content computed overflow:hidden empêchait scroll vers champs/consent/submit. Codename popup-newsletter-fix.
  *   1.16.1 · 2026-05-18 · #227 fix migration JSON_UNQUOTE compat SQLite — wrap `if (DB::getDriverName() === 'mysql')` autour des statements MySQL-only dans Modules/Dictionary/database/migrations/2026_05_05_180100_set_transformer_case_sensitive.php (up + down). Débloque Pest local (SQLite in-memory) qui plantait sur JSON_UNQUOTE/JSON_EXTRACT inexistants en SQLite. Aucun impact prod (MySQL exécute toujours la data migration originelle). Codename pest-sqlite-unblocked.
@@ -50,17 +51,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 17,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'book-promo-component',
+    'codename' => 'typo-fr-nbsp',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.17.0',
+    'semver' => '1.17.1',
 ];

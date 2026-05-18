@@ -15,11 +15,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Laravel\Pennant\Feature;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         foreach ([
             base_path('app/Helpers/version.php'),
             base_path('app/Helpers/dictionary.php'),
+            base_path('app/Helpers/typo.php'),
         ] as $helper) {
             if (is_file($helper)) {
                 require_once $helper;
@@ -54,6 +57,11 @@ class AppServiceProvider extends ServiceProvider
         // Force Carbon + setLocale FR (dates en français globalement)
         \Carbon\Carbon::setLocale('fr');
         setlocale(LC_TIME, 'fr_CA.UTF-8', 'fr_FR.UTF-8', 'fr_CA', 'fr_FR', 'fr');
+
+        // Typographie française — directive Blade @typo + macro Str::typoFr
+        // (helper lv_typo_fr déjà chargé via files[] composer.json + register())
+        Blade::directive('typo', static fn (string $expression): string => "<?php echo lv_typo_fr({$expression}); ?>");
+        Str::macro('typoFr', static fn (?string $t): string => lv_typo_fr($t));
 
         Model::automaticallyEagerLoadRelationships();
         Model::preventLazyLoading(! app()->isProduction());

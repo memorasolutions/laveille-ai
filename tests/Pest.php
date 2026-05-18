@@ -10,6 +10,9 @@ declare(strict_types=1);
 pest()->extend(Tests\TestCase::class)
     ->in('Feature');
 
+pest()->extend(Tests\TestCase::class)
+    ->in('Unit/Helpers');
+
 afterEach(function () {
     // Flush Livewire EventBus pour éviter le memory leak entre tests
     if (class_exists(\Livewire\Mechanisms\EventBus::class)) {

@@ -44,10 +44,10 @@
     </div>
     <div style="flex:1 1 280px;min-width:240px;" x-data="{ open: false }">
         <p style="margin:0 0 0.25rem;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-text-muted);font-weight:600;">Publication de l'auteur</p>
-        <h3 id="{{ $uid }}-title" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;margin:0 0 0.35rem;font-size:1.35rem;line-height:1.25;color:var(--c-text);">{{ $title }}</h3>
-        <p style="margin:0 0 0.5rem;font-size:0.95rem;color:var(--c-text-muted);font-weight:500;">{{ $subtitle }}</p>
+        <h3 id="{{ $uid }}-title" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;margin:0 0 0.35rem;font-size:1.35rem;line-height:1.25;color:var(--c-text);">{!! lv_typo_fr($title) !!}</h3>
+        <p style="margin:0 0 0.5rem;font-size:0.95rem;color:var(--c-text-muted);font-weight:500;">{!! lv_typo_fr($subtitle) !!}</p>
         <p style="margin:0 0 1rem;font-size:0.85rem;color:var(--c-text-muted);">Par <strong style="color:var(--c-text);">{{ $author }}</strong>, {{ $author_role }}</p>
-        <p style="margin:0 0 1rem;color:var(--c-text);font-size:0.95rem;line-height:1.55;">{{ $description_short }}</p>
+        <p style="margin:0 0 1rem;color:var(--c-text);font-size:0.95rem;line-height:1.55;">{!! lv_typo_fr($description_short) !!}</p>
 
         <div style="margin:0 0 1rem;">
             <button
@@ -62,7 +62,7 @@
                 <span aria-hidden="true" x-text="open ? '▲' : '▼'"></span>
             </button>
             <div id="{{ $uid }}-details" x-show="open" x-collapse x-cloak style="margin-top:0.75rem;padding:1rem;background:#fff;border-radius:0.5rem;border:1px solid var(--c-border);">
-                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:var(--c-text);">{{ $descLong }}</p>
+                <p style="margin:0;font-size:0.9rem;line-height:1.6;color:var(--c-text);">{!! lv_typo_fr($descLong) !!}</p>
             </div>
         </div>
 

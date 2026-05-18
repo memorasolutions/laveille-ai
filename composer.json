@@ -78,7 +78,8 @@
     "autoload": {
         "files": [
             "app/Helpers/dates.php",
-            "app/Helpers/version.php"
+            "app/Helpers/version.php",
+            "app/Helpers/typo.php"
         ],
         "psr-4": {
             "App\\": "app/",
