@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.17.0 · 2026-05-18 · #230 remplace pub Nexus Neural par livre auteur « L'IA sans se faire poursuivre : guide pratique pour PME et professionnels — Édition 2026 ». Composant Blade réutilisable `<x-fronttheme::book-promo>` (DRY) avec 20 props (title/subtitle/author/cover_url_webp/cover_url_jpg/cta_url/schema/variant/etc.). Schema.org Book JSON-LD complet (Person Stéphane Lapointe + Organization MEMORA solutions + Offer Amazon CAD). WCAG 2.2 AA (min-height 44px CTA, focus-visible orange #C2410C, alt SEO descriptif Loi 25/RGPD/AI Act/PME). 4 images optimisées dans `public/images/books/` : webp 600 ~52KB, jpg 600 ~121KB (fallback compat réseaux sociaux), webp 300 ~21KB (mobile thumbnail), og 1200×630 ~54KB (Facebook/LinkedIn/Twitter cards). Responsive flex-row desktop / flex-column mobile <640px. Alpine.js x-collapse description longue toggle. CTA target=_blank + rel="noopener sponsored". Enhancement `AdsRenderer::render()` détecte `<x-` dans `ad_code` et compile via `Blade::render()` (pattern réutilisable pour toute pub à base de composant). DB ads : id=1 renommé `nexus-neural` → `book-author`, id=2 `article-inline` (auto-injection après 3e paragraphe articles) — les 2 utilisent `<x-fronttheme::book-promo variant="inline" />`. Migration `2026_05_18_120000_replace_nexus_neural_ads_with_book_promo.php` propage le changement DB en prod. 11 tests Pest verts (28 assertions). Codename book-promo-component.
  *   1.16.2 · 2026-05-18 · #229 fix popup newsletter /blog — bouton fermeture 14×26 → 44×44 px (WCAG 2.5.5 AAA) + cible touch mobile fiable + ESC handler explicite (delegation $(document)) + click backdrop ferme + data-bs-dismiss="modal" fallback Bootstrap natif + delegation click closeBtn (résiste au re-render DOM) + modal-dialog-scrollable + max-height calc(100vh - 40px) + overflow-y:auto !important sur modal-content (fix Bootstrap 5.0.1 cascade qui forçait overflow:hidden) + box-sizing:border-box inputs + font-size 16px (anti-zoom iOS) + media query mobile <480px margin/max-width adaptés. Cause racine confirmée Playwright prod 375×667 : modal débordait bottom 672>667, X 14×26 inatteignable touch, modal-content computed overflow:hidden empêchait scroll vers champs/consent/submit. Codename popup-newsletter-fix.
  *   1.16.1 · 2026-05-18 · #227 fix migration JSON_UNQUOTE compat SQLite — wrap `if (DB::getDriverName() === 'mysql')` autour des statements MySQL-only dans Modules/Dictionary/database/migrations/2026_05_05_180100_set_transformer_case_sensitive.php (up + down). Débloque Pest local (SQLite in-memory) qui plantait sur JSON_UNQUOTE/JSON_EXTRACT inexistants en SQLite. Aucun impact prod (MySQL exécute toujours la data migration originelle). Codename pest-sqlite-unblocked.
  *   1.16.0 · 2026-05-18 · #226 unsubscribe v2 — refonte complète flux désabonnement newsletter. Migration colonnes dédiées (unsubscribe_token, unsubscribed_at, unsubscribe_reason). Vue dédiée avec confirmation + raison optionnelle + routes web sécurisées par token signé. Tests Pest couvrant nominal/expired/invalid/double-click. Codename unsubscribe-v2.
@@ -48,18 +49,18 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 16,
-    'patch' => 2,
+    'minor' => 17,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'popup-newsletter-fix',
+    'codename' => 'book-promo-component',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.16.2',
+    'semver' => '1.17.0',
 ];

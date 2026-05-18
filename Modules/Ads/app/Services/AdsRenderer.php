@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Modules\Ads\Services;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Modules\Ads\Models\AdPlacement;
 
@@ -25,6 +26,18 @@ class AdsRenderer
             }
 
             $html = $ad->ad_code;
+
+            // #230 — Si ad_code contient une balise composant Blade (<x-namespace::name>),
+            // compiler côté serveur pour permettre la réutilisation DRY de composants
+            // (ex. <x-fronttheme::book-promo />). Sinon, HTML brut comme avant.
+            if (is_string($html) && str_contains($html, '<x-')) {
+                try {
+                    $html = Blade::render($html);
+                } catch (\Throwable $e) {
+                    \Log::warning("AdsRenderer: Blade::render échec pour {$key}", ['error' => $e->getMessage()]);
+                    // fallback : laisser le HTML brut
+                }
+            }
 
             // Pubs internes : ajouter le label "Publicité" (les externes comme Google le gèrent elles-mêmes)
             if (! $ad->is_external) {
