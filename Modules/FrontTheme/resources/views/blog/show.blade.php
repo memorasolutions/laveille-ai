@@ -260,17 +260,41 @@
                             </div>
                         @endif
 
-                        @php $author = $article->isGuestPost() ? $article->submittedByUser : $article->user; @endphp
+                        @php
+                            $author = $article->isGuestPost() ? $article->submittedByUser : $article->user;
+                            $isMainAuthor = ! $article->isGuestPost();
+                            $authorPhotoWebp = $isMainAuthor ? asset('images/author/stephane-lapointe-256.webp') : null;
+                            $authorPhotoJpg = $isMainAuthor ? asset('images/author/stephane-lapointe-256.jpg') : ($author?->avatar ? asset('storage/' . $author->avatar) : asset('images/logo.webp'));
+                            $authorLink = $isMainAuthor ? route('author.show', 'stephane-lapointe') : null;
+                        @endphp
                         <div class="author-box" itemscope itemtype="https://schema.org/Person">
                             <div class="author-avatar">
-                                <img src="{{ $author?->avatar ? asset('storage/' . $author->avatar) : asset('images/logo.webp') }}"
-                                     alt="{{ $author->name ?? __('Auteur') }}"
-                                     itemprop="image"
-                                     loading="lazy"
-                                     style="border-radius:50%;width:120px;height:120px;object-fit:cover;">
+                                @if($authorPhotoWebp)
+                                    <picture>
+                                        <source srcset="{{ $authorPhotoWebp }}" type="image/webp">
+                                        <img src="{{ $authorPhotoJpg }}"
+                                             alt="{{ $author->name ?? __('Auteur') }}"
+                                             itemprop="image"
+                                             loading="lazy"
+                                             width="120" height="120"
+                                             style="border-radius:50%;width:120px;height:120px;object-fit:cover;">
+                                    </picture>
+                                @else
+                                    <img src="{{ $authorPhotoJpg }}"
+                                         alt="{{ $author->name ?? __('Auteur') }}"
+                                         itemprop="image"
+                                         loading="lazy"
+                                         style="border-radius:50%;width:120px;height:120px;object-fit:cover;">
+                                @endif
                             </div>
                             <div class="author-content">
-                                <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
+                                @if($authorLink)
+                                    <a href="{{ $authorLink }}" rel="author" style="text-decoration:none;color:inherit;">
+                                        <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
+                                    </a>
+                                @else
+                                    <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
+                                @endif
                                 <p itemprop="description">{{ $author->bio ?? __('Merci de lire nos articles.') }}</p>
                                 @if($author?->social_links)
                                     <div class="author-social" style="margin-top:8px;">

@@ -25,22 +25,29 @@ class AuthorController extends Controller
             try {
                 $articles = \Modules\Blog\Models\Article::published()
                     ->latest('published_at')
-                    ->limit(6)
+                    ->limit(10)
                     ->get();
             } catch (\Throwable) {
                 $articles = collect();
             }
         }
 
+        // Image dédiée auteur si présente, fallback logo-avatar
+        $schemaImage = file_exists(public_path('images/author/stephane-lapointe-schema.jpg'))
+            ? asset('images/author/stephane-lapointe-schema.jpg')
+            : asset('images/logo-avatar.png');
+
         // Pre-encode Schema.org JSON-LD (évite conflit Blade @context directive)
         $schemaJson = json_encode([
             '@context' => 'https://schema.org',
             '@type' => 'Person',
+            '@id' => route('author.show', $slug).'#person',
             'name' => $author['name'] ?? '',
             'description' => $author['bio'] ?? '',
             'url' => route('author.show', $slug),
-            'image' => asset('images/logo-avatar.png'),
+            'image' => $schemaImage,
             'jobTitle' => $author['role'] ?? '',
+            'knowsAbout' => $author['knowsAbout'] ?? [],
             'sameAs' => array_values(array_filter([
                 $author['linkedin'] ?? null,
                 $author['twitter'] ?? null,

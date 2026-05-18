@@ -15,16 +15,25 @@ declare(strict_types=1);
 return [
     'stephane-lapointe' => [
         'name' => 'Stéphane Lapointe',
-        'role' => 'Veille IA Québec',
-        'bio' => 'Stéphane Lapointe est fondateur de MEMORA solutions, agence numérique québécoise spécialisée en IA et automatisation pour PME. Il anime laveille.ai pour démocratiser la veille IA au Québec : actualités triées, outils gratuits, glossaire et mini-jeux pédagogiques.',
-        'linkedin' => '',
+        'role' => 'Expert IA Québec — Gouvernance numérique',
+        'bio' => 'Stéphane Lapointe, fondateur de MEMORA solutions à L\'Ancienne-Lorette (Québec), expert en gouvernance numérique depuis plus de 20 ans. Auteur de « L\'IA sans se faire poursuivre — Le guide pratique pour PME et professionnels » (Édition 2026). Spécialiste de la conformité Loi 25, RGPD et AI Act pour les organisations francophones.',
+        'linkedin' => 'https://www.linkedin.com/in/lapointestephane',
         'twitter' => '',
         'website' => 'https://memora.solutions',
         'qualifications' => [
             'Fondateur MEMORA solutions',
-            'Spécialiste IA générative et automatisation',
-            'Transformation numérique pour PME québécoises',
-            'Pédagogue technologique au Québec',
+            'Auteur « L\'IA sans se faire poursuivre » (Édition 2026)',
+            'Expert gouvernance numérique 20+ ans au Québec',
+            'Spécialiste conformité Loi 25, RGPD et AI Act',
+        ],
+        'knowsAbout' => [
+            'Loi 25',
+            'RGPD',
+            'AI Act',
+            'Gouvernance numérique',
+            'Intelligence artificielle',
+            'Conformité PME',
+            'Protection des renseignements personnels',
         ],
     ],
 ];

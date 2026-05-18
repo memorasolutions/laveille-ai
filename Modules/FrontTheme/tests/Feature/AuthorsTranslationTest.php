@@ -61,7 +61,18 @@ it('stephane-lapointe.website pointe vers MEMORA solutions (worksFor Schema.org)
     expect($website)->toContain('memora.solutions');
 });
 
-it('stephane-lapointe.linkedin est string (vide acceptable, à fournir user)', function () {
-    $linkedin = $this->authors['stephane-lapointe']['linkedin'] ?? null;
-    expect($linkedin)->toBeString();
+it('stephane-lapointe.linkedin pointe vers profil réel (rel=me EEAT 2026)', function () {
+    $linkedin = $this->authors['stephane-lapointe']['linkedin'] ?? '';
+    expect($linkedin)->toBeString()->toContain('linkedin.com/in/lapointestephane');
+});
+
+it('stephane-lapointe.bio mentionne livre ou MEMORA (signal expertise S95 #234)', function () {
+    $bio = $this->authors['stephane-lapointe']['bio'] ?? '';
+    expect($bio)->toContain('MEMORA');
+});
+
+it('stephane-lapointe.knowsAbout array non-vide (Schema.org Person 2026)', function () {
+    $knowsAbout = $this->authors['stephane-lapointe']['knowsAbout'] ?? [];
+    expect($knowsAbout)->toBeArray()->not->toBeEmpty();
+    expect(count($knowsAbout))->toBeGreaterThanOrEqual(3);
 });
