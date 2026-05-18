@@ -34,7 +34,7 @@
     "Tenancy": false,
     "Testimonials": false,
     "Translation": true,
-    "Webhooks": false,
+    "Webhooks": true,
     "Widget": true,
     "FrontTheme": true,
     "Ads": true,
