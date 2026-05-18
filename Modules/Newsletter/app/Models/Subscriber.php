@@ -33,11 +33,25 @@ class Subscriber extends Model
 
     protected $table = 'newsletter_subscribers';
 
-    protected $fillable = ['email', 'name', 'token', 'confirmed_at', 'unsubscribed_at', 'bounce_count', 'bounce_reason', 'tenant_id'];
+    protected $fillable = [
+        'email',
+        'name',
+        'token',
+        'confirmed_at',
+        'unsubscribed_at',
+        'bounce_count',
+        'bounce_reason',
+        'tenant_id',
+        'unsubscribe_reason',
+        'unsubscribe_feedback',
+        'paused_until',
+        'frequency_preference',
+    ];
 
     protected $casts = [
         'confirmed_at' => 'datetime',
         'unsubscribed_at' => 'datetime',
+        'paused_until' => 'datetime',
     ];
 
     protected static function boot(): void
@@ -64,6 +78,18 @@ class Subscriber extends Model
     public function scopeActive($query)
     {
         return $query->whereNotNull('confirmed_at')->whereNull('unsubscribed_at');
+    }
+
+    public function scopeNotPaused($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('paused_until')->orWhere('paused_until', '<=', now());
+        });
+    }
+
+    public function isPaused(): bool
+    {
+        return $this->paused_until !== null && $this->paused_until->isFuture();
     }
 
     protected static function newFactory(): SubscriberFactory
