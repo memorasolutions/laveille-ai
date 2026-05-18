@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
             base_path('app/Helpers/version.php'),
             base_path('app/Helpers/dictionary.php'),
             base_path('app/Helpers/typo.php'),
+            base_path('app/Helpers/jsonld.php'),
         ] as $helper) {
             if (is_file($helper)) {
                 require_once $helper;

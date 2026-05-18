@@ -10,24 +10,28 @@
 @endsection
 
 @push('head')
+{{-- #237 P27 : pré-encode dans @php block pour éviter Blade @context directive corruption (Laravel 11) --}}
+@php
+    $__crosswordJsonLd = json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'CollectionPage',
+        'name' => $pageTitle,
+        'description' => $pageDescription,
+        'url' => url('/jeumc'),
+        'mainEntity' => [
+            '@type' => 'ItemList',
+            'numberOfItems' => $totalPublic,
+            'itemListElement' => $presets->take(12)->values()->map(fn ($p, $i) => [
+                '@type' => 'ListItem',
+                'position' => $i + 1,
+                'name' => $p->name,
+                'url' => url('/jeumc/'.$p->public_id),
+            ])->all(),
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+@endphp
 <script type="application/ld+json">
-{!! json_encode([
-    '@context' => 'https://schema.org',
-    '@type' => 'CollectionPage',
-    'name' => $pageTitle,
-    'description' => $pageDescription,
-    'url' => url('/jeumc'),
-    'mainEntity' => [
-        '@type' => 'ItemList',
-        'numberOfItems' => $totalPublic,
-        'itemListElement' => $presets->take(12)->values()->map(fn ($p, $i) => [
-            '@type' => 'ListItem',
-            'position' => $i + 1,
-            'name' => $p->name,
-            'url' => url('/jeumc/'.$p->public_id),
-        ])->all(),
-    ],
-], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+{!! $__crosswordJsonLd !!}
 </script>
 @endpush
 

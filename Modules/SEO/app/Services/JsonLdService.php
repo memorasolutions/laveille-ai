@@ -103,11 +103,12 @@ final class JsonLdService
             $data['image'] = \Illuminate\Support\Facades\Storage::url($article->cover_image);
         }
 
+        // #237 P27 : harmonisation auteur via helper canonique lv_jsonld_author_stephane()
+        // (accents préservés, knowsAbout EEAT, sameAs LinkedIn, @id stable).
         if ($article->user ?? null) {
-            $data['author'] = [
-                '@type' => 'Person',
-                'name' => $article->user->name,
-            ];
+            $data['author'] = function_exists('lv_jsonld_author_stephane')
+                ? lv_jsonld_author_stephane()
+                : ['@type' => 'Person', 'name' => $article->user->name];
         }
 
         if ($article->meta_description ?? $article->excerpt ?? null) {
@@ -193,22 +194,25 @@ final class JsonLdService
             $article->source->name ?? null,
         ])->filter()->unique()->values()->implode(', ');
 
+        // #237 P27 : Person canonique via helper lv_jsonld_author_stephane().
         $authors = [
-            [
-                '@type' => 'Person',
-                'name' => 'Stéphane Lapointe',
-                'url' => url('/auteur/stephane-lapointe'),
-                'sameAs' => [
-                    'https://www.linkedin.com/in/lapointestephane/',
-                    lv_social('facebook'),
+            function_exists('lv_jsonld_author_stephane')
+                ? lv_jsonld_author_stephane()
+                : [
+                    '@type' => 'Person',
+                    'name' => 'Stéphane Lapointe',
+                    'url' => url('/auteur/stephane-lapointe'),
+                    'sameAs' => [
+                        'https://www.linkedin.com/in/lapointestephane/',
+                        lv_social('facebook'),
+                    ],
+                    'knowsAbout' => [
+                        'Intelligence artificielle',
+                        'Veille technologique',
+                        'Éducation Québec',
+                        'IA générative',
+                    ],
                 ],
-                'knowsAbout' => [
-                    'Intelligence artificielle',
-                    'Veille technologique',
-                    'Éducation Québec',
-                    'IA générative',
-                ],
-            ],
         ];
         if (! empty($article->source->name)) {
             $authors[] = [

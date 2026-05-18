@@ -86,6 +86,12 @@
 @endif
 
 @php
+    // #237 P27 : Person auteur harmonisé via lv_jsonld_author_stephane() (Schéma EEAT canonique).
+    // Si l'article a un auteur custom, on garde son nom mais on enrichit avec le profil canonique.
+    $__articleAuthor = $article->author && $article->author->name
+        ? (function_exists('lv_jsonld_author_stephane') ? lv_jsonld_author_stephane() : ['@type' => 'Person', 'name' => $article->author->name])
+        : (function_exists('lv_jsonld_author_stephane') ? lv_jsonld_author_stephane() : ['@type' => 'Person', 'name' => 'Stéphane Lapointe']);
+
     $schemaJson = json_encode([
         '@context' => 'https://schema.org',
         '@type' => 'Article',
@@ -93,15 +99,14 @@
         'description' => Str::limit(strip_tags($article->excerpt ?? $article->content), 300),
         'datePublished' => $article->published_at?->toIso8601String(),
         'dateModified' => $article->updated_at->toIso8601String(),
-        'author' => [
-            '@type' => 'Person',
-            'name' => $article->author->name ?? 'La veille',
-        ],
-        'publisher' => [
-            '@type' => 'Organization',
-            'name' => 'La veille',
-            'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-avatar.png')],
-        ],
+        'author' => $__articleAuthor,
+        'publisher' => function_exists('lv_jsonld_publisher')
+            ? lv_jsonld_publisher()
+            : [
+                '@type' => 'Organization',
+                'name' => 'La veille',
+                'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-avatar.png')],
+            ],
         'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => url('/blog/' . $article->slug)],
     ] + ($article->featured_image ? ['image' => asset($article->featured_image)] : []),
     JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -113,18 +118,22 @@
     <meta name="llm:url" content="{{ url('/blog/' . $article->slug) }}">
     <script type="application/ld+json">{!! $schemaJson !!}</script>
     @if($article->faqs->where('is_published', true)->isNotEmpty())
-        <script type="application/ld+json">{!! json_encode([
-            chr(64).'context' => 'https://schema.org',
-            chr(64).'type' => 'FAQPage',
-            'mainEntity' => $article->faqs->where('is_published', true)->map(fn($faq) => [
-                chr(64).'type' => 'Question',
-                'name' => $faq->question,
-                'acceptedAnswer' => [
-                    chr(64).'type' => 'Answer',
-                    'text' => strip_tags($faq->answer),
-                ],
-            ])->values()->all(),
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        {{-- #237 P27 : pré-encode dans @php pour éviter Blade @context directive corruption (Laravel 11) --}}
+        @php
+            $__faqJson = json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => $article->faqs->where('is_published', true)->map(fn($faq) => [
+                    '@type' => 'Question',
+                    'name' => $faq->question,
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => strip_tags($faq->answer),
+                    ],
+                ])->values()->all(),
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        @endphp
+        <script type="application/ld+json">{!! $__faqJson !!}</script>
     @endif
 @endpush
 
@@ -366,8 +375,9 @@
 
 @push('scripts')
 @php
+// #237 P27 : Person auteur harmonisé via helper canonique + clean @context (Blade @php block safe).
 $blogPostingJsonLd = json_encode([
-    chr(64).'context' => 'https://schema.org',
+    '@context' => 'https://schema.org',
     '@type' => 'BlogPosting',
     'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => route('blog.show', $article->slug)],
     'headline' => $article->title,
@@ -375,8 +385,12 @@ $blogPostingJsonLd = json_encode([
     'image' => $article->featured_image ? asset($article->featured_image) : asset('images/og-image.png'),
     'datePublished' => $article->published_at?->toIso8601String(),
     'dateModified' => $article->updated_at?->toIso8601String(),
-    'author' => ['@type' => 'Person', 'name' => $article->getAuthorName()],
-    'publisher' => ['@type' => 'Organization', 'name' => config('app.name'), 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/og-image.png')]],
+    'author' => function_exists('lv_jsonld_author_stephane')
+        ? lv_jsonld_author_stephane()
+        : ['@type' => 'Person', 'name' => $article->getAuthorName()],
+    'publisher' => function_exists('lv_jsonld_publisher')
+        ? lv_jsonld_publisher()
+        : ['@type' => 'Organization', 'name' => config('app.name'), 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/og-image.png')]],
     'articleSection' => $article->blogCategory?->name,
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 @endphp

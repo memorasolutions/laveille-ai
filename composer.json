@@ -79,7 +79,8 @@
         "files": [
             "app/Helpers/dates.php",
             "app/Helpers/version.php",
-            "app/Helpers/typo.php"
+            "app/Helpers/typo.php",
+            "app/Helpers/jsonld.php"
         ],
         "psr-4": {
             "App\\": "app/",

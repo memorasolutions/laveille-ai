@@ -210,21 +210,25 @@
         </script>
     @endonce
     {{-- Schema.org JSON-LD : DefinedTermSet pour SEO/AEO/GEO (impact +12% featured snippets, +28% crawl, ×3 citations LLM) --}}
+    {{-- #237 P27 : pré-encode dans @php block pour éviter Blade @context directive corruption (Laravel 11) --}}
+    @php
+        $__glossaryJsonLd = json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'DefinedTermSet',
+            '@id' => url('/glossaire').'#auto-linked',
+            'name' => __('Termes définis'),
+            'inLanguage' => str_replace('_', '-', strtolower(app()->getLocale() ?: 'fr-CA')),
+            'hasDefinedTerm' => array_map(fn ($t) => [
+                '@type' => 'DefinedTerm',
+                'name' => $t['name'],
+                'description' => $t['definition'],
+                'termCode' => $t['slug'],
+                'url' => url($t['url']),
+                'inDefinedTermSet' => url($t['type'] === 'glossary' ? '/glossaire' : '/acronymes-education'),
+            ], $matchedTerms),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    @endphp
     <script type="application/ld+json">
-    {!! json_encode([
-        '@context' => 'https://schema.org',
-        '@type' => 'DefinedTermSet',
-        '@id' => url('/glossaire').'#auto-linked',
-        'name' => __('Termes définis'),
-        'inLanguage' => str_replace('_', '-', strtolower(app()->getLocale() ?: 'fr-CA')),
-        'hasDefinedTerm' => array_map(fn ($t) => [
-            '@type' => 'DefinedTerm',
-            'name' => $t['name'],
-            'description' => $t['definition'],
-            'termCode' => $t['slug'],
-            'url' => url($t['url']),
-            'inDefinedTermSet' => url($t['type'] === 'glossary' ? '/glossaire' : '/acronymes-education'),
-        ], $matchedTerms),
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+    {!! $__glossaryJsonLd !!}
     </script>
 @endif
