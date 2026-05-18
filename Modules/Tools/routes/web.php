@@ -18,6 +18,25 @@ use Modules\Tools\Http\Middleware\EnsureCrosswordTester;
 Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index');
 
+    // P17 #235 — redirects 301 /outil/{slug} (singular, typo legacy) → /outils ou /outils/{slug} si match
+    Route::get('/outil/{slug?}', function (?string $slug = null) {
+        if (! $slug) {
+            return redirect('/outils', 301);
+        }
+        // Si le slug existe en DB (Tools), redirige vers la fiche, sinon vers l'index /outils
+        if (class_exists(\Modules\Tools\Models\Tool::class)) {
+            try {
+                $exists = \Modules\Tools\Models\Tool::where('slug', $slug)->exists();
+                if ($exists) {
+                    return redirect('/outils/'.$slug, 301);
+                }
+            } catch (\Throwable) {
+                // ignore — fallback vers /outils
+            }
+        }
+        return redirect('/outils', 301);
+    })->where('slug', '[a-z0-9\-]*')->name('tools.singular.redirect');
+
     // Mots croisés - routes API spécifiques + fiche (S80 #63 : ouvert au public, lockdown #48 retiré)
     // Note : middleware EnsureCrosswordTester conservé en code (Modules/Tools/Http/Middleware/) pour réactivation rapide si besoin
     Route::get('/outils/mots-croises', [PublicToolController::class, 'show'])

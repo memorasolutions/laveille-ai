@@ -46,6 +46,12 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         ->where('slug', '[a-z0-9-]+')
         ->name('author.show');
 
+    // P17 #235 — pagination legacy WordPress /auteur/{slug}/page/{n} → 301 vers /auteur/{slug}
+    // (auteur unique : <10 articles, pagination jamais nécessaire ; redirect 301 plutôt que 404)
+    Route::get('/auteur/{slug}/page/{n}', function (string $slug, string $n) {
+        return redirect()->route('author.show', $slug, 301);
+    })->where(['slug' => '[a-z0-9-]+', 'n' => '[0-9]+']);
+
     Route::get('/lien-expire', function () {
         $reason = request('reason', 'notfound');
         return response()->view('fronttheme::link-expired', compact('reason'), $reason === 'expired' ? 410 : 404);

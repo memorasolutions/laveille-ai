@@ -24,7 +24,15 @@ Route::middleware('web')->group(function () {
         return redirect()->route('news.show', $article, 301);
     })->where('id', '[0-9]+');
 
-    Route::get('/actualites/{article:slug}', [PublicNewsController::class, 'show'])->name('news.show');
+    // P17 #235 — wrapper smart : si slug existe affiche fiche, sinon 301 vers /actualites
+    Route::get('/actualites/{slug}', function (string $slug) {
+        $article = \Modules\News\Models\NewsArticle::where('slug', $slug)->first();
+        if (! $article) {
+            return redirect('/actualites', 301);
+        }
+
+        return app(\Modules\News\Http\Controllers\PublicNewsController::class)->show($article);
+    })->where('slug', '[a-z0-9\-]+')->name('news.show');
 });
 
 // ── Routes admin ──

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.18.1 · 2026-05-18 · #235 P17 fix 404 prod actionnables : (a) redirects 301 sitemaps legacy bots `/sitemap_index.xml` + `/sitemaps.xml` + `/sitemap.xml.gz` + `/atom.xml` → `/sitemap.xml` via Route::redirect inline dans Modules/SEO/routes/web.php (DRY natif Laravel) ; (b) wildcard `/outil/{slug?}` (typo singular legacy WP) → smart redirect 301 vers `/outils/{slug}` si Tool::where('slug')->exists() sinon `/outils` (closure inline dans Modules/Tools/routes/web.php, regex `[a-z0-9\-]*` accepte vide aussi) ; (c) `/actualites/{slug}` refondu en closure smart : NewsArticle::where('slug')->first() → si trouvé délègue PublicNewsController::show(article), sinon 301 vers `/actualites` (Modules/News/routes/web.php — remplace ancien route model binding qui throwait 404 sur slugs orphelins) ; (d) `/auteur/{slug}/page/{n}` legacy WordPress pagination → 301 vers `/auteur/{slug}` (auteur unique <10 articles, pagination inutile) dans Modules/FrontTheme/routes/web.php ; (e) JS stubs `/js/ga4-events.js` + `/js/sw-register.js` + `/sw.js` déjà 200 OK prod (false 404 dans rapport user). 9 tests Pest reflexifs verts (14 assertions, route inspection pattern pour éviter SQLite settings bloqueur). Codename fix-404-redirects.
  *   1.18.0 · 2026-05-18 · #234 EEAT byline + page auteur Stéphane Lapointe activée (matériel user fourni) — 5 photos optimisées (webp+jpg 80/256 + schema 1200), bio mise à jour avec livre « L'IA sans se faire poursuivre » Édition 2026 + 20+ ans gouvernance numérique + L'Ancienne-Lorette QC, LinkedIn `https://www.linkedin.com/in/lapointestephane` (rel="me" IndieWeb critique), 4 qualifications (Fondateur MEMORA / Auteur livre 2026 / Expert 20+ ans / Spécialiste Loi 25+RGPD+AI Act), 7 entrées knowsAbout Schema.org Person, H1 "Nom — Rôle" pour signal expertise immédiat, picture webp+jpg fallback responsive, byline cards et author-box bottom blog/show utilisent photo réelle (vs logo-avatar générique), AuthorController enrichi (@id, knowsAbout, image dédiée file_exists fallback, limit 10 articles), réutilise composant DRY `<x-fronttheme::book-promo>` sur page auteur, 14 nouveaux tests Pest reflexifs AuthorPageTest + 3 enrichis AuthorsTranslationTest (27 verts / 61 assertions total). Sitemap.xml + link rel="author" master layout + meta name="author" déjà cablés depuis S84 scaffolding. Codename eeat-stephane-active.
  *   1.17.2 · 2026-05-18 · #232 désactive temporairement /annuaire/classement (1 seul contributor solo, classement vide d'intérêt). Feature flag réversible `directory.leaderboard.enabled` (default false, env DIRECTORY_LEADERBOARD_ENABLED) dans Modules/Directory/config/config.php (pattern réutilisé de `category_alerts`). Route /annuaire/classement conservée mais wrappée dans closure qui redirige 302 vers /annuaire avec flash session `info` ("Le classement sera disponible quand plusieurs contributeurs participeront à l'annuaire.") quand flag off ; déléguée à `app(LeaderboardController::class)->index()` quand flag on. Nom de route `directory.leaderboard` préservé pour que `Route::has()` reste vrai et que les gates @if combinent Route::has + config flag (double sécurité, traçabilité). 5 gates @if mis à jour dans header.blade.php (4 = mega-menu desktop + 2 sub-menu mobile + offcanvas mobile) + 1 gate dans footer.blade.php. Pour réactiver dès que ≥3 contributeurs réguliers : DIRECTORY_LEADERBOARD_ENABLED=true (.env prod) — pas besoin de redéployer. 6 tests Pest verts (15 assertions) — reflexifs source-based pour éviter dépendance DB lourde (closure inline + nom route + gates + config default). Sitemap.xml vérifié zéro référence préalable (jamais référencé). Codename leaderboard-feature-flag.
  *   1.17.1 · 2026-05-18 · #231 NBSP typographie FR site-wide — helper `lv_typo_fr()` autoload via composer.json `files[]` + `app/Providers/AppServiceProvider::register()` (idempotent, double layer prod-safe). Directive Blade `@typo($text)` + macro `Str::typoFr()` enregistrées dans `boot()`. Règles appliquées : (1) NBSP avant `? ! : ; »` (ponctuation double FR) ; (2) NBSP après `«` (guillemet ouvrant) ; (3) NBSP entre chiffre et unité (`%`, `$`, `€`, `°C`, `M$`, `M€`, `k€`, `k$`). Préservation 3 couches : (a) URL — pas de NBSP injecté dans `href="...?q=1"` ; (b) HTML — segmentation balises `<...>` / texte, balises laissées intactes ; (c) JSON — détection auto `{...}` ou `[...]`, walk récursif sur valeurs string uniquement, ré-encode JSON valide (préserve colonnes spatie/laravel-translatable `{"fr_CA":"..."}`). 19 tests Pest verts (40 assertions). Patch composant `<x-fronttheme::book-promo>` user-visible (title/subtitle/descriptions) → fix bug screenshot user `?` rejeté + `7\n%` séparés. Command Artisan `php artisan typo:apply-fr {--dry} {--table=*}` idempotente avec plan curated 8 tables (articles, ads_placements, directory_tools, dictionary_terms, news_articles, pages, faqs, testimonials). Codename typo-fr-nbsp.
@@ -53,17 +54,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 18,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'eeat-stephane-active',
+    'codename' => 'fix-404-redirects',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.17.2',
+    'semver' => '1.18.1',
 ];
