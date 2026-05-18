@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.16.1 · 2026-05-18 · #227 fix migration JSON_UNQUOTE compat SQLite — wrap `if (DB::getDriverName() === 'mysql')` autour des statements MySQL-only dans Modules/Dictionary/database/migrations/2026_05_05_180100_set_transformer_case_sensitive.php (up + down). Débloque Pest local (SQLite in-memory) qui plantait sur JSON_UNQUOTE/JSON_EXTRACT inexistants en SQLite. Aucun impact prod (MySQL exécute toujours la data migration originelle). Codename pest-sqlite-unblocked.
  *   1.16.0 · 2026-05-18 · #226 unsubscribe v2 — refonte complète flux désabonnement newsletter. Migration colonnes dédiées (unsubscribe_token, unsubscribed_at, unsubscribe_reason). Vue dédiée avec confirmation + raison optionnelle + routes web sécurisées par token signé. Tests Pest couvrant nominal/expired/invalid/double-click. Codename unsubscribe-v2.
  *   1.15.2 · 2026-05-17 · #226 fix assets admin post-login — retrait `splash-screen.css` orphelin (CSS jamais déployé, 404 console) dans Modules/Auth/resources/views/layouts/app.blade.php + Modules/Backoffice/resources/views/themes/backend/layouts/admin.blade.php + retrait blocs JS dynamiques associés (createElement splash). Standardisation `apexcharts.min.js` sur CDN jsdelivr v4.4.0 (cohérence stats/index.blade.php S89) dans dashboard/index.blade.php + revenue/index.blade.php (élimine asset local manquant). Codename admin-assets-fix. Console admin propre post-login user S95.
  *   1.15.1 · 2026-05-17 · #225 fix login bloqué — retrait `<script src="auth/plugins/preline/preline.js">` orphelin (404 console, fichier jamais déployé) dans Modules/Auth/resources/views/layouts/guest.blade.php + ajout `<meta name="mobile-web-app-capable" content="yes">` (deprecation warning Chrome, apple-mobile-web-app-capable conservé pour compat iOS Safari). Codename login-fix. Bloqueur user signalé S95 ; 415 Livewire résolu en parallèle via purge Cloudflare cache.
@@ -47,17 +48,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 16,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'unsubscribe-v2',
+    'codename' => 'pest-sqlite-unblocked',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.16.0',
+    'semver' => '1.16.1',
 ];
