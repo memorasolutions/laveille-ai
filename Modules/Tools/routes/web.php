@@ -16,7 +16,7 @@ use Modules\Tools\Http\Controllers\UserCrosswordController;
 use Modules\Tools\Http\Middleware\EnsureCrosswordTester;
 
 Route::middleware('web')->group(function () {
-    Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index');
+    Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index')->middleware('cacheResponse:600');
 
     // P17 #235 — redirects 301 /outil/{slug} (singular, typo legacy) → /outils ou /outils/{slug} si match
     Route::get('/outil/{slug?}', function (?string $slug = null) {
@@ -112,6 +112,7 @@ Route::middleware('web')->group(function () {
     // #163 : exclure 'sudoku' + #177 'avatar' (routes fournies par modules dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
         ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/).+')
+        ->middleware('cacheResponse:600')
         ->name('tools.show');
 });
 

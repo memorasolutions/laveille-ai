@@ -1,6 +1,16 @@
-# Compression gzip (fallback si Cloudflare desactive)
+# Compression gzip CWV #238 (fallback si Cloudflare desactive) — coverage etendue
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json text/xml application/xml image/svg+xml application/font-woff2 application/rss+xml
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/javascript text/xml
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json application/ld+json application/xml application/xhtml+xml application/rss+xml application/atom+xml application/manifest+json
+    AddOutputFilterByType DEFLATE application/font-woff application/font-woff2 font/woff font/woff2
+    AddOutputFilterByType DEFLATE image/svg+xml image/x-icon
+</IfModule>
+
+# Brotli compression CWV #238 (si dispo Apache 2.4+ mod_brotli, sinon ignore silencieusement)
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/plain text/javascript text/xml
+    AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json application/ld+json application/xml application/rss+xml application/manifest+json
+    AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
 </IfModule>
 
 # Cache statiques (images, fonts, CSS, JS)

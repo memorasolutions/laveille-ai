@@ -13,8 +13,8 @@ use Modules\Dictionary\Http\Controllers\Admin\TermAdminController;
 use Modules\Dictionary\Http\Controllers\PublicDictionaryController;
 
 Route::middleware('web')->group(function () {
-    Route::get('/glossaire', [PublicDictionaryController::class, 'index'])->name('dictionary.index');
-    Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show');
+    Route::get('/glossaire', [PublicDictionaryController::class, 'index'])->name('dictionary.index')->middleware('cacheResponse:3600');
+    Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show')->middleware('cacheResponse:3600');
 });
 
 // Suggestions glossaire (authentifié)

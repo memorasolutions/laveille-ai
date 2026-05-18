@@ -30,9 +30,12 @@ class PurgeCloudflareCacheJob implements ShouldQueue
     /** @var array<int,int> */
     public array $backoff = [30, 120];
 
-    public string $queue = 'cloudflare';
-
-    public function __construct(public array $urls) {}
+    public function __construct(public array $urls)
+    {
+        // Trait Queueable declare public $queue (untyped sans default) — set via setter pour eviter
+        // « define the same property differs and is considered incompatible » error PHP 8.2+
+        $this->onQueue('cloudflare');
+    }
 
     public function handle(): void
     {

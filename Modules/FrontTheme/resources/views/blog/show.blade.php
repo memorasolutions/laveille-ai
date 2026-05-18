@@ -116,6 +116,10 @@
     <meta name="llm:summary" content="{{ e($article->title) }} — {{ e(Str::limit(strip_tags($article->excerpt ?? $article->content ?? ''), 200)) }}">
     <meta name="llm:keywords" content="{{ e($article->title) }}, article, blog, IA, intelligence artificielle, francophone, Québec">
     <meta name="llm:url" content="{{ url('/blog/' . $article->slug) }}">
+    {{-- CWV #238 — preload LCP image article + fetchpriority high --}}
+    @if($article->featured_image)
+    <link rel="preload" as="image" href="{{ asset($article->featured_image) }}?v={{ $article->updated_at?->timestamp ?? '0' }}" fetchpriority="high">
+    @endif
     <script type="application/ld+json">{!! $schemaJson !!}</script>
     @if($article->faqs->where('is_published', true)->isNotEmpty())
         {{-- #237 P27 : pre-encode dans bloc PHP pour eviter corruption directive Blade context (Laravel 11) --}}
@@ -170,7 +174,7 @@
                         <div class="post format-standard-image">
                             @if($article->featured_image)
                                 <div class="entry-media">
-                                    <img src="{{ asset($article->featured_image) }}?v={{ $article->updated_at?->timestamp ?? time() }}" alt="{{ $article->title }}">
+                                    <img src="{{ asset($article->featured_image) }}?v={{ $article->updated_at?->timestamp ?? time() }}" alt="{{ $article->title }}" fetchpriority="high" loading="eager" decoding="async">
                                 </div>
                             @endif
                             <div class="entry-meta">

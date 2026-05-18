@@ -15,7 +15,7 @@ Route::get('/news-sitemap.xml', [NewsSitemapController::class, 'index'])->name('
 
 // ── Routes publiques ──
 Route::middleware('web')->group(function () {
-    Route::get('/actualites', [PublicNewsController::class, 'index'])->name('news.index');
+    Route::get('/actualites', [PublicNewsController::class, 'index'])->name('news.index')->middleware('cacheResponse:600');
 
     // Redirect 301 : anciennes URLs /actualites/{id} → /actualites/{slug}
     Route::get('/actualites/{id}', function (string $id) {
@@ -32,7 +32,7 @@ Route::middleware('web')->group(function () {
         }
 
         return app(\Modules\News\Http\Controllers\PublicNewsController::class)->show($article);
-    })->where('slug', '[a-z0-9\-]+')->name('news.show');
+    })->where('slug', '[a-z0-9\-]+')->name('news.show')->middleware('cacheResponse:600');
 });
 
 // ── Routes admin ──

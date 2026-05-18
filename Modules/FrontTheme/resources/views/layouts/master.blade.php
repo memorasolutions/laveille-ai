@@ -107,12 +107,11 @@
     {{-- RSS désactivé (décision utilisateur 2026-04-04) --}}
     @stack('head')
     @include('fronttheme::partials.critical-css')
-    <link rel="preload" as="style" href="{{ fronttheme_asset('css/bootstrap.min.css') }}">
-    <link rel="preload" as="style" href="{{ fronttheme_asset('sass/style.css') }}">
-    <link rel="preload" as="style" href="{{ asset('css/charte.css') }}?v={{ filemtime(public_path('css/charte.css')) }}">
+    {{-- CWV #238 — preload + apply async pour CSS critiques (charte/style.css restent blocking) --}}
+    <link rel="preload" as="style" href="{{ fronttheme_asset('css/bootstrap.min.css') }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="{{ fronttheme_asset('css/bootstrap.min.css') }}" rel="stylesheet"></noscript>
     <link href="{{ fronttheme_asset('css/themify-icons.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/flaticon.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
-    <link href="{{ fronttheme_asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ fronttheme_asset('css/animate.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/owl.carousel.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="{{ fronttheme_asset('css/owl.theme.css') }}" rel="stylesheet" media="print" onload="this.media='all'">
@@ -291,13 +290,13 @@
         @include('privacy::partials.cookie-consent')
     @endif
 
-    <!-- All JavaScript files -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="{{ fronttheme_asset('js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ fronttheme_asset('js/modernizr.custom.js') }}"></script>
-    <script src="{{ fronttheme_asset('js/jquery.dlmenu.js') }}"></script>
-    <script src="{{ fronttheme_asset('js/jquery-plugin-collection.js') }}"></script>
-    <script src="{{ fronttheme_asset('js/script.js') }}?v={{ filemtime(public_path('themes/' . config('app.frontend_theme', 'bloggar') . '/js/script.js')) }}"></script>
+    <!-- All JavaScript files — CWV #238 defer non-critique (sauf jQuery + bootstrap bundle qui restent en sync car dépendances dlmenu/plugin-collection) -->
+    <script defer src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script defer src="{{ fronttheme_asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script defer src="{{ fronttheme_asset('js/modernizr.custom.js') }}"></script>
+    <script defer src="{{ fronttheme_asset('js/jquery.dlmenu.js') }}"></script>
+    <script defer src="{{ fronttheme_asset('js/jquery-plugin-collection.js') }}"></script>
+    <script defer src="{{ fronttheme_asset('js/script.js') }}?v={{ filemtime(public_path('themes/' . config('app.frontend_theme', 'bloggar') . '/js/script.js')) }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>

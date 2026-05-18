@@ -14,10 +14,11 @@ use Modules\Directory\Http\Controllers\PublicDirectoryController;
 use Modules\Directory\Http\Controllers\RoadmapController;
 
 Route::middleware('web')->group(function () {
-    Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
-    Route::get('/collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
-    Route::get('/annuaire', [PublicDirectoryController::class, 'index'])->name('directory.index');
-    Route::get('/tarifs-education', [PublicDirectoryController::class, 'educationPricing'])->name('directory.education-pricing');
+    // CWV #238 — cache 10 min listes publiques (invalidées admin via cache:clear)
+    Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index')->middleware('cacheResponse:600');
+    Route::get('/collections/{slug}', [CollectionController::class, 'show'])->name('collections.show')->middleware('cacheResponse:600');
+    Route::get('/annuaire', [PublicDirectoryController::class, 'index'])->name('directory.index')->middleware('cacheResponse:600');
+    Route::get('/tarifs-education', [PublicDirectoryController::class, 'educationPricing'])->name('directory.education-pricing')->middleware('cacheResponse:3600');
     // #232 (v1.17.2) — Classement gated par config('directory.leaderboard.enabled').
     // Désactivé tant qu'un seul contributor (user solo). Quand off → redirect /annuaire + flash info.
     // Quand on (DIRECTORY_LEADERBOARD_ENABLED=true .env) → comportement original. Route conservée pour
@@ -32,8 +33,8 @@ Route::middleware('web')->group(function () {
         return app(LeaderboardController::class)->index();
     })->name('directory.leaderboard');
     Route::get('/annuaire/comparer', [PublicDirectoryController::class, 'compare'])->name('directory.compare-by-ids');
-    Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare');
-    Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap');
+    Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare')->middleware('cacheResponse:600');
+    Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap')->middleware('cacheResponse:3600');
     Route::get('/membre/{id}', [ProfileController::class, 'show'])->name('directory.profile');
     Route::get('/annuaire/{slug}', [PublicDirectoryController::class, 'show'])->name('directory.show')->middleware('doNotCacheResponse');
 });
