@@ -70,6 +70,9 @@
                                 <li><a href="{{ route('methodologie') }}">{{ __('Méthodologie') }}</a></li>
                             @endif
                             <li><a href="{{ route('contact') }}">{{ __('Contact') }}</a></li>
+                            @if(Route::has('statut.index'))
+                                <li><a href="{{ route('statut.index') }}">{{ __('Statut des services') }}</a></li>
+                            @endif
                             @if(Route::has('legal.privacy'))
                                 <li><a href="{{ route('legal.privacy') }}">{{ __('Confidentialité') }}</a></li>
                             @endif
