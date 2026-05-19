@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.19.12 · 2026-05-19 · #251 /statut charte Memora (custom views override). User a flagué la page « hors charte » (#21). Fix architectural propre : `php artisan vendor:publish --tag=statut-views` → publie 6 vues Blade dans `resources/views/vendor/statut/` (override hors vendor/, robuste à composer update memora/statut). Customisation `index.blade.php` aux tokens charte officielle : `--statut-fg: #064E5A` (teal primary), `--statut-accent: #C2410C` (orange), `--statut-down: #C2410C` (orange remplace red), `--statut-bg: #F8FAFB` (cream charte), font-family Plus Jakarta Sans (titres) + DM Sans (corps), card box-shadow + border-radius 1.25rem (cohérence layouts Memora), h2 bordure inférieure 2px charte, empty state stylé en card dashed (pas juste italic). Mode dark adapté aux mêmes tokens (#051a1f bg + #0d3d46 cards). Aucun changement de logique blade (logic vendor préservée 1:1). Composants monitor-card/incident-card/badge-global/error-banner non touchés cette release (utilisent déjà CSS variables héritées). Codename statut-charte-memora.
  *   1.19.11 · 2026-05-19 · #250 endpoint `public/_lvgit.php` token-protégé pour git pull prod (resync SHA). Cause : Shell API cPanel désactivée → chaque deploy bypassait git via multi cpanel_file_write (lourd, SHA git prod stuck à 8d0699e3 alors que local poussé jusqu'à v1.19.10). Fix : script PHP permanent dans public/ qui lit `LV_GIT_TOKEN` depuis .env (sans booter Laravel pour rapidité), valide via hash_equals, puis exec git fetch + reset --hard origin/master + log -1 + status -s via proc_open (allowlist commandes git uniquement). Headers X-Robots-Tag noindex/nofollow. Token 64-char hex (.env.example placeholder vide, .env prod à compléter avec valeur générée localement via `openssl rand -hex 32`). Usage futur : `git push && curl https://laveille.ai/_lvgit.php?t=$TOKEN` → SHA prod sync en 1 requête au lieu de N cpanel_file_write. Pattern réutilisable autres sites Memora avec Shell API KO. Codename git-pull-endpoint.
  *   1.19.10 · 2026-05-19 · #249 SEO hygiene collections vides : masque sur listing + noindex auto sous seuil 3 outils. Audit S97 a montré 2 collections accessibles publiquement avec 0/1 outil (top-outils-ia-enseignants-quebec, meilleurs-outils-ia-redaction-francais) — indexables par Google = signal SEO maigre. Fix DRY architectural : (1) `CollectionController::index()` ajoute `->having('tools_count', '>', 0)` après `withCount('tools')` → masque les collections vides de la pagination publique `/collections` ; (2) `CollectionController::show()` charge `withCount('tools')` pour exposer `tools_count` à la vue ; (3) `Modules/Directory/resources/views/public/collections/show.blade.php` injecte conditionnellement `<meta name="robots" content="noindex,follow">` quand `tools_count < 3` (seuil sparse, follow conservé pour que les outils référencés restent crawlables). URL directe RESTE accessible (pas de 404 destructif sur slugs existants ni rupture SEO de backlinks externes) — juste signal noindex au crawler. Pattern réutilisable : tout listing avec `withCount` peut filtrer pareil + tout `show` peut injecter noindex sous seuil. Aucun changement DB. Codename collections-noindex-sparse.
  *   1.19.9 · 2026-05-19 · #248 fix /stats robustesse query concentrés (case-insensitive + accent-flexible). Diagnostic local (tinker queries) : pattern actuel `title->fr_CA LIKE '%Concentré%'` retourne 0 matches local, alors que `%oncentr%` matche 3. Cause : titres réels en DB commencent par "Le **c**oncentré de la dernière semaine..." (c minuscule). En prod 4 matches affichés (collation utf8mb4_unicode_ci permet case-insensitive sur certaines configs, mais brittle selon serveur). Fix : `whereRaw LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, '$.fr_CA'))) LIKE '%concentr%'` — case-insensitive forcé + sans accent (matche concentré/Concentré/concentre/Concentre). Concernant le diagnostic anomalie 29 termes glossaire `is_published=0` : LOCAL DB n'a aucun terme unpublished (128 published / 128 total) ; le delta 256 prod vs 285 mémoire S91 est probablement dû à des insertions S91 partielles (slugs doublons rejetés pré-INSERT vérifié) ou un chiffre mémoire approximatif — 256 est probablement la vérité DB, pas un bug. Codename stats-concentre-robust.
@@ -69,17 +70,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 19,
-    'patch' => 11,
+    'patch' => 12,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'git-pull-endpoint',
+    'codename' => 'statut-charte-memora',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.19.11',
+    'semver' => '1.19.12',
 ];
