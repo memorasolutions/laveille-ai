@@ -5,6 +5,15 @@
 @section('meta_description', $collection->description ?: 'Collection d\'outils ' . $collection->name . ' — ' . $collection->tools->count() . ' outils sélectionnés.')
 
 @push('head')
+{{-- #249 — noindex auto si collection sparse (< 3 outils). URL reste accessible aux utilisateurs
+     mais Google/Bing/Perplexity ne l'indexent pas (évite SEO maigre, follow=true pour que les outils
+     référencés restent crawlables). --}}
+@if(($collection->tools_count ?? $collection->tools->count()) < 3)
+<meta name="robots" content="noindex,follow">
+@endif
+@endpush
+
+@push('head')
 @php
     // Schema.org ItemList — best practice 2026 SEO/AI Overviews #43 S90
     $itemListJsonLd = json_encode([
