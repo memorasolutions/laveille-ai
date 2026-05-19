@@ -4466,16 +4466,16 @@
         },
         {
             "name": "memora/statut",
-            "version": "v0.1.2",
+            "version": "v0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/memorasolutions/statut.git",
-                "reference": "8edbe793b3abdb2e6e3cd90291dd014d81755dab"
+                "reference": "676b553f6c7bae22e0b2e96fa194db4dcec2ed54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/memorasolutions/statut/zipball/8edbe793b3abdb2e6e3cd90291dd014d81755dab",
-                "reference": "8edbe793b3abdb2e6e3cd90291dd014d81755dab",
+                "url": "https://api.github.com/repos/memorasolutions/statut/zipball/676b553f6c7bae22e0b2e96fa194db4dcec2ed54",
+                "reference": "676b553f6c7bae22e0b2e96fa194db4dcec2ed54",
                 "shasum": ""
             },
             "require": {
@@ -4528,7 +4528,7 @@
                 "issues": "https://github.com/memorasolutions/statut/issues",
                 "source": "https://github.com/memorasolutions/statut"
             },
-            "time": "2026-05-19T11:57:34+00:00"
+            "time": "2026-05-19T17:13:50+00:00"
         },
         {
             "name": "mews/purifier",

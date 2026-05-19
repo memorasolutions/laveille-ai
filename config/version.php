@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.19.13 · 2026-05-19 · #252 upgrade memora/statut v0.1.2 → v0.1.4 (endpoints Robotalp réels + header ApiKey + timestamps ms). Le paquet v0.1.2 utilisait des paths HTTP inexistants (`workspace/{id}/robots/status/` au lieu de `robot/status/{id}/`) + header `Token` au lieu de `ApiKey`, causant échec total /statut prod (bannière « plateforme de surveillance temporairement indisponible »). v0.1.4 (publié upstream 2026-05-19) corrige les 5 endpoints + auth + parsing timestamps. Aucune modif `.env` requise (STATUT_ROBOTALP_* déjà en place). Smoke local /statut OK : 9 moniteurs, 6 UP, 0 DOWN, 2 PAUSED. Codename statut-v014-fix.
  *   1.19.12 · 2026-05-19 · #251 /statut charte Memora (custom views override). User a flagué la page « hors charte » (#21). Fix architectural propre : `php artisan vendor:publish --tag=statut-views` → publie 6 vues Blade dans `resources/views/vendor/statut/` (override hors vendor/, robuste à composer update memora/statut). Customisation `index.blade.php` aux tokens charte officielle : `--statut-fg: #064E5A` (teal primary), `--statut-accent: #C2410C` (orange), `--statut-down: #C2410C` (orange remplace red), `--statut-bg: #F8FAFB` (cream charte), font-family Plus Jakarta Sans (titres) + DM Sans (corps), card box-shadow + border-radius 1.25rem (cohérence layouts Memora), h2 bordure inférieure 2px charte, empty state stylé en card dashed (pas juste italic). Mode dark adapté aux mêmes tokens (#051a1f bg + #0d3d46 cards). Aucun changement de logique blade (logic vendor préservée 1:1). Composants monitor-card/incident-card/badge-global/error-banner non touchés cette release (utilisent déjà CSS variables héritées). Codename statut-charte-memora.
  *   1.19.11 · 2026-05-19 · #250 endpoint `public/_lvgit.php` token-protégé pour git pull prod (resync SHA). Cause : Shell API cPanel désactivée → chaque deploy bypassait git via multi cpanel_file_write (lourd, SHA git prod stuck à 8d0699e3 alors que local poussé jusqu'à v1.19.10). Fix : script PHP permanent dans public/ qui lit `LV_GIT_TOKEN` depuis .env (sans booter Laravel pour rapidité), valide via hash_equals, puis exec git fetch + reset --hard origin/master + log -1 + status -s via proc_open (allowlist commandes git uniquement). Headers X-Robots-Tag noindex/nofollow. Token 64-char hex (.env.example placeholder vide, .env prod à compléter avec valeur générée localement via `openssl rand -hex 32`). Usage futur : `git push && curl https://laveille.ai/_lvgit.php?t=$TOKEN` → SHA prod sync en 1 requête au lieu de N cpanel_file_write. Pattern réutilisable autres sites Memora avec Shell API KO. Codename git-pull-endpoint.
  *   1.19.10 · 2026-05-19 · #249 SEO hygiene collections vides : masque sur listing + noindex auto sous seuil 3 outils. Audit S97 a montré 2 collections accessibles publiquement avec 0/1 outil (top-outils-ia-enseignants-quebec, meilleurs-outils-ia-redaction-francais) — indexables par Google = signal SEO maigre. Fix DRY architectural : (1) `CollectionController::index()` ajoute `->having('tools_count', '>', 0)` après `withCount('tools')` → masque les collections vides de la pagination publique `/collections` ; (2) `CollectionController::show()` charge `withCount('tools')` pour exposer `tools_count` à la vue ; (3) `Modules/Directory/resources/views/public/collections/show.blade.php` injecte conditionnellement `<meta name="robots" content="noindex,follow">` quand `tools_count < 3` (seuil sparse, follow conservé pour que les outils référencés restent crawlables). URL directe RESTE accessible (pas de 404 destructif sur slugs existants ni rupture SEO de backlinks externes) — juste signal noindex au crawler. Pattern réutilisable : tout listing avec `withCount` peut filtrer pareil + tout `show` peut injecter noindex sous seuil. Aucun changement DB. Codename collections-noindex-sparse.
@@ -70,17 +71,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 19,
-    'patch' => 12,
+    'patch' => 13,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'statut-charte-memora',
+    'codename' => 'statut-v014-fix',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.19.12',
+    'semver' => '1.19.13',
 ];
