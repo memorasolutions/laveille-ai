@@ -90,8 +90,26 @@ return [
         // #161 (2026-05-06) — transport custom Brevo (API HTTP) enregistré via
         // Modules\Newsletter\Providers\NewsletterServiceProvider::boot() Mail::extend('brevo').
         // Aucune SMTP key requise : reuse BREVO_API_KEY existant.
+        // RÉSERVÉ NEWSLETTER (bulk campaigns via BrevoService::sendCampaignEmail). Tous
+        // les Mailables transactionnels doivent utiliser le mailer 'workspace' ci-dessous.
         'brevo' => [
             'transport' => 'brevo',
+        ],
+
+        // #255 (2026-05-19) — SMTP Google Workspace pour mails TRANSACTIONNELS uniquement
+        // (RegistrationAttemptMail, WelcomeMail, DigestMail, FiscalRatesReminderMail,
+        // ArticleSubmissionNotification, AbandonmentReminderMail, HealthCheckReportMail).
+        // Préserve le quota Brevo pour les vraies campagnes newsletter (bulk).
+        // Credentials prefixés WORKSPACE_MAIL_* pour éviter conflit avec MAIL_* (Brevo default).
+        'workspace' => [
+            'transport' => 'smtp',
+            'host' => env('WORKSPACE_MAIL_HOST', 'smtp.gmail.com'),
+            'port' => env('WORKSPACE_MAIL_PORT', 587),
+            'encryption' => env('WORKSPACE_MAIL_ENCRYPTION', 'tls'),
+            'username' => env('WORKSPACE_MAIL_USERNAME'),
+            'password' => env('WORKSPACE_MAIL_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
         'failover' => [

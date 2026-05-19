@@ -14,10 +14,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Modules\Blog\Models\Article;
+use Modules\Core\Mail\Traits\RoutesToWorkspaceMailer;
 
 class ArticleSubmissionNotification extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RoutesToWorkspaceMailer, SerializesModels;
 
     public function __construct(
         public Article $article,

@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Modules\Core\Mail\Traits\RoutesToWorkspaceMailer;
 
 /**
  * Rapport hebdomadaire santé des outils annuaire — admin valide manuellement (pas d'auto-mark).
@@ -17,7 +18,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class HealthCheckReportMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RoutesToWorkspaceMailer, SerializesModels;
 
     public function __construct(
         public int $totalChecked,

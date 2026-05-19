@@ -17,10 +17,11 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Support\Collection;
+use Modules\Core\Mail\Traits\RoutesToWorkspaceMailer;
 
 class DigestMail extends Mailable implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, RoutesToWorkspaceMailer;
 
     public function __construct(public User $user, public Collection $notifications) {}
 

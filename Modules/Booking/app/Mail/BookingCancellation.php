@@ -14,15 +14,18 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Booking\Models\Appointment;
+use Modules\Core\Mail\Traits\RoutesToWorkspaceMailer;
 
 class BookingCancellation extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RoutesToWorkspaceMailer, SerializesModels;
 
     public function __construct(public Appointment $appointment) {}
 
     public function build(): static
     {
+        $this->routeToWorkspaceMailer();
+
         return $this->subject('Annulation de votre rendez-vous')
             ->markdown('booking::emails.cancellation')
             ->with([

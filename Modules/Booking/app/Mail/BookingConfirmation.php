@@ -15,15 +15,18 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Booking\Models\Appointment;
 use Modules\Booking\Services\ICalService;
+use Modules\Core\Mail\Traits\RoutesToWorkspaceMailer;
 
 class BookingConfirmation extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RoutesToWorkspaceMailer, SerializesModels;
 
     public function __construct(public Appointment $appointment) {}
 
     public function build(): static
     {
+        $this->routeToWorkspaceMailer();
+
         $icsContent = app(ICalService::class)->generateCalendar(
             collect([$this->appointment->load(['service'])]),
             'Rendez-vous'

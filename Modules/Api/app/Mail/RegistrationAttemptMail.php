@@ -16,6 +16,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Modules\Core\Mail\Traits\RoutesToWorkspaceMailer;
 
 /**
  * Courriel transactionnel envoyé au propriétaire d'un compte EXISTANT lorsqu'une
@@ -30,7 +31,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class RegistrationAttemptMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RoutesToWorkspaceMailer, SerializesModels;
 
     public function __construct(public User $user) {}
 

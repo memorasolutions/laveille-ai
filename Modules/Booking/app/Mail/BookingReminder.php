@@ -14,10 +14,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Booking\Models\Appointment;
+use Modules\Core\Mail\Traits\RoutesToWorkspaceMailer;
 
 class BookingReminder extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, RoutesToWorkspaceMailer, SerializesModels;
 
     public function __construct(
         public Appointment $appointment,
@@ -26,6 +27,8 @@ class BookingReminder extends Mailable
 
     public function build(): static
     {
+        $this->routeToWorkspaceMailer();
+
         return $this->subject('Rappel : votre rendez-vous dans '.$this->hoursBeforeLabel)
             ->markdown('booking::emails.reminder')
             ->with([
