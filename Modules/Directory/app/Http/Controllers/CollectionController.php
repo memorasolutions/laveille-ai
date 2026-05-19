@@ -13,10 +13,16 @@ use Modules\Directory\Models\ToolCollection;
 
 class CollectionController extends Controller
 {
+    /**
+     * #249 — Listing public masque les collections vides (tools_count = 0) pour éviter de pousser
+     * du contenu maigre vers les utilisateurs et les crawlers SEO. URL directe reste accessible
+     * (cf show() qui ajoute un noindex meta sous le seuil de 3 outils).
+     */
     public function index(): View
     {
         $collections = ToolCollection::where('is_public', true)
             ->withCount('tools')
+            ->having('tools_count', '>', 0)
             ->latest()
             ->paginate(12);
 
@@ -28,6 +34,7 @@ class CollectionController extends Controller
         $collection = ToolCollection::where('slug', $slug)
             ->where('is_public', true)
             ->with('tools')
+            ->withCount('tools')
             ->firstOrFail();
 
         return view('directory::public.collections.show', compact('collection'));
