@@ -22,7 +22,10 @@ class StatsController extends Controller
 {
     public function index(): View
     {
-        $stats = Cache::remember('frontstats:public:v1', 3600, function (): array {
+        // #245 — TTL réduit 3600 → 300 (5 min) pour auto-refresh quasi temps réel quand on ajoute
+        // contenu (outils, articles, termes glossaire). Bump clé v1 → v2 force recomputation
+        // post-déploiement après fix bug glossary status → is_published.
+        $stats = Cache::remember('frontstats:public:v2', 300, function (): array {
             return [
                 'tools_total' => $this->countIfTable('directory_tools', fn ($q) => $q->where('status', 'published')),
                 'tools_with_education' => $this->countIfTable('directory_tools', fn ($q) => $q->where('status', 'published')->where('has_education_pricing', 1)),
@@ -35,7 +38,7 @@ class StatsController extends Controller
                 'concentres_published' => $this->countIfTable('articles', fn ($q) => $q->whereNotNull('published_at')->where('published_at', '<=', now())->where(function ($qq) {
                     $qq->where('title->fr_CA', 'like', '%Concentré%')->orWhere('title->fr', 'like', '%Concentré%');
                 })),
-                'glossary_terms' => $this->countIfTable('dictionary_terms', fn ($q) => $q->where('status', 'published')),
+                'glossary_terms' => $this->countIfTable('dictionary_terms', fn ($q) => $q->where('is_published', 1)),
                 'acronyms' => $this->countIfTable('acronyms'),
                 'interactive_tools' => $this->countIfTable('tools', fn ($q) => $q->where('is_active', 1)),
                 'last_tool_added' => $this->lastDateIfTable('directory_tools', 'created_at'),
