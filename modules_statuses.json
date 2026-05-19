@@ -1,7 +1,7 @@
 {
     "ABTest": false,
     "AI": true,
-    "Api": false,
+    "Api": true,
     "Auth": true,
     "Backoffice": true,
     "Backup": false,
