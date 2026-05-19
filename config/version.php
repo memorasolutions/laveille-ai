@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.19.14 · 2026-05-19 · #253 /statut hero charte Memora aligné autres pages (a-propos/contact/faq). Cause : la page /statut affichait un header local (label « La veille » + H1 teal inline + sous-titre) au lieu du HERO PLEINE LARGEUR gradient marine (`linear-gradient(135deg, #1a1d23 → #3f4451)`) + H1 blanc + breadcrumb « Accueil / X » utilisé partout ailleurs sur le site (signature visuelle laveille.ai). Le layout `fronttheme::layouts.master` expose deux yields séparés `@yield('breadcrumb')` (ligne 239) puis `@yield('content')` (ligne 266) ; le partial canonique `Modules/FrontTheme/resources/views/partials/breadcrumb.blade.php` produit la section `.wpo-breadcumb-area` (h=400px pleine largeur, fond gradient, h2 blanc, breadcrumb ul + JSON-LD BreadcrumbList Schema.org). Fix dans `resources/views/vendor/statut/index.blade.php` (override Blade hors vendor/, robuste à composer update memora/statut) : (a) ajout `@section('breadcrumb')` au niveau racine de la vue (en dehors de `@section('statut-content')`), incluant `fronttheme::partials.breadcrumb` avec `breadcrumbTitle = 'État des services'` (locale fr_CA via `__('statut::messages.page_title')`) et `breadcrumbItems = ['Statut des services']` → la section traverse `statut::layouts.statut` jusqu'au layout master grâce au mécanisme Blade natif de propagation des sections. (b) Suppression du `<header class="statut-header">` redondant (logo brand + H1 + subtitle) — le H1 et le breadcrumb sont maintenant dans le hero, le subtitle est conservé en intro douce sous le hero (`<p class="statut-subtitle">`). Validation Playwright local : hero rendu pleine largeur (1672×400px), H1 blanc « État des services » contraste 9.35:1 vs gradient (AAA OK), breadcrumb « Accueil / Statut des services », gradient identique à /page/a-propos (rgb 26,29,35 → 45,48,57 → 63,68,81). Aucun changement DB. Aucun cron temporaire créé. Aucun touch au paquet vendor/memora/statut/. Logique Blade vendor (variables $monitors, $incidents, $overview, $hasError, $brand) préservée 1:1. Codename statut-hero-charte.
  *   1.19.13 · 2026-05-19 · #252 upgrade memora/statut v0.1.2 → v0.1.4 (endpoints Robotalp réels + header ApiKey + timestamps ms). Le paquet v0.1.2 utilisait des paths HTTP inexistants (`workspace/{id}/robots/status/` au lieu de `robot/status/{id}/`) + header `Token` au lieu de `ApiKey`, causant échec total /statut prod (bannière « plateforme de surveillance temporairement indisponible »). v0.1.4 (publié upstream 2026-05-19) corrige les 5 endpoints + auth + parsing timestamps. Aucune modif `.env` requise (STATUT_ROBOTALP_* déjà en place). Smoke local /statut OK : 9 moniteurs, 6 UP, 0 DOWN, 2 PAUSED. Codename statut-v014-fix.
  *   1.19.12 · 2026-05-19 · #251 /statut charte Memora (custom views override). User a flagué la page « hors charte » (#21). Fix architectural propre : `php artisan vendor:publish --tag=statut-views` → publie 6 vues Blade dans `resources/views/vendor/statut/` (override hors vendor/, robuste à composer update memora/statut). Customisation `index.blade.php` aux tokens charte officielle : `--statut-fg: #064E5A` (teal primary), `--statut-accent: #C2410C` (orange), `--statut-down: #C2410C` (orange remplace red), `--statut-bg: #F8FAFB` (cream charte), font-family Plus Jakarta Sans (titres) + DM Sans (corps), card box-shadow + border-radius 1.25rem (cohérence layouts Memora), h2 bordure inférieure 2px charte, empty state stylé en card dashed (pas juste italic). Mode dark adapté aux mêmes tokens (#051a1f bg + #0d3d46 cards). Aucun changement de logique blade (logic vendor préservée 1:1). Composants monitor-card/incident-card/badge-global/error-banner non touchés cette release (utilisent déjà CSS variables héritées). Codename statut-charte-memora.
  *   1.19.11 · 2026-05-19 · #250 endpoint `public/_lvgit.php` token-protégé pour git pull prod (resync SHA). Cause : Shell API cPanel désactivée → chaque deploy bypassait git via multi cpanel_file_write (lourd, SHA git prod stuck à 8d0699e3 alors que local poussé jusqu'à v1.19.10). Fix : script PHP permanent dans public/ qui lit `LV_GIT_TOKEN` depuis .env (sans booter Laravel pour rapidité), valide via hash_equals, puis exec git fetch + reset --hard origin/master + log -1 + status -s via proc_open (allowlist commandes git uniquement). Headers X-Robots-Tag noindex/nofollow. Token 64-char hex (.env.example placeholder vide, .env prod à compléter avec valeur générée localement via `openssl rand -hex 32`). Usage futur : `git push && curl https://laveille.ai/_lvgit.php?t=$TOKEN` → SHA prod sync en 1 requête au lieu de N cpanel_file_write. Pattern réutilisable autres sites Memora avec Shell API KO. Codename git-pull-endpoint.
@@ -71,17 +72,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 19,
-    'patch' => 13,
+    'patch' => 14,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'statut-v014-fix',
+    'codename' => 'statut-hero-charte',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.19.13',
+    'semver' => '1.19.14',
 ];

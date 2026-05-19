@@ -1,5 +1,16 @@
 @extends('statut::layouts.statut')
 
+{{-- #253 — Hero charte Memora pleine largeur (gradient marine + H1 blanc + breadcrumb).
+     Aligné sur /page/a-propos, /contact, /faq via le partial fronttheme::partials.breadcrumb.
+     Le layout master expose deux yields séparés : @yield('breadcrumb') puis @yield('content'),
+     donc on injecte le hero ici tout en conservant le contenu existant dans 'statut-content'. --}}
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', [
+        'breadcrumbTitle' => __('statut::messages.page_title'),
+        'breadcrumbItems' => [__('Statut des services')],
+    ])
+@endsection
+
 @section('statut-content')
     {{-- #251 — Charte Memora laveille.ai : tokens primary teal #064E5A + accent orange #C2410C
          + font Plus Jakarta Sans (titres) / DM Sans (corps). Override package vendor view via
@@ -211,24 +222,9 @@
     </noscript>
 
     <main class="statut-page" role="main" aria-label="{{ __('statut::messages.page_title') }}">
-        <header class="statut-header">
-            @if(!empty($brand['name']) || !empty($brand['logo']))
-                <div class="statut-brand">
-                    @if(!empty($brand['logo']))
-                        <img src="{{ $brand['logo'] }}" alt="{{ $brand['name'] ?? '' }}" loading="lazy">
-                    @endif
-                    @if(!empty($brand['url']))
-                        <a href="{{ $brand['url'] }}" class="statut-brand-name" rel="noopener noreferrer">{{ $brand['name'] ?? '' }}</a>
-                    @elseif(!empty($brand['name']))
-                        <span class="statut-brand-name">{{ $brand['name'] }}</span>
-                    @endif
-                </div>
-            @endif
-            <div class="statut-title-block">
-                <h1>{{ __('statut::messages.page_title') }}</h1>
-                <p class="statut-subtitle">{{ __('statut::messages.page_subtitle') }}</p>
-            </div>
-        </header>
+        {{-- #253 — Header local supprimé : H1 + breadcrumb désormais dans le hero charte
+             ('breadcrumb' section ci-dessus). Subtitle déplacée en intro douce ci-dessous. --}}
+        <p class="statut-subtitle">{{ __('statut::messages.page_subtitle') }}</p>
 
         @if($hasError)
             @include('statut::components.error-banner')
