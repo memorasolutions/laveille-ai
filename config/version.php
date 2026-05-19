@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.19.9 · 2026-05-19 · #248 fix /stats robustesse query concentrés (case-insensitive + accent-flexible). Diagnostic local (tinker queries) : pattern actuel `title->fr_CA LIKE '%Concentré%'` retourne 0 matches local, alors que `%oncentr%` matche 3. Cause : titres réels en DB commencent par "Le **c**oncentré de la dernière semaine..." (c minuscule). En prod 4 matches affichés (collation utf8mb4_unicode_ci permet case-insensitive sur certaines configs, mais brittle selon serveur). Fix : `whereRaw LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, '$.fr_CA'))) LIKE '%concentr%'` — case-insensitive forcé + sans accent (matche concentré/Concentré/concentre/Concentre). Concernant le diagnostic anomalie 29 termes glossaire `is_published=0` : LOCAL DB n'a aucun terme unpublished (128 published / 128 total) ; le delta 256 prod vs 285 mémoire S91 est probablement dû à des insertions S91 partielles (slugs doublons rejetés pré-INSERT vérifié) ou un chiffre mémoire approximatif — 256 est probablement la vérité DB, pas un bug. Codename stats-concentre-robust.
  *   1.19.8 · 2026-05-19 · #247 fix UX hero homepage chips collections vides. User a flagué `https://laveille.ai/collections/top-outils-ia-enseignants-quebec` vide. Audit 6 chips du hero comparateur (Modules/FrontTheme/resources/views/home.blade.php:391-400) via curl `[0-9]+ outils?` : top-outils-ia-enseignants-quebec = 0 outils (collection vide), meilleurs-outils-ia-redaction-francais = 1 outil (sparse), 4 autres = 6 outils OK. Fix : remplace les 2 chips problématiques par des collections existantes avec 6 outils : (a) `top-outils-ia-enseignants-quebec` → `stack-enseignant-primaire-quebec` (thème enseignant préservé, label « 🎓 Stack enseignants »), (b) `meilleurs-outils-ia-redaction-francais` → `stack-marketeur-pme-quebec` (varie persona, label « 📣 Stack marketeur PME »). Toutes 6 chips pointent maintenant vers des collections ≥ 6 outils (vérifié curl 2026-05-19). Pas de modification DB : les 2 collections vides restent accessibles via URL directe (404 SEO non-régressé) ; nettoyage permanent à venir task #27 (scope `withMinimumTools` + noindex auto). Codename hero-chips-empty-fix.
  *   1.19.7 · 2026-05-19 · #246 fix C-01 module Api flag inconsistance (audit S97). Cause : `modules_statuses.json` déclarait `"Api": false` mais `routes/api/v1.php` (chargé directement par `bootstrap/app.php` ligne 18, hors mécanisme nwidart) restait actif → 15+ routes `/api/v1/*` (login/register/articles/plans/newsletter/users/notifications) exposées malgré module désactivé. Inconsistance dangereuse : un opérateur qui désactive Api dans l'admin Backoffice croyait fermer la surface, sans effet réel. Fix : flip `"Api": false → true` — déclare la réalité de prod (l'API est documentée sur `/api` page publique + consommée par crawlers/intégrateurs). Pas de duplication route : `Modules/Api/routes/api.php` est vide (juste un commentaire qui redirige vers `routes/api/v1.php`). Activation du module Api enregistre maintenant son ServiceProvider (BaseApiController + UserController accessibles via DI normal, push subscription controller, etc.). Aucun changement DB. Aucun nouveau cron. Aucune nouvelle route ni middleware. Codename api-module-flag-fix.
  *   1.19.6 · 2026-05-19 · #245 fix page /stats — chiffre glossaire incorrect (0) + TTL auto-refresh 1h → 5min. User a flagué via screenshot 2026-05-19 09:35 que certains chiffres sont faux. Audit `Modules/FrontTheme/app/Http/Controllers/StatsController.php` + visualisation Playwright prod : (1) « Termes du glossaire IA = 0 » → bug confirmé, le query `dictionary_terms where status='published'` cible une colonne `status` (string) qui N'EXISTE PAS dans la table — le vrai schéma (migration `2026_03_20_000002_create_dictionary_tables.php:35`) déclare `is_published` (boolean default true). `countIfTable()` wrap try/catch et retourne 0 silencieusement sur SQL error → 0 affiché. Fix : `->where('status', 'published')` → `->where('is_published', 1)` ; attendu prod ≥ 285 termes (mémoire S91 a inséré ids 248-285). (2) TTL `Cache::remember('frontstats:public:v1', 3600, ...)` → `'frontstats:public:v2', 300, ...` (bump clé pour invalider l'ancienne en cache + délai max 5 min entre ajout et reflet dans /stats). User veut auto-update quand on ajoute du contenu, donc 5 min est proche-temps-réel. Pour vraiment instant, il faudrait des Eloquent observers sur Tool/Article/DictionaryTerm saved/deleted → `Cache::forget('frontstats:public:v2')` (à faire en task séparée #25b si besoin). Autres chiffres affichés (331 outils, 61 éducation, 1156 tutos, 21 collections, 58 articles, 13 outils interactifs) semblent cohérents — pas de bug détecté hors glossaire ; les « 4 concentrés hebdo » via `title->fr_CA like %Concentré%` à valider avec user (semble bas vs cadence hebdo depuis 2025). Codename stats-glossary-fix.
@@ -66,17 +67,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 19,
-    'patch' => 8,
+    'patch' => 9,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'hero-chips-empty-fix',
+    'codename' => 'stats-concentre-robust',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.19.8',
+    'semver' => '1.19.9',
 ];

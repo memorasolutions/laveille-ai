@@ -35,8 +35,12 @@ class StatsController extends Controller
                 'tutorials_en' => $this->countIfTable('directory_resources', fn ($q) => $q->where('language', 'en')->where('is_approved', 1)),
                 'tutorials_total' => $this->countIfTable('directory_resources', fn ($q) => $q->where('is_approved', 1)),
                 'articles_published' => $this->countIfTable('articles', fn ($q) => $q->whereNotNull('published_at')->where('published_at', '<=', now())),
+                // #248 — match case-insensitive + accent-flexible ('concentr' sans accent matche
+                // "concentré"/"Concentré"/"Concentre"). Diagnostic 2026-05-19 : titres réels en DB
+                // commencent par "Le concentré..." (c minuscule) → ancien LIKE %Concentré% fragile.
                 'concentres_published' => $this->countIfTable('articles', fn ($q) => $q->whereNotNull('published_at')->where('published_at', '<=', now())->where(function ($qq) {
-                    $qq->where('title->fr_CA', 'like', '%Concentré%')->orWhere('title->fr', 'like', '%Concentré%');
+                    $qq->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(`title`, '$.fr_CA'))) LIKE '%concentr%'")
+                       ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(`title`, '$.fr'))) LIKE '%concentr%'");
                 })),
                 'glossary_terms' => $this->countIfTable('dictionary_terms', fn ($q) => $q->where('is_published', 1)),
                 'acronyms' => $this->countIfTable('acronyms'),
