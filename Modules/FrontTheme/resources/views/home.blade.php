@@ -366,14 +366,14 @@
         {{-- Section CTA comparateur + collections (#43 S90 — exposition feature comparateur + 21 collections/stacks curatées) --}}
         <section class="hp-section" aria-labelledby="cta-compare-title" style="padding: 36px 0;">
             <div class="container">
-                <div style="background: linear-gradient(135deg, #064E5A 0%, #0B7285 100%); border-radius: 16px; padding: clamp(28px, 4vw, 44px) clamp(22px, 3vw, 38px); color: #fff; box-shadow: 0 12px 30px rgba(6, 78, 90, 0.25);">
+                <div style="background: #064E5A; border-radius: 16px; padding: clamp(28px, 4vw, 44px) clamp(22px, 3vw, 38px); color: #fff; box-shadow: 0 12px 30px rgba(6, 78, 90, 0.25);">
                     <div style="display: grid; grid-template-columns: 1fr; gap: 22px; align-items: center;" class="cta-compare-grid">
                         <div>
-                            <p style="margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; font-weight: 700; opacity: 0.85;">{{ __('Nouveau · 2026') }}</p>
-                            <h2 id="cta-compare-title" style="margin: 0 0 8px; font-weight: 800; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; letter-spacing: -0.3px;">
+                            <p style="margin: 0 0 6px; text-transform: uppercase; letter-spacing: 1.5px; font-size: 12px; font-weight: 700; color: #fff;">{{ __('Nouveau · 2026') }}</p>
+                            <h2 id="cta-compare-title" style="margin: 0 0 8px; font-weight: 800; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; letter-spacing: -0.3px; color: #fff;">
                                 {{ __('Comparez 6 outils IA côte à côte') }}
                             </h2>
-                            <p style="margin: 0 0 14px; font-size: 15.5px; line-height: 1.55; opacity: 0.93;">
+                            <p style="margin: 0 0 14px; font-size: 15.5px; line-height: 1.55; color: #fff;">
                                 {{ __("Sélectionnez vos candidats dans l'annuaire et obtenez un tableau comparatif instantané : pricing, programme éducation, fonctionnalités clés, alternatives. Idéal pour choisir la bonne stack avant d'engager des budgets.") }}
                             </p>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -381,7 +381,7 @@
                                     🔀 {{ __('Ouvrir le comparateur') }}
                                 </a>
                                 @if(Route::has('collections.index'))
-                                    <a href="{{ route('collections.index') }}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); color: #fff; font-weight: 700; padding: 12px 22px; border-radius: 50px; text-decoration: none; min-height: 44px; line-height: 20px; border: 1px solid rgba(255,255,255,0.25);">
+                                    <a href="{{ route('collections.index') }}" style="display: inline-flex; align-items: center; gap: 6px; background: transparent; color: #fff; font-weight: 700; padding: 12px 22px; border-radius: 50px; text-decoration: none; min-height: 44px; line-height: 20px; border: 2px solid #fff;">
                                         📚 {{ __('21 collections & stacks curatés') }}
                                     </a>
                                 @endif
@@ -399,7 +399,7 @@
                                 ];
                             @endphp
                             @foreach($featuredCollections as $cslug => $clabel)
-                                <a href="{{ url('/collections/' . $cslug) }}" style="display: inline-block; background: rgba(255,255,255,0.18); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.25); transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.28)'" onmouseout="this.style.background='rgba(255,255,255,0.18)'">{{ $clabel }}</a>
+                                <a href="{{ url('/collections/' . $cslug) }}" style="display: inline-block; background: transparent; color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; text-decoration: none; border: 2px solid rgba(255,255,255,0.55); transition: border-color 0.15s, text-decoration 0.15s;" onmouseover="this.style.borderColor='#fff';this.style.textDecoration='underline'" onmouseout="this.style.borderColor='rgba(255,255,255,0.55)';this.style.textDecoration='none'" onfocus="this.style.borderColor='#fff';this.style.textDecoration='underline'" onblur="this.style.borderColor='rgba(255,255,255,0.55)';this.style.textDecoration='none'">{{ $clabel }}</a>
                             @endforeach
                         </div>
                     </div>
