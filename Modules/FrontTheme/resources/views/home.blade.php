@@ -389,12 +389,16 @@
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px;">
                             @php
+                                // #247 — collections audit 2026-05-19 : top-outils-ia-enseignants-quebec (0 outils)
+                                // et meilleurs-outils-ia-redaction-francais (1 outil) remplacées par des collections
+                                // avec 6 outils chacune pour éviter pages vides au clic. Toutes les 6 chips ci-dessous
+                                // pointent maintenant vers collections ≥ 6 outils (vérifié curl 2026-05-19).
                                 $featuredCollections = [
-                                    'top-outils-ia-enseignants-quebec' => '🎓 Top enseignants',
+                                    'stack-enseignant-primaire-quebec' => '🎓 Stack enseignants',
                                     'stack-startup-saas-quebec' => '🚀 Stack startup SaaS',
                                     'stack-etudiant-universitaire-quebec' => '📖 Stack étudiant',
                                     'stack-developpeur-full-stack-2026' => '💻 Stack développeur',
-                                    'meilleurs-outils-ia-redaction-francais' => '✍️ Rédaction français',
+                                    'stack-marketeur-pme-quebec' => '📣 Stack marketeur PME',
                                     'ia-creation-images-illustrations' => '🎨 Images & illustrations',
                                 ];
                             @endphp
