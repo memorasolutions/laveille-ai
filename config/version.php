@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.19.5 · 2026-05-19 · #244 fix sécurité M-03 sudoku leaderboard anti-pollution (audit security-auditor-fr S97). Vulnérabilité : `POST /api/sudoku/score` acceptait soumissions anonymes (pas d'`auth:sanctum`) avec `pseudo` libre + score arbitraire ; un attaquant connaissant la solution d'une grille (récupérable via `GET /api/sudoku/puzzle/easy` publique) pouvait polluer le top du leaderboard avec n'importe quel pseudo en respectant juste le seuil anti-cheat `MIN_TIMES[difficulty]` (60s/120s/180s/240s/300s selon difficulté). Fix minimal 1-ligne `ScoreApiController.php:62` : ajout `&& $request->user() !== null` à la condition `$isPublished` → les scores anonymes restent enregistrés en DB (rangs `rank_today`/`rank_week` toujours renvoyés dans réponse API pour UX), MAIS `is_published_in_leaderboard=false` → invisibles dans toutes les requêtes publiques `scopePublished()` (LeaderboardController). Pattern défense en profondeur : la colonne `is_published_in_leaderboard` existait depuis migration `2026_05_06_100001`, déjà utilisée pour l'anti-cheat temps-trop-court (`time_seconds < MIN_TIMES[difficulty]`), juste enrichie. UX préservée : joueurs anonymes peuvent toujours jouer + voir leur rang en privé via réponse API, encouragés à s'authentifier pour publier. Existing data : scores anonymes déjà publiés en DB conservés (pas de backfill destructif sans GO user — task #246 si nécessaire). Aucun changement DB. Aucun nouveau cron. Codename sudoku-leaderboard-auth.
  *   1.19.4 · 2026-05-19 · #243 fix locale fr_CA page /statut (anglais en prod malgré APP_LOCALE=fr_CA). Cause racine : paquet `memora/statut` v0.1.2 fournit traductions dans `resources/lang/{fr,en}/messages.php` mais Laravel cherche match exact `fr_CA/messages.php` → introuvable → bascule sur fallback `en/` (= screenshot user 2026-05-19 09:26 montrant "Service status" / "No monitor configured" / "Real-time availability"). Fix local override Laravel 11 sans toucher au vendor : `php artisan vendor:publish --tag=statut-lang` → publie dans `lang/vendor/statut/{fr,en}/messages.php` ; `cp -r lang/vendor/statut/fr lang/vendor/statut/fr_CA` → crée variante fr_CA. Laravel charge automatiquement `lang/vendor/{namespace}/{locale}/` avant le vendor. Smoke local `curl /statut` confirme rendu "État des services" / "Disponibilité en temps réel" / "Aucun moniteur configuré". Robuste à `composer update memora/statut` (override hors vendor/). PR upstream à envisager pour publier fr_CA nativement. Le bandeau "plateforme de surveillance temporairement indisponible" est un signal Robotalp à investiguer séparément (#244 backlog : workspace 364200 peut être vide ou clé API expirée). Codename statut-fr-locale.
  *   1.19.3 · 2026-05-19 · #242 fix sécurité M-01 CORS allowed_origins (audit security-auditor-fr S97). Cause : `config/cors.php:14` avait `env('FRONTEND_URL', 'http://localhost:3000')` comme default avec `supports_credentials: true` → en prod où `FRONTEND_URL` n'était pas défini, `http://localhost:3000` devenait une origine CORS autorisée avec cookies de session = vecteur CSRF cross-origin si un dev expose un port 3000 sur le même réseau qu'une session admin authentifiée. Fix defense in depth 3 niveaux : (1) `config/cors.php` default changé `'http://localhost:3000'` → `array_filter([env('FRONTEND_URL') ?: env('APP_URL')])` — chaîne de fallback safe : si FRONTEND_URL vide, fallback sur APP_URL (toujours défini par Laravel), jamais de fuite localhost en prod par accident pour n'importe quelle install. (2) `FRONTEND_URL=https://laveille.ai` ajouté au `.env` prod via `cpanel_file_write` (explicit lock à l'origine prod). (3) `FRONTEND_URL=` ajouté à `.env.example` (placeholder vide, défense documentée pour intégrateurs futurs). Aucun changement DB. Aucun nouveau cron. Codename cors-hardening.
  *   1.19.2 · 2026-05-19 · #241 lien `/statut` ajouté footer section « À propos » (gated `@if(Route::has('statut.index'))`). Page Robotalp (livrée v1.19.0) était orpheline — accessible uniquement par URL directe, aucune nav. User a flagué l'absence de découverte. Libellé « Statut des services » entre Contact et Confidentialité (groupe institutionnel/support, pas légal). Pattern Route::has défensif aligné sur les autres liens du footer (page.show, faq.index, methodologie, legal.*, sitemap.html) — robuste à la désactivation future du paquet `memora/statut`. Codename statut-footer-link.
@@ -62,17 +63,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 19,
-    'patch' => 4,
+    'patch' => 5,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'statut-fr-locale',
+    'codename' => 'sudoku-leaderboard-auth',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.19.4',
+    'semver' => '1.19.5',
 ];

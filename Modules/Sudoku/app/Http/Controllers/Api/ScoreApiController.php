@@ -59,7 +59,10 @@ class ScoreApiController extends Controller
             - ($data['errors_count'] * 200)
         );
 
-        $isPublished = $data['time_seconds'] >= $minTime;
+        // #244 anti-pollution leaderboard : publication exige (a) temps >= min anti-cheat ET (b) compte authentifié.
+        // Les scores anonymes restent enregistrés (rangs renvoyés dans réponse API) mais n'apparaissent pas
+        // dans le leaderboard public — protège contre soumissions bots avec pseudo libre + solution récupérable.
+        $isPublished = $data['time_seconds'] >= $minTime && $request->user() !== null;
         $ipHash = hash('sha256', $request->ip().date('Y-m-d'));
 
         // Anti-spam : 1 score validateur par puzzle + ip_hash sur 60s
