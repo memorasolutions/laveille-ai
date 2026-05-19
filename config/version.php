@@ -66,11 +66,11 @@ return [
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'cwv-quick-wins',
+    'codename' => 'statut-footer-link',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.18.4',
+    'semver' => '1.19.2',
 ];
