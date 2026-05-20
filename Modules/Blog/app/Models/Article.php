@@ -130,6 +130,37 @@ class Article extends Model implements SearchableContract
         return $query->where('format', $format);
     }
 
+    /**
+     * Recherche blog réutilisable et durcie (source de vérité unique).
+     *
+     * Échappe les wildcards LIKE (%, _, \) pour qu'ils soient traités
+     * littéralement (un terme « 100% » ou « a_b » ne devient plus un joker)
+     * et cible les 3 colonnes traduisibles (title/content/excerpt) sur la
+     * locale courante. Terme vide => no-op (query inchangé).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string|null  $term
+     * @param  string|null  $locale
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearchText($query, ?string $term, ?string $locale = null)
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return $query;
+        }
+
+        $locale ??= app()->getLocale();
+        // MySQL : le caractère d'échappement LIKE par défaut est le backslash.
+        $like = '%'.addcslashes($term, '%_\\').'%';
+
+        return $query->where(function ($q) use ($like, $locale) {
+            $q->orWhere("title->{$locale}", 'like', $like)
+                ->orWhere("content->{$locale}", 'like', $like)
+                ->orWhere("excerpt->{$locale}", 'like', $like);
+        });
+    }
+
     public function isPasswordProtected(): bool
     {
         return ! empty($this->content_password);

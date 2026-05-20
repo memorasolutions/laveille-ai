@@ -65,7 +65,8 @@ it('lists blog categories', function () {
 it('searches articles by query', function () {
     $article = Article::factory()->published()->create();
 
-    $title = $article->getTranslation('title', 'fr');
+    // Le terme doit exister dans la locale courante (= celle ciblée par scopeSearchText).
+    $title = $article->title;
     $searchTerm = mb_substr($title, 0, 5);
 
     $this->getJson('/api/v1/blog/search?q='.urlencode($searchTerm))

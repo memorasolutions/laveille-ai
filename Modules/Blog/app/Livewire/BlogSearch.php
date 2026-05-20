@@ -34,11 +34,7 @@ class BlogSearch extends Component
         }
 
         return Article::published()
-            ->where(fn ($query) => $query
-                ->where('title->'.app()->getLocale(), 'like', "%{$this->search}%")
-                ->orWhere('content', 'like', "%{$this->search}%")
-                ->orWhere('excerpt', 'like', "%{$this->search}%")
-            )
+            ->searchText($this->search)
             ->limit(8)
             ->get();
     }

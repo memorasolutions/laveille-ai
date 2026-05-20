@@ -40,12 +40,7 @@ class PublicPostController extends Controller
             ->with(['user', 'blogCategory', 'tagsRelation']);
 
         if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function (Builder $q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('content', 'like', "%{$search}%")
-                    ->orWhere('excerpt', 'like', "%{$search}%");
-            });
+            $query->searchText($request->input('search'));
         }
 
         if ($request->filled('tag')) {
@@ -74,11 +69,7 @@ class PublicPostController extends Controller
         $categoriesQuery = Category::withCount(['articles as published_articles_count' => function (Builder $q) use ($search, $tag) {
             $q->published();
             if ($search) {
-                $q->where(function (Builder $query) use ($search) {
-                    $query->where('title', 'like', "%{$search}%")
-                        ->orWhere('content', 'like', "%{$search}%")
-                        ->orWhere('excerpt', 'like', "%{$search}%");
-                });
+                $q->searchText($search);
             }
             if ($tag) {
                 $q->whereHas('tagsRelation', fn (Builder $query) => $query->where('slug', $tag));

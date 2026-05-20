@@ -72,13 +72,9 @@ final class BlogApiController extends BaseApiController
     {
         $request->validate(['q' => ['required', 'string', 'min:2']]);
 
-        $locale = app()->getLocale();
-        $q = '%'.$request->q.'%';
-
         $articles = Article::published()
             ->with(['user', 'blogCategory'])
-            ->where("title->{$locale}", 'LIKE', $q)
-            ->orWhere(fn ($query) => $query->where("content->{$locale}", 'LIKE', $q)->published())
+            ->searchText($request->q)
             ->paginate((int) Settings::get('api.blog_articles_per_page', 15));
 
         return $this->respondSuccess(ArticleResource::collection($articles));
