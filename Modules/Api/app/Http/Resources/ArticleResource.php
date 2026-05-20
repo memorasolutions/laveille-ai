@@ -12,6 +12,7 @@ namespace Modules\Api\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Auth\Http\Resources\PublicUserResource;
 
 /** @mixin \Modules\Blog\Models\Article */
 final class ArticleResource extends JsonResource
@@ -30,10 +31,10 @@ final class ArticleResource extends JsonResource
             ], $this->category),
             'tags' => $this->tags ?? [],
             'published_at' => $this->published_at?->toIso8601String(),
-            'author' => $this->when($this->relationLoaded('user') && $this->user, [
-                'id' => $this->user?->id,
-                'name' => $this->user?->name,
-            ]),
+            'author' => $this->when(
+                $this->relationLoaded('user') && $this->user,
+                fn () => (new PublicUserResource($this->user))->toArray($request)
+            ),
             'comments_count' => $this->whenCounted('comments'),
             'url' => url('/api/v1/articles/'.$this->slug),
         ];
