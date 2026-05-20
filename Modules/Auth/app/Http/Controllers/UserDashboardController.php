@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Modules\Blog\Models\Article;
+use Modules\Blog\Models\Comment;
 use Modules\Core\Shared\Traits\VerifiesPassword;
 
 class UserDashboardController extends Controller
