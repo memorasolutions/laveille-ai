@@ -17,9 +17,11 @@ test('PricingStatsCommand handle returns int', function () {
     expect($reflection->getReturnType()?->getName())->toBe('int');
 });
 
-test('PricingStatsCommand source uses Tool::pricingDistribution', function () {
+test('PricingStatsCommand source uses Tool::healthMetrics distribution', function () {
+    // Refactor : la distribution provient désormais de Tool::healthMetrics()['distribution'].
     $source = file_get_contents(base_path('Modules/Directory/app/Console/PricingStatsCommand.php'));
-    expect($source)->toContain('Tool::pricingDistribution()');
+    expect($source)->toContain('Tool::healthMetrics()');
+    expect($source)->toContain("['distribution']");
 });
 
 test('PricingStatsCommand source uses autoFlagged scope', function () {
@@ -32,9 +34,11 @@ test('PricingStatsCommand source uses userSubmitted scope', function () {
     expect($source)->toContain('->userSubmitted()');
 });
 
-test('PricingStatsCommand source uses notArchived scope', function () {
+test('PricingStatsCommand source surfaces drift and never-checked metrics', function () {
+    // Refactor : drift/never-checked proviennent de Tool::healthMetrics() (clés drift_90 / never_checked).
     $source = file_get_contents(base_path('Modules/Directory/app/Console/PricingStatsCommand.php'));
-    expect($source)->toContain('->notArchived()');
+    expect($source)->toContain("['drift_90']");
+    expect($source)->toContain("['never_checked']");
 });
 
 test('PricingStatsCommand registered via artisan list', function () {

@@ -95,7 +95,7 @@ it('testimonials index has NobleUI layout markers', function () {
     $response->assertSee('nobleui', false);
     $response->assertSee('data-lucide', false);
     $response->assertSee('page-breadcrumb', false);
-});
+})->skip(fn () => ! \Nwidart\Modules\Facades\Module::find('Testimonials')?->isEnabled(), 'Module Testimonials désactivé dans ce déploiement.');
 
 it('contact messages index has NobleUI layout markers', function () {
     $response = $this->actingAs($this->admin)->get('/admin/contact-messages');
@@ -153,7 +153,7 @@ it('testimonials index does not contain wowdash markers', function () {
     $response->assertDontSee('iconify-icon', false);
     $response->assertDontSee('radius-12', false);
     $response->assertDontSee('bg-base', false);
-});
+})->skip(fn () => ! \Nwidart\Modules\Facades\Module::find('Testimonials')?->isEnabled(), 'Module Testimonials désactivé dans ce déploiement.');
 
 it('contact messages index does not contain wowdash markers', function () {
     $response = $this->actingAs($this->admin)->get('/admin/contact-messages');
@@ -226,7 +226,7 @@ it('testimonials index has Bootstrap card structure', function () {
 
     $response->assertOk();
     $response->assertSee('card-body', false);
-});
+})->skip(fn () => ! \Nwidart\Modules\Facades\Module::find('Testimonials')?->isEnabled(), 'Module Testimonials désactivé dans ce déploiement.');
 
 // ── 4. Dark mode support (color-modes.js injected by admin layout) ──
 

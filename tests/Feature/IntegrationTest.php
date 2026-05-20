@@ -12,16 +12,18 @@ test('core setup command exists', function () {
         ->assertSuccessful();
 });
 
-test('all modules are loaded', function () {
+test('core foundation modules are loaded', function () {
     $modules = app('modules')->allEnabled();
     $enabledNames = collect($modules)->map(fn ($m) => $m->getName())->toArray();
 
+    // Modules socle réellement actifs dans ce déploiement (laveille.ai).
+    // Storage/SaaS/Tenancy/Backup sont volontairement désactivés ici (modules_statuses.json) :
+    // ils ne font donc pas partie des attentes de ce déploiement (boilerplate ≠ prod).
     $expectedModules = [
         'Core', 'Auth', 'RolesPermissions', 'Settings',
-        'Logging', 'Health', 'Storage', 'Media',
+        'Logging', 'Health', 'Media',
         'Notifications', 'Webhooks', 'Api', 'SEO',
-        'Backoffice', 'SaaS', 'Tenancy',
-        'Backup', 'Translation', 'Export', 'Search',
+        'Backoffice', 'Translation', 'Export', 'Search',
     ];
 
     foreach ($expectedModules as $module) {
@@ -38,7 +40,11 @@ test('saas and tenancy modules are enabled with feature flags defined', function
     $defined = \Laravel\Pennant\Feature::defined();
     expect($defined)->toContain('module-saas');
     expect($defined)->toContain('module-tenancy');
-});
+})->skip(
+    fn () => ! \Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()
+        || ! \Nwidart\Modules\Facades\Module::find('Tenancy')?->isEnabled(),
+    'Modules SaaS/Tenancy désactivés dans ce déploiement.'
+);
 
 test('backoffice service provider is registered', function () {
     expect(class_exists(\Modules\Backoffice\Providers\BackofficeServiceProvider::class))->toBeTrue();

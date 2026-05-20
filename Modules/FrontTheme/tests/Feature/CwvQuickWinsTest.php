@@ -85,13 +85,23 @@ test('News routes index + show cached 600s', function () {
     expect($source)->toContain("cacheResponse:600");
 });
 
-test('config/version.php bumped to 1.18.4 with codename cwv-quick-wins', function () {
+test('config/version.php is well-formed and at least the CWV release (1.18.4)', function () {
+    // Les CWV quick wins ont été introduits en 1.18.4 ; la version applicative évolue ensuite.
+    // On vérifie donc la cohérence du config + un plancher >= 1.18.4 plutôt qu'une valeur figée
+    // (un pin exact casserait à chaque bump SemVer — anti-pattern).
     $cfg = require base_path('config/version.php');
-    expect($cfg['semver'])->toBe('1.18.4');
-    expect($cfg['codename'])->toBe('cwv-quick-wins');
-    expect($cfg['major'])->toBe(1);
-    expect($cfg['minor'])->toBe(18);
-    expect($cfg['patch'])->toBe(4);
+
+    expect($cfg)->toHaveKeys(['semver', 'codename', 'major', 'minor', 'patch']);
+    expect($cfg['semver'])->toMatch('/^\d+\.\d+\.\d+$/');
+    expect($cfg['major'])->toBeInt();
+    expect($cfg['minor'])->toBeInt();
+    expect($cfg['patch'])->toBeInt();
+
+    // Plancher : version >= 1.18.4 (release CWV).
+    expect(version_compare($cfg['semver'], '1.18.4', '>='))->toBeTrue();
+
+    // Cohérence interne semver vs composants major/minor/patch.
+    expect($cfg['semver'])->toBe("{$cfg['major']}.{$cfg['minor']}.{$cfg['patch']}");
 });
 
 test('CloudflareCache job uses onQueue setter to avoid Queueable trait composition error', function () {

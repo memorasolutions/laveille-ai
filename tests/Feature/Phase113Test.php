@@ -55,6 +55,13 @@ it('download retourne 404 si fichier inexistant', function () {
 });
 
 it('la page backups affiche le bouton Télécharger pour admin', function () {
+    // Le bouton Télécharger n'apparaît que s'il existe au moins une sauvegarde .zip.
+    // On simule une sauvegarde sur le disque/prefix configurés (backup.backup.*).
+    $disk = config('backup.backup.destination.disks.0', 'local');
+    $prefix = config('backup.backup.name', 'laravel-backup');
+    Storage::fake($disk);
+    Storage::disk($disk)->put($prefix.'/backup-test.zip', 'dummy backup content');
+
     $this->actingAs($this->admin)
         ->get('/admin/backups')
         ->assertSee('Télécharger');

@@ -23,28 +23,30 @@ it('toast partial declare listener legacy @toast.window', function () {
     expect($this->content)->toContain('@toast.window');
 });
 
-it('toast partial declare listener nouveau @toast-show.window', function () {
-    expect($this->content)->toContain('@toast-show.window');
+it('toast partial lit le type depuis $event.detail.type', function () {
+    // Implémentation courante : un seul listener @toast.window qui lit message/type de detail.
+    expect($this->content)->toContain('$event.detail.type');
+    expect($this->content)->toContain('$event.detail.message');
 });
 
-it('toast partial mappe variant danger vers error', function () {
-    expect($this->content)->toContain("(v === 'danger' || v === 'warning') ? 'error'");
+it('toast partial style success applique fond vert', function () {
+    expect($this->content)->toContain("type === 'success'");
+    expect($this->content)->toContain('#065f46');
 });
 
-it('toast partial mappe variant warning vers error', function () {
-    expect($this->content)->toContain("(v === 'danger' || v === 'warning') ? 'error'");
+it('toast partial style error applique fond rouge', function () {
+    expect($this->content)->toContain("type === 'error'");
+    expect($this->content)->toContain('#DC2626');
 });
 
-it('toast partial mappe variant success vers success', function () {
-    expect($this->content)->toContain("v === 'success' ? 'success'");
+it('toast partial fallback type info (fond teal)', function () {
+    // Pas de mapping explicite : le ternaire retombe sur le style info par défaut.
+    expect($this->content)->toContain("type === 'info'");
+    expect($this->content)->toContain('#0B7285');
 });
 
-it('toast partial fallback variant info', function () {
-    expect($this->content)->toContain(": 'info'");
-});
-
-it('toast partial supporte duration custom', function () {
-    expect($this->content)->toContain('$event.detail.duration || 3000');
+it('toast partial auto-dismiss après 3000ms', function () {
+    expect($this->content)->toContain('setTimeout(() => show = false, 3000)');
 });
 
 it('toast partial inclut accessibility role status aria-live polite', function () {

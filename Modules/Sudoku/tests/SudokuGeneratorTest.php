@@ -25,12 +25,13 @@ it('genere une grille resolue valide 9x9 sans 0', function () {
     }
 });
 
-it('genere un puzzle facile avec 43-46 indices', function () {
+it('genere un puzzle facile avec 32 indices (standard NYT/Conceptis)', function () {
     $service = new SudokuGeneratorService();
     $data = $service->generate('easy');
 
+    // DIFFICULTY_RANGES['easy'] = [32, 32] (standard universel : NYT 32 / Conceptis 33).
     expect($data)->toHaveKeys(['grid_init', 'solution', 'clues_count', 'time_ms']);
-    expect($data['clues_count'])->toBeGreaterThanOrEqual(43)->toBeLessThanOrEqual(46);
+    expect($data['clues_count'])->toBe(32);
 
     // Compter les cellules non vides
     $nonZero = 0;

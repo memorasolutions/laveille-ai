@@ -111,7 +111,8 @@ it('POST pause days=30 sets paused_until ~30 days and clears unsubscribed_at', f
     expect($fresh->unsubscribed_at)->toBeNull();
     expect($fresh->paused_until)->not->toBeNull();
     // Fenêtre [29.9 ; 30.1] jours pour absorber la latence du test.
-    expect($fresh->paused_until->diffInHours(now()))->toBeGreaterThan(29 * 24)->toBeLessThan(31 * 24);
+    // Carbon 3 retourne un diff SIGNÉ (paused_until est dans le futur → négatif) : on prend la valeur absolue.
+    expect(abs($fresh->paused_until->diffInHours(now())))->toBeGreaterThan(29 * 24)->toBeLessThan(31 * 24);
 });
 
 it('POST pause rejects invalid days value', function () {

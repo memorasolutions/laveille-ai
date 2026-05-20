@@ -66,7 +66,7 @@ test('api plans index returns active plans only', function () {
         ->assertOk()
         ->assertJsonFragment(['name' => 'Active Plan'])
         ->assertJsonMissing(['name' => 'Hidden Plan']);
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('plans'), 'Module SaaS désactivé : table plans absente.');
 
 test('api plans show by slug', function () {
     Plan::factory()->create(['slug' => 'pro', 'name' => 'Pro', 'is_active' => true]);
@@ -74,12 +74,12 @@ test('api plans show by slug', function () {
     $this->getJson('/api/v1/plans/pro')
         ->assertOk()
         ->assertJsonFragment(['slug' => 'pro']);
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('plans'), 'Module SaaS désactivé : table plans absente.');
 
 test('api plans show returns 404 for unknown slug', function () {
     $this->getJson('/api/v1/plans/nonexistent')
         ->assertNotFound();
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('plans'), 'Module SaaS désactivé : table plans absente.');
 
 // Articles API
 test('api articles store requires auth', function () {

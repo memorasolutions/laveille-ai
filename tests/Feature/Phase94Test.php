@@ -117,19 +117,22 @@ it('régénérer les codes crée 8 nouveaux codes', function () {
     expect($newCodes[0])->not->toBe('OLD1234-CODE5678');
 });
 
-it('le profil affiche le bouton Activer le 2FA si désactivé', function () {
-    $response = $this->actingAs($this->user)->get('/user/profile');
-    $response->assertSee('Activer le 2FA');
+it('la page setup affiche le bouton Activer la double authentification si désactivé', function () {
+    // L'UI 2FA vit sur /user/two-factor/setup (pas embarquée dans /user/profile).
+    $response = $this->actingAs($this->user)->get('/user/two-factor/setup');
+    $response->assertOk();
+    $response->assertSee('Activer la double authentification');
 });
 
-it('le profil affiche Désactiver et codes de secours si 2FA activé', function () {
+it('la page recovery-codes affiche les codes de secours si 2FA activé', function () {
     $this->user->update([
         'two_factor_secret' => Crypt::encrypt('TESTSECRET1234567890'),
         'two_factor_recovery_codes' => Crypt::encrypt(json_encode(['AAAA1111-BBBB2222'])),
         'two_factor_confirmed_at' => now(),
     ]);
 
-    $response = $this->actingAs($this->user)->get('/user/profile');
-    $response->assertSee('Désactiver');
+    // Quand le 2FA est confirmé, la page des codes de secours est accessible.
+    $response = $this->actingAs($this->user)->get('/user/two-factor/recovery-codes');
+    $response->assertOk();
     $response->assertSee('Codes de secours');
 });

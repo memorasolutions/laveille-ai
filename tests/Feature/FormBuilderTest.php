@@ -16,6 +16,12 @@ use Modules\FormBuilder\Models\FormSubmission;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // Module FormBuilder désactivé dans ce déploiement (modules_statuses.json) → routes,
+    // migrations et providers non chargés. Tests N/A tant que le module est off.
+    if (! \Nwidart\Modules\Facades\Module::find('FormBuilder')?->isEnabled()) {
+        $this->markTestSkipped('Module FormBuilder désactivé dans ce déploiement.');
+    }
+
     $this->seed(\Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder::class);
 });
 

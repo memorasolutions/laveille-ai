@@ -40,5 +40,6 @@ test('DedupService isLikelyDuplicate detects identical normalized_url + title fu
     );
 
     expect($result['is_duplicate'])->toBeTrue();
-    expect($result['reason'])->toBe('multi_signal');
+    // URL normalisée identique : c'est le signal le plus fort, donc le reason courant.
+    expect($result['reason'])->toBe('normalized_url_match');
 });

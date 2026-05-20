@@ -13,6 +13,25 @@ pest()->extend(Tests\TestCase::class)
 pest()->extend(Tests\TestCase::class)
     ->in('Unit/Helpers');
 
+/*
+ * Modules désactivés dans ce déploiement (modules_statuses.json).
+ * Leurs tests (Modules/<Module>/tests) ciblent des routes/migrations/providers non chargés :
+ * on les saute proprement tant que le module reste désactivé, sans toucher au code prod.
+ * Si un module est réactivé un jour, ses tests reprennent automatiquement.
+ */
+$disabledModuleTestDirs = [
+    'ABTest', 'Backup', 'Booking', 'CustomFields', 'FormBuilder',
+    'Import', 'SaaS', 'Storage', 'Team', 'Tenancy', 'Testimonials',
+];
+
+foreach ($disabledModuleTestDirs as $moduleName) {
+    pest()->beforeEach(function () use ($moduleName) {
+        if (! \Nwidart\Modules\Facades\Module::find($moduleName)?->isEnabled()) {
+            test()->markTestSkipped("Module {$moduleName} désactivé dans ce déploiement.");
+        }
+    })->in(__DIR__.'/../Modules/'.$moduleName.'/tests');
+}
+
 afterEach(function () {
     // Flush Livewire EventBus pour éviter le memory leak entre tests
     if (class_exists(\Livewire\Mechanisms\EventBus::class)) {

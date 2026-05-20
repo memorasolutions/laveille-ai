@@ -16,6 +16,14 @@ use Modules\ABTest\Services\ABTestService;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    // Module ABTest désactivé dans ce déploiement (modules_statuses.json) → migrations,
+    // routes et providers non chargés. Les tests sont N/A tant que le module est off.
+    if (! \Nwidart\Modules\Facades\Module::find('ABTest')?->isEnabled()) {
+        $this->markTestSkipped('Module ABTest désactivé dans ce déploiement.');
+    }
+});
+
 test('experiment model can be created', function () {
     $experiment = Experiment::factory()->create();
 

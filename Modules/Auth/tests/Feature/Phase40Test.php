@@ -19,8 +19,9 @@ beforeEach(function () {
     \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'user']);
 });
 
-it('unauthenticated user redirected from dashboard', function () {
-    $this->get('/dashboard')->assertRedirect('/login');
+it('unauthenticated user sees the public guest dashboard', function () {
+    // /dashboard est désormais public : un invité voit la vue guest (formulaire OTP), pas de redirect.
+    $this->get('/dashboard')->assertOk();
 });
 
 it('authenticated user can access dashboard', function () {

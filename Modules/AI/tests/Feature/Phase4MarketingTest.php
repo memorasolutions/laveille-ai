@@ -156,7 +156,7 @@ it('authenticated user can submit CSAT', function () {
         'ticket_id' => $ticket->id,
         'score' => 5,
     ]);
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('tenants'), 'Module Tenancy désactivé : table tenants absente (requise par les tickets).');
 
 it('CSAT submit validates score range', function () {
     $this->actingAs($this->user)

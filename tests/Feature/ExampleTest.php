@@ -24,6 +24,8 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(302);
+        // Le module FrontTheme est actif → '/' rend la page d'accueil (200).
+        // (Le fallback redirect vers /login n'existe que si FrontTheme est désactivé.)
+        $response->assertStatus(200);
     }
 }

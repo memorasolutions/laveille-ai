@@ -13,10 +13,11 @@ declare(strict_types=1);
 it('errors.layout view contains charte tokens', function () {
     $rendered = view('errors.layout')->render();
 
-    expect($rendered)->toContain('#064E5A');
-    expect($rendered)->toContain('#9A2A06');
+    // Palette charte courante (refonte error pages) : primary #0B7285, accent #C2410C.
+    expect($rendered)->toContain('#0B7285');
+    expect($rendered)->toContain('#C2410C');
     expect($rendered)->toContain('--c-primary');
-    expect($rendered)->toContain('Veille IA Québec');
+    expect($rendered)->toContain('--c-accent');
 });
 
 it('errors.405 view contains code and microcopy', function () {
@@ -26,7 +27,7 @@ it('errors.405 view contains code and microcopy', function () {
     expect($rendered)->toContain('Méthode non autorisée');
     expect($rendered)->toContain('Cette action');
     expect($rendered)->toContain('autoris');
-    expect($rendered)->toContain('#064E5A');
+    expect($rendered)->toContain('#0B7285');
 });
 
 it('errors.403 view contains code and microcopy', function () {
@@ -56,8 +57,8 @@ it('errors.503 view is autonomous and contains charte tokens', function () {
     $rendered = view('errors.503', ['exception' => $exception])->render();
 
     expect($rendered)->toContain('Maintenance en cours');
-    expect($rendered)->toContain('#064E5A');
-    expect($rendered)->toContain('#9A2A06');
+    expect($rendered)->toContain('#0B7285');
+    expect($rendered)->toContain('#C2410C');
     expect($rendered)->toContain('503');
     expect($rendered)->not->toContain('extends');
 });

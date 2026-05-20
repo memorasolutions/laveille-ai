@@ -21,8 +21,9 @@ beforeEach(function () {
     $this->user->assignRole('user');
 });
 
-test('guest is redirected from roadmap', function () {
-    $this->get(route('roadmap.boards.index'))->assertRedirect();
+test('guest can view public roadmap index', function () {
+    // L'index roadmap est désormais public (middleware 'web' sans 'auth').
+    $this->get(route('roadmap.boards.index'))->assertOk();
 });
 
 test('user can view public boards', function () {
@@ -45,12 +46,21 @@ test('user can view public board ideas', function () {
         ->assertOk();
 });
 
-test('user cannot view private board', function () {
+test('guest cannot view private board', function () {
+    // Logique courante : abort 404 seulement si le board est privé ET le visiteur non authentifié.
+    $board = Board::factory()->create(['is_public' => false]);
+
+    $this->get(route('roadmap.boards.show', $board))
+        ->assertNotFound();
+});
+
+test('authenticated user can view private board', function () {
+    // Un utilisateur authentifié peut consulter un board privé (auth()->check() === true).
     $board = Board::factory()->create(['is_public' => false]);
 
     $this->actingAs($this->user)
         ->get(route('roadmap.boards.show', $board))
-        ->assertNotFound();
+        ->assertOk();
 });
 
 test('user can submit idea', function () {
@@ -63,7 +73,7 @@ test('user can submit idea', function () {
         ])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('ideas', ['title' => 'My Idea']);
+    $this->assertDatabaseHas('roadmap_ideas', ['title' => 'My Idea']);
 });
 
 test('user can vote on idea', function () {
@@ -95,7 +105,7 @@ test('user can comment on idea', function () {
         ])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('idea_comments', [
+    $this->assertDatabaseHas('roadmap_idea_comments', [
         'content' => 'Great idea!',
         'is_official' => false,
     ]);

@@ -53,7 +53,7 @@ test('admin can create board', function () {
         ])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('boards', ['name' => 'Test Board']);
+    $this->assertDatabaseHas('roadmap_boards', ['name' => 'Test Board']);
 });
 
 test('admin can update board', function () {
@@ -66,7 +66,7 @@ test('admin can update board', function () {
         ])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('boards', ['name' => 'Updated']);
+    $this->assertDatabaseHas('roadmap_boards', ['name' => 'Updated']);
 });
 
 test('admin can delete board', function () {
@@ -76,7 +76,7 @@ test('admin can delete board', function () {
         ->delete(route('admin.roadmap.boards.destroy', $board))
         ->assertRedirect();
 
-    $this->assertDatabaseMissing('boards', ['id' => $board->id]);
+    $this->assertDatabaseMissing('roadmap_boards', ['id' => $board->id]);
 });
 
 // ── Ideas ───────────────────────────────────────────────
@@ -119,7 +119,7 @@ test('admin can delete idea (soft delete)', function () {
         ->delete(route('admin.roadmap.ideas.destroy', $idea))
         ->assertRedirect();
 
-    $this->assertSoftDeleted('ideas', ['id' => $idea->id]);
+    $this->assertSoftDeleted('roadmap_ideas', ['id' => $idea->id]);
 });
 
 test('admin can toggle vote via JSON', function () {
@@ -140,7 +140,7 @@ test('admin can add official comment', function () {
         ])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('idea_comments', [
+    $this->assertDatabaseHas('roadmap_idea_comments', [
         'content' => 'Official reply',
         'is_official' => true,
     ]);

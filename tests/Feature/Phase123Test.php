@@ -22,7 +22,8 @@ it('switch to fr sets session locale and redirects', function () {
         ->assertRedirect()
         ->assertStatus(302);
 
-    expect(session('locale'))->toBe('fr');
+    // LocaleController mappe 'fr' → 'fr_CA' (locale canonique de l'application).
+    expect(session('locale'))->toBe('fr_CA');
 });
 
 it('switch to en sets session locale and redirects', function () {
@@ -45,18 +46,20 @@ it('unauthenticated user can switch locale', function () {
     expect(session('locale'))->toBe('en');
 });
 
-it('switching to en then visiting home returns redirect', function () {
+it('switching to en then visiting home returns 200', function () {
     $this->post(route('locale.switch', 'en'));
 
-    $this->get('/')->assertRedirect();
+    // FrontTheme est actif → '/' rend la page d'accueil (200), pas de redirection.
+    $this->get('/')->assertOk();
 });
 
 it('locale session persists across requests', function () {
     $this->post(route('locale.switch', 'en'));
 
+    // FrontTheme actif → '/' rend la page d'accueil (200).
     $this->withSession(['locale' => 'en'])
         ->get('/')
-        ->assertRedirect();
+        ->assertOk();
 
     expect(session('locale'))->toBe('en');
 });
@@ -65,5 +68,6 @@ it('switch to fr after en restores fr locale', function () {
     $this->post(route('locale.switch', 'en'));
     $this->post(route('locale.switch', 'fr'));
 
-    expect(session('locale'))->toBe('fr');
+    // 'fr' est canonicalisé en 'fr_CA' par le LocaleController.
+    expect(session('locale'))->toBe('fr_CA');
 });

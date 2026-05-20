@@ -80,7 +80,8 @@ it('permet de créer un article', function () {
         ])
         ->assertRedirect();
 
-    expect(Article::where('title->fr', 'Mon nouvel article test')->exists())->toBeTrue();
+    // Accesseur locale-courante (l'app stocke le titre traduit dans la locale active, ex. fr_CA en test).
+    expect(Article::query()->get()->contains(fn ($a) => $a->title === 'Mon nouvel article test'))->toBeTrue();
 });
 
 it('requiert un titre pour créer un article', function () {
@@ -132,7 +133,8 @@ it('permet à un éditeur de créer un article', function () {
         ])
         ->assertRedirect();
 
-    expect(Article::where('title->fr', 'Article éditeur')->exists())->toBeTrue();
+    // Accesseur locale-courante (titre traduit stocké dans la locale active, ex. fr_CA en test).
+    expect(Article::query()->get()->contains(fn ($a) => $a->title === 'Article éditeur'))->toBeTrue();
 });
 
 // --- Publier / dépublier ---
@@ -164,7 +166,8 @@ it('permet de créer une catégorie', function () {
         ->post('/admin/blog/categories', ['name' => 'Nouvelle catégorie', 'color' => '#ff0000'])
         ->assertRedirect();
 
-    expect(Category::where('name->fr', 'Nouvelle catégorie')->exists())->toBeTrue();
+    // Accesseur locale-courante (le nom traduit est stocké dans la locale active, ex. fr_CA en test).
+    expect(Category::query()->get()->contains(fn ($c) => $c->name === 'Nouvelle catégorie'))->toBeTrue();
 });
 
 it('empêche la création d une catégorie sans couleur', function () {

@@ -48,7 +48,7 @@ test('auth login validates required fields', function () {
     $response->assertStatus(422);
 });
 
-test('auth register creates user and returns token', function () {
+test('auth register creates user and returns neutral 201 (anti-enumeration)', function () {
     Role::findOrCreate('user', 'web');
 
     $response = $this->postJson('/api/v1/register', [
@@ -58,10 +58,13 @@ test('auth register creates user and returns token', function () {
         'password_confirmation' => 'Password1',
     ]);
 
+    // #254 (S99) : réponse 201 neutre, sans user ni token (pas de fuite d'énumération).
     $response->assertStatus(201)
-        ->assertJsonStructure(['success', 'data' => ['user', 'token']])
-        ->assertJsonPath('success', true);
+        ->assertJsonStructure(['success', 'message', 'data'])
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data', null);
 
+    // Le compte est bien créé en base pour une adresse inconnue.
     $this->assertDatabaseHas('users', ['email' => 'newuser@example.com']);
 });
 
@@ -71,7 +74,8 @@ test('auth register validates required fields', function () {
     $response->assertStatus(422);
 });
 
-test('auth register prevents duplicate email', function () {
+test('auth register does not create a duplicate for an existing email (anti-enumeration)', function () {
+    Role::findOrCreate('user', 'web');
     User::factory()->create(['email' => 'taken@example.com']);
 
     $response = $this->postJson('/api/v1/register', [
@@ -81,8 +85,13 @@ test('auth register prevents duplicate email', function () {
         'password_confirmation' => 'Password1',
     ]);
 
-    $response->assertStatus(422)
-        ->assertJsonValidationErrors('email');
+    // #254 (S99) : pour ne PAS révéler l'existence du compte, la réponse est la même 201
+    // neutre que pour une adresse inconnue — mais aucun doublon n'est créé.
+    $response->assertStatus(201)
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data', null);
+
+    expect(User::where('email', 'taken@example.com')->count())->toBe(1);
 });
 
 test('auth logout revokes token', function () {

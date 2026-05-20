@@ -30,10 +30,12 @@ it('subscriber model exists and can be created', function () {
 it('subscribe route sends notification and creates subscriber', function () {
     Notification::fake();
 
-    $this->post('/newsletter/subscribe', ['email' => 'new@example.com', 'name' => 'New User'])
+    // La validation prod utilise email:rfc,dns (vérifie l'enregistrement MX du domaine).
+    // example.com n'a PAS de MX → on utilise un domaine avec MX réel pour un test déterministe.
+    $this->post('/newsletter/subscribe', ['email' => 'new@gmail.com', 'name' => 'New User'])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'new@example.com']);
+    $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'new@gmail.com']);
     Notification::assertSentOnDemand(WelcomeNewsletterNotification::class);
 });
 
@@ -62,8 +64,9 @@ it('unsubscribe link unsubscribes subscriber', function () {
         'confirmed_at' => now(),
     ]);
 
+    // Unsubscribe v2 (S96) : désabonnement immédiat + page de confirmation (200), plus de redirect.
     $this->get(route('newsletter.unsubscribe', $subscriber->token))
-        ->assertRedirect('/');
+        ->assertOk();
 
     expect($subscriber->fresh()->isActive())->toBeFalse();
     expect($subscriber->fresh()->unsubscribed_at)->not->toBeNull();

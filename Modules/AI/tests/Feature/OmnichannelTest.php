@@ -128,7 +128,7 @@ it('admin peut lier un message à un ticket', function () {
         ->assertRedirect();
 
     expect($message->fresh()->ticket_id)->toBe($ticket->id);
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('tenants'), 'Module Tenancy désactivé : table tenants absente (requise par les tickets).');
 
 // --- ChannelRegistry ---
 
@@ -164,7 +164,7 @@ it('EmailChannelAdapter crée un ticket depuis email entrant', function () {
     expect($channelMessage)->toBeInstanceOf(ChannelMessage::class);
     expect($channelMessage->ticket_id)->not()->toBeNull();
     $this->assertDatabaseHas('tickets', ['title' => 'Problème urgent']);
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('tenants'), 'Module Tenancy désactivé : table tenants absente (requise par les tickets).');
 
 it('EmailChannelAdapter lie au ticket existant pour "Re: Ticket #XX"', function () {
     $channel = Channel::factory()->create(['type' => 'email']);
@@ -179,7 +179,7 @@ it('EmailChannelAdapter lie au ticket existant pour "Re: Ticket #XX"', function 
     ], $channel);
 
     expect($channelMessage->ticket_id)->toBe($ticket->id);
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('tenants'), 'Module Tenancy désactivé : table tenants absente (requise par les tickets).');
 
 // --- Email Webhook ---
 
@@ -200,7 +200,7 @@ it('le webhook email crée un channel message', function () {
         'channel_id' => $channel->id,
         'external_id' => '<webhook@id>',
     ]);
-});
+})->skip(fn () => ! \Illuminate\Support\Facades\Schema::hasTable('tenants'), 'Module Tenancy désactivé : table tenants absente (requise par les tickets).');
 
 it('le webhook email retourne 404 pour secret invalide', function () {
     $this->postJson(route('ai.webhooks.email', 'invalid-secret'), [

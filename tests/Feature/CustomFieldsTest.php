@@ -18,6 +18,12 @@ use Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    // Module CustomFields désactivé dans ce déploiement (modules_statuses.json) → routes,
+    // migrations et providers non chargés. Tests N/A tant que le module est off.
+    if (! \Nwidart\Modules\Facades\Module::find('CustomFields')?->isEnabled()) {
+        $this->markTestSkipped('Module CustomFields désactivé dans ce déploiement.');
+    }
+
     $this->seed(RolesAndPermissionsSeeder::class);
 });
 

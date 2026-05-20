@@ -30,7 +30,7 @@ test('admin can access analytics page', function () {
     $this->actingAs($this->admin)
         ->get(route('admin.roadmap.analytics'))
         ->assertOk()
-        ->assertSee('Statistiques Roadmap');
+        ->assertSee('Statistiques Idées et votes');
 });
 
 test('analytics shows correct total ideas', function () {

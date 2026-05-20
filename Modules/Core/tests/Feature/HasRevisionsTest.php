@@ -39,7 +39,8 @@ test('HasRevisions creates revision on model update', function () {
     expect($revision)->toBeInstanceOf(ContentRevision::class);
     // Title is translatable, stored as JSON {"fr": "Test Page"}
     $titleData = $revision->data['title'];
-    $titleValue = is_array($titleData) ? ($titleData['fr'] ?? $titleData) : $titleData;
+    // Clé locale courante (ex. fr_CA en test) → on prend la 1re valeur traduite.
+    $titleValue = is_array($titleData) ? reset($titleData) : $titleData;
     expect($titleValue)->toBe('Test Page');
     expect($revision->revision_number)->toBeGreaterThanOrEqual(1);
 });
@@ -58,11 +59,11 @@ test('HasRevisions stores original values in revision data', function () {
 
     $revision = $page->revisions()->first();
 
-    // Translatable fields are stored as JSON arrays
+    // Translatable fields are stored as JSON arrays keyed by the current locale (ex. fr_CA en test).
     $title = $revision->data['title'];
-    expect(is_array($title) ? $title['fr'] : $title)->toBe('Original Title');
+    expect(is_array($title) ? reset($title) : $title)->toBe('Original Title');
     $content = $revision->data['content'];
-    expect(is_array($content) ? $content['fr'] : $content)->toBe('Original content');
+    expect(is_array($content) ? reset($content) : $content)->toBe('Original content');
     expect($revision->data['status'])->toBe('draft');
 });
 
@@ -148,9 +149,9 @@ test('RevisionService diff returns changed fields', function () {
     $diff = $service->diff($page, $revision);
 
     expect($diff)->toHaveKeys(['title', 'content', 'status']);
-    // Translatable fields: old is JSON array from getOriginal, new is current locale string
+    // Translatable fields: old is JSON array from getOriginal (clé locale courante, ex. fr_CA), new is current locale string
     $oldTitle = $diff['title']['old'];
-    expect(is_array($oldTitle) ? $oldTitle['fr'] : $oldTitle)->toBe('Original');
+    expect(is_array($oldTitle) ? reset($oldTitle) : $oldTitle)->toBe('Original');
     expect($diff['status']['old'])->toBe('draft');
     expect($diff['status']['new'])->toBe('published');
 });
