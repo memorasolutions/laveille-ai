@@ -149,7 +149,7 @@ class ShortUrlTest extends TestCase
         $response->assertRedirect('https://example.com');
     }
 
-    public function test_short_url_redirect_expired_returns_410(): void
+    public function test_short_url_redirect_expired_redirects_to_expiry_page(): void
     {
         ShortUrl::create([
             'user_id' => $this->admin->id,
@@ -159,8 +159,10 @@ class ShortUrlTest extends TestCase
             'expires_at' => now()->subDay(),
         ]);
 
+        // Comportement courant : un lien expiré redirige vers une page conviviale /lien-expire
+        // (302) au lieu de renvoyer un 410 brut.
         $response = $this->get('/s/expired1');
-        $response->assertStatus(410);
+        $response->assertRedirect(config('app.url') . '/lien-expire?reason=expired');
     }
 
     public function test_short_url_click_is_tracked(): void
