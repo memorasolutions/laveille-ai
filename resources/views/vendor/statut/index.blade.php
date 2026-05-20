@@ -107,6 +107,9 @@
         .statut-title-block { flex: 1 1 auto; }
         .statut-subtitle { color: var(--statut-muted); font-size: 1rem; margin-top: 0.25rem; }
 
+        /* #260 — WCAG 2.2 AAA : bandeau global utilise des tokens dédiés (assombris)
+           pour atteindre ≥ 7:1 avec texte blanc. Les tokens --statut-up/--statut-down/
+           --statut-paused restent inchangés (pills de monitor-card, bordures cards). */
         .statut-badge-global {
             width: 100%;
             padding: 1.5rem;
@@ -115,11 +118,11 @@
             text-align: center;
             margin-bottom: 2rem;
         }
-        .statut-badge-global__title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .statut-badge-global__counts { font-size: 0.95rem; margin-top: 0.5rem; opacity: 0.95; }
-        .statut-badge-global--up { background-color: var(--statut-up); }
-        .statut-badge-global--down { background-color: var(--statut-down); }
-        .statut-badge-global--paused { background-color: var(--statut-paused); }
+        .statut-badge-global__title { font-size: 1.5rem; font-weight: 700; margin: 0; color: #ffffff; }
+        .statut-badge-global__counts { font-size: 0.95rem; margin-top: 0.5rem; color: #ffffff; }
+        .statut-badge-global--up { background-color: #0f5f2c; } /* 7.80:1 vs #fff (AAA) */
+        .statut-badge-global--down { background-color: #9a3409; } /* 7.32:1 vs #fff (AAA) */
+        .statut-badge-global--paused { background-color: #7a3d05; } /* 8.41:1 vs #fff (AAA) */
 
         .statut-monitors-grid {
             display: grid;
