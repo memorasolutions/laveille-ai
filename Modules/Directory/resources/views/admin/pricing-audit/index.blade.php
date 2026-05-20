@@ -1,7 +1,7 @@
 {{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
-<x-backoffice::layouts.master>
-    @section('title', __('Audits Pricing'))
+@extends('backoffice::themes.backend.layouts.admin', ['title' => __('Audits Pricing')])
 
+@section('content')
     <div class="page-content">
         <nav class="page-breadcrumb" aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -113,4 +113,4 @@
             {{ __('Lance manuellement') }} : <code>php artisan tools:audit-pricing-tiered --limit=10</code>
         </p>
     </div>
-</x-backoffice::layouts.master>
+@endsection

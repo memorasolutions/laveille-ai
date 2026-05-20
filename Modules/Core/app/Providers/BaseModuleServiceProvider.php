@@ -90,9 +90,13 @@ abstract class BaseModuleServiceProvider extends ServiceProvider
         if (is_dir($themePath)) {
             array_unshift($paths, $themePath);
         }
-        $paths[] = $sourcePath;
+        if (is_dir($sourcePath)) {
+            $paths[] = $sourcePath;
+        }
 
-        $this->loadViewsFrom($paths, $this->nameLower);
+        if ($paths !== []) {
+            $this->loadViewsFrom($paths, $this->nameLower);
+        }
         Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 }
