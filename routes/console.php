@@ -43,8 +43,11 @@ Schedule::command('queue:prune-batches --hours=48')->cron('30 2 * * *');
 // Data retention cleanup (reads settings for retention days)
 Schedule::command('app:cleanup')->dailyAt('02:00');
 
-// Trial expiry notifications (3 days before + day of)
-Schedule::command('saas:trial-expiry-notify')->dailyAt('09:00');
+// Trial expiry notifications (3 days before + day of) — gated: skip si module SaaS désactivé
+// (sinon Laravel échoue avec NamespaceNotFoundException car la commande n'est pas enregistrée)
+if (\Nwidart\Modules\Facades\Module::find('SaaS')?->isEnabled()) {
+    Schedule::command('saas:trial-expiry-notify')->dailyAt('09:00');
+}
 
 // IP blocking (suspicious login attempts)
 Schedule::command('app:block-suspicious-ips')->everyFiveMinutes();
