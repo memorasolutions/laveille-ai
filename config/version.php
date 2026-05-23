@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.20.5 · 2026-05-23 · #262 fix services.openrouter manquant (cause récidive 3j blocage AiSummary après config:cache) + reclass 3 logs dedup error→info. Codename news-pipeline-resilience.
  *   1.20.4 · 2026-05-23 · #261 guard `module_enabled('SaaS')` autour du `Schedule::command('saas:trial-expiry-notify')` dans `routes/console.php` pour stopper l'erreur quotidienne 9h00 `NamespaceNotFoundException: There are no commands defined in the "saas" namespace` quand le module SaaS est désactivé dans `modules_statuses.json`. Codename cron-saas-orphan-guard.
  *   1.20.3 · 2026-05-20 · #260 fix contraste bandeau global /statut WCAG 2.2 AAA — texte blanc sur green saturé ≥ 7:1. Cause : `resources/views/vendor/statut/components/badge-global.blade.php` rendait un bandeau pleine largeur avec `color: #ffffff` sur `background-color: var(--statut-up)` = `#16a34a` (green-600) → ratio 3.30:1 (échoue MÊME WCAG AA 4.5:1, très loin du AAA 7:1). Sous-titre `.statut-badge-global__counts` aggravé par `opacity: 0.95` (≈ 3.18:1). Screenshot user 2026-05-20 confirme « 6 moniteurs au total » quasi illisible sur fond vert. Fix minimal localisé au bandeau (override Blade hors vendor/, paquet memora/statut intact) : assombrissement des backgrounds de `.statut-badge-global--up/--down/--paused` aux valeurs AAA : `#0f5f2c` (7.80:1 vs #fff) pour up, `#9a3409` (7.32:1) pour down, `#7a3d05` (8.41:1) pour paused. Retrait de `opacity: 0.95` sur le sous-titre + ajout `color: #ffffff` explicite sur titre ET sous-titre (résiste aux overrides downstream). Les tokens `--statut-up/--statut-down/--statut-paused` (utilisés par les pills de monitor-card et bordures cards) RESTENT INCHANGÉS — scope strict bandeau global uniquement. Identité « état opérationnel = vert vif » préservée (Option A du brief : green saturé foncé vs vert pâle + texte foncé). Aucun changement DB. Aucun nouveau cron. Aucune nouvelle route. Aucune modif `.env`. Aucun touch vendor/. Codename statut-banner-wcag-aaa.
  *   1.20.2 · 2026-05-20 · #259 fix 2 bugs prod 500 sur pages user authentifiées (découverts via stabilisation suite Pest CI S101). BUG 1 (export de données GDPR) : `Modules/Auth/app/Http/Controllers/UserDashboardController.php::exportData()` référençait `Article::` et `Comment::` sans les `use` correspondants → PHP résolvait `Modules\Auth\Http\Controllers\Article`/`Comment` inexistants → fatal 500 sur l'export RGPD/Loi 25 des données personnelles (articles + commentaires de l'utilisateur). Fix : ajout `use Modules\Blog\Models\Article;` + `use Modules\Blog\Models\Comment;`. BUG 2 (page clés d'accès) : la route `/user/passkeys` (`Modules/Auth/routes/web.php:146`) rendait `view('auth::themes.backend.profile.passkeys')` — vue INEXISTANTE → 500 pour tout utilisateur authentifié. Le package `spatie/laravel-passkeys` EST installé (table `passkeys`, `config/passkeys.php`, composant Livewire `passkeys` enregistré, User implémente HasPasskeys) : passkeys est une vraie fonctionnalité, seule la vue manquait (pas du code mort à supprimer). Fix : création de `Modules/Auth/resources/views/themes/backend/profile/passkeys.blade.php` qui `@extends('auth::layouts.user-frontend')` (cohérence charte profil) et embarque `@livewire('passkeys')` (le composant spatie gère liste + enregistrement + suppression — zéro logique WebAuthn réimplémentée). Validation : `GdprDataExportTest` 8 verts + `PasskeysTest` 11 verts (33 assertions, 25s). Génération vue Blade déléguée à qwen3-max via openrouter-free (MCP, 1.1s). Aucun changement DB. Aucun nouveau cron. Aucune nouvelle route. Aucune modif `.env`. Aucun touch vendor/. Codename auth-pages-500-fix.
@@ -80,17 +81,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 20,
-    'patch' => 4,
+    'patch' => 5,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'cron-saas-orphan-guard',
+    'codename' => 'news-pipeline-resilience',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.20.4',
+    'semver' => '1.20.5',
 ];

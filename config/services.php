@@ -90,4 +90,13 @@ return [
         'api_key' => env('BREVO_API_KEY'),
     ],
 
+    'openrouter' => [
+        'api_key' => env('OPENROUTER_API_KEY'),
+        'summary_models' => [
+            'deepseek/deepseek-chat',
+            'openai/gpt-4o-mini',
+            'google/gemma-3-27b-it:free',
+        ],
+    ],
+
 ];
