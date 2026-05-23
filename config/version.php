@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.20.6 · 2026-05-23 · #263 P3-F purge auto health_check_result_history_items >30j via app:cleanup (déjà câblé cron daily 02:00). Étend `cleanTable()` avec param optionnel `int $chunkSize = 0` pour gérer les tables volumineuses sans locker MySQL en prod (chunked DELETE LIMIT N + garde-fou 200 itérations). Ajoute setting `retention.health_check_history_days` (default 30j) côté admin Backoffice. Cause : table Spatie Health accumulait 602 938 lignes (60j d'historique) malgré `keep_history_for_days = 5` dans `config/health.php` — le cleanup interne Spatie ne se déclenche pas en pratique (probablement à cause du runtime Eloquent vs save() interception). Impact prod : libération ~300 000 lignes au prochain run cron app:cleanup (dimanche 02:00), baisse backup zip ~5-8 MB, perf dashboard /statut /backoffice/health améliorée. Audit DB préalable S104 confirmait croissance ~10K lignes/jour donc dette technique à régler avant qu'elle ne devienne problème backup/perf. Zéro autre table touchée. Aucun changement DB. Aucun nouveau cron (réutilisation app:cleanup). Codename health-history-purge.
  *   1.20.5 · 2026-05-23 · #262 fix services.openrouter manquant (cause récidive 3j blocage AiSummary après config:cache) + reclass 3 logs dedup error→info. Codename news-pipeline-resilience.
  *   1.20.4 · 2026-05-23 · #261 guard `module_enabled('SaaS')` autour du `Schedule::command('saas:trial-expiry-notify')` dans `routes/console.php` pour stopper l'erreur quotidienne 9h00 `NamespaceNotFoundException: There are no commands defined in the "saas" namespace` quand le module SaaS est désactivé dans `modules_statuses.json`. Codename cron-saas-orphan-guard.
  *   1.20.3 · 2026-05-20 · #260 fix contraste bandeau global /statut WCAG 2.2 AAA — texte blanc sur green saturé ≥ 7:1. Cause : `resources/views/vendor/statut/components/badge-global.blade.php` rendait un bandeau pleine largeur avec `color: #ffffff` sur `background-color: var(--statut-up)` = `#16a34a` (green-600) → ratio 3.30:1 (échoue MÊME WCAG AA 4.5:1, très loin du AAA 7:1). Sous-titre `.statut-badge-global__counts` aggravé par `opacity: 0.95` (≈ 3.18:1). Screenshot user 2026-05-20 confirme « 6 moniteurs au total » quasi illisible sur fond vert. Fix minimal localisé au bandeau (override Blade hors vendor/, paquet memora/statut intact) : assombrissement des backgrounds de `.statut-badge-global--up/--down/--paused` aux valeurs AAA : `#0f5f2c` (7.80:1 vs #fff) pour up, `#9a3409` (7.32:1) pour down, `#7a3d05` (8.41:1) pour paused. Retrait de `opacity: 0.95` sur le sous-titre + ajout `color: #ffffff` explicite sur titre ET sous-titre (résiste aux overrides downstream). Les tokens `--statut-up/--statut-down/--statut-paused` (utilisés par les pills de monitor-card et bordures cards) RESTENT INCHANGÉS — scope strict bandeau global uniquement. Identité « état opérationnel = vert vif » préservée (Option A du brief : green saturé foncé vs vert pâle + texte foncé). Aucun changement DB. Aucun nouveau cron. Aucune nouvelle route. Aucune modif `.env`. Aucun touch vendor/. Codename statut-banner-wcag-aaa.
@@ -81,17 +82,17 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 20,
-    'patch' => 5,
+    'patch' => 6,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
      */
-    'codename' => 'news-pipeline-resilience',
+    'codename' => 'health-history-purge',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.20.5',
+    'semver' => '1.20.6',
 ];

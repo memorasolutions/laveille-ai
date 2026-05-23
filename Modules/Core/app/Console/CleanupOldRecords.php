@@ -27,6 +27,7 @@ class CleanupOldRecords extends Command
         $daysEmails = (int) $this->getSetting('retention.sent_emails_days', 90);
         $daysActivity = (int) $this->getSetting('retention.activity_log_days', 180);
         $daysBlockedIps = (int) $this->getSetting('retention.blocked_ips_days', 365);
+        $daysHealthHistory = (int) $this->getSetting('retention.health_check_history_days', 30);
 
         if ($dryRun) {
             $this->warn('Mode simulation (dry-run) - aucune donnée ne sera supprimée.');
@@ -35,6 +36,7 @@ class CleanupOldRecords extends Command
         $this->cleanTable('login_attempts', 'logged_in_at', $daysLogin, $dryRun);
         $this->cleanTable('sent_emails', 'sent_at', $daysEmails, $dryRun);
         $this->cleanTable('activity_log', 'created_at', $daysActivity, $dryRun);
+        $this->cleanTable('health_check_result_history_items', 'created_at', $daysHealthHistory, $dryRun, chunkSize: 5000);
 
         $countTokens = DB::table('magic_login_tokens')->where('expires_at', '<', now())->count();
         if (! $dryRun) {
@@ -58,12 +60,24 @@ class CleanupOldRecords extends Command
         return self::SUCCESS;
     }
 
-    private function cleanTable(string $table, string $column, int $days, bool $dryRun): void
+    private function cleanTable(string $table, string $column, int $days, bool $dryRun, int $chunkSize = 0): void
     {
         $count = DB::table($table)->where($column, '<', now()->subDays($days))->count();
 
         if (! $dryRun) {
-            DB::table($table)->where($column, '<', now()->subDays($days))->delete();
+            if ($chunkSize > 0) {
+                $iterations = 0;
+                $maxIterations = 200;
+                do {
+                    $deleted = DB::table($table)
+                        ->where($column, '<', now()->subDays($days))
+                        ->limit($chunkSize)
+                        ->delete();
+                    $iterations++;
+                } while ($deleted > 0 && $iterations < $maxIterations);
+            } else {
+                DB::table($table)->where($column, '<', now()->subDays($days))->delete();
+            }
         }
 
         $prefix = $dryRun ? '[DRY-RUN] Supprimerait' : 'Supprimé';
