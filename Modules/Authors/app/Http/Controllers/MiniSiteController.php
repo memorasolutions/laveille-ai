@@ -23,7 +23,7 @@ final class MiniSiteController extends Controller
     ) {
     }
 
-    public function show(string $slug)
+    public function show(\Illuminate\Http\Request $request, string $slug)
     {
         $author = AuthorProfile::where('slug', $slug)
             ->whereNull('archived_at')
@@ -49,6 +49,24 @@ final class MiniSiteController extends Controller
         $lastPublishedAt = $author->last_published_at;
         $showAbandonBanner = $lastPublishedAt !== null && $lastPublishedAt->diffInDays(Carbon::now()) > 60;
 
+        // S120-1 — search query handling (GET ?q=...)
+        $searchQuery = trim((string) $request->query('q', ''));
+        $searchResults = null;
+        if ($searchQuery !== '' && mb_strlen($searchQuery) >= 2) {
+            $escaped = '%'.addcslashes($searchQuery, '%_\\').'%';
+            $searchResults = \Modules\Authors\Models\AuthorPost::published()
+                ->public()
+                ->where('author_profile_id', $author->id)
+                ->where(function ($q) use ($escaped) {
+                    $q->where('title', 'like', $escaped)
+                        ->orWhere('excerpt', 'like', $escaped)
+                        ->orWhere('body_markdown', 'like', $escaped);
+                })
+                ->orderByDesc('published_at')
+                ->limit(20)
+                ->get();
+        }
+
         $jsonLd = [
             '@context' => 'https://schema.org',
             '@graph' => [
@@ -62,6 +80,8 @@ final class MiniSiteController extends Controller
             'timeline' => $timeline,
             'showAbandonBanner' => $showAbandonBanner,
             'jsonLd' => $jsonLd,
+            'searchQuery' => $searchQuery,
+            'searchResults' => $searchResults,
         ]);
     }
 

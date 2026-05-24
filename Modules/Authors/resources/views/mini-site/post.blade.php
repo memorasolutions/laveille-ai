@@ -144,6 +144,16 @@
         <span x-show="readerMode" x-cloak>✕ Mode normal</span>
     </button>
 
+    <nav aria-label="Fil d'Ariane" class="lv-post-breadcrumb" style="max-width:720px; margin:0 auto; padding:24px 24px 0; font-size:13px; color:#5A6270;">
+        <ol style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+            <li><a href="{{ url('/') }}" style="color:#5A6270; text-decoration:underline;">Accueil</a></li>
+            <li aria-hidden="true">›</li>
+            <li><a href="/@{{ $author->slug }}" style="color:#5A6270; text-decoration:underline;">{{ $author->display_name ?? $author->slug }}</a></li>
+            <li aria-hidden="true">›</li>
+            <li aria-current="page" style="color:#064E5A; font-weight:600;">{{ \Illuminate\Support\Str::limit($post->title, 50) }}</li>
+        </ol>
+    </nav>
+
     <article>
         <header class="lv-post-header">
             <a href="{{ route('authors.mini-site.show', $author->slug) }}" class="lv-post-back">← Retour au profil</a>
@@ -214,6 +224,10 @@
             :author-profile-id="$author->id"
             :current-post-id="$post->id"
             :current-tags="is_array($post->tags) ? $post->tags : []" />
+    </div>
+
+    <div class="lv-section-wrap" style="max-width: 720px; margin: 32px auto; padding: 0 24px;">
+        <x-authors::author-bio-card :author="$author" />
     </div>
 
     @if($webmentions->isNotEmpty())

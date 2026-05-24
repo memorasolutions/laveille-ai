@@ -135,6 +135,7 @@
             <div style="display: flex; gap: 12px; align-items: center;">
                 <a href="#articles" style="color: var(--c-primary); font-weight: 600; text-decoration: none;" class="hidden md:inline">Articles</a>
                 <a href="#about" style="color: var(--c-primary); font-weight: 600; text-decoration: none;" class="hidden md:inline">À propos</a>
+                <x-authors::search-header-toggle :author="$author" />
                 <x-authors::follow-button :author="$author" />
                 <button id="theme-toggle" class="theme-toggle" aria-label="Basculer mode sombre">
                     <svg id="theme-icon" role="img" aria-label="Icône thème" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -147,6 +148,42 @@
 
     @if($showAbandonBanner)
         <div class="container"><div class="abandon-banner fade-up">🌱 Pas publié depuis {{ $author->daysSinceLastPublish() }} jours. Le contenu reste accessible.</div></div>
+    @endif
+
+    @if(isset($searchResults) && $searchResults !== null)
+        <section class="container lv-search-results-section" aria-labelledby="lv-search-results-h2" style="padding-top:24px; padding-bottom:24px;">
+            <h2 id="lv-search-results-h2" style="font-size:22px; font-weight:700; color:var(--c-primary,#064E5A); margin:0 0 16px;">
+                🔍 Résultats pour « {{ e($searchQuery) }} »
+            </h2>
+            @if($searchResults->isNotEmpty())
+                <p style="color:#3F4554; margin:0 0 16px; font-size:14px;">{{ $searchResults->count() }} article(s) trouvé(s).</p>
+                <ul class="lv-search-results-list" style="list-style:none; padding:0; margin:0; display:grid; gap:16px;">
+                    @foreach($searchResults as $sr)
+                        <li>
+                            <a href="/@{{ $author->slug }}/{{ $sr->slug }}" style="display:block; padding:16px; min-height:44px; background:var(--c-cream,#F8FAFB); border-radius:10px; text-decoration:none; color:inherit; transition:transform 200ms, box-shadow 200ms; border:1px solid rgba(6,78,90,0.08);"
+                               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(6,78,90,0.12)';"
+                               onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
+                               onfocus="this.style.outline='3px solid #9A2A06'; this.style.outlineOffset='2px';"
+                               onblur="this.style.outline='none';">
+                                <h3 style="font-size:18px; font-weight:700; color:var(--c-primary,#064E5A); margin:0 0 6px; line-height:1.3;">{{ $sr->title }}</h3>
+                                @if($sr->excerpt)
+                                    <p style="font-size:14px; color:#3F4554; margin:0 0 8px; line-height:1.5;">{{ \Illuminate\Support\Str::limit($sr->excerpt, 160) }}</p>
+                                @endif
+                                <div style="display:flex; gap:8px; font-size:12px; color:#5A6270;">
+                                    <span>{{ $sr->reading_time ?? 1 }} min</span>
+                                    @if($sr->published_at)
+                                        <span aria-hidden="true">•</span>
+                                        <time datetime="{{ $sr->published_at->toIso8601String() }}">{{ $sr->published_at->diffForHumans() }}</time>
+                                    @endif
+                                </div>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p style="color:#3F4554; font-size:15px;">Aucun résultat trouvé. <a href="/@{{ $author->slug }}" style="color:var(--c-accent,#9A2A06); font-weight:600;">Voir tous les articles →</a></p>
+            @endif
+        </section>
     @endif
 
     <header class="container" style="padding-top: 32px;">
@@ -337,6 +374,10 @@
         @php
             $articles = $timeline->filter(function ($i) { return ! isset($i->content_type); })->values();
         @endphp
+
+        <div class="container" style="padding-top:24px;">
+            <x-authors::popular-posts :author="$author" :limit="5" />
+        </div>
 
         @if($articles->isNotEmpty() && $author->isModuleVisible('recent_articles'))
             <section id="articles">
