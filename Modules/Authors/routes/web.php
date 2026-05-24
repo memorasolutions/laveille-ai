@@ -8,6 +8,21 @@ use Modules\Authors\Http\Controllers\MiniSiteController;
 use Modules\Authors\Http\Controllers\PostController;
 use Modules\Authors\Http\Controllers\AffiliateController;
 use Modules\Authors\Http\Controllers\UpgradeController;
+use Modules\Authors\Http\Controllers\OgImageController;
+
+// S121 — Dynamic OG image (PNG GD) per post, distinct prefix to avoid /@slug collision
+Route::get('/og-image/{slug}/{postSlug}.png', [OgImageController::class, 'show'])
+    ->where('slug', '[a-z0-9-]+')
+    ->where('postSlug', '[a-z0-9-]+')
+    ->name('authors.og-image');
+
+// S121 — Comment moderation queue (super-admin only)
+Route::middleware(['web', 'auth', \Modules\Authors\Http\Middleware\EnsureSuperAdmin::class])
+    ->prefix('backoffice/authors')
+    ->group(function () {
+        Route::get('/comments', fn () => view('authors::backoffice.comment-moderation'))
+            ->name('backoffice.authors.comments');
+    });
 
 // S115 — API publique JSON Authors profils (no auth, public read-only)
 // Préfixe author-profiles pour éviter collision avec route resource api/v1/authors/{author} (admin auth)

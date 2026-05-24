@@ -12,8 +12,12 @@
     <meta property="og:title" content="{{ $post->title }}">
     <meta property="og:description" content="{{ $post->excerpt }}">
     <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ route('authors.og-image', ['slug' => $author->slug, 'postSlug' => $post->slug]) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:image" content="{{ route('authors.og-image', ['slug' => $author->slug, 'postSlug' => $post->slug]) }}">
     @if($post->cover_image)
-        <meta property="og:image" content="{{ url($post->cover_image) }}">
+        <meta property="og:image:alt" content="{{ $post->title }}">
     @endif
     @if($post->published_at)
         <meta property="article:published_time" content="{{ $post->published_at->toIso8601String() }}">

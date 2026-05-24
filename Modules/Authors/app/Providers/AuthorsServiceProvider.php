@@ -58,6 +58,7 @@ class AuthorsServiceProvider extends ServiceProvider
         Livewire::component('authors.all-authors-viewer', \Modules\Authors\Livewire\AllAuthorsViewer::class);
         Livewire::component('authors.author-recent-notifications', \Modules\Authors\Livewire\AuthorRecentNotifications::class);
         Livewire::component('authors.author-related-posts', \Modules\Authors\Livewire\AuthorRelatedPosts::class);
+        Livewire::component('authors.comment-moderation-queue', \Modules\Authors\Livewire\CommentModerationQueue::class);
     }
 
     /**
@@ -87,6 +88,7 @@ class AuthorsServiceProvider extends ServiceProvider
             \Modules\Authors\Console\Commands\AuthorsHealthCommand::class,
             \Modules\Authors\Console\Commands\AuthorsWeeklyDigestCommand::class,
             \Modules\Authors\Console\Commands\AuthorsWebmentionSendCommand::class,
+            \Modules\Authors\Console\Commands\SendSubscriberDigestCommand::class,
         ]);
     }
 
@@ -112,6 +114,13 @@ class AuthorsServiceProvider extends ServiceProvider
             // S117 — Healthcheck quotidien 04:00 Québec time
             $schedule->command('authors:health')
                 ->dailyAt('04:00')
+                ->timezone('America/Toronto')
+                ->withoutOverlapping()
+                ->onOneServer();
+
+            // S121 — Digest hebdo aux abonnés dimanche 10:00 Québec time
+            $schedule->command('authors:subscriber-digest')
+                ->weeklyOn(0, '10:00')
                 ->timezone('America/Toronto')
                 ->withoutOverlapping()
                 ->onOneServer();

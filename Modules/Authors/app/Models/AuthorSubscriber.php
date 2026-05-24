@@ -23,11 +23,13 @@ class AuthorSubscriber extends Model
         'ip_address',
         'user_agent',
         'locale',
+        'last_digest_at',
     ];
 
     protected $casts = [
         'confirmed_at' => 'datetime',
         'unsubscribed_at' => 'datetime',
+        'last_digest_at' => 'datetime',
     ];
 
     public function authorProfile(): BelongsTo
