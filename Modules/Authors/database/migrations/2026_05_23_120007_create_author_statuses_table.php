@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['author_profile_id', 'is_published', 'published_at']);
+            $table->index(['author_profile_id', 'is_published', 'published_at'], 'as_profile_pub_pubat_idx');
         });
     }
 
