@@ -276,17 +276,49 @@
     </header>
 
     @if($author->user && config('cashier.secret'))
-        <form method="POST" action="{{ url('/auteur/'.$author->slug.'/tip') }}" style="position: fixed; bottom: 24px; right: 24px; z-index: 100;">
-            @csrf
-            <input type="hidden" name="amount_cents" value="500">
-            <button type="submit" class="lv-tip-btn" aria-label="Offrir un café 5 dollars à {{ $author->display_name ?? $author->slug }}">
-                ☕ 5$
+        <div x-data="{ open: false, amount: 500 }"
+             role="region"
+             aria-label="Pourboires"
+             style="position: fixed; bottom: 24px; right: 24px; z-index: 100;">
+            <button type="button"
+                    @click="open = !open"
+                    @keydown.escape.window="open = false"
+                    class="lv-tip-btn"
+                    :aria-expanded="open ? 'true' : 'false'"
+                    aria-controls="lv-tip-panel"
+                    aria-label="Ouvrir menu pourboire">
+                ☕ <span x-show="!open">Offrir un café</span><span x-show="open" x-cloak>Fermer</span>
             </button>
-        </form>
+            <div id="lv-tip-panel"
+                 x-show="open"
+                 x-cloak
+                 x-transition
+                 @click.outside="open = false"
+                 style="position: absolute; bottom: 60px; right: 0; background: #FFFFFF; border: 2px solid #064E5A; border-radius: 12px; padding: 16px; min-width: 240px; box-shadow: 0 8px 24px rgba(6,78,90,0.2);">
+                <form method="POST" action="{{ url('/auteur/'.$author->slug.'/tip') }}">
+                    @csrf
+                    <fieldset style="border: 0; padding: 0; margin: 0 0 12px;">
+                        <legend style="font-size: 13px; color: #064E5A; font-weight: 700; margin-bottom: 8px;">Montant</legend>
+                        @foreach([500 => '5$', 1000 => '10$', 2000 => '20$'] as $cents => $label)
+                            <label style="display: block; padding: 10px; min-height: 44px; cursor: pointer; border-radius: 8px; margin-bottom: 4px;"
+                                   :style="amount === {{ $cents }} ? 'background: #E0F2F1; border: 2px solid #064E5A;' : 'background: #F8FAFB; border: 2px solid transparent;'">
+                                <input type="radio" name="amount_cents" value="{{ $cents }}" x-model.number="amount"
+                                       style="margin-right: 8px;" {{ $cents === 500 ? 'checked' : '' }}>
+                                <span style="font-weight: 600;">{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </fieldset>
+                    <button type="submit"
+                            style="width: 100%; padding: 12px; min-height: 44px; background: #064E5A; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;"
+                            x-text="'💳 Offrir ' + (amount/100) + '$'">💳 Offrir 5$</button>
+                </form>
+            </div>
+        </div>
         <style>
             .lv-tip-btn { background: #064E5A; color: #FFFFFF; border: none; border-radius: 999px; padding: 12px 20px; min-height: 44px; min-width: 44px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px rgba(6,78,90,0.3); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 15px; transition: transform 200ms, background 200ms; }
             .lv-tip-btn:hover { background: #043C45; transform: scale(1.05); }
             .lv-tip-btn:focus-visible { outline: 3px solid #9A2A06; outline-offset: 2px; }
+            [x-cloak] { display: none !important; }
         </style>
     @endif
 

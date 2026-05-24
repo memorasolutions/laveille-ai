@@ -35,6 +35,10 @@ class AuthorsServiceProvider extends ServiceProvider
     protected function registerObservers(): void
     {
         \Modules\Authors\Models\AuthorPost::observe(\Modules\Authors\Observers\AuthorPostObserver::class);
+
+        if (class_exists(\Modules\Authors\Models\AuthorWebmention::class)) {
+            \Modules\Authors\Models\AuthorWebmention::observe(\Modules\Authors\Observers\AuthorWebmentionObserver::class);
+        }
     }
 
     protected function registerLivewireComponents(): void
@@ -80,6 +84,7 @@ class AuthorsServiceProvider extends ServiceProvider
             \Modules\Authors\Console\Commands\AuthorsReportCommand::class,
             \Modules\Authors\Console\Commands\AuthorsHealthCommand::class,
             \Modules\Authors\Console\Commands\AuthorsWeeklyDigestCommand::class,
+            \Modules\Authors\Console\Commands\AuthorsWebmentionSendCommand::class,
         ]);
     }
 
@@ -88,10 +93,27 @@ class AuthorsServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            if (! function_exists('module_enabled') || ! module_enabled('Authors')) {
+                return;
+            }
+
+            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+
+            // S117 — Digest hebdo dimanche 09:00 Québec time
+            $schedule->command('authors:digest')
+                ->weeklyOn(0, '09:00')
+                ->timezone('America/Toronto')
+                ->withoutOverlapping()
+                ->onOneServer();
+
+            // S117 — Healthcheck quotidien 04:00 Québec time
+            $schedule->command('authors:health')
+                ->dailyAt('04:00')
+                ->timezone('America/Toronto')
+                ->withoutOverlapping()
+                ->onOneServer();
+        });
     }
 
     /**
