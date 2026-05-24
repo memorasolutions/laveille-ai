@@ -73,8 +73,24 @@ final class NewsletterSubscriberService
             return null;
         }
 
+        $wasUnconfirmed = $subscriber->confirmed_at === null;
         $subscriber->markConfirmed();
-        // event(new SubscriberConfirmed($subscriber)); // TODO S108 : create Event + welcome sequence listener
+
+        // S118 — Dispatch welcome mail seulement sur la transition NULL→confirmed
+        if ($wasUnconfirmed) {
+            $author = $subscriber->authorProfile()->with('user')->first();
+            if ($author) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($subscriber->email)
+                        ->queue(new \Modules\Authors\Mail\NewsletterWelcomeMail($subscriber, $author));
+                } catch (\Throwable $e) {
+                    Log::channel('daily')->warning('newsletter.welcome.failed', [
+                        'subscriber_id' => $subscriber->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
 
         return $subscriber;
     }
