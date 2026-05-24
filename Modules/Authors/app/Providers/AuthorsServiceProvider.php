@@ -29,6 +29,12 @@ class AuthorsServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
         $this->registerLivewireComponents();
+        $this->registerObservers();
+    }
+
+    protected function registerObservers(): void
+    {
+        \Modules\Authors\Models\AuthorPost::observe(\Modules\Authors\Observers\AuthorPostObserver::class);
     }
 
     protected function registerLivewireComponents(): void
@@ -45,6 +51,7 @@ class AuthorsServiceProvider extends ServiceProvider
         Livewire::component('authors.author-activity-log-viewer', \Modules\Authors\Livewire\AuthorActivityLogViewer::class);
         Livewire::component('authors.author-search', \Modules\Authors\Livewire\AuthorSearch::class);
         Livewire::component('authors.affiliate-link-manager', \Modules\Authors\Livewire\AffiliateLinkManager::class);
+        Livewire::component('authors.all-authors-viewer', \Modules\Authors\Livewire\AllAuthorsViewer::class);
     }
 
     /**
@@ -71,6 +78,7 @@ class AuthorsServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Authors\Console\Commands\AuthorsReportCommand::class,
+            \Modules\Authors\Console\Commands\AuthorsHealthCommand::class,
         ]);
     }
 

@@ -9,6 +9,27 @@ use Modules\Authors\Http\Controllers\PostController;
 use Modules\Authors\Http\Controllers\AffiliateController;
 use Modules\Authors\Http\Controllers\UpgradeController;
 
+// S115 — API publique JSON Authors profils (no auth, public read-only)
+// Préfixe author-profiles pour éviter collision avec route resource api/v1/authors/{author} (admin auth)
+Route::prefix('api/v1')
+    ->middleware('throttle:60,1')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->group(function () {
+        Route::get('/author-profiles/{slug}', [\Modules\Authors\Http\Controllers\Api\PublicAuthorApiController::class, 'show'])
+            ->where('slug', '[a-z0-9-]+')
+            ->name('authors.api.show');
+
+        Route::get('/author-profiles/{slug}/posts', [\Modules\Authors\Http\Controllers\Api\PublicAuthorApiController::class, 'posts'])
+            ->where('slug', '[a-z0-9-]+')
+            ->name('authors.api.posts');
+    });
+
+// S115 — Backoffice all-authors viewer (super-admin)
+Route::middleware(['web', 'auth'])->prefix('/backoffice')->group(function () {
+    Route::get('/authors', fn () => view('authors::backoffice.all-authors'))
+        ->name('authors.backoffice.all');
+});
+
 // S112 — Affiliate links cloaking
 Route::get('/go/{slug}', [AffiliateController::class, 'go'])
     ->where('slug', '[a-z0-9-]+')
