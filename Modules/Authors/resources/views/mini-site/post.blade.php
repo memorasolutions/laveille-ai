@@ -200,6 +200,22 @@
             ->limit(50)
             ->get();
     @endphp
+    <x-authors::reading-progress />
+
+    <div class="lv-section-wrap" style="max-width: 720px; margin: 32px auto; padding: 0 24px;">
+        <x-authors::share-buttons
+            :title="$post->title"
+            :url="url()->current()"
+            :description="$post->excerpt ?? ''" />
+    </div>
+
+    <div class="lv-section-wrap" style="max-width: 1100px; margin: 32px auto; padding: 0 24px;">
+        <livewire:authors.author-related-posts
+            :author-profile-id="$author->id"
+            :current-post-id="$post->id"
+            :current-tags="is_array($post->tags) ? $post->tags : []" />
+    </div>
+
     @if($webmentions->isNotEmpty())
         <div class="lv-section-wrap">
             <section aria-labelledby="lv-webmentions-title" class="lv-webmentions">

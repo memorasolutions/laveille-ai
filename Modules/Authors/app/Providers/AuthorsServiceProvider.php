@@ -56,6 +56,8 @@ class AuthorsServiceProvider extends ServiceProvider
         Livewire::component('authors.author-search', \Modules\Authors\Livewire\AuthorSearch::class);
         Livewire::component('authors.affiliate-link-manager', \Modules\Authors\Livewire\AffiliateLinkManager::class);
         Livewire::component('authors.all-authors-viewer', \Modules\Authors\Livewire\AllAuthorsViewer::class);
+        Livewire::component('authors.author-recent-notifications', \Modules\Authors\Livewire\AuthorRecentNotifications::class);
+        Livewire::component('authors.author-related-posts', \Modules\Authors\Livewire\AuthorRelatedPosts::class);
     }
 
     /**
