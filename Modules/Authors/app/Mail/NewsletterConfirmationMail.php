@@ -44,9 +44,21 @@ class NewsletterConfirmationMail extends Mailable implements ShouldQueue
     {
         return new Headers(
             text: [
-                'List-Unsubscribe' => '<'.$this->unsubscribeUrl().'>',
+                // RFC 8058 — both mailto + HTTPS, with POST one-click endpoint for Gmail/Yahoo 2026
+                'List-Unsubscribe' => '<'.$this->unsubscribeOneClickUrl().'>, <'.$this->unsubscribeUrl().'>',
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             ],
+        );
+    }
+
+    public function unsubscribeOneClickUrl(): string
+    {
+        return URL::signedRoute(
+            'authors.newsletter.unsubscribe-1click',
+            [
+                'slug' => $this->author->slug,
+                'token' => $this->subscriber->confirmation_token,
+            ]
         );
     }
 

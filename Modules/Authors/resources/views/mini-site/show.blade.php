@@ -23,10 +23,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --c-primary: #0B7285; --c-primary-hover: #064E5C; --c-primary-light: #F0FAFB;
-            --c-accent: #C2410C; --c-accent-hover: #9A3412; --c-accent-light: #FDF5ED;
-            --c-dark: #1A1D23; --c-text-secondary: #4a4f5c; --c-text-muted: #52586a;
+            --c-primary: #064E5A; --c-primary-hover: #043C45; --c-primary-light: #F0FAFB;
+            --c-accent: #9A2A06; --c-accent-hover: #7A2105; --c-accent-light: #FDF5ED;
+            --c-dark: #1A1D23; --c-text-secondary: #3A4050; --c-text-muted: #3F4554;
             --c-surface: #F8FAFB;
+        }
+        /* WCAG 2.2 AAA skip link — premier focusable, hidden tant que pas focus */
+        .lv-skip-link {
+            position: absolute; top: -100px; left: 0; z-index: 9999;
+            background: #064E5A; color: #FFFFFF; padding: 12px 24px;
+            font-weight: 700; text-decoration: none; border-radius: 0 0 8px 0;
+            min-height: 44px; display: inline-flex; align-items: center;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+        .lv-skip-link:focus, .lv-skip-link:focus-visible {
+            top: 0;
+            outline: 3px solid #9A2A06; outline-offset: 2px;
+        }
+        /* WCAG 2.5.5 AAA target size 44x44 minimum */
+        .read-link {
+            display: inline-flex; align-items: center; min-height: 44px;
+            padding: 10px 12px; margin: -6px -8px;
+            border-radius: 0.5rem;
+        }
+        .read-link:hover, .read-link:focus-visible {
+            background: var(--c-primary-light);
+        }
+        .read-link:focus-visible {
+            outline: 3px solid var(--c-accent); outline-offset: 2px;
         }
         [data-theme="dark"] {
             --c-primary: #4FB3C6; --c-primary-hover: #2A8DAE; --c-primary-light: #0F1419;
@@ -87,7 +111,9 @@
     </style>
 </head>
 <body>
-    <svg style="position: fixed; inset: 0; pointer-events: none; opacity: 0.04; mix-blend-mode: multiply; z-index: -1; width: 100%; height: 100%;">
+    <a href="#lv-main-content" class="lv-skip-link">Aller au contenu principal</a>
+
+    <svg aria-hidden="true" focusable="false" style="position: fixed; inset: 0; pointer-events: none; opacity: 0.04; mix-blend-mode: multiply; z-index: -1; width: 100%; height: 100%;">
         <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3"/></filter>
         <rect width="100%" height="100%" filter="url(#grain)"></rect>
     </svg>
@@ -238,7 +264,7 @@
         @endif
     </header>
 
-    <main class="container">
+    <main class="container" id="lv-main-content" role="main">
         @php
             $articles = $timeline->filter(function ($i) { return ! isset($i->content_type); })->values();
         @endphp

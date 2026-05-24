@@ -11,7 +11,14 @@
     $description ??= 'Newsletter hebdo. Désabo 1-clic. Zéro spam.';
     $endpoint = '/auteur/' . $author->slug . '/newsletter/subscribe';
     $componentId = 'nlopt-' . $author->id;
+    $turnstileSiteKey = \Modules\Authors\Services\TurnstileVerificationService::siteKey();
 @endphp
+
+@if($turnstileSiteKey)
+    @once
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+    @endonce
+@endif
 
 <div
     x-data="{
@@ -26,11 +33,12 @@
                 return;
             }
             this.state = 'loading';
+            const turnstileToken = this.$root.querySelector('[name=cf-turnstile-response]')?.value ?? '';
             try {
                 const res = await fetch('{{ $endpoint }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content ?? '' },
-                    body: JSON.stringify({ email: this.email, consent: this.consent, website: '' })
+                    body: JSON.stringify({ email: this.email, consent: this.consent, website: '', 'cf-turnstile-response': turnstileToken })
                 });
                 if (res.ok) {
                     this.state = 'success';
@@ -68,6 +76,11 @@
             aria-describedby="{{ $componentId }}-status"
         >
         <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+
+        @if($turnstileSiteKey)
+            <div class="cf-turnstile lv-nlopt__turnstile" data-sitekey="{{ $turnstileSiteKey }}" data-size="invisible" data-action="newsletter-subscribe"></div>
+        @endif
+
         <button
             type="submit"
             class="lv-nlopt__btn"
@@ -111,8 +124,8 @@
 .lv-nlopt__btn:focus-visible { outline: 3px solid var(--c-primary, #0B7285); outline-offset: 2px; }
 .lv-nlopt__btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .lv-nlopt__consent { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: 0.8125rem; color: var(--c-text-muted, #52586a); }
-.lv-nlopt__consent input { margin-top: 2px; width: 16px; height: 16px; accent-color: var(--c-primary, #0B7285); }
-.lv-nlopt__consent a { color: var(--c-primary, #0B7285); text-decoration: underline; }
+.lv-nlopt__consent input { margin-top: 2px; width: 24px; height: 24px; min-width: 24px; min-height: 24px; accent-color: var(--c-primary, #064E5A); cursor: pointer; }
+.lv-nlopt__consent a { color: var(--c-primary, #064E5A); text-decoration: underline; }
 .lv-nlopt__msg { margin-top: 12px; padding: 10px 12px; border-radius: 0.5rem; font-size: 0.875rem; }
 .lv-nlopt__msg--success { background: #ECFDF5; color: #064E3B; border: 1px solid #6EE7B7; }
 .lv-nlopt__msg--error { background: #FEF2F2; color: #7F1D1D; border: 1px solid #FCA5A5; }

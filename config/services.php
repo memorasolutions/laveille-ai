@@ -26,6 +26,17 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    // Cloudflare Turnstile (S108 — anti-bot privacy-first newsletter + comments)
+    'turnstile' => [
+        'site_key' => env('CLOUDFLARE_TURNSTILE_SITE_KEY'),
+        'secret_key' => env('CLOUDFLARE_TURNSTILE_SECRET_KEY'),
+    ],
+
+    // Akismet (S108 backlog — anti-spam comments commercial fallback)
+    'akismet' => [
+        'key' => env('AKISMET_KEY'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

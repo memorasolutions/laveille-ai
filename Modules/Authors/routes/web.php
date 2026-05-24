@@ -42,6 +42,13 @@ Route::get('/auteur/{slug}/newsletter/unsubscribe/{token}', [MiniSiteController:
     ->middleware(['signed', 'throttle:10,1'])
     ->name('authors.newsletter.unsubscribe');
 
+// RFC 8058 one-click POST endpoint (Gmail/Yahoo bulk sender compliance 2026)
+Route::post('/auteur/{slug}/newsletter/unsubscribe-1click/{token}', [MiniSiteController::class, 'unsubscribeOneClick'])
+    ->where('slug', '[a-z0-9-]+')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->middleware('throttle:30,1')
+    ->name('authors.newsletter.unsubscribe-1click');
+
 // Dashboard auteur (auth required)
 Route::middleware(['web', 'auth'])->prefix('/auteur')->group(function () {
     Route::get('/dashboard', fn () => view('authors::dashboard'))

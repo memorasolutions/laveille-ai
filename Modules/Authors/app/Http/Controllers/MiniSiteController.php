@@ -13,11 +13,13 @@ use Illuminate\Support\Facades\Response as ResponseFacade;
 use Modules\Authors\Models\AuthorProfile;
 use Modules\Authors\Services\AuthorExportService;
 use Modules\Authors\Services\NewsletterSubscriberService;
+use Modules\Authors\Services\TurnstileVerificationService;
 
 final class MiniSiteController extends Controller
 {
     public function __construct(
-        private readonly NewsletterSubscriberService $newsletterService
+        private readonly NewsletterSubscriberService $newsletterService,
+        private readonly TurnstileVerificationService $turnstile
     ) {
     }
 
@@ -109,6 +111,17 @@ final class MiniSiteController extends Controller
             return ResponseFacade::json(['ok' => true], 200);
         }
 
+        // S108 — Cloudflare Turnstile verification (graceful bypass si pas configuré)
+        if ($this->turnstile->isEnabled()) {
+            $token = $request->input('cf-turnstile-response');
+            if (! $this->turnstile->verify($token, $request->ip())) {
+                return ResponseFacade::json([
+                    'ok' => false,
+                    'message' => "Validation anti-bot échouée. Réessaie en rafraîchissant la page.",
+                ], 422);
+            }
+        }
+
         $validated = $request->validate([
             'email' => 'required|email:rfc|max:255',
             'consent' => 'required|accepted',
@@ -158,6 +171,24 @@ final class MiniSiteController extends Controller
             'author' => $author,
             'sub' => $sub,
         ]);
+    }
+
+    public function unsubscribeOneClick(Request $request, string $slug, string $token)
+    {
+        abort_unless($request->hasValidSignature(), 401, 'Lien expiré ou invalide.');
+
+        $author = AuthorProfile::where('slug', $slug)->whereNull('archived_at')->firstOrFail();
+        $unsubscribed = $this->newsletterService->unsubscribe($token);
+
+        Log::channel('daily')->info('newsletter.unsubscribe.one_click', [
+            'slug' => $slug,
+            'author_id' => $author->id,
+            'success' => $unsubscribed,
+            'ua' => substr((string) $request->userAgent(), 0, 256),
+            'ip' => $request->ip(),
+        ]);
+
+        return ResponseFacade::make('Unsubscribed', 200, ['Content-Type' => 'text/plain; charset=utf-8']);
     }
 
     public function unsubscribeNewsletter(Request $request, string $slug, string $token)
