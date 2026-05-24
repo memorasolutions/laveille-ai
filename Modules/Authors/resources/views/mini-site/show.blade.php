@@ -275,6 +275,21 @@
         @endif
     </header>
 
+    @if($author->user && config('cashier.secret'))
+        <form method="POST" action="{{ url('/auteur/'.$author->slug.'/tip') }}" style="position: fixed; bottom: 24px; right: 24px; z-index: 100;">
+            @csrf
+            <input type="hidden" name="amount_cents" value="500">
+            <button type="submit" class="lv-tip-btn" aria-label="Offrir un café 5 dollars à {{ $author->display_name ?? $author->slug }}">
+                ☕ 5$
+            </button>
+        </form>
+        <style>
+            .lv-tip-btn { background: #064E5A; color: #FFFFFF; border: none; border-radius: 999px; padding: 12px 20px; min-height: 44px; min-width: 44px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px rgba(6,78,90,0.3); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 15px; transition: transform 200ms, background 200ms; }
+            .lv-tip-btn:hover { background: #043C45; transform: scale(1.05); }
+            .lv-tip-btn:focus-visible { outline: 3px solid #9A2A06; outline-offset: 2px; }
+        </style>
+    @endif
+
     <nav aria-label="Fil d'Ariane" class="container" style="padding-top: 8px; padding-bottom: 8px; font-size: 13px; color: var(--c-text-muted);">
         <ol style="list-style: none; padding: 0; margin: 0; display: flex; gap: 8px; flex-wrap: wrap;">
             <li><a href="{{ url('/') }}" style="color: var(--c-primary); text-decoration: none;">Accueil</a></li>

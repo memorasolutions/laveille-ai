@@ -44,6 +44,7 @@ class AuthorsServiceProvider extends ServiceProvider
         Livewire::component('authors.comment-section', \Modules\Authors\Livewire\CommentSection::class);
         Livewire::component('authors.author-activity-log-viewer', \Modules\Authors\Livewire\AuthorActivityLogViewer::class);
         Livewire::component('authors.author-search', \Modules\Authors\Livewire\AuthorSearch::class);
+        Livewire::component('authors.affiliate-link-manager', \Modules\Authors\Livewire\AffiliateLinkManager::class);
     }
 
     /**

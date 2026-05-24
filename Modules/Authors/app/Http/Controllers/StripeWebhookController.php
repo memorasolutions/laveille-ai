@@ -37,6 +37,38 @@ class StripeWebhookController extends \Laravel\Cashier\Http\Controllers\WebhookC
         return $response;
     }
 
+    protected function handleCheckoutSessionCompleted(array $payload): Response
+    {
+        $response = parent::handleCheckoutSessionCompleted($payload);
+        $object = $payload['data']['object'] ?? [];
+        $metadata = $object['metadata'] ?? [];
+        $tipType = $metadata['tip_type'] ?? null;
+
+        if ($tipType !== 'one-time') {
+            return $response;
+        }
+
+        $authorProfileId = (int) ($metadata['author_profile_id'] ?? 0);
+        if ($authorProfileId <= 0) {
+            return $response;
+        }
+
+        $authorProfile = AuthorProfile::find($authorProfileId);
+        if (! $authorProfile) {
+            return $response;
+        }
+
+        $amountTotal = (int) ($object['amount_total'] ?? 0);
+        Log::channel('daily')->info('tips.received', [
+            'author_profile_id' => $authorProfile->id,
+            'amount_total_cents' => $amountTotal,
+            'currency' => $object['currency'] ?? 'cad',
+            'customer_email' => $object['customer_details']['email'] ?? null,
+        ]);
+
+        return $response;
+    }
+
     private function syncTier(array $payload, string $tier): void
     {
         $stripeId = $payload['data']['object']['customer'] ?? null;
