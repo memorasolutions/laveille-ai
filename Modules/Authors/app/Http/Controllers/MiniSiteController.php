@@ -273,6 +273,36 @@ final class MiniSiteController extends Controller
         ]);
     }
 
+    public function tip(Request $request, string $slug)
+    {
+        $author = AuthorProfile::where('slug', $slug)->whereNull('archived_at')->firstOrFail();
+
+        $service = app(\Modules\Authors\Services\AuthorTipsService::class);
+
+        if (! $service->isEnabled()) {
+            abort(503, 'Tips non configurés.');
+        }
+
+        $amountCents = (int) $request->input('amount_cents', 500);
+
+        if ($amountCents < 100 || $amountCents > 50000) {
+            abort(422, 'Montant invalide.');
+        }
+
+        try {
+            $checkoutUrl = $service->createCheckout($author, $amountCents);
+
+            return redirect($checkoutUrl);
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('tips.checkout.failed', [
+                'author_slug' => $slug,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Erreur Stripe. Réessaie.');
+        }
+    }
+
     public function unsubscribeOneClick(Request $request, string $slug, string $token)
     {
         abort_unless($request->hasValidSignature(), 401, 'Lien expiré ou invalide.');

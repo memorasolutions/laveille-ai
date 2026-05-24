@@ -43,6 +43,7 @@ class AuthorsServiceProvider extends ServiceProvider
         Livewire::component('authors.image-builder', \Modules\Authors\Livewire\ImageBuilder::class);
         Livewire::component('authors.comment-section', \Modules\Authors\Livewire\CommentSection::class);
         Livewire::component('authors.author-activity-log-viewer', \Modules\Authors\Livewire\AuthorActivityLogViewer::class);
+        Livewire::component('authors.author-search', \Modules\Authors\Livewire\AuthorSearch::class);
     }
 
     /**

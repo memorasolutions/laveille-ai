@@ -6,7 +6,20 @@ use Illuminate\Support\Facades\Route;
 use Modules\Authors\Http\Controllers\AuthorsController;
 use Modules\Authors\Http\Controllers\MiniSiteController;
 use Modules\Authors\Http\Controllers\PostController;
+use Modules\Authors\Http\Controllers\AffiliateController;
 use Modules\Authors\Http\Controllers\UpgradeController;
+
+// S112 — Affiliate links cloaking
+Route::get('/go/{slug}', [AffiliateController::class, 'go'])
+    ->where('slug', '[a-z0-9-]+')
+    ->middleware('throttle:60,1')
+    ->name('authors.affiliate.go');
+
+// S112 — Tips Stripe one-tap
+Route::post('/auteur/{slug}/tip', [MiniSiteController::class, 'tip'])
+    ->where('slug', '[a-z0-9-]+')
+    ->middleware('throttle:10,1')
+    ->name('authors.tip');
 
 // S111 — Webmentions IndieWeb endpoint (réception backlinks décentralisés)
 Route::post('/webmention', function (\Illuminate\Http\Request $request) {

@@ -140,6 +140,56 @@
         </div>
     </article>
 
+    @php
+        $webmentions = \Modules\Authors\Models\AuthorWebmention::where('author_post_id', $post->id)
+            ->verified()
+            ->notSpam()
+            ->latest('received_at')
+            ->limit(50)
+            ->get();
+    @endphp
+    @if($webmentions->isNotEmpty())
+        <div class="lv-section-wrap">
+            <section aria-labelledby="lv-webmentions-title" class="lv-webmentions">
+                <h2 id="lv-webmentions-title">🔗 Mentions du web ({{ $webmentions->count() }})</h2>
+                <ul class="lv-webmentions-list">
+                    @foreach($webmentions as $wm)
+                        <li class="lv-webmention">
+                            <header>
+                                @if($wm->source_author_url)
+                                    <a href="{{ e($wm->source_author_url) }}" rel="noopener" target="_blank">{{ e($wm->source_author_name ?? 'Anonyme') }}</a>
+                                @else
+                                    <strong>{{ e($wm->source_author_name ?? 'Anonyme') }}</strong>
+                                @endif
+                                <span class="lv-webmention-type">{{ $wm->type }}</span>
+                                <time datetime="{{ $wm->received_at->toIso8601String() }}">{{ $wm->received_at->diffForHumans() }}</time>
+                            </header>
+                            @if($wm->source_excerpt)
+                                <p class="lv-webmention-excerpt">{{ \Illuminate\Support\Str::limit($wm->source_excerpt, 200) }}</p>
+                            @endif
+                            <a href="{{ e($wm->source_url) }}" rel="noopener" target="_blank" class="lv-webmention-source">Voir la source →</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </section>
+
+            <style>
+                .lv-webmentions { max-width: 720px; margin: 32px auto; padding: 24px; background: #F8FAFB; border-radius: 12px; }
+                .lv-webmentions h2 { color: #064E5A; font-size: 22px; margin: 0 0 16px; }
+                .lv-webmentions-list { list-style: none; padding: 0; margin: 0; }
+                .lv-webmention { padding: 16px 0; border-bottom: 1px solid #E2E8F0; }
+                .lv-webmention:last-child { border-bottom: none; }
+                .lv-webmention header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; font-size: 14px; }
+                .lv-webmention header a, .lv-webmention header strong { color: #064E5A; font-weight: 600; }
+                .lv-webmention-type { background: #064E5A; color: #FFFFFF; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+                .lv-webmention header time { color: #3A4050; font-size: 13px; margin-left: auto; }
+                .lv-webmention-excerpt { color: #1F2937; line-height: 1.6; margin: 0 0 8px; }
+                .lv-webmention-source { color: #9A2A06; font-size: 13px; text-decoration: underline; min-height: 44px; display: inline-flex; align-items: center; }
+                .lv-webmention-source:focus-visible { outline: 3px solid #9A2A06; outline-offset: 2px; }
+            </style>
+        </div>
+    @endif
+
     <div class="lv-section-wrap">
         <x-authors::comment-section :commentable="$post" :author-profile-id="$author->id" />
     </div>
