@@ -7,6 +7,8 @@
                 'curation' => '📚 Curation',
                 'builders' => '🤖 Builders',
                 'subscribers' => '📬 Abonnés',
+                'affiliates' => '🔗 Affiliés',
+                'historique' => '📜 Historique',
                 'parametres' => '⚙️ Paramètres',
                 'stats' => '📊 Stats',
             ] as $key => $label)
@@ -54,6 +56,18 @@
                     @livewire('authors.image-builder')
                 </div>
             </div>
+        @elseif($activeTab === 'affiliates')
+            @if($author)
+                @livewire('authors.affiliate-link-manager', ['authorProfileId' => $author->id], key('affiliate-mgr-'.$author->id))
+            @else
+                <p class="text-gray-500 italic bg-gray-50 p-6 rounded">Profil auteur non trouvé.</p>
+            @endif
+        @elseif($activeTab === 'historique')
+            @if($author)
+                @livewire('authors.author-activity-log-viewer', ['authorProfileId' => $author->id], key('activity-log-'.$author->id))
+            @else
+                <p class="text-gray-500 italic bg-gray-50 p-6 rounded">Profil auteur non trouvé.</p>
+            @endif
         @elseif($activeTab === 'parametres')
             @if($author)
                 @livewire('authors.author-settings', ['authorProfileId' => $author->id], key('author-settings-'.$author->id))

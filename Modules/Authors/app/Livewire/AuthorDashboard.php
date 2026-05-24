@@ -22,7 +22,7 @@ class AuthorDashboard extends Component
 
     public function switchTab(string $tab): void
     {
-        if (in_array($tab, ['composer', 'articles', 'curation', 'builders', 'parametres', 'stats', 'subscribers'], true)) {
+        if (in_array($tab, ['composer', 'articles', 'curation', 'builders', 'parametres', 'stats', 'subscribers', 'affiliates', 'historique'], true)) {
             $this->activeTab = $tab;
         }
     }

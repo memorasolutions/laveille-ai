@@ -69,7 +69,9 @@ class AuthorsServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Authors\Console\Commands\AuthorsReportCommand::class,
+        ]);
     }
 
     /**

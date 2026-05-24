@@ -81,9 +81,29 @@
     </style>
     @stack('head')
 </head>
+@if($author->user && config('cashier.secret'))
+    <script>
+        // S114 — Tip button on post pages (gated cashier.secret server-side check)
+    </script>
+@endif
 <body x-data="{ readerMode: localStorage.getItem('lv-reader-mode') === '1' }"
     :class="{ 'lv-reader-mode': readerMode }"
     x-init="if (readerMode) document.body.classList.add('lv-reader-mode')">
+    @if($author->user && config('cashier.secret'))
+        <form method="POST" action="{{ url('/auteur/'.$author->slug.'/tip') }}" style="position: fixed; bottom: 80px; right: 24px; z-index: 100;">
+            @csrf
+            <input type="hidden" name="amount_cents" value="500">
+            <button type="submit" class="lv-tip-btn-post" aria-label="Offrir un café 5 dollars à {{ $author->display_name ?? $author->slug }}">
+                ☕ 5$
+            </button>
+        </form>
+        <style>
+            .lv-tip-btn-post { background: #064E5A; color: #FFFFFF; border: none; border-radius: 999px; padding: 12px 20px; min-height: 44px; min-width: 44px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 16px rgba(6,78,90,0.3); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 15px; transition: transform 200ms, background 200ms; }
+            .lv-tip-btn-post:hover { background: #043C45; transform: scale(1.05); }
+            .lv-tip-btn-post:focus-visible { outline: 3px solid #9A2A06; outline-offset: 2px; }
+        </style>
+    @endif
+
     <button type="button" class="lv-reader-toggle"
         @click="readerMode = !readerMode; document.body.classList.toggle('lv-reader-mode'); localStorage.setItem('lv-reader-mode', readerMode ? '1' : '0')"
         :aria-pressed="readerMode"

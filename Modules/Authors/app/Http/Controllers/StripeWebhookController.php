@@ -39,7 +39,9 @@ class StripeWebhookController extends \Laravel\Cashier\Http\Controllers\WebhookC
 
     protected function handleCheckoutSessionCompleted(array $payload): Response
     {
-        $response = parent::handleCheckoutSessionCompleted($payload);
+        $response = method_exists(\Laravel\Cashier\Http\Controllers\WebhookController::class, 'handleCheckoutSessionCompleted')
+            ? parent::handleCheckoutSessionCompleted($payload)
+            : new \Symfony\Component\HttpFoundation\Response('Webhook handled', 200);
         $object = $payload['data']['object'] ?? [];
         $metadata = $object['metadata'] ?? [];
         $tipType = $metadata['tip_type'] ?? null;
@@ -59,12 +61,32 @@ class StripeWebhookController extends \Laravel\Cashier\Http\Controllers\WebhookC
         }
 
         $amountTotal = (int) ($object['amount_total'] ?? 0);
+        $currency = (string) ($object['currency'] ?? 'cad');
+        $tipperEmail = $object['customer_details']['email'] ?? null;
+
         Log::channel('daily')->info('tips.received', [
             'author_profile_id' => $authorProfile->id,
             'amount_total_cents' => $amountTotal,
-            'currency' => $object['currency'] ?? 'cad',
-            'customer_email' => $object['customer_details']['email'] ?? null,
+            'currency' => $currency,
+            'customer_email' => $tipperEmail,
         ]);
+
+        if ($authorProfile->user_id && $authorProfile->user?->email) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($authorProfile->user->email)
+                    ->queue(new \Modules\Authors\Mail\TipReceivedNotificationMail(
+                        $authorProfile,
+                        $amountTotal,
+                        $currency,
+                        $tipperEmail
+                    ));
+            } catch (\Throwable $e) {
+                Log::channel('daily')->error('tips.notification.mail.failed', [
+                    'author_profile_id' => $authorProfile->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         return $response;
     }
