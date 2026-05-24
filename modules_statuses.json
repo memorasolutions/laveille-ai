@@ -48,5 +48,5 @@
     "Shop": true,
     "CloudflareCache": true,
     "Sudoku": true,
-    "Authors": false
+    "Authors": true
 }
