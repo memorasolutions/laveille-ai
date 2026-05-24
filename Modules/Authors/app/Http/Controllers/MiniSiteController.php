@@ -12,9 +12,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response as ResponseFacade;
 use Modules\Authors\Models\AuthorProfile;
 use Modules\Authors\Services\AuthorExportService;
+use Modules\Authors\Services\NewsletterSubscriberService;
 
 final class MiniSiteController extends Controller
 {
+    public function __construct(
+        private readonly NewsletterSubscriberService $newsletterService
+    ) {
+    }
+
     public function show(string $slug)
     {
         $author = AuthorProfile::where('slug', $slug)
@@ -97,13 +103,8 @@ final class MiniSiteController extends Controller
         }
     }
 
-    /**
-     * Newsletter subscribe — Top5-C scaffolding S106 PM.
-     * TODO S107 : intégrer BrevoApiTransport + table author_subscribers + welcome séquence.
-     */
     public function subscribe(Request $request, string $slug)
     {
-        // Honeypot anti-bot
         if (! empty($request->input('website'))) {
             return ResponseFacade::json(['ok' => true], 200);
         }
@@ -111,22 +112,64 @@ final class MiniSiteController extends Controller
         $validated = $request->validate([
             'email' => 'required|email:rfc|max:255',
             'consent' => 'required|accepted',
+            'source' => 'nullable|string|in:inline,footer,modal',
         ]);
 
         $author = AuthorProfile::where('slug', $slug)->whereNull('archived_at')->firstOrFail();
 
-        // Stub : log uniquement (TODO S107 : table author_subscribers + Brevo)
-        Log::channel('daily')->info('author.newsletter.subscribe', [
-            'author_slug' => $author->slug,
-            'email' => $validated['email'],
-            'consent' => true,
-            'ip' => $request->ip(),
-        ]);
+        try {
+            $this->newsletterService->subscribe(
+                email: $validated['email'],
+                author: $author,
+                source: $validated['source'] ?? 'inline',
+                ip: $request->ip(),
+                ua: substr((string) $request->userAgent(), 0, 512),
+                locale: app()->getLocale()
+            );
+        } catch (\Throwable $e) {
+            Log::channel('daily')->error('author.newsletter.subscribe.error', [
+                'author_slug' => $author->slug,
+                'email' => $validated['email'],
+                'error' => $e->getMessage(),
+            ]);
+
+            return ResponseFacade::json([
+                'ok' => false,
+                'message' => "Une erreur est survenue. Réessaie dans quelques instants.",
+            ], 500);
+        }
 
         return ResponseFacade::json([
             'ok' => true,
             'message' => "Merci. Vérifie ta boîte courriel pour confirmer.",
         ], 200);
+    }
+
+    public function confirmNewsletter(Request $request, string $slug, string $token)
+    {
+        abort_unless($request->hasValidSignature(), 401, 'Lien expiré ou invalide.');
+
+        $author = AuthorProfile::where('slug', $slug)->whereNull('archived_at')->firstOrFail();
+        $sub = $this->newsletterService->confirm($token);
+
+        abort_if($sub === null, 404, 'Abonnement introuvable.');
+
+        return view('authors::mini-site.newsletter-confirmed', [
+            'author' => $author,
+            'sub' => $sub,
+        ]);
+    }
+
+    public function unsubscribeNewsletter(Request $request, string $slug, string $token)
+    {
+        abort_unless($request->hasValidSignature(), 401, 'Lien expiré ou invalide.');
+
+        $author = AuthorProfile::where('slug', $slug)->whereNull('archived_at')->firstOrFail();
+        $this->newsletterService->unsubscribe($token);
+
+        return view('authors::mini-site.newsletter-unsubscribed', [
+            'author' => $author,
+        ]);
     }
 
     private function buildRssXml(AuthorProfile $author, $items): string

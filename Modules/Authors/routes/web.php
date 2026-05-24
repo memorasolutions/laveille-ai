@@ -19,11 +19,21 @@ Route::get('/@{slug}/feed.json', [MiniSiteController::class, 'jsonFeed'])
     ->where('slug', '[a-z0-9-]+')
     ->name('authors.mini-site.json-feed');
 
-// Newsletter subscribe par auteur (Top5-C S106 PM scaffolding)
+// Newsletter subscribe par auteur (S107 P0b — Service + table + Brevo + double opt-in)
 Route::post('/auteur/{slug}/newsletter/subscribe', [MiniSiteController::class, 'subscribe'])
     ->where('slug', '[a-z0-9-]+')
     ->middleware('throttle:5,1')
     ->name('authors.newsletter.subscribe');
+
+Route::get('/auteur/{slug}/newsletter/confirm/{token}', [MiniSiteController::class, 'confirmNewsletter'])
+    ->where('slug', '[a-z0-9-]+')
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('authors.newsletter.confirm');
+
+Route::get('/auteur/{slug}/newsletter/unsubscribe/{token}', [MiniSiteController::class, 'unsubscribeNewsletter'])
+    ->where('slug', '[a-z0-9-]+')
+    ->middleware(['signed', 'throttle:10,1'])
+    ->name('authors.newsletter.unsubscribe');
 
 // Dashboard auteur (auth required)
 Route::middleware(['web', 'auth'])->prefix('/auteur')->group(function () {

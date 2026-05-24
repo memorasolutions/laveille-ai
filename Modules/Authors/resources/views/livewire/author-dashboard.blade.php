@@ -6,6 +6,7 @@
                 'articles' => '📝 Articles',
                 'curation' => '📚 Curation',
                 'builders' => '🤖 Builders',
+                'subscribers' => '📬 Abonnés',
                 'parametres' => '⚙️ Paramètres',
                 'stats' => '📊 Stats',
             ] as $key => $label)
@@ -61,6 +62,51 @@
                     <p class="text-gray-500 italic">Profil auteur non trouvé.</p>
                 </div>
             @endif
+        @elseif($activeTab === 'subscribers')
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-bold mb-6 text-[#0B7285]">📬 Abonnés newsletter</h2>
+                @if(!$author)
+                    <p class="text-gray-500 italic">Profil auteur non trouvé.</p>
+                @elseif(($subscribersStats['total'] ?? 0) === 0)
+                    <div aria-live="polite" class="text-center py-12 px-6 bg-[#F8FAFB] rounded-lg border border-gray-200">
+                        <p class="text-lg font-medium text-[#0B7285]">Pas encore d'abonnés.</p>
+                        <p class="mt-2 text-gray-600">
+                            Partage ton lien
+                            <code class="bg-white px-2 py-1 rounded text-[#C2410C] border">/@{{ $author->slug }}#newsletter</code>
+                            pour commencer à grandir ta liste.
+                        </p>
+                    </div>
+                @else
+                    <div aria-live="polite" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="p-4 rounded-lg border bg-white border-[#0B7285]" style="min-height: 88px;">
+                            <p class="text-sm font-medium text-[#0B7285]">Total</p>
+                            <p class="text-2xl font-bold mt-1 text-[#0B7285]">{{ $subscribersStats['total'] }}</p>
+                        </div>
+                        <div class="p-4 rounded-lg border bg-white border-green-700" style="min-height: 88px;">
+                            <p class="text-sm font-medium text-green-700">Confirmés</p>
+                            <p class="text-2xl font-bold mt-1 text-green-700">{{ $subscribersStats['confirmed'] }}</p>
+                        </div>
+                        <div class="p-4 rounded-lg border bg-white border-[#C2410C]" style="min-height: 88px;">
+                            <p class="text-sm font-medium text-[#C2410C]">En attente</p>
+                            <p class="text-2xl font-bold mt-1 text-[#C2410C]">{{ $subscribersStats['pending'] }}</p>
+                        </div>
+                        <div class="p-4 rounded-lg border bg-white border-gray-500" style="min-height: 88px;">
+                            <p class="text-sm font-medium text-gray-700">Désabonnés</p>
+                            <p class="text-2xl font-bold mt-1 text-gray-700">{{ $subscribersStats['unsubscribed'] }}</p>
+                        </div>
+                    </div>
+
+                    <p class="mb-6 text-gray-700">
+                        Nouveaux abonnés sur 7 jours :
+                        <strong class="text-[#0B7285]">{{ $subscribersStats['last_7_days'] }}</strong>
+                    </p>
+
+                    <button type="button" wire:click="exportSubscribersCsv"
+                            class="inline-flex items-center gap-2 px-4 py-3 bg-white text-[#C2410C] border-2 border-[#C2410C] rounded-md font-semibold hover:bg-[#C2410C] hover:text-white focus-visible:outline-3 focus-visible:outline-offset-2 min-h-[44px]">
+                        📥 Exporter CSV
+                    </button>
+                @endif
+            </div>
         @elseif($activeTab === 'stats')
             <div class="bg-gray-50 rounded-lg p-6">
                 <h2 class="text-xl font-bold mb-6">Statistiques & Recommandations IA</h2>

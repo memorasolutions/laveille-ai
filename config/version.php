@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.23.0 · 2026-05-24 · #269 Newsletter Authors double opt-in complète (S107 P0b). Architecture : (1) Migration `author_subscribers` (id, author_profile_id FK cascadeOnDelete, email, confirmation_token, confirmed_at, unsubscribed_at, source enum inline|footer|modal, ip_address, user_agent, locale, timestamps + 3 index courts as_sub_*_idx leçon L-MARIADB-INDEX-64CHAR-LIMIT-V1) ; (2) Model `Modules\Authors\Models\AuthorSubscriber` (scopes confirmed/active/pending + helpers isConfirmed/isUnsubscribed/markConfirmed/markUnsubscribed + Str::random(64) confirmation_token générateur statique) ; (3) Service `Modules\Authors\Services\NewsletterSubscriberService` (subscribe idempotent regen-token-if-unconfirmed + confirm + unsubscribe + isSubscribed, inject Mailer interface PSR DI, Log audit channel daily) ; (4) Mailable `Modules\Authors\Mail\NewsletterConfirmationMail` implements ShouldQueue (Brevo workspace mailer transactionnel) avec Envelope Address propre + Headers RFC 8058 List-Unsubscribe + List-Unsubscribe-Post One-Click + view 'authors::mail.newsletter-confirmation' + helpers confirmUrl/unsubscribeUrl signed routes 7j expiry ; (5) Vue email HTML responsive sobre tokens charte teal #0B7285 cream #F8FAFB Plus Jakarta Sans + CTA 44px min-height + footer Loi 25 (politique confidentialité + adresse postale MEMORA solutions Québec) ; (6) Refactor `MiniSiteController::subscribe` ($newsletterService injection constructor, honeypot website silent reject, validation email+consent accepted+source enum, try/catch JSON 500 + logs error) + 2 nouvelles méthodes confirmNewsletter (signed URL + view newsletter-confirmed + flash) + unsubscribeNewsletter (signed URL + view newsletter-unsubscribed + lien réabonner) ; (7) 2 nouvelles vues HTML standalone (newsletter-confirmed.blade.php + newsletter-unsubscribed.blade.php) — design centré max-width 600px box-shadow 0 4px 16px rgba(11,114,133,.08) + SVG inline icônes check (vert teal) ou enveloppe (gris) + boutons WCAG AAA min-height 44px focus-visible outline 3px #C2410C ; (8) Routes signed `/auteur/{slug}/newsletter/confirm/{token}` + `/auteur/{slug}/newsletter/unsubscribe/{token}` throttle:10,1 ; (9) Dashboard auteur Livewire tab "📬 Abonnés" entre Builders et Paramètres avec 4 stats cards (Total teal / Confirmés vert / En attente accent / Désabonnés gris) + count 7j + bouton Exporter CSV (StreamedResponse chunked 200 rows email/source/locale/confirmed_at/unsubscribed_at/created_at RFC 4180) + empty state si total=0 (CTA partager lien /@slug#newsletter) ; (10) 8 tests Pest reflexifs `NewsletterSubscriberTest` (subscribe queues mail + honeypot silent reject + idempotent regen-token without duplicate + confirm signed URL + unsubscribe signed URL + reject without consent + throttle 5/min + reject invalid email) — 25 assertions, 5.66s. Coût IA total ~0$ (8 délégations qwen3-max via openrouter-free latency moyenne 1.0s). Codename newsletter-double-optin.
  *   1.20.6 · 2026-05-23 · #263 P3-F purge auto health_check_result_history_items >30j via app:cleanup (déjà câblé cron daily 02:00). Étend `cleanTable()` avec param optionnel `int $chunkSize = 0` pour gérer les tables volumineuses sans locker MySQL en prod (chunked DELETE LIMIT N + garde-fou 200 itérations). Ajoute setting `retention.health_check_history_days` (default 30j) côté admin Backoffice. Cause : table Spatie Health accumulait 602 938 lignes (60j d'historique) malgré `keep_history_for_days = 5` dans `config/health.php` — le cleanup interne Spatie ne se déclenche pas en pratique (probablement à cause du runtime Eloquent vs save() interception). Impact prod : libération ~300 000 lignes au prochain run cron app:cleanup (dimanche 02:00), baisse backup zip ~5-8 MB, perf dashboard /statut /backoffice/health améliorée. Audit DB préalable S104 confirmait croissance ~10K lignes/jour donc dette technique à régler avant qu'elle ne devienne problème backup/perf. Zéro autre table touchée. Aucun changement DB. Aucun nouveau cron (réutilisation app:cleanup). Codename health-history-purge.
  *   1.20.5 · 2026-05-23 · #262 fix services.openrouter manquant (cause récidive 3j blocage AiSummary après config:cache) + reclass 3 logs dedup error→info. Codename news-pipeline-resilience.
  *   1.20.4 · 2026-05-23 · #261 guard `module_enabled('SaaS')` autour du `Schedule::command('saas:trial-expiry-notify')` dans `routes/console.php` pour stopper l'erreur quotidienne 9h00 `NamespaceNotFoundException: There are no commands defined in the "saas" namespace` quand le module SaaS est désactivé dans `modules_statuses.json`. Codename cron-saas-orphan-guard.
@@ -81,7 +82,7 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 21,
+    'minor' => 23,
     'patch' => 0,
 
     /**
@@ -92,11 +93,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'authors-top5-eeat-toc-newsletter',
+    'codename' => 'newsletter-double-optin',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.22.0',
+    'semver' => '1.23.0',
 ];
