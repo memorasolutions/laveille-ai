@@ -79,6 +79,7 @@ class AuthorsServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\Authors\Console\Commands\AuthorsReportCommand::class,
             \Modules\Authors\Console\Commands\AuthorsHealthCommand::class,
+            \Modules\Authors\Console\Commands\AuthorsWeeklyDigestCommand::class,
         ]);
     }
 

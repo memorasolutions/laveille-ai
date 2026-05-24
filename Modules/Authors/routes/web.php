@@ -24,8 +24,8 @@ Route::prefix('api/v1')
             ->name('authors.api.posts');
     });
 
-// S115 — Backoffice all-authors viewer (super-admin)
-Route::middleware(['web', 'auth'])->prefix('/backoffice')->group(function () {
+// S115/S116 — Backoffice all-authors viewer (super-admin only)
+Route::middleware(['web', 'auth', \Modules\Authors\Http\Middleware\EnsureSuperAdmin::class])->prefix('/backoffice')->group(function () {
     Route::get('/authors', fn () => view('authors::backoffice.all-authors'))
         ->name('authors.backoffice.all');
 });
