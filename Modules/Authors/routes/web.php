@@ -19,6 +19,12 @@ Route::get('/@{slug}/feed.json', [MiniSiteController::class, 'jsonFeed'])
     ->where('slug', '[a-z0-9-]+')
     ->name('authors.mini-site.json-feed');
 
+// Newsletter subscribe par auteur (Top5-C S106 PM scaffolding)
+Route::post('/auteur/{slug}/newsletter/subscribe', [MiniSiteController::class, 'subscribe'])
+    ->where('slug', '[a-z0-9-]+')
+    ->middleware('throttle:5,1')
+    ->name('authors.newsletter.subscribe');
+
 // Dashboard auteur (auth required)
 Route::middleware(['web', 'auth'])->prefix('/auteur')->group(function () {
     Route::get('/dashboard', fn () => view('authors::dashboard'))

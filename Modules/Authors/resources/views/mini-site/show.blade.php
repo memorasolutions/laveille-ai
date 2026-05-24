@@ -10,6 +10,13 @@
     <meta property="og:image" content="{{ $author->profile_image ? asset('storage/'.$author->profile_image) : url('/images/default-avatar.svg') }}">
     <meta property="og:type" content="profile">
     <meta property="og:url" content="{{ url()->current() }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    @php
+        $__authorJsonLd = isset($jsonLd) ? json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
+    @endphp
+    @if($__authorJsonLd)
+        <script type="application/ld+json">{!! $__authorJsonLd !!}</script>
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&family=Fraunces:opsz,wght@9..144,300..900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -207,10 +214,8 @@
             @endif
 
             @if($author->isModuleVisible('newsletter'))
-            <div id="newsletter" class="glass-card fade-up" style="background: var(--c-primary-light); border-color: var(--c-primary);">
-                <h3 style="font-size: 16px; font-weight: 700; color: var(--c-primary); margin-bottom: 8px;">📬 Newsletter</h3>
-                <p style="font-size: 13px; color: var(--c-text-muted); margin-bottom: 16px;">Hebdo · 0 spam · désabo 1-clic</p>
-                <a href="#" class="btn-primary" style="width: 100%; padding: 10px;">S'abonner</a>
+            <div id="newsletter" class="fade-up">
+                <x-authors::newsletter-optin :author="$author" variant="inline" />
             </div>
             @endif
 
@@ -315,5 +320,7 @@
             document.querySelectorAll('.fade-up').forEach(el => el.classList.add('in-view'));
         }
     </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
 </html>

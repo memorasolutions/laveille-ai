@@ -61,6 +61,66 @@ if (! function_exists('lv_jsonld_author_stephane')) {
     }
 }
 
+if (! function_exists('lv_jsonld_author_from_profile')) {
+    function lv_jsonld_author_from_profile(\Modules\Authors\Models\AuthorProfile $profile): array
+    {
+        $baseUrl = rtrim((string) (config('app.url') ?? 'https://laveille.ai'), '/');
+        $slug = (string) $profile->slug;
+        $personId = "{$baseUrl}/@{$slug}#person";
+        $url = "{$baseUrl}/@{$slug}";
+        $name = $profile->user?->name ?? $slug;
+
+        $person = [
+            '@type' => 'Person',
+            '@id' => $personId,
+            'name' => $name,
+            'url' => $url,
+        ];
+
+        if ($profile->bio) {
+            $person['description'] = $profile->bio;
+        }
+
+        if (! empty($profile->social_links)) {
+            $person['sameAs'] = array_values($profile->social_links);
+        }
+
+        if (! empty($profile->qualifications)) {
+            $person['knowsAbout'] = $profile->qualifications;
+            $person['jobTitle'] = $profile->qualifications[0];
+        }
+
+        if ($profile->profile_image) {
+            $person['image'] = [
+                '@type' => 'ImageObject',
+                'url' => $profile->profile_image,
+            ];
+        }
+
+        return $person;
+    }
+}
+
+if (! function_exists('lv_jsonld_author_website')) {
+    function lv_jsonld_author_website(\Modules\Authors\Models\AuthorProfile $profile): array
+    {
+        $baseUrl = rtrim((string) (config('app.url') ?? 'https://laveille.ai'), '/');
+        $slug = (string) $profile->slug;
+        $url = "{$baseUrl}/@{$slug}";
+        $name = ($profile->user?->name ?? $slug) . ' · laveille.ai';
+
+        return [
+            '@type' => 'WebSite',
+            '@id' => "{$baseUrl}/@{$slug}#website",
+            'name' => $name,
+            'url' => $url,
+            'inLanguage' => 'fr-CA',
+            'publisher' => ['@id' => "{$baseUrl}/@{$slug}#person"],
+            'description' => $profile->manifesto ?? $profile->bio ?? '',
+        ];
+    }
+}
+
 if (! function_exists('lv_jsonld_publisher')) {
     /**
      * Organization Schema.org canonique pour publisher "La veille".

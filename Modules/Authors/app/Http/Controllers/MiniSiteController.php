@@ -6,7 +6,9 @@ namespace Modules\Authors\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response as ResponseFacade;
 use Modules\Authors\Models\AuthorProfile;
 use Modules\Authors\Services\AuthorExportService;
@@ -39,10 +41,19 @@ final class MiniSiteController extends Controller
         $lastPublishedAt = $author->last_published_at;
         $showAbandonBanner = $lastPublishedAt !== null && $lastPublishedAt->diffInDays(Carbon::now()) > 60;
 
+        $jsonLd = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                lv_jsonld_author_from_profile($author),
+                lv_jsonld_author_website($author),
+            ],
+        ];
+
         return view('authors::mini-site.show', [
             'author' => $author,
             'timeline' => $timeline,
             'showAbandonBanner' => $showAbandonBanner,
+            'jsonLd' => $jsonLd,
         ]);
     }
 
@@ -84,6 +95,38 @@ final class MiniSiteController extends Controller
         } catch (\Throwable $e) {
             return ResponseFacade::json(['error' => 'feed unavailable'], 500);
         }
+    }
+
+    /**
+     * Newsletter subscribe — Top5-C scaffolding S106 PM.
+     * TODO S107 : intégrer BrevoApiTransport + table author_subscribers + welcome séquence.
+     */
+    public function subscribe(Request $request, string $slug)
+    {
+        // Honeypot anti-bot
+        if (! empty($request->input('website'))) {
+            return ResponseFacade::json(['ok' => true], 200);
+        }
+
+        $validated = $request->validate([
+            'email' => 'required|email:rfc|max:255',
+            'consent' => 'required|accepted',
+        ]);
+
+        $author = AuthorProfile::where('slug', $slug)->whereNull('archived_at')->firstOrFail();
+
+        // Stub : log uniquement (TODO S107 : table author_subscribers + Brevo)
+        Log::channel('daily')->info('author.newsletter.subscribe', [
+            'author_slug' => $author->slug,
+            'email' => $validated['email'],
+            'consent' => true,
+            'ip' => $request->ip(),
+        ]);
+
+        return ResponseFacade::json([
+            'ok' => true,
+            'message' => "Merci. Vérifie ta boîte courriel pour confirmer.",
+        ], 200);
     }
 
     private function buildRssXml(AuthorProfile $author, $items): string
