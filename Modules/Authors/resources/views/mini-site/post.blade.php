@@ -31,6 +31,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
     @livewireStyles
+    <style>
+        /* S110 Mode lecture distraction-free */
+        body.lv-reader-mode .lv-reader-hide,
+        body.lv-reader-mode .lv-section-wrap,
+        body.lv-reader-mode .lv-post-back { display: none !important; }
+        body.lv-reader-mode { background: #FBF9F4; }
+        body.lv-reader-mode .lv-post-body { max-width: 65ch; margin: 0 auto; font-size: 19px; line-height: 1.8; color: #1F2937; padding: 0 20px 48px; }
+        body.lv-reader-mode .lv-post-header { max-width: 65ch; margin: 0 auto; padding: 48px 20px 24px; }
+        body.lv-reader-mode h1.lv-post-title { font-size: 36px; }
+        .lv-reader-toggle { position: fixed; top: 16px; right: 16px; z-index: 100; background: #064E5A; color: #FFFFFF; border: none; border-radius: 999px; padding: 10px 16px; min-height: 44px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(6,78,90,0.25); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 14px; }
+        .lv-reader-toggle:hover { background: #043C45; }
+        .lv-reader-toggle:focus-visible { outline: 3px solid #9A2A06; outline-offset: 2px; }
+        .lv-post-body { max-width: 65ch; margin: 0 auto; }
+    </style>
 
     <style>
         body { margin: 0; font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #F8FAFB; color: #1F2937; line-height: 1.6; }
@@ -67,7 +81,17 @@
     </style>
     @stack('head')
 </head>
-<body>
+<body x-data="{ readerMode: localStorage.getItem('lv-reader-mode') === '1' }"
+    :class="{ 'lv-reader-mode': readerMode }"
+    x-init="if (readerMode) document.body.classList.add('lv-reader-mode')">
+    <button type="button" class="lv-reader-toggle"
+        @click="readerMode = !readerMode; document.body.classList.toggle('lv-reader-mode'); localStorage.setItem('lv-reader-mode', readerMode ? '1' : '0')"
+        :aria-pressed="readerMode"
+        aria-label="Activer ou désactiver le mode lecture sans distraction">
+        <span x-show="!readerMode">📖 Mode lecture</span>
+        <span x-show="readerMode" x-cloak>✕ Mode normal</span>
+    </button>
+
     <article>
         <header class="lv-post-header">
             <a href="{{ route('authors.mini-site.show', $author->slug) }}" class="lv-post-back">← Retour au profil</a>

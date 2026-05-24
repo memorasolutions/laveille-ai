@@ -8,6 +8,16 @@ use Modules\Authors\Http\Controllers\MiniSiteController;
 use Modules\Authors\Http\Controllers\PostController;
 use Modules\Authors\Http\Controllers\UpgradeController;
 
+// S110 — Sitemap dédié auteurs + posts (SEO/AEO)
+Route::get('/sitemap-authors.xml', function () {
+    $xml = app(\Modules\Authors\Services\AuthorsSitemapService::class)->generate();
+
+    return response($xml, 200, [
+        'Content-Type' => 'application/xml; charset=UTF-8',
+        'Cache-Control' => 'public, max-age=3600, s-maxage=86400',
+    ]);
+})->name('authors.sitemap');
+
 // Mini-site public (sans menu laveille, layout pleine page)
 Route::get('/@{slug}', [MiniSiteController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')

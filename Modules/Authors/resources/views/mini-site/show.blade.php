@@ -71,7 +71,8 @@
         @media (min-width: 768px) { .bento-sub { grid-template-columns: repeat(3, 1fr); } }
         .bento-articles { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 768px) { .bento-articles { grid-template-columns: repeat(4, 1fr); grid-auto-rows: minmax(200px, auto); } .bento-articles > .featured { grid-column: span 2; grid-row: span 2; } }
-        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(11, 114, 133, 0.12); border-radius: 1.25rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06); padding: 24px; transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms; }
+        /* WCAG AAA fix S110 : opacité augmentée 0.7→0.95 pour contraste texte garanti sur translucent backgrounds */
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(6, 78, 90, 0.15); border-radius: 1.25rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06); padding: 24px; transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms; }
         [data-theme="dark"] .glass-card { background: rgba(26, 32, 38, 0.7); border-color: rgba(79, 179, 198, 0.15); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
         .glass-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(11, 114, 133, 0.1); }
         .now-card { background: linear-gradient(135deg, rgba(11, 114, 133, 0.12) 0%, rgba(240, 250, 251, 0.7) 100%); border: 1px solid rgba(11, 114, 133, 0.2); }
