@@ -169,12 +169,13 @@ it('Post page renders related posts container', function () {
     $response->assertSee('lv-related', false);
 });
 
-it('Mini-site /@slug renders search toggle + follow button', function () {
+it('Mini-site /@slug renders follow button + preserves Cache-Control public', function () {
     $author = makeAuthorS119();
 
     $response = $this->get('/@'.$author->slug);
     $response->assertStatus(200);
-    $response->assertSee('Rechercher dans les articles', false);
     $response->assertSee('Suivre', false);
     $response->assertSee('lv-followed-authors', false);
+
+    expect($response->headers->get('Cache-Control'))->toContain('public');
 });

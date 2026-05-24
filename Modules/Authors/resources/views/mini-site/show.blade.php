@@ -135,7 +135,6 @@
             <div style="display: flex; gap: 12px; align-items: center;">
                 <a href="#articles" style="color: var(--c-primary); font-weight: 600; text-decoration: none;" class="hidden md:inline">Articles</a>
                 <a href="#about" style="color: var(--c-primary); font-weight: 600; text-decoration: none;" class="hidden md:inline">À propos</a>
-                <x-authors::search-header-toggle :author-profile-id="$author->id" />
                 <x-authors::follow-button :author="$author" />
                 <button id="theme-toggle" class="theme-toggle" aria-label="Basculer mode sombre">
                     <svg id="theme-icon" role="img" aria-label="Icône thème" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
