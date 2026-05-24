@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Authors\Http\Controllers\AuthorsController;
 use Modules\Authors\Http\Controllers\MiniSiteController;
+use Modules\Authors\Http\Controllers\PostController;
 
 // Mini-site public (sans menu laveille, layout pleine page)
 Route::get('/@{slug}', [MiniSiteController::class, 'show'])
@@ -18,6 +19,11 @@ Route::get('/@{slug}/feed.xml', [MiniSiteController::class, 'rss'])
 Route::get('/@{slug}/feed.json', [MiniSiteController::class, 'jsonFeed'])
     ->where('slug', '[a-z0-9-]+')
     ->name('authors.mini-site.json-feed');
+
+// Article public (S107 P2) — MUST come AFTER feed.xml/feed.json routes for regex priority
+Route::get('/@{slug}/{postSlug}', [PostController::class, 'show'])
+    ->where(['slug' => '[a-z0-9-]+', 'postSlug' => '[a-z0-9-]+'])
+    ->name('authors.post.show');
 
 // Newsletter subscribe par auteur (S107 P0b — Service + table + Brevo + double opt-in)
 Route::post('/auteur/{slug}/newsletter/subscribe', [MiniSiteController::class, 'subscribe'])

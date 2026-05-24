@@ -4,51 +4,49 @@ declare(strict_types=1);
 
 namespace Modules\Authors\Livewire;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use League\CommonMark\GithubFlavoredMarkdownConverter;
 use Livewire\Component;
 use Modules\Authors\Models\AuthorPost;
+use Modules\Authors\Models\AuthorPostRevision;
 use Modules\Authors\Models\AuthorProfile;
 
-/**
- * AuthorEditor — Top5-E S106 scaffolding S107-ready.
- *
- * TODO S107 implementation complète (~20h) :
- * - EasyMDE CDN integration (60KB) + Tailwind Typography preview
- * - Auto-save toutes 30s : localStorage + UPDATE draft DB
- * - Slash commands : /image /quote /code /embed /toc /poll /tip-button
- * - Toolbar minimal mobile-collapse : H1-H6, bold, italic, link, image upload, embed paste
- * - Side-by-side live preview avec league/commonmark
- * - Drag-drop image upload via Spatie/Image (resize 1920w max + webp + jpg fallback)
- * - Auto-embed detection : Twitter/X, YouTube, CodePen, Spotify, Loom URLs
- * - Slug auto-generated from title (Str::slug + unique check)
- * - Reading time calc : str_word_count / 200wpm
- * - Excerpt auto : 200 first chars stripped
- * - Pre-publish scan via ModerationPipelineService (LlamaGuard cascade)
- * - Snapshot AuthorPostRevision avant chaque save publish
- * - Tags input : Alpine.js chips + autocomplete depuis tags existants auteur
- */
 class AuthorEditor extends Component
 {
     public ?AuthorPost $post = null;
+
     public AuthorProfile $authorProfile;
 
     public string $title = '';
+
     public string $body_markdown = '';
+
     public string $excerpt = '';
-    public string $status = AuthorPost::STATUS_DRAFT;
-    public string $visibility = AuthorPost::VISIBILITY_PUBLIC;
+
+    public string $status = 'draft';
+
+    public string $visibility = 'public';
+
     public array $tags = [];
+
+    public string $tagsInput = '';
+
     public ?string $cover_image = null;
 
-    public bool $autoSaveEnabled = true;
     public string $autoSaveStatus = 'idle';
+
+    public ?string $publicUrl = null;
 
     public function mount(AuthorProfile $authorProfile, ?int $postId = null): void
     {
         $this->authorProfile = $authorProfile;
 
-        if ($postId) {
-            $this->post = AuthorPost::where('author_profile_id', $authorProfile->id)
-                ->findOrFail($postId);
+        if ($postId !== null) {
+            $this->post = AuthorPost::where('author_profile_id', $this->authorProfile->id)
+                ->where('id', $postId)
+                ->firstOrFail();
+
             $this->title = $this->post->title;
             $this->body_markdown = $this->post->body_markdown;
             $this->excerpt = $this->post->excerpt ?? '';
@@ -56,23 +54,186 @@ class AuthorEditor extends Component
             $this->visibility = $this->post->visibility;
             $this->tags = $this->post->tags ?? [];
             $this->cover_image = $this->post->cover_image;
+            $this->tagsInput = implode(', ', $this->tags);
         }
     }
 
     public function autoSave(): void
     {
-        // TODO S107 : persist draft DB + snapshot revision
-        $this->autoSaveStatus = 'saved';
+        if (mb_strlen(trim($this->title)) < 3 && mb_strlen(trim($this->body_markdown)) < 3) {
+            return;
+        }
+
+        $this->autoSaveStatus = 'saving';
+
+        try {
+            $this->normalizeData();
+
+            if ($this->post === null) {
+                $this->post = AuthorPost::create([
+                    'author_profile_id' => $this->authorProfile->id,
+                    'title' => $this->title ?: 'Brouillon sans titre',
+                    'slug' => $this->generateUniqueSlug($this->title ?: 'brouillon'),
+                    'body_markdown' => $this->body_markdown,
+                    'body_html' => $this->renderHtml($this->body_markdown),
+                    'excerpt' => $this->computeExcerpt(),
+                    'status' => 'draft',
+                    'visibility' => $this->visibility,
+                    'tags' => $this->tags,
+                    'reading_time_minutes' => $this->computeReadingTime(),
+                ]);
+            } else {
+                $this->post->update([
+                    'title' => $this->title,
+                    'body_markdown' => $this->body_markdown,
+                    'body_html' => $this->renderHtml($this->body_markdown),
+                    'excerpt' => $this->computeExcerpt(),
+                    'visibility' => $this->visibility,
+                    'tags' => $this->tags,
+                    'reading_time_minutes' => $this->computeReadingTime(),
+                ]);
+            }
+
+            $this->autoSaveStatus = 'saved';
+        } catch (\Throwable $e) {
+            $this->autoSaveStatus = 'error';
+        }
     }
 
     public function publish(): void
     {
-        // TODO S107 : validation + ModerationPipelineService scan + persist
-        $this->status = AuthorPost::STATUS_PUBLISHED;
+        $this->validate([
+            'title' => 'required|string|min:3|max:255',
+            'body_markdown' => 'required|string|min:20',
+        ]);
+
+        $this->normalizeData();
+
+        if ($this->post === null) {
+            $this->autoSave();
+        }
+
+        $wasPublished = $this->post->status === 'published';
+
+        if ($this->post->wasChanged('body_markdown') || ! $wasPublished) {
+            AuthorPostRevision::create([
+                'author_post_id' => $this->post->id,
+                'user_id' => Auth::id(),
+                'body_markdown_snapshot' => $this->post->body_markdown,
+                'change_summary' => $wasPublished ? 'Mise à jour du contenu' : 'Publication initiale',
+            ]);
+        }
+
+        $this->post->update([
+            'title' => $this->title,
+            'slug' => $this->generateUniqueSlug($this->title, $this->post->id),
+            'body_markdown' => $this->body_markdown,
+            'body_html' => $this->renderHtml($this->body_markdown),
+            'excerpt' => $this->computeExcerpt(),
+            'status' => 'published',
+            'visibility' => $this->visibility,
+            'tags' => $this->tags,
+            'reading_time_minutes' => $this->computeReadingTime(),
+            'published_at' => $this->post->published_at ?? now(),
+        ]);
+
+        $this->publicUrl = url('/@'.$this->authorProfile->slug.'/'.$this->post->slug);
+        $this->dispatch('post-published', url: $this->publicUrl);
+    }
+
+    public function addTag(): void
+    {
+        $tag = trim(strtolower($this->tagsInput));
+
+        if ($tag === '' || in_array($tag, $this->tags, true)) {
+            $this->tagsInput = '';
+
+            return;
+        }
+
+        $this->tags[] = $tag;
+        $this->tagsInput = '';
+    }
+
+    public function removeTag(string $tag): void
+    {
+        $this->tags = array_values(array_diff($this->tags, [$tag]));
+    }
+
+    private function normalizeData(): void
+    {
+        $this->title = trim($this->title);
+
+        if ($this->tagsInput !== '') {
+            $parsed = array_filter(array_map(
+                fn ($t) => trim(strtolower($t)),
+                explode(',', $this->tagsInput)
+            ));
+            $this->tags = array_values(array_unique(array_merge($this->tags, $parsed)));
+            $this->tagsInput = '';
+        }
+    }
+
+    private function generateUniqueSlug(string $title, ?int $excludePostId = null): string
+    {
+        $base = Str::slug($title ?: 'article') ?: 'article';
+        $slug = mb_substr($base, 0, 200);
+        $i = 1;
+
+        while (AuthorPost::where('author_profile_id', $this->authorProfile->id)
+            ->where('slug', $slug)
+            ->when($excludePostId, fn ($q) => $q->where('id', '!=', $excludePostId))
+            ->exists()) {
+            $i++;
+            $slug = mb_substr($base, 0, 195).'-'.$i;
+        }
+
+        return $slug;
+    }
+
+    private function computeReadingTime(): int
+    {
+        $words = str_word_count(strip_tags($this->renderHtml($this->body_markdown)));
+
+        return max(1, (int) ceil($words / 200));
+    }
+
+    private function computeExcerpt(): string
+    {
+        $strip = trim(strip_tags($this->renderHtml($this->body_markdown)));
+
+        if ($this->excerpt !== '') {
+            return mb_substr($this->excerpt, 0, 280);
+        }
+
+        return mb_substr($strip, 0, 280);
+    }
+
+    private function renderHtml(string $markdown): string
+    {
+        $converter = new GithubFlavoredMarkdownConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+
+        return (string) $converter->convert($markdown);
+    }
+
+    private function collectExistingTags(): array
+    {
+        return AuthorPost::where('author_profile_id', $this->authorProfile->id)
+            ->whereNotNull('tags')
+            ->pluck('tags')
+            ->flatten()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function render()
     {
-        return view('authors::livewire.author-editor');
+        return view('authors::livewire.author-editor', [
+            'allTags' => $this->collectExistingTags(),
+        ]);
     }
 }
