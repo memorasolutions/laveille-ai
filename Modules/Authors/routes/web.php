@@ -8,6 +8,22 @@ use Modules\Authors\Http\Controllers\MiniSiteController;
 use Modules\Authors\Http\Controllers\PostController;
 use Modules\Authors\Http\Controllers\UpgradeController;
 
+// S111 — Webmentions IndieWeb endpoint (réception backlinks décentralisés)
+Route::post('/webmention', function (\Illuminate\Http\Request $request) {
+    $source = $request->input('source');
+    $target = $request->input('target');
+    if (! $source || ! $target) {
+        return response('Missing source or target', 400);
+    }
+    $service = app(\Modules\Authors\Services\WebmentionService::class);
+    $webmention = $service->receive($source, $target);
+
+    return response($webmention ? 'Accepted' : 'Target not found', $webmention ? 202 : 400);
+})
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->middleware('throttle:30,1')
+    ->name('authors.webmention.receive');
+
 // S110 — Sitemap dédié auteurs + posts (SEO/AEO)
 Route::get('/sitemap-authors.xml', function () {
     $xml = app(\Modules\Authors\Services\AuthorsSitemapService::class)->generate();

@@ -11,6 +11,16 @@
     <meta property="og:type" content="profile">
     <meta property="og:url" content="{{ url()->current() }}">
     <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#064E5A">
+    <link rel="webmention" href="{{ url('/webmention') }}">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw-authors.js').catch(() => {});
+            });
+        }
+    </script>
     @php
         $__authorJsonLd = isset($jsonLd) ? json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
     @endphp

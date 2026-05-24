@@ -211,12 +211,17 @@ class AuthorEditor extends Component
 
     private function renderHtml(string $markdown): string
     {
+        // S111 — oEmbed pre-process (URLs sur ligne seule → iframe lazy)
+        $oembed = new \Modules\Authors\Services\OembedService();
+        $processed = $oembed->transformMarkdown($markdown);
+
+        // S111 — html_input=allow pour préserver iframes oEmbed (markdown=strip stripperait)
         $converter = new GithubFlavoredMarkdownConverter([
-            'html_input' => 'strip',
+            'html_input' => 'allow',
             'allow_unsafe_links' => false,
         ]);
 
-        return (string) $converter->convert($markdown);
+        return (string) $converter->convert($processed);
     }
 
     private function collectExistingTags(): array
