@@ -19,7 +19,23 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 }
 
 // Register the Composer autoloader...
-require __DIR__.'/../vendor/autoload.php';
+$composerLoader = require __DIR__.'/../vendor/autoload.php';
+
+// Modules nwidart : extension PSR-4 runtime pour modules ajoutés sans composer dump-autoload
+// (cPanel sans shell : composer dump impossible). Itère Modules/*/composer.json et merge psr-4.
+if ($composerLoader instanceof \Composer\Autoload\ClassLoader) {
+    foreach (glob(__DIR__.'/../Modules/*/composer.json') as $modComposer) {
+        $modDir = dirname($modComposer);
+        $modData = json_decode((string) file_get_contents($modComposer), true);
+        $psr4 = $modData['autoload']['psr-4'] ?? [];
+        foreach ($psr4 as $namespace => $path) {
+            $absPath = $modDir.'/'.ltrim($path, '/');
+            if (is_dir($absPath)) {
+                $composerLoader->addPsr4($namespace, $absPath);
+            }
+        }
+    }
+}
 
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
