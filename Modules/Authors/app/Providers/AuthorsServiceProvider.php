@@ -51,6 +51,14 @@ class AuthorsServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+
+        // S107 P3 — override Cashier webhook controller to sync AuthorProfile tier
+        if (class_exists(\Laravel\Cashier\Http\Controllers\WebhookController::class)) {
+            $this->app->bind(
+                \Laravel\Cashier\Http\Controllers\WebhookController::class,
+                \Modules\Authors\Http\Controllers\StripeWebhookController::class
+            );
+        }
     }
 
     /**

@@ -30,6 +30,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Premium Plan Price ID (S107 P3 Authors)
+    |--------------------------------------------------------------------------
+    | Stripe price ID for the Authors Premium plan (7 CAD/month).
+    | Configure via .env LV_STRIPE_PRICE_PREMIUM after creating the price in Stripe Dashboard.
+    */
+
+    'price_premium' => env('LV_STRIPE_PRICE_PREMIUM'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cashier Path
     |--------------------------------------------------------------------------
     |

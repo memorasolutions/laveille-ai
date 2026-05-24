@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Authors\Http\Controllers\AuthorsController;
 use Modules\Authors\Http\Controllers\MiniSiteController;
 use Modules\Authors\Http\Controllers\PostController;
+use Modules\Authors\Http\Controllers\UpgradeController;
 
 // Mini-site public (sans menu laveille, layout pleine page)
 Route::get('/@{slug}', [MiniSiteController::class, 'show'])
@@ -48,6 +49,15 @@ Route::middleware(['web', 'auth'])->prefix('/auteur')->group(function () {
 
     Route::get('/curation/save', fn () => response()->json(['todo' => true]))
         ->name('authors.curation.save');
+
+    // Premium upgrade (S107 P3 — Stripe Cashier)
+    Route::get('/upgrade', [UpgradeController::class, 'show'])->name('authors.upgrade');
+    Route::post('/upgrade/checkout', [UpgradeController::class, 'checkout'])
+        ->middleware('throttle:10,1')
+        ->name('authors.upgrade.checkout');
+    Route::post('/upgrade/billing-portal', [UpgradeController::class, 'billingPortal'])
+        ->middleware('throttle:10,1')
+        ->name('authors.upgrade.billing-portal');
 });
 
 // Route TEST LOCAL UNIQUEMENT (à retirer en prod) — preview dashboard sans auth
