@@ -81,18 +81,22 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 20,
-    'patch' => 6,
+    'minor' => 21,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
      * Vide ou null si pas de codename.
+     *
+     * v1.21.0 = scaffold complet Modules\Authors (16 services + 6 models + 7 migrations + 2 mailables + 2 jobs + 3 components Blade + 3 components Livewire + 3 vues + bookmarklet + tests Pest)
+     * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
+     * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'health-history-purge',
+    'codename' => 'authors-platform-scaffold',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.20.6',
+    'semver' => '1.21.0',
 ];
