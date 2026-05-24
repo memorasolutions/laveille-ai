@@ -82,11 +82,111 @@ final class MiniSiteController extends Controller
             $items = $articles;
         }
 
-        $xml = $this->buildRssXml($author, $items);
+        $xml = $this->buildRichRssXml($author, $items);
 
         return ResponseFacade::make($xml, Response::HTTP_OK, [
             'Content-Type' => 'application/rss+xml; charset=utf-8',
+            'Cache-Control' => 'public, max-age=600, s-maxage=1800',
         ]);
+    }
+
+    private function buildRichRssXml(AuthorProfile $author, $items): string
+    {
+        $xml = new \XMLWriter();
+        $xml->openMemory();
+        $xml->setIndent(true);
+        $xml->startDocument('1.0', 'UTF-8');
+        $xml->startElement('rss');
+        $xml->writeAttribute('version', '2.0');
+        $xml->writeAttribute('xmlns:content', 'http://purl.org/rss/1.0/modules/content/');
+        $xml->writeAttribute('xmlns:media', 'http://search.yahoo.com/mrss/');
+        $xml->writeAttribute('xmlns:atom', 'http://www.w3.org/2005/Atom');
+        $xml->writeAttribute('xmlns:dc', 'http://purl.org/dc/elements/1.1/');
+
+        $xml->startElement('channel');
+        $title = $author->display_name ?: ($author->user?->name ?? $author->slug);
+        $xml->writeElement('title', $title);
+        $xml->writeElement('link', url("/@{$author->slug}"));
+        $xml->writeElement('description', (string) ($author->bio ?? 'Auteur sur laveille.ai'));
+        $xml->writeElement('language', 'fr-CA');
+        $xml->writeElement('lastBuildDate', now()->toRssString());
+
+        $pubDate = ($items->isNotEmpty() && $items->first()->published_at)
+            ? Carbon::parse($items->first()->published_at)->toRssString()
+            : now()->toRssString();
+        $xml->writeElement('pubDate', $pubDate);
+
+        $xml->startElement('atom:link');
+        $xml->writeAttribute('href', url("/@{$author->slug}/feed.xml"));
+        $xml->writeAttribute('rel', 'self');
+        $xml->writeAttribute('type', 'application/rss+xml');
+        $xml->endElement();
+
+        $imageUrl = $author->profile_image ? url('storage/'.$author->profile_image) : url('/images/default-avatar.svg');
+        $xml->startElement('image');
+        $xml->writeElement('url', $imageUrl);
+        $xml->writeElement('title', $title);
+        $xml->writeElement('link', url("/@{$author->slug}"));
+        $xml->endElement();
+
+        $xml->writeElement('copyright', '© '.date('Y').' '.$title);
+        $xml->writeElement('generator', 'laveille.ai Authors v1.28');
+        if ($author->user?->email) {
+            $xml->writeElement('managingEditor', $author->user->email.' ('.$title.')');
+        }
+
+        foreach ($items as $item) {
+            $xml->startElement('item');
+            $itemTitle = $item->title ?? mb_substr((string) ($item->content ?? ''), 0, 80);
+            $xml->writeElement('title', $itemTitle);
+            $link = url('/blog/'.$item->slug);
+            $xml->writeElement('link', $link);
+            $xml->startElement('guid');
+            $xml->writeAttribute('isPermaLink', 'true');
+            $xml->text($link);
+            $xml->endElement();
+            $description = (string) ($item->excerpt ?? strip_tags((string) ($item->content ?? '')));
+            $xml->writeElement('description', $description);
+
+            $xml->startElement('content:encoded');
+            $xml->writeCData((string) ($item->content ?? $description));
+            $xml->endElement();
+
+            if ($item->published_at) {
+                $xml->writeElement('pubDate', Carbon::parse($item->published_at)->toRssString());
+            }
+            $xml->writeElement('dc:creator', $title);
+
+            $xml->startElement('atom:author');
+            $xml->writeElement('name', $title);
+            if ($author->user?->email) {
+                $xml->writeElement('email', $author->user->email);
+            }
+            $xml->endElement();
+
+            if (! empty($item->cover_image)) {
+                $xml->startElement('media:thumbnail');
+                $xml->writeAttribute('url', url('storage/'.$item->cover_image));
+                $xml->writeAttribute('width', '1200');
+                $xml->writeAttribute('height', '630');
+                $xml->endElement();
+            }
+
+            $tags = is_array($item->tags ?? null) ? $item->tags : [];
+            foreach ($tags as $tag) {
+                $xml->startElement('category');
+                $xml->text((string) $tag);
+                $xml->endElement();
+            }
+
+            $xml->endElement();
+        }
+
+        $xml->endElement();
+        $xml->endElement();
+        $xml->endDocument();
+
+        return $xml->outputMemory();
     }
 
     public function jsonFeed(string $slug)

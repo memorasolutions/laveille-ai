@@ -25,31 +25,25 @@ final class PostController extends Controller
 
         $post->increment('views_count');
 
-        $jsonLd = [
-            '@context' => 'https://schema.org',
-            '@graph' => [
-                [
-                    '@type' => 'Article',
-                    '@id' => url()->current().'#article',
-                    'headline' => $post->title,
-                    'description' => $post->excerpt,
-                    'datePublished' => $post->published_at?->toIso8601String(),
-                    'dateModified' => $post->updated_at->toIso8601String(),
-                    'author' => function_exists('lv_jsonld_author_from_profile')
-                        ? lv_jsonld_author_from_profile($author)
-                        : ['@type' => 'Person', 'name' => $author->display_name ?? $author->slug],
-                    'image' => $post->cover_image ? [url($post->cover_image)] : null,
-                    'wordCount' => str_word_count(strip_tags((string) $post->body_html)),
-                    'keywords' => implode(', ', $post->tags ?? []),
-                    'mainEntityOfPage' => url()->current(),
-                    'inLanguage' => app()->getLocale(),
-                ],
-            ],
-        ];
+        $graph = [];
+
+        if (function_exists('lv_jsonld_blog_posting')) {
+            $graph[] = lv_jsonld_blog_posting($post, $author);
+        }
+
+        if (function_exists('lv_jsonld_breadcrumb')) {
+            $graph[] = lv_jsonld_breadcrumb([
+                ['name' => 'Accueil', 'url' => url('/')],
+                ['name' => $author->display_name ?? $author->slug, 'url' => url('/@'.$author->slug)],
+                ['name' => $post->title, 'url' => url()->current()],
+            ]);
+        }
 
         if (function_exists('lv_jsonld_author_website')) {
-            $jsonLd['@graph'][] = lv_jsonld_author_website($author);
+            $graph[] = lv_jsonld_author_website($author);
         }
+
+        $jsonLd = ['@context' => 'https://schema.org', '@graph' => $graph];
 
         return view('authors::mini-site.post', compact('author', 'post', 'jsonLd'));
     }

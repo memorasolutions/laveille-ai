@@ -143,3 +143,62 @@ if (! function_exists('lv_jsonld_publisher')) {
         ];
     }
 }
+
+
+if (! function_exists('lv_jsonld_blog_posting')) {
+    function lv_jsonld_blog_posting(\Modules\Authors\Models\AuthorPost $post, \Modules\Authors\Models\AuthorProfile $author): array
+    {
+        $url = url()->current();
+        $body = strip_tags((string) ($post->body_html ?? ''));
+        $tags = $post->tags ?? [];
+
+        return array_filter([
+            '@type' => 'BlogPosting',
+            '@id' => $url.'#blogposting',
+            'mainEntityOfPage' => $url,
+            'headline' => $post->title,
+            'description' => $post->excerpt ?? \Illuminate\Support\Str::words($body, 30, ''),
+            'articleBody' => \Illuminate\Support\Str::limit($body, 500, ''),
+            'datePublished' => $post->published_at?->toIso8601String() ?? now()->toIso8601String(),
+            'dateModified' => ($post->updated_at ?? $post->published_at ?? now())->toIso8601String(),
+            'author' => function_exists('lv_jsonld_author_from_profile') ? lv_jsonld_author_from_profile($author) : ['@type' => 'Person', 'name' => $author->display_name],
+            'publisher' => function_exists('lv_jsonld_author_website') ? lv_jsonld_author_website($author) : ['@type' => 'Organization', 'name' => config('app.name')],
+            'image' => $post->cover_image ? [url($post->cover_image)] : null,
+            'keywords' => ! empty($tags) ? implode(',', $tags) : null,
+            'wordCount' => str_word_count($body),
+            'inLanguage' => app()->getLocale(),
+            'articleSection' => $tags[0] ?? 'Blog',
+        ], fn ($value) => $value !== null);
+    }
+}
+
+if (! function_exists('lv_jsonld_breadcrumb')) {
+    function lv_jsonld_breadcrumb(array $items): array
+    {
+        return [
+            '@type' => 'BreadcrumbList',
+            '@id' => url()->current().'#breadcrumb',
+            'itemListElement' => collect($items)->map(fn ($item, $index) => [
+                '@type' => 'ListItem',
+                'position' => $index + 1,
+                'name' => $item['name'],
+                'item' => $item['url'],
+            ])->all(),
+        ];
+    }
+}
+
+if (! function_exists('lv_jsonld_faq_page')) {
+    function lv_jsonld_faq_page(array $faqs): array
+    {
+        return [
+            '@type' => 'FAQPage',
+            '@id' => url()->current().'#faq',
+            'mainEntity' => array_map(fn ($faq) => [
+                '@type' => 'Question',
+                'name' => $faq['question'],
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['answer']],
+            ], $faqs),
+        ];
+    }
+}

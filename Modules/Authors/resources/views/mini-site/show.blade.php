@@ -103,9 +103,9 @@
         .pill { display: inline-block; padding: 4px 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 999px; }
         .pill-now { background: var(--c-accent-light); color: var(--c-accent); }
         .pill-featured { background: var(--c-primary-light); color: var(--c-primary); }
-        .social-link { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(11, 114, 133, 0.1); color: var(--c-primary); text-decoration: none; font-weight: 700; transition: background 200ms; font-size: 13px; }
-        .social-link:hover { background: var(--c-primary); color: #fff; }
-        [data-theme="dark"] .social-link { background: rgba(79, 179, 198, 0.15); }
+        .social-link { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%; background: #FFFFFF; color: var(--c-primary); text-decoration: none; font-weight: 700; transition: background 200ms, color 200ms; font-size: 13px; border: 2px solid var(--c-primary); }
+        .social-link:hover, .social-link:focus-visible { background: var(--c-primary); color: #fff; outline: 3px solid var(--c-accent); outline-offset: 2px; }
+        [data-theme="dark"] .social-link { background: var(--c-primary-light); border-color: var(--c-primary); }
         section { padding: 32px 0; }
         @media (min-width: 768px) { section { padding: 48px 0; } }
     </style>
@@ -125,7 +125,7 @@
                 <a href="#articles" style="color: var(--c-primary); font-weight: 600; text-decoration: none;" class="hidden md:inline">Articles</a>
                 <a href="#about" style="color: var(--c-primary); font-weight: 600; text-decoration: none;" class="hidden md:inline">À propos</a>
                 <button id="theme-toggle" class="theme-toggle" aria-label="Basculer mode sombre">
-                    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg id="theme-icon" role="img" aria-label="Icône thème" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                 </button>
@@ -230,7 +230,7 @@
         <div class="bento-sub" style="grid-template-columns: repeat({{ min($visibleSubModules->count(), 3) }}, 1fr);">
             @if($author->isModuleVisible('stats'))
             <div class="glass-card fade-up">
-                <h3 style="font-size: 13px; font-weight: 700; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">📊 Statistiques</h3>
+                <h2 style="font-size: 13px; font-weight: 700; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">📊 Statistiques</h2>
                 <p style="font-size: 32px; font-weight: 800; color: var(--c-primary); font-family: 'Fraunces', serif; line-height: 1; margin: 0;">{{ $timeline->count() }}</p>
                 <p style="color: var(--c-text-muted); font-size: 14px; margin-top: 4px;">publications</p>
                 @if(!empty($author->qualifications))
@@ -247,7 +247,7 @@
 
             @if($author->isModuleVisible('about'))
             <div id="about" class="glass-card fade-up">
-                <h3 style="font-size: 13px; font-weight: 700; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">À propos</h3>
+                <h2 style="font-size: 13px; font-weight: 700; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">À propos</h2>
                 @if($author->bio)
                     <p style="font-size: 14px; line-height: 1.6; color: var(--c-text-secondary);">{{ \Illuminate\Support\Str::limit($author->bio, 220) }}</p>
                 @endif
@@ -264,7 +264,17 @@
         @endif
     </header>
 
-    <main class="container" id="lv-main-content" role="main">
+    <nav aria-label="Fil d'Ariane" class="container" style="padding-top: 8px; padding-bottom: 8px; font-size: 13px; color: var(--c-text-muted);">
+        <ol style="list-style: none; padding: 0; margin: 0; display: flex; gap: 8px; flex-wrap: wrap;">
+            <li><a href="{{ url('/') }}" style="color: var(--c-primary); text-decoration: none;">Accueil</a></li>
+            <li aria-hidden="true">›</li>
+            <li><a href="{{ url('/auteurs') }}" style="color: var(--c-primary); text-decoration: none;">Auteurs</a></li>
+            <li aria-hidden="true">›</li>
+            <li aria-current="page" style="color: var(--c-text-secondary);">{{ $author->display_name ?? $author->slug }}</li>
+        </ol>
+    </nav>
+
+    <main class="container" id="lv-main-content" role="main" style="max-width: 1200px;">
         @php
             $articles = $timeline->filter(function ($i) { return ! isset($i->content_type); })->values();
         @endphp

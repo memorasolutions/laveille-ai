@@ -11,6 +11,7 @@ use Modules\Authors\Http\Controllers\UpgradeController;
 // Mini-site public (sans menu laveille, layout pleine page)
 Route::get('/@{slug}', [MiniSiteController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
+    ->middleware(\Modules\Authors\Http\Middleware\CacheAuthorMiniSite::class)
     ->name('authors.mini-site.show');
 
 Route::get('/@{slug}/feed.xml', [MiniSiteController::class, 'rss'])
@@ -24,6 +25,7 @@ Route::get('/@{slug}/feed.json', [MiniSiteController::class, 'jsonFeed'])
 // Article public (S107 P2) — MUST come AFTER feed.xml/feed.json routes for regex priority
 Route::get('/@{slug}/{postSlug}', [PostController::class, 'show'])
     ->where(['slug' => '[a-z0-9-]+', 'postSlug' => '[a-z0-9-]+'])
+    ->middleware(\Modules\Authors\Http\Middleware\CacheAuthorMiniSite::class)
     ->name('authors.post.show');
 
 // Newsletter subscribe par auteur (S107 P0b — Service + table + Brevo + double opt-in)
