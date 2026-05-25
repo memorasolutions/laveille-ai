@@ -1,6 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @if(Route::has('newsletter.subscribe'))
-<div class="modal fade" id="newsletterModal" tabindex="-1" role="dialog" aria-labelledby="newsletterModalLabel" aria-hidden="true" inert style="display:none;">
+<div class="modal fade" id="newsletterModal" tabindex="-1" role="dialog" aria-labelledby="newsletterModalLabel" aria-hidden="true" style="display:none;">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document" style="max-width: 420px;">
         <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none;">
             <div style="background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-hover) 100%); padding: 20px 30px 20px 30px; position: relative;">
@@ -61,91 +61,150 @@
 
 @push('scripts')
 <script>
-$(function() {
-    if ($('#newsletterModal').length === 0) return;
+(function () {
+    var el = document.getElementById('newsletterModal');
+    if (! el) return;
 
-    // #164 fix : cacher le scroll-trigger quand la modale s'ouvre (evite superposition z-index)
-    $('#newsletterModal').on('show.bs.modal', function() {
+    // Ouverture robuste (indépendante de l'API jQuery .modal, instable en BS5)
+    function openNewsletterModal() {
         var st = document.getElementById('newsletterScrollTrigger');
         if (st) st.style.display = 'none';
-        // Ensure modal not inert when shown (defense in depth)
-        document.getElementById('newsletterModal').removeAttribute('inert');
-    });
+        el.removeAttribute('inert');
+        try {
+            if (window.bootstrap && window.bootstrap.Modal) {
+                (new window.bootstrap.Modal(el)).show();
+                return;
+            }
+        } catch (e) {}
+        // Fallback pur si bootstrap indisponible
+        el.classList.add('show');
+        el.style.display = 'block';
+        el.removeAttribute('aria-hidden');
+        document.body.classList.add('modal-open');
+        if (! document.querySelector('.modal-backdrop')) {
+            var bd = document.createElement('div');
+            bd.className = 'modal-backdrop fade show';
+            document.body.appendChild(bd);
+        }
+    }
 
-    // #229 fix : close button — délégation + dismiss data-attr fallback Bootstrap natif
-    $(document).on('click', '#newsletterModalClose', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $('#newsletterModal').modal('hide');
-    });
+    // Fermeture robuste (le bug venait de $(...).modal('hide') inopérant + inert jamais retiré)
+    function closeNewsletterModal() {
+        try {
+            if (window.bootstrap && window.bootstrap.Modal) {
+                var inst = (window.bootstrap.Modal.getInstance && window.bootstrap.Modal.getInstance(el))
+                    || (window.bootstrap.Modal.getOrCreateInstance && window.bootstrap.Modal.getOrCreateInstance(el));
+                if (inst) { inst.hide(); return; }
+            }
+        } catch (e) {}
+        // Fallback pur
+        el.classList.remove('show');
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+        document.querySelectorAll('.modal-backdrop').forEach(function (b) { b.remove(); });
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    }
 
-    // #229 fix : ESC handler explicite (defense in depth en cas de Bootstrap keyboard:false override)
-    $(document).on('keydown.newsletterModal', function(e) {
-        if (e.key === 'Escape' && $('#newsletterModal').hasClass('show')) {
-            $('#newsletterModal').modal('hide');
+    // Quand la modale s'ouvre (data-bs-toggle natif OU openNewsletterModal) : retirer inert
+    el.addEventListener('show.bs.modal', function () {
+        var st = document.getElementById('newsletterScrollTrigger');
+        if (st) st.style.display = 'none';
+        el.removeAttribute('inert');
+    });
+    el.addEventListener('shown.bs.modal', function () { el.removeAttribute('inert'); });
+
+    // Bouton X : fermeture explicite vanilla (en plus du data-bs-dismiss natif)
+    var closeBtn = document.getElementById('newsletterModalClose');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            closeNewsletterModal();
+        });
+    }
+
+    // ESC
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && el.classList.contains('show')) {
+            closeNewsletterModal();
         }
     });
 
-    // #229 fix : click backdrop ferme (Bootstrap le fait par défaut sauf si backdrop=static)
-    $(document).on('click', '#newsletterModal', function(e) {
-        if (e.target === this) {
-            $('#newsletterModal').modal('hide');
-        }
+    // Clic sur le fond (backdrop dans la modale)
+    el.addEventListener('click', function (e) {
+        if (e.target === el) { closeNewsletterModal(); }
     });
 
-    $(document).on('click', '.entry-details a, .entry-media a, .wpo-blog-content a, .post a', function(e) {
-        var text = ($(this).text() || '').toLowerCase();
-        var href = ($(this).attr('href') || '').toLowerCase();
+    // Liens « infolettre / newsletter » dans le contenu ouvrent la modale
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest('.entry-details a, .entry-media a, .wpo-blog-content a, .post a');
+        if (! a) return;
+        var text = (a.textContent || '').toLowerCase();
+        var href = (a.getAttribute('href') || '').toLowerCase();
         if (text.indexOf('infolettre') !== -1 || text.indexOf('newsletter') !== -1 ||
             href.indexOf('infolettre') !== -1 || (href.indexOf('newsletter') !== -1 && href.indexOf('/blog') === -1)) {
             e.preventDefault();
-            document.getElementById('newsletterModal').removeAttribute('inert');
-            $('#newsletterModal').modal('show');
+            openNewsletterModal();
         }
     });
 
-    $('#newsletterModalForm').on('submit', function(e) {
-        e.preventDefault();
-        var $form = $(this);
-        var $btn = $form.find('button[type="submit"]');
-        var $msg = $('#newsletterModalMessage');
+    // Soumission du formulaire (fetch natif, indépendant de jQuery)
+    var form = document.getElementById('newsletterModalForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var btn = document.getElementById('newsletterModalSubmit');
+            var msg = document.getElementById('newsletterModalMessage');
+            var txt = btn.querySelector('.submit-text');
+            var spin = btn.querySelector('.spinner-border');
+            msg.classList.add('d-none'); msg.classList.remove('alert-success', 'alert-danger');
+            if (txt) txt.classList.add('d-none');
+            if (spin) spin.classList.remove('d-none');
+            btn.disabled = true;
 
-        $msg.addClass('d-none').removeClass('alert-success alert-danger');
-        $btn.find('.submit-text').addClass('d-none');
-        $btn.find('.spinner-border').removeClass('d-none');
-        $btn.prop('disabled', true);
-
-        $.ajax({
-            url: '{{ route("newsletter.subscribe") }}',
-            method: 'POST',
-            data: $form.serialize(),
-            headers: { 'Accept': 'application/json' },
-            success: function(response) {
-                $msg.removeClass('d-none').addClass('alert-success').text(response.message || '{{ __("Inscription réussie !") }}');
-                $form[0].reset();
-                setTimeout(function() { $('#newsletterModal').modal('hide'); }, 2500);
-            },
-            error: function(xhr) {
-                var err = '{{ __("Une erreur est survenue.") }}';
-                if (xhr.responseJSON) {
-                    err = xhr.responseJSON.message || (xhr.responseJSON.errors ? Object.values(xhr.responseJSON.errors)[0] : err);
+            var token = (document.querySelector('meta[name="csrf-token"]') || {}).content
+                || (form.querySelector('input[name="_token"]') || {}).value || '';
+            fetch('{{ route("newsletter.subscribe") }}', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token },
+                body: new FormData(form)
+            }).then(function (resp) {
+                return resp.json().then(function (data) { return { ok: resp.ok, data: data }; });
+            }).then(function (res) {
+                if (res.ok) {
+                    msg.classList.remove('d-none'); msg.classList.add('alert-success');
+                    msg.textContent = (res.data && res.data.message) || '{{ __("Inscription réussie !") }}';
+                    form.reset();
+                    setTimeout(closeNewsletterModal, 2500);
+                } else {
+                    var err = '{{ __("Une erreur est survenue.") }}';
+                    if (res.data) { err = res.data.message || (res.data.errors ? Object.values(res.data.errors)[0] : err); }
+                    msg.classList.remove('d-none'); msg.classList.add('alert-danger');
+                    msg.textContent = err;
                 }
-                $msg.removeClass('d-none').addClass('alert-danger').text(err);
-            },
-            complete: function() {
-                $btn.find('.spinner-border').addClass('d-none');
-                $btn.find('.submit-text').removeClass('d-none');
-                $btn.prop('disabled', false);
-            }
+            }).catch(function () {
+                msg.classList.remove('d-none'); msg.classList.add('alert-danger');
+                msg.textContent = '{{ __("Une erreur est survenue.") }}';
+            }).finally(function () {
+                if (spin) spin.classList.add('d-none');
+                if (txt) txt.classList.remove('d-none');
+                btn.disabled = false;
+            });
         });
+    }
+
+    // Réinitialisation à la fermeture
+    el.addEventListener('hidden.bs.modal', function () {
+        if (form) form.reset();
+        var msg = document.getElementById('newsletterModalMessage');
+        if (msg) { msg.classList.add('d-none'); msg.classList.remove('alert-success', 'alert-danger'); }
     });
 
-    $('#newsletterModal').on('hidden.bs.modal', function() {
-        $('#newsletterModalForm')[0].reset();
-        $('#newsletterModalMessage').addClass('d-none').removeClass('alert-success alert-danger');
-        this.setAttribute('inert', '');
-    });
-});
+    // Exposé global au cas où d'autres déclencheurs en aient besoin
+    window.openNewsletterModal = openNewsletterModal;
+    window.closeNewsletterModal = closeNewsletterModal;
+})();
 </script>
 @endpush
 @endif
