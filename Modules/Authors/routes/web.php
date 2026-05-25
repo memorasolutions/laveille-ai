@@ -97,7 +97,18 @@ Route::get('/@{slug}/feed.json', [MiniSiteController::class, 'jsonFeed'])
     ->where('slug', '[a-z0-9-]+')
     ->name('authors.mini-site.json-feed');
 
-// Article public (S107 P2) — MUST come AFTER feed.xml/feed.json routes for regex priority
+// S122 — Tag archive (MUST come before catch-all /@{slug}/{postSlug} for regex priority)
+Route::get('/@{slug}/tag/{tag}', [\Modules\Authors\Http\Controllers\TagArchiveController::class, 'show'])
+    ->where(['slug' => '[a-z0-9-]+', 'tag' => '[A-Za-z0-9\-\.%]+'])
+    ->name('authors.tag-archive');
+
+// S122 — Draft preview signed link (MUST come before catch-all)
+Route::get('/@{slug}/preview/{postSlug}', [\Modules\Authors\Http\Controllers\DraftPreviewController::class, 'show'])
+    ->middleware('signed')
+    ->where(['slug' => '[a-z0-9-]+', 'postSlug' => '[a-z0-9-]+'])
+    ->name('authors.post.preview');
+
+// Article public (S107 P2) — MUST come AFTER feed.xml/feed.json + tag/preview routes for regex priority
 Route::get('/@{slug}/{postSlug}', [PostController::class, 'show'])
     ->where(['slug' => '[a-z0-9-]+', 'postSlug' => '[a-z0-9-]+'])
     ->middleware(\Modules\Authors\Http\Middleware\CacheAuthorMiniSite::class)

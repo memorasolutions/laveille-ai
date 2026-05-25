@@ -53,6 +53,7 @@ class AuthorPost extends Model
 
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PUBLISHED = 'published';
+    public const STATUS_SCHEDULED = 'scheduled';
     public const STATUS_ARCHIVED = 'archived';
 
     public const VISIBILITY_PUBLIC = 'public';
@@ -84,6 +85,19 @@ class AuthorPost extends Model
     public function scopePublic($query)
     {
         return $query->where('visibility', self::VISIBILITY_PUBLIC);
+    }
+
+    public function scopeScheduled($query)
+    {
+        return $query->where('status', self::STATUS_SCHEDULED)
+            ->whereNotNull('published_at');
+    }
+
+    public function isScheduled(): bool
+    {
+        return $this->status === self::STATUS_SCHEDULED
+            && $this->published_at !== null
+            && $this->published_at->isFuture();
     }
 
     public function isPaywalled(): bool

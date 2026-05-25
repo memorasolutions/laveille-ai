@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Authors\Livewire;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 use Livewire\Component;
@@ -15,6 +16,8 @@ use Modules\Authors\Models\AuthorProfile;
 class AuthorEditor extends Component
 {
     public ?AuthorPost $post = null;
+
+    public ?string $scheduledAt = null;
 
     public AuthorProfile $authorProfile;
 
@@ -98,6 +101,52 @@ class AuthorEditor extends Component
         } catch (\Throwable $e) {
             $this->autoSaveStatus = 'error';
         }
+    }
+
+    public function schedule(): void
+    {
+        $this->validate([
+            'title' => 'required|string|min:3|max:255',
+            'body_markdown' => 'required|string|min:20',
+            'scheduledAt' => 'required|date|after:now',
+        ]);
+
+        $this->normalizeData();
+
+        if ($this->post === null) {
+            $this->autoSave();
+        }
+
+        $this->post->update([
+            'title' => $this->title,
+            'slug' => $this->generateUniqueSlug($this->title, $this->post->id),
+            'body_markdown' => $this->body_markdown,
+            'body_html' => $this->renderHtml($this->body_markdown),
+            'excerpt' => $this->computeExcerpt(),
+            'status' => AuthorPost::STATUS_SCHEDULED,
+            'visibility' => $this->visibility,
+            'tags' => $this->tags,
+            'reading_time_minutes' => $this->computeReadingTime(),
+            'published_at' => $this->scheduledAt,
+        ]);
+
+        $this->dispatch('post-scheduled', scheduledAt: (string) $this->scheduledAt);
+    }
+
+    public function previewUrl(): string
+    {
+        if ($this->post === null) {
+            return '';
+        }
+
+        return URL::signedRoute(
+            'authors.post.preview',
+            [
+                'slug' => $this->authorProfile->slug,
+                'postSlug' => $this->post->slug,
+            ],
+            now()->addDays(7)
+        );
     }
 
     public function publish(): void

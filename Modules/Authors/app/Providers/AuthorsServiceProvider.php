@@ -59,6 +59,7 @@ class AuthorsServiceProvider extends ServiceProvider
         Livewire::component('authors.author-recent-notifications', \Modules\Authors\Livewire\AuthorRecentNotifications::class);
         Livewire::component('authors.author-related-posts', \Modules\Authors\Livewire\AuthorRelatedPosts::class);
         Livewire::component('authors.comment-moderation-queue', \Modules\Authors\Livewire\CommentModerationQueue::class);
+        Livewire::component('authors.author-analytics-widget', \Modules\Authors\Livewire\AuthorAnalyticsWidget::class);
     }
 
     /**
@@ -89,6 +90,7 @@ class AuthorsServiceProvider extends ServiceProvider
             \Modules\Authors\Console\Commands\AuthorsWeeklyDigestCommand::class,
             \Modules\Authors\Console\Commands\AuthorsWebmentionSendCommand::class,
             \Modules\Authors\Console\Commands\SendSubscriberDigestCommand::class,
+            \Modules\Authors\Console\Commands\PublishScheduledPostsCommand::class,
         ]);
     }
 
@@ -121,6 +123,13 @@ class AuthorsServiceProvider extends ServiceProvider
             // S121 — Digest hebdo aux abonnés dimanche 10:00 Québec time
             $schedule->command('authors:subscriber-digest')
                 ->weeklyOn(0, '10:00')
+                ->timezone('America/Toronto')
+                ->withoutOverlapping()
+                ->onOneServer();
+
+            // S122 — Publication automatique des articles programmés (toutes les 5 min)
+            $schedule->command('authors:publish-scheduled')
+                ->everyFiveMinutes()
                 ->timezone('America/Toronto')
                 ->withoutOverlapping()
                 ->onOneServer();

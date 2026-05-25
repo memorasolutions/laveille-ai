@@ -148,6 +148,12 @@
         <span x-show="readerMode" x-cloak>✕ Mode normal</span>
     </button>
 
+    @if(isset($isDraftPreview) && $isDraftPreview)
+        <div role="status" style="background:#9A2A06; color:white; text-align:center; padding:12px; font-weight:600; position:sticky; top:0; z-index:1000;">
+            👁️ Aperçu brouillon — cet article n'est pas encore publié
+        </div>
+    @endif
+
     <nav aria-label="Fil d'Ariane" class="lv-post-breadcrumb" style="max-width:720px; margin:0 auto; padding:24px 24px 0; font-size:13px; color:#5A6270;">
         <ol style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
             <li><a href="{{ url('/') }}" style="color:#5A6270; text-decoration:underline;">Accueil</a></li>
@@ -189,7 +195,7 @@
             @if(! empty($post->tags))
                 <div class="lv-post-tags">
                     @foreach($post->tags as $tag)
-                        <span class="lv-post-tag">#{{ $tag }}</span>
+                        <a class="lv-post-tag" href="{{ route('authors.tag-archive', ['slug' => $author->slug, 'tag' => $tag]) }}" aria-label="Voir tous les articles tagués {{ $tag }}">#{{ $tag }}</a>
                     @endforeach
                 </div>
             @endif
