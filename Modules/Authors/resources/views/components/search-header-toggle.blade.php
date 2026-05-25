@@ -30,7 +30,7 @@
          aria-label="Recherche d'articles"
          class="lv-search-panel"
          style="position:absolute; top:calc(100% + 8px); right:0; z-index:50; min-width:320px; background:var(--c-cream,#F8FAFB); padding:1rem; border-radius:10px; box-shadow:0 10px 30px rgba(6,78,90,0.18); border:1px solid rgba(6,78,90,0.12);">
-        <form action="/@{{ $author->slug }}" method="GET" role="search" style="display:flex; gap:8px; align-items:stretch;">
+        <form action="{{ route('authors.mini-site.show', $author->slug) }}" method="GET" role="search" style="display:flex; gap:8px; align-items:stretch;">
             <label for="lv-search-input" class="lv-sr-only">Rechercher dans les articles</label>
             <input id="lv-search-input"
                    x-ref="searchInput"

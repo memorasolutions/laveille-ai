@@ -75,6 +75,16 @@ class AuthorProfile extends Model
         return (bool) ($config[$key] ?? (self::MODULES_DEFAULTS[$key] ?? true));
     }
 
+    /**
+     * Nom d'affichage de l'auteur. `display_name` n'est pas une colonne :
+     * on dérive du nom utilisateur, sinon du slug. Accessor pour cohérence
+     * avec tous les composants mini-site (S119-S122).
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->user?->name ?? $this->slug;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

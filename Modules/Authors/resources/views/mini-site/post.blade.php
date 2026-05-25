@@ -158,7 +158,7 @@
         <ol style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
             <li><a href="{{ url('/') }}" style="color:#5A6270; text-decoration:underline;">Accueil</a></li>
             <li aria-hidden="true">›</li>
-            <li><a href="/@{{ $author->slug }}" style="color:#5A6270; text-decoration:underline;">{{ $author->display_name ?? $author->slug }}</a></li>
+            <li><a href="{{ route('authors.mini-site.show', $author->slug) }}" style="color:#5A6270; text-decoration:underline;">{{ $author->display_name ?? $author->slug }}</a></li>
             <li aria-hidden="true">›</li>
             <li aria-current="page" style="color:#064E5A; font-weight:600;">{{ \Illuminate\Support\Str::limit($post->title, 50) }}</li>
         </ol>

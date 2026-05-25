@@ -26,7 +26,7 @@ final class AuthorRelatedPosts extends Component
     {
         $query = AuthorPost::published()
             ->public()
-            ->with('authorProfile:id,slug,display_name')
+            ->with('authorProfile.user:id,name')
             ->where('author_profile_id', $this->authorProfileId)
             ->where('id', '!=', $this->currentPostId);
 

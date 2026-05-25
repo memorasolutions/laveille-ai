@@ -160,7 +160,7 @@
                 <ul class="lv-search-results-list" style="list-style:none; padding:0; margin:0; display:grid; gap:16px;">
                     @foreach($searchResults as $sr)
                         <li>
-                            <a href="/@{{ $author->slug }}/{{ $sr->slug }}" style="display:block; padding:16px; min-height:44px; background:var(--c-cream,#F8FAFB); border-radius:10px; text-decoration:none; color:inherit; transition:transform 200ms, box-shadow 200ms; border:1px solid rgba(6,78,90,0.08);"
+                            <a href="{{ route('authors.post.show', [$author->slug, $sr->slug]) }}" style="display:block; padding:16px; min-height:44px; background:var(--c-cream,#F8FAFB); border-radius:10px; text-decoration:none; color:inherit; transition:transform 200ms, box-shadow 200ms; border:1px solid rgba(6,78,90,0.08);"
                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(6,78,90,0.12)';"
                                onmouseout="this.style.transform='none'; this.style.boxShadow='none';"
                                onfocus="this.style.outline='3px solid #9A2A06'; this.style.outlineOffset='2px';"
@@ -181,7 +181,7 @@
                     @endforeach
                 </ul>
             @else
-                <p style="color:#3F4554; font-size:15px;">Aucun résultat trouvé. <a href="/@{{ $author->slug }}" style="color:var(--c-accent,#9A2A06); font-weight:600;">Voir tous les articles →</a></p>
+                <p style="color:#3F4554; font-size:15px;">Aucun résultat trouvé. <a href="{{ route('authors.mini-site.show', $author->slug) }}" style="color:var(--c-accent,#9A2A06); font-weight:600;">Voir tous les articles →</a></p>
             @endif
         </section>
     @endif

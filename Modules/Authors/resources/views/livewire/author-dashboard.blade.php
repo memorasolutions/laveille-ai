@@ -86,7 +86,7 @@
                         <p class="text-lg font-medium text-[#0B7285]">Pas encore d'abonnés.</p>
                         <p class="mt-2 text-gray-600">
                             Partage ton lien
-                            <code class="bg-white px-2 py-1 rounded text-[#C2410C] border">/@{{ $author->slug }}#newsletter</code>
+                            <code class="bg-white px-2 py-1 rounded text-[#C2410C] border">{{ '/@'.$author->slug.'#newsletter' }}</code>
                             pour commencer à grandir ta liste.
                         </p>
                     </div>

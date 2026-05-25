@@ -25,7 +25,7 @@
         </div>
         <div class="lv-author-bio-content">
             <h3 class="lv-author-bio-name">
-                <a href="/@{{ $author->slug }}">{{ $authorName }}</a>
+                <a href="{{ route('authors.mini-site.show', $author->slug) }}">{{ $authorName }}</a>
             </h3>
             @if($bio)
                 <p class="lv-author-bio-text">{{ \Illuminate\Support\Str::limit($bio, 280) }}</p>
@@ -38,7 +38,7 @@
                 </ul>
             @endif
             <div class="lv-author-bio-actions">
-                <a href="/@{{ $author->slug }}" class="lv-author-bio-btn-primary">Voir tous ses articles →</a>
+                <a href="{{ route('authors.mini-site.show', $author->slug) }}" class="lv-author-bio-btn-primary">Voir tous ses articles →</a>
                 @if($showFollow)
                     <x-authors::follow-button :author="$author" />
                 @endif

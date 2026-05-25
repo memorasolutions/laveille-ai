@@ -89,7 +89,7 @@ final class CommentModerationQueue extends Component
     public function render()
     {
         $query = AuthorComment::query()
-            ->with(['authorProfile:id,slug,display_name', 'commentable']);
+            ->with(['authorProfile.user:id,name', 'commentable']);
 
         if (trim($this->search) !== '') {
             $escaped = '%'.addcslashes(trim($this->search), '%_\\').'%';
