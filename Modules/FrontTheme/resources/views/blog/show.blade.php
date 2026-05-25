@@ -245,11 +245,25 @@
                                     if (! ($isPreview ?? false) && class_exists(\App\Helpers\AeoHelper::class)) {
                                         $articleContent = \App\Helpers\AeoHelper::chunkContent($articleContent);
                                     }
+                                    // Liens (externes ET internes) du contenu : ouverture dans un nouvel onglet
+                                    $articleContent = preg_replace(
+                                        '/<a\b(?![^>]*\btarget=)/i',
+                                        '<a target="_blank" rel="noopener noreferrer"',
+                                        $articleContent
+                                    );
                                 @endphp
                                 {{-- 2026-05-05 #141 : auto-link glossaire/acronymes pour SEO/AEO/GEO --}}
                                 @glossarize($articleContent)
                             </div>
                             @include('core::partials.glossary-jsonld')
+                            <script>
+                                document.querySelectorAll('.entry-details a[href]').forEach(function (a) {
+                                    if (! a.hasAttribute('target')) {
+                                        a.setAttribute('target', '_blank');
+                                        a.setAttribute('rel', 'noopener noreferrer');
+                                    }
+                                });
+                            </script>
                         </div>
 
                         @include('fronttheme::blog.partials.faq-accordion')
