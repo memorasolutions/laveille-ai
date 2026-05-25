@@ -350,6 +350,16 @@
                             </div>
                         @endif
 
+                        {{-- Pour aller plus loin : référence vers un article du blog --}}
+                        @if(! empty($term->reference_url))
+                            <div class="gl-section gl-bento-full">
+                                <div class="gl-section-box">
+                                    <h2 class="gl-section-title">📖 {{ __('Pour aller plus loin') }}</h2>
+                                    <p><a href="{{ $term->reference_url }}" target="_blank" rel="noopener noreferrer">{{ $term->reference_label ?? __('Lire l\'article complet') }}</a></p>
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
 
                 </article>

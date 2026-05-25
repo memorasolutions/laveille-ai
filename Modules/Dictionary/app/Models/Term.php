@@ -51,6 +51,8 @@ class Term extends Model implements Searchable
         'difficulty',
         'icon',
         'hero_image',
+        'reference_url',
+        'reference_label',
         'type',
         'dictionary_category_id',
         'is_published',
