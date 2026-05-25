@@ -229,21 +229,35 @@
                                         $articleContent = $adsRenderer->renderShortcodes($articleContent);
                                         $articleContent = $adsRenderer->injectAfterParagraph($articleContent, 'article-inline', 3);
                                     }
-                                    // Regex plus strict : matche uniquement un heading ou paragraphe dont le TITRE commence par
-                                    // "Sources" ou "Références" (avec strong/b optionnel), suivi d'un ":" — évite les faux positifs sur "open source"
-                                    $articleContent = preg_replace(
-                                        '/(<(?:h[2-4])[^>]*>(?:<(?:strong|b|em)>)?\s*(?:Sources?|Références?)\s*:?\s*(?:<\/(?:strong|b|em)>)?\s*<\/(?:h[2-4])>)/i',
-                                        '</div><div class="sources-section">$1',
-                                        $articleContent,
-                                        1
-                                    );
                                     if (function_exists('render_shortcodes')) {
                                         $articleContent = render_shortcodes($articleContent);
                                     }
-                                    // AEO : sections wrappées, IDs sur headings, itemprop sur premiers paragraphes
-                                    // (skip en mode preview pour éviter le bug DOMDocument avec HTML complexe)
+                                    // AEO : sections wrappées, IDs sur headings, itemprop. DOIT précéder le wrap Sources :
+                                    // sinon le </div> injecté ferme le wrapper interne de chunkContent (DOMDocument) et la
+                                    // section Sources tombe hors $body → disparition silencieuse sur articles publiés (fix 2026-05-25).
                                     if (! ($isPreview ?? false) && class_exists(\App\Helpers\AeoHelper::class)) {
                                         $articleContent = \App\Helpers\AeoHelper::chunkContent($articleContent);
+                                    }
+                                    // Encadrement visuel de la section "Sources"/"Références".
+                                    $lvSourcesHead = '(?:<(?:strong|b|em)>)?\s*(?:Sources?|Références?)\s*:?\s*(?:<\/(?:strong|b|em)>)?';
+                                    $lvSourcesCount = 0;
+                                    // Cas publié : chunkContent a produit des <section class="aeo-section"> → simple ajout de
+                                    // classe (HTML équilibré, aucun risque de casse au rendu).
+                                    $articleContent = preg_replace(
+                                        '/<section class="aeo-section">(\s*<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)/i',
+                                        '<section class="aeo-section sources-section">$1',
+                                        $articleContent,
+                                        1,
+                                        $lvSourcesCount
+                                    );
+                                    // Cas preview (chunkContent non exécuté) : encadrement par div dédié.
+                                    if ($lvSourcesCount === 0) {
+                                        $articleContent = preg_replace(
+                                            '/(<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)/i',
+                                            '</div><div class="sources-section">$1',
+                                            $articleContent,
+                                            1
+                                        );
                                     }
                                     // Liens (externes ET internes) du contenu : ouverture dans un nouvel onglet
                                     $articleContent = preg_replace(
