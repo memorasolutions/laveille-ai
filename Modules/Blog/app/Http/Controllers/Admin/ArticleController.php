@@ -179,7 +179,7 @@ class ArticleController extends Controller
         $recentArticles = collect();
         $isPreview = true;
 
-        return view('blog::public.show', compact(
+        return view('fronttheme::blog.show', compact(
             'article', 'comments', 'relatedArticles', 'recentArticles', 'isPreview'
         ));
     }
