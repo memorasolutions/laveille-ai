@@ -312,7 +312,7 @@
                         <div class="gl-section-box" style="background: #F8FAFC; border-left: 4px solid var(--c-primary); padding: 28px;">
                             <h2 class="gl-section-title" style="color: var(--c-dark); font-size: 1.3rem;">📖 {{ __('Définition') }}</h2>
                             <div class="gl-definition" style="font-size: 1.05rem;">
-                                {!! nl2br(e($term->definition)) !!}
+                                {!! nl2br($term->definition) !!}
                             </div>
                         </div>
                     </div>
@@ -325,7 +325,7 @@
                             <div class="gl-section">
                                 <div class="gl-section-box gl-box-analogy" style="height: 100%;">
                                     <h2 class="gl-section-title">💬 {{ __('En termes simples') }}</h2>
-                                    <p>{{ $term->analogy }}</p>
+                                    <p>{!! nl2br($term->analogy) !!}</p>
                                 </div>
                             </div>
                         @endif
@@ -335,7 +335,7 @@
                             <div class="gl-section">
                                 <div class="gl-section-box gl-box-example" style="height: 100%;">
                                     <h2 class="gl-section-title">🎯 {{ __('Exemple concret') }}</h2>
-                                    <p>{{ $term->example }}</p>
+                                    <p>{!! nl2br($term->example) !!}</p>
                                 </div>
                             </div>
                         @endif
@@ -345,7 +345,7 @@
                             <div class="gl-section gl-bento-full">
                                 <div class="gl-section-box gl-box-fact">
                                     <h2 class="gl-section-title">💡 {{ __('Le saviez-vous ?') }}</h2>
-                                    <p>{{ $term->did_you_know }}</p>
+                                    <p>{!! nl2br($term->did_you_know) !!}</p>
                                 </div>
                             </div>
                         @endif

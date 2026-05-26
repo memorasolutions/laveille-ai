@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.41.6 · 2026-05-26 · #294 + terme glossaire RAG strict (id=307, hero image 1024×572 teal+orange, catégorie 17 héritée de RAG, acronyme « Strict Retrieval-Augmented Generation »). Mise à jour terme RAG existant (id=4) : did_you_know enrichi avec un paragraphe expliquant la différence avec RAG strict et lien bidirectionnel vers /glossaire/rag-strict. Fix template glossaire `Modules/Dictionary/resources/views/public/show.blade.php` : 4 champs translatables (definition, analogy, example, did_you_know) passent de `{{ }}` (échappement Blade) à `{!! nl2br(...) !!}` (HTML brut, retours ligne préservés). Permet liens inline `<a>`, `<strong>`, `<em>` dans tous les termes. Rétro-compat : termes plain-text rendent identiquement. Image générée via Gemini Playwright (compte user, 3 itérations format paysage + palette teal). Linkifier `usort($terms, fn($a,$b) => mb_strlen($b['name']) <=> mb_strlen($a['name']))` ligne 269 GlossaryLinkifier garantit longest-match-first : « RAG strict » matché avant « RAG » dans tous textes. Codename glossary-terms-html-inline-support.
  *   1.41.5 · 2026-05-26 · #293 newsletter : permettre de désactiver explicitement le wellnessChallenge hebdo (Brain Dump par défaut) via `$content['wellness_challenge'] = null`. DigestContentService::gatherFromIssue ligne 164 changé de `?? null + ! $val` (qui re-déclenchait getWellnessChallenge() sur null) vers `array_key_exists` (qui respecte un null explicite). Use case : remplacer le défi Brain Dump hebdo par un défi custom différent (ex défi NotebookLM) pour une semaine donnée, sans perdre la synergie linked_prompt pour les autres semaines. Rétro-compat : payloads existants sans clé wellness_challenge → comportement identique (auto-lookup). Détecté par test S22 où mon weeklyPrompt NotebookLM était écrasé par linked_prompt du Brain Dump (synergie défi+prompt auto-injectée). Codename newsletter-wellness-explicit-null-override.
  *   1.41.4 · 2026-05-26 · #292 newsletter mini-editorial supporte HTML riche (liens, mise en forme) : template digest-weekly.blade.php passe `{{ $editorial }}` (échappement auto Blade) → `{!! $editorial !!}` (HTML brut). Permet aux éditoriaux personnalisés d'inclure des liens inline `<a href>` vers articles laveille.ai + balises `<p>` pour paragraphes (vs ancien comportement plain-text only avec balises affichées littéralement comme `&lt;p&gt;`). Détecté par test envoi S22 newsletter défi NotebookLM (Gemini-généré 200 mots avec lien Déclaration de Montréal échappé en plain text). Rétro-compat : éditoriaux plain text existants (auto-générés via DigestContentService::generateEditorial deepseek) rendent identiquement (texte sans tags). Codename newsletter-editorial-html-support.
  *   1.41.3 · 2026-05-26 · #291 fix(frontheme) lien Amazon de la pub livre (composant `book-promo`) aligné sur le lien guide canonique de Stéphane : `a.co/d/0fQyG3Jw` → `a.co/d/0dN4X9m2`. Concerne le CTA "Commander sur Amazon" injecté via module Ads `article-inline` après le 3e paragraphe des articles. Mêmes corrections appliquées dans `BookPromoComponentTest` (toContain + Schema.org Product.offers.url). Cohérence avec le lien subtil inline dans le corps des articles. Codename book-promo-canonical-link.
@@ -107,7 +108,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 41,
-    'patch' => 5,
+    'patch' => 6,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -117,11 +118,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'newsletter-wellness-explicit-null-override',
+    'codename' => 'glossary-terms-html-inline-support',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.5',
+    'semver' => '1.41.6',
 ];
