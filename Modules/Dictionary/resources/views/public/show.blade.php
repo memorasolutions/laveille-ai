@@ -325,12 +325,17 @@
                         </div>
                     @endif
 
+                    @php
+                        $_glossSkip = ['skip_slug' => (string) $term->slug];
+                        $_glossarizeFr = fn ($txt) => $txt ? \Modules\Core\Services\GlossaryLinkifier::linkify(nl2br((string) $txt), $_glossSkip) : '';
+                    @endphp
+
                     {{-- Définition en vedette –full width --}}
                     <div class="gl-section" style="margin-bottom: 24px;">
                         <div class="gl-section-box" style="background: #F8FAFC; border-left: 4px solid var(--c-primary); padding: 28px;">
                             <h2 class="gl-section-title" style="color: var(--c-dark); font-size: 1.3rem;">📖 {{ __('Définition') }}</h2>
                             <div class="gl-definition" style="font-size: 1.05rem;">
-                                {!! nl2br($term->definition) !!}
+                                {!! $_glossarizeFr($term->definition) !!}
                             </div>
                         </div>
                     </div>
@@ -343,7 +348,7 @@
                             <div class="gl-section">
                                 <div class="gl-section-box gl-box-analogy" style="height: 100%;">
                                     <h2 class="gl-section-title">💬 {{ __('En termes simples') }}</h2>
-                                    <p>{!! nl2br($term->analogy) !!}</p>
+                                    <p>{!! $_glossarizeFr($term->analogy) !!}</p>
                                 </div>
                             </div>
                         @endif
@@ -353,7 +358,7 @@
                             <div class="gl-section">
                                 <div class="gl-section-box gl-box-example" style="height: 100%;">
                                     <h2 class="gl-section-title">🎯 {{ __('Exemple concret') }}</h2>
-                                    <p>{!! nl2br($term->example) !!}</p>
+                                    <p>{!! $_glossarizeFr($term->example) !!}</p>
                                 </div>
                             </div>
                         @endif
@@ -363,7 +368,7 @@
                             <div class="gl-section gl-bento-full">
                                 <div class="gl-section-box gl-box-fact">
                                     <h2 class="gl-section-title">💡 {{ __('Le saviez-vous ?') }}</h2>
-                                    <p>{!! nl2br($term->did_you_know) !!}</p>
+                                    <p>{!! $_glossarizeFr($term->did_you_know) !!}</p>
                                 </div>
                             </div>
                         @endif
