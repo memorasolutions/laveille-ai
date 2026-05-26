@@ -326,7 +326,8 @@
                     @endif
 
                     @php
-                        $_glossSkip = ['skip_slug' => (string) $term->slug];
+                        // 2026-05-26 #300 : sur les pages glossaire, limiter à 1 occurrence par terme + 25 liens max (vs 10/120 par défaut sur blog) pour éviter saturation visuelle (audit a montré 30+ liens vers même cible).
+                        $_glossSkip = ['skip_slug' => (string) $term->slug, 'max_occ' => 1, 'max_links' => 25];
                         $_glossarizeFr = fn ($txt) => $txt ? \Modules\Core\Services\GlossaryLinkifier::linkify(nl2br((string) $txt), $_glossSkip) : '';
                     @endphp
 
@@ -392,7 +393,7 @@
                                         @if(is_array($qa) && ! empty($qa['question']) && ! empty($qa['answer']))
                                             <details style="border-bottom: 1px solid #e5e7eb; padding: 12px 0;">
                                                 <summary style="font-weight: 600; cursor: pointer; padding: 4px 0; color: var(--c-dark);">{{ $qa['question'] }}</summary>
-                                                <div style="padding: 10px 0 4px; color: #4B5563; line-height: 1.6;">{!! \Modules\Core\Services\GlossaryLinkifier::linkify(nl2br(e($qa['answer'])), $_glossSkip) !!}</div>
+                                                <div style="padding: 10px 0 4px; color: #4B5563; line-height: 1.6;">{!! \Modules\Core\Services\GlossaryLinkifier::linkify(nl2br(e($qa['answer'])), array_merge($_glossSkip, ['max_occ' => 1])) !!}</div>
                                             </details>
                                         @endif
                                     @endforeach

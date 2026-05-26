@@ -70,6 +70,7 @@ class GlossaryLinkifier
 
         $skipSlug = $options['skip_slug'] ?? null;
         $maxLinks = $options['max_links'] ?? self::MAX_LINKS_PER_PAGE;
+        $maxOcc = $options['max_occ'] ?? self::MAX_OCCURRENCES_PER_TERM; // 2026-05-26 #300 : opt option pour pages glossaire (1 occurrence par terme)
 
         $terms = self::loadTerms();
         if (empty($terms)) {
@@ -95,7 +96,7 @@ class GlossaryLinkifier
             return $html;
         }
 
-        self::walkAndReplace($dom, $root, $terms, self::$seenThisRequest, self::$linkCountThisRequest, $maxLinks, $skipSlug);
+        self::walkAndReplace($dom, $root, $terms, self::$seenThisRequest, self::$linkCountThisRequest, $maxLinks, $skipSlug, $maxOcc);
 
         // Extract inner HTML from glx-root wrapper
         $output = '';
@@ -449,7 +450,7 @@ class GlossaryLinkifier
     /**
      * Walk récursif DOM + remplacement text nodes hors zones interdites.
      */
-    protected static function walkAndReplace(\DOMDocument $dom, \DOMNode $node, array $terms, array &$seen, int &$linkCount, int $maxLinks, ?string $skipSlug): void
+    protected static function walkAndReplace(\DOMDocument $dom, \DOMNode $node, array $terms, array &$seen, int &$linkCount, int $maxLinks, ?string $skipSlug, int $maxOcc = self::MAX_OCCURRENCES_PER_TERM): void
     {
         if ($linkCount >= $maxLinks) return;
 
@@ -470,7 +471,7 @@ class GlossaryLinkifier
                 $text = $child->nodeValue;
                 if (! $text || mb_strlen(trim($text)) < self::MIN_LENGTH) continue;
 
-                $replaced = self::matchInText($dom, $text, $terms, $seen, $linkCount, $maxLinks, $skipSlug);
+                $replaced = self::matchInText($dom, $text, $terms, $seen, $linkCount, $maxLinks, $skipSlug, $maxOcc);
                 if ($replaced !== null) {
                     // Replace text node par fragment (mix text + <a>)
                     $parent = $child->parentNode;
@@ -480,7 +481,7 @@ class GlossaryLinkifier
                     $parent->removeChild($child);
                 }
             } elseif ($child->nodeType === XML_ELEMENT_NODE) {
-                self::walkAndReplace($dom, $child, $terms, $seen, $linkCount, $maxLinks, $skipSlug);
+                self::walkAndReplace($dom, $child, $terms, $seen, $linkCount, $maxLinks, $skipSlug, $maxOcc);
             }
         }
     }
@@ -490,13 +491,13 @@ class GlossaryLinkifier
      *
      * @return array<\DOMNode>|null
      */
-    protected static function matchInText(\DOMDocument $dom, string $text, array $terms, array &$seen, int &$linkCount, int $maxLinks, ?string $skipSlug): ?array
+    protected static function matchInText(\DOMDocument $dom, string $text, array $terms, array &$seen, int &$linkCount, int $maxLinks, ?string $skipSlug, int $maxOcc = self::MAX_OCCURRENCES_PER_TERM): ?array
     {
         foreach ($terms as $term) {
             if ($linkCount >= $maxLinks) return null;
             // 2026-05-11 #158 : autorise jusqu'à MAX_OCCURRENCES_PER_TERM wraps du même terme par page
             $seenKey = $term['slug'].'|'.$term['type'];
-            if (($seen[$seenKey] ?? 0) >= self::MAX_OCCURRENCES_PER_TERM) continue;
+            if (($seen[$seenKey] ?? 0) >= $maxOcc) continue;
             if ($skipSlug && $term['slug'] === $skipSlug) continue;
 
             $name = $term['name'];
@@ -543,7 +544,7 @@ class GlossaryLinkifier
             // (sort longueur DESC) et $before "Les GPU... TPU " perdait GPU+TPU.
             $fragment = [];
             if ($before !== '') {
-                $beforeFragment = self::matchInText($dom, $before, $terms, $seen, $linkCount, $maxLinks, $skipSlug);
+                $beforeFragment = self::matchInText($dom, $before, $terms, $seen, $linkCount, $maxLinks, $skipSlug, $maxOcc);
                 if ($beforeFragment !== null) {
                     $fragment = $beforeFragment;
                 } else {
@@ -552,7 +553,7 @@ class GlossaryLinkifier
             }
             $fragment[] = $a;
             if ($after !== '') {
-                $afterFragment = self::matchInText($dom, $after, $terms, $seen, $linkCount, $maxLinks, $skipSlug);
+                $afterFragment = self::matchInText($dom, $after, $terms, $seen, $linkCount, $maxLinks, $skipSlug, $maxOcc);
                 if ($afterFragment !== null) {
                     $fragment = array_merge($fragment, $afterFragment);
                 } else {
