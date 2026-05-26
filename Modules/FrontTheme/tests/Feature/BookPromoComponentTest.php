@@ -27,7 +27,7 @@ it('le composant rend le titre du livre par défaut', function () {
 
 it('le composant rend le CTA vers Amazon (lien officiel)', function () {
     $html = Blade::render('<x-fronttheme::book-promo />');
-    expect($html)->toContain('https://a.co/d/0fQyG3Jw');
+    expect($html)->toContain('https://a.co/d/0dN4X9m2');
 });
 
 it('le CTA respecte les bonnes pratiques sécurité target=_blank + rel sponsored noopener', function () {
@@ -68,7 +68,7 @@ it('le composant inclut un Schema.org JSON-LD Book valide', function () {
         ->and($data['author']['@type'] ?? null)->toBe('Person')
         ->and($data['author']['name'] ?? null)->toBe('Stéphane Lapointe')
         ->and($data['publisher']['name'] ?? null)->toBe('MEMORA solutions')
-        ->and($data['offers']['url'] ?? null)->toBe('https://a.co/d/0fQyG3Jw');
+        ->and($data['offers']['url'] ?? null)->toBe('https://a.co/d/0dN4X9m2');
 });
 
 it('le bouton CTA respecte WCAG 2.5.5 target size min-height 44px', function () {

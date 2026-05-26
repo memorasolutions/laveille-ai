@@ -18,7 +18,7 @@
     'og_image'          => '/images/books/ia-sans-se-faire-poursuivre-og-1200x630.jpg',
     'cover_alt'         => "L'IA sans se faire poursuivre — Édition 2026 — Guide pratique Loi 25 RGPD AI Act pour PME francophones par Stéphane Lapointe",
     'cta_label'         => 'Commander sur Amazon',
-    'cta_url'           => 'https://a.co/d/0fQyG3Jw',
+    'cta_url'           => 'https://a.co/d/0dN4X9m2',
     'schema'            => true,
     'variant'           => 'card', // 'card' | 'inline'
 ])
