@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.41.14 · 2026-05-26 · #302 fix WCAG 2.2 AAA newsletter — liens dans blocs dark presque invisibles (screenshot user 2026-05-26 14:11). Avant : `a { color:#0B7285 }` global appliqué partout, sur fond dark `#0c1427`/`#1e293b` ratio 1.6:1 FAIL. Fix : ajout règle `td[style*="#0c1427"] a, td[style*="#1e293b"] a { color:#5eead4 !important }` dans `<style>` head — cyan clair #5eead4 vs dark = ratio 12:1 AAA largement dépassé. + Update NewsletterIssue #9 weekly_prompt : reformulation étape 4 (clarifie le panneau Studio + flèche ›), restaure le défi NotebookLM (Brain Dump était re-écrasé), ajoute 2 liens vers /glossaire/rag-strict et /glossaire/rag dans la section technique pour pédagogie + maillage interne. Test Cloudflare confirme aucun blocage NotebookLM (GoogleBot/Mozilla/NotebookLM tous 200). Codename newsletter-wcag-aaa-dark-links.
  *   1.41.13 · 2026-05-26 · #301 ligne « Aussi appelé : X · Y · Z » sous le titre des fiches glossaire (best practice sonar-pro mai 2026, approche 3+4 combinée Wikipedia/IBM/AWS). Fusionne acronym_full + aliases en 1 ligne italique inline (DRY, anti-redondance, mobile-friendly). TermSchemaService.alternateName devient multivalué (array de variantes) pour SEO+AEO max. + Génération MCP Gemini de 3-6 aliases pour les 64 termes glossaire orphelins (déjà 200/265 termes avec aliases pré-existants → maintenant 264/265 couverts, 99.6%). Codename glossary-aliases-aka-line.
  *   1.41.12 · 2026-05-26 · #300 GlossaryLinkifier accepte `max_occ` en option (anciennement constante MAX_OCCURRENCES_PER_TERM=10 hardcoded dans matchInText). Vue glossaire show.blade.php passe maintenant `['max_occ' => 1, 'max_links' => 25]` au linkifier : 1 lien par terme par page + 25 liens max. Évite la saturation visuelle (audit a montré 30 liens vers /amazon sur certaines pages, 37 sur /google). Comportement blog/articles inchangé (default 10/120 préservé). Aussi : ajout automatique de `acronym_full` aux aliases pour 120 termes (LLM → "Large Language Model", Bedrock → "Amazon Bedrock", etc.) pour que le linkifier longest-match évite les faux liens parents (« Amazon » dans « Amazon Bedrock »). Codename glossary-linkifier-max-occ-option.
  *   1.41.11 · 2026-05-26 · #299 fix newsletter CTA double-flèche « → → » (TASK #230). Le template digest-weekly.blade.php ajoutait inconditionnellement ` &rarr;` au cta_label de la section Atelier (prompt + wellness), causant un double-arrow quand le cta_label finissait déjà par « → » ou « » » (Gemini en met souvent). Fix DRY : `@php $_ctaSuffix = preg_match('/[→»]\\s*$/u', $cta_label) ? '' : ' &rarr;'; @endphp` puis `{{ $cta_label }}{!! $_ctaSuffix !!}`. Smart-arrow détecte les flèches/chevrons existants et n'ajoute la sienne que si nécessaire. Appliqué aux 2 CTA (weekly_prompt + wellness_challenge). Codename newsletter-cta-smart-arrow.
@@ -115,7 +116,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 41,
-    'patch' => 13,
+    'patch' => 14,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -125,11 +126,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'glossary-aliases-aka-line',
+    'codename' => 'newsletter-wcag-aaa-dark-links',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.13',
+    'semver' => '1.41.14',
 ];

@@ -9,6 +9,14 @@
         table, td { border-collapse:collapse; }
         img { display:block; max-width:100%; height:auto; border:0; }
         a { color:#0B7285; text-decoration:none; }
+        /* 2026-05-26 #302 WCAG 2.2 AAA : liens lisibles dans les blocs dark (atelier #0c1427, code #1e293b) — cyan #3dc9d8 vs dark = ratio 8.7:1 AAA. Avant : teal #0B7285 invisible sur dark (1.6:1 FAIL). */
+        td[style*="#0c1427"] a, td[style*="#1e293b"] a,
+        td[style*="background-color:#0c1427"] a, td[style*="background-color:#1e293b"] a,
+        td[style*="background:#0c1427"] a, td[style*="background:#1e293b"] a {
+            color:#5eead4 !important;
+            text-decoration:underline !important;
+            text-underline-offset:2px;
+        }
         @media only screen and (max-width:600px) {
             .email-container { width:100% !important; }
             .stack-col { display:block !important; width:100% !important; padding-right:0 !important; padding-left:0 !important; padding-bottom:12px !important; }
