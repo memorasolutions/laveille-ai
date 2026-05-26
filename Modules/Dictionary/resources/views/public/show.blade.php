@@ -418,16 +418,6 @@
                             </div>
                         @endif
 
-                        {{-- Citation suggérée (copy-paste, encourage co-citations académiques) --}}
-                        <div class="gl-section gl-bento-full">
-                            <div class="gl-section-box" style="background: #f9fafb; border: 1px dashed #9ca3af;">
-                                <h2 class="gl-section-title">📋 {{ __('Citation suggérée') }}</h2>
-                                <p style="font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.88rem; background: #fff; padding: 14px 16px; border-radius: 4px; user-select: all; color: #374151; line-height: 1.55; margin: 0;">
-                                    Lapointe, S. ({{ $term->updated_at?->year ?? now()->year }}). <em>{{ $term->name }}</em>. Glossaire IA, La veille. {{ route('dictionary.show', $term->slug) }}
-                                </p>
-                            </div>
-                        </div>
-
                     </div>
 
                 </article>
