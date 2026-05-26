@@ -161,8 +161,11 @@ class DigestContentService
         $weekNumber = $issue->week_number;
 
         // #186 : wellnessChallenge reconstruit depuis snapshot OU re-lookup config si absent
-        $wellnessChallenge = $content['wellness_challenge'] ?? null;
-        if (! $wellnessChallenge) {
+        // #293 : array_key_exists permet l'override explicite à null (ex : remplacer le wellness
+        // hebdo par un autre défi via $content['wellness_challenge'] = null).
+        if (array_key_exists('wellness_challenge', $content)) {
+            $wellnessChallenge = $content['wellness_challenge'];
+        } else {
             $wellnessChallenge = self::getWellnessChallenge((int) $weekNumber);
         }
 

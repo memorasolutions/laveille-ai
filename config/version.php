@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.41.5 · 2026-05-26 · #293 newsletter : permettre de désactiver explicitement le wellnessChallenge hebdo (Brain Dump par défaut) via `$content['wellness_challenge'] = null`. DigestContentService::gatherFromIssue ligne 164 changé de `?? null + ! $val` (qui re-déclenchait getWellnessChallenge() sur null) vers `array_key_exists` (qui respecte un null explicite). Use case : remplacer le défi Brain Dump hebdo par un défi custom différent (ex défi NotebookLM) pour une semaine donnée, sans perdre la synergie linked_prompt pour les autres semaines. Rétro-compat : payloads existants sans clé wellness_challenge → comportement identique (auto-lookup). Détecté par test S22 où mon weeklyPrompt NotebookLM était écrasé par linked_prompt du Brain Dump (synergie défi+prompt auto-injectée). Codename newsletter-wellness-explicit-null-override.
  *   1.41.4 · 2026-05-26 · #292 newsletter mini-editorial supporte HTML riche (liens, mise en forme) : template digest-weekly.blade.php passe `{{ $editorial }}` (échappement auto Blade) → `{!! $editorial !!}` (HTML brut). Permet aux éditoriaux personnalisés d'inclure des liens inline `<a href>` vers articles laveille.ai + balises `<p>` pour paragraphes (vs ancien comportement plain-text only avec balises affichées littéralement comme `&lt;p&gt;`). Détecté par test envoi S22 newsletter défi NotebookLM (Gemini-généré 200 mots avec lien Déclaration de Montréal échappé en plain text). Rétro-compat : éditoriaux plain text existants (auto-générés via DigestContentService::generateEditorial deepseek) rendent identiquement (texte sans tags). Codename newsletter-editorial-html-support.
  *   1.41.3 · 2026-05-26 · #291 fix(frontheme) lien Amazon de la pub livre (composant `book-promo`) aligné sur le lien guide canonique de Stéphane : `a.co/d/0fQyG3Jw` → `a.co/d/0dN4X9m2`. Concerne le CTA "Commander sur Amazon" injecté via module Ads `article-inline` après le 3e paragraphe des articles. Mêmes corrections appliquées dans `BookPromoComponentTest` (toContain + Schema.org Product.offers.url). Cohérence avec le lien subtil inline dans le corps des articles. Codename book-promo-canonical-link.
  *   1.41.2 · 2026-05-25 · #290 fix(blog) section "Sources" disparaissait au rendu sur articles PUBLIÉS (liens sources officiels = 0). Cause racine (lecture code + test) : la vue fronttheme::blog.show appliquait le wrap Sources (`</div><div class="sources-section">`) AVANT `AeoHelper::chunkContent` ; or chunkContent enveloppe le HTML dans `<div>…</div>` puis parse via DOMDocument — le `</div>` injecté fermait prématurément ce wrapper interne, faisant tomber la section Sources hors `$body` (nœud frère) → suppression silencieuse. Invisible en preview (chunkContent skippé sur preview) d'où le piège. **Fix : chunkContent déplacé AVANT le wrap (HTML équilibré en entrée) + wrap transformé en simple ajout de classe `sources-section` au `<section class="aeo-section">` produit par chunkContent (HTML équilibré, zéro risque de casse) ; fallback div-injection conservé pour le mode preview.** Validé local (pipeline rejoué sur HTML réel : 3 liens conservés, classe appliquée, target=_blank, dans .sources-section) + prod live. Bénéficie à TOUS les articles publiés avec section Sources (règle guide rédaction : sources cliquables obligatoires). Codename blog-sources-render-fix.
@@ -106,7 +107,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 41,
-    'patch' => 4,
+    'patch' => 5,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -116,11 +117,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'newsletter-editorial-html-support',
+    'codename' => 'newsletter-wellness-explicit-null-override',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.4',
+    'semver' => '1.41.5',
 ];
