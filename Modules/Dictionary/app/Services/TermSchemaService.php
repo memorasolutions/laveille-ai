@@ -59,8 +59,24 @@ final class TermSchemaService
             'identifier' => $term->slug,
             'inLanguage' => 'fr-CA',
         ];
-        if ($term->acronym_full) {
-            $definedTerm['alternateName'] = $term->acronym_full;
+        // 2026-05-26 #301 : alternateName multivalué (acronym_full + aliases) — boost AEO/GEO
+        $alternates = [];
+        if (! empty($term->acronym_full)) {
+            $alternates[] = trim((string) $term->acronym_full);
+        }
+        if (is_array($term->aliases)) {
+            foreach ($term->aliases as $a) {
+                if (! is_string($a)) continue;
+                $a = trim($a);
+                if (! $a) continue;
+                if (mb_strtolower($a) === mb_strtolower((string) $term->name)) continue;
+                if (! in_array($a, $alternates, true)) {
+                    $alternates[] = $a;
+                }
+            }
+        }
+        if (! empty($alternates)) {
+            $definedTerm['alternateName'] = count($alternates) === 1 ? $alternates[0] : $alternates;
         }
         if ($imageUrl) {
             $definedTerm['image'] = $imageUrl;

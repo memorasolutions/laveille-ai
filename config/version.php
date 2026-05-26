@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.41.13 · 2026-05-26 · #301 ligne « Aussi appelé : X · Y · Z » sous le titre des fiches glossaire (best practice sonar-pro mai 2026, approche 3+4 combinée Wikipedia/IBM/AWS). Fusionne acronym_full + aliases en 1 ligne italique inline (DRY, anti-redondance, mobile-friendly). TermSchemaService.alternateName devient multivalué (array de variantes) pour SEO+AEO max. + Génération MCP Gemini de 3-6 aliases pour les 64 termes glossaire orphelins (déjà 200/265 termes avec aliases pré-existants → maintenant 264/265 couverts, 99.6%). Codename glossary-aliases-aka-line.
  *   1.41.12 · 2026-05-26 · #300 GlossaryLinkifier accepte `max_occ` en option (anciennement constante MAX_OCCURRENCES_PER_TERM=10 hardcoded dans matchInText). Vue glossaire show.blade.php passe maintenant `['max_occ' => 1, 'max_links' => 25]` au linkifier : 1 lien par terme par page + 25 liens max. Évite la saturation visuelle (audit a montré 30 liens vers /amazon sur certaines pages, 37 sur /google). Comportement blog/articles inchangé (default 10/120 préservé). Aussi : ajout automatique de `acronym_full` aux aliases pour 120 termes (LLM → "Large Language Model", Bedrock → "Amazon Bedrock", etc.) pour que le linkifier longest-match évite les faux liens parents (« Amazon » dans « Amazon Bedrock »). Codename glossary-linkifier-max-occ-option.
  *   1.41.11 · 2026-05-26 · #299 fix newsletter CTA double-flèche « → → » (TASK #230). Le template digest-weekly.blade.php ajoutait inconditionnellement ` &rarr;` au cta_label de la section Atelier (prompt + wellness), causant un double-arrow quand le cta_label finissait déjà par « → » ou « » » (Gemini en met souvent). Fix DRY : `@php $_ctaSuffix = preg_match('/[→»]\\s*$/u', $cta_label) ? '' : ' &rarr;'; @endphp` puis `{{ $cta_label }}{!! $_ctaSuffix !!}`. Smart-arrow détecte les flèches/chevrons existants et n'ajoute la sienne que si nécessaire. Appliqué aux 2 CTA (weekly_prompt + wellness_challenge). Codename newsletter-cta-smart-arrow.
  *   1.41.10 · 2026-05-26 · #298 + image hero Agent IA (1024×572 paysage teal+orange, cerveau IA mosaïque + 4 outils + boucle autonomie, Gemini Playwright 1 itération). + Infobulle tooltip glossaire activée sur les pages glossaire elles-mêmes (TASK #224) : ajout `@include('core::partials.glossary-jsonld')` dans show.blade.php (juste avant @endsection). Le partial contient le CSS + JS du tooltip Memora hybride glassmorphism (specs : 240-320px, padding 14x18, delay 200ms, position: fixed avec --tt-top/--tt-left calculés JS pour échapper aux overflow:hidden ancêtres). Cohérence UX maintenant identique partout (blog, articles, glossaire). DRY : 1 ligne, réutilise le partial existant. Codename glossary-tooltip-on-self-pages.
@@ -114,7 +115,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 41,
-    'patch' => 12,
+    'patch' => 13,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -124,11 +125,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'glossary-linkifier-max-occ-option',
+    'codename' => 'glossary-aliases-aka-line',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.12',
+    'semver' => '1.41.13',
 ];

@@ -271,9 +271,28 @@
                     @endphp
                     {{-- Partage social : utilise barre flottante master.blade.php (S75 Wave 3 - rich payload via @section('share_text')) --}}
 
-                    {{-- Acronym full form --}}
-                    @if($term->acronym_full)
-                        <p style="text-align: center; color: #6B7280; font-size: 0.95rem; font-style: italic; margin: 4px 0 12px; letter-spacing: 0.02em;">{{ $term->acronym_full }}</p>
+                    {{-- 2026-05-26 #301 : ligne « Aussi appelé » fusionnant acronym_full + aliases (best practice SEO/AEO inline italique sous H1, recommandée sonar-pro mai 2026 vs carte) --}}
+                    @php
+                        $_variants = [];
+                        if (! empty($term->acronym_full)) {
+                            $_variants[] = trim($term->acronym_full);
+                        }
+                        if (is_array($term->aliases)) {
+                            foreach ($term->aliases as $_a) {
+                                if (! is_string($_a)) continue;
+                                $_a = trim($_a);
+                                if (! $_a) continue;
+                                if (mb_strtolower($_a) === mb_strtolower((string) $term->name)) continue;
+                                if (in_array($_a, $_variants, true)) continue;
+                                $_variants[] = $_a;
+                            }
+                        }
+                    @endphp
+                    @if(! empty($_variants))
+                        <p style="text-align: center; color: #6B7280; font-size: 0.95rem; font-style: italic; margin: 4px 0 12px; letter-spacing: 0.02em;">
+                            <span style="font-weight: 500; font-style: normal; color: #9CA3AF;">{{ __('Aussi appelé') }} :</span>
+                            {{ implode(' · ', $_variants) }}
+                        </p>
                     @endif
 
                     {{-- Badges --}}
