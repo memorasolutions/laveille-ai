@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.41.10 · 2026-05-26 · #298 + image hero Agent IA (1024×572 paysage teal+orange, cerveau IA mosaïque + 4 outils + boucle autonomie, Gemini Playwright 1 itération). + Infobulle tooltip glossaire activée sur les pages glossaire elles-mêmes (TASK #224) : ajout `@include('core::partials.glossary-jsonld')` dans show.blade.php (juste avant @endsection). Le partial contient le CSS + JS du tooltip Memora hybride glassmorphism (specs : 240-320px, padding 14x18, delay 200ms, position: fixed avec --tt-top/--tt-left calculés JS pour échapper aux overflow:hidden ancêtres). Cohérence UX maintenant identique partout (blog, articles, glossaire). DRY : 1 ligne, réutilise le partial existant. Codename glossary-tooltip-on-self-pages.
  *   1.41.9 · 2026-05-26 · #297 + linkifier glossaire actif sur les pages glossaire elles-mêmes (TASK #223). Helper Blade `$_glossarizeFr` dans show.blade.php encapsule `GlossaryLinkifier::linkify(nl2br($txt), ['skip_slug' => $term->slug])`. Appliqué sur 5 champs : Définition, Analogie, Exemple, Le saviez-vous, FAQ answers. Le terme courant n'est PAS auto-link sur sa propre page (skip_slug). Maillage interne dense entre termes du glossaire = bénéfice SEO interne fort + UX hover définition. Aucune duplication code (closure 1 ligne). Codename glossary-self-linkify-skip-current.
  *   1.41.8 · 2026-05-26 · #296 retire le bloc « 📋 Citation suggérée » de la vue glossaire show.blade.php (jugé inutile par user 2026-05-26 — encombre la page sans valeur UX claire ; les co-citations académiques peuvent se faire via URL canonique + dateModified visibles dans Schema.org @graph). Conserve toutes les autres sections P1 : one_sentence_answer, dateModified, FAQ, Sources, Pour aller plus loin. Codename glossary-remove-citation-block.
  *   1.41.7 · 2026-05-26 · #295 Phase 2 audit glossaire : infrastructure Pack P1 SEO+AEO+GEO 2026. (1) Migration `2026_05_26_190000_add_seo_aeo_geo_fields_to_dictionary_terms.php` ajoute 3 colonnes JSON à `dictionary_terms` : `one_sentence_answer` (translatable, ≤40 mots pour AI Overviews/LLM citation), `faq` (array of {question,answer} pour FAQPage Schema.org), `sources` (array of {label,url,year,author} signal EEAT/anti-hallucination GEO). Migration idempotente (hasColumn check). (2) Term model `$fillable` + `$translatable` étendus. (3) Service final `Modules\\Dictionary\\Services\\TermSchemaService::buildGraph(Term)` qui produit le bloc JSON-LD @graph complet : DefinedTermSet + DefinedTerm + Person (Stéphane EEAT) + Article + Organization + BreadcrumbList + FAQPage conditionnel — remplace JsonLdService::definedTerm (DRY, 1 source de vérité Schema.org). (4) Refonte `Modules/Dictionary/resources/views/public/show.blade.php` : section one_sentence_answer (gradient teal, gras italique) sous badges, « Mis à jour le » `<time datetime>` (signal freshness GEO 2026), FAQ accordion `<details>` (HTML natif, zéro JS), Sources liste, Citation block monospace copy-paste user-select all. Toutes sections optionnelles (compat rétro avec 263 termes sans données P1). Standard cible 2026 = 91/100 selon recherche sonar-pro 4 axes. Phase 3 (génération content via Gemini batches) reportée au prochain sprint. Codename glossary-p1-aeo-geo-infrastructure.
@@ -111,7 +112,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 41,
-    'patch' => 9,
+    'patch' => 10,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -121,11 +122,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'glossary-self-linkify-skip-current',
+    'codename' => 'glossary-tooltip-on-self-pages',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.9',
+    'semver' => '1.41.10',
 ];

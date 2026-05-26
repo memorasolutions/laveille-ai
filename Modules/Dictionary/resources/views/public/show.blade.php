@@ -459,6 +459,9 @@
         @endif
 
     </div>
+
+    {{-- 2026-05-26 #298 : CSS + JS tooltip glossaire (cohérence avec blog/articles) --}}
+    @include('core::partials.glossary-jsonld')
 </div>
 @endsection
 
