@@ -128,7 +128,7 @@
     @if($editorial ?? null)
     <tr>
         <td style="padding:20px 30px 16px;background-color:#ffffff;border-bottom:1px solid #f0f0f0;" class="mobile-p">
-            <p style="margin:0;font-size:15px;color:#333;line-height:1.6;font-style:italic;">{{ $editorial }}</p>
+            <div style="margin:0;font-size:15px;color:#333;line-height:1.6;font-style:italic;">{!! $editorial !!}</div>
         </td>
     </tr>
     @endif

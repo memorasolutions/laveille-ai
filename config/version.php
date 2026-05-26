@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.41.4 · 2026-05-26 · #292 newsletter mini-editorial supporte HTML riche (liens, mise en forme) : template digest-weekly.blade.php passe `{{ $editorial }}` (échappement auto Blade) → `{!! $editorial !!}` (HTML brut). Permet aux éditoriaux personnalisés d'inclure des liens inline `<a href>` vers articles laveille.ai + balises `<p>` pour paragraphes (vs ancien comportement plain-text only avec balises affichées littéralement comme `&lt;p&gt;`). Détecté par test envoi S22 newsletter défi NotebookLM (Gemini-généré 200 mots avec lien Déclaration de Montréal échappé en plain text). Rétro-compat : éditoriaux plain text existants (auto-générés via DigestContentService::generateEditorial deepseek) rendent identiquement (texte sans tags). Codename newsletter-editorial-html-support.
  *   1.41.3 · 2026-05-26 · #291 fix(frontheme) lien Amazon de la pub livre (composant `book-promo`) aligné sur le lien guide canonique de Stéphane : `a.co/d/0fQyG3Jw` → `a.co/d/0dN4X9m2`. Concerne le CTA "Commander sur Amazon" injecté via module Ads `article-inline` après le 3e paragraphe des articles. Mêmes corrections appliquées dans `BookPromoComponentTest` (toContain + Schema.org Product.offers.url). Cohérence avec le lien subtil inline dans le corps des articles. Codename book-promo-canonical-link.
  *   1.41.2 · 2026-05-25 · #290 fix(blog) section "Sources" disparaissait au rendu sur articles PUBLIÉS (liens sources officiels = 0). Cause racine (lecture code + test) : la vue fronttheme::blog.show appliquait le wrap Sources (`</div><div class="sources-section">`) AVANT `AeoHelper::chunkContent` ; or chunkContent enveloppe le HTML dans `<div>…</div>` puis parse via DOMDocument — le `</div>` injecté fermait prématurément ce wrapper interne, faisant tomber la section Sources hors `$body` (nœud frère) → suppression silencieuse. Invisible en preview (chunkContent skippé sur preview) d'où le piège. **Fix : chunkContent déplacé AVANT le wrap (HTML équilibré en entrée) + wrap transformé en simple ajout de classe `sources-section` au `<section class="aeo-section">` produit par chunkContent (HTML équilibré, zéro risque de casse) ; fallback div-injection conservé pour le mode preview.** Validé local (pipeline rejoué sur HTML réel : 3 liens conservés, classe appliquée, target=_blank, dans .sources-section) + prod live. Bénéficie à TOUS les articles publiés avec section Sources (règle guide rédaction : sources cliquables obligatoires). Codename blog-sources-render-fix.
  *   1.41.1 · 2026-05-25 · #289 Sprint S123 validation E2E complète + 2 BUGS CRITIQUES corrigés (détectés par validation locale réelle, invisibles aux tests Pest). **Méthode : seed démo local (2 posts publiés + 1 programmé + 1 brouillon + 2 commentaires + 1 abonné) sur Herd laveilledestef.test + parcours curl/Playwright réel.** BUG 1 (500 sur toute page post) : `display_name` n'est PAS une colonne author_profiles (jamais migrée) — les composants S119-S122 (AuthorRelatedPosts, CommentModerationQueue eager-load `with('authorProfile:id,slug,display_name')`) déclenchaient `SQLSTATE 42S22 Unknown column display_name` → HTTP 500 sur post page. Masqué aux tests Pest car (a) eager-load non déclenché quand collection vide, (b) assertions `toContain($author->display_name)` testaient toContain('') toujours vrai (display_name retournait null partout → noms d'auteurs VIDES dans tous les composants). **Fix : accessor `getDisplayNameAttribute()` → user?->name ?? slug (source de vérité cohérente mini-site) + retrait des 2 selects partiels invalides → `with('authorProfile.user:id,name')`.** BUG 2 (liens cassés) : 8 occurrences `href="/@{{ $author->slug }}"` — `@{` est échappé par Blade (leçon L-BLADE-AT-SLUG) → liens littéraux `/@{{ $author->slug }}` cassés (breadcrumb, bio card "Voir tous ses articles", popular posts, search results, search form action, dashboard newsletter hint). **Fix : route('authors.mini-site.show'/'authors.post.show') partout.** Pipeline E2E PROUVÉ fonctionnel : post page 200 (breadcrumb + bio + share + reading-progress + related + commentaires) + OG image PNG 1200×630 + tag archive CollectionPage + draft preview signed 200/403 + scheduled+draft invisibles 404 + analytics widget (sparklines). **Validation finale : 1003 tests Pest / 3455 assertions / 0 régression S107-S123 + E2E réel validé.** Aucune donnée démo laissée (cleanup forceDelete local). Coût IA ~0$ (validation Playwright déléguée subagent Sonnet). Codename authors-e2e-validation-display-name-blade-fix.
@@ -105,7 +106,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 41,
-    'patch' => 3,
+    'patch' => 4,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -115,11 +116,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'book-promo-canonical-link',
+    'codename' => 'newsletter-editorial-html-support',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.3',
+    'semver' => '1.41.4',
 ];
