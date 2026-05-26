@@ -10,7 +10,7 @@ La veille (laveille.ai) est une plateforme indépendante fondée par Stéphane L
 - [Actualités](https://laveille.ai/actualites) : plus de 450 nouvelles auto-curées provenant de 23 sources RSS francophones et anglophones, classées selon un score de pertinence généré par IA.
 - [Annuaire](https://laveille.ai/annuaire) : répertoire de plus de 128 outils d'IA, accompagnés de captures d'écran, d'avis critiques, de tarifications détaillées, de tutoriels YouTube et de comparaisons.
 - [Collections](https://laveille.ai/collections) : collections publiques thématiques (outils IA pour enseignants, assistants conversationnels, création audio, etc.) créées par les membres.
-- [Glossaire](https://laveille.ai/glossaire) : définitions claires de plus de 20 termes liés à l'intelligence artificielle.
+- [Glossaire](https://laveille.ai/glossaire) : 264 termes d'intelligence artificielle expliqués selon un standard 4 sections (Définition + En termes simples + Exemple concret québécois + Le saviez-vous avec source datée). Schema.org DefinedTerm + DefinedTermSet. Linkifier interne longest-match (« RAG strict » est matché avant « RAG »). Termes phares : [RAG](https://laveille.ai/glossaire/rag), [RAG strict](https://laveille.ai/glossaire/rag-strict), Hallucination IA, AGI, Embeddings, MoE, NPU, Tokens, Loi 25, AI Act.
 - [Acronymes éducation](https://laveille.ai/acronymes-education) : répertoire de 307 acronymes utilisés dans le système d'éducation québécois (8 catégories).
 - [Outils](https://laveille.ai/outils) : neuf outils interactifs pratiques (calculateur d'impôt Québec, générateur de mots de passe Pro, etc.).
 - [FAQ](https://laveille.ai/faq) : réponses aux questions fréquemment posées sur le site et ses fonctionnalités.
