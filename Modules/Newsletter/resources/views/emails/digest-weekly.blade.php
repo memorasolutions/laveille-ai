@@ -368,7 +368,8 @@
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr><td style="border-left:3px solid #3dc9d8;padding-left:12px;font-size:13px;color:#94a3b8;line-height:1.7;">
                             <strong style="color:#3dc9d8;">Pourquoi ce prompt fonctionne :</strong><br/>
-                            {!! nl2br(e($weeklyPrompt['technique'])) !!}
+                            {{-- 2026-05-26 #302 : whitelist HTML safe (a/strong/em/br) pour permettre liens vers glossaire dans la technique --}}
+                            {!! nl2br(strip_tags((string) $weeklyPrompt['technique'], '<a><strong><em><br>')) !!}
                         </td></tr>
                     </table>
                 </td></tr>
