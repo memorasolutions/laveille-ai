@@ -307,6 +307,24 @@
                         @endif
                     </div>
 
+                    {{-- Date de mise à jour (signal freshness GEO 2026) --}}
+                    @if($term->updated_at)
+                        <p style="text-align:center; color: #9ca3af; font-size: 0.82rem; margin: -8px 0 20px; font-style: italic;">
+                            {{ __('Mis à jour le') }} <time datetime="{{ $term->updated_at->toDateString() }}">{{ $term->updated_at->locale('fr_CA')->translatedFormat('j F Y') }}</time>
+                        </p>
+                    @endif
+
+                    {{-- One-sentence answer (AEO) : phrase-réponse ≤40 mots, citée par AI Overviews et LLM --}}
+                    @if(! empty($term->one_sentence_answer))
+                        <div class="gl-section" style="margin-bottom: 22px;">
+                            <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%); border-left: 4px solid var(--c-primary); padding: 18px 24px; border-radius: 6px;">
+                                <p style="font-size: 1.12rem; font-weight: 600; color: var(--c-dark); margin: 0; line-height: 1.55;">
+                                    {!! e($term->one_sentence_answer) !!}
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Définition en vedette –full width --}}
                     <div class="gl-section" style="margin-bottom: 24px;">
                         <div class="gl-section-box" style="background: #F8FAFC; border-left: 4px solid var(--c-primary); padding: 28px;">
@@ -360,6 +378,56 @@
                             </div>
                         @endif
 
+                        {{-- FAQ (AEO/GEO) : Q&R structurées + FAQPage Schema dans @graph --}}
+                        @if(! empty($term->faq) && is_array($term->faq))
+                            <div class="gl-section gl-bento-full">
+                                <div class="gl-section-box">
+                                    <h2 class="gl-section-title">❓ {{ __('Questions fréquentes') }}</h2>
+                                    @foreach($term->faq as $qa)
+                                        @if(is_array($qa) && ! empty($qa['question']) && ! empty($qa['answer']))
+                                            <details style="border-bottom: 1px solid #e5e7eb; padding: 12px 0;">
+                                                <summary style="font-weight: 600; cursor: pointer; padding: 4px 0; color: var(--c-dark);">{{ $qa['question'] }}</summary>
+                                                <div style="padding: 10px 0 4px; color: #4B5563; line-height: 1.6;">{!! nl2br(e($qa['answer'])) !!}</div>
+                                            </details>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Sources externes vérifiables (GEO + EEAT) --}}
+                        @if(! empty($term->sources) && is_array($term->sources))
+                            <div class="gl-section gl-bento-full">
+                                <div class="gl-section-box">
+                                    <h2 class="gl-section-title">📚 {{ __('Sources') }}</h2>
+                                    <ul style="list-style: none; padding: 0; margin: 0;">
+                                        @foreach($term->sources as $src)
+                                            @if(is_array($src) && ! empty($src['label']) && ! empty($src['url']))
+                                                <li style="margin-bottom: 10px; line-height: 1.5;">
+                                                    <a href="{{ $src['url'] }}" target="_blank" rel="noopener noreferrer">{{ $src['label'] }}</a>
+                                                    @if(! empty($src['author']) || ! empty($src['year']))
+                                                        <span style="color: #6B7280; font-size: 0.9rem;">
+                                                            ({{ trim(($src['author'] ?? '').(! empty($src['author']) && ! empty($src['year']) ? ', ' : '').($src['year'] ?? '')) }})
+                                                        </span>
+                                                    @endif
+                                                </li>
+                                            @endif
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Citation suggérée (copy-paste, encourage co-citations académiques) --}}
+                        <div class="gl-section gl-bento-full">
+                            <div class="gl-section-box" style="background: #f9fafb; border: 1px dashed #9ca3af;">
+                                <h2 class="gl-section-title">📋 {{ __('Citation suggérée') }}</h2>
+                                <p style="font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.88rem; background: #fff; padding: 14px 16px; border-radius: 4px; user-select: all; color: #374151; line-height: 1.55; margin: 0;">
+                                    Lapointe, S. ({{ $term->updated_at?->year ?? now()->year }}). <em>{{ $term->name }}</em>. Glossaire IA, La veille. {{ route('dictionary.show', $term->slug) }}
+                                </p>
+                            </div>
+                        </div>
+
                     </div>
 
                 </article>
@@ -400,7 +468,6 @@
 @endsection
 
 @push('scripts')
-{!! \Modules\SEO\Services\JsonLdService::render(
-    \Modules\SEO\Services\JsonLdService::definedTerm('dictionary.index', __('Glossaire IA'), $term->name, Str::limit(strip_tags($term->definition), 160), (string) $term->slug),
-) !!}
+{{-- Schema.org @graph complet (DefinedTerm + Person + Article + BreadcrumbList + FAQPage si présent) --}}
+{!! \Modules\Dictionary\Services\TermSchemaService::buildGraph($term) !!}
 @endpush

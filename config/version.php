@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.41.7 · 2026-05-26 · #295 Phase 2 audit glossaire : infrastructure Pack P1 SEO+AEO+GEO 2026. (1) Migration `2026_05_26_190000_add_seo_aeo_geo_fields_to_dictionary_terms.php` ajoute 3 colonnes JSON à `dictionary_terms` : `one_sentence_answer` (translatable, ≤40 mots pour AI Overviews/LLM citation), `faq` (array of {question,answer} pour FAQPage Schema.org), `sources` (array of {label,url,year,author} signal EEAT/anti-hallucination GEO). Migration idempotente (hasColumn check). (2) Term model `$fillable` + `$translatable` étendus. (3) Service final `Modules\\Dictionary\\Services\\TermSchemaService::buildGraph(Term)` qui produit le bloc JSON-LD @graph complet : DefinedTermSet + DefinedTerm + Person (Stéphane EEAT) + Article + Organization + BreadcrumbList + FAQPage conditionnel — remplace JsonLdService::definedTerm (DRY, 1 source de vérité Schema.org). (4) Refonte `Modules/Dictionary/resources/views/public/show.blade.php` : section one_sentence_answer (gradient teal, gras italique) sous badges, « Mis à jour le » `<time datetime>` (signal freshness GEO 2026), FAQ accordion `<details>` (HTML natif, zéro JS), Sources liste, Citation block monospace copy-paste user-select all. Toutes sections optionnelles (compat rétro avec 263 termes sans données P1). Standard cible 2026 = 91/100 selon recherche sonar-pro 4 axes. Phase 3 (génération content via Gemini batches) reportée au prochain sprint. Codename glossary-p1-aeo-geo-infrastructure.
  *   1.41.6 · 2026-05-26 · #294 + terme glossaire RAG strict (id=307, hero image 1024×572 teal+orange, catégorie 17 héritée de RAG, acronyme « Strict Retrieval-Augmented Generation »). Mise à jour terme RAG existant (id=4) : did_you_know enrichi avec un paragraphe expliquant la différence avec RAG strict et lien bidirectionnel vers /glossaire/rag-strict. Fix template glossaire `Modules/Dictionary/resources/views/public/show.blade.php` : 4 champs translatables (definition, analogy, example, did_you_know) passent de `{{ }}` (échappement Blade) à `{!! nl2br(...) !!}` (HTML brut, retours ligne préservés). Permet liens inline `<a>`, `<strong>`, `<em>` dans tous les termes. Rétro-compat : termes plain-text rendent identiquement. Image générée via Gemini Playwright (compte user, 3 itérations format paysage + palette teal). Linkifier `usort($terms, fn($a,$b) => mb_strlen($b['name']) <=> mb_strlen($a['name']))` ligne 269 GlossaryLinkifier garantit longest-match-first : « RAG strict » matché avant « RAG » dans tous textes. Codename glossary-terms-html-inline-support.
  *   1.41.5 · 2026-05-26 · #293 newsletter : permettre de désactiver explicitement le wellnessChallenge hebdo (Brain Dump par défaut) via `$content['wellness_challenge'] = null`. DigestContentService::gatherFromIssue ligne 164 changé de `?? null + ! $val` (qui re-déclenchait getWellnessChallenge() sur null) vers `array_key_exists` (qui respecte un null explicite). Use case : remplacer le défi Brain Dump hebdo par un défi custom différent (ex défi NotebookLM) pour une semaine donnée, sans perdre la synergie linked_prompt pour les autres semaines. Rétro-compat : payloads existants sans clé wellness_challenge → comportement identique (auto-lookup). Détecté par test S22 où mon weeklyPrompt NotebookLM était écrasé par linked_prompt du Brain Dump (synergie défi+prompt auto-injectée). Codename newsletter-wellness-explicit-null-override.
  *   1.41.4 · 2026-05-26 · #292 newsletter mini-editorial supporte HTML riche (liens, mise en forme) : template digest-weekly.blade.php passe `{{ $editorial }}` (échappement auto Blade) → `{!! $editorial !!}` (HTML brut). Permet aux éditoriaux personnalisés d'inclure des liens inline `<a href>` vers articles laveille.ai + balises `<p>` pour paragraphes (vs ancien comportement plain-text only avec balises affichées littéralement comme `&lt;p&gt;`). Détecté par test envoi S22 newsletter défi NotebookLM (Gemini-généré 200 mots avec lien Déclaration de Montréal échappé en plain text). Rétro-compat : éditoriaux plain text existants (auto-générés via DigestContentService::generateEditorial deepseek) rendent identiquement (texte sans tags). Codename newsletter-editorial-html-support.
@@ -108,7 +109,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 41,
-    'patch' => 6,
+    'patch' => 7,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -118,11 +119,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'glossary-terms-html-inline-support',
+    'codename' => 'glossary-p1-aeo-geo-infrastructure',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.6',
+    'semver' => '1.41.7',
 ];

@@ -38,7 +38,7 @@ class Term extends Model implements Searchable
 
     protected $table = 'dictionary_terms';
 
-    public array $translatable = ['name', 'slug', 'definition', 'analogy', 'example', 'did_you_know'];
+    public array $translatable = ['name', 'slug', 'definition', 'analogy', 'example', 'did_you_know', 'one_sentence_answer'];
 
     protected $fillable = [
         'name',
@@ -48,6 +48,9 @@ class Term extends Model implements Searchable
         'analogy',
         'example',
         'did_you_know',
+        'one_sentence_answer', // 2026-05-26 #295 AEO : phrase-réponse ≤ 40 mots pour AI Overviews + LLM citation
+        'faq', // 2026-05-26 #295 AEO : array of {question, answer} pour FAQPage Schema.org
+        'sources', // 2026-05-26 #295 GEO : array of {label, url, year, author} sources externes vérifiées
         'difficulty',
         'icon',
         'hero_image',
@@ -64,6 +67,8 @@ class Term extends Model implements Searchable
     protected $casts = [
         'is_published' => 'boolean',
         'aliases' => 'array',
+        'faq' => 'array',
+        'sources' => 'array',
     ];
 
     public function category(): BelongsTo
