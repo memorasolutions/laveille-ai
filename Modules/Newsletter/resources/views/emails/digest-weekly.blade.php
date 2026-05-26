@@ -288,7 +288,8 @@
                     @endif
                     @if(! empty($wc['cta_url']) && ! empty($wc['cta_label']))
                     <tr><td align="center" style="padding-top:6px;">
-                        <a href="{{ $wc['cta_url'] }}" target="_blank" style="display:inline-block;background-color:#f97316;color:#fff;padding:11px 24px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $wc['cta_label'] }} &rarr;</a>
+                        @php $_wcCtaSuffix = preg_match('/[→»»]\s*$/u', $wc['cta_label']) ? '' : ' &rarr;'; @endphp
+                        <a href="{{ $wc['cta_url'] }}" target="_blank" style="display:inline-block;background-color:#f97316;color:#fff;padding:11px 24px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $wc['cta_label'] }}{!! $_wcCtaSuffix !!}</a>
                     </td></tr>
                     @endif
                 @endif
@@ -408,7 +409,8 @@
                         : ((is_array($weeklyPrompt) && ! empty($weeklyPrompt['cta_label'])) ? $weeklyPrompt['cta_label'] : 'Construire mon prompt →');
                 @endphp
                 <tr><td align="center">
-                    <a href="{{ $promptCtaUrl }}" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $promptCtaLabel }} &rarr;</a>
+                    @php $_ctaSuffix = preg_match('/[→»»]\s*$/u', $promptCtaLabel) ? '' : ' &rarr;'; @endphp
+                    <a href="{{ $promptCtaUrl }}" target="_blank" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">{{ $promptCtaLabel }}{!! $_ctaSuffix !!}</a>
                 </td></tr>
             </table>
         </td>
