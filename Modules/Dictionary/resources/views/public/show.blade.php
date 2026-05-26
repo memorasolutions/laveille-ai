@@ -392,7 +392,7 @@
                                         @if(is_array($qa) && ! empty($qa['question']) && ! empty($qa['answer']))
                                             <details style="border-bottom: 1px solid #e5e7eb; padding: 12px 0;">
                                                 <summary style="font-weight: 600; cursor: pointer; padding: 4px 0; color: var(--c-dark);">{{ $qa['question'] }}</summary>
-                                                <div style="padding: 10px 0 4px; color: #4B5563; line-height: 1.6;">{!! nl2br(e($qa['answer'])) !!}</div>
+                                                <div style="padding: 10px 0 4px; color: #4B5563; line-height: 1.6;">{!! \Modules\Core\Services\GlossaryLinkifier::linkify(nl2br(e($qa['answer'])), $_glossSkip) !!}</div>
                                             </details>
                                         @endif
                                     @endforeach
