@@ -54,7 +54,10 @@
         try { localStorage.setItem('anonymiseur_preset_v1', name); } catch (e) { /* silent */ }
 
         if (typeof window.showToast === 'function' && name !== 'custom') {
-            const labels = { standard: 'Protection standard activée', maximum: 'Protection maximum activée — masquage irréversible' };
+            const labels = {
+                standard: 'Mode IA activé : faux noms similaires pour meilleure réponse + restauration ensuite.',
+                maximum: 'Mode Maximum : effacement définitif [SUPPRIMÉ]. Pas de restauration possible.'
+            };
             window.showToast(labels[name] || name, 'info');
         }
     }

@@ -154,36 +154,38 @@
     </div>
 
     <div class="anonymiseur-presets" style="margin:1rem 0 1.5rem;">
-        <h3 style="margin:0 0 0.85rem;font-size:1.05rem;font-weight:700;color:var(--text-primary);">
-            🛡️ {{ __('Niveau de protection') }}
-            <span style="font-weight:400;font-size:0.85rem;color:var(--text-secondary);margin-left:0.5rem;">{{ __('Choisissez ce qui vous convient — vous pouvez changer à tout moment') }}</span>
+        <h3 style="margin:0 0 0.35rem;font-size:1.05rem;font-weight:700;color:var(--text-primary);">
+            🛡️ {{ __('Comment voulez-vous protéger vos données ?') }}
         </h3>
+        <p style="margin:0 0 0.85rem;font-size:0.88rem;color:var(--text-secondary);line-height:1.5;">
+            {{ __('Le mode « Standard » remplace par des faux noms similaires pour que l\'IA donne la meilleure réponse possible, puis restaure vos vraies données.') }}
+        </p>
         <div class="preset-grid" role="radiogroup" aria-label="{{ __('Niveau de protection') }}">
             <button type="button" class="preset-card preset-card-recommended is-selected" data-preset="standard" role="radio" aria-checked="true">
-                <h4>🔒 {{ __('Standard') }}</h4>
-                <p>{{ __('Le bon choix pour la plupart des usages.') }}</p>
+                <h4>🔄 {{ __('Standard — IA') }}</h4>
+                <p>{{ __('Le bon choix pour utiliser ChatGPT, Claude, Gemini.') }}</p>
                 <ul>
-                    <li>{{ __('Remplace votre nom par un prénom fictif') }}</li>
-                    <li>{{ __('Vous pourrez restaurer les vraies données ensuite') }}</li>
-                    <li>{{ __('Tout reste sur votre appareil') }}</li>
+                    <li>{{ __('Remplace par des faux noms SIMILAIRES (Marie → Catherine)') }}</li>
+                    <li>{{ __('L\'IA comprend le contexte et donne sa meilleure réponse') }}</li>
+                    <li>{{ __('On restaure vos vraies données dans la réponse') }}</li>
                 </ul>
             </button>
             <button type="button" class="preset-card" data-preset="maximum" role="radio" aria-checked="false">
-                <h4>🛡️ {{ __('Maximum') }}</h4>
-                <p>{{ __('Pour données très sensibles (santé, légal, finance).') }}</p>
+                <h4>🛡️ {{ __('Maximum — Sensible') }}</h4>
+                <p>{{ __('Pour santé, légal, finance — sans retour possible.') }}</p>
                 <ul>
-                    <li>{{ __('Remplace par [SUPPRIMÉ] — irréversible') }}</li>
+                    <li>{{ __('Efface définitivement par [SUPPRIMÉ]') }}</li>
                     <li>{{ __('Export protégé par mot de passe') }}</li>
-                    <li>{{ __('Impossible de retrouver les vraies données') }}</li>
+                    <li>{{ __('Impossible de retrouver les vraies données ensuite') }}</li>
                 </ul>
             </button>
             <button type="button" class="preset-card" data-preset="custom" role="radio" aria-checked="false">
                 <h4>⚙️ {{ __('Personnalisé') }}</h4>
-                <p>{{ __('Pour utilisateurs avancés.') }}</p>
+                <p>{{ __('Pour utilisateurs avancés (techniques).') }}</p>
                 <ul>
-                    <li>{{ __('Choix du type de masquage') }}</li>
+                    <li>{{ __('Choisir comment remplacer (4 modes)') }}</li>
                     <li>{{ __('Sensibilité de détection ajustable') }}</li>
-                    <li>{{ __('Chiffrement optionnel') }}</li>
+                    <li>{{ __('Chiffrement optionnel des exports') }}</li>
                 </ul>
             </button>
         </div>
@@ -192,16 +194,16 @@
             <h4 style="margin:0 0 0.85rem;font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ __('Réglages personnalisés') }}</h4>
             <div class="anonymiseur-custom-grid">
                 <div class="anonymiseur-custom-field">
-                    <label for="maskMode" class="anonymiseur-custom-label">{{ __('Type de masquage') }}</label>
+                    <label for="maskMode" class="anonymiseur-custom-label">{{ __('Comment remplacer vos données') }}</label>
                     <div class="anonymiseur-custom-control">
                         <select id="maskMode" class="form-input">
-                            <option value="pseudo">{{ __('Faux prénom (réversible)') }}</option>
-                            <option value="hash">{{ __('Code unique (irréversible)') }}</option>
-                            <option value="redaction">{{ __('[SUPPRIMÉ] (irréversible)') }}</option>
-                            <option value="fpe">{{ __('Brouillage format-préservant') }}</option>
+                            <option value="pseudo">🔄 {{ __('Faux noms similaires (recommandé pour ChatGPT/Claude/Gemini)') }}</option>
+                            <option value="redaction">🗑️ {{ __('Effacer définitivement [SUPPRIMÉ]') }}</option>
+                            <option value="hash">🔒 {{ __('Code unique irréversible (hash SHA-256)') }}</option>
+                            <option value="fpe">🎲 {{ __('Brouillage format identique (avancé)') }}</option>
                         </select>
                     </div>
-                    <small class="anonymiseur-custom-hint">{{ __('Comment remplacer les données détectées dans le texte') }}</small>
+                    <small class="anonymiseur-custom-hint">{{ __('Le but : que l\'IA comprenne votre contexte SANS voir vos vraies données. Vous pourrez les restaurer après.') }}</small>
                 </div>
 
                 <div class="anonymiseur-custom-field">

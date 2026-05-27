@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.47.3 · 2026-05-27 · #313 feat(tools) anonymiseur — clarification cas d'usage IA (Option A user GO 94/100, pp_search best practices 2026 8p-design + azenflow). User : « Type de masquage tu veux dire quoi? Le but est de remplacer par un texte SIMILAIRE pour meilleure réponse IA ». Refonte langage : (1) « Type de masquage » → « Comment remplacer vos données » + hint permanent « Le but : que l'IA comprenne votre contexte SANS voir vos vraies données. Vous pourrez les restaurer après ». (2) Section header « Niveau de protection » → « Comment voulez-vous protéger vos données ? » + paragraphe explicatif visible. (3) Presets renommés : 🔒 Standard → 🔄 « Standard — IA » (« Le bon choix pour utiliser ChatGPT, Claude, Gemini » + ul cas usage Marie→Catherine), 🛡️ Maximum → « Maximum — Sensible » (santé/légal/finance + [SUPPRIMÉ] irréversible), ⚙️ Personnalisé (4 modes techniques). (4) Options select reformulées par cas d'usage avec emoji : 🔄 « Faux noms similaires (recommandé pour ChatGPT/Claude/Gemini) » / 🗑️ « Effacer définitivement [SUPPRIMÉ] » / 🔒 « Code unique irréversible (hash SHA-256) » / 🎲 « Brouillage format identique (avancé) ». (5) Toast messages enrichis (« Mode IA activé : faux noms similaires pour meilleure réponse + restauration ensuite »). Langage plain Loi 25/RGPD (Canada plain language guide) sans jargon technique. Codename anonymizer-mode-ia-clear-language.
  *   1.47.2 · 2026-05-27 · #313 feat(glossary) cluster privacy étendu — 3 nouveaux termes (k-anonymity, differential-privacy, tokenisation) + 5 hero images générées via skill nanobanana (Gemini Playwright compte user). Images : isométrique 3D charte Memora teal+orange+navy, 1024×572 widescreen, 3 formats par image (PNG ~700-1000KB original + JPG ~170-220KB pour og:image réseaux sociaux car X/Facebook/LinkedIn n'acceptent pas WebP/Avif + WebP ~60-90KB pour bandwidth web). Contenu vérifié 3 qwen3-max parallèles + 3 pp_search sourcés (Sweeney CMU 2002, Dwork Microsoft 2006, Apple iOS, Google RAPPOR, US Census 2020, OpenDP Harvard/Microsoft, PCI DSS, NIST SP 800-188, Visa EMV Tokenization, Stripe). Pattern Memora intégré : hero_image colonne + fallback chain .jpg → og:image (L-JPEG-vs-WebP-social-V1 S75). Cluster broader/narrower : anonymisation ↔ pseudonymisation ↔ k-anonymity ↔ differential-privacy ↔ tokenisation. Codename glossary-privacy-cluster-5-images.
  *   1.47.1 · 2026-05-27 · #313 feat(glossary) anonymisation + pseudonymisation termes complets SEO/AEO/GEO 2026. User signalait /glossaire/anonymisation = 404 (référencé par bannière confiance + JSON-LD anonymiseur). Seeder `Modules\Tools\Database\Seeders\AnonymisationGlossarySeeder` insère 2 termes via Term::setTranslation idempotent (lookup whereRaw JSON_UNQUOTE leçon L-JSON-UNQUOTE-TRANSLATABLE-V1 S126). Contenu généré via 2 qwen3-max parallèles + vérifié pp_search Perplexity Pro 2 recherches (CNIL, CAI Québec, Commissariat vie privée Canada, EPFL, AvocatsPI, ENISA, NIST FF1/FF3-1). Best practices mai 2026 appliquées : H1 question + one_sentence_answer 40-60 mots (AI Overviews/Perplexity direct answer) + analogy quotidienne québécoise + example PME concret + did_you_know fait surprenant + 6 FAQ FAQPage Schema.org + 5 sources EEAT datées + broader_slugs [loi-25, rgpd, protection-vie-privee] + narrower_slugs (anonymisation ↔ pseudonymisation cross-link). TermSchemaService S126 prendra automatiquement broader/narrower dans @graph JSON-LD. Catégorie « Sécurité et éthique » lookup safe. Codename glossary-anonymisation-pseudo.
  *   1.47.0 · 2026-05-27 · #313 feat(tools) anonymiseur PUBLICATION PUBLIQUE 🚀 — décision user GO 2026-05-27 après sprint S129 complet (33 todos / 14 commits / refonte UX/UI 2026 / 4 pp_search). Migration `2026_05_27_240000_publish_anonymiseur_finally.php` flip is_under_construction=false sur slug='anonymiseur' (idempotent hasColumn). Anonymiseur accessible publiquement à `https://laveille.ai/outils/anonymiseur`. Récap features livrées : Tiptap éditeur riche + bubble menu vanilla (B/I/U/S/Code/Highlight/Clear + 🕵️ Anonymiser sélection) + détection PII regex (email/phoneCA/postalCA/NAS/CB/date/money/nom) + Luhn+checksum NAS validation + 3 presets sécurité (Standard/Maximum/Personnalisé) + 4 modes masquage (pseudo/hash SHA-256/redaction/FPE) + chiffrement AES-GCM 256 Web Crypto export + NLP compromise.js lazy CDN + PWA installable Service Worker + manifest + audit log local Loi 25 + bannière confiance accordéon pédagogique (4 cards par finalité + schéma flux) + Schema.org SoftwareApplication JSON-LD knowsAbout 18 sujets + split-pane étape 2 + textareas 320px + charte Memora teal AAA 7:1+ + WCAG 2.2 AAA validé + tests Pest. Pattern Memora : zéro duplication, zéro stockage serveur, charte 15 outils unifiée. Coût IA total ~0 $ (MCP openrouter-free + Gemini SuperAgent + pp_search abonnement). Codename anonymizer-public-launch.
@@ -141,7 +142,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 47,
-    'patch' => 2,
+    'patch' => 3,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -151,11 +152,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'glossary-privacy-cluster-5-images',
+    'codename' => 'anonymizer-mode-ia-clear-language',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.2',
+    'semver' => '1.47.3',
 ];
