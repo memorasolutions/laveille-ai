@@ -1804,3 +1804,85 @@ body {
     animation: none !important;
   }
 }
+
+/* === Réglages personnalisés — grille alignée 3 colonnes uniformes (v1.46.3) === */
+.app .anonymiseur-custom-grid {
+  display: grid !important;
+  gap: 1.25rem !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  align-items: stretch !important;
+}
+.app .anonymiseur-custom-field {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.4rem !important;
+  min-width: 0 !important;
+}
+.app .anonymiseur-custom-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 0.92rem !important;
+  color: var(--text-primary) !important;
+  min-height: 22px !important;
+  margin: 0 !important;
+}
+.app .anonymiseur-custom-value {
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+}
+.app .anonymiseur-custom-control {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 44px !important;
+  width: 100% !important;
+}
+.app .anonymiseur-custom-control > select,
+.app .anonymiseur-custom-control > input[type="password"],
+.app .anonymiseur-custom-control > input[type="text"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 44px !important;
+  padding: 0.5rem 0.75rem !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  font: inherit !important;
+  font-size: 0.9rem !important;
+  box-sizing: border-box !important;
+  text-overflow: ellipsis !important;
+}
+.app .anonymiseur-custom-control > select:focus,
+.app .anonymiseur-custom-control > input:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(11, 114, 133, 0.18) !important;
+}
+.app .anonymiseur-custom-control > input[type="range"] {
+  width: 100% !important;
+  min-height: 44px !important;
+  accent-color: var(--primary) !important;
+}
+.app .anonymiseur-custom-control > input[type="password"]:disabled {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+  cursor: not-allowed !important;
+}
+.app .anonymiseur-custom-checkbox {
+  min-width: 22px !important;
+  min-height: 22px !important;
+  cursor: pointer !important;
+  accent-color: var(--primary) !important;
+  margin: 0 !important;
+}
+.app .anonymiseur-custom-hint {
+  font-size: 0.78rem !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.4 !important;
+  min-height: 1.5em !important;
+  margin: 0 !important;
+}

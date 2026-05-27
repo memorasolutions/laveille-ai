@@ -126,29 +126,39 @@
 
         <div id="custom-settings" hidden style="margin-top:1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:1.15rem;">
             <h4 style="margin:0 0 0.85rem;font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ __('Réglages personnalisés') }}</h4>
-            <div style="display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
-                <div>
-                    <label for="maskMode" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;font-size:0.92rem;">{{ __('Type de masquage') }}</label>
-                    <select id="maskMode" class="form-input" style="min-height:44px;width:100%;">
-                        <option value="pseudo">{{ __('Remplacer par un faux prénom (réversible)') }}</option>
-                        <option value="hash">{{ __('Remplacer par un code unique (irréversible)') }}</option>
-                        <option value="redaction">{{ __('Remplacer par [SUPPRIMÉ] (irréversible)') }}</option>
-                        <option value="fpe">{{ __('Brouiller en gardant le format (avancé)') }}</option>
-                    </select>
+            <div class="anonymiseur-custom-grid">
+                <div class="anonymiseur-custom-field">
+                    <label for="maskMode" class="anonymiseur-custom-label">{{ __('Type de masquage') }}</label>
+                    <div class="anonymiseur-custom-control">
+                        <select id="maskMode" class="form-input">
+                            <option value="pseudo">{{ __('Faux prénom (réversible)') }}</option>
+                            <option value="hash">{{ __('Code unique (irréversible)') }}</option>
+                            <option value="redaction">{{ __('[SUPPRIMÉ] (irréversible)') }}</option>
+                            <option value="fpe">{{ __('Brouillage format-préservant') }}</option>
+                        </select>
+                    </div>
+                    <small class="anonymiseur-custom-hint">{{ __('Comment remplacer les données détectées dans le texte') }}</small>
                 </div>
-                <div>
-                    <label for="confidenceThreshold" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;font-size:0.92rem;">
-                        {{ __('Sensibilité de détection') }} : <span id="confidenceThresholdValue" style="color:var(--primary);font-weight:700;">60 %</span>
+
+                <div class="anonymiseur-custom-field">
+                    <label for="confidenceThreshold" class="anonymiseur-custom-label">
+                        {{ __('Sensibilité de détection') }} <span id="confidenceThresholdValue" class="anonymiseur-custom-value">60 %</span>
                     </label>
-                    <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" style="width:100%;min-height:44px;" aria-describedby="confidenceHint">
-                    <small id="confidenceHint" style="color:var(--text-secondary);display:block;margin-top:0.35rem;font-size:0.8rem;">{{ __('Plus haut = moins de fausses détections') }}</small>
+                    <div class="anonymiseur-custom-control">
+                        <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" aria-describedby="confidenceHint">
+                    </div>
+                    <small id="confidenceHint" class="anonymiseur-custom-hint">{{ __('Plus haut = moins de fausses alertes') }}</small>
                 </div>
-                <div>
-                    <label style="display:flex;align-items:center;gap:0.5rem;font-weight:600;color:var(--text-primary);min-height:44px;font-size:0.92rem;">
-                        <input type="checkbox" id="encryptionEnabled" style="min-width:24px;min-height:24px;cursor:pointer;">
-                        <span>{{ __('Protéger les exports par mot de passe') }}</span>
+
+                <div class="anonymiseur-custom-field">
+                    <label class="anonymiseur-custom-label">
+                        <input type="checkbox" id="encryptionEnabled" class="anonymiseur-custom-checkbox">
+                        <span>{{ __('Protéger les exports') }}</span>
                     </label>
-                    <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Mot de passe (12+ caractères)') }}" style="min-height:44px;width:100%;margin-top:0.35rem;" autocomplete="new-password" disabled>
+                    <div class="anonymiseur-custom-control">
+                        <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Mot de passe (12+ car.)') }}" autocomplete="new-password" disabled>
+                    </div>
+                    <small class="anonymiseur-custom-hint">{{ __('Chiffrement AES‑GCM par mot de passe') }}</small>
                 </div>
             </div>
         </div>
