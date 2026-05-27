@@ -56,9 +56,9 @@
 
 <style>
 .lv-under-construction {
-    --uc-primary: #0B7285;
-    --uc-primary-hover: #064E5C;
-    --uc-accent: #C2410C;
+    --uc-primary: #064E5C;
+    --uc-primary-hover: #053E4A;
+    --uc-accent: #7C2D12;
     --uc-dark: #1A1D23;
     --uc-bg: #F0FDFA;
     --uc-card-bg: #FFFFFF;
@@ -139,7 +139,7 @@
     font-weight: 700;
 }
 .lv-uc__step--done .lv-uc__step-icon { background: var(--uc-primary); color: #FFFFFF; }
-.lv-uc__step--current .lv-uc__step-icon { background: var(--uc-accent); color: #FFFFFF; }
+.lv-uc__step--current .lv-uc__step-icon { background: #7C2D12; color: #FFFFFF; }
 .lv-uc__step--upcoming .lv-uc__step-icon { background: transparent; color: var(--uc-primary); border: 2px solid var(--uc-primary); }
 .lv-uc__step--upcoming { opacity: 0.72; }
 .lv-uc__actions {

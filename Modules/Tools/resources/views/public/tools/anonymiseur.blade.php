@@ -319,4 +319,5 @@
 <script src="{{ asset('assets/tools/anonymiseur/app.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v145.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/enhancements-v146.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush
