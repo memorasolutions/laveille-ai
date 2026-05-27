@@ -84,9 +84,73 @@
     {{-- Bouton fullpage masqué (remplacé par tools::partials.fullscreen-btn dans le header charte) --}}
     <button id="btnFullpage" type="button" class="hidden" aria-hidden="true" tabindex="-1"></button>
 
-    <div id="infoBanner" class="info-banner" role="region" aria-label="Information confidentialité">
-        <span class="info-message">🛡️ <strong>100 % local</strong> — Aucune donnée ne quitte votre appareil. Conforme <a href="/glossaire/loi-25" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">Loi 25</a> et <a href="/glossaire/rgpd" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">RGPD</a>.</span>
-        <button id="closeBanner" class="btn-icon" aria-label="Fermer la bannière" title="{{ __('Fermer') }}" style="min-width:44px;min-height:44px;">×</button>
+    <div id="infoBanner" class="lv-trust-banner" role="region" aria-label="{{ __('Garantie de confidentialité') }}">
+        {{-- État réduit (badge cliquable après acceptation) --}}
+        <button type="button" id="lvTrustToggle" class="lv-trust-toggle" aria-expanded="true" aria-controls="lvTrustContent">
+            <span class="lv-trust-icon" aria-hidden="true">🛡️</span>
+            <span class="lv-trust-title">
+                <strong>{{ __('100 % local') }}</strong>
+                <span class="lv-trust-sub">{{ __('Traitement dans votre navigateur — aucun contenu envoyé à un serveur') }}</span>
+            </span>
+            <span class="lv-trust-chevron" aria-hidden="true">▾</span>
+        </button>
+
+        {{-- Contenu détaillé (accordéon) --}}
+        <div id="lvTrustContent" class="lv-trust-content">
+            {{-- Schéma flux visuel --}}
+            <div class="lv-trust-flow" aria-label="{{ __('Flux des données') }}">
+                <span class="lv-trust-flow-step"><span aria-hidden="true">📝</span> {{ __('Votre texte') }}</span>
+                <span class="lv-trust-flow-arrow" aria-hidden="true">→</span>
+                <span class="lv-trust-flow-step lv-trust-flow-here"><span aria-hidden="true">🖥️</span> {{ __('Votre navigateur') }}</span>
+                <span class="lv-trust-flow-arrow" aria-hidden="true">→</span>
+                <span class="lv-trust-flow-step"><span aria-hidden="true">✋</span> {{ __('Vous décidez') }}</span>
+                <span class="lv-trust-flow-arrow" aria-hidden="true">→</span>
+                <span class="lv-trust-flow-step lv-trust-flow-external"><span aria-hidden="true">🤖</span> {{ __('IA externe (optionnel)') }}</span>
+            </div>
+
+            {{-- 4 sections par finalité (best practice Iapp/CNIL 2026) --}}
+            <div class="lv-trust-grid">
+                <div class="lv-trust-card">
+                    <h4>✅ {{ __('Ce qui reste local') }}</h4>
+                    <ul>
+                        <li>{{ __('Votre texte source') }}</li>
+                        <li>{{ __('Les règles d\'anonymisation') }}</li>
+                        <li>{{ __('Les correspondances vraie ↔ fictive') }}</li>
+                        <li>{{ __('Vos exports JSON') }}</li>
+                    </ul>
+                </div>
+                <div class="lv-trust-card">
+                    <h4>📤 {{ __('Ce qui peut sortir') }}</h4>
+                    <ul>
+                        <li>{{ __('Uniquement si VOUS cliquez « Copier »') }}</li>
+                        <li>{{ __('Et le collez dans une IA externe') }}</li>
+                        <li>{{ __('Le contenu copié est déjà anonymisé') }}</li>
+                    </ul>
+                </div>
+                <div class="lv-trust-card">
+                    <h4>🔇 {{ __('Quand on transmet') }}</h4>
+                    <ul>
+                        <li>{{ __('Jamais à l\'initiative de l\'outil') }}</li>
+                        <li>{{ __('Pas d\'envoi auto ni de tracking') }}</li>
+                        <li>{{ __('Pas de cookie d\'analyse sur cette page') }}</li>
+                    </ul>
+                </div>
+                <div class="lv-trust-card">
+                    <h4>⚙️ {{ __('Vos contrôles') }}</h4>
+                    <ul>
+                        <li>{{ __('Effacer à tout moment (bouton Effacer)') }}</li>
+                        <li>{{ __('Exporter vos règles (JSON local)') }}</li>
+                        <li>{{ __('Fonctionne hors-ligne') }}</li>
+                        <li><a href="/glossaire/loi-25" target="_blank" rel="noopener">{{ __('Conforme Loi 25') }}</a> · <a href="/glossaire/rgpd" target="_blank" rel="noopener">{{ __('Conforme RGPD') }}</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="lv-trust-actions">
+                <button type="button" id="lvTrustAccept" class="lv-trust-accept">{{ __('J\'ai compris, ne plus afficher') }}</button>
+                <a href="/glossaire/anonymisation" target="_blank" rel="noopener" class="lv-trust-learn-more">{{ __('Comprendre l\'anonymisation') }} →</a>
+            </div>
+        </div>
     </div>
 
     <div class="anonymiseur-presets" style="margin:1rem 0 1.5rem;">
@@ -398,4 +462,5 @@
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v145.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v146.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v148-presets.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/enhancements-v149-trust.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush
