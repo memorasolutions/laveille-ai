@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.47.1 · 2026-05-27 · #313 feat(glossary) anonymisation + pseudonymisation termes complets SEO/AEO/GEO 2026. User signalait /glossaire/anonymisation = 404 (référencé par bannière confiance + JSON-LD anonymiseur). Seeder `Modules\Tools\Database\Seeders\AnonymisationGlossarySeeder` insère 2 termes via Term::setTranslation idempotent (lookup whereRaw JSON_UNQUOTE leçon L-JSON-UNQUOTE-TRANSLATABLE-V1 S126). Contenu généré via 2 qwen3-max parallèles + vérifié pp_search Perplexity Pro 2 recherches (CNIL, CAI Québec, Commissariat vie privée Canada, EPFL, AvocatsPI, ENISA, NIST FF1/FF3-1). Best practices mai 2026 appliquées : H1 question + one_sentence_answer 40-60 mots (AI Overviews/Perplexity direct answer) + analogy quotidienne québécoise + example PME concret + did_you_know fait surprenant + 6 FAQ FAQPage Schema.org + 5 sources EEAT datées + broader_slugs [loi-25, rgpd, protection-vie-privee] + narrower_slugs (anonymisation ↔ pseudonymisation cross-link). TermSchemaService S126 prendra automatiquement broader/narrower dans @graph JSON-LD. Catégorie « Sécurité et éthique » lookup safe. Codename glossary-anonymisation-pseudo.
  *   1.47.0 · 2026-05-27 · #313 feat(tools) anonymiseur PUBLICATION PUBLIQUE 🚀 — décision user GO 2026-05-27 après sprint S129 complet (33 todos / 14 commits / refonte UX/UI 2026 / 4 pp_search). Migration `2026_05_27_240000_publish_anonymiseur_finally.php` flip is_under_construction=false sur slug='anonymiseur' (idempotent hasColumn). Anonymiseur accessible publiquement à `https://laveille.ai/outils/anonymiseur`. Récap features livrées : Tiptap éditeur riche + bubble menu vanilla (B/I/U/S/Code/Highlight/Clear + 🕵️ Anonymiser sélection) + détection PII regex (email/phoneCA/postalCA/NAS/CB/date/money/nom) + Luhn+checksum NAS validation + 3 presets sécurité (Standard/Maximum/Personnalisé) + 4 modes masquage (pseudo/hash SHA-256/redaction/FPE) + chiffrement AES-GCM 256 Web Crypto export + NLP compromise.js lazy CDN + PWA installable Service Worker + manifest + audit log local Loi 25 + bannière confiance accordéon pédagogique (4 cards par finalité + schéma flux) + Schema.org SoftwareApplication JSON-LD knowsAbout 18 sujets + split-pane étape 2 + textareas 320px + charte Memora teal AAA 7:1+ + WCAG 2.2 AAA validé + tests Pest. Pattern Memora : zéro duplication, zéro stockage serveur, charte 15 outils unifiée. Coût IA total ~0 $ (MCP openrouter-free + Gemini SuperAgent + pp_search abonnement). Codename anonymizer-public-launch.
  *   1.46.5 · 2026-05-27 · #313 fix(tools) anonymiseur bannière confiance — grid 2×2 desktop au lieu de 3+1 isolé (user screenshot 18:52 « pas belle mise en page »). Cause : `auto-fit minmax(230px,1fr)` faisait 3 colonnes avec la 4e card « Vos contrôles » seule sur sa ligne à gauche = laid + déséquilibré + grand vide à droite. Fix : grid responsive prévisible — 1 col mobile (<720px) / 2×2 tablet+desktop (720-1199px) / 4 cols large (≥1200px). align-items: stretch + height 100% sur cards pour hauteurs uniformes. Codename anonymizer-trust-grid-2x2.
  *   1.46.4 · 2026-05-27 · #313 feat(tools) anonymiseur — bannière confiance accordéon pédagogique (Option A user GO 96/100, best practices pp_search mai 2026 : Iapp/CNIL/Didomi/Ketch). Demande user : « pas assez complet, le × semble perdu » + accordéon fermé une fois accepté + « les personnes doivent comprendre qu'on ne garde RIEN sur le serveur ». Refonte #infoBanner en `.lv-trust-banner` : (1) Toggle header cliquable « 🛡️ 100 % local — Traitement dans votre navigateur, aucun contenu envoyé à un serveur » + chevron animé. (2) Schéma flux visuel `📝 Texte → 🖥️ Navigateur (highlight teal solid) → ✋ Vous décidez → 🤖 IA externe (dashed)` montrant que rien ne transite par le serveur Memora. (3) 4 cards structurées PAR FINALITÉ (best practice Iapp/CNIL, pas par jargon juridique) : « Ce qui reste local » / « Ce qui peut sortir » / « Quand on transmet » / « Vos contrôles » avec liens glossaire Loi 25 + RGPD. (4) Bouton « J'ai compris, ne plus afficher » → memorise localStorage `anonymiseur_trust_accepted_v1=1` + collapse l'accordéon + toast confirmation. (5) Header reste cliquable même collapsé pour ré-afficher au besoin. (6) Persistance entre visites : visiteur récurrent voit la version compacte 1-ligne, nouveau voit l'accordéon ouvert. Module `enhancements-v149-trust.js` ~30 lignes. CSS ~140 lignes scope `.app !important` avec gradient teal + cards bordées + chevron rotate transition + ARIA expanded + focus-visible 3px AAA. Codename anonymizer-trust-banner-accordion.
@@ -139,7 +140,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 47,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -149,11 +150,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-public-launch',
+    'codename' => 'glossary-anonymisation-pseudo',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.0',
+    'semver' => '1.47.1',
 ];
