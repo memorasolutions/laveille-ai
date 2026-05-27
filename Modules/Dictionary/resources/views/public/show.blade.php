@@ -448,9 +448,11 @@
                             $_broaderSlugs = is_array($term->broader_slugs) ? $term->broader_slugs : [];
                             $_narrowerSlugs = is_array($term->narrower_slugs) ? $term->narrower_slugs : [];
                             $_kgSlugs = array_values(array_unique(array_merge($_broaderSlugs, $_narrowerSlugs)));
+                            // 2026-05-27 #304 : slug est Spatie Translatable JSON → JSON_EXTRACT match
+                            $_kgPlaceholders = ! empty($_kgSlugs) ? implode(',', array_fill(0, count($_kgSlugs), '?')) : '';
                             $_kgTerms = ! empty($_kgSlugs)
                                 ? \Modules\Dictionary\Models\Term::query()
-                                    ->whereIn('slug', $_kgSlugs)
+                                    ->whereRaw("JSON_EXTRACT(slug, '$.fr_CA') IN ($_kgPlaceholders)", $_kgSlugs)
                                     ->where('is_published', 1)
                                     ->get(['id', 'slug', 'name', 'icon'])
                                     ->keyBy(fn ($t) => (string) $t->slug)
