@@ -443,6 +443,67 @@
                             </div>
                         @endif
 
+                        {{-- 2026-05-27 #304 : Termes liés (Schema.org broader/narrower) — knowledge graph glossaire AEO/GEO --}}
+                        @php
+                            $_broaderSlugs = is_array($term->broader_slugs) ? $term->broader_slugs : [];
+                            $_narrowerSlugs = is_array($term->narrower_slugs) ? $term->narrower_slugs : [];
+                            $_kgSlugs = array_values(array_unique(array_merge($_broaderSlugs, $_narrowerSlugs)));
+                            $_kgTerms = ! empty($_kgSlugs)
+                                ? \Modules\Dictionary\Models\Term::query()
+                                    ->whereIn('slug', $_kgSlugs)
+                                    ->where('is_published', 1)
+                                    ->get(['id', 'slug', 'name', 'icon'])
+                                    ->keyBy(fn ($t) => (string) $t->slug)
+                                : collect();
+                        @endphp
+                        @if($_kgTerms->isNotEmpty())
+                            <div class="gl-section gl-bento-full">
+                                <div class="gl-section-box" style="background: #F0FAFB; border-left: 4px solid var(--c-primary);">
+                                    <h2 class="gl-section-title" style="color: #0B7285;">🔗 {{ __('Termes liés') }}</h2>
+
+                                    @php
+                                        $_renderChip = function ($t) {
+                                            $url = route('dictionary.show', $t->slug);
+                                            $icon = $t->icon ?: '📄';
+                                            $name = e((string) $t->name);
+                                            $aria = e(__('Voir la définition de').' '.((string) $t->name));
+                                            return '<a href="'.e($url).'" aria-label="'.$aria.'" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:#fff; border:1px solid #BAE6FD; border-radius:9999px; color:#075985; font-weight:600; font-size:0.9rem; text-decoration:none; margin:4px 6px 4px 0; transition:all 0.2s;" onmouseover="this.style.background=\'#0B7285\'; this.style.color=\'#fff\'; this.style.borderColor=\'#0B7285\';" onmouseout="this.style.background=\'#fff\'; this.style.color=\'#075985\'; this.style.borderColor=\'#BAE6FD\';"><span aria-hidden="true">'.$icon.'</span><span>'.$name.'</span></a>';
+                                        };
+                                    @endphp
+
+                                    @if(! empty($_broaderSlugs))
+                                        @php
+                                            $_broaderChips = collect($_broaderSlugs)
+                                                ->filter(fn ($s) => $_kgTerms->has((string) $s))
+                                                ->map(fn ($s) => $_renderChip($_kgTerms->get((string) $s)))
+                                                ->implode('');
+                                        @endphp
+                                        @if($_broaderChips)
+                                            <div style="margin-bottom: 14px;">
+                                                <p style="margin: 0 0 8px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6B7280;">🏷️ {{ __('Catégorie parente') }}</p>
+                                                <div>{!! $_broaderChips !!}</div>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    @if(! empty($_narrowerSlugs))
+                                        @php
+                                            $_narrowerChips = collect($_narrowerSlugs)
+                                                ->filter(fn ($s) => $_kgTerms->has((string) $s))
+                                                ->map(fn ($s) => $_renderChip($_kgTerms->get((string) $s)))
+                                                ->implode('');
+                                        @endphp
+                                        @if($_narrowerChips)
+                                            <div>
+                                                <p style="margin: 0 0 8px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6B7280;">🌿 {{ __('Sous-termes') }}</p>
+                                                <div>{!! $_narrowerChips !!}</div>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
 
                 </article>

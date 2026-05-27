@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.42.0 · 2026-05-27 · #304 glossaire Schema.org broader/narrower knowledge graph — knowledge graph relations entre 265 DefinedTerms. (1) Migration `2026_05_27_120000_add_broader_narrower_to_dictionary_terms.php` ajoute 2 colonnes JSON nullable `broader_slugs` + `narrower_slugs` à `dictionary_terms` (idempotent hasColumn check, pattern S125). (2) Term model `$fillable` + `$casts` étendus pour les 2 nouvelles colonnes (cast `array`). (3) Service `Modules\\Dictionary\\Services\\TermSchemaService::buildGraph` injecte `broader` + `narrower` (arrays de DefinedTerm refs avec @type/@id/name/url) dans le bloc DefinedTerm du @graph JSON-LD. Bénéfice : AI Overviews / Gemini / ChatGPT suivent le graphe pour contextualiser parents (ex: GPT → LLM → Modèle de fondation) et enfants (ex: LLM → 12 modèles enfants), boost AEO/GEO direct. (4) Seeder `GlossaryBroaderNarrowerSeeder` + JSON data `seeders/data/glossary_broader_narrower.json` (59 relations parent→narrower, 203 edges total) — mappings générés via SuperAgent Gemini analyse 265 termes (latence 53s). Couvre familles clés : LLM (12 modèles), Prompt Engineering (12 techniques), Apprentissage Automatique (12 méthodes), GAFAM (5 entreprises), Régulation IA (10 textes), Cybersécurité IA (6 menaces), Chaîne de Pensée (7 variantes), etc. Idempotent (overwrite narrower, merge broader avec dédup). (5) Vue `Modules/Dictionary/resources/views/public/show.blade.php` nouvelle section "🔗 Termes liés" dans gl-bento full-width — affiche 2 sous-sections "Catégorie parente" (broader chips teal pill cliquables) + "Sous-termes" (narrower chips même style). Inline style WCAG AAA contraste #075985/#fff (ratio 7:1+) + hover background primary + ARIA aria-label "Voir la définition de X". Skip si vide (rétro-compat 100% pour 206 termes sans relations encore). Boost UX maillage interne visible (cohérent Wikipedia/IBM/AWS standard 2026). Codename glossary-knowledge-graph.
  *   1.41.15 · 2026-05-27 · #303 newsletter — support image illustrative par étape weekly_prompt. Template digest-weekly.blade.php accepte 4 nouvelles clés optionnelles par part : `image_url` (URL absolue ou relative), `image_alt` (texte alt accessibilité), `image_caption` (légende italique sous l'image), `image_width` (largeur en px, default 320). Rendu : `<img>` centré avec fond blanc + padding 4px + border-radius pour ressortir sur fond dark #0c1427 du bloc atelier. Première utilisation : étape 4 défi NotebookLM (`/images/newsletter/notebooklm-step4-arrow.jpg` 203×67 + flèche orange annotée + alt + caption) pour clarifier visuellement « cliquez sur la flèche › ». User feedback : « pourquoi tu n'as pas mis cette image en plus du texte ? ». Codename newsletter-step-image-support.
  *   1.41.14 · 2026-05-26 · #302 fix WCAG 2.2 AAA newsletter — liens dans blocs dark presque invisibles (screenshot user 2026-05-26 14:11). Avant : `a { color:#0B7285 }` global appliqué partout, sur fond dark `#0c1427`/`#1e293b` ratio 1.6:1 FAIL. Fix : ajout règle `td[style*="#0c1427"] a, td[style*="#1e293b"] a { color:#5eead4 !important }` dans `<style>` head — cyan clair #5eead4 vs dark = ratio 12:1 AAA largement dépassé. + Update NewsletterIssue #9 weekly_prompt : reformulation étape 4 (clarifie le panneau Studio + flèche ›), restaure le défi NotebookLM (Brain Dump était re-écrasé), ajoute 2 liens vers /glossaire/rag-strict et /glossaire/rag dans la section technique pour pédagogie + maillage interne. Test Cloudflare confirme aucun blocage NotebookLM (GoogleBot/Mozilla/NotebookLM tous 200). Codename newsletter-wcag-aaa-dark-links.
  *   1.41.13 · 2026-05-26 · #301 ligne « Aussi appelé : X · Y · Z » sous le titre des fiches glossaire (best practice sonar-pro mai 2026, approche 3+4 combinée Wikipedia/IBM/AWS). Fusionne acronym_full + aliases en 1 ligne italique inline (DRY, anti-redondance, mobile-friendly). TermSchemaService.alternateName devient multivalué (array de variantes) pour SEO+AEO max. + Génération MCP Gemini de 3-6 aliases pour les 64 termes glossaire orphelins (déjà 200/265 termes avec aliases pré-existants → maintenant 264/265 couverts, 99.6%). Codename glossary-aliases-aka-line.
@@ -116,8 +117,8 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 41,
-    'patch' => 15,
+    'minor' => 42,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -127,11 +128,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'newsletter-step-image-support',
+    'codename' => 'glossary-knowledge-graph',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.41.15',
+    'semver' => '1.42.0',
 ];

@@ -62,6 +62,8 @@ class Term extends Model implements Searchable
         'match_strategy', // 2026-05-05 #145 WSD : loose | partial_case_sensitive | case_sensitive | exact_phrase | never_auto
         'aliases', // 2026-05-05 #151 : variations d'écriture (ex ["tokens","Tokens"])
         'sort_order',
+        'broader_slugs', // 2026-05-27 #304 Schema.org knowledge graph : slugs des termes parents (broader)
+        'narrower_slugs', // 2026-05-27 #304 Schema.org knowledge graph : slugs des termes enfants (narrower)
     ];
 
     protected $casts = [
@@ -69,6 +71,8 @@ class Term extends Model implements Searchable
         'aliases' => 'array',
         'faq' => 'array',
         'sources' => 'array',
+        'broader_slugs' => 'array',
+        'narrower_slugs' => 'array',
     ];
 
     public function category(): BelongsTo

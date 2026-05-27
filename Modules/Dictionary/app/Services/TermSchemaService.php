@@ -78,6 +78,39 @@ final class TermSchemaService
         if (! empty($alternates)) {
             $definedTerm['alternateName'] = count($alternates) === 1 ? $alternates[0] : $alternates;
         }
+
+        // 2026-05-27 #304 : Schema.org broader/narrower — knowledge graph relations entre DefinedTerm.
+        // Boost AEO/GEO (AI Overviews suit le graphe pour citer contextes parents/enfants).
+        $broaderSlugs = is_array($term->broader_slugs) ? $term->broader_slugs : [];
+        $narrowerSlugs = is_array($term->narrower_slugs) ? $term->narrower_slugs : [];
+        $allRelated = array_values(array_unique(array_merge($broaderSlugs, $narrowerSlugs)));
+        if (! empty($allRelated)) {
+            $relatedQuery = Term::query()
+                ->where('is_published', 1)
+                ->get(['id', 'slug', 'name'])
+                ->keyBy(fn ($t) => (string) $t->slug);
+            $toRefArray = function (array $slugs) use ($relatedQuery): array {
+                $out = [];
+                foreach ($slugs as $s) {
+                    $rel = $relatedQuery->get((string) $s);
+                    if (! $rel) {
+                        continue;
+                    }
+                    $u = route('dictionary.show', $rel->slug);
+                    $out[] = ['@type' => 'DefinedTerm', '@id' => $u.'#term', 'name' => (string) $rel->name, 'url' => $u];
+                }
+                return $out;
+            };
+            $broaderArr = $toRefArray($broaderSlugs);
+            $narrowerArr = $toRefArray($narrowerSlugs);
+            if (! empty($broaderArr)) {
+                $definedTerm['broader'] = $broaderArr;
+            }
+            if (! empty($narrowerArr)) {
+                $definedTerm['narrower'] = $narrowerArr;
+            }
+        }
+
         if ($imageUrl) {
             $definedTerm['image'] = $imageUrl;
         }
