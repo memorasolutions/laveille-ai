@@ -2095,3 +2095,130 @@ body {
   font-size: 0.85rem !important;
   text-decoration: underline !important;
 }
+
+/* === Bouton ? aide modes + modal d'aide v1.47.4 (charte Memora pattern constructeur-prompts) === */
+.app .anonymiseur-help-btn {
+  flex-shrink: 0 !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  border-radius: 50% !important;
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.15s ease, transform 0.15s ease !important;
+}
+.app .anonymiseur-help-btn:hover {
+  background: var(--primary-hover) !important;
+  transform: scale(1.08) !important;
+}
+.app .anonymiseur-help-btn:focus-visible {
+  outline: 3px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* Cards modale d'aide 4 modes */
+.app #maskModeHelpModal .modal-body { max-height: 70vh !important; overflow-y: auto !important; }
+.app .lv-help-cards {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 1rem !important;
+}
+@media (min-width: 720px) {
+  .app .lv-help-cards { grid-template-columns: repeat(2, 1fr) !important; }
+}
+.app .lv-help-card {
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  padding: 1rem 1.15rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.4rem !important;
+}
+.app .lv-help-card--recommended {
+  border-color: var(--primary) !important;
+  background: var(--bg-tertiary) !important;
+  box-shadow: 0 0 0 1px var(--primary) inset !important;
+}
+.app .lv-help-card h3 {
+  margin: 0 0 0.25rem !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #064E5C !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex-wrap: wrap !important;
+}
+.app .lv-help-badge {
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  padding: 0.15rem 0.55rem !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.02em !important;
+  margin-left: auto !important;
+}
+.app .lv-help-badge--advanced {
+  background: var(--text-muted) !important;
+}
+.app .lv-help-card p {
+  margin: 0 !important;
+  font-size: 0.85rem !important;
+  color: var(--text-primary) !important;
+  line-height: 1.5 !important;
+}
+.app .lv-help-card .lv-help-when,
+.app .lv-help-card .lv-help-why,
+.app .lv-help-card .lv-help-example {
+  border-left: 3px solid var(--border) !important;
+  padding-left: 0.65rem !important;
+}
+.app .lv-help-card--recommended .lv-help-when,
+.app .lv-help-card--recommended .lv-help-why,
+.app .lv-help-card--recommended .lv-help-example {
+  border-left-color: var(--primary) !important;
+}
+.app .lv-help-card .lv-help-example em {
+  color: var(--text-secondary) !important;
+  font-size: 0.78rem !important;
+}
+.app .lv-help-reversible {
+  margin-top: 0.35rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  color: #065F46 !important;
+}
+.app .lv-help-reversible--no {
+  color: #991B1B !important;
+}
+
+/* === Encryption passphrase visual feedback v1.47.4 — pas activé → clair pourquoi === */
+.app #encryptionPassphraseWrap > input[type="password"]:disabled {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-muted) !important;
+  cursor: not-allowed !important;
+  border-style: dashed !important;
+  opacity: 0.7 !important;
+}
+.app #encryptionPassphraseWrap > input[type="password"]:disabled::placeholder {
+  color: var(--text-muted) !important;
+  font-style: italic !important;
+  opacity: 1 !important;
+}
+.app .anonymiseur-custom-checkbox {
+  width: 20px !important;
+  height: 20px !important;
+  cursor: pointer !important;
+  accent-color: var(--primary) !important;
+}

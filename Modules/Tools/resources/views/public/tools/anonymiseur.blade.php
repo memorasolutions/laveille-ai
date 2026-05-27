@@ -194,7 +194,10 @@
             <h4 style="margin:0 0 0.85rem;font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ __('Réglages personnalisés') }}</h4>
             <div class="anonymiseur-custom-grid">
                 <div class="anonymiseur-custom-field">
-                    <label for="maskMode" class="anonymiseur-custom-label">{{ __('Comment remplacer vos données') }}</label>
+                    <label for="maskMode" class="anonymiseur-custom-label">
+                        <span>{{ __('Comment remplacer vos données') }}</span>
+                        <button type="button" id="btnMaskModeHelp" class="anonymiseur-help-btn" aria-label="{{ __('Aide : comprendre les 4 modes de remplacement') }}" title="{{ __('Comprendre la différence entre les 4 modes') }}">?</button>
+                    </label>
                     <div class="anonymiseur-custom-control">
                         <select id="maskMode" class="form-input">
                             <option value="pseudo">🔄 {{ __('Faux noms similaires (recommandé pour ChatGPT/Claude/Gemini)') }}</option>
@@ -217,14 +220,16 @@
                 </div>
 
                 <div class="anonymiseur-custom-field">
-                    <label class="anonymiseur-custom-label">
-                        <input type="checkbox" id="encryptionEnabled" class="anonymiseur-custom-checkbox">
-                        <span>{{ __('Protéger les exports') }}</span>
+                    <label for="encryptionEnabled" class="anonymiseur-custom-label" style="cursor:pointer;">
+                        <span style="display:flex;align-items:center;gap:0.5rem;">
+                            <input type="checkbox" id="encryptionEnabled" class="anonymiseur-custom-checkbox">
+                            <span>{{ __('Protéger les exports') }}</span>
+                        </span>
                     </label>
-                    <div class="anonymiseur-custom-control">
-                        <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Mot de passe (12+ car.)') }}" autocomplete="new-password" disabled>
+                    <div class="anonymiseur-custom-control" id="encryptionPassphraseWrap">
+                        <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Cochez d\'abord ☝️ pour activer') }}" autocomplete="new-password" disabled>
                     </div>
-                    <small class="anonymiseur-custom-hint">{{ __('Chiffrement AES‑GCM par mot de passe') }}</small>
+                    <small class="anonymiseur-custom-hint">{{ __('Chiffre votre fichier JSON exporté avec un mot de passe (AES-GCM). Vous seul·e pourrez l\'ouvrir.') }}</small>
                 </div>
             </div>
         </div>
@@ -434,6 +439,62 @@
         </div>
     </div>
 
+    {{-- Modal d'aide : explique les 4 modes de remplacement --}}
+    <div id="maskModeHelpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="maskModeHelpTitle">
+        <div class="modal" style="max-width:780px;">
+            <div class="modal-header">
+                <h2 id="maskModeHelpTitle" class="panel-title">{{ __('Les 4 façons de remplacer vos données') }}</h2>
+                <button type="button" id="closeMaskHelpModal" class="btn-icon" aria-label="{{ __('Fermer') }}" title="{{ __('Fermer') }}">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin:0 0 1rem;color:var(--text-secondary);line-height:1.5;">
+                    {{ __('Choisissez selon ce que vous voulez faire ensuite avec votre texte.') }}
+                </p>
+
+                <div class="lv-help-cards">
+                    <article class="lv-help-card lv-help-card--recommended">
+                        <h3>🔄 {{ __('Faux noms similaires') }}<span class="lv-help-badge">{{ __('Recommandé') }}</span></h3>
+                        <p class="lv-help-when"><strong>{{ __('Quand') }} :</strong> {{ __('vous voulez utiliser ChatGPT, Claude ou Gemini.') }}</p>
+                        <p class="lv-help-why"><strong>{{ __('Pourquoi') }} :</strong> {{ __('l\'IA comprend votre contexte (un nom, une adresse, une date) et donne sa meilleure réponse. Ensuite on remet vos vraies données dans la réponse.') }}</p>
+                        <p class="lv-help-example"><strong>{{ __('Exemple') }} :</strong><br>« Marie Tremblay habite à Montréal » → « <strong>Catherine Bouchard</strong> habite à <strong>Québec</strong> »<br><em>{{ __('Vous pourrez revenir aux vrais noms après.') }}</em></p>
+                        <p class="lv-help-reversible">✅ {{ __('Restauration possible') }}</p>
+                    </article>
+
+                    <article class="lv-help-card">
+                        <h3>🗑️ {{ __('Effacer définitivement') }}</h3>
+                        <p class="lv-help-when"><strong>{{ __('Quand') }} :</strong> {{ __('vous voulez partager un document public (rapport, étude, capture d\'écran).') }}</p>
+                        <p class="lv-help-why"><strong>{{ __('Pourquoi') }} :</strong> {{ __('aucun risque de fuite — les vraies données disparaissent pour toujours.') }}</p>
+                        <p class="lv-help-example"><strong>{{ __('Exemple') }} :</strong><br>« Marie Tremblay habite à Montréal » → « <strong>[SUPPRIMÉ]</strong> habite à <strong>[SUPPRIMÉ]</strong> »</p>
+                        <p class="lv-help-reversible lv-help-reversible--no">⛔ {{ __('Aucune restauration possible') }}</p>
+                    </article>
+
+                    <article class="lv-help-card">
+                        <h3>🔒 {{ __('Code unique irréversible') }}</h3>
+                        <p class="lv-help-when"><strong>{{ __('Quand') }} :</strong> {{ __('vous voulez comparer ou dédoublonner sans connaître les vrais noms (statistiques internes, recherche).') }}</p>
+                        <p class="lv-help-why"><strong>{{ __('Pourquoi') }} :</strong> {{ __('même nom = même code, donc on peut compter les occurrences sans jamais voir les vraies identités.') }}</p>
+                        <p class="lv-help-example"><strong>{{ __('Exemple') }} :</strong><br>« Marie Tremblay » → « <strong>a8f3c2e1</strong> »<br>« Marie Tremblay » (2e fois) → « <strong>a8f3c2e1</strong> »</p>
+                        <p class="lv-help-reversible lv-help-reversible--no">⛔ {{ __('Aucune restauration possible') }}</p>
+                    </article>
+
+                    <article class="lv-help-card">
+                        <h3>🎲 {{ __('Brouillage format identique') }}<span class="lv-help-badge lv-help-badge--advanced">{{ __('Avancé') }}</span></h3>
+                        <p class="lv-help-when"><strong>{{ __('Quand') }} :</strong> {{ __('vous avez un système (base de données, vieux logiciel) qui exige un format précis : 16 chiffres pour une carte bancaire, 9 chiffres pour un NAS.') }}</p>
+                        <p class="lv-help-why"><strong>{{ __('Pourquoi') }} :</strong> {{ __('le système reste fonctionnel parce que le format est respecté, mais les vraies données sont protégées.') }}</p>
+                        <p class="lv-help-example"><strong>{{ __('Exemple') }} :</strong><br>« 4532-1234-5678-9876 » → « <strong>7831-9402-1456-2289</strong> » (toujours 16 chiffres)</p>
+                        <p class="lv-help-reversible">✅ {{ __('Restauration avec clé technique') }}</p>
+                    </article>
+                </div>
+
+                <p style="margin:1.25rem 0 0;padding:0.75rem 1rem;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:0.88rem;color:var(--text-primary);">
+                    💡 <strong>{{ __('Pas sûr·e ?') }}</strong> {{ __('Choisissez « Faux noms similaires » — c\'est le mode qui marche le mieux avec ChatGPT, Claude et Gemini, et vous récupérez vos vraies données après.') }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeMaskHelpModalFooter" class="btn btn-primary">{{ __('J\'ai compris') }}</button>
+            </div>
+        </div>
+    </div>
+
     <div id="confirmModal" class="modal-overlay confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmMessage">
         <div class="modal">
             <div class="modal-body text-center">
@@ -465,4 +526,5 @@
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v146.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v148-presets.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v149-trust.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/enhancements-v150-help.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush
