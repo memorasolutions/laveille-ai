@@ -52,6 +52,100 @@
     .app *, .app *::before, .app *::after { transition: none !important; animation: none !important; }
 }
 
+/* Memora WCAG AAA — override Bootstrap btn colors (forcer ratios 7:1+) */
+.app .btn-primary,
+.app button.btn-primary {
+    background-color: #064E5C !important;
+    border-color: #064E5C !important;
+    color: #FFFFFF !important;
+}
+.app .btn-primary:hover,
+.app button.btn-primary:hover {
+    background-color: #053E4A !important;
+    border-color: #053E4A !important;
+}
+.app .btn-secondary,
+.app button.btn-secondary {
+    background-color: #475569 !important;
+    border-color: #475569 !important;
+    color: #FFFFFF !important;
+}
+.app .btn-secondary:hover,
+.app button.btn-secondary:hover {
+    background-color: #334155 !important;
+    border-color: #334155 !important;
+}
+.app .btn-danger,
+.app button.btn-danger {
+    background-color: #991B1B !important;
+    border-color: #991B1B !important;
+    color: #FFFFFF !important;
+}
+.app .btn-danger:hover,
+.app button.btn-danger:hover {
+    background-color: #7F1D1D !important;
+    border-color: #7F1D1D !important;
+}
+.app .btn-success,
+.app button.btn-success {
+    background-color: #065F46 !important;
+    border-color: #065F46 !important;
+    color: #FFFFFF !important;
+}
+.app .btn-success:hover,
+.app button.btn-success:hover {
+    background-color: #064E3B !important;
+    border-color: #064E3B !important;
+}
+/* WCAG AAA — text-secondary plus foncé pour ratios 7:1+ */
+.app .form-hint,
+.app .char-count,
+.app #charCount {
+    color: #334155 !important;
+}
+/* WCAG AAA — step-number sur primary teal foncé pour ratio 9.3:1 */
+.app .step.active .step-number,
+.app .step .step-number {
+    background-color: #064E5C !important;
+    color: #FFFFFF !important;
+}
+/* WCAG AAA — result-tab teal foncé */
+.app .result-tab.active {
+    color: #064E5C !important;
+    border-bottom-color: #064E5C !important;
+}
+/* WCAG AAA — danger menu item rouge foncé */
+.app .action-menu-item.danger {
+    color: #7F1D1D !important;
+}
+/* WCAG 2.2 AAA Target Size — boutons sm 44x44 minimum */
+.app .btn-sm,
+.app button.btn-sm {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 0.5rem 1rem !important;
+}
+/* Skip-link visible au focus (sortie de 1x1px caché) */
+.app .skip-link,
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 10000;
+    padding: 0.75rem 1.25rem;
+    background: #064E5C;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: 700;
+    border-radius: 0 0 8px 0;
+}
+.app .skip-link:focus,
+.skip-link:focus {
+    left: 0;
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
 /* ============================================
    RESET & BASE
    ============================================ */

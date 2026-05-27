@@ -5,6 +5,8 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset('assets/tools/anonymiseur/styles.css') }}?v={{ config('version.semver') }}">
+<link rel="manifest" href="{{ asset('assets/tools/anonymiseur/manifest.webmanifest') }}">
+<meta name="theme-color" content="#0B7285">
 <meta property="og:title" content="🕵️ Anonymiseur de texte — La veille de Stef">
 <meta property="og:description" content="Anonymisez vos textes localement avant de les envoyer à une IA. Conforme Loi 25 et RGPD.">
 <meta property="og:type" content="website">
@@ -69,14 +71,46 @@
                     </button>
                 </div>
             </div>
-            <input type="file" id="fileImport" accept=".json" class="hidden">
+            <input type="file" id="fileImport" accept=".json" class="hidden" aria-label="Importer un fichier JSON de règles d'anonymisation">
         </div>
     </header>
 
     <div id="infoBanner" class="info-banner" role="region" aria-label="Information confidentialité">
-        <span class="info-message">🛡️ <strong>100 % local</strong> — Aucune donnée ne quitte votre appareil. Conforme <a href="/glossaire/loi-25" target="_blank" rel="noopener">Loi 25</a> et <a href="/glossaire/rgpd" target="_blank" rel="noopener">RGPD</a>.</span>
+        <span class="info-message">🛡️ <strong>100 % local</strong> — Aucune donnée ne quitte votre appareil. Conforme <a href="/glossaire/loi-25" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">Loi 25</a> et <a href="/glossaire/rgpd" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">RGPD</a>.</span>
         <button id="closeBanner" class="btn-icon" aria-label="Fermer la bannière" style="min-width:44px;min-height:44px;">×</button>
     </div>
+
+    <details class="anonymiseur-settings" style="margin:1rem 0;padding:0;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);">
+        <summary style="padding:0.85rem 1.25rem;cursor:pointer;font-weight:600;color:var(--text-primary);user-select:none;min-height:44px;display:flex;align-items:center;gap:0.5rem;">
+            <span aria-hidden="true">⚙️</span>
+            <span>Réglages avancés (mode masquage, score confiance, chiffrement)</span>
+        </summary>
+        <div style="padding:1rem 1.25rem;display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));">
+            <div>
+                <label for="maskMode" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;">Mode de masquage</label>
+                <select id="maskMode" class="form-input" style="min-height:44px;width:100%;">
+                    <option value="pseudo">Pseudonymisation (réversible, default)</option>
+                    <option value="hash">Hash SHA-256 (irréversible)</option>
+                    <option value="redaction">Redaction [REDACTED] (irréversible)</option>
+                    <option value="fpe">FPE format-préservant (déterministe)</option>
+                </select>
+                <small style="color:var(--text-secondary);display:block;margin-top:0.35rem;">Pseudo = anonymisation Loi 25 conformité. Hash/Redaction/FPE = vraie anonymisation irréversible.</small>
+            </div>
+            <div>
+                <label for="confidenceThreshold" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;">Seuil de confiance détection : <span id="confidenceThresholdValue" style="color:var(--primary);font-weight:700;">60 %</span></label>
+                <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" style="width:100%;min-height:44px;" aria-describedby="confidenceHint">
+                <small id="confidenceHint" style="color:var(--text-secondary);display:block;margin-top:0.35rem;">Masque les détections sous le seuil (réduit faux positifs).</small>
+            </div>
+            <div>
+                <label style="display:flex;align-items:center;gap:0.5rem;font-weight:600;color:var(--text-primary);min-height:44px;">
+                    <input type="checkbox" id="encryptionEnabled" style="min-width:24px;min-height:24px;cursor:pointer;">
+                    <span>Chiffrer exports JSON (AES-GCM 256)</span>
+                </label>
+                <input type="password" id="encryptionPassphrase" class="form-input" placeholder="Passphrase (12+ caractères)" style="min-height:44px;width:100%;margin-top:0.35rem;" autocomplete="new-password" disabled>
+                <small style="color:var(--text-secondary);display:block;margin-top:0.35rem;">Web Crypto natif zéro dépendance. PBKDF2 100k itérations.</small>
+            </div>
+        </div>
+    </details>
 
     <nav class="steps" aria-label="Étapes du processus">
         <button class="step active" data-step="1" aria-current="step">
@@ -284,4 +318,5 @@
 @push('scripts')
 <script src="{{ asset('assets/tools/anonymiseur/app.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/enhancements-v145.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

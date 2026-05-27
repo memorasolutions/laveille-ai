@@ -1,0 +1,16 @@
+{
+    "name": "Anonymiseur de texte — La veille de Stef",
+    "short_name": "Anonymiseur",
+    "description": "Anonymisez vos textes avant l'envoi à une IA. 100 % local. Conforme Loi 25 et RGPD.",
+    "start_url": "/outils/anonymiseur?source=pwa",
+    "scope": "/outils/anonymiseur",
+    "display": "standalone",
+    "orientation": "any",
+    "theme_color": "#0B7285",
+    "background_color": "#F0FDFA",
+    "lang": "fr-CA",
+    "categories": ["productivity", "security", "utilities"],
+    "icons": [
+        {"src": "/favicon.ico", "sizes": "any", "type": "image/x-icon"}
+    ]
+}
