@@ -145,9 +145,12 @@ return [
     */
 
     'recorders' => [
+        // 2026-05-27 #308 : CacheInteractions désactivé par défaut prod — ingérait 4,2M cache_hit
+        // (99,9 % du bloat pulse_entries 1 GB). Cache hits/miss capturés par Cloudflare side + logs Laravel.
+        // Pour réactiver dashboard cache locale : PULSE_CACHE_INTERACTIONS_ENABLED=true dans .env.
         Recorders\CacheInteractions::class => [
-            'enabled' => env('PULSE_CACHE_INTERACTIONS_ENABLED', true),
-            'sample_rate' => env('PULSE_CACHE_INTERACTIONS_SAMPLE_RATE', 1),
+            'enabled' => env('PULSE_CACHE_INTERACTIONS_ENABLED', false),
+            'sample_rate' => env('PULSE_CACHE_INTERACTIONS_SAMPLE_RATE', 0.05),
             'ignore' => [
                 ...Pulse::defaultVendorCacheKeys(),
             ],
