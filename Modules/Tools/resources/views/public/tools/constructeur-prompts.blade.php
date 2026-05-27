@@ -413,6 +413,46 @@
 </div>
 @endsection
 
+@push('head')
+{{-- 2026-05-27 #310 : Schema.org SoftwareApplication pour AEO/GEO. Outil top page 403 PV /30j. --}}
+@php
+    $_swApp = [
+        '@context' => 'https://schema.org',
+        '@type' => 'SoftwareApplication',
+        '@id' => url()->current().'#software',
+        'name' => 'Constructeur de prompts IA',
+        'alternateName' => ['Prompt Builder', 'Générateur de prompts ChatGPT', 'Constructeur de prompts'],
+        'description' => 'Outil gratuit et interactif pour créer des prompts optimisés en 5 étapes (persona, verbe d\'action, sujet, audience, format de sortie). Compatible ChatGPT, Claude, Gemini, Mistral et tous les LLMs. Sauvegarde compte ou navigateur, partage natif, mode plein écran.',
+        'url' => url()->current(),
+        'applicationCategory' => 'BusinessApplication',
+        'applicationSubCategory' => 'ProductivityApplication',
+        'operatingSystem' => 'Web (any modern browser)',
+        'browserRequirements' => 'Requires JavaScript. Best on Chrome, Firefox, Safari, Edge.',
+        'inLanguage' => 'fr-CA',
+        'isAccessibleForFree' => true,
+        'offers' => [
+            '@type' => 'Offer',
+            'price' => '0',
+            'priceCurrency' => 'CAD',
+            'availability' => 'https://schema.org/OnlineOnly',
+        ],
+        'featureList' => [
+            'Construction guidée 5 étapes (persona + verbe + sujet + audience + format)',
+            'Bibliothèque de personas et verbes pré-définis',
+            'Sauvegarde locale (navigateur) ou compte utilisateur',
+            'Partage natif (Web Share API) et copier-coller',
+            'Mode plein écran sans distraction',
+            'Compatible ChatGPT, Claude, Gemini, Mistral, DeepSeek, Qwen, Llama',
+        ],
+        'author' => function_exists('lv_jsonld_author_stephane') ? lv_jsonld_author_stephane() : ['@type' => 'Person', 'name' => 'Stéphane Lapointe'],
+        'publisher' => function_exists('lv_jsonld_publisher') ? lv_jsonld_publisher() : ['@type' => 'Organization', 'name' => 'La veille'],
+        'softwareVersion' => '1.0',
+        'dateModified' => now()->toIso8601String(),
+    ];
+@endphp
+<script type="application/ld+json">{!! json_encode($_swApp, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
+
 @push('scripts')
 @php
 $defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines']];

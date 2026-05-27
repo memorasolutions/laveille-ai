@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.43.0 · 2026-05-27 · #310 feat(schema) Schema.org + EEAT roadmap audit S128 livré : (1) Helper `lv_jsonld_author_stephane()` knowsAbout étendu 7 → 18 sujets (Intelligence artificielle + Veille technologique + Éducation au Québec + Prompt engineering + ChatGPT + Claude (Anthropic) + Gemini (Google) + LLM + Agents IA + RAG + IA générative + Loi 25 + RGPD + AI Act + Gouvernance numérique + Cybersécurité PME + Transformation numérique + Schema.org SEO). Boost EEAT 2026 — 96 % citations AI Overviews = sites EEAT + 15+ entités reconnues (source pp_search S127). (2) JSON-LD SoftwareApplication injecté `Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php` via @push('head') : @type + name + alternateName 3 variantes + description complète + applicationCategory BusinessApplication + ProductivityApplication + operatingSystem Web + offers gratuit CAD + featureList 6 fonctionnalités + author Person Stéphane (via helper) + publisher Organization (via helper) + isAccessibleForFree true + softwareVersion 1.0 + dateModified ISO 8601. Cible top page audit S127 (403 PV / 30j GSC) pour boost AEO/GEO citation outil. (3) Vérification homepage Schema.org : `JsonLdService::website()` contient déjà SearchAction + alternateName ["veille ai", "Veille IA Québec", "La veille de Stef"] + publisher Organization → C2 audit DONE. (4) Audit sitemap GSC 36 warnings : 8 URLs `/actualites/*` trop longues (slugs > 200 chars news syndication), 3 URLs `/methodologie` `/api` `/stats` toutes 200 OK. Cause probable warnings restants = sluggification news syndication (à fixer S128+ via tronc slug à 80 chars). Codename schema-eeat-software-app.
  *   1.42.4 · 2026-05-27 · #308 fix(pulse) désactiver recorder CacheInteractions par défaut prod (audit roadmap S127 P1). Cause racine du bloat : 4 188 469 entries `cache_hit` + 351 096 `cache_miss` = 99,9 % du contenu `pulse_entries` (1052 MB / 4,5M rows total). CacheInteractions ingère chaque hit/miss du backend Laravel cache (config:cache + view:cache + Livewire + sessions DB + etc.) à sample_rate 1 (100 %). Trim default 7 jours mais le volume d'écriture dépasse largement la purge. Fix : `enabled` default `false` (préserve override env `PULSE_CACHE_INTERACTIONS_ENABLED=true` pour debug local) + `sample_rate` default `0.05` (5 %, fallback safe si réactivé). Autres recorders (Exceptions, Queues, Servers, SlowJobs, SlowOutgoingRequests, SlowQueries, SlowRequests, UserJobs, UserRequests) restent actifs car volume normal (~3 500 entries cumul). Setting `retention.activity_log_days` également mis à jour 180 → 60 jours en prod via UPDATE direct DB `settings` (compatible Loi 25 art. 17 + RGPD Art. 30 sans excès de stockage). Validation prod : OPTIMIZE TABLE pulse_entries a déjà libéré 179 MB (1052 → 873 MB), purge auto trim 7d continuera à libérer espace progressivement. Codename pulse-cache-interactions-off.
  *   1.42.3 · 2026-05-27 · #307 fix(glossary) titre terme « anthropomorphisme » → « Anthropomorphisme » (capitaliser première lettre pour cohérence avec les 264 autres termes du glossaire). Correctif data prod via UPDATE direct DB `dictionary_terms` id=255 : `name` JSON Spatie Translatable `{"fr_CA":"Anthropomorphisme","fr":"Anthropomorphisme"}` (avant : `{"fr_CA":"anthropomorphisme"}`). Validation visuelle Playwright STRICT post-purge Cloudflare : H1 `Anthropomorphisme` (A majuscule), title page `Anthropomorphisme - Glossaire IA - La veille` ✅. Détecté par user après audit complet S126→S127 (note globale 86/100 documentée dans `audit_complet_laveille_S127.md`). Aucun fichier code modifié (DB-only fix). Codename glossary-anthropomorphisme-capital.
  *   1.42.2 · 2026-05-27 · #306 fix(glossary) broader/narrower TOUJOURS invisible v1.42.1 — la fix v1.42.1 utilisait `JSON_EXTRACT(slug, '$.fr_CA') IN (?,?,...)` mais MySQL JSON_EXTRACT retourne la valeur ENCADRÉE de double-quotes (`"llm"` au lieu de `llm`) car c'est du JSON valide. Le `IN` matchait donc `"llm"` vs `llm` → 0 résultats. Fix v1.42.2 : `JSON_UNQUOTE(JSON_EXTRACT(slug, '$.fr_CA')) IN (?,?,...)` qui décode le JSON string. Équivalent au sucre Laravel `where('slug->fr_CA', $val)` qui génère `slug->>'$.fr_CA' = ?` (opérateur `->>` = `->` + JSON_UNQUOTE). Validé via _debug_view_query.php prod : whereRaw retourne maintenant 16/16 termes liés au lieu de 0. Section "Termes liés" visible + JSON-LD broader/narrower aux 2 endroits (HTML + Schema).
@@ -121,8 +122,8 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 42,
-    'patch' => 4,
+    'minor' => 43,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -132,11 +133,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'pulse-cache-interactions-off',
+    'codename' => 'schema-eeat-software-app',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.42.4',
+    'semver' => '1.43.0',
 ];

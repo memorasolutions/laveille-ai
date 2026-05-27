@@ -48,14 +48,28 @@ if (! function_exists('lv_jsonld_author_stephane')) {
                 'https://www.linkedin.com/in/lapointestephane',
                 'https://memora.solutions',
             ],
+            // 2026-05-27 #310 : knowsAbout enrichi 7→18 sujets pour EEAT 2026 (96% citations
+            // AI Overviews = sites EEAT élevé + 15+ entités reconnues). Aligné sur top queries
+            // GSC + glossaire 265 termes + audience 50% Québec.
             'knowsAbout' => [
                 'Intelligence artificielle',
+                'Veille technologique',
+                'Éducation au Québec',
+                'Prompt engineering',
+                'ChatGPT',
+                'Claude (Anthropic)',
+                'Gemini (Google)',
+                'LLM (Large Language Models)',
+                'Agents IA',
+                'RAG (Retrieval-Augmented Generation)',
+                'IA générative',
                 'Loi 25 (Québec)',
                 'RGPD',
-                'AI Act',
+                'AI Act (Union européenne)',
                 'Gouvernance numérique',
                 'Cybersécurité PME',
                 'Transformation numérique',
+                'Schema.org SEO',
             ],
         ];
     }
