@@ -86,40 +86,73 @@
 
     <div id="infoBanner" class="info-banner" role="region" aria-label="Information confidentialité">
         <span class="info-message">🛡️ <strong>100 % local</strong> — Aucune donnée ne quitte votre appareil. Conforme <a href="/glossaire/loi-25" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">Loi 25</a> et <a href="/glossaire/rgpd" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">RGPD</a>.</span>
-        <button id="closeBanner" class="btn-icon" aria-label="Fermer la bannière" style="min-width:44px;min-height:44px;">×</button>
+        <button id="closeBanner" class="btn-icon" aria-label="Fermer la bannière" title="{{ __('Fermer') }}" style="min-width:44px;min-height:44px;">×</button>
     </div>
 
-    <details class="anonymiseur-settings" style="margin:1rem 0;padding:0;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);">
-        <summary style="padding:0.85rem 1.25rem;cursor:pointer;font-weight:600;color:var(--text-primary);user-select:none;min-height:44px;display:flex;align-items:center;gap:0.5rem;">
-            <span aria-hidden="true">⚙️</span>
-            <span>Réglages avancés (mode masquage, score confiance, chiffrement)</span>
-        </summary>
-        <div style="padding:1rem 1.25rem;display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));">
-            <div>
-                <label for="maskMode" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;">Mode de masquage</label>
-                <select id="maskMode" class="form-input" style="min-height:44px;width:100%;">
-                    <option value="pseudo">Pseudonymisation (réversible, default)</option>
-                    <option value="hash">Hash SHA-256 (irréversible)</option>
-                    <option value="redaction">Redaction [REDACTED] (irréversible)</option>
-                    <option value="fpe">FPE format-préservant (déterministe)</option>
-                </select>
-                <small style="color:var(--text-secondary);display:block;margin-top:0.35rem;">Pseudo = anonymisation Loi 25 conformité. Hash/Redaction/FPE = vraie anonymisation irréversible.</small>
-            </div>
-            <div>
-                <label for="confidenceThreshold" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;">Seuil de confiance détection : <span id="confidenceThresholdValue" style="color:var(--primary);font-weight:700;">60 %</span></label>
-                <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" style="width:100%;min-height:44px;" aria-describedby="confidenceHint">
-                <small id="confidenceHint" style="color:var(--text-secondary);display:block;margin-top:0.35rem;">Masque les détections sous le seuil (réduit faux positifs).</small>
-            </div>
-            <div>
-                <label style="display:flex;align-items:center;gap:0.5rem;font-weight:600;color:var(--text-primary);min-height:44px;">
-                    <input type="checkbox" id="encryptionEnabled" style="min-width:24px;min-height:24px;cursor:pointer;">
-                    <span>Chiffrer exports JSON (AES-GCM 256)</span>
-                </label>
-                <input type="password" id="encryptionPassphrase" class="form-input" placeholder="Passphrase (12+ caractères)" style="min-height:44px;width:100%;margin-top:0.35rem;" autocomplete="new-password" disabled>
-                <small style="color:var(--text-secondary);display:block;margin-top:0.35rem;">Web Crypto natif zéro dépendance. PBKDF2 100k itérations.</small>
+    <div class="anonymiseur-presets" style="margin:1rem 0 1.5rem;">
+        <h3 style="margin:0 0 0.85rem;font-size:1.05rem;font-weight:700;color:var(--text-primary);">
+            🛡️ {{ __('Niveau de protection') }}
+            <span style="font-weight:400;font-size:0.85rem;color:var(--text-secondary);margin-left:0.5rem;">{{ __('Choisissez ce qui vous convient — vous pouvez changer à tout moment') }}</span>
+        </h3>
+        <div class="preset-grid" role="radiogroup" aria-label="{{ __('Niveau de protection') }}">
+            <button type="button" class="preset-card preset-card-recommended is-selected" data-preset="standard" role="radio" aria-checked="true">
+                <h4>🔒 {{ __('Standard') }}</h4>
+                <p>{{ __('Le bon choix pour la plupart des usages.') }}</p>
+                <ul>
+                    <li>{{ __('Remplace votre nom par un prénom fictif') }}</li>
+                    <li>{{ __('Vous pourrez restaurer les vraies données ensuite') }}</li>
+                    <li>{{ __('Tout reste sur votre appareil') }}</li>
+                </ul>
+            </button>
+            <button type="button" class="preset-card" data-preset="maximum" role="radio" aria-checked="false">
+                <h4>🛡️ {{ __('Maximum') }}</h4>
+                <p>{{ __('Pour données très sensibles (santé, légal, finance).') }}</p>
+                <ul>
+                    <li>{{ __('Remplace par [SUPPRIMÉ] — irréversible') }}</li>
+                    <li>{{ __('Export protégé par mot de passe') }}</li>
+                    <li>{{ __('Impossible de retrouver les vraies données') }}</li>
+                </ul>
+            </button>
+            <button type="button" class="preset-card" data-preset="custom" role="radio" aria-checked="false">
+                <h4>⚙️ {{ __('Personnalisé') }}</h4>
+                <p>{{ __('Pour utilisateurs avancés.') }}</p>
+                <ul>
+                    <li>{{ __('Choix du type de masquage') }}</li>
+                    <li>{{ __('Sensibilité de détection ajustable') }}</li>
+                    <li>{{ __('Chiffrement optionnel') }}</li>
+                </ul>
+            </button>
+        </div>
+
+        <div id="custom-settings" hidden style="margin-top:1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:1.15rem;">
+            <h4 style="margin:0 0 0.85rem;font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ __('Réglages personnalisés') }}</h4>
+            <div style="display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+                <div>
+                    <label for="maskMode" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;font-size:0.92rem;">{{ __('Type de masquage') }}</label>
+                    <select id="maskMode" class="form-input" style="min-height:44px;width:100%;">
+                        <option value="pseudo">{{ __('Remplacer par un faux prénom (réversible)') }}</option>
+                        <option value="hash">{{ __('Remplacer par un code unique (irréversible)') }}</option>
+                        <option value="redaction">{{ __('Remplacer par [SUPPRIMÉ] (irréversible)') }}</option>
+                        <option value="fpe">{{ __('Brouiller en gardant le format (avancé)') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="confidenceThreshold" style="display:block;font-weight:600;color:var(--text-primary);margin-bottom:0.35rem;font-size:0.92rem;">
+                        {{ __('Sensibilité de détection') }} : <span id="confidenceThresholdValue" style="color:var(--primary);font-weight:700;">60 %</span>
+                    </label>
+                    <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" style="width:100%;min-height:44px;" aria-describedby="confidenceHint">
+                    <small id="confidenceHint" style="color:var(--text-secondary);display:block;margin-top:0.35rem;font-size:0.8rem;">{{ __('Plus haut = moins de fausses détections') }}</small>
+                </div>
+                <div>
+                    <label style="display:flex;align-items:center;gap:0.5rem;font-weight:600;color:var(--text-primary);min-height:44px;font-size:0.92rem;">
+                        <input type="checkbox" id="encryptionEnabled" style="min-width:24px;min-height:24px;cursor:pointer;">
+                        <span>{{ __('Protéger les exports par mot de passe') }}</span>
+                    </label>
+                    <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Mot de passe (12+ caractères)') }}" style="min-height:44px;width:100%;margin-top:0.35rem;" autocomplete="new-password" disabled>
+                </div>
             </div>
         </div>
-    </details>
+    </div>
 
     <nav class="steps" aria-label="Étapes du processus">
         <button class="step active" data-step="1" aria-current="step">
@@ -138,12 +171,15 @@
 
     <main class="main-content">
         <div class="step-content active" data-step-content="1">
+            <div class="lv-anonym-help" style="background:#E6F7F5;border:1px solid rgba(11,114,133,0.2);border-radius:var(--radius);padding:0.85rem 1.15rem;margin-bottom:1rem;font-size:0.92rem;line-height:1.5;color:var(--text-primary);">
+                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte ci-dessous, puis cliquez') }} <strong>{{ __('Détecter PII') }}</strong> {{ __('pour repérer automatiquement les données sensibles (noms, courriels, NAS…). Vous pouvez aussi sélectionner du texte à la souris puis cliquer') }} <strong>🕵️ {{ __('Anonymiser') }}</strong>. {{ __('Les vraies données restent sur votre appareil — rien n\'est envoyé à un serveur.') }}
+            </div>
             <section class="panel editor-panel">
                 <div class="panel-header">
-                    <h2 class="panel-title">Source</h2>
+                    <h2 class="panel-title">{{ __('Votre texte') }}</h2>
                     <div class="panel-actions">
-                        <button id="btnClear" class="btn btn-secondary btn-sm">Effacer</button>
-                        <button id="btnDetect" class="btn btn-primary btn-sm">Détecter PII</button>
+                        <button id="btnClear" class="btn btn-secondary btn-sm" title="{{ __('Effacer tout le texte') }}">{{ __('Effacer') }}</button>
+                        <button id="btnDetect" class="btn btn-primary btn-sm" title="{{ __('Repérer automatiquement les données personnelles') }}">🔍 {{ __('Détecter les données sensibles') }}</button>
                     </div>
                 </div>
                 <div class="panel-content">
@@ -238,7 +274,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h2 id="modalTitle" class="panel-title">Ajouter une règle</h2>
-                <button id="closeModal" class="btn-icon" aria-label="Fermer la modale">×</button>
+                <button id="closeModal" class="btn-icon" aria-label="Fermer la modale" title="{{ __('Fermer') }}">×</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -264,29 +300,30 @@
                 </div>
 
                 <div id="identityFields" class="identity-fields">
+                    <p class="form-hint" style="margin-bottom:0.75rem;">{{ __('La vraie identité (gauche) sera remplacée par l\'identité fictive (droite) dans le texte envoyé à l\'IA. Vous pourrez restaurer les vraies données à l\'étape 3.') }}</p>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="inputFirstName" class="form-label">Prénom original</label>
+                            <label for="inputFirstName" class="form-label">{{ __('Prénom réel') }}</label>
                             <input type="text" id="inputFirstName" class="form-input" placeholder="ex: Stéphane">
                         </div>
                         <div class="form-group">
-                            <label for="inputLastName" class="form-label">Nom original</label>
+                            <label for="inputLastName" class="form-label">{{ __('Nom réel') }}</label>
                             <input type="text" id="inputLastName" class="form-input" placeholder="ex: Lapointe">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="inputFakeFirstName" class="form-label">Prénom fictif</label>
+                            <label for="inputFakeFirstName" class="form-label">{{ __('Prénom fictif') }} <span style="color:var(--primary);font-weight:600;">↔</span></label>
                             <input type="text" id="inputFakeFirstName" class="form-input" placeholder="ex: Pierre">
                         </div>
                         <div class="form-group">
-                            <label for="inputFakeLastName" class="form-label">Nom fictif</label>
+                            <label for="inputFakeLastName" class="form-label">{{ __('Nom fictif') }}</label>
                             <input type="text" id="inputFakeLastName" class="form-input" placeholder="ex: Tremblay">
                         </div>
                     </div>
-                    <div class="form-row">
-                        <button id="btnGenerateIdentity" class="btn btn-secondary btn-sm">🎲 Générer identité fictive</button>
-                        <button id="btnRefreshVariant" class="btn btn-icon btn-sm" aria-label="Nouvelle variante">🔄</button>
+                    <div class="form-row" style="align-items:center;gap:0.5rem;">
+                        <button id="btnGenerateIdentity" class="btn btn-secondary btn-sm" title="{{ __('Générer automatiquement une identité fictive québécoise') }}">🎲 {{ __('Générer une identité fictive') }}</button>
+                        <button id="btnRefreshVariant" class="btn btn-secondary btn-sm" aria-label="{{ __('Proposer une autre identité fictive') }}" title="{{ __('Proposer une autre suggestion') }}">🔄 {{ __('Autre suggestion') }}</button>
                     </div>
                 </div>
 
@@ -350,4 +387,5 @@
 <script src="{{ asset('assets/tools/anonymiseur/enhancements.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v145.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v146.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/enhancements-v148-presets.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

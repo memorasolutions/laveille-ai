@@ -202,7 +202,7 @@
 
 /* === Tiptap éditeur (v1.46.0) — scope .app pour override Bootstrap/fronttheme === */
 .app .tiptap-source-host {
-    min-height: 240px;
+    min-height: 320px;
     max-height: 60vh;
     overflow-y: auto;
     border: 1px solid var(--border);
@@ -216,7 +216,7 @@
     box-shadow: 0 0 0 3px rgba(11, 114, 133, 0.18);
 }
 .app .ProseMirror {
-    min-height: 240px;
+    min-height: 320px;
     padding: 1rem 1.25rem;
     outline: none;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
@@ -1562,3 +1562,245 @@ body {
 .mt-4 { margin-top: 16px; }
 .mb-2 { margin-bottom: 8px; }
 .mb-4 { margin-bottom: 16px; }
+
+/* ===================================================================
+   REFONTE UX/UI v1.46.2 — best practices mai 2026 (pp_search sourcé)
+   Split-pane 58/42 + textareas 320px + presets cards + stats cards
+   Scope .app + !important pour battre Bootstrap parent.
+   =================================================================== */
+
+/* 1. SPLIT-PANE étape 2 */
+@media (min-width: 900px) {
+  .app .category-grid-layout {
+    display: grid !important;
+    grid-template-columns: 42% 58% !important;
+    gap: 1.5rem !important;
+    align-items: start !important;
+  }
+  .app .sidebar {
+    position: sticky !important;
+    top: 1rem !important;
+  }
+}
+@media (max-width: 899px) {
+  .app .category-grid-layout {
+    display: block !important;
+  }
+}
+
+/* 2. TEXTAREAS agrandies */
+.app .anonymized-output,
+.app textarea#aiResponse,
+.app .source-content textarea {
+  min-height: 320px !important;
+  width: 100% !important;
+  padding: 1rem 1.25rem !important;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  resize: vertical !important;
+  transition: border 0.15s, box-shadow 0.15s !important;
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+.app .anonymized-output:focus,
+.app textarea#aiResponse:focus,
+.app .source-content textarea:focus {
+  outline: none !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(11, 114, 133, 0.18) !important;
+}
+.app .anonymized-output[readonly],
+.app textarea#aiResponse[readonly],
+.app .source-content textarea[readonly] {
+  background: var(--bg-secondary) !important;
+}
+
+/* 3. STATS cards */
+.app .stats-bar {
+  display: flex !important;
+  gap: 1rem !important;
+  margin-bottom: 1rem !important;
+  flex-wrap: wrap !important;
+}
+.app .stat-item {
+  background: var(--bg-tertiary) !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--border) !important;
+  flex: 1 1 140px !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important;
+}
+.app .stat-item strong {
+  display: block !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  color: var(--primary) !important;
+  line-height: 1 !important;
+}
+
+/* 4. EMPTY STATE */
+.app .empty-state {
+  padding: 2.5rem 1rem !important;
+  text-align: center !important;
+  color: var(--text-muted) !important;
+  background: var(--bg-tertiary) !important;
+  border-radius: var(--radius) !important;
+  border: 1px dashed var(--border) !important;
+}
+.app .empty-state-icon {
+  font-size: 2.5rem !important;
+  opacity: 0.5 !important;
+  margin-bottom: 0.5rem !important;
+  display: block !important;
+}
+
+/* 5. RESULT TABS */
+.app .result-tabs {
+  display: flex !important;
+  gap: 0 !important;
+  border-bottom: 2px solid var(--border) !important;
+  margin-bottom: 1rem !important;
+}
+.app .result-tab {
+  padding: 0.85rem 1.25rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
+  margin-bottom: -2px !important;
+  cursor: pointer !important;
+  color: var(--text-secondary) !important;
+  font-weight: 600 !important;
+  min-height: 44px !important;
+}
+.app .result-tab.active {
+  color: var(--primary) !important;
+  border-bottom-color: var(--primary) !important;
+}
+.app .result-content {
+  display: none !important;
+}
+.app .result-content.active {
+  display: block !important;
+}
+
+/* 6. PRESETS CARDS — réglages sécurité ultra-simples 3 niveaux */
+.app .preset-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+.app .preset-card {
+  border: 2px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  padding: 1.15rem !important;
+  cursor: pointer !important;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s !important;
+  background: var(--bg-primary) !important;
+  display: block !important;
+  text-align: left !important;
+  width: 100% !important;
+  font: inherit !important;
+  color: inherit !important;
+}
+.app .preset-card:hover {
+  border-color: var(--primary) !important;
+}
+.app .preset-card.is-selected {
+  border-color: var(--primary) !important;
+  background: var(--bg-tertiary) !important;
+  box-shadow: 0 0 0 1px var(--primary) inset !important;
+}
+.app .preset-card h4 {
+  margin: 0 0 0.35rem !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+}
+.app .preset-card p {
+  margin: 0 0 0.5rem !important;
+  font-size: 0.85rem !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.4 !important;
+}
+.app .preset-card ul {
+  margin: 0 !important;
+  padding-left: 1.1rem !important;
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.5 !important;
+  list-style: '✓ ' !important;
+}
+.app .preset-card li {
+  margin: 0.2rem 0 !important;
+  padding-left: 0.25rem !important;
+}
+.app .preset-card.is-selected ul { color: var(--text-primary) !important; }
+.app .preset-card:focus-visible {
+  outline: 3px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+.app .preset-card-recommended {
+  position: relative !important;
+}
+.app .preset-card-recommended::before {
+  content: 'Recommandé' !important;
+  position: absolute !important;
+  top: -10px !important;
+  right: 12px !important;
+  background: var(--primary) !important;
+  color: #fff !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  padding: 0.15rem 0.55rem !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* 7. PANEL harmonisé */
+.app .panel {
+  margin-bottom: 1.5rem !important;
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+.app .panel-header {
+  padding: 1rem 1.25rem !important;
+  border-bottom: 1px solid var(--border) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  flex-wrap: wrap !important;
+  background: var(--bg-secondary) !important;
+}
+.app .panel-content {
+  padding: 1.25rem !important;
+}
+.app .panel-actions {
+  margin-top: 1rem !important;
+  display: flex !important;
+  gap: 0.65rem !important;
+  flex-wrap: wrap !important;
+}
+
+/* 8. prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .app *,
+  .app *::before,
+  .app *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
