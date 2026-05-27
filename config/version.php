@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.46.5 · 2026-05-27 · #313 fix(tools) anonymiseur bannière confiance — grid 2×2 desktop au lieu de 3+1 isolé (user screenshot 18:52 « pas belle mise en page »). Cause : `auto-fit minmax(230px,1fr)` faisait 3 colonnes avec la 4e card « Vos contrôles » seule sur sa ligne à gauche = laid + déséquilibré + grand vide à droite. Fix : grid responsive prévisible — 1 col mobile (<720px) / 2×2 tablet+desktop (720-1199px) / 4 cols large (≥1200px). align-items: stretch + height 100% sur cards pour hauteurs uniformes. Codename anonymizer-trust-grid-2x2.
  *   1.46.4 · 2026-05-27 · #313 feat(tools) anonymiseur — bannière confiance accordéon pédagogique (Option A user GO 96/100, best practices pp_search mai 2026 : Iapp/CNIL/Didomi/Ketch). Demande user : « pas assez complet, le × semble perdu » + accordéon fermé une fois accepté + « les personnes doivent comprendre qu'on ne garde RIEN sur le serveur ». Refonte #infoBanner en `.lv-trust-banner` : (1) Toggle header cliquable « 🛡️ 100 % local — Traitement dans votre navigateur, aucun contenu envoyé à un serveur » + chevron animé. (2) Schéma flux visuel `📝 Texte → 🖥️ Navigateur (highlight teal solid) → ✋ Vous décidez → 🤖 IA externe (dashed)` montrant que rien ne transite par le serveur Memora. (3) 4 cards structurées PAR FINALITÉ (best practice Iapp/CNIL, pas par jargon juridique) : « Ce qui reste local » / « Ce qui peut sortir » / « Quand on transmet » / « Vos contrôles » avec liens glossaire Loi 25 + RGPD. (4) Bouton « J'ai compris, ne plus afficher » → memorise localStorage `anonymiseur_trust_accepted_v1=1` + collapse l'accordéon + toast confirmation. (5) Header reste cliquable même collapsé pour ré-afficher au besoin. (6) Persistance entre visites : visiteur récurrent voit la version compacte 1-ligne, nouveau voit l'accordéon ouvert. Module `enhancements-v149-trust.js` ~30 lignes. CSS ~140 lignes scope `.app !important` avec gradient teal + cards bordées + chevron rotate transition + ARIA expanded + focus-visible 3px AAA. Codename anonymizer-trust-banner-accordion.
  *   1.46.3 · 2026-05-27 · #313 fix(tools) anonymiseur — alignement réglages personnalisés (screenshot 18:45). 2 bugs visuels : (1) select « Type de masquage » tronqué (« Remplacer par un faux prénom (v » → chevron caché car parent column étroit + texte option trop long). (2) Les 3 champs (select / slider / password) désalignés verticalement car contenus de hauteur différente (hint vs pas de hint). Fix : (a) refonte markup en wrapper `.anonymiseur-custom-field` flex column avec label + .anonymiseur-custom-control + hint TOUJOURS présents (3 colonnes uniformes), (b) options select raccourcies (« Faux prénom (réversible) » au lieu de « Remplacer par un faux prénom (réversible) »), (c) CSS `.anonymiseur-custom-control > select/input width 100% + max-width 100% + text-overflow ellipsis box-sizing border-box`, (d) grid align-items stretch + min-width 0 sur les fields (anti-overflow grid items), (e) hint min-height 1.5em pour aligner hauteurs même si vide, (f) accent-color primary teal sur range/checkbox. Codename anonymizer-custom-fields-aligned.
  *   1.46.2 · 2026-05-27 · #313 feat(tools) anonymiseur REFONTE UX/UI 2026 (Option A user GO). Sprint S129 finalisation. Best practices mai 2026 sourcées via 2 pp_search (lollypop, uxplanet, foxit, ENISA, Canada plain language, Loi 25). 6 améliorations majeures : (1) **Split-pane étape 2** : `.app .category-grid-layout` grid 42/58 desktop (min-width 900px), 1 colonne mobile. Sidebar règles sticky top 1rem desktop. Relation cause-effet visible (entrée gauche ↔ résultat droite). (2) **Textareas agrandies** : `.app .anonymized-output`, `#aiResponse`, `.source-content textarea` + `.ProseMirror` + `.tiptap-source-host` min-height 320px (vs 135-240px avant). Police Plus Jakarta Sans line-height 1.6. Focus ring teal 3px AAA. (3) **Réglages avancés simplifiés en 3 PRESETS** (au lieu de jargon technique « mode masquage / score confiance / chiffrement ») : « 🔒 Standard recommandé » (pseudo + restauration + 0.6 confidence) / « 🛡️ Maximum » (redaction irréversible + chiffrement + 0.5) / « ⚙️ Personnalisé » (révèle les vrais réglages). Langage clair Loi 25 (« Remplacer par [SUPPRIMÉ] » au lieu de « pseudonymisation par hachage ») + badge « Recommandé » + role=radiogroup ARIA. Module `enhancements-v148-presets.js` mappe preset → maskMode/confidence/encryption via events synthétiques. Persistance localStorage `anonymiseur_preset_v1`. (4) **Stats cards** : `.app .stat-item` flex card avec strong 1.5rem teal au lieu de stats brutes inline. (5) **Empty state** : .empty-state padding 2.5rem + icon 2.5rem opacity + border dashed + background tertiary teal pâle. (6) **Result tabs** : border-bottom 2px + active border 3px primary 44px target. (7) **Panel harmonisé** : header bg secondary + border + radius + content padding 1.25rem. (8) **Fix UX T28** intégrés : `btnRefreshVariant` label « 🔄 Autre suggestion » + aide contextuelle bloc identity « Vraie ↔ Fictive » + titles closeBanner/closeModal + aide workflow étape 1 « 💡 Comment ça marche ». Tous overrides scopés `.app !important` (battre Bootstrap parent). prefers-reduced-motion guard. Codename anonymizer-ux-refonte-2026.
@@ -137,7 +138,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 46,
-    'patch' => 4,
+    'patch' => 5,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -147,11 +148,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-trust-banner-accordion',
+    'codename' => 'anonymizer-trust-grid-2x2',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.46.4',
+    'semver' => '1.46.5',
 ];
