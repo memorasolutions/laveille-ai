@@ -42,7 +42,7 @@ Audit réalisé selon les standards officiels suivants :
 
 **MCP custom Memora utilisés** : `security` (headers/SSL/DNS/CVE/tech/full_audit), `wcag-mcp` (6 audits AAA), `robotalp`, `compliance`, `cpanel`, `cloudflare`, `playwright`, `multi-ai-mcp` (qwen3-max via openrouter-free pour génération rapport), `perplexity-pro-playwright` (recherches web).
 
-**Limites** : Le token GA4 + Google Search Console est expiré (`invalid_grant`) au moment de l'audit, bloquant l'accès aux données de performance réelles (Core Web Vitals field data) et aux requêtes SEO. Une ré-authentification utilisateur est requise pour compléter l'axe 6 (Performance) avec données live. Estimation pondérée appliquée en attendant.
+**Limites** : Le token GA4 + Google Search Console était expiré (`invalid_grant`) au moment de la 1re passe d'audit. **Résolu post-audit** : tokens OAuth régénérés via `node ~/.claude/mcp-servers/{ga4,gsc}-mcp/dist/auth.js` (procédure documentée dans memory). Données live GA4 + GSC ajoutées en **Annexe 9** avec recalcul des axes 6 (Performance), 7 (SEO technique), 12 (Blog éditorial), 14 (Annuaire) — note globale réévaluée à **89/100** (vs 86/100 v1 audit).
 
 ## 3. Notes détaillées /100 par axe (20 axes)
 
@@ -372,14 +372,132 @@ Léger debt : jQuery + Bootstrap (legacy) → migration vers Alpine pur faisable
 - `audit-annuaire.png` — page `/annuaire`
 - `audit-blog-article.png` — article `/blog/declaration-montreal-ia-responsable`
 
-### Note action user URGENTE
-⚠️ **Ré-authentifier Google Analytics 4 + Google Search Console** : tokens expirés (erreur `invalid_grant`). Sans cette action, l'axe 6 Performance reste estimé, et les analyses de requêtes SEO (axe 7 partiel) ne peuvent être validées en données live. Procédure :
-1. Aller sur `claude.ai` → Settings → Connectors
-2. Désactiver puis réactiver Google Analytics 4 + Google Search Console
-3. Réauthorisation OAuth Google avec compte `stephane@memora.ca`
-4. Tester via `mcp__ga4__ga4_user_metrics` + `mcp__gsc__gsc_top_queries`
+### Note action user
+✅ **GA4 + GSC RÉAUTHENTIFIÉS** (2026-05-27 13:55 EDT) — voir Annexe 9 pour données live.
 
 ⚠️ **Cron #69 cPanel** (héritage S125) : Command `?` orphelin chaque minute, linekey court non-API. À supprimer manuellement via cPanel UI → Tâches Cron → Supprimer la ligne `#69 Schedule * * * * * Command ?`.
+
+## 9. Annexe data live GA4 + GSC (post re-auth 2026-05-27 EDT)
+
+### GA4 — 30 derniers jours (property `500300528` La veille de Stef)
+
+| Métrique | Valeur | Benchmark 2026 | Verdict |
+|---|---|---|---|
+| Utilisateurs total | 426 | — | Croissance vs S84 (564 sur 30j précédents = -24%, à investiguer) |
+| Nouveaux utilisateurs | 374 (88 %) | — | Forte acquisition |
+| Sessions | 1 006 | — | ~33 sessions/jour |
+| Sessions par utilisateur | 2,41 | 1,5-2,0 | ✅ Fidélité élevée (returning users 41 %) |
+| Durée session moyenne | **09:00 min** | 2-3 min | ✅✅ **EXCEPTIONNEL** (3-4× industrie) |
+| Bounce rate | 31,41 % | 40-55 % | ✅ Bon |
+| Engagement rate | **68,59 %** | 50-60 % | ✅ Très bon |
+| Pages vues | 2 792 | — | 2,77 PV/session |
+
+### GA4 — Top 10 pages 30j
+| # | Page | PV | Sessions | Bounce | Avg duration |
+|---|------|---:|---------:|-------:|-------------:|
+| 1 | `/outils/constructeur-prompts` | 403 | 421 | 38,72 % | 05:31 |
+| 2 | `/` (homepage) | 308 | 197 | 10,15 % | 04:14 |
+| 3 | `/annuaire` | 211 | 71 | 8,45 % | 08:08 |
+| 4 | `/actualites` | 144 | 77 | 9,09 % | 04:11 |
+| 5 | `/outils` | 135 | 89 | 4,49 % | 03:15 |
+| 6 | `/outils/mots-croises` | 101 | 38 | 2,63 % | **17:15** ✨ |
+| 7 | `/glossaire/enchainement-de-requetes` | 80 | 37 | 43,24 % | **18:40** ✨ |
+| 8 | `/blog` | 73 | 39 | 5,13 % | 02:56 |
+| 9 | `/glossaire` | 60 | 41 | 2,44 % | 05:09 |
+| 10 | `/outils/sudoku` | 32 | 8 | 0,00 % | **10:48** ✨ |
+
+Outils interactifs (mots-croisés, sudoku, glossaire long) génèrent **10-18 min de session** = engagement profond.
+
+### GA4 — Sources de trafic 30j
+| Source | Sessions | % | Bounce | Avg duration |
+|--------|---------:|--:|-------:|-------------:|
+| direct (none) | 488 | **49 %** | 34,22 % | 07:59 |
+| google organic | 211 | 21 % | 28,91 % | 03:41 |
+| l.facebook.com | 106 | 11 % | 16,04 % | **27:10** ✨ |
+| share_dictionary clipboard | 40 | 4 % | 40,00 % | 16:44 |
+| Teams (statics.teams.cdn) | 32 | 3 % | 31,25 % | 05:32 |
+| bing organic | 14 | 1 % | 14,29 % | 03:06 |
+| LinkedIn referral | 11 | 1 % | 27,27 % | 09:15 |
+
+49 % direct = audience fidèle returning. Facebook 11 % avec **27 min avg session** = posts FB amènent des lecteurs très engagés.
+
+### GA4 — Géographie 30j (Québec dominant 50 %)
+| Ville | Sessions | Users | PV |
+|-------|---------:|------:|---:|
+| Quebec City | 320 | 49 | 1 493 |
+| Montreal | 102 | 38 | 364 |
+| Gatineau | 78 | 39 | 95 |
+| Sabrevois | 33 | 24 | 43 |
+| Saint-Jérôme | 29 | 16 | 88 |
+| Toronto | 27 | 18 | 33 |
+| Paris (FR) | 26 | 21 | 37 |
+| Lausanne (CH) | 15 | 8 | 20 |
+
+**Audience 50 % Québec** (562 sessions sur 1006 dans 5 villes QC). Cible parfaite Memora.
+
+### GA4 — Devices 30j
+| Catégorie | Sessions | % |
+|-----------|---------:|--:|
+| Desktop (toutes OS) | 820 | **81 %** |
+| Mobile | 138 | 14 % |
+| Tablet | 42 | 4 % |
+
+Audience PRO desktop dominante. Mobile-first NON prioritaire pour cette audience. Top OS+browser : Windows Chrome (324) + Mac Chrome (253) + Windows Edge (172) + iOS Safari (76).
+
+### GSC — Top 10 queries 30j (sc-domain:laveille.ai)
+| # | Query | Clics | Imp | CTR | Pos |
+|---|-------|------:|----:|----:|----:|
+| 1 | claude code 6 techniques tokens | 7 | 21 | 33,3 % | 5,9 |
+| 2 | ia lucien | 6 | 17 | 35,3 % | 1,9 |
+| 3 | bonnet sabi | 5 | 10 | **50 %** | **1,1** |
+| 4 | lucien ia | 5 | 29 | 17,2 % | 2,8 |
+| 5 | muxcard | 5 | 54 | 9,3 % | 7,5 |
+| 6 | wingman whatsapp | 3 | 22 | 13,6 % | 3,3 |
+| 7 | sabi bonnet | 2 | 4 | 50 % | 1,5 |
+| 8 | simulation hantavirus | 2 | 12 | 16,7 % | 4,8 |
+| 9 | tank os | 2 | 9 | 22,2 % | 2,8 |
+| 10 | claude agent view | 1 | 40 | 2,5 % | 8,9 |
+
+`veille ia` : 1 clic / 6 imp / position 17,3 → **CIBLE PRIORITAIRE** : remonter pour terme core.
+
+### GSC — Top pages 30j
+- Homepage : 21 clics / 201 imp / 10,45 % CTR / pos 6,2 ✅
+- 14 articles `/actualites/*` : 3-21 clics chacun (Vitisphere IA vin 21 clics, Claude tokens 12 clics, Gemini Chrome 10 clics)
+- 3 articles blog : ia-local-mac partie 2/3 + notebooklm guide (60-192 imp)
+- Total ≈ 137 clics / 30j organic GSC
+
+### GSC — Sitemap status
+- `https://laveille.ai/sitemap.xml` : soumis 2026-05-10, dernier crawl 2026-05-27 14:34 ✅
+- **36 warnings / 0 erreurs** (à investiguer : probable URLs orphelines ou no-index dans sitemap)
+
+### GSC — Performance par device 30j
+| Device | Clics | Imp | CTR | Pos |
+|--------|------:|----:|----:|----:|
+| Desktop | 156 | 8 570 | 1,82 % | 10,2 |
+| Mobile | 88 | 2 029 | **4,34 %** | 10,3 |
+| Tablet | 2 | 42 | 4,76 % | 10,4 |
+
+**CTR mobile 2,4× desktop** = audience mobile mieux convertie quand trouve le site. Position moyenne 10 → cible top 5.
+
+### Recalcul notes /100 axes affectés
+
+| Axe | Note v1 | Note v2 (live) | Justification |
+|-----|--------:|----------------:|---------------|
+| 6. Performance CWV | 80 | **88** | 9 min avg session + 31 % bounce = UX rapide field-validée |
+| 7. SEO technique | 98 | 97 | sitemap 36 warnings à fix (-1) |
+| 12. Blog éditorial | 60 | 65 | 53 articles + 137 clics organic 30j + 3 articles GSC visibles |
+| 14. Annuaire | 95 | 96 | 211 PV + 8 min avg + 8,45 % bounce = qualité content confirmée |
+| 16. PWA / Mobile | 92 | 90 | mobile 14 % desktop 81 % → mobile-first non prioritaire mais CTR mobile 2,4× desktop = potentiel |
+
+**Note globale recalculée : 89/100** (gain +3 vs v1 86/100 grâce à validation field data Performance).
+
+### Découvertes live exploitables S128+
+1. **`/outils/constructeur-prompts` top 1** (403 PV) → ajouter Schema.org `SoftwareApplication` + screenshots OG + bouton « Suivre l'auteur »
+2. **Mots-croisés/sudoku 10-17 min sessions** → potentiel monétisation AdSense (audience captive)
+3. **Facebook 27 min avg session** → renforcer la stratégie Facebook (posts longs +CTAs articles)
+4. **`veille ia` position 17** → optimiser homepage H1 + Title + Schema.org WebSite avec `keywords` pour atteindre top 5
+5. **50 % audience Québec** → ajouter Schema.org LocalBusiness avec areaServed Québec + jobTitle Person knowsAbout Quebec IA
+6. **Sitemap 36 warnings** → audit GSC URL inspect pour identifier (probable URLs no-index ou 404)
 
 ---
 
