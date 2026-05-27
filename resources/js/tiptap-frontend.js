@@ -291,24 +291,31 @@ async function initAnonymiseurTiptap() {
             const bubble = document.getElementById('tiptap-bubble-menu')
             if (!bubble) return
             const sel = editor.state.selection
+            // Mémoriser le texte sélectionné pour l'action "Anonymiser"
+            const selText = editor.state.doc.textBetween(sel.from, sel.to, ' ').trim()
+            window._anonymiseurSelectedText = selText
             if (sel.empty || !window.getSelection().rangeCount) {
                 bubble.classList.remove('is-visible')
                 return
             }
+            // Affiche/masque le bouton Anonymiser selon longueur sélection
+            const anonBtn = bubble.querySelector('button[data-action="anonymize"]')
+            if (anonBtn) anonBtn.style.display = (selText.length > 1 && selText.length < 500) ? '' : 'none'
             try {
                 const range = window.getSelection().getRangeAt(0)
                 const rect = range.getBoundingClientRect()
                 if (rect.width === 0 && rect.height === 0) { bubble.classList.remove('is-visible'); return }
+                // position: fixed → coords viewport-relatives (PAS de scrollY)
+                bubble.classList.add('is-visible')
                 const br = bubble.getBoundingClientRect()
-                let left = rect.left + window.scrollX + (rect.width / 2) - (br.width / 2)
-                let top = rect.top + window.scrollY - br.height - 8
-                if (top < window.scrollY + 8) top = rect.bottom + window.scrollY + 8
-                if (left < window.scrollX + 8) left = window.scrollX + 8
-                const maxLeft = window.scrollX + window.innerWidth - br.width - 8
+                let left = rect.left + (rect.width / 2) - (br.width / 2)
+                let top = rect.top - br.height - 8
+                if (top < 8) top = rect.bottom + 8
+                if (left < 8) left = 8
+                const maxLeft = window.innerWidth - br.width - 8
                 if (left > maxLeft) left = maxLeft
                 bubble.style.left = `${left}px`
                 bubble.style.top = `${top}px`
-                bubble.classList.add('is-visible')
                 bubble.querySelectorAll('button[data-mark]').forEach(btn => {
                     btn.classList.toggle('is-active', editor.isActive(btn.getAttribute('data-mark')))
                 })
@@ -347,6 +354,14 @@ async function initAnonymiseurTiptap() {
             else if (mark === 'code') editor.chain().focus().toggleCode().run()
             else if (mark === 'highlight') editor.chain().focus().toggleHighlight().run()
             else if (action === 'clearmark') editor.chain().focus().unsetAllMarks().run()
+            else if (action === 'anonymize') {
+                const sel = editor.state.selection
+                const text = (window._anonymiseurSelectedText || editor.state.doc.textBetween(sel.from, sel.to, ' ')).trim()
+                if (text && typeof window.anonymizeTextValue === 'function') {
+                    window.anonymizeTextValue(text)
+                    bubble.classList.remove('is-visible')
+                }
+            }
         })
     }
 

@@ -270,20 +270,29 @@
     font-style: italic;
 }
 
-/* Bubble menu Tiptap vanilla */
+/* Bubble menu Tiptap vanilla — position fixed (viewport-relative, robuste scroll) */
 .tiptap-bubble-menu {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    z-index: 9999;
+    z-index: 10050;
     background: #1A1D23;
     color: #FFFFFF;
     border-radius: 8px;
     padding: 4px;
     display: none;
     gap: 2px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
     pointer-events: auto;
+    white-space: nowrap;
+}
+.tiptap-bubble-menu button[data-action="anonymize"] {
+    background: var(--accent);
+    font-weight: 700;
+    padding: 6px 12px;
+}
+.tiptap-bubble-menu button[data-action="anonymize"]:hover {
+    background: #9A3412;
 }
 .tiptap-bubble-menu.is-visible {
     display: inline-flex;

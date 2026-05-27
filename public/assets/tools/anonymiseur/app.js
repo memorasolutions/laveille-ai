@@ -1049,14 +1049,19 @@ function checkFullpageParam() {
 function handleTextSelection() {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
+    anonymizeTextValue(selectedText);
+}
 
+// Ouvre la modale de règle pré-remplie pour un texte sélectionné donné.
+// Exposée sur window pour le bubble menu Tiptap (action "Anonymiser sélection").
+function anonymizeTextValue(selectedText) {
+    selectedText = (selectedText || '').trim();
     if (selectedText.length > 0 && selectedText.length < 500) {
         const exists = AppState.rules.some(r => r.original.toLowerCase() === selectedText.toLowerCase());
         if (!exists) {
             AppState.selectedCategory = 'identity';
             AppState.editingRuleId = null;
 
-            // Parser le texte selectionne en prenom et nom
             const parts = selectedText.split(' ');
             if (parts.length >= 2) {
                 document.getElementById('inputFirstName').value = parts[0];
@@ -1066,14 +1071,15 @@ function handleTextSelection() {
                 document.getElementById('inputLastName').value = '';
             }
 
-            // Generer les faux noms
             generateFakeIdentity();
-
             updateCategorySelection();
             openModal();
+        } else if (typeof showToast === 'function') {
+            showToast('Une règle existe déjà pour « ' + selectedText + ' ».', 'info');
         }
     }
 }
+window.anonymizeTextValue = anonymizeTextValue;
 
 // ============================================
 // INITIALISATION
@@ -1124,7 +1130,7 @@ function init() {
     const sourceText = document.getElementById('sourceText');
     sourceText.addEventListener('input', () => {
         const text = sourceText.innerText;
-        document.getElementById('charCount').textContent = `${text.length} caracteres`;
+        document.getElementById('charCount').textContent = String(text.length);
         updateAnonymizedText();
         updateStats();
     });
@@ -1145,7 +1151,7 @@ function init() {
     document.getElementById('btnDetect').addEventListener('click', detectPII);
     document.getElementById('btnClear').addEventListener('click', () => {
         sourceText.innerText = '';
-        document.getElementById('charCount').textContent = '0 caracteres';
+        document.getElementById('charCount').textContent = '0';
         document.getElementById('detectionsBar').classList.add('hidden');
         updateAnonymizedText();
         updateStats();

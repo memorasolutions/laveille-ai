@@ -154,6 +154,8 @@
 
                     {{-- Bubble menu Tiptap vanilla : Bold / Italic / Underline / Strike / Code / Highlight / Clear --}}
                     <div id="tiptap-bubble-menu" class="tiptap-bubble-menu" role="toolbar" aria-label="{{ __('Format de texte') }}">
+                        <button type="button" data-action="anonymize" aria-label="{{ __('Anonymiser la sélection') }}" title="{{ __('Anonymiser cette sélection') }}">🕵️ {{ __('Anonymiser') }}</button>
+                        <span class="tiptap-bubble-divider" aria-hidden="true"></span>
                         <button type="button" data-mark="bold" aria-label="{{ __('Gras') }}" title="{{ __('Gras (Ctrl+B)') }}"><strong>B</strong></button>
                         <button type="button" data-mark="italic" aria-label="{{ __('Italique') }}" title="{{ __('Italique (Ctrl+I)') }}"><em>I</em></button>
                         <button type="button" data-mark="underline" aria-label="{{ __('Souligné') }}" title="{{ __('Souligné (Ctrl+U)') }}"><u>U</u></button>
