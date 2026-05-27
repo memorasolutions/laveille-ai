@@ -44,6 +44,22 @@ $commands = [
     ['/usr/bin/git', 'status', '-s'],
 ];
 
+// 2026-05-27 #311 : option `&cache=1` pour rafraîchir les caches Laravel après pull,
+// bullet-proof quand cPanel UAPI est down (Shell API désactivée + File Manager API
+// en restart). Workaround validé en S128 incident cPanel maintenance prolongée.
+// Allowlist commandes artisan (view:clear + config:cache + view:cache + route:cache).
+if (! empty($_GET['cache'])) {
+    // Localiser PHP CLI (cron #20 prod : /opt/cpanel/ea-php84/root/usr/bin/php).
+    $phpBin = '/opt/cpanel/ea-php84/root/usr/bin/php';
+    if (! is_executable($phpBin)) {
+        $phpBin = trim((string) shell_exec('which php')) ?: '/usr/bin/php';
+    }
+    $commands[] = [$phpBin, 'artisan', 'view:clear'];
+    $commands[] = [$phpBin, 'artisan', 'config:cache'];
+    $commands[] = [$phpBin, 'artisan', 'view:cache'];
+    $commands[] = [$phpBin, 'artisan', 'route:cache'];
+}
+
 foreach ($commands as $cmd) {
     echo '$ '.implode(' ', $cmd)."\n";
     $proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
@@ -60,6 +76,18 @@ foreach ($commands as $cmd) {
         echo "[proc_open failed]\n";
     }
     echo "\n";
+}
+
+// 2026-05-27 #311 : si cache refresh demandé, écrire _lvversion.txt avec semver courant
+// (footer prod synchronisé sans cPanel UAPI File Manager).
+if (! empty($_GET['cache'])) {
+    $cfgPath = __DIR__.'/../config/version.php';
+    if (file_exists($cfgPath)) {
+        $cfg = include $cfgPath;
+        $ver = $cfg['semver'] ?? 'unknown';
+        @file_put_contents(__DIR__.'/_lvversion.txt', $ver."\n");
+        echo "[_lvversion.txt] $ver\n";
+    }
 }
 
 echo "OK ".date('c')."\n";
