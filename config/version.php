@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.42.3 · 2026-05-27 · #307 fix(glossary) titre terme « anthropomorphisme » → « Anthropomorphisme » (capitaliser première lettre pour cohérence avec les 264 autres termes du glossaire). Correctif data prod via UPDATE direct DB `dictionary_terms` id=255 : `name` JSON Spatie Translatable `{"fr_CA":"Anthropomorphisme","fr":"Anthropomorphisme"}` (avant : `{"fr_CA":"anthropomorphisme"}`). Validation visuelle Playwright STRICT post-purge Cloudflare : H1 `Anthropomorphisme` (A majuscule), title page `Anthropomorphisme - Glossaire IA - La veille` ✅. Détecté par user après audit complet S126→S127 (note globale 86/100 documentée dans `audit_complet_laveille_S127.md`). Aucun fichier code modifié (DB-only fix). Codename glossary-anthropomorphisme-capital.
  *   1.42.2 · 2026-05-27 · #306 fix(glossary) broader/narrower TOUJOURS invisible v1.42.1 — la fix v1.42.1 utilisait `JSON_EXTRACT(slug, '$.fr_CA') IN (?,?,...)` mais MySQL JSON_EXTRACT retourne la valeur ENCADRÉE de double-quotes (`"llm"` au lieu de `llm`) car c'est du JSON valide. Le `IN` matchait donc `"llm"` vs `llm` → 0 résultats. Fix v1.42.2 : `JSON_UNQUOTE(JSON_EXTRACT(slug, '$.fr_CA')) IN (?,?,...)` qui décode le JSON string. Équivalent au sucre Laravel `where('slug->fr_CA', $val)` qui génère `slug->>'$.fr_CA' = ?` (opérateur `->>` = `->` + JSON_UNQUOTE). Validé via _debug_view_query.php prod : whereRaw retourne maintenant 16/16 termes liés au lieu de 0. Section "Termes liés" visible + JSON-LD broader/narrower aux 2 endroits (HTML + Schema).
  *   1.42.1 · 2026-05-27 · #305 fix(glossary) broader/narrower invisible prod — la query `whereIn('slug', $slugs)` matchait le JSON Spatie Translatable brut `{"fr_CA":"llm"}` au lieu de la valeur `llm`. Fix DRY appliqué dans 2 endroits : `TermSchemaService` ET `show.blade.php` — utiliser `whereRaw("JSON_EXTRACT(slug, '$.fr_CA') IN (?,?,...)", $slugs)`. Vérifié en prod via _debug_kg.php : LLM avait broader=[ia-generative,nlp,modele-fondation,modele-de-langage] + narrower=12 enfants en DB, mais `whereIn` retournait 0 match → section vide + Schema.org broader/narrower absent. Post-fix : section visible + JSON-LD complet sur 59 termes parents + ~150 termes enfants (cumul ~200 pages glossaire avec relations affichées). Pattern réutilisable pour toute query future sur slug Translatable.
  *   1.42.0 · 2026-05-27 · #304 glossaire Schema.org broader/narrower knowledge graph — knowledge graph relations entre 265 DefinedTerms. (1) Migration `2026_05_27_120000_add_broader_narrower_to_dictionary_terms.php` ajoute 2 colonnes JSON nullable `broader_slugs` + `narrower_slugs` à `dictionary_terms` (idempotent hasColumn check, pattern S125). (2) Term model `$fillable` + `$casts` étendus pour les 2 nouvelles colonnes (cast `array`). (3) Service `Modules\\Dictionary\\Services\\TermSchemaService::buildGraph` injecte `broader` + `narrower` (arrays de DefinedTerm refs avec @type/@id/name/url) dans le bloc DefinedTerm du @graph JSON-LD. Bénéfice : AI Overviews / Gemini / ChatGPT suivent le graphe pour contextualiser parents (ex: GPT → LLM → Modèle de fondation) et enfants (ex: LLM → 12 modèles enfants), boost AEO/GEO direct. (4) Seeder `GlossaryBroaderNarrowerSeeder` + JSON data `seeders/data/glossary_broader_narrower.json` (59 relations parent→narrower, 203 edges total) — mappings générés via SuperAgent Gemini analyse 265 termes (latence 53s). Couvre familles clés : LLM (12 modèles), Prompt Engineering (12 techniques), Apprentissage Automatique (12 méthodes), GAFAM (5 entreprises), Régulation IA (10 textes), Cybersécurité IA (6 menaces), Chaîne de Pensée (7 variantes), etc. Idempotent (overwrite narrower, merge broader avec dédup). (5) Vue `Modules/Dictionary/resources/views/public/show.blade.php` nouvelle section "🔗 Termes liés" dans gl-bento full-width — affiche 2 sous-sections "Catégorie parente" (broader chips teal pill cliquables) + "Sous-termes" (narrower chips même style). Inline style WCAG AAA contraste #075985/#fff (ratio 7:1+) + hover background primary + ARIA aria-label "Voir la définition de X". Skip si vide (rétro-compat 100% pour 206 termes sans relations encore). Boost UX maillage interne visible (cohérent Wikipedia/IBM/AWS standard 2026). Codename glossary-knowledge-graph.
@@ -120,7 +121,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 42,
-    'patch' => 2,
+    'patch' => 3,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -130,11 +131,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'glossary-knowledge-graph',
+    'codename' => 'glossary-anthropomorphisme-capital',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.42.2',
+    'semver' => '1.42.3',
 ];
