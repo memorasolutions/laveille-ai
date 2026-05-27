@@ -24,6 +24,7 @@ class Tool extends Model
         'icon',
         'featured_image',
         'is_active',
+        'is_under_construction',
         'sort_order',
         'category',
         'views_count',
@@ -31,6 +32,7 @@ class Tool extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_under_construction' => 'boolean',
         'views_count' => 'integer',
     ];
 

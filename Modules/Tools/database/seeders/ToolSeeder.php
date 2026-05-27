@@ -28,6 +28,7 @@ class ToolSeeder extends Seeder
             ['name' => 'Simulateur fiscal', 'slug' => 'simulateur-fiscal', 'description' => 'Simulez vos impôts et visualisez la répartition avec des graphiques.', 'icon' => '📊', 'sort_order' => 8],
             ['name' => 'Roue de tirage', 'slug' => 'roue-tirage', 'description' => 'Une roue de la fortune interactive pour vos tirages au sort.', 'icon' => '🎡', 'sort_order' => 9],
             ['name' => 'Oscilloscope RLC', 'slug' => 'oscilloscope-rlc', 'description' => 'Simulateur d\'oscilloscope pour visualiser les signaux dans les circuits RLC (résistance, inductance, capacitance).', 'icon' => '📡', 'sort_order' => 10],
+            ['name' => 'Anonymiseur de texte', 'slug' => 'anonymiseur', 'description' => 'Anonymisez vos textes avant de les envoyer à une IA. 100 % local, conforme Loi 25 et RGPD.', 'icon' => '🕵️', 'sort_order' => 11, 'category' => 'securite', 'is_under_construction' => true],
         ];
 
         foreach ($tools as $tool) {

@@ -48,16 +48,39 @@ $commands = [
 // bullet-proof quand cPanel UAPI est down (Shell API désactivée + File Manager API
 // en restart). Workaround validé en S128 incident cPanel maintenance prolongée.
 // Allowlist commandes artisan (view:clear + config:cache + view:cache + route:cache).
-if (! empty($_GET['cache'])) {
-    // Localiser PHP CLI (cron #20 prod : /opt/cpanel/ea-php84/root/usr/bin/php).
-    $phpBin = '/opt/cpanel/ea-php84/root/usr/bin/php';
-    if (! is_executable($phpBin)) {
-        $phpBin = trim((string) shell_exec('which php')) ?: '/usr/bin/php';
+// 2026-05-27 #313 : ajout options `&migrate=1` + `&seed=ClassName` (allowlist Modules\ ou Database\Seeders\).
+$phpBin = null;
+$resolvePhpBin = function () use (&$phpBin) {
+    if ($phpBin !== null) {
+        return $phpBin;
     }
+    $bin = '/opt/cpanel/ea-php84/root/usr/bin/php';
+    if (! is_executable($bin)) {
+        $bin = trim((string) shell_exec('which php')) ?: '/usr/bin/php';
+    }
+    return $phpBin = $bin;
+};
+if (! empty($_GET['cache'])) {
+    $phpBin = $resolvePhpBin();
     $commands[] = [$phpBin, 'artisan', 'view:clear'];
     $commands[] = [$phpBin, 'artisan', 'config:cache'];
     $commands[] = [$phpBin, 'artisan', 'view:cache'];
     $commands[] = [$phpBin, 'artisan', 'route:cache'];
+}
+if (! empty($_GET['migrate'])) {
+    $phpBin = $resolvePhpBin();
+    $commands[] = [$phpBin, 'artisan', 'migrate', '--force'];
+}
+if (! empty($_GET['seed'])) {
+    $seedClass = trim((string) $_GET['seed']);
+    $isAllowed = (bool) preg_match('/^[A-Za-z0-9_\\\\]+$/', $seedClass)
+        && (str_starts_with($seedClass, 'Modules\\') || str_starts_with($seedClass, 'Database\\Seeders\\'));
+    if ($isAllowed) {
+        $phpBin = $resolvePhpBin();
+        $commands[] = [$phpBin, 'artisan', 'db:seed', '--class='.$seedClass, '--force'];
+    } else {
+        $commands[] = ['/bin/echo', '[seed skipped: invalid class '.preg_replace('/[^A-Za-z0-9_\\\\]/', '?', $seedClass).']'];
+    }
 }
 
 foreach ($commands as $cmd) {

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.44.0 · 2026-05-27 · #313 feat(tools) anonymiseur P0 placeholder admin-only — Sprint S129 anonymiseur de texte démarré. (1) Migration idempotente `2026_05_27_180000_add_is_under_construction_to_tools.php` ajoute colonne `is_under_construction` boolean default false sur `tools` (Schema::hasColumn check up + down). (2) Tool model Modules/Tools/app/Models/Tool.php : `$fillable` étendu + cast boolean `is_under_construction`. (3) PublicToolController::show() : check `Schema::hasColumn` + `$tool->is_under_construction` + `$user->isSuperAdmin()` → render `tools::public.under-construction` pour non-admin (gracieux, pas abort 403). Réutilise méthode `isSuperAdmin()` native User model (email + hasRole 'super_admin') — DRY. (4) Vue `Modules/Tools/resources/views/public/under-construction.blade.php` placeholder centré : `<x-tools::octopus variant="thinking" size="160" />` + badge orange "🚧 En construction" + h1 nom outil + lead + timeline 3 étapes (Conception ✓ / Développement 🚧 / Lancement public 🎯) + 2 boutons "Voir tous les outils" + "← Retour aux outils" route('tools.index'). Tokens charte Memora teal #0B7285 + orange #C2410C + radius 10px + Plus Jakarta Sans + WCAG 2.2 AAA focus-visible 3px outline-offset 3 + min-height 44px boutons + prefers-reduced-motion guard. (5) ToolSeeder ajout entry anonymiseur slug + icon 🕵️ + sort_order 11 + category securite + is_under_construction=true. Codename anonymizer-placeholder-admin.
  *   1.43.1 · 2026-05-27 · #312 chore(news) commentaires désactivés sur pages actualités (décision user). Les actualités sont du contenu auto-syndiqué (450+ news depuis 23 sources RSS), pas du contenu éditorial original — les commentaires créent du bruit et de la modération sans bénéfice utilisateur clair. Implémentation : (a) `Modules/News/config/config.php` nouveau flag `'comments_enabled' => env('NEWS_COMMENTS_ENABLED', false)` (default false, override env possible), (b) `Modules/News/resources/views/public/show.blade.php` ligne 372 condition étendue `class_exists(...) && config('news.comments_enabled', false)` au lieu de juste class_exists. Aucune destruction de données : la table comments existante et les commentaires déjà postés sont préservés (juste plus affichés sur news). Réactivation 1 ligne env. Articles blog éditoriaux gardent commentaires (CommentsThread Modules/Community inchangé). Codename news-comments-disabled.
  *   1.43.0 · 2026-05-27 · #310 feat(schema) Schema.org + EEAT roadmap audit S128 livré : (1) Helper `lv_jsonld_author_stephane()` knowsAbout étendu 7 → 18 sujets (Intelligence artificielle + Veille technologique + Éducation au Québec + Prompt engineering + ChatGPT + Claude (Anthropic) + Gemini (Google) + LLM + Agents IA + RAG + IA générative + Loi 25 + RGPD + AI Act + Gouvernance numérique + Cybersécurité PME + Transformation numérique + Schema.org SEO). Boost EEAT 2026 — 96 % citations AI Overviews = sites EEAT + 15+ entités reconnues (source pp_search S127). (2) JSON-LD SoftwareApplication injecté `Modules/Tools/resources/views/public/tools/constructeur-prompts.blade.php` via @push('head') : @type + name + alternateName 3 variantes + description complète + applicationCategory BusinessApplication + ProductivityApplication + operatingSystem Web + offers gratuit CAD + featureList 6 fonctionnalités + author Person Stéphane (via helper) + publisher Organization (via helper) + isAccessibleForFree true + softwareVersion 1.0 + dateModified ISO 8601. Cible top page audit S127 (403 PV / 30j GSC) pour boost AEO/GEO citation outil. (3) Vérification homepage Schema.org : `JsonLdService::website()` contient déjà SearchAction + alternateName ["veille ai", "Veille IA Québec", "La veille de Stef"] + publisher Organization → C2 audit DONE. (4) Audit sitemap GSC 36 warnings : 8 URLs `/actualites/*` trop longues (slugs > 200 chars news syndication), 3 URLs `/methodologie` `/api` `/stats` toutes 200 OK. Cause probable warnings restants = sluggification news syndication (à fixer S128+ via tronc slug à 80 chars). Codename schema-eeat-software-app.
  *   1.42.4 · 2026-05-27 · #308 fix(pulse) désactiver recorder CacheInteractions par défaut prod (audit roadmap S127 P1). Cause racine du bloat : 4 188 469 entries `cache_hit` + 351 096 `cache_miss` = 99,9 % du contenu `pulse_entries` (1052 MB / 4,5M rows total). CacheInteractions ingère chaque hit/miss du backend Laravel cache (config:cache + view:cache + Livewire + sessions DB + etc.) à sample_rate 1 (100 %). Trim default 7 jours mais le volume d'écriture dépasse largement la purge. Fix : `enabled` default `false` (préserve override env `PULSE_CACHE_INTERACTIONS_ENABLED=true` pour debug local) + `sample_rate` default `0.05` (5 %, fallback safe si réactivé). Autres recorders (Exceptions, Queues, Servers, SlowJobs, SlowOutgoingRequests, SlowQueries, SlowRequests, UserJobs, UserRequests) restent actifs car volume normal (~3 500 entries cumul). Setting `retention.activity_log_days` également mis à jour 180 → 60 jours en prod via UPDATE direct DB `settings` (compatible Loi 25 art. 17 + RGPD Art. 30 sans excès de stockage). Validation prod : OPTIMIZE TABLE pulse_entries a déjà libéré 179 MB (1052 → 873 MB), purge auto trim 7d continuera à libérer espace progressivement. Codename pulse-cache-interactions-off.
@@ -123,8 +124,8 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 43,
-    'patch' => 1,
+    'minor' => 44,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -134,11 +135,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'news-comments-disabled',
+    'codename' => 'anonymizer-placeholder-admin',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.43.1',
+    'semver' => '1.44.0',
 ];

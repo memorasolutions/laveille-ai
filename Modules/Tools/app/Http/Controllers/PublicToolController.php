@@ -43,6 +43,15 @@ class PublicToolController extends Controller
     {
         $tool = Tool::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
+        // #313 P0.2 : placeholder admin-only si is_under_construction (vue tools::public.under-construction)
+        if (Schema::hasColumn('tools', 'is_under_construction') && $tool->is_under_construction) {
+            $user = request()->user();
+            $isAdmin = $user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin();
+            if (! $isAdmin) {
+                return view('tools::public.under-construction', compact('tool'));
+            }
+        }
+
         // #190 : increment views_count (ignore HEAD + bots)
         if (! request()->isMethod('HEAD') && Schema::hasColumn('tools', 'views_count')) {
             try { Tool::where('id', $tool->id)->increment('views_count'); } catch (\Throwable $e) {}
