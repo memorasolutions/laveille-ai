@@ -246,6 +246,18 @@ body {
     margin: 0 auto;
     padding: 20px;
 }
+/* CRITIQUE v1.45.4 : adapter .app au contexte card-body charte Memora unifiée */
+.card-body .app,
+.tool-fullscreen-target .app {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+.tool-fullscreen-target.is-fullscreen .app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
 /* Header */
 .header {

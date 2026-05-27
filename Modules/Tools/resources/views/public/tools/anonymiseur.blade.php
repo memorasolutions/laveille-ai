@@ -1,16 +1,21 @@
-@extends('fronttheme::layouts.master')
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
+@extends(fronttheme_layout())
 
-@section('title', '🕵️ Anonymiseur de texte — La veille de Stef')
-@section('meta_description', 'Anonymisez vos textes avant de les envoyer à une IA. 100 % local, conforme Loi 25 et RGPD.')
+@php $shareData = $tool->getShareData(); @endphp
+@section('title', $tool->name . ' - ' . config('app.name'))
+@section('meta_description', $shareData['meta_description'] ?? 'Anonymisez vos textes avant de les envoyer à une IA. 100 % local, conforme Loi 25 et RGPD.')
+@section('og_type', $shareData['og_type'] ?? 'website')
+@section('og_image', $shareData['og_image'] ?? '')
+@section('share_text', $shareData['share_text'] ?? '')
+
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
+@endsection
 
 @push('head')
 <link rel="stylesheet" href="{{ asset('assets/tools/anonymiseur/styles.css') }}?v={{ config('version.semver') }}">
 <link rel="manifest" href="{{ asset('assets/tools/anonymiseur/manifest.webmanifest') }}">
 <meta name="theme-color" content="#0B7285">
-<meta property="og:title" content="🕵️ Anonymiseur de texte — La veille de Stef">
-<meta property="og:description" content="Anonymisez vos textes localement avant de les envoyer à une IA. Conforme Loi 25 et RGPD.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ url('/outils/anonymiseur') }}">
 <link rel="canonical" href="{{ url('/outils/anonymiseur') }}">
 @php
     $anonymizerJsonLd = [
@@ -42,38 +47,41 @@
 @endpush
 
 @section('content')
-<a href="#sourceText" class="skip-link">Aller au contenu principal</a>
+<section class="wpo-blog-single-section section-padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-12">
+                <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->icon }} {{ $tool->name }}</h1>
+                                <p class="text-muted mb-0">{{ __('Sécurisez vos données avant traitement par IA. 100 % local. Conforme Loi 25 et RGPD.') }}</p>
+                            </div>
+                            <div class="d-flex gap-1 align-items-center" style="flex-shrink:0;">
+                                @include('tools::partials.fullscreen-btn')
+                                @include('tools::partials.share-btn', ['tool' => $tool])
+                                <div class="action-menu-wrapper" style="position:relative;">
+                                    <button id="btnActionsMenu" type="button" class="ct-btn ct-btn-ghost ct-btn-xs action-menu-trigger" aria-label="{{ __('Menu d\'actions Import/Export') }}" aria-haspopup="true" title="{{ __('Plus d\'actions') }}" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;display:inline-flex;align-items:center;justify-content:center;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                    </button>
+                                    <div id="actionsMenu" class="action-menu" role="menu">
+                                        <button id="btnImport" type="button" class="action-menu-item" role="menuitem"><span>📥 {{ __('Importer JSON') }}</span></button>
+                                        <button id="btnExport" type="button" class="action-menu-item" role="menuitem"><span>📤 {{ __('Exporter JSON') }}</span></button>
+                                        <div class="action-menu-divider" role="separator"></div>
+                                        <button id="btnClearAllRules" type="button" class="action-menu-item danger" role="menuitem"><span>🗑️ {{ __('Tout effacer les règles') }}</span></button>
+                                    </div>
+                                </div>
+                                <input type="file" id="fileImport" accept=".json" class="hidden" aria-label="{{ __('Importer un fichier JSON de règles d\'anonymisation') }}">
+                            </div>
+                        </div>
+
+<a href="#sourceText" class="skip-link visually-hidden-focusable">{{ __('Aller au contenu principal') }}</a>
 
 <div class="app">
-    <header class="header">
-        <div class="header-left">
-            <h1 class="panel-title">🕵️ Anonymiseur de texte</h1>
-            <p class="form-hint">Sécurisez vos données avant traitement par IA · 100 % local</p>
-        </div>
-        <div class="header-actions">
-            <button id="btnFullpage" class="btn btn-icon" aria-label="Mode plein écran" title="Plein écran">
-                <span class="action-icon">⛶</span>
-            </button>
-            <div class="action-menu-wrapper">
-                <button id="btnActionsMenu" class="btn btn-icon action-menu-trigger" aria-label="Menu d'actions" aria-haspopup="true">
-                    <span class="action-icon">⋮</span>
-                </button>
-                <div id="actionsMenu" class="action-menu">
-                    <button id="btnImport" class="action-menu-item">
-                        <span>📥 Importer JSON</span>
-                    </button>
-                    <button id="btnExport" class="action-menu-item">
-                        <span>📤 Exporter JSON</span>
-                    </button>
-                    <div class="action-menu-divider"></div>
-                    <button id="btnClearAllRules" class="action-menu-item danger">
-                        <span>🗑️ Tout effacer les règles</span>
-                    </button>
-                </div>
-            </div>
-            <input type="file" id="fileImport" accept=".json" class="hidden" aria-label="Importer un fichier JSON de règles d'anonymisation">
-        </div>
-    </header>
+    {{-- Bouton fullpage masqué (remplacé par tools::partials.fullscreen-btn dans le header charte) --}}
+    <button id="btnFullpage" type="button" class="hidden" aria-hidden="true" tabindex="-1"></button>
 
     <div id="infoBanner" class="info-banner" role="region" aria-label="Information confidentialité">
         <span class="info-message">🛡️ <strong>100 % local</strong> — Aucune donnée ne quitte votre appareil. Conforme <a href="/glossaire/loi-25" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">Loi 25</a> et <a href="/glossaire/rgpd" target="_blank" rel="noopener" style="color:#064E5C;font-weight:700;text-decoration:underline;padding:2px 6px;border-radius:4px;">RGPD</a>.</span>
@@ -313,6 +321,13 @@
 
     <div id="toastContainer" class="toast-container" aria-live="polite" role="status"></div>
 </div>
+
+                    </div>{{-- /.card-body --}}
+                </div>{{-- /.card --}}
+            </div>{{-- /.col --}}
+        </div>{{-- /.row --}}
+    </div>{{-- /.container --}}
+</section>
 @endsection
 
 @push('scripts')
