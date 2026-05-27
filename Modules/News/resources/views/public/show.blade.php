@@ -368,8 +368,9 @@
                     </div>
                     @endif
 
-                    {{-- Commentaires --}}
-                    @if(class_exists(\Modules\Community\Livewire\CommentsThread::class))
+                    {{-- Commentaires — 2026-05-27 #312 DÉSACTIVÉS sur actualités (décision user).
+                         Pour réactiver : retirer le `&& false` ci-dessous OU basculer flag config('news.comments_enabled', false). --}}
+                    @if(class_exists(\Modules\Community\Livewire\CommentsThread::class) && config('news.comments_enabled', false))
                         <div class="mt-4 pt-4 border-top">
                             @livewire('community-comments-thread', [
                                 'commentableType' => \Modules\News\Models\NewsArticle::class,
