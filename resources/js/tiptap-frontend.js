@@ -234,4 +234,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.Alpine && window.Alpine.data && !window._tiptapFrontendRegistered) {
         registerTiptapEditor()
     }
+    // Si Alpine a déjà scanné le DOM avant la registration, force initTree sur les éléments x-data
+    // qui utilisent tiptapAnonymiseur ou tiptapEditor (anti race condition)
+    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+        document.querySelectorAll('[x-data*="tiptapAnonymiseur"], [x-data*="tiptapEditor"]').forEach(el => {
+            try { window.Alpine.initTree(el) } catch (e) { /* déjà init */ }
+        })
+    }
 })
