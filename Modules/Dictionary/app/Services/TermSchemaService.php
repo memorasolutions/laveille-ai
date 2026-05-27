@@ -88,7 +88,7 @@ final class TermSchemaService
             // 2026-05-27 #304 : slug est Spatie Translatable JSON ({"fr_CA":"llm"}) — utiliser JSON_EXTRACT pour matcher
             $placeholders = implode(',', array_fill(0, count($allRelated), '?'));
             $relatedQuery = Term::query()
-                ->whereRaw("JSON_EXTRACT(slug, '$.fr_CA') IN ($placeholders)", $allRelated)
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(slug, '$.fr_CA')) IN ($placeholders)", $allRelated)
                 ->where('is_published', 1)
                 ->get(['id', 'slug', 'name'])
                 ->keyBy(fn ($t) => (string) $t->slug);

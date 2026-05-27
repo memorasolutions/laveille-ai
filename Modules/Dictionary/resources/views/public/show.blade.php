@@ -452,7 +452,7 @@
                             $_kgPlaceholders = ! empty($_kgSlugs) ? implode(',', array_fill(0, count($_kgSlugs), '?')) : '';
                             $_kgTerms = ! empty($_kgSlugs)
                                 ? \Modules\Dictionary\Models\Term::query()
-                                    ->whereRaw("JSON_EXTRACT(slug, '$.fr_CA') IN ($_kgPlaceholders)", $_kgSlugs)
+                                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(slug, '$.fr_CA')) IN ($_kgPlaceholders)", $_kgSlugs)
                                     ->where('is_published', 1)
                                     ->get(['id', 'slug', 'name', 'icon'])
                                     ->keyBy(fn ($t) => (string) $t->slug)

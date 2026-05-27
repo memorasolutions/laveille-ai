@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.42.2 · 2026-05-27 · #306 fix(glossary) broader/narrower TOUJOURS invisible v1.42.1 — la fix v1.42.1 utilisait `JSON_EXTRACT(slug, '$.fr_CA') IN (?,?,...)` mais MySQL JSON_EXTRACT retourne la valeur ENCADRÉE de double-quotes (`"llm"` au lieu de `llm`) car c'est du JSON valide. Le `IN` matchait donc `"llm"` vs `llm` → 0 résultats. Fix v1.42.2 : `JSON_UNQUOTE(JSON_EXTRACT(slug, '$.fr_CA')) IN (?,?,...)` qui décode le JSON string. Équivalent au sucre Laravel `where('slug->fr_CA', $val)` qui génère `slug->>'$.fr_CA' = ?` (opérateur `->>` = `->` + JSON_UNQUOTE). Validé via _debug_view_query.php prod : whereRaw retourne maintenant 16/16 termes liés au lieu de 0. Section "Termes liés" visible + JSON-LD broader/narrower aux 2 endroits (HTML + Schema).
  *   1.42.1 · 2026-05-27 · #305 fix(glossary) broader/narrower invisible prod — la query `whereIn('slug', $slugs)` matchait le JSON Spatie Translatable brut `{"fr_CA":"llm"}` au lieu de la valeur `llm`. Fix DRY appliqué dans 2 endroits : `TermSchemaService` ET `show.blade.php` — utiliser `whereRaw("JSON_EXTRACT(slug, '$.fr_CA') IN (?,?,...)", $slugs)`. Vérifié en prod via _debug_kg.php : LLM avait broader=[ia-generative,nlp,modele-fondation,modele-de-langage] + narrower=12 enfants en DB, mais `whereIn` retournait 0 match → section vide + Schema.org broader/narrower absent. Post-fix : section visible + JSON-LD complet sur 59 termes parents + ~150 termes enfants (cumul ~200 pages glossaire avec relations affichées). Pattern réutilisable pour toute query future sur slug Translatable.
  *   1.42.0 · 2026-05-27 · #304 glossaire Schema.org broader/narrower knowledge graph — knowledge graph relations entre 265 DefinedTerms. (1) Migration `2026_05_27_120000_add_broader_narrower_to_dictionary_terms.php` ajoute 2 colonnes JSON nullable `broader_slugs` + `narrower_slugs` à `dictionary_terms` (idempotent hasColumn check, pattern S125). (2) Term model `$fillable` + `$casts` étendus pour les 2 nouvelles colonnes (cast `array`). (3) Service `Modules\\Dictionary\\Services\\TermSchemaService::buildGraph` injecte `broader` + `narrower` (arrays de DefinedTerm refs avec @type/@id/name/url) dans le bloc DefinedTerm du @graph JSON-LD. Bénéfice : AI Overviews / Gemini / ChatGPT suivent le graphe pour contextualiser parents (ex: GPT → LLM → Modèle de fondation) et enfants (ex: LLM → 12 modèles enfants), boost AEO/GEO direct. (4) Seeder `GlossaryBroaderNarrowerSeeder` + JSON data `seeders/data/glossary_broader_narrower.json` (59 relations parent→narrower, 203 edges total) — mappings générés via SuperAgent Gemini analyse 265 termes (latence 53s). Couvre familles clés : LLM (12 modèles), Prompt Engineering (12 techniques), Apprentissage Automatique (12 méthodes), GAFAM (5 entreprises), Régulation IA (10 textes), Cybersécurité IA (6 menaces), Chaîne de Pensée (7 variantes), etc. Idempotent (overwrite narrower, merge broader avec dédup). (5) Vue `Modules/Dictionary/resources/views/public/show.blade.php` nouvelle section "🔗 Termes liés" dans gl-bento full-width — affiche 2 sous-sections "Catégorie parente" (broader chips teal pill cliquables) + "Sous-termes" (narrower chips même style). Inline style WCAG AAA contraste #075985/#fff (ratio 7:1+) + hover background primary + ARIA aria-label "Voir la définition de X". Skip si vide (rétro-compat 100% pour 206 termes sans relations encore). Boost UX maillage interne visible (cohérent Wikipedia/IBM/AWS standard 2026). Codename glossary-knowledge-graph.
  *   1.41.15 · 2026-05-27 · #303 newsletter — support image illustrative par étape weekly_prompt. Template digest-weekly.blade.php accepte 4 nouvelles clés optionnelles par part : `image_url` (URL absolue ou relative), `image_alt` (texte alt accessibilité), `image_caption` (légende italique sous l'image), `image_width` (largeur en px, default 320). Rendu : `<img>` centré avec fond blanc + padding 4px + border-radius pour ressortir sur fond dark #0c1427 du bloc atelier. Première utilisation : étape 4 défi NotebookLM (`/images/newsletter/notebooklm-step4-arrow.jpg` 203×67 + flèche orange annotée + alt + caption) pour clarifier visuellement « cliquez sur la flèche › ». User feedback : « pourquoi tu n'as pas mis cette image en plus du texte ? ». Codename newsletter-step-image-support.
@@ -119,7 +120,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 42,
-    'patch' => 1,
+    'patch' => 2,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -135,5 +136,5 @@ return [
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.42.1',
+    'semver' => '1.42.2',
 ];
