@@ -211,8 +211,8 @@
         </div>
     </main>
 
-    <div id="ruleModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal-content">
+    <div id="ruleModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal">
             <div class="modal-header">
                 <h2 id="modalTitle" class="panel-title">Ajouter une règle</h2>
                 <button id="closeModal" class="btn-icon" aria-label="Fermer la modale">×</button>
@@ -298,8 +298,8 @@
         </div>
     </div>
 
-    <div id="confirmModal" class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmMessage">
-        <div class="modal-content">
+    <div id="confirmModal" class="modal-overlay confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmMessage">
+        <div class="modal">
             <div class="modal-body text-center">
                 <div id="confirmIcon" class="confirm-icon">❓</div>
                 <div id="confirmMessage" class="confirm-message">Êtes-vous sûr ?</div>
