@@ -1,6 +1,6 @@
 {
-  "_editor-Dxr-HCOO.js": {
-    "file": "assets/editor-Dxr-HCOO.js",
+  "_editor-Cqeq6YSY.js": {
+    "file": "assets/editor-Cqeq6YSY.js",
     "name": "editor",
     "imports": [
       "_vendor-BxpX-Pxt.js"
@@ -381,13 +381,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BfY1vmkg.js",
+    "file": "assets/app-CAdAM6xk.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-BxpX-Pxt.js",
-      "_editor-Dxr-HCOO.js"
+      "_editor-Cqeq6YSY.js"
     ],
     "dynamicImports": [
       "_vendor-BxpX-Pxt.js"
@@ -406,12 +406,12 @@
     "isEntry": true
   },
   "resources/js/tiptap-frontend.js": {
-    "file": "assets/tiptap-frontend-Bnrk-GMs.js",
+    "file": "assets/tiptap-frontend-tnOdQu-K.js",
     "name": "tiptap-frontend",
     "src": "resources/js/tiptap-frontend.js",
     "isEntry": true,
     "imports": [
-      "_editor-Dxr-HCOO.js",
+      "_editor-Cqeq6YSY.js",
       "_vendor-BxpX-Pxt.js"
     ]
   },

@@ -200,6 +200,124 @@
     gap: 0.65rem !important;
 }
 
+/* === Tiptap éditeur (v1.46.0) — scope .app pour override Bootstrap/fronttheme === */
+.app .tiptap-source-host {
+    min-height: 240px;
+    max-height: 60vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-primary);
+    padding: 0;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.app .tiptap-source-host:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(11, 114, 133, 0.18);
+}
+.app .ProseMirror {
+    min-height: 240px;
+    padding: 1rem 1.25rem;
+    outline: none;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+    color: var(--text-primary) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.app .ProseMirror p { margin: 0 0 0.65rem; color: var(--text-primary); }
+.app .ProseMirror p:last-child { margin-bottom: 0; }
+.app .ProseMirror strong { font-weight: 700; color: var(--text-primary); }
+.app .ProseMirror em { font-style: italic; }
+.app .ProseMirror u { text-decoration: underline; }
+.app .ProseMirror s { text-decoration: line-through; opacity: 0.85; }
+.app .ProseMirror code {
+    background: rgba(11, 114, 133, 0.08);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 0.92em;
+    color: var(--primary);
+}
+.app .ProseMirror mark {
+    background: #FEF3C7;
+    color: var(--text-primary);
+    padding: 0.05em 0.2em;
+    border-radius: 3px;
+}
+.app .ProseMirror h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.35rem; margin: 1rem 0 0.5rem; color: var(--text-primary); }
+.app .ProseMirror h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.15rem; margin: 0.85rem 0 0.4rem; color: var(--text-primary); }
+.app .ProseMirror ul, .app .ProseMirror ol { padding-left: 1.5rem; margin: 0.5rem 0; color: var(--text-primary); }
+.app .ProseMirror li { margin: 0.15rem 0; }
+.app .ProseMirror blockquote {
+    border-left: 3px solid var(--primary);
+    padding-left: 1rem;
+    margin: 0.85rem 0;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+/* Placeholder Tiptap */
+.app .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: var(--text-muted);
+    pointer-events: none;
+    height: 0;
+    font-style: italic;
+}
+
+/* Bubble menu Tiptap vanilla */
+.tiptap-bubble-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: #1A1D23;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 4px;
+    display: none;
+    gap: 2px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    pointer-events: auto;
+}
+.tiptap-bubble-menu.is-visible {
+    display: inline-flex;
+    align-items: center;
+}
+.tiptap-bubble-menu button {
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    padding: 6px 9px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    min-width: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+.tiptap-bubble-menu button:hover { background: rgba(255, 255, 255, 0.12); }
+.tiptap-bubble-menu button.is-active { background: var(--primary); color: #FFFFFF; }
+.tiptap-bubble-menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tiptap-bubble-menu .tiptap-bubble-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.18);
+    margin: 0 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .app .tiptap-source-host, .app .ProseMirror, .tiptap-bubble-menu button { transition: none !important; }
+}
+
 /* Skip-link visible au focus (sortie de 1x1px caché) */
 .app .skip-link,
 .skip-link {
