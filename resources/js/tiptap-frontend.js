@@ -234,11 +234,127 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.Alpine && window.Alpine.data && !window._tiptapFrontendRegistered) {
         registerTiptapEditor()
     }
-    // Si Alpine a déjà scanné le DOM avant la registration, force initTree sur les éléments x-data
-    // qui utilisent tiptapAnonymiseur ou tiptapEditor (anti race condition)
-    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-        document.querySelectorAll('[x-data*="tiptapAnonymiseur"], [x-data*="tiptapEditor"]').forEach(el => {
-            try { window.Alpine.initTree(el) } catch (e) { /* déjà init */ }
+})
+
+// === Init vanilla Tiptap pour anonymiseur (S129) ===
+// Bypass Alpine race condition : init direct sur [data-tiptap-anonymiseur="1"] dès DOMContentLoaded.
+// Plus prévisible que x-data Alpine (qui peut scanner avant que le composant ne soit registered).
+async function initAnonymiseurTiptap() {
+    const host = document.querySelector('[data-tiptap-anonymiseur="1"]')
+    if (!host || host._tiptapInited) return
+    host._tiptapInited = true
+
+    // Ghost sourceText shim pour anti-régression app.js source
+    let ghost = document.getElementById('sourceText')
+    if (!ghost) {
+        ghost = document.createElement('div')
+        ghost.id = 'sourceText'
+        ghost.setAttribute('aria-hidden', 'true')
+        ghost.style.cssText = 'position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;'
+        document.body.appendChild(ghost)
+    }
+
+    const stripWordPaste = (html) => {
+        if (!html) return html
+        let cleaned = String(html)
+        cleaned = cleaned.replace(/<!--\[if[^>]*?\]>[\s\S]*?<!\[endif\]-->/gi, '')
+        cleaned = cleaned.replace(/<o:p[^>]*>[\s\S]*?<\/o:p>/gi, '')
+        cleaned = cleaned.replace(/<\/?(meta|link|style|script|xml)[^>]*>/gi, '')
+        cleaned = cleaned.replace(/\sclass="Mso[^"]*"/gi, '')
+        cleaned = cleaned.replace(/\sstyle="[^"]*"/gi, '')
+        cleaned = cleaned.replace(/<span[^>]*>(\s*)<\/span>/gi, '$1')
+        return cleaned
+    }
+
+    const editor = new Editor({
+        element: host,
+        extensions: [
+            StarterKit.configure({ codeBlock: false, link: { openOnClick: false }, heading: { levels: [2, 3] } }),
+            Placeholder.configure({ placeholder: 'Collez ici le texte à anonymiser avant de l\'envoyer à une IA…' }),
+            Highlight.configure({ multicolor: true }),
+            Underline
+        ],
+        editorProps: {
+            attributes: {
+                role: 'textbox', 'aria-multiline': 'true',
+                'aria-label': 'Zone de texte à anonymiser', spellcheck: 'true'
+            },
+            transformPastedHTML(html) { return stripWordPaste(html) }
+        },
+        onUpdate: ({ editor }) => {
+            const cc = document.getElementById('charCount')
+            if (cc) cc.textContent = String(editor.getText().length)
+            window.dispatchEvent(new CustomEvent('anonymiseur:text-change', { detail: { text: editor.getText() } }))
+            try { ghost.dispatchEvent(new Event('input', { bubbles: true })) } catch (e) {}
+        },
+        onSelectionUpdate: ({ editor }) => {
+            const bubble = document.getElementById('tiptap-bubble-menu')
+            if (!bubble) return
+            const sel = editor.state.selection
+            if (sel.empty || !window.getSelection().rangeCount) {
+                bubble.classList.remove('is-visible')
+                return
+            }
+            try {
+                const range = window.getSelection().getRangeAt(0)
+                const rect = range.getBoundingClientRect()
+                if (rect.width === 0 && rect.height === 0) { bubble.classList.remove('is-visible'); return }
+                const br = bubble.getBoundingClientRect()
+                let left = rect.left + window.scrollX + (rect.width / 2) - (br.width / 2)
+                let top = rect.top + window.scrollY - br.height - 8
+                if (top < window.scrollY + 8) top = rect.bottom + window.scrollY + 8
+                if (left < window.scrollX + 8) left = window.scrollX + 8
+                const maxLeft = window.scrollX + window.innerWidth - br.width - 8
+                if (left > maxLeft) left = maxLeft
+                bubble.style.left = `${left}px`
+                bubble.style.top = `${top}px`
+                bubble.classList.add('is-visible')
+                bubble.querySelectorAll('button[data-mark]').forEach(btn => {
+                    btn.classList.toggle('is-active', editor.isActive(btn.getAttribute('data-mark')))
+                })
+            } catch (e) { bubble.classList.remove('is-visible') }
+        }
+    })
+
+    // Shim getters #sourceText
+    Object.defineProperty(ghost, 'innerText', {
+        configurable: true,
+        get() { return editor.getText() },
+        set(v) { editor.commands.setContent(String(v || '')) }
+    })
+    Object.defineProperty(ghost, 'textContent', {
+        configurable: true,
+        get() { return editor.getText() },
+        set(v) { editor.commands.setContent(String(v || '')) }
+    })
+
+    host._tiptapEditor = editor
+    window.tiptapAnonymiseurEditor = editor
+
+    // Wire bubble menu
+    const bubble = document.getElementById('tiptap-bubble-menu')
+    if (bubble) {
+        bubble.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-mark], button[data-action]')
+            if (!btn) return
+            e.preventDefault()
+            const mark = btn.getAttribute('data-mark')
+            const action = btn.getAttribute('data-action')
+            if (mark === 'bold') editor.chain().focus().toggleBold().run()
+            else if (mark === 'italic') editor.chain().focus().toggleItalic().run()
+            else if (mark === 'underline') editor.chain().focus().toggleUnderline().run()
+            else if (mark === 'strike') editor.chain().focus().toggleStrike().run()
+            else if (mark === 'code') editor.chain().focus().toggleCode().run()
+            else if (mark === 'highlight') editor.chain().focus().toggleHighlight().run()
+            else if (action === 'clearmark') editor.chain().focus().unsetAllMarks().run()
         })
     }
-})
+
+    window.dispatchEvent(new CustomEvent('tiptap-anonymiseur:ready', { detail: { editor } }))
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnonymiseurTiptap)
+} else {
+    initAnonymiseurTiptap()
+}

@@ -146,22 +146,22 @@
                         <button id="btnDetect" class="btn btn-primary btn-sm">Détecter PII</button>
                     </div>
                 </div>
-                <div class="panel-content" x-data="tiptapAnonymiseur()" x-init="init()" x-on:beforeunload.window="destroy()">
-                    <div x-ref="editorContent" id="tiptap-source" class="source-content tiptap-source-host" aria-label="{{ __('Zone de texte à anonymiser') }}"></div>
+                <div class="panel-content">
+                    <div id="tiptap-source" data-tiptap-anonymiseur="1" class="source-content tiptap-source-host" aria-label="{{ __('Zone de texte à anonymiser') }}"></div>
                     <div class="char-count">
-                        <span id="charCount" x-text="characterCount">0</span> {{ __('caractères') }}
+                        <span id="charCount">0</span> {{ __('caractères') }}
                     </div>
 
                     {{-- Bubble menu Tiptap vanilla : Bold / Italic / Underline / Strike / Code / Highlight / Clear --}}
-                    <div x-ref="bubbleMenu" class="tiptap-bubble-menu" role="toolbar" aria-label="{{ __('Format de texte') }}">
-                        <button type="button" @click="toggleBold()" :class="{ 'is-active': isActive('bold') }" aria-label="{{ __('Gras') }}" title="{{ __('Gras (Ctrl+B)') }}"><strong>B</strong></button>
-                        <button type="button" @click="toggleItalic()" :class="{ 'is-active': isActive('italic') }" aria-label="{{ __('Italique') }}" title="{{ __('Italique (Ctrl+I)') }}"><em>I</em></button>
-                        <button type="button" @click="toggleUnderline()" :class="{ 'is-active': isActive('underline') }" aria-label="{{ __('Souligné') }}" title="{{ __('Souligné (Ctrl+U)') }}"><u>U</u></button>
-                        <button type="button" @click="toggleStrike()" :class="{ 'is-active': isActive('strike') }" aria-label="{{ __('Barré') }}" title="{{ __('Barré') }}"><s>S</s></button>
-                        <button type="button" @click="toggleCode()" :class="{ 'is-active': isActive('code') }" aria-label="{{ __('Code inline') }}" title="{{ __('Code') }}"><code>&lt;/&gt;</code></button>
-                        <button type="button" @click="toggleHighlight()" :class="{ 'is-active': isActive('highlight') }" aria-label="{{ __('Surlignage') }}" title="{{ __('Surligner') }}">🖍️</button>
+                    <div id="tiptap-bubble-menu" class="tiptap-bubble-menu" role="toolbar" aria-label="{{ __('Format de texte') }}">
+                        <button type="button" data-mark="bold" aria-label="{{ __('Gras') }}" title="{{ __('Gras (Ctrl+B)') }}"><strong>B</strong></button>
+                        <button type="button" data-mark="italic" aria-label="{{ __('Italique') }}" title="{{ __('Italique (Ctrl+I)') }}"><em>I</em></button>
+                        <button type="button" data-mark="underline" aria-label="{{ __('Souligné') }}" title="{{ __('Souligné (Ctrl+U)') }}"><u>U</u></button>
+                        <button type="button" data-mark="strike" aria-label="{{ __('Barré') }}" title="{{ __('Barré') }}"><s>S</s></button>
+                        <button type="button" data-mark="code" aria-label="{{ __('Code inline') }}" title="{{ __('Code') }}"><code>&lt;/&gt;</code></button>
+                        <button type="button" data-mark="highlight" aria-label="{{ __('Surlignage') }}" title="{{ __('Surligner') }}">🖍️</button>
                         <span class="tiptap-bubble-divider" aria-hidden="true"></span>
-                        <button type="button" @click="clearMarks()" aria-label="{{ __('Effacer mise en forme') }}" title="{{ __('Effacer le formatage') }}">✕</button>
+                        <button type="button" data-action="clearmark" aria-label="{{ __('Effacer mise en forme') }}" title="{{ __('Effacer le formatage') }}">✕</button>
                     </div>
                 </div>
                 <div id="detectionsBar" class="detections-bar hidden">
