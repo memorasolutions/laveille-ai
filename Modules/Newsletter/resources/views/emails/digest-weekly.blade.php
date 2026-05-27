@@ -342,6 +342,13 @@
                                 </td></tr>
                             </table>
                         </td></tr>
+                        @if(! empty($part['image_url']))
+                        {{-- 2026-05-27 #303 : image illustrative optionnelle par étape (ex screenshot d'UI) --}}
+                        <tr><td style="padding-bottom:8px;text-align:center;">
+                            <img src="{{ str_starts_with($part['image_url'], 'http') ? $part['image_url'] : asset($part['image_url']) }}" alt="{{ e($part['image_alt'] ?? '') }}" style="max-width:100%;height:auto;border:1px solid #334155;border-radius:6px;background:#fff;padding:4px;" width="{{ $part['image_width'] ?? '320' }}"/>
+                            @if(! empty($part['image_caption']))<br/><span style="display:inline-block;margin-top:6px;font-size:12px;color:#94a3b8;font-style:italic;">{!! e($part['image_caption']) !!}</span>@endif
+                        </td></tr>
+                        @endif
                         @if(! empty($part['post_note']))
                         <tr><td style="padding-bottom:14px;font-size:13px;color:#94a3b8;line-height:1.5;font-style:italic;">↳ {!! e($part['post_note']) !!}</td></tr>
                         @else
