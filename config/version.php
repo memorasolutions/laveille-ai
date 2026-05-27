@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.44.1 · 2026-05-27 · #313 fix(tools) anonymiseur P2 quick wins sécurité — additif `public/assets/tools/anonymiseur/enhancements.js` chargé APRÈS app.js (pattern non-régressif zéro modif source) : (1) Luhn checksum pour cartes bancaires (post-filter badge faux positifs Visa/MC/Amex valides 13-19 chiffres). (2) Checksum NAS canadien mod-10 (post-filter badge NAS invalides — réduit ~90% faux positifs sur 9-chiffres). (3) Round-trip consistency check sur btnCopy click : compare original vs restored, toast warning si divergence avant envoi IA. (4) Audit log local `anonymiseur_audit_v1` (max 200 entrées, action+type+timestamp uniquement, JAMAIS la PII) sur events detect/copy/export/import/restore (exigence Loi 25 art. 17 auditabilité). (5) contextScore (function) pour boost confidence si keywords NAS/patient/dossier/carte/adresse autour du match (windowSize 60 chars). Vue Blade : load enhancements.js après app.js avec ?v={semver}. Tests Pest `Modules/Tools/tests/Feature/AnonymiseurToolTest.php` (3 it() : DOM markers required + flag is_under_construction respect + index visible). Codename anonymizer-quick-wins-security.
  *   1.44.0 · 2026-05-27 · #313 feat(tools) anonymiseur P1 MVP public + P0 placeholder admin-only. Sprint S129 outil anonymisation client-side de prompts. **P1 MVP livré** : (1) vue Blade tools::public.tools.anonymiseur 3 étapes (data-step=1/2/3 + data-step-content) générée via Gemini SuperAgent matching 50 IDs DOM + 30 classes du JS source. (2) Assets vanilla copiés tels quels public/assets/tools/anonymiseur/{app.js 1316 lignes, styles.css 1245 lignes} self-contained zéro dépendance externe. (3) Tokens charte Memora teal #0B7285 + accent #C2410C + radius 10px appliqués via override :root variables CSS (8 tokens primary + categories + texte + bordures + shadow + WCAG AAA focus-visible 3px + prefers-reduced-motion guard). (4) Bannière #infoBanner avec liens vers /glossaire/loi-25 + /glossaire/rgpd (bonification A2 maillage interne 95/100). (5) Schema.org SoftwareApplication JSON-LD complet (SecurityApplication + BusinessApplication + featureList 6 + offers gratuit CAD + Person Stéphane knowsAbout 18 sujets via lv_jsonld_author_stephane helper). (6) Import/Export JSON natif via Blob+FileReader (déjà inclus app.js source, zéro stockage serveur). (7) Migration de transition `2026_05_27_220000_publish_anonymiseur_tool.php` flip is_under_construction=false sur slug=anonymiseur. **P0 livré** précédemment : Migration idempotente is_under_construction + Tool model + PublicToolController render placeholder admin-only (User::isSuperAdmin() native, DRY) + Vue under-construction Octopus thinking + timeline 3 étapes WCAG AAA + Seeder entry anonymiseur. **Extension _lvgit.php** : options &migrate=1 + &seed=Class allowlist (Modules\ ou Database\Seeders\). Codename anonymizer-mvp-public.
  *   1.44.0-rc1 · 2026-05-27 · #313 feat(tools) anonymiseur P0 placeholder admin-only — Sprint S129 anonymiseur de texte démarré. (1) Migration idempotente `2026_05_27_180000_add_is_under_construction_to_tools.php` ajoute colonne `is_under_construction` boolean default false sur `tools` (Schema::hasColumn check up + down). (2) Tool model Modules/Tools/app/Models/Tool.php : `$fillable` étendu + cast boolean `is_under_construction`. (3) PublicToolController::show() : check `Schema::hasColumn` + `$tool->is_under_construction` + `$user->isSuperAdmin()` → render `tools::public.under-construction` pour non-admin (gracieux, pas abort 403). Réutilise méthode `isSuperAdmin()` native User model (email + hasRole 'super_admin') — DRY. (4) Vue `Modules/Tools/resources/views/public/under-construction.blade.php` placeholder centré : `<x-tools::octopus variant="thinking" size="160" />` + badge orange "🚧 En construction" + h1 nom outil + lead + timeline 3 étapes (Conception ✓ / Développement 🚧 / Lancement public 🎯) + 2 boutons "Voir tous les outils" + "← Retour aux outils" route('tools.index'). Tokens charte Memora teal #0B7285 + orange #C2410C + radius 10px + Plus Jakarta Sans + WCAG 2.2 AAA focus-visible 3px outline-offset 3 + min-height 44px boutons + prefers-reduced-motion guard. (5) ToolSeeder ajout entry anonymiseur slug + icon 🕵️ + sort_order 11 + category securite + is_under_construction=true. Codename anonymizer-placeholder-admin.
  *   1.43.1 · 2026-05-27 · #312 chore(news) commentaires désactivés sur pages actualités (décision user). Les actualités sont du contenu auto-syndiqué (450+ news depuis 23 sources RSS), pas du contenu éditorial original — les commentaires créent du bruit et de la modération sans bénéfice utilisateur clair. Implémentation : (a) `Modules/News/config/config.php` nouveau flag `'comments_enabled' => env('NEWS_COMMENTS_ENABLED', false)` (default false, override env possible), (b) `Modules/News/resources/views/public/show.blade.php` ligne 372 condition étendue `class_exists(...) && config('news.comments_enabled', false)` au lieu de juste class_exists. Aucune destruction de données : la table comments existante et les commentaires déjà postés sont préservés (juste plus affichés sur news). Réactivation 1 ligne env. Articles blog éditoriaux gardent commentaires (CommentsThread Modules/Community inchangé). Codename news-comments-disabled.
@@ -126,7 +127,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 44,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -136,11 +137,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-mvp-public',
+    'codename' => 'anonymizer-quick-wins-security',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.44.0',
+    'semver' => '1.44.1',
 ];
