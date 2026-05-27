@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.47.5 · 2026-05-27 · #313 fix(tools) anonymiseur — refonte modal aide 4 modes en ONGLETS (user feedback « la popup est dégueulasse, mettre des onglets, voir ailleurs sur le site »). Pattern réutilisé : `.result-tabs/.result-tab` déjà dans anonymiseur ligne 317 + `nav-tabs` mots-croises (charte Memora cohérente). 4 onglets `.lv-help-tab` (emoji + label court + badge optionnel Reco/Avancé) + 4 panneaux `.lv-help-panel` (1 visible à la fois). Pattern WAI-ARIA tablist : role=tablist/tab/tabpanel + aria-selected + aria-controls + aria-labelledby + tabindex 0/-1 + clavier nav ArrowLeft/ArrowRight/Home/End (standard W3C tabs). Contenu structuré en `<dl>` Quand/Pourquoi/Exemple (au lieu de paragraphes empilés) + lv-help-reversible block coloré vert/rouge selon ✅/⛔. Sync intelligent : ouverture modal → onglet du mode actuellement sélectionné dans `#maskMode` est auto-activé. CSS scope `.app` (override Bootstrap) : grid 4 colonnes desktop / 2 colonnes mobile + transitions hover/focus + badge teal + dl 2-col responsive. Module `enhancements-v150-help.js` ~50 lignes (tabs + ARIA keyboard + modal toggle). Codename anonymizer-help-modal-tabs.
  *   1.47.4 · 2026-05-27 · #313 feat(tools) anonymiseur — bouton ? aide modes + fix UX passphrase disabled. User screenshots 19:27 + 19:28. (1) Bouton « ? » rond 26×26 charte Memora teal à côté du label « Comment remplacer vos données » (pattern constructeur-prompts S82). Au clic ouvre `#maskModeHelpModal` (modal-overlay v1.45.3) avec 4 cards par mode : Quand / Pourquoi / Exemple concret (Marie Tremblay → Catherine Bouchard / [SUPPRIMÉ] / a8f3c2e1 / 7831-9402-1456-2289) / Réversibilité ✅ ou ⛔. Card recommandée bordure primary + box-shadow inset + badge « Recommandé » teal. Card avancée badge « Avancé » slate. Encadré bas « Pas sûr·e ? Choisissez Faux noms similaires ». Module `enhancements-v150-help.js` ~25 lignes (open/close + ESC + click outside). CSS ~80 lignes scope `.app` cards grid 1col mobile / 2col desktop. (2) Fix UX `#encryptionPassphrase` disabled (user signalait « le champ fonctionne pas, normal? ») : background `--bg-tertiary` + border dashed + opacity 0.7 + cursor not-allowed + placeholder italic « Cochez d'abord ☝️ pour activer » + hint amélioré « Chiffre votre fichier JSON exporté avec un mot de passe (AES-GCM). Vous seul·e pourrez l'ouvrir. ». Wrap `#encryptionPassphraseWrap` pour cibler CSS spécifique. Codename anonymizer-help-modal-pw-feedback.
  *   1.47.3 · 2026-05-27 · #313 feat(tools) anonymiseur — clarification cas d'usage IA (Option A user GO 94/100, pp_search best practices 2026 8p-design + azenflow). User : « Type de masquage tu veux dire quoi? Le but est de remplacer par un texte SIMILAIRE pour meilleure réponse IA ». Refonte langage : (1) « Type de masquage » → « Comment remplacer vos données » + hint permanent « Le but : que l'IA comprenne votre contexte SANS voir vos vraies données. Vous pourrez les restaurer après ». (2) Section header « Niveau de protection » → « Comment voulez-vous protéger vos données ? » + paragraphe explicatif visible. (3) Presets renommés : 🔒 Standard → 🔄 « Standard — IA » (« Le bon choix pour utiliser ChatGPT, Claude, Gemini » + ul cas usage Marie→Catherine), 🛡️ Maximum → « Maximum — Sensible » (santé/légal/finance + [SUPPRIMÉ] irréversible), ⚙️ Personnalisé (4 modes techniques). (4) Options select reformulées par cas d'usage avec emoji : 🔄 « Faux noms similaires (recommandé pour ChatGPT/Claude/Gemini) » / 🗑️ « Effacer définitivement [SUPPRIMÉ] » / 🔒 « Code unique irréversible (hash SHA-256) » / 🎲 « Brouillage format identique (avancé) ». (5) Toast messages enrichis (« Mode IA activé : faux noms similaires pour meilleure réponse + restauration ensuite »). Langage plain Loi 25/RGPD (Canada plain language guide) sans jargon technique. Codename anonymizer-mode-ia-clear-language.
  *   1.47.2 · 2026-05-27 · #313 feat(glossary) cluster privacy étendu — 3 nouveaux termes (k-anonymity, differential-privacy, tokenisation) + 5 hero images générées via skill nanobanana (Gemini Playwright compte user). Images : isométrique 3D charte Memora teal+orange+navy, 1024×572 widescreen, 3 formats par image (PNG ~700-1000KB original + JPG ~170-220KB pour og:image réseaux sociaux car X/Facebook/LinkedIn n'acceptent pas WebP/Avif + WebP ~60-90KB pour bandwidth web). Contenu vérifié 3 qwen3-max parallèles + 3 pp_search sourcés (Sweeney CMU 2002, Dwork Microsoft 2006, Apple iOS, Google RAPPOR, US Census 2020, OpenDP Harvard/Microsoft, PCI DSS, NIST SP 800-188, Visa EMV Tokenization, Stripe). Pattern Memora intégré : hero_image colonne + fallback chain .jpg → og:image (L-JPEG-vs-WebP-social-V1 S75). Cluster broader/narrower : anonymisation ↔ pseudonymisation ↔ k-anonymity ↔ differential-privacy ↔ tokenisation. Codename glossary-privacy-cluster-5-images.
@@ -143,7 +144,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 47,
-    'patch' => 4,
+    'patch' => 5,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -153,11 +154,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-help-modal-pw-feedback',
+    'codename' => 'anonymizer-help-modal-tabs',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.4',
+    'semver' => '1.47.5',
 ];

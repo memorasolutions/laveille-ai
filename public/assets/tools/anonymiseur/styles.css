@@ -2222,3 +2222,160 @@ body {
   cursor: pointer !important;
   accent-color: var(--primary) !important;
 }
+
+/* === Modal aide — onglets pattern Memora (refonte v1.47.5) === */
+.app .lv-help-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 0 !important;
+  border-bottom: 2px solid var(--border) !important;
+  margin: 0 -1.5rem 1.25rem !important;
+  padding: 0 1.5rem !important;
+}
+.app .lv-help-tab {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.25rem !important;
+  padding: 0.85rem 0.5rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 3px solid transparent !important;
+  margin-bottom: -2px !important;
+  cursor: pointer !important;
+  color: var(--text-secondary) !important;
+  font-weight: 600 !important;
+  font-size: 0.82rem !important;
+  min-height: 64px !important;
+  text-align: center !important;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+  position: relative !important;
+}
+.app .lv-help-tab > span[aria-hidden] { font-size: 1.35rem !important; line-height: 1 !important; }
+.app .lv-help-tab .lv-help-tab-label {
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  color: var(--text-secondary) !important;
+}
+.app .lv-help-tab .lv-help-tab-badge {
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+  padding: 0.1rem 0.4rem !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.02em !important;
+  margin-top: 0.15rem !important;
+}
+.app .lv-help-tab:hover {
+  background: rgba(11, 114, 133, 0.06) !important;
+  color: var(--text-primary) !important;
+}
+.app .lv-help-tab:hover .lv-help-tab-label { color: var(--text-primary) !important; }
+.app .lv-help-tab.is-active {
+  color: #064E5C !important;
+  border-bottom-color: var(--primary) !important;
+  background: var(--bg-tertiary) !important;
+}
+.app .lv-help-tab.is-active .lv-help-tab-label { color: #064E5C !important; }
+.app .lv-help-tab:focus-visible {
+  outline: 3px solid var(--accent) !important;
+  outline-offset: -3px !important;
+  z-index: 1 !important;
+}
+@media (max-width: 539px) {
+  .app .lv-help-tabs { grid-template-columns: repeat(2, 1fr) !important; }
+  .app .lv-help-tab { min-height: 56px !important; padding: 0.65rem 0.4rem !important; }
+}
+
+/* Panneaux de contenu */
+.app .lv-help-panel { display: none !important; padding: 0 !important; }
+.app .lv-help-panel.is-active { display: block !important; }
+.app .lv-help-panel[hidden] { display: none !important; }
+.app .lv-help-panel.is-active[hidden] { display: block !important; }
+.app .lv-help-panel-title {
+  margin: 0 0 1rem !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  color: #064E5C !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  flex-wrap: wrap !important;
+  line-height: 1.3 !important;
+}
+.app .lv-help-panel-pill {
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+  padding: 0.15rem 0.65rem !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase !important;
+}
+.app .lv-help-panel-pill--advanced { background: var(--text-muted) !important; }
+
+/* DL structuré Quand / Pourquoi / Exemple */
+.app .lv-help-dl {
+  margin: 0 0 1rem !important;
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: max-content 1fr !important;
+  gap: 0.55rem 1rem !important;
+  align-items: start !important;
+}
+.app .lv-help-dl dt {
+  font-weight: 700 !important;
+  color: var(--primary) !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  padding-top: 0.15rem !important;
+  white-space: nowrap !important;
+}
+.app .lv-help-dl dd {
+  margin: 0 !important;
+  font-size: 0.92rem !important;
+  color: var(--text-primary) !important;
+  line-height: 1.55 !important;
+}
+.app .lv-help-dl dd strong {
+  background: var(--bg-tertiary) !important;
+  padding: 0.1rem 0.4rem !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+  color: #064E5C !important;
+}
+@media (max-width: 539px) {
+  .app .lv-help-dl { grid-template-columns: 1fr !important; gap: 0.15rem !important; }
+  .app .lv-help-dl dt { padding-top: 0.7rem !important; }
+}
+
+.app .lv-help-reversible {
+  margin: 0.85rem 0 0 !important;
+  padding: 0.6rem 0.85rem !important;
+  background: rgba(6, 95, 70, 0.08) !important;
+  border-left: 3px solid #065F46 !important;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  color: #064E3B !important;
+}
+.app .lv-help-reversible--no {
+  background: rgba(153, 27, 27, 0.06) !important;
+  border-left-color: #991B1B !important;
+  color: #7F1D1D !important;
+}
+
+.app .lv-help-cta {
+  margin: 1.5rem 0 0 !important;
+  padding: 0.85rem 1.15rem !important;
+  background: var(--bg-tertiary) !important;
+  border: 1px solid rgba(11, 114, 133, 0.2) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5 !important;
+  color: var(--text-primary) !important;
+}
