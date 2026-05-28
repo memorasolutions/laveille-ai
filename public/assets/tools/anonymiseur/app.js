@@ -680,12 +680,14 @@ function detectPII() {
     }
     accepted.sort((a, b) => a.start - b.start);
 
+    // On n'EXCLUT plus les termes déjà règlés : on les INCLUT pour qu'ils apparaissent dans
+    // la section « Anonymisés ✓ » (isDetectionDone les classe done). Re-détecter = portrait complet
+    // (à traiter + déjà anonymisés), au lieu de « Aucune donnée détectée » trompeur (fix #20).
     const detections = [];
     const alreadyDetected = new Set();
-    const existingOriginals = new Set(AppState.rules.map(r => r.original.toLowerCase()));
     for (const c of accepted) {
         const key = c.text.toLowerCase();
-        if (alreadyDetected.has(key) || existingOriginals.has(key)) continue;
+        if (alreadyDetected.has(key)) continue;
         alreadyDetected.add(key);
         detections.push({ text: c.text, category: c.category, label: c.label });
     }

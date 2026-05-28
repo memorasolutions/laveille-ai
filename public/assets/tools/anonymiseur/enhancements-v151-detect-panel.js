@@ -421,11 +421,21 @@
         lvShowPanel();
         lvSyncHighlight();
 
+        var total = (AppState.detections || []).filter(function (d) { return !d._ignored; }).length;
         var pending = getPendingIndices().length;
-        showToast(
-            pending > 0 ? pending + ' donnée(s) sensible(s) détectée(s)' : 'Aucune donnée sensible détectée',
-            pending > 0 ? 'success' : 'warning'
-        );
+        var done = total - pending;
+        var msg, variant;
+        if (total === 0) {
+            msg = 'Aucune donnée sensible détectée';
+            variant = 'warning';
+        } else if (pending === 0) {
+            msg = total + ' donnée(s) déjà anonymisée(s) ✓';
+            variant = 'success';
+        } else {
+            msg = pending + ' à traiter' + (done > 0 ? ' · ' + done + ' déjà anonymisée(s)' : '');
+            variant = 'success';
+        }
+        showToast(msg, variant);
     };
 
     window.lvMarkDetectionDone = lvMarkDetectionDone;
