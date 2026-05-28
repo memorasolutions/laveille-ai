@@ -218,10 +218,6 @@
         }
     }
 
-    function handleScroll() {
-        lvHidePopover();
-    }
-
     var listenersInitialized = false;
 
     function initListeners() {
@@ -306,8 +302,6 @@
 
         document.addEventListener('click', handleDocumentClick);
         document.addEventListener('keydown', handleEscapeKey);
-        // sans capture : n'attrape que le scroll de page, pas les scrolls internes (sidebar/éditeur)
-        window.addEventListener('scroll', handleScroll);
 
         // Clic sur une marque surlignée inline dans l'éditeur Tiptap → popover + activation
         document.addEventListener('click', function (e) {
