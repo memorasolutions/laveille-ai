@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.47.12 · 2026-05-28 · #313 fix(tools) anonymiseur — boutons « ? » d'aide « dégueulasse » (user). Cause : la migration v1.47.11 vers le composant officiel <x-core::help-modal> avait aussi adopté le visuel `.ct-help-btn` officiel (22px, contour fin teal 1.5px, glyphe « ⓘ » U+24D8). Le glyphe « ⓘ » est un i-cerclé → rendu « cercle dans un cercle » avec le border-radius du bouton = brouillon + le contour fin paraît faible à côté des labels en gras. Le visuel précédent (`.anonymiseur-help-btn` 26px teal plein + « ? » blanc) plaisait. Fix : (1) override scope `.app` du `.ct-help-btn` réutilisant les déclarations du `.anonymiseur-help-btn` (DRY, sélecteurs groupés) → 26px, fond teal plein var(--primary), « ? » blanc gras 0.9rem, hover scale 1.08 + primary-hover, focus-visible 3px accent. Scopé `.app` donc calculatrice-taxes et les autres outils gardent le look officiel ⓘ contour. (2) glyphe des 3 boutons « ⓘ » → « ? ». Le mécanisme officiel (data-help-key + window.HELP_CONTENT + popup .ct-modal charte radius 16) est INCHANGÉ → cohérence charte préservée, seul le déclencheur retrouve le visuel teal plein. Codename anonymizer-help-btn-teal-clean.
  *   1.47.11 · 2026-05-28 · #313 refactor(tools) anonymiseur — popups d'aide migrées vers composant OFFICIEL <x-core::help-modal> (user « est-ce que les popups respectent la charte comme les autres? »). Audit : le site a un composant officiel help-modal (S84, .ct-modal-overlay radius 16 + .ct-help-btn contour teal + data-help-key + window.HELP_CONTENT, déjà dans master.blade.php + utilisé par calculatrice-taxes). Mes 3 popups utilisaient un pattern maison .modal-overlay (radius 10, bouton teal plein) = incohérent. Migration : (1) 3 boutons → `.ct-help-btn data-help-key` (anonym-modes/sensitivity/encryption). (2) 3 modals custom supprimées, contenu déplacé dans `window.HELP_CONTENT` via @php heredoc + json_encode (pattern calculatrice-taxes). (3) Onglets des 4 modes préservés via event delegation globale (le body x-html est teleporté hors .app → enhancements-v150-help.js réécrit en delegation document sur .lv-help-tab data-help-panel + clavier ArrowLeft/Right/Home/End). (4) CSS .lv-help-* dé-scopés de .app (sed 49 remplacements) car le help-modal teleporte au body. Résultat : popups 100% cohérentes avec le reste du site (même overlay, même bouton ⓘ, même radius 16) + onglets conservés. Codename anonymizer-popups-official-help-modal.
  *   1.47.10 · 2026-05-28 · #313 fix(tools) anonymiseur — checkbox « Protéger les exports » invisible (user « j'ai rien à cocher, aucun visuel, mais le champ fonctionne au clic »). Cause : le thème fronttheme/Bootstrap applique `display:none` aux input[type=checkbox] natifs (remplacés par toggles custom ailleurs). Diagnostic Playwright : checkbox computed display:none malgré width/height 20px. Fix CSS scope `.app .anonymiseur-custom-checkbox` : appearance auto/checkbox + display inline-block + visibility visible + opacity 1 + position static + pointer-events auto, le tout en !important pour battre le thème. Confirme aussi v1.47.9 : menu ⋮ Actions fonctionne (menuActionsToggle: true validé Playwright). Codename anonymizer-fix-checkbox-visible.
  *   1.47.9 · 2026-05-28 · #313 fix(tools) anonymiseur CRITIQUE — menu ⋮ Actions (Import/Export/Tout effacer) + autres boutons ne fonctionnaient pas. Cause racine : app.js init() crashait à `document.getElementById('closeBanner').addEventListener` car #closeBanner a été SUPPRIMÉ lors de la refonte bannière confiance accordéon v1.46.4 (remplacé par .lv-trust-banner + bouton J'ai compris géré par enhancements-v149-trust.js). L'exception TypeError sur null stoppait l'init AVANT d'attacher les listeners suivants (btnActionsMenu, btnExport, btnImport, btnDetect, btnClear, btnAddRule...). Fix : null-safe sur _closeBanner (if présent) + wrapper sourceText listeners dans if(sourceText) (ghost Tiptap timing). Diagnostic Playwright : click btnActionsMenu → .active jamais ajouté (handler absent) → après fix .active toggle OK. Leçon : quand on retire un élément DOM (closeBanner), grep le JS source pour les addEventListener orphelins qui crashent l'init. Codename anonymizer-fix-init-crash-closebanner.
@@ -150,7 +151,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 47,
-    'patch' => 11,
+    'patch' => 12,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -160,11 +161,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-popups-official-help-modal',
+    'codename' => 'anonymizer-help-btn-teal-clean',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.11',
+    'semver' => '1.47.12',
 ];

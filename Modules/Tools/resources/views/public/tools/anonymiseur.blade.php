@@ -196,7 +196,7 @@
                 <div class="anonymiseur-custom-field">
                     <label for="maskMode" class="anonymiseur-custom-label">
                         <span>{{ __('Comment remplacer vos données') }}</span>
-                        <button type="button" class="ct-help-btn" data-help-key="anonym-modes" aria-label="{{ __('Aide : comprendre les 4 modes de remplacement') }}">ⓘ</button>
+                        <button type="button" class="ct-help-btn" data-help-key="anonym-modes" aria-label="{{ __('Aide : comprendre les 4 modes de remplacement') }}">?</button>
                     </label>
                     <div class="anonymiseur-custom-control">
                         <select id="maskMode" class="form-input">
@@ -213,7 +213,7 @@
                     <label for="confidenceThreshold" class="anonymiseur-custom-label">
                         <span style="display:flex;align-items:center;gap:0.5rem;">
                             <span>{{ __('Sensibilité de détection') }}</span>
-                            <button type="button" class="ct-help-btn" data-help-key="anonym-sensitivity" aria-label="{{ __('Aide : comprendre la sensibilité de détection') }}">ⓘ</button>
+                            <button type="button" class="ct-help-btn" data-help-key="anonym-sensitivity" aria-label="{{ __('Aide : comprendre la sensibilité de détection') }}">?</button>
                         </span>
                         <span id="confidenceThresholdValue" class="anonymiseur-custom-value">60 %</span>
                     </label>
@@ -229,7 +229,7 @@
                             <input type="checkbox" id="encryptionEnabled" class="anonymiseur-custom-checkbox">
                             <span>{{ __('Protéger les exports') }}</span>
                         </span>
-                        <button type="button" class="ct-help-btn" data-help-key="anonym-encryption" aria-label="{{ __('Aide : comprendre la protection des exports') }}">ⓘ</button>
+                        <button type="button" class="ct-help-btn" data-help-key="anonym-encryption" aria-label="{{ __('Aide : comprendre la protection des exports') }}">?</button>
                     </label>
                     <div class="anonymiseur-custom-control" id="encryptionPassphraseWrap">
                         <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Cochez d\'abord ☝️ pour activer') }}" autocomplete="new-password" disabled>

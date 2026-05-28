@@ -2096,8 +2096,9 @@ body {
   text-decoration: underline !important;
 }
 
-/* === Bouton ? aide modes + modal d'aide v1.47.4 (charte Memora pattern constructeur-prompts) === */
-.app .anonymiseur-help-btn {
+/* === Bouton ? aide (charte Memora teal plein) — override scope .app du .ct-help-btn officiel v1.47.12 === */
+.app .anonymiseur-help-btn,
+.app .ct-help-btn {
   flex-shrink: 0 !important;
   width: 26px !important;
   height: 26px !important;
@@ -2108,19 +2109,23 @@ body {
   color: #FFFFFF !important;
   border: none !important;
   font-weight: 700 !important;
-  font-size: 0.85rem !important;
+  font-size: 0.9rem !important;
   cursor: pointer !important;
   line-height: 1 !important;
+  margin-left: 6px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   transition: background 0.15s ease, transform 0.15s ease !important;
 }
-.app .anonymiseur-help-btn:hover {
+.app .anonymiseur-help-btn:hover,
+.app .ct-help-btn:hover {
   background: var(--primary-hover) !important;
   transform: scale(1.08) !important;
+  outline: none !important;
 }
-.app .anonymiseur-help-btn:focus-visible {
+.app .anonymiseur-help-btn:focus-visible,
+.app .ct-help-btn:focus-visible {
   outline: 3px solid var(--accent) !important;
   outline-offset: 2px !important;
 }
