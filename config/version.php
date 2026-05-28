@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.49.0 · 2026-05-28 · #313 feat(tools) anonymiseur — état « anonymisé/confirmé » persistant (Option A choix user, recherche pp_search mai 2026 : garder les éléments traités visibles + indice non-couleur). Avant : anonymiser une détection la faisait disparaître. Maintenant : (1) la détection RESTE visible et descend dans une nouvelle section « Anonymisés ✓ » du panneau (l'utilisateur garde le fil de ce qui est traité), avec bouton ↶ « Annuler ». (2) Dans le texte, le terme passe du soulignement (en attente) au SURLIGNEUR plein vert rgba(22,163,74,.30) + ✓ (confirmé, comme un coup de surligneur). (3) État « anonymisé » DÉRIVÉ de l'existence d'une règle (source de vérité AppState.rules) : robuste, auto-synchronisé. « Annuler » supprime la/les règle(s) du terme (deleteRule) → repasse en « À traiter ». Extension Tiptap : decorations supportent un flag done (classe is-done). enhancements-v151 : isDetectionDone + lvRenderList 2 sections + lvUndoDetection + lvSyncHighlight done + getPendingIndices/nav excluent les done. detect-panel.css : .anonym-detect.is-done (surligneur + ✓ ::after), section--done, .lv-detect-undo. Génération qwen3-max via openrouter-free (0 $), Opus superviseur. Validé Playwright local : anonymiser → section Anonymisés ✓ + surligneur is-done + count -1, undo → +1, tout anonymiser → 7/7 done. Codename anonymizer-confirmed-highlight-state.
  *   1.48.1 · 2026-05-28 · #313 fix(tools) anonymiseur — popover d'action (clic sur marque inline) invisible en prod. Cause : l'écouteur de scroll global (handleScroll → lvHidePopover) re-masquait le popover juste après son affichage, déclenché par un événement scroll résiduel (page prod plus haute → scroll-into-view au clic Playwright + momentum). Le masquage-au-scroll n'étant pas essentiel et source de fragilité, retiré complètement : le popover se ferme désormais uniquement sur clic-extérieur + ESC (comportement standard et robuste, position:fixed). Fix v151-only (statique), aucun rebuild Vite. Codename anonymizer-detect-panel-inline-highlight.
  *   1.48.0 · 2026-05-28 · #313 feat(tools) anonymiseur — refonte affichage des détections (Option A hybride, choix user, recherche pp_search mai 2026 Grammarly/Notion/Microsoft Editor). (1) Panneau latéral droit (#detectionsPanel) groupé par catégorie avec compteurs + navigation ◀▶ + bouton « Tout anonymiser » + « Ajouter une règle manuelle » : remplace l'ancienne barre de badges en bas (#detectionsBar conservée masquée pour anti-régression). Layout étape 1 passé en grid 2 colonnes .lv-editor-split (éditeur | panneau, responsive <900px). (2) SURLIGNAGE INLINE des termes détectés DANS l'éditeur Tiptap via Extension ProseMirror AnonymDetectionHighlight (decorations non destructives, ne cassent pas le curseur) : soulignement 2px par catégorie (tokens --cat-*), marque active fond teal + outline. Exposé via window.anonymiseurHighlightDetections / SetActiveDetection(index, scroll) / ClearDetections dans resources/js/tiptap-frontend.js (rebuild Vite). (3) Popover d'action au clic d'une marque [Anonymiser]/[Ignorer]. (4) Retrait DIRECT sans popup (demande user) : bouton Ignorer (×) sur chaque détection retire la détection + son surlignage. (5) Synchronisation liste ↔ surlignage : clic item → saut + flash de la marque ; clic marque → popover + item actif. Nouveau enhancements-v151-detect-panel.js (IIFE, classic script) + detect-panel.css (scope .app, WCAG 2.2 AAA, prefers-reduced-motion). Edits app.js : detectPII délègue à window.lvUpdateDetections (fallback conservé), addDetection lit AppState.detections (badge supprimé), markDetectionAsAdded hooke lvMarkDetectionDone, updateStats guard ?. sur #sourceText (fix course init pré-existante). Génération markup/JS/CSS déléguée qwen3-max via openrouter-free (0 $), Opus = superviseur. Validé Playwright local (7 détections, 6 catégories, popover, nav, ignore, tout anonymiser → 7 règles). Codename anonymizer-detect-panel-inline-highlight.
  *   1.47.15 · 2026-05-28 · #313 fix(tools) anonymiseur — « Standard par défaut » réellement appliqué au chargement. Validation Playwright v1.47.14 révélait maskMode=redaction + confidence=0.5 (valeurs Maximum) au lieu de Standard : enhancements-v145.js restaure les réglages depuis localStorage (anonymiseur_settings_v1), ce qui contredisait le bandeau « recommandés appliqués ». Fix dans enhancements-v148 : applyDefaults() (set pseudo/0.6/encryption off si différent) appelée via setTimeout(60ms) au DOMContentLoaded pour passer APRÈS la restauration v145 → chaque visite démarre sur Standard, cohérent avec le bandeau et la demande user « on met standard par défaut ». resetToRecommended() réutilise applyDefaults() (DRY). Codename anonymizer-default-standard-no-presets.
@@ -155,8 +156,8 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 48,
-    'patch' => 1,
+    'minor' => 49,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -166,11 +167,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-detect-panel-inline-highlight',
+    'codename' => 'anonymizer-confirmed-highlight-state',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.48.1',
+    'semver' => '1.49.0',
 ];

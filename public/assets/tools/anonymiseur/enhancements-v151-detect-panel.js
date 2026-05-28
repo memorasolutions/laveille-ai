@@ -3,7 +3,13 @@
  * Panneau latéral des détections PII (groupé par catégorie + compteurs + navigation ◀▶)
  * synchronisé avec le surlignage inline Tiptap (window.anonymiseur*) + popover d'action
  * + retrait direct sans popup (Ignorer). Chargé en classic <script> APRÈS app.js.
- * Globals déjà disponibles : AppState, addDetection, addRule, generateFakeData,
+ *
+ * État « anonymisé » DÉRIVÉ de l'existence d'une règle (source de vérité = AppState.rules) :
+ * les items anonymisés restent visibles dans une section « Anonymisés ✓ » (continuité,
+ * demande user #13), surlignés en surligneur plein + ✓ dans le texte. « Annuler » supprime
+ * la règle → l'item repasse en « À traiter ».
+ *
+ * Globals déjà disponibles : AppState, addDetection, addRule, deleteRule, generateFakeData,
  * getCategoryIcon, escapeHtml, showToast.
  */
 (function () {
@@ -21,11 +27,20 @@
         other: 'Autre'
     };
 
+    function isDetectionDone(d) {
+        if (!d || !d.text || !AppState || !Array.isArray(AppState.rules)) return false;
+        var textLower = d.text.toLowerCase();
+        return AppState.rules.some(function (r) {
+            return r && r.original && r.original.toLowerCase() === textLower;
+        });
+    }
+
+    // Indices des détections « à traiter » : ni ignorées, ni déjà anonymisées (dérivé).
     function getPendingIndices() {
         var pending = [];
         if (!AppState.detections) return pending;
         AppState.detections.forEach(function (d, i) {
-            if (!d._ignored && !d._done) {
+            if (!d._ignored && !isDetectionDone(d)) {
                 pending.push(i);
             }
         });
@@ -39,63 +54,94 @@
         if (!listEl || !countEl || !emptyEl) return;
 
         var detections = AppState.detections || [];
-        var pendingIndices = getPendingIndices();
-        var pendingCount = pendingIndices.length;
+        var pending = [];
+        var done = [];
 
-        countEl.textContent = pendingCount;
-
-        if (pendingCount === 0) {
-            emptyEl.classList.remove('hidden');
-            listEl.innerHTML = '';
-            return;
-        }
-
-        emptyEl.classList.add('hidden');
-
-        var groups = {};
-        var groupOrder = [];
-
-        pendingIndices.forEach(function (i) {
-            var d = detections[i];
-            if (!groups[d.category]) {
-                groups[d.category] = [];
-                groupOrder.push(d.category);
+        detections.forEach(function (d, i) {
+            if (d._ignored) return;
+            if (isDetectionDone(d)) {
+                done.push({ index: i, detection: d });
+            } else {
+                pending.push({ index: i, detection: d });
             }
-            groups[d.category].push({ index: i, detection: d });
         });
 
+        countEl.textContent = pending.length;
+        if (pending.length === 0 && done.length === 0) {
+            emptyEl.classList.remove('hidden');
+        } else {
+            emptyEl.classList.add('hidden');
+        }
+
         var html = '';
-        groupOrder.forEach(function (cat) {
-            var items = groups[cat];
-            var label = categoryLabels[cat] || cat;
-            var icon = getCategoryIcon(cat);
-            var count = items.length;
 
-            html += '<div class="lv-detect-group" data-category="' + escapeHtml(cat) + '">' +
-                '<div class="lv-detect-grouphead">' +
-                '<span class="lv-detect-gico" aria-hidden="true">' + escapeHtml(icon) + '</span>' +
-                escapeHtml(label) +
-                '<span class="lv-detect-gcount">' + count + '</span>' +
-                '</div>' +
-                '<div class="lv-detect-items" role="list">';
+        // === Section « À traiter » (groupée par catégorie) ===
+        if (pending.length > 0) {
+            var groups = {};
+            var groupOrder = [];
+            pending.forEach(function (item) {
+                var cat = item.detection.category;
+                if (!groups[cat]) {
+                    groups[cat] = [];
+                    groupOrder.push(cat);
+                }
+                groups[cat].push(item);
+            });
 
-            items.forEach(function (item) {
+            html += '<div class="lv-detect-section">';
+            html += '<div class="lv-detect-sechead">À traiter <span class="lv-detect-seccount">' + pending.length + '</span></div>';
+
+            groupOrder.forEach(function (cat) {
+                var items = groups[cat];
+                var label = categoryLabels[cat] || cat;
+                var icon = getCategoryIcon(cat);
+                html += '<div class="lv-detect-group" data-category="' + escapeHtml(cat) + '">' +
+                    '<div class="lv-detect-grouphead">' +
+                    '<span class="lv-detect-gico" aria-hidden="true">' + escapeHtml(icon) + '</span>' +
+                    escapeHtml(label) +
+                    '<span class="lv-detect-gcount">' + items.length + '</span>' +
+                    '</div>' +
+                    '<div class="lv-detect-items" role="list">';
+                items.forEach(function (item) {
+                    var d = item.detection;
+                    var escText = escapeHtml(d.text);
+                    html += '<div class="lv-detect-item" role="listitem" data-index="' + item.index + '" data-category="' + escapeHtml(cat) + '">' +
+                        '<button type="button" class="lv-detect-jump" data-index="' + item.index + '" title="Voir dans le texte">' +
+                        '<span class="lv-detect-swatch" aria-hidden="true"></span>' +
+                        '<span class="lv-detect-text">' + escText + '</span>' +
+                        '</button>' +
+                        '<span class="lv-detect-actions">' +
+                        '<button type="button" class="lv-detect-anon" data-index="' + item.index + '" title="Anonymiser" aria-label="Anonymiser ' + escText + '">＋</button>' +
+                        '<button type="button" class="lv-detect-ignore" data-index="' + item.index + '" title="Ignorer" aria-label="Ignorer ' + escText + '">×</button>' +
+                        '</span>' +
+                        '</div>';
+                });
+                html += '</div></div>';
+            });
+            html += '</div>';
+        }
+
+        // === Section « Anonymisés ✓ » (liste plate, bouton Annuler) ===
+        if (done.length > 0) {
+            html += '<div class="lv-detect-section lv-detect-section--done">';
+            html += '<div class="lv-detect-sechead">Anonymisés ✓ <span class="lv-detect-seccount">' + done.length + '</span></div>';
+            html += '<div class="lv-detect-items" role="list">';
+            done.forEach(function (item) {
                 var d = item.detection;
-                var escapedText = escapeHtml(d.text);
-                html += '<div class="lv-detect-item" role="listitem" data-index="' + item.index + '" data-category="' + escapeHtml(cat) + '">' +
+                var cat = d.category;
+                var escText = escapeHtml(d.text);
+                html += '<div class="lv-detect-item is-done" role="listitem" data-index="' + item.index + '" data-category="' + escapeHtml(cat) + '">' +
                     '<button type="button" class="lv-detect-jump" data-index="' + item.index + '" title="Voir dans le texte">' +
                     '<span class="lv-detect-swatch" aria-hidden="true"></span>' +
-                    '<span class="lv-detect-text">' + escapedText + '</span>' +
+                    '<span class="lv-detect-text">' + escText + '</span>' +
                     '</button>' +
                     '<span class="lv-detect-actions">' +
-                    '<button type="button" class="lv-detect-anon" data-index="' + item.index + '" title="Anonymiser" aria-label="Anonymiser ' + escapedText + '">＋</button>' +
-                    '<button type="button" class="lv-detect-ignore" data-index="' + item.index + '" title="Ignorer" aria-label="Ignorer ' + escapedText + '">×</button>' +
+                    '<button type="button" class="lv-detect-undo" data-index="' + item.index + '" title="Annuler l\'anonymisation" aria-label="Annuler l\'anonymisation de ' + escText + '">↶</button>' +
                     '</span>' +
                     '</div>';
             });
-
             html += '</div></div>';
-        });
+        }
 
         listEl.innerHTML = html;
     }
@@ -111,10 +157,10 @@
         if (typeof window.anonymiseurHighlightDetections !== 'function') return;
         var detections = AppState.detections || [];
         var highlightList = detections.map(function (d) {
-            if (d._ignored || d._done) {
+            if (d._ignored) {
                 return { text: '', category: d.category };
             }
-            return { text: d.text, category: d.category };
+            return { text: d.text, category: d.category, done: isDetectionDone(d) };
         });
         window.anonymiseurHighlightDetections(highlightList);
     }
@@ -140,11 +186,31 @@
         }
     }
 
+    // Appelée après création d'une règle depuis une détection (état done dérivé) → re-rendu.
     function lvMarkDetectionDone(index) {
-        if (!AppState.detections || !AppState.detections[index]) return;
-        AppState.detections[index]._done = true;
         lvRenderList();
         lvSyncHighlight();
+    }
+
+    // « Annuler l'anonymisation » : supprime la/les règle(s) du terme → repasse en À traiter.
+    function lvUndoDetection(index) {
+        var detections = AppState && AppState.detections;
+        if (!detections || index < 0 || index >= detections.length) return;
+        var d = detections[index];
+        if (!d || !d.text) return;
+        var textLower = d.text.toLowerCase();
+        var idsToDelete = [];
+        if (Array.isArray(AppState.rules)) {
+            AppState.rules.forEach(function (r) {
+                if (r && r.id && r.original && r.original.toLowerCase() === textLower) {
+                    idsToDelete.push(r.id);
+                }
+            });
+        }
+        idsToDelete.forEach(function (id) { deleteRule(id); });
+        lvRenderList();
+        lvSyncHighlight();
+        showToast('Anonymisation annulée', 'info');
     }
 
     function lvIgnore(index) {
@@ -240,8 +306,8 @@
             anonAllBtn.addEventListener('click', function () {
                 var n = 0;
                 if (!AppState.detections) return;
-                AppState.detections.forEach(function (d, i) {
-                    if (d._ignored || d._done) return;
+                AppState.detections.forEach(function (d) {
+                    if (d._ignored || isDetectionDone(d)) return;
                     var repl = '';
                     try {
                         repl = generateFakeData(d.category, d.text) || '';
@@ -251,7 +317,6 @@
                     }
                     try {
                         addRule(d.text, repl, d.category);
-                        d._done = true;
                         n++;
                     } catch (e) { }
                 });
@@ -280,6 +345,12 @@
                 if (ignoreBtn) {
                     var iIndex = +ignoreBtn.getAttribute('data-index');
                     lvIgnore(iIndex);
+                    return;
+                }
+                var undoBtn = e.target.closest('.lv-detect-undo');
+                if (undoBtn) {
+                    var uIndex = +undoBtn.getAttribute('data-index');
+                    lvUndoDetection(uIndex);
                     return;
                 }
             });
@@ -320,8 +391,7 @@
                 text: d.text,
                 category: d.category,
                 label: d.label,
-                _ignored: false,
-                _done: false
+                _ignored: false
             };
         });
         AppState.activeDetectIndex = -1;

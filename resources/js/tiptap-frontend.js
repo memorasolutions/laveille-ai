@@ -23,7 +23,7 @@ function buildDecorations(doc, detections, activeIndex) {
   }
   // Index original stable AVANT filtrage, puis tri longueur DESC (anti-chevauchement partiel)
   const indexed = detections
-    .map((d, i) => ({ text: d.text, category: d.category, _i: i }))
+    .map((d, i) => ({ text: d.text, category: d.category, done: !!d.done, _i: i }))
     .filter(d => d.text && d.text.trim() !== '')
   if (!indexed.length) return DecorationSet.empty
   const sorted = [...indexed].sort((a, b) => b.text.length - a.text.length)
@@ -42,7 +42,7 @@ function buildDecorations(doc, detections, activeIndex) {
         const start = pos + idx
         const end = start + d.text.length
         decos.push(Decoration.inline(start, end, {
-          class: 'anonym-detect anonym-detect--' + d.category + (d._i === activeIndex ? ' is-active' : ''),
+          class: 'anonym-detect anonym-detect--' + d.category + (d.done ? ' is-done' : '') + (d._i === activeIndex ? ' is-active' : ''),
           'data-detect-index': String(d._i)
         }))
         offset = idx + 1

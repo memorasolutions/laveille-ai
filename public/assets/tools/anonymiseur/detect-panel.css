@@ -434,3 +434,111 @@
     transition: none !important;
   }
 }
+
+/* ============================================
+   ÉTAT « ANONYMISÉ / CONFIRMÉ » (S131 #13)
+   ============================================ */
+.app .anonym-detect.is-done,
+.anonym-detect.is-done {
+  background: rgba(22, 163, 74, 0.30) !important;
+  border-bottom: none !important;
+  border-radius: 3px;
+  padding: 0 2px;
+  position: relative;
+}
+
+.app .anonym-detect.is-done::after,
+.anonym-detect.is-done::after {
+  content: "\2713";
+  font-size: 0.75em;
+  color: #15803d;
+  margin-left: 2px;
+  font-weight: 700;
+  vertical-align: baseline;
+}
+
+.app .lv-detect-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app .lv-detect-section + .lv-detect-section {
+  margin-top: 0.75rem;
+}
+
+.app .lv-detect-sechead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
+  z-index: 1;
+}
+
+.app .lv-detect-seccount {
+  margin-left: auto;
+}
+
+.app .lv-detect-section--done .lv-detect-sechead {
+  color: #15803d;
+}
+
+.app .lv-detect-item.is-done {
+  background: rgba(22, 163, 74, 0.08);
+  border-left-color: #16a34a !important;
+}
+
+.app .lv-detect-item.is-done .lv-detect-text {
+  color: var(--text-muted);
+}
+
+.app .lv-detect-item.is-done .lv-detect-swatch {
+  background: #16a34a;
+  position: relative;
+}
+
+.app .lv-detect-item.is-done .lv-detect-swatch::after {
+  content: "\2713";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.app .lv-detect-undo {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.app .lv-detect-undo:hover {
+  background: var(--text-muted);
+  color: #fff;
+}
+
+.app .lv-detect-undo:focus-visible {
+  outline: 3px solid rgba(11, 114, 133, 0.5);
+  outline-offset: 1px;
+}
