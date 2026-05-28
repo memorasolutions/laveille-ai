@@ -2119,6 +2119,13 @@ body {
   outline: 3px solid var(--accent) !important;
   outline-offset: 2px !important;
 }
+/* v1.49.2 #12 : le « ? » du champ « Comment remplacer vos données » a un label qui s'enroule sur 2 lignes ;
+   le label est align-items:center, donc le bouton se centrait sur TOUT le bloc 2 lignes (trop bas, « pas centré » remarque user).
+   On l'aligne sur la PREMIÈRE ligne pour matcher visuellement les boutons des champs à une seule ligne. */
+.app .anonymiseur-custom-label .ct-help-btn[data-help-key="anonym-modes"] {
+  align-self: flex-start !important;
+  margin-top: -2px !important;
+}
 
 /* Cards modale d'aide 4 modes */
 .app #maskModeHelpModal .modal-body { max-height: 70vh !important; overflow-y: auto !important; }

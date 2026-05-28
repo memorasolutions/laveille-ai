@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.49.2 · 2026-05-28 · #313 fix(tools) anonymiseur — centrage vertical du « ? » du champ « Comment remplacer vos données » (remarque user, screenshots 13-37-35 + 14-22-06 : « 1 centré oui / 2 centré non »). Le label de ce champ s'enroule sur 2 lignes ; comme `.anonymiseur-custom-label` est align-items:center, le bouton « ? » se centrait sur tout le bloc 2 lignes (paraissait trop bas/détaché), alors que les boutons des champs à une seule ligne sont alignés sur leur ligne. Fix CSS ciblé `.app .anonymiseur-custom-label .ct-help-btn[data-help-key="anonym-modes"] { align-self:flex-start; margin-top:-2px }` → le « ? » s'aligne sur la PREMIÈRE ligne, cohérent avec les 2 autres. CSS-only. Codename anonymizer-confirmed-highlight-state.
  *   1.49.1 · 2026-05-28 · #313 fix(tools) anonymiseur — le surligneur « anonymisé » suit le CODE COULEUR par catégorie (remarque user). v1.49.0 surlignait tout en vert (sémantique « confirmé »), ce qui cassait le code couleur catégorie établi. Correctif : `.anonym-detect.is-done` prend désormais la couleur de la catégorie en surligneur plein via color-mix(in srgb, var(--cat-X) 30%, transparent), le ✓ (::after, var(--text-primary)) restant l'indice de statut « anonymisé » (non-couleur, WCAG ok). Côté panneau, l'item « Anonymisés ✓ » garde la pastille + bordure de sa catégorie (retrait des overrides verts), ✓ en overlay sur la pastille. CSS-only (detect-panel.css), aucun rebuild Vite. Codename anonymizer-confirmed-highlight-state.
  *   1.49.0 · 2026-05-28 · #313 feat(tools) anonymiseur — état « anonymisé/confirmé » persistant (Option A choix user, recherche pp_search mai 2026 : garder les éléments traités visibles + indice non-couleur). Avant : anonymiser une détection la faisait disparaître. Maintenant : (1) la détection RESTE visible et descend dans une nouvelle section « Anonymisés ✓ » du panneau (l'utilisateur garde le fil de ce qui est traité), avec bouton ↶ « Annuler ». (2) Dans le texte, le terme passe du soulignement (en attente) au SURLIGNEUR plein vert rgba(22,163,74,.30) + ✓ (confirmé, comme un coup de surligneur). (3) État « anonymisé » DÉRIVÉ de l'existence d'une règle (source de vérité AppState.rules) : robuste, auto-synchronisé. « Annuler » supprime la/les règle(s) du terme (deleteRule) → repasse en « À traiter ». Extension Tiptap : decorations supportent un flag done (classe is-done). enhancements-v151 : isDetectionDone + lvRenderList 2 sections + lvUndoDetection + lvSyncHighlight done + getPendingIndices/nav excluent les done. detect-panel.css : .anonym-detect.is-done (surligneur + ✓ ::after), section--done, .lv-detect-undo. Génération qwen3-max via openrouter-free (0 $), Opus superviseur. Validé Playwright local : anonymiser → section Anonymisés ✓ + surligneur is-done + count -1, undo → +1, tout anonymiser → 7/7 done. Codename anonymizer-confirmed-highlight-state.
  *   1.48.1 · 2026-05-28 · #313 fix(tools) anonymiseur — popover d'action (clic sur marque inline) invisible en prod. Cause : l'écouteur de scroll global (handleScroll → lvHidePopover) re-masquait le popover juste après son affichage, déclenché par un événement scroll résiduel (page prod plus haute → scroll-into-view au clic Playwright + momentum). Le masquage-au-scroll n'étant pas essentiel et source de fragilité, retiré complètement : le popover se ferme désormais uniquement sur clic-extérieur + ESC (comportement standard et robuste, position:fixed). Fix v151-only (statique), aucun rebuild Vite. Codename anonymizer-detect-panel-inline-highlight.
@@ -158,7 +159,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 49,
-    'patch' => 1,
+    'patch' => 2,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -174,5 +175,5 @@ return [
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.49.1',
+    'semver' => '1.49.2',
 ];
