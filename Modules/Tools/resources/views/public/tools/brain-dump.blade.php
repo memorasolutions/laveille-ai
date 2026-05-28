@@ -10,6 +10,9 @@
 
 @section('og_type', 'website')
 @section('share_text', 'Brain Dump 2026 — 10 min de papier + 30 sec d\'IA pour vider et structurer ton mental.')
+@if(isset($tool) && $tool->featured_image)
+@section('og_image', asset($tool->featured_image) . '?v=' . (file_exists(public_path($tool->featured_image)) ? filemtime(public_path($tool->featured_image)) : '1'))
+@endif
 
 @push('scripts')
 {{-- JSON-LD multi-couche : SoftwareApplication + HowTo + FAQPage + BreadcrumbList + Person (auteur) — AEO/GEO 2026 +30% Perplexity visibility --}}
