@@ -85,19 +85,8 @@
     {{-- Bouton fullpage masqué (remplacé par tools::partials.fullscreen-btn dans le header charte) --}}
     <button id="btnFullpage" type="button" class="hidden" aria-hidden="true" tabindex="-1"></button>
 
-    <div id="infoBanner" class="lv-trust-banner" role="region" aria-label="{{ __('Garantie de confidentialité') }}">
-        {{-- État réduit (badge cliquable après acceptation) --}}
-        <button type="button" id="lvTrustToggle" class="lv-trust-toggle" aria-expanded="true" aria-controls="lvTrustContent">
-            <span class="lv-trust-icon" aria-hidden="true">🛡️</span>
-            <span class="lv-trust-title">
-                <strong>{{ __('100 % local') }}</strong>
-                <span class="lv-trust-sub">{{ __('Traitement dans votre navigateur — aucun contenu envoyé à un serveur') }}</span>
-            </span>
-            <span class="lv-trust-chevron" aria-hidden="true">▾</span>
-        </button>
-
-        {{-- Contenu détaillé (accordéon) --}}
-        <div id="lvTrustContent" class="lv-trust-content">
+    <div id="infoBanner">
+        <x-core::accordion id="anonymTrust" icon="🛡️" :title="__('100 % local')" :subtitle="__('Traitement dans votre navigateur — aucun contenu envoyé à un serveur')" :open="true">
             {{-- Schéma flux visuel --}}
             <div class="lv-trust-flow" aria-label="{{ __('Flux des données') }}">
                 <span class="lv-trust-flow-step"><span aria-hidden="true">📝</span> {{ __('Votre texte') }}</span>
@@ -151,19 +140,11 @@
                 <button type="button" id="lvTrustAccept" class="lv-trust-accept">{{ __('J\'ai compris, ne plus afficher') }}</button>
                 <a href="/glossaire/anonymisation" target="_blank" rel="noopener" class="lv-trust-learn-more">{{ __('Comprendre l\'anonymisation') }} →</a>
             </div>
-        </div>
+        </x-core::accordion>
     </div>
 
     <div class="anonymiseur-settings" style="margin:1rem 0 1.5rem;">
-        <div id="custom-settings" class="anonymiseur-settings-panel">
-            <button type="button" id="anonymiseurSettingsToggle" class="anonymiseur-settings-toggle" aria-expanded="false" aria-controls="anonymiseur-settings-body">
-                <span class="anonymiseur-reco-banner-inline">
-                    <span class="anonymiseur-reco-check" aria-hidden="true">✓</span>
-                    {{ __('Réglages recommandés pour l\'IA appliqués') }}
-                </span>
-                <span class="anonymiseur-settings-toggle-cta">{{ __('Personnaliser') }} <span class="anonymiseur-settings-chevron" aria-hidden="true">▾</span></span>
-            </button>
-            <div id="anonymiseur-settings-body" class="anonymiseur-settings-body" hidden>
+        <x-core::accordion id="anonymSettings" icon="✓" :title="__('Réglages recommandés pour l\'IA appliqués')" :cta="__('Personnaliser')" :open="false">
                 <div class="anonymiseur-settings-reset-row">
                     <button type="button" id="resetRecommended" class="anonymiseur-reset-link">
                         {{ __('↺ Réinitialiser aux recommandés') }}
@@ -214,8 +195,7 @@
                     <small class="anonymiseur-custom-hint">{{ __('Chiffre votre fichier JSON exporté avec un mot de passe (AES-GCM). Vous seul·e pourrez l\'ouvrir.') }}</small>
                 </div>
             </div>
-            </div>{{-- /#anonymiseur-settings-body --}}
-        </div>
+        </x-core::accordion>
     </div>
 
     <nav class="steps" aria-label="Étapes du processus">
@@ -537,5 +517,4 @@ HTML;
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v149-trust.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v150-help.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v151-detect-panel.js') }}?v={{ config('version.semver') }}" defer></script>
-<script src="{{ asset('assets/tools/anonymiseur/enhancements-v152-settings-accordion.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

@@ -1266,7 +1266,7 @@ function init() {
 
     const bannerClosed = localStorage.getItem('anonymizer_banner_closed');
     if (bannerClosed) {
-        document.getElementById('infoBanner').classList.add('hidden');
+        document.getElementById('infoBanner')?.classList.add('hidden');
     }
     // #313 v1.47.9 : closeBanner peut être absent (bannière confiance accordéon S129 le remplace)
     const _closeBanner = document.getElementById('closeBanner');
