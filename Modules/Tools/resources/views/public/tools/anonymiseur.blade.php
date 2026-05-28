@@ -196,7 +196,7 @@
                 <div class="anonymiseur-custom-field">
                     <label for="maskMode" class="anonymiseur-custom-label">
                         <span>{{ __('Comment remplacer vos données') }}</span>
-                        <button type="button" id="btnMaskModeHelp" class="anonymiseur-help-btn" aria-label="{{ __('Aide : comprendre les 4 modes de remplacement') }}" title="{{ __('Comprendre la différence entre les 4 modes') }}">?</button>
+                        <button type="button" class="ct-help-btn" data-help-key="anonym-modes" aria-label="{{ __('Aide : comprendre les 4 modes de remplacement') }}">ⓘ</button>
                     </label>
                     <div class="anonymiseur-custom-control">
                         <select id="maskMode" class="form-input">
@@ -213,7 +213,7 @@
                     <label for="confidenceThreshold" class="anonymiseur-custom-label">
                         <span style="display:flex;align-items:center;gap:0.5rem;">
                             <span>{{ __('Sensibilité de détection') }}</span>
-                            <button type="button" id="btnSensitivityHelp" class="anonymiseur-help-btn" aria-label="{{ __('Aide : comprendre la sensibilité de détection') }}" title="{{ __('Comprendre la sensibilité de détection') }}">?</button>
+                            <button type="button" class="ct-help-btn" data-help-key="anonym-sensitivity" aria-label="{{ __('Aide : comprendre la sensibilité de détection') }}">ⓘ</button>
                         </span>
                         <span id="confidenceThresholdValue" class="anonymiseur-custom-value">60 %</span>
                     </label>
@@ -229,7 +229,7 @@
                             <input type="checkbox" id="encryptionEnabled" class="anonymiseur-custom-checkbox">
                             <span>{{ __('Protéger les exports') }}</span>
                         </span>
-                        <button type="button" id="btnEncryptionHelp" class="anonymiseur-help-btn" aria-label="{{ __('Aide : comprendre la protection des exports') }}" title="{{ __('Comprendre la protection par mot de passe') }}">?</button>
+                        <button type="button" class="ct-help-btn" data-help-key="anonym-encryption" aria-label="{{ __('Aide : comprendre la protection des exports') }}">ⓘ</button>
                     </label>
                     <div class="anonymiseur-custom-control" id="encryptionPassphraseWrap">
                         <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Cochez d\'abord ☝️ pour activer') }}" autocomplete="new-password" disabled>
@@ -444,176 +444,7 @@
         </div>
     </div>
 
-    {{-- Modal d'aide : explique les 4 modes de remplacement (pattern onglets Memora) --}}
-    <div id="maskModeHelpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="maskModeHelpTitle">
-        <div class="modal" style="max-width:680px;">
-            <div class="modal-header">
-                <h2 id="maskModeHelpTitle" class="panel-title">{{ __('Les 4 façons de remplacer vos données') }}</h2>
-                <button type="button" id="closeMaskHelpModal" class="btn-icon" aria-label="{{ __('Fermer') }}" title="{{ __('Fermer') }}">×</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin:0 0 1rem;color:var(--text-secondary);line-height:1.5;font-size:0.9rem;">
-                    {{ __('Choisissez selon ce que vous voulez faire ensuite avec votre texte.') }}
-                </p>
-
-                <div class="lv-help-tabs" role="tablist" aria-label="{{ __('Modes de remplacement') }}">
-                    <button type="button" role="tab" id="lvhelp-tab-pseudo" aria-selected="true" aria-controls="lvhelp-panel-pseudo" tabindex="0" class="lv-help-tab is-active" data-help-tab="pseudo">
-                        <span aria-hidden="true">🔄</span>
-                        <span class="lv-help-tab-label">{{ __('Faux noms') }}</span>
-                        <span class="lv-help-tab-badge">{{ __('Reco') }}</span>
-                    </button>
-                    <button type="button" role="tab" id="lvhelp-tab-redaction" aria-selected="false" aria-controls="lvhelp-panel-redaction" tabindex="-1" class="lv-help-tab" data-help-tab="redaction">
-                        <span aria-hidden="true">🗑️</span>
-                        <span class="lv-help-tab-label">{{ __('Effacer') }}</span>
-                    </button>
-                    <button type="button" role="tab" id="lvhelp-tab-hash" aria-selected="false" aria-controls="lvhelp-panel-hash" tabindex="-1" class="lv-help-tab" data-help-tab="hash">
-                        <span aria-hidden="true">🔒</span>
-                        <span class="lv-help-tab-label">{{ __('Code unique') }}</span>
-                    </button>
-                    <button type="button" role="tab" id="lvhelp-tab-fpe" aria-selected="false" aria-controls="lvhelp-panel-fpe" tabindex="-1" class="lv-help-tab" data-help-tab="fpe">
-                        <span aria-hidden="true">🎲</span>
-                        <span class="lv-help-tab-label">{{ __('Brouillage') }}</span>
-                    </button>
-                </div>
-
-                <div class="lv-help-panel is-active" role="tabpanel" id="lvhelp-panel-pseudo" aria-labelledby="lvhelp-tab-pseudo">
-                    <h3 class="lv-help-panel-title">🔄 {{ __('Faux noms similaires') }} <span class="lv-help-panel-pill">{{ __('Recommandé') }}</span></h3>
-                    <dl class="lv-help-dl">
-                        <dt>{{ __('Quand') }}</dt>
-                        <dd>{{ __('vous voulez utiliser ChatGPT, Claude ou Gemini.') }}</dd>
-                        <dt>{{ __('Pourquoi') }}</dt>
-                        <dd>{{ __('l\'IA comprend votre contexte (un nom, une adresse, une date) et donne sa meilleure réponse. Ensuite on remet vos vraies données dans la réponse.') }}</dd>
-                        <dt>{{ __('Exemple') }}</dt>
-                        <dd>« Marie Tremblay habite à Montréal »<br>→ « <strong>Catherine Bouchard</strong> habite à <strong>Québec</strong> »</dd>
-                    </dl>
-                    <p class="lv-help-reversible">✅ {{ __('Restauration possible — vous récupérez vos vraies données après.') }}</p>
-                </div>
-
-                <div class="lv-help-panel" role="tabpanel" id="lvhelp-panel-redaction" aria-labelledby="lvhelp-tab-redaction" hidden>
-                    <h3 class="lv-help-panel-title">🗑️ {{ __('Effacer définitivement') }}</h3>
-                    <dl class="lv-help-dl">
-                        <dt>{{ __('Quand') }}</dt>
-                        <dd>{{ __('vous voulez partager un document public (rapport, étude, capture d\'écran).') }}</dd>
-                        <dt>{{ __('Pourquoi') }}</dt>
-                        <dd>{{ __('aucun risque de fuite — les vraies données disparaissent pour toujours.') }}</dd>
-                        <dt>{{ __('Exemple') }}</dt>
-                        <dd>« Marie Tremblay habite à Montréal »<br>→ « <strong>[SUPPRIMÉ]</strong> habite à <strong>[SUPPRIMÉ]</strong> »</dd>
-                    </dl>
-                    <p class="lv-help-reversible lv-help-reversible--no">⛔ {{ __('Aucune restauration possible.') }}</p>
-                </div>
-
-                <div class="lv-help-panel" role="tabpanel" id="lvhelp-panel-hash" aria-labelledby="lvhelp-tab-hash" hidden>
-                    <h3 class="lv-help-panel-title">🔒 {{ __('Code unique irréversible') }}</h3>
-                    <dl class="lv-help-dl">
-                        <dt>{{ __('Quand') }}</dt>
-                        <dd>{{ __('vous voulez comparer ou dédoublonner sans connaître les vrais noms (statistiques internes, recherche).') }}</dd>
-                        <dt>{{ __('Pourquoi') }}</dt>
-                        <dd>{{ __('même nom = même code, donc on peut compter les occurrences sans jamais voir les vraies identités.') }}</dd>
-                        <dt>{{ __('Exemple') }}</dt>
-                        <dd>« Marie Tremblay » → « <strong>a8f3c2e1</strong> »<br>« Marie Tremblay » (2<sup>e</sup> fois) → « <strong>a8f3c2e1</strong> »</dd>
-                    </dl>
-                    <p class="lv-help-reversible lv-help-reversible--no">⛔ {{ __('Aucune restauration possible.') }}</p>
-                </div>
-
-                <div class="lv-help-panel" role="tabpanel" id="lvhelp-panel-fpe" aria-labelledby="lvhelp-tab-fpe" hidden>
-                    <h3 class="lv-help-panel-title">🎲 {{ __('Brouillage format identique') }} <span class="lv-help-panel-pill lv-help-panel-pill--advanced">{{ __('Avancé') }}</span></h3>
-                    <dl class="lv-help-dl">
-                        <dt>{{ __('Quand') }}</dt>
-                        <dd>{{ __('vous avez un système (base de données, vieux logiciel) qui exige un format précis : 16 chiffres pour une carte bancaire, 9 chiffres pour un NAS.') }}</dd>
-                        <dt>{{ __('Pourquoi') }}</dt>
-                        <dd>{{ __('le système reste fonctionnel parce que le format est respecté, mais les vraies données sont protégées.') }}</dd>
-                        <dt>{{ __('Exemple') }}</dt>
-                        <dd>« 4532-1234-5678-9876 »<br>→ « <strong>7831-9402-1456-2289</strong> » {{ __('(toujours 16 chiffres)') }}</dd>
-                    </dl>
-                    <p class="lv-help-reversible">✅ {{ __('Restauration avec clé technique.') }}</p>
-                </div>
-
-                <p class="lv-help-cta">
-                    💡 <strong>{{ __('Pas sûr·e ?') }}</strong> {{ __('Choisissez') }} <strong>{{ __('🔄 Faux noms similaires') }}</strong> — {{ __('c\'est le mode qui marche le mieux avec ChatGPT, Claude et Gemini, et vous récupérez vos vraies données après.') }}
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="closeMaskHelpModalFooter" class="btn btn-primary">{{ __('J\'ai compris') }}</button>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal d'aide : Sensibilité de détection --}}
-    <div id="sensitivityHelpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sensitivityHelpTitle">
-        <div class="modal" style="max-width:560px;">
-            <div class="modal-header">
-                <h2 id="sensitivityHelpTitle" class="panel-title">{{ __('La sensibilité de détection, c\'est quoi ?') }}</h2>
-                <button type="button" id="closeSensitivityHelp" class="btn-icon" aria-label="{{ __('Fermer') }}" title="{{ __('Fermer') }}">×</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin:0 0 1rem;font-size:0.95rem;line-height:1.55;color:var(--text-primary);">
-                    {{ __('Ce réglage contrôle à quel point l\'outil est strict pour repérer vos informations personnelles (noms, courriels, numéros…).') }}
-                </p>
-
-                <div class="lv-help-analogy">
-                    <h3>🔥 {{ __('Comme un détecteur de fumée') }}</h3>
-                    <dl class="lv-help-dl">
-                        <dt>{{ __('Très sensible') }}</dt>
-                        <dd>{{ __('il sonne dès qu\'il voit un peu de fumée — repère le maximum de données, mais parfois à tort (faux positifs).') }}</dd>
-                        <dt>{{ __('Peu sensible') }}</dt>
-                        <dd>{{ __('il sonne seulement s\'il est sûr — moins de fausses alertes, mais il peut rater certaines données.') }}</dd>
-                    </dl>
-                </div>
-
-                <div class="lv-help-scale" aria-hidden="true">
-                    <span>← {{ __('Détecte tout') }}</span>
-                    <span class="lv-help-scale-mid">{{ __('Équilibré') }}</span>
-                    <span>{{ __('Très précis') }} →</span>
-                </div>
-
-                <p class="lv-help-cta">
-                    💡 <strong>{{ __('Conseil') }} :</strong> {{ __('pour respecter la Loi 25 et le RGPD, gardez un niveau') }} <strong>{{ __('équilibré ou plus sensible') }}</strong> — {{ __('mieux vaut une fausse alerte que de laisser passer une vraie donnée personnelle.') }}
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="closeSensitivityHelpFooter" class="btn btn-primary">{{ __('J\'ai compris') }}</button>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal d'aide : Protéger les exports (chiffrement) --}}
-    <div id="encryptionHelpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="encryptionHelpTitle">
-        <div class="modal" style="max-width:560px;">
-            <div class="modal-header">
-                <h2 id="encryptionHelpTitle" class="panel-title">{{ __('Protéger vos exports, c\'est quoi ?') }}</h2>
-                <button type="button" id="closeEncryptionHelp" class="btn-icon" aria-label="{{ __('Fermer') }}" title="{{ __('Fermer') }}">×</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin:0 0 1rem;font-size:0.95rem;line-height:1.55;color:var(--text-primary);">
-                    {{ __('Quand vous exportez vos règles dans un fichier (pour les réutiliser ou les partager), ce fichier peut contenir vos vraies données. Cette option le verrouille avec un mot de passe.') }}
-                </p>
-
-                <div class="lv-help-analogy">
-                    <h3>🔐 {{ __('Comme un coffre-fort') }}</h3>
-                    <dl class="lv-help-dl">
-                        <dt>{{ __('Sans protection') }}</dt>
-                        <dd>{{ __('le fichier est lisible par quiconque l\'ouvre (collègue, pièce jointe interceptée, clé USB perdue).') }}</dd>
-                        <dt>{{ __('Avec protection') }}</dt>
-                        <dd>{{ __('le fichier devient illisible sans le mot de passe. Même intercepté, personne ne peut rien en faire.') }}</dd>
-                    </dl>
-                </div>
-
-                <dl class="lv-help-dl" style="margin-top:1rem;">
-                    <dt>{{ __('Quand') }}</dt>
-                    <dd>{{ __('vous partagez le fichier par courriel, le stockez dans le nuage, ou sur un appareil partagé.') }}</dd>
-                    <dt>{{ __('Comment') }}</dt>
-                    <dd>{{ __('cochez la case, choisissez un mot de passe de 12 caractères ou plus, puis exportez. Gardez ce mot de passe — sans lui, le fichier est irrécupérable.') }}</dd>
-                </dl>
-
-                <p class="lv-help-cta">
-                    🛡️ <strong>{{ __('Technique') }} :</strong> {{ __('chiffrement AES-GCM 256 bits (standard bancaire), calculé dans votre navigateur. Le mot de passe ne quitte jamais votre appareil.') }}
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="closeEncryptionHelpFooter" class="btn btn-primary">{{ __('J\'ai compris') }}</button>
-            </div>
-        </div>
-    </div>
+    {{-- Aides contextuelles migrées vers le composant officiel <x-core::help-modal> (S129 cohérence charte) : contenu dans window.HELP_CONTENT (@push scripts), boutons .ct-help-btn data-help-key. --}}
 
     <div id="confirmModal" class="modal-overlay confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmMessage">
         <div class="modal">
@@ -640,6 +471,61 @@
 @endsection
 
 @push('scripts')
+@php
+    // Aides contextuelles via composant officiel <x-core::help-modal> (window.HELP_CONTENT[key] = {title, body})
+    $modesBody = <<<'HTML'
+<div class="lv-help-tabs" role="tablist" aria-label="Modes de remplacement">
+  <button type="button" role="tab" tabindex="0" class="lv-help-tab is-active" data-help-tab="pseudo"><span aria-hidden="true">🔄</span><span class="lv-help-tab-label">Faux noms</span><span class="lv-help-tab-badge">Reco</span></button>
+  <button type="button" role="tab" tabindex="-1" class="lv-help-tab" data-help-tab="redaction"><span aria-hidden="true">🗑️</span><span class="lv-help-tab-label">Effacer</span></button>
+  <button type="button" role="tab" tabindex="-1" class="lv-help-tab" data-help-tab="hash"><span aria-hidden="true">🔒</span><span class="lv-help-tab-label">Code unique</span></button>
+  <button type="button" role="tab" tabindex="-1" class="lv-help-tab" data-help-tab="fpe"><span aria-hidden="true">🎲</span><span class="lv-help-tab-label">Brouillage</span></button>
+</div>
+<div class="lv-help-panel is-active" data-help-panel="pseudo">
+  <h3 class="lv-help-panel-title">🔄 Faux noms similaires <span class="lv-help-panel-pill">Recommandé</span></h3>
+  <dl class="lv-help-dl"><dt>Quand</dt><dd>vous voulez utiliser ChatGPT, Claude ou Gemini.</dd><dt>Pourquoi</dt><dd>l'IA comprend votre contexte (un nom, une adresse, une date) et donne sa meilleure réponse. Ensuite on remet vos vraies données dans la réponse.</dd><dt>Exemple</dt><dd>« Marie Tremblay habite à Montréal »<br>→ « <strong>Catherine Bouchard</strong> habite à <strong>Québec</strong> »</dd></dl>
+  <p class="lv-help-reversible">✅ Restauration possible — vous récupérez vos vraies données après.</p>
+</div>
+<div class="lv-help-panel" data-help-panel="redaction" hidden>
+  <h3 class="lv-help-panel-title">🗑️ Effacer définitivement</h3>
+  <dl class="lv-help-dl"><dt>Quand</dt><dd>vous voulez partager un document public (rapport, étude, capture d'écran).</dd><dt>Pourquoi</dt><dd>aucun risque de fuite — les vraies données disparaissent pour toujours.</dd><dt>Exemple</dt><dd>« Marie Tremblay habite à Montréal »<br>→ « <strong>[SUPPRIMÉ]</strong> habite à <strong>[SUPPRIMÉ]</strong> »</dd></dl>
+  <p class="lv-help-reversible lv-help-reversible--no">⛔ Aucune restauration possible.</p>
+</div>
+<div class="lv-help-panel" data-help-panel="hash" hidden>
+  <h3 class="lv-help-panel-title">🔒 Code unique irréversible</h3>
+  <dl class="lv-help-dl"><dt>Quand</dt><dd>vous voulez comparer ou dédoublonner sans connaître les vrais noms (statistiques internes, recherche).</dd><dt>Pourquoi</dt><dd>même nom = même code, donc on peut compter les occurrences sans jamais voir les vraies identités.</dd><dt>Exemple</dt><dd>« Marie Tremblay » → « <strong>a8f3c2e1</strong> »<br>« Marie Tremblay » (2<sup>e</sup> fois) → « <strong>a8f3c2e1</strong> »</dd></dl>
+  <p class="lv-help-reversible lv-help-reversible--no">⛔ Aucune restauration possible.</p>
+</div>
+<div class="lv-help-panel" data-help-panel="fpe" hidden>
+  <h3 class="lv-help-panel-title">🎲 Brouillage format identique <span class="lv-help-panel-pill lv-help-panel-pill--advanced">Avancé</span></h3>
+  <dl class="lv-help-dl"><dt>Quand</dt><dd>vous avez un système (base de données, vieux logiciel) qui exige un format précis : 16 chiffres pour une carte bancaire, 9 chiffres pour un NAS.</dd><dt>Pourquoi</dt><dd>le système reste fonctionnel parce que le format est respecté, mais les vraies données sont protégées.</dd><dt>Exemple</dt><dd>« 4532-1234-5678-9876 »<br>→ « <strong>7831-9402-1456-2289</strong> » (toujours 16 chiffres)</dd></dl>
+  <p class="lv-help-reversible">✅ Restauration avec clé technique.</p>
+</div>
+<p class="lv-help-cta">💡 <strong>Pas sûr·e ?</strong> Choisissez <strong>🔄 Faux noms similaires</strong> — c'est le mode qui marche le mieux avec ChatGPT, Claude et Gemini, et vous récupérez vos vraies données après.</p>
+HTML;
+
+    $sensitivityBody = <<<'HTML'
+<p style="margin:0 0 1rem;">Ce réglage contrôle à quel point l'outil est strict pour repérer vos informations personnelles (noms, courriels, numéros…).</p>
+<div class="lv-help-analogy"><h3>🔥 Comme un détecteur de fumée</h3><dl class="lv-help-dl"><dt>Très sensible</dt><dd>il sonne dès qu'il voit un peu de fumée — repère le maximum de données, mais parfois à tort (faux positifs).</dd><dt>Peu sensible</dt><dd>il sonne seulement s'il est sûr — moins de fausses alertes, mais il peut rater certaines données.</dd></dl></div>
+<div class="lv-help-scale" aria-hidden="true"><span>← Détecte tout</span><span class="lv-help-scale-mid">Équilibré</span><span>Très précis →</span></div>
+<p class="lv-help-cta">💡 <strong>Conseil :</strong> pour respecter la Loi 25 et le RGPD, gardez un niveau <strong>équilibré ou plus sensible</strong> — mieux vaut une fausse alerte que de laisser passer une vraie donnée personnelle.</p>
+HTML;
+
+    $encryptionBody = <<<'HTML'
+<p style="margin:0 0 1rem;">Quand vous exportez vos règles dans un fichier (pour les réutiliser ou les partager), ce fichier peut contenir vos vraies données. Cette option le verrouille avec un mot de passe.</p>
+<div class="lv-help-analogy"><h3>🔐 Comme un coffre-fort</h3><dl class="lv-help-dl"><dt>Sans protection</dt><dd>le fichier est lisible par quiconque l'ouvre (collègue, pièce jointe interceptée, clé USB perdue).</dd><dt>Avec protection</dt><dd>le fichier devient illisible sans le mot de passe. Même intercepté, personne ne peut rien en faire.</dd></dl></div>
+<dl class="lv-help-dl" style="margin-top:1rem;"><dt>Quand</dt><dd>vous partagez le fichier par courriel, le stockez dans le nuage, ou sur un appareil partagé.</dd><dt>Comment</dt><dd>cochez la case, choisissez un mot de passe de 12 caractères ou plus, puis exportez. Gardez ce mot de passe — sans lui, le fichier est irrécupérable.</dd></dl>
+<p class="lv-help-cta">🛡️ <strong>Technique :</strong> chiffrement AES-GCM 256 bits (standard bancaire), calculé dans votre navigateur. Le mot de passe ne quitte jamais votre appareil.</p>
+HTML;
+
+    $anonymHelp = [
+        'anonym-modes' => ['title' => 'Les 4 façons de remplacer vos données', 'body' => $modesBody],
+        'anonym-sensitivity' => ['title' => "La sensibilité de détection, c'est quoi ?", 'body' => $sensitivityBody],
+        'anonym-encryption' => ['title' => "Protéger vos exports, c'est quoi ?", 'body' => $encryptionBody],
+    ];
+@endphp
+<script>
+    window.HELP_CONTENT = Object.assign({}, window.HELP_CONTENT || {}, {!! json_encode($anonymHelp, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!});
+</script>
 <script src="{{ asset('assets/tools/anonymiseur/app.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v145.js') }}?v={{ config('version.semver') }}" defer></script>

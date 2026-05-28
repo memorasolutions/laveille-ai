@@ -2127,15 +2127,15 @@ body {
 
 /* Cards modale d'aide 4 modes */
 .app #maskModeHelpModal .modal-body { max-height: 70vh !important; overflow-y: auto !important; }
-.app .lv-help-cards {
+.lv-help-cards {
   display: grid !important;
   grid-template-columns: 1fr !important;
   gap: 1rem !important;
 }
 @media (min-width: 720px) {
-  .app .lv-help-cards { grid-template-columns: repeat(2, 1fr) !important; }
+  .lv-help-cards { grid-template-columns: repeat(2, 1fr) !important; }
 }
-.app .lv-help-card {
+.lv-help-card {
   background: var(--bg-primary) !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
@@ -2144,12 +2144,12 @@ body {
   flex-direction: column !important;
   gap: 0.4rem !important;
 }
-.app .lv-help-card--recommended {
+.lv-help-card--recommended {
   border-color: var(--primary) !important;
   background: var(--bg-tertiary) !important;
   box-shadow: 0 0 0 1px var(--primary) inset !important;
 }
-.app .lv-help-card h3 {
+.lv-help-card h3 {
   margin: 0 0 0.25rem !important;
   font-size: 1rem !important;
   font-weight: 700 !important;
@@ -2159,7 +2159,7 @@ body {
   gap: 0.5rem !important;
   flex-wrap: wrap !important;
 }
-.app .lv-help-badge {
+.lv-help-badge {
   background: var(--primary) !important;
   color: #FFFFFF !important;
   font-size: 0.65rem !important;
@@ -2169,37 +2169,37 @@ body {
   letter-spacing: 0.02em !important;
   margin-left: auto !important;
 }
-.app .lv-help-badge--advanced {
+.lv-help-badge--advanced {
   background: var(--text-muted) !important;
 }
-.app .lv-help-card p {
+.lv-help-card p {
   margin: 0 !important;
   font-size: 0.85rem !important;
   color: var(--text-primary) !important;
   line-height: 1.5 !important;
 }
-.app .lv-help-card .lv-help-when,
-.app .lv-help-card .lv-help-why,
-.app .lv-help-card .lv-help-example {
+.lv-help-card .lv-help-when,
+.lv-help-card .lv-help-why,
+.lv-help-card .lv-help-example {
   border-left: 3px solid var(--border) !important;
   padding-left: 0.65rem !important;
 }
-.app .lv-help-card--recommended .lv-help-when,
-.app .lv-help-card--recommended .lv-help-why,
-.app .lv-help-card--recommended .lv-help-example {
+.lv-help-card--recommended .lv-help-when,
+.lv-help-card--recommended .lv-help-why,
+.lv-help-card--recommended .lv-help-example {
   border-left-color: var(--primary) !important;
 }
-.app .lv-help-card .lv-help-example em {
+.lv-help-card .lv-help-example em {
   color: var(--text-secondary) !important;
   font-size: 0.78rem !important;
 }
-.app .lv-help-reversible {
+.lv-help-reversible {
   margin-top: 0.35rem !important;
   font-size: 0.82rem !important;
   font-weight: 600 !important;
   color: #065F46 !important;
 }
-.app .lv-help-reversible--no {
+.lv-help-reversible--no {
   color: #991B1B !important;
 }
 
@@ -2224,15 +2224,15 @@ body {
 }
 
 /* === Modal aide — onglets pattern Memora (refonte v1.47.5) === */
-.app .lv-help-tabs {
+.lv-help-tabs {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
   gap: 0 !important;
-  border-bottom: 2px solid var(--border) !important;
-  margin: 0 -1.5rem 1.25rem !important;
-  padding: 0 1.5rem !important;
+  border-bottom: 2px solid var(--border, #CBD5E1) !important;
+  margin: 0 0 1.25rem !important;
+  padding: 0 !important;
 }
-.app .lv-help-tab {
+.lv-help-tab {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -2252,13 +2252,13 @@ body {
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
   position: relative !important;
 }
-.app .lv-help-tab > span[aria-hidden] { font-size: 1.35rem !important; line-height: 1 !important; }
-.app .lv-help-tab .lv-help-tab-label {
+.lv-help-tab > span[aria-hidden] { font-size: 1.35rem !important; line-height: 1 !important; }
+.lv-help-tab .lv-help-tab-label {
   font-size: 0.85rem !important;
   font-weight: 700 !important;
   color: var(--text-secondary) !important;
 }
-.app .lv-help-tab .lv-help-tab-badge {
+.lv-help-tab .lv-help-tab-badge {
   font-size: 0.65rem !important;
   font-weight: 700 !important;
   background: var(--primary) !important;
@@ -2268,33 +2268,33 @@ body {
   letter-spacing: 0.02em !important;
   margin-top: 0.15rem !important;
 }
-.app .lv-help-tab:hover {
+.lv-help-tab:hover {
   background: rgba(11, 114, 133, 0.06) !important;
   color: var(--text-primary) !important;
 }
-.app .lv-help-tab:hover .lv-help-tab-label { color: var(--text-primary) !important; }
-.app .lv-help-tab.is-active {
+.lv-help-tab:hover .lv-help-tab-label { color: var(--text-primary) !important; }
+.lv-help-tab.is-active {
   color: #064E5C !important;
   border-bottom-color: var(--primary) !important;
   background: var(--bg-tertiary) !important;
 }
-.app .lv-help-tab.is-active .lv-help-tab-label { color: #064E5C !important; }
-.app .lv-help-tab:focus-visible {
+.lv-help-tab.is-active .lv-help-tab-label { color: #064E5C !important; }
+.lv-help-tab:focus-visible {
   outline: 3px solid var(--accent) !important;
   outline-offset: -3px !important;
   z-index: 1 !important;
 }
 @media (max-width: 539px) {
-  .app .lv-help-tabs { grid-template-columns: repeat(2, 1fr) !important; }
-  .app .lv-help-tab { min-height: 56px !important; padding: 0.65rem 0.4rem !important; }
+  .lv-help-tabs { grid-template-columns: repeat(2, 1fr) !important; }
+  .lv-help-tab { min-height: 56px !important; padding: 0.65rem 0.4rem !important; }
 }
 
 /* Panneaux de contenu */
-.app .lv-help-panel { display: none !important; padding: 0 !important; }
-.app .lv-help-panel.is-active { display: block !important; }
-.app .lv-help-panel[hidden] { display: none !important; }
-.app .lv-help-panel.is-active[hidden] { display: block !important; }
-.app .lv-help-panel-title {
+.lv-help-panel { display: none !important; padding: 0 !important; }
+.lv-help-panel.is-active { display: block !important; }
+.lv-help-panel[hidden] { display: none !important; }
+.lv-help-panel.is-active[hidden] { display: block !important; }
+.lv-help-panel-title {
   margin: 0 0 1rem !important;
   font-size: 1.15rem !important;
   font-weight: 800 !important;
@@ -2305,7 +2305,7 @@ body {
   flex-wrap: wrap !important;
   line-height: 1.3 !important;
 }
-.app .lv-help-panel-pill {
+.lv-help-panel-pill {
   font-size: 0.7rem !important;
   font-weight: 700 !important;
   background: var(--primary) !important;
@@ -2315,10 +2315,10 @@ body {
   letter-spacing: 0.03em !important;
   text-transform: uppercase !important;
 }
-.app .lv-help-panel-pill--advanced { background: var(--text-muted) !important; }
+.lv-help-panel-pill--advanced { background: var(--text-muted) !important; }
 
 /* DL structuré Quand / Pourquoi / Exemple */
-.app .lv-help-dl {
+.lv-help-dl {
   margin: 0 0 1rem !important;
   padding: 0 !important;
   display: grid !important;
@@ -2326,7 +2326,7 @@ body {
   gap: 0.55rem 1rem !important;
   align-items: start !important;
 }
-.app .lv-help-dl dt {
+.lv-help-dl dt {
   font-weight: 700 !important;
   color: var(--primary) !important;
   font-size: 0.8rem !important;
@@ -2335,13 +2335,13 @@ body {
   padding-top: 0.15rem !important;
   white-space: nowrap !important;
 }
-.app .lv-help-dl dd {
+.lv-help-dl dd {
   margin: 0 !important;
   font-size: 0.92rem !important;
   color: var(--text-primary) !important;
   line-height: 1.55 !important;
 }
-.app .lv-help-dl dd strong {
+.lv-help-dl dd strong {
   background: var(--bg-tertiary) !important;
   padding: 0.1rem 0.4rem !important;
   border-radius: 4px !important;
@@ -2349,11 +2349,11 @@ body {
   color: #064E5C !important;
 }
 @media (max-width: 539px) {
-  .app .lv-help-dl { grid-template-columns: 1fr !important; gap: 0.15rem !important; }
-  .app .lv-help-dl dt { padding-top: 0.7rem !important; }
+  .lv-help-dl { grid-template-columns: 1fr !important; gap: 0.15rem !important; }
+  .lv-help-dl dt { padding-top: 0.7rem !important; }
 }
 
-.app .lv-help-reversible {
+.lv-help-reversible {
   margin: 0.85rem 0 0 !important;
   padding: 0.6rem 0.85rem !important;
   background: rgba(6, 95, 70, 0.08) !important;
@@ -2363,13 +2363,13 @@ body {
   font-weight: 600 !important;
   color: #064E3B !important;
 }
-.app .lv-help-reversible--no {
+.lv-help-reversible--no {
   background: rgba(153, 27, 27, 0.06) !important;
   border-left-color: #991B1B !important;
   color: #7F1D1D !important;
 }
 
-.app .lv-help-cta {
+.lv-help-cta {
   margin: 1.5rem 0 0 !important;
   padding: 0.85rem 1.15rem !important;
   background: var(--bg-tertiary) !important;
@@ -2381,20 +2381,20 @@ body {
 }
 
 /* === Aide analogie + échelle (modals sensibilité/chiffrement) v1.47.8 === */
-.app .lv-help-analogy {
+.lv-help-analogy {
   background: var(--bg-tertiary) !important;
   border: 1px solid rgba(11, 114, 133, 0.18) !important;
   border-radius: var(--radius-sm) !important;
   padding: 0.85rem 1.15rem !important;
   margin-bottom: 1rem !important;
 }
-.app .lv-help-analogy h3 {
+.lv-help-analogy h3 {
   margin: 0 0 0.65rem !important;
   font-size: 1rem !important;
   font-weight: 700 !important;
   color: #064E5C !important;
 }
-.app .lv-help-scale {
+.lv-help-scale {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -2407,7 +2407,7 @@ body {
   color: var(--text-secondary) !important;
   margin-bottom: 1rem !important;
 }
-.app .lv-help-scale .lv-help-scale-mid {
+.lv-help-scale .lv-help-scale-mid {
   color: var(--primary) !important;
   font-weight: 700 !important;
 }

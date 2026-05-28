@@ -1,81 +1,50 @@
 'use strict';
-(function () {
-    function open(modal) { if (modal) modal.classList.add('active'); }
-    function close(modal) { if (modal) modal.classList.remove('active'); }
 
-    function activateHelpTab(tabBtn) {
-        const tabs = document.querySelectorAll('.lv-help-tab');
-        const panels = document.querySelectorAll('.lv-help-panel');
-        const target = tabBtn.getAttribute('data-help-tab');
+/**
+ * Anonymiseur v1.47.11 — onglets dans la modal d'aide officielle <x-core::help-modal>.
+ * Le body HTML (window.HELP_CONTENT['anonym-modes']) est injecté via x-html quand la
+ * modal s'ouvre, donc les .lv-help-tab n'existent pas au DOMContentLoaded → on utilise
+ * l'event delegation globale sur document (clic + clavier ArrowLeft/Right/Home/End).
+ */
+(function () {
+    function activateTab(tab) {
+        const container = tab.closest('.ct-modal-content, .ct-modal-body, body');
+        if (!container) return;
+        const tabs = container.querySelectorAll('.lv-help-tab');
+        const panels = container.querySelectorAll('.lv-help-panel');
+        const target = tab.getAttribute('data-help-tab');
         tabs.forEach(t => {
-            const isActive = t === tabBtn;
-            t.classList.toggle('is-active', isActive);
-            t.setAttribute('aria-selected', isActive ? 'true' : 'false');
-            t.setAttribute('tabindex', isActive ? '0' : '-1');
+            const active = t === tab;
+            t.classList.toggle('is-active', active);
+            t.setAttribute('aria-selected', active ? 'true' : 'false');
+            t.setAttribute('tabindex', active ? '0' : '-1');
         });
         panels.forEach(p => {
-            const isMatch = p.id === 'lvhelp-panel-' + target;
-            p.classList.toggle('is-active', isMatch);
-            if (isMatch) p.removeAttribute('hidden');
+            const match = p.getAttribute('data-help-panel') === target;
+            p.classList.toggle('is-active', match);
+            if (match) p.removeAttribute('hidden');
             else p.setAttribute('hidden', '');
         });
-        try { tabBtn.focus(); } catch (e) {}
+        try { tab.focus(); } catch (e) {}
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const modal = document.getElementById('maskModeHelpModal');
-        const btn = document.getElementById('btnMaskModeHelp');
-        const closeX = document.getElementById('closeMaskHelpModal');
-        const closeFooter = document.getElementById('closeMaskHelpModalFooter');
-        if (!modal || !btn) return;
+    // Delegation clic
+    document.addEventListener('click', (e) => {
+        const tab = e.target.closest('.lv-help-tab');
+        if (tab) { e.preventDefault(); activateTab(tab); }
+    });
 
-        btn.addEventListener('click', () => open(modal));
-        closeX && closeX.addEventListener('click', () => close(modal));
-        closeFooter && closeFooter.addEventListener('click', () => close(modal));
-        modal.addEventListener('click', (e) => { if (e.target === modal) close(modal); });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.classList.contains('active')) close(modal);
-        });
-
-        // Tabs : click + arrow keys (ARIA pattern WAI tablist)
-        const tabs = Array.from(document.querySelectorAll('.lv-help-tab'));
-        tabs.forEach((t, idx) => {
-            t.addEventListener('click', () => activateHelpTab(t));
-            t.addEventListener('keydown', (e) => {
-                let next = null;
-                if (e.key === 'ArrowRight') next = tabs[(idx + 1) % tabs.length];
-                else if (e.key === 'ArrowLeft') next = tabs[(idx - 1 + tabs.length) % tabs.length];
-                else if (e.key === 'Home') next = tabs[0];
-                else if (e.key === 'End') next = tabs[tabs.length - 1];
-                if (next) { e.preventDefault(); activateHelpTab(next); }
-            });
-        });
-
-        // Sync l'onglet ouvert avec le mode actuellement sélectionné dans #maskMode
-        btn.addEventListener('click', () => {
-            const select = document.getElementById('maskMode');
-            if (!select) return;
-            const tabForCurrent = document.querySelector('.lv-help-tab[data-help-tab="' + select.value + '"]');
-            if (tabForCurrent) activateHelpTab(tabForCurrent);
-        });
-
-        // Modals d'aide secondaires (Sensibilité + Chiffrement) — pattern simple open/close
-        [
-            { btn: 'btnSensitivityHelp', modal: 'sensitivityHelpModal', x: 'closeSensitivityHelp', footer: 'closeSensitivityHelpFooter' },
-            { btn: 'btnEncryptionHelp', modal: 'encryptionHelpModal', x: 'closeEncryptionHelp', footer: 'closeEncryptionHelpFooter' }
-        ].forEach(cfg => {
-            const b = document.getElementById(cfg.btn);
-            const m = document.getElementById(cfg.modal);
-            const x = document.getElementById(cfg.x);
-            const f = document.getElementById(cfg.footer);
-            if (!b || !m) return;
-            b.addEventListener('click', () => open(m));
-            x && x.addEventListener('click', () => close(m));
-            f && f.addEventListener('click', () => close(m));
-            m.addEventListener('click', (e) => { if (e.target === m) close(m); });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && m.classList.contains('active')) close(m);
-            });
-        });
+    // Delegation clavier (WAI-ARIA tablist)
+    document.addEventListener('keydown', (e) => {
+        const tab = e.target.closest && e.target.closest('.lv-help-tab');
+        if (!tab) return;
+        const all = Array.from(tab.parentElement.querySelectorAll('.lv-help-tab'));
+        const idx = all.indexOf(tab);
+        let next = null;
+        if (e.key === 'ArrowRight') next = all[(idx + 1) % all.length];
+        else if (e.key === 'ArrowLeft') next = all[(idx - 1 + all.length) % all.length];
+        else if (e.key === 'Home') next = all[0];
+        else if (e.key === 'End') next = all[all.length - 1];
+        if (next) { e.preventDefault(); activateTab(next); }
     });
 })();
