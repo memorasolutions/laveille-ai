@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.55.0 · 2026-05-28 · #313 feat(dictionary) glossaire — fiches manquantes du livre « L'IA pour les parents » (91 termes au total, brief IMPORT). LOT 1 PILOTE (2 fiches, chapitre 9 sécurité famille) : « Voix clonée » (voix-clonee) + « Mot de code familial » (mot-de-code-familial). Standard répliqué (AnonymisationGlossarySeeder) : Term Spatie Translatable fr_CA/fr (name/slug/definition/analogy/example/did_you_know/one_sentence_answer 40-60 mots) + JSON faq(6)/sources(4-5 EEAT réelles, gouv. Canada/Centre canadien cybersécurité/Gérez mieux votre argent/TELUS WISE)/broader_slugs/narrower_slugs + type/difficulty/icon + catégorie « Sécurité et éthique ». Nouveau seeder idempotent LivreParentsGlossarySeeder (extensible par lots). Recherche : pp_search KO cette session → fallback sonar-pro (sources réelles, zéro invention). Contenu rédigé par SuperAgent Gemini (prose FR), Opus superviseur. Décisions : 3 cas « à vérifier » → CRÉER distinct (autonomie-ia/biais-d-automatisation/few-shot-prompting) avec lien vers la fiche voisine. Validé local : /glossaire/voix-clonee 200 + Schema DefinedTerm + maillage. hero_image null (Phase B = images Gemini Playwright). Codename glossaire-livre-parents.
  *   1.54.2 · 2026-05-28 · #313 fix(tools) #20 anonymiseur — « Aucune donnée détectée » sur un texte pourtant riche en PII (user). Cause : detectPII EXCLUAIT les termes ayant déjà une règle (existingOriginals) ; après plusieurs anonymisations du même texte, toutes les règles existaient → 0 nouvelle détection + message trompeur (L-LOCALSTORAGE-RULES-POLLUTE-DETECTION-V1, cette fois côté utilisateur). Fix : detectPII n'exclut plus les termes règlés — il les INCLUT (seule la dédup intra-passe reste), et isDetectionDone (v151) les classe dans « Anonymisés ✓ ». Re-détecter affiche désormais le portrait COMPLET (à traiter + déjà anonymisés). Toast lvUpdateDetections enrichi : 3 cas (« Aucune donnée détectée » / « N déjà anonymisée(s) ✓ » / « N à traiter · M déjà anonymisée(s) »). Test node : 13 PII détectés sur le courriel-test exact. Statique. Codename core-accordion-component.
  *   1.54.1 · 2026-05-28 · #313 fix(core+tools) #19 anonymiseur — corrections WCAG 2.2 AAA après audit wcag-mcp des ajouts UI S131. Vrais manquements corrigés (faux positifs écartés : 1:1 blanc/blanc = modales cachées, ~60 « not reachable Tab » = éléments dans conteneurs hidden, teal site-wide hors scope) : (1) `.ct-accordion__subtitle` passait l'AA à 4.3:1 → #334155 (AAA). (2) Saut de titre h1→h3 : le composant x-core::accordion utilise désormais un `<div class="ct-accordion__heading">` (un disclosure isolé n'exige pas de heading, bouton porte la sémantique aria-expanded). (3) `#encryptionPassphrase` sans label accessible (échec AA 3.3.2/4.1.2) → aria-label ajouté. (4) AAA : `.ct-accordion__cta`/chevron #0B7285 (5.05:1) → #064E5C (8.43:1) ; `.lv-detect-count` fond #0B7285 (blanc 5.59:1) → #064E5C (9.32:1) ; `.lv-detect-empty` #64748B (4.55:1) → #475569 (7.24:1). Contrastes vérifiés via wcag_check_contrast. CSS/markup, statique. Codename core-accordion-component.
  *   1.54.0 · 2026-05-28 · #313 feat(core+tools) #16 anonymiseur — composant officiel RÉUTILISABLE x-core::accordion (DRY, demande user « un standard uniforme selon la charte »). Recherche pp_search mai 2026 : pattern W3C APG (heading + button aria-expanded/aria-controls + panneau hidden/aria-labelledby + chevron droite→bas), source de vérité unique. Nouveau Modules/Core/resources/views/components/accordion.blade.php (@props id/icon/title/subtitle/cta/open ; CSS .ct-accordion* + JS délégation émis UNE seule fois via @once @push). Les DEUX accordéons de l'anonymiseur (bandeau « 100 % local » + panneau « Réglages recommandés ») — qui avaient 2 implémentations distinctes (lv-trust-* + anonymiseur-settings-*) — sont refondus dessus : markup uniforme, même chevron, même clavier. enhancements-v149-trust.js simplifié (ne garde que la persistance « J'ai compris » anonymiseur_trust_accepted_v1 + repli au chargement, cible #anonymTrust-trigger/-panel). enhancements-v152-settings-accordion.js SUPPRIMÉ (le composant gère le toggle). #infoBanner conservé en wrapper + app.js getElementById('infoBanner')?. null-safe. Validé Playwright local : 2 .ct-accordion uniformes, toggle/chevron 90°/persistance OK, zéro régression. Réutilisable par tous les futurs outils. Génération composant qwen3-max via openrouter-free (0 $). Codename core-accordion-component.
@@ -166,8 +167,8 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 54,
-    'patch' => 2,
+    'minor' => 55,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -177,11 +178,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'core-accordion-component',
+    'codename' => 'glossaire-livre-parents',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.54.2',
+    'semver' => '1.55.0',
 ];
