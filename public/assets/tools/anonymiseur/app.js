@@ -165,7 +165,7 @@ const DetectionPatterns = {
     ipv4: { regex: /\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g, category: 'other', label: 'Adresse IP', priority: 58 },
     ipv6: { regex: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b|\b(?:[0-9a-fA-F]{1,4}:)+:(?:[0-9a-fA-F]{1,4}:?)+\b/g, category: 'other', label: 'Adresse IPv6', priority: 57 },
     mac: { regex: /\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b/g, category: 'other', label: 'Adresse MAC', priority: 56 },
-    url: { regex: /\bhttps?:\/\/[^\s<>"']+/gi, category: 'other', label: 'URL', priority: 48 },
+    url: { regex: /\bhttps?:\/\/[^\s<>"']*[^\s<>"'.,;:!?)\]]/gi, category: 'other', label: 'URL', priority: 48 },
     phoneEU: { regex: /(?<![\d\w])\+(?:33|32|34|39|49|41|351|352)[\s.\-]?(?:\d[\s.\-]?){8,11}\d(?!\d)/g, category: 'contact', label: 'Téléphone (UE)', priority: 52 },
     adresseCivique: { regex: /\b\d{1,5}[,]?\s+(?:rue|avenue|av\.?|boulevard|boul\.?|blvd|chemin|ch\.?|route|rang|place|impasse|allée|all\.?|côte|montée)\s+[A-Za-zÀ-ÿ'’\-\s]{2,40}/gi, category: 'location', label: 'Adresse civique', priority: 45 },
     email: {
