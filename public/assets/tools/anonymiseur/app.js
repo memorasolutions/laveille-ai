@@ -76,26 +76,43 @@ const CategoryConfig = {
 // ============================================
 // PATTERNS DE DETECTION
 // ============================================
+// Validation Luhn (carte de crédit). Garde uniquement les chiffres.
+function luhn(str) {
+    const digits = String(str).replace(/\D/g, '');
+    if (digits.length < 2) return false;
+    let sum = 0;
+    let isEven = false;
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let digit = parseInt(digits.charAt(i), 10);
+        if (isEven) { digit *= 2; if (digit > 9) digit -= 9; }
+        sum += digit;
+        isEven = !isEven;
+    }
+    return (sum % 10 === 0);
+}
+
+// Détecteurs PII (S131 #7) : RAMQ ajouté, téléphone durci (10 chiffres + frontières),
+// postalFR retiré (faux positifs « 00432/88492 »), chevauchements résolus par priorité dans detectPII.
 const DetectionPatterns = {
+    ramq: {
+        regex: /\b[A-Za-z]{4}[\s-]?\d{4}[\s-]?\d{4}\b/g,
+        category: 'id',
+        label: 'Num. assurance maladie (RAMQ)'
+    },
     email: {
         regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
         category: 'contact',
         label: 'Email'
     },
     phoneCA: {
-        regex: /(?:\+1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/g,
+        regex: /(?<!\d)(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)/g,
         category: 'contact',
-        label: 'Telephone'
+        label: 'Téléphone'
     },
     postalCA: {
         regex: /[A-Za-z]\d[A-Za-z][-\s]?\d[A-Za-z]\d/g,
         category: 'location',
         label: 'Code postal CA'
-    },
-    postalFR: {
-        regex: /\b\d{5}\b/g,
-        category: 'location',
-        label: 'Code postal FR'
     },
     nas: {
         regex: /\b\d{3}[-\s]?\d{3}[-\s]?\d{3}\b/g,
@@ -105,7 +122,8 @@ const DetectionPatterns = {
     creditCard: {
         regex: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
         category: 'id',
-        label: 'Carte credit'
+        label: 'Carte de crédit',
+        validate: function (s) { return luhn(s); }
     },
     date: {
         regex: /\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}\s+(?:janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)\s+\d{4})\b/gi,
@@ -529,25 +547,44 @@ function editRule(id) {
 // DETECTION AUTOMATIQUE
 // ============================================
 function detectPII() {
-    const text = document.getElementById('sourceText').innerText;
+    const text = document.getElementById('sourceText')?.innerText || '';
+    const PRIORITY = { ramq: 100, creditCard: 90, nas: 80, postalCA: 70, email: 60, phoneCA: 50, money: 40, date: 30, properName: 20 };
+
+    // Collecte POSITIONNELLE de tous les candidats (+ validation éventuelle, ex. Luhn).
+    const candidates = [];
+    for (const [name, pattern] of Object.entries(DetectionPatterns)) {
+        for (const m of text.matchAll(pattern.regex)) {
+            const raw = m[0];
+            const norm = raw.trim();
+            if (!norm) continue;
+            if (pattern.validate && !pattern.validate(norm)) continue;
+            candidates.push({
+                start: m.index,
+                end: m.index + raw.length,
+                text: norm,
+                category: pattern.category,
+                label: pattern.label,
+                priority: PRIORITY[name] || 0
+            });
+        }
+    }
+
+    // Résolution des chevauchements : le motif le plus spécifique (priorité) puis le plus long gagne.
+    candidates.sort((a, b) => (b.priority - a.priority) || ((b.end - b.start) - (a.end - a.start)));
+    const accepted = [];
+    for (const c of candidates) {
+        if (!accepted.some(a => c.start < a.end && a.start < c.end)) accepted.push(c);
+    }
+    accepted.sort((a, b) => a.start - b.start);
+
     const detections = [];
     const alreadyDetected = new Set();
     const existingOriginals = new Set(AppState.rules.map(r => r.original.toLowerCase()));
-
-    for (const [key, pattern] of Object.entries(DetectionPatterns)) {
-        const matches = text.match(pattern.regex) || [];
-        for (const match of matches) {
-            const normalized = match.trim();
-            if (!alreadyDetected.has(normalized.toLowerCase()) &&
-                !existingOriginals.has(normalized.toLowerCase())) {
-                alreadyDetected.add(normalized.toLowerCase());
-                detections.push({
-                    text: normalized,
-                    category: pattern.category,
-                    label: pattern.label
-                });
-            }
-        }
+    for (const c of accepted) {
+        const key = c.text.toLowerCase();
+        if (alreadyDetected.has(key) || existingOriginals.has(key)) continue;
+        alreadyDetected.add(key);
+        detections.push({ text: c.text, category: c.category, label: c.label });
     }
 
     AppState.detections = detections;
