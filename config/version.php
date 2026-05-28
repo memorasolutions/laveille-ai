@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.47.10 · 2026-05-28 · #313 fix(tools) anonymiseur — checkbox « Protéger les exports » invisible (user « j'ai rien à cocher, aucun visuel, mais le champ fonctionne au clic »). Cause : le thème fronttheme/Bootstrap applique `display:none` aux input[type=checkbox] natifs (remplacés par toggles custom ailleurs). Diagnostic Playwright : checkbox computed display:none malgré width/height 20px. Fix CSS scope `.app .anonymiseur-custom-checkbox` : appearance auto/checkbox + display inline-block + visibility visible + opacity 1 + position static + pointer-events auto, le tout en !important pour battre le thème. Confirme aussi v1.47.9 : menu ⋮ Actions fonctionne (menuActionsToggle: true validé Playwright). Codename anonymizer-fix-checkbox-visible.
  *   1.47.9 · 2026-05-28 · #313 fix(tools) anonymiseur CRITIQUE — menu ⋮ Actions (Import/Export/Tout effacer) + autres boutons ne fonctionnaient pas. Cause racine : app.js init() crashait à `document.getElementById('closeBanner').addEventListener` car #closeBanner a été SUPPRIMÉ lors de la refonte bannière confiance accordéon v1.46.4 (remplacé par .lv-trust-banner + bouton J'ai compris géré par enhancements-v149-trust.js). L'exception TypeError sur null stoppait l'init AVANT d'attacher les listeners suivants (btnActionsMenu, btnExport, btnImport, btnDetect, btnClear, btnAddRule...). Fix : null-safe sur _closeBanner (if présent) + wrapper sourceText listeners dans if(sourceText) (ghost Tiptap timing). Diagnostic Playwright : click btnActionsMenu → .active jamais ajouté (handler absent) → après fix .active toggle OK. Leçon : quand on retire un élément DOM (closeBanner), grep le JS source pour les addEventListener orphelins qui crashent l'init. Codename anonymizer-fix-init-crash-closebanner.
  *   1.47.8 · 2026-05-28 · #313 feat(tools) anonymiseur — boutons ? + popups aide « Sensibilité de détection » + « Protéger les exports » (Option A user GO 93/100, pp_search 2026 Zendesk/Gallio/Google Cloud/ISED Canada). 2 boutons `?` (réutilise `.anonymiseur-help-btn`) à côté des labels. (1) Modal `#sensitivityHelpModal` : analogie détecteur de fumée (très sensible = sonne pour rien/repère max données + faux positifs ; peu sensible = sûr mais rate des données) + échelle visuelle gradient orange→teal (Détecte tout / Équilibré / Très précis) + conseil Loi 25 « équilibré ou plus sensible ». (2) Modal `#encryptionHelpModal` : analogie coffre-fort (sans protection = lisible par quiconque ; avec = illisible sans mot de passe) + Quand/Comment + note technique AES-GCM 256 calculé navigateur (mot de passe ne quitte jamais l'appareil). Réutilise `.modal-overlay` v1.45.3 + `.lv-help-dl` + nouveau `.lv-help-analogy` + `.lv-help-scale`. Handlers étendus dans `enhancements-v150-help.js` (boucle config open/close/ESC/click-outside). Codename anonymizer-help-sensitivity-encryption.
  *   1.47.7 · 2026-05-28 · #313 fix(tools) brain-dump @section('og_image') manquant — la vue brain-dump.blade.php ne déclarait pas de section og_image (contrairement aux 13 autres outils via tools::public.show + $shareData), donc l'og:image tombait sur le fallback global og-image.png malgré featured_image set en DB v1.47.6. Fix : ajout `@section('og_image', asset($tool->featured_image).'?v='.filemtime)` conditionnel si featured_image présent. anonymiseur déjà OK (utilise $shareData['og_image']). Codename braindump-ogimage-section.
@@ -148,7 +149,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 47,
-    'patch' => 9,
+    'patch' => 10,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -158,11 +159,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-fix-init-crash-closebanner',
+    'codename' => 'anonymizer-fix-checkbox-visible',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.9',
+    'semver' => '1.47.10',
 ];

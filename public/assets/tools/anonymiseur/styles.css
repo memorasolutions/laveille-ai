@@ -2411,3 +2411,25 @@ body {
   color: var(--primary) !important;
   font-weight: 700 !important;
 }
+
+/* === Fix checkbox encryption invisible v1.47.10 — thème cache input[checkbox] natifs === */
+.app .anonymiseur-custom-checkbox,
+.app input[type="checkbox"].anonymiseur-custom-checkbox {
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
+  -moz-appearance: checkbox !important;
+  display: inline-block !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  opacity: 1 !important;
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  visibility: visible !important;
+  cursor: pointer !important;
+  accent-color: var(--primary) !important;
+  flex-shrink: 0 !important;
+  pointer-events: auto !important;
+}
