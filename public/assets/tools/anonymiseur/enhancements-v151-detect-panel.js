@@ -131,11 +131,12 @@
                 var cat = d.category;
                 var escText = escapeHtml(d.text);
                 html += '<div class="lv-detect-item is-done" role="listitem" data-index="' + item.index + '" data-category="' + escapeHtml(cat) + '">' +
-                    '<button type="button" class="lv-detect-jump" data-index="' + item.index + '" title="Voir dans le texte">' +
+                    '<button type="button" class="lv-detect-jump" data-index="' + item.index + '" title="Cliquer pour modifier l\'anonymisation">' +
                     '<span class="lv-detect-swatch" aria-hidden="true"></span>' +
                     '<span class="lv-detect-text">' + escText + '</span>' +
                     '</button>' +
                     '<span class="lv-detect-actions">' +
+                    '<button type="button" class="lv-detect-edit" data-index="' + item.index + '" title="Modifier l\'anonymisation" aria-label="Modifier l\'anonymisation de ' + escText + '">✏️</button>' +
                     '<button type="button" class="lv-detect-undo" data-index="' + item.index + '" title="Annuler l\'anonymisation" aria-label="Annuler l\'anonymisation de ' + escText + '">↶</button>' +
                     '</span>' +
                     '</div>';
@@ -211,6 +212,20 @@
         lvRenderList();
         lvSyncHighlight();
         showToast('Anonymisation annulée', 'info');
+    }
+
+    // Édition au clic d'une anonymisation (demande #18) : ouvre le modal d'édition de la règle du terme.
+    function lvEditDetection(index) {
+        var d = AppState.detections && AppState.detections[index];
+        if (!d || !d.text) return;
+        var key = d.text.toLowerCase();
+        var rule = (AppState.rules || []).find(function (r) {
+            return r && r.original && r.original.toLowerCase() === key;
+        });
+        if (rule && typeof editRule === 'function') {
+            lvHidePopover();
+            editRule(rule.id);
+        }
     }
 
     function lvIgnore(index) {
@@ -331,7 +346,14 @@
                 var jumpBtn = e.target.closest('.lv-detect-jump');
                 if (jumpBtn) {
                     var jIndex = +jumpBtn.getAttribute('data-index');
+                    var jItem = jumpBtn.closest('.lv-detect-item');
+                    if (jItem && jItem.classList.contains('is-done')) { lvEditDetection(jIndex); return; }
                     lvSetActive(jIndex);
+                    return;
+                }
+                var editBtn = e.target.closest('.lv-detect-edit');
+                if (editBtn) {
+                    lvEditDetection(+editBtn.getAttribute('data-index'));
                     return;
                 }
                 var anonBtn = e.target.closest('.lv-detect-anon');

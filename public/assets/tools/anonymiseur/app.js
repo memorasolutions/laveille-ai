@@ -148,6 +148,39 @@ function codiceFiscaleValidate(s) {
     return String.fromCharCode(65 + (sum % 26)) === s[15];
 }
 
+// === Anti-faux-positifs « nom de personne » (S131 #17) ===
+// Têtes nominales d'organisations/services (FR, minuscules sans accents) : un « Mot Capitalisé
+// + Mot Capitalisé » contenant un de ces mots est une organisation, PAS une personne.
+const NAME_STOPWORDS = new Set([
+    'ressources', 'humaines', 'naturelles', 'service', 'services', 'direction',
+    'generale', 'generales', 'conseil', 'comite', 'comites', 'societe', 'banque',
+    'centre', 'hospitalier', 'clinique', 'ministere', 'departement', 'departements',
+    'bureau', 'agence', 'association', 'federation', 'fondation', 'institut',
+    'college', 'universite', 'ecole', 'commission', 'regie', 'office', 'secretariat',
+    'division', 'succursale', 'filiale', 'entreprise', 'entreprises', 'compagnie',
+    'corporation', 'groupe', 'equipe', 'client', 'clients', 'support', 'technique',
+    'comptabilite', 'facturation', 'marketing', 'ventes', 'achats', 'logistique',
+    'production', 'qualite', 'securite', 'informatique', 'juridique', 'finances',
+    'administration', 'gestion', 'royale', 'nationale', 'internationale', 'municipale',
+    'provinciale', 'federale', 'publique', 'privee', 'inc', 'ltee', 'ltd', 'enr',
+    'srl', 'senc'
+]);
+
+function isLikelyPersonName(s) {
+    if (typeof s !== 'string') return false;
+    try {
+        const normalized = s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+        const tokens = normalized.split(/[\s-]+/).filter(t => t.length > 0);
+        if (tokens.length < 2) return false;
+        for (const token of tokens) {
+            if (NAME_STOPWORDS.has(token)) return false;
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 // Détecteurs PII (S131 #7) : RAMQ ajouté, téléphone durci (10 chiffres + frontières),
 // postalFR retiré (faux positifs « 00432/88492 »), chevauchements résolus par priorité dans detectPII.
 const DetectionPatterns = {
@@ -207,7 +240,8 @@ const DetectionPatterns = {
     properName: {
         regex: /\b[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜÇ][a-zàâäéèêëïîôùûüç]{2,}(?:[-][A-ZÀÂÄÉÈÊËÏÎÔÙÛÜÇ][a-zàâäéèêëïîôùûüç]+)?\s+[A-ZÀÂÄÉÈÊËÏÎÔÙÛÜÇ][a-zàâäéèêëïîôùûüç]+\b/g,
         category: 'identity',
-        label: 'Nom complet'
+        label: 'Nom complet',
+        validate: function (s) { return isLikelyPersonName(s); }
     }
 };
 

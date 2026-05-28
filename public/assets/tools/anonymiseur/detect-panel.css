@@ -550,6 +550,33 @@
   outline-offset: 1px;
 }
 
+/* Bouton ✏️ Modifier une anonymisation (S131 #18) */
+.app .lv-detect-edit {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.app .lv-detect-edit:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.app .lv-detect-edit:focus-visible {
+  outline: 3px solid rgba(11, 114, 133, 0.5);
+  outline-offset: 1px;
+}
+
 /* ============================================
    ACCORDÉON RÉGLAGES RECOMMANDÉS (S131 #11)
    ============================================ */
