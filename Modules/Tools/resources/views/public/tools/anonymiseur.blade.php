@@ -156,15 +156,19 @@
 
     <div class="anonymiseur-settings" style="margin:1rem 0 1.5rem;">
         <div id="custom-settings" class="anonymiseur-settings-panel">
-            <div class="anonymiseur-settings-head">
-                <p class="anonymiseur-reco-banner" role="status">
+            <button type="button" id="anonymiseurSettingsToggle" class="anonymiseur-settings-toggle" aria-expanded="false" aria-controls="anonymiseur-settings-body">
+                <span class="anonymiseur-reco-banner-inline">
                     <span class="anonymiseur-reco-check" aria-hidden="true">✓</span>
-                    {{ __('Réglages recommandés pour l\'IA appliqués — modifiez si besoin.') }}
-                </p>
-                <button type="button" id="resetRecommended" class="anonymiseur-reset-link">
-                    {{ __('↺ Réinitialiser aux recommandés') }}
-                </button>
-            </div>
+                    {{ __('Réglages recommandés pour l\'IA appliqués') }}
+                </span>
+                <span class="anonymiseur-settings-toggle-cta">{{ __('Personnaliser') }} <span class="anonymiseur-settings-chevron" aria-hidden="true">▾</span></span>
+            </button>
+            <div id="anonymiseur-settings-body" class="anonymiseur-settings-body" hidden>
+                <div class="anonymiseur-settings-reset-row">
+                    <button type="button" id="resetRecommended" class="anonymiseur-reset-link">
+                        {{ __('↺ Réinitialiser aux recommandés') }}
+                    </button>
+                </div>
             <div class="anonymiseur-custom-grid">
                 <div class="anonymiseur-custom-field">
                     <label for="maskMode" class="anonymiseur-custom-label">
@@ -210,6 +214,7 @@
                     <small class="anonymiseur-custom-hint">{{ __('Chiffre votre fichier JSON exporté avec un mot de passe (AES-GCM). Vous seul·e pourrez l\'ouvrir.') }}</small>
                 </div>
             </div>
+            </div>{{-- /#anonymiseur-settings-body --}}
         </div>
     </div>
 
@@ -231,7 +236,7 @@
     <main class="main-content">
         <div class="step-content active" data-step-content="1">
             <div class="lv-anonym-help" style="background:#E6F7F5;border:1px solid rgba(11,114,133,0.2);border-radius:var(--radius);padding:0.85rem 1.15rem;margin-bottom:1rem;font-size:0.92rem;line-height:1.5;color:var(--text-primary);">
-                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte ci-dessous, puis cliquez') }} <strong>{{ __('Détecter PII') }}</strong> {{ __('pour repérer automatiquement les données sensibles (noms, courriels, NAS…). Vous pouvez aussi sélectionner du texte à la souris puis cliquer') }} <strong>🕵️ {{ __('Anonymiser') }}</strong>. {{ __('Les vraies données restent sur votre appareil — rien n\'est envoyé à un serveur.') }}
+                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte ci-dessous, puis cliquez') }} <strong>🔍 {{ __('Détecter les données sensibles') }}</strong> {{ __('pour repérer automatiquement les données sensibles (noms, courriels, NAS…). Vous pouvez aussi sélectionner du texte à la souris puis cliquer') }} <strong>🕵️ {{ __('Anonymiser') }}</strong>. {{ __('Les vraies données restent sur votre appareil — rien n\'est envoyé à un serveur.') }}
             </div>
             <section class="panel editor-panel">
                 <div class="panel-header">
@@ -532,4 +537,5 @@ HTML;
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v149-trust.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v150-help.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v151-detect-panel.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/enhancements-v152-settings-accordion.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush
