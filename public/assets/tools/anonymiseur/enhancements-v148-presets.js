@@ -12,17 +12,17 @@
         encryption: false
     };
 
-    function resetToRecommended() {
+    function applyDefaults() {
         const maskModeSelect = document.getElementById('maskMode');
         const confidenceInput = document.getElementById('confidenceThreshold');
         const encryptionCheckbox = document.getElementById('encryptionEnabled');
 
-        if (maskModeSelect) {
+        if (maskModeSelect && maskModeSelect.value !== DEFAULTS.maskMode) {
             maskModeSelect.value = DEFAULTS.maskMode;
             maskModeSelect.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
-        if (confidenceInput) {
+        if (confidenceInput && confidenceInput.value !== String(DEFAULTS.confidence)) {
             confidenceInput.value = String(DEFAULTS.confidence);
             confidenceInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
@@ -31,13 +31,21 @@
             encryptionCheckbox.checked = false;
             encryptionCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
         }
+    }
 
+    function resetToRecommended() {
+        applyDefaults();
         if (typeof window.showToast === 'function') {
             window.showToast('Réglages réinitialisés aux recommandés.', 'info');
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // « Standard par défaut » : on force les recommandations IA au chargement (cohérent
+        // avec le bandeau de réassurance) — délai court pour passer APRÈS la restauration
+        // localStorage éventuelle de enhancements-v145.js.
+        setTimeout(applyDefaults, 60);
+
         const resetButton = document.getElementById('resetRecommended');
         if (resetButton) {
             resetButton.addEventListener('click', resetToRecommended);
@@ -45,6 +53,7 @@
     });
 
     window.AnonymiseurSettings = {
+        applyDefaults: applyDefaults,
         resetToRecommended: resetToRecommended,
         DEFAULTS: DEFAULTS
     };
