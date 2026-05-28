@@ -1122,31 +1122,37 @@ function init() {
     if (bannerClosed) {
         document.getElementById('infoBanner').classList.add('hidden');
     }
-    document.getElementById('closeBanner').addEventListener('click', () => {
-        document.getElementById('infoBanner').classList.add('hidden');
-        localStorage.setItem('anonymizer_banner_closed', 'true');
-    });
+    // #313 v1.47.9 : closeBanner peut être absent (bannière confiance accordéon S129 le remplace)
+    const _closeBanner = document.getElementById('closeBanner');
+    if (_closeBanner) {
+        _closeBanner.addEventListener('click', () => {
+            const ib = document.getElementById('infoBanner');
+            if (ib) ib.classList.add('hidden');
+            localStorage.setItem('anonymizer_banner_closed', 'true');
+        });
+    }
 
+    // #313 v1.47.9 : sourceText est un ghost créé par Tiptap (timing) — null-safe
     const sourceText = document.getElementById('sourceText');
-    sourceText.addEventListener('input', () => {
-        const text = sourceText.innerText;
-        document.getElementById('charCount').textContent = String(text.length);
-        updateAnonymizedText();
-        updateStats();
-    });
-    sourceText.addEventListener('mouseup', handleTextSelection);
-
-    sourceText.addEventListener('focus', () => {
-        isEditing = true;
-    });
-    sourceText.addEventListener('blur', () => {
-        isEditing = false;
-        const modalOpen = document.getElementById('ruleModal').classList.contains('active') ||
-                          document.getElementById('confirmModal').classList.contains('active');
-        if (!modalOpen) {
-            applyHighlights();
-        }
-    });
+    if (sourceText) {
+        sourceText.addEventListener('input', () => {
+            const text = sourceText.innerText;
+            const cc = document.getElementById('charCount');
+            if (cc) cc.textContent = String(text.length);
+            updateAnonymizedText();
+            updateStats();
+        });
+        sourceText.addEventListener('mouseup', handleTextSelection);
+        sourceText.addEventListener('focus', () => { isEditing = true; });
+        sourceText.addEventListener('blur', () => {
+            isEditing = false;
+            const modalOpen = document.getElementById('ruleModal').classList.contains('active') ||
+                              document.getElementById('confirmModal').classList.contains('active');
+            if (!modalOpen) {
+                applyHighlights();
+            }
+        });
+    }
 
     document.getElementById('btnDetect').addEventListener('click', detectPII);
     document.getElementById('btnClear').addEventListener('click', () => {
