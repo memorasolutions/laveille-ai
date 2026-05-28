@@ -91,6 +91,63 @@ function luhn(str) {
     return (sum % 10 === 0);
 }
 
+// === Validateurs Europe (S131 #14 pack QC+EU, 100% local) ===
+function ibanMod97(s) {
+    if (typeof s !== 'string') return false;
+    const cleaned = s.replace(/[\s\-]/g, '').toUpperCase();
+    if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]{10,30}$/.test(cleaned)) return false;
+    const rearranged = cleaned.slice(4) + cleaned.slice(0, 4);
+    let numeric = '';
+    for (const ch of rearranged) {
+        numeric += (ch >= 'A' && ch <= 'Z') ? (ch.charCodeAt(0) - 55).toString() : ch;
+    }
+    let mod = 0;
+    for (let i = 0; i < numeric.length; i++) {
+        mod = (mod * 10 + parseInt(numeric[i], 10)) % 97;
+    }
+    return mod === 1;
+}
+
+function nirFrValidate(s) {
+    if (typeof s !== 'string') return false;
+    const cleaned = s.replace(/\s+/g, '').toUpperCase();
+    if (cleaned.length !== 15) return false;
+    const keyStr = cleaned.slice(13, 15);
+    if (!/^\d{2}$/.test(keyStr)) return false;
+    let body = cleaned.slice(0, 13).replace(/2A/g, '19').replace(/2B/g, '18');
+    if (!/^\d{13}$/.test(body)) return false;
+    try {
+        const expectedKey = 97 - Number(BigInt(body) % 97n);
+        return expectedKey === parseInt(keyStr, 10);
+    } catch (e) { return false; }
+}
+
+function spainDniNieValidate(s) {
+    if (typeof s !== 'string') return false;
+    const cleaned = s.replace(/[\s\-]/g, '').toUpperCase();
+    const dni = cleaned.match(/^(\d{8})([A-Z])$/);
+    const nie = cleaned.match(/^([XYZ])(\d{7})([A-Z])$/);
+    if (!dni && !nie) return false;
+    let numberPart, letterPart;
+    if (dni) { numberPart = dni[1]; letterPart = dni[2]; }
+    else { numberPart = ({ X: '0', Y: '1', Z: '2' })[nie[1]] + nie[2]; letterPart = nie[3]; }
+    const table = 'TRWAGMYFPDXBNJZSQVHLCKE';
+    return letterPart === table[parseInt(numberPart, 10) % 23];
+}
+
+function codiceFiscaleValidate(s) {
+    if (typeof s !== 'string') return false;
+    if (!/^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-EHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$/.test(s)) return false;
+    const ODD = { '0': 1, '1': 0, '2': 5, '3': 7, '4': 9, '5': 13, '6': 15, '7': 17, '8': 19, '9': 21, A: 1, B: 0, C: 5, D: 7, E: 9, F: 13, G: 15, H: 17, I: 19, J: 21, K: 2, L: 4, M: 18, N: 20, O: 11, P: 3, Q: 6, R: 8, S: 12, T: 14, U: 16, V: 10, W: 22, X: 25, Y: 24, Z: 23 };
+    const EVEN = { '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, A: 0, B: 1, C: 2, D: 3, E: 4, F: 5, G: 6, H: 7, I: 8, J: 9, K: 10, L: 11, M: 12, N: 13, O: 14, P: 15, Q: 16, R: 17, S: 18, T: 19, U: 20, V: 21, W: 22, X: 23, Y: 24, Z: 25 };
+    let sum = 0;
+    for (let i = 0; i < 15; i++) {
+        const ch = s[i];
+        sum += (i % 2 === 0) ? (ODD[ch] || 0) : (EVEN[ch] || 0);
+    }
+    return String.fromCharCode(65 + (sum % 26)) === s[15];
+}
+
 // Détecteurs PII (S131 #7) : RAMQ ajouté, téléphone durci (10 chiffres + frontières),
 // postalFR retiré (faux positifs « 00432/88492 »), chevauchements résolus par priorité dans detectPII.
 const DetectionPatterns = {
@@ -99,6 +156,18 @@ const DetectionPatterns = {
         category: 'id',
         label: 'Num. assurance maladie (RAMQ)'
     },
+    iban: { regex: /\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30}\b/g, category: 'id', label: 'IBAN', priority: 96, validate: function (s) { return ibanMod97(s); } },
+    swift: { regex: /\b[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?\b/g, category: 'id', label: 'Code SWIFT/BIC', priority: 78 },
+    vat: { regex: /\b(?:DE\d{9}|FR[A-HJ-NP-Z0-9]{2}\d{9}|IT\d{11}|BE0?\d{9}|ES[A-Z0-9]\d{7}[A-Z0-9])\b/g, category: 'id', label: 'Num. TVA (UE)', priority: 75 },
+    nirFr: { regex: /\b[12][ ]?\d{2}[ ]?\d{2}[ ]?(?:\d{2}|2[AB])[ ]?\d{3}[ ]?\d{3}[ ]?\d{2}\b/gi, category: 'id', label: 'NIR (France)', priority: 94, validate: function (s) { return nirFrValidate(s); } },
+    dniNie: { regex: /\b(?:[0-9]{8}|[XYZ][0-9]{7})[-]?[A-Z]\b/gi, category: 'id', label: 'DNI/NIE (Espagne)', priority: 93, validate: function (s) { return spainDniNieValidate(s); } },
+    codiceFiscale: { regex: /\b[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-EHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]\b/gi, category: 'id', label: 'Codice fiscale (Italie)', priority: 95, validate: function (s) { return codiceFiscaleValidate(s); } },
+    ipv4: { regex: /\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g, category: 'other', label: 'Adresse IP', priority: 58 },
+    ipv6: { regex: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b|\b(?:[0-9a-fA-F]{1,4}:)+:(?:[0-9a-fA-F]{1,4}:?)+\b/g, category: 'other', label: 'Adresse IPv6', priority: 57 },
+    mac: { regex: /\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b/g, category: 'other', label: 'Adresse MAC', priority: 56 },
+    url: { regex: /\bhttps?:\/\/[^\s<>"']+/gi, category: 'other', label: 'URL', priority: 48 },
+    phoneEU: { regex: /(?<![\d\w])\+(?:33|32|34|39|49|41|351|352)[\s.\-]?(?:\d[\s.\-]?){8,11}\d(?!\d)/g, category: 'contact', label: 'Téléphone (UE)', priority: 52 },
+    adresseCivique: { regex: /\b\d{1,5}[,]?\s+(?:rue|avenue|av\.?|boulevard|boul\.?|blvd|chemin|ch\.?|route|rang|place|impasse|allée|all\.?|côte|montée)\s+[A-Za-zÀ-ÿ'’\-\s]{2,40}/gi, category: 'location', label: 'Adresse civique', priority: 45 },
     email: {
         regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
         category: 'contact',
@@ -564,7 +633,7 @@ function detectPII() {
                 text: norm,
                 category: pattern.category,
                 label: pattern.label,
-                priority: PRIORITY[name] || 0
+                priority: (pattern.priority != null ? pattern.priority : (PRIORITY[name] || 0))
             });
         }
     }

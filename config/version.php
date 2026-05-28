@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.51.0 · 2026-05-28 · #313 feat(tools) anonymiseur — pack de détection POLYVALENT Canada/QC + Europe (demande user « rendre la détection la plus polyvalente possible… ajoute pour Québec et Europe », recherche pp_search mai 2026 catalogues Presidio/Google DLP/Purview). 13 nouveaux détecteurs additifs sur le moteur v2 (priorité + validate + chevauchements), 100 % local (aucun appel réseau, checksums locaux) : IBAN (validation mod-97), Code SWIFT/BIC, Num. TVA UE (DE/FR/IT/BE/ES format), NIR France sécurité sociale (clé mod-97), DNI/NIE Espagne (lettre de contrôle), Codice fiscale Italie (caractère de contrôle), Adresse IP v4, Adresse IPv6, Adresse MAC, URL, Téléphone UE (E.164 indicatifs +33/32/34/39/49/41/351/352), Adresse civique (n° + mots-clés rue/avenue/boulevard…). Validateurs ajoutés : ibanMod97, nirFrValidate, spainDniNieValidate, codiceFiscaleValidate. detectPII : priorité lue depuis pattern.priority (sinon table). IDs purement numériques sans checksum (Steuer-ID DE, registre BE) volontairement ÉCARTÉS (trop de faux positifs sur tout nombre à 11 chiffres). Test isolé node validé : IBAN espacé+compact ✓, SWIFT/VAT/DNI/codice fiscale/IP/MAC/URL/tél UE/adresse/RAMQ ✓, échantillon bruit (12345/00432/88492/2024) = 0 faux positif. Génération qwen3-max via openrouter-free (0 $), Opus superviseur. Statique (app.js), aucun rebuild Vite. Codename anonymizer-detection-pack-qc-eu.
  *   1.50.0 · 2026-05-28 · #313 feat(tools) anonymiseur — moteur de détection v2 (Option A, choix user, recherche pp_search mai 2026 : format RAMQ = 4 lettres + 8 chiffres, gestion des chevauchements par spécificité). User signalait « LANM 8205 1499 » détecté comme « 205 1499 » (fragment de téléphone) + faux positifs « 00432/88492 ». Corrections : (1) AJOUT du détecteur RAMQ/NAM `\\b[A-Za-z]{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b` (catégorie id). (2) Téléphone DURCI : code régional obligatoire (10 chiffres) + frontières `(?<!\\d)...(?!\\d)` → ne capture plus un fragment de 7 chiffres au milieu d'une suite. (3) RETRAIT de postalFR `\\b\\d{5}\\b` (source des faux positifs « 00432/88492 » — tout nombre à 5 chiffres). (4) Validation Luhn sur la carte de crédit (rejette les fausses cartes). (5) detectPII réécrit : collecte POSITIONNELLE (matchAll), validation, puis RÉSOLUTION DES CHEVAUCHEMENTS par table de priorité (ramq 100 > creditCard 90 > nas 80 > postalCA 70 > email 60 > phone 50 > money 40 > date 30 > properName 20) — le motif le plus spécifique gagne, les fragments chevauchants sont écartés. NAS gardé en format-only (outil de protection : on préfère détecter). Helper luhn() ajouté. Test isolé node validé : RAMQ ✓, 00432/88492 absents ✓, fragment 205 1499 absent ✓, fausse carte Luhn rejetée ✓. Génération qwen3-max via openrouter-free (0 $), Opus superviseur. Statique (app.js), aucun rebuild Vite. Codename anonymizer-detection-engine-overlap-ramq.
  *   1.49.2 · 2026-05-28 · #313 fix(tools) anonymiseur — centrage vertical du « ? » du champ « Comment remplacer vos données » (remarque user, screenshots 13-37-35 + 14-22-06 : « 1 centré oui / 2 centré non »). Le label de ce champ s'enroule sur 2 lignes ; comme `.anonymiseur-custom-label` est align-items:center, le bouton « ? » se centrait sur tout le bloc 2 lignes (paraissait trop bas/détaché), alors que les boutons des champs à une seule ligne sont alignés sur leur ligne. Fix CSS ciblé `.app .anonymiseur-custom-label .ct-help-btn[data-help-key="anonym-modes"] { align-self:flex-start; margin-top:-2px }` → le « ? » s'aligne sur la PREMIÈRE ligne, cohérent avec les 2 autres. CSS-only. Codename anonymizer-confirmed-highlight-state.
  *   1.49.1 · 2026-05-28 · #313 fix(tools) anonymiseur — le surligneur « anonymisé » suit le CODE COULEUR par catégorie (remarque user). v1.49.0 surlignait tout en vert (sémantique « confirmé »), ce qui cassait le code couleur catégorie établi. Correctif : `.anonym-detect.is-done` prend désormais la couleur de la catégorie en surligneur plein via color-mix(in srgb, var(--cat-X) 30%, transparent), le ✓ (::after, var(--text-primary)) restant l'indice de statut « anonymisé » (non-couleur, WCAG ok). Côté panneau, l'item « Anonymisés ✓ » garde la pastille + bordure de sa catégorie (retrait des overrides verts), ✓ en overlay sur la pastille. CSS-only (detect-panel.css), aucun rebuild Vite. Codename anonymizer-confirmed-highlight-state.
@@ -159,7 +160,7 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 50,
+    'minor' => 51,
     'patch' => 0,
 
     /**
@@ -170,11 +171,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-detection-engine-overlap-ramq',
+    'codename' => 'anonymizer-detection-pack-qc-eu',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.50.0',
+    'semver' => '1.51.0',
 ];
