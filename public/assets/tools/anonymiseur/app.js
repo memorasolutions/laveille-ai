@@ -550,12 +550,17 @@ function detectPII() {
         }
     }
 
-    renderDetections(detections);
-    if (detections.length > 0) {
-        document.getElementById('detectionsBar').classList.remove('hidden');
-        showToast(`${detections.length} elements detectes`, 'success');
+    AppState.detections = detections;
+    if (typeof window.lvUpdateDetections === 'function') {
+        window.lvUpdateDetections(detections);
     } else {
-        showToast('Aucun element detecte', 'warning');
+        renderDetections(detections);
+        if (detections.length > 0) {
+            document.getElementById('detectionsBar').classList.remove('hidden');
+            showToast(`${detections.length} elements detectes`, 'success');
+        } else {
+            showToast('Aucun element detecte', 'warning');
+        }
     }
 }
 
@@ -570,10 +575,11 @@ function renderDetections(detections) {
 }
 
 function addDetection(index) {
+    const det = (AppState.detections && AppState.detections[index]) ? AppState.detections[index] : null;
     const badge = document.querySelector(`.detection-badge[data-index="${index}"]`);
-    if (badge && !badge.classList.contains('added')) {
-        const text = badge.dataset.text;
-        const category = badge.dataset.category;
+    const text = det ? det.text : (badge ? badge.dataset.text : null);
+    const category = det ? det.category : (badge ? badge.dataset.category : null);
+    if (text && category && !(badge && badge.classList.contains('added'))) {
 
         AppState.detectionBadgeIndex = index;
         AppState.editingRuleId = null;
@@ -737,7 +743,7 @@ function clearHighlights() {
 function updateStats() {
     document.getElementById('statRules').textContent = AppState.rules.length;
 
-    const sourceText = document.getElementById('sourceText').innerText;
+    const sourceText = document.getElementById('sourceText')?.innerText || '';
     let replacementCount = 0;
 
     for (const rule of AppState.rules) {
@@ -1253,6 +1259,7 @@ function init() {
             if (AppState.detectionBadgeIndex !== null) {
                 const badge = document.querySelector(`.detection-badge[data-index="${AppState.detectionBadgeIndex}"]`);
                 if (badge) badge.classList.add('added');
+                if (typeof window.lvMarkDetectionDone === 'function') window.lvMarkDetectionDone(AppState.detectionBadgeIndex);
             }
         };
 

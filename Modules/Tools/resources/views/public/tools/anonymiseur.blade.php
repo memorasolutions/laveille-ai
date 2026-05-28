@@ -14,6 +14,7 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset('assets/tools/anonymiseur/styles.css') }}?v={{ config('version.semver') }}">
+<link rel="stylesheet" href="{{ asset('assets/tools/anonymiseur/detect-panel.css') }}?v={{ config('version.semver') }}">
 <link rel="manifest" href="{{ asset('assets/tools/anonymiseur/manifest.webmanifest') }}">
 <meta name="theme-color" content="#0B7285">
 <link rel="canonical" href="{{ url('/outils/anonymiseur') }}">
@@ -240,6 +241,8 @@
                         <button id="btnDetect" class="btn btn-primary btn-sm" title="{{ __('Repérer automatiquement les données personnelles') }}">🔍 {{ __('Détecter les données sensibles') }}</button>
                     </div>
                 </div>
+                <div class="lv-editor-split">
+                  <div class="lv-editor-col">
                 <div class="panel-content">
                     <div id="tiptap-source" data-tiptap-anonymiseur="1" class="source-content tiptap-source-host" aria-label="{{ __('Zone de texte à anonymiser') }}"></div>
                     <div class="char-count">
@@ -260,11 +263,25 @@
                         <button type="button" data-action="clearmark" aria-label="{{ __('Effacer mise en forme') }}" title="{{ __('Effacer le formatage') }}">✕</button>
                     </div>
                 </div>
-                <div id="detectionsBar" class="detections-bar hidden">
-                    <div class="panel-header">
-                        <h3 class="panel-title">Détections automatiques</h3>
-                        <button id="btnAddRule" class="btn btn-success btn-sm">+ Ajouter règle</button>
-                    </div>
+                  </div>{{-- /.lv-editor-col --}}
+                  <aside id="detectionsPanel" class="lv-detect-panel hidden" aria-label="{{ __('Données sensibles détectées') }}">
+                      <div class="lv-detect-head">
+                          <h3 class="lv-detect-title">🔍 {{ __('Détections') }} <span id="lvDetectCount" class="lv-detect-count">0</span></h3>
+                          <div class="lv-detect-nav" role="group" aria-label="{{ __('Naviguer entre les détections') }}">
+                              <button type="button" id="lvDetectPrev" class="lv-detect-navbtn" aria-label="{{ __('Détection précédente') }}" title="{{ __('Précédente') }}">◀</button>
+                              <button type="button" id="lvDetectNext" class="lv-detect-navbtn" aria-label="{{ __('Détection suivante') }}" title="{{ __('Suivante') }}">▶</button>
+                          </div>
+                      </div>
+                      <div id="lvDetectList" class="lv-detect-list" role="list"></div>
+                      <p id="lvDetectEmpty" class="lv-detect-empty hidden">{{ __('Aucune donnée sensible détectée. Modifiez votre texte ou ajoutez une règle manuelle.') }}</p>
+                      <div class="lv-detect-foot">
+                          <button type="button" id="lvAnonymizeAll" class="btn btn-primary btn-sm">{{ __('Tout anonymiser') }}</button>
+                          <button id="btnAddRule" class="btn btn-secondary btn-sm" style="width:100%;margin-top:0.5rem;">+ {{ __('Ajouter une règle manuelle') }}</button>
+                      </div>
+                  </aside>
+                </div>{{-- /.lv-editor-split --}}
+                {{-- Ancienne barre de détections conservée masquée (anti-régression JS source) --}}
+                <div id="detectionsBar" class="detections-bar hidden" hidden>
                     <div id="detectionsList" class="detections-list"></div>
                 </div>
             </section>
@@ -431,6 +448,15 @@
         </div>
     </div>
 
+    <div id="lvDetectPopover" class="lv-detect-popover hidden" role="dialog" aria-label="{{ __('Action sur la détection') }}">
+        <span class="lv-detect-popcat" id="lvDetectPopcat"></span>
+        <span class="lv-detect-poptext" id="lvDetectPoptext"></span>
+        <div class="lv-detect-popbtns">
+            <button type="button" class="lv-detect-popbtn lv-detect-popanon" data-pop-action="anonymize">{{ __('Anonymiser') }}</button>
+            <button type="button" class="lv-detect-popbtn lv-detect-popignore" data-pop-action="ignore">{{ __('Ignorer') }}</button>
+        </div>
+    </div>
+
     <div id="toastContainer" class="toast-container" aria-live="polite" role="status"></div>
 </div>
 
@@ -505,4 +531,5 @@ HTML;
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v148-presets.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v149-trust.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/enhancements-v150-help.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/enhancements-v151-detect-panel.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

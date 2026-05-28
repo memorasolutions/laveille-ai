@@ -3,12 +3,113 @@
  * Registers the tiptapEditor Alpine.data() component on window.Alpine.
  * Loaded via @vite('resources/js/tiptap-frontend.js') only on pages that need it.
  */
-import { Editor } from '@tiptap/core'
+import { Editor, Extension } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
 import Underline from '@tiptap/extension-underline'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
 // Link inclus dans StarterKit v3.19+ — ne pas importer séparément (duplicate extension warning)
+
+// === Surlignage inline des détections PII (Sprint S131, Option A) ===
+// Decorations ProseMirror non destructives : ne modifient pas le document,
+// ne cassent pas le curseur. Pilotées par app.js via window.anonymiseur*.
+const AnonymDetectPluginKey = new PluginKey('anonymDetect')
+
+function buildDecorations(doc, detections, activeIndex) {
+  if (!detections || !detections.length) {
+    return DecorationSet.empty
+  }
+  // Index original stable AVANT filtrage, puis tri longueur DESC (anti-chevauchement partiel)
+  const indexed = detections
+    .map((d, i) => ({ text: d.text, category: d.category, _i: i }))
+    .filter(d => d.text && d.text.trim() !== '')
+  if (!indexed.length) return DecorationSet.empty
+  const sorted = [...indexed].sort((a, b) => b.text.length - a.text.length)
+
+  const decos = []
+  doc.descendants((node, pos) => {
+    if (!node.isText || !node.text) return
+    const nodeText = node.text
+    const lower = nodeText.toLowerCase()
+    for (const d of sorted) {
+      const needle = d.text.toLowerCase()
+      let offset = 0
+      while (offset < nodeText.length) {
+        const idx = lower.indexOf(needle, offset)
+        if (idx === -1) break
+        const start = pos + idx
+        const end = start + d.text.length
+        decos.push(Decoration.inline(start, end, {
+          class: 'anonym-detect anonym-detect--' + d.category + (d._i === activeIndex ? ' is-active' : ''),
+          'data-detect-index': String(d._i)
+        }))
+        offset = idx + 1
+      }
+    }
+  })
+  return DecorationSet.create(doc, decos)
+}
+
+const AnonymDetectionHighlight = Extension.create({
+  name: 'anonymDetectionHighlight',
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: AnonymDetectPluginKey,
+        state: {
+          init() {
+            return { deco: DecorationSet.empty, detections: [], activeIndex: -1 }
+          },
+          apply(tr, prev) {
+            const meta = tr.getMeta(AnonymDetectPluginKey)
+            if (meta !== undefined && meta !== null) {
+              const detections = meta.detections || []
+              const activeIndex = (meta.activeIndex === undefined || meta.activeIndex === null) ? -1 : meta.activeIndex
+              return { deco: buildDecorations(tr.doc, detections, activeIndex), detections, activeIndex }
+            }
+            if (tr.docChanged) {
+              return { deco: prev.deco.map(tr.mapping, tr.doc), detections: prev.detections, activeIndex: prev.activeIndex }
+            }
+            return prev
+          }
+        },
+        props: {
+          decorations(state) {
+            const s = AnonymDetectPluginKey.getState(state)
+            return s ? s.deco : null
+          }
+        }
+      })
+    ]
+  }
+})
+
+window.anonymiseurHighlightDetections = function (detections) {
+  const editor = window.tiptapAnonymiseurEditor
+  if (!editor || !editor.view) return
+  editor.view.dispatch(editor.view.state.tr.setMeta(AnonymDetectPluginKey, { detections: detections || [], activeIndex: -1 }))
+}
+
+window.anonymiseurSetActiveDetection = function (index, scroll) {
+  const editor = window.tiptapAnonymiseurEditor
+  if (!editor || !editor.view) return
+  const cur = AnonymDetectPluginKey.getState(editor.view.state)
+  const detections = (cur && cur.detections) ? cur.detections : []
+  editor.view.dispatch(editor.view.state.tr.setMeta(AnonymDetectPluginKey, { detections, activeIndex: index }))
+  if (scroll === false) return
+  try {
+    const el = editor.view.dom.querySelector('[data-detect-index="' + index + '"]')
+    if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  } catch (e) { /* silent */ }
+}
+
+window.anonymiseurClearDetections = function () {
+  const editor = window.tiptapAnonymiseurEditor
+  if (!editor || !editor.view) return
+  editor.view.dispatch(editor.view.state.tr.setMeta(AnonymDetectPluginKey, { detections: [], activeIndex: -1 }))
+}
 
 function registerTiptapEditor() {
     if (window._tiptapFrontendRegistered) return
@@ -132,7 +233,8 @@ function registerTiptapEditor() {
                         placeholder: config.placeholder || 'Collez ici le texte à anonymiser avant de l\'envoyer à une IA…'
                     }),
                     Highlight.configure({ multicolor: true }),
-                    Underline
+                    Underline,
+                    AnonymDetectionHighlight
                 ],
                 editorProps: {
                     attributes: {
@@ -272,7 +374,8 @@ async function initAnonymiseurTiptap() {
             StarterKit.configure({ codeBlock: false, link: { openOnClick: false }, heading: { levels: [2, 3] } }),
             Placeholder.configure({ placeholder: 'Collez ici le texte à anonymiser avant de l\'envoyer à une IA…' }),
             Highlight.configure({ multicolor: true }),
-            Underline
+            Underline,
+            AnonymDetectionHighlight
         ],
         editorProps: {
             attributes: {

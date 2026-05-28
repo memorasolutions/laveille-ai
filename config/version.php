@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.48.0 · 2026-05-28 · #313 feat(tools) anonymiseur — refonte affichage des détections (Option A hybride, choix user, recherche pp_search mai 2026 Grammarly/Notion/Microsoft Editor). (1) Panneau latéral droit (#detectionsPanel) groupé par catégorie avec compteurs + navigation ◀▶ + bouton « Tout anonymiser » + « Ajouter une règle manuelle » : remplace l'ancienne barre de badges en bas (#detectionsBar conservée masquée pour anti-régression). Layout étape 1 passé en grid 2 colonnes .lv-editor-split (éditeur | panneau, responsive <900px). (2) SURLIGNAGE INLINE des termes détectés DANS l'éditeur Tiptap via Extension ProseMirror AnonymDetectionHighlight (decorations non destructives, ne cassent pas le curseur) : soulignement 2px par catégorie (tokens --cat-*), marque active fond teal + outline. Exposé via window.anonymiseurHighlightDetections / SetActiveDetection(index, scroll) / ClearDetections dans resources/js/tiptap-frontend.js (rebuild Vite). (3) Popover d'action au clic d'une marque [Anonymiser]/[Ignorer]. (4) Retrait DIRECT sans popup (demande user) : bouton Ignorer (×) sur chaque détection retire la détection + son surlignage. (5) Synchronisation liste ↔ surlignage : clic item → saut + flash de la marque ; clic marque → popover + item actif. Nouveau enhancements-v151-detect-panel.js (IIFE, classic script) + detect-panel.css (scope .app, WCAG 2.2 AAA, prefers-reduced-motion). Edits app.js : detectPII délègue à window.lvUpdateDetections (fallback conservé), addDetection lit AppState.detections (badge supprimé), markDetectionAsAdded hooke lvMarkDetectionDone, updateStats guard ?. sur #sourceText (fix course init pré-existante). Génération markup/JS/CSS déléguée qwen3-max via openrouter-free (0 $), Opus = superviseur. Validé Playwright local (7 détections, 6 catégories, popover, nav, ignore, tout anonymiser → 7 règles). Codename anonymizer-detect-panel-inline-highlight.
  *   1.47.15 · 2026-05-28 · #313 fix(tools) anonymiseur — « Standard par défaut » réellement appliqué au chargement. Validation Playwright v1.47.14 révélait maskMode=redaction + confidence=0.5 (valeurs Maximum) au lieu de Standard : enhancements-v145.js restaure les réglages depuis localStorage (anonymiseur_settings_v1), ce qui contredisait le bandeau « recommandés appliqués ». Fix dans enhancements-v148 : applyDefaults() (set pseudo/0.6/encryption off si différent) appelée via setTimeout(60ms) au DOMContentLoaded pour passer APRÈS la restauration v145 → chaque visite démarre sur Standard, cohérent avec le bandeau et la demande user « on met standard par défaut ». resetToRecommended() réutilise applyDefaults() (DRY). Codename anonymizer-default-standard-no-presets.
  *   1.47.14 · 2026-05-28 · #313 feat(tools) anonymiseur — suppression des 3 cartes de presets (user « ces 3 cartes inutile »). Recherche UX mai 2026 (sonar-pro, fallback car pp_search KO 5 serveurs zombies nettoyés pkill) : tendance dominante = smart defaults inline + progressive disclosure, supprimer la notion de « preset » que l'utilisateur doit comprendre. 4 options notées /100 proposées, user a tranché « décide du mieux pour la plateforme » → Option A (92/100). Implémentation : (1) retrait du bloc .preset-grid (3 boutons standard/maximum/custom) + h3 « Comment voulez-vous protéger » + p. (2) Le panneau #custom-settings devient l'UNIQUE zone, toujours visible (plus de hidden), pré-réglé sur Standard via les valeurs HTML par défaut (maskMode=pseudo, confidence=0.6, encryption=off). (3) Nouvel entête .anonymiseur-settings-head : bandeau réassurance « ✓ Réglages recommandés pour l'IA appliqués — modifiez si besoin » (pastille teal #0B7285) + bouton pill « ↺ Réinitialiser aux recommandés » (#resetRecommended). (4) enhancements-v148-presets.js réécrit : retrait logique preset-card, ajout resetToRecommended() (set maskMode/confidence/encryption defaults + dispatch events + toast) + bind #resetRecommended, expose window.AnonymiseurSettings. (5) CSS : suppression du bloc mort .preset-grid/.preset-card (~75 lignes), ajout styles bandeau + reset scope .app WCAG AAA (focus 3px accent, responsive <600px). Génération markup+JS+CSS déléguée qwen3-max via openrouter-free (latence 1.1s, coût 0$), Opus = superviseur. Codename anonymizer-default-standard-no-presets.
  *   1.47.13 · 2026-05-28 · #313 fix(tools) anonymiseur — centrage vertical du « ? » dans les boutons d'aide (user « doivent être au centre horizontal et vertical »). Diagnostic Playwright : la boîte de ligne du glyphe est parfaitement centrée (Range.getBoundingClientRect offset X/Y = 0), MAIS le « ? » n'a pas de jambage descendant donc son encre occupe le haut de la boîte de ligne → il paraît ~1,4px trop haut. Test empirique zoom ×4 padding-top 2/3/4px sur les 3 boutons côte à côte : 2px reste haut, 4px trop bas, 3px parfaitement centré. Fix : `box-sizing: border-box` + `padding: 3px 0 0 0` sur `.app .anonymiseur-help-btn, .app .ct-help-btn` (le cercle 26px reste inchangé, seule l'encre du « ? » descend de ~1,5px). Horizontal déjà centré (justify-content center). Codename anonymizer-help-btn-q-centered.
@@ -153,8 +154,8 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 47,
-    'patch' => 15,
+    'minor' => 48,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -164,11 +165,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-default-standard-no-presets',
+    'codename' => 'anonymizer-detect-panel-inline-highlight',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.15',
+    'semver' => '1.48.0',
 ];

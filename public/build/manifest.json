@@ -1,6 +1,6 @@
 {
-  "_editor-Cqeq6YSY.js": {
-    "file": "assets/editor-Cqeq6YSY.js",
+  "_editor-a5OaYEAy.js": {
+    "file": "assets/editor-a5OaYEAy.js",
     "name": "editor",
     "imports": [
       "_vendor-BxpX-Pxt.js"
@@ -381,13 +381,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CAdAM6xk.js",
+    "file": "assets/app-DR7AVMga.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-BxpX-Pxt.js",
-      "_editor-Cqeq6YSY.js"
+      "_editor-a5OaYEAy.js"
     ],
     "dynamicImports": [
       "_vendor-BxpX-Pxt.js"
@@ -406,12 +406,12 @@
     "isEntry": true
   },
   "resources/js/tiptap-frontend.js": {
-    "file": "assets/tiptap-frontend-DHYjWv89.js",
+    "file": "assets/tiptap-frontend-CiJkmR_p.js",
     "name": "tiptap-frontend",
     "src": "resources/js/tiptap-frontend.js",
     "isEntry": true,
     "imports": [
-      "_editor-Cqeq6YSY.js",
+      "_editor-a5OaYEAy.js",
       "_vendor-BxpX-Pxt.js"
     ]
   },

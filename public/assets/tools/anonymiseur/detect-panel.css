@@ -1,0 +1,436 @@
+/* detect-panel.css — Sprint S131, Option A (hybride)
+   Panneau latéral des détections PII + surlignage inline + popover.
+   Scope .app pour battre le thème Bootstrap parent. WCAG 2.2 AAA. */
+
+.app .lv-editor-split {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.app .lv-editor-col {
+  min-width: 0;
+}
+
+@media (max-width: 899px) {
+  .app .lv-editor-split {
+    grid-template-columns: 1fr;
+  }
+
+  .app .lv-detect-panel {
+    position: static !important;
+  }
+}
+
+.app .lv-detect-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 200px);
+  position: sticky;
+  top: 1rem;
+}
+
+.app .lv-detect-panel.hidden {
+  display: none !important;
+}
+
+.app .lv-detect-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-tertiary);
+}
+
+.app .lv-detect-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app .lv-detect-count {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+}
+
+.app .lv-detect-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.app .lv-detect-navbtn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.app .lv-detect-navbtn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.app .lv-detect-navbtn:focus-visible {
+  outline: 3px solid rgba(11, 114, 133, 0.5);
+  outline-offset: 2px;
+}
+
+.app .lv-detect-list {
+  overflow-y: auto;
+  padding: 0.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app .lv-detect-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.app .lv-detect-empty.hidden {
+  display: none !important;
+}
+
+.app .lv-detect-foot {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.app .lv-detect-foot button {
+  width: 100%;
+}
+
+.app .lv-detect-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app .lv-detect-grouphead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  padding: 2px 4px;
+}
+
+.app .lv-detect-gcount {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.app .lv-detect-items {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.app .lv-detect-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cat-other);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px 2px 6px;
+  transition: all var(--transition);
+}
+
+.app .lv-detect-item[data-category="identity"] {
+  border-left-color: var(--cat-identity);
+}
+
+.app .lv-detect-item[data-category="contact"] {
+  border-left-color: var(--cat-contact);
+}
+
+.app .lv-detect-item[data-category="location"] {
+  border-left-color: var(--cat-location);
+}
+
+.app .lv-detect-item[data-category="id"] {
+  border-left-color: var(--cat-id);
+}
+
+.app .lv-detect-item[data-category="date"] {
+  border-left-color: var(--cat-date);
+}
+
+.app .lv-detect-item[data-category="money"] {
+  border-left-color: var(--cat-money);
+}
+
+.app .lv-detect-item[data-category="other"] {
+  border-left-color: var(--cat-other);
+}
+
+.app .lv-detect-item.is-active {
+  outline: 2px solid var(--primary);
+  background: var(--bg-tertiary);
+}
+
+.app .lv-detect-jump {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  padding: 4px 2px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  min-width: 0;
+}
+
+.app .lv-detect-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app .lv-detect-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: var(--cat-other);
+}
+
+.app .lv-detect-item[data-category="identity"] .lv-detect-swatch {
+  background: var(--cat-identity);
+}
+
+.app .lv-detect-item[data-category="contact"] .lv-detect-swatch {
+  background: var(--cat-contact);
+}
+
+.app .lv-detect-item[data-category="location"] .lv-detect-swatch {
+  background: var(--cat-location);
+}
+
+.app .lv-detect-item[data-category="id"] .lv-detect-swatch {
+  background: var(--cat-id);
+}
+
+.app .lv-detect-item[data-category="date"] .lv-detect-swatch {
+  background: var(--cat-date);
+}
+
+.app .lv-detect-item[data-category="money"] .lv-detect-swatch {
+  background: var(--cat-money);
+}
+
+.app .lv-detect-item[data-category="other"] .lv-detect-swatch {
+  background: var(--cat-other);
+}
+
+.app .lv-detect-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.app .lv-detect-anon,
+.app .lv-detect-ignore {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app .lv-detect-anon {
+  background: rgba(11, 114, 133, 0.12);
+  color: var(--primary);
+}
+
+.app .lv-detect-anon:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.app .lv-detect-ignore {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--error);
+}
+
+.app .lv-detect-ignore:hover {
+  background: var(--error);
+  color: #fff;
+}
+
+.app .lv-detect-anon:focus-visible,
+.app .lv-detect-ignore:focus-visible {
+  outline: 3px solid rgba(11, 114, 133, 0.5);
+  outline-offset: 1px;
+}
+
+.anonym-detect,
+.app .anonym-detect {
+  border-bottom: 2px solid var(--cat-other);
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background var(--transition);
+}
+
+.anonym-detect--identity,
+.app .anonym-detect--identity {
+  border-bottom-color: var(--cat-identity);
+}
+
+.anonym-detect--contact,
+.app .anonym-detect--contact {
+  border-bottom-color: var(--cat-contact);
+}
+
+.anonym-detect--location,
+.app .anonym-detect--location {
+  border-bottom-color: var(--cat-location);
+}
+
+.anonym-detect--id,
+.app .anonym-detect--id {
+  border-bottom-color: var(--cat-id);
+}
+
+.anonym-detect--date,
+.app .anonym-detect--date {
+  border-bottom-color: var(--cat-date);
+}
+
+.anonym-detect--money,
+.app .anonym-detect--money {
+  border-bottom-color: var(--cat-money);
+}
+
+.anonym-detect--other,
+.app .anonym-detect--other {
+  border-bottom-color: var(--cat-other);
+}
+
+.anonym-detect:hover,
+.app .anonym-detect:hover {
+  background: rgba(11, 114, 133, 0.1);
+}
+
+.anonym-detect.is-active,
+.app .anonym-detect.is-active {
+  background: rgba(11, 114, 133, 0.18);
+  outline: 1px solid var(--primary);
+}
+
+.app .lv-detect-popover {
+  position: fixed;
+  z-index: 10050;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  padding: 0.6rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 240px;
+  font-size: 0.85rem;
+}
+
+.app .lv-detect-popover.hidden {
+  display: none !important;
+}
+
+.app .lv-detect-popcat {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.app .lv-detect-poptext {
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.app .lv-detect-popbtns {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.app .lv-detect-popbtn {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 0;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.app .lv-detect-popanon {
+  background: var(--primary);
+  color: #fff;
+}
+
+.app .lv-detect-popignore {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.app .lv-detect-popanon:focus-visible,
+.app .lv-detect-popignore:focus-visible {
+  outline: 3px solid rgba(11, 114, 133, 0.5);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app .lv-detect-item,
+  .anonym-detect,
+  .app .anonym-detect {
+    transition: none !important;
+  }
+}
