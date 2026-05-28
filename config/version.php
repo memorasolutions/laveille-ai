@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.47.8 · 2026-05-28 · #313 feat(tools) anonymiseur — boutons ? + popups aide « Sensibilité de détection » + « Protéger les exports » (Option A user GO 93/100, pp_search 2026 Zendesk/Gallio/Google Cloud/ISED Canada). 2 boutons `?` (réutilise `.anonymiseur-help-btn`) à côté des labels. (1) Modal `#sensitivityHelpModal` : analogie détecteur de fumée (très sensible = sonne pour rien/repère max données + faux positifs ; peu sensible = sûr mais rate des données) + échelle visuelle gradient orange→teal (Détecte tout / Équilibré / Très précis) + conseil Loi 25 « équilibré ou plus sensible ». (2) Modal `#encryptionHelpModal` : analogie coffre-fort (sans protection = lisible par quiconque ; avec = illisible sans mot de passe) + Quand/Comment + note technique AES-GCM 256 calculé navigateur (mot de passe ne quitte jamais l'appareil). Réutilise `.modal-overlay` v1.45.3 + `.lv-help-dl` + nouveau `.lv-help-analogy` + `.lv-help-scale`. Handlers étendus dans `enhancements-v150-help.js` (boucle config open/close/ESC/click-outside). Codename anonymizer-help-sensitivity-encryption.
  *   1.47.7 · 2026-05-28 · #313 fix(tools) brain-dump @section('og_image') manquant — la vue brain-dump.blade.php ne déclarait pas de section og_image (contrairement aux 13 autres outils via tools::public.show + $shareData), donc l'og:image tombait sur le fallback global og-image.png malgré featured_image set en DB v1.47.6. Fix : ajout `@section('og_image', asset($tool->featured_image).'?v='.filemtime)` conditionnel si featured_image présent. anonymiseur déjà OK (utilise $shareData['og_image']). Codename braindump-ogimage-section.
  *   1.47.6 · 2026-05-28 · #313 feat(tools) hero images brain-dump + anonymiseur (manquaient — user « n'a pas son image comme les autres, garder la même dynamique »). 2 images générées via skill nanobanana (Gemini Playwright compte user) style isométrique 3D cohérent avec les 13 autres outils (référence constructeur-prompts.jpg : teal #0B7285 + orange + violet + lego blocks + gears + glow). brain-dump : cerveau 3D versant idées/post-its sur bureau organisé. anonymiseur : document avec icônes PII (silhouette, @, cadenas) remplacées par tokens masqués flux vers IA brain. Dimensions 600×360 (match exact pattern outils existants via sips -z 360 600 -c 360 600) + WebP q82 (bandwidth web). JPG pour og:image (X/FB/LinkedIn n'acceptent pas WebP/Avif L-JPEG-vs-WebP-social-V1). Migration `2026_05_28_100000_add_featured_images_braindump_anonymiseur` set Tool.featured_image (sert og:image via Shareable::getShareData + card image dans /outils index). Idempotent. Codename tools-hero-images-braindump-anonym.
  *   1.47.5 · 2026-05-27 · #313 fix(tools) anonymiseur — refonte modal aide 4 modes en ONGLETS (user feedback « la popup est dégueulasse, mettre des onglets, voir ailleurs sur le site »). Pattern réutilisé : `.result-tabs/.result-tab` déjà dans anonymiseur ligne 317 + `nav-tabs` mots-croises (charte Memora cohérente). 4 onglets `.lv-help-tab` (emoji + label court + badge optionnel Reco/Avancé) + 4 panneaux `.lv-help-panel` (1 visible à la fois). Pattern WAI-ARIA tablist : role=tablist/tab/tabpanel + aria-selected + aria-controls + aria-labelledby + tabindex 0/-1 + clavier nav ArrowLeft/ArrowRight/Home/End (standard W3C tabs). Contenu structuré en `<dl>` Quand/Pourquoi/Exemple (au lieu de paragraphes empilés) + lv-help-reversible block coloré vert/rouge selon ✅/⛔. Sync intelligent : ouverture modal → onglet du mode actuellement sélectionné dans `#maskMode` est auto-activé. CSS scope `.app` (override Bootstrap) : grid 4 colonnes desktop / 2 colonnes mobile + transitions hover/focus + badge teal + dl 2-col responsive. Module `enhancements-v150-help.js` ~50 lignes (tabs + ARIA keyboard + modal toggle). Codename anonymizer-help-modal-tabs.
@@ -146,7 +147,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 47,
-    'patch' => 7,
+    'patch' => 8,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -156,11 +157,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'braindump-ogimage-section',
+    'codename' => 'anonymizer-help-sensitivity-encryption',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.7',
+    'semver' => '1.47.8',
 ];

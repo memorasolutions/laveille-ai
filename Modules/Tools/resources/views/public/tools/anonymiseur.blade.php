@@ -211,7 +211,11 @@
 
                 <div class="anonymiseur-custom-field">
                     <label for="confidenceThreshold" class="anonymiseur-custom-label">
-                        {{ __('Sensibilité de détection') }} <span id="confidenceThresholdValue" class="anonymiseur-custom-value">60 %</span>
+                        <span style="display:flex;align-items:center;gap:0.5rem;">
+                            <span>{{ __('Sensibilité de détection') }}</span>
+                            <button type="button" id="btnSensitivityHelp" class="anonymiseur-help-btn" aria-label="{{ __('Aide : comprendre la sensibilité de détection') }}" title="{{ __('Comprendre la sensibilité de détection') }}">?</button>
+                        </span>
+                        <span id="confidenceThresholdValue" class="anonymiseur-custom-value">60 %</span>
                     </label>
                     <div class="anonymiseur-custom-control">
                         <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" aria-describedby="confidenceHint">
@@ -225,6 +229,7 @@
                             <input type="checkbox" id="encryptionEnabled" class="anonymiseur-custom-checkbox">
                             <span>{{ __('Protéger les exports') }}</span>
                         </span>
+                        <button type="button" id="btnEncryptionHelp" class="anonymiseur-help-btn" aria-label="{{ __('Aide : comprendre la protection des exports') }}" title="{{ __('Comprendre la protection par mot de passe') }}">?</button>
                     </label>
                     <div class="anonymiseur-custom-control" id="encryptionPassphraseWrap">
                         <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Cochez d\'abord ☝️ pour activer') }}" autocomplete="new-password" disabled>
@@ -529,6 +534,83 @@
             </div>
             <div class="modal-footer">
                 <button type="button" id="closeMaskHelpModalFooter" class="btn btn-primary">{{ __('J\'ai compris') }}</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal d'aide : Sensibilité de détection --}}
+    <div id="sensitivityHelpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sensitivityHelpTitle">
+        <div class="modal" style="max-width:560px;">
+            <div class="modal-header">
+                <h2 id="sensitivityHelpTitle" class="panel-title">{{ __('La sensibilité de détection, c\'est quoi ?') }}</h2>
+                <button type="button" id="closeSensitivityHelp" class="btn-icon" aria-label="{{ __('Fermer') }}" title="{{ __('Fermer') }}">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin:0 0 1rem;font-size:0.95rem;line-height:1.55;color:var(--text-primary);">
+                    {{ __('Ce réglage contrôle à quel point l\'outil est strict pour repérer vos informations personnelles (noms, courriels, numéros…).') }}
+                </p>
+
+                <div class="lv-help-analogy">
+                    <h3>🔥 {{ __('Comme un détecteur de fumée') }}</h3>
+                    <dl class="lv-help-dl">
+                        <dt>{{ __('Très sensible') }}</dt>
+                        <dd>{{ __('il sonne dès qu\'il voit un peu de fumée — repère le maximum de données, mais parfois à tort (faux positifs).') }}</dd>
+                        <dt>{{ __('Peu sensible') }}</dt>
+                        <dd>{{ __('il sonne seulement s\'il est sûr — moins de fausses alertes, mais il peut rater certaines données.') }}</dd>
+                    </dl>
+                </div>
+
+                <div class="lv-help-scale" aria-hidden="true">
+                    <span>← {{ __('Détecte tout') }}</span>
+                    <span class="lv-help-scale-mid">{{ __('Équilibré') }}</span>
+                    <span>{{ __('Très précis') }} →</span>
+                </div>
+
+                <p class="lv-help-cta">
+                    💡 <strong>{{ __('Conseil') }} :</strong> {{ __('pour respecter la Loi 25 et le RGPD, gardez un niveau') }} <strong>{{ __('équilibré ou plus sensible') }}</strong> — {{ __('mieux vaut une fausse alerte que de laisser passer une vraie donnée personnelle.') }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeSensitivityHelpFooter" class="btn btn-primary">{{ __('J\'ai compris') }}</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal d'aide : Protéger les exports (chiffrement) --}}
+    <div id="encryptionHelpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="encryptionHelpTitle">
+        <div class="modal" style="max-width:560px;">
+            <div class="modal-header">
+                <h2 id="encryptionHelpTitle" class="panel-title">{{ __('Protéger vos exports, c\'est quoi ?') }}</h2>
+                <button type="button" id="closeEncryptionHelp" class="btn-icon" aria-label="{{ __('Fermer') }}" title="{{ __('Fermer') }}">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin:0 0 1rem;font-size:0.95rem;line-height:1.55;color:var(--text-primary);">
+                    {{ __('Quand vous exportez vos règles dans un fichier (pour les réutiliser ou les partager), ce fichier peut contenir vos vraies données. Cette option le verrouille avec un mot de passe.') }}
+                </p>
+
+                <div class="lv-help-analogy">
+                    <h3>🔐 {{ __('Comme un coffre-fort') }}</h3>
+                    <dl class="lv-help-dl">
+                        <dt>{{ __('Sans protection') }}</dt>
+                        <dd>{{ __('le fichier est lisible par quiconque l\'ouvre (collègue, pièce jointe interceptée, clé USB perdue).') }}</dd>
+                        <dt>{{ __('Avec protection') }}</dt>
+                        <dd>{{ __('le fichier devient illisible sans le mot de passe. Même intercepté, personne ne peut rien en faire.') }}</dd>
+                    </dl>
+                </div>
+
+                <dl class="lv-help-dl" style="margin-top:1rem;">
+                    <dt>{{ __('Quand') }}</dt>
+                    <dd>{{ __('vous partagez le fichier par courriel, le stockez dans le nuage, ou sur un appareil partagé.') }}</dd>
+                    <dt>{{ __('Comment') }}</dt>
+                    <dd>{{ __('cochez la case, choisissez un mot de passe de 12 caractères ou plus, puis exportez. Gardez ce mot de passe — sans lui, le fichier est irrécupérable.') }}</dd>
+                </dl>
+
+                <p class="lv-help-cta">
+                    🛡️ <strong>{{ __('Technique') }} :</strong> {{ __('chiffrement AES-GCM 256 bits (standard bancaire), calculé dans votre navigateur. Le mot de passe ne quitte jamais votre appareil.') }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeEncryptionHelpFooter" class="btn btn-primary">{{ __('J\'ai compris') }}</button>
             </div>
         </div>
     </div>

@@ -58,5 +58,24 @@
             const tabForCurrent = document.querySelector('.lv-help-tab[data-help-tab="' + select.value + '"]');
             if (tabForCurrent) activateHelpTab(tabForCurrent);
         });
+
+        // Modals d'aide secondaires (Sensibilité + Chiffrement) — pattern simple open/close
+        [
+            { btn: 'btnSensitivityHelp', modal: 'sensitivityHelpModal', x: 'closeSensitivityHelp', footer: 'closeSensitivityHelpFooter' },
+            { btn: 'btnEncryptionHelp', modal: 'encryptionHelpModal', x: 'closeEncryptionHelp', footer: 'closeEncryptionHelpFooter' }
+        ].forEach(cfg => {
+            const b = document.getElementById(cfg.btn);
+            const m = document.getElementById(cfg.modal);
+            const x = document.getElementById(cfg.x);
+            const f = document.getElementById(cfg.footer);
+            if (!b || !m) return;
+            b.addEventListener('click', () => open(m));
+            x && x.addEventListener('click', () => close(m));
+            f && f.addEventListener('click', () => close(m));
+            m.addEventListener('click', (e) => { if (e.target === m) close(m); });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && m.classList.contains('active')) close(m);
+            });
+        });
     });
 })();

@@ -2379,3 +2379,35 @@ body {
   line-height: 1.5 !important;
   color: var(--text-primary) !important;
 }
+
+/* === Aide analogie + échelle (modals sensibilité/chiffrement) v1.47.8 === */
+.app .lv-help-analogy {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid rgba(11, 114, 133, 0.18) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.85rem 1.15rem !important;
+  margin-bottom: 1rem !important;
+}
+.app .lv-help-analogy h3 {
+  margin: 0 0 0.65rem !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #064E5C !important;
+}
+.app .lv-help-scale {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.5rem !important;
+  padding: 0.65rem 0.85rem !important;
+  background: linear-gradient(90deg, rgba(194,65,18,0.12) 0%, var(--bg-tertiary) 50%, rgba(11,114,133,0.12) 100%) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+  margin-bottom: 1rem !important;
+}
+.app .lv-help-scale .lv-help-scale-mid {
+  color: var(--primary) !important;
+  font-weight: 700 !important;
+}
