@@ -440,18 +440,26 @@
    ============================================ */
 .app .anonym-detect.is-done,
 .anonym-detect.is-done {
-  background: rgba(22, 163, 74, 0.30) !important;
   border-bottom: none !important;
   border-radius: 3px;
   padding: 0 2px;
   position: relative;
 }
 
+/* Surligneur plein = couleur de la CATÉGORIE (suit le code couleur). Le ✓ = indice de statut « anonymisé » (non-couleur). */
+.app .anonym-detect--identity.is-done, .anonym-detect--identity.is-done { background: color-mix(in srgb, var(--cat-identity) 30%, transparent) !important; }
+.app .anonym-detect--contact.is-done,  .anonym-detect--contact.is-done  { background: color-mix(in srgb, var(--cat-contact) 30%, transparent) !important; }
+.app .anonym-detect--location.is-done, .anonym-detect--location.is-done { background: color-mix(in srgb, var(--cat-location) 30%, transparent) !important; }
+.app .anonym-detect--id.is-done,       .anonym-detect--id.is-done       { background: color-mix(in srgb, var(--cat-id) 30%, transparent) !important; }
+.app .anonym-detect--date.is-done,     .anonym-detect--date.is-done     { background: color-mix(in srgb, var(--cat-date) 30%, transparent) !important; }
+.app .anonym-detect--money.is-done,    .anonym-detect--money.is-done    { background: color-mix(in srgb, var(--cat-money) 30%, transparent) !important; }
+.app .anonym-detect--other.is-done,    .anonym-detect--other.is-done    { background: color-mix(in srgb, var(--cat-other) 30%, transparent) !important; }
+
 .app .anonym-detect.is-done::after,
 .anonym-detect.is-done::after {
   content: "\2713";
   font-size: 0.75em;
-  color: #15803d;
+  color: var(--text-primary);
   margin-left: 2px;
   font-weight: 700;
   vertical-align: baseline;
@@ -492,16 +500,15 @@
 }
 
 .app .lv-detect-item.is-done {
-  background: rgba(22, 163, 74, 0.08);
-  border-left-color: #16a34a !important;
+  background: var(--bg-tertiary);
 }
 
 .app .lv-detect-item.is-done .lv-detect-text {
   color: var(--text-muted);
 }
 
+/* La pastille garde la couleur de catégorie (héritée), on ajoute juste le ✓ de statut. */
 .app .lv-detect-item.is-done .lv-detect-swatch {
-  background: #16a34a;
   position: relative;
 }
 
