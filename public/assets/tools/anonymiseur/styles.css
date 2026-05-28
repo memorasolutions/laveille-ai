@@ -2100,6 +2100,7 @@ body {
 .app .anonymiseur-help-btn,
 .app .ct-help-btn {
   flex-shrink: 0 !important;
+  box-sizing: border-box !important;
   width: 26px !important;
   height: 26px !important;
   min-width: 26px !important;
@@ -2113,6 +2114,8 @@ body {
   cursor: pointer !important;
   line-height: 1 !important;
   margin-left: 6px !important;
+  /* padding-top 3px : compense l'absence de jambage du « ? » qui le rend optiquement haut (centrage vertical réel de l'encre, validé Playwright zoom 2/3/4px) */
+  padding: 3px 0 0 0 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
