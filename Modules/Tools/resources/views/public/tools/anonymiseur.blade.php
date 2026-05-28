@@ -190,7 +190,7 @@
                         <button type="button" class="ct-help-btn" data-help-key="anonym-encryption" aria-label="{{ __('Aide : comprendre la protection des exports') }}">?</button>
                     </label>
                     <div class="anonymiseur-custom-control" id="encryptionPassphraseWrap">
-                        <input type="password" id="encryptionPassphrase" class="form-input" placeholder="{{ __('Cochez d\'abord ☝️ pour activer') }}" autocomplete="new-password" disabled>
+                        <input type="password" id="encryptionPassphrase" class="form-input" aria-label="{{ __('Mot de passe pour chiffrer le fichier exporté') }}" placeholder="{{ __('Cochez d\'abord ☝️ pour activer') }}" autocomplete="new-password" disabled>
                     </div>
                     <small class="anonymiseur-custom-hint">{{ __('Chiffre votre fichier JSON exporté avec un mot de passe (AES-GCM). Vous seul·e pourrez l\'ouvrir.') }}</small>
                 </div>

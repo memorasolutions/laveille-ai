@@ -65,7 +65,7 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 11px;
-  background: var(--primary);
+  background: #064E5C; /* AAA : blanc sur #064E5C = 9.32:1 (var(--primary) = 5.59:1) */
   color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
@@ -112,7 +112,7 @@
 .app .lv-detect-empty {
   padding: 1rem;
   text-align: center;
-  color: var(--text-muted);
+  color: #475569; /* AAA : 7.24:1 sur #F8FAFC (var(--text-muted) = 4.55:1) */
   font-size: 0.85rem;
 }
 

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.54.1 · 2026-05-28 · #313 fix(core+tools) #19 anonymiseur — corrections WCAG 2.2 AAA après audit wcag-mcp des ajouts UI S131. Vrais manquements corrigés (faux positifs écartés : 1:1 blanc/blanc = modales cachées, ~60 « not reachable Tab » = éléments dans conteneurs hidden, teal site-wide hors scope) : (1) `.ct-accordion__subtitle` passait l'AA à 4.3:1 → #334155 (AAA). (2) Saut de titre h1→h3 : le composant x-core::accordion utilise désormais un `<div class="ct-accordion__heading">` (un disclosure isolé n'exige pas de heading, bouton porte la sémantique aria-expanded). (3) `#encryptionPassphrase` sans label accessible (échec AA 3.3.2/4.1.2) → aria-label ajouté. (4) AAA : `.ct-accordion__cta`/chevron #0B7285 (5.05:1) → #064E5C (8.43:1) ; `.lv-detect-count` fond #0B7285 (blanc 5.59:1) → #064E5C (9.32:1) ; `.lv-detect-empty` #64748B (4.55:1) → #475569 (7.24:1). Contrastes vérifiés via wcag_check_contrast. CSS/markup, statique. Codename core-accordion-component.
  *   1.54.0 · 2026-05-28 · #313 feat(core+tools) #16 anonymiseur — composant officiel RÉUTILISABLE x-core::accordion (DRY, demande user « un standard uniforme selon la charte »). Recherche pp_search mai 2026 : pattern W3C APG (heading + button aria-expanded/aria-controls + panneau hidden/aria-labelledby + chevron droite→bas), source de vérité unique. Nouveau Modules/Core/resources/views/components/accordion.blade.php (@props id/icon/title/subtitle/cta/open ; CSS .ct-accordion* + JS délégation émis UNE seule fois via @once @push). Les DEUX accordéons de l'anonymiseur (bandeau « 100 % local » + panneau « Réglages recommandés ») — qui avaient 2 implémentations distinctes (lv-trust-* + anonymiseur-settings-*) — sont refondus dessus : markup uniforme, même chevron, même clavier. enhancements-v149-trust.js simplifié (ne garde que la persistance « J'ai compris » anonymiseur_trust_accepted_v1 + repli au chargement, cible #anonymTrust-trigger/-panel). enhancements-v152-settings-accordion.js SUPPRIMÉ (le composant gère le toggle). #infoBanner conservé en wrapper + app.js getElementById('infoBanner')?. null-safe. Validé Playwright local : 2 .ct-accordion uniformes, toggle/chevron 90°/persistance OK, zéro régression. Réutilisable par tous les futurs outils. Génération composant qwen3-max via openrouter-free (0 $). Codename core-accordion-component.
  *   1.53.0 · 2026-05-28 · #313 feat+fix(tools) anonymiseur — (a) #17 faux positifs « nom de personne » : « Ressources Humaines », « Banque Royale », « Conseil Municipal », « Service Client », « Entreprise Test »… étaient détectés comme des noms de personnes (regex « Mot Capitalisé + Mot Capitalisé »). Recherche pp_search mai 2026 : stoplist/gazetteer haute précision au niveau du span. Ajout `NAME_STOPWORDS` (≈70 têtes nominales d'organisations/services FR, minuscules sans accents) + `isLikelyPersonName(s)` (normalise NFD, tokenise sur espace/trait d'union, rejette si un token est une tête d'organisation) en `validate` sur le détecteur `properName`. Test node : org-noms rejetés, vrais noms (Marc-André Langevin, Sophie Gariépy) gardés. (b) #18 édition au clic : un item de la section « Anonymisés ✓ » est désormais cliquable pour MODIFIER la règle (✏️ + clic sur le libellé → `editRule(id)` du terme, modal pré-rempli) en plus du ↶ Annuler. Fonction `lvEditDetection` dans enhancements-v151 + bouton ✏️ + CSS `.lv-detect-edit`. Génération qwen3-max via openrouter-free (0 $), Opus superviseur. Statique. Codename anonymizer-name-stoplist-edit-click.
  *   1.52.1 · 2026-05-28 · #313 fix(tools) anonymiseur — détecteur URL : ne capture plus la ponctuation de fin de phrase (« https://exemple.com/page. » → « https://exemple.com/page »). Regex `[^\s<>"']*[^\s<>"'.,;:!?)\]]` : le dernier caractère ne peut pas être . , ; : ! ? ) ]. Le slash final légitime est conservé. CSS-rien, app.js statique. Codename anonymizer-settings-accordion.
@@ -165,7 +166,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 54,
-    'patch' => 0,
+    'patch' => 1,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -181,5 +182,5 @@ return [
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.54.0',
+    'semver' => '1.54.1',
 ];

@@ -10,7 +10,9 @@
     'open' => false,
 ])
 <div class="ct-accordion">
-  <h3 class="ct-accordion__heading">
+  {{-- Wrapper neutre (pas de <h?>) : un disclosure isolé n'exige pas de heading et éviter
+       un saut de niveau (h1→h3) selon le contexte de la page. Le bouton porte la sémantique. --}}
+  <div class="ct-accordion__heading">
     <button type="button" class="ct-accordion__trigger" id="{{ $id }}-trigger" aria-expanded="{{ $open ? 'true' : 'false' }}" aria-controls="{{ $id }}-panel">
       <span class="ct-accordion__lead">
         @if($icon)<span class="ct-accordion__icon" aria-hidden="true">{{ $icon }}</span>@endif
@@ -24,7 +26,7 @@
         <span class="ct-accordion__chevron" aria-hidden="true">›</span>
       </span>
     </button>
-  </h3>
+  </div>
   <div id="{{ $id }}-panel" class="ct-accordion__panel" role="region" aria-labelledby="{{ $id }}-trigger" @unless($open) hidden @endunless>
     <div class="ct-accordion__content">{{ $slot }}</div>
   </div>
@@ -99,14 +101,14 @@
 .app .ct-accordion__subtitle {
   font-weight: 400;
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: #334155; /* WCAG AAA sur fond pâle (#E6F7F5) — var(--text-muted) échouait l'AA à 4.3:1 */
 }
 .ct-accordion__cta,
 .app .ct-accordion__cta {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--primary);
+  color: #064E5C; /* teal AAA (8.43:1 sur #E6F7F5) — var(--primary) #0B7285 = 5.05:1 (AAA fail) */
   font-weight: 700;
   font-size: 0.85rem;
   white-space: nowrap;
