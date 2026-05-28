@@ -153,45 +153,17 @@
         </div>
     </div>
 
-    <div class="anonymiseur-presets" style="margin:1rem 0 1.5rem;">
-        <h3 style="margin:0 0 0.35rem;font-size:1.05rem;font-weight:700;color:var(--text-primary);">
-            🛡️ {{ __('Comment voulez-vous protéger vos données ?') }}
-        </h3>
-        <p style="margin:0 0 0.85rem;font-size:0.88rem;color:var(--text-secondary);line-height:1.5;">
-            {{ __('Le mode « Standard » remplace par des faux noms similaires pour que l\'IA donne la meilleure réponse possible, puis restaure vos vraies données.') }}
-        </p>
-        <div class="preset-grid" role="radiogroup" aria-label="{{ __('Niveau de protection') }}">
-            <button type="button" class="preset-card preset-card-recommended is-selected" data-preset="standard" role="radio" aria-checked="true">
-                <h4>🔄 {{ __('Standard — IA') }}</h4>
-                <p>{{ __('Le bon choix pour utiliser ChatGPT, Claude, Gemini.') }}</p>
-                <ul>
-                    <li>{{ __('Remplace par des faux noms SIMILAIRES (Marie → Catherine)') }}</li>
-                    <li>{{ __('L\'IA comprend le contexte et donne sa meilleure réponse') }}</li>
-                    <li>{{ __('On restaure vos vraies données dans la réponse') }}</li>
-                </ul>
-            </button>
-            <button type="button" class="preset-card" data-preset="maximum" role="radio" aria-checked="false">
-                <h4>🛡️ {{ __('Maximum — Sensible') }}</h4>
-                <p>{{ __('Pour santé, légal, finance — sans retour possible.') }}</p>
-                <ul>
-                    <li>{{ __('Efface définitivement par [SUPPRIMÉ]') }}</li>
-                    <li>{{ __('Export protégé par mot de passe') }}</li>
-                    <li>{{ __('Impossible de retrouver les vraies données ensuite') }}</li>
-                </ul>
-            </button>
-            <button type="button" class="preset-card" data-preset="custom" role="radio" aria-checked="false">
-                <h4>⚙️ {{ __('Personnalisé') }}</h4>
-                <p>{{ __('Pour utilisateurs avancés (techniques).') }}</p>
-                <ul>
-                    <li>{{ __('Choisir comment remplacer (4 modes)') }}</li>
-                    <li>{{ __('Sensibilité de détection ajustable') }}</li>
-                    <li>{{ __('Chiffrement optionnel des exports') }}</li>
-                </ul>
-            </button>
-        </div>
-
-        <div id="custom-settings" hidden style="margin-top:1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:1.15rem;">
-            <h4 style="margin:0 0 0.85rem;font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ __('Réglages personnalisés') }}</h4>
+    <div class="anonymiseur-settings" style="margin:1rem 0 1.5rem;">
+        <div id="custom-settings" class="anonymiseur-settings-panel">
+            <div class="anonymiseur-settings-head">
+                <p class="anonymiseur-reco-banner" role="status">
+                    <span class="anonymiseur-reco-check" aria-hidden="true">✓</span>
+                    {{ __('Réglages recommandés pour l\'IA appliqués — modifiez si besoin.') }}
+                </p>
+                <button type="button" id="resetRecommended" class="anonymiseur-reset-link">
+                    {{ __('↺ Réinitialiser aux recommandés') }}
+                </button>
+            </div>
             <div class="anonymiseur-custom-grid">
                 <div class="anonymiseur-custom-field">
                     <label for="maskMode" class="anonymiseur-custom-label">

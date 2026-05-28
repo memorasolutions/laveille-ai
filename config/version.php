@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.47.14 · 2026-05-28 · #313 feat(tools) anonymiseur — suppression des 3 cartes de presets (user « ces 3 cartes inutile »). Recherche UX mai 2026 (sonar-pro, fallback car pp_search KO 5 serveurs zombies nettoyés pkill) : tendance dominante = smart defaults inline + progressive disclosure, supprimer la notion de « preset » que l'utilisateur doit comprendre. 4 options notées /100 proposées, user a tranché « décide du mieux pour la plateforme » → Option A (92/100). Implémentation : (1) retrait du bloc .preset-grid (3 boutons standard/maximum/custom) + h3 « Comment voulez-vous protéger » + p. (2) Le panneau #custom-settings devient l'UNIQUE zone, toujours visible (plus de hidden), pré-réglé sur Standard via les valeurs HTML par défaut (maskMode=pseudo, confidence=0.6, encryption=off). (3) Nouvel entête .anonymiseur-settings-head : bandeau réassurance « ✓ Réglages recommandés pour l'IA appliqués — modifiez si besoin » (pastille teal #0B7285) + bouton pill « ↺ Réinitialiser aux recommandés » (#resetRecommended). (4) enhancements-v148-presets.js réécrit : retrait logique preset-card, ajout resetToRecommended() (set maskMode/confidence/encryption defaults + dispatch events + toast) + bind #resetRecommended, expose window.AnonymiseurSettings. (5) CSS : suppression du bloc mort .preset-grid/.preset-card (~75 lignes), ajout styles bandeau + reset scope .app WCAG AAA (focus 3px accent, responsive <600px). Génération markup+JS+CSS déléguée qwen3-max via openrouter-free (latence 1.1s, coût 0$), Opus = superviseur. Codename anonymizer-default-standard-no-presets.
  *   1.47.13 · 2026-05-28 · #313 fix(tools) anonymiseur — centrage vertical du « ? » dans les boutons d'aide (user « doivent être au centre horizontal et vertical »). Diagnostic Playwright : la boîte de ligne du glyphe est parfaitement centrée (Range.getBoundingClientRect offset X/Y = 0), MAIS le « ? » n'a pas de jambage descendant donc son encre occupe le haut de la boîte de ligne → il paraît ~1,4px trop haut. Test empirique zoom ×4 padding-top 2/3/4px sur les 3 boutons côte à côte : 2px reste haut, 4px trop bas, 3px parfaitement centré. Fix : `box-sizing: border-box` + `padding: 3px 0 0 0` sur `.app .anonymiseur-help-btn, .app .ct-help-btn` (le cercle 26px reste inchangé, seule l'encre du « ? » descend de ~1,5px). Horizontal déjà centré (justify-content center). Codename anonymizer-help-btn-q-centered.
  *   1.47.12 · 2026-05-28 · #313 fix(tools) anonymiseur — boutons « ? » d'aide « dégueulasse » (user). Cause : la migration v1.47.11 vers le composant officiel <x-core::help-modal> avait aussi adopté le visuel `.ct-help-btn` officiel (22px, contour fin teal 1.5px, glyphe « ⓘ » U+24D8). Le glyphe « ⓘ » est un i-cerclé → rendu « cercle dans un cercle » avec le border-radius du bouton = brouillon + le contour fin paraît faible à côté des labels en gras. Le visuel précédent (`.anonymiseur-help-btn` 26px teal plein + « ? » blanc) plaisait. Fix : (1) override scope `.app` du `.ct-help-btn` réutilisant les déclarations du `.anonymiseur-help-btn` (DRY, sélecteurs groupés) → 26px, fond teal plein var(--primary), « ? » blanc gras 0.9rem, hover scale 1.08 + primary-hover, focus-visible 3px accent. Scopé `.app` donc calculatrice-taxes et les autres outils gardent le look officiel ⓘ contour. (2) glyphe des 3 boutons « ⓘ » → « ? ». Le mécanisme officiel (data-help-key + window.HELP_CONTENT + popup .ct-modal charte radius 16) est INCHANGÉ → cohérence charte préservée, seul le déclencheur retrouve le visuel teal plein. Codename anonymizer-help-btn-teal-clean.
  *   1.47.11 · 2026-05-28 · #313 refactor(tools) anonymiseur — popups d'aide migrées vers composant OFFICIEL <x-core::help-modal> (user « est-ce que les popups respectent la charte comme les autres? »). Audit : le site a un composant officiel help-modal (S84, .ct-modal-overlay radius 16 + .ct-help-btn contour teal + data-help-key + window.HELP_CONTENT, déjà dans master.blade.php + utilisé par calculatrice-taxes). Mes 3 popups utilisaient un pattern maison .modal-overlay (radius 10, bouton teal plein) = incohérent. Migration : (1) 3 boutons → `.ct-help-btn data-help-key` (anonym-modes/sensitivity/encryption). (2) 3 modals custom supprimées, contenu déplacé dans `window.HELP_CONTENT` via @php heredoc + json_encode (pattern calculatrice-taxes). (3) Onglets des 4 modes préservés via event delegation globale (le body x-html est teleporté hors .app → enhancements-v150-help.js réécrit en delegation document sur .lv-help-tab data-help-panel + clavier ArrowLeft/Right/Home/End). (4) CSS .lv-help-* dé-scopés de .app (sed 49 remplacements) car le help-modal teleporte au body. Résultat : popups 100% cohérentes avec le reste du site (même overlay, même bouton ⓘ, même radius 16) + onglets conservés. Codename anonymizer-popups-official-help-modal.
@@ -152,7 +153,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 47,
-    'patch' => 13,
+    'patch' => 14,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -162,11 +163,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-help-btn-q-centered',
+    'codename' => 'anonymizer-default-standard-no-presets',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.47.13',
+    'semver' => '1.47.14',
 ];
