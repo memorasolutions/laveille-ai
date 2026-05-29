@@ -689,7 +689,7 @@ function detectPII() {
     const PRIORITY = { ramq: 100, creditCard: 90, nas: 80, postalCA: 70, email: 60, phoneCA: 50, money: 40, date: 30, properName: 20 };
     // Score de confiance par detecteur (0-1). Calibre pour que le seuil par defaut 0.6 laisse TOUT passer
     // (zero regression) ; MONTER le curseur retire d'abord les heuristiques bruyantes (nom, date, montant).
-    const CONFIDENCE = { ramq: 0.9, creditCard: 0.95, nas: 0.7, postalCA: 0.8, email: 0.95, phoneCA: 0.8, money: 0.6, date: 0.6, properName: 0.6, iban: 0.95, swift: 0.85, vat: 0.7, nirFr: 0.9, dniNie: 0.85, codiceFiscale: 0.85, ipv4: 0.8, ipv6: 0.8, mac: 0.85, url: 0.7, phoneEU: 0.8, adresseCivique: 0.6 };
+    const CONFIDENCE = { ramq: 0.9, creditCard: 0.95, nas: 0.65, postalCA: 0.8, email: 0.95, phoneCA: 0.8, money: 0.5, date: 0.5, properName: 0.5, iban: 0.95, swift: 0.8, vat: 0.65, nirFr: 0.9, dniNie: 0.85, codiceFiscale: 0.85, ipv4: 0.7, ipv6: 0.7, mac: 0.8, url: 0.6, phoneEU: 0.8, adresseCivique: 0.5 };
 
     // Collecte POSITIONNELLE de tous les candidats (+ validation éventuelle, ex. Luhn).
     const candidates = [];
@@ -735,11 +735,12 @@ function detectPII() {
     lvRenderDetectionsFiltered();
 }
 
-// Seuil courant du curseur de sensibilite (0 si absent).
+// Le curseur exprime la SENSIBILITE (haut = detecte tout). Le seuil de confiance retenu
+// est donc l'INVERSE : threshold = 1 - sensibilite. Absent => sensibilite max => seuil 0.
 function getConfidenceThreshold() {
     const el = document.getElementById('confidenceThreshold');
     const v = el ? parseFloat(el.value) : NaN;
-    return isNaN(v) ? 0 : v;
+    return isNaN(v) ? 0 : (1 - v);
 }
 
 // Filtre les detections selon le seuil, puis rend (panneau v151 ou fallback badges).

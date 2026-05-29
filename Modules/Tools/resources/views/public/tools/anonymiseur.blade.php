@@ -178,7 +178,7 @@
                     <div class="anonymiseur-custom-control">
                         <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" aria-describedby="confidenceHint">
                     </div>
-                    <small id="confidenceHint" class="anonymiseur-custom-hint">{{ __('Plus haut = moins de fausses alertes') }}</small>
+                    <small id="confidenceHint" class="anonymiseur-custom-hint">{{ __('Plus haut = détecte tout · plus bas = seulement les plus certaines') }}</small>
                 </div>
 
                 <div class="anonymiseur-custom-field">
