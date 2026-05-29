@@ -266,8 +266,8 @@
                             <h2 class="panel-title">Règles actives</h2>
                         </div>
                         <div class="stats-bar">
-                            <span class="stat-item"><strong id="statRules">0</strong> règles</span>
-                            <span class="stat-item"><strong id="statReplacements">0</strong> remplacements</span>
+                            <span class="stat-item" title="{{ __('Nombre total de règles d\'anonymisation enregistrées (défilez la liste pour toutes les voir)') }}"><strong id="statRules">0</strong> règles</span>
+                            <span class="stat-item" title="{{ __('Nombre de correspondances trouvées dans votre texte actuel') }}"><strong id="statReplacements">0</strong> remplacements</span>
                         </div>
                         <div id="rulesList" class="rules-list">
                             <div class="empty-state">

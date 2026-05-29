@@ -633,19 +633,29 @@ function renderRules() {
         return;
     }
 
-    container.innerHTML = AppState.rules.map(rule => `
-        <div class="rule-item" data-id="${rule.id}">
+    const _srcTxt = document.getElementById('sourceText')?.innerText || '';
+    const _hasSrc = _srcTxt.trim().length > 0;
+    container.innerHTML = AppState.rules.map(rule => {
+        let _active = true;
+        if (_hasSrc) {
+            try { _active = createBoundedRegex(rule.original, 'gi').test(_srcTxt); } catch (e) { _active = true; }
+        }
+        const _inactive = _hasSrc && !_active;
+        const _badge = _inactive ? '<span class="rule-inactive-badge" title="Cette règle ne correspond à aucun texte dans le document actuel">absente du texte</span>' : '';
+        return `
+        <div class="rule-item${_inactive ? ' rule-item--inactive' : ''}" data-id="${rule.id}">
             <div class="rule-icon ${rule.category}">${getCategoryIcon(rule.category)}</div>
             <div class="rule-content">
                 <div class="rule-original">${escapeHtml(rule.original)}</div>
                 <div class="rule-replacement">-> ${escapeHtml(rule.replacement)}</div>
+                ${_badge}
             </div>
             <div class="rule-actions">
                 <button onclick="editRule('${rule.id}')" title="Modifier">✏️</button>
                 <button onclick="deleteRule('${rule.id}')" title="Supprimer">🗑️</button>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function editRule(id) {

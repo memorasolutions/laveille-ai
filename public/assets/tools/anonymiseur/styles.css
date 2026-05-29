@@ -690,10 +690,18 @@ body {
 }
 
 .rules-list {
-    flex: 1;
+    flex: 1 1 auto;
+    max-height: min(60vh, 520px);
     overflow-y: auto;
     padding: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 transparent;
 }
+.rules-list::-webkit-scrollbar { width: 10px; }
+.rules-list::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+.rules-list::-webkit-scrollbar-track { background: transparent; }
+.rule-item.rule-item--inactive { opacity: 0.5; }
+.rule-inactive-badge { display: inline-block; margin-top: 2px; font-size: 0.68rem; line-height: 1.4; padding: 0 6px; border-radius: 999px; background: #f1f5f9; color: #64748b; }
 
 .rule-item {
     display: flex;
