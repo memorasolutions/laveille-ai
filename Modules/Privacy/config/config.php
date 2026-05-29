@@ -31,7 +31,7 @@ return [
     */
     'documents' => [
         'privacy_policy' => [
-            'version' => '3.1',
+            'version' => '3.2',
             'url' => '/privacy-policy',
             'updated_at' => '2026-05-29',
         ],
@@ -280,6 +280,6 @@ return [
     */
     'minors' => [
         'eu_age' => 16,
-        'canada_age' => 13,
+        'canada_age' => 14, // Loi 25 (P-39.1) art. 14 : consentement parental requis sous 14 ans
     ],
 ];

@@ -293,7 +293,7 @@
                             </p>
 
                             <h3 id="minors">{{ __('21. Mineurs') }}</h3>
-                            <p>{{ __('Conformément à l\'article 14.1 de la Loi sur la protection des renseignements personnels dans le secteur privé (RLRQ c P-39.1), nos services ne sont pas destinés aux personnes de moins de 14 ans. Nous ne collectons pas sciemment de données auprès de mineurs sans le consentement parental requis par la loi applicable.') }}</p>
+                            <p>{{ __('Notre service n\'est pas destiné aux enfants. Conformément à l\'article 14 de la Loi sur la protection des renseignements personnels dans le secteur privé (RLRQ, c. P-39.1), le consentement au traitement des renseignements personnels d\'un mineur de moins de 14 ans doit être donné par le titulaire de l\'autorité parentale ou le tuteur; à partir de 14 ans, le mineur peut consentir lui-même. Toutefois, nos conditions d\'utilisation prévoient qu\'il faut avoir au moins 16 ans pour créer un compte sur notre site, et au moins 18 ans — ou détenir l\'autorisation d\'un parent ou tuteur — pour effectuer un achat dans notre boutique en ligne. Nous ne recueillons pas sciemment de renseignements personnels auprès d\'un mineur n\'ayant pas atteint l\'âge requis sans le consentement parental exigé par la loi, et nous supprimerons promptement tout renseignement ainsi recueilli dès que nous en serons informés.') }}</p>
 
                             <h3 id="contact">{{ __('22. Contact, DPO et autorités de contrôle') }}</h3>
                             <p>{{ __('Pour toute question ou exercice de vos droits :') }}</p>
