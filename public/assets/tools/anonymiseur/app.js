@@ -687,6 +687,9 @@ function editRule(id) {
 function detectPII() {
     const text = document.getElementById('sourceText')?.innerText || '';
     const PRIORITY = { ramq: 100, creditCard: 90, nas: 80, postalCA: 70, email: 60, phoneCA: 50, money: 40, date: 30, properName: 20 };
+    // Score de confiance par detecteur (0-1). Calibre pour que le seuil par defaut 0.6 laisse TOUT passer
+    // (zero regression) ; MONTER le curseur retire d'abord les heuristiques bruyantes (nom, date, montant).
+    const CONFIDENCE = { ramq: 0.9, creditCard: 0.95, nas: 0.7, postalCA: 0.8, email: 0.95, phoneCA: 0.8, money: 0.6, date: 0.6, properName: 0.6, iban: 0.95, swift: 0.85, vat: 0.7, nirFr: 0.9, dniNie: 0.85, codiceFiscale: 0.85, ipv4: 0.8, ipv6: 0.8, mac: 0.85, url: 0.7, phoneEU: 0.8, adresseCivique: 0.6 };
 
     // Collecte POSITIONNELLE de tous les candidats (+ validation éventuelle, ex. Luhn).
     const candidates = [];
@@ -702,7 +705,8 @@ function detectPII() {
                 text: norm,
                 category: pattern.category,
                 label: pattern.label,
-                priority: (pattern.priority != null ? pattern.priority : (PRIORITY[name] || 0))
+                priority: (pattern.priority != null ? pattern.priority : (PRIORITY[name] || 0)),
+                confidence: (pattern.confidence != null ? pattern.confidence : (CONFIDENCE[name] != null ? CONFIDENCE[name] : (pattern.validate ? 0.9 : 0.6)))
             });
         }
     }
@@ -724,17 +728,36 @@ function detectPII() {
         const key = c.text.toLowerCase();
         if (alreadyDetected.has(key)) continue;
         alreadyDetected.add(key);
-        detections.push({ text: c.text, category: c.category, label: c.label });
+        detections.push({ text: c.text, category: c.category, label: c.label, confidence: c.confidence });
     }
 
-    AppState.detections = detections;
+    AppState.detectionsAll = detections;
+    lvRenderDetectionsFiltered();
+}
+
+// Seuil courant du curseur de sensibilite (0 si absent).
+function getConfidenceThreshold() {
+    const el = document.getElementById('confidenceThreshold');
+    const v = el ? parseFloat(el.value) : NaN;
+    return isNaN(v) ? 0 : v;
+}
+
+// Filtre les detections selon le seuil, puis rend (panneau v151 ou fallback badges).
+// Les termes deja regles (anonymises) sont TOUJOURS conserves, peu importe leur confiance.
+function lvRenderDetectionsFiltered() {
+    const all = AppState.detectionsAll || [];
+    const threshold = getConfidenceThreshold();
+    const ruled = new Set((AppState.rules || []).map(r => (r.original || '').toLowerCase()));
+    const shown = all.filter(d => (d.confidence == null || d.confidence >= threshold) || ruled.has((d.text || '').toLowerCase()));
+    AppState.detections = shown;
     if (typeof window.lvUpdateDetections === 'function') {
-        window.lvUpdateDetections(detections);
+        window.lvUpdateDetections(shown);
     } else {
-        renderDetections(detections);
-        if (detections.length > 0) {
-            document.getElementById('detectionsBar').classList.remove('hidden');
-            showToast(`${detections.length} elements detectes`, 'success');
+        renderDetections(shown);
+        if (shown.length > 0) {
+            const bar = document.getElementById('detectionsBar');
+            if (bar) bar.classList.remove('hidden');
+            showToast(`${shown.length} elements detectes`, 'success');
         } else {
             showToast('Aucun element detecte', 'warning');
         }
@@ -1338,6 +1361,12 @@ function init() {
     }
 
     document.getElementById('btnDetect').addEventListener('click', detectPII);
+    const _confSlider = document.getElementById('confidenceThreshold');
+    if (_confSlider) {
+        _confSlider.addEventListener('input', () => {
+            if (AppState.detectionsAll && AppState.detectionsAll.length) lvRenderDetectionsFiltered();
+        });
+    }
     document.getElementById('btnClear').addEventListener('click', () => {
         sourceText.innerText = '';
         document.getElementById('charCount').textContent = '0';
