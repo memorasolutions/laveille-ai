@@ -41,9 +41,9 @@ return [
             'updated_at' => '2026-05-29',
         ],
         'cookie_policy' => [
-            'version' => '2.0',
+            'version' => '2.1',
             'url' => '/cookie-policy',
-            'updated_at' => '2026-03-29',
+            'updated_at' => '2026-05-29',
         ],
     ],
 

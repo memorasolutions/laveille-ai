@@ -39,6 +39,8 @@
                                     <li><a href="#consent-duration">{{ __('Durée du consentement') }}</a></li>
                                     <li><a href="#third-party">{{ __('Cookies tiers') }}</a></li>
                                     <li><a href="#ga4">{{ __('Google Analytics 4 et mode consentement') }}</a></li>
+                                    <li><a href="#loi25">{{ __('Fondement légal au Québec (Loi 25)') }}</a></li>
+                                    <li><a href="#gpc">{{ __('Signal Global Privacy Control (GPC)') }}</a></li>
                                     <li><a href="#eu-cookies">{{ __('Droits spécifiques des visiteurs européens') }}</a></li>
                                     <li><a href="#updates">{{ __('Mises à jour de cette politique') }}</a></li>
                                     <li><a href="#contact">{{ __('Contact') }}</a></li>
@@ -132,13 +134,19 @@
                             <h3 id="ga4">{{ __('7. Google Analytics 4 et mode consentement') }}</h3>
                             <p>{{ __('Ce site utilise Google Analytics 4 (GA4) en mode consentement v2. Aucun cookie à finalité analytique n\'est déposé sans votre consentement explicite (opt-in). Votre adresse IP est anonymisée par défaut, conformément aux recommandations de la CNIL. Les données collectées sont conservées au maximum 14 mois. Le traitement des données est effectué dans le cadre du Data Processing Framework UE-États-Unis et des clauses contractuelles types (SCC), garantissant ainsi une conformité au RGPD.') }}</p>
 
-                            <h3 id="eu-cookies">{{ __('8. Droits spécifiques des visiteurs européens') }}</h3>
+                            <h3 id="loi25">{{ __('8. Fondement légal au Québec (Loi 25)') }}</h3>
+                            <p>{{ __('Conformément à la Loi 25 sur la protection des renseignements personnels, notre site dépose uniquement les témoins de connexion strictement nécessaires au fonctionnement du service sans requérir votre consentement. En revanche, les témoins utilisés à des fins de statistiques, de marketing ou de profilage — c\'est-à-dire ceux qui permettent de vous identifier, de vous localiser ou de dresser un profil — sont désactivés par défaut. Ils ne sont activés qu\'après votre consentement explicite, donné par catégorie. Vous êtes clairement informé des moyens de les activer ou de les désactiver à tout moment au moyen de notre outil de gestion des témoins. Cette approche respecte pleinement les exigences de la Loi 25.') }}</p>
+
+                            <h3 id="gpc">{{ __('9. Signal Global Privacy Control (GPC)') }}</h3>
+                            <p>{{ __('Certains navigateurs émettent un signal appelé Global Privacy Control (GPC), conçu pour exprimer votre choix en matière de confidentialité. Ce signal est juridiquement contraignant dans certaines juridictions américaines (notamment la Californie, le Colorado, le Connecticut et le New Jersey) à compter de 2026. Bien que ni la Loi 25 ni la Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) n\'imposent de le respecter au Québec ou ailleurs au Canada en 2026, nous choisissons d\'en tenir compte volontairement, par souci de transparence et de respect de votre autonomie. Votre contrôle demeure en tout temps assuré par notre bannière de gestion des témoins, où vous pouvez ajuster vos préférences.') }}</p>
+
+                            <h3 id="eu-cookies">{{ __('10. Droits spécifiques des visiteurs européens') }}</h3>
                             <p>{{ __('Conformément au RGPD et à la Directive ePrivacy (2002/58/CE), les cookies non essentiels ne sont utilisés qu\'après votre consentement préalable. Ce consentement peut être refusé aussi facilement qu\'il peut être accepté. Aucun « cookie wall » n\'est mis en place : l\'accès au site ne dépend pas de l\'acceptation des cookies non essentiels. Vous pouvez retirer votre consentement à tout moment via le bouton « Gérer les témoins » présent sur le site. Vous disposez également du droit d\'introduire une réclamation auprès d\'une autorité de contrôle compétente, telle que la CNIL en France.') }}</p>
 
-                            <h3 id="updates">{{ __('9. Mises à jour de cette politique') }}</h3>
+                            <h3 id="updates">{{ __('11. Mises à jour de cette politique') }}</h3>
                             <p>{{ __('Cette politique peut être mise à jour pour refléter les changements technologiques, légaux ou opérationnels. La version et la date de mise à jour en haut de cette page indiquent la version en vigueur.') }}</p>
 
-                            <h3 id="contact">{{ __('10. Contact') }}</h3>
+                            <h3 id="contact">{{ __('12. Contact') }}</h3>
                             <p>{{ __('Pour toute question concernant cette politique des cookies :') }}</p>
                             <p>
                                 <strong>{{ $company['name'] }}</strong><br>

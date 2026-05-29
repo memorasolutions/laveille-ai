@@ -17,7 +17,7 @@
                     <div class="post">
                         <h2>{{ __('Conditions générales de vente') }}</h2>
                         <p style="color: #999; font-size: 13px;">
-                            <strong>{{ __('Date d\'entrée en vigueur') }}&nbsp;:</strong> {{ __('8 avril 2026') }}
+                            <strong>{{ __('Date d\'entrée en vigueur') }}&nbsp;:</strong> {{ __('29 mai 2026') }}
                         </p>
 
                         <div class="entry-details" style="line-height: 1.8;">
@@ -67,9 +67,8 @@
 
                             {{-- 5. Droit de résolution --}}
                             <h3 id="resolution">{{ __('5. Droit de résolution') }}</h3>
-                            <p>{{ __('Pour les contrats conclus à distance, le consommateur dispose d\'un délai de 10 jours pour résoudre le contrat après réception du bien (article 54.5 LPC).') }}</p>
-                            <p><strong>{{ __('Exception pour les produits POD') }} :</strong> {{ __('ce droit de résolution ne s\'applique pas aux biens fabriqués selon les spécifications du consommateur, ce qui est le cas de nos produits imprimés à la demande.') }}</p>
-                            <p>{{ __('Si les informations obligatoires n\'ont pas été fournies, le délai est prolongé à 45 jours (article 54.7 LPC).') }}</p>
+                            <p>{{ __('Conformément aux articles 54.1 à 54.16 de la Loi sur la protection du consommateur (LPC), vous bénéficiez d\'un droit de résolution dans des cas précis. Si nous ne remplissons pas nos obligations — notamment en omettant de vous remettre un exemplaire du contrat dans les 15 jours suivant sa conclusion (article 54.7 LPC), en ne respectant pas nos devoirs d\'information (article 54.4 LPC) ou en livrant un produit non conforme (article 54.6 LPC) — vous pouvez résoudre le contrat dans les 7 jours suivant la réception de l\'exemplaire du contrat, ou dans les 30 jours si cet exemplaire ne vous a pas été transmis à temps (article 54.8 LPC). De plus, si nous ne livrons pas votre commande dans les 30 jours suivant la date convenue ou, à défaut, suivant la conclusion du contrat, vous pouvez également résoudre celui-ci (article 54.9 LPC).') }}</p>
+                            <p>{{ __('La LPC ne prévoit aucun droit général d\'annulation pour simple changement d\'avis. Toutefois, le fait qu\'un produit soit personnalisé ou fabriqué selon vos spécifications ne prive jamais d\'effet les droits de résolution prévus par la loi en cas de manquement du commerçant à ses obligations légales.') }}</p>
 
                             {{-- 6. Garantie légale --}}
                             <h3 id="garantie">{{ __('6. Garantie légale') }}</h3>
@@ -78,16 +77,17 @@
                             {{-- 7. Remboursement et annulation --}}
                             <h3 id="remboursement">{{ __('7. Remboursement et annulation') }}</h3>
                             <ul>
-                                <li><strong>{{ __('Dépassement du délai') }} :</strong> {{ __('remboursement intégral (article 54.4 LPC).') }}</li>
-                                <li><strong>{{ __('Produit défectueux') }} :</strong> {{ __('remplacement ou remboursement, sur présentation de photos claires du problème dans les 7 jours suivant la réception.') }}</li>
-                                <li><strong>{{ __('Changement d\'avis') }} :</strong> {{ __('les produits fabriqués sur commande (POD) ne sont pas remboursables sauf défaut.') }}</li>
+                                <li><strong>{{ __('Dépassement du délai de livraison') }} :</strong> {{ __('remboursement intégral.') }}</li>
+                                <li><strong>{{ __('Produit défectueux ou non conforme') }} :</strong> {{ __('remplacement ou remboursement au titre de la garantie légale (articles 37 et 38 LPC), sur présentation de photos claires du problème dans un délai raisonnable suivant la réception.') }}</li>
+                                <li><strong>{{ __('Résolution conforme à la LPC') }} :</strong> {{ __('remboursement intégral lorsque vous exercez un droit de résolution reconnu par la loi (articles 54.8 et 54.9 LPC).') }}</li>
+                                <li><strong>{{ __('Changement d\'avis') }} :</strong> {{ __('un produit fabriqué sur commande (POD) n\'est pas repris ni remboursé pour un simple changement d\'avis, sauf dans la mesure où la loi l\'exige; cette pratique ne limite jamais la garantie légale ni les droits de résolution prévus par la LPC.') }}</li>
                             </ul>
-                            <p>{{ __('Aucuns frais d\'annulation ne seront facturés pour une annulation conforme aux présentes conditions.') }}</p>
+                            <p>{{ __('Aucuns frais d\'annulation ne seront facturés pour une annulation effectuée conformément à la loi.') }}</p>
 
                             {{-- 8. Responsabilité --}}
                             <h3 id="responsabilite">{{ __('8. Responsabilité') }}</h3>
-                            <p>{{ __('La responsabilité du vendeur est limitée au prix payé pour le produit concerné. Le vendeur exclut toute responsabilité pour les dommages indirects, spéciaux ou consécutifs. La fabrication est assurée par un partenaire tiers.') }}</p>
-                            <p>{{ __('Conformément à l\'article 1474 du Code civil du Québec, le vendeur ne peut exclure sa responsabilité pour faute intentionnelle ou faute lourde.') }}</p>
+                            <p>{{ __('À l\'égard des consommateurs, rien dans les présentes conditions ne limite la responsabilité du vendeur ni les recours que vous confèrent la Loi sur la protection du consommateur et le Code civil du Québec. La garantie légale de qualité et de durabilité prévue aux articles 37 et 38 de la LPC s\'applique pleinement et ne peut être exclue. Conformément à l\'article 10 de la LPC, le vendeur ne peut se dégager de sa responsabilité pour son propre fait ou celui de ses préposés ou mandataires.') }}</p>
+                            <p>{{ __('Dans les seuls cas où la relation contractuelle n\'est pas visée par la LPC (notamment hors contexte de consommation), la responsabilité du vendeur est limitée au prix payé pour les biens ou services concernés, et les dommages indirects, spéciaux, accessoires ou consécutifs sont exclus. La fabrication est assurée par un partenaire tiers. En tout état de cause et conformément à l\'article 1474 du Code civil du Québec, le vendeur n\'exclut jamais sa responsabilité en cas de préjudice corporel ou moral, ni en cas de faute lourde ou intentionnelle. Toute clause abusive au sens de l\'article 1437 du Code civil du Québec est réputée non écrite.') }}</p>
 
                             {{-- 9. Force majeure --}}
                             <h3 id="force-majeure">{{ __('9. Force majeure') }}</h3>
