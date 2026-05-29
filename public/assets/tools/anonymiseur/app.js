@@ -1310,8 +1310,36 @@ window.anonymizeTextValue = anonymizeTextValue;
 // ============================================
 // INITIALISATION
 // ============================================
+// Brouillon éphémère du texte source : sessionStorage (survit au rafraîchissement, effacé à la
+// fermeture de l'onglet). 100% local, jamais transmis au serveur (conforme Loi 25). Purgé par
+// « Effacer » et « Tout réinitialiser ».
+const SOURCE_DRAFT_KEY = 'anonymizer_source_draft_v1';
+function persistSourceDraft() {
+    try {
+        const ed = window.tiptapAnonymiseurEditor;
+        if (!ed) return;
+        if (ed.getText().trim()) sessionStorage.setItem(SOURCE_DRAFT_KEY, ed.getHTML());
+        else sessionStorage.removeItem(SOURCE_DRAFT_KEY);
+    } catch (e) {}
+}
+function clearSourceDraft() { try { sessionStorage.removeItem(SOURCE_DRAFT_KEY); } catch (e) {} }
+function restoreSourceDraft() {
+    let html = '';
+    try { html = sessionStorage.getItem(SOURCE_DRAFT_KEY) || ''; } catch (e) {}
+    if (!html) return;
+    const apply = () => {
+        try { window.tiptapAnonymiseurEditor.commands.setContent(html); } catch (e) { return; }
+        if (typeof detectPII === 'function') detectPII();
+        if (typeof showToast === 'function') showToast('Brouillon restauré · effacé en fermant l’onglet', 'info');
+    };
+    if (window.tiptapAnonymiseurEditor) apply();
+    else window.addEventListener('tiptap-anonymiseur:ready', apply, { once: true });
+}
+
 function init() {
     loadRules();
+    restoreSourceDraft();
+    window.addEventListener('anonymiseur:text-change', persistSourceDraft);
     checkFullpageParam();
     document.getElementById('btnFullpage').addEventListener('click', toggleFullpage);
 
@@ -1389,6 +1417,7 @@ function init() {
     }
     document.getElementById('btnClear').addEventListener('click', () => {
         sourceText.innerText = '';
+        clearSourceDraft();
         document.getElementById('charCount').textContent = '0';
         document.getElementById('detectionsBar').classList.add('hidden');
         updateAnonymizedText();
@@ -1408,6 +1437,7 @@ function init() {
             AppState.detections = [];
             AppState.detectionsAll = [];
             saveRules();
+            clearSourceDraft();
             try { localStorage.removeItem('anonymizer_rules_v2'); localStorage.removeItem('anonymiseur_audit_v1'); } catch (e) {}
             // Sorties
             ['anonymizedText', 'restoredText', 'aiResponse'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
