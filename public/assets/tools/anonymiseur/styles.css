@@ -2447,3 +2447,32 @@ body {
   flex-shrink: 0 !important;
   pointer-events: auto !important;
 }
+
+/* S133 — restauration IA (étape 3) : rapport + aperçu surligné */
+.lv-restore-report {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+.lv-restore-report small { color: var(--text-secondary, #475569); }
+#restoredPreview {
+  min-height: 120px;
+  max-height: 360px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.75rem;
+  background: #fff;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius, 8px);
+}
+#restoredPreview:empty { display: none; }
+mark.lv-restored-hit {
+  background: color-mix(in srgb, var(--primary, #0B7285) 22%, transparent);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 600;
+}

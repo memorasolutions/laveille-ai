@@ -325,7 +325,7 @@
                     if (d._ignored || isDetectionDone(d)) return;
                     var repl = '';
                     try {
-                        repl = generateFakeData(d.category, d.text) || '';
+                        repl = (typeof pickReplacement === 'function' ? pickReplacement(d.category, d.text) : generateFakeData(d.category, d.text)) || '';
                     } catch (e) { }
                     if (!repl) {
                         repl = '[' + d.category.toUpperCase() + ']';

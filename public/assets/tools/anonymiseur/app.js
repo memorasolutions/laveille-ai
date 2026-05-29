@@ -403,6 +403,56 @@ function maskDigitsPreserving(original) {
 // ============================================
 // GENERATION DE DONNEES FICTIVES
 // ============================================
+// S133 — Mode « jetons balisés stables » (A) : restauration la plus fiable.
+function getMaskMode() {
+  const select = document.getElementById('maskMode');
+  return select ? select.value : 'pseudo';
+}
+
+function categoryTokenLabel(category) {
+  const mapping = {
+    identity: 'PERSONNE',
+    contact: 'CONTACT',
+    location: 'LIEU',
+    id: 'ID',
+    money: 'MONTANT',
+    date: 'DATE',
+    org: 'ORG',
+    other: 'INFO'
+  };
+  return mapping[category] || 'INFO';
+}
+
+function getStableToken(category, original) {
+  const label = categoryTokenLabel(category);
+  const normalizedOriginal = original.trim().toLowerCase();
+  const regex = new RegExp(`^\\[${label}_(\\d+)\\]$`);
+
+  for (const rule of AppState.rules) {
+    if (rule.original.trim().toLowerCase() === normalizedOriginal && regex.test(rule.replacement)) {
+      return rule.replacement;
+    }
+  }
+
+  let maxN = 0;
+  for (const rule of AppState.rules) {
+    const match = rule.replacement.match(regex);
+    if (match) {
+      const n = parseInt(match[1], 10);
+      if (n > maxN) maxN = n;
+    }
+  }
+
+  return `[${label}_${maxN + 1}]`;
+}
+
+function pickReplacement(category, original) {
+  if (getMaskMode() === 'tokens') {
+    return getStableToken(category, original);
+  }
+  return generateFakeData(category, original);
+}
+
 function generateFakeData(category, original = '', gender = null) {
     switch (category) {
         case 'identity':
@@ -814,7 +864,7 @@ function addDetection(index) {
             generateFakeIdentity();
         } else {
             document.getElementById('inputOriginal').value = text;
-            const replacement = generateFakeData(category, text);
+            const replacement = pickReplacement(category, text);
             document.getElementById('inputReplacement').value = replacement;
         }
 
@@ -984,23 +1034,74 @@ function updateStats() {
 // ============================================
 function restoreOriginalData() {
     const aiResponse = document.getElementById('aiResponse').value;
-    let restoredText = aiResponse;
+    if (!aiResponse.trim()) {
+        showToast('Collez d\'abord la réponse de l\'IA', 'warning');
+        return;
+    }
 
+    // Trier les règles par longueur décroissante de replacement (évite les remplacements partiels)
     const sortedRules = [...AppState.rules].sort((a, b) => b.replacement.length - a.replacement.length);
+
+    const totalRules = sortedRules.length;
+    let foundCount = 0;
+    const notFoundList = [];
+    let restoredText = aiResponse;
 
     for (const rule of sortedRules) {
         const regex = createBoundedRegex(rule.replacement, 'gi');
-        restoredText = restoredText.replace(regex, rule.original);
+        const matches = restoredText.match(regex);
+        const count = matches ? matches.length : 0;
+        if (count > 0) {
+            foundCount += 1;
+            restoredText = restoredText.replace(regex, rule.original);
+        } else {
+            notFoundList.push(rule.original);
+        }
     }
 
-    document.getElementById('restoredText').value = restoredText;
+    // Écrire le résultat (onglet étape 2 + zone dédiée étape 3)
+    const legacy = document.getElementById('restoredText');
+    if (legacy) legacy.value = restoredText;
+    const step3Textarea = document.getElementById('restoredTextStep3');
+    if (step3Textarea) step3Textarea.value = restoredText;
 
-    document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.result-content').forEach(c => c.classList.remove('active'));
-    document.querySelector('[data-tab="output"]').classList.add('active');
-    document.querySelector('[data-tab-content="output"]').classList.add('active');
+    // Rapport de restauration (C)
+    const reportEl = document.getElementById('restoreReport');
+    if (reportEl) {
+        let reportHtml = `✅ ${foundCount} valeur(s) restaurée(s) sur ${totalRules} règle(s).`;
+        if (notFoundList.length > 0) {
+            const escapedList = notFoundList.map(v => escapeHtml(v)).join(', ');
+            reportHtml += `<br>ℹ️ ${notFoundList.length} valeur(s) anonymisée(s) non retrouvée(s) dans la réponse (l'IA les a peut-être reformulées ou omises).<br><small>Valeurs concernées : ${escapedList}</small>`;
+        }
+        reportEl.innerHTML = reportHtml;
+    }
 
-    showToast('Donnees restaurees', 'success');
+    // Aperçu surligné (D) — entoure les vraies valeurs réinjectées
+    const previewEl = document.getElementById('restoredPreview');
+    if (previewEl) {
+        let previewText = escapeHtml(restoredText);
+        const foundOriginals = sortedRules
+            .filter(rule => createBoundedRegex(rule.replacement, 'gi').test(aiResponse))
+            .map(rule => rule.original)
+            .sort((a, b) => b.length - a.length);
+        for (const original of foundOriginals) {
+            const safe = escapeHtml(original).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            if (!safe) continue;
+            previewText = previewText.replace(new RegExp(`(${safe})`, 'g'), '<mark class="lv-restored-hit">$1</mark>');
+        }
+        previewEl.innerHTML = previewText;
+    }
+
+    showToast('Texte restauré', 'success');
+}
+
+function copyMappingTable() {
+    if (!AppState.rules || AppState.rules.length === 0) {
+        showToast('Aucune correspondance à copier', 'warning');
+        return;
+    }
+    const mappingText = AppState.rules.map(rule => `${rule.replacement} => ${rule.original}`).join('\n');
+    copyToClipboard(mappingText, 'Tableau de correspondance copié');
 }
 
 // ============================================
@@ -1494,7 +1595,7 @@ function init() {
                 const fullName = [firstName, lastName].filter(Boolean).join(' ');
                 if (fullName && !document.getElementById('inputOriginal').value) {
                     document.getElementById('inputOriginal').value = fullName;
-                    document.getElementById('inputReplacement').value = generateFakeData(newCategory, fullName);
+                    document.getElementById('inputReplacement').value = pickReplacement(newCategory, fullName);
                 }
             } else if (previousCategory !== 'identity' && newCategory === 'identity') {
                 const original = document.getElementById('inputOriginal').value.trim();
@@ -1541,7 +1642,7 @@ function init() {
             displayVariants();
             const repl = document.getElementById('inputReplacement');
             if (repl && !repl.value.trim()) {
-                repl.value = generateFakeData(AppState.selectedCategory, inputOriginalEl.value.trim());
+                repl.value = pickReplacement(AppState.selectedCategory, inputOriginalEl.value.trim());
             }
         });
     }
@@ -1617,6 +1718,10 @@ function init() {
     document.getElementById('btnCopyRestored').addEventListener('click', () => {
         const text = document.getElementById('restoredText').value;
         copyToClipboard(text, 'Texte restaure copie !');
+    });
+    document.getElementById('btnCopyMapping')?.addEventListener('click', copyMappingTable);
+    document.getElementById('btnCopyRestoredStep3')?.addEventListener('click', () => {
+        copyToClipboard(document.getElementById('restoredTextStep3').value, 'Texte restauré copié !');
     });
 
     document.addEventListener('keydown', (e) => {

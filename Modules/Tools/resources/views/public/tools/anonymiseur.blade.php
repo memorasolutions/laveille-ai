@@ -155,11 +155,12 @@
                 <div class="anonymiseur-custom-field">
                     <label for="maskMode" class="anonymiseur-custom-label">
                         <span>{{ __('Comment remplacer vos données') }}</span>
-                        <button type="button" class="ct-help-btn" data-help-key="anonym-modes" aria-label="{{ __('Aide : comprendre les 4 modes de remplacement') }}">?</button>
+                        <button type="button" class="ct-help-btn" data-help-key="anonym-modes" aria-label="{{ __('Aide : comprendre les modes de remplacement') }}">?</button>
                     </label>
                     <div class="anonymiseur-custom-control">
                         <select id="maskMode" class="form-input">
                             <option value="pseudo">🔄 {{ __('Faux noms similaires (recommandé pour ChatGPT/Claude/Gemini)') }}</option>
+                            <option value="tokens">🏷️ {{ __('Jetons balisés stables [PERSONNE_1] (restauration la plus fiable)') }}</option>
                             <option value="redaction">🗑️ {{ __('Effacer définitivement [SUPPRIMÉ]') }}</option>
                             <option value="hash">🔒 {{ __('Code unique irréversible (hash SHA-256)') }}</option>
                             <option value="fpe">🎲 {{ __('Brouillage format identique (avancé)') }}</option>
@@ -304,14 +305,36 @@
         </div>
 
         <div class="step-content" data-step-content="3">
+            <div class="lv-anonym-help" style="background:#E6F7F5;border:1px solid rgba(11,114,133,0.2);border-radius:var(--radius);padding:0.85rem 1.15rem;margin-bottom:1rem;font-size:0.92rem;line-height:1.6;color:var(--text-primary);">
+                🔁 <strong>{{ __('Comment récupérer vos vraies données') }}</strong>
+                <ol style="margin:0.5rem 0 0;padding-left:1.25rem;">
+                    <li>{{ __('Vous avez déjà anonymisé votre texte (étape 2) et collé la version anonymisée dans votre IA (ChatGPT, Claude, Gemini…).') }}</li>
+                    <li>{{ __('Copiez la réponse de l\'IA et collez-la ci-dessous.') }}</li>
+                    <li>{{ __('Cliquez sur « Restaurer mes vraies données » : les valeurs fictives redeviennent vos vraies données dans le résultat ci-dessous.') }}</li>
+                </ol>
+            </div>
             <section class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title">Réponse de l'IA</h2>
+                    <h2 class="panel-title">{{ __('Réponse de l\'IA à restaurer') }}</h2>
                 </div>
                 <div class="panel-content">
-                    <textarea id="aiResponse" class="source-content" placeholder="Collez ici la réponse de l'IA contenant des termes anonymisés..." aria-label="Réponse de l'IA"></textarea>
+                    <textarea id="aiResponse" class="source-content" placeholder="{{ __('Collez ici la réponse de l\'IA contenant les valeurs anonymisées…') }}" aria-label="{{ __('Réponse de l\'IA à restaurer') }}"></textarea>
                     <div class="panel-actions">
-                        <button id="btnRestore" class="btn btn-primary">Restaurer les données originales</button>
+                        <button id="btnRestore" class="btn btn-primary">🔓 {{ __('Restaurer mes vraies données') }}</button>
+                        <button id="btnCopyMapping" class="btn btn-secondary" title="{{ __('Copier la liste « valeur fictive → vraie valeur »') }}">📋 {{ __('Copier le tableau de correspondance') }}</button>
+                    </div>
+                </div>
+            </section>
+            <section class="panel" style="margin-top:1rem;">
+                <div class="panel-header">
+                    <h2 class="panel-title">{{ __('Résultat restauré') }}</h2>
+                </div>
+                <div class="panel-content">
+                    <div id="restoreReport" class="lv-restore-report" role="status" aria-live="polite"></div>
+                    <div id="restoredPreview" class="anonymized-output" aria-label="{{ __('Aperçu du texte restauré, vos vraies données surlignées') }}"></div>
+                    <textarea id="restoredTextStep3" class="anonymized-output" readonly aria-label="{{ __('Texte restauré (brut, à copier)') }}"></textarea>
+                    <div class="panel-actions">
+                        <button id="btnCopyRestoredStep3" class="btn btn-primary">{{ __('Copier le résultat') }}</button>
                     </div>
                 </div>
             </section>
