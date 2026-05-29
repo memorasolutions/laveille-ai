@@ -9,7 +9,8 @@
  * Fallback gracieux : si CDN inaccessible, regex seules continuent.
  */
 (function () {
-    const COMPROMISE_CDN = 'https://unpkg.com/compromise@14.14.0/builds/compromise.min.js';
+    // Auto-hébergé sur laveille.ai (plus de CDN externe) : aucune connexion tierce, fonctionne hors-ligne (PWA). compromise 14.14.0.
+    const COMPROMISE_CDN = '/assets/tools/anonymiseur/compromise.min.js?v=14.14.0';
     let compromiseLoaded = false;
     let compromiseLoading = null;
     let nlp = null;
