@@ -2580,6 +2580,13 @@ class LivreParentsGlossarySeeder extends Seeder
                 $term->narrower_slugs = $data['narrower'];
             }
 
+            // Auto-attache l'image hero si le fichier existe (déposé dans public/images/glossaire/<slug>.webp).
+            // Idempotent : ne touche pas hero_image tant que l'image n'est pas déployée.
+            $heroWebp = 'images/glossaire/'.$data['slug'].'.webp';
+            if (file_exists(public_path($heroWebp))) {
+                $term->hero_image = $heroWebp;
+            }
+
             $term->save();
         }
     }
