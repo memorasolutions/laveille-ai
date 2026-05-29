@@ -168,20 +168,6 @@
                 </div>
 
                 <div class="anonymiseur-custom-field">
-                    <label for="confidenceThreshold" class="anonymiseur-custom-label">
-                        <span style="display:flex;align-items:center;gap:0.5rem;">
-                            <span>{{ __('Sensibilité de détection') }}</span>
-                            <button type="button" class="ct-help-btn" data-help-key="anonym-sensitivity" aria-label="{{ __('Aide : comprendre la sensibilité de détection') }}">?</button>
-                        </span>
-                        <span id="confidenceThresholdValue" class="anonymiseur-custom-value">60 %</span>
-                    </label>
-                    <div class="anonymiseur-custom-control">
-                        <input type="range" id="confidenceThreshold" min="0" max="1" step="0.05" value="0.6" aria-describedby="confidenceHint">
-                    </div>
-                    <small id="confidenceHint" class="anonymiseur-custom-hint">{{ __('Plus haut = détecte tout · plus bas = seulement les plus certaines') }}</small>
-                </div>
-
-                <div class="anonymiseur-custom-field">
                     <label for="encryptionEnabled" class="anonymiseur-custom-label" style="cursor:pointer;">
                         <span style="display:flex;align-items:center;gap:0.5rem;">
                             <input type="checkbox" id="encryptionEnabled" class="anonymiseur-custom-checkbox">

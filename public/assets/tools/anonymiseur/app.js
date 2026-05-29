@@ -201,6 +201,12 @@ const DetectionPatterns = {
     url: { regex: /\bhttps?:\/\/[^\s<>"']*[^\s<>"'.,;:!?)\]]/gi, category: 'other', label: 'URL', priority: 48 },
     phoneEU: { regex: /(?<![\d\w])\+(?:33|32|34|39|49|41|351|352)[\s.\-]?(?:\d[\s.\-]?){8,11}\d(?!\d)/g, category: 'contact', label: 'Téléphone (UE)', priority: 52 },
     adresseCivique: { regex: /\b\d{1,5}[,]?\s+(?:rue|avenue|av\.?|boulevard|boul\.?|blvd|chemin|ch\.?|route|rang|place|impasse|allée|all\.?|côte|montée)\s+[A-Za-zÀ-ÿ'’\-\s]{2,40}/gi, category: 'location', label: 'Adresse civique', priority: 45 },
+    labelledId: {
+        regex: /(?<=\b(?:dossier|matricule|référence|reference|réf|ref|transit|folio|police|contrat|facture|commande|client|adhérent|identifiant|permis|cmq|compte|institution|n[°o]|no)\b[\s.:#°nN\-]{0,5})\d[\d \-]{1,18}\d/gi,
+        category: 'id',
+        label: 'Identifiant',
+        priority: 85
+    },
     email: {
         regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
         category: 'contact',
@@ -228,7 +234,7 @@ const DetectionPatterns = {
         validate: function (s) { return luhn(s); }
     },
     date: {
-        regex: /\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}\s+(?:janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)\s+\d{4})\b/gi,
+        regex: /\b(?:\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}(?:er|re|e|ème|ᵉʳ?)?\s+(?:janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)\s+\d{4})\b/gi,
         category: 'date',
         label: 'Date'
     },
