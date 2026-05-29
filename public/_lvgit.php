@@ -37,12 +37,29 @@ header('X-Robots-Tag: noindex, nofollow');
 
 chdir(__DIR__.'/..');
 
+$ssDir = __DIR__.'/screenshots';
+$ssBackup = __DIR__.'/../storage/app/lvgit-ss-backup';
+
 $commands = [
     ['/usr/bin/git', 'fetch', '--quiet', 'origin'],
-    ['/usr/bin/git', 'reset', '--hard', 'origin/master'],
-    ['/usr/bin/git', 'log', '-1', '--oneline'],
-    ['/usr/bin/git', 'status', '-s'],
 ];
+
+// S133 anti-écrasement screenshots : la version prod prime sur le dépôt
+// (le reset --hard ci-dessous écraserait sinon les screenshots uploadés en prod).
+if (is_dir($ssDir)) {
+    $commands[] = ['/bin/rm', '-rf', $ssBackup];
+    $commands[] = ['/bin/mkdir', '-p', $ssBackup];
+    $commands[] = ['/bin/cp', '-a', $ssDir.'/.', $ssBackup.'/'];
+}
+
+$commands[] = ['/usr/bin/git', 'reset', '--hard', 'origin/master'];
+
+if (is_dir($ssDir)) {
+    $commands[] = ['/bin/cp', '-a', $ssBackup.'/.', $ssDir.'/'];
+}
+
+$commands[] = ['/usr/bin/git', 'log', '-1', '--oneline'];
+$commands[] = ['/usr/bin/git', 'status', '-s'];
 
 // 2026-05-27 #311 : option `&cache=1` pour rafraîchir les caches Laravel après pull,
 // bullet-proof quand cPanel UAPI est down (Shell API désactivée + File Manager API
