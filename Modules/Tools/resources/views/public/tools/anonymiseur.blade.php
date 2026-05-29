@@ -264,6 +264,7 @@
                     <div class="panel">
                         <div class="panel-header">
                             <h2 class="panel-title">Règles actives</h2>
+                            <button type="button" id="btnResetAll" class="btn-reset-all" title="{{ __('Tout remettre à zéro : efface le texte, les règles et les résultats sur cet appareil') }}">↺ {{ __('Tout réinitialiser') }}</button>
                         </div>
                         <div class="stats-bar">
                             <span class="stat-item" title="{{ __('Nombre total de règles d\'anonymisation enregistrées (défilez la liste pour toutes les voir)') }}"><strong id="statRules">0</strong> règles</span>

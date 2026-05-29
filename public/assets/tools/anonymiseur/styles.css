@@ -702,6 +702,10 @@ body {
 .rules-list::-webkit-scrollbar-track { background: transparent; }
 .rule-item.rule-item--inactive { opacity: 0.5; }
 .rule-inactive-badge { display: inline-block; margin-top: 2px; font-size: 0.68rem; line-height: 1.4; padding: 0 6px; border-radius: 999px; background: #f1f5f9; color: #64748b; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.btn-reset-all { flex: 0 0 auto; font-size: 0.78rem; font-weight: 600; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 5px 10px; cursor: pointer; transition: background .15s, border-color .15s; }
+.btn-reset-all:hover { background: #fee2e2; border-color: #f87171; }
+.btn-reset-all:focus-visible { outline: 3px solid var(--accent, #f59e0b); outline-offset: 2px; }
 
 .rule-item {
     display: flex;

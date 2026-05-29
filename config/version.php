@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.55.8 · 2026-05-29 · #313 feat(tools) anonymiseur — bouton « ↺ Tout réinitialiser » (demande user : « il faudrait un bouton de réinitialisation pour remettre à 0 »). Contexte : les RÈGLES (anonymizer_rules_v2), réglages et journal d'audit sont persistés en localStorage (reviennent au refresh, d'où l'accumulation), mais le TEXTE source n'est PAS persisté (éditeur vide au chargement) — d'où l'impression de « tout perdre » au refresh côté texte, alors que les règles s'accumulent. Ajout d'un bouton visible dans l'en-tête « Règles actives » (#btnResetAll) qui efface en une fois : texte source (editor.clearContent), règles + détections (AppState + localStorage anonymizer_rules_v2), journal audit (anonymiseur_audit_v1), sorties (anonymizedText/restoredText/aiResponse), compteurs et panneau de détections. Confirmation via showConfirmModal existant (modale du thème, PAS de confirm() natif, conforme règle user). Les réglages de détection gardent leur propre « ↺ Réinitialiser aux recommandés ». Style .btn-reset-all rouge doux + en-tête flex. Validé Playwright. Codename anonymizer-reset-all.
  *   1.55.7 · 2026-05-29 · #313 fix(tools) anonymiseur — interlignes excessifs dans le texte anonymisé (user « trop de retour de charriot »). Cause : Tiptap `editor.getText()` (lu par le shim #sourceText) utilise blockSeparator `\n\n` PAR DÉFAUT → une ligne vide entre CHAQUE paragraphe (test : 4 paragraphes = 6 \n), cumulé sur les paragraphes vides aux ruptures de section (4-5 lignes vides). Fix chirurgical (sans rebuild Vite, pour éviter le re-hash de tous les bundles) dans updateAnonymizedText : normalisation des suites de sauts de ligne avant écriture du textarea — `replace(/\n+/g, m => '\n'.repeat(min(2, max(1, floor(m.length/2)))))` → lignes adjacentes = 1 saut, rupture de section = 1 ligne vide max, jamais de suppression d'un saut isolé (hardbreak Shift+Enter préservé). Validé Playwright. Codename anonymizer-compact-linebreaks.
  *   1.55.6 · 2026-05-29 · #313 fix(tools) anonymiseur — panneau « Règles actives » : l'utilisateur ne voyait pas ses 22 règles (« je ne les vois pas, normal ? »). Cause : `.rules-list` (flex:1, overflow-y:auto) s'ÉTIRAIT à toute la hauteur du contenu (~1532px pour 22 règles, scrollable:false) au lieu de défiler en interne → seules ~8 visibles, le reste sous la ligne de flottaison (scroll de page peu évident) ; et l'écart « 22 règles / 19 remplacements » n'était pas expliqué (3 règles sans correspondance dans le texte courant). Correctifs : (1) styles.css `.rules-list` max-height min(60vh,520px) + scrollbar mince TOUJOURS visible (scrollbar-width thin + ::-webkit-scrollbar stylé #94a3b8) → panneau compact, les 22 règles accessibles par défilement interne évident. (2) blade : tooltips sur les compteurs (« règles » = total enregistré, défilez pour tout voir ; « remplacements » = correspondances dans le texte actuel). (3) app.js renderRules : les règles dont l'`original` est ABSENT du texte courant sont estompées (.rule-item--inactive opacity .5) + badge « absente du texte » → explique visuellement l'écart 22/19 et aide au nettoyage (le bouton 🗑️ par règle + « Tout effacer les règles » du menu Actions restent disponibles). Validé Playwright (22 règles : liste plafonnée + scrollable, badges sur règles sans correspondance). Corrections appliquées par Opus après échec SuperAgent. Codename anonymizer-rules-panel-scroll.
  *   1.55.5 · 2026-05-29 · #313 fix(tools) anonymiseur — mise en page (sauts de ligne) du texte anonymisé NON conservée (user, onglet « Règles & anonymisation »). Cause : `#anonymizedText` et `#restoredText` sont des `<textarea>` mais le code écrivait via `.innerText =` ; or le SETTER innerText normalise/supprime les sauts de ligne sur un textarea (test Playwright : 7 \n → 0, tout collé). Fix : `.innerText` → `.value` pour l'écriture (l.863 anonymisé, l.983 restauré) ET la lecture des boutons « Copier » (l.1535, l.1550) afin de préserver les \n au copier-coller. Validé Playwright : 7 sauts de ligne conservés via .value (0 via .innerText). NB : la mise en forme RICHE (gras, puces) reste en texte brut — voulu pour un anonymiseur (on copie du texte vers l'IA), seuls les sauts de ligne/paragraphes sont désormais préservés. Corrections mineures Opus (.innerText→.value ×4). Codename anonymizer-preserve-layout.
@@ -175,7 +176,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 55,
-    'patch' => 7,
+    'patch' => 8,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -185,11 +186,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-compact-linebreaks',
+    'codename' => 'anonymizer-reset-all',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.55.7',
+    'semver' => '1.55.8',
 ];

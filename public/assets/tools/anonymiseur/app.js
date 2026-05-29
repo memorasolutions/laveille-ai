@@ -1395,6 +1395,31 @@ function init() {
         updateStats();
     });
 
+    const _btnResetAll = document.getElementById('btnResetAll');
+    if (_btnResetAll) {
+        _btnResetAll.addEventListener('click', async () => {
+            const confirmed = await showConfirmModal('Tout remettre à zéro ? Cela efface le texte, toutes les règles et les résultats enregistrés sur cet appareil. Action irréversible.', '↺');
+            if (!confirmed) return;
+            // Texte source
+            if (window.tiptapAnonymiseurEditor) { window.tiptapAnonymiseurEditor.commands.clearContent(true); }
+            else { sourceText.innerText = ''; }
+            // Règles + détections + stockage local
+            AppState.rules = [];
+            AppState.detections = [];
+            AppState.detectionsAll = [];
+            saveRules();
+            try { localStorage.removeItem('anonymizer_rules_v2'); localStorage.removeItem('anonymiseur_audit_v1'); } catch (e) {}
+            // Sorties
+            ['anonymizedText', 'restoredText', 'aiResponse'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            const _cc = document.getElementById('charCount'); if (_cc) _cc.textContent = '0';
+            const _db = document.getElementById('detectionsBar'); if (_db) _db.classList.add('hidden');
+            if (typeof window.lvUpdateDetections === 'function') window.lvUpdateDetections([]);
+            renderRules();
+            updateStats();
+            showToast('Tout a été réinitialisé', 'success');
+        });
+    }
+
     document.getElementById('btnAddRule').addEventListener('click', () => {
         AppState.editingRuleId = null;
         AppState.selectedCategory = 'identity';
