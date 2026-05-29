@@ -89,7 +89,7 @@
 
                             {{-- SECTION 4 : UGC --}}
                             <h3 id="contenu">{{ __('4. Contenu généré par les utilisateurs') }}</h3>
-                            <p>{{ __('En soumettant du contenu (suggestions de corrections, votes, idées pour la feuille de route, signalements de bogues), vous accordez à l\'exploitant une licence mondiale, non exclusive, gratuite et perpétuelle pour utiliser, reproduire et modifier ce contenu afin d\'améliorer le Service. Vous garantissez que vous détenez les droits nécessaires sur ce contenu et renoncez à tout droit moral (droit d\'attribution et droit à l\'intégrité) sur le contenu soumis, dans la mesure permise par la loi.') }}</p>
+                            <p>{{ __('En soumettant du contenu (notamment des suggestions de corrections, des votes, des idées pour la feuille de route ou des signalements de bogues), vous accordez à l\'exploitant une licence mondiale, non exclusive, gratuite, perpétuelle et transférable pour utiliser, reproduire, modifier, adapter, publier et exploiter ce contenu dans le but exclusif d\'améliorer le Service. Vous garantissez détenir tous les droits nécessaires sur ledit contenu et renoncez expressément, conformément à l\'article 14.1(2) de la Loi sur le droit d\'auteur (L.R.C. 1985, ch. C-42), à tout droit moral (notamment le droit à l\'attribution et le droit au respect de l\'intégrité de l\'œuvre) sur ce contenu, pour toute la durée de la protection accordée par la loi, au profit de l\'exploitant ainsi que de ses ayants cause et licenciés, dans la mesure permise par la loi.') }}</p>
 
                             {{-- SECTION 5 : IA --}}
                             <h3 id="ia">{{ __('5. Résumés par intelligence artificielle') }}</h3>
@@ -110,6 +110,7 @@
                             {{-- SECTION 8 : OUTILS INTERACTIFS --}}
                             <h3 id="outils">{{ __('8. Outils interactifs') }}</h3>
                             <p>{{ __('laveille.ai met à la disposition de ses utilisateurs divers outils interactifs — notamment des calculatrices, des générateurs de mots de passe, des compteurs et d\'autres utilitaires — fournis « tels quels » et « selon la disponibilité », à des fins informatives et éducatives uniquement, sans aucune garantie de précision, d\'exhaustivité, de fiabilité ou d\'adéquation à un usage particulier. Les résultats produits par ces outils ne constituent en aucun cas un conseil professionnel de quelque nature que ce soit, y compris, sans s\'y limiter, un conseil fiscal, juridique, financier, technique ou médical, et ne sauraient se substituer à la consultation d\'un professionnel qualifié. L\'exploitant décline toute responsabilité à l\'égard de tout dommage direct, indirect, accessoire ou consécutif pouvant découler de l\'utilisation de ces outils ou de la confiance accordée à leurs résultats.') }}</p>
+                            <p>{{ __('Rien dans la présente section n\'a pour effet d\'exclure ou de limiter la responsabilité qui ne peut l\'être en vertu de la loi, notamment en cas de préjudice corporel ou moral, de faute lourde ou intentionnelle (article 1474 du Code civil du Québec), ni les garanties et droits impératifs conférés au consommateur par la Loi sur la protection du consommateur.') }}</p>
 
                             {{-- SECTION 9 : RSS --}}
                             <h3 id="rss">{{ __('9. Agrégation RSS et contenu tiers') }}</h3>
@@ -125,7 +126,8 @@
 
                             {{-- SECTION 12 : ANTI-SCRAPING --}}
                             <h3 id="anti-scraping">{{ __('12. Interdiction de moissonnage et d\'entraînement d\'IA') }}</h3>
-                            <p>{{ __('Sauf autorisation écrite préalable de l\'exploitant, il est strictement interdit d\'utiliser des systèmes automatisés, des robots de balayage (crawlers), des algorithmes de moissonnage de données (scraping) ou tout autre procédé manuel ou automatique pour extraire du contenu de laveille.ai. Cette interdiction s\'applique spécifiquement à l\'utilisation du contenu du site pour l\'entraînement, le développement ou l\'amélioration de modèles d\'intelligence artificielle ou de grands modèles de langage (LLM).') }}</p>
+                            <p>{{ __('L\'exploitant autorise expressément les moteurs de recherche, les assistants d\'intelligence artificielle (notamment GPTBot, ClaudeBot, Google-Extended, PerplexityBot) et les autres robots respectant les directives du fichier robots.txt publié sur le site laveille.ai à indexer, explorer et citer publiquement le contenu du site, à condition que toute utilisation comporte une attribution claire accompagnée d\'un lien actif vers la source originale. Cette autorisation vise à soutenir la visibilité du site dans les moteurs de recherche et les moteurs génératifs (optimisation GEO/AEO) et ne constitue en aucun cas une licence générale d\'exploitation commerciale ou de reproduction intégrale.') }}</p>
+                            <p>{{ __('Il demeure strictement interdit de procéder à un moissonnage massif, à une extraction systématique, au contournement des mesures techniques mises en place (y compris les règles du robots.txt, les limites de débit ou tout autre mécanisme de contrôle d\'accès), ainsi qu\'à toute reproduction, redistribution ou utilisation commerciale du contenu sans autorisation expresse. L\'utilisation du contenu à des fins d\'entraînement, de développement ou d\'amélioration de modèles d\'intelligence artificielle ou de grands modèles de langage (LLM) n\'est permise que dans les limites définies par le fichier robots.txt et sous réserve d\'une attribution conforme. L\'exploitant se réserve le droit de modifier, de restreindre ou de révoquer ces autorisations à tout moment, unilatéralement et sans préavis, en mettant à jour ledit fichier robots.txt.') }}</p>
 
                             {{-- SECTION 13 : COMPORTEMENT --}}
                             <h3 id="usage">{{ __('13. Comportement acceptable') }}</h3>
@@ -156,6 +158,7 @@
                             {{-- SECTION 17 : TRANSPARENCE ALGORITHMIQUE --}}
                             <h3 id="transparence">{{ __('17. Transparence algorithmique') }}</h3>
                             <p>{{ __('Conformément à l\'article 12.1 de la Loi sur la protection des renseignements personnels dans le secteur privé (Loi 25), l\'exploitant informe l\'utilisateur que le service utilise des systèmes d\'intelligence artificielle pour générer des résumés et classer l\'information. L\'utilisateur a le droit de demander des précisions sur les paramètres principaux ayant mené à une décision ou à une recommandation automatisée le concernant, le cas échéant, en communiquant avec le responsable de la protection des renseignements personnels.') }}</p>
+                            <p>{{ __('Lorsqu\'une décision est fondée exclusivement sur un traitement automatisé, l\'utilisateur a également le droit de faire corriger les renseignements personnels utilisés et de présenter ses observations à une personne en mesure de réviser ladite décision.') }}</p>
 
                             {{-- SECTION 18 : DISPONIBILITÉ, MODIFICATION ET FERMETURE --}}
                             <h3 id="disponibilite">{{ __('18. Disponibilité, modification et fermeture du service') }}</h3>
@@ -175,11 +178,13 @@
                             {{-- SECTION 19 : EXCLUSION DE GARANTIE --}}
                             <h3 id="garantie">{{ __('19. Exclusion de garantie') }}</h3>
                             <p>{{ __('Le service laveille.ai est fourni gratuitement, « tel quel » et « selon sa disponibilité », sans aucune représentation, garantie ou condition de quelque nature que ce soit, expresse ou implicite. L\'exploitant décline expressément toute garantie de qualité marchande, d\'adéquation à un usage particulier, d\'absence de contrefaçon ou d\'exactitude. Aucun engagement n\'est pris quant à la disponibilité continue du service, à l\'absence d\'erreurs, de virus ou d\'interruptions techniques. L\'utilisateur reconnaît utiliser le service à ses propres risques.') }}</p>
+                            <p>{{ __('Ces exclusions s\'appliquent dans la mesure permise par la loi et ne portent pas atteinte aux garanties légales impératives prévues par la Loi sur la protection du consommateur lorsque celle-ci s\'applique.') }}</p>
 
                             {{-- SECTION 20 : LIMITATION RESPONSABILITÉ + CAP --}}
                             <h3 id="responsabilite">{{ __('20. Limitation de responsabilité et plafond de dommages') }}</h3>
                             <p>{{ __('Étant donné la nature gratuite du service, la responsabilité totale et cumulative de l\'exploitant, de ses employés ou représentants, pour toute réclamation découlant des présentes ou de l\'utilisation du site, est limitée à un montant maximal de cent dollars canadiens (100,00 $ CAN). En aucun cas l\'exploitant ne sera responsable des dommages indirects, spéciaux, punitifs, accessoires ou consécutifs, incluant notamment la perte de profits, la perte de données, l\'interruption des affaires ou les dommages réputationnels.') }}</p>
-                            <p>{{ __('Toute réclamation découlant de l\'utilisation du Service doit être formulée dans un délai maximal d\'un (1) an suivant l\'événement à l\'origine de la réclamation, à défaut de quoi elle sera prescrite. Cette limitation ne s\'applique pas aux réclamations découlant d\'une faute intentionnelle ou d\'une fraude de l\'exploitant.') }}</p>
+                            <p>{{ __('Toute réclamation découlant de l\'utilisation du Service doit être formulée avec diligence. Les délais de prescription prévus par la loi s\'appliquent, notamment celui de trois (3) ans prévu à l\'article 2925 du Code civil du Québec. Aucune disposition des présentes conditions ne modifie la durée légale de la prescription, conformément à l\'article 2884 du Code civil du Québec.') }}</p>
+                            <p>{{ __('Malgré ce qui précède, aucune disposition n\'exclut ni ne limite la responsabilité de l\'exploitant pour le préjudice corporel ou moral causé à autrui, pour sa faute lourde ou intentionnelle (article 1474 du Code civil du Québec), ni pour toute responsabilité qui ne peut être limitée en vertu de la loi applicable.') }}</p>
 
                             {{-- SECTION 21 : FORCE MAJEURE --}}
                             <h3 id="force-majeure">{{ __('21. Force majeure') }}</h3>
@@ -187,7 +192,7 @@
 
                             {{-- SECTION 22 : INDEMNISATION --}}
                             <h3 id="indemnisation">{{ __('22. Indemnisation') }}</h3>
-                            <p>{{ __('Vous acceptez d\'indemniser et de dégager de toute responsabilité MEMORA solutions, ses dirigeants, employés et représentants contre toute réclamation, dommage, perte ou frais (incluant les honoraires d\'avocat raisonnables) découlant de votre violation des présentes conditions, de votre utilisation du Service ou de tout contenu que vous soumettez.') }}</p>
+                            <p>{{ __('Vous acceptez d\'indemniser et de dégager de toute responsabilité MEMORA solutions, ses dirigeants, employés et représentants uniquement contre les réclamations de tiers découlant (i) d\'un manquement fautif de votre part à vos obligations, (ii) d\'une violation des présentes conditions ou (iii) d\'une atteinte illicite aux droits d\'un tiers, à concurrence des montants raisonnables et proportionnés réellement engagés. Cette obligation d\'indemnisation ne s\'applique pas dans la mesure où le dommage résulte de la faute de l\'exploitant.') }}</p>
 
                             {{-- SECTION 23 : LOI APPLICABLE --}}
                             <h3 id="loi">{{ __('23. Loi applicable') }}</h3>
@@ -219,7 +224,7 @@
 
                             {{-- SECTION 30 : ACCESSIBILITÉ --}}
                             <h3 id="accessibilite">{{ __('30. Accessibilité') }}</h3>
-                            <p>{{ __('L\'exploitant s\'engage à rendre le Service accessible au plus grand nombre, conformément aux normes WCAG 2.2 niveau AA. Si vous rencontrez des difficultés d\'accessibilité, veuillez nous contacter à politiques@memora.ca afin que nous puissions y remédier.') }}</p>
+                            <p>{{ __('L\'exploitant s\'efforce de rendre le Service accessible au plus grand nombre et vise à respecter les normes WCAG 2.2 niveau AA, sans toutefois garantir une conformité intégrale et continue. Si vous rencontrez des difficultés d\'accessibilité, veuillez nous contacter à politiques@memora.ca afin que nous puissions y remédier dans la mesure du possible.') }}</p>
 
                             {{-- SECTION 31 : CONTACT --}}
                             <h3 id="contact">{{ __('31. Coordonnées') }}</h3>

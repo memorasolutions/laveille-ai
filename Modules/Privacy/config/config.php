@@ -36,9 +36,9 @@ return [
             'updated_at' => '2026-05-29',
         ],
         'terms' => [
-            'version' => '3.0',
+            'version' => '3.1',
             'url' => '/terms-of-use',
-            'updated_at' => '2026-03-29',
+            'updated_at' => '2026-05-29',
         ],
         'cookie_policy' => [
             'version' => '2.0',
