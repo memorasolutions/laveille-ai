@@ -365,6 +365,36 @@ function generateNearbyDate(original) {
 }
 
 // ============================================
+// PRESERVATION DU FORMAT (longueur, separateurs, casse)
+// ============================================
+const FP_UPPER = 'ABCEGHJKLMNPRSTVWXYZ';
+const FP_LOWER = 'abcdefghijklmnopqrstuvwxyz';
+
+// Randomise chaque chiffre ET chaque lettre en conservant longueur, separateurs (- / espace #) et casse.
+function maskFormatPreserving(original) {
+    if (!original) return '';
+    let out = '';
+    for (const ch of original) {
+        if (ch >= '0' && ch <= '9') {
+            out += String(randomNumber(0, 9));
+        } else if (ch >= 'A' && ch <= 'Z') {
+            out += FP_UPPER[randomNumber(0, FP_UPPER.length - 1)];
+        } else if (ch >= 'a' && ch <= 'z') {
+            out += FP_LOWER[randomNumber(0, FP_LOWER.length - 1)];
+        } else {
+            out += ch;
+        }
+    }
+    return out;
+}
+
+// Randomise uniquement les chiffres (conserve lettres, mots, symboles et longueur). Pour montants ($, euros).
+function maskDigitsPreserving(original) {
+    if (!original) return '';
+    return original.replace(/\d/g, () => String(randomNumber(0, 9)));
+}
+
+// ============================================
 // GENERATION DE DONNEES FICTIVES
 // ============================================
 function generateFakeData(category, original = '', gender = null) {
@@ -392,10 +422,13 @@ function generateFakeData(category, original = '', gender = null) {
                 const domain = randomFrom(FakeData.domains);
                 return `${name}@${domain}`;
             } else {
+                if (original) { return maskFormatPreserving(original); }
                 return `${randomNumber(200, 999)}-${randomNumber(100, 999)}-${randomNumber(1000, 9999)}`;
             }
 
         case 'location':
+            if (original && /[A-Za-z]\d[A-Za-z]/.test(original)) { return maskFormatPreserving(original); }
+            if (original && /\d{5}/.test(original)) { return maskFormatPreserving(original); }
             if (/[A-Za-z]\d[A-Za-z]/.test(original)) {
                 const letters = 'ABCEGHJKLMNPRSTVWXYZ';
                 return `${letters[randomNumber(0, letters.length-1)]}${randomNumber(1, 9)}${letters[randomNumber(0, letters.length-1)]} ${randomNumber(1, 9)}${letters[randomNumber(0, letters.length-1)]}${randomNumber(1, 9)}`;
@@ -406,6 +439,7 @@ function generateFakeData(category, original = '', gender = null) {
             }
 
         case 'id':
+            if (original) { return maskFormatPreserving(original); }
             if (original.length >= 16) {
                 return `${randomNumber(4000, 4999)}-${randomNumber(1000, 9999)}-${randomNumber(1000, 9999)}-${randomNumber(1000, 9999)}`;
             } else {
@@ -422,6 +456,7 @@ function generateFakeData(category, original = '', gender = null) {
             return `${fakeDay.toString().padStart(2, '0')}/${fakeMonth.toString().padStart(2, '0')}/${fakeYear}`;
 
         case 'money':
+            if (original && /\d/.test(original)) { return maskDigitsPreserving(original); }
             const amount = randomNumber(100, 99999);
             if (original.includes('euro')) {
                 return `${amount.toLocaleString('fr-FR')} euros`;
@@ -1375,6 +1410,7 @@ function init() {
             updateCategorySelection();
             updateGenderVisibility();
             updateFieldsVisibility();
+            if (newCategory !== 'identity') { displayVariants(); }
         });
     });
 
@@ -1393,6 +1429,18 @@ function init() {
             document.getElementById('inputReplacement').value = firstVariant.dataset.value;
         }
     });
+
+    const inputOriginalEl = document.getElementById('inputOriginal');
+    if (inputOriginalEl) {
+        inputOriginalEl.addEventListener('input', () => {
+            if (AppState.selectedCategory === 'identity') return;
+            displayVariants();
+            const repl = document.getElementById('inputReplacement');
+            if (repl && !repl.value.trim()) {
+                repl.value = generateFakeData(AppState.selectedCategory, inputOriginalEl.value.trim());
+            }
+        });
+    }
 
     document.getElementById('btnGenerateIdentity').addEventListener('click', generateFakeIdentity);
 
