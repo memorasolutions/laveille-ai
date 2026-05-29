@@ -860,7 +860,7 @@ function updateAnonymizedText() {
         });
     }
 
-    document.getElementById('anonymizedText').innerText = anonymizedText;
+    document.getElementById('anonymizedText').value = anonymizedText;
 
     clearTimeout(highlightTimeout);
     highlightTimeout = setTimeout(() => {
@@ -980,7 +980,7 @@ function restoreOriginalData() {
         restoredText = restoredText.replace(regex, rule.original);
     }
 
-    document.getElementById('restoredText').innerText = restoredText;
+    document.getElementById('restoredText').value = restoredText;
 
     document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.result-content').forEach(c => c.classList.remove('active'));
@@ -1532,7 +1532,7 @@ function init() {
     });
 
     document.getElementById('btnCopy').addEventListener('click', () => {
-        const text = document.getElementById('anonymizedText').innerText;
+        const text = document.getElementById('anonymizedText').value;
         copyToClipboard(text, 'Texte anonymise copie !');
     });
 
@@ -1547,7 +1547,7 @@ function init() {
 
     document.getElementById('btnRestore').addEventListener('click', restoreOriginalData);
     document.getElementById('btnCopyRestored').addEventListener('click', () => {
-        const text = document.getElementById('restoredText').innerText;
+        const text = document.getElementById('restoredText').value;
         copyToClipboard(text, 'Texte restaure copie !');
     });
 

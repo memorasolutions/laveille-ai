@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.55.5 · 2026-05-29 · #313 fix(tools) anonymiseur — mise en page (sauts de ligne) du texte anonymisé NON conservée (user, onglet « Règles & anonymisation »). Cause : `#anonymizedText` et `#restoredText` sont des `<textarea>` mais le code écrivait via `.innerText =` ; or le SETTER innerText normalise/supprime les sauts de ligne sur un textarea (test Playwright : 7 \n → 0, tout collé). Fix : `.innerText` → `.value` pour l'écriture (l.863 anonymisé, l.983 restauré) ET la lecture des boutons « Copier » (l.1535, l.1550) afin de préserver les \n au copier-coller. Validé Playwright : 7 sauts de ligne conservés via .value (0 via .innerText). NB : la mise en forme RICHE (gras, puces) reste en texte brut — voulu pour un anonymiseur (on copie du texte vers l'IA), seuls les sauts de ligne/paragraphes sont désormais préservés. Corrections mineures Opus (.innerText→.value ×4). Codename anonymizer-preserve-layout.
  *   1.55.4 · 2026-05-29 · #313 feat+fix(tools) anonymiseur — couverture de détection + RETRAIT du curseur Sensibilité (user : « ne sert à rien, ne change rien »). Sur un document réaliste, manquaient : « Dossier #88492 », « Transit : 00432 », « Numéro de compte : 123-456-7 », « CMQ #654321 » (identifiants étiquetés ; les nombres nus avaient été retirés en S131 pour éviter les faux positifs) et « 1er septembre 2026 » (date ordinale). Correctifs app.js : (1) NOUVEAU détecteur `labelledId` (priority 85, catégorie id) à lookbehind : détecte un numéro UNIQUEMENT quand précédé d'un libellé (dossier|matricule|référence|réf|transit|folio|police|contrat|facture|commande|client|adhérent|identifiant|permis|cmq|compte|institution|n°|no) + séparateur — capte le numéro sans réintroduire de faux positifs sur les nombres nus. (2) Détecteur `date` accepte l'ordinal (1er/1re/2e/ᵉʳ) + mois accentués (février/août/décembre). (3) Curseur #confidenceThreshold RETIRÉ de la vue (le filtre de précision contredisait le besoin « tout détecter » ; getConfidenceThreshold renvoie 0 quand absent → toutes les détections s'affichent ; écouteurs v145/v148 déjà null-safe). Validé Playwright sur le courriel-test : les 5 manques désormais captés (88492/00432/123-456-7/654321/1er septembre 2026) + 11 détections antérieures conservées. Génération régex Opus (corrections ciblées). Codename anonymizer-labelled-id-detection.
  *   1.55.3 · 2026-05-29 · #313 fix(tools) anonymiseur — curseur « Sensibilité » CORRIGÉ (sens inversé). v1.55.2 branchait le seuil = valeur du curseur (haut = moins de détections), ce qui : (a) ne changeait RIEN sous 0.6 (aucun détecteur < 0.6) → user « à 0 rien ne change » ; (b) allait À L'ENVERS du libellé « Sensibilité » ET de la popup d'aide existante (analogie détecteur de fumée : « très sensible = détecte tout »). Correctif : la valeur du curseur EST la sensibilité, et le seuil de confiance = 1 - sensibilité (getConfidenceThreshold retourne 1-v). Donc curseur HAUT = détecte tout (seuil bas) ; BAS = ne garde que les détections les plus sûres ; 0 = ne détecte (quasi) rien. Scores CONFIDENCE recalibrés en bande [0.5..0.95] (heuristiques noms/dates/montants/adresse 0.5 ; nas/vat/url 0.6-0.65 ; format fort 0.8 ; validés checksum 0.85-0.95) pour un dégradé fluide sur toute la course. Indice sous le curseur mis à jour (« Plus haut = détecte tout · plus bas = seulement les plus certaines »), cohérent avec la popup d'aide. Termes déjà anonymisés toujours visibles. Validé Playwright : défaut 0.6 → 6/6 (zéro régression), 0.4 → 3 (email+carte+NAS), 0 → 0. Corrections mineures Opus (<5 lignes/edit). Codename anonymizer-sensitivity-inverted.
  *   1.55.2 · 2026-05-29 · #313 fix(tools) anonymiseur — le curseur « Sensibilité de détection » (#confidenceThreshold) ne faisait RIEN (question user « je réajuste la sensibilité, je clique Détecter, rien ne change, normal ? »). Cause : le moteur v2 (detectPII) n'attribuait aucun score de confiance, et l'ancien filtre (enhancements-v145 applyConfidenceFilter) n'agissait que sur les badges OBSOLÈTES masqués depuis la refonte panneau v1.48 → curseur mort. Décision « le mieux pour la plateforme » = le rendre RÉEL (filtre de précision) plutôt que le retirer. Correctif app.js (statique) : (1) table CONFIDENCE par détecteur (validés/checksum 0.85-0.95 : email/creditCard/iban/ramq/nirFr… ; heuristiques bruyantes 0.6 : properName/date/money/adresseCivique ; nas format-only 0.7) ; (2) chaque candidat/détection porte sa confidence ; (3) detectPII stocke AppState.detectionsAll puis lvRenderDetectionsFiltered() filtre par le seuil courant (getConfidenceThreshold) — les termes déjà réglés (anonymisés) restent TOUJOURS visibles peu importe leur confiance ; (4) écouteur input sur le curseur = re-filtrage LIVE sans recliquer Détecter. Calibration ZÉRO RÉGRESSION : au défaut 0.6 tout passe (≥0.6) ; MONTER le curseur retire d'abord noms/dates/montants (faux positifs), puis NAS/TVA/URL au-delà de 0.75. Validé Playwright local : seuil 60 %→6 détections, 75 %→2 (email+carte), 90 %→2 ; live 0.6↔0.8 = 6↔2 sans reclic. Génération déléguée SuperAgent Gemini, Opus superviseur. Codename anonymizer-sensitivity-wired.
@@ -172,7 +173,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 55,
-    'patch' => 4,
+    'patch' => 5,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -182,11 +183,11 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'anonymizer-labelled-id-detection',
+    'codename' => 'anonymizer-preserve-layout',
 
     /**
      * Format du SemVer assemblé.
      * Lu via lv_version() dans app/Helpers/version.php.
      */
-    'semver' => '1.55.4',
+    'semver' => '1.55.5',
 ];
