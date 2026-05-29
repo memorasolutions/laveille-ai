@@ -132,6 +132,7 @@
                         <li>{{ __('Exporter vos règles (JSON local)') }}</li>
                         <li>{{ __('Fonctionne hors-ligne') }}</li>
                         <li><a href="/glossaire/loi-25" target="_blank" rel="noopener">{{ __('Conforme Loi 25') }}</a> · <a href="/glossaire/rgpd" target="_blank" rel="noopener">{{ __('Conforme RGPD') }}</a></li>
+                        <li><a href="{{ route('legal.privacy') }}#outils-locaux" target="_blank" rel="noopener">{{ __('Politique de confidentialité (traitement local)') }}</a> · <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener">{{ __('Conditions d\'utilisation') }}</a></li>
                     </ul>
                 </div>
             </div>

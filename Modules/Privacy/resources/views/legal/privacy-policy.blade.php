@@ -45,6 +45,7 @@
                                     <li><a href="#introduction">{{ __('Introduction et lois applicables') }}</a></li>
                                     <li><a href="#controller">{{ __('Responsable du traitement') }}</a></li>
                                     <li><a href="#data-collected">{{ __('Données personnelles collectées') }}</a></li>
+                                    <li><a href="#outils-locaux">{{ __('Outils interactifs — traitement local (côté client)') }}</a></li>
                                     <li><a href="#legal-bases">{{ __('Fondements juridiques') }}</a></li>
                                     <li><a href="#purposes">{{ __('Finalités du traitement') }}</a></li>
                                     <li><a href="#contributions">{{ __('Contributions des membres') }}</a></li>
@@ -91,6 +92,10 @@
                                 <li>{{ __('Données de navigation (pages consultées, préférences)') }}</li>
                                 <li>{{ __('Données de consentement et choix de cookies') }}</li>
                             </ul>
+
+                            <h3 id="outils-locaux">{{ __('3b. Outils interactifs — traitement local (côté client)') }}</h3>
+                            <p>{{ __('Certains outils interactifs de la plateforme — notamment l\'anonymiseur de texte, les calculatrices et les générateurs — fonctionnent entièrement dans votre navigateur (traitement « côté client »). Les données que vous y saisissez (texte, valeurs, règles) sont traitées localement sur votre appareil : elles ne sont ni transmises, ni consultées, ni conservées sur les serveurs de l\'exploitant. L\'exploitant ne collecte donc aucun de ces renseignements et n\'en assume pas la conservation.') }}</p>
+                            <p>{{ __('Lorsqu\'un outil enregistre des données pour votre commodité (par exemple vos règles d\'anonymisation ou un brouillon de texte), celles-ci demeurent uniquement dans le stockage de votre navigateur (localStorage ou sessionStorage), sous votre seul contrôle. Vous pouvez les effacer à tout moment au moyen des fonctions « Effacer » ou « Tout réinitialiser » de l\'outil, ou en vidant les données de votre navigateur ; le brouillon de texte est de toute façon effacé à la fermeture de l\'onglet. Les fichiers que vous exportez sont gérés par vous seul(e). Sur un appareil partagé, pensez à effacer vos données après usage.') }}</p>
 
                             <h3 id="legal-bases">{{ __('4. Fondements juridiques') }}</h3>
                             <ul>
