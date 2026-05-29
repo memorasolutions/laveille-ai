@@ -870,7 +870,10 @@ function updateAnonymizedText() {
         });
     }
 
-    document.getElementById('anonymizedText').value = anonymizedText;
+    // Tiptap getText() insère un double saut de ligne (\n\n) entre CHAQUE paragraphe, ce qui
+    // double les interlignes. On normalise : lignes adjacentes -> 1 saut ; rupture de section -> 1 ligne vide max.
+    const compactText = anonymizedText.replace(/\n+/g, (m) => '\n'.repeat(Math.min(2, Math.max(1, Math.floor(m.length / 2)))));
+    document.getElementById('anonymizedText').value = compactText;
 
     clearTimeout(highlightTimeout);
     highlightTimeout = setTimeout(() => {
