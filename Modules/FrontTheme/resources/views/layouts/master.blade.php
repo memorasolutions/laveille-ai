@@ -61,7 +61,7 @@
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="theme-color" content="#0B7285">
+    <meta name="theme-color" content="#064E5A">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">

@@ -61,10 +61,10 @@
             @if($isCurrent)
                 <div
                     aria-current="page"
-                    style="flex: 1 1 220px; max-width: 100%; background-color: #FFFFFF; border: 3px solid #0B7285; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px;"
+                    style="flex: 1 1 220px; max-width: 100%; background-color: #FFFFFF; border: 3px solid #064E5A; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px;"
                 >
-                    <span style="display: inline-block; background-color: #0B7285; color: #FFFFFF; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 4px; align-self: flex-start;" aria-label="Article actuel">Vous êtes ici</span>
-                    <span style="font-size: 0.85rem; font-weight: 700; color: #0B7285; line-height: 1.2;">Partie {{ $part['part_number'] }}&nbsp;:</span>
+                    <span style="display: inline-block; background-color: #064E5A; color: #FFFFFF; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 4px; align-self: flex-start;" aria-label="Article actuel">Vous êtes ici</span>
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #064E5A; line-height: 1.2;">Partie {{ $part['part_number'] }}&nbsp;:</span>
                     <span style="font-size: 0.9rem; font-weight: 600; color: #1A1D23; line-height: 1.4;">{{ $truncatedTitle }}</span>
                 </div>
             @else
@@ -72,12 +72,12 @@
                     href="{{ url('/blog/' . $part['slug']) }}"
                     aria-label="Partie {{ $part['part_number'] }}&nbsp;: {{ $truncatedTitle }}"
                     style="flex: 1 1 220px; max-width: 100%; background-color: #FFFFFF; border: 2px solid #D5EDF0; border-radius: 8px; padding: 16px; text-decoration: none; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.2s, box-shadow 0.2s;"
-                    onmouseover="this.style.borderColor='#0B7285'; this.style.boxShadow='0 2px 8px rgba(11,114,133,0.15)';"
+                    onmouseover="this.style.borderColor='#064E5A'; this.style.boxShadow='0 2px 8px rgba(11,114,133,0.15)';"
                     onmouseout="this.style.borderColor='#D5EDF0'; this.style.boxShadow='none';"
-                    onfocus="this.style.borderColor='#0B7285'; this.style.boxShadow='0 0 0 3px rgba(11,114,133,0.4)';"
+                    onfocus="this.style.borderColor='#064E5A'; this.style.boxShadow='0 0 0 3px rgba(11,114,133,0.4)';"
                     onblur="this.style.borderColor='#D5EDF0'; this.style.boxShadow='none';"
                 >
-                    <span style="font-size: 0.85rem; font-weight: 700; color: #0B7285; line-height: 1.2;">Partie {{ $part['part_number'] }}&nbsp;:</span>
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #064E5A; line-height: 1.2;">Partie {{ $part['part_number'] }}&nbsp;:</span>
                     <span style="font-size: 0.9rem; font-weight: 500; color: #1A1D23; line-height: 1.4;">{{ $truncatedTitle }}</span>
                     <span style="font-size: 0.78rem; color: #6E7687; margin-top: auto; font-weight: 500;">Lire cette partie →</span>
                 </a>

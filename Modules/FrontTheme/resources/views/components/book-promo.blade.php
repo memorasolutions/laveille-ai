@@ -27,7 +27,7 @@
     $uid = 'bookpromo-' . substr(md5($title . $cta_url), 0, 8);
     $absOg = url($og_image);
 @endphp
-<aside class="lv-book-promo lv-book-promo--{{ $variant }}" role="complementary" aria-labelledby="{{ $uid }}-title" style="--c-primary:#0B7285;--c-accent:#C2410C;--c-bg:#F8FAFB;--c-text:#1a1d23;--c-text-muted:#555B6A;--c-border:#e2e8f0;background:var(--c-bg);border:1px solid var(--c-border);border-radius:0.75rem;padding:1.5rem;margin:2rem 0;display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;color:var(--c-text);font-family:'DM Sans','Plus Jakarta Sans',system-ui,sans-serif;">
+<aside class="lv-book-promo lv-book-promo--{{ $variant }}" role="complementary" aria-labelledby="{{ $uid }}-title" style="--c-primary:#064E5A;--c-accent:#9A2A06;--c-bg:#F8FAFB;--c-text:#1a1d23;--c-text-muted:#555B6A;--c-border:#e2e8f0;background:var(--c-bg);border:1px solid var(--c-border);border-radius:0.75rem;padding:1.5rem;margin:2rem 0;display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;color:var(--c-text);font-family:'DM Sans','Plus Jakarta Sans',system-ui,sans-serif;">
     <div style="flex:0 0 200px;max-width:200px;">
         <picture>
             <source type="image/webp" srcset="{{ $cover_url_webp }} 1x, {{ $cover_url_webp_2x }} 2x">
@@ -73,8 +73,8 @@
             aria-label="{{ $cta_label }} — {{ $title }} (nouvel onglet)"
             style="display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;min-height:44px;padding:0.75rem 1.5rem;background:var(--c-primary);color:#fff;border-radius:0.5rem;text-decoration:none;font-weight:700;font-size:0.95rem;letter-spacing:0.02em;box-shadow:0 2px 6px rgba(11,114,133,0.25);transition:background 0.15s ease,transform 0.15s ease;"
             onmouseover="this.style.background='#085c6b';this.style.transform='translateY(-1px)'"
-            onmouseout="this.style.background='#0B7285';this.style.transform='translateY(0)'"
-            onfocus="this.style.outline='3px solid #C2410C';this.style.outlineOffset='2px'"
+            onmouseout="this.style.background='#064E5A';this.style.transform='translateY(0)'"
+            onfocus="this.style.outline='3px solid #9A2A06';this.style.outlineOffset='2px'"
             onblur="this.style.outline='none'"
         >
             {{ $cta_label }}
@@ -134,7 +134,7 @@
         .lv-book-promo h3 { font-size: 1.2rem !important; }
     }
     @endverbatim
-    .lv-book-promo a:focus-visible { outline: 3px solid #C2410C !important; outline-offset: 2px !important; }
+    .lv-book-promo a:focus-visible { outline: 3px solid #9A2A06 !important; outline-offset: 2px !important; }
     [x-cloak] { display: none !important; }
 </style>
 @endonce

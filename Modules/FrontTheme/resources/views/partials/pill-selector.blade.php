@@ -25,7 +25,7 @@
             <button
                 type="button"
                 :style="{{ $alpineVar }} === '{{ $item }}'
-                    ? 'border-radius:10px; padding:10px 18px; min-width:48px; height:44px; font-size:15px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.2s; border:1px solid #0B7285; background:#0B7285; color:#fff; outline:none;'
+                    ? 'border-radius:10px; padding:10px 18px; min-width:48px; height:44px; font-size:15px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.2s; border:1px solid #064E5A; background:#064E5A; color:#fff; outline:none;'
                     : 'border-radius:10px; padding:10px 18px; min-width:48px; height:44px; font-size:15px; font-weight:600; cursor:pointer; text-align:center; transition:all 0.2s; border:1px solid #cbd5e1; background:#f1f5f9; color:#374151; outline:none;'"
                 @click="{{ $alpineVar }} = '{{ $item }}'"
             >{{ $item }}</button>
