@@ -81,10 +81,9 @@
                 </div>
 
                 <div style="margin-bottom: 40px;">
-                    <h2 style="color: var(--sys-text-default); margin-bottom: 16px;">Overlays & dark mode</h2>
+                    <h2 style="color: var(--sys-text-default); margin-bottom: 16px;">Overlays</h2>
                     <p style="color: var(--sys-text-default);">
-                        Les overlays (modale, confirm, toast, bannières) partagent la même grammaire visuelle via les tokens <code>--cmp-overlay-*</code>.
-                        Le mode sombre est activé ou désactivé via le bouton 🌙 flottant en bas à droite de l'écran.
+                        Les overlays (modale, confirm, toast, bannières) partagent la même grammaire visuelle via les tokens <code>--cmp-overlay-*</code> (surface, rayon, ombre, voile, anneau de focus).
                     </p>
                 </div>
 
