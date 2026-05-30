@@ -50,7 +50,7 @@
 #newsletterModal .modal-dialog.modal-dialog-scrollable .modal-content { max-height: 100%; overflow: hidden; }
 #newsletterModal .modal-dialog.modal-dialog-scrollable .modal-body, #newsletterModal form { overflow-y: auto; }
 #newsletterModal input[type="checkbox"] { display: inline-block !important; width: 18px !important; height: 18px !important; appearance: auto !important; -webkit-appearance: checkbox !important; opacity: 1 !important; position: static !important; }
-#newsletterModal input:focus { border-color: var(--c-primary) !important; box-shadow: 0 0 0 3px rgba(11,114,133,0.15); }
+#newsletterModal input:focus { border-color: var(--c-primary) !important; box-shadow: 0 0 0 3px rgba(6,78,90,0.18); }
 #newsletterModalSubmit:hover, #newsletterModalSubmit:focus-visible { background: var(--c-primary) !important; }
 #newsletterModalClose:hover, #newsletterModalClose:focus-visible { opacity: 1 !important; background: rgba(0,0,0,0.30) !important; outline: 2px solid #fff; outline-offset: 2px; }
 @media (max-width: 480px) {
