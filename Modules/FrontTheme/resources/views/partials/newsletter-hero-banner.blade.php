@@ -70,7 +70,7 @@
                        :disabled="submitting"
                        style="flex: 1; min-width: 280px; padding: 12px 16px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
                 <button type="submit" :disabled="submitting"
-                        style="background-color: #F97316; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem; white-space: nowrap; min-height: 48px;">
+                        style="background-color: var(--sys-action-accent, #9A2A06); color: white; border: none; padding: 12px 24px; border-radius: var(--sys-radius-sm, 6px); font-weight: 600; cursor: pointer; font-size: 1rem; white-space: nowrap; min-height: 48px;">
                     <span x-show="!submitting">{{ __('S’inscrire') }}</span>
                     <span x-show="submitting" x-cloak>{{ __('Envoi...') }}</span>
                 </button>
