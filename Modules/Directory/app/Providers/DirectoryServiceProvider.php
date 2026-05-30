@@ -60,6 +60,7 @@ class DirectoryServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\Directory\Console\DirectoryEnrichToolsCommand::class,
             \Modules\Directory\Console\CaptureScreenshotsCommand::class,
+            \Modules\Directory\Console\LockScreenshotsCommand::class,
             \Modules\Directory\Console\CheckLinksCommand::class,
             \Modules\Directory\Console\EnrichTutorialsCommand::class,
             \Modules\Directory\Console\EnrichTutorialsSonarCommand::class,

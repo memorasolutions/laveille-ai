@@ -14,6 +14,7 @@ class ToolObserver
         if (
             $tool->wasChanged('status')
             && $tool->status === 'published'
+            && empty($tool->screenshot_locked)
             && (empty($tool->screenshot) || str_starts_with((string) $tool->screenshot, 'http'))
             && ScreenshotService::isAvailable()
         ) {

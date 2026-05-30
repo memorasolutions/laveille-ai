@@ -17,6 +17,13 @@ class ScreenshotService
      */
     public function capture(Tool $tool): bool
     {
+        // Screenshot verrouillé (uploadé manuellement) : ne JAMAIS l'écraser via la capture automatique.
+        if (! empty($tool->screenshot_locked)) {
+            Log::info('ScreenshotService: capture ignorée (screenshot verrouillé) pour '.$tool->getTranslation('slug', 'fr_CA'));
+
+            return false;
+        }
+
         if (! self::isAvailable()) {
             Log::warning('ScreenshotService: Node.js ou script introuvable.');
 
@@ -116,6 +123,11 @@ class ScreenshotService
 
     public function captureWithRetry(Tool $tool, int $maxAttempts = 3): bool
     {
+        // Screenshot verrouillé : aucune (re)capture ni fallback gradient.
+        if (! empty($tool->screenshot_locked)) {
+            return false;
+        }
+
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             if ($this->capture($tool)) {
                 return true;

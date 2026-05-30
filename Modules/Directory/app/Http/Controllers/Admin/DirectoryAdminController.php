@@ -219,6 +219,10 @@ class DirectoryAdminController extends Controller
         );
 
         if ($result['ok']) {
+            // Verrouille le screenshot manuel : la régénération automatique ne doit jamais l'écraser.
+            $tool->screenshot_locked = true;
+            $tool->saveQuietly();
+
             return $wantsJson
                 ? response()->json(['ok' => true, 'message' => $result['message'], 'screenshot_url' => $result['url']])
                 : back()->with('success', $result['message']);
