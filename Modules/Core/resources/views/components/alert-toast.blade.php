@@ -7,7 +7,7 @@
 .ct-toast-container.top-left { top: 20px; left: 20px; }
 .ct-toast-container.bottom-right { bottom: 20px; right: 20px; }
 .ct-toast-container.bottom-left { bottom: 20px; left: 20px; }
-.ct-toast-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 10px; color: #fff; max-width: 380px; min-width: 260px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); pointer-events: auto; font-size: 0.92rem; line-height: 1.45; }
+.ct-toast-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: var(--sys-radius-md, 0.75rem); color: #fff; max-width: 380px; min-width: 260px; box-shadow: var(--sys-shadow-lg, 0 8px 24px rgba(0,0,0,0.18)); pointer-events: auto; font-size: 0.92rem; line-height: 1.45; }
 .ct-toast-item.success { background-color: #065F46; }
 .ct-toast-item.error { background-color: #991B1B; }
 .ct-toast-item.warning { background-color: #92400E; }

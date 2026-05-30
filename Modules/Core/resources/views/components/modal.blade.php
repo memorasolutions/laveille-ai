@@ -7,12 +7,13 @@
 
 @once
 <style>
-.ct-modal-overlay { position: fixed; inset: 0; z-index: 99999; background: rgba(0,0,0,0.5); display: grid; place-items: center; padding: 20px; }
-.ct-modal-content { background: #fff; border-radius: 16px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 28px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-.ct-modal-close { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; color: #6B7280; padding: 4px; line-height: 1; }
-.ct-modal-close:hover { color: #1F2937; }
-.ct-modal-title { font-family: var(--f-heading); font-weight: 700; font-size: 1.2rem; margin: 0 0 16px; color: var(--c-dark); }
-.ct-modal-body { color: #4B5563; line-height: 1.7; }
+.ct-modal-overlay { position: fixed; inset: 0; z-index: 99999; background: var(--cmp-overlay-backdrop, rgba(17,20,23,0.5)); display: grid; place-items: center; padding: 20px; }
+.ct-modal-content { background: var(--cmp-overlay-bg, #fff); border-radius: var(--cmp-overlay-radius, 1rem); width: 100%; max-height: 80vh; overflow-y: auto; padding: 28px; position: relative; box-shadow: var(--cmp-overlay-shadow, 0 20px 60px rgba(0,0,0,0.2)); }
+.ct-modal-close { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--sys-text-muted, #52586a); padding: 4px; line-height: 1; border-radius: var(--sys-radius-sm, 0.375rem); }
+.ct-modal-close:hover { color: var(--sys-text-default, #1A1D23); }
+.ct-modal-close:focus-visible { outline: var(--cmp-overlay-focus-ring-width, 3px) solid var(--cmp-overlay-focus-ring, #9A2A06); outline-offset: 2px; }
+.ct-modal-title { font-family: var(--f-heading); font-weight: 700; font-size: 1.2rem; margin: 0 0 16px; color: var(--sys-text-default, #1A1D23); }
+.ct-modal-body { color: var(--sys-text-secondary, #4a4f5c); line-height: 1.7; }
 </style>
 @endonce
 
