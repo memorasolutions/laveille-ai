@@ -1382,3 +1382,16 @@ article h3 {
   --cmp-overlay-anim-out: 140ms;
   --cmp-overlay-focus-ring: var(--sys-focus-ring);
 }
+
+/* ===== BRIDGE Bootstrap 5.3 (--bs-*) ← design tokens — S134 charte ===== */
+:root {
+  --bs-primary: var(--sys-action-primary, #064E5A);
+  --bs-primary-rgb: 6, 78, 90;
+  --bs-link-color: var(--sys-text-link, #064E5A);
+  --bs-link-color-rgb: 6, 78, 90;
+  --bs-link-hover-color: var(--sys-text-link-hover, #032E36);
+  --bs-danger: var(--sys-danger, #DC2626);
+  --bs-danger-rgb: 220, 38, 38;
+  --bs-success: var(--sys-success, #047857);
+  --bs-border-color: var(--sys-border-default, #D1D5DB);
+}
