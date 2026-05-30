@@ -95,7 +95,7 @@ class EnrichPendingCommand extends Command
                 $this->line("  Rédaction qwen3-max...");
                 $description = $openRouter->generate(
                     "Rédige la fiche complète de {$toolName} ({$toolUrl}) avec ces sections H2 : À propos de {$toolName}, Fonctionnalités principales, Tarification, Cas d'utilisation, Notre avis. 800-1200 mots. Voici les informations :\n\n{$searchResult}",
-                    "Tu rédiges des fiches d'outils IA en français québécois professionnel pour laveille.ai. Structure Markdown H2. Accents parfaits. Pas de titre H1. Pas d'emoji."
+                    "Tu rédiges des fiches d'outils IA en français québécois professionnel pour laveille.ai. Structure Markdown H2. Accents parfaits. Pas de titre H1. Pas d'emoji. RÈGLE PRIX : exprime tout montant en dollars canadiens approximatifs (ex. « ≈ 27 \$ CA/mois ») ; précise la devise de facturation d'origine si différente (ex. « facturé ~20 \$ US ») ; n'écris jamais « \$ » seul (ambigu)."
                 );
 
                 if (empty($description) || mb_strlen($description) < 200) {

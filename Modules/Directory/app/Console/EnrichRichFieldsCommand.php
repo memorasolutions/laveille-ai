@@ -125,7 +125,8 @@ final class EnrichRichFieldsCommand extends Command
             . "- \"cons\" : 2 à 4 inconvénients honnêtes séparés par virgule (string max 200 chars).\n"
             . "- \"faq\" : tableau de 3 à 5 objets {\"question\":\"...\",\"answer\":\"...\"} (questions courtes, réponses ~150 chars).\n"
             . "- \"how_to_use\" : string max 200 chars expliquant les premiers pas.\n\n"
-            . "Exemple : {\"core_features\":\"GPT-4o, Voix temps réel, Mémoire, Recherche web, Plugins\",\"use_cases\":\"Rédaction, Code, Analyse\",\"pros\":\"Polyvalent, Rapide, Écosystème riche\",\"cons\":\"Limites gratuit, Confidentialité\",\"faq\":[{\"question\":\"Est-ce gratuit ?\",\"answer\":\"Oui en plan de base.\"}],\"how_to_use\":\"Aller sur chat.openai.com et taper une question.\"}\n\n"
+            . "RÈGLE PRIX : exprime tout montant en dollars canadiens approximatifs (ex. « ≈ 27 \$ CA/mois ») ; si la facturation d'origine est dans une autre devise, précise-la (ex. « ≈ 27 \$ CA/mois, facturé ~20 \$ US »). N'écris jamais « \$ » seul (ambigu).\n\n"
+            . "Exemple : {\"core_features\":\"GPT-4o, Voix temps réel, Mémoire, Recherche web, Plugins\",\"use_cases\":\"Rédaction, Code, Analyse\",\"pros\":\"Polyvalent, Rapide, Écosystème riche\",\"cons\":\"Limites gratuit, Confidentialité\",\"faq\":[{\"question\":\"Est-ce gratuit ?\",\"answer\":\"Oui, plan de base; payant ≈ 27 \$ CA/mois (facturé ~20 \$ US).\"}],\"how_to_use\":\"Aller sur chat.openai.com et taper une question.\"}\n\n"
             . "Réponds UNIQUEMENT avec le JSON, rien d'autre.";
     }
 

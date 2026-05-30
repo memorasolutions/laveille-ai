@@ -460,6 +460,9 @@
                 </h3>
                 <div style="width: 50px; height: 3px; background: linear-gradient(90deg, var(--c-primary), var(--c-accent)); margin-bottom: 20px; border-radius: 2px;"></div>
                 <div class="rt-description" style="font-size: 1.05rem; line-height: 1.8; color: #475569;" data-editable="description">@glossarize($descHtmlWithIds)</div>
+                <div role="note" style="background-color:#F1F5F9;border-left:3px solid #0B7285;border-radius:8px;padding:10px 14px;margin:16px 0 0;font-size:13px;color:#334155;line-height:1.5;">
+                    💡 {{ __('Les prix affichés sont indicatifs et convertis approximativement en dollars canadiens ($ CA). La facturation réelle peut être effectuée dans une autre devise (souvent en $ US) par le fournisseur. Vérifiez le prix exact sur le site officiel.') }}
+                </div>
             </div>
             {{-- 2026-05-05 #141 : auto-link glossaire/acronymes pour SEO/AEO/GEO --}}
             @include('core::partials.glossary-jsonld')
