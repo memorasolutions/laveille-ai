@@ -1,0 +1,153 @@
+/* dark.css — dark mode opt-in [data-theme=dark], S134. Défaut clair inchangé. */
+
+/* 1) Remap des PRIMITIVES + SÉMANTIQUE */
+html[data-theme="dark"] {
+  --c-dark: #E6E8EC;
+  --c-text-secondary: #C2C7D0;
+  --c-text-muted: #A7AEBA;
+  --c-surface: #1A1E25;
+  --c-primary-light: #0E2A30;
+  --c-primary-badge: #0E2A30;
+  --c-accent-light: #2A1B12;
+
+  --sys-surface-page: #0F1419;
+  --sys-surface-raised: #1A1E25;
+  --sys-surface-sunken: #15181E;
+  --sys-surface-overlay: #1A1E25;
+  --sys-text-default: #E6E8EC;
+  --sys-text-secondary: #C2C7D0;
+  --sys-text-muted: #A7AEBA;
+  --sys-text-link: #5EEAD4;
+  --sys-text-link-hover: #99F6E4;
+  --sys-border-subtle: #2A2F3A;
+  --sys-border-default: #3A414E;
+  --sys-border-strong: #525A68;
+  --sys-success-bg: #06281E;
+  --sys-warning-bg: #2A2008;
+  --sys-danger-bg: #2A1414;
+  --sys-info-bg: #0E2A30;
+
+  --cmp-overlay-bg: #1A1E25;
+  --cmp-overlay-backdrop: rgba(0,0,0,0.65);
+
+  /* bridge Bootstrap en sombre */
+  --bs-body-bg: #0F1419;
+  --bs-body-color: #E6E8EC;
+  --bs-border-color: #3A414E;
+  --bs-link-color: #5EEAD4;
+  --bs-link-color-rgb: 94,234,212;
+  --bs-link-hover-color: #99F6E4;
+}
+
+/* 2) DOUBLE RÔLE : liens textuels en teal clair, boutons conservent --c-primary */
+html[data-theme="dark"] a:not(.btn):not(.theme-btn):not([class*="ct-btn"]):not(.cc-btn) {
+  color: var(--sys-text-link, #5EEAD4);
+}
+html[data-theme="dark"] a:not(.btn):not(.theme-btn):not([class*="ct-btn"]):not(.cc-btn):hover {
+  color: var(--sys-text-link-hover, #99F6E4);
+}
+
+/* 3) OVERRIDES CHROME Bloggar */
+html[data-theme="dark"] body {
+  background-color: #0F1419;
+  color: #E6E8EC;
+}
+html[data-theme="dark"] .page-wrapper,
+html[data-theme="dark"] .wpo-blog-single-section,
+html[data-theme="dark"] .wpo-blog-pg-section,
+html[data-theme="dark"] section {
+  background-color: transparent;
+}
+html[data-theme="dark"] .wpo-site-header,
+html[data-theme="dark"] .wpo-site-header .navigation {
+  background-color: #12161C;
+}
+html[data-theme="dark"] .post,
+html[data-theme="dark"] .wpo-blog-content,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .widget {
+  background-color: #1A1E25;
+  color: #E6E8EC;
+}
+html[data-theme="dark"] p,
+html[data-theme="dark"] li,
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4 {
+  color: #E6E8EC;
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background-color: #15181E;
+  color: #E6E8EC;
+  border-color: #3A414E;
+}
+
+/* 4) Transition douce + respect prefers-reduced-motion */
+html {
+  transition: background-color .2s ease, color .2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    transition: none;
+  }
+}
+
+/* dark.css — overrides composants de contenu (S134) */
+html[data-theme="dark"] .tableau-wrapper,
+html[data-theme="dark"] .tableau-article {
+  background-color: #1A1E25 !important;
+  color: #E6E8EC !important;
+  border-color: #3A414E !important;
+}
+html[data-theme="dark"] .tableau-article td {
+  background-color: #1A1E25 !important;
+  color: #E6E8EC !important;
+  border-color: #3A414E !important;
+}
+html[data-theme="dark"] .tableau-zebra tbody tr:nth-child(even) {
+  background-color: #15181E !important;
+}
+html[data-theme="dark"] .callout,
+html[data-theme="dark"] .callout-content,
+html[data-theme="dark"] .callout-conseil,
+html[data-theme="dark"] .callout-retenir,
+html[data-theme="dark"] .callout-vulgarisateur,
+html[data-theme="dark"] .callout-exemple {
+  background-color: #1A1E25 !important;
+  color: #E6E8EC !important;
+}
+html[data-theme="dark"] pre,
+html[data-theme="dark"] code,
+html[data-theme="dark"] .wp-block-code {
+  background-color: #15181E !important;
+  color: #E6E8EC !important;
+  border-color: #3A414E !important;
+}
+html[data-theme="dark"] blockquote {
+  background-color: #15181E !important;
+  color: #E6E8EC !important;
+  border-left-color: #5EEAD4 !important;
+}
+html[data-theme="dark"] #newsletterScrollTrigger {
+  background-color: #1A1E25 !important;
+  color: #E6E8EC !important;
+  border-color: #3A414E !important;
+}
+html[data-theme="dark"] #newsletterScrollTrigger h4,
+html[data-theme="dark"] #newsletterScrollTrigger p {
+  color: #E6E8EC !important;
+}
+html[data-theme="dark"] .modal-content {
+  background-color: #1A1E25 !important;
+  color: #E6E8EC !important;
+}
+html[data-theme="dark"] .wp-block-table table,
+html[data-theme="dark"] .wp-block-table td,
+html[data-theme="dark"] .wp-block-table th {
+  background-color: #1A1E25 !important;
+  color: #E6E8EC !important;
+  border-color: #3A414E !important;
+}

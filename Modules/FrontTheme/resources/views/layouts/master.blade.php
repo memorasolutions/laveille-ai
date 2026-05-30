@@ -4,6 +4,8 @@
 
 <head>
     <meta charset="utf-8">
+    {{-- S134 dark mode opt-in : applique le thème AVANT le 1er paint (anti-FOUC). Défaut clair ; sombre seulement sur choix explicite stocké. --}}
+    <script>(function(){try{var t=localStorage.getItem('lv-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -141,6 +143,9 @@
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <link href="{{ asset('css/charte.css') }}?v={{ filemtime(public_path('css/charte.css')) }}" rel="stylesheet">
     <link href="{{ asset('css/components.css') }}?v={{ filemtime(public_path('css/components.css')) }}" rel="stylesheet">
+    {{-- S134 dark mode opt-in : chargé en dernier pour surcharger sous [data-theme="dark"] ; n'affecte rien en clair --}}
+    <link href="{{ asset('css/dark.css') }}?v={{ filemtime(public_path('css/dark.css')) }}" rel="stylesheet">
+
     <style>
         /* Tailles spécifiques au layout */
         .navbar-brand img { max-height: 50px; width: auto; }
@@ -472,6 +477,7 @@
     };
     window.__openLinkedIn=function(url,text){window.__openShare(url,text,'LinkedIn','#0A66C2');};
     </script>
+    @include('fronttheme::partials.dark-toggle')
 </body>
 
 </html>
