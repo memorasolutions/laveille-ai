@@ -10,8 +10,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasColumn('tools', 'screenshot_locked')) {
-            Schema::table('tools', function (Blueprint $table): void {
+        if (! Schema::hasColumn('directory_tools', 'screenshot_locked')) {
+            Schema::table('directory_tools', function (Blueprint $table): void {
                 $table->boolean('screenshot_locked')->default(false);
             });
         }
@@ -19,8 +19,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (Schema::hasColumn('tools', 'screenshot_locked')) {
-            Schema::table('tools', function (Blueprint $table): void {
+        if (Schema::hasColumn('directory_tools', 'screenshot_locked')) {
+            Schema::table('directory_tools', function (Blueprint $table): void {
                 $table->dropColumn('screenshot_locked');
             });
         }
