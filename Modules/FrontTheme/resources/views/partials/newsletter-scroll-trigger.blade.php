@@ -91,7 +91,7 @@
                 font-size: 14px;
                 font-weight: 600;
                 color: #fff;
-                background-color: var(--c-primary, #0d6efd);
+                background-color: var(--sys-action-primary, #064E5A);
                 border: none;
                 border-radius: 6px;
                 cursor: pointer;

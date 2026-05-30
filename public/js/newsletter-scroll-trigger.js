@@ -79,8 +79,9 @@
         if (!msg) return;
         msg.textContent = text;
         msg.className = '';
-        msg.style.background = isSuccess ? '#d4edda' : '#f8d7da';
-        msg.style.color = isSuccess ? '#155724' : '#721c24';
+        // Couleurs de feedback alignées sur les tokens de marque (cohérent toasts/confirm, AAA) - S134
+        msg.style.background = isSuccess ? '#ECFDF5' : '#FEF2F2';
+        msg.style.color = isSuccess ? '#065F46' : '#991B1B';
     }
 
     function hideMessage() {
