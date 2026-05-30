@@ -25,6 +25,11 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         ->name('methodologie')
         ->middleware('cacheResponse:3600');
 
+    // Référence du design system (S134 — gouvernance charte, anti-duplication ; non listée, noindex dans la vue)
+    Route::view('/charte-graphique', 'fronttheme::charte-graphique')
+        ->name('charte.reference')
+        ->middleware('cacheResponse:3600');
+
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
     Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])
         ->name('rss.concentres');
