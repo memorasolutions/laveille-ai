@@ -71,6 +71,7 @@
                         <p>{{ $qa[1] }}</p>
                     @endforeach
 
+                    @include('fronttheme::partials.pillars-related', ['current' => 'pillar.ia-pme'])
                 </article>
             </div>
         </div>

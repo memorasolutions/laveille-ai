@@ -54,6 +54,7 @@
                 <h3 style="font-family: var(--f-heading); font-size: 1.1rem; margin-top: 20px;">{{ $qa[0] }}</h3>
                 <p>{{ $qa[1] }}</p>
             @endforeach
+            @include('fronttheme::partials.pillars-related', ['current' => 'pillar.ia-education'])
         </article>
     </div></div></div>
 </section>
