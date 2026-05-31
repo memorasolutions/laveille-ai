@@ -212,7 +212,7 @@
     .lv-cmp-table tbody td.cmp-value.best { background: rgba(6, 78, 90, 0.06); color: #064E5A; font-weight: 800; }
     .lv-cmp-table tbody td.cmp-value.best::before { content: '✓'; display: inline-block; margin-right: 6px; color: #064E5A; font-weight: 900; }
     .lv-cmp-table tbody td.cmp-value.worst { background: rgba(154, 42, 6, 0.04); color: #9A2A06; }
-    .lv-cmp-table tbody td.cmp-value.unavailable { color: #9CA3AF; font-weight: 500; font-style: italic; }
+    .lv-cmp-table tbody td.cmp-value.unavailable { color: var(--c-text-muted, #52586a); font-weight: 500; font-style: italic; }
 
     /* Section header rows (sub-thead) */
     .cmp-section-row th {

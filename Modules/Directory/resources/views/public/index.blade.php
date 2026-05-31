@@ -979,7 +979,7 @@
                             </td>
                             <td style="padding:8px 12px;white-space:nowrap;">
                                 <template x-if="tool.isLifecycleActive">
-                                    <span style="color:#16A34A;font-size:0.75rem;font-weight:600;">● {{ __('Actif') }}</span>
+                                    <span style="color:var(--sys-success, #047857);font-size:0.75rem;font-weight:600;">● {{ __('Actif') }}</span>
                                 </template>
                                 <template x-if="!tool.isLifecycleActive">
                                     <span :style="'color:' + tool.lifecycleColor + ';font-size:0.75rem;font-weight:600;'" x-text="'● ' + tool.lifecycleLabel"></span>
@@ -990,7 +990,7 @@
                                     <span style="color:#F59E0B;font-weight:700;">★ <span x-text="tool.avgRating"></span></span>
                                 </template>
                                 <template x-if="tool.avgRating === 0">
-                                    <span style="color:#9CA3AF;font-size:0.75rem;">—</span>
+                                    <span style="color:var(--c-text-muted, #52586a);font-size:0.75rem;">—</span>
                                 </template>
                             </td>
                             <td style="padding:8px 12px;text-align:right;white-space:nowrap;">

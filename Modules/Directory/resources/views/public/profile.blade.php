@@ -30,7 +30,7 @@
         <div style="display: inline-flex; align-items: center; gap: 10px; background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: 50px; padding: 8px 20px; margin-bottom: 16px;">
             <span style="font-size: 1.5rem;">{{ $levelInfo['emoji'] }}</span>
             <span style="font-weight: 700; color: #14532D;">{{ $levelInfo['name'] }}</span>
-            <span style="color: #16A34A; font-weight: 600;">{{ $user->reputation_points }} {{ __('pts') }}</span>
+            <span style="color: var(--sys-success, #047857); font-weight: 600;">{{ $user->reputation_points }} {{ __('pts') }}</span>
         </div>
 
         {{-- Progress bar --}}
@@ -41,7 +41,7 @@
             @if(!$isMax)
                 <p style="font-size: 12px; color: #6B7280;">{{ __('Plus que') }} <strong>{{ $remaining }}</strong> {{ __('pts pour') }} {{ \Modules\Directory\Services\ReputationService::getLevelInfo($user->trust_level + 1)['emoji'] ?? '' }} {{ \Modules\Directory\Services\ReputationService::getLevelInfo($user->trust_level + 1)['name'] ?? __('le prochain niveau') }}</p>
             @else
-                <p style="font-size: 12px; color: #16A34A; font-weight: 600;">🏆 {{ __('Niveau maximum atteint !') }}</p>
+                <p style="font-size: 12px; color: var(--sys-success, #047857); font-weight: 600;">🏆 {{ __('Niveau maximum atteint !') }}</p>
             @endif
         </div>
     </div>
