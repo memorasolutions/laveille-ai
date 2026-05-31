@@ -368,6 +368,8 @@
                     </div>
                     @endif
 
+                    @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->category_tag ?? '').' '.strip_tags((string) ($article->summary ?? $article->meta_description ?? '')))])
+
                     {{-- Commentaires — 2026-05-27 #312 DÉSACTIVÉS sur actualités (décision user).
                          Pour réactiver : retirer le `&& false` ci-dessous OU basculer flag config('news.comments_enabled', false). --}}
                     @if(class_exists(\Modules\Community\Livewire\CommentsThread::class) && config('news.comments_enabled', false))

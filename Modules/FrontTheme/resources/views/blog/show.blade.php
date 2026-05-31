@@ -282,6 +282,8 @@
 
                         @include('fronttheme::blog.partials.faq-accordion')
 
+                        @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->blogCategory?->name ?? '').' '.(optional($article->tagsRelation)->pluck('name')->implode(' ') ?? ''))])
+
                         @include('fronttheme::partials.newsletter-native-cta')
 
                         @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))
