@@ -47,6 +47,11 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         ->name('pillar.ia-generative')
         ->middleware('cacheResponse:3600');
 
+    // Sous-articles factuels rattachés aux piliers (faits sourcés via Perplexity, evergreen)
+    Route::view('/adopter-ia-pme-quebec', 'fronttheme::adopter-ia-pme-quebec')
+        ->name('guide.adopter-ia-pme')
+        ->middleware('cacheResponse:3600');
+
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
     Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])
         ->name('rss.concentres');

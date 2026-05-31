@@ -33,6 +33,13 @@ class SitemapController
             }
         }
 
+        // Sous-articles factuels rattachés aux piliers (faits sourcés, evergreen)
+        foreach (['guide.adopter-ia-pme'] as $guideRoute) {
+            if (Route::has($guideRoute)) {
+                $sitemap->add(Url::create(route($guideRoute))->setPriority(0.7)->setChangeFrequency('monthly'));
+            }
+        }
+
         // Articles publiés (avec images)
         Article::where('status', 'published')->whereNotNull('published_at')->get()->each(function ($article) use ($sitemap) {
             $url = Url::create(url('/blog/'.$article->slug))
