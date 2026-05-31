@@ -35,6 +35,12 @@
                             @if(Route::has('pillar.ia-dev'))
                                 <li><a href="{{ route('pillar.ia-dev') }}">{{ __('IA pour développeurs (Québec)') }}</a></li>
                             @endif
+                            @if(Route::has('pillar.veille-ia'))
+                                <li><a href="{{ route('pillar.veille-ia') }}">{{ __('Faire sa veille IA (Québec)') }}</a></li>
+                            @endif
+                            @if(Route::has('pillar.ia-generative'))
+                                <li><a href="{{ route('pillar.ia-generative') }}">{{ __('IA générative') }}</a></li>
+                            @endif
                             @if(Route::has('news.index'))
                                 <li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>
                             @endif

@@ -27,7 +27,7 @@ class SitemapController
         $sitemap->add(Url::create(route('home'))->setPriority(1.0)->setChangeFrequency('daily'));
 
         // Pages piliers SEO (S134 audit) — hubs thématiques evergreen
-        foreach (['pillar.ia-pme', 'pillar.ia-education', 'pillar.ia-dev'] as $pillarRoute) {
+        foreach (['pillar.ia-pme', 'pillar.ia-education', 'pillar.ia-dev', 'pillar.veille-ia', 'pillar.ia-generative'] as $pillarRoute) {
             if (Route::has($pillarRoute)) {
                 $sitemap->add(Url::create(route($pillarRoute))->setPriority(0.9)->setChangeFrequency('weekly'));
             }
