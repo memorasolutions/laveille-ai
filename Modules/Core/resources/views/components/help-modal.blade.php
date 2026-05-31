@@ -56,7 +56,7 @@
              @click.self="open = false">
             <div class="ct-modal-content" style="max-width: 520px;">
                 <button @click="open = false" class="ct-modal-close" aria-label="Fermer">✕</button>
-                <h3 id="ct-help-modal-title" class="ct-modal-title" x-text="modalTitle"></h3>
+                <h3 id="ct-help-modal-title" class="ct-modal-title" x-text="modalTitle || '{{ __('Aide') }}'">{{ __('Aide') }}</h3>
                 <div class="ct-modal-body" x-html="modalBody"></div>
             </div>
         </div>
