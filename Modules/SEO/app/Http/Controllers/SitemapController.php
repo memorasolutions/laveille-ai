@@ -95,7 +95,8 @@ class SitemapController
                     ->setPriority(0.7)
                     ->setChangeFrequency('monthly');
 
-                if ($tool->screenshot) {
+                // S134 SEO : ne lister QUE les images self-hosted (les screenshots externes causent des warnings sitemap-image GSC)
+                if ($tool->screenshot && ! (str_starts_with($tool->screenshot, 'http') && ! str_contains($tool->screenshot, 'laveille.ai'))) {
                     $url->addImage(str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : url($tool->screenshot));
                 }
 
@@ -190,7 +191,8 @@ class SitemapController
                         ->setPriority(0.6)
                         ->setChangeFrequency('weekly');
 
-                    if ($article->image_url) {
+                    // S134 SEO : ne lister QUE les images self-hosted (les image_url externes des sources news causent des warnings sitemap-image GSC)
+                    if ($article->image_url && ! (str_starts_with($article->image_url, 'http') && ! str_contains($article->image_url, 'laveille.ai'))) {
                         $url->addImage(str_starts_with($article->image_url, 'http') ? $article->image_url : url($article->image_url));
                     }
 
