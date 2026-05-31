@@ -29,6 +29,12 @@
                             @if(Route::has('pillar.ia-pme'))
                                 <li><a href="{{ route('pillar.ia-pme') }}">{{ __('IA pour les PME québécoises') }}</a></li>
                             @endif
+                            @if(Route::has('pillar.ia-education'))
+                                <li><a href="{{ route('pillar.ia-education') }}">{{ __('IA en éducation (Québec)') }}</a></li>
+                            @endif
+                            @if(Route::has('pillar.ia-dev'))
+                                <li><a href="{{ route('pillar.ia-dev') }}">{{ __('IA pour développeurs (Québec)') }}</a></li>
+                            @endif
                             @if(Route::has('news.index'))
                                 <li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>
                             @endif

@@ -30,9 +30,15 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         ->name('charte.reference')
         ->middleware('cacheResponse:3600');
 
-    // Page pilier SEO (S134 audit) — hub thématique evergreen, agrège annuaire/glossaire/blog (indexable)
+    // Pages piliers SEO (S134 audit) — hubs thématiques evergreen, agrègent annuaire/glossaire/blog (indexables)
     Route::view('/ia-pme-quebec', 'fronttheme::ia-pme-quebec')
         ->name('pillar.ia-pme')
+        ->middleware('cacheResponse:3600');
+    Route::view('/ia-education-quebec', 'fronttheme::ia-education-quebec')
+        ->name('pillar.ia-education')
+        ->middleware('cacheResponse:3600');
+    Route::view('/ia-developpeurs-quebec', 'fronttheme::ia-developpeurs-quebec')
+        ->name('pillar.ia-dev')
         ->middleware('cacheResponse:3600');
 
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.62.0 · 2026-05-31 · #314 feat(seo) PAGES PILIERS #2 + #3 (suite audit SEO S134). /ia-education-quebec (reco #2 92/100, « IA en éducation : étudiants, TDAH, NotebookLM ») + /ia-developpeurs-quebec (reco #3 90/100, « Claude, IA locale, MCP »). Mêmes patron sûr que le pilier #1 : hubs evergreen agrégeant le contenu EXISTANT (liens TOUS vérifiés HTTP 200 avant : éducation→articles TDAH 299imp + NotebookLM 799imp + annuaire/notebooklm + glossaire ; dev→articles cest-quoi-le-mcp + IA-locale-Mac-p3 + actualites claude-code-tokens + annuaire cursor/claude + glossaire llm/rag/mcp) + réutilise x-core::button + x-fronttheme::newsletter-form (DRY) + schema FAQPage (GEO/AEO). Contenus qwen3-max SANS faits fabriqués (pas de politiques d'établissements/specs précises). Route::view pillar.ia-education + pillar.ia-dev, ajoutées au sitemap (foreach piliers, priority 0.9) + liens footer Ressources (anti-orphelinage). Indexables. ADDITIF (aucune page existante touchée). Vérifié local : HTTP, H1, FAQPage, newsletter, liens internes valides (200). Backup tag backup-pre-pilier-pme. RESTE : 7 autres piliers proposés + sous-articles (faits Québec à valider) = sur GO. Codename seo-piliers-education-dev.
  *   1.61.0 · 2026-05-31 · #314 feat(seo) PAGE PILIER #1 /ia-pme-quebec (suite audit SEO S134, reco #1 95/100). Hub thématique evergreen « L'IA pour les PME québécoises » : agrège le contenu EXISTANT (liens vérifiés vers /annuaire + outils chatgpt/claude/perplexity, /glossaire, /blog + articles réels cest-quoi-le-mcp & declaration-montreal-ia-responsable) + réutilise les composants x-core::button et x-fronttheme::newsletter-form (DRY) + mini-FAQ avec schema FAQPage (GEO/AEO). Contenu intro rédigé par qwen3-max SANS faits Québec fabriqués (générique/juste). Route::view fronttheme::ia-pme-quebec (name pillar.ia-pme), ajoutée au sitemap (priority 0.9) + lien footer Ressources (sort la page de l'orphelinage → crawlable + maillée). Indexable (SEO title/meta/og/H1). ADDITIF : aucune page existante touchée. Vérifié local : HTTP 200, H1, FAQPage schema, newsletter form, liens internes valides, rendu visuel propre. Backup tag backup-pre-pilier-pme. Les 9 autres piliers proposés + sous-articles (faits Québec) = sur GO user. Codename seo-pilier-ia-pme.
  *   1.60.5 · 2026-05-31 · #314 fix(seo) sitemap — exclusion des IMAGES EXTERNES (fix propre des 44 warnings GSC, suite audit SEO S134). Diagnostic : /sitemap.xml (SitemapController SEO, Spatie) sain (3722 URLs, 100% HTTP 200) mais ajoutait des <image:loc> EXTERNES non maîtrisées : screenshots d'outils annuaire externes (l.99) + image_url des actualités syndiquées (l.194, images des sources) = cause probable des 44 warnings sitemap-image. Correctif (ne lister QUE les images self-hosted) : guard `! (str_starts_with http && ! str_contains laveille.ai)` sur les 2 points → garde les images relatives + laveille.ai, drope uniquement les externes. URLs de pages INCHANGÉES (aucune page retirée). Vérifié local : sitemap XML valide, 710 URLs intactes, 0 image externe restante. Backup git tag backup-pre-seo-sitemap-fix. NB : /news-sitemap.xml (794 art.) volontairement NON soumis à GSC (non conforme règle Google News 48h). Édit ciblé Opus. Codename seo-sitemap-no-external-images.
  *   1.60.4 · 2026-05-31 · #314 feat(core) commande core:find-text — outil sûr de recherche/remplacement de texte en DB (pour la demande user « remplacer Cost-plus transparent par Tarification transparente partout »). Le texte n'est PAS dans le code (grep 0) ni dans la DB locale (88 outils vs 311 prod) → il est en contenu prod. Nouvelle commande `Modules\Core\Console\FindReplaceTextCommand` (core:find-text {needle} {--replace=} {--apply} {--table=}) : scanne toutes les colonnes texte (varchar/text/json) de toutes les tables (exclut techniques telescope/jobs/cache/sessions…), rapporte table.colonne|pk|extrait ; en mode --replace --apply, BACKUP JSON (storage/app/text-replace-backups) avant chaque UPDATE ciblé (where pk), jamais de TRUNCATE/DELETE ; échappement LIKE manuel ; paramétré. Fix : méthode renommée context()→excerpt() (collision avec Illuminate\Console\Command::context() en Laravel 11+). Enregistrée dans CoreServiceProvider. Exécution prod via cron one-shot (terminal cPanel Shell indisponible) pour localiser puis remplacer, supprimé après. Génération qwen3-max, intégration Opus. Codename core-find-replace-text-cmd.
@@ -200,7 +201,7 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 61,
+    'minor' => 62,
     'patch' => 0,
 
     /**
@@ -211,7 +212,7 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'seo-pilier-ia-pme',
+    'codename' => 'seo-piliers-education-dev',
 
     /**
      * Format du SemVer assemblé.
