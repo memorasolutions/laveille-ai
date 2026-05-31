@@ -23,7 +23,7 @@ $jsonLd = [
 <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => "L'IA locale sur son ordinateur"])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => "L'IA locale sur son ordinateur", 'breadcrumbItems' => ["L'IA pour les développeurs", "L'IA locale sur son ordinateur"]])
 @endsection
 @section('content')
 <section class="wpo-blog-single-section section-padding">

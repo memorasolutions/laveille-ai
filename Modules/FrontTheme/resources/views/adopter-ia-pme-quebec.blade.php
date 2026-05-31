@@ -26,7 +26,7 @@ $jsonLd = [
 <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush
 @section('breadcrumb')
-@include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => "Adopter l'IA dans une PME au Québec"])
+@include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => "Adopter l'IA dans une PME au Québec", 'breadcrumbItems' => ["L'IA pour les PME", "Adopter l'IA dans une PME au Québec"]])
 @endsection
 @section('content')
 <section class="wpo-blog-single-section section-padding">

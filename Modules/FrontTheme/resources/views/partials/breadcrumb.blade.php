@@ -23,6 +23,9 @@
                                             __('Glossaire') => Route::has('dictionary.index') ? route('dictionary.index') : null,
                                             __('Actualités') => Route::has('news.index') ? route('news.index') : null,
                                             __('Boutique') => Route::has('shop.index') ? route('shop.index') : null,
+                                            __("L'IA pour les PME") => Route::has('pillar.ia-pme') ? route('pillar.ia-pme') : null,
+                                            __("L'IA en éducation") => Route::has('pillar.ia-education') ? route('pillar.ia-education') : null,
+                                            __("L'IA pour les développeurs") => Route::has('pillar.ia-dev') ? route('pillar.ia-dev') : null,
                                         ];
                                         $url = $breadcrumbRoutes[$item] ?? null;
                                     @endphp
