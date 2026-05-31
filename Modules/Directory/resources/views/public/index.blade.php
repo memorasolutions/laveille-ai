@@ -62,9 +62,11 @@
     .rt-search-input:focus { border-color: var(--c-primary); box-shadow: 0 4px 15px rgba(11,114,133,0.1); }
     .rt-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #374151; width: 20px; height: 20px; }
 
-    .rt-pill { display: inline-flex; align-items: center; gap: 4px; padding: 7px 16px; min-height: 44px; border-radius: var(--r-btn); background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; }
+    .rt-pill { display: inline-flex; align-items: center; gap: 4px; padding: 7px 16px; min-height: 44px; border-radius: var(--r-btn); background: #F3F4F6; color: var(--c-dark); font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
     .rt-pill:hover { background: #E5E7EB; }
     .rt-pill.active { background: var(--c-primary); color: #fff; }
+    /* S134 a11y : base CSS du toggle de vue (teal sur blanc) = contraste AAA garanti même avant l'init Alpine / sans JS (évite l'héritage du gris #777 de Bloggar). L'état actif (fond teal/texte blanc) est appliqué par le :style Alpine. */
+    .rt-view-toggle button { background: #fff; color: var(--c-primary, #064E5A); transition: background-color 0.15s, color 0.15s, border-color 0.15s; }
 
     .rt-sort-bar { display: flex; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px; }
     .rt-sort-tab { padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; font-size: 0.9rem; color: #374151; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
