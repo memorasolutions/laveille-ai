@@ -45,6 +45,7 @@
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Guides techniques</h2>
             <p>Des tutoriels concrets : IA locale sur Mac, MCP et optimisation des tokens.</p>
             <ul>
+                <li><a href="{{ route('guide.ia-locale') }}" style="color: var(--sys-text-link, #064E5A);">L'IA locale : faire tourner un modèle de langage sur son ordinateur</a></li>
                 <li><a href="{{ route('blog.show', 'cest-quoi-le-mcp-le-guide-simplifie-de-la-revolution-ia-au-quebec') }}" style="color: var(--sys-text-link, #064E5A);">C'est quoi le MCP ? Le guide simplifié</a></li>
                 <li><a href="{{ route('blog.show', 'jai-cree-mon-ia-en-local-sur-mon-mac-partie-3') }}" style="color: var(--sys-text-link, #064E5A);">J'ai créé mon IA en local sur mon Mac (partie 3)</a></li>
                 <li><a href="{{ route('news.show', 'claude-code-les-6-meilleures-techniques-pour-ne-plus-jamais-manquer-de-tokens') }}" style="color: var(--sys-text-link, #064E5A);">Claude Code : 6 techniques pour ne plus manquer de tokens</a></li>

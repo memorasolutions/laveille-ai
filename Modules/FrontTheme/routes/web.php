@@ -54,6 +54,9 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::view('/ia-pour-etudier-quebec', 'fronttheme::ia-pour-etudier-quebec')
         ->name('guide.ia-etudier')
         ->middleware('cacheResponse:3600');
+    Route::view('/ia-locale-sur-son-ordinateur', 'fronttheme::ia-locale-sur-son-ordinateur')
+        ->name('guide.ia-locale')
+        ->middleware('cacheResponse:3600');
 
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
     Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])
