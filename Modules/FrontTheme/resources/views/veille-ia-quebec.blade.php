@@ -29,6 +29,9 @@
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Suivre l'actualité IA</h2>
             <p>Restez à jour avec les nouvelles les plus pertinentes en IA, filtrées selon les enjeux québécois et les développements concrets.</p>
             <p style="margin:16px 0;"><x-core::button :href="route('news.index')" variant="primary">Voir les actualités IA</x-core::button></p>
+            <ul>
+                <li><a href="{{ route('guide.veille-adoption') }}" style="color: var(--sys-text-link, #064E5A);">L'adoption de l'IA générative au Québec : les chiffres</a></li>
+            </ul>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Outils de veille</h2>
             <p>Une sélection d'outils pratiques pour automatiser, organiser et prioriser votre veille.</p>

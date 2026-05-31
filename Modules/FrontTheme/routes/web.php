@@ -60,6 +60,9 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
     Route::view('/ia-generative-capacites-limites', 'fronttheme::ia-generative-capacites-limites')
         ->name('guide.ia-generative')
         ->middleware('cacheResponse:3600');
+    Route::view('/adoption-ia-generative-quebec', 'fronttheme::adoption-ia-generative-quebec')
+        ->name('guide.veille-adoption')
+        ->middleware('cacheResponse:3600');
 
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
     Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])
