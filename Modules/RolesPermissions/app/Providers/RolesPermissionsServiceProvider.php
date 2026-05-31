@@ -27,8 +27,20 @@ class RolesPermissionsServiceProvider extends BaseModuleServiceProvider
         $this->registerCommands();
         $this->bootModule();
 
-        // super_admin bypasses all permission/policy checks
-        Gate::before(fn ($user) => $user->hasRole('super_admin') ? true : null);
+        // super_admin bypasses all permission/policy checks.
+        // Le super-admin configuré (app.superadmin_email) passe TOUJOURS, même si la
+        // résolution du rôle spatie est transitoirement indisponible au 1er hit post-login
+        // (corrige « menus admin manquants au login, présents au refresh »). Portée stricte :
+        // ne peut accorder l'accès qu'au courriel super-admin configuré, jamais à un tiers.
+        Gate::before(function ($user) {
+            $superEmail = config('app.superadmin_email');
+
+            if ($superEmail && $user->email === $superEmail) {
+                return true;
+            }
+
+            return $user->hasRole('super_admin') ? true : null;
+        });
     }
 
     /**
