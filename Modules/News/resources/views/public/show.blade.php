@@ -267,7 +267,7 @@
                     {{-- Résumé structuré --}}
                     @if($ss)
                         @if(!empty($ss['key_points']))
-                        <h3 class="nw-section-heading">{{ __('Que faut-il retenir ?') }}</h3>
+                        <h2 class="nw-section-heading">{{ __('Que faut-il retenir ?') }}</h2>
                         <ul class="nw-key-list">
                             @foreach($ss['key_points'] as $point)
                                 <li>@glossarize(e($point))</li>
@@ -276,7 +276,7 @@
                         @endif
 
                         @if(isset($ss['why_important']))
-                        <h3 class="nw-section-heading">{{ __('Pourquoi cette nouvelle compte-t-elle ?') }}</h3>
+                        <h2 class="nw-section-heading">{{ __('Pourquoi cette nouvelle compte-t-elle ?') }}</h2>
                         <div class="nw-why">
                             <p>@glossarize(e($ss['why_important']))</p>
                             @if(!empty($ss['key_stat']))
