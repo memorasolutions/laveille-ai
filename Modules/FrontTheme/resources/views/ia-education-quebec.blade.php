@@ -40,6 +40,7 @@
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Guides pratiques</h2>
             <p>Des articles concrets pour utiliser l'IA de façon éthique et efficace dans les études.</p>
             <ul>
+                <li><a href="{{ route('guide.ia-etudier') }}" style="color: var(--sys-text-link, #064E5A);">L'IA pour étudier au Québec : usages, bénéfices et règles</a></li>
                 <li><a href="{{ route('blog.show', 'la-plupart-des-etudiants-tdah-utilisent-mal-lia-voici-le-guide-complet-et-concret') }}" style="color: var(--sys-text-link, #064E5A);">La plupart des étudiants TDAH utilisent mal l'IA : le guide complet et concret</a></li>
                 <li><a href="{{ route('blog.show', 'notebooklm-le-guide-complet-pour-maitriser-toutes-les-options-expliquees-simplement') }}" style="color: var(--sys-text-link, #064E5A);">Guide complet de NotebookLM expliqué simplement</a></li>
                 <li><a href="{{ route('blog.index') }}" style="color: var(--sys-text-link, #064E5A);">Tous les guides du blogue</a></li>
