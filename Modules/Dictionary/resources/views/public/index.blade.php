@@ -582,6 +582,10 @@
         </div>
     </div>
 
+    {{-- S134 SEO : cluster bidirectionnel — le hub glossaire pointe vers les piliers thématiques (les 5). --}}
+    <div class="container">
+        @include('fronttheme::partials.pillars-related')
+    </div>
 
 </section>
 @endsection

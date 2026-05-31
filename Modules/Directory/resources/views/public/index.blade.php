@@ -1162,6 +1162,11 @@
     </div>
 </div>
 
+{{-- S134 SEO : cluster bidirectionnel — le hub annuaire pointe vers les piliers thématiques (les 5). --}}
+<div class="container" style="padding-bottom:40px;">
+    @include('fronttheme::partials.pillars-related')
+</div>
+
 <x-directory::compare-bar />
 @endsection
 
