@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.63.11 · 2026-05-31 · #315 fix(boot) — application effective du guard C (l'Edit avait échoué en v1.63.10 : mauvaise indentation, seul B avait été déployé). Ajout `is_file()` avant le `require` dans BaseModuleServiceProvider::mergeConfigDeep → plus de fatal de boot si un config module est brièvement absent pendant un déploiement. B (bypass super_admin résilient) reste déployé depuis 1.63.10. Lint OK. Codename seo-piliers-veille-generative.
  *   1.63.10 · 2026-05-31 · #315 fix(admin/a11y-boot) « menus admin manquants au 1er login, présents au refresh ». Cause probable : résolution transitoire du rôle/permissions au 1er hit post-login (gating sidebar = 98 @can + bypass Gate::before super_admin via hasRole). Fix B (sûr, portée stricte) : le super-admin configuré (config app.superadmin_email) passe TOUJOURS le Gate::before, même si hasRole('super_admin') est transitoirement indisponible — ne peut accorder l'accès qu'au courriel super-admin configuré, jamais à un tiers. Fix C : guard is_file() dans BaseModuleServiceProvider::mergeConfigDeep (le require d'un config module brièvement absent pendant un git reset --hard de déploiement fatalisait le boot — vu dans les logs prod le 31/05). DIFFÉRÉ A (permission.cache.store file→database) : hypothèse non confirmée + risque si table cache non migrée → non appliqué. ADDITIF, lint OK, déployé. Codename seo-piliers-veille-generative.
  *   1.63.9 · 2026-05-31 · #314 feat(seo/ux) FILS D'ARIANE HIÉRARCHIQUES sur les 3 sous-articles (audit « 100 % » user). Avant : fil plat (Accueil > titre). Après : Accueil > [Pilier parent LIÉ] > sous-article, + BreadcrumbList schema 3 niveaux (meilleure compréhension hiérarchie par Google + navigation retour au pilier). Ajout des 3 routes piliers (PME/éducation/dev) à la table $breadcrumbRoutes du partial breadcrumb (additif, aucune page existante n'utilise ces libellés) + breadcrumbItems sur les 3 sous-articles. Vérifié local (parent lié, positions 1/2/3). ADDITIF. Codename seo-piliers-veille-generative.
  *   1.63.8 · 2026-05-31 · #314 feat(seo) 3e SOUS-ARTICLE FACTUEL (pilier développeurs) — `/ia-locale-sur-son-ordinateur` (route guide.ia-locale). Faits techniques sourcés Perplexity (sonar-pro) : outils (Ollama, LM Studio, llama.cpp, GPT4All, Jan), modèles ouverts (Llama, Mistral, Qwen, Gemma, DeepSeek), prérequis matériel par taille en 4 bits (7-8B≈8 Go VRAM+16 Go RAM ; 13-14B≈12-16+32 ; 70B≈40 Go+/multi-GPU ; quantification 70B 140→35 Go), avantages (confidentialité/coût/hors-ligne) + limites (perf vs cloud, vitesse, maj manuelles). Squelette éprouvé écrit par superviseur (faits verbatim) + lien blog IA-locale-Mac. Route::view + sitemap (0.7) + maillage bidirectionnel pillar.ia-dev↔sous-article. ADDITIF. Vérifié local. Codename seo-piliers-veille-generative.
@@ -213,7 +214,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 63,
-    'patch' => 10,
+    'patch' => 11,
 
     /**
      * Codename optionnel (nom de la release courante).

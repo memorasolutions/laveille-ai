@@ -60,6 +60,12 @@ abstract class BaseModuleServiceProvider extends ServiceProvider
 
     protected function mergeConfigDeep(string $path, string $key): void
     {
+        // Garde anti-fatal pendant les déploiements (git reset --hard) : un fichier de
+        // config de module peut être brièvement absent → require fataliserait le boot.
+        if (! is_file($path)) {
+            return;
+        }
+
         config([$key => array_replace_recursive(config($key, []), require $path)]);
     }
 
