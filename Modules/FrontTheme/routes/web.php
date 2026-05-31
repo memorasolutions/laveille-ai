@@ -30,6 +30,11 @@ Route::middleware(['web', SetFrontendTheme::class])->group(function () {
         ->name('charte.reference')
         ->middleware('cacheResponse:3600');
 
+    // Page pilier SEO (S134 audit) — hub thématique evergreen, agrège annuaire/glossaire/blog (indexable)
+    Route::view('/ia-pme-quebec', 'fronttheme::ia-pme-quebec')
+        ->name('pillar.ia-pme')
+        ->middleware('cacheResponse:3600');
+
     // Flux RSS (S90 #43 — distribution multi-canal + AI agents/chatbots)
     Route::get('/rss/concentres.xml', [\Modules\FrontTheme\Http\Controllers\RssFeedController::class, 'concentres'])
         ->name('rss.concentres');

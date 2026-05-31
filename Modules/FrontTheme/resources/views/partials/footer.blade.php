@@ -26,6 +26,9 @@
                             @if(Route::has('directory.index'))
                                 <li><a href="{{ route('directory.index') }}">{{ __('Répertoire techno') }}</a></li>
                             @endif
+                            @if(Route::has('pillar.ia-pme'))
+                                <li><a href="{{ route('pillar.ia-pme') }}">{{ __('IA pour les PME québécoises') }}</a></li>
+                            @endif
                             @if(Route::has('news.index'))
                                 <li><a href="{{ route('news.index') }}">{{ __('Actualités') }}</a></li>
                             @endif

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.61.0 · 2026-05-31 · #314 feat(seo) PAGE PILIER #1 /ia-pme-quebec (suite audit SEO S134, reco #1 95/100). Hub thématique evergreen « L'IA pour les PME québécoises » : agrège le contenu EXISTANT (liens vérifiés vers /annuaire + outils chatgpt/claude/perplexity, /glossaire, /blog + articles réels cest-quoi-le-mcp & declaration-montreal-ia-responsable) + réutilise les composants x-core::button et x-fronttheme::newsletter-form (DRY) + mini-FAQ avec schema FAQPage (GEO/AEO). Contenu intro rédigé par qwen3-max SANS faits Québec fabriqués (générique/juste). Route::view fronttheme::ia-pme-quebec (name pillar.ia-pme), ajoutée au sitemap (priority 0.9) + lien footer Ressources (sort la page de l'orphelinage → crawlable + maillée). Indexable (SEO title/meta/og/H1). ADDITIF : aucune page existante touchée. Vérifié local : HTTP 200, H1, FAQPage schema, newsletter form, liens internes valides, rendu visuel propre. Backup tag backup-pre-pilier-pme. Les 9 autres piliers proposés + sous-articles (faits Québec) = sur GO user. Codename seo-pilier-ia-pme.
  *   1.60.5 · 2026-05-31 · #314 fix(seo) sitemap — exclusion des IMAGES EXTERNES (fix propre des 44 warnings GSC, suite audit SEO S134). Diagnostic : /sitemap.xml (SitemapController SEO, Spatie) sain (3722 URLs, 100% HTTP 200) mais ajoutait des <image:loc> EXTERNES non maîtrisées : screenshots d'outils annuaire externes (l.99) + image_url des actualités syndiquées (l.194, images des sources) = cause probable des 44 warnings sitemap-image. Correctif (ne lister QUE les images self-hosted) : guard `! (str_starts_with http && ! str_contains laveille.ai)` sur les 2 points → garde les images relatives + laveille.ai, drope uniquement les externes. URLs de pages INCHANGÉES (aucune page retirée). Vérifié local : sitemap XML valide, 710 URLs intactes, 0 image externe restante. Backup git tag backup-pre-seo-sitemap-fix. NB : /news-sitemap.xml (794 art.) volontairement NON soumis à GSC (non conforme règle Google News 48h). Édit ciblé Opus. Codename seo-sitemap-no-external-images.
  *   1.60.4 · 2026-05-31 · #314 feat(core) commande core:find-text — outil sûr de recherche/remplacement de texte en DB (pour la demande user « remplacer Cost-plus transparent par Tarification transparente partout »). Le texte n'est PAS dans le code (grep 0) ni dans la DB locale (88 outils vs 311 prod) → il est en contenu prod. Nouvelle commande `Modules\Core\Console\FindReplaceTextCommand` (core:find-text {needle} {--replace=} {--apply} {--table=}) : scanne toutes les colonnes texte (varchar/text/json) de toutes les tables (exclut techniques telescope/jobs/cache/sessions…), rapporte table.colonne|pk|extrait ; en mode --replace --apply, BACKUP JSON (storage/app/text-replace-backups) avant chaque UPDATE ciblé (where pk), jamais de TRUNCATE/DELETE ; échappement LIKE manuel ; paramétré. Fix : méthode renommée context()→excerpt() (collision avec Illuminate\Console\Command::context() en Laravel 11+). Enregistrée dans CoreServiceProvider. Exécution prod via cron one-shot (terminal cPanel Shell indisponible) pour localiser puis remplacer, supprimé après. Génération qwen3-max, intégration Opus. Codename core-find-replace-text-cmd.
  *   1.60.3 · 2026-05-31 · #314 fix(a11y) raffinage toggle de vue + pills annuaire (demande user). DIAGNOSTIC (mesure live Playwright) : les états RÉELS du toggle (.rt-view-toggle button) et des pills (.rt-pill) sont DÉJÀ AAA — toggle actif #fff/#064E5A 9,35:1, inactif #064E5A/blanc ; pill actif #fff/#064E5A, inactif #1A1D23/#F3F4F6. Les échecs wcag-mcp (#757575 sur teal-tint 1,74:1 ; #606266 sur teal clair 3,25:1) étaient des ARTEFACTS de transition/pré-Alpine : le toggle n'avait AUCUNE base CSS (que le :style Alpine) → avant l'init JS il héritait du gris #777 de Bloggar sur un fond en cours de transition. RAFFINAGE : (1) base CSS .rt-view-toggle button { background:#fff; color:var(--c-primary,#064E5A); } = contraste AAA garanti même pré-JS / sans JS (le :style Alpine applique l'état actif teal/blanc) ; (2) transitions scopées (.rt-pill + toggle : `all`→`background-color,color,border-color`) pour réduire la fenêtre d'artefact. Le pill avait déjà sa base CSS AAA (robuste), aucune correction de fond nécessaire. Vérifié wcag-mcp post-déploiement. Édit ciblé Opus (CSS). Codename a11y-annuaire-toggle-pill.
@@ -199,8 +200,8 @@ declare(strict_types=1);
 
 return [
     'major' => 1,
-    'minor' => 60,
-    'patch' => 5,
+    'minor' => 61,
+    'patch' => 0,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -210,7 +211,7 @@ return [
      * Module Authors DÉSACTIVÉ dans modules_statuses.json — pas de risque prod.
      * Activation prod nécessitera : tests visuels Playwright local + migrations en local + smoke + GO user explicite.
      */
-    'codename' => 'seo-sitemap-no-external-images',
+    'codename' => 'seo-pilier-ia-pme',
 
     /**
      * Format du SemVer assemblé.
