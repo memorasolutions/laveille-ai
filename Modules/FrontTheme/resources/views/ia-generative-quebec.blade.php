@@ -46,6 +46,9 @@
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Bonnes pratiques</h2>
             <p>Utilisez l'IA de façon éthique : vérifiez toujours les faits, respectez les droits d'auteur et gardez un contrôle humain sur le contenu final.</p>
+            <ul>
+                <li><a href="{{ route('guide.ia-generative') }}" style="color: var(--sys-text-link, #064E5A);">IA générative : capacités, limites et bonnes pratiques</a></li>
+            </ul>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Rester à jour</h2>
             <p>Recevez des mises à jour fiables sur les évolutions de l'IA générative.</p>

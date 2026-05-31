@@ -214,7 +214,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 63,
-    'patch' => 11,
+    'patch' => 12,
 
     /**
      * Codename optionnel (nom de la release courante).

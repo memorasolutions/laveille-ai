@@ -26,6 +26,8 @@
                                             __("L'IA pour les PME") => Route::has('pillar.ia-pme') ? route('pillar.ia-pme') : null,
                                             __("L'IA en éducation") => Route::has('pillar.ia-education') ? route('pillar.ia-education') : null,
                                             __("L'IA pour les développeurs") => Route::has('pillar.ia-dev') ? route('pillar.ia-dev') : null,
+                                            __('IA générative') => Route::has('pillar.ia-generative') ? route('pillar.ia-generative') : null,
+                                            __('Faire sa veille IA') => Route::has('pillar.veille-ia') ? route('pillar.veille-ia') : null,
                                         ];
                                         $url = $breadcrumbRoutes[$item] ?? null;
                                     @endphp
