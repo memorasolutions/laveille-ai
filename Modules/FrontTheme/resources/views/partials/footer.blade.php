@@ -100,7 +100,7 @@
                             @if(Route::has('legal.cookies'))
                                 <li><a href="{{ route('legal.cookies') }}">{{ __('Cookies') }}</a></li>
                             @endif
-                            <li><a href="#" onclick="event.preventDefault(); var fab=document.getElementById('cc-fab'); if(fab) fab.click();" style="cursor: pointer;">{{ __('Gerer les temoins') }}</a></li>
+                            <li><a href="#" onclick="event.preventDefault(); var fab=document.getElementById('cc-fab'); if(fab) fab.click();" style="cursor: pointer;">{{ __('Gérer les témoins') }}</a></li>
                             @if(Route::has('sitemap.html'))
                                 <li><a href="{{ route('sitemap.html') }}">{{ __('Plan du site') }}</a></li>
                             @endif
