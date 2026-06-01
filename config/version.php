@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.63.22 · 2026-06-01 · #319 fix(CRITIQUE site-wide) `semver` était FIGÉ en dur à '1.55.18' → cache-bust `?v={{ config('version.semver') }}` de TOUS les assets (CSS/JS outils) inchangé depuis ~30 versions → navigateurs + Cloudflare (max-age 30j) servaient le CSS/JS PÉRIMÉ. **VRAIE cause racine du « popup à gauche persistant »** (fix CSS v1.63.18-20 corrects mais jamais servis, URL restait ?v=1.55.18). Fix : `semver` DÉRIVÉ de major.minor.patch (source unique) → l'URL des assets change à chaque version → cache auto-invalidé. TOUS les outils bénéficient enfin de leurs CSS/JS à jour. Codename seo-piliers-veille-generative.
  *   1.63.21 · 2026-06-01 · #318 fix(anonymiseur) CAUSE RACINE popup à gauche = SERVICE WORKER. sw.js avait CACHE_NAME figé 'anonymiseur-v1-45-0' + stratégie CACHE-FIRST sur CSS/JS/HTML → servait ÉTERNELLEMENT l'ancien styles.css (avec l'ancienne règle .confirm-modal sur l'overlay) aux users ayant le SW installé, masquant TOUS les déploiements (d'où « popup encore à gauche » malgré les fix CSS corrects v1.63.18-20). Fix : (1) CACHE_NAME → 'anonymiseur-v1-63-20' (l'activate purge déjà les anciens caches anonymiseur-*). (2) stratégie NETWORK-FIRST pour le shell (toujours la dernière version si réseau OK, fallback cache hors-ligne → PWA préservée). Les fix CSS centrage (v1.63.18 .app .confirm-modal .modal max-width 360 sur la boîte ; v1.63.19 dé-dup .modal-overlay + margin auto ; v1.63.20 overlay forcé plein écran max-width:none) sont corrects et désormais réellement servis. Codename seo-piliers-veille-generative.
  *   1.63.19 · 2026-06-01 · #318 fix(anonymiseur) centrage modales BULLETPROOF + dé-duplication CSS. Retrait du bloc `.modal-overlay` DUPLIQUÉ (l.975, sans .app, z-index 1000) qui divergeait de la source `.app .modal-overlay` (l.131, flex center !important z-index 10000) → source unique. Ajout garantie `.app .modal-overlay > .modal { margin:auto !important }` = TOUTES les popups de l'outil centrées vertical+horizontal en tout temps (confirmModal, ruleModal, futures). Complète le fix v1.63.18 (.app .confirm-modal .modal). NB le test E2E v1.63.18 voyait du CSS caché (profil Playwright) ; CSS prod vérifié correct. Anti-duplication appliquée. Migration vers composant CORE x-core::confirm-modal = refactor DRY noté (#refactor, non fait à chaud). Codename seo-piliers-veille-generative.
  *   1.63.18 · 2026-06-01 · #318 fix(anonymiseur) popup confirmation (#confirmModal « Êtes-vous sûr ? ») décentrée à GAUCHE. Cause : `.confirm-modal` (assets/tools/anonymiseur/styles.css l.1071) appliquait max-width:360px + padding:32px directement sur l'élément `.modal-overlay` (plein écran flex) au lieu de la boîte interne → l'overlay rétréci se collait à gauche. Fix : sélecteur `.app .confirm-modal .modal` (cible la boîte interne, width:auto + max-width:360px ; l'overlay garde son flex center). CSS statique (pas de build). NB anti-duplication : un composant CORE x-core::confirm-modal existe ; migration de #confirmModal vers ce composant = amélioration DRY notée (#refactor) mais NON faite à chaud (anonymiseur vient d'être réparé, refactor JS+HTML risqué). Codename seo-piliers-veille-generative.
@@ -220,10 +221,14 @@ declare(strict_types=1);
  *   1.0.0 · 2026-05-08 · Initial production release (comparateur multi-outils livré)
  */
 
+$lvMajor = 1;
+$lvMinor = 63;
+$lvPatch = 22;
+
 return [
-    'major' => 1,
-    'minor' => 63,
-    'patch' => 21,
+    'major' => $lvMajor,
+    'minor' => $lvMinor,
+    'patch' => $lvPatch,
 
     /**
      * Codename optionnel (nom de la release courante).
@@ -236,8 +241,10 @@ return [
     'codename' => 'seo-piliers-veille-generative',
 
     /**
-     * Format du SemVer assemblé.
-     * Lu via lv_version() dans app/Helpers/version.php.
+     * Format du SemVer assemblé — DÉRIVÉ automatiquement de major.minor.patch (source unique).
+     * (Était figé en dur à '1.55.18' → cache-bust ?v={{semver}} des assets cassé site-wide :
+     *  navigateurs + Cloudflare servaient le CSS/JS périmé. Fix 2026-06-01 #319.)
+     * Lu via lv_version() dans app/Helpers/version.php + cache-bust assets ?v={{ config('version.semver') }}.
      */
-    'semver' => '1.55.18',
+    'semver' => $lvMajor.'.'.$lvMinor.'.'.$lvPatch,
 ];
