@@ -14,19 +14,19 @@ class DirectoryCategoriesSeeder extends Seeder
     {
         $categories = [
             ['name' => 'Assistants IA', 'icon' => '🤖', 'slug' => 'assistants-ia'],
-            ['name' => 'Ecriture IA', 'icon' => '✍️', 'slug' => 'ecriture-ia'],
-            ['name' => "Generation d'images", 'icon' => '🎨', 'slug' => 'generation-images'],
+            ['name' => 'Écriture IA', 'icon' => '✍️', 'slug' => 'ecriture-ia'],
+            ['name' => "Génération d'images", 'icon' => '🎨', 'slug' => 'generation-images'],
             ['name' => 'Audio et voix', 'icon' => '🎵', 'slug' => 'audio-voix'],
-            ['name' => 'Video IA', 'icon' => '🎬', 'slug' => 'video'],
-            ['name' => 'Code et developpement', 'icon' => '💻', 'slug' => 'developpement'],
-            ['name' => 'Productivite', 'icon' => '📊', 'slug' => 'productivite'],
-            ['name' => 'Design et creation', 'icon' => '🖌️', 'slug' => 'design'],
+            ['name' => 'Vidéo IA', 'icon' => '🎬', 'slug' => 'video'],
+            ['name' => 'Code et développement', 'icon' => '💻', 'slug' => 'developpement'],
+            ['name' => 'Productivité', 'icon' => '📊', 'slug' => 'productivite'],
+            ['name' => 'Design et création', 'icon' => '🖌️', 'slug' => 'design'],
             ['name' => 'Recherche et analyse', 'icon' => '🔍', 'slug' => 'recherche'],
             ['name' => 'SEO, GEO et AEO', 'icon' => '📈', 'slug' => 'seo-geo-aeo'],
-            ['name' => 'Education et formation', 'icon' => '🎓', 'slug' => 'education'],
+            ['name' => 'Éducation et formation', 'icon' => '🎓', 'slug' => 'education'],
             ['name' => 'Agents IA', 'icon' => '🤝', 'slug' => 'agents-ia'],
             ['name' => 'Musique IA', 'icon' => '🎶', 'slug' => 'musique-ia'],
-            ['name' => 'Presentations', 'icon' => '📑', 'slug' => 'presentations'],
+            ['name' => 'Présentations', 'icon' => '📑', 'slug' => 'presentations'],
             ['name' => 'No-code et automatisation', 'icon' => '⚡', 'slug' => 'no-code'],
         ];
 
