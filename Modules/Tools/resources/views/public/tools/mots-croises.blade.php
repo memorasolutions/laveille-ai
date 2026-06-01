@@ -1039,6 +1039,10 @@
     .crossword-print-footer { display: block !important; }
   }
 </style>
+
+<div class="no-print">
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'mots-croises'])
+</div>
 @endsection
 
 @push('scripts')

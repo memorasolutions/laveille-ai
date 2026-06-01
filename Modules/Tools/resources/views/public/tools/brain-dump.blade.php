@@ -809,4 +809,6 @@ function brainDumpPage() {
     };
 }
 </script>
+
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'brain-dump'])
 @endsection

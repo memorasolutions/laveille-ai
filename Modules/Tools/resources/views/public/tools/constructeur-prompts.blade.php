@@ -411,6 +411,8 @@
         </div>
     </div>
 </div>
+
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'constructeur-prompts'])
 @endsection
 
 @push('head')

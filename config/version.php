@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.63.14 · 2026-06-01 · #316 feat(retention) CTA INFOLETTRE dans les OUTILS (suite diag 2026-06-01 : les outils = aimant rétention #1, devant l'éditorial ; constructeur-prompts = page #1 du site 225 vues, mots-croises 17 min/session). Nouveau partial DRY `fronttheme::partials.tools-newsletter-cta` (bloc discret non intrusif « Cet outil vous a été utile ? » + réutilise x-fronttheme::newsletter-form, source `outil-{slug}` pour traçabilité, tokens --sys-*) inclus en bas de constructeur-prompts, mots-croises (dans .no-print) et brain-dump. But : convertir le visiteur le plus engagé (outils) en abonné infolettre. ADDITIF (aucune logique outil touchée). sudoku exclu (pas de vue dédiée). Vérifié local (constructeur-prompts 200 + CTA + form + source ; mots-croises/brain-dump 404 LOCAL = DB dev non seedée, 200 en prod). Codename seo-piliers-veille-generative.
  *   1.63.13 · 2026-05-31 · #314 feat(seo) 5e SOUS-ARTICLE FACTUEL (pilier veille) — `/adoption-ia-generative-quebec` (route guide.veille-adoption). Angle SOCIÉTÉ/grand public distinct des sous-articles PME (entreprises) et éducation (étudiants) : adoption de l'IA générative par la population QC (NETendances/ATN Université Laval : 52 % des adultes en 2025 vs 33 % 2024 vs ~16 % 2023 ; ChatGPT ~84 % des utilisateurs ; 18-34 ans les plus actifs, 55+ les moins). Faits sourcés Perplexity (sonar-pro, cohérents avec recherche sous-article éducation). Squelette éprouvé (superviseur) + FAQPage + breadcrumb hiérarchique + Route::view + sitemap (0.7) + maillage bidirectionnel pillar.veille-ia. **5/5 piliers ont maintenant leur cornerstone factuel.** ADDITIF. Vérifié local. Codename seo-piliers-veille-generative.
  *   1.63.12 · 2026-05-31 · #314 feat(seo) 4e SOUS-ARTICLE FACTUEL (pilier génératif) — `/ia-generative-capacites-limites` (route guide.ia-generative). Angle descriptif STABLE : types par modalité (texte/image/audio/vidéo/code + multimodaux), fonctionnement (prédiction probabiliste, ne « comprend » pas), limites (hallucinations/biais/dépendance prompt/connaissances figées), bonnes pratiques. Faits Perplexity (sonar-pro). FAQPage + breadcrumb hiérarchique (ajout libellés piliers génératif+veille à la table breadcrumb) + Route::view + sitemap (0.7) + maillage bidirectionnel pillar.ia-generative. Vérifié prod (WCAG 0 non-conf). Codename seo-piliers-veille-generative.
  *   1.63.11 · 2026-05-31 · #315 fix(boot) — application effective du guard C (l'Edit avait échoué en v1.63.10 : mauvaise indentation, seul B avait été déployé). Ajout `is_file()` avant le `require` dans BaseModuleServiceProvider::mergeConfigDeep → plus de fatal de boot si un config module est brièvement absent pendant un déploiement. B (bypass super_admin résilient) reste déployé depuis 1.63.10. Lint OK. Codename seo-piliers-veille-generative.
@@ -216,7 +217,7 @@ declare(strict_types=1);
 return [
     'major' => 1,
     'minor' => 63,
-    'patch' => 13,
+    'patch' => 14,
 
     /**
      * Codename optionnel (nom de la release courante).
