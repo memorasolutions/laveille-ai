@@ -1057,11 +1057,20 @@ body {
     border-radius: 0 0 var(--radius) var(--radius);
 }
 
-/* Modal de confirmation — cibler la BOÎTE interne (.modal), PAS l'overlay plein écran
-   (sinon max-width/padding s'appliquent à l'overlay flex → boîte décentrée à gauche). Fix 2026-06-01. */
+/* Modal de confirmation. GARANTIE centrage « en tout temps » : l'OVERLAY doit rester plein écran
+   (flex center) — on force donc max-width:none/width:100% dessus pour qu'aucune règle ne puisse
+   le rétrécir et le coller à gauche. Le max-width 360px va sur la BOÎTE interne .modal. Fix 2026-06-01. */
+.app .confirm-modal.modal-overlay {
+    max-width: none !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 0 !important;
+}
 .app .confirm-modal .modal {
     max-width: 360px !important;
     width: auto !important;
+    margin: auto !important;
     text-align: center;
     padding: 32px;
 }
