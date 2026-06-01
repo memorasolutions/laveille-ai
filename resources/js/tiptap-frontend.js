@@ -373,7 +373,6 @@ async function initAnonymiseurTiptap() {
             StarterKit.configure({ codeBlock: false, link: { openOnClick: false }, heading: { levels: [2, 3] } }),
             Placeholder.configure({ placeholder: 'Collez ici le texte à anonymiser avant de l\'envoyer à une IA…' }),
             Highlight.configure({ multicolor: true }),
-            Underline,
             AnonymDetectionHighlight
         ],
         editorProps: {
