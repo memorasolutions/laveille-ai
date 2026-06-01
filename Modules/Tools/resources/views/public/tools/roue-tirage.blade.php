@@ -373,6 +373,7 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
         </div>
     </div>
 </div>
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'roue-tirage'])
 @endsection
 
 @push('scripts')

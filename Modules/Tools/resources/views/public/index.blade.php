@@ -268,4 +268,6 @@
             #tools-sort:focus { border-color: #053D4A; box-shadow: 0 0 0 3px rgba(5, 61, 74, .15); }
         </style>
     </section>
+
+    @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'index-outils'])
 @endsection

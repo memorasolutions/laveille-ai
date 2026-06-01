@@ -610,4 +610,5 @@ function fiscalSim(cfg) {
         </div>
     </div>
 </div>
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'simulateur-fiscal'])
 @endsection

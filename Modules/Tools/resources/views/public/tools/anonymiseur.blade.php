@@ -462,6 +462,7 @@
         </div>{{-- /.row --}}
     </div>{{-- /.container --}}
 </section>
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'anonymiseur'])
 @endsection
 
 @push('scripts')

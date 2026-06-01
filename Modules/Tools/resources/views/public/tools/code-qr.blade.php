@@ -548,6 +548,7 @@
         </div>
     </div>
 </div>
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'code-qr'])
 @endsection
 
 @push('scripts')
