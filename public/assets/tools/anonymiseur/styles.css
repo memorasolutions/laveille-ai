@@ -972,22 +972,12 @@ body {
 /* ============================================
    MODAL
    ============================================ */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all var(--transition);
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
+/* SOURCE UNIQUE du centrage des modales : voir `.app .modal-overlay` plus haut (≈ l.131,
+   flex center + !important). Ancien bloc dupliqué retiré (2026-06-01) pour éviter la divergence.
+   Garantie « toutes les popups centrées en tout temps » : l'overlay centre via flex, et toute
+   boîte interne .modal reste auto-centrée (ni top/left ancrés, ni margin imposée). */
+.app .modal-overlay > .modal {
+    margin: auto !important;
 }
 
 .modal {
