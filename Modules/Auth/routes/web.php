@@ -42,8 +42,9 @@ Route::middleware(['guest', 'throttle:10,1'])->group(function () {
 });
 
 // MagicLink - connexion sans mot de passe avec code 6 caractères
-// GET d'affichage : pas de throttle (pages stateless, aucun secret exposé)
-Route::middleware(['guest'])->group(function () {
+// GET d'affichage : throttle GÉNÉREUX 20/min (UX fluide pour l'humain, bloque l'énumération
+// de masse via ?email= sur /magic-link/verify — cf. QC code-reviewer-fr 2026-06-01)
+Route::middleware(['guest', 'throttle:20,1'])->group(function () {
     Route::get('/magic-link', [MagicLinkController::class, 'showRequestForm'])->name('magic-link.request');
     Route::get('/magic-link/verify', [MagicLinkController::class, 'showVerifyForm'])->name('magic-link.verify');
 });

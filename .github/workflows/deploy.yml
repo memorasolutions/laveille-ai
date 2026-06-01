@@ -51,7 +51,7 @@ jobs:
 
       - name: Clear caches on server
         run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan config:clear && php artisan view:clear && php artisan responsecache:clear" || true
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan config:clear; php artisan view:clear; php artisan responsecache:clear" || true
           # NOTE: Purge Cloudflare CDN non automatisée — secrets absents du repo.
           # Pour l'activer, créer les secrets GitHub suivants, puis ajouter un step dédié :
           #   CLOUDFLARE_API_TOKEN  (token avec permission Zone:Cache Purge)
