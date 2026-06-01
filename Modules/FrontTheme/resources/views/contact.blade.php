@@ -17,7 +17,7 @@
 
                 <div style="text-align: center; margin-bottom: 28px;">
                     <h2 style="margin: 0 0 8px; font-weight: 700; font-size: clamp(22px, 3.2vw, 30px); line-height: 1.2; color: var(--c-dark);">
-                        {{ __('Avez-vous des questions?') }}
+                        {{ __('Avez-vous des questions ?') }}
                     </h2>
                     <p style="color: #374151; margin: 0; font-size: 15px;">
                         {{ __('Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.') }}
