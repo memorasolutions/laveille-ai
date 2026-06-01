@@ -456,8 +456,8 @@
         <div class="row">
             <div class="col-md-8">
                 <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l'outil') }} <span style="color: #B91C1C;">*</span></label>
-                    <input type="text" x-model="toolName" required aria-required="true" aria-label="{{ __('Nom de l'outil') }}"
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l\'outil') }} <span style="color: #B91C1C;">*</span></label>
+                    <input type="text" x-model="toolName" required aria-required="true" aria-label="{{ __('Nom de l\'outil') }}"
                         style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark);">
                 </div>
                 <div style="margin-bottom: 14px;">
