@@ -52,11 +52,14 @@ jobs:
       - name: Clear caches on server
         run: |
           ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear; php artisan responsecache:clear" || true
-          # NOTE: Purge Cloudflare CDN non automatisée — secrets absents du repo.
-          # Pour l'activer, créer les secrets GitHub suivants, puis ajouter un step dédié :
-          #   CLOUDFLARE_API_TOKEN  (token avec permission Zone:Cache Purge)
-          #   CLOUDFLARE_ZONE_ID    (ID de zone pour laveille.ai dans Cloudflare)
-          # En attendant, purger manuellement via MCP cloudflare (cf_purge_cache) après chaque deploy.
+
+      - name: Purge Cloudflare cache
+        # Token scopé "Cache Purge" limité à la zone laveille.ai (jamais la Global API Key).
+        run: |
+          curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}' || true
 
       - name: Deploy notification
         run: |
