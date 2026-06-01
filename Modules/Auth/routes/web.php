@@ -42,10 +42,15 @@ Route::middleware(['guest', 'throttle:10,1'])->group(function () {
 });
 
 // MagicLink - connexion sans mot de passe avec code 6 caractères
-Route::middleware(['guest', 'throttle:5,1'])->group(function () {
+// GET d'affichage : pas de throttle (pages stateless, aucun secret exposé)
+Route::middleware(['guest'])->group(function () {
     Route::get('/magic-link', [MagicLinkController::class, 'showRequestForm'])->name('magic-link.request');
-    Route::post('/magic-link', [MagicLinkController::class, 'sendLink'])->name('magic-link.send');
     Route::get('/magic-link/verify', [MagicLinkController::class, 'showVerifyForm'])->name('magic-link.verify');
+});
+
+// POST sensibles : throttle strict maintenu (double protection : middleware + RateLimiter par email)
+Route::middleware(['guest', 'throttle:5,1'])->group(function () {
+    Route::post('/magic-link', [MagicLinkController::class, 'sendLink'])->name('magic-link.send');
     Route::post('/magic-link/verify', [MagicLinkController::class, 'verify'])->name('magic-link.confirm');
     Route::post('/magic-link/sms', [MagicLinkController::class, 'sendSms'])->name('magic-link.sms')->middleware('throttle:3,1');
 });
