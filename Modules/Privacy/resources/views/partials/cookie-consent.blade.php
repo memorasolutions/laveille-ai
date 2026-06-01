@@ -213,6 +213,8 @@
         els.modal.classList.remove('cc-open');
         els.backdrop.classList.remove('cc-open');
         els.fab.classList.remove('cc-hidden');
+        // Retirer le handler ESC pour éviter les fuites mémoire
+        if (_escHandler) { document.removeEventListener('keydown', _escHandler); _escHandler = null; }
     }
 
     function showDetails() {
@@ -233,13 +235,10 @@
     }
 
     // --- Focus trap (WCAG) ---
+    var _escHandler = null;
     function initFocusTrap() {
+        // Tab trap : reste sur la modale
         els.modal.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                if (els.details.classList.contains('cc-show')) { showMain(); }
-                else if (getCookie(config.cookieName)) { closeBanner(); }
-                return;
-            }
             if (e.key !== 'Tab') return;
             var focusable = els.modal.querySelectorAll('button:not(.cc-hidden), a[href], input:not([disabled])');
             var visible = [];
@@ -251,6 +250,15 @@
             if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
             else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
         });
+        // WCAG 2.1.2 — ESC sur document pour capter le clavier même si le focus est hors modale
+        if (_escHandler) { document.removeEventListener('keydown', _escHandler); }
+        _escHandler = function(e) {
+            if (e.key !== 'Escape') return;
+            if (!els.modal.classList.contains('cc-open')) return;
+            if (els.details.classList.contains('cc-show')) { showMain(); }
+            else { closeBanner(); }  // ferme toujours (1ère visite comprise)
+        };
+        document.addEventListener('keydown', _escHandler);
         var firstBtn = els.modal.querySelector('button:not(.cc-hidden)');
         if (firstBtn) firstBtn.focus();
     }
