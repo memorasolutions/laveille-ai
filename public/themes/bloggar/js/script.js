@@ -71,6 +71,7 @@
 
     $("body").on("click", function () {
         $('.navigation-holder').removeClass('slideInn');
+        $('.open-btn').removeClass('x-close').attr("aria-expanded", "false");
     });
     $(".menu-close").on("click", function () {
         $('.navigation-holder').removeClass('slideInn');
