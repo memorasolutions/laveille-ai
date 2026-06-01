@@ -356,7 +356,7 @@
     @if($tool->screenshot)
         <div style="margin-bottom: 20px; border-radius: var(--r-base); overflow: hidden; border: 1px solid #E5E7EB;">
             @php $__ssUrl = str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.$tool->updated_at->timestamp; @endphp
-            <img src="{{ $__ssUrl }}" alt="{{ __('Capture d ecran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;"
+            <img src="{{ $__ssUrl }}" alt="{{ __('Capture d'écran de') }} {{ $tool->name }}" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block;"
                  onerror="this.onerror=null; this.src='/images/directory-fallback.svg';">
         </div>
     @else

@@ -456,8 +456,8 @@
         <div class="row">
             <div class="col-md-8">
                 <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l outil') }} <span style="color: #B91C1C;">*</span></label>
-                    <input type="text" x-model="toolName" required aria-required="true" aria-label="{{ __('Nom de l outil') }}"
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Nom de l'outil') }} <span style="color: #B91C1C;">*</span></label>
+                    <input type="text" x-model="toolName" required aria-required="true" aria-label="{{ __('Nom de l'outil') }}"
                         style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; color: var(--c-dark);">
                 </div>
                 <div style="margin-bottom: 14px;">
@@ -471,8 +471,8 @@
                         style="width: 100%; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; outline: none; resize: vertical; color: var(--c-dark);"></textarea>
                 </div>
                 <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Modele economique') }} <span style="color: #B91C1C;">*</span></label>
-                    <select x-model="toolPricing" required aria-required="true" aria-label="{{ __('Modele economique') }}"
+                    <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Modèle économique') }} <span style="color: #B91C1C;">*</span></label>
+                    <select x-model="toolPricing" required aria-required="true" aria-label="{{ __('Modèle économique') }}"
                         style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E5E7EB; border-radius: var(--r-base); font-size: 14px; background: #fff; color: var(--c-dark);">
                         <option value="">{{ __('Choisir...') }}</option>
                         <option value="free">🆓 {{ __('Gratuit') }}</option>
@@ -585,7 +585,7 @@
         <div style="text-align: center; margin-bottom: 16px;">
             <div style="font-size: 28px; margin-bottom: 8px;">🔐</div>
             <h3 style="font-family: var(--f-heading); color: var(--c-dark); margin: 0 0 4px; font-size: 16px;">{{ __('Connexion requise') }}</h3>
-            <p style="color: #374151; font-size: 13px; margin: 0;">{{ __('Connectez-vous pour soumettre votre proposition. Votre formulaire est sauvegarde.') }}</p>
+            <p style="color: #374151; font-size: 13px; margin: 0;">{{ __('Connectez-vous pour soumettre votre proposition. Votre formulaire est sauvegardé.') }}</p>
         </div>
 
         {{-- Email input --}}
@@ -608,7 +608,7 @@
             <div style="background: #D1FAE5; color: #065F46; padding: 10px 14px; border-radius: var(--r-base); font-size: 13px; margin-bottom: 14px;">
                 ✓ {{ __('Code envoyé à') }} <strong x-text="authEmail"></strong>. {{ __('Vérifiez vos courriels.') }}
             </div>
-            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Code a 6 chiffres') }}</label>
+            <label style="display: block; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; font-size: 13px;">{{ __('Code à 6 chiffres') }}</label>
             <div style="display: flex; gap: 8px;">
                 <input type="text" x-model="authCode" maxlength="6" placeholder="000000" aria-label="{{ __('Code de connexion') }}" autocomplete="one-time-code" inputmode="numeric"
                     @keydown.enter="verifyCode()" @input="if(authCode.length === 6) verifyCode()"
