@@ -50,7 +50,7 @@
     <button
         type="button"
         class="ct-btn ct-btn-primary ct-btn-icon"
-        style="border-radius:50%; width:32px; height:32px; padding:0; line-height:32px; flex-shrink:0;"
+        style="border-radius:50%; width:44px; height:44px; min-width:44px; min-height:44px; padding:0; line-height:1; flex-shrink:0;"
         @click="share()"
         :disabled="busy"
         aria-label="Partager {{ e($tool->name) }} sur les reseaux sociaux"

@@ -65,7 +65,7 @@
                                 @include('tools::partials.fullscreen-btn')
                                 @include('tools::partials.share-btn', ['tool' => $tool])
                                 <div class="action-menu-wrapper" style="position:relative;">
-                                    <button id="btnActionsMenu" type="button" class="ct-btn ct-btn-ghost ct-btn-xs action-menu-trigger" aria-label="{{ __('Menu d\'actions Import/Export') }}" aria-haspopup="true" title="{{ __('Plus d\'actions') }}" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;display:inline-flex;align-items:center;justify-content:center;">
+                                    <button id="btnActionsMenu" type="button" class="ct-btn ct-btn-ghost ct-btn-xs action-menu-trigger" aria-label="{{ __('Menu d\'actions Import/Export') }}" aria-haspopup="true" title="{{ __('Plus d\'actions') }}" style="border-radius:50%;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;line-height:1;display:inline-flex;align-items:center;justify-content:center;">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                                     </button>
                                     <div id="actionsMenu" class="action-menu" role="menu">

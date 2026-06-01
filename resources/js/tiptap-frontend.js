@@ -7,10 +7,10 @@ import { Editor, Extension } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Highlight from '@tiptap/extension-highlight'
-import Underline from '@tiptap/extension-underline'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
-// Link inclus dans StarterKit v3.19+ — ne pas importer séparément (duplicate extension warning)
+// Link ET Underline inclus dans StarterKit v3.19+ — ne pas importer séparément (duplicate extension warning
+// qui déstabilise l'éditeur et casse le bubble-menu / bouton Anonymiser). Underline fourni par StarterKit.
 
 // === Surlignage inline des détections PII (Sprint S131, Option A) ===
 // Decorations ProseMirror non destructives : ne modifient pas le document,
@@ -233,7 +233,6 @@ function registerTiptapEditor() {
                         placeholder: config.placeholder || 'Collez ici le texte à anonymiser avant de l\'envoyer à une IA…'
                     }),
                     Highlight.configure({ multicolor: true }),
-                    Underline,
                     AnonymDetectionHighlight
                 ],
                 editorProps: {
