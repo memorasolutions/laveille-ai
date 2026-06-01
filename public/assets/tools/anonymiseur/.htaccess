@@ -1,0 +1,11 @@
+# Service-Worker-Allowed — permet au SW servi depuis ce chemin (/assets/tools/anonymiseur/)
+# d'être enregistré avec un scope plus large (/outils/anonymiseur).
+# Sans cet en-tête, le navigateur rejette silencieusement l'enregistrement PWA
+# (scope interdit car hors du répertoire du script).
+# Ref: https://w3c.github.io/ServiceWorker/#get-registration-algorithm (step 7.2)
+# NOTE: ne prend effet qu'au déploiement sur Apache/LiteSpeed avec mod_headers actif.
+<IfModule mod_headers.c>
+  <Files "sw.js">
+    Header set Service-Worker-Allowed "/outils/anonymiseur"
+  </Files>
+</IfModule>

@@ -30,8 +30,8 @@
             <div class="row align-items-center">
                 <div class="col-lg-3 col-md-3 col-3 d-lg-none dl-block">
                     <div class="mobail-menu">
-                        <button type="button" class="navbar-toggler open-btn">
-                            <span class="sr-only">Toggle navigation</span>
+                        <button type="button" class="navbar-toggler open-btn" aria-label="{{ __('Ouvrir le menu') }}" aria-expanded="false" aria-controls="navbar">
+                            <span class="sr-only" aria-hidden="true">Toggle navigation</span>
                             <span class="icon-bar first-angle"></span>
                             <span class="icon-bar middle-angle"></span>
                             <span class="icon-bar last-angle"></span>

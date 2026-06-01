@@ -1212,6 +1212,21 @@ article h3 {
 .blog-sidebar .category-widget ul a { padding-right: 50px !important; }
 .blog-sidebar .category-widget ul li span { background: #fff; padding-left: 6px; z-index: 2; }
 
+/* === WCAG 1.4.1 — Liens corps d'article : soulignement obligatoire (distinction non-couleur) ===
+   Scoping strict aux zones de contenu éditorial. Exclut .btn/.ct-btn/nav/cartes. */
+.wpo-blog-single-section .entry-details a:not(.btn):not(.ct-btn):not([class*="btn-"]),
+.nw-desc a,
+.nw-why a,
+.nw-faq a {
+    text-decoration: underline;
+}
+.wpo-blog-single-section .entry-details a:not(.btn):not(.ct-btn):not([class*="btn-"]):hover,
+.nw-desc a:hover,
+.nw-why a:hover,
+.nw-faq a:hover {
+    text-decoration: underline;
+}
+
 /* === WCAG 2.2 AA CONTRAST FIX === Override #777 (ratio 4.48:1) → #595959 (ratio 7:1) texte paragraphes blog */
 .wpo-blog-single-section p,
 .wpo-blog-single-section .entry-details p,

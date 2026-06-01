@@ -17,6 +17,9 @@
             e.stopImmediatePropagation();
             navbar.toggleClass("slideInn");
             xbutton.toggleClass("x-close");
+            // WCAG 4.1.2 : sync aria-expanded
+            var isOpen = navbar.hasClass("slideInn");
+            xbutton.attr("aria-expanded", isOpen ? "true" : "false");
             return false;
         })
     }
@@ -68,12 +71,13 @@
 
     $("body").on("click", function () {
         $('.navigation-holder').removeClass('slideInn');
+        $('.open-btn').removeClass('x-close').attr("aria-expanded", "false");
     });
     $(".menu-close").on("click", function () {
         $('.navigation-holder').removeClass('slideInn');
     });
     $(".menu-close").on("click", function () {
-        $('.open-btn').removeClass('x-close');
+        $('.open-btn').removeClass('x-close').attr("aria-expanded", "false");
     });
 
     // toggle1
