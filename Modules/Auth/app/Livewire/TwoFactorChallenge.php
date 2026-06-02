@@ -54,7 +54,7 @@ class TwoFactorChallenge extends Component
         session(['auth.2fa_confirmed' => true]);
         session()->regenerate();
 
-        $this->redirect(route('admin.dashboard'), navigate: false);
+        $this->redirect($user->homeRoute(), navigate: false);
     }
 
     public function toggleRecoveryMode(): void
