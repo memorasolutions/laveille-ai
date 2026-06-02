@@ -21,103 +21,114 @@
 <script id="defaultPresetData" type="application/json">@json($defaultPreset->blocks ?? [])</script>
 @endif
 
-<style>
-/* ===== STEPPER ===== */
-.pb-stepper {
-    display: flex;
-    align-items: flex-start;
-    gap: 0;
-    margin-bottom: 1.5rem;
-    overflow-x: auto;
-    padding-bottom: 4px;
-}
-.pb-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    min-width: 0;
-    position: relative;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-    text-decoration: none;
-    color: inherit;
-}
-.pb-step:focus-visible {
-    outline: 2px solid var(--sys-action-accent, #9A2A06);
-    outline-offset: 2px;
-    border-radius: 4px;
-}
-/* Connector line between steps */
-.pb-step::before {
-    content: '';
-    position: absolute;
-    top: 18px;
-    left: calc(-50% + 20px);
-    right: calc(50% + 20px);
-    height: 2px;
-    background: #dee2e6;
-    z-index: 0;
-}
-.pb-step:first-child::before { display: none; }
-.pb-step[data-active="true"]::before,
-.pb-step[data-done="true"]::before { background: var(--sys-primary, #064E5A); }
+{{-- Mapping sections (injecté depuis PHP pour DRY — source unique = sectionsMap()) --}}
+<script id="sectionsMeta" type="application/json">@json($sectionsMeta)</script>
 
-.pb-step-circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+<style>
+/* ===== SECTION CARD ===== */
+.pb-section-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: .75rem;
+    overflow: hidden;
+    transition: border-color .2s;
+}
+.pb-section-card[data-custom="true"] {
+    border-color: var(--sys-primary, #064E5A);
+}
+.pb-section-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.85rem;
-    border: 2px solid #dee2e6;
+    gap: .75rem;
+    padding: .75rem 1rem;
     background: #fff;
-    color: var(--c-text-muted, #52586a);
-    position: relative;
-    z-index: 1;
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    cursor: pointer;
+    user-select: none;
+    min-height: 52px;
+}
+.pb-section-card[data-custom="true"] .pb-section-header {
+    background: #f0fafa;
+}
+.pb-section-header:focus-visible {
+    outline: 2px solid var(--sys-action-accent, #9A2A06);
+    outline-offset: -2px;
+}
+.pb-section-toggle {
+    display: flex;
+    gap: .5rem;
+    margin-left: auto;
     flex-shrink: 0;
 }
-.pb-step[data-active="true"] .pb-step-circle {
-    background: var(--sys-primary, #064E5A);
-    border-color: var(--sys-primary, #064E5A);
-    color: #fff;
-}
-.pb-step[data-done="true"] .pb-step-circle {
-    background: var(--sys-primary, #064E5A);
-    border-color: var(--sys-primary, #064E5A);
-    color: #fff;
-}
-.pb-step-label {
-    font-size: 0.72rem;
-    color: var(--c-text-muted, #52586a);
-    margin-top: 5px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100px;
-}
-.pb-step[data-active="true"] .pb-step-label {
-    color: var(--sys-primary, #064E5A);
+/* Radio pill toggle */
+.pb-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .25rem .7rem;
+    border-radius: 999px;
+    font-size: .78rem;
     font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid #dee2e6;
+    background: #f8f9fa;
+    color: var(--c-text-muted, #52586a);
+    transition: background .15s, border-color .15s, color .15s;
+    white-space: nowrap;
 }
-.pb-step[data-done="true"] .pb-step-label {
+.pb-toggle-input:checked + .pb-toggle-label[data-value="auto"] {
+    background: color-mix(in srgb, var(--sys-success, #198754) 12%, #fff);
+    border-color: var(--sys-success, #198754);
+    color: color-mix(in srgb, var(--sys-success, #198754) 70%, #000);
+}
+.pb-toggle-input:checked + .pb-toggle-label[data-value="custom"] {
+    background: color-mix(in srgb, var(--sys-action-accent, #9A2A06) 8%, #fff);
+    border-color: var(--sys-primary, #064E5A);
     color: var(--sys-primary, #064E5A);
 }
-
-/* ===== PANELS ===== */
-.pb-panel { display: none; }
-.pb-panel[data-visible="true"] { display: block; }
-
+.pb-toggle-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+.pb-toggle-input:focus-visible + .pb-toggle-label {
+    outline: 2px solid var(--sys-action-accent, #9A2A06);
+    outline-offset: 2px;
+}
+.pb-section-body {
+    padding: .75rem 1rem 1rem;
+    border-top: 1px solid #dee2e6;
+    background: #fafafa;
+}
+.pb-section-card[data-custom="true"] .pb-section-body {
+    background: #f5fffe;
+}
 /* ===== PREVIEW sticky ===== */
 .pb-preview-sticky {
     position: sticky;
     top: 80px;
+}
+/* Badge AUTO en petit */
+.pb-auto-badge {
+    font-size: .68rem;
+    font-weight: 600;
+    padding: .1rem .45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--sys-success, #198754) 12%, #fff);
+    color: color-mix(in srgb, var(--sys-success, #198754) 70%, #000);
+    border: 1px solid color-mix(in srgb, var(--sys-success, #198754) 35%, #fff);
+    white-space: nowrap;
+}
+.pb-custom-badge {
+    font-size: .68rem;
+    font-weight: 600;
+    padding: .1rem .45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--sys-action-accent, #9A2A06) 8%, #fff);
+    color: var(--sys-primary, #064E5A);
+    border: 1px solid color-mix(in srgb, var(--sys-primary, #064E5A) 35%, #fff);
+    white-space: nowrap;
 }
 </style>
 
@@ -126,324 +137,229 @@
     x-init="init()"
     class="row gy-4"
 >
-    {{-- ===== COLONNE GAUCHE : stepper + formulaire ===== --}}
+    {{-- ===== COLONNE GAUCHE : sections ===== --}}
     <div class="col-lg-7">
 
-        {{-- ===== STEPPER HORIZONTAL ===== --}}
-        <nav aria-label="Étapes du générateur de prompt" class="pb-stepper" role="tablist">
-            <template x-for="(step, idx) in steps" :key="step.id">
+        {{-- ===== EN-TÊTE GLOBAL ===== --}}
+        <div class="card mb-3">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i data-lucide="settings-2" style="width:16px;height:16px;" class="text-muted"></i>
+                <h6 class="mb-0">Options globales</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <label for="pb_subject" class="form-label">
+                            Objet du courriel
+                            <small class="text-muted fw-normal">(optionnel, max 45 car.)</small>
+                        </label>
+                        <input type="text" id="pb_subject" x-model="subject" class="form-control"
+                               maxlength="45"
+                               placeholder="ex: L'IA en cuisine — 3 usages surprenants">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="pb_test_email" class="form-label">
+                            Adresse courriel de test
+                        </label>
+                        <input type="email" id="pb_test_email" x-model="test_email" class="form-control"
+                               placeholder="ex: votre@adresse.com">
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label for="pb_notes" class="form-label">
+                        Notes complémentaires
+                        <small class="text-muted fw-normal">(instructions libres pour Claude Code)</small>
+                    </label>
+                    <textarea id="pb_notes" x-model="extra_notes" rows="2" class="form-control"
+                              placeholder="ex: accentue les usages pratiques pour les PME québécoises cette semaine"></textarea>
+                </div>
+                <div class="mt-2 d-flex align-items-center gap-2">
+                    <span class="text-muted small">
+                        <i data-lucide="info" style="width:13px;height:13px;"></i>
+                        Semaine cible :
+                        <strong>{{ now()->year }}, semaine {{ now()->weekOfYear }}</strong>
+                        &mdash; NewsletterIssue(year={{ now()->year }}, week_number={{ now()->weekOfYear }})
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {{-- ===== SECTIONS DU GABARIT ===== --}}
+        <div class="mb-2 d-flex align-items-center justify-content-between">
+            <h6 class="mb-0 text-muted fw-semibold" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;">
+                Sections du gabarit digest-weekly
+            </h6>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" style="font-size:.75rem;"
+                        x-on:click="setAllSections('auto')"
+                        aria-label="Passer toutes les sections en mode Automatique">
+                    Tout auto
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" style="font-size:.75rem;"
+                        x-on:click="setAllSections('custom')"
+                        aria-label="Passer toutes les sections en mode Personnaliser">
+                    Tout personnaliser
+                </button>
+            </div>
+        </div>
+
+        <template x-for="(meta, key) in sectionsMeta" :key="key">
+            <div
+                class="pb-section-card"
+                :data-custom="sections[key] && sections[key].mode === 'custom' ? 'true' : 'false'"
+            >
+                {{-- En-tête cliquable --}}
                 <button
                     type="button"
-                    class="pb-step"
-                    role="tab"
-                    :id="'pb-tab-' + step.id"
-                    :aria-controls="'pb-panel-' + step.id"
-                    :aria-selected="currentStep === idx + 1"
-                    :aria-current="currentStep === idx + 1 ? 'step' : undefined"
-                    :data-active="currentStep === idx + 1 ? 'true' : 'false'"
-                    :data-done="currentStep > idx + 1 ? 'true' : 'false'"
-                    :data-idx="idx"
-                    x-on:click="goToStep(idx + 1)"
-                    x-on:keydown.arrow-right.prevent="focusAdjacentTab($event, 1)"
-                    x-on:keydown.arrow-left.prevent="focusAdjacentTab($event, -1)"
-                    x-on:keydown.home.prevent="goToStep(1)"
-                    x-on:keydown.end.prevent="goToStep(steps.length)"
-                    :tabindex="currentStep === idx + 1 ? 0 : -1"
+                    class="pb-section-header"
+                    :aria-expanded="sections[key] && sections[key].mode === 'custom' ? 'true' : 'false'"
+                    :aria-label="'Section ' + meta.label + ' — ' + (sections[key] && sections[key].mode === 'custom' ? 'personnalisée' : 'automatique')"
+                    x-on:click="toggleSection(key)"
                 >
-                    <span class="pb-step-circle" :aria-hidden="true">
-                        <template x-if="currentStep > idx + 1">
-                            <i data-lucide="check" style="width:16px;height:16px;"></i>
-                        </template>
-                        <template x-if="currentStep <= idx + 1">
-                            <span x-text="idx + 1"></span>
-                        </template>
-                    </span>
-                    <span class="pb-step-label" x-text="step.label"></span>
-                </button>
-            </template>
-        </nav>
+                    <i :data-lucide="getSectionIcon(key)" style="width:15px;height:15px;flex-shrink:0;" class="text-muted"></i>
+                    <span class="fw-semibold" style="font-size:.9rem;" x-text="meta.label"></span>
 
-        {{-- ===== PANEL 1 : Éditorial ===== --}}
-        <div
-            id="pb-panel-editorial"
-            role="tabpanel"
-            :aria-labelledby="'pb-tab-editorial'"
-            class="pb-panel"
-            :data-visible="currentStep === 1 ? 'true' : 'false'"
-        >
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i data-lucide="edit-3" class="text-primary" style="width:16px;height:16px;"></i>
-                    <h6 class="mb-0">Éditorial</h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label for="pb_subject" class="form-label">Sujet / Titre de la newsletter</label>
-                        <input type="text" id="pb_subject" x-model="subject" class="form-control"
-                               placeholder="ex: L'IA générative transforme le travail de bureau au Québec">
-                    </div>
-                    <div class="mb-3">
-                        <label for="pb_angle" class="form-label">Angle rédactionnel</label>
-                        <input type="text" id="pb_angle" x-model="angle" class="form-control"
-                               placeholder="ex: Gains de productivité concrets pour les PME">
-                    </div>
-                    <div class="mb-3">
-                        <label for="pb_tone" class="form-label">Tonalité</label>
-                        <select id="pb_tone" x-model="tone" class="form-select">
-                            <option value="Professionnel et chaleureux (QC)">Professionnel et chaleureux (QC)</option>
-                            <option value="Informatif et concis">Informatif et concis</option>
-                            <option value="Inspirant et motivateur">Inspirant et motivateur</option>
-                            <option value="Technique et expert">Technique et expert</option>
-                            <option value="Conversationnel et accessible">Conversationnel et accessible</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="pb_audience" class="form-label">Public cible</label>
-                        <input type="text" id="pb_audience" x-model="audience" class="form-control"
-                               placeholder="ex: professionnels québécois en veille stratégique IA">
-                    </div>
-                </div>
-            </div>
-        </div>
+                    {{-- Badge mode courant --}}
+                    <template x-if="!sections[key] || sections[key].mode === 'auto'">
+                        <span class="pb-auto-badge" aria-hidden="true">AUTO</span>
+                    </template>
+                    <template x-if="sections[key] && sections[key].mode === 'custom'">
+                        <span class="pb-custom-badge" aria-hidden="true">PERSO</span>
+                    </template>
 
-        {{-- ===== PANEL 2 : Défi de la semaine ===== --}}
-        <div
-            id="pb-panel-defi"
-            role="tabpanel"
-            :aria-labelledby="'pb-tab-defi'"
-            class="pb-panel"
-            :data-visible="currentStep === 2 ? 'true' : 'false'"
-        >
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i data-lucide="zap" class="text-warning" style="width:16px;height:16px;"></i>
-                    <h6 class="mb-0">Défi de la semaine</h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label for="pb_challenge" class="form-label">Consigne du défi <small class="text-muted">(micro-action mesurable)</small></label>
-                        <textarea id="pb_challenge" x-model="challenge_instruction" rows="2" class="form-control"
-                                  placeholder="ex: Essaie de résumer un document de travail avec ChatGPT"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="pb_duration" class="form-label">Durée estimée</label>
-                        <input type="text" id="pb_duration" x-model="challenge_duration" class="form-control"
-                               placeholder="ex: 10 minutes">
-                    </div>
-                    <p class="text-muted small mb-0">
-                        <i data-lucide="info" style="width:13px;height:13px;"></i>
-                        Laisser vide = le service applique le comportement automatique par défaut pour cette section.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        {{-- ===== PANEL 3 : Actualités ===== --}}
-        <div
-            id="pb-panel-articles"
-            role="tabpanel"
-            :aria-labelledby="'pb-tab-articles'"
-            class="pb-panel"
-            :data-visible="currentStep === 3 ? 'true' : 'false'"
-        >
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i data-lucide="newspaper" class="text-info" style="width:16px;height:16px;"></i>
-                    <h6 class="mb-0">Articles / Concentrés <small class="text-muted fw-normal">(30 derniers jours)</small></h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-2">
-                        <label for="pb_articles" class="form-label">
-                            Sélectionner les articles à inclure
-                            <small class="text-muted">(Ctrl+clic ou Cmd+clic pour multi-select)</small>
+                    {{-- Toggle pills Auto / Personnaliser --}}
+                    <div class="pb-section-toggle" role="group" :aria-label="'Mode section ' + meta.label"
+                         x-on:click.stop>
+                        {{-- AUTO --}}
+                        <input type="radio"
+                               class="pb-toggle-input"
+                               :id="'pb_mode_auto_' + key"
+                               :name="'pb_mode_' + key"
+                               value="auto"
+                               x-on:change="setMode(key, 'auto')"
+                               :checked="!sections[key] || sections[key].mode === 'auto'"
+                               :aria-label="'Automatique pour ' + meta.label">
+                        <label :for="'pb_mode_auto_' + key" class="pb-toggle-label" data-value="auto">
+                            <i data-lucide="zap-off" style="width:11px;height:11px;"></i>
+                            Auto
                         </label>
-                        <select id="pb_articles" multiple class="form-select" style="height: 180px;">
-                            @if($recentNewsArticles->isNotEmpty())
-                                <optgroup label="Actualités IA">
-                                    @foreach($recentNewsArticles as $article)
-                                        <option value="{{ $article->url ?? '' }}">{{ $article->seo_title ?? $article->title }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endif
-                            @if($recentBlogArticles->isNotEmpty())
-                                <optgroup label="Articles de blogue">
-                                    @foreach($recentBlogArticles as $article)
-                                        <option value="{{ url('/blog/' . $article->slug) }}">{{ $article->title }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endif
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                            x-on:click="deselectAll()" aria-label="Tout désélectionner">
-                        Tout désélectionner
-                    </button>
-                    <p class="text-muted small mt-2 mb-0">
-                        <i data-lucide="info" style="width:13px;height:13px;"></i>
-                        Aucune sélection = le service applique le comportement automatique par défaut pour les actualités.
-                    </p>
-                </div>
-            </div>
-        </div>
 
-        {{-- ===== PANEL 4 : Sections personnalisées ===== --}}
-        <div
-            id="pb-panel-sections"
-            role="tabpanel"
-            :aria-labelledby="'pb-tab-sections'"
-            class="pb-panel"
-            :data-visible="currentStep === 4 ? 'true' : 'false'"
-        >
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i data-lucide="layout" class="text-secondary" style="width:16px;height:16px;"></i>
-                    <h6 class="mb-0">Sections personnalisées</h6>
-                </div>
-                <div class="card-body">
-                    <template x-for="(section, i) in sections" :key="i">
-                        <div class="mb-3 border rounded p-3 bg-light">
-                            <div class="mb-2">
-                                <label :for="'pb_sec_title_' + i" class="form-label"
-                                       x-text="'Titre — section ' + (i + 1)"></label>
-                                <input :id="'pb_sec_title_' + i"
-                                       x-model="sections[i].title"
-                                       type="text" class="form-control"
-                                       placeholder="ex: Focus outil">
-                            </div>
-                            <div class="mb-2">
-                                <label :for="'pb_sec_content_' + i" class="form-label"
-                                       x-text="'Contenu — section ' + (i + 1)"></label>
-                                <textarea :id="'pb_sec_content_' + i"
-                                          x-model="sections[i].content"
-                                          rows="3" class="form-control"
-                                          placeholder="Contenu ou instructions pour cette section"></textarea>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-danger"
-                                    x-on:click="sections.splice(i, 1)"
-                                    :aria-label="'Supprimer la section ' + (i + 1)">
-                                Supprimer
-                            </button>
+                        {{-- PERSONNALISER --}}
+                        <input type="radio"
+                               class="pb-toggle-input"
+                               :id="'pb_mode_custom_' + key"
+                               :name="'pb_mode_' + key"
+                               value="custom"
+                               x-on:change="setMode(key, 'custom')"
+                               :checked="sections[key] && sections[key].mode === 'custom'"
+                               :aria-label="'Personnaliser la section ' + meta.label">
+                        <label :for="'pb_mode_custom_' + key" class="pb-toggle-label" data-value="custom">
+                            <i data-lucide="edit-3" style="width:11px;height:11px;"></i>
+                            Personnaliser
+                        </label>
+                    </div>
+                </button>
+
+                {{-- Corps de la section (visible si mode=custom) --}}
+                <div
+                    class="pb-section-body"
+                    x-show="sections[key] && sections[key].mode === 'custom'"
+                    x-cloak
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                >
+                    {{-- Source auto (info) --}}
+                    <p class="text-muted small mb-2" style="font-size:.75rem;">
+                        <i data-lucide="info" style="width:12px;height:12px;"></i>
+                        <strong>Source auto :</strong> <span x-text="meta.auto_source"></span>
+                    </p>
+
+                    {{-- Champ adapté selon field_type --}}
+                    <template x-if="meta.field_type === 'textarea'">
+                        <div>
+                            <label :for="'pb_val_' + key" class="form-label visually-hidden" x-text="'Consigne pour ' + meta.label"></label>
+                            <textarea
+                                :id="'pb_val_' + key"
+                                x-model="sections[key].value"
+                                rows="3"
+                                class="form-control"
+                                :placeholder="meta.placeholder"
+                                :aria-label="'Contenu personnalisé pour ' + meta.label"
+                            ></textarea>
                         </div>
                     </template>
-                    <button type="button" class="btn btn-sm btn-outline-primary"
-                            x-on:click="sections.push({title: '', content: ''})">
-                        <i data-lucide="plus" style="width:14px;height:14px;"></i>
-                        Ajouter une section
-                    </button>
-                    <p class="text-muted small mt-2 mb-0">
-                        <i data-lucide="info" style="width:13px;height:13px;"></i>
-                        Aucune section ajoutée = le service applique le comportement automatique par défaut.
+                    <template x-if="meta.field_type === 'text'">
+                        <div>
+                            <label :for="'pb_val_' + key" class="form-label visually-hidden" x-text="'Consigne pour ' + meta.label"></label>
+                            <input
+                                type="text"
+                                :id="'pb_val_' + key"
+                                x-model="sections[key].value"
+                                class="form-control"
+                                :placeholder="meta.placeholder"
+                                :aria-label="'Consigne pour ' + meta.label"
+                            >
+                            <p class="text-muted mt-1 mb-0" style="font-size:.73rem;">
+                                <i data-lucide="info" style="width:11px;height:11px;"></i>
+                                Claude Code trouvera l'enregistrement en DB et écrira l'ID correspondant dans NewsletterIssue.content.
+                            </p>
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Corps auto (info visible si mode=auto) --}}
+                <div
+                    class="pb-section-body"
+                    style="background:#f8fafb;"
+                    x-show="!sections[key] || sections[key].mode === 'auto'"
+                    x-cloak
+                >
+                    <p class="text-muted mb-0" style="font-size:.75rem;">
+                        <i data-lucide="check-circle" style="width:12px;height:12px;color:#198754;"></i>
+                        <strong>Automatique</strong> —
+                        <span x-text="meta.auto_source"></span>
                     </p>
                 </div>
             </div>
-        </div>
+        </template>
 
-        {{-- ===== PANEL 5 : Options & courriel test ===== --}}
-        <div
-            id="pb-panel-options"
-            role="tabpanel"
-            :aria-labelledby="'pb-tab-options'"
-            class="pb-panel"
-            :data-visible="currentStep === 5 ? 'true' : 'false'"
-        >
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i data-lucide="sliders" class="text-muted" style="width:16px;height:16px;"></i>
-                    <h6 class="mb-0">Options &amp; courriel test</h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label for="pb_wordcount" class="form-label">Longueur cible</label>
-                        <select id="pb_wordcount" x-model="word_count" class="form-select">
-                            <option value="300-500 mots">Court — 300-500 mots</option>
-                            <option value="500-700 mots">Moyen — 500-700 mots</option>
-                            <option value="700-900 mots">Long — 700-900 mots</option>
-                        </select>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" id="pb_send_test" x-model="send_test_email" class="form-check-input">
-                        <label for="pb_send_test" class="form-check-label">Envoyer un courriel test après génération</label>
-                    </div>
-                    <div x-show="send_test_email" x-cloak class="mb-3">
-                        <label for="pb_test_email" class="form-label">Adresse courriel de test</label>
-                        <input type="email" id="pb_test_email" x-model="test_email" class="form-control"
-                               placeholder="{{ config('mail.from.address', 'info@example.com') }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="pb_notes" class="form-label">Notes complémentaires <small class="text-muted">(instructions libres pour Claude)</small></label>
-                        <textarea id="pb_notes" x-model="extra_notes" rows="2" class="form-control"
-                                  placeholder="ex: Mets l'accent sur les usages pratiques pour les PME québécoises"></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- ===== NAVIGATION PRÉCÉDENT / SUIVANT ===== --}}
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-            {{-- Précédent (masqué à l'étape 1) --}}
+        {{-- ===== BOUTONS PRINCIPAUX ===== --}}
+        <div class="d-flex flex-wrap gap-2 mt-4 mb-4">
             <button
                 type="button"
-                class="btn btn-outline-secondary d-flex align-items-center gap-2"
-                x-show="currentStep > 1"
-                x-cloak
-                x-on:click="prev()"
+                class="btn btn-primary d-flex align-items-center gap-2"
+                x-on:click="generatePrompt()"
+                :disabled="loading"
             >
-                <i data-lucide="chevron-left" style="width:16px;height:16px;"></i>
-                Précédent
+                <span x-show="!loading">
+                    <i data-lucide="wand-2" style="width:16px;height:16px;"></i>
+                    Générer le prompt
+                </span>
+                <span x-show="loading" x-cloak>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Génération en cours…
+                </span>
             </button>
-            <div x-show="currentStep === 1" x-cloak style="min-width:1px;"></div>
-
-            {{-- Suivant (étapes 1-4) / Générer + Copier (étape 5) --}}
-            <div class="d-flex flex-wrap gap-2">
-                <template x-if="currentStep < 5">
-                    <button
-                        type="button"
-                        class="btn btn-primary d-flex align-items-center gap-2"
-                        x-on:click="next()"
-                    >
-                        Suivant
-                        <i data-lucide="chevron-right" style="width:16px;height:16px;"></i>
-                    </button>
-                </template>
-                <template x-if="currentStep === 5">
-                    <div class="d-flex flex-wrap gap-2">
-                        <button
-                            type="button"
-                            class="btn btn-primary d-flex align-items-center gap-2"
-                            x-on:click="generatePrompt()"
-                            :disabled="loading"
-                        >
-                            <span x-show="!loading" x-cloak>
-                                <i data-lucide="wand-2" style="width:16px;height:16px;"></i>
-                                Générer le prompt
-                            </span>
-                            <span x-show="loading" x-cloak>
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                Génération en cours…
-                            </span>
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary d-flex align-items-center gap-1"
-                            x-on:click="copyPrompt()"
-                            :disabled="!promptText"
-                        >
-                            <i data-lucide="copy" style="width:16px;height:16px;"></i>
-                            Copier le prompt
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-outline-secondary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#presetModal"
-                            x-on:click="injectBlocksIntoPresetForm()"
-                        >
-                            <i data-lucide="save" style="width:16px;height:16px;"></i>
-                            Sauvegarder le preset
-                        </button>
-                    </div>
-                </template>
-            </div>
+            <button
+                type="button"
+                class="btn btn-outline-primary d-flex align-items-center gap-1"
+                x-on:click="copyPrompt()"
+                :disabled="!promptText"
+            >
+                <i data-lucide="copy" style="width:16px;height:16px;"></i>
+                Copier le prompt
+            </button>
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#presetModal"
+                x-on:click="injectBlocksIntoPresetForm()"
+            >
+                <i data-lucide="save" style="width:16px;height:16px;"></i>
+                Sauvegarder le preset
+            </button>
         </div>
 
     </div>{{-- /col-lg-7 --}}
@@ -592,7 +508,7 @@
                         <label for="preset_name" class="form-label">Nom du preset <span class="text-danger" aria-hidden="true">*</span></label>
                         <input type="text" id="preset_name" name="name" class="form-control"
                                required maxlength="150"
-                               placeholder="ex: Newsletter PME — ton formel">
+                               placeholder="ex: Newsletter focus PME — ton formel">
                     </div>
                     <div class="form-check">
                         <input type="checkbox" id="preset_is_default" name="is_default" value="1"
@@ -615,66 +531,84 @@
 <script>
 function promptBuilder() {
     return {
-        // --- État formulaire ---
-        subject: '',
-        angle: '',
-        tone: 'Professionnel et chaleureux (QC)',
-        audience: '',
-        challenge_instruction: '',
-        challenge_duration: '',
-        word_count: '300-500 mots',
-        send_test_email: false,
-        test_email: '',
+        // --- État formulaire global ---
+        subject:    '',
+        test_email: '{{ config('newsletter.test_email', '') }}',
         extra_notes: '',
-        sections: [],
+
+        // --- Sections : { [key]: { mode: 'auto'|'custom', value: '' } } ---
+        sections: {},
+
+        // --- Métadonnées des sections (injectées depuis PHP) ---
+        sectionsMeta: {},
 
         // --- État UI ---
         promptText: '',
-        loading: false,
+        loading:    false,
 
-        // --- Stepper ---
-        currentStep: 1,
-        steps: [
-            { id: 'editorial', label: 'Éditorial' },
-            { id: 'defi',      label: 'Défi' },
-            { id: 'articles',  label: 'Actualités' },
-            { id: 'sections',  label: 'Sections' },
-            { id: 'options',   label: 'Options' },
-        ],
+        /**
+         * Icône Lucide par section (pour l'aperçu visuel de la section).
+         */
+        getSectionIcon(key) {
+            const icons = {
+                editorial:        'feather',
+                challenge:        'zap',
+                highlight:        'star',
+                top_news:         'newspaper',
+                tool:             'wrench',
+                term:             'book-open',
+                article:          'file-text',
+                interactive_tool: 'mouse-pointer-click',
+            };
+            return icons[key] || 'circle';
+        },
 
-        goToStep(n) {
-            this.currentStep = Math.max(1, Math.min(n, this.steps.length));
-            // Re-init lucide icons for newly visible panels
+        /**
+         * Bascule entre auto et custom pour une section.
+         * Le clic sur l'en-tête ouvre/ferme sans changer le mode — le changement
+         * se fait via les radios uniquement. Cette fonction gère le focus visuel.
+         */
+        toggleSection(key) {
+            // Ne basculer que si clic sur l'en-tête (pas sur les radios gérés séparément)
+            // Ici on peut faire un aperçu : si auto → custom ; si custom → auto
+            const current = this.sections[key]?.mode ?? 'auto';
+            this.setMode(key, current === 'auto' ? 'custom' : 'auto');
+        },
+
+        setMode(key, mode) {
+            if (!this.sections[key]) {
+                this.sections[key] = { mode, value: '' };
+            } else {
+                this.sections[key].mode = mode;
+            }
             this.$nextTick(() => {
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             });
         },
-        next() { this.goToStep(this.currentStep + 1); },
-        prev() { this.goToStep(this.currentStep - 1); },
 
-        /**
-         * WAI-ARIA roving tabindex : déplace le focus ET l'activation vers l'onglet adjacent
-         * à celui qui a le focus (pas forcément l'onglet courant).
-         * direction: +1 (droite) ou -1 (gauche)
-         */
-        focusAdjacentTab(event, direction) {
-            const currentBtn = event.currentTarget;
-            const idx = parseInt(currentBtn.dataset.idx, 10);
-            const targetIdx = idx + direction;
-            if (targetIdx < 0 || targetIdx >= this.steps.length) return;
-            this.goToStep(targetIdx + 1);
-            this.$nextTick(() => {
-                const targetBtn = document.getElementById('pb-tab-' + this.steps[targetIdx].id);
-                if (targetBtn) targetBtn.focus();
+        setAllSections(mode) {
+            Object.keys(this.sectionsMeta).forEach(key => {
+                this.setMode(key, mode);
             });
         },
 
         init() {
+            // Charger les métadonnées des sections depuis le script JSON injecté par PHP
+            const metaEl = document.getElementById('sectionsMeta');
+            if (metaEl) {
+                try { this.sectionsMeta = JSON.parse(metaEl.textContent || '{}'); } catch (e) {}
+            }
+
+            // Initialiser toutes les sections en mode auto
+            Object.keys(this.sectionsMeta).forEach(key => {
+                this.sections[key] = { mode: 'auto', value: '' };
+            });
+
             // Charger le preset par défaut s'il existe
-            const el = document.getElementById('defaultPresetData');
-            if (el) {
+            const presetEl = document.getElementById('defaultPresetData');
+            if (presetEl) {
                 try {
-                    const data = JSON.parse(el.textContent || '{}');
+                    const data = JSON.parse(presetEl.textContent || '{}');
                     this.applyBlocks(data);
                 } catch (e) {
                     console.warn('Impossible de charger le preset par défaut', e);
@@ -697,57 +631,43 @@ function promptBuilder() {
                     });
                 }
             }
-        },
 
-        /**
-         * Applique un objet blocks dans le state Alpine.
-         */
-        applyBlocks(data) {
-            if (!data || typeof data !== 'object') return;
-            const fields = ['subject', 'angle', 'tone', 'audience', 'challenge_instruction',
-                            'challenge_duration', 'word_count', 'send_test_email', 'test_email', 'extra_notes'];
-            fields.forEach(f => { if (data[f] !== undefined) this[f] = data[f]; });
-            if (Array.isArray(data.sections)) this.sections = data.sections;
-            // Restaurer les articles sélectionnés
             this.$nextTick(() => {
-                const select = document.getElementById('pb_articles');
-                if (select && Array.isArray(data.selected_articles)) {
-                    for (const opt of select.options) {
-                        opt.selected = data.selected_articles.some(a => a.url === opt.value);
-                    }
-                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             });
         },
 
         /**
-         * Construit l'objet blocks à envoyer au service.
+         * Applique un objet blocks dans le state Alpine (chargement preset).
          */
-        buildBlocks() {
-            const select = document.getElementById('pb_articles');
-            const selectedArticles = select
-                ? Array.from(select.selectedOptions).map(o => ({ title: o.text, url: o.value }))
-                : [];
-            return {
-                subject:               this.subject,
-                angle:                 this.angle,
-                tone:                  this.tone,
-                audience:              this.audience,
-                challenge_instruction: this.challenge_instruction,
-                challenge_duration:    this.challenge_duration,
-                word_count:            this.word_count,
-                send_test_email:       this.send_test_email,
-                test_email:            this.test_email,
-                extra_notes:           this.extra_notes,
-                sections:              this.sections,
-                selected_articles:     selectedArticles,
-            };
+        applyBlocks(data) {
+            if (!data || typeof data !== 'object') return;
+            if (data.subject    !== undefined) this.subject    = data.subject;
+            if (data.test_email !== undefined) this.test_email = data.test_email;
+            if (data.extra_notes !== undefined) this.extra_notes = data.extra_notes;
+            if (data.sections && typeof data.sections === 'object') {
+                Object.keys(data.sections).forEach(key => {
+                    const sec = data.sections[key];
+                    if (sec && typeof sec === 'object') {
+                        this.sections[key] = {
+                            mode:  sec.mode  ?? 'auto',
+                            value: sec.value ?? '',
+                        };
+                    }
+                });
+            }
         },
 
-        deselectAll() {
-            const select = document.getElementById('pb_articles');
-            if (select) {
-                for (const opt of select.options) opt.selected = false;
-            }
+        /**
+         * Construit l'objet blocks à envoyer au service / preset.
+         */
+        buildBlocks() {
+            return {
+                subject:     this.subject,
+                test_email:  this.test_email,
+                extra_notes: this.extra_notes,
+                sections:    this.sections,
+            };
         },
 
         async generatePrompt() {
@@ -786,8 +706,10 @@ function promptBuilder() {
             try {
                 const res = await fetch(
                     '{{ url('admin/newsletter/prompt-builder/presets') }}/' + id,
-                    { headers: { 'Accept': 'application/json',
-                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '' } }
+                    { headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+                    }}
                 );
                 const data = await res.json();
                 if (res.ok && data.preset) {
@@ -821,14 +743,6 @@ function promptBuilder() {
             }
         },
 
-        /**
-         * Injecte les blocs actuels dans le champ caché du formulaire modal.
-         *
-         * Appelée depuis 3 endroits pour garantie maximale :
-         *   1. x-on:click sur le bouton « Sauvegarder le preset »
-         *   2. Écouteur Bootstrap show.bs.modal dans init()
-         *   3. Écouteur natif submit du formulaire dans init() (filet final)
-         */
         injectBlocksIntoPresetForm() {
             const input = document.getElementById('presetBlocksInput');
             if (input) {

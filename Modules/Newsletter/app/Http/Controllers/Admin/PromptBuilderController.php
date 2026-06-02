@@ -28,47 +28,34 @@ class PromptBuilderController extends Controller
     {
         $presets = NewsletterPromptPreset::orderBy('name')->get();
 
-        $recentNewsArticles = collect();
-        if (class_exists(\Modules\News\Models\NewsArticle::class)) {
-            $recentNewsArticles = \Modules\News\Models\NewsArticle::where('pub_date', '>=', now()->subDays(30))
-                ->orderByDesc('pub_date')
-                ->limit(30)
-                ->get(['id', 'title', 'seo_title', 'url', 'pub_date']);
-        }
-
-        $recentBlogArticles = collect();
-        if (class_exists(\Modules\Blog\Models\Article::class)) {
-            $recentBlogArticles = \Modules\Blog\Models\Article::where('published_at', '>=', now()->subDays(30))
-                ->orderByDesc('published_at')
-                ->limit(20)
-                ->get(['id', 'title', 'slug', 'published_at']);
-        }
-
         $defaultPreset = NewsletterPromptPreset::loadDefault();
+
+        // Mapping des sections : source unique (sectionsMap()) exposée à la vue pour DRY
+        $sectionsMeta = NewsletterPromptBuilder::sectionsMap();
 
         return view('newsletter::admin.prompt-builder.index', compact(
             'presets',
-            'recentNewsArticles',
-            'recentBlogArticles',
-            'defaultPreset'
+            'defaultPreset',
+            'sectionsMeta',
         ));
     }
 
     public function compile(Request $request): JsonResponse
     {
-        $request->validate($this->blocksValidationRules());
+        $validated = $request->validate($this->blocksValidationRules());
 
-        $blocks = $request->input('blocks', []);
+        $blocks = $validated['blocks'] ?? [];
 
-        // Limite totale anti-abus
+        // Limite totale anti-abus (les max: par champ protègent déjà le détail ;
+        // cette garde globale couvre les cas limites d'accumulation).
         try {
             $totalLength = mb_strlen(json_encode($blocks, JSON_THROW_ON_ERROR));
         } catch (\JsonException $e) {
             return response()->json(['error' => 'Contenu invalide (encodage JSON).'], 422);
         }
 
-        if ($totalLength > 8000) {
-            return response()->json(['error' => 'Contenu trop long (max 8000 caractères).'], 422);
+        if ($totalLength > 20000) {
+            return response()->json(['error' => 'Contenu trop long (max 20 000 caractères).'], 422);
         }
 
         $prompt = $this->builder->compile($blocks);
@@ -125,28 +112,34 @@ class PromptBuilderController extends Controller
     /**
      * Règles de validation communes aux blocs (réutilisées dans compile() et storePreset()).
      *
+     * Structure attendue :
+     *   blocks.subject      string  Objet du courriel
+     *   blocks.test_email   email   Adresse de test
+     *   blocks.extra_notes  string  Notes libres
+     *   blocks.sections     array   Clé = section_key, valeur = {mode, value}
+     *
      * @return array<string, mixed>
      */
     private function blocksValidationRules(): array
     {
-        return [
-            'blocks'                           => 'required|array',
-            'blocks.subject'                   => 'nullable|string|max:200',
-            'blocks.angle'                     => 'nullable|string|max:300',
-            'blocks.tone'                      => 'nullable|string|max:100',
-            'blocks.audience'                  => 'nullable|string|max:200',
-            'blocks.challenge_instruction'     => 'nullable|string|max:500',
-            'blocks.challenge_duration'        => 'nullable|string|max:50',
-            'blocks.word_count'                => ['nullable', 'in:300-500 mots,500-700 mots,700-900 mots'],
-            'blocks.send_test_email'           => 'nullable|boolean',
-            'blocks.test_email'                => 'nullable|email|max:254',
-            'blocks.extra_notes'               => 'nullable|string|max:1000',
-            'blocks.sections'                  => 'nullable|array|max:10',
-            'blocks.sections.*.title'          => 'nullable|string|max:150',
-            'blocks.sections.*.content'        => 'nullable|string|max:2000',
-            'blocks.selected_articles'         => 'nullable|array|max:30',
-            'blocks.selected_articles.*.title' => 'nullable|string|max:300',
-            'blocks.selected_articles.*.url'   => 'nullable|url|max:500',
+        $validSectionKeys = array_keys(NewsletterPromptBuilder::sectionsMap());
+        $keysIn           = implode(',', $validSectionKeys);
+
+        $rules = [
+            'blocks'            => 'required|array',
+            'blocks.subject'    => 'nullable|string|max:45',
+            'blocks.test_email' => 'nullable|email|max:254',
+            'blocks.extra_notes'=> 'nullable|string|max:1000',
+            'blocks.sections'   => 'nullable|array',
         ];
+
+        // Règles par section : mode (auto|custom) + value texte libre
+        foreach ($validSectionKeys as $key) {
+            $rules['blocks.sections.' . $key]         = 'nullable|array';
+            $rules['blocks.sections.' . $key . '.mode']  = 'nullable|in:auto,custom';
+            $rules['blocks.sections.' . $key . '.value'] = 'nullable|string|max:2000';
+        }
+
+        return $rules;
     }
 }
