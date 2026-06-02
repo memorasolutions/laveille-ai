@@ -153,6 +153,11 @@
                                     <li class="nav-item"><a href="{{ route('admin.newsletter.index') }}?tab=subscribers" class="nav-link {{ request()->is('*/newsletter*') && request()->get('tab') === 'subscribers' ? 'active' : '' }}">{{ __('Abonnés') }}</a></li>
                                     @endcan
                                     @endif
+                                    @if(Route::has('admin.newsletter.prompt-builder.index'))
+                                    @can('view_newsletter')
+                                    <li class="nav-item"><a href="{{ route('admin.newsletter.prompt-builder.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.prompt-builder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.prompt-builder.*') ? 'aria-current=page' : '' }}>{{ __('Générateur de prompt') }}</a></li>
+                                    @endcan
+                                    @endif
                                     @if(Route::has('admin.formbuilder.forms.index'))
                                     @can('view_forms')
                                     <li class="nav-item"><a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.news.*', 'admin.formbuilder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.formbuilder.*') ? 'aria-current=page' : '' }}>{{ __('Formulaires') }}</a></li>

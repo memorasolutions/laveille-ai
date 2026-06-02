@@ -14,6 +14,7 @@ use Modules\Core\Http\Middleware\SetBackofficeTheme;
 use Modules\Newsletter\Http\Controllers\Admin\CampaignController;
 use Modules\Newsletter\Http\Controllers\Admin\MarketingTemplateController;
 use Modules\Newsletter\Http\Controllers\Admin\NewsletterAdminController;
+use Modules\Newsletter\Http\Controllers\Admin\PromptBuilderController;
 use Modules\Newsletter\Http\Controllers\Admin\WorkflowController;
 use Modules\Newsletter\Http\Controllers\NewsletterController;
 
@@ -102,6 +103,20 @@ Route::prefix('admin/newsletter')
 
         // Templates marketing - delete
         Route::delete('/templates/{template}', [MarketingTemplateController::class, 'destroy'])->name('templates.destroy')->middleware('permission:delete_campaigns');
+
+        // Générateur de prompt newsletter pour Claude Code CLI
+        Route::prefix('prompt-builder')->name('prompt-builder.')->group(function () {
+            // Lecture (view_newsletter)
+            Route::get('/', [PromptBuilderController::class, 'index'])->name('index')->middleware('permission:view_newsletter');
+            Route::get('/presets/{preset}', [PromptBuilderController::class, 'loadPreset'])->name('preset.load')->middleware('permission:view_newsletter');
+            // Génération + création preset (create_newsletter)
+            Route::post('/compile', [PromptBuilderController::class, 'compile'])->name('compile')->middleware(['permission:create_newsletter', 'throttle:30,1']);
+            Route::post('/presets', [PromptBuilderController::class, 'storePreset'])->name('preset.store')->middleware('permission:create_newsletter');
+            // Modifier le preset par défaut (update_newsletter)
+            Route::post('/presets/{preset}/default', [PromptBuilderController::class, 'setDefault'])->name('preset.default')->middleware('permission:update_newsletter');
+            // Suppression preset (delete_newsletter)
+            Route::delete('/presets/{preset}', [PromptBuilderController::class, 'destroyPreset'])->name('preset.destroy')->middleware('permission:delete_newsletter');
+        });
 
         // Brouillon newsletter hebdomadaire (digest)
         Route::get('/digest/draft', [\Modules\Newsletter\Http\Controllers\Admin\DigestDraftController::class, 'edit'])->name('digest.edit');
