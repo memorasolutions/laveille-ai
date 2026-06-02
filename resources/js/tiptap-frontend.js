@@ -466,6 +466,17 @@ async function initAnonymiseurTiptap() {
         })
     }
 
+    // Fix sélection souris directe : le listener mouseup d'app.js est attaché au ghost #sourceText
+    // (invisible à -9999px) → ne reçoit jamais les vrais clics. On câble ici le mouseup sur
+    // l'élément éditeur visible, de façon à appeler handleTextSelection via window.getSelection().
+    host.addEventListener('mouseup', () => {
+        const sel = window.getSelection()
+        const text = sel ? sel.toString().trim() : ''
+        if (text && typeof window.anonymizeTextValue === 'function') {
+            window.anonymizeTextValue(text)
+        }
+    })
+
     window.dispatchEvent(new CustomEvent('tiptap-anonymiseur:ready', { detail: { editor } }))
 }
 
