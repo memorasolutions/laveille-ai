@@ -17,6 +17,12 @@
             text-decoration:underline !important;
             text-underline-offset:2px;
         }
+        /* 2026-06-02 fix contraste WCAG 2.2 AAA : les BOUTONS cyan (#3dc9d8) dans les blocs dark gardent leur texte foncé #0c1427 — la règle générique ci-dessus les rendait cyan-sur-cyan illisibles. Sélecteur plus spécifique (attribut background-color) → bat la règle générique. Ne touche PAS les liens texte (color:#3dc9d8) qui restent en #5eead4. */
+        td[style*="#0c1427"] a[style*="background-color:#3dc9d8"],
+        td[style*="#1e293b"] a[style*="background-color:#3dc9d8"] {
+            color:#0c1427 !important;
+            text-decoration:none !important;
+        }
         @media only screen and (max-width:600px) {
             .email-container { width:100% !important; }
             .stack-col { display:block !important; width:100% !important; padding-right:0 !important; padding-left:0 !important; padding-bottom:12px !important; }
