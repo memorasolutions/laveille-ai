@@ -1,0 +1,29 @@
+name: Newsletter — envoi test (manuel)
+
+# Déclenchement MANUEL uniquement (workflow_dispatch). Lance un envoi test du
+# digest-weekly à une adresse précise depuis le serveur prod (IP autorisée Brevo).
+# N'affecte JAMAIS les abonnés : --test-email envoie à un seul destinataire.
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Adresse de réception du test"
+        required: true
+        default: "stephane@memora.ca"
+
+jobs:
+  test-send:
+    name: Envoi test newsletter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
+
+      - name: Run newsletter:digest --test-email
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan newsletter:digest --test-email='${{ github.event.inputs.email }}' --force"
