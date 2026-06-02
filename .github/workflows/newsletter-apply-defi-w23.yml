@@ -1,0 +1,33 @@
+name: Newsletter — appliquer défi W23 + test (manuel, one-off)
+
+# One-off : écrit content['wellness_challenge'] (défi #1) dans l'issue 2026 semaine 23
+# sur prod (backup + merge, ne touche pas les autres clés), puis envoie un test.
+# Le PHP est encodé en base64 pour éviter tout souci de quotes/accents via SSH.
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Adresse de réception du test"
+        required: true
+        default: "stephane@memora.ca"
+
+jobs:
+  apply-and-test:
+    name: Appliquer défi W23 + envoi test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
+
+      - name: Écrire le défi dans l'issue W23 (backup + merge)
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && echo 'PD9waHAKCi8vIFNjcmlwdCBvbmUtb2ZmIDogw6ljcml0IGxlIGTDqWZpICMxICh3ZWxsbmVzc19jaGFsbGVuZ2UpIGRhbnMgbCdpc3N1ZSBzZW1haW5lIDIzLgovLyBFeMOpY3V0w6kgc3VyIFBST0QgdmlhIFNTSCAoYmFzZTY0IHwgcGhwKS4gQm9vdHN0cmFwIExhcmF2ZWwgKyBiYWNrdXAgKyBtZXJnZS4KCnJlcXVpcmUgJ3ZlbmRvci9hdXRvbG9hZC5waHAnOwokYXBwID0gcmVxdWlyZSAnYm9vdHN0cmFwL2FwcC5waHAnOwokYXBwLT5tYWtlKElsbHVtaW5hdGVcQ29udHJhY3RzXENvbnNvbGVcS2VybmVsOjpjbGFzcyktPmJvb3RzdHJhcCgpOwoKdXNlIE1vZHVsZXNcTmV3c2xldHRlclxNb2RlbHNcTmV3c2xldHRlcklzc3VlOwoKJGlzc3VlID0gTmV3c2xldHRlcklzc3VlOjpmaXJzdE9yTmV3KFsneWVhcicgPT4gMjAyNiwgJ3dlZWtfbnVtYmVyJyA9PiAyM10pOwokZXhpc3RlZCA9ICRpc3N1ZS0+ZXhpc3RzOwppZiAoISAkZXhpc3RlZCkgewogICAgJGlzc3VlLT5zdWJqZWN0ID0gJ0xhIHZlaWxsZSBJQSAjMjMnOwogICAgJGlzc3VlLT5zdGF0dXMgID0gJ2RyYWZ0JzsKfQoKJGNvbnRlbnQgPSAoYXJyYXkpICgkaXNzdWUtPmNvbnRlbnQgPz8gW10pOwoKLy8gQmFja3VwIHJvbGxiYWNrIChhdmFudCB0b3V0ZSBtb2RpZmljYXRpb24pCkBmaWxlX3B1dF9jb250ZW50cygKICAgIHN0b3JhZ2VfcGF0aCgnYXBwL2lzc3VlLXcyMy1iYWNrdXAtJyAuIGRhdGUoJ1ltZEhpcycpIC4gJy5qc29uJyksCiAgICBqc29uX2VuY29kZShbJ2V4aXN0ZWQnID0+ICRleGlzdGVkLCAnY29udGVudCcgPT4gJGNvbnRlbnRdLCBKU09OX1VORVNDQVBFRF9VTklDT0RFIHwgSlNPTl9QUkVUVFlfUFJJTlQpCik7CgokY29udGVudFsnd2VsbG5lc3NfY2hhbGxlbmdlJ10gPSBbCiAgICAnaG9vaycgICAgID0+ICJUdSB2ZXV4IGN1aXNpbmVyIHZpdGUgZXQgYmllbj8gPHN0cm9uZz5MYWlzc2UgbCdJQSB0J2luc3BpcmVyIGF2ZWMgY2UgcXVlIHR1IGFzIGTDqWrDoCBkYW5zIHRvbiBmcmlnbyE8L3N0cm9uZz4iLAogICAgJ3N1YnRpdGxlJyA9PiAiRMOpZmkgY3Vpc2luZSBleHByZXNzIMOgIGwnSUEiLAogICAgJ3N0ZXBzJyAgICA9PiBbCiAgICAgICAgJ0Nob2lzaXMgMyBpbmdyw6lkaWVudHMgcXVlIHR1IGFzIHNvdXMgbGEgbWFpbiAoZXguIDogcMOidGVzLCBmcm9tYWdlLCB0b21hdGVzKS4nLAogICAgICAgICdEZW1hbmRlIHVuZSByZWNldHRlIMOgIHRvbiBJQSBwcsOpZsOpcsOpZSA6IMKrIERvbm5lLW1vaSB1bmUgcmVjZXR0ZSBzaW1wbGUgYXZlYyBbaW5ncsOpZGllbnQgMV0sIFtpbmdyw6lkaWVudCAyXSBldCBbaW5ncsOpZGllbnQgM10uIMK7JywKICAgICAgICAnU3VpcyBsZXMgw6l0YXBlcyBldCBjdWlzaW5lIHRvbiBwbGF0IGVuIG1vaW5zIGRlIDMwIG1pbnV0ZXMhJywKICAgICAgICAnUGFydGFnZSB0b24gcsOpc3VsdGF0IChtw6ptZSByYXTDqSEpIGF2ZWMgdW4gY29sbMOoZ3VlIG91IHN1ciBsZXMgcsOpc2VhdXguJywKICAgIF0sCl07CiRjb250ZW50Wyd3ZWVrbHlfcHJvbXB0J10gPSBudWxsOyAvLyBzdHJ1Y3R1cmUgT1BUSU9OIEEgKGTDqWZpIGFjdGlvbiwgcGFzIGRlIHByb21wdCBjb3B5LXBhc3RlKQoKJGlzc3VlLT5jb250ZW50ID0gJGNvbnRlbnQ7CiRpc3N1ZS0+c2F2ZSgpOwoKZWNobyAnREVGSV9XMjNfT0sgZXhpc3RlZD0nIC4gKCRleGlzdGVkID8gJ291aScgOiAnbm9uKGNyZWUpJykKICAgIC4gJyBpZD0nIC4gJGlzc3VlLT5pZAogICAgLiAnIGtleXM9JyAuIGltcGxvZGUoJywnLCBhcnJheV9rZXlzKCRjb250ZW50KSkgLiBQSFBfRU9MOwo=' | base64 -d | php"
+
+      - name: Envoyer le test du digest-weekly
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan newsletter:digest --test-email='${{ github.event.inputs.email }}' --force"
