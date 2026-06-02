@@ -543,10 +543,11 @@
                                                 data-confirm-message="{{ e('Supprimer le preset « ' . $preset->name . ' » ?') }}"
                                                 data-confirm-target="delete-preset-{{ $preset->id }}"
                                                 x-on:click="
-                                                    window.dispatchEvent(new CustomEvent('open-confirm-global', {
+                                                    window.dispatchEvent(new CustomEvent('confirm-action', {
                                                         detail: {
+                                                            title: 'Supprimer le preset',
                                                             message: $el.dataset.confirmMessage,
-                                                            callback: () => document.getElementById($el.dataset.confirmTarget).submit()
+                                                            action: () => document.getElementById($el.dataset.confirmTarget).submit()
                                                         }
                                                     }))
                                                 ">

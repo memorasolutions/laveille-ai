@@ -127,37 +127,48 @@
                                     <li class="nav-item"><a href="{{ route('admin.custom-fields.index') }}" class="nav-link {{ request()->routeIs('admin.custom-fields.*') ? 'active' : '' }}" {{ request()->routeIs('admin.custom-fields.*') ? 'aria-current=page' : '' }}>{{ __('Champs personnalisés') }}</a></li>
                                     @endcan
                                     @endif
-                                    {{-- Marketing --}}
+                                    {{-- Newsletter --}}
+                                    @canany(['view_newsletter', 'view_campaigns', 'view_workflows'])
+                                    <li class="nav-item" role="presentation">
+                                        <hr style="border-color:rgba(255,255,255,0.1);margin:4px 0;">
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <span class="nav-link d-flex align-items-center gap-1" style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.4);cursor:default;padding-top:4px;padding-bottom:4px;" aria-hidden="true">
+                                            <i data-lucide="mail" style="width:11px;height:11px;opacity:0.6;"></i>
+                                            {{ __('Newsletter') }}
+                                        </span>
+                                    </li>
                                     @if(Route::has('admin.newsletter.index'))
                                     @can('view_newsletter')
-                                    <li class="nav-item"><a href="{{ route('admin.newsletter.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.index') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.index') ? 'aria-current=page' : '' }}>{{ __('Newsletter') }}</a></li>
+                                    <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.index') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.index') ? 'aria-current=page' : '' }}>{{ __('Vue d\'ensemble') }}</a></li>
                                     @endcan
                                     @endif
                                     @if(Route::has('admin.newsletter.campaigns.index'))
                                     @can('view_campaigns')
-                                    <li class="nav-item"><a href="{{ route('admin.newsletter.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'aria-current=page' : '' }}>{{ __('Campagnes') }}</a></li>
+                                    <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'aria-current=page' : '' }}>{{ __('Campagnes') }}</a></li>
                                     @endcan
                                     @endif
                                     @if(Route::has('admin.newsletter.workflows.index'))
                                     @can('view_workflows')
-                                    <li class="nav-item"><a href="{{ route('admin.newsletter.workflows.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.workflows.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.workflows.*') ? 'aria-current=page' : '' }}>{{ __('Workflows') }}</a></li>
+                                    <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.workflows.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.workflows.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.workflows.*') ? 'aria-current=page' : '' }}>{{ __('Workflows') }}</a></li>
                                     @endcan
                                     @endif
                                     @if(Route::has('admin.newsletter.templates.index'))
                                     @can('view_newsletter')
-                                    <li class="nav-item"><a href="{{ route('admin.newsletter.templates.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.templates.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.templates.*') ? 'aria-current=page' : '' }}>{{ __('Templates') }}</a></li>
+                                    <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.templates.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.templates.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.templates.*') ? 'aria-current=page' : '' }}>{{ __('Templates') }}</a></li>
                                     @endcan
                                     @endif
                                     @if(Route::has('admin.newsletter.index'))
                                     @can('view_newsletter')
-                                    <li class="nav-item"><a href="{{ route('admin.newsletter.index') }}?tab=subscribers" class="nav-link {{ request()->is('*/newsletter*') && request()->get('tab') === 'subscribers' ? 'active' : '' }}">{{ __('Abonnés') }}</a></li>
+                                    <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.index') }}?tab=subscribers" class="nav-link {{ request()->is('*/newsletter*') && request()->get('tab') === 'subscribers' ? 'active' : '' }}">{{ __('Abonnés') }}</a></li>
                                     @endcan
                                     @endif
                                     @if(Route::has('admin.newsletter.prompt-builder.index'))
                                     @can('view_newsletter')
-                                    <li class="nav-item"><a href="{{ route('admin.newsletter.prompt-builder.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.prompt-builder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.prompt-builder.*') ? 'aria-current=page' : '' }}>{{ __('Générateur de prompt') }}</a></li>
+                                    <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.prompt-builder.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.prompt-builder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.prompt-builder.*') ? 'aria-current=page' : '' }}>{{ __('Générateur de prompt') }}</a></li>
                                     @endcan
                                     @endif
+                                    @endcanany
                                     @if(Route::has('admin.formbuilder.forms.index'))
                                     @can('view_forms')
                                     <li class="nav-item"><a href="{{ route('admin.formbuilder.forms.index') }}" class="nav-link {{ request()->routeIs('admin.news.*', 'admin.formbuilder.*') ? 'active' : '' }}" {{ request()->routeIs('admin.formbuilder.*') ? 'aria-current=page' : '' }}>{{ __('Formulaires') }}</a></li>
