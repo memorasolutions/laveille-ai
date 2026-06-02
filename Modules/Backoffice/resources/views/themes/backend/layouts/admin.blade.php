@@ -1,15 +1,15 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', __('Administration')) - {{ $branding['site_name'] ?? config('app.name') }}</title>
+    {{-- Forcer le mode clair : nettoie tout choix dark persistant et verrouille data-bs-theme=light --}}
+    <script>try{localStorage.removeItem('theme');document.documentElement.setAttribute('data-bs-theme','light');}catch(e){}</script>
 
-    {{-- Dark mode: must run synchronously before render to avoid flash --}}
-    @vite('resources/js/nobleui/color-modes.js')
+    <title>@yield('title', __('Administration')) - {{ $branding['site_name'] ?? config('app.name') }}</title>
 
     {{-- Fonts: Roboto self-hosted via @fontsource in app.scss (RGPD compliant) --}}
 
@@ -43,22 +43,10 @@
     @endphp
     <style>
         /*
-         * Branding dynamique — deux blocs distincts :
-         *
-         * 1) Variables typographiques (topbar) : safe sur :root — elles n'interfèrent
-         *    pas avec le dark mode (pas de couleurs de fond).
-         *
-         * 2) Variables de couleur et de fond : déclarées UNIQUEMENT en mode clair via
-         *    :root:not([data-bs-theme="dark"]).
-         *    En dark, Bootstrap/NobleUI [data-bs-theme="dark"] reprend la main et
-         *    fournit les tokens de fond sombres natifs (#0c1427 / #070d19).
-         *
-         * Fix WCAG 2.2 AA : empêche l'écrasement de --bs-body-bg / --header-bg par
-         * la couleur blanche du branding lorsque le thème sombre est actif.
-         * Spécificité : :not() ajoute 0-1-0 → dépasse le :root nu (0-0-1) du CSS Vite.
+         * Branding dynamique — mode clair uniquement (dark mode retiré 2026-06-02).
          */
 
-        /* --- Typographie topbar : toujours appliquée, mode-agnostique --- */
+        /* --- Typographie topbar : toujours appliquée --- */
         :root {
             --topbar-font-family: {{ $branding['topbar_font_family'] ?? 'Roboto' }}, sans-serif;
             --topbar-font-size: {{ $branding['topbar_font_size'] ?? '1.25rem' }};
@@ -68,8 +56,8 @@
             --topbar-text-transform: {{ $branding['topbar_text_transform'] ?? 'none' }};
         }
 
-        /* --- Couleurs et fonds branding : MODE CLAIR UNIQUEMENT --- */
-        :root:not([data-bs-theme="dark"]) {
+        /* --- Couleurs et fonds branding (mode clair seul) --- */
+        :root {
             @foreach($cssColors as $name => $hex)
                 --bs-{{ $name }}: {{ $hex }};
                 --bs-{{ $name }}-rgb: {{ implode(',', sscanf($hex, '#%02x%02x%02x')) }};
@@ -78,48 +66,6 @@
             --header-bg: {{ $branding['header_bg'] ?? '#ffffff' }};
             --bs-body-bg: {{ $branding['body_bg'] ?? '#ffffff' }};
             --bs-app-bg: {{ $branding['body_bg'] ?? '#ffffff' }};
-        }
-
-        /*
-         * Surcharges WCAG 2.2 AA pour le mode sombre.
-         * Seuls les tokens qui échouent le ratio minimal sont overridés ici ;
-         * tout le reste (fond #0c1427, texte body #d0d6e1, texte muté #7987a1)
-         * est déjà conforme via les variables NobleUI [data-bs-theme="dark"].
-         *
-         * Ratios vérifiés (fond de référence : #0c1427) :
-         *   corps #d0d6e1             → 12.57:1 ✓ — natif NobleUI
-         *   lien  #6571ff             →  4.68:1 ✓ — natif NobleUI
-         *   muté  #7987a1             →  5.06:1 ✓ — natif NobleUI
-         *   bouton primaire #6571ff/blanc → 3.92:1 ✗ → #4d5be8/blanc → 5.28:1 ✓
-         *   badge-info blanc/#66d1d1  →  1.81:1 ✗ → #0c1427/#66d1d1 → 10.14:1 ✓
-         */
-        [data-bs-theme="dark"] {
-            /* Fond entête : suit le body dark de NobleUI, pas le blanc du branding */
-            --header-bg: #0c1427;
-
-            /*
-             * Bouton primaire : fond assombri pour que le texte blanc atteigne ≥4.5:1.
-             * #4d5be8/blanc → 5.28:1 ✓
-             */
-            --bs-primary: #4d5be8;
-            --bs-primary-rgb: 77,91,232;
-        }
-
-        /* Badge info en dark : texte foncé sur fond teal pour ≥4.5:1 */
-        /* #0c1427 sur #66d1d1 → 10.14:1 ✓ */
-        [data-bs-theme="dark"] .badge.bg-info,
-        [data-bs-theme="dark"] .badge.text-bg-info {
-            color: #0c1427 !important;
-        }
-
-        /* Bouton primaire en dark : tokens btn pour spécificité correcte */
-        [data-bs-theme="dark"] .btn-primary {
-            --bs-btn-bg: #4d5be8;
-            --bs-btn-border-color: #4d5be8;
-            --bs-btn-hover-bg: #3d4bd8;
-            --bs-btn-hover-border-color: #3d4bd8;
-            --bs-btn-active-bg: #3d4bd8;
-            --bs-btn-color: #ffffff;
         }
     </style>
 

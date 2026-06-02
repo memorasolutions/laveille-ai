@@ -28,21 +28,8 @@
 
         <ul class="navbar-nav">
 
-            {{-- Dark/Light mode toggle --}}
-            <li class="theme-switcher-wrapper nav-item">
-                <input type="checkbox" value="" id="theme-switcher">
-                <label for="theme-switcher" aria-label="{{ __('Basculer mode clair/sombre') }}">
-                    <div class="box">
-                        <div class="ball"></div>
-                        <div class="icons">
-                            <i class="link-icon" data-lucide="sun"></i>
-                            <i class="link-icon" data-lucide="moon"></i>
-                        </div>
-                    </div>
-                </label>
-            </li>
 
-            {{-- Language switcher — désactivé temporairement (site FR uniquement) --}}
+{{-- Language switcher — désactivé temporairement (site FR uniquement) --}}
             {{-- @if(config('app.available_locales', ['fr']) !== ['fr'])
             <li class="nav-item dropdown">
                 ...

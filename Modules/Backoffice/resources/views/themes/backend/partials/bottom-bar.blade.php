@@ -46,11 +46,7 @@
     transition: transform .3s ease;
     box-shadow: 0 -2px 10px rgba(0,0,0,.05);
 }
-[data-bs-theme="dark"] .admin-bottom-bar {
-    background: var(--bs-body-bg, #1a1d21);
-    border-top-color: rgba(255,255,255,.1);
-    box-shadow: 0 -2px 10px rgba(0,0,0,.3);
-}
+
 .admin-bottom-bar.bottom-bar-hidden { transform: translateY(100%); }
 .bottom-bar-item {
     min-width: 48px;
