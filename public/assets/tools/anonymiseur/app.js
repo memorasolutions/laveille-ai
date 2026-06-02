@@ -569,7 +569,9 @@ function addRule(original, replacement, category, exceptions = '') {
     saveRules();
     renderRules();
     updateAnonymizedText();
+    applyRuleHighlightsTiptap();
     updateStats();
+    goToStep(2);
     showToast('Regle ajoutee', 'success');
 }
 
@@ -586,7 +588,9 @@ function updateRule(id, original, replacement, category, exceptions = '') {
         saveRules();
         renderRules();
         updateAnonymizedText();
+        applyRuleHighlightsTiptap();
         updateStats();
+        goToStep(2);
         showToast('Regle modifiee', 'success');
     }
 }
@@ -596,6 +600,7 @@ function deleteRule(id) {
     saveRules();
     renderRules();
     updateAnonymizedText();
+    applyRuleHighlightsTiptap();
     updateStats();
     showToast('Regle supprimee', 'success');
 }
@@ -610,7 +615,15 @@ function loadRules() {
         try {
             AppState.rules = JSON.parse(saved);
             renderRules();
+            updateAnonymizedText();
             updateStats();
+            // Surlignage Tiptap après chargement des règles — Tiptap peut ne pas être prêt,
+            // on attend l'événement ready si nécessaire.
+            if (window.tiptapAnonymiseurEditor) {
+                applyRuleHighlightsTiptap();
+            } else {
+                window.addEventListener('tiptap-anonymiseur:ready', () => applyRuleHighlightsTiptap(), { once: true });
+            }
         } catch (e) {
             console.error('Erreur chargement regles:', e);
         }
@@ -904,6 +917,7 @@ function isException(match, fullText, matchIndex, exceptions) {
 
 function updateAnonymizedText() {
     const sourceEl = document.getElementById('sourceText');
+    if (!sourceEl) return; // ghost pas encore créé (timing init)
     const sourceText = sourceEl.innerText;
     let anonymizedText = sourceText;
 
@@ -933,8 +947,22 @@ function updateAnonymizedText() {
     }, 300);
 }
 
+// Surligne les règles actives dans l'éditeur Tiptap via les décorations ProseMirror
+// (AnonymDetectPluginKey, déjà câblé dans tiptap-frontend.js).
+// Appelé après tout ajout/modif/suppression de règle.
+function applyRuleHighlightsTiptap() {
+    if (typeof window.anonymiseurHighlightDetections !== 'function') return;
+    const detections = AppState.rules.map(r => ({
+        text: r.original,
+        category: r.category,
+        done: false
+    }));
+    window.anonymiseurHighlightDetections(detections);
+}
+
 function applyHighlights() {
     const sourceEl = document.getElementById('sourceText');
+    if (!sourceEl) return; // ghost pas encore créé (timing init)
     const plainText = sourceEl.innerText;
 
     if (AppState.rules.length === 0 || !plainText.trim()) {
@@ -1238,7 +1266,9 @@ function addIdentityRules(firstName, lastName, fakeFirstName, fakeLastName, exce
     saveRules();
     renderRules();
     updateAnonymizedText();
+    applyRuleHighlightsTiptap();
     updateStats();
+    goToStep(2);
     showToast('Identite ajoutee avec variantes', 'success');
 }
 
@@ -1517,7 +1547,8 @@ function init() {
         });
     }
     document.getElementById('btnClear').addEventListener('click', () => {
-        sourceText.innerText = '';
+        if (window.tiptapAnonymiseurEditor) { window.tiptapAnonymiseurEditor.commands.clearContent(true); }
+        else { sourceText.innerText = ''; }
         clearSourceDraft();
         document.getElementById('charCount').textContent = '0';
         document.getElementById('detectionsBar').classList.add('hidden');
