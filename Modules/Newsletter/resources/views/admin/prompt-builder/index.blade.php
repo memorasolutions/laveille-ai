@@ -24,6 +24,9 @@
 {{-- Mapping sections (injecté depuis PHP pour DRY — source unique = sectionsMap()) --}}
 <script id="sectionsMeta" type="application/json">@json($sectionsMeta)</script>
 
+{{-- Compagnies pour les facettes news (source de vérité = config) --}}
+<script id="pbCompanies" type="application/json">@json($companies)</script>
+
 <style>
 /* ===== SECTION CARD ===== */
 .pb-section-card {
@@ -129,6 +132,186 @@
     color: var(--sys-primary, #064E5A);
     border: 1px solid color-mix(in srgb, var(--sys-primary, #064E5A) 35%, #fff);
     white-space: nowrap;
+}
+
+/* ===== COMBOBOX DB ===== */
+.pb-combobox-wrap {
+    position: relative;
+}
+.pb-combobox-input {
+    width: 100%;
+    padding: .375rem .75rem;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    font-size: .9rem;
+    line-height: 1.5;
+    color: #212529;
+    background: #fff;
+    transition: border-color .15s, box-shadow .15s;
+}
+.pb-combobox-input:focus {
+    outline: none;
+    border-color: var(--sys-primary, #064E5A);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sys-primary, #064E5A) 20%, transparent);
+}
+.pb-listbox {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    max-height: 260px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: .25rem 0;
+}
+.pb-listbox-option {
+    padding: .45rem .85rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+}
+.pb-listbox-option:hover,
+.pb-listbox-option[aria-selected="true"] {
+    background: color-mix(in srgb, var(--sys-primary, #064E5A) 8%, #fff);
+}
+.pb-listbox-option-label {
+    font-size: .875rem;
+    color: #212529;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pb-listbox-option-sub {
+    font-size: .74rem;
+    color: var(--c-text-muted, #52586a);
+}
+.pb-listbox-empty {
+    padding: .5rem .85rem;
+    font-size: .85rem;
+    color: var(--c-text-muted, #52586a);
+    font-style: italic;
+}
+/* ===== CHIPS ===== */
+.pb-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin-top: .5rem;
+}
+.pb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .2rem .6rem .2rem .7rem;
+    background: color-mix(in srgb, var(--sys-primary, #064E5A) 10%, #fff);
+    border: 1px solid color-mix(in srgb, var(--sys-primary, #064E5A) 30%, #fff);
+    border-radius: 999px;
+    font-size: .8rem;
+    color: var(--sys-primary, #064E5A);
+    font-weight: 500;
+    max-width: 100%;
+}
+.pb-chip-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 240px;
+}
+.pb-chip-remove {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--sys-primary, #064E5A) 15%, transparent);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: .75rem;
+    line-height: 1;
+    color: var(--sys-primary, #064E5A);
+}
+.pb-chip-remove:hover {
+    background: color-mix(in srgb, var(--sys-action-accent, #9A2A06) 20%, transparent);
+    color: #9A2A06;
+}
+.pb-chip-remove:focus-visible {
+    outline: 2px solid var(--sys-action-accent, #9A2A06);
+    outline-offset: 1px;
+}
+/* ===== FACETTES NEWS ===== */
+.pb-facets {
+    margin-bottom: .65rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: flex-end;
+}
+.pb-facets label {
+    font-size: .75rem;
+    color: var(--c-text-muted, #52586a);
+    font-weight: 500;
+    margin-bottom: .15rem;
+    display: block;
+}
+.pb-facets input[type="date"] {
+    font-size: .8rem;
+    padding: .25rem .5rem;
+    border: 1px solid #dee2e6;
+    border-radius: .3rem;
+    background: #fff;
+    color: #212529;
+    height: 32px;
+}
+.pb-facets input[type="date"]:focus {
+    outline: none;
+    border-color: var(--sys-primary, #064E5A);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--sys-primary, #064E5A) 18%, transparent);
+}
+.pb-company-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    align-items: center;
+    margin-top: .35rem;
+}
+.pb-company-pill {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .65rem;
+    border-radius: 999px;
+    font-size: .76rem;
+    font-weight: 600;
+    border: 1.5px solid #dee2e6;
+    background: #f8f9fa;
+    color: var(--c-text-muted, #52586a);
+    cursor: pointer;
+    transition: background .12s, border-color .12s, color .12s;
+    user-select: none;
+}
+.pb-company-pill:hover {
+    background: color-mix(in srgb, var(--sys-primary, #064E5A) 8%, #fff);
+    border-color: var(--sys-primary, #064E5A);
+    color: var(--sys-primary, #064E5A);
+}
+.pb-company-pill[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--sys-primary, #064E5A) 14%, #fff);
+    border-color: var(--sys-primary, #064E5A);
+    color: var(--sys-primary, #064E5A);
+}
+.pb-company-pill:focus-visible {
+    outline: 2px solid var(--sys-action-accent, #9A2A06);
+    outline-offset: 2px;
 }
 </style>
 
@@ -289,20 +472,116 @@
                             ></textarea>
                         </div>
                     </template>
-                    <template x-if="meta.field_type === 'text'">
-                        <div>
-                            <label :for="'pb_val_' + key" class="form-label visually-hidden" x-text="'Consigne pour ' + meta.label"></label>
-                            <input
-                                type="text"
-                                :id="'pb_val_' + key"
-                                x-model="sections[key].value"
-                                class="form-control"
-                                :placeholder="meta.placeholder"
-                                :aria-label="'Consigne pour ' + meta.label"
-                            >
+                    <template x-if="meta.field_type === 'combobox'">
+                        <div
+                            x-data="pbCombobox(key, meta)"
+                            x-init="initCombobox()"
+                        >
+                            {{-- Facettes news (date + compagnies) — uniquement pour le type news --}}
+                            <template x-if="meta.combobox_type === 'news'">
+                                <div class="pb-facets">
+                                    <div>
+                                        <label :for="'pb_date_from_' + key">Du</label>
+                                        <input type="date" :id="'pb_date_from_' + key"
+                                               x-model="dateFrom"
+                                               x-on:change="triggerSearch()"
+                                               :aria-label="'Date de début pour ' + meta.label">
+                                    </div>
+                                    <div>
+                                        <label :for="'pb_date_to_' + key">Au</label>
+                                        <input type="date" :id="'pb_date_to_' + key"
+                                               x-model="dateTo"
+                                               x-on:change="triggerSearch()"
+                                               :aria-label="'Date de fin pour ' + meta.label">
+                                    </div>
+                                    <div>
+                                        <span class="pb-facette-label">Compagnie</span>
+                                        <div class="pb-company-chips" role="group" aria-label="Filtrer par compagnie">
+                                            <template x-for="cmp in companies" :key="cmp">
+                                                <button
+                                                    type="button"
+                                                    class="pb-company-pill"
+                                                    :aria-pressed="activeCompany === cmp ? 'true' : 'false'"
+                                                    x-on:click="toggleCompany(cmp)"
+                                                    x-text="cmp"
+                                                ></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- Combobox input --}}
+                            <div class="pb-combobox-wrap">
+                                <input
+                                    type="text"
+                                    :id="'pb_val_' + key"
+                                    class="pb-combobox-input"
+                                    :placeholder="meta.placeholder"
+                                    x-model="query"
+                                    x-on:input.debounce.250ms="triggerSearch()"
+                                    x-on:keydown.arrow-down.prevent="moveActive(1)"
+                                    x-on:keydown.arrow-up.prevent="moveActive(-1)"
+                                    x-on:keydown.enter.prevent="selectActive()"
+                                    x-on:keydown.escape="closeList()"
+                                    x-on:focus="if(query.length >= 0) triggerSearch()"
+                                    x-on:blur="onBlur()"
+                                    role="combobox"
+                                    :aria-expanded="open ? 'true' : 'false'"
+                                    :aria-controls="'pb_listbox_' + key"
+                                    :aria-activedescendant="activeIndex >= 0 ? 'pb_opt_' + key + '_' + activeIndex : undefined"
+                                    :aria-label="'Rechercher ' + meta.label"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                >
+                                <ul
+                                    x-show="open"
+                                    x-cloak
+                                    :id="'pb_listbox_' + key"
+                                    class="pb-listbox"
+                                    role="listbox"
+                                    :aria-label="'Suggestions pour ' + meta.label"
+                                >
+                                    <template x-if="suggestions.length === 0">
+                                        <li class="pb-listbox-empty" role="option" aria-selected="false">
+                                            Aucun résultat
+                                        </li>
+                                    </template>
+                                    <template x-for="(item, idx) in suggestions" :key="item.id">
+                                        <li
+                                            :id="'pb_opt_' + key + '_' + idx"
+                                            class="pb-listbox-option"
+                                            role="option"
+                                            :aria-selected="activeIndex === idx ? 'true' : 'false'"
+                                            x-on:mousedown.prevent="selectItem(item)"
+                                        >
+                                            <span class="pb-listbox-option-label" x-text="item.label"></span>
+                                            <span class="pb-listbox-option-sub" x-show="item.sublabel" x-text="item.sublabel"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+
+                            {{-- Chips sélectionnés --}}
+                            <div class="pb-chips" role="list" x-show="chips.length > 0" :aria-label="'Éléments sélectionnés pour ' + meta.label">
+                                <template x-for="(chip, idx) in chips" :key="chip.id">
+                                    <span class="pb-chip" role="listitem">
+                                        <span class="pb-chip-label" x-text="chip.label"></span>
+                                        <button
+                                            type="button"
+                                            class="pb-chip-remove"
+                                            :aria-label="'Retirer ' + chip.label"
+                                            x-on:click="removeChip(idx)"
+                                        >&times;</button>
+                                    </span>
+                                </template>
+                            </div>
+
+                            {{-- Aide --}}
                             <p class="text-muted mt-1 mb-0" style="font-size:.73rem;">
-                                <i data-lucide="info" style="width:11px;height:11px;"></i>
-                                Claude Code trouvera l'enregistrement en DB et écrira l'ID correspondant dans NewsletterIssue.content.
+                                <i data-lucide="database" style="width:11px;height:11px;"></i>
+                                <span x-text="meta.multi ? 'Sélectionnez jusqu\'à ' + (meta.max_items ?? 5) + ' éléments. ' : 'Sélectionnez un élément. '"></span>
+                                ID(s) injectés directement dans le prompt — aucune recherche manuelle requise.
                             </p>
                         </div>
                     </template>
@@ -529,11 +808,163 @@
 </div>
 
 <script>
+/* ===================================================================
+ * pbCombobox(key, meta) — composant Alpine pour un combobox DB
+ * ================================================================= */
+function pbCombobox(key, meta) {
+    return {
+        key,
+        meta,
+        query:       '',
+        open:        false,
+        suggestions: [],
+        activeIndex: -1,
+        chips:       [],   // [{id, label}]
+        dateFrom:    '',
+        dateTo:      '',
+        activeCompany: null,
+        companies:   [],
+        _searchTimer: null,
+
+        initCombobox() {
+            // Compagnies depuis le JSON injecté PHP
+            const el = document.getElementById('pbCompanies');
+            if (el) {
+                try { this.companies = JSON.parse(el.textContent || '[]'); } catch(e) {}
+            }
+            // Charger la valeur initiale depuis sections[key] si elle existe déjà (preset)
+            this.$watch('chips', chips => {
+                this.syncValue(chips);
+            });
+        },
+
+        // Synchronise le tableau de chips → sections[key].value (dans le contexte parent)
+        syncValue(chips) {
+            if (!this.meta.multi) {
+                // SINGLE : ID string ou ''
+                const val = chips.length > 0 ? String(chips[0].id) : '';
+                this.$dispatch('pb-combobox-update', { key: this.key, value: val });
+            } else {
+                // MULTI : JSON d'IDs
+                const val = chips.length > 0 ? JSON.stringify(chips.map(c => c.id)) : '';
+                this.$dispatch('pb-combobox-update', { key: this.key, value: val });
+            }
+        },
+
+        triggerSearch() {
+            clearTimeout(this._searchTimer);
+            this._searchTimer = setTimeout(() => this.doSearch(), 0);
+        },
+
+        async doSearch() {
+            const q = this.query.trim();
+            const params = new URLSearchParams({ type: this.meta.combobox_type, q });
+            if (this.meta.combobox_type === 'news') {
+                if (this.dateFrom) params.append('date_from', this.dateFrom);
+                if (this.dateTo)   params.append('date_to',   this.dateTo);
+                if (this.activeCompany) params.append('company', this.activeCompany);
+            }
+            try {
+                const url = '{{ route('admin.newsletter.prompt-builder.search') }}?' + params.toString();
+                const res = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    },
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                this.suggestions = data.results ?? [];
+                this.open = true;
+                this.activeIndex = -1;
+            } catch(e) {
+                // Pas de toast sur erreur réseau combobox — silencieux
+            }
+        },
+
+        moveActive(dir) {
+            if (!this.open || this.suggestions.length === 0) return;
+            const max = this.suggestions.length - 1;
+            this.activeIndex = Math.max(0, Math.min(max, this.activeIndex + dir));
+        },
+
+        selectActive() {
+            if (this.activeIndex >= 0 && this.activeIndex < this.suggestions.length) {
+                this.selectItem(this.suggestions[this.activeIndex]);
+            }
+        },
+
+        selectItem(item) {
+            const maxItems = this.meta.max_items ?? 5;
+            if (!this.meta.multi) {
+                // SINGLE : remplace
+                this.chips = [{ id: item.id, label: item.label }];
+            } else {
+                // MULTI : ajoute si pas déjà présent et limite respectée
+                const alreadyIn = this.chips.some(c => c.id === item.id);
+                if (!alreadyIn && this.chips.length < maxItems) {
+                    this.chips = [...this.chips, { id: item.id, label: item.label }];
+                }
+            }
+            this.query = '';
+            this.closeList();
+            // Redonner le focus à l'input
+            this.$nextTick(() => {
+                const input = document.getElementById('pb_val_' + this.key);
+                if (input) input.focus();
+            });
+        },
+
+        removeChip(idx) {
+            this.chips = this.chips.filter((_, i) => i !== idx);
+        },
+
+        closeList() {
+            this.open = false;
+            this.activeIndex = -1;
+        },
+
+        onBlur() {
+            // Délai pour laisser le mousedown sur les options se déclencher avant
+            setTimeout(() => { this.open = false; }, 150);
+        },
+
+        toggleCompany(cmp) {
+            this.activeCompany = this.activeCompany === cmp ? null : cmp;
+            this.triggerSearch();
+        },
+
+        // Charge les chips depuis une valeur sérialisée (preset reload)
+        loadFromValue(value) {
+            if (!value || value === '') { this.chips = []; return; }
+            // Tente de voir si c'est du JSON d'IDs : "[12,45]"
+            try {
+                const parsed = JSON.parse(value);
+                if (Array.isArray(parsed)) {
+                    // Multi : IDs seuls — on affiche juste l'ID en label (sans lookup réseau)
+                    this.chips = parsed.map(id => ({ id: Number(id), label: '#' + id }));
+                    return;
+                }
+            } catch(e) {}
+            // Single : ID entier ou texte legacy
+            if (/^\d+$/.test(value.trim())) {
+                this.chips = [{ id: Number(value.trim()), label: '#' + value.trim() }];
+            } else {
+                // Texte legacy → on le met dans le query mais pas en chip
+                this.query = value;
+            }
+        },
+    };
+}
+
+/* ===================================================================
+ * promptBuilder() — composant Alpine principal
+ * ================================================================= */
 function promptBuilder() {
     return {
         // --- État formulaire global ---
         subject:    '',
-        test_email: '{{ config('newsletter.test_email', '') }}',
+        test_email: @json(config('newsletter.test_email', '')),
         extra_notes: '',
 
         // --- Sections : { [key]: { mode: 'auto'|'custom', value: '' } } ---
@@ -563,14 +994,7 @@ function promptBuilder() {
             return icons[key] || 'circle';
         },
 
-        /**
-         * Bascule entre auto et custom pour une section.
-         * Le clic sur l'en-tête ouvre/ferme sans changer le mode — le changement
-         * se fait via les radios uniquement. Cette fonction gère le focus visuel.
-         */
         toggleSection(key) {
-            // Ne basculer que si clic sur l'en-tête (pas sur les radios gérés séparément)
-            // Ici on peut faire un aperçu : si auto → custom ; si custom → auto
             const current = this.sections[key]?.mode ?? 'auto';
             this.setMode(key, current === 'auto' ? 'custom' : 'auto');
         },
@@ -592,7 +1016,18 @@ function promptBuilder() {
             });
         },
 
+        // Réception des mises à jour depuis pbCombobox via dispatch
+        onComboboxUpdate(event) {
+            const { key, value } = event.detail;
+            if (this.sections[key]) {
+                this.sections[key].value = value;
+            }
+        },
+
         init() {
+            // Écouter les mises à jour de valeur des combobox
+            this.$el.addEventListener('pb-combobox-update', (e) => this.onComboboxUpdate(e));
+
             // Charger les métadonnées des sections depuis le script JSON injecté par PHP
             const metaEl = document.getElementById('sectionsMeta');
             if (metaEl) {

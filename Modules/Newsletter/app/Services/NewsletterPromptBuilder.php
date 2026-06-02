@@ -83,49 +83,62 @@ SHAPE
                 'label'        => 'Actualité vedette',
                 'content_keys' => ['highlight_id'],
                 'auto_source'  => 'NewsArticle le plus récent et pertinent (relevance_score desc, 7 derniers jours)',
-                'field_type'   => 'text',
-                'placeholder'  => "ex: mets en vedette l'article sur la Loi 25 et les données d'entreprise",
-                'shape'        => "content['highlight_id'] = ID (entier) d'un enregistrement NewsArticle EXISTANT en DB. Cherche via : NewsArticle::where('title', 'like', '%mot-clé%')->first()->id ou en cherchant par sujet dans la table news_articles.",
+                'field_type'   => 'combobox',
+                'combobox_type'=> 'news',
+                'multi'        => false,
+                'placeholder'  => 'Chercher une actualité par titre ou mot-clé…',
+                'shape'        => "content['highlight_id'] = ID (entier) sélectionné directement via le sélecteur DB du générateur de prompt.",
             ],
             'top_news' => [
                 'label'        => 'Top actualités (5)',
                 'content_keys' => ['top_news_ids'],
                 'auto_source'  => 'Top 5 NewsArticle (relevance_score desc, 7 derniers jours, hors vedette)',
-                'field_type'   => 'text',
-                'placeholder'  => "ex: privilégie les actus sur l'IA en éducation au Québec cette semaine",
-                'shape'        => "content['top_news_ids'] = tableau d'IDs (entiers) de NewsArticle EXISTANTS (ex: [12, 45, 78]). Cherche 5 articles correspondant à la consigne via NewsArticle::where(…)->pluck('id')->toArray().",
+                'field_type'   => 'combobox',
+                'combobox_type'=> 'news',
+                'multi'        => true,
+                'max_items'    => 5,
+                'placeholder'  => 'Chercher des actualités (jusqu\'à 5)…',
+                'shape'        => "content['top_news_ids'] = tableau JSON d'IDs entiers sélectionnés directement via le sélecteur DB du générateur de prompt (ex: [12, 45, 78]).",
             ],
             'tool' => [
                 'label'        => 'Outil de la semaine',
                 'content_keys' => ['tool_id'],
                 'auto_source'  => 'DigestContentService::getUnsentItem(\'tool\') — rotation anti-répétition parmi les outils publiés',
-                'field_type'   => 'text',
-                'placeholder'  => "ex: mets en vedette un outil de transcription audio gratuit",
-                'shape'        => "content['tool_id'] = ID (entier) d'un enregistrement Directory\\Tool EXISTANT en DB. Cherche via : Tool::where('name', 'like', '%mot-clé%')->orWhere('category', '…')->first()->id dans la table directory_tools.",
+                'field_type'   => 'combobox',
+                'combobox_type'=> 'tool',
+                'multi'        => false,
+                'placeholder'  => 'Chercher un outil par nom…',
+                'shape'        => "content['tool_id'] = ID (entier) sélectionné directement via le sélecteur DB du générateur de prompt.",
             ],
             'term' => [
                 'label'        => 'Terme IA de la semaine',
                 'content_keys' => ['term_id'],
                 'auto_source'  => 'DigestContentService::getUnsentItem(\'term\') — rotation anti-répétition parmi les termes publiés',
-                'field_type'   => 'text',
-                'placeholder'  => "ex: explique le concept de RAG (Retrieval-Augmented Generation)",
-                'shape'        => "content['term_id'] = ID (entier) d'un enregistrement Dictionary\\Term EXISTANT en DB. Cherche via : Term::where('name', 'like', '%mot-clé%')->first()->id dans la table dictionary_terms.",
+                'field_type'   => 'combobox',
+                'combobox_type'=> 'term',
+                'multi'        => false,
+                'placeholder'  => 'Chercher un terme IA…',
+                'shape'        => "content['term_id'] = ID (entier) sélectionné directement via le sélecteur DB du générateur de prompt.",
             ],
             'article' => [
                 'label'        => 'Article de blogue vedette',
                 'content_keys' => ['article_id'],
                 'auto_source'  => 'Blog\\Article::published()->latest(\'published_at\')->first()',
-                'field_type'   => 'text',
-                'placeholder'  => "ex: mets en vedette l'article sur l'adoption de l'IA dans les PME québécoises",
-                'shape'        => "content['article_id'] = ID (entier) d'un enregistrement Blog\\Article EXISTANT et publié. Cherche via : Article::published()->where('title', 'like', '%mot-clé%')->first()->id dans la table blog_articles (ou articles).",
+                'field_type'   => 'combobox',
+                'combobox_type'=> 'article',
+                'multi'        => false,
+                'placeholder'  => 'Chercher un article de blogue…',
+                'shape'        => "content['article_id'] = ID (entier) sélectionné directement via le sélecteur DB du générateur de prompt.",
             ],
             'interactive_tool' => [
                 'label'        => 'Outil interactif (outil gratuit)',
                 'content_keys' => ['interactive_tool_id'],
                 'auto_source'  => 'DigestContentService::getUnsentItem(\'interactive_tool\') — rotation parmi Tools actifs',
-                'field_type'   => 'text',
-                'placeholder'  => "ex: mets en avant le générateur de quiz IA",
-                'shape'        => "content['interactive_tool_id'] = ID (entier) d'un enregistrement Tools\\Tool EXISTANT et actif. Cherche via : Tool::where('name', 'like', '%mot-clé%')->first()->id dans la table tools.",
+                'field_type'   => 'combobox',
+                'combobox_type'=> 'interactive_tool',
+                'multi'        => false,
+                'placeholder'  => 'Chercher un outil interactif…',
+                'shape'        => "content['interactive_tool_id'] = ID (entier) sélectionné directement via le sélecteur DB du générateur de prompt.",
             ],
         ];
     }
@@ -188,19 +201,52 @@ SHAPE
             $lines[] = '### ' . $meta['label'];
 
             if ($mode === 'custom' && $value !== '') {
-                $keysStr = implode(', ', $meta['content_keys']);
+                $keysStr   = implode(', ', $meta['content_keys']);
+                $isCombobox = ($meta['field_type'] ?? '') === 'combobox';
+
                 $lines[] = '  MODE      : PERSONNALISER';
                 $lines[] = '  CLÉ(S)    : content[' . $keysStr . ']';
-                $lines[] = '  CONSIGNE  : ' . $value;
-                if (! empty($meta['shape'])) {
-                    // Indente chaque ligne du shape pour l'alignement visuel dans le prompt
-                    $shapeLines = explode("\n", rtrim((string) $meta['shape']));
-                    $lines[]    = '  FORME     : ' . array_shift($shapeLines);
-                    foreach ($shapeLines as $shapeLine) {
-                        $lines[] = '              ' . $shapeLine;
+
+                if ($isCombobox) {
+                    // La valeur est un ID entier (single) ou un tableau JSON d'IDs (multi)
+                    // Sélectionné directement depuis la DB via le sélecteur — aucune recherche nécessaire.
+                    $isMulti = ! empty($meta['multi']);
+                    if ($isMulti) {
+                        // Valeur = JSON d'IDs ex: [12, 45, 78]
+                        $decoded = json_decode($value, true);
+                        if (is_array($decoded)) {
+                            $ids = array_map('intval', $decoded);
+                            $lines[] = '  IDS       : ' . json_encode($ids);
+                            $lines[] = '  ACTION    : Écris content[\'' . $keysStr . '\'] = ' . json_encode($ids) . ' directement (IDs sélectionnés en DB, aucune recherche requise).';
+                        } else {
+                            // Valeur texte legacy — rétro-compat
+                            $lines[] = '  CONSIGNE  : ' . $value;
+                            $lines[] = '  ACTION    : Cherche les IDs correspondant à cette consigne et écris content[\'' . $keysStr . '\'] = tableau d\'IDs entiers.';
+                        }
+                    } else {
+                        // Valeur = ID entier sous forme de string ex: "123"
+                        if (ctype_digit($value)) {
+                            $id = (int) $value;
+                            $lines[] = '  ID        : ' . $id;
+                            $lines[] = '  ACTION    : Écris content[\'' . $keysStr . '\'] = ' . $id . ' directement (ID sélectionné en DB, aucune recherche requise).';
+                        } else {
+                            // Valeur texte legacy — rétro-compat
+                            $lines[] = '  CONSIGNE  : ' . $value;
+                            $lines[] = '  ACTION    : Cherche l\'ID correspondant à cette consigne et écris content[\'' . $keysStr . '\'] = ID entier.';
+                        }
                     }
+                } else {
+                    $lines[] = '  CONSIGNE  : ' . $value;
+                    if (! empty($meta['shape'])) {
+                        // Indente chaque ligne du shape pour l'alignement visuel dans le prompt
+                        $shapeLines = explode("\n", rtrim((string) $meta['shape']));
+                        $lines[]    = '  FORME     : ' . array_shift($shapeLines);
+                        foreach ($shapeLines as $shapeLine) {
+                            $lines[] = '              ' . $shapeLine;
+                        }
+                    }
+                    $lines[] = '  ACTION    : Écris cette consigne dans la/les clé(s) indiquée(s) en respectant la FORME ci-dessus.';
                 }
-                $lines[] = '  ACTION    : Écris cette consigne dans la/les clé(s) indiquée(s) en respectant la FORME ci-dessus.';
             } else {
                 $lines[] = '  MODE      : AUTO — ne touche pas cette section';
                 $lines[] = '  SOURCE    : ' . $meta['auto_source'];

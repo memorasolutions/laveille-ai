@@ -24,4 +24,26 @@ return [
     */
     'test_email' => env('NEWSLETTER_TEST_EMAIL', ''),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Compagnies IA — facettes de recherche pour les actualités
+    |--------------------------------------------------------------------------
+    |
+    | Liste des compagnies utilisées comme filtres rapides dans le combobox
+    | « Actualité vedette » et « Top actualités » du générateur de prompt.
+    | Aucun hardcode dans le contrôleur ou la vue — toujours via config('newsletter.companies').
+    |
+    */
+    'companies' => [
+        'OpenAI',
+        'Anthropic',
+        'Google',
+        'Meta',
+        'Mistral',
+        'Microsoft',
+        'Apple',
+        'xAI',
+        'DeepSeek',
+    ],
+
 ];

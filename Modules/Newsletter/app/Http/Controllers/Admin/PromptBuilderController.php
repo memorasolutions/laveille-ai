@@ -17,11 +17,14 @@ use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\Newsletter\Models\NewsletterPromptPreset;
 use Modules\Newsletter\Services\NewsletterPromptBuilder;
+use Modules\Newsletter\Services\PromptBuilderSearchService;
 
 class PromptBuilderController extends Controller
 {
-    public function __construct(private readonly NewsletterPromptBuilder $builder)
-    {
+    public function __construct(
+        private readonly NewsletterPromptBuilder $builder,
+        private readonly PromptBuilderSearchService $searchService,
+    ) {
     }
 
     public function index(): View
@@ -33,11 +36,48 @@ class PromptBuilderController extends Controller
         // Mapping des sections : source unique (sectionsMap()) exposée à la vue pour DRY
         $sectionsMeta = NewsletterPromptBuilder::sectionsMap();
 
+        // Compagnies pour les facettes news (source de vérité = config)
+        $companies = config('newsletter.companies', []);
+
         return view('newsletter::admin.prompt-builder.index', compact(
             'presets',
             'defaultPreset',
             'sectionsMeta',
+            'companies',
         ));
+    }
+
+    /**
+     * Endpoint AJAX de recherche pour les combobox DB du générateur de prompt.
+     *
+     * Paramètres GET :
+     *   type      (news|tool|term|article|interactive_tool)
+     *   q         texte libre
+     *   date_from (YYYY-MM-DD, news uniquement)
+     *   date_to   (YYYY-MM-DD, news uniquement)
+     *   company   (texte, news uniquement)
+     *
+     * @return JsonResponse [{id, label, sublabel?}]
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'type'      => 'required|in:news,tool,term,article,interactive_tool',
+            'q'         => 'nullable|string|max:200',
+            'date_from' => 'nullable|date_format:Y-m-d',
+            'date_to'   => 'nullable|date_format:Y-m-d',
+            'company'   => 'nullable|string|max:200',
+        ]);
+
+        $results = $this->searchService->search(
+            type:     $validated['type'],
+            q:        $validated['q'] ?? '',
+            dateFrom: $validated['date_from'] ?? null,
+            dateTo:   $validated['date_to'] ?? null,
+            company:  $validated['company'] ?? null,
+        );
+
+        return response()->json(['results' => $results]);
     }
 
     public function compile(Request $request): JsonResponse

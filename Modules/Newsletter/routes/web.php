@@ -109,6 +109,8 @@ Route::prefix('admin/newsletter')
             // Lecture (view_newsletter)
             Route::get('/', [PromptBuilderController::class, 'index'])->name('index')->middleware('permission:view_newsletter');
             Route::get('/presets/{preset}', [PromptBuilderController::class, 'loadPreset'])->name('preset.load')->middleware('permission:view_newsletter');
+            // Recherche DB pour les combobox (view_newsletter + throttle anti-abus)
+            Route::get('/search', [PromptBuilderController::class, 'search'])->name('search')->middleware(['permission:view_newsletter', 'throttle:60,1']);
             // Génération + création preset (create_newsletter)
             Route::post('/compile', [PromptBuilderController::class, 'compile'])->name('compile')->middleware(['permission:create_newsletter', 'throttle:30,1']);
             Route::post('/presets', [PromptBuilderController::class, 'storePreset'])->name('preset.store')->middleware('permission:create_newsletter');
