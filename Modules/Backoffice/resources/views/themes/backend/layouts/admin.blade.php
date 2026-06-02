@@ -42,7 +42,34 @@
         $primaryColor = $cssColors['primary'];
     @endphp
     <style>
+        /*
+         * Branding dynamique — deux blocs distincts :
+         *
+         * 1) Variables typographiques (topbar) : safe sur :root — elles n'interfèrent
+         *    pas avec le dark mode (pas de couleurs de fond).
+         *
+         * 2) Variables de couleur et de fond : déclarées UNIQUEMENT en mode clair via
+         *    :root:not([data-bs-theme="dark"]).
+         *    En dark, Bootstrap/NobleUI [data-bs-theme="dark"] reprend la main et
+         *    fournit les tokens de fond sombres natifs (#0c1427 / #070d19).
+         *
+         * Fix WCAG 2.2 AA : empêche l'écrasement de --bs-body-bg / --header-bg par
+         * la couleur blanche du branding lorsque le thème sombre est actif.
+         * Spécificité : :not() ajoute 0-1-0 → dépasse le :root nu (0-0-1) du CSS Vite.
+         */
+
+        /* --- Typographie topbar : toujours appliquée, mode-agnostique --- */
         :root {
+            --topbar-font-family: {{ $branding['topbar_font_family'] ?? 'Roboto' }}, sans-serif;
+            --topbar-font-size: {{ $branding['topbar_font_size'] ?? '1.25rem' }};
+            --topbar-font-weight: {{ $branding['topbar_font_weight'] ?? '700' }};
+            --topbar-letter-spacing: {{ $branding['topbar_letter_spacing'] ?? '0px' }};
+            --topbar-word-spacing: {{ $branding['topbar_word_spacing'] ?? '0px' }};
+            --topbar-text-transform: {{ $branding['topbar_text_transform'] ?? 'none' }};
+        }
+
+        /* --- Couleurs et fonds branding : MODE CLAIR UNIQUEMENT --- */
+        :root:not([data-bs-theme="dark"]) {
             @foreach($cssColors as $name => $hex)
                 --bs-{{ $name }}: {{ $hex }};
                 --bs-{{ $name }}-rgb: {{ implode(',', sscanf($hex, '#%02x%02x%02x')) }};
@@ -51,12 +78,48 @@
             --header-bg: {{ $branding['header_bg'] ?? '#ffffff' }};
             --bs-body-bg: {{ $branding['body_bg'] ?? '#ffffff' }};
             --bs-app-bg: {{ $branding['body_bg'] ?? '#ffffff' }};
-            --topbar-font-family: {{ $branding['topbar_font_family'] ?? 'Roboto' }}, sans-serif;
-            --topbar-font-size: {{ $branding['topbar_font_size'] ?? '1.25rem' }};
-            --topbar-font-weight: {{ $branding['topbar_font_weight'] ?? '700' }};
-            --topbar-letter-spacing: {{ $branding['topbar_letter_spacing'] ?? '0px' }};
-            --topbar-word-spacing: {{ $branding['topbar_word_spacing'] ?? '0px' }};
-            --topbar-text-transform: {{ $branding['topbar_text_transform'] ?? 'none' }};
+        }
+
+        /*
+         * Surcharges WCAG 2.2 AA pour le mode sombre.
+         * Seuls les tokens qui échouent le ratio minimal sont overridés ici ;
+         * tout le reste (fond #0c1427, texte body #d0d6e1, texte muté #7987a1)
+         * est déjà conforme via les variables NobleUI [data-bs-theme="dark"].
+         *
+         * Ratios vérifiés (fond de référence : #0c1427) :
+         *   corps #d0d6e1             → 12.57:1 ✓ — natif NobleUI
+         *   lien  #6571ff             →  4.68:1 ✓ — natif NobleUI
+         *   muté  #7987a1             →  5.06:1 ✓ — natif NobleUI
+         *   bouton primaire #6571ff/blanc → 3.92:1 ✗ → #4d5be8/blanc → 5.28:1 ✓
+         *   badge-info blanc/#66d1d1  →  1.81:1 ✗ → #0c1427/#66d1d1 → 10.14:1 ✓
+         */
+        [data-bs-theme="dark"] {
+            /* Fond entête : suit le body dark de NobleUI, pas le blanc du branding */
+            --header-bg: #0c1427;
+
+            /*
+             * Bouton primaire : fond assombri pour que le texte blanc atteigne ≥4.5:1.
+             * #4d5be8/blanc → 5.28:1 ✓
+             */
+            --bs-primary: #4d5be8;
+            --bs-primary-rgb: 77,91,232;
+        }
+
+        /* Badge info en dark : texte foncé sur fond teal pour ≥4.5:1 */
+        /* #0c1427 sur #66d1d1 → 10.14:1 ✓ */
+        [data-bs-theme="dark"] .badge.bg-info,
+        [data-bs-theme="dark"] .badge.text-bg-info {
+            color: #0c1427 !important;
+        }
+
+        /* Bouton primaire en dark : tokens btn pour spécificité correcte */
+        [data-bs-theme="dark"] .btn-primary {
+            --bs-btn-bg: #4d5be8;
+            --bs-btn-border-color: #4d5be8;
+            --bs-btn-hover-bg: #3d4bd8;
+            --bs-btn-hover-border-color: #3d4bd8;
+            --bs-btn-active-bg: #3d4bd8;
+            --bs-btn-color: #ffffff;
         }
     </style>
 
