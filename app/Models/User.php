@@ -177,6 +177,17 @@ class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyE
         return $this->email === config('app.superadmin_email') && $this->hasRole('super_admin');
     }
 
+    /**
+     * Route d'accueil post-connexion selon le rôle.
+     * Évite d'envoyer un non-admin vers /admin (403). Source unique pour toutes les redirections de login.
+     */
+    public function homeRoute(): string
+    {
+        return $this->hasRole(['admin', 'super_admin'])
+            ? route('admin.dashboard')
+            : route('user.dashboard');
+    }
+
     protected static function booted(): void
     {
         static::deleting(function (User $user): bool {

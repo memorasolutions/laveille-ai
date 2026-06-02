@@ -158,7 +158,7 @@ class MagicLinkController extends Controller
             return redirect()->route('password.force-change');
         }
 
-        return redirect()->intended(route('user.dashboard'));
+        return redirect()->intended($user->homeRoute());
     }
 
     /**

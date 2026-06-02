@@ -8,7 +8,7 @@ Bienvenue sur **{{ config('app.name') }}** ! Votre compte a été créé avec su
 
 Vous pouvez dès maintenant accéder à votre tableau de bord :
 
-@component('mail::button', ['url' => url('/admin')])
+@component('mail::button', ['url' => url('/dashboard')])
 Accéder au tableau de bord
 @endcomponent
 
