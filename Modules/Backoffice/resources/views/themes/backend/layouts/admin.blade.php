@@ -210,7 +210,7 @@
     </script>
     @stack('custom-scripts')
     @stack('scripts')
-    <script src="/js/infinite-scroll.js" defer></script>
+    {{-- infinite-scroll.js retiré du layout admin (#incident) : ce script front public détournait la pagination Laravel des listes admin (annuaire…) → scroll sans fin + icônes des lignes ajoutées non initialisées. L'admin utilise la pagination standard. --}}
 
     {{-- AI Chatbot (activable via Settings > IA > ai.chatbot_enabled) --}}
     @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::has('AI') && \Nwidart\Modules\Facades\Module::isEnabled('AI') && class_exists(\Modules\AI\Livewire\ChatBot::class))

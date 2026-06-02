@@ -470,14 +470,29 @@
                         class="form-control border-0 font-monospace rounded-0"
                         style="font-size: 0.78rem; resize: vertical; min-height: 300px;"
                         aria-label="Aperçu du prompt généré"
-                        placeholder="Cliquez « Générer le prompt » (étape 5) pour voir l'aperçu…"
+                        placeholder="Cliquez « Générer le prompt » pour voir l'aperçu…"
                     ></textarea>
                 </div>
-                <div class="card-footer d-flex gap-2">
+                <div class="card-footer d-flex flex-wrap gap-2">
+                    <button type="button"
+                            class="btn btn-sm btn-primary d-flex align-items-center gap-1"
+                            x-on:click="generatePrompt()"
+                            :disabled="loading"
+                            aria-label="Générer le prompt à partir des paramètres saisis">
+                        <span x-show="!loading">
+                            <i data-lucide="wand-2" style="width:14px;height:14px;"></i>
+                            Générer le prompt
+                        </span>
+                        <span x-show="loading" x-cloak>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Génération…
+                        </span>
+                    </button>
                     <button type="button"
                             class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
                             x-on:click="copyPrompt()"
-                            :disabled="!promptText">
+                            :disabled="!promptText"
+                            aria-label="Copier le prompt dans le presse-papiers">
                         <i data-lucide="copy" style="width:14px;height:14px;"></i>
                         Copier le prompt
                     </button>
