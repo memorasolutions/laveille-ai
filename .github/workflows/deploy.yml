@@ -33,7 +33,6 @@ jobs:
             --exclude='.env' \
             --exclude='.env.example' \
             --exclude='public/screenshots/' \
-            --exclude='public/build/' \
             --exclude='bootstrap/cache/' \
             --exclude='tests/' \
             --exclude='public/_*.php' \
