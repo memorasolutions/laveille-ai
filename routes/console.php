@@ -31,6 +31,8 @@ Schedule::command('tools:check-images')->weeklyOn(0, '04:30')->withoutOverlappin
 
 // Health checks
 Schedule::command('health:check')->everyMinute();
+// Heartbeat Spatie pour le ScheduleCheck (sinon le check « Schedule » reste rouge malgré le cron actif)
+Schedule::command('health:schedule-check-heartbeat')->everyMinute();
 
 // Telescope cleanup (48h — skip si package non installé OU désactivé en prod)
 if (class_exists(\Laravel\Telescope\Telescope::class)) {
