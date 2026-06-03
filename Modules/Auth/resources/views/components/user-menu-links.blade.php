@@ -17,6 +17,11 @@
         ['route' => 'shorturl.user.index', 'label' => __('Mes liens courts'), 'icon' => 'fa-link', 'emoji' => '🔗'],
         ['route' => 'user.notifications', 'label' => __('Notifications'), 'icon' => 'fa-bell', 'emoji' => '🔔', 'badge' => true],
     ];
+
+    // Masquer « Mes commandes » (lien boutique) quand la boutique est en maintenance (sinon → 503).
+    if (config('shop.maintenance', false)) {
+        $links = array_values(array_filter($links, fn ($l) => $l['route'] !== 'shop.my-orders'));
+    }
 @endphp
 
 @foreach($links as $link)

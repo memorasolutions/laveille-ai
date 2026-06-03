@@ -245,7 +245,7 @@
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Acronymes éducation') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $acronymsCount }} {{ __('acronymes du Québec') }}</div></div>
                                             </a>
                                             @endif
-                                            @if(Route::has('shop.index') && (! config('shop.maintenance', false) || (auth()->check() && auth()->user()->isSuperAdmin())))
+                                            @if(Route::has('shop.index') && ! config('shop.maintenance', false))
                                             <a href="{{ route('shop.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🛍️</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Boutique') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Merch IA et technologie') }}</div></div>
@@ -261,7 +261,7 @@
                                     @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🔤 {{ __('Acronymes') }}</a></li>@endif
                                     @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">❓ {{ __('FAQ') }}</a></li>@endif
-                                    @if(Route::has('shop.index') && (! config('shop.maintenance', false) || (auth()->check() && auth()->user()->isSuperAdmin())))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
+                                    @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
                                 </ul>
                             </li>
                             {{-- #200 Anciens blocs Ressources + Jouer retirés — remplacés par les 3 nouveaux mega Outils/Annuaire/Apprendre ci-dessus. Old code ci-dessous gardé en @if(false) zone --}}
@@ -301,7 +301,7 @@
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Acronymes éducation') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ cache()->remember('acronyms_count', 3600, fn () => class_exists(\Modules\Acronyms\Models\Acronym::class) ? \Modules\Acronyms\Models\Acronym::count() : 0) }} {{ __('acronymes du Québec') }}</div></div>
                                             </a>
                                             @endif
-                                            @if(Route::has('shop.index') && (! config('shop.maintenance', false) || (auth()->check() && auth()->user()->isSuperAdmin())))
+                                            @if(Route::has('shop.index') && ! config('shop.maintenance', false))
                                             <a href="{{ route('shop.index') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🛍️</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Boutique') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Merch IA et technologie') }}</div></div>
@@ -593,7 +593,7 @@
                                                 @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire IA ('.$dictionaryCount.')') }}</a></li>@endif
                                                 @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🔤 {{ __('Acronymes') }}</a></li>@endif
                                                 @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">❓ {{ __('FAQ') }}</a></li>@endif
-                                                @if(Route::has('shop.index') && (! config('shop.maintenance', false) || (auth()->check() && auth()->user()->isSuperAdmin())))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
+                                                @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
                                             </ul>
                                         </div>
                                     </div>

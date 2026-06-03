@@ -50,7 +50,7 @@
                             @if(Route::has('tools.index'))
                                 <li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>
                             @endif
-                            @if(Route::has('shop.index') && (! config('shop.maintenance', false) || (auth()->check() && auth()->user()->isSuperAdmin())))
+                            @if(Route::has('shop.index') && ! config('shop.maintenance', false))
                                 <li><a href="{{ route('shop.index') }}">{{ __('Boutique') }}</a></li>
                             @endif
                             @if(Route::has('shorturl.create'))
