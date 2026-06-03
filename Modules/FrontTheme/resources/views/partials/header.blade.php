@@ -491,8 +491,10 @@
                                 ><i class="fi flaticon-magnifiying-glass"></i></button>
                             </div>
                         </div>
-                        {{-- Mini-cart (conditionnel — module Shop activé) --}}
-                        @includeIf('shop::partials.mini-cart')
+                        {{-- Mini-cart (conditionnel — module Shop activé ET boutique pas en maintenance) --}}
+                        @unless(config('shop.maintenance', false))
+                            @includeIf('shop::partials.mini-cart')
+                        @endunless
                         {{-- Menu utilisateur connecté --}}
                         @auth
                         <div x-data="{ open: false }" style="display:inline-block;position:relative;margin-right:8px;vertical-align:middle;">

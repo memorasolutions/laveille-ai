@@ -222,6 +222,7 @@ declare(strict_types=1);
  *   1.11.1 · 2026-05-13 · #189 réécriture ch1 narrative Loop → Octopus (cohérence mascotte) — pieuvre numérique 8 tentacules + clairière sous-marine + bulles-mots + tentacule lumineux. Concepts pédagogiques LLM/prédiction/hallucinations conservés. Délégation rédaction qwen3-max via openrouter-free.
  *   1.11.0 · 2026-05-13 · #201 Cmd+K command palette globale — modale Alpine WCAG (role=dialog + aria-modal + focus auto + return-focus) déclenchée par Cmd+K (macOS) / Ctrl+K (Windows/Linux) ou bouton loupe header, recherche live cross-module via endpoint JSON `/recherche/palette` (web throttle 60/min) servie par SearchService::searchFront() limité 6/section depuis SearchRegistry (Blog + Actualités + Glossaire + Annuaire + Acronymes), debounce 250 ms + AbortController, keyboard nav ↑↓/Enter/Esc, sections groupées avec icône+compteur, footer « Voir tous les résultats » → /recherche?q=, mobile fullscreen, modules désactivés ignorés (zéro régression). + #200 refonte menus navigation Option E hybride — 3 mega menus Outils (4 groupes Productivité/Création/Détente/Pratique) + Annuaire (5 fiches stars data-driven GA4) + Apprendre (Contenu éditorial + Référence) + mobile sidebar refondue.
  *   1.10.0 · 2026-05-12 · #198 Brain Dump Partie 2 — refonte Mad Libs C+E (90/100 best practice 2026) — 5 chips inline cliquables (catégories multi-select / nbPatterns / nbActions / horizon / tone) avec popovers Alpine, prompt copié = rendu actuel substituant variables, WCAG AAA 32-44px target sizes, mobile popover full-width. + #196 uniformité bloc tool charte Memora (card blanc + ct-btn teal) + #195 Octopus intro.svg lisible (corps #0B7285 + tentacules #52B8C7 + pupilles #1a1d23).
+ *   1.65.13 · 2026-06-03 · Boutique désactivée : l'icône panier (mini-cart) du header restait visible malgré SHOP_MAINTENANCE=true. Inclusion du mini-cart gatée par @unless(config('shop.maintenance')) → panier caché pour tous quand la boutique est en maintenance (réversible : revient quand SHOP_MAINTENANCE=false).
  *   1.65.12 · 2026-06-03 · Fix /collections (index public) — même bug que /user/collections : la grille Bootstrap col-md-4 débordait le .container (4e carte coupée). Remplacée par grille CSS responsive (repeat auto-fill minmax 280px) contenue dans le conteneur → plus de débordement.
  *   1.65.11 · 2026-06-03 · Fix /user/collections — la page utilisait le layout générique master (pleine largeur, sans sidebar) → cartes débordantes, incohérentes avec les autres pages « Mon espace ». Migrée vers auth::layouts.user-frontend (sidebar + colonne centrée) + grille CSS responsive (repeat auto-fill minmax 230px) au lieu de col-md-4 Bootstrap → plus de débordement, aligné sur favoris/contributions/etc.
  *   1.65.10 · 2026-06-03 · Menu : compteur dynamique d'acronymes — la variante de méga-menu « Référence » affichait « Sigles du Québec » au lieu du nombre. Ajout $acronymsCount (cache 3600s, même pattern que glossaire/annuaire) → « N acronymes du Québec ».
@@ -248,7 +249,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 12;
+$lvPatch = 13;
 
 return [
     'major' => $lvMajor,
