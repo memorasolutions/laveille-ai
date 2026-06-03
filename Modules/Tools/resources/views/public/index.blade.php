@@ -37,7 +37,7 @@
                 : null,
             'icon' => $t->icon ?? '🔧',
             'show_url' => route('tools.show', $t->slug),
-            'under_construction' => false,
+            'under_construction' => (bool) ($t->is_under_construction ?? false),
             'trending' => $isTrending,
             'new' => $isNew,
         ];
@@ -137,6 +137,9 @@
                                         <span x-show="tool.new"
                                               class="tools-badge tools-badge-new"
                                               x-cloak>✨ {{ __('Nouveau') }}</span>
+                                        <span x-show="tool.under_construction"
+                                              class="tools-badge tools-badge-construction"
+                                              x-cloak>🚧 {{ __('Bientôt') }}</span>
                                     </div>
 
                                     <template x-if="tool.image">
@@ -262,6 +265,7 @@
             }
             .tools-badge-trending { background: #DC2626; color: #fff; }
             .tools-badge-new { background: #065F46; color: #fff; } /* #217 S83 Lot 7 WCAG AAA 7.68:1 (avant #059669 3.77:1 FAIL) */
+            .tools-badge-construction { background: var(--c-accent, #9A2A06); color: #fff; } /* « Bientôt » — accent orange marque, blanc AAA */
             .tools-card { transition: transform .2s ease, box-shadow .2s ease; }
             .tools-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08) !important; }
             #tools-search:focus { border-color: #053D4A; box-shadow: 0 0 0 3px rgba(5, 61, 74, .15); }
