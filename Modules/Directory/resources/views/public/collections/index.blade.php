@@ -16,9 +16,9 @@
         </div>
 
         @if($collections->count())
-            <div class="row">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
                 @foreach($collections as $collection)
-                    <div class="col-md-4 col-sm-6" style="margin-bottom: 30px;">
+                    <div>
                         <div class="entry-details" style="border: 1px solid #e8e8e8; border-radius: 8px; padding: 25px; height: 100%; background: #fff;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                                 <h4 style="margin: 0; font-size: 18px; color: #333; font-weight: 600;">
