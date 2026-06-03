@@ -1,0 +1,31 @@
+name: Outils — anonymiseur « en construction » (manuel, one-off)
+
+# One-off : passe l'anonymiseur en is_under_construction=true sur prod
+# (public → page « En construction », super-admin garde l'accès), puis vide
+# le response cache + purge la page sur Cloudflare. PHP encodé base64.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apply:
+    name: Anonymiseur en construction
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
+
+      - name: Activer is_under_construction + vider cache
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && echo 'PD9waHAKCi8vIE9uZS1vZmYgOiBtYXJxdWUgbCdhbm9ueW1pc2V1ciBjb21tZSDCqyBlbiBjb25zdHJ1Y3Rpb24gwrsgKGlzX3VuZGVyX2NvbnN0cnVjdGlvbj10cnVlKSBzdXIgcHJvZC4KcmVxdWlyZSAndmVuZG9yL2F1dG9sb2FkLnBocCc7CiRhcHAgPSByZXF1aXJlICdib290c3RyYXAvYXBwLnBocCc7CiRhcHAtPm1ha2UoSWxsdW1pbmF0ZVxDb250cmFjdHNcQ29uc29sZVxLZXJuZWw6OmNsYXNzKS0+Ym9vdHN0cmFwKCk7CgokbiA9IFxNb2R1bGVzXFRvb2xzXE1vZGVsc1xUb29sOjp3aGVyZSgnc2x1ZycsICdhbm9ueW1pc2V1cicpLT51cGRhdGUoWydpc191bmRlcl9jb25zdHJ1Y3Rpb24nID0+IHRydWVdKTsKJHQgPSBcTW9kdWxlc1xUb29sc1xNb2RlbHNcVG9vbDo6d2hlcmUoJ3NsdWcnLCAnYW5vbnltaXNldXInKS0+Zmlyc3QoKTsKCmVjaG8gJ0FOT05fVUNfT0sgcm93cz0nIC4gJG4gLiAnIGlzX3VuZGVyX2NvbnN0cnVjdGlvbj0nIC4gdmFyX2V4cG9ydCgkdC0+aXNfdW5kZXJfY29uc3RydWN0aW9uLCB0cnVlKSAuIFBIUF9FT0w7Cg==' | base64 -d | php && php artisan responsecache:clear && php artisan optimize:clear"
+
+      - name: Purge Cloudflare (page anonymiseur)
+        run: |
+          curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"files":["https://laveille.ai/outils/anonymiseur"]}' || true
