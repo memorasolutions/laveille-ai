@@ -21,6 +21,13 @@ class Bookmark extends Model
 
     protected $fillable = ['user_id', 'bookmarkable_type', 'bookmarkable_id', 'created_at'];
 
+    /**
+     * $timestamps=false n'applique pas de cast → created_at était lu comme string,
+     * d'où "Call to a member function format() on string" dans la vue /mes-favoris.
+     * Ce cast le rend Carbon en lecture (le ?->format() de la vue fonctionne alors).
+     */
+    protected $casts = ['created_at' => 'datetime'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
