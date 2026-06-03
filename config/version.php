@@ -222,6 +222,7 @@ declare(strict_types=1);
  *   1.11.1 · 2026-05-13 · #189 réécriture ch1 narrative Loop → Octopus (cohérence mascotte) — pieuvre numérique 8 tentacules + clairière sous-marine + bulles-mots + tentacule lumineux. Concepts pédagogiques LLM/prédiction/hallucinations conservés. Délégation rédaction qwen3-max via openrouter-free.
  *   1.11.0 · 2026-05-13 · #201 Cmd+K command palette globale — modale Alpine WCAG (role=dialog + aria-modal + focus auto + return-focus) déclenchée par Cmd+K (macOS) / Ctrl+K (Windows/Linux) ou bouton loupe header, recherche live cross-module via endpoint JSON `/recherche/palette` (web throttle 60/min) servie par SearchService::searchFront() limité 6/section depuis SearchRegistry (Blog + Actualités + Glossaire + Annuaire + Acronymes), debounce 250 ms + AbortController, keyboard nav ↑↓/Enter/Esc, sections groupées avec icône+compteur, footer « Voir tous les résultats » → /recherche?q=, mobile fullscreen, modules désactivés ignorés (zéro régression). + #200 refonte menus navigation Option E hybride — 3 mega menus Outils (4 groupes Productivité/Création/Détente/Pratique) + Annuaire (5 fiches stars data-driven GA4) + Apprendre (Contenu éditorial + Référence) + mobile sidebar refondue.
  *   1.10.0 · 2026-05-12 · #198 Brain Dump Partie 2 — refonte Mad Libs C+E (90/100 best practice 2026) — 5 chips inline cliquables (catégories multi-select / nbPatterns / nbActions / horizon / tone) avec popovers Alpine, prompt copié = rendu actuel substituant variables, WCAG AAA 32-44px target sizes, mobile popover full-width. + #196 uniformité bloc tool charte Memora (card blanc + ct-btn teal) + #195 Octopus intro.svg lisible (corps #0B7285 + tentacules #52B8C7 + pupilles #1a1d23).
+ *   1.65.18 · 2026-06-03 · Nouveau terme glossaire « MFA (authentification multifacteur) » — entité DISTINCTE du 2FA (anti-duplication) : aliases pour les vrais synonymes (authentification multifacteur), knowledge graph Schema.org bidirectionnel MFA(narrower=2fa) ↔ 2FA(broader=mfa), contenu cross-linkant le 2FA sans le redéfinir. Image Gemini 1200×669 (mfa.jpg og:image + mfa.webp), 3 catégories de facteurs. Sources Wikipédia + Pensez cybersécurité Canada.
  *   1.65.17 · 2026-06-03 · Nouveau terme glossaire « SSO (authentification unique) » — contenu factuel (def, analogie, exemple, le saviez-vous, FAQ, sources Wikipédia+Okta vérifiées, AEO one-sentence, schema), catégorie Sécurité et éthique, image générée via Gemini (gemini-2.5-flash-image) recadrée 1200×669, sso.jpg (og:image réseaux sociaux) + sso.webp (affichage), compressées. Mise en page identique aux autres termes.
  *   1.65.16 · 2026-06-03 · Badge « 🚧 Bientôt » sur les cartes d'outils en construction (liste /outils) — under_construction câblé sur le vrai is_under_construction (était false en dur) + badge accent marque AAA. L'outil reste listé ; sa page montre « En construction » au public, le super-admin garde l'accès. Anonymiseur = premier cas.
  *   1.65.15 · 2026-06-03 · Ajout du lien LinkedIn (profil Stéphane Lapointe) aux liens sociaux header + footer, à côté de Facebook et Messenger. URL via lv_social('linkedin') (setting social.linkedin_url corrigé → lapointestephane + défaut helper mis à jour).
@@ -253,7 +254,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 17;
+$lvPatch = 18;
 
 return [
     'major' => $lvMajor,
