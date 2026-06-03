@@ -1191,6 +1191,18 @@ article h3 {
     padding: 0 !important;
     flex: 0 0 auto;
 }
+/* 2026-06-03 — Les « ? » d'aide INLINE (à côté des libellés de champs, .ct-btn-xs)
+   restent petits : cercle 24×24 (WCAG 2.2 AA target size, exception « cible inline »)
+   au lieu de 44px. Les boutons de barre d'outils (.ct-btn-icon) gardent 44px AAA. */
+.ct-btn-xs[style*="border-radius:50%"], .ct-btn-xs[style*="border-radius: 50%"] {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    padding: 0 !important;
+    font-size: 12px;
+    line-height: 1;
+}
 
 /* ═══════════════════════════════════════════════════
    23. IMPRESSION (@media print)
