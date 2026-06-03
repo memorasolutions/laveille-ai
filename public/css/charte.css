@@ -1179,7 +1179,18 @@ article h3 {
 .ct-btn-xs { padding: 5px 10px; font-size: 12px; }
 .ct-btn-lg { padding: 12px 20px; font-size: 16px; }
 .ct-btn-full { width: 100%; justify-content: center; }
-.ct-btn-icon { padding: 0; min-width: 36px; min-height: 36px; justify-content: center; }
+.ct-btn-icon { padding: 0; width: var(--ct-btn-min-height, 44px); height: var(--ct-btn-min-height, 44px); min-width: var(--ct-btn-min-height, 44px); min-height: var(--ct-btn-min-height, 44px); justify-content: center; flex: 0 0 auto; }
+/* 2026-06-03 — Boutons icône CIRCULAIRES = carré parfait → cercle (jamais ovale).
+   La cible tactile AAA min-height:44 (composant x-core::button) étirait la hauteur
+   des boutons « ? » d'aide à largeur fixe (32/22px) → ovale dans tous les outils.
+   On force width=height=min-height → cercle conforme WCAG 2.2 AAA (44×44). */
+.ct-btn[style*="border-radius:50%"], .ct-btn[style*="border-radius: 50%"] {
+    width: var(--ct-btn-min-height, 44px) !important;
+    height: var(--ct-btn-min-height, 44px) !important;
+    min-width: var(--ct-btn-min-height, 44px) !important;
+    padding: 0 !important;
+    flex: 0 0 auto;
+}
 
 /* ═══════════════════════════════════════════════════
    23. IMPRESSION (@media print)
