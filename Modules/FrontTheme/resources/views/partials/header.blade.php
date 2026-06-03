@@ -19,6 +19,7 @@
                         <ul>
                             <li><a href="{{ lv_social('facebook') }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="ti-facebook"></i></a></li>
                             <li><a href="{{ lv_social('messenger') }}" target="_blank" rel="noopener" aria-label="Messenger"><i class="ti-comment"></i></a></li>
+                            <li><a href="{{ lv_social('linkedin') }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="ti-linkedin"></i></a></li>
                         </ul>
                     </div>
                 </div>

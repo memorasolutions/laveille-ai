@@ -56,7 +56,7 @@ if (! function_exists('lv_social')) {
             'facebook' => 'https://www.facebook.com/LaVeilleAI',
             'messenger' => 'https://m.me/LaVeilleAI',
             'twitter' => 'https://x.com/laveille',
-            'linkedin' => 'https://www.linkedin.com/in/stephane-lapointe-quebec',
+            'linkedin' => 'https://www.linkedin.com/in/lapointestephane/',
             'github' => 'https://github.com/memorasolutions',
             'instagram' => 'https://www.instagram.com/laveille.ai',
             'youtube' => 'https://www.youtube.com/@laveille-ai',
