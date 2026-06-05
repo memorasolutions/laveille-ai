@@ -155,6 +155,21 @@
 @endsection
 
 @push('scripts')
+{{-- Désinscrit l'ancien Service Worker (outil pré-refonte) pour garantir la version actuelle --}}
+<script>
+(() => {
+  try {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(r => { if (r.scope.includes('/outils/anonymiseur')) r.unregister(); });
+      });
+    }
+    if (window.caches) {
+      caches.keys().then(keys => { keys.forEach(k => { if (/anonym/i.test(k)) caches.delete(k); }); });
+    }
+  } catch (e) {}
+})();
+</script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-core.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-ui.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

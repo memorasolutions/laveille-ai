@@ -26,14 +26,15 @@ it('renders anonymiseur tool page with required DOM markers', function () {
 
     $response->assertStatus(200);
     $response->assertSee('Anonymiseur de texte', escape: false);
-    $response->assertSee('id="sourceText"', escape: false);
+    $response->assertSee('id="anonSource"', escape: false);
     $response->assertSee('id="btnDetect"', escape: false);
+    $response->assertSee('id="anonAnnotated"', escape: false);
+    $response->assertSee('id="anonOutput"', escape: false);
+    $response->assertSee('id="btnRestore"', escape: false);
     $response->assertSee('id="infoBanner"', escape: false);
-    $response->assertSee('id="ruleModal"', escape: false);
-    $response->assertSee('id="toastContainer"', escape: false);
-    $response->assertSee('assets/tools/anonymiseur/app.js', escape: false);
-    $response->assertSee('assets/tools/anonymiseur/styles.css', escape: false);
-    $response->assertSee('assets/tools/anonymiseur/enhancements.js', escape: false);
+    $response->assertSee('assets/tools/anonymiseur/anonymizer-core.js', escape: false);
+    $response->assertSee('assets/tools/anonymiseur/anonymizer-ui.js', escape: false);
+    $response->assertSee('assets/tools/anonymiseur/anon-v2.css', escape: false);
     $response->assertSee('SoftwareApplication', escape: false);
 });
 
