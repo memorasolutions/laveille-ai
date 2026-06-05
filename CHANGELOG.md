@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.48] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — les deux champs (original / anonymisé) démarrent maintenant au même niveau** : le label de gauche « Votre texte (cliquez les passages soulignés pour les anonymiser) » occupait 3 lignes (texte sur 2 lignes + le « ? » qui retombait dessous), poussant la boîte de gauche bien plus bas que celle de droite. Corrigé : label raccourci à « Votre texte » (le détail reste dans l'aide « ? » et la légende), et `.anon-pane-label` passe en hauteur fixe égale avec `flex-wrap:nowrap` (le « ? » reste à côté du texte). **Vérifié Playwright** : labels 32px = 32px, les deux champs démarrent au même Y (262.5px = 262.5px).
+
 ## [1.65.47] - 2026-06-05
 
 ### Fixed

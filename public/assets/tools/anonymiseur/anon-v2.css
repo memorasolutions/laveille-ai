@@ -124,8 +124,9 @@
 .anon-viewswitch button { border: none; background: none; font: inherit; font-size: .88rem; padding: .4rem .8rem; border-radius: 8px; cursor: pointer; color: #1A1D23; min-height: 38px; }
 .anon-viewswitch button[aria-pressed="true"] { background: #fff; color: var(--anon-primary); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 .anon-viewswitch button:focus-visible { outline: 2px solid #9A2A06; outline-offset: 1px; }
-/* Hauteur min égale pour les 2 labels → les boîtes gauche/droite démarrent au MÊME Y (parité) */
-.anon-pane-label { font-weight: 600; color: #1A1D23; margin-bottom: .4rem; display: flex; align-items: flex-start; flex-wrap: wrap; gap: 2px; font-size: .92rem; min-height: 2.6em; }
+/* Hauteur fixe égale pour les 2 labels → les boîtes gauche/droite démarrent au MÊME Y (parité).
+   nowrap : le « ? » reste à côté du texte (ne retombe pas sur une 3e ligne). */
+.anon-pane-label { font-weight: 600; color: #1A1D23; margin-bottom: .4rem; display: flex; align-items: center; flex-wrap: nowrap; gap: 4px; font-size: .92rem; height: 2.2em; line-height: 1.2; }
 
 #anonEditorWrap.mode-edit #anonAnnotated { display: none; }
 #anonEditorWrap.mode-annotate #anonSource { display: none; }
