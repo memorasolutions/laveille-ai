@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.53] - 2026-06-05
+
+### Added
+
+- **Anonymiseur — la colonne de droite (texte anonymisé) surligne aussi les valeurs, pour comparer facilement** : le panneau résultat passe de `textarea` à une vue riche miroir de la colonne gauche. Les valeurs remplacées y sont **surlignées** (fond teal) et les candidats non encore masqués **soulignés**, exactement aux mêmes endroits qu'à gauche → comparaison original ↔ anonymisé immédiate. La mise en forme (gras, listes) est conservée des deux côtés. La fonction `highlightEntitiesInElement` accepte un remplacement par marque + un mode non interactif (pas de boutons/`tabindex` inertes à droite). **La copie vers l'IA reste le texte simple exact** (`anonPlain` via l'anonymisation à plat, avec les overrides), indépendant de l'affichage riche. **Vérifié Playwright** : surlignage à droite (faux affichés, vraies valeurs absentes), surlignage imbriqué dans `<strong>`, listes préservées, alignement gauche/droite conservé, 0 bouton inerte, 0 erreur console.
+
 ## [1.65.52] - 2026-06-05
 
 ### Fixed

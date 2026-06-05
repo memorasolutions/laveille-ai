@@ -61,12 +61,13 @@
    * @param {Array<{value:string,category:string,cls:string,priority:number}>} marks  cls = 'anon-anon'|'anon-cand'
    * @param {(s:string)=>string} normFn  normalisation pour la clé d'occurrence
    */
-  function highlightEntitiesInElement(rootEl, marks, normFn) {
+  function highlightEntitiesInElement(rootEl, marks, normFn, opts) {
     if (!rootEl || !Array.isArray(marks) || !marks.length || typeof normFn !== 'function') return;
     if (!window.AnonymizerCore || !window.AnonymizerCore.buildAccentInsensitiveBoundedRegex) return;
+    const interactive = !opts || opts.interactive !== false; // false = vue d'affichage (colonne droite)
 
     const patterns = marks.map(function (m) {
-      return { value: m.value, category: m.category, cls: m.cls, priority: m.priority || 0,
+      return { value: m.value, category: m.category, cls: m.cls, priority: m.priority || 0, replacement: m.replacement,
                regex: window.AnonymizerCore.buildAccentInsensitiveBoundedRegex(m.value) };
     });
 
@@ -99,7 +100,7 @@
         while ((m = p.regex.exec(text)) !== null) {
           if (m[0].length === 0) { p.regex.lastIndex++; continue; } // garde anti-boucle
           hits.push({ start: m.index, end: m.index + m[0].length, text: m[0],
-                      value: p.value, category: p.category, cls: p.cls, priority: p.priority });
+                      value: p.value, category: p.category, cls: p.cls, priority: p.priority, replacement: p.replacement });
         }
       });
       if (!hits.length) return;
@@ -133,12 +134,15 @@
         const idx = occ.get(key) || 0;
         span.setAttribute('data-occ', String(idx));
         occ.set(key, idx + 1);
-        span.setAttribute('tabindex', '0');
-        span.setAttribute('role', 'button');
-        span.setAttribute('aria-label', h.cls === 'anon-anon'
-          ? 'Anonymisé — cliquer pour les options'
-          : 'À anonymiser — cliquer pour anonymiser');
-        span.textContent = h.text; // échappement sûr
+        if (interactive) {
+          span.setAttribute('tabindex', '0');
+          span.setAttribute('role', 'button');
+          span.setAttribute('aria-label', h.cls === 'anon-anon'
+            ? 'Anonymisé — cliquer pour les options'
+            : 'À anonymiser — cliquer pour anonymiser');
+        }
+        // Vue droite : on AFFICHE le faux (replacement) à la place de l'original ; sinon on garde l'original.
+        span.textContent = (h.replacement != null) ? h.replacement : h.text; // échappement sûr
         frag.appendChild(span);
         pos = h.end;
       });

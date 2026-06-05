@@ -7,6 +7,7 @@ class AnonymizerUI {
   constructor() {
     this.sourceText = '';
     this.sourceHtml = ''; // version riche (mise en forme conservée) de l'éditeur
+    this.anonPlain = '';  // texte anonymisé exact (pour la copie vers l'IA)
     this.candidates = [];
     this.rules = [];
     this.anonMode = 'pseudo';
@@ -70,14 +71,26 @@ class AnonymizerUI {
 
   updateOutput() {
     const output = document.getElementById('anonOutput');
-    if (output) { output.value = window.AnonymizerCore.anonymize(this.sourceText, this.rules, this.overrides); this.autoGrow(output); }
+    if (!output) return;
+    // Texte simple EXACT (avec overrides) — c'est CE texte qui est copié vers l'IA.
+    this.anonPlain = window.AnonymizerCore.anonymize(this.sourceText, this.rules, this.overrides);
+    // Vue riche miroir : faux SURLIGNÉS + candidats SOULIGNÉS → comparaison gauche↔droite facile.
+    if (this.sourceText.trim() && this.sourceHtml && this.sourceHtml.trim() && window.AnonRich && window.AnonRich.highlightEntitiesInElement) {
+      output.innerHTML = this.sourceHtml;
+      const marks = [];
+      const ruleSet = new Set();
+      for (const r of this.rules) { ruleSet.add(_norm(r.original)); marks.push({ value: r.original, replacement: r.replacement, category: r.category, cls: 'anon-anon', priority: 1 }); }
+      for (const c of this.candidates) { if (!ruleSet.has(_norm(c.value))) marks.push({ value: c.value, category: c.category, cls: 'anon-cand', priority: 0 }); }
+      if (marks.length) window.AnonRich.highlightEntitiesInElement(output, marks, _norm, { interactive: false });
+    } else {
+      output.textContent = this.anonPlain; // repli texte simple
+    }
   }
 
   async copyAnon(btn) {
-    const output = document.getElementById('anonOutput');
-    if (!output || !output.value) { this.toast('Rien à copier.', 'warning'); return; }
+    if (!this.anonPlain) { this.toast('Rien à copier.', 'warning'); return; }
     try {
-      await navigator.clipboard.writeText(output.value);
+      await navigator.clipboard.writeText(this.anonPlain);
       this.toast('Texte anonymisé copié.', 'success');
       if (btn) { const o = btn.innerHTML; btn.innerHTML = '✓ Copié'; setTimeout(() => { btn.innerHTML = o; }, 1500); }
     } catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }

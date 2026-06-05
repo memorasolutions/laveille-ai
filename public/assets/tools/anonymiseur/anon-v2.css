@@ -64,14 +64,15 @@
 .anon-rich:focus { white-space: pre-wrap; }
 /* Rendu des listes dans l'éditeur ET le volet annoté (mise en forme préservée).
    Marges de bloc à 0 pour épouser le rythme vertical du textarea de sortie → parité de comparaison. */
-#anonSource ul, #anonAnnotated ul { list-style: disc; padding-left: 1.4rem; margin: 0; }
-#anonSource ol, #anonAnnotated ol { list-style: decimal; padding-left: 1.4rem; margin: 0; }
-#anonSource li, #anonAnnotated li { margin: 0; }
-#anonSource p, #anonAnnotated p { margin: 0; }
-#anonSource h1, #anonAnnotated h1, #anonSource h2, #anonAnnotated h2, #anonSource h3, #anonAnnotated h3 { margin: 0; font-weight: 700; line-height: 1.5; }
-#anonSource blockquote, #anonAnnotated blockquote { margin: 0; padding-left: .8rem; border-left: 3px solid var(--anon-line); color: #52586a; }
-/* Même hauteur min pour les 2 boîtes (gauche/droite) → comparaison alignée */
-#anonOutput { min-height: 200px; }
+#anonSource ul, #anonAnnotated ul, #anonOutput ul { list-style: disc; padding-left: 1.4rem; margin: 0; }
+#anonSource ol, #anonAnnotated ol, #anonOutput ol { list-style: decimal; padding-left: 1.4rem; margin: 0; }
+#anonSource li, #anonAnnotated li, #anonOutput li { margin: 0; }
+#anonSource p, #anonAnnotated p, #anonOutput p { margin: 0; }
+#anonSource h1, #anonAnnotated h1, #anonOutput h1, #anonSource h2, #anonAnnotated h2, #anonOutput h2, #anonSource h3, #anonAnnotated h3, #anonOutput h3 { margin: 0; font-weight: 700; line-height: 1.5; }
+#anonSource blockquote, #anonAnnotated blockquote, #anonOutput blockquote { margin: 0; padding-left: .8rem; border-left: 3px solid var(--anon-line); color: #52586a; }
+/* Colonne droite = vue riche miroir (lecture seule) : même hauteur min + retour à la ligne */
+#anonOutput { min-height: 200px; white-space: pre-wrap; word-wrap: break-word; overflow: auto; }
+#anonOutput:focus { outline: 2px solid var(--anon-primary); outline-offset: 1px; }
 
 /* Bouton « Copier » flottant en haut-droite du panneau résultat (overlay → n'affecte pas l'alignement) */
 .anon-output-wrap { position: relative; }

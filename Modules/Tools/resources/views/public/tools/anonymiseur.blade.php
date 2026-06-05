@@ -132,7 +132,7 @@
                                     <div class="anon-output-wrap">
                                         {{-- Copie toujours accessible en haut du panneau (pattern bloc de code), sans casser l'alignement --}}
                                         <button type="button" id="btnCopyAnonTop" class="anon-copy-float" aria-label="{{ __('Copier le texte anonymisé pour l\'IA') }}">📋 {{ __('Copier') }}</button>
-                                        <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé prêt pour l\'IA') }}"></textarea>
+                                        <div id="anonOutput" class="anon-textarea anon-out-rich" role="textbox" aria-readonly="true" tabindex="0" aria-label="{{ __('Texte anonymisé prêt pour l\'IA — valeurs surlignées') }}"></div>
                                     </div>
                                     <div class="anon-actions">
                                         <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier pour l\'IA') }}</button>
