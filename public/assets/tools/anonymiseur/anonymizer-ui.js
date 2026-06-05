@@ -23,6 +23,7 @@ class AnonymizerUI {
       this.goStep(1);
       this.bindEvents();
       this.bindActionMenu();
+      this.bindSelectionBubble();
       this.bindAutoGrow();
       this.updateModeUI();
     });
@@ -157,7 +158,12 @@ class AnonymizerUI {
   }
 
   guessCategory(text) {
-    return /^[A-ZÀ-Ÿ][a-zà-ÿ]+(\s+[A-ZÀ-Ÿ][a-zà-ÿ]+)+$/.test(text) ? 'name' : 'other';
+    // Réutilise le moteur de détection sur le passage sélectionné → bonne catégorie (nom, date, RAMQ, courriel…)
+    const t = (text || '').trim();
+    const ents = window.AnonymizerCore.detectEntities(t) || [];
+    if (ents.length) return ents.sort((a, b) => b.value.length - a.value.length)[0].category;
+    if (/\d/.test(t)) return 'id';
+    return /^[A-ZÀ-Ÿ]/.test(t) ? 'name' : 'other';
   }
 
   toggleAnonMode() {
@@ -202,6 +208,43 @@ class AnonymizerUI {
     }
     // Recalcule au redimensionnement (le texte se reflowe → la hauteur change)
     window.addEventListener('resize', () => ids.forEach(id => this.autoGrow(document.getElementById(id))));
+  }
+
+  bindSelectionBubble() {
+    const $ = id => document.getElementById(id);
+    const bubble = $('anonSelBubble');
+    const btn = $('anonSelBubbleBtn');
+    const annotated = $('anonAnnotated');
+    if (!bubble || !btn || !annotated) return;
+    const showBubble = (rect) => {
+      let top = rect.top - 44;
+      if (top < 8) top = rect.bottom + 8;
+      bubble.style.left = (rect.left + rect.width / 2) + 'px';
+      bubble.style.top = top + 'px';
+      bubble.classList.remove('hidden');
+    };
+    const hideBubble = () => bubble.classList.add('hidden');
+    const handleSelection = () => {
+      const sel = window.getSelection();
+      const txt = (sel.toString() || '').trim();
+      if (txt && sel.rangeCount && annotated.contains(sel.anchorNode)) {
+        this.lastSelection = txt;
+        btn.textContent = '🕵️ Anonymiser « ' + (txt.length > 22 ? txt.slice(0, 22) + '…' : txt) + ' »';
+        showBubble(sel.getRangeAt(0).getBoundingClientRect());
+      } else {
+        hideBubble();
+      }
+    };
+    annotated.addEventListener('mouseup', handleSelection);
+    annotated.addEventListener('keyup', () => setTimeout(handleSelection, 0));
+    btn.addEventListener('click', () => {
+      if (this.lastSelection) { this.anonymizeValue(this.lastSelection, this.guessCategory(this.lastSelection)); this.lastSelection = ''; }
+      window.getSelection().removeAllRanges();
+      hideBubble();
+      this.toast('Passage anonymisé.', 'success');
+    });
+    document.addEventListener('mousedown', (e) => { if (!bubble.contains(e.target) && !annotated.contains(e.target)) hideBubble(); });
+    window.addEventListener('scroll', () => hideBubble(), { capture: true });
   }
 
   bindActionMenu() {

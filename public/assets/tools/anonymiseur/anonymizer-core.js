@@ -118,6 +118,9 @@ function generateFake(category, original) {
       const d = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
       return `${y}-${mo}-${d}`;
     }
+    case 'id': // RAMQ, permis, matricule : on randomise chiffres ET lettres en gardant le format
+      return original.replace(/\d/g, () => Math.floor(Math.random() * 10).toString())
+                     .replace(/[A-ZÀ-Ÿ]/g, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]);
     case 'organization':
     case 'other': return getRandomItem(FAKE_DATA.companies);
     default: return getRandomItem(FAKE_DATA.companies);

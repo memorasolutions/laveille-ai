@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.31] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — pseudonyme incohérent en anonymisation MANUELLE (bug critique, en construction/admin)** : sélectionner « Jean-François Tremblay » ou « 12 mars 1982 » donnait un nom **d'entreprise** (« Groupe Solva »…). Cause : `guessCategory()` échouait sur les noms à trait d'union et les dates → catégorie `other` → faux d'entreprise ; et la catégorie `id` (RAMQ/permis) tombait aussi sur « entreprise ». Fix : `guessCategory` **réutilise le moteur de détection** sur le passage sélectionné (nom→name, date→date, RAMQ→id, courriel→email, tél→phone, adresse→address) ; `generateFake('id')` masque chiffres **et** lettres en gardant le format (RAMQ « TREM 8203 12 01 »→« ODWL 6764 33 54 », permis « 123456 »→« 864904 »). Vérifié : nom→faux nom, date→fausse date, RAMQ→numéro masqué — plus aucune entreprise parasite.
+
+### Added
+
+- **Anonymiseur — bulle contextuelle « 🕵️ Anonymiser » à la sélection** (anonymisation manuelle enfin intuitive). Recherche juin 2026 (W3C/Notion) : **hybride** (option 96/100) = bouton fixe conservé **+** bulle flottante qui apparaît juste au-dessus du passage sélectionné à la souris (pattern Medium/Notion), même action, avec l'extrait sélectionné dans le libellé. Consigne d'amorçage clarifiée. Validé **E2E Playwright** (vraie sélection souris → bulle positionnée → clic → bonne catégorie, 10/10).
+
 ## [1.65.30] - 2026-06-05
 
 ### Added

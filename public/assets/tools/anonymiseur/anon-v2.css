@@ -12,6 +12,17 @@
   cursor: pointer; min-height: 44px; }
 .anon-menu-item:hover, .anon-menu-item:focus-visible { background: #ECFDF5; outline: none; }
 .anon-menu-item:focus-visible { box-shadow: 0 0 0 2px #9A2A06; }
+
+/* Bulle contextuelle d'anonymisation (apparaît près de la sélection) */
+.anon-sel-bubble { position: fixed; z-index: 50; transform: translateX(-50%); }
+.anon-sel-bubble.hidden { display: none; }
+.anon-sel-bubble button { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .85rem;
+  background: #1A1D23; color: #fff; border: none; border-radius: 999px; font: inherit; font-weight: 600;
+  font-size: .88rem; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.28); white-space: nowrap; min-height: 40px; }
+.anon-sel-bubble button:hover { background: #064E5A; }
+.anon-sel-bubble button:focus-visible { outline: 2px solid #9A2A06; outline-offset: 2px; }
+.anon-sel-bubble::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg);
+  width: 10px; height: 10px; background: #1A1D23; }
 .anon-steps { display: flex; gap: .5rem; margin: 0 0 1.25rem; flex-wrap: wrap; }
 .anon-step { flex: 1 1 0; min-width: 140px; display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
   background: #fff; border: 1px solid var(--anon-line); border-radius: 12px; cursor: pointer; font: inherit; text-align: left; transition: .15s; }

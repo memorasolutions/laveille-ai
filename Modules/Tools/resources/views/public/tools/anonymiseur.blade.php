@@ -81,7 +81,7 @@
                         {{-- ÉTAPE 1 : éditeur annoté + aperçu --}}
                         <div class="anon-panel active" data-step-content="1">
                             <div class="anon-help">
-                                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les anonymiser (elles deviennent surlignées). Vous pouvez aussi sélectionner un passage et « Anonymiser la sélection ». Le texte prêt pour l\'IA apparaît à droite.') }}
+                                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les masquer (elles deviennent surlignées). Pour masquer autre chose, sélectionnez simplement un passage avec la souris — un bouton « 🕵️ Anonymiser » apparaît juste au-dessus. Le texte prêt pour l\'IA apparaît à droite.') }}
                             </div>
 
                             {{-- Barre d'outils : 1 action primaire + sélection + menu « Actions » (réduit la surcharge — tendance 2026) --}}
@@ -151,6 +151,11 @@
                         </div>
 
                     </div>{{-- /.card-body --}}
+
+                    {{-- Bulle contextuelle : apparaît près de la sélection (pattern Medium/Notion) --}}
+                    <div id="anonSelBubble" class="anon-sel-bubble hidden" role="tooltip">
+                        <button type="button" id="anonSelBubbleBtn">🕵️ {{ __('Anonymiser') }}</button>
+                    </div>
                 </div>{{-- /.card --}}
             </div>{{-- /.col --}}
         </div>{{-- /.row --}}
