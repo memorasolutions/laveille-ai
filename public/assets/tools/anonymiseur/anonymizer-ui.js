@@ -239,6 +239,18 @@ class AnonymizerUI {
     };
     annotated.addEventListener('mouseup', handleSelection);
     annotated.addEventListener('keyup', () => setTimeout(handleSelection, 0));
+    // Cmd/Ctrl+A : confiner la sélection au champ annoté (sinon le navigateur sélectionne toute la page)
+    annotated.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        const r = document.createRange();
+        r.selectNodeContents(annotated);
+        const s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+        handleSelection();
+      }
+    });
     btn.addEventListener('click', () => {
       if (this.lastSelection) { this.anonymizeValue(this.lastSelection, this.guessCategory(this.lastSelection)); this.lastSelection = ''; }
       window.getSelection().removeAllRanges();

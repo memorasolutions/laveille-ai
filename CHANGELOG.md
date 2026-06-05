@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.33] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — Cmd/Ctrl+A sélectionnait toute la page** : la vue annotée est un `div` (non éditable nativement) → le raccourci sélectionnait tout le document. Désormais intercepté pour **confiner la sélection au seul contenu du champ annoté** (`Range.selectNodeContents`). Validé E2E Playwright (sélection limitée à `#anonAnnotated`, rien hors champ).
+
 ## [1.65.32] - 2026-06-05
 
 ### Fixed
