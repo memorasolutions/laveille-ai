@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.58] - 2026-06-05
+
+### Fixed
+
+- **Bouton plein écran des outils — icône « brisée » corrigée** (signalé sur le constructeur de prompts, partial partagé `tools::partials.fullscreen-btn`). Cause : la règle responsive globale `svg { max-width:100%; height:auto }` (charte.css) s'appliquait à la SVG inline 16×16 du bouton ; comme ce bouton est `ct-btn-ghost ct-btn-xs` (largeur **auto**, contrairement au bouton « partager » en `ct-btn-icon` 44×44 fixe), le dimensionnement devenait circulaire et l'icône se réduisait/déformait. Correctif ciblé **zéro risque** : taille forcée en style inline (`width:16px;height:16px;flex-shrink:0`) sur les 2 SVG du partial (bat la règle globale). Corrige l'icône sur **tous** les outils, sans toucher aux autres médias.
+
 ## [1.65.57] - 2026-06-05
 
 ### Added
