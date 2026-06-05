@@ -622,6 +622,14 @@ class AnonymizerUI {
     on('btnCopyAnon', 'click', (e) => this.copyAnon(e.currentTarget));
     on('btnCopyAnonTop', 'click', (e) => this.copyAnon(e.currentTarget));
 
+    // Handoff vers le constructeur de prompts : on passe SEULEMENT le texte anonymisé,
+    // via sessionStorage (volatile, same-origin) — jamais dans l'URL (aucune fuite PII).
+    on('btnToPromptBuilder', 'click', () => {
+      if (!this.anonPlain) { this.toast('Anonymisez d\'abord un texte.', 'warning'); return; }
+      try { sessionStorage.setItem('lv_handoff_prompt_text', this.anonPlain); } catch (e) {}
+      window.location.href = '/outils/constructeur-prompts';
+    });
+
     on('btnRestore', 'click', () => {
       const ai = document.getElementById('aiResponse');
       const aiText = (ai && ai.value) || '';

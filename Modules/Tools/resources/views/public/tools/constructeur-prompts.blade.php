@@ -124,8 +124,22 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label class="form-label fw-medium">{{ __('Objet de la tâche') }} <span style="color: #DC2626;">*</span></label>
-                                <textarea class="form-control" rows="3" x-model="taskObject" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la tâche') }}"></textarea>
+                                <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la tâche') }}"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que l\'IA doit produire.') }}</small>
+                            </div>
+
+                            {{-- Liaison anonymiseur (pattern « module partagé in-page », 100% local) --}}
+                            <div class="form-group mb-3">
+                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" aria-expanded="false" aria-controls="cpAnonPanel">🛡️ {{ __('Anonymiser un texte (optionnel)') }}</button>
+                                <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
+                                <div id="cpAnonPanel" style="display:none; border:1px solid var(--anon-line,#e2e6ea); border-radius:12px; padding:1rem; margin-top:.75rem; background:#f8fafb;" aria-hidden="true">
+                                    <p style="font-size:.85rem; color:#52586a; margin:0 0 .5rem;">🔒 {{ __('100 % local — aucune donnée ne quitte votre navigateur.') }}</p>
+                                    <textarea id="cpAnonInput" class="form-control" rows="3" placeholder="{{ __('Collez ici le texte à anonymiser…') }}" aria-label="{{ __('Texte à anonymiser') }}"></textarea>
+                                    <button id="cpAnonRun" type="button" class="ct-btn ct-btn-primary ct-btn-sm" style="margin:.5rem 0;">🕵️ {{ __('Anonymiser') }}</button>
+                                    <textarea id="cpAnonOutput" class="form-control" rows="3" readonly placeholder="{{ __('Résultat anonymisé…') }}" aria-label="{{ __('Résultat de l\'anonymisation') }}"></textarea>
+                                    <div id="cpAnonReport" style="font-size:.85rem; color:#065F46; margin:.4rem 0;" aria-live="polite"></div>
+                                    <button id="cpAnonInsert" type="button" class="ct-btn ct-btn-accent ct-btn-sm">➕ {{ __('Insérer dans la tâche') }}</button>
+                                </div>
                             </div>
                         </div>
 
@@ -456,6 +470,9 @@
 @endpush
 
 @push('scripts')
+{{-- Liaison anonymiseur : moteur partagé (100% local) + panneau d'anonymisation in-page --}}
+<script src="{{ asset('assets/tools/anonymiseur/anonymizer-core.js') }}?v={{ config('version.semver') }}"></script>
+<script src="{{ asset('assets/tools/constructeur-prompts/prompt-anon-panel.js') }}?v={{ config('version.semver') }}"></script>
 @php
 $defaultPersonas = [['value'=>'expert_marketing','label'=>'Expert en marketing digital'],['value'=>'redacteur_web','label'=>'Rédacteur web professionnel'],['value'=>'enseignant','label'=>'Enseignant pédagogue'],['value'=>'developpeur','label'=>'Développeur senior'],['value'=>'consultant','label'=>'Consultant en stratégie'],['value'=>'graphiste','label'=>'Graphiste créatif'],['value'=>'analyste','label'=>'Analyste de données'],['value'=>'gestionnaire','label'=>'Gestionnaire de projet'],['value'=>'coach','label'=>'Coach professionnel'],['value'=>'journaliste','label'=>'Journaliste d\'investigation'],['value'=>'chercheur','label'=>'Chercheur scientifique'],['value'=>'rh','label'=>'Spécialiste en ressources humaines']];
 $defaultVerbs = ['Rédige','Analyse','Crée','Génère','Explique','Compare','Résume','Traduis','Optimise','Évalue','Développe','Conçois','Planifie','Diagnostique'];

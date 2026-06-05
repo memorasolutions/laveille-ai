@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.57] - 2026-06-05
+
+### Added
+
+- **Anonymiseur ↔ Constructeur de prompts — liaison des deux outils (utilisables séparément OU ensemble, 100 % local)** : d'après la recherche best practices juin 2026 (Perplexity ; privacy-by-design, pas de PII en URL), approche hybride notée 93/100 (module partagé in-page) + 88/100 (handoff sessionStorage), évitant le deep-link URL (35/100, fuite PII).
+  - **Module partagé in-page** (pattern 2) : le constructeur de prompts charge le moteur `window.AnonymizerCore` et expose un panneau repliable « 🛡️ Anonymiser un texte (optionnel) » (progressive disclosure) — anonymise un texte localement puis l'insère dans le champ « Objet de la tâche » (`prompt-anon-panel.js`, vanilla, 100 % local).
+  - **Handoff sessionStorage** (pattern 1) : bouton « ✨ Créer un prompt → » dans l'anonymiseur qui transmet **uniquement le texte anonymisé** via `sessionStorage` (volatile, same-origin — **jamais dans l'URL**) ; le constructeur l'importe automatiquement, affiche un toast et **efface la clé** (one-time). Lien « ↗ Anonymiseur complet » côté constructeur.
+  - Les deux outils restent **100 % autonomes**. Aucune donnée personnelle ne quitte le navigateur.
+
 ## [1.65.56] - 2026-06-05
 
 ### Changed

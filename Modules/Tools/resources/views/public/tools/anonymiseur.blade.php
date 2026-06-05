@@ -136,6 +136,7 @@
                                     </div>
                                     <div class="anon-actions">
                                         <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier pour l\'IA') }}</button>
+                                        <button type="button" id="btnToPromptBuilder" class="anon-btn secondary" title="{{ __('Ouvre le constructeur de prompts avec ce texte anonymisé') }}">✨ {{ __('Créer un prompt →') }}</button>
                                         <button type="button" class="anon-btn secondary anon-step" data-step="2">{{ __('J\'ai la réponse de l\'IA →') }}</button>
                                     </div>
                                 </div>
