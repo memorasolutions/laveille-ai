@@ -58,3 +58,33 @@
 .anon-report { margin: .6rem 0; padding: .6rem .85rem; border-radius: 10px; background: #ECFDF5;
   border: 1px solid rgba(6,78,90,.18); color: #065F46; font-size: .9rem; }
 .anon-report:empty { display: none; }
+
+/* ===== Éditeur annoté inline (refonte UX juin 2026) ===== */
+.anon-toolbar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: .5rem;
+  padding: .6rem 0; margin-bottom: .85rem; background: #fff; border-bottom: 1px solid var(--anon-line); }
+.anon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+@media (max-width: 860px) { .anon-grid { grid-template-columns: 1fr; } }
+.anon-pane-label { font-weight: 600; color: #1A1D23; margin-bottom: .4rem; display: block; font-size: .92rem; }
+
+#anonEditorWrap.mode-edit #anonAnnotated { display: none; }
+#anonEditorWrap.mode-annotate #anonSource { display: none; }
+
+#anonAnnotated { white-space: pre-wrap; word-wrap: break-word; min-height: 200px; padding: .85rem 1rem;
+  border: 1px solid var(--anon-line); border-radius: 12px; background: #fff; line-height: 1.7; color: #1A1D23; }
+#anonAnnotated:focus { outline: 2px solid var(--anon-primary); outline-offset: 1px; }
+.anon-placeholder { color: #52586a; font-style: italic; }
+
+/* Souligné = candidat (sera anonymisé) */
+.anon-cand { text-decoration: underline; text-decoration-style: dashed; text-decoration-thickness: 2px;
+  text-underline-offset: 3px; text-decoration-color: #0B7285; cursor: pointer; border-radius: 3px; }
+.anon-cand:hover { background: #ECFDF5; }
+
+/* Surligné = anonymisé (actif) */
+.anon-anon { background: #B9ECE2; color: #064E5A; border-radius: 4px; padding: 0 3px; cursor: pointer;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; font-weight: 600; }
+.anon-anon:hover { background: #97E0D1; }
+
+#anonAnnotated span[role="button"]:focus-visible { outline: 2px solid #9A2A06; outline-offset: 1px; }
+
+.anon-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .5rem 0 0; font-size: .82rem; color: #52586a; }
+.anon-legend .anon-cand, .anon-legend .anon-anon { cursor: default; }

@@ -72,79 +72,55 @@
                             </x-core::accordion>
                         </div>
 
-                        {{-- Navigation des 3 étapes --}}
+                        {{-- Navigation des 2 étapes --}}
                         <nav class="anon-steps" aria-label="{{ __('Étapes') }}">
-                            <button type="button" class="anon-step active" data-step="1"><span class="num">1</span><span class="lbl">{{ __('Votre texte') }}</span></button>
-                            <button type="button" class="anon-step" data-step="2"><span class="num">2</span><span class="lbl">{{ __('Texte anonymisé') }}</span></button>
-                            <button type="button" class="anon-step" data-step="3"><span class="num">3</span><span class="lbl">{{ __('Restaurer la réponse IA') }}</span></button>
+                            <button type="button" class="anon-step active" data-step="1"><span class="num">1</span><span class="lbl">{{ __('Anonymiser votre texte') }}</span></button>
+                            <button type="button" class="anon-step" data-step="2"><span class="num">2</span><span class="lbl">{{ __('Restaurer la réponse IA') }}</span></button>
                         </nav>
 
-                        {{-- ÉTAPE 1 --}}
+                        {{-- ÉTAPE 1 : éditeur annoté + aperçu --}}
                         <div class="anon-panel active" data-step-content="1">
                             <div class="anon-help">
-                                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, puis soit cliquez « Détecter » (automatique), soit sélectionnez un passage à la souris et cliquez « Anonymiser la sélection ». Cochez ce qui doit être masqué, puis « Anonymiser ».') }}
-                            </div>
-                            <div class="anon-field">
-                                <label class="anon-label" for="anonSource">{{ __('Collez votre texte original') }}</label>
-                                <textarea id="anonSource" class="anon-textarea" placeholder="{{ __('Ex. : Le dossier #86734 pour M. Jean Dubé concerne le chantier du 15 rue de la Gare…') }}"></textarea>
-                            </div>
-                            <div class="anon-actions">
-                                <button type="button" id="btnDetect" class="anon-btn">🔍 {{ __('Détecter les données sensibles') }}</button>
-                                <button type="button" id="btnAnonymizeSelection" class="anon-btn secondary">✍️ {{ __('Anonymiser la sélection') }}</button>
-                                <button type="button" id="btnAddManual" class="anon-btn secondary">+ {{ __('Ajouter manuellement') }}</button>
+                                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les anonymiser (elles deviennent surlignées). Vous pouvez aussi sélectionner un passage et « Anonymiser la sélection ». Le texte prêt pour l\'IA apparaît à droite.') }}
                             </div>
 
-                            <div id="manualRow" class="anon-manual hidden">
-                                <div class="row">
-                                    <div style="flex:1 1 220px;">
-                                        <label class="anon-label" for="manualOriginal">{{ __('Texte exact à masquer') }}</label>
-                                        <input type="text" id="manualOriginal" class="anon-input" style="width:100%;" placeholder="{{ __('ex. : Constructions ABC inc.') }}">
+                            {{-- Barre d'outils collante (pattern WAI-ARIA toolbar) --}}
+                            <div class="anon-toolbar" role="toolbar" aria-label="{{ __('Actions d\'anonymisation') }}">
+                                <button type="button" id="btnDetect" class="anon-btn">🔍 {{ __('Détecter') }}</button>
+                                <button type="button" id="btnAnonymizeSelection" class="anon-btn secondary">✍️ {{ __('Anonymiser la sélection') }}</button>
+                                <button type="button" id="btnAnonymizeAll" class="anon-btn secondary">🕵️ {{ __('Tout anonymiser') }}</button>
+                                <button type="button" id="btnEditText" class="anon-btn secondary">✏️ {{ __('Modifier le texte') }}</button>
+                                <button type="button" id="btnResetAll" class="anon-btn secondary">↺ {{ __('Réinitialiser') }}</button>
+                            </div>
+
+                            <div class="anon-grid">
+                                {{-- Volet gauche : éditeur annoté --}}
+                                <div>
+                                    <label class="anon-pane-label" for="anonSource">{{ __('Votre texte (cliquez les passages soulignés pour les anonymiser)') }}</label>
+                                    <div id="anonEditorWrap" class="mode-edit">
+                                        <textarea id="anonSource" class="anon-textarea" placeholder="{{ __('Ex. : Le dossier #86734 pour M. Jean Dubé concerne le chantier du 15 rue de la Gare…') }}"></textarea>
+                                        <div id="anonAnnotated" tabindex="0" role="textbox" aria-label="{{ __('Texte annoté — cliquez une entité pour l\'anonymiser') }}"></div>
                                     </div>
-                                    <div>
-                                        <label class="anon-label" for="manualCategory">{{ __('Type') }}</label>
-                                        <select id="manualCategory" class="anon-select">
-                                            <option value="name">{{ __('Nom de personne') }}</option>
-                                            <option value="address">{{ __('Adresse') }}</option>
-                                            <option value="dossier">{{ __('Numéro de dossier') }}</option>
-                                            <option value="email">{{ __('Courriel') }}</option>
-                                            <option value="phone">{{ __('Téléphone') }}</option>
-                                            <option value="amount">{{ __('Montant') }}</option>
-                                            <option value="date">{{ __('Date') }}</option>
-                                            <option value="other">{{ __('Autre') }}</option>
-                                        </select>
+                                    <div class="anon-legend" aria-hidden="true">
+                                        <span><span class="anon-cand">{{ __('souligné') }}</span> = {{ __('sera anonymisé') }}</span>
+                                        <span><span class="anon-anon">{{ __('surligné') }}</span> = {{ __('anonymisé') }}</span>
                                     </div>
-                                    <button type="button" id="btnSaveManual" class="anon-btn secondary">{{ __('Ajouter') }}</button>
+                                </div>
+
+                                {{-- Volet droit : aperçu anonymisé --}}
+                                <div>
+                                    <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }}</label>
+                                    <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé prêt pour l\'IA') }}"></textarea>
+                                    <div class="anon-actions">
+                                        <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier pour l\'IA') }}</button>
+                                        <button type="button" class="anon-btn secondary anon-step" data-step="2">{{ __('J\'ai la réponse de l\'IA →') }}</button>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div id="detectResults" class="anon-detect-list" aria-live="polite"></div>
-
-                            <div class="anon-actions">
-                                <button type="button" id="btnAnonymize" class="anon-btn">🕵️ {{ __('Anonymiser') }}</button>
-                            </div>
                         </div>
 
-                        {{-- ÉTAPE 2 --}}
+                        {{-- ÉTAPE 2 : restauration --}}
                         <div class="anon-panel" data-step-content="2">
-                            <div class="anon-help">
-                                📋 {{ __('Copiez ce texte anonymisé et collez-le dans votre IA (ChatGPT, Claude, Gemini…). Vous récupérerez vos vraies données à l\'étape 3.') }}
-                            </div>
-                            <div class="anon-field">
-                                <label class="anon-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }}</label>
-                                <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé') }}"></textarea>
-                            </div>
-                            <div class="anon-actions">
-                                <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier le texte anonymisé') }}</button>
-                                <button type="button" class="anon-btn secondary anon-step" data-step="3">{{ __('J\'ai la réponse de l\'IA →') }}</button>
-                            </div>
-                            <div class="anon-field" style="margin-top:1.25rem;">
-                                <label class="anon-label">{{ __('Correspondances (vraie ↔ fictive) — restent sur votre appareil') }}</label>
-                                <div id="rulesMapping" class="anon-mapping"></div>
-                            </div>
-                        </div>
-
-                        {{-- ÉTAPE 3 --}}
-                        <div class="anon-panel" data-step-content="3">
                             <div class="anon-help">
                                 🔁 {{ __('Collez ci-dessous la réponse de l\'IA (même reformulée) : l\'outil remet automatiquement vos vraies données.') }}
                             </div>

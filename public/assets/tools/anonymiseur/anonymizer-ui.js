@@ -1,218 +1,262 @@
-// anonymizer-ui.js — contrôleur UI (vanilla, sans dépendance)
-// Consomme window.AnonymizerCore + toasts du thème (CustomEvent 'toast-show'). Aucune popup native.
+// anonymizer-ui.js — éditeur annoté inline (souligné = à anonymiser, surligné = anonymisé)
+// Vanilla, sans dépendance. Consomme window.AnonymizerCore. Aucune popup native.
 
-let rules = [];
+const _norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-function goStep(n) {
-  document.querySelectorAll('.anon-step').forEach(btn => btn.classList.toggle('active', btn.dataset.step == n));
-  document.querySelectorAll('.anon-panel').forEach(p => p.classList.toggle('active', p.dataset.stepContent == n));
-}
-
-function showToast(message, variant = 'info', duration = 3000) {
-  window.dispatchEvent(new CustomEvent('toast-show', { detail: { message, variant, duration } }));
-}
-
-function saveRules() {
-  try { localStorage.setItem('lv_anon_rules_v3', JSON.stringify(rules)); }
-  catch (e) { console.warn('saveRules', e); }
-}
-
-function loadRules() {
-  try { const s = localStorage.getItem('lv_anon_rules_v3'); if (s) rules = JSON.parse(s); }
-  catch (e) { console.warn('loadRules', e); rules = []; }
-}
-
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function renderMapping() {
-  const container = document.getElementById('rulesMapping');
-  if (!container) return;
-  container.innerHTML = '';
-  if (!rules.length) {
-    container.innerHTML = '<p class="anon-empty">Aucune règle pour l\'instant.</p>';
-    return;
-  }
-  rules.forEach((rule, idx) => {
-    const div = document.createElement('div');
-    div.className = 'anon-rule-item';
-    div.innerHTML = '<span class="anon-rule-text">« ' + esc(rule.original) + ' » → « ' + esc(rule.replacement) + ' »</span>'
-      + '<button type="button" class="anon-rule-remove" data-id="' + idx + '" aria-label="Retirer cette règle">✕</button>';
-    container.appendChild(div);
-  });
-}
-
-function dedupeRules(newRules) {
-  const map = new Map();
-  [...rules, ...newRules].forEach(r => map.set(r.original, r));
-  return Array.from(map.values());
-}
-
-function reanonymize() {
-  const source = document.getElementById('anonSource');
-  const output = document.getElementById('anonOutput');
-  if (source && output) output.value = window.AnonymizerCore.anonymize(source.value, rules);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (!window.AnonymizerCore) { console.error('AnonymizerCore manquant'); return; }
-  loadRules();
-  renderMapping();
-  goStep(1);
-
-  document.querySelectorAll('.anon-step').forEach(btn => {
-    btn.addEventListener('click', () => goStep(btn.dataset.step));
-  });
-
-  let manualSelections = [];
-
-  const btnAddManual = document.getElementById('btnAddManual');
-  const manualRow = document.getElementById('manualRow');
-  if (btnAddManual && manualRow) {
-    btnAddManual.addEventListener('click', () => manualRow.classList.remove('hidden'));
+class AnonymizerUI {
+  constructor() {
+    this.sourceText = '';
+    this.candidates = [];
+    this.rules = [];
+    this.init();
   }
 
-  const btnSaveManual = document.getElementById('btnSaveManual');
-  if (btnSaveManual) {
-    btnSaveManual.addEventListener('click', () => {
-      const orig = document.getElementById('manualOriginal');
-      const cat = document.getElementById('manualCategory');
-      const original = orig && orig.value.trim();
-      const category = cat && cat.value;
-      if (original && category) {
-        manualSelections.push({ value: original, category });
-        showToast('Élément ajouté à anonymiser : « ' + original + ' »', 'success');
-        if (orig) orig.value = '';
-        if (manualRow) manualRow.classList.add('hidden');
-      } else {
-        showToast('Saisissez le texte à anonymiser.', 'warning');
-      }
+  init() {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window.AnonymizerCore) { console.error('AnonymizerCore manquant'); return; }
+      this.loadRules();
+      this.setMode('edit');
+      this.updateOutput();
+      this.goStep(1);
+      this.bindEvents();
     });
   }
 
-  // Geste « Anonymiser la sélection » : sélection native du textarea -> préremplit la règle manuelle
-  const btnAnonymizeSelection = document.getElementById('btnAnonymizeSelection');
-  if (btnAnonymizeSelection) {
-    btnAnonymizeSelection.addEventListener('click', () => {
-      const textarea = document.getElementById('anonSource');
-      if (!textarea) return;
-      const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
-      if (!selectedText) {
-        showToast('Sélectionnez d\'abord du texte dans la boîte.', 'warning');
-        return;
-      }
-      const manualOriginal = document.getElementById('manualOriginal');
-      const manualRowEl = document.getElementById('manualRow');
-      const manualCategory = document.getElementById('manualCategory');
-      if (manualOriginal) manualOriginal.value = selectedText;
-      if (manualRowEl) { manualRowEl.classList.remove('hidden'); manualRowEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-      if (manualCategory) manualCategory.focus();
-      showToast('Choisissez le type puis « Ajouter ».', 'info');
-    });
+  escHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
   }
 
-  const btnDetect = document.getElementById('btnDetect');
-  if (btnDetect) {
-    btnDetect.addEventListener('click', () => {
-      const source = document.getElementById('anonSource');
-      const results = document.getElementById('detectResults');
-      if (!source || !results) return;
-      const text = source.value;
-      if (!text.trim()) { showToast('Collez d\'abord votre texte.', 'warning'); return; }
-      const entities = window.AnonymizerCore.detectEntities(text);
-      if (!entities.length) {
-        results.innerHTML = '<p class="anon-empty">Aucune donnée sensible détectée automatiquement. Ajoutez-en manuellement.</p>';
-        showToast('Aucune donnée sensible détectée.', 'info');
-        return;
-      }
-      results.innerHTML = entities.map(ent =>
-        '<label class="anon-detect-row"><input type="checkbox" checked data-value="' + esc(ent.value) + '" data-category="' + esc(ent.category) + '"> '
-        + '<span class="anon-detect-cat">' + esc(ent.label) + '</span> : « ' + esc(ent.value) + ' »</label>'
-      ).join('');
-      showToast(entities.length + ' donnée(s) détectée(s).', 'success');
-    });
+  saveRules() {
+    try { localStorage.setItem('lv_anon_rules_v3', JSON.stringify(this.rules)); }
+    catch (e) { console.warn('save', e); }
   }
 
-  const btnAnonymize = document.getElementById('btnAnonymize');
-  if (btnAnonymize) {
-    btnAnonymize.addEventListener('click', () => {
-      const source = document.getElementById('anonSource');
-      if (!source) return;
-      const text = source.value;
-      if (!text.trim()) { showToast('Collez d\'abord votre texte.', 'warning'); return; }
-      const selections = [];
-      document.querySelectorAll('#detectResults input[type="checkbox"]:checked').forEach(cb => {
-        selections.push({ value: cb.dataset.value, category: cb.dataset.category });
+  loadRules() {
+    try { const s = localStorage.getItem('lv_anon_rules_v3'); if (s) this.rules = JSON.parse(s); }
+    catch (e) { console.warn('load', e); this.rules = []; }
+  }
+
+  updateOutput() {
+    const output = document.getElementById('anonOutput');
+    if (output) output.value = window.AnonymizerCore.anonymize(this.sourceText, this.rules);
+  }
+
+  renderAnnotated() {
+    const container = document.getElementById('anonAnnotated');
+    if (!container) return;
+    if (!this.sourceText.trim()) {
+      container.innerHTML = '<span class="anon-placeholder">Saisissez ou collez du texte, puis « Détecter ».</span>';
+      return;
+    }
+
+    const marks = [];
+    const ruleSet = new Set();
+    for (const rule of this.rules) {
+      const norm = _norm(rule.original);
+      ruleSet.add(norm);
+      marks.push({ value: rule.original, category: rule.category, cls: 'anon-anon', priority: 1 });
+    }
+    for (const cand of this.candidates) {
+      if (!ruleSet.has(_norm(cand.value))) {
+        marks.push({ value: cand.value, category: cand.category, cls: 'anon-cand', priority: 0 });
+      }
+    }
+
+    const intervals = [];
+    for (const mark of marks) {
+      const regex = window.AnonymizerCore.buildAccentInsensitiveBoundedRegex(mark.value);
+      let match;
+      while ((match = regex.exec(this.sourceText)) !== null) {
+        intervals.push({ start: match.index, end: match.index + match[0].length, cls: mark.cls, value: mark.value, category: mark.category, priority: mark.priority, length: match[0].length });
+        if (match[0].length === 0) { regex.lastIndex++; }
+      }
+    }
+
+    intervals.sort((a, b) => {
+      if (a.start !== b.start) return a.start - b.start;
+      if (a.priority !== b.priority) return b.priority - a.priority;
+      return b.length - a.length;
+    });
+
+    const selected = [];
+    let lastEnd = 0;
+    for (const iv of intervals) {
+      if (iv.start >= lastEnd) { selected.push(iv); lastEnd = iv.end; }
+    }
+
+    let html = '', pos = 0;
+    for (const iv of selected) {
+      if (iv.start > pos) html += this.escHtml(this.sourceText.substring(pos, iv.start));
+      const spanText = this.escHtml(this.sourceText.substring(iv.start, iv.end));
+      const label = iv.cls === 'anon-anon' ? 'Anonymisé — cliquer pour annuler' : 'À anonymiser — cliquer pour anonymiser';
+      html += `<span class="${iv.cls}" data-value="${this.escHtml(iv.value)}" data-category="${this.escHtml(iv.category)}" tabindex="0" role="button" aria-label="${label}">${spanText}</span>`;
+      pos = iv.end;
+    }
+    if (pos < this.sourceText.length) html += this.escHtml(this.sourceText.substring(pos));
+    container.innerHTML = html;
+  }
+
+  setMode(mode) {
+    const wrap = document.getElementById('anonEditorWrap');
+    const source = document.getElementById('anonSource');
+    const btnEdit = document.getElementById('btnEditText');
+    if (mode === 'edit') {
+      if (wrap) { wrap.classList.remove('mode-annotate'); wrap.classList.add('mode-edit'); }
+      if (source) source.value = this.sourceText;
+      if (btnEdit) btnEdit.textContent = '👁️ Voir les annotations';
+    } else {
+      this.sourceText = (source && source.value) || this.sourceText;
+      if (wrap) { wrap.classList.remove('mode-edit'); wrap.classList.add('mode-annotate'); }
+      this.renderAnnotated();
+      if (btnEdit) btnEdit.textContent = '✏️ Modifier le texte';
+    }
+  }
+
+  detect() {
+    const source = document.getElementById('anonSource');
+    this.sourceText = (source && source.value) || this.sourceText;
+    if (!this.sourceText.trim()) { this.toast('Collez d\'abord votre texte.', 'warning'); return; }
+    const entities = window.AnonymizerCore.detectEntities(this.sourceText);
+    const existing = new Set(this.rules.map(r => _norm(r.original)));
+    this.candidates = entities.filter(ent => !existing.has(_norm(ent.value)));
+    this.setMode('annotate');
+    if (this.candidates.length) this.toast(this.candidates.length + ' donnée(s) repérée(s) — cliquez pour anonymiser.', 'info');
+    else this.toast('Aucune donnée repérée automatiquement. Sélectionnez un passage à anonymiser.', 'info');
+  }
+
+  anonymizeValue(value, category) {
+    const newRules = window.AnonymizerCore.buildRules([{ value, category }]);
+    const normNew = new Set(newRules.map(r => _norm(r.original)));
+    this.rules = [...this.rules.filter(r => !normNew.has(_norm(r.original))), ...newRules];
+    const nv = _norm(value);
+    this.candidates = this.candidates.filter(c => _norm(c.value) !== nv);
+    this.saveRules();
+    this.renderAnnotated();
+    this.updateOutput();
+  }
+
+  deanonymizeValue(value) {
+    const nv = _norm(value);
+    const parts = new Set(value.split(/\s+/).map(_norm).filter(Boolean));
+    this.rules = this.rules.filter(rule => {
+      const nr = _norm(rule.original);
+      if (nr === nv) return false;
+      if ((rule.category === 'firstName' || rule.category === 'lastName') && parts.has(nr)) return false;
+      return true;
+    });
+    this.candidates.push({ value, category: this.guessCategory(value) });
+    this.saveRules();
+    this.renderAnnotated();
+    this.updateOutput();
+  }
+
+  guessCategory(text) {
+    return /^[A-ZÀ-Ÿ][a-zà-ÿ]+(\s+[A-ZÀ-Ÿ][a-zà-ÿ]+)+$/.test(text) ? 'name' : 'other';
+  }
+
+  toast(message, variant) {
+    window.dispatchEvent(new CustomEvent('toast-show', { detail: { message, variant, duration: 3000 } }));
+  }
+
+  goStep(n) {
+    document.querySelectorAll('.anon-step').forEach(el => el.classList.toggle('active', el.dataset.step == n));
+    document.querySelectorAll('.anon-panel').forEach(el => el.classList.toggle('active', el.dataset.stepContent == n));
+  }
+
+  bindEvents() {
+    const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+
+    on('btnDetect', 'click', () => this.detect());
+
+    on('btnEditText', 'click', () => {
+      const wrap = document.getElementById('anonEditorWrap');
+      if (wrap && wrap.classList.contains('mode-edit')) this.setMode('annotate');
+      else this.setMode('edit');
+    });
+
+    const annotated = document.getElementById('anonAnnotated');
+    if (annotated) {
+      annotated.addEventListener('click', (e) => {
+        const span = e.target.closest('span.anon-cand, span.anon-anon');
+        if (!span) return;
+        const value = span.dataset.value;
+        if (span.classList.contains('anon-cand')) this.anonymizeValue(value, span.dataset.category || 'other');
+        else this.deanonymizeValue(value);
       });
-      selections.push(...manualSelections);
-      if (!selections.length) { showToast('Sélectionnez au moins une donnée à anonymiser.', 'warning'); return; }
-      const newRules = window.AnonymizerCore.buildRules(selections);
-      rules = dedupeRules(newRules);
-      saveRules();
-      reanonymize();
-      renderMapping();
-      manualSelections = [];
-      goStep(2);
-      showToast('Texte anonymisé. Copiez-le pour votre IA.', 'success');
-    });
-  }
+      annotated.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('span[role="button"]')) {
+          e.preventDefault();
+          e.target.click();
+        }
+      });
+    }
 
-  const btnCopyAnon = document.getElementById('btnCopyAnon');
-  if (btnCopyAnon) {
-    btnCopyAnon.addEventListener('click', async () => {
-      const output = document.getElementById('anonOutput');
-      if (!output) return;
-      try { await navigator.clipboard.writeText(output.value); showToast('Texte anonymisé copié.', 'success'); }
-      catch (e) { showToast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
-    });
-  }
-
-  const rulesMapping = document.getElementById('rulesMapping');
-  if (rulesMapping) {
-    rulesMapping.addEventListener('click', (e) => {
-      const btn = e.target.closest('.anon-rule-remove');
-      if (!btn) return;
-      const idx = parseInt(btn.dataset.id, 10);
-      if (idx >= 0 && idx < rules.length) {
-        rules.splice(idx, 1);
-        saveRules();
-        reanonymize();
-        renderMapping();
+    on('btnAnonymizeSelection', 'click', () => {
+      let selText = '';
+      const wrap = document.getElementById('anonEditorWrap');
+      if (wrap && wrap.classList.contains('mode-annotate')) {
+        selText = (window.getSelection().toString() || '').trim();
+      } else {
+        const source = document.getElementById('anonSource');
+        if (source && source.selectionStart !== undefined) {
+          selText = source.value.substring(source.selectionStart, source.selectionEnd).trim();
+          if (selText) { this.sourceText = source.value; this.setMode('annotate'); }
+        }
       }
+      if (!selText) { this.toast('Sélectionnez d\'abord un passage à anonymiser.', 'warning'); return; }
+      this.anonymizeValue(selText, this.guessCategory(selText));
+      this.toast('Passage anonymisé.', 'success');
     });
-  }
 
-  const btnRestore = document.getElementById('btnRestore');
-  if (btnRestore) {
-    btnRestore.addEventListener('click', () => {
+    on('btnAnonymizeAll', 'click', () => {
+      const cands = [...this.candidates];
+      if (!cands.length) { this.toast('Rien à anonymiser — détectez ou sélectionnez d\'abord.', 'info'); return; }
+      for (const c of cands) this.anonymizeValue(c.value, c.category);
+      this.toast(cands.length + ' donnée(s) anonymisée(s).', 'success');
+    });
+
+    on('btnResetAll', 'click', () => {
+      this.rules = []; this.candidates = [];
+      this.saveRules(); this.renderAnnotated(); this.updateOutput();
+      this.toast('Réinitialisé.', 'info');
+    });
+
+    on('btnCopyAnon', 'click', async () => {
+      const output = document.getElementById('anonOutput');
+      if (!output || !output.value) { this.toast('Rien à copier.', 'warning'); return; }
+      try { await navigator.clipboard.writeText(output.value); this.toast('Texte anonymisé copié.', 'success'); }
+      catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
+    });
+
+    on('btnRestore', 'click', () => {
       const ai = document.getElementById('aiResponse');
-      if (!ai) return;
-      const text = ai.value;
-      if (!text.trim()) { showToast('Collez la réponse de l\'IA.', 'warning'); return; }
-      if (!rules.length) { showToast('Aucune règle : anonymisez d\'abord un texte (étape 1).', 'warning'); return; }
-      const res = window.AnonymizerCore.restore(text, rules);
+      const aiText = (ai && ai.value) || '';
+      if (!aiText.trim()) { this.toast('Collez la réponse de l\'IA.', 'warning'); return; }
+      if (!this.rules.length) { this.toast('Aucune règle : anonymisez d\'abord (étape 1).', 'warning'); return; }
+      const res = window.AnonymizerCore.restore(aiText, this.rules);
       const out = document.getElementById('restoredOutput');
       const report = document.getElementById('restoreReport');
       if (out) out.value = res.text;
-      if (report) {
-        const found = res.found.length, total = found + res.notFound.length;
-        let msg = found + ' valeur(s) restaurée(s) sur ' + total + '.';
-        if (res.notFound.length) msg += ' Non retrouvées (l\'IA les a peut-être reformulées) : ' + res.notFound.map(r => '« ' + r.original + ' »').join(', ');
-        report.textContent = msg;
+      const total = res.found.length + res.notFound.length;
+      let msg = res.found.length + ' valeur(s) restaurée(s) sur ' + total + '.';
+      if (res.notFound.length) {
+        msg += ' Non retrouvées : ' + res.notFound.map(r => '« ' + r.original + ' »').join(', ');
+        this.toast(res.notFound.length + ' valeur(s) non retrouvée(s).', 'warning');
+      } else {
+        this.toast('Toutes vos vraies données ont été restaurées.', 'success');
       }
-      if (res.notFound.length) showToast(res.notFound.length + ' valeur(s) non retrouvée(s).', 'warning');
-      else showToast('Toutes vos vraies données ont été restaurées.', 'success');
+      if (report) report.textContent = msg;
     });
-  }
 
-  const btnCopyRestored = document.getElementById('btnCopyRestored');
-  if (btnCopyRestored) {
-    btnCopyRestored.addEventListener('click', async () => {
+    on('btnCopyRestored', 'click', async () => {
       const out = document.getElementById('restoredOutput');
-      if (!out) return;
-      try { await navigator.clipboard.writeText(out.value); showToast('Texte restauré copié.', 'success'); }
-      catch (e) { showToast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
+      if (!out || !out.value) { this.toast('Rien à copier.', 'warning'); return; }
+      try { await navigator.clipboard.writeText(out.value); this.toast('Résultat copié.', 'success'); }
+      catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
     });
+
+    document.querySelectorAll('.anon-step').forEach(btn => btn.addEventListener('click', () => this.goStep(btn.dataset.step)));
   }
-});
+}
+
+new AnonymizerUI();
