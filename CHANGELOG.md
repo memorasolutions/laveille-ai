@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.36] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — garde-fou anti-fuite : le faux n'égale jamais l'original** : par collision aléatoire, une valeur factice pouvait égaler la vraie (ex. faux prénom « Jean » = vrai prénom « Jean »), laissant fuiter une donnée. Ajout de `safeFake()` (régénère jusqu'à 8× si le faux normalisé == l'original) ; `buildRules` compose les noms à partir de **parties prénom/nom garanties différentes** des vraies (et cohérentes entre occurrences). **Confirmation** : les répétitions d'un même contenu reçoivent **toujours le même** faux (cohérence pour l'IA) et la restauration reste parfaite. Testé Node : 18 000 règles, **0 collision**.
+
 ## [1.65.35] - 2026-06-05
 
 ### Fixed

@@ -139,6 +139,15 @@ function generateFake(category, original) {
   }
 }
 
+// Garde-fou anti-fuite : garantit que le faux n'égale jamais l'original (insensible casse/accents)
+function safeFake(category, original) {
+  const norm = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const no = norm(original);
+  let result = generateFake(category, original), attempts = 0;
+  while (norm(result) === no && attempts < 8) { result = generateFake(category, original); attempts++; }
+  return norm(result) === no ? result + '_x' : result;
+}
+
 function tokenLabel(category) {
   const labelMap = {
     name: 'PERSONNE', firstName: 'PERSONNE', lastName: 'PERSONNE',
@@ -183,27 +192,25 @@ function buildRules(selections, opts = {}) {
     return rules;
   }
   const rules = [];
-  const nameMap = new Map();
+  const nameMap = new Map(); // partie réelle (minuscule) -> faux (cohérence + garde-fou)
+  const subDone = new Set();  // parties ayant déjà une sous-règle
   for (const sel of selections) {
     const { value, category } = sel;
-    const replacement = generateFake(category, value);
     const id = `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    rules.push({ id, original: value, replacement, category });
     if (category === 'name') {
       const parts = value.split(/\s+/);
-      const fakeParts = replacement.split(/\s+/);
-      if (parts.length === 2 && fakeParts.length === 2) {
+      if (parts.length === 2) {
         const [first, last] = parts;
-        if (!nameMap.has(first.toLowerCase())) {
-          nameMap.set(first.toLowerCase(), fakeParts[0]);
-          rules.push({ id: `${id}_first`, original: first, replacement: fakeParts[0], category: 'firstName' });
-        }
-        if (!nameMap.has(last.toLowerCase())) {
-          nameMap.set(last.toLowerCase(), fakeParts[1]);
-          rules.push({ id: `${id}_last`, original: last, replacement: fakeParts[1], category: 'lastName' });
-        }
+        const fk = first.toLowerCase(), lk = last.toLowerCase();
+        let fakeFirst = nameMap.get(fk); if (fakeFirst === undefined) { fakeFirst = safeFake('firstName', first); nameMap.set(fk, fakeFirst); }
+        let fakeLast = nameMap.get(lk); if (fakeLast === undefined) { fakeLast = safeFake('lastName', last); nameMap.set(lk, fakeLast); }
+        rules.push({ id, original: value, replacement: `${fakeFirst} ${fakeLast}`, category });
+        if (!subDone.has(fk)) { subDone.add(fk); rules.push({ id: `${id}_first`, original: first, replacement: fakeFirst, category: 'firstName' }); }
+        if (!subDone.has(lk)) { subDone.add(lk); rules.push({ id: `${id}_last`, original: last, replacement: fakeLast, category: 'lastName' }); }
+        continue;
       }
     }
+    rules.push({ id, original: value, replacement: safeFake(category, value), category });
   }
   return rules;
 }
