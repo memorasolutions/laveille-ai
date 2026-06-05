@@ -23,6 +23,7 @@ class AnonymizerUI {
       this.goStep(1);
       this.bindEvents();
       this.bindActionMenu();
+      this.bindAutoGrow();
       this.updateModeUI();
     });
   }
@@ -43,7 +44,7 @@ class AnonymizerUI {
 
   updateOutput() {
     const output = document.getElementById('anonOutput');
-    if (output) output.value = window.AnonymizerCore.anonymize(this.sourceText, this.rules);
+    if (output) { output.value = window.AnonymizerCore.anonymize(this.sourceText, this.rules); this.autoGrow(output); }
   }
 
   renderAnnotated() {
@@ -107,7 +108,7 @@ class AnonymizerUI {
     const btnEdit = document.getElementById('btnEditText');
     if (mode === 'edit') {
       if (wrap) { wrap.classList.remove('mode-annotate'); wrap.classList.add('mode-edit'); }
-      if (source) source.value = this.sourceText;
+      if (source) { source.value = this.sourceText; this.autoGrow(source); }
       if (btnEdit) btnEdit.textContent = '👁️ Voir les annotations';
     } else {
       this.sourceText = (source && source.value) || this.sourceText;
@@ -185,6 +186,22 @@ class AnonymizerUI {
       btn.setAttribute('aria-pressed', this.anonMode === 'tokens' ? 'true' : 'false');
     }
     if (hint) hint.style.display = this.anonMode === 'tokens' ? '' : 'none';
+  }
+
+  autoGrow(el) {
+    if (!el || el.tagName !== 'TEXTAREA') return;
+    el.style.height = 'auto';
+    el.style.height = Math.max(el.scrollHeight, 160) + 'px';
+  }
+
+  bindAutoGrow() {
+    const ids = ['anonSource', 'anonOutput', 'aiResponse', 'restoredOutput'];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) { el.addEventListener('input', () => this.autoGrow(el)); this.autoGrow(el); }
+    }
+    // Recalcule au redimensionnement (le texte se reflowe → la hauteur change)
+    window.addEventListener('resize', () => ids.forEach(id => this.autoGrow(document.getElementById(id))));
   }
 
   bindActionMenu() {
@@ -297,7 +314,7 @@ class AnonymizerUI {
       const res = window.AnonymizerCore.restore(aiText, this.rules);
       const out = document.getElementById('restoredOutput');
       const report = document.getElementById('restoreReport');
-      if (out) out.value = res.text;
+      if (out) { out.value = res.text; this.autoGrow(out); }
       const total = res.found.length + res.notFound.length;
       let msg = res.found.length + ' valeur(s) restaurée(s) sur ' + total + '.';
       if (res.notFound.length) {
