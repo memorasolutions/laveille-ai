@@ -10,6 +10,7 @@ class AnonymizerUI {
     this.rules = [];
     this.anonMode = 'pseudo';
     this.lastSelection = '';
+    this.overrides = []; // [{original, occ, replacement}] : remplacements par occurrence
     this.init();
   }
 
@@ -25,6 +26,7 @@ class AnonymizerUI {
       this.bindActionMenu();
       this.bindSelectionBubble();
       this.bindSelectionBubbleCustom();
+      this.bindOccPopover();
       this.bindAutoGrow();
       this.updateModeUI();
     });
@@ -35,8 +37,10 @@ class AnonymizerUI {
   }
 
   saveRules() {
-    try { localStorage.setItem('lv_anon_rules_v3', JSON.stringify(this.rules)); }
-    catch (e) { console.warn('save', e); }
+    try {
+      localStorage.setItem('lv_anon_rules_v3', JSON.stringify(this.rules));
+      localStorage.setItem('lv_anon_overrides_v3', JSON.stringify(this.overrides));
+    } catch (e) { console.warn('save', e); }
   }
 
   loadRules() {
@@ -45,17 +49,19 @@ class AnonymizerUI {
       const ver = window.LV_ANON_VERSION || '';
       if (ver && localStorage.getItem('lv_anon_v') !== ver) {
         localStorage.removeItem('lv_anon_rules_v3');
+        localStorage.removeItem('lv_anon_overrides_v3');
         localStorage.setItem('lv_anon_v', ver);
-        this.rules = [];
+        this.rules = []; this.overrides = [];
         return;
       }
       const s = localStorage.getItem('lv_anon_rules_v3'); if (s) this.rules = JSON.parse(s);
-    } catch (e) { console.warn('load', e); this.rules = []; }
+      const o = localStorage.getItem('lv_anon_overrides_v3'); if (o) this.overrides = JSON.parse(o);
+    } catch (e) { console.warn('load', e); this.rules = []; this.overrides = []; }
   }
 
   updateOutput() {
     const output = document.getElementById('anonOutput');
-    if (output) { output.value = window.AnonymizerCore.anonymize(this.sourceText, this.rules); this.autoGrow(output); }
+    if (output) { output.value = window.AnonymizerCore.anonymize(this.sourceText, this.rules, this.overrides); this.autoGrow(output); }
   }
 
   renderAnnotated() {
@@ -102,11 +108,15 @@ class AnonymizerUI {
     }
 
     let html = '', pos = 0;
+    const occCounter = new Map(); // index d'occurrence par valeur (ordre du texte)
     for (const iv of selected) {
       if (iv.start > pos) html += this.escHtml(this.sourceText.substring(pos, iv.start));
       const spanText = this.escHtml(this.sourceText.substring(iv.start, iv.end));
-      const label = iv.cls === 'anon-anon' ? 'Anonymisé — cliquer pour annuler' : 'À anonymiser — cliquer pour anonymiser';
-      html += `<span class="${iv.cls}" data-value="${this.escHtml(iv.value)}" data-category="${this.escHtml(iv.category)}" tabindex="0" role="button" aria-label="${label}">${spanText}</span>`;
+      const okey = _norm(iv.value);
+      const occ = occCounter.has(okey) ? occCounter.get(okey) : 0;
+      occCounter.set(okey, occ + 1);
+      const label = iv.cls === 'anon-anon' ? 'Anonymisé — cliquer pour les options' : 'À anonymiser — cliquer pour anonymiser';
+      html += `<span class="${iv.cls}" data-value="${this.escHtml(iv.value)}" data-category="${this.escHtml(iv.category)}" data-occ="${occ}" tabindex="0" role="button" aria-label="${label}">${spanText}</span>`;
       pos = iv.end;
     }
     if (pos < this.sourceText.length) html += this.escHtml(this.sourceText.substring(pos));
@@ -161,10 +171,63 @@ class AnonymizerUI {
       if ((rule.category === 'firstName' || rule.category === 'lastName') && parts.has(nr)) return false;
       return true;
     });
+    this.overrides = (this.overrides || []).filter(o => _norm(o.original) !== nv); // retire les overrides de cette valeur
     this.candidates.push({ value, category: this.guessCategory(value) });
     this.saveRules();
     this.renderAnnotated();
     this.updateOutput();
+  }
+
+  addOverride(original, occ, replacement) {
+    if (!original || !replacement) return;
+    const no = _norm(original);
+    this.overrides = (this.overrides || []).filter(o => !(_norm(o.original) === no && o.occ === occ));
+    this.overrides.push({ original, occ, replacement });
+    this.saveRules();
+    this.renderAnnotated();
+    this.updateOutput();
+  }
+
+  showOccPopover(span) {
+    const pop = document.getElementById('anonOccPopover');
+    if (!pop) { this.deanonymizeValue(span.dataset.value); return; } // repli si markup absent
+    this.currentOcc = { original: span.dataset.value, occ: parseInt(span.dataset.occ, 10) || 0 };
+    const custom = document.getElementById('anonOccCustom'); if (custom) custom.classList.add('hidden');
+    const rect = span.getBoundingClientRect();
+    pop.style.left = (rect.left + rect.width / 2) + 'px';
+    let top = rect.top - 48; if (top < 8) top = rect.bottom + 8;
+    pop.style.top = top + 'px';
+    pop.classList.remove('hidden');
+  }
+
+  hideOccPopover() {
+    const pop = document.getElementById('anonOccPopover');
+    if (pop) pop.classList.add('hidden');
+  }
+
+  bindOccPopover() {
+    const $ = id => document.getElementById(id);
+    const pop = $('anonOccPopover');
+    if (!pop) return;
+    const cancel = $('anonOccCancel'), diff = $('anonOccDiff'), custom = $('anonOccCustom'), input = $('anonOccInput'), confirm = $('anonOccConfirm');
+    if (cancel) cancel.addEventListener('click', () => { const oc = this.currentOcc; this.hideOccPopover(); if (oc) this.deanonymizeValue(oc.original); });
+    if (diff) diff.addEventListener('click', () => {
+      if (custom) custom.classList.remove('hidden');
+      if (input && this.currentOcc) {
+        input.value = window.AnonymizerCore.generateFake(this.guessCategory(this.currentOcc.original), this.currentOcc.original);
+        input.focus(); input.select();
+      }
+    });
+    const doConfirm = () => {
+      const v = input ? input.value.trim() : '';
+      const oc = this.currentOcc;
+      this.hideOccPopover();
+      if (oc && v) { this.addOverride(oc.original, oc.occ, v); this.toast('Cette occurrence est désormais différente.', 'success'); }
+    };
+    if (confirm) confirm.addEventListener('click', doConfirm);
+    if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doConfirm(); } });
+    document.addEventListener('mousedown', (e) => { const a = $('anonAnnotated'); if (!pop.contains(e.target) && (!a || !a.contains(e.target))) this.hideOccPopover(); });
+    window.addEventListener('scroll', () => this.hideOccPopover(), { capture: true });
   }
 
   guessCategory(text) {
@@ -368,7 +431,7 @@ class AnonymizerUI {
         if (!span) return;
         const value = span.dataset.value;
         if (span.classList.contains('anon-cand')) this.anonymizeValue(value, span.dataset.category || 'other');
-        else this.deanonymizeValue(value);
+        else this.showOccPopover(span);
       });
       annotated.addEventListener('keydown', (e) => {
         if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('span[role="button"]')) {
@@ -400,8 +463,8 @@ class AnonymizerUI {
     });
 
     on('btnResetAll', 'click', () => {
-      this.rules = []; this.candidates = []; this.lastSelection = '';
-      try { localStorage.removeItem('lv_anon_rules_v3'); } catch (e) {}
+      this.rules = []; this.candidates = []; this.lastSelection = ''; this.overrides = [];
+      try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); } catch (e) {}
       this.setMode('edit');
       this.renderAnnotated();
       this.updateOutput();
@@ -420,7 +483,7 @@ class AnonymizerUI {
       const aiText = (ai && ai.value) || '';
       if (!aiText.trim()) { this.toast('Collez la réponse de l\'IA.', 'warning'); return; }
       if (!this.rules.length) { this.toast('Aucune règle : anonymisez d\'abord (étape 1).', 'warning'); return; }
-      const res = window.AnonymizerCore.restore(aiText, this.rules);
+      const res = window.AnonymizerCore.restore(aiText, this.rules, this.overrides);
       const out = document.getElementById('restoredOutput');
       const report = document.getElementById('restoreReport');
       if (out) { out.value = res.text; this.autoGrow(out); }

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.38] - 2026-06-05
+
+### Added
+
+- **Anonymiseur — anonymisation par occurrence (« rendre cette occurrence différente »)**. Réponse à la demande : par défaut un même contenu reçoit toujours le même faux (cohérence) ; en cliquant sur une occurrence déjà anonymisée, un popover offre **« ✎ Différent ici »** pour donner à **cette occurrence précise** une valeur de remplacement distincte (les autres restent identiques), ou **« ↩︎ Annuler »**. Construit sur le moteur durci (passe par intervalles + overrides) : `renderAnnotated` numérote les occurrences (`data-occ`), overrides persistés (`lv_anon_overrides_v3`, versionnés). Validé **E2E Playwright 9/9** : cohérence par défaut (3× même faux), override sur la 2ᵉ occurrence seulement, et **restauration exacte des 3 occurrences** (réversibilité préservée). Option A retenue (refactor strangler-fig + golden/round-trip 100 %), sans régression.
+
 ## [1.65.37] - 2026-06-05
 
 ### Fixed

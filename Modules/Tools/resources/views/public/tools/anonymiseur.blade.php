@@ -163,6 +163,18 @@
                             <button type="button" id="anonSelBubbleConfirm" aria-label="{{ __('Confirmer la valeur') }}">✓</button>
                         </div>
                     </div>
+
+                    {{-- Popover sur une occurrence déjà anonymisée : annuler ou rendre CETTE occurrence différente --}}
+                    <div id="anonOccPopover" class="anon-sel-bubble hidden" role="dialog" aria-label="{{ __('Options de cette occurrence') }}">
+                        <div class="anon-sel-main">
+                            <button type="button" id="anonOccDiff">✎ {{ __('Différent ici') }}</button>
+                            <button type="button" id="anonOccCancel">↩︎ {{ __('Annuler') }}</button>
+                        </div>
+                        <div id="anonOccCustom" class="anon-sel-custom hidden">
+                            <input type="text" id="anonOccInput" placeholder="{{ __('Valeur pour cette occurrence…') }}" aria-label="{{ __('Valeur de remplacement pour cette occurrence') }}">
+                            <button type="button" id="anonOccConfirm" aria-label="{{ __('Confirmer') }}">✓</button>
+                        </div>
+                    </div>
                 </div>{{-- /.card --}}
             </div>{{-- /.col --}}
         </div>{{-- /.row --}}
