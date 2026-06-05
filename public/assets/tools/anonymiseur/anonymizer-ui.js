@@ -91,6 +91,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Geste « Anonymiser la sélection » : sélection native du textarea -> préremplit la règle manuelle
+  const btnAnonymizeSelection = document.getElementById('btnAnonymizeSelection');
+  if (btnAnonymizeSelection) {
+    btnAnonymizeSelection.addEventListener('click', () => {
+      const textarea = document.getElementById('anonSource');
+      if (!textarea) return;
+      const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
+      if (!selectedText) {
+        showToast('Sélectionnez d\'abord du texte dans la boîte.', 'warning');
+        return;
+      }
+      const manualOriginal = document.getElementById('manualOriginal');
+      const manualRowEl = document.getElementById('manualRow');
+      const manualCategory = document.getElementById('manualCategory');
+      if (manualOriginal) manualOriginal.value = selectedText;
+      if (manualRowEl) { manualRowEl.classList.remove('hidden'); manualRowEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      if (manualCategory) manualCategory.focus();
+      showToast('Choisissez le type puis « Ajouter ».', 'info');
+    });
+  }
+
   const btnDetect = document.getElementById('btnDetect');
   if (btnDetect) {
     btnDetect.addEventListener('click', () => {

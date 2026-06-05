@@ -82,7 +82,7 @@
                         {{-- ÉTAPE 1 --}}
                         <div class="anon-panel active" data-step-content="1">
                             <div class="anon-help">
-                                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, cliquez « Détecter », cochez ce qui doit être masqué (ou ajoutez-le manuellement), puis « Anonymiser ».') }}
+                                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, puis soit cliquez « Détecter » (automatique), soit sélectionnez un passage à la souris et cliquez « Anonymiser la sélection ». Cochez ce qui doit être masqué, puis « Anonymiser ».') }}
                             </div>
                             <div class="anon-field">
                                 <label class="anon-label" for="anonSource">{{ __('Collez votre texte original') }}</label>
@@ -90,6 +90,7 @@
                             </div>
                             <div class="anon-actions">
                                 <button type="button" id="btnDetect" class="anon-btn">🔍 {{ __('Détecter les données sensibles') }}</button>
+                                <button type="button" id="btnAnonymizeSelection" class="anon-btn secondary">✍️ {{ __('Anonymiser la sélection') }}</button>
                                 <button type="button" id="btnAddManual" class="anon-btn secondary">+ {{ __('Ajouter manuellement') }}</button>
                             </div>
 

@@ -6,7 +6,8 @@ const FAKE_DATA = {
   lastNames: ['Tremblay', 'Gagnon', 'Bouchard', 'Gauthier', 'Morin', 'Lavoie', 'Fortin', 'Gagné', 'Pelletier', 'Bélanger'],
   streets: ['rue Principale', 'avenue du Parc', 'boulevard Saint-Joseph', 'chemin de la Rivière', 'rue des Érables', 'avenue Laurier', 'boulevard René-Lévesque', 'rue Saint-Denis', 'chemin Sainte-Foy', 'rue de la Gauchetière'],
   cities: ['Montréal', 'Québec', 'Laval', 'Gatineau', 'Longueuil', 'Sherbrooke', 'Saguenay', 'Lévis', 'Trois-Rivières', 'Terrebonne'],
-  domains: ['gmail.com', 'hotmail.com', 'yahoo.ca', 'videotron.ca', 'bell.net']
+  domains: ['gmail.com', 'hotmail.com', 'yahoo.ca', 'videotron.ca', 'bell.net'],
+  companies: ['Constructions Boréal inc.', 'Groupe Solva', 'Entreprises Lemay-Côté', 'Gestion Riverin', 'Atelier Norjak', 'Services Permafort', 'Coopérative Verdelis', 'Industries Cap-Vert', 'Groupe Makila', 'Solutions Drakkar']
 };
 
 function escapeRegex(str) {
@@ -89,7 +90,9 @@ function generateFake(category, original) {
       const d = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
       return `${y}-${mo}-${d}`;
     }
-    default: return '***';
+    case 'organization':
+    case 'other': return getRandomItem(FAKE_DATA.companies);
+    default: return getRandomItem(FAKE_DATA.companies);
   }
 }
 
