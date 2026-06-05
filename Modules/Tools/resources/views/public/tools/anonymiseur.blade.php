@@ -91,7 +91,11 @@
                                 <button type="button" id="btnAnonymizeAll" class="anon-btn secondary">🕵️ {{ __('Tout anonymiser') }}</button>
                                 <button type="button" id="btnEditText" class="anon-btn secondary">✏️ {{ __('Modifier le texte') }}</button>
                                 <button type="button" id="btnResetAll" class="anon-btn secondary">↺ {{ __('Réinitialiser') }}</button>
+                                <button type="button" id="btnModeToggle" class="anon-btn secondary" aria-pressed="false" title="{{ __('Basculer entre faux noms réalistes et jetons balisés stables') }}">🎭 {{ __('Réaliste') }}</button>
                             </div>
+                            <p id="anonModeHint" class="anon-help" style="display:none;margin-top:.5rem;">
+                                🏷️ <strong>{{ __('Mode jetons stables') }}</strong> : {{ __('vos données deviennent des balises comme [PERSONNE_1]. Ajoutez à votre demande à l\'IA : « garde les jetons entre crochets intacts ». Restauration la plus fiable même si l\'IA reformule beaucoup.') }}
+                            </p>
 
                             <div class="anon-grid">
                                 {{-- Volet gauche : éditeur annoté --}}

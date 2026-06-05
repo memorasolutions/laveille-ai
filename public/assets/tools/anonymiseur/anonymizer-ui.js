@@ -8,6 +8,7 @@ class AnonymizerUI {
     this.sourceText = '';
     this.candidates = [];
     this.rules = [];
+    this.anonMode = 'pseudo';
     this.init();
   }
 
@@ -15,10 +16,12 @@ class AnonymizerUI {
     document.addEventListener('DOMContentLoaded', () => {
       if (!window.AnonymizerCore) { console.error('AnonymizerCore manquant'); return; }
       this.loadRules();
+      this.anonMode = localStorage.getItem('lv_anon_mode') || 'pseudo';
       this.setMode('edit');
       this.updateOutput();
       this.goStep(1);
       this.bindEvents();
+      this.updateModeUI();
     });
   }
 
@@ -125,7 +128,7 @@ class AnonymizerUI {
   }
 
   anonymizeValue(value, category) {
-    const newRules = window.AnonymizerCore.buildRules([{ value, category }]);
+    const newRules = window.AnonymizerCore.buildRules([{ value, category }], { mode: this.anonMode, existing: this.rules });
     const normNew = new Set(newRules.map(r => _norm(r.original)));
     this.rules = [...this.rules.filter(r => !normNew.has(_norm(r.original))), ...newRules];
     const nv = _norm(value);
@@ -154,6 +157,34 @@ class AnonymizerUI {
     return /^[A-ZÀ-Ÿ][a-zà-ÿ]+(\s+[A-ZÀ-Ÿ][a-zà-ÿ]+)+$/.test(text) ? 'name' : 'other';
   }
 
+  toggleAnonMode() {
+    this.anonMode = this.anonMode === 'tokens' ? 'pseudo' : 'tokens';
+    localStorage.setItem('lv_anon_mode', this.anonMode);
+    const mainRules = this.rules
+      .filter(r => r.category !== 'firstName' && r.category !== 'lastName')
+      .map(r => ({ value: r.original, category: r.category }));
+    this.rules = [];
+    for (const m of mainRules) {
+      const newRules = window.AnonymizerCore.buildRules([m], { mode: this.anonMode, existing: this.rules });
+      this.rules = this.rules.concat(newRules);
+    }
+    this.saveRules();
+    this.renderAnnotated();
+    this.updateOutput();
+    this.updateModeUI();
+    this.toast(this.anonMode === 'tokens' ? 'Mode jetons stables activé.' : 'Mode pseudonymes réalistes activé.', 'info');
+  }
+
+  updateModeUI() {
+    const btn = document.getElementById('btnModeToggle');
+    const hint = document.getElementById('anonModeHint');
+    if (btn) {
+      btn.textContent = this.anonMode === 'tokens' ? '🏷️ Jetons' : '🎭 Réaliste';
+      btn.setAttribute('aria-pressed', this.anonMode === 'tokens' ? 'true' : 'false');
+    }
+    if (hint) hint.style.display = this.anonMode === 'tokens' ? '' : 'none';
+  }
+
   toast(message, variant) {
     window.dispatchEvent(new CustomEvent('toast-show', { detail: { message, variant, duration: 3000 } }));
   }
@@ -167,6 +198,7 @@ class AnonymizerUI {
     const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
 
     on('btnDetect', 'click', () => this.detect());
+    on('btnModeToggle', 'click', () => this.toggleAnonMode());
 
     on('btnEditText', 'click', () => {
       const wrap = document.getElementById('anonEditorWrap');

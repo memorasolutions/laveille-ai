@@ -96,7 +96,49 @@ function generateFake(category, original) {
   }
 }
 
-function buildRules(selections) {
+function tokenLabel(category) {
+  const labelMap = {
+    name: 'PERSONNE', firstName: 'PERSONNE', lastName: 'PERSONNE',
+    dossier: 'DOSSIER', address: 'ADRESSE', email: 'COURRIEL',
+    phone: 'TEL', amount: 'MONTANT', date: 'DATE'
+  };
+  return labelMap[category] || 'ORG';
+}
+
+function buildRules(selections, opts = {}) {
+  const mode = opts.mode || 'pseudo';
+  const existing = opts.existing || [];
+  if (mode === 'tokens') {
+    const normalize = (str) => str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const tokenIndex = new Map();
+    const existingTokens = new Map();
+    for (const rule of existing) {
+      const match = /^\[([A-Z_]+)_(\d+)\]$/.exec(rule.replacement || '');
+      if (match) {
+        const label = match[1], idx = parseInt(match[2], 10);
+        if (!existingTokens.has(label) || existingTokens.get(label) < idx) existingTokens.set(label, idx);
+      }
+    }
+    const rules = [];
+    const seen = new Map();
+    for (const sel of selections) {
+      const { value, category } = sel;
+      const normValue = normalize(value);
+      const label = tokenLabel(category);
+      const id = `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      if (seen.has(normValue)) {
+        rules.push({ id, original: value, replacement: seen.get(normValue), category });
+        continue;
+      }
+      let currentIndex = tokenIndex.has(label) ? tokenIndex.get(label) : (existingTokens.get(label) || 0);
+      currentIndex += 1;
+      tokenIndex.set(label, currentIndex);
+      const replacement = `[${label}_${currentIndex}]`;
+      seen.set(normValue, replacement);
+      rules.push({ id, original: value, replacement, category });
+    }
+    return rules;
+  }
   const rules = [];
   const nameMap = new Map();
   for (const sel of selections) {
