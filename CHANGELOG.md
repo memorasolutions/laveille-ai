@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.37] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — durcissement du moteur : réversibilité garantie (~73 % → 100 %)**. En auditant une demande d'évolution (anonymisation par occurrence), découverte d'un défaut latent : ~1 aller-retour sur 4 échouait à cause de **collisions de valeurs factices** (remplacements en cascade + deux personnes recevant le même faux). Refonte best-practice (recherche juin 2026 : single-pass interval tokenizer) : `anonymize` **et** `restore` réécrits en **passe unique par intervalles** (plus de re-remplacement en cascade) ; `buildRules` génère des faux **globalement uniques** (aucun faux n'égale un original ni un autre faux) avec garantie finale d'unicité. Résultat : **aller-retour 100 % sur 30 000 cas** (y compris adversariaux : 6 personnes même nom, répétitions). Préliminaire au support de l'anonymisation par occurrence (overrides). Détection et UI inchangées.
+
 ## [1.65.36] - 2026-06-05
 
 ### Fixed

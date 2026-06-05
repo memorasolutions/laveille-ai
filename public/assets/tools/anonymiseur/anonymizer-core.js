@@ -148,6 +148,16 @@ function safeFake(category, original) {
   return norm(result) === no ? result + '_x' : result;
 }
 
+// Unicité globale : aucun faux n'égale un original ni un autre faux déjà utilisé (réversibilité garantie)
+const _normU = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function uniqueFake(category, original, used) {
+  let result = safeFake(category, original), attempts = 0;
+  while (used.has(_normU(result)) && attempts < 12) { result = safeFake(category, original); attempts++; }
+  if (used.has(_normU(result))) { let n = 1; while (used.has(_normU(result + ' ' + n))) n++; result = result + ' ' + n; }
+  used.add(_normU(result));
+  return result;
+}
+
 function tokenLabel(category) {
   const labelMap = {
     name: 'PERSONNE', firstName: 'PERSONNE', lastName: 'PERSONNE',
@@ -194,6 +204,9 @@ function buildRules(selections, opts = {}) {
   const rules = [];
   const nameMap = new Map(); // partie réelle (minuscule) -> faux (cohérence + garde-fou)
   const subDone = new Set();  // parties ayant déjà une sous-règle
+  const used = new Set();     // faux déjà utilisés (unicité globale)
+  for (const r of existing) { used.add(_normU(r.original)); used.add(_normU(r.replacement)); }
+  for (const sel of selections) { used.add(_normU(sel.value)); }
   for (const sel of selections) {
     const { value, category } = sel;
     const id = `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -202,42 +215,104 @@ function buildRules(selections, opts = {}) {
       if (parts.length === 2) {
         const [first, last] = parts;
         const fk = first.toLowerCase(), lk = last.toLowerCase();
-        let fakeFirst = nameMap.get(fk); if (fakeFirst === undefined) { fakeFirst = safeFake('firstName', first); nameMap.set(fk, fakeFirst); }
-        let fakeLast = nameMap.get(lk); if (fakeLast === undefined) { fakeLast = safeFake('lastName', last); nameMap.set(lk, fakeLast); }
+        let fakeFirst = nameMap.get(fk); if (fakeFirst === undefined) { fakeFirst = uniqueFake('firstName', first, used); nameMap.set(fk, fakeFirst); }
+        let fakeLast = nameMap.get(lk); if (fakeLast === undefined) { fakeLast = uniqueFake('lastName', last, used); nameMap.set(lk, fakeLast); }
         rules.push({ id, original: value, replacement: `${fakeFirst} ${fakeLast}`, category });
         if (!subDone.has(fk)) { subDone.add(fk); rules.push({ id: `${id}_first`, original: first, replacement: fakeFirst, category: 'firstName' }); }
         if (!subDone.has(lk)) { subDone.add(lk); rules.push({ id: `${id}_last`, original: last, replacement: fakeLast, category: 'lastName' }); }
         continue;
       }
     }
-    rules.push({ id, original: value, replacement: safeFake(category, value), category });
+    rules.push({ id, original: value, replacement: uniqueFake(category, value, used), category });
+  }
+  // Garantie finale : tous les remplacements globalement uniques (réversibilité 100 %)
+  const usedFinal = new Set();
+  for (const rule of rules) {
+    let rep = rule.replacement, tries = 0;
+    while (usedFinal.has(_normU(rep)) && tries < 15) { rep = generateFake(rule.category, rule.original); tries++; }
+    let n = 1; while (usedFinal.has(_normU(rep))) { rep = rule.replacement + ' ' + n; n++; }
+    rule.replacement = rep; usedFinal.add(_normU(rep));
   }
   return rules;
 }
 
-function anonymize(text, rules) {
-  if (!rules.length) return text;
-  const sorted = [...rules].sort((a, b) => b.original.length - a.original.length);
-  let result = text;
-  for (const rule of sorted) {
-    result = result.replace(buildAccentInsensitiveBoundedRegex(rule.original), rule.replacement);
-  }
-  return result;
-}
-
-function restore(aiText, rules) {
-  if (!rules.length) return { text: aiText, found: [], notFound: [] };
-  const sorted = [...rules].sort((a, b) => b.replacement.length - a.replacement.length);
-  let result = aiText;
-  const found = [], notFound = [];
-  for (const rule of sorted) {
-    if (buildAccentInsensitiveBoundedRegex(rule.replacement).test(result)) {
-      result = result.replace(buildAccentInsensitiveBoundedRegex(rule.replacement), rule.original);
-      found.push(rule);
-    } else {
-      notFound.push(rule);
+function anonymize(text, rules, overrides = []) {
+  if (!rules || rules.length === 0) return text;
+  const intervals = [];
+  const seen = new Set();
+  for (const rule of rules) {
+    if (seen.has(rule.original)) continue;
+    seen.add(rule.original);
+    const regex = buildAccentInsensitiveBoundedRegex(rule.original);
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      if (match[0].length === 0) { regex.lastIndex = Math.max(regex.lastIndex + 1, match.index + 1); continue; }
+      intervals.push({ start: match.index, end: match.index + match[0].length, original: rule.original, replacement: rule.replacement, len: match[0].length });
+      if (regex.lastIndex === match.index) regex.lastIndex++;
     }
   }
+  if (intervals.length === 0) return text;
+  intervals.sort((a, b) => (a.start !== b.start) ? a.start - b.start : b.len - a.len);
+  const nonOverlapping = [];
+  let lastEnd = -1;
+  for (const it of intervals) { if (it.start >= lastEnd) { nonOverlapping.push(it); lastEnd = it.end; } }
+  const normalizeKey = (str) => str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const overrideMap = new Map();
+  for (const ov of (overrides || [])) {
+    const key = normalizeKey(ov.original);
+    if (!overrideMap.has(key)) overrideMap.set(key, []);
+    overrideMap.get(key).push({ occ: ov.occ, replacement: ov.replacement });
+  }
+  const occ = new Map();
+  const out = [];
+  let lastIndex = 0;
+  for (const it of nonOverlapping) {
+    const key = normalizeKey(it.original);
+    const count = occ.has(key) ? occ.get(key) : 0;
+    occ.set(key, count + 1);
+    let replacement = it.replacement;
+    const ovs = overrideMap.get(key);
+    if (ovs) { const o = ovs.find(x => x.occ === count); if (o) replacement = o.replacement; }
+    out.push(text.slice(lastIndex, it.start), replacement);
+    lastIndex = it.end;
+  }
+  out.push(text.slice(lastIndex));
+  return out.join('');
+}
+
+function restore(aiText, rules, overrides = []) {
+  if (!Array.isArray(rules)) rules = [];
+  const ovRules = (overrides || []).map(o => ({ original: o.original, replacement: o.replacement, category: 'override' }));
+  const all = [...ovRules, ...rules];
+  if (all.length === 0) return { text: aiText, found: [], notFound: [] };
+  // Intervalles des remplacements présents dans le texte IA (dédup par replacement)
+  const intervals = [];
+  const seen = new Set();
+  for (const entry of all) {
+    if (!entry.replacement || seen.has(entry.replacement)) continue;
+    seen.add(entry.replacement);
+    const regex = buildAccentInsensitiveBoundedRegex(entry.replacement);
+    let match;
+    while ((match = regex.exec(aiText)) !== null) {
+      if (match[0].length === 0) { regex.lastIndex = Math.max(regex.lastIndex + 1, match.index + 1); continue; }
+      intervals.push({ start: match.index, end: match.index + match[0].length, replacement: entry.replacement, original: entry.original, len: match[0].length });
+      if (regex.lastIndex === match.index) regex.lastIndex++;
+    }
+  }
+  intervals.sort((a, b) => (a.start !== b.start) ? a.start - b.start : b.len - a.len);
+  const nonOverlapping = [];
+  let lastEnd = -1;
+  for (const it of intervals) { if (it.start >= lastEnd) { nonOverlapping.push(it); lastEnd = it.end; } }
+  let result = '', lastIndex = 0;
+  const usedRepl = new Set();
+  for (const it of nonOverlapping) {
+    result += aiText.slice(lastIndex, it.start) + it.original;
+    lastIndex = it.end;
+    usedRepl.add(it.replacement);
+  }
+  result += aiText.slice(lastIndex);
+  const found = [], notFound = [];
+  for (const rule of rules) { (usedRepl.has(rule.replacement) ? found : notFound).push(rule); }
   return { text: result, found, notFound };
 }
 
