@@ -81,6 +81,20 @@
   font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); min-height: 32px; }
 .anon-copy-float:hover { filter: brightness(1.1); }
 .anon-copy-float:focus-visible { outline: 2px solid #9A2A06; outline-offset: 2px; }
+
+/* Étape 2 — résultat restauré : vraies données SURLIGNÉES (vert = restauré), valeur anonyme au survol/focus */
+#restoredOutput { min-height: 120px; white-space: pre-wrap; word-wrap: break-word; overflow: auto; }
+#restoredOutput:focus { outline: 2px solid var(--anon-primary); outline-offset: 1px; }
+.anon-restored { background: #D1FAE5; color: #065F46; border-radius: 4px; padding: 0 3px; font-weight: 600;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; cursor: help; }
+.anon-restored:focus-visible { outline: 2px solid #9A2A06; outline-offset: 1px; }
+/* Bascule globale : révèle tous les faux en ligne « vrai (faux) » */
+#restoredOutput.lv-show-fakes .anon-restored::after { content: ' (' attr(data-fake) ')'; color: #9A2A06; font-weight: 600; font-size: .9em; }
+/* Tooltip accessible (WCAG 1.4.13) */
+.anon-tip { position: fixed; z-index: 60; transform: translateX(-50%); background: #1A1D23; color: #fff;
+  padding: .4rem .65rem; border-radius: 8px; font-size: .85rem; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.28);
+  white-space: nowrap; max-width: 280px; pointer-events: auto; }
+.anon-tip.hidden { display: none; }
 /* En plein écran (API Fullscreen native via tools::partials.fullscreen-btn), la carte remplit l'écran */
 :fullscreen .anon-grid, :-webkit-full-screen .anon-grid { min-height: 60vh; }
 :fullscreen .card-body, :-webkit-full-screen .card-body { max-width: 1400px; margin: 0 auto; }

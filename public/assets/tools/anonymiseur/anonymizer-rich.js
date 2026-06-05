@@ -67,7 +67,7 @@
     const interactive = !opts || opts.interactive !== false; // false = vue d'affichage (colonne droite)
 
     const patterns = marks.map(function (m) {
-      return { value: m.value, category: m.category, cls: m.cls, priority: m.priority || 0, replacement: m.replacement,
+      return { value: m.value, category: m.category, cls: m.cls, priority: m.priority || 0, replacement: m.replacement, tip: m.tip,
                regex: window.AnonymizerCore.buildAccentInsensitiveBoundedRegex(m.value) };
     });
 
@@ -100,7 +100,7 @@
         while ((m = p.regex.exec(text)) !== null) {
           if (m[0].length === 0) { p.regex.lastIndex++; continue; } // garde anti-boucle
           hits.push({ start: m.index, end: m.index + m[0].length, text: m[0],
-                      value: p.value, category: p.category, cls: p.cls, priority: p.priority, replacement: p.replacement });
+                      value: p.value, category: p.category, cls: p.cls, priority: p.priority, replacement: p.replacement, tip: p.tip });
         }
       });
       if (!hits.length) return;
@@ -140,6 +140,11 @@
           span.setAttribute('aria-label', h.cls === 'anon-anon'
             ? 'Anonymisé — cliquer pour les options'
             : 'À anonymiser — cliquer pour anonymiser');
+        } else if (h.tip != null) {
+          // Mode tooltip (colonne « résultat restauré ») : focusable + valeur anonyme révélable.
+          span.setAttribute('tabindex', '0');
+          span.setAttribute('data-fake', h.tip);
+          span.setAttribute('aria-label', ((h.replacement != null) ? h.replacement : h.text) + ' — valeur anonyme : ' + h.tip);
         }
         // Vue droite : on AFFICHE le faux (replacement) à la place de l'original ; sinon on garde l'original.
         span.textContent = (h.replacement != null) ? h.replacement : h.text; // échappement sûr

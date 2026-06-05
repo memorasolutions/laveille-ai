@@ -8,6 +8,7 @@ class AnonymizerUI {
     this.sourceText = '';
     this.sourceHtml = ''; // version riche (mise en forme conservée) de l'éditeur
     this.anonPlain = '';  // texte anonymisé exact (pour la copie vers l'IA)
+    this.restoredPlain = ''; // texte restauré exact (pour la copie du résultat)
     this.candidates = [];
     this.rules = [];
     this.anonMode = 'pseudo';
@@ -32,6 +33,8 @@ class AnonymizerUI {
       this.bindViewSwitch();
       this.bindAutoGrow();
       this.bindRichEditor();
+      this.bindRestoredTooltip();
+      this.bindToggleFakes();
       this.updateModeUI();
     });
   }
@@ -94,6 +97,65 @@ class AnonymizerUI {
       this.toast('Texte anonymisé copié.', 'success');
       if (btn) { const o = btn.innerHTML; btn.innerHTML = '✓ Copié'; setTimeout(() => { btn.innerHTML = o; }, 1500); }
     } catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
+  }
+
+  // Étape 2 : affiche le texte restauré avec les vraies données SURLIGNÉES ; la valeur anonyme
+  // (le faux) est révélée au survol/focus (tooltip) et via la bascule globale.
+  renderRestored(res) {
+    const out = document.getElementById('restoredOutput');
+    if (!out) return;
+    this.restoredPlain = res.text;
+    out.classList.remove('lv-show-fakes');
+    const btn = document.getElementById('btnToggleFakes');
+    if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = '👁️ Voir les valeurs anonymes'; }
+    if (!res.text) { out.textContent = ''; return; }
+    out.textContent = res.text;
+    const marks = (res.found || []).map(r => ({ value: r.original, category: r.category, cls: 'anon-restored', tip: r.replacement, priority: 1 }));
+    if (marks.length && window.AnonRich && window.AnonRich.highlightEntitiesInElement) {
+      window.AnonRich.highlightEntitiesInElement(out, marks, _norm, { interactive: false });
+    }
+  }
+
+  // Tooltip accessible (WCAG 1.4.13 : survol + focus clavier, fermable Esc, survolable/persistant).
+  bindRestoredTooltip() {
+    const out = document.getElementById('restoredOutput');
+    const tip = document.getElementById('anonTip');
+    if (!out || !tip) return;
+    let hideTimer = null;
+    const cancelHide = () => { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } };
+    const show = (span) => {
+      const fake = span.getAttribute('data-fake');
+      if (!fake) return;
+      cancelHide();
+      tip.textContent = 'Anonymisé : ' + fake;
+      tip.classList.remove('hidden');
+      const r = span.getBoundingClientRect();
+      tip.style.left = (r.left + r.width / 2) + 'px';
+      let top = r.top - tip.offsetHeight - 8;
+      if (top < 8) top = r.bottom + 8;
+      tip.style.top = top + 'px';
+    };
+    const scheduleHide = () => { cancelHide(); hideTimer = setTimeout(() => tip.classList.add('hidden'), 200); };
+    out.addEventListener('mouseover', (e) => { const s = e.target.closest('.anon-restored'); if (s) show(s); });
+    out.addEventListener('mouseout', (e) => { if (e.target.closest('.anon-restored')) scheduleHide(); });
+    out.addEventListener('focusin', (e) => { const s = e.target.closest('.anon-restored'); if (s) show(s); });
+    out.addEventListener('focusout', (e) => { if (e.target.closest('.anon-restored')) scheduleHide(); });
+    tip.addEventListener('mouseover', cancelHide); // survolable
+    tip.addEventListener('mouseout', scheduleHide);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tip.classList.add('hidden'); }); // fermable
+    window.addEventListener('scroll', () => tip.classList.add('hidden'), { capture: true });
+  }
+
+  // Bascule globale (B) : révèle TOUTES les valeurs anonymes en ligne (relecture/audit).
+  bindToggleFakes() {
+    const btn = document.getElementById('btnToggleFakes');
+    const out = document.getElementById('restoredOutput');
+    if (!btn || !out) return;
+    btn.addEventListener('click', () => {
+      const on = out.classList.toggle('lv-show-fakes');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.innerHTML = on ? '🙈 Masquer les valeurs anonymes' : '👁️ Voir les valeurs anonymes';
+    });
   }
 
   renderAnnotated() {
@@ -566,9 +628,8 @@ class AnonymizerUI {
       if (!aiText.trim()) { this.toast('Collez la réponse de l\'IA.', 'warning'); return; }
       if (!this.rules.length) { this.toast('Aucune règle : anonymisez d\'abord (étape 1).', 'warning'); return; }
       const res = window.AnonymizerCore.restore(aiText, this.rules, this.overrides);
-      const out = document.getElementById('restoredOutput');
       const report = document.getElementById('restoreReport');
-      if (out) { out.value = res.text; this.autoGrow(out); }
+      this.renderRestored(res);
       if (res.notFound.length) this.toast(res.notFound.length + ' valeur(s) non retrouvée(s).', 'warning');
       else this.toast('Toutes vos vraies données ont été restaurées.', 'success');
       if (report) {
@@ -582,9 +643,8 @@ class AnonymizerUI {
     });
 
     on('btnCopyRestored', 'click', async () => {
-      const out = document.getElementById('restoredOutput');
-      if (!out || !out.value) { this.toast('Rien à copier.', 'warning'); return; }
-      try { await navigator.clipboard.writeText(out.value); this.toast('Résultat copié.', 'success'); }
+      if (!this.restoredPlain) { this.toast('Rien à copier.', 'warning'); return; }
+      try { await navigator.clipboard.writeText(this.restoredPlain); this.toast('Résultat copié.', 'success'); }
       catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
     });
 

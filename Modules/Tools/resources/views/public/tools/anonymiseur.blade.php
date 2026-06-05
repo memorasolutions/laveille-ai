@@ -156,11 +156,12 @@
                             </div>
                             <div id="restoreReport" class="anon-report" role="status" aria-live="polite"></div>
                             <div class="anon-field" style="margin-top:.5rem;">
-                                <label class="anon-label" for="restoredOutput">{{ __('Résultat avec vos vraies données') }}</label>
-                                <textarea id="restoredOutput" class="anon-textarea" readonly aria-label="{{ __('Texte restauré') }}"></textarea>
+                                <label class="anon-label" for="restoredOutput">{{ __('Résultat avec vos vraies données') }} <span style="font-weight:400;color:#52586a;font-size:.85rem;">{{ __('— survolez une donnée surlignée pour voir sa valeur anonyme') }}</span></label>
+                                <div id="restoredOutput" class="anon-textarea anon-out-rich" role="textbox" aria-readonly="true" tabindex="0" aria-label="{{ __('Texte restauré — données surlignées, valeur anonyme au survol') }}"></div>
                             </div>
                             <div class="anon-actions">
                                 <button type="button" id="btnCopyRestored" class="anon-btn">📋 {{ __('Copier le résultat') }}</button>
+                                <button type="button" id="btnToggleFakes" class="anon-btn secondary" aria-pressed="false">👁️ {{ __('Voir les valeurs anonymes') }}</button>
                             </div>
                         </div>
 
@@ -190,6 +191,9 @@
                             <button type="button" id="anonOccConfirm" aria-label="{{ __('Confirmer') }}">✓</button>
                         </div>
                     </div>
+
+                    {{-- Tooltip accessible (WCAG 1.4.13) : révèle la valeur anonyme d'une donnée restaurée au survol/focus --}}
+                    <div id="anonTip" class="anon-tip hidden" role="tooltip"></div>
                 </div>{{-- /.card --}}
             </div>{{-- /.col --}}
         </div>{{-- /.row --}}

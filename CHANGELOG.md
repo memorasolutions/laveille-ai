@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.55] - 2026-06-05
+
+### Added
+
+- **Anonymiseur — les données restaurées sont surlignées + leur ancienne valeur anonyme se révèle au survol/focus** : dans « Résultat avec vos vraies données », chaque vraie donnée remise en place est **surlignée en vert** (= restaurée). Au **survol OU au focus clavier**, un tooltip accessible affiche « Anonymisé : *faux* » (fermable avec Échap, survolable/persistant — conforme **WCAG 2.2 §1.4.13**, pas le `title` natif). Bouton **« 👁️ Voir les valeurs anonymes »** : bascule globale qui révèle tous les faux en ligne « vrai (faux) » pour relecture/audit (mobile/clavier-friendly). Approche notée 92/100 (recherche pp_search juin 2026 : tooltip accessible custom + bascule globale > badge inline > `title` natif). `#restoredOutput` passe de `textarea` à div riche ; la copie du résultat reste le texte exact (`restoredPlain`). **Vérifié Playwright** : 3 données surlignées avec `data-fake`+`aria-label`, tooltip hover **et** focus, fermeture Échap, bascule `aria-pressed`, 0 erreur console.
+
 ## [1.65.54] - 2026-06-05
 
 ### Fixed
