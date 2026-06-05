@@ -190,9 +190,44 @@
     return walk(root, 0).replace(/\n{3,}/g, '\n\n').trim();
   }
 
+  /**
+   * Construit le HTML lisible du rapport de restauration (en-tête + puces des valeurs non retrouvées).
+   * Déduplique le bruit : un mot seul (« Louise ») n'apparaît pas si une valeur multi-mots
+   * le contient (« Louise Gagnon ») est aussi non retrouvée.
+   * @param {{found:Array, notFound:Array}} res
+   * @param {(s:string)=>string} esc  fonction d'échappement HTML
+   * @returns {string}
+   */
+  function buildRestoreReportHtml(res, esc) {
+    if (!res || typeof res !== 'object' || !Array.isArray(res.found) || !Array.isArray(res.notFound)) return '';
+    const total = res.found.length + res.notFound.length;
+    const norm = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const e = typeof esc === 'function' ? esc : (s) => String(s);
+
+    // Dédup : retirer un mot seul si contenu dans une valeur multi-mots également non retrouvée.
+    const multi = res.notFound.filter(it => (it.original || '').trim().split(/\s+/).length > 1)
+                              .map(it => new Set(norm(it.original).split(/\s+/)));
+    const missing = res.notFound.filter(it => {
+      const words = (it.original || '').trim().split(/\s+/);
+      if (words.length > 1) return true;
+      const w = norm(it.original);
+      return !multi.some(set => set.has(w));
+    });
+
+    if (res.notFound.length === 0) {
+      return `<div class="anon-rep-head ok"><span class="anon-rep-ico">✅</span><span><strong>Toutes vos données ont été restaurées</strong> (${total}/${total}).</span></div>`;
+    }
+    const chips = missing.map(m => `<span class="anon-rep-chip">${e(m.original)}</span>`).join('');
+    const ico = res.found.length ? '✅' : '⚠️';
+    return `<div class="anon-rep-head partial"><span class="anon-rep-ico">${ico}</span><span><strong>${res.found.length} valeur(s)</strong> restaurée(s) sur ${total}.</span></div>`
+         + `<div class="anon-rep-missing"><div class="anon-rep-note">ℹ️ ${missing.length} valeur(s) absente(s) de la réponse collée — normal si l'IA ne les a pas reprises dans son texte.</div>`
+         + `<div class="anon-rep-chips">${chips}</div></div>`;
+  }
+
   window.AnonRich = {
     sanitizePastedHtml: sanitizePastedHtml,
     highlightEntitiesInElement: highlightEntitiesInElement,
-    richToText: richToText
+    richToText: richToText,
+    buildRestoreReportHtml: buildRestoreReportHtml
   };
 })();

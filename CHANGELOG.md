@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.50] - 2026-06-05
+
+### Changed
+
+- **Anonymiseur — rapport de restauration restructuré (UX lisible)** : la longue phrase « X valeur(s) restaurée(s) sur N. Non retrouvées : « … », « … », … » est remplacée par un rapport structuré : en-tête avec icône + compte (✅ si ≥1 restaurée, ⚠️ si 0), une note explicative (« absentes de la réponse collée — normal si l'IA ne les a pas reprises »), puis les valeurs non retrouvées en **puces** lisibles. **Déduplication du bruit** : un nom de famille ou prénom seul (« Louise », « Gagnon ») n'apparaît plus si le nom complet (« Louise Gagnon ») est déjà listé. Nouveau `buildRestoreReportHtml()` dans `anonymizer-rich.js`. **Vérifié Playwright** : 3 puces correctes (Roy / Louise Gagnon / Julie Morin), sous-parties dédupliquées, 0 erreur console.
+
 ## [1.65.49] - 2026-06-05
 
 ### Fixed

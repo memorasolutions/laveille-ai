@@ -550,15 +550,16 @@ class AnonymizerUI {
       const out = document.getElementById('restoredOutput');
       const report = document.getElementById('restoreReport');
       if (out) { out.value = res.text; this.autoGrow(out); }
-      const total = res.found.length + res.notFound.length;
-      let msg = res.found.length + ' valeur(s) restaurée(s) sur ' + total + '.';
-      if (res.notFound.length) {
-        msg += ' Non retrouvées : ' + res.notFound.map(r => '« ' + r.original + ' »').join(', ');
-        this.toast(res.notFound.length + ' valeur(s) non retrouvée(s).', 'warning');
-      } else {
-        this.toast('Toutes vos vraies données ont été restaurées.', 'success');
+      if (res.notFound.length) this.toast(res.notFound.length + ' valeur(s) non retrouvée(s).', 'warning');
+      else this.toast('Toutes vos vraies données ont été restaurées.', 'success');
+      if (report) {
+        if (window.AnonRich && window.AnonRich.buildRestoreReportHtml) {
+          report.innerHTML = window.AnonRich.buildRestoreReportHtml(res, s => this.escHtml(s));
+        } else {
+          const total = res.found.length + res.notFound.length;
+          report.textContent = res.found.length + ' valeur(s) restaurée(s) sur ' + total + '.';
+        }
       }
-      if (report) report.textContent = msg;
     });
 
     on('btnCopyRestored', 'click', async () => {
