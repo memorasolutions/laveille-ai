@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.52] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — meilleure détection des noms dans les lettres (médicales/admin)** : « Patient Louise Gagnon » détectait « Patient Louise » (le mot « Patient » en début de phrase pris pour un prénom) et ratait le vrai nom. Ajout des mots courants qui précèdent un nom aux mots ignorés (`patient`, `patiente`, `usager`, `bénéficiaire`, `médecin`, `concernant`, `référence`, `sujet`, `destinataire`, `dossier`, `date`) + **rembobinage du scan** : quand le 1er mot d'une paire est un mot courant, on ne consomme pas le 2e mot et on rescanne pour capter le vrai nom complet derrière. **Vérifié (test Node)** : « Patient Louise Gagnon » → « Louise Gagnon », « Concernant Julie Morin » → « Julie Morin », « Le bénéficiaire Marc Tremblay » → « Marc Tremblay », sans régression (« Dr Jean Dubé » → « Jean Dubé », « Dr Lavoie » → « Lavoie »).
+
 ## [1.65.51] - 2026-06-05
 
 ### Changed

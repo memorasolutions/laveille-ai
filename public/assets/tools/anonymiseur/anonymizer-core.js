@@ -43,7 +43,10 @@ function detectEntities(text) {
     'bonjour', 'bonsoir', 'salut', 'merci', 'cordialement', 'madame', 'monsieur',
     'docteur', 'clinique', 'hopital', 'centre', 'est', 'ouest', 'nord', 'sud',
     'quebec', 'canada', 'objet', 'suivi', 'nom', 'adresse',
-    'dr', 'm', 'mme', 'me', 'pr', 'mr', 'mlle'
+    'dr', 'm', 'mme', 'me', 'pr', 'mr', 'mlle',
+    // Mots courants des lettres (médicales/admin) qui précèdent un nom — ne pas les prendre pour un prénom
+    'patient', 'patiente', 'usager', 'usagere', 'beneficiaire', 'medecin',
+    'concernant', 'reference', 'sujet', 'destinataire', 'dossier', 'date'
   ]);
   const normalize = (str) => str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const entities = [];
@@ -90,7 +93,14 @@ function detectEntities(text) {
   // 2. Noms sans titre (deux mots capitalisés, hors stopwords)
   const name = /(?<![A-Za-zÀ-ÿ])([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)(?![A-Za-zÀ-ÿ])/g;
   while ((m = name.exec(text))) {
-    if (!STOPWORDS.has(normalize(m[1])) && !STOPWORDS.has(normalize(m[2]))) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
+    const w1 = normalize(m[1]), w2 = normalize(m[2]);
+    if (STOPWORDS.has(w1) && !STOPWORDS.has(w2)) {
+      // 1er mot = mot courant (« Patient », « Concernant »…) : ne PAS consommer le 2e mot,
+      // rembobiner pour capter le vrai nom complet qui le suit (« Louise Gagnon »).
+      name.lastIndex = m.index + m[1].length;
+      continue;
+    }
+    if (!STOPWORDS.has(w1) && !STOPWORDS.has(w2)) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
   }
   return entities;
 }
