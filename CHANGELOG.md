@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.41] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — boutons d'aide alignés sur la charte du site** : uniformisation des ⓘ (un seul glyphe « ⓘ » partout — un « ? » résiduel retiré ; un seul ⓘ par section ; l'explication « Seulement ici »/« Ma valeur » fusionnée dans l'aide « masquer »). **Vérifié visuellement** (Playwright) : identique à la référence `.ct-help-btn` du site (22×22px, cercle teal #064E5A).
+- **Anonymiseur — rester en haut de l'éditeur après collage d'un long texte** : le champ auto-extensible faisait « tomber » la page en bas ; un handler de collage ramène la vue en haut du champ (offset toolbar). **Vérifié visuellement** : après 60 lignes collées, le haut de l'éditeur reste visible.
+
 ## [1.65.40] - 2026-06-05
 
 ### Added

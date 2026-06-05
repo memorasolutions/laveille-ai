@@ -312,6 +312,16 @@ class AnonymizerUI {
       const el = document.getElementById(id);
       if (el) { el.addEventListener('input', () => this.autoGrow(el)); this.autoGrow(el); }
     }
+    // Après collage d'un long texte : rester en haut de l'éditeur (ne pas « tomber » en bas)
+    for (const id of ['anonSource', 'aiResponse']) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('paste', () => setTimeout(() => {
+        this.autoGrow(el);
+        try { el.setSelectionRange(0, 0); } catch (e) {}
+        const r = el.getBoundingClientRect();
+        window.scrollTo({ top: Math.max(0, window.scrollY + r.top - 90), behavior: 'auto' });
+      }, 0));
+    }
     // Recalcule au redimensionnement (le texte se reflowe → la hauteur change)
     window.addEventListener('resize', () => ids.forEach(id => this.autoGrow(document.getElementById(id))));
   }
