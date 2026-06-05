@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.42] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — boutons d'aide alignés sur la charte réelle du site** : mes boutons utilisaient `.ct-help-btn` avec le glyphe « ⓘ » (un caractère cercle-i → effet cercle-dans-cercle, présent seulement sur calculatrice). La charte dominante (constructeur-prompts, simulateur-fiscal, code-qr, roue-tirage) utilise un **« ? » rond** `ct-btn ct-btn-ghost ct-btn-xs` (22px, border-radius 50%). Basculé sur ce style **byte-identique** au bouton de référence (même classes + même style inline), en conservant `data-help-key` pour ouvrir la popup complète. Conforme à la capture utilisateur (bouton « ? » de la section persona du constructeur de prompts).
+
 ## [1.65.41] - 2026-06-05
 
 ### Fixed

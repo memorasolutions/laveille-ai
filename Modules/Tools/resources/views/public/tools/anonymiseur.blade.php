@@ -81,7 +81,7 @@
                         {{-- ÉTAPE 1 : éditeur annoté + aperçu --}}
                         <div class="anon-panel active" data-step-content="1">
                             <div class="anon-help">
-                                💡 <strong>{{ __('Comment ça marche') }}</strong> <button type="button" class="ct-help-btn" data-help-key="anon-comment" aria-label="{{ __('Aide : comment ça marche') }}">ⓘ</button> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les masquer (elles deviennent surlignées). Pour masquer autre chose, sélectionnez simplement un passage avec la souris — un bouton « 🕵️ Anonymiser » apparaît juste au-dessus. Le texte prêt pour l\'IA apparaît à droite.') }}
+                                💡 <strong>{{ __('Comment ça marche') }}</strong> <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-comment" aria-label="{{ __('Aide : comment ça marche') }}">?</button> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les masquer (elles deviennent surlignées). Pour masquer autre chose, sélectionnez simplement un passage avec la souris — un bouton « 🕵️ Anonymiser » apparaît juste au-dessus. Le texte prêt pour l\'IA apparaît à droite.') }}
                             </div>
 
                             {{-- Barre d'outils : 1 action primaire + sélection + menu « Actions » (réduit la surcharge — tendance 2026) --}}
@@ -109,13 +109,13 @@
                                     <button type="button" data-view="split" aria-pressed="true">⬓ {{ __('Split') }}</button>
                                     <button type="button" data-view="preview" aria-pressed="false">👁️ {{ __('Aperçu') }}</button>
                                 </div>
-                                <button type="button" class="ct-help-btn" data-help-key="anon-vues" aria-label="{{ __('Aide : affichage des volets') }}">ⓘ</button>
+                                <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-vues" aria-label="{{ __('Aide : affichage des volets') }}">?</button>
                             </div>
 
                             <div class="anon-grid">
                                 {{-- Volet gauche : éditeur annoté --}}
                                 <div class="anon-pane-editor">
-                                    <label class="anon-pane-label" for="anonSource">{{ __('Votre texte (cliquez les passages soulignés pour les anonymiser)') }} <button type="button" class="ct-help-btn" data-help-key="anon-selection" aria-label="{{ __('Aide : masquer une donnée et options') }}">ⓘ</button></label>
+                                    <label class="anon-pane-label" for="anonSource">{{ __('Votre texte (cliquez les passages soulignés pour les anonymiser)') }} <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-selection" aria-label="{{ __('Aide : masquer une donnée et options') }}">?</button></label>
                                     <div id="anonEditorWrap" class="mode-edit">
                                         <textarea id="anonSource" class="anon-textarea" placeholder="{{ __('Ex. : Le dossier #86734 pour M. Jean Dubé concerne le chantier du 15 rue de la Gare…') }}"></textarea>
                                         <div id="anonAnnotated" tabindex="0" role="textbox" aria-label="{{ __('Texte annoté — cliquez une entité pour l\'anonymiser') }}"></div>
@@ -128,7 +128,7 @@
 
                                 {{-- Volet droit : aperçu anonymisé --}}
                                 <div class="anon-pane-preview">
-                                    <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }} <button type="button" class="ct-help-btn" data-help-key="anon-restauration" aria-label="{{ __('Aide : récupérer vos données après l\'IA') }}">ⓘ</button></label>
+                                    <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }} <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-restauration" aria-label="{{ __('Aide : récupérer vos données après l\'IA') }}">?</button></label>
                                     <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé prêt pour l\'IA') }}"></textarea>
                                     <div class="anon-actions">
                                         <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier pour l\'IA') }}</button>
