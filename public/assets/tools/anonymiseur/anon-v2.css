@@ -1,0 +1,60 @@
+/* anon-v2.css — UI simplifiée de l'anonymiseur (refonte juin 2026) */
+.anon-wrap { --anon-primary: var(--c-primary, #064E5A); --anon-line: #e2e6ea; }
+.anon-steps { display: flex; gap: .5rem; margin: 0 0 1.25rem; flex-wrap: wrap; }
+.anon-step { flex: 1 1 0; min-width: 140px; display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
+  background: #fff; border: 1px solid var(--anon-line); border-radius: 12px; cursor: pointer; font: inherit; text-align: left; transition: .15s; }
+.anon-step:hover { border-color: var(--anon-primary); }
+.anon-step.active { border-color: var(--anon-primary); box-shadow: 0 0 0 2px rgba(6,78,90,.12); }
+.anon-step .num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+  border-radius: 50%; background: #eef2f4; color: var(--anon-primary); font-weight: 700; flex-shrink: 0; }
+.anon-step.active .num { background: var(--anon-primary); color: #fff; }
+.anon-step .lbl { font-weight: 600; color: #1A1D23; font-size: .95rem; }
+
+.anon-panel { display: none; }
+.anon-panel.active { display: block; animation: anonFade .2s ease; }
+@keyframes anonFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.anon-help { background: #ECFDF5; border: 1px solid rgba(6,78,90,.18); border-radius: 12px;
+  padding: .85rem 1.1rem; margin-bottom: 1rem; font-size: .92rem; line-height: 1.55; color: #1A1D23; }
+.anon-help ol { margin: .4rem 0 0; padding-left: 1.2rem; }
+
+.anon-field { margin-bottom: 1rem; }
+.anon-label { display: block; font-weight: 600; margin-bottom: .4rem; color: #1A1D23; }
+.anon-textarea { width: 100%; min-height: 160px; padding: .85rem 1rem; border: 1px solid var(--anon-line);
+  border-radius: 12px; font: inherit; line-height: 1.5; resize: vertical; background: #fff; color: #1A1D23; }
+.anon-textarea:focus { outline: 2px solid var(--anon-primary); outline-offset: 1px; border-color: var(--anon-primary); }
+.anon-textarea[readonly] { background: #f8fafb; }
+
+.anon-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .85rem; }
+.anon-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .65rem 1.1rem; border-radius: 10px;
+  border: 1px solid var(--anon-primary); background: var(--anon-primary); color: #fff; font: inherit; font-weight: 600;
+  cursor: pointer; min-height: 44px; transition: .15s; }
+.anon-btn:hover { filter: brightness(1.08); }
+.anon-btn.secondary { background: #fff; color: var(--anon-primary); }
+.anon-btn:focus-visible { outline: 2px solid #9A2A06; outline-offset: 2px; }
+
+.anon-detect-list { display: flex; flex-direction: column; gap: .4rem; margin-top: .85rem; }
+.anon-detect-row { display: flex; align-items: center; gap: .6rem; padding: .55rem .8rem;
+  border: 1px solid var(--anon-line); border-radius: 10px; cursor: pointer; }
+.anon-detect-row:hover { background: #f8fafb; }
+.anon-detect-cat { display: inline-block; font-size: .78rem; font-weight: 700; color: var(--anon-primary);
+  background: #ECFDF5; padding: .12rem .5rem; border-radius: 999px; }
+.anon-empty { color: #52586a; font-style: italic; margin: .6rem 0; }
+
+.anon-manual { margin-top: .85rem; padding: .85rem; border: 1px dashed var(--anon-line); border-radius: 10px; }
+.anon-manual.hidden { display: none; }
+.anon-manual .row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: flex-end; }
+.anon-input, .anon-select { padding: .6rem .8rem; border: 1px solid var(--anon-line); border-radius: 10px; font: inherit; min-height: 44px; }
+.anon-input { flex: 1 1 220px; }
+
+.anon-mapping { margin-top: 1rem; display: flex; flex-direction: column; gap: .4rem; }
+.anon-rule-item { display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  padding: .5rem .8rem; background: #f8fafb; border: 1px solid var(--anon-line); border-radius: 10px; }
+.anon-rule-text { font-size: .9rem; color: #1A1D23; }
+.anon-rule-remove { border: none; background: none; color: #991B1B; font-size: 1.1rem; cursor: pointer;
+  width: 32px; height: 32px; border-radius: 8px; }
+.anon-rule-remove:hover { background: #FEF2F2; }
+
+.anon-report { margin: .6rem 0; padding: .6rem .85rem; border-radius: 10px; background: #ECFDF5;
+  border: 1px solid rgba(6,78,90,.18); color: #065F46; font-size: .9rem; }
+.anon-report:empty { display: none; }
