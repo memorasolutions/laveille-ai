@@ -33,9 +33,23 @@ function buildAccentInsensitiveBoundedRegex(str) {
     if (char === '+') { pattern += char; continue; }
     pattern += getAccentClass(char);
   }
-  const startBoundary = /^\w/.test(str) ? '\\b' : '(?<!\\w)';
-  const endBoundary = /\w$/.test(str) ? '\\b' : '(?!\\w)';
+  const startBoundary = /^\w/.test(str) ? '(?<![A-Za-zÀ-ÖØ-öø-ÿ0-9])' : '(?<!\\w)';
+  const endBoundary = /\w$/.test(str) ? '(?![A-Za-zÀ-ÖØ-öø-ÿ0-9])' : '(?!\\w)';
   return new RegExp(startBoundary + pattern + endBoundary, 'gi');
+}
+
+// Variante sans boundary pour la restauration : les pseudos sont uniques par construction,
+// inutile de risquer un échec de \b quand le texte IA est collé (textContent sans séparateurs).
+function buildAccentInsensitiveUnboundedRegex(str) {
+  let escaped = escapeRegex(str).replace(/\s+/g, '\\s+');
+  let pattern = '';
+  for (let i = 0; i < escaped.length; i++) {
+    const char = escaped[i];
+    if (char === '\\') { pattern += char + escaped[++i]; continue; }
+    if (char === '+') { pattern += char; continue; }
+    pattern += getAccentClass(char);
+  }
+  return new RegExp(pattern, 'gi');
 }
 
 function detectEntities(text) {
@@ -314,7 +328,7 @@ function restore(aiText, rules, overrides = []) {
   for (const entry of all) {
     if (!entry.replacement || seen.has(entry.replacement)) continue;
     seen.add(entry.replacement);
-    const regex = buildAccentInsensitiveBoundedRegex(entry.replacement);
+    const regex = buildAccentInsensitiveUnboundedRegex(entry.replacement);
     let match;
     while ((match = regex.exec(aiText)) !== null) {
       if (match[0].length === 0) { regex.lastIndex = Math.max(regex.lastIndex + 1, match.index + 1); continue; }
@@ -339,6 +353,6 @@ function restore(aiText, rules, overrides = []) {
   return { text: result, found, notFound };
 }
 
-const AnonymizerCore = { detectEntities, generateFake, buildRules, anonymize, restore, buildAccentInsensitiveBoundedRegex };
+const AnonymizerCore = { detectEntities, generateFake, buildRules, anonymize, restore, buildAccentInsensitiveBoundedRegex, buildAccentInsensitiveUnboundedRegex };
 if (typeof module !== 'undefined' && module.exports) module.exports = AnonymizerCore;
 if (typeof window !== 'undefined') window.AnonymizerCore = AnonymizerCore;

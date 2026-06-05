@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.54] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — restauration plus robuste quand la réponse IA est collée sans séparateurs + bornes de mots sensibles aux accents** : trouvé lors d'une certification E2E intégrée. (1) `restore()` utilise désormais `buildAccentInsensitiveUnboundedRegex` (sans `\b`) car les pseudonymes sont uniques par construction — une valeur dont la fin touche le mot suivant (ex. `…01RAMQ…` dans un texte collé) est désormais restaurée. (2) `buildAccentInsensitiveBoundedRegex` (détection/anonymisation) : les bornes `\b` (ASCII seulement) deviennent des bornes explicites incluant les lettres accentuées `À-ÿ` → meilleures limites de mots pour « Gagné », « Émilie », etc. **Vérifié (test Node)** : détection inchangée, **round-trip 100 % (3/3)**, restauration d'adjacence corrigée. **Certification E2E intégrée PASS** : 7 entités, format préservé des 2 côtés, restauration complète, rapport structuré, 0 erreur console.
+
 ## [1.65.53] - 2026-06-05
 
 ### Added
