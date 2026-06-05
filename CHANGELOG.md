@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.43] - 2026-06-05
+
+### Added
+
+- **Anonymiseur — l'éditeur conserve la mise en forme (gras, italique, listes à puces et numérotées, titres) au collage** : le champ de saisie passe de `textarea` (texte brut, qui supprimait tout format) à un éditeur riche `contenteditable`. Approche retenue après recherche best practices juin 2026 (Perplexity, doc ProseMirror/Tiptap paste-handler) : **éditeur riche + anonymisation sur les nœuds texte** (note 90/100), supérieure au Markdown round-trip (68) et au textarea brut (38), sans réintroduire de dépendance Tiptap (les bugs passés y étaient liés).
+  - Nouveau fichier additif `anonymizer-rich.js` : `sanitizePastedHtml()` (liste blanche stricte `p/br/b/strong/i/em/u/ul/ol/li/h1-3/blockquote/a[href]`, nettoyage du HTML Word/Google Docs : styles, classes, `<span>`, scripts, balises `mso`/`o:p`) + `highlightEntitiesInElement()` (surlignage injecté **dans les nœuds texte** d'un clone du HTML riche → la mise en forme reste intacte ET les entités restent cliquables).
+  - **Zéro régression sur le moteur réversible** : détection, anonymisation et restauration continuent sur le texte (`innerText`), la sortie pour l'IA reste en texte simple (c'est ce que l'IA reçoit). Bulle de sélection, popover par occurrence, modes réaliste/jetons, valeur personnalisée, bascule de vue : tous conservés.
+  - **Vérifié en banc d'essai local (Playwright)** : sanitize Word 9/9, `<strong>/<ul>/<ol>` préservés à travers détection → annotation → sortie, 5 entités détectées+anonymisées (les vraies données disparaissent de la sortie), restauration 3/3 exacte, **0 erreur console**.
+
 ## [1.65.42] - 2026-06-05
 
 ### Fixed

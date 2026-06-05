@@ -117,7 +117,7 @@
                                 <div class="anon-pane-editor">
                                     <label class="anon-pane-label" for="anonSource">{{ __('Votre texte (cliquez les passages soulignés pour les anonymiser)') }} <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-selection" aria-label="{{ __('Aide : masquer une donnée et options') }}">?</button></label>
                                     <div id="anonEditorWrap" class="mode-edit">
-                                        <textarea id="anonSource" class="anon-textarea" placeholder="{{ __('Ex. : Le dossier #86734 pour M. Jean Dubé concerne le chantier du 15 rue de la Gare…') }}"></textarea>
+                                        <div id="anonSource" class="anon-textarea anon-rich" contenteditable="true" role="textbox" aria-multiline="true" aria-label="{{ __('Votre texte — la mise en forme (gras, listes…) est conservée au collage') }}" data-placeholder="{{ __('Ex. : Le dossier #86734 pour M. Jean Dubé concerne le chantier du 15 rue de la Gare…') }}"></div>
                                         <div id="anonAnnotated" tabindex="0" role="textbox" aria-label="{{ __('Texte annoté — cliquez une entité pour l\'anonymiser') }}"></div>
                                     </div>
                                     <div class="anon-legend" aria-hidden="true">
@@ -222,5 +222,6 @@ window.HELP_CONTENT = Object.assign(window.HELP_CONTENT || {}, {
 });
 </script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-core.js') }}?v={{ config('version.semver') }}" defer></script>
+<script src="{{ asset('assets/tools/anonymiseur/anonymizer-rich.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-ui.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush

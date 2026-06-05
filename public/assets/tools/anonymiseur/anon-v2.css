@@ -57,6 +57,18 @@
 .anon-textarea[readonly] { background: #f8fafb; }
 /* Champs auto-extensibles : pas de scrollbar interne, la page défile */
 .anon-textarea { overflow: hidden; }
+
+/* Éditeur riche (contenteditable) : conserve la mise en forme collée (gras, italique, listes) */
+.anon-rich { overflow: auto; cursor: text; white-space: pre-wrap; word-wrap: break-word; }
+.anon-rich:empty::before { content: attr(data-placeholder); color: #52586a; font-style: italic; pointer-events: none; }
+.anon-rich:focus { white-space: pre-wrap; }
+/* Rendu des listes dans l'éditeur ET le volet annoté (la mise en forme est préservée) */
+#anonSource ul, #anonAnnotated ul { list-style: disc; padding-left: 1.6rem; margin: .4rem 0; }
+#anonSource ol, #anonAnnotated ol { list-style: decimal; padding-left: 1.6rem; margin: .4rem 0; }
+#anonSource li, #anonAnnotated li { margin: .15rem 0; }
+#anonSource p, #anonAnnotated p { margin: 0 0 .5rem; }
+#anonSource h1, #anonAnnotated h1, #anonSource h2, #anonAnnotated h2, #anonSource h3, #anonAnnotated h3 { margin: .5rem 0 .35rem; font-weight: 700; line-height: 1.3; }
+#anonSource blockquote, #anonAnnotated blockquote { margin: .4rem 0; padding-left: .8rem; border-left: 3px solid var(--anon-line); color: #52586a; }
 /* En plein écran (API Fullscreen native via tools::partials.fullscreen-btn), la carte remplit l'écran */
 :fullscreen .anon-grid, :-webkit-full-screen .anon-grid { min-height: 60vh; }
 :fullscreen .card-body, :-webkit-full-screen .card-body { max-width: 1400px; margin: 0 auto; }

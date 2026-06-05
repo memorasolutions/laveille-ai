@@ -6,6 +6,7 @@ const _norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 class AnonymizerUI {
   constructor() {
     this.sourceText = '';
+    this.sourceHtml = ''; // version riche (mise en forme conservée) de l'éditeur
     this.candidates = [];
     this.rules = [];
     this.anonMode = 'pseudo';
@@ -29,6 +30,7 @@ class AnonymizerUI {
       this.bindOccPopover();
       this.bindViewSwitch();
       this.bindAutoGrow();
+      this.bindRichEditor();
       this.updateModeUI();
     });
   }
@@ -73,11 +75,17 @@ class AnonymizerUI {
       return;
     }
 
+    // Base = HTML riche (préserve gras/italique/listes), sinon repli texte simple échappé.
+    if (this.sourceHtml && this.sourceHtml.trim()) {
+      container.innerHTML = this.sourceHtml;
+    } else {
+      container.textContent = this.sourceText;
+    }
+
     const marks = [];
     const ruleSet = new Set();
     for (const rule of this.rules) {
-      const norm = _norm(rule.original);
-      ruleSet.add(norm);
+      ruleSet.add(_norm(rule.original));
       marks.push({ value: rule.original, category: rule.category, cls: 'anon-anon', priority: 1 });
     }
     for (const cand of this.candidates) {
@@ -86,42 +94,10 @@ class AnonymizerUI {
       }
     }
 
-    const intervals = [];
-    for (const mark of marks) {
-      const regex = window.AnonymizerCore.buildAccentInsensitiveBoundedRegex(mark.value);
-      let match;
-      while ((match = regex.exec(this.sourceText)) !== null) {
-        intervals.push({ start: match.index, end: match.index + match[0].length, cls: mark.cls, value: mark.value, category: mark.category, priority: mark.priority, length: match[0].length });
-        if (match[0].length === 0) { regex.lastIndex++; }
-      }
+    // Surlignage injecté DANS les nœuds texte (la mise en forme reste intacte).
+    if (marks.length && window.AnonRich) {
+      window.AnonRich.highlightEntitiesInElement(container, marks, _norm);
     }
-
-    intervals.sort((a, b) => {
-      if (a.start !== b.start) return a.start - b.start;
-      if (a.priority !== b.priority) return b.priority - a.priority;
-      return b.length - a.length;
-    });
-
-    const selected = [];
-    let lastEnd = 0;
-    for (const iv of intervals) {
-      if (iv.start >= lastEnd) { selected.push(iv); lastEnd = iv.end; }
-    }
-
-    let html = '', pos = 0;
-    const occCounter = new Map(); // index d'occurrence par valeur (ordre du texte)
-    for (const iv of selected) {
-      if (iv.start > pos) html += this.escHtml(this.sourceText.substring(pos, iv.start));
-      const spanText = this.escHtml(this.sourceText.substring(iv.start, iv.end));
-      const okey = _norm(iv.value);
-      const occ = occCounter.has(okey) ? occCounter.get(okey) : 0;
-      occCounter.set(okey, occ + 1);
-      const label = iv.cls === 'anon-anon' ? 'Anonymisé — cliquer pour les options' : 'À anonymiser — cliquer pour anonymiser';
-      html += `<span class="${iv.cls}" data-value="${this.escHtml(iv.value)}" data-category="${this.escHtml(iv.category)}" data-occ="${occ}" tabindex="0" role="button" aria-label="${label}">${spanText}</span>`;
-      pos = iv.end;
-    }
-    if (pos < this.sourceText.length) html += this.escHtml(this.sourceText.substring(pos));
-    container.innerHTML = html;
   }
 
   setMode(mode) {
@@ -130,10 +106,14 @@ class AnonymizerUI {
     const btnEdit = document.getElementById('btnEditText');
     if (mode === 'edit') {
       if (wrap) { wrap.classList.remove('mode-annotate'); wrap.classList.add('mode-edit'); }
-      if (source) { source.value = this.sourceText; this.autoGrow(source); }
+      if (source) {
+        if (this.sourceHtml && this.sourceHtml.trim()) source.innerHTML = this.sourceHtml;
+        else source.innerHTML = this.escHtml(this.sourceText).replace(/\n/g, '<br>');
+      }
       if (btnEdit) btnEdit.textContent = '👁️ Voir les annotations';
     } else {
-      this.sourceText = (source && source.value) || this.sourceText;
+      // Lire AVANT de masquer l'éditeur (innerText='' si display:none)
+      if (source) { this.sourceHtml = source.innerHTML; this.sourceText = source.innerText; }
       if (wrap) { wrap.classList.remove('mode-edit'); wrap.classList.add('mode-annotate'); }
       this.renderAnnotated();
       if (btnEdit) btnEdit.textContent = '✏️ Modifier le texte';
@@ -142,7 +122,7 @@ class AnonymizerUI {
 
   detect() {
     const source = document.getElementById('anonSource');
-    this.sourceText = (source && source.value) || this.sourceText;
+    if (source) { this.sourceHtml = source.innerHTML; this.sourceText = source.innerText; }
     if (!this.sourceText.trim()) { this.toast('Collez d\'abord votre texte.', 'warning'); return; }
     const entities = window.AnonymizerCore.detectEntities(this.sourceText);
     const existing = new Set(this.rules.map(r => _norm(r.original)));
@@ -307,13 +287,14 @@ class AnonymizerUI {
   }
 
   bindAutoGrow() {
-    const ids = ['anonSource', 'anonOutput', 'aiResponse', 'restoredOutput'];
+    // anonSource est un contenteditable (géré par bindRichEditor) : auto-extensible nativement.
+    const ids = ['anonOutput', 'aiResponse', 'restoredOutput'];
     for (const id of ids) {
       const el = document.getElementById(id);
       if (el) { el.addEventListener('input', () => this.autoGrow(el)); this.autoGrow(el); }
     }
-    // Après collage d'un long texte : rester en haut de l'éditeur (ne pas « tomber » en bas)
-    for (const id of ['anonSource', 'aiResponse']) {
+    // Après collage d'un long texte : rester en haut du champ (ne pas « tomber » en bas)
+    for (const id of ['aiResponse']) {
       const el = document.getElementById(id);
       if (el) el.addEventListener('paste', () => setTimeout(() => {
         this.autoGrow(el);
@@ -324,6 +305,35 @@ class AnonymizerUI {
     }
     // Recalcule au redimensionnement (le texte se reflowe → la hauteur change)
     window.addEventListener('resize', () => ids.forEach(id => this.autoGrow(document.getElementById(id))));
+  }
+
+  // Éditeur riche : collage Word/Docs nettoyé (mise en forme conservée), synchro de l'état.
+  bindRichEditor() {
+    const src = document.getElementById('anonSource');
+    if (!src) return;
+    const sync = () => { this.sourceHtml = src.innerHTML; this.sourceText = src.innerText; };
+    src.addEventListener('input', sync);
+    src.addEventListener('blur', sync);
+    src.addEventListener('paste', (e) => {
+      const cb = e.clipboardData || window.clipboardData;
+      if (!cb) return; // laisse le collage natif
+      e.preventDefault();
+      const rawHtml = cb.getData('text/html');
+      let clean = '';
+      if (rawHtml && window.AnonRich) clean = window.AnonRich.sanitizePastedHtml(rawHtml);
+      try {
+        if (clean && clean.trim()) document.execCommand('insertHTML', false, clean);
+        else document.execCommand('insertText', false, cb.getData('text/plain') || '');
+      } catch (err) {
+        // Repli : insertion texte brut
+        try { document.execCommand('insertText', false, cb.getData('text/plain') || ''); } catch (e2) {}
+      }
+      setTimeout(() => {
+        sync();
+        const r = src.getBoundingClientRect();
+        window.scrollTo({ top: Math.max(0, window.scrollY + r.top - 90), behavior: 'auto' });
+      }, 0);
+    });
   }
 
   bindSelectionBubble() {
@@ -433,8 +443,11 @@ class AnonymizerUI {
     }
     const source = $('anonSource');
     if (source) {
-      const cap = () => { const v = source.value.substring(source.selectionStart, source.selectionEnd).trim(); if (v) this.lastSelection = v; };
-      source.addEventListener('select', cap);
+      const cap = () => {
+        const sel = window.getSelection();
+        const v = (sel.toString() || '').trim();
+        if (v && sel.rangeCount && source.contains(sel.anchorNode)) this.lastSelection = v;
+      };
       source.addEventListener('mouseup', cap);
       source.addEventListener('keyup', cap);
     }
@@ -485,14 +498,13 @@ class AnonymizerUI {
     }
 
     on('btnAnonymizeSelection', 'click', () => {
-      // Lit la sélection courante, sinon celle du textarea, sinon la dernière sélection captée (le clic l'a effacée)
+      // Lit la sélection courante, sinon la dernière sélection captée (le clic l'a effacée)
       let selText = (window.getSelection().toString() || '').trim();
       const source = document.getElementById('anonSource');
-      if (!selText && source) selText = source.value.substring(source.selectionStart, source.selectionEnd).trim();
       if (!selText) selText = this.lastSelection || '';
       if (!selText) { this.toast('Sélectionnez d\'abord un passage dans votre texte, puis cliquez.', 'warning'); return; }
       const wrap = document.getElementById('anonEditorWrap');
-      if (wrap && wrap.classList.contains('mode-edit') && source) { this.sourceText = source.value; this.setMode('annotate'); }
+      if (wrap && wrap.classList.contains('mode-edit') && source) { this.sourceHtml = source.innerHTML; this.sourceText = source.innerText; this.setMode('annotate'); }
       this.anonymizeValue(selText, this.guessCategory(selText));
       this.lastSelection = '';
       this.toast('Passage anonymisé.', 'success');
