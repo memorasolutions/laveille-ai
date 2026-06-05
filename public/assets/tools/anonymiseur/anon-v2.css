@@ -72,6 +72,14 @@
 #anonSource blockquote, #anonAnnotated blockquote { margin: 0; padding-left: .8rem; border-left: 3px solid var(--anon-line); color: #52586a; }
 /* Même hauteur min pour les 2 boîtes (gauche/droite) → comparaison alignée */
 #anonOutput { min-height: 200px; }
+
+/* Bouton « Copier » flottant en haut-droite du panneau résultat (overlay → n'affecte pas l'alignement) */
+.anon-output-wrap { position: relative; }
+.anon-copy-float { position: absolute; top: 8px; right: 8px; z-index: 3; display: inline-flex; align-items: center;
+  gap: .3rem; background: var(--anon-primary); color: #fff; border: none; border-radius: 8px; padding: .35rem .6rem;
+  font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); min-height: 32px; }
+.anon-copy-float:hover { filter: brightness(1.1); }
+.anon-copy-float:focus-visible { outline: 2px solid #9A2A06; outline-offset: 2px; }
 /* En plein écran (API Fullscreen native via tools::partials.fullscreen-btn), la carte remplit l'écran */
 :fullscreen .anon-grid, :-webkit-full-screen .anon-grid { min-height: 60vh; }
 :fullscreen .card-body, :-webkit-full-screen .card-body { max-width: 1400px; margin: 0 auto; }

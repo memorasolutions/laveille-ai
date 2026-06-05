@@ -129,7 +129,11 @@
                                 {{-- Volet droit : aperçu anonymisé --}}
                                 <div class="anon-pane-preview">
                                     <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }} <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-restauration" aria-label="{{ __('Aide : récupérer vos données après l\'IA') }}">?</button></label>
-                                    <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé prêt pour l\'IA') }}"></textarea>
+                                    <div class="anon-output-wrap">
+                                        {{-- Copie toujours accessible en haut du panneau (pattern bloc de code), sans casser l'alignement --}}
+                                        <button type="button" id="btnCopyAnonTop" class="anon-copy-float" aria-label="{{ __('Copier le texte anonymisé pour l\'IA') }}">📋 {{ __('Copier') }}</button>
+                                        <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé prêt pour l\'IA') }}"></textarea>
+                                    </div>
                                     <div class="anon-actions">
                                         <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier pour l\'IA') }}</button>
                                         <button type="button" class="anon-btn secondary anon-step" data-step="2">{{ __('J\'ai la réponse de l\'IA →') }}</button>

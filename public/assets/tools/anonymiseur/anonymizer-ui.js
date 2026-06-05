@@ -73,6 +73,16 @@ class AnonymizerUI {
     if (output) { output.value = window.AnonymizerCore.anonymize(this.sourceText, this.rules, this.overrides); this.autoGrow(output); }
   }
 
+  async copyAnon(btn) {
+    const output = document.getElementById('anonOutput');
+    if (!output || !output.value) { this.toast('Rien à copier.', 'warning'); return; }
+    try {
+      await navigator.clipboard.writeText(output.value);
+      this.toast('Texte anonymisé copié.', 'success');
+      if (btn) { const o = btn.innerHTML; btn.innerHTML = '✓ Copié'; setTimeout(() => { btn.innerHTML = o; }, 1500); }
+    } catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
+  }
+
   renderAnnotated() {
     const container = document.getElementById('anonAnnotated');
     if (!container) return;
@@ -534,12 +544,8 @@ class AnonymizerUI {
       this.toast('Réinitialisé — vous pouvez repartir à zéro.', 'info');
     });
 
-    on('btnCopyAnon', 'click', async () => {
-      const output = document.getElementById('anonOutput');
-      if (!output || !output.value) { this.toast('Rien à copier.', 'warning'); return; }
-      try { await navigator.clipboard.writeText(output.value); this.toast('Texte anonymisé copié.', 'success'); }
-      catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
-    });
+    on('btnCopyAnon', 'click', (e) => this.copyAnon(e.currentTarget));
+    on('btnCopyAnonTop', 'click', (e) => this.copyAnon(e.currentTarget));
 
     on('btnRestore', 'click', () => {
       const ai = document.getElementById('aiResponse');

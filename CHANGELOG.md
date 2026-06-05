@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.51] - 2026-06-05
+
+### Changed
+
+- **Anonymiseur — bouton « Copier » accessible en haut du panneau résultat (plus seulement en bas)** : d'après les meilleures pratiques juin 2026 (Perplexity ; éviter « Copier » uniquement en bas sur un long contenu), ajout d'un bouton « 📋 Copier » flottant en haut-droite du panneau « Texte anonymisé » (pattern bloc de code, overlay → ne casse pas l'alignement gauche/droite). Le bouton « Copier pour l'IA » du bas est conservé (2e accès pour les longs contenus) et « J'ai la réponse de l'IA → » reste en bas comme action de progression séparée. Feedback « ✓ Copié » sur les boutons. **Vérifié Playwright** : bouton flottant en `position:absolute` haut-droite, colonnes split toujours alignées (262.5px=262.5px), 0 erreur console.
+
 ## [1.65.50] - 2026-06-05
 
 ### Changed
