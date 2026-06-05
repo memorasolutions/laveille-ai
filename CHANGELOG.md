@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.45] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — un nom seul (prénom OU nom de famille) n'est plus remplacé par un nom complet inventé** : « Bonjour Dr Lavoie » devenait « Bonjour Dr Nathalie Morin » (prénom + nom fabriqués). Désormais un seul mot → un seul faux. Trois corrections : (1) `detectEntities` — un seul mot après un titre de civilité (Dr/M/Mme…) est classé `lastName` au lieu de `name` ; (2) `buildRules` — un `'name'` à un seul mot (ex. sélection manuelle) utilise un faux unique au lieu d'un prénom + nom ; (3) `guessCategory` (ui) — un mot capitalisé seul → `lastName`, deux mots ou plus → `name`. Les noms complets (« Dr Jean Dubé » → « Dr Isabelle Morin ») restent complets ; cohérence préservée entre un nom de famille seul et le même nom dans un nom complet. **Vérifié (test unitaire Node)** : « Dr Lavoie »→« Dr Fortin », « Mme Gagnon »→« Mme Lavoie », « Dr Jean Dubé »→« Dr Isabelle Morin », phrase mixte OK.
+
 ## [1.65.44] - 2026-06-05
 
 ### Added

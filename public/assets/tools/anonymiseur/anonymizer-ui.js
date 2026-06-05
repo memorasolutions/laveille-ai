@@ -239,7 +239,9 @@ class AnonymizerUI {
     const ents = window.AnonymizerCore.detectEntities(t) || [];
     if (ents.length) return ents.sort((a, b) => b.value.length - a.value.length)[0].category;
     if (/\d/.test(t)) return 'id';
-    return /^[A-ZÀ-Ÿ]/.test(t) ? 'name' : 'other';
+    // Mot capitalisé seul → nom de famille (un seul faux), 2+ mots → nom complet.
+    if (/^[A-ZÀ-Ÿ]/.test(t)) return /\s/.test(t) ? 'name' : 'lastName';
+    return 'other';
   }
 
   toggleAnonMode() {

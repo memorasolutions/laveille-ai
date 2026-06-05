@@ -53,9 +53,13 @@ function detectEntities(text) {
     if (k && !seen.has(normalize(k))) { seen.add(normalize(k)); entities.push({ value: k, category, label, confidence: confidence || 0.9 }); }
   };
   let m;
-  // 1. Noms avec titre de civilité (capture le nom, pas le titre)
-  const titled = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’\-]+(?:[^\S\r\n]+[A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)?)/g;
-  while ((m = titled.exec(text))) push(m[1], 'name', 'Nom complet', 0.85);
+  // 1. Noms avec titre de civilité (capture le nom, pas le titre). Un SEUL mot après le titre
+  //    = nom de famille seul → catégorie 'lastName' (ne JAMAIS inventer un prénom + nom complet).
+  const titled = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)(?:[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’\-]+))?/g;
+  while ((m = titled.exec(text))) {
+    if (m[2]) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.85);
+    else if (!STOPWORDS.has(normalize(m[1]))) push(m[1], 'lastName', 'Nom de famille', 0.8);
+  }
   // 3. RAMQ
   const ramq = /\b[A-ZÀ-Ÿ]{4}\s?\d{4}\s?\d{2}\s?\d{2}\b/g;
   while ((m = ramq.exec(text))) push(m[0], 'id', 'RAMQ', 0.95);
@@ -211,7 +215,16 @@ function buildRules(selections, opts = {}) {
     const { value, category } = sel;
     const id = `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     if (category === 'name') {
-      const parts = value.split(/\s+/);
+      const parts = value.split(/\s+/).filter(Boolean);
+      if (parts.length === 1) {
+        // Un seul mot étiqueté 'name' (ex. sélection manuelle d'un nom seul) → UN seul faux,
+        // jamais un prénom + nom inventé. Cohérence via nameMap.
+        const k = parts[0].toLowerCase();
+        let fake = nameMap.get(k);
+        if (fake === undefined) { fake = uniqueFake('lastName', parts[0], used); nameMap.set(k, fake); }
+        rules.push({ id, original: value, replacement: fake, category: 'lastName' });
+        continue;
+      }
       if (parts.length === 2) {
         const [first, last] = parts;
         const fk = first.toLowerCase(), lk = last.toLowerCase();
