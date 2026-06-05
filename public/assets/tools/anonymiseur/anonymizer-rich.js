@@ -148,5 +148,51 @@
     });
   }
 
-  window.AnonRich = { sanitizePastedHtml: sanitizePastedHtml, highlightEntitiesInElement: highlightEntitiesInElement };
+  /**
+   * Convertit un élément DOM riche en texte simple en PRÉSERVANT les listes
+   * (puces « - », numéros « N. », indentation des listes imbriquées). Implémentation
+   * manuelle (innerText n'est pas fiable et perd les marqueurs de liste générés par CSS).
+   * @param {Element} root
+   * @returns {string}
+   */
+  function richToText(root) {
+    if (!root || root.nodeType !== 1) return '';
+    const BLOCK = ['P', 'DIV', 'H1', 'H2', 'H3', 'BLOCKQUOTE', 'TR'];
+
+    function walk(node, depth) {
+      let out = '';
+      Array.prototype.forEach.call(node.childNodes, function (child) {
+        if (child.nodeType === 3) { out += child.textContent; return; } // texte
+        if (child.nodeType !== 1) return;
+        const tag = child.tagName.toUpperCase();
+        if (tag === 'BR') { out += '\n'; return; }
+        if (tag === 'UL' || tag === 'OL') { out += walk(child, depth); return; } // pas d'incrément ici
+        if (tag === 'LI') {
+          const parent = child.parentElement;
+          let marker = '';
+          if (parent && parent.tagName.toUpperCase() === 'OL') {
+            const lis = Array.prototype.filter.call(parent.children, function (el) {
+              return el.tagName && el.tagName.toUpperCase() === 'LI';
+            });
+            marker = (lis.indexOf(child) + 1) + '. ';
+          } else if (parent && parent.tagName.toUpperCase() === 'UL') {
+            marker = '- ';
+          }
+          out += '  '.repeat(depth) + marker + walk(child, depth + 1) + '\n';
+          return;
+        }
+        out += walk(child, depth);
+        if (BLOCK.indexOf(tag) !== -1) out += '\n';
+      });
+      return out;
+    }
+
+    return walk(root, 0).replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  window.AnonRich = {
+    sanitizePastedHtml: sanitizePastedHtml,
+    highlightEntitiesInElement: highlightEntitiesInElement,
+    richToText: richToText
+  };
 })();

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.44] - 2026-06-05
+
+### Added
+
+- **Anonymiseur — la sortie vers l'IA conserve aussi les marqueurs de liste (`1.`, `2.`, `-`)** : complément du v1.65.43. Le texte simple dérivé de l'éditeur riche passe d'`innerText` (qui perdait les puces/numéros générés par CSS) à un nouveau `richToText()` (dans `anonymizer-rich.js`) qui sérialise `<ol>`/`<ul>` en marqueurs texte (`1. `, `- `, indentation des listes imbriquées). Les listes survivent donc de bout en bout : éditeur → texte anonymisé copié à l'IA → restauration. Détection, anonymisation et restauration intactes (les marqueurs ne font pas partie des valeurs d'entités). **Vérifié banc d'essai Playwright** : `richToText` 1./2./- corrects sans indentation parasite niveau 1, sortie anonymisée conserve les listes, anonymisation nom+courriel OK, restauration 3/3, 0 erreur console.
+
 ## [1.65.43] - 2026-06-05
 
 ### Added

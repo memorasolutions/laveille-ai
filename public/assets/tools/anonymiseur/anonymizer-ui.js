@@ -39,6 +39,12 @@ class AnonymizerUI {
     return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
   }
 
+  // Texte simple de l'éditeur riche en CONSERVANT les listes (« - », « 1. »). Repli innerText.
+  richText(el) {
+    if (window.AnonRich && window.AnonRich.richToText) return window.AnonRich.richToText(el);
+    return el ? (el.innerText || '') : '';
+  }
+
   saveRules() {
     try {
       localStorage.setItem('lv_anon_rules_v3', JSON.stringify(this.rules));
@@ -113,7 +119,7 @@ class AnonymizerUI {
       if (btnEdit) btnEdit.textContent = '👁️ Voir les annotations';
     } else {
       // Lire AVANT de masquer l'éditeur (innerText='' si display:none)
-      if (source) { this.sourceHtml = source.innerHTML; this.sourceText = source.innerText; }
+      if (source) { this.sourceHtml = source.innerHTML; this.sourceText = this.richText(source); }
       if (wrap) { wrap.classList.remove('mode-edit'); wrap.classList.add('mode-annotate'); }
       this.renderAnnotated();
       if (btnEdit) btnEdit.textContent = '✏️ Modifier le texte';
@@ -122,7 +128,7 @@ class AnonymizerUI {
 
   detect() {
     const source = document.getElementById('anonSource');
-    if (source) { this.sourceHtml = source.innerHTML; this.sourceText = source.innerText; }
+    if (source) { this.sourceHtml = source.innerHTML; this.sourceText = this.richText(source); }
     if (!this.sourceText.trim()) { this.toast('Collez d\'abord votre texte.', 'warning'); return; }
     const entities = window.AnonymizerCore.detectEntities(this.sourceText);
     const existing = new Set(this.rules.map(r => _norm(r.original)));
@@ -311,7 +317,7 @@ class AnonymizerUI {
   bindRichEditor() {
     const src = document.getElementById('anonSource');
     if (!src) return;
-    const sync = () => { this.sourceHtml = src.innerHTML; this.sourceText = src.innerText; };
+    const sync = () => { this.sourceHtml = src.innerHTML; this.sourceText = this.richText(src); };
     src.addEventListener('input', sync);
     src.addEventListener('blur', sync);
     src.addEventListener('paste', (e) => {
@@ -504,7 +510,7 @@ class AnonymizerUI {
       if (!selText) selText = this.lastSelection || '';
       if (!selText) { this.toast('Sélectionnez d\'abord un passage dans votre texte, puis cliquez.', 'warning'); return; }
       const wrap = document.getElementById('anonEditorWrap');
-      if (wrap && wrap.classList.contains('mode-edit') && source) { this.sourceHtml = source.innerHTML; this.sourceText = source.innerText; this.setMode('annotate'); }
+      if (wrap && wrap.classList.contains('mode-edit') && source) { this.sourceHtml = source.innerHTML; this.sourceText = this.richText(source); this.setMode('annotate'); }
       this.anonymizeValue(selText, this.guessCategory(selText));
       this.lastSelection = '';
       this.toast('Passage anonymisé.', 'success');
