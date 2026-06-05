@@ -27,6 +27,7 @@ class AnonymizerUI {
       this.bindSelectionBubble();
       this.bindSelectionBubbleCustom();
       this.bindOccPopover();
+      this.bindViewSwitch();
       this.bindAutoGrow();
       this.updateModeUI();
     });
@@ -271,6 +272,22 @@ class AnonymizerUI {
     if (!el || el.tagName !== 'TEXTAREA') return;
     el.style.height = 'auto';
     el.style.height = Math.max(el.scrollHeight, 160) + 'px';
+  }
+
+  bindViewSwitch() {
+    const grid = document.querySelector('.anon-grid');
+    const btns = document.querySelectorAll('.anon-viewswitch button[data-view]');
+    if (!grid || !btns.length) return;
+    const apply = (view) => {
+      grid.classList.remove('view-editor', 'view-split', 'view-preview');
+      grid.classList.add('view-' + view);
+      btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view ? 'true' : 'false'));
+      try { localStorage.setItem('lv_anon_view', view); } catch (e) {}
+      ['anonSource', 'anonOutput'].forEach(id => this.autoGrow(document.getElementById(id)));
+    };
+    btns.forEach(b => b.addEventListener('click', () => apply(b.dataset.view)));
+    let saved = 'split'; try { saved = localStorage.getItem('lv_anon_view') || 'split'; } catch (e) {}
+    apply(saved);
   }
 
   bindAutoGrow() {

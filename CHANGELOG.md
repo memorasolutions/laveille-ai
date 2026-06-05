@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.39] - 2026-06-05
+
+### Added
+
+- **Anonymiseur — bascule de vue « ✍️ Éditeur · ⬓ Split · 👁️ Aperçu »** (en construction/admin) : un *segmented control* au-dessus de l'éditeur permet d'**agrandir un volet à pleine largeur** (Éditeur seul, ou Aperçu seul, en masquant l'autre) ou de revenir au **Split** côte à côte. Choix recommandé par la recherche juin 2026 (Apple HIG/UX Planet/W3C, option 95/100 : très découvrable, état visible, accessible clavier, excellent mobile). État **persisté** (localStorage `lv_anon_view`). Validé **E2E Playwright 5/5** (Éditeur 1000px/Aperçu masqué et inverse, retour split, persistance au rechargement, 0 erreur console).
+
 ## [1.65.38] - 2026-06-05
 
 ### Added

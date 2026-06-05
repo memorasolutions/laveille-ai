@@ -102,9 +102,16 @@
                                 🏷️ <strong>{{ __('Mode jetons stables') }}</strong> : {{ __('vos données deviennent des balises comme [PERSONNE_1]. Ajoutez à votre demande à l\'IA : « garde les jetons entre crochets intacts ». Restauration la plus fiable même si l\'IA reformule beaucoup.') }}
                             </p>
 
+                            {{-- Bascule de vue : Éditeur pleine largeur / Split / Aperçu pleine largeur --}}
+                            <div class="anon-viewswitch" role="group" aria-label="{{ __('Affichage des volets') }}">
+                                <button type="button" data-view="editor" aria-pressed="false">✍️ {{ __('Éditeur') }}</button>
+                                <button type="button" data-view="split" aria-pressed="true">⬓ {{ __('Split') }}</button>
+                                <button type="button" data-view="preview" aria-pressed="false">👁️ {{ __('Aperçu') }}</button>
+                            </div>
+
                             <div class="anon-grid">
                                 {{-- Volet gauche : éditeur annoté --}}
-                                <div>
+                                <div class="anon-pane-editor">
                                     <label class="anon-pane-label" for="anonSource">{{ __('Votre texte (cliquez les passages soulignés pour les anonymiser)') }}</label>
                                     <div id="anonEditorWrap" class="mode-edit">
                                         <textarea id="anonSource" class="anon-textarea" placeholder="{{ __('Ex. : Le dossier #86734 pour M. Jean Dubé concerne le chantier du 15 rue de la Gare…') }}"></textarea>
@@ -117,7 +124,7 @@
                                 </div>
 
                                 {{-- Volet droit : aperçu anonymisé --}}
-                                <div>
+                                <div class="anon-pane-preview">
                                     <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }}</label>
                                     <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé prêt pour l\'IA') }}"></textarea>
                                     <div class="anon-actions">

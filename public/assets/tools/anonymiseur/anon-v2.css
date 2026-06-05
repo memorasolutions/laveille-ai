@@ -100,6 +100,15 @@
   padding: .6rem 0; margin-bottom: .85rem; background: #fff; border-bottom: 1px solid var(--anon-line); }
 .anon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
 @media (max-width: 860px) { .anon-grid { grid-template-columns: 1fr; } }
+/* Bascule de vue : Éditeur pleine largeur / Split / Aperçu pleine largeur */
+.anon-grid.view-editor { grid-template-columns: 1fr; }
+.anon-grid.view-editor > .anon-pane-preview { display: none; }
+.anon-grid.view-preview { grid-template-columns: 1fr; }
+.anon-grid.view-preview > .anon-pane-editor { display: none; }
+.anon-viewswitch { display: inline-flex; gap: 2px; padding: 3px; background: #eef2f4; border-radius: 10px; margin-bottom: .85rem; }
+.anon-viewswitch button { border: none; background: none; font: inherit; font-size: .88rem; padding: .4rem .8rem; border-radius: 8px; cursor: pointer; color: #1A1D23; min-height: 38px; }
+.anon-viewswitch button[aria-pressed="true"] { background: #fff; color: var(--anon-primary); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.anon-viewswitch button:focus-visible { outline: 2px solid #9A2A06; outline-offset: 1px; }
 .anon-pane-label { font-weight: 600; color: #1A1D23; margin-bottom: .4rem; display: block; font-size: .92rem; }
 
 #anonEditorWrap.mode-edit #anonAnnotated { display: none; }
