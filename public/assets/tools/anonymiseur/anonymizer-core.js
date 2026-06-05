@@ -105,7 +105,14 @@ function generateFake(category, original) {
     }
     case 'phone': return original.replace(/\d/g, () => Math.floor(Math.random() * 10).toString());
     case 'address': {
-      const num = (Math.floor(Math.random() * 990) + 10).toString();
+      const canadianPostalCode = /^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$/;
+      if (original.trim().match(canadianPostalCode)) {
+        const letters = 'ABCEGHJKLMNPRSTVXY';
+        const rl = () => letters.charAt(Math.floor(Math.random() * letters.length));
+        const rd = () => Math.floor(Math.random() * 10);
+        return `${rl()}${rd()}${rl()} ${rd()}${rl()}${rd()}`;
+      }
+      const num = Math.floor(Math.random() * 990) + 10;
       return `${num} ${getRandomItem(FAKE_DATA.streets)}`;
     }
     case 'name': return `${getRandomItem([...FAKE_DATA.firstNamesM, ...FAKE_DATA.firstNamesF])} ${getRandomItem(FAKE_DATA.lastNames)}`;
@@ -113,10 +120,15 @@ function generateFake(category, original) {
     case 'lastName': return getRandomItem(FAKE_DATA.lastNames);
     case 'amount': return '$' + ((Math.floor(Math.random() * 9000) + 100)) + ',00';
     case 'date': {
-      const y = 2000 + Math.floor(Math.random() * 25);
-      const mo = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
-      const d = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
-      return `${y}-${mo}-${d}`;
+      const year = Math.floor(Math.random() * (2024 - 1950 + 1)) + 1950;
+      const month = Math.floor(Math.random() * 12) + 1;
+      const day = Math.floor(Math.random() * 28) + 1;
+      const pad = (n) => n.toString().padStart(2, '0');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(original)) return `${year}-${pad(month)}-${pad(day)}`;
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(original)) return `${pad(day)}/${pad(month)}/${year}`;
+      const monthsFr = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+      if (monthsFr.some(m => original.toLowerCase().includes(m))) return `${day} ${monthsFr[month - 1]} ${year}`;
+      return `${year}-${pad(month)}-${pad(day)}`;
     }
     case 'id': // RAMQ, permis, matricule : on randomise chiffres ET lettres en gardant le format
       return original.replace(/\d/g, () => Math.floor(Math.random() * 10).toString())

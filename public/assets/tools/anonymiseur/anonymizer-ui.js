@@ -24,6 +24,7 @@ class AnonymizerUI {
       this.bindEvents();
       this.bindActionMenu();
       this.bindSelectionBubble();
+      this.bindSelectionBubbleCustom();
       this.bindAutoGrow();
       this.updateModeUI();
     });
@@ -230,6 +231,7 @@ class AnonymizerUI {
       if (txt && sel.rangeCount && annotated.contains(sel.anchorNode)) {
         this.lastSelection = txt;
         btn.textContent = '🕵️ Anonymiser « ' + (txt.length > 22 ? txt.slice(0, 22) + '…' : txt) + ' »';
+        const cust = $('anonSelBubbleCustom'); if (cust) cust.classList.add('hidden');
         showBubble(sel.getRangeAt(0).getBoundingClientRect());
       } else {
         hideBubble();
@@ -245,6 +247,49 @@ class AnonymizerUI {
     });
     document.addEventListener('mousedown', (e) => { if (!bubble.contains(e.target) && !annotated.contains(e.target)) hideBubble(); });
     window.addEventListener('scroll', () => hideBubble(), { capture: true });
+  }
+
+  anonymizeCustom(value, replacement) {
+    if (!value || !replacement) return;
+    const normValue = _norm(value);
+    this.rules = this.rules.filter(rule => _norm(rule.original) !== normValue);
+    this.rules.push({
+      id: `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      original: value, replacement: replacement, category: this.guessCategory(value)
+    });
+    this.saveRules();
+    this.renderAnnotated();
+    this.updateOutput();
+  }
+
+  bindSelectionBubbleCustom() {
+    const $ = id => document.getElementById(id);
+    const bubbleCustomBtn = $('anonSelBubbleCustomBtn');
+    const bubbleCustom = $('anonSelBubbleCustom');
+    const bubbleInput = $('anonSelBubbleInput');
+    const bubbleConfirm = $('anonSelBubbleConfirm');
+    const bubble = $('anonSelBubble');
+    if (!bubbleCustomBtn || !bubbleCustom || !bubbleInput || !bubbleConfirm || !bubble) return;
+    bubbleCustomBtn.addEventListener('click', () => {
+      bubbleCustom.classList.remove('hidden');
+      const suggestion = window.AnonymizerCore.generateFake(this.guessCategory(this.lastSelection), this.lastSelection);
+      bubbleInput.value = suggestion || '';
+      bubbleInput.focus();
+      bubbleInput.select();
+    });
+    const confirm = () => {
+      const v = bubbleInput.value.trim();
+      if (this.lastSelection && v) {
+        this.anonymizeCustom(this.lastSelection, v);
+        this.lastSelection = '';
+        if (window.getSelection) window.getSelection().removeAllRanges();
+      }
+      bubble.classList.add('hidden');
+      bubbleCustom.classList.add('hidden');
+      this.toast('Remplacé par votre valeur.', 'success');
+    };
+    bubbleConfirm.addEventListener('click', confirm);
+    bubbleInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); confirm(); } });
   }
 
   bindActionMenu() {
@@ -376,7 +421,11 @@ class AnonymizerUI {
       catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
     });
 
-    document.querySelectorAll('.anon-step').forEach(btn => btn.addEventListener('click', () => this.goStep(btn.dataset.step)));
+    document.querySelectorAll('.anon-step').forEach(btn => btn.addEventListener('click', () => {
+      this.goStep(btn.dataset.step);
+      const top = document.querySelector('.anon-steps') || document.querySelector('.tool-fullscreen-target');
+      if (top) top.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
   }
 }
 

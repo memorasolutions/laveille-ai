@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.32] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — faux respectant le format (en construction/admin)** : (1) un **code postal** « H2K 1E5 » devenait une rue → produit désormais un **faux code postal** valide (« H8H 8N9 »), tandis qu'une adresse de rue reste une rue. (2) les **dates** gardent le **format de l'entrée** : « 12 mars 1982 »→« 24 mai 1958 » (J mois AAAA), « 2023-05-15 »→« AAAA-MM-JJ », « 15/05/2023 »→« JJ/MM/AAAA ».
+- **Anonymiseur — passage à l'étape 2 remonte en haut de l'outil** : « J'ai la réponse de l'IA → » faisait rester dans le footer → `scrollIntoView` de la nav d'étapes au changement d'étape.
+
+### Added
+
+- **Anonymiseur — valeur de remplacement personnalisée** : la bulle de sélection offre, à côté de « 🕵️ Anonymiser » (auto), un bouton **✎** qui ouvre un champ pour **saisir sa propre valeur** de remplacement (préremplie d'une suggestion) → règle sur mesure. Validé **E2E Playwright 4/4** (code postal, dates FR/ISO format-préservé, valeur perso « 120/80 », scroll remonté).
+
 ## [1.65.31] - 2026-06-05
 
 ### Fixed

@@ -154,7 +154,14 @@
 
                     {{-- Bulle contextuelle : apparaît près de la sélection (pattern Medium/Notion) --}}
                     <div id="anonSelBubble" class="anon-sel-bubble hidden" role="tooltip">
-                        <button type="button" id="anonSelBubbleBtn">🕵️ {{ __('Anonymiser') }}</button>
+                        <div class="anon-sel-main">
+                            <button type="button" id="anonSelBubbleBtn">🕵️ {{ __('Anonymiser') }}</button>
+                            <button type="button" id="anonSelBubbleCustomBtn" title="{{ __('Choisir ma propre valeur de remplacement') }}" aria-label="{{ __('Valeur personnalisée') }}">✎</button>
+                        </div>
+                        <div id="anonSelBubbleCustom" class="anon-sel-custom hidden">
+                            <input type="text" id="anonSelBubbleInput" placeholder="{{ __('Votre valeur…') }}" aria-label="{{ __('Valeur de remplacement personnalisée') }}">
+                            <button type="button" id="anonSelBubbleConfirm" aria-label="{{ __('Confirmer la valeur') }}">✓</button>
+                        </div>
                     </div>
                 </div>{{-- /.card --}}
             </div>{{-- /.col --}}

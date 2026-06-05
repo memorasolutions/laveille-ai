@@ -22,7 +22,15 @@
 .anon-sel-bubble button:hover { background: #064E5A; }
 .anon-sel-bubble button:focus-visible { outline: 2px solid #9A2A06; outline-offset: 2px; }
 .anon-sel-bubble::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg);
-  width: 10px; height: 10px; background: #1A1D23; }
+  width: 10px; height: 10px; background: #1A1D23; z-index: -1; }
+.anon-sel-main { display: flex; align-items: stretch; gap: 2px; background: #1A1D23; border-radius: 999px; }
+.anon-sel-bubble #anonSelBubbleCustomBtn { padding: .5rem .7rem; font-size: .95rem; border-radius: 0 999px 999px 0; }
+.anon-sel-bubble #anonSelBubbleBtn { border-radius: 999px 0 0 999px; }
+.anon-sel-custom { display: flex; gap: 4px; margin-top: 6px; background: #1A1D23; padding: 4px; border-radius: 12px; }
+.anon-sel-custom.hidden { display: none; }
+.anon-sel-custom input { flex: 1 1 180px; min-width: 160px; padding: .45rem .6rem; border: none; border-radius: 8px; font: inherit; font-size: .88rem; }
+.anon-sel-custom input:focus { outline: 2px solid #9A2A06; }
+.anon-sel-custom button { padding: .45rem .7rem; background: #047857; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; }
 .anon-steps { display: flex; gap: .5rem; margin: 0 0 1.25rem; flex-wrap: wrap; }
 .anon-step { flex: 1 1 0; min-width: 140px; display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
   background: #fff; border: 1px solid var(--anon-line); border-radius: 12px; cursor: pointer; font: inherit; text-align: left; transition: .15s; }
