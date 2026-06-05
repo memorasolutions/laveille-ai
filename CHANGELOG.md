@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.49] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — débordement horizontal sur mobile (375px) corrigé** : trouvé lors d'une passe QA proactive (Playwright). La `.anon-textarea` avait `width:100%` sans `box-sizing:border-box` → padding + bordure provoquaient un débordement de 18px à 375px. Ajout de `box-sizing:border-box`. **Passe QA complète PASS 13/13** : 3 vues (Éditeur/Split/Aperçu), pipeline collage riche → détection → anonymisation (•/1. + faux, nom seul vs complet) → restauration exacte, clavier (Entrée sur entité), responsive 375/768/1280 sans débordement, 0 erreur console.
+
 ## [1.65.48] - 2026-06-05
 
 ### Fixed

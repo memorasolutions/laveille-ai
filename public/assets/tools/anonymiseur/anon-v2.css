@@ -51,7 +51,7 @@
 
 .anon-field { margin-bottom: 1rem; }
 .anon-label { display: block; font-weight: 600; margin-bottom: .4rem; color: #1A1D23; }
-.anon-textarea { width: 100%; min-height: 160px; padding: .85rem 1rem; border: 1px solid var(--anon-line);
+.anon-textarea { width: 100%; box-sizing: border-box; min-height: 160px; padding: .85rem 1rem; border: 1px solid var(--anon-line);
   border-radius: 12px; font: inherit; line-height: 1.5; resize: vertical; background: #fff; color: #1A1D23; }
 .anon-textarea:focus { outline: 2px solid var(--anon-primary); outline-offset: 1px; border-color: var(--anon-primary); }
 .anon-textarea[readonly] { background: #f8fafb; }
