@@ -176,7 +176,7 @@
             });
             marker = (lis.indexOf(child) + 1) + '. ';
           } else if (parent && parent.tagName.toUpperCase() === 'UL') {
-            marker = '- ';
+            marker = '• '; // vraie puce (identique à l'éditeur), pas un tiret
           }
           out += '  '.repeat(depth) + marker + walk(child, depth + 1) + '\n';
           return;

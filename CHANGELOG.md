@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.46] - 2026-06-05
+
+### Changed
+
+- **Anonymiseur — la sortie texte conserve la vraie puce « • » des listes à puces (au lieu d'un tiret « - »)** : suite à une remarque utilisateur (les puces de l'éditeur devenaient des tirets dans le texte anonymisé). `richToText()` sérialise désormais les `<ul>` avec « • » (identique à l'affichage de l'éditeur) ; les `<ol>` gardent « 1. / 2. ». La sortie envoyée à l'IA ressemble ainsi exactement à l'éditeur. **Vérifié Playwright** : `• Tension`/`• LDL`, `1. Analyse`/`2. Suivi`, puce conservée après anonymisation, 0 erreur console.
+
 ## [1.65.45] - 2026-06-05
 
 ### Fixed
