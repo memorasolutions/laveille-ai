@@ -54,7 +54,7 @@ function detectEntities(text) {
   };
   let m;
   // 1. Noms avec titre de civilité (capture le nom, pas le titre)
-  const titled = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)\s+([A-ZÀ-Ÿ][a-zà-ÿ'’\-]+(?:\s+[A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)?)/g;
+  const titled = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’\-]+(?:[^\S\r\n]+[A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)?)/g;
   while ((m = titled.exec(text))) push(m[1], 'name', 'Nom complet', 0.85);
   // 3. RAMQ
   const ramq = /\b[A-ZÀ-Ÿ]{4}\s?\d{4}\s?\d{2}\s?\d{2}\b/g;
@@ -84,7 +84,7 @@ function detectEntities(text) {
   const date = /\b(?:\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+\d{4})\b/gi;
   while ((m = date.exec(text))) push(m[0], 'date', 'Date', 0.9);
   // 2. Noms sans titre (deux mots capitalisés, hors stopwords)
-  const name = /(?<![A-Za-zÀ-ÿ])([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)\s+([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)(?![A-Za-zÀ-ÿ])/g;
+  const name = /(?<![A-Za-zÀ-ÿ])([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)(?![A-Za-zÀ-ÿ])/g;
   while ((m = name.exec(text))) {
     if (!STOPWORDS.has(normalize(m[1])) && !STOPWORDS.has(normalize(m[2]))) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
   }

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.34] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — faux nom détecté à cheval sur un saut de ligne** : la regex de noms utilisait `\s+` (qui traverse les retours à la ligne) → deux mots capitalisés en fin/début de lignes voisines (ex. « CLSC de **Rosemont** » + « **Référence** en cardiologie ») étaient fusionnés en un faux nom, avec l'espace surligné. Fix : entre les deux mots (regex `name` et `titled`), n'autoriser que l'espace **sur la même ligne** (`[^\S\r\n]+`). Vérifié Node : plus de fusion cross-ligne **et zéro régression** sur les vrais noms (Jean Dubé, Jean-François Tremblay, Dr Lavoie, Louise Gagnon, Marie Roy, espaces insécables).
+
 ## [1.65.33] - 2026-06-05
 
 ### Fixed
