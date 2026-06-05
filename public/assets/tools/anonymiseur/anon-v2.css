@@ -62,13 +62,16 @@
 .anon-rich { overflow: auto; cursor: text; white-space: pre-wrap; word-wrap: break-word; }
 .anon-rich:empty::before { content: attr(data-placeholder); color: #52586a; font-style: italic; pointer-events: none; }
 .anon-rich:focus { white-space: pre-wrap; }
-/* Rendu des listes dans l'éditeur ET le volet annoté (la mise en forme est préservée) */
-#anonSource ul, #anonAnnotated ul { list-style: disc; padding-left: 1.6rem; margin: .4rem 0; }
-#anonSource ol, #anonAnnotated ol { list-style: decimal; padding-left: 1.6rem; margin: .4rem 0; }
-#anonSource li, #anonAnnotated li { margin: .15rem 0; }
-#anonSource p, #anonAnnotated p { margin: 0 0 .5rem; }
-#anonSource h1, #anonAnnotated h1, #anonSource h2, #anonAnnotated h2, #anonSource h3, #anonAnnotated h3 { margin: .5rem 0 .35rem; font-weight: 700; line-height: 1.3; }
-#anonSource blockquote, #anonAnnotated blockquote { margin: .4rem 0; padding-left: .8rem; border-left: 3px solid var(--anon-line); color: #52586a; }
+/* Rendu des listes dans l'éditeur ET le volet annoté (mise en forme préservée).
+   Marges de bloc à 0 pour épouser le rythme vertical du textarea de sortie → parité de comparaison. */
+#anonSource ul, #anonAnnotated ul { list-style: disc; padding-left: 1.4rem; margin: 0; }
+#anonSource ol, #anonAnnotated ol { list-style: decimal; padding-left: 1.4rem; margin: 0; }
+#anonSource li, #anonAnnotated li { margin: 0; }
+#anonSource p, #anonAnnotated p { margin: 0; }
+#anonSource h1, #anonAnnotated h1, #anonSource h2, #anonAnnotated h2, #anonSource h3, #anonAnnotated h3 { margin: 0; font-weight: 700; line-height: 1.5; }
+#anonSource blockquote, #anonAnnotated blockquote { margin: 0; padding-left: .8rem; border-left: 3px solid var(--anon-line); color: #52586a; }
+/* Même hauteur min pour les 2 boîtes (gauche/droite) → comparaison alignée */
+#anonOutput { min-height: 200px; }
 /* En plein écran (API Fullscreen native via tools::partials.fullscreen-btn), la carte remplit l'écran */
 :fullscreen .anon-grid, :-webkit-full-screen .anon-grid { min-height: 60vh; }
 :fullscreen .card-body, :-webkit-full-screen .card-body { max-width: 1400px; margin: 0 auto; }
@@ -121,13 +124,14 @@
 .anon-viewswitch button { border: none; background: none; font: inherit; font-size: .88rem; padding: .4rem .8rem; border-radius: 8px; cursor: pointer; color: #1A1D23; min-height: 38px; }
 .anon-viewswitch button[aria-pressed="true"] { background: #fff; color: var(--anon-primary); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 .anon-viewswitch button:focus-visible { outline: 2px solid #9A2A06; outline-offset: 1px; }
-.anon-pane-label { font-weight: 600; color: #1A1D23; margin-bottom: .4rem; display: block; font-size: .92rem; }
+/* Hauteur min égale pour les 2 labels → les boîtes gauche/droite démarrent au MÊME Y (parité) */
+.anon-pane-label { font-weight: 600; color: #1A1D23; margin-bottom: .4rem; display: flex; align-items: flex-start; flex-wrap: wrap; gap: 2px; font-size: .92rem; min-height: 2.6em; }
 
 #anonEditorWrap.mode-edit #anonAnnotated { display: none; }
 #anonEditorWrap.mode-annotate #anonSource { display: none; }
 
 #anonAnnotated { white-space: pre-wrap; word-wrap: break-word; min-height: 200px; padding: .85rem 1rem;
-  border: 1px solid var(--anon-line); border-radius: 12px; background: #fff; line-height: 1.7; color: #1A1D23; }
+  border: 1px solid var(--anon-line); border-radius: 12px; background: #fff; line-height: 1.5; color: #1A1D23; }
 #anonAnnotated:focus { outline: 2px solid var(--anon-primary); outline-offset: 1px; }
 .anon-placeholder { color: #52586a; font-style: italic; }
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.47] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — espacement identique entre le volet original (gauche) et anonymisé (droite)** : le volet gauche était plus aéré (line-height 1.7 + marges de paragraphes/listes) que le textarea de sortie (line-height 1.5, sans marges), ce qui nuisait à la comparaison côte à côte. Uniformisé en CSS : line-height 1.5 partout, marges de bloc (p/ul/ol/li/titres) à 0 dans l'éditeur riche pour épouser le rythme du textarea, hauteur min des labels égalisée (`min-height` → les 2 boîtes démarrent au même Y), hauteur min des 2 boîtes alignée. **Vérifié Playwright** : line-height (24px=24px), padding-left (16px=16px), hauteur des labels (38px=38px) et position top des 2 boîtes (268.4px=268.4px) strictement identiques.
+
 ## [1.65.46] - 2026-06-05
 
 ### Changed
