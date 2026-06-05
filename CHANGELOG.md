@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.35] - 2026-06-05
+
+### Fixed
+
+- **Anonymiseur — règles « fantômes » persistantes** : des règles créées par d'anciennes versions (avant les correctifs de détection) restaient dans `localStorage` et re-surlignaient à tort des termes (« Vieux-Québec », « Téléphone »…) même si la détection actuelle ne les crée plus. Fix : les règles sont **estampillées avec la version de l'outil** (`window.LV_ANON_VERSION`) ; au chargement, si la version a changé, on **repart d'un état propre** (purge automatique). Plus de règles périmées après un déploiement. (La détection actuelle sur le texte médical de référence est propre : 15 entités, toutes correctes.)
+
 ## [1.65.34] - 2026-06-05
 
 ### Fixed

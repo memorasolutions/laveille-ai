@@ -40,8 +40,17 @@ class AnonymizerUI {
   }
 
   loadRules() {
-    try { const s = localStorage.getItem('lv_anon_rules_v3'); if (s) this.rules = JSON.parse(s); }
-    catch (e) { console.warn('load', e); this.rules = []; }
+    try {
+      // Anti règles fantômes : si la version de l'outil a changé, on repart propre
+      const ver = window.LV_ANON_VERSION || '';
+      if (ver && localStorage.getItem('lv_anon_v') !== ver) {
+        localStorage.removeItem('lv_anon_rules_v3');
+        localStorage.setItem('lv_anon_v', ver);
+        this.rules = [];
+        return;
+      }
+      const s = localStorage.getItem('lv_anon_rules_v3'); if (s) this.rules = JSON.parse(s);
+    } catch (e) { console.warn('load', e); this.rules = []; }
   }
 
   updateOutput() {

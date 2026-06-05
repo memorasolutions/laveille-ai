@@ -187,6 +187,7 @@
   } catch (e) {}
 })();
 </script>
+<script>window.LV_ANON_VERSION = '{{ config('version.semver') }}';</script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-core.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-ui.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush
