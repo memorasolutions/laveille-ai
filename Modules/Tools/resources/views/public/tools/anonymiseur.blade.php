@@ -84,14 +84,19 @@
                                 💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les anonymiser (elles deviennent surlignées). Vous pouvez aussi sélectionner un passage et « Anonymiser la sélection ». Le texte prêt pour l\'IA apparaît à droite.') }}
                             </div>
 
-                            {{-- Barre d'outils collante (pattern WAI-ARIA toolbar) --}}
+                            {{-- Barre d'outils : 1 action primaire + sélection + menu « Actions » (réduit la surcharge — tendance 2026) --}}
                             <div class="anon-toolbar" role="toolbar" aria-label="{{ __('Actions d\'anonymisation') }}">
                                 <button type="button" id="btnDetect" class="anon-btn">🔍 {{ __('Détecter') }}</button>
-                                <button type="button" id="btnAnonymizeSelection" class="anon-btn secondary">✍️ {{ __('Anonymiser la sélection') }}</button>
-                                <button type="button" id="btnAnonymizeAll" class="anon-btn secondary">🕵️ {{ __('Tout anonymiser') }}</button>
-                                <button type="button" id="btnEditText" class="anon-btn secondary">✏️ {{ __('Modifier le texte') }}</button>
-                                <button type="button" id="btnResetAll" class="anon-btn secondary">↺ {{ __('Réinitialiser') }}</button>
-                                <button type="button" id="btnModeToggle" class="anon-btn secondary" aria-pressed="false" title="{{ __('Basculer entre faux noms réalistes et jetons balisés stables') }}">🎭 {{ __('Réaliste') }}</button>
+                                <button type="button" id="btnAnonymizeSelection" class="anon-btn secondary" title="{{ __('Sélectionnez un passage dans votre texte, puis cliquez') }}">✍️ {{ __('Anonymiser la sélection') }}</button>
+                                <div class="anon-menu-wrap">
+                                    <button type="button" id="btnActionsMenu" class="anon-btn secondary" aria-haspopup="menu" aria-expanded="false">⋯ {{ __('Actions') }}</button>
+                                    <div id="actionsMenu" class="anon-menu hidden" role="menu" aria-label="{{ __('Plus d\'actions') }}">
+                                        <button type="button" id="btnAnonymizeAll" class="anon-menu-item" role="menuitem">🕵️ {{ __('Tout anonymiser') }}</button>
+                                        <button type="button" id="btnEditText" class="anon-menu-item" role="menuitem">✏️ {{ __('Modifier le texte') }}</button>
+                                        <button type="button" id="btnModeToggle" class="anon-menu-item" role="menuitem" aria-pressed="false" title="{{ __('Basculer entre faux noms réalistes et jetons balisés stables') }}">🎭 {{ __('Réaliste') }}</button>
+                                        <button type="button" id="btnResetAll" class="anon-menu-item" role="menuitem">↺ {{ __('Réinitialiser') }}</button>
+                                    </div>
+                                </div>
                             </div>
                             <p id="anonModeHint" class="anon-help" style="display:none;margin-top:.5rem;">
                                 🏷️ <strong>{{ __('Mode jetons stables') }}</strong> : {{ __('vos données deviennent des balises comme [PERSONNE_1]. Ajoutez à votre demande à l\'IA : « garde les jetons entre crochets intacts ». Restauration la plus fiable même si l\'IA reformule beaucoup.') }}

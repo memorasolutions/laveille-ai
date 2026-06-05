@@ -39,27 +39,55 @@ function buildAccentInsensitiveBoundedRegex(str) {
 }
 
 function detectEntities(text) {
+  const STOPWORDS = new Set([
+    'bonjour', 'bonsoir', 'salut', 'merci', 'cordialement', 'madame', 'monsieur',
+    'docteur', 'clinique', 'hopital', 'centre', 'est', 'ouest', 'nord', 'sud',
+    'quebec', 'canada', 'objet', 'suivi', 'nom', 'adresse',
+    'dr', 'm', 'mme', 'me', 'pr', 'mr', 'mlle'
+  ]);
+  const normalize = (str) => str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const entities = [];
   const seen = new Set();
   const push = (value, category, label, confidence) => {
-    const k = value.trim();
-    if (k && !seen.has(k.toLowerCase())) { seen.add(k.toLowerCase()); entities.push({ value: k, category, label, confidence }); }
+    const k = (value || '').trim();
+    if (k && !seen.has(normalize(k))) { seen.add(normalize(k)); entities.push({ value: k, category, label, confidence: confidence || 0.9 }); }
   };
   let m;
-  const dossier = /(?:#|dossier\s*(?:n[°o]\s*)?)\d+/gi;
-  while ((m = dossier.exec(text))) push(m[0], 'dossier', 'Numéro de dossier', 0.95);
+  // 1. Noms avec titre de civilité (capture le nom, pas le titre)
+  const titled = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)\s+([A-ZÀ-Ÿ][a-zà-ÿ'’\-]+(?:\s+[A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)?)/g;
+  while ((m = titled.exec(text))) push(m[1], 'name', 'Nom complet', 0.85);
+  // 3. RAMQ
+  const ramq = /\b[A-ZÀ-Ÿ]{4}\s?\d{4}\s?\d{2}\s?\d{2}\b/g;
+  while ((m = ramq.exec(text))) push(m[0], 'id', 'RAMQ', 0.95);
+  // 5. Numéro de permis / matricule (avec contexte)
+  const permit = /(?:permis|oiiq|matricule|n[°o]\s*de\s*permis)[^\d]{0,15}(\d{5,})/gi;
+  while ((m = permit.exec(text))) push(m[1], 'id', 'Numéro de permis', 0.9);
+  // 6. Adresse civique
+  const address = /\b\d{1,5},?\s+(?:rue|avenue|av\.?|boulevard|boul\.?|chemin|ch\.?|rang|montée|place|impasse)\s+[A-Za-zÀ-ÿ'’\-]+(?:\s+(?:Est|Ouest|Nord|Sud))?/gi;
+  while ((m = address.exec(text))) push(m[0], 'address', 'Adresse', 0.85);
+  // 4. Code postal canadien
+  const postal = /\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b/g;
+  while ((m = postal.exec(text))) push(m[0], 'address', 'Code postal', 0.9);
+  // 7. Courriel
   const email = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
   while ((m = email.exec(text))) push(m[0], 'email', 'Courriel', 0.99);
+  // 8. Téléphone CA
   const phone = /(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}/g;
   while ((m = phone.exec(text))) push(m[0], 'phone', 'Téléphone', 0.9);
-  const address = /\b\d+\s+(?:rue|avenue|av\.?|boulevard|boul\.?|chemin|ch\.?)\s+(?:de\s+la\s+|de\s+|du\s+|des\s+|la\s+|le\s+)?[A-Za-zÀ-ÿ'-]+(?:\s+[A-Za-zÀ-ÿ'-]+)?/gi;
-  while ((m = address.exec(text))) push(m[0], 'address', 'Adresse', 0.85);
-  const name = /(?<![A-Za-zÀ-ÿ])[A-ZÀ-Ÿ][a-zà-ÿ]+(?:[-'][A-ZÀ-Ÿ]?[a-zà-ÿ]+)?\s+[A-ZÀ-Ÿ][a-zà-ÿ]+(?:[-'][A-ZÀ-Ÿ]?[a-zà-ÿ]+)?(?![A-Za-zÀ-ÿ])/g;
-  while ((m = name.exec(text))) push(m[0], 'name', 'Nom complet', 0.8);
+  // 9. Numéro de dossier
+  const dossier = /(?:#|dossier\s*(?:n[°o]\s*)?)\d+/gi;
+  while ((m = dossier.exec(text))) push(m[0], 'dossier', 'Numéro de dossier', 0.95);
+  // 10. Montant
   const amount = /\$\s*\d+(?:[ ,]\d{3})*(?:[.,]\d{2})?\s*(?:CAD|cad)?/g;
   while ((m = amount.exec(text))) push(m[0], 'amount', 'Montant', 0.95);
+  // 11. Date FR/ISO
   const date = /\b(?:\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+\d{4})\b/gi;
   while ((m = date.exec(text))) push(m[0], 'date', 'Date', 0.9);
+  // 2. Noms sans titre (deux mots capitalisés, hors stopwords)
+  const name = /(?<![A-Za-zÀ-ÿ])([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)\s+([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)(?![A-Za-zÀ-ÿ])/g;
+  while ((m = name.exec(text))) {
+    if (!STOPWORDS.has(normalize(m[1])) && !STOPWORDS.has(normalize(m[2]))) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
+  }
   return entities;
 }
 

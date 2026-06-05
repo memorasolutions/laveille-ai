@@ -9,6 +9,7 @@ class AnonymizerUI {
     this.candidates = [];
     this.rules = [];
     this.anonMode = 'pseudo';
+    this.lastSelection = '';
     this.init();
   }
 
@@ -21,6 +22,7 @@ class AnonymizerUI {
       this.updateOutput();
       this.goStep(1);
       this.bindEvents();
+      this.bindActionMenu();
       this.updateModeUI();
     });
   }
@@ -185,6 +187,33 @@ class AnonymizerUI {
     if (hint) hint.style.display = this.anonMode === 'tokens' ? '' : 'none';
   }
 
+  bindActionMenu() {
+    const $ = id => document.getElementById(id);
+    const openMenu = () => { const b = $('btnActionsMenu'), mu = $('actionsMenu'); if (b) b.setAttribute('aria-expanded', 'true'); if (mu) mu.classList.remove('hidden'); };
+    const closeMenu = () => { const b = $('btnActionsMenu'), mu = $('actionsMenu'); if (b) b.setAttribute('aria-expanded', 'false'); if (mu) mu.classList.add('hidden'); };
+
+    // Capture continue de la sélection (corrige : le clic d'un bouton efface la sélection avant lecture)
+    const annotated = $('anonAnnotated');
+    if (annotated) {
+      const cap = () => { const s = (window.getSelection().toString() || '').trim(); if (s) this.lastSelection = s; };
+      annotated.addEventListener('mouseup', cap);
+      annotated.addEventListener('keyup', cap);
+    }
+    const source = $('anonSource');
+    if (source) {
+      const cap = () => { const v = source.value.substring(source.selectionStart, source.selectionEnd).trim(); if (v) this.lastSelection = v; };
+      source.addEventListener('select', cap);
+      source.addEventListener('mouseup', cap);
+      source.addEventListener('keyup', cap);
+    }
+
+    const btn = $('btnActionsMenu'), menu = $('actionsMenu');
+    if (btn) btn.addEventListener('click', (e) => { e.stopPropagation(); (menu && menu.classList.contains('hidden')) ? openMenu() : closeMenu(); });
+    document.addEventListener('click', (e) => { if (btn && menu && !menu.contains(e.target) && e.target !== btn) closeMenu(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu && !menu.classList.contains('hidden')) { closeMenu(); if (btn) btn.focus(); } });
+    if (menu) menu.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(closeMenu, 0); });
+  }
+
   toast(message, variant) {
     window.dispatchEvent(new CustomEvent('toast-show', { detail: { message, variant, duration: 3000 } }));
   }
@@ -224,19 +253,16 @@ class AnonymizerUI {
     }
 
     on('btnAnonymizeSelection', 'click', () => {
-      let selText = '';
+      // Lit la sélection courante, sinon celle du textarea, sinon la dernière sélection captée (le clic l'a effacée)
+      let selText = (window.getSelection().toString() || '').trim();
+      const source = document.getElementById('anonSource');
+      if (!selText && source) selText = source.value.substring(source.selectionStart, source.selectionEnd).trim();
+      if (!selText) selText = this.lastSelection || '';
+      if (!selText) { this.toast('Sélectionnez d\'abord un passage dans votre texte, puis cliquez.', 'warning'); return; }
       const wrap = document.getElementById('anonEditorWrap');
-      if (wrap && wrap.classList.contains('mode-annotate')) {
-        selText = (window.getSelection().toString() || '').trim();
-      } else {
-        const source = document.getElementById('anonSource');
-        if (source && source.selectionStart !== undefined) {
-          selText = source.value.substring(source.selectionStart, source.selectionEnd).trim();
-          if (selText) { this.sourceText = source.value; this.setMode('annotate'); }
-        }
-      }
-      if (!selText) { this.toast('Sélectionnez d\'abord un passage à anonymiser.', 'warning'); return; }
+      if (wrap && wrap.classList.contains('mode-edit') && source) { this.sourceText = source.value; this.setMode('annotate'); }
       this.anonymizeValue(selText, this.guessCategory(selText));
+      this.lastSelection = '';
       this.toast('Passage anonymisé.', 'success');
     });
 
@@ -248,9 +274,12 @@ class AnonymizerUI {
     });
 
     on('btnResetAll', 'click', () => {
-      this.rules = []; this.candidates = [];
-      this.saveRules(); this.renderAnnotated(); this.updateOutput();
-      this.toast('Réinitialisé.', 'info');
+      this.rules = []; this.candidates = []; this.lastSelection = '';
+      try { localStorage.removeItem('lv_anon_rules_v3'); } catch (e) {}
+      this.setMode('edit');
+      this.renderAnnotated();
+      this.updateOutput();
+      this.toast('Réinitialisé — vous pouvez repartir à zéro.', 'info');
     });
 
     on('btnCopyAnon', 'click', async () => {

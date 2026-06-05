@@ -1,5 +1,17 @@
 /* anon-v2.css — UI simplifiée de l'anonymiseur (refonte juin 2026) */
 .anon-wrap { --anon-primary: var(--c-primary, #064E5A); --anon-line: #e2e6ea; }
+
+/* Menu d'actions (dropdown WAI-ARIA, remplace la surcharge de boutons) */
+.anon-menu-wrap { position: relative; display: inline-block; }
+.anon-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; min-width: 230px;
+  background: #fff; border: 1px solid var(--anon-line); border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.14);
+  padding: .35rem; display: flex; flex-direction: column; gap: .15rem; }
+.anon-menu.hidden { display: none; }
+.anon-menu-item { display: flex; align-items: center; gap: .55rem; width: 100%; text-align: left;
+  padding: .6rem .75rem; border: none; background: none; border-radius: 8px; font: inherit; color: #1A1D23;
+  cursor: pointer; min-height: 44px; }
+.anon-menu-item:hover, .anon-menu-item:focus-visible { background: #ECFDF5; outline: none; }
+.anon-menu-item:focus-visible { box-shadow: 0 0 0 2px #9A2A06; }
 .anon-steps { display: flex; gap: .5rem; margin: 0 0 1.25rem; flex-wrap: wrap; }
 .anon-step { flex: 1 1 0; min-width: 140px; display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem;
   background: #fff; border: 1px solid var(--anon-line); border-radius: 12px; cursor: pointer; font: inherit; text-align: left; transition: .15s; }
