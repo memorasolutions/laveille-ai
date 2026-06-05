@@ -1,0 +1,36 @@
+name: Cleanup anonymiseur orphans (one-off)
+
+# Supprime les 13 assets orphelins de l'anonymiseur v1 restés sur le disque prod
+# (rsync sans --delete). Backup tar AVANT suppression. Déclenché manuellement
+# (workflow_dispatch), puis ce fichier est retiré du repo. Rollback : tarball serveur
+# + historique git (commit e2ba5e48).
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts
+
+      - name: Backup (tar) then delete the 13 orphan files
+        run: |
+          ssh gmemora@server.memora.pro '
+            set -e
+            cd /home/gmemora/public_html/apps_diverses/laveille.ai/public/assets/tools/anonymiseur
+            FILES="app.js compromise.min.js styles.css detect-panel.css enhancements.js enhancements-v145.js enhancements-v146.js enhancements-v148-presets.js enhancements-v149-trust.js enhancements-v150-help.js enhancements-v151-detect-panel.js manifest.webmanifest sw.js"
+            echo "=== AVANT ==="; ls -1
+            tar -czf ~/backup-anonymiseur-orphans-2026-06-05.tar.gz $FILES
+            echo "=== BACKUP ==="; ls -la ~/backup-anonymiseur-orphans-2026-06-05.tar.gz
+            rm -f $FILES
+            echo "=== APRES (doit rester: .htaccess, anon-v2.css, anonymizer-core/rich/ui.js) ==="; ls -1
+          '
+
+      - name: Clear caches on server
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan responsecache:clear" || true
