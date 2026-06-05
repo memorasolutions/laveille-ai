@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.40] - 2026-06-05
+
+### Added
+
+- **Anonymiseur — boutons d'aide ⓘ (popups du thème) + valeur personnalisée partout (en construction/admin)**.
+  - **Aides contextuelles** : boutons ⓘ sur les sections clés (affichage des volets, « comment ça marche », masquer une donnée, **éléments déjà masqués / « Différent ici »**, restauration), via le **composant officiel `<x-core::help-modal>`** (déjà global) + `window.HELP_CONTENT` → **100 % uniforme avec la charte**. Explications grand public.
+  - **Valeur personnalisée (anti-régression)** rendue intuitive et disponible partout : la bulle de sélection et le popover d'une donnée masquée offrent **« ✎ Ma valeur »** (je choisis le remplacement, partout) ; le popover ajoute **« 🔀 Seulement ici »** (valeur distincte pour cette occurrence) et **« ↩︎ Annuler »**. `setCustomReplacement` (global) + `addOverride` (par occurrence). Validé **E2E Playwright** : 5/5 popups d'aide + 4/4 valeur personnalisée (sélection, globale, par occurrence) avec **restauration exacte**.
+
 ## [1.65.39] - 2026-06-05
 
 ### Added

@@ -206,24 +206,40 @@ class AnonymizerUI {
     if (pop) pop.classList.add('hidden');
   }
 
+  setCustomReplacement(value, replacement) {
+    if (!value || !replacement) return;
+    const nv = _norm(value);
+    let done = false;
+    this.rules.forEach(r => { if (_norm(r.original) === nv) { r.replacement = replacement; done = true; } });
+    if (!done) this.rules.push({ id: 'rule_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9), original: value, replacement, category: this.guessCategory(value) });
+    this.overrides = (this.overrides || []).filter(o => _norm(o.original) !== nv); // la valeur globale prime
+    this.saveRules(); this.renderAnnotated(); this.updateOutput();
+  }
+
   bindOccPopover() {
     const $ = id => document.getElementById(id);
     const pop = $('anonOccPopover');
     if (!pop) return;
-    const cancel = $('anonOccCancel'), diff = $('anonOccDiff'), custom = $('anonOccCustom'), input = $('anonOccInput'), confirm = $('anonOccConfirm');
-    if (cancel) cancel.addEventListener('click', () => { const oc = this.currentOcc; this.hideOccPopover(); if (oc) this.deanonymizeValue(oc.original); });
-    if (diff) diff.addEventListener('click', () => {
+    const cancel = $('anonOccCancel'), diff = $('anonOccDiff'), valueBtn = $('anonOccValue'), custom = $('anonOccCustom'), input = $('anonOccInput'), confirm = $('anonOccConfirm');
+    const reveal = (mode) => {
+      this.occMode = mode;
       if (custom) custom.classList.remove('hidden');
       if (input && this.currentOcc) {
         input.value = window.AnonymizerCore.generateFake(this.guessCategory(this.currentOcc.original), this.currentOcc.original);
         input.focus(); input.select();
       }
-    });
+    };
+    if (cancel) cancel.addEventListener('click', () => { const oc = this.currentOcc; this.hideOccPopover(); if (oc) this.deanonymizeValue(oc.original); });
+    if (valueBtn) valueBtn.addEventListener('click', () => reveal('global'));
+    if (diff) diff.addEventListener('click', () => reveal('occ'));
     const doConfirm = () => {
       const v = input ? input.value.trim() : '';
-      const oc = this.currentOcc;
+      const oc = this.currentOcc, mode = this.occMode;
       this.hideOccPopover();
-      if (oc && v) { this.addOverride(oc.original, oc.occ, v); this.toast('Cette occurrence est désormais différente.', 'success'); }
+      if (oc && v) {
+        if (mode === 'global') { this.setCustomReplacement(oc.original, v); this.toast('Valeur remplacée partout.', 'success'); }
+        else { this.addOverride(oc.original, oc.occ, v); this.toast('Cette occurrence est désormais différente.', 'success'); }
+      }
     };
     if (confirm) confirm.addEventListener('click', doConfirm);
     if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doConfirm(); } });

@@ -81,7 +81,7 @@
                         {{-- ÉTAPE 1 : éditeur annoté + aperçu --}}
                         <div class="anon-panel active" data-step-content="1">
                             <div class="anon-help">
-                                💡 <strong>{{ __('Comment ça marche') }}</strong> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les masquer (elles deviennent surlignées). Pour masquer autre chose, sélectionnez simplement un passage avec la souris — un bouton « 🕵️ Anonymiser » apparaît juste au-dessus. Le texte prêt pour l\'IA apparaît à droite.') }}
+                                💡 <strong>{{ __('Comment ça marche') }}</strong> <button type="button" class="ct-help-btn" data-help-key="anon-comment" aria-label="{{ __('Aide : comment ça marche') }}">ⓘ</button> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les masquer (elles deviennent surlignées). Pour masquer autre chose, sélectionnez simplement un passage avec la souris — un bouton « 🕵️ Anonymiser » apparaît juste au-dessus. Le texte prêt pour l\'IA apparaît à droite.') }}
                             </div>
 
                             {{-- Barre d'outils : 1 action primaire + sélection + menu « Actions » (réduit la surcharge — tendance 2026) --}}
@@ -103,16 +103,19 @@
                             </p>
 
                             {{-- Bascule de vue : Éditeur pleine largeur / Split / Aperçu pleine largeur --}}
-                            <div class="anon-viewswitch" role="group" aria-label="{{ __('Affichage des volets') }}">
-                                <button type="button" data-view="editor" aria-pressed="false">✍️ {{ __('Éditeur') }}</button>
-                                <button type="button" data-view="split" aria-pressed="true">⬓ {{ __('Split') }}</button>
-                                <button type="button" data-view="preview" aria-pressed="false">👁️ {{ __('Aperçu') }}</button>
+                            <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;">
+                                <div class="anon-viewswitch" role="group" aria-label="{{ __('Affichage des volets') }}">
+                                    <button type="button" data-view="editor" aria-pressed="false">✍️ {{ __('Éditeur') }}</button>
+                                    <button type="button" data-view="split" aria-pressed="true">⬓ {{ __('Split') }}</button>
+                                    <button type="button" data-view="preview" aria-pressed="false">👁️ {{ __('Aperçu') }}</button>
+                                </div>
+                                <button type="button" class="ct-help-btn" data-help-key="anon-vues" aria-label="{{ __('Aide : affichage des volets') }}">ⓘ</button>
                             </div>
 
                             <div class="anon-grid">
                                 {{-- Volet gauche : éditeur annoté --}}
                                 <div class="anon-pane-editor">
-                                    <label class="anon-pane-label" for="anonSource">{{ __('Votre texte (cliquez les passages soulignés pour les anonymiser)') }}</label>
+                                    <label class="anon-pane-label" for="anonSource">{{ __('Votre texte (cliquez les passages soulignés pour les anonymiser)') }} <button type="button" class="ct-help-btn" data-help-key="anon-selection" aria-label="{{ __('Aide : comment masquer une donnée') }}">ⓘ</button> <button type="button" class="ct-help-btn" data-help-key="anon-occurrence" aria-label="{{ __('Aide : éléments déjà masqués et « Différent ici »') }}">?</button></label>
                                     <div id="anonEditorWrap" class="mode-edit">
                                         <textarea id="anonSource" class="anon-textarea" placeholder="{{ __('Ex. : Le dossier #86734 pour M. Jean Dubé concerne le chantier du 15 rue de la Gare…') }}"></textarea>
                                         <div id="anonAnnotated" tabindex="0" role="textbox" aria-label="{{ __('Texte annoté — cliquez une entité pour l\'anonymiser') }}"></div>
@@ -125,7 +128,7 @@
 
                                 {{-- Volet droit : aperçu anonymisé --}}
                                 <div class="anon-pane-preview">
-                                    <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }}</label>
+                                    <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé (prêt pour l\'IA)') }} <button type="button" class="ct-help-btn" data-help-key="anon-restauration" aria-label="{{ __('Aide : récupérer vos données après l\'IA') }}">ⓘ</button></label>
                                     <textarea id="anonOutput" class="anon-textarea" readonly aria-label="{{ __('Texte anonymisé prêt pour l\'IA') }}"></textarea>
                                     <div class="anon-actions">
                                         <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier pour l\'IA') }}</button>
@@ -163,7 +166,7 @@
                     <div id="anonSelBubble" class="anon-sel-bubble hidden" role="tooltip">
                         <div class="anon-sel-main">
                             <button type="button" id="anonSelBubbleBtn">🕵️ {{ __('Anonymiser') }}</button>
-                            <button type="button" id="anonSelBubbleCustomBtn" title="{{ __('Choisir ma propre valeur de remplacement') }}" aria-label="{{ __('Valeur personnalisée') }}">✎</button>
+                            <button type="button" id="anonSelBubbleCustomBtn" title="{{ __('Choisir ma propre valeur de remplacement') }}" aria-label="{{ __('Valeur personnalisée') }}">✎ {{ __('Ma valeur') }}</button>
                         </div>
                         <div id="anonSelBubbleCustom" class="anon-sel-custom hidden">
                             <input type="text" id="anonSelBubbleInput" placeholder="{{ __('Votre valeur…') }}" aria-label="{{ __('Valeur de remplacement personnalisée') }}">
@@ -174,8 +177,9 @@
                     {{-- Popover sur une occurrence déjà anonymisée : annuler ou rendre CETTE occurrence différente --}}
                     <div id="anonOccPopover" class="anon-sel-bubble hidden" role="dialog" aria-label="{{ __('Options de cette occurrence') }}">
                         <div class="anon-sel-main">
-                            <button type="button" id="anonOccDiff">✎ {{ __('Différent ici') }}</button>
-                            <button type="button" id="anonOccCancel">↩︎ {{ __('Annuler') }}</button>
+                            <button type="button" id="anonOccValue" title="{{ __('Saisir ma propre valeur (remplace partout)') }}">✎ {{ __('Ma valeur') }}</button>
+                            <button type="button" id="anonOccDiff" title="{{ __('Une valeur différente uniquement pour cette occurrence-ci') }}">🔀 {{ __('Seulement ici') }}</button>
+                            <button type="button" id="anonOccCancel" title="{{ __('Annuler l\'anonymisation') }}">↩︎ {{ __('Annuler') }}</button>
                         </div>
                         <div id="anonOccCustom" class="anon-sel-custom hidden">
                             <input type="text" id="anonOccInput" placeholder="{{ __('Valeur pour cette occurrence…') }}" aria-label="{{ __('Valeur de remplacement pour cette occurrence') }}">
@@ -207,6 +211,16 @@
 })();
 </script>
 <script>window.LV_ANON_VERSION = '{{ config('version.semver') }}';</script>
+{{-- Aides contextuelles (composant officiel <x-core::help-modal> global) --}}
+<script>
+window.HELP_CONTENT = Object.assign(window.HELP_CONTENT || {}, {
+  "anon-comment": {"title":"Comment ça marche?","body":"<p>Cet outil vous permet de masquer vos données personnelles avant de les envoyer à une intelligence artificielle, puis de les récupérer dans la réponse. Voici les 3 étapes :</p><ul><li><strong>1. Collez votre texte</strong> dans la zone d'édition.</li><li><strong>2. Masquez les données sensibles</strong> : soit en cliquant sur « Détecter » pour que l'outil repère automatiquement les noms, adresses, etc., soit en sélectionnant vous-même un passage avec la souris.</li><li><strong>3. Copiez le texte masqué</strong> vers l'IA, puis collez la réponse de l'IA dans l'outil et cliquez sur « Restaurer » pour retrouver vos vraies données.</li></ul><p><strong>Rassurez-vous : tout se fait dans votre navigateur, rien n'est envoyé sur Internet.</strong></p>"},
+  "anon-vues": {"title":"Changer l'affichage","body":"<p>Vous pouvez choisir comment voir votre texte grâce au sélecteur en haut :</p><ul><li><strong>Éditeur</strong> : votre texte original en grand, idéal pour écrire ou modifier.</li><li><strong>Aperçu</strong> : le texte masqué en grand, pour vérifier ce qui sera envoyé à l'IA.</li><li><strong>Split</strong> : les deux côte à côte, pratique pour comparer sur de longs textes.</li></ul><p>Passez de l'un à l'autre sans perdre votre travail.</p>"},
+  "anon-selection": {"title":"Comment masquer une donnée?","body":"<p>Deux façons de faire :</p><ul><li><strong>Cliquez sur un mot souligné</strong> (repéré automatiquement) pour le masquer immédiatement.</li><li><strong>Sélectionnez un passage</strong> avec la souris : un bouton « Anonymiser » apparaît. Cliquez dessus pour le masquer.</li><li>Vous pouvez aussi cliquer sur <strong>« ✎ Ma valeur »</strong> pour choisir vous-même par quoi remplacer la donnée (exemple : remplacer « Jean Dupont » par « Client »).</li></ul><p>Simple comme tout!</p>"},
+  "anon-occurrence": {"title":"Gérer les éléments déjà masqués","body":"<p>Quand vous cliquez sur un élément déjà masqué (surligné), trois options s'offrent à vous :</p><ul><li><strong>« ✎ Ma valeur »</strong> : changez le remplacement pour toutes les occurrences identiques (exemple : tous les « Jean » deviennent « Client »).</li><li><strong>« 🔀 Seulement ici »</strong> : donnez une valeur différente à CETTE occurrence précise, les autres restent comme avant. Exemple : si vous avez deux fois « Montréal », vous pouvez remplacer l'un par « Ville A » et l'autre par « Ville B ».</li><li><strong>« ↩︎ Annuler »</strong> : retirez le masquage et remettez la donnée originale.</li></ul>"},
+  "anon-restauration": {"title":"Récupérer vos données après l'IA","body":"<p>Une fois que vous avez reçu la réponse de l'IA (même si elle a reformulé le texte), faites ceci :</p><ul><li><strong>Copiez la réponse</strong> et collez-la dans la zone prévue.</li><li><strong>Cliquez sur « Restaurer »</strong> : l'outil retrouve automatiquement vos vraies données et les remet à leur place.</li></ul><p><strong>C'est fiable</strong> : l'outil garde en mémoire le lien entre les données masquées et les vraies, même si l'IA change la formulation.</p>"}
+});
+</script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-core.js') }}?v={{ config('version.semver') }}" defer></script>
 <script src="{{ asset('assets/tools/anonymiseur/anonymizer-ui.js') }}?v={{ config('version.semver') }}" defer></script>
 @endpush
