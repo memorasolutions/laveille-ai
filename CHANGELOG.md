@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.56] - 2026-06-05
+
+### Changed
+
+- **Anonymiseur de texte — PUBLIÉ publiquement** (GO user « publie l'outil ») après la refonte UX/UI complète (v1.65.43→55) et la certification E2E intégrée PASS. Migration `2026_06_05_210000_publish_anonymiseur_go_user` : `tools.is_under_construction = false` pour `slug='anonymiseur'` (le déploiement exécute `php artisan migrate --force` puis vide les caches). Seeder par défaut aligné sur `false`. L'outil n'est plus en placeholder « en construction » : il est accessible à tous sur `/outils/anonymiseur` et listé sans badge « Bientôt ». Réversible via le `down()` de la migration.
+
 ## [1.65.55] - 2026-06-05
 
 ### Added
