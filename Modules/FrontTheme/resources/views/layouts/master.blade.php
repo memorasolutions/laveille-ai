@@ -279,7 +279,12 @@
 
         @include('fronttheme::partials.footer')
 
-        @include('fronttheme::partials.newsletter-scroll-trigger')
+        {{-- Pop-up infolettre : retirée des pages OUTILS (tâches focalisées : éditeur/formulaire) pour ne pas
+             interrompre l'usage sur mobile (NN/g + pénalité Google interstitiels intrusifs). Conservée sur le
+             contenu (blog/articles/index) où le scroll-trigger est pertinent. Réversible (retirer le @unless). --}}
+        @unless(request()->is('outils/*'))
+            @include('fronttheme::partials.newsletter-scroll-trigger')
+        @endunless
         @include('fronttheme::partials.newsletter-modal')
         @include('fronttheme::partials.auth-modal')
         @auth

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.74] - 2026-06-06
+
+### Changed
+- **Pop-up infolettre retirée des pages outils** (`outils/*`) : le scroll-trigger (bottom-sheet ~234 px sur mobile,
+  ~29 % de l'écran) n'apparaît plus pendant l'usage d'un outil (éditeur/formulaire = tâche focalisée), où il
+  masquait la barre d'outils et risquait la pénalité Google « interstitiels mobiles intrusifs ». Conservée sur le
+  contenu (blog, articles, index) où le déclenchement au scroll reste pertinent. Décision sourcée (pp_search NN/g,
+  juin 2026). Réversible (retrait du `@unless`). Aucune autre page affectée, aucune donnée supprimée.
+
+### Notes
+- Modale cookies : déjà conforme (`max-height: min(90vh,640px); overflow-y:auto`) — le « bouton hors viewport »
+  de l'audit était un artefact Playwright (clic avant scroll), aucun correctif nécessaire.
+
 ## [1.65.73] - 2026-06-06
 
 ### Fixed
