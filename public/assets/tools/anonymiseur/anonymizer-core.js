@@ -104,6 +104,18 @@ function detectEntities(text) {
   // 11. Date FR/ISO
   const date = /\b(?:\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4}|\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+\d{4})\b/gi;
   while ((m = date.exec(text))) push(m[0], 'date', 'Date', 0.9);
+  // 12. NAS (numéro d'assurance sociale) — contextuel (étiquette NAS/assurance sociale) + isolé validé Luhn
+  const luhnNAS = (d) => { let s = 0; for (let i = 0; i < 9; i++) { let x = parseInt(d[i], 10); if ((9 - i) % 2 === 0) { x *= 2; if (x > 9) x -= 9; } s += x; } return s % 10 === 0; };
+  const nasCtx = /(?:N\.?A\.?S\.?|assurance\s+sociale|num[ée]ro\s+d['’]assurance(?:\s+sociale)?|\bSIN\b)\D{0,12}(\d{3}[ -]?\d{3}[ -]?\d{3})/gi;
+  while ((m = nasCtx.exec(text))) push(m[1], 'id', 'NAS', 0.9);
+  const nasStd = /(?<!\d)\d{3}[ -]?\d{3}[ -]?\d{3}(?!\d)/g;
+  while ((m = nasStd.exec(text))) { const c = m[0].replace(/[ -]/g, ''); if (c.length === 9 && luhnNAS(c)) push(m[0], 'id', 'NAS', 0.9); }
+  // 13. Montant avec le symbole $ APRÈS le nombre (format québécois : « 1 250,00 $ », « 2 750$ »)
+  const amountFr = /\d{1,3}(?:[ .  ]\d{3})*(?:,\d{2})?\s*\$/g;
+  while ((m = amountFr.exec(text))) push(m[0], 'amount', 'Montant', 0.9);
+  // 14. Nom abrégé après titre de civilité (initiale + nom : « Mme L. Gagnon », « Dr. A. Roy »)
+  const titledAbbrev = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)[^\S\r\n]+([A-ZÀ-Ÿ]\.?[^\S\r\n]+[A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)/g;
+  while ((m = titledAbbrev.exec(text))) push(m[1], 'name', 'Nom complet', 0.8);
   // 2. Noms sans titre (deux mots capitalisés, hors stopwords)
   const name = /(?<![A-Za-zÀ-ÿ])([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)[^\S\r\n]+([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)(?![A-Za-zÀ-ÿ])/g;
   while ((m = name.exec(text))) {

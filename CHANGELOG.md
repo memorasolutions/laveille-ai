@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.60] - 2026-06-06
+
+### Fixed
+
+- **Anonymiseur — comble 3 fuites de détection identifiées par l'audit (NAS, montants format québécois, noms abrégés)** : l'audit exhaustif des outils (rapport `.outils/audit-anonymiseur-constructeur-2026-06-06.md`) a mesuré une détection automatique de 80 % avec des faux négatifs sensibles. Ajout à `detectEntities` : (1) **NAS** (numéro d'assurance sociale) — contextuel (étiquette « NAS »/« assurance sociale ») + isolé validé par **algorithme de Luhn** (évite les faux positifs sur tout numéro à 9 chiffres) ; (2) **montants format québécois** où le « $ » suit le nombre (« 1 250,00 $ », « 2 750$ ») ; (3) **noms abrégés** initiale + nom après titre (« Mme L. Gagnon », « Dr. A. Roy »). **Vérifié (test Node, corpus 12 cas PII québécois)** : détection 80 % → **100 % (40/40)**, réversibilité round-trip **100 %**, **zéro régression** (cas noms/médicaux), **zéro faux positif** (numéros non-Luhn et téléphones non confondus).
+
 ## [1.65.59] - 2026-06-05
 
 ### Fixed
