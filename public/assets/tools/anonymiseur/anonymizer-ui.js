@@ -363,7 +363,10 @@ class AnonymizerUI {
     };
     if (confirm) confirm.addEventListener('click', doConfirm);
     if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doConfirm(); } });
-    document.addEventListener('mousedown', (e) => { const a = $('anonAnnotated'); if (!pop.contains(e.target) && (!a || !a.contains(e.target))) this.hideOccPopover(); });
+    // Fermer dès qu'on clique HORS du popover (y compris dans le texte) ; un clic sur une autre
+    // entité le rouvre via le handler de clic. + Échap.
+    document.addEventListener('mousedown', (e) => { if (!pop.contains(e.target)) this.hideOccPopover(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.hideOccPopover(); });
     window.addEventListener('scroll', () => this.hideOccPopover(), { capture: true });
   }
 
@@ -454,7 +457,13 @@ class AnonymizerUI {
   bindRichEditor() {
     const src = document.getElementById('anonSource');
     if (!src) return;
-    const sync = () => { this.sourceHtml = src.innerHTML; this.sourceText = this.richText(src); this.saveSource(); };
+    // La colonne droite suit la gauche EN TEMPS RÉEL (anti-rebond léger pour rester fluide).
+    let outTimer = null;
+    const sync = () => {
+      this.sourceHtml = src.innerHTML; this.sourceText = this.richText(src); this.saveSource();
+      if (outTimer) clearTimeout(outTimer);
+      outTimer = setTimeout(() => this.updateOutput(), 120);
+    };
     src.addEventListener('input', sync);
     src.addEventListener('blur', sync);
     src.addEventListener('paste', (e) => {
@@ -663,15 +672,13 @@ class AnonymizerUI {
       this.toast(cands.length + ' donnée(s) anonymisée(s).', 'success');
     });
 
+    // « Réinitialiser le masquage » : efface l'anonymisation mais GARDE le texte (≠ « Oublier mes données »).
     on('btnResetAll', 'click', () => {
       this.rules = []; this.candidates = []; this.lastSelection = ''; this.overrides = [];
-      this.sourceText = ''; this.sourceHtml = ''; this.anonPlain = '';
-      try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); localStorage.removeItem('lv_anon_source_v3'); } catch (e) {}
-      const src = document.getElementById('anonSource'); if (src) src.innerHTML = '';
-      this.setMode('edit');
+      try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); } catch (e) {}
       this.renderAnnotated();
       this.updateOutput();
-      this.toast('Réinitialisé — tout le contenu a été effacé.', 'info');
+      this.toast('Masquage réinitialisé — votre texte est conservé.', 'info');
     });
 
     on('btnForgetAll', 'click', () => this.forgetAll());

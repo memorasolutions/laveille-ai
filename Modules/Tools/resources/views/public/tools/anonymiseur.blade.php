@@ -97,7 +97,7 @@
                                         <button type="button" id="btnAnonymizeSelection" class="anon-menu-item" role="menuitem" title="{{ __('Sélectionnez un passage dans votre texte, puis cliquez') }}">✍️ {{ __('Anonymiser la sélection') }}</button>
                                         <button type="button" id="btnEditText" class="anon-menu-item" role="menuitem">✏️ {{ __('Modifier le texte') }}</button>
                                         <button type="button" id="btnModeToggle" class="anon-menu-item" role="menuitem" aria-pressed="false" title="{{ __('Basculer entre faux noms réalistes et jetons balisés stables') }}">🎭 {{ __('Réaliste') }}</button>
-                                        <button type="button" id="btnResetAll" class="anon-menu-item" role="menuitem">↺ {{ __('Réinitialiser') }}</button>
+                                        <button type="button" id="btnResetAll" class="anon-menu-item" role="menuitem" title="{{ __('Efface le masquage mais garde votre texte') }}">↺ {{ __('Réinitialiser le masquage') }}</button>
                                         <button type="button" id="btnForgetAll" class="anon-menu-item" role="menuitem" title="{{ __('Efface tout (texte + table de correspondance) de ce navigateur') }}">🗑️ {{ __('Oublier mes données') }}</button>
                                     </div>
                                 </div>

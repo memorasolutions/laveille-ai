@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.69] - 2026-06-06
+
+### Changed / Fixed
+
+- **Anonymiseur — la colonne « anonymisé » suit la colonne de gauche en TEMPS RÉEL** : dès qu'on colle/écrit dans l'éditeur, le panneau de droite se met à jour (anti-rebond ~120 ms), sans devoir cliquer « Détecter et anonymiser ». Avant masquage : la droite reflète le texte ; après : anonymisé en direct.
+- **Anonymiseur — le popover d'occurrence se ferme au clic à l'extérieur** (+ Échap) : il restait ouvert quand on cliquait dans le texte (le handler excluait la zone annotée). Cliquer ailleurs le ferme désormais ; cliquer une autre entité le rouvre.
+- **Anonymiseur — « Réinitialiser » et « Oublier mes données » sont maintenant distincts** : « ↺ Réinitialiser le masquage » efface l'anonymisation mais **conserve votre texte** (pour re-masquer autrement) ; « 🗑️ Oublier mes données » efface **tout** (texte + correspondances). Lèvent la confusion (les deux faisaient la même chose).
+
 ## [1.65.68] - 2026-06-06
 
 ### Changed
