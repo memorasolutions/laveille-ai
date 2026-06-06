@@ -181,3 +181,16 @@
 
 .anon-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .5rem 0 0; font-size: .82rem; color: #52586a; }
 .anon-legend .anon-cand, .anon-legend .anon-anon { cursor: default; }
+
+/* ===== Mobile (≤480px) : UX tactile + anti-zoom iOS (audit 2026-06-06) ===== */
+@media (max-width: 480px) {
+  /* P2.1 — 16px empêche le zoom automatique de Safari iOS au focus d'un champ éditable */
+  .anon-textarea { font-size: 16px; }
+  /* P1.2 — cibles tactiles ≥44px pour la bascule de vue, pleine largeur */
+  .anon-viewswitch { width: 100%; }
+  .anon-viewswitch button { min-height: 44px; flex: 1; }
+  /* P1.1 — le bouton « Copier » flottant passe en flux normal : il ne recouvre plus
+     le texte de sortie et offre une cible ≥44px (le bouton absolu chevauchait le résultat à 375px) */
+  .anon-output-wrap { display: flex; flex-direction: column; }
+  .anon-copy-float { position: static; align-self: flex-end; margin-bottom: .4rem; min-height: 44px; }
+}

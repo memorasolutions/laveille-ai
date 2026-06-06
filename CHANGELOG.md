@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.73] - 2026-06-06
+
+### Fixed
+- **UX mobile éditeur d'anonymisation** (anonymiseur + panneau du constructeur, audit Playwright 375 px) :
+  - police des champs éditables portée à 16 px sous 480 px → supprime le zoom automatique de Safari iOS au focus ;
+  - bascule de vue (Éditeur/Split/Aperçu) : cibles tactiles ≥44 px, pleine largeur sur mobile ;
+  - bouton « Copier » flottant remis en flux normal sous 480 px → ne recouvre plus le texte de sortie, cible ≥44 px.
+  - CSS uniquement, scoppé `@media (max-width:480px)` ; desktop inchangé.
+
 ## [1.65.72] - 2026-06-06
 
 ### Fixed
