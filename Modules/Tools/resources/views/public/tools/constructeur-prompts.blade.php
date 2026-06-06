@@ -139,7 +139,7 @@
                                     <x-tools::anonymizer-editor>
                                         <x-slot:previewActions>
                                             <button type="button" id="btnCopyAnon" class="anon-btn secondary">📋 {{ __('Copier') }}</button>
-                                            <button type="button" id="cpAnonInsert" class="anon-btn">➕ {{ __('Insérer dans la tâche') }}</button>
+                                            <button type="button" id="cpAnonInsert" class="anon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true" focusable="false" style="vertical-align:-2px;margin-right:5px;flex-shrink:0;"><path d="M12 5v14M5 12h14"/></svg>{{ __('Insérer dans la tâche') }}</button>
                                         </x-slot:previewActions>
                                     </x-tools::anonymizer-editor>
                                 </div>

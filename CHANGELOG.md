@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.72] - 2026-06-06
+
+### Fixed
+- **Constructeur de prompts** : icône du bouton « Insérer dans la tâche » illisible (emoji ➕ sombre
+  sur fond teal foncé) remplacée par une icône SVG `+` en `currentColor` (blanche, contraste correct).
+
 ## [1.65.71] - 2026-06-06
 
 ### Changed
