@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.62] - 2026-06-06
+
+### Changed
+
+- **Publicités AdSense retirées des pages d'outils traitant des données personnelles** (décision suite à l'audit ; posture de confiance Loi 25) : le chargeur AdSense du layout (`master.blade.php`) ne se déclenche plus sur les pages déclarant `@section('no_ads')`. Activé sur l'**anonymiseur** et le **constructeur de prompts** (qui manipulent du texte potentiellement personnel). Mécanisme scopé via section Blade : **aucun impact sur les autres pages** (les pubs restent actives partout ailleurs — revenu préservé). Liste extensible à tout futur outil sensible.
+
 ## [1.65.61] - 2026-06-06
 
 ### Added / Fixed

@@ -1,5 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
+@section('no_ads', '1') {{-- Aucune pub : l'outil peut contenir des données personnelles (posture Loi 25) --}}
 @php $shareData = $tool->getShareData(); @endphp
 @section('meta_description', $shareData['meta_description'])
 @section('og_type', $shareData['og_type'])

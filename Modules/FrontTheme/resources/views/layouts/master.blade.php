@@ -14,7 +14,8 @@
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     @endif
     <style>[x-cloak] { display: none !important; }</style>
-    @if(env('ADSENSE_CLIENT_ID'))
+    {{-- AdSense désactivé sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) --}}
+    @if(env('ADSENSE_CLIENT_ID') && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
     <script>
     (function(){
       var loadAdsense = function() {
