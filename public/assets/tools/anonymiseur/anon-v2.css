@@ -76,11 +76,16 @@
 
 /* Bouton « Copier » flottant en haut-droite du panneau résultat (overlay → n'affecte pas l'alignement) */
 .anon-output-wrap { position: relative; }
-.anon-copy-float { position: absolute; top: 8px; right: 8px; z-index: 3; display: inline-flex; align-items: center;
-  gap: .3rem; background: var(--anon-primary); color: #fff; border: none; border-radius: 8px; padding: .35rem .6rem;
-  font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); min-height: 32px; }
-.anon-copy-float:hover { filter: brightness(1.1); }
-.anon-copy-float:focus-visible { outline: 2px solid #9A2A06; outline-offset: 2px; }
+/* Ligne d'en-tête de volet : label + (à droite) bouton « Copier ». Le bouton vit DANS l'en-tête
+   (au-dessus de la boîte), jamais en overlay sur le texte → zéro chevauchement à toute largeur.
+   Les deux volets ont une `.anon-pane-head` de même hauteur → boîtes alignées en mode 2 colonnes. */
+.anon-pane-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 2.2em; margin-bottom: .4rem; }
+.anon-pane-head .anon-pane-label { margin-bottom: 0; height: auto; }
+.anon-copy-inline { flex-shrink: 0; display: inline-flex; align-items: center; gap: .3rem; background: var(--anon-primary);
+  color: #fff; border: none; border-radius: 8px; padding: .35rem .7rem; font: inherit; font-size: .82rem; font-weight: 600;
+  cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.18); height: 2.2em; }
+.anon-copy-inline:hover { filter: brightness(1.1); }
+.anon-copy-inline:focus-visible { outline: 2px solid #9A2A06; outline-offset: 2px; }
 
 /* Étape 2 — résultat restauré : vraies données SURLIGNÉES (vert = restauré), valeur anonyme au survol/focus */
 #restoredOutput { min-height: 120px; white-space: pre-wrap; word-wrap: break-word; overflow: auto; }
@@ -182,15 +187,15 @@
 .anon-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .5rem 0 0; font-size: .82rem; color: #52586a; }
 .anon-legend .anon-cand, .anon-legend .anon-anon { cursor: default; }
 
-/* ===== Tablette + mobile (≤860px : grille empilée) : UX tactile (audit 2026-06-06) =====
-   À ≤860px la grille est déjà en 1 colonne → mettre le bouton « Copier » en flux normal
-   ne casse aucun alignement de volets, et supprime le chevauchement du texte de sortie
-   constaté à 375px ET à 768px. Cibles tactiles ≥44px (WCAG 2.5.5) pour la bascule de vue. */
+/* ===== Tablette + mobile (≤860px : grille empilée) : cibles tactiles ≥44px (WCAG 2.5.5) =====
+   La bascule de vue et le bouton « Copier » de l'en-tête passent à 44px (les deux volets gardent
+   une `.anon-pane-head` de même hauteur → alignement préservé). Le bouton n'a jamais été en overlay
+   donc aucun chevauchement de texte, quelle que soit la largeur (corrige l'overlap vu jusqu'à 1440px). */
 @media (max-width: 860px) {
   .anon-viewswitch { width: 100%; }
   .anon-viewswitch button { min-height: 44px; flex: 1; }
-  .anon-output-wrap { display: flex; flex-direction: column; }
-  .anon-copy-float { position: static; align-self: flex-end; margin-bottom: .4rem; min-height: 44px; }
+  .anon-pane-head { min-height: 44px; }
+  .anon-copy-inline { height: auto; min-height: 44px; }
 }
 /* ===== Mobile (≤480px) : 16px empêche le zoom automatique de Safari iOS au focus ===== */
 @media (max-width: 480px) {

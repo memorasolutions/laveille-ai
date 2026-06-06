@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.76] - 2026-06-06
+
+### Fixed
+- **Bouton « Copier » ne recouvre plus le texte (toutes largeurs, audit 1440 px)** : le bouton flottant
+  `position:absolute` en haut-droite de la boîte de sortie masquait la 1re ligne du texte anonymisé à
+  **toutes** les largeurs (mobile → desktop 1440). Il est désormais placé dans une **ligne d'en-tête**
+  (`.anon-pane-head`, au-dessus de la boîte, à droite du label) → zéro chevauchement. Les deux volets
+  reçoivent une `.anon-pane-head` de même hauteur → l'alignement des boîtes en mode 2 colonnes est
+  préservé. Compact (~2.2em) sur desktop, ≥44 px en tactile (≤860 px). Composant + CSS, appliqué aux
+  2 outils (anonymiseur + constructeur). Réversible (tag `backup-pre-copybtn-header-v1.65.75`).
+
 ## [1.65.75] - 2026-06-06
 
 ### Fixed

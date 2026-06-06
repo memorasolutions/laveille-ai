@@ -35,7 +35,9 @@
 <div class="anon-grid">
     {{-- Volet gauche : éditeur annoté --}}
     <div class="anon-pane-editor">
-        <label class="anon-pane-label" for="anonSource">{{ __('Votre texte') }}</label>
+        <div class="anon-pane-head">
+            <label class="anon-pane-label" for="anonSource">{{ __('Votre texte') }}</label>
+        </div>
         <div id="anonEditorWrap" class="mode-edit">
             <div id="anonSource" class="anon-textarea anon-rich" contenteditable="true" role="textbox" aria-multiline="true" aria-label="{{ __('Votre texte — la mise en forme (gras, listes…) est conservée au collage') }}" data-placeholder="{{ __('Collez ou écrivez votre texte ici…') }}"></div>
             <div id="anonAnnotated" tabindex="0" role="textbox" aria-label="{{ __('Texte annoté — cliquez une entité pour l\'anonymiser') }}"></div>
@@ -48,9 +50,11 @@
 
     {{-- Volet droit : aperçu anonymisé --}}
     <div class="anon-pane-preview">
-        <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé') }}</label>
+        <div class="anon-pane-head">
+            <label class="anon-pane-label" for="anonOutput">{{ __('Texte anonymisé') }}</label>
+            <button type="button" id="btnCopyAnonTop" class="anon-copy-inline" aria-label="{{ __('Copier le texte anonymisé') }}">📋 {{ __('Copier') }}</button>
+        </div>
         <div class="anon-output-wrap">
-            <button type="button" id="btnCopyAnonTop" class="anon-copy-float" aria-label="{{ __('Copier le texte anonymisé') }}">📋 {{ __('Copier') }}</button>
             <div id="anonOutput" class="anon-textarea anon-out-rich" role="textbox" aria-readonly="true" tabindex="0" aria-label="{{ __('Texte anonymisé — valeurs surlignées') }}"></div>
         </div>
         @isset($previewActions)
