@@ -75,6 +75,8 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
 @endpush
 @section('content')
 <section class="wpo-blog-single-section section-padding">
+    {{-- h1 accessible (a11y/SEO) — le titre éditable de la roue n'est pas un titre de page --}}
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">{{ $tool->name }}</h1>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10 col-12">

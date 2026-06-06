@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.64] - 2026-06-06
+
+### Fixed
+
+- **Accessibilité/SEO — `h1` manquant ajouté sur 2 outils** (oscilloscope-rlc, roue-tirage) : ces pages n'avaient aucun `<h1>` (uniquement des `h2`). Ajout d'un `h1` accessible (sr-only, technique clip — lu par Google et les lecteurs d'écran, zéro impact visuel sur ces outils canvas/app dont le titre s'affiche déjà via l'UI et le fil d'Ariane). Chaque page outil a désormais exactement un `h1`.
+
 ## [1.65.63] - 2026-06-06
 
 ### Changed

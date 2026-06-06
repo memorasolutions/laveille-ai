@@ -19,6 +19,8 @@
 @endpush
 @section('content')
 <section class="wpo-blog-single-section" style="padding-top: 0;">
+    {{-- h1 accessible (a11y/SEO) — outil canvas plein écran, titre visuel via l'UI/fil d'Ariane --}}
+    <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">{{ $tool->name }}</h1>
     <div class="container-fluid" style="padding: 0;">
         <div class="oscilloscope-wrapper" data-theme="light">
     <div class="app-container">
