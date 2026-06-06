@@ -79,7 +79,7 @@ class AnonymizerUI {
     this.anonPlain = window.AnonymizerCore.anonymize(this.sourceText, this.rules, this.overrides);
     // Vue riche miroir : faux SURLIGNÉS + candidats SOULIGNÉS → comparaison gauche↔droite facile.
     if (this.sourceText.trim() && this.sourceHtml && this.sourceHtml.trim() && window.AnonRich && window.AnonRich.highlightEntitiesInElement) {
-      output.innerHTML = this.sourceHtml;
+      output.innerHTML = this.safeSourceHtml();
       const marks = [];
       const ruleSet = new Set();
       for (const r of this.rules) { ruleSet.add(_norm(r.original)); marks.push({ value: r.original, replacement: r.replacement, category: r.category, cls: 'anon-anon', priority: 1 }); }
@@ -97,6 +97,25 @@ class AnonymizerUI {
       this.toast('Texte anonymisé copié.', 'success');
       if (btn) { const o = btn.innerHTML; btn.innerHTML = '✓ Copié'; setTimeout(() => { btn.innerHTML = o; }, 1500); }
     } catch (e) { this.toast('Copie impossible — sélectionnez puis Ctrl+C.', 'danger'); }
+  }
+
+  // Défense en profondeur : re-sanitize le HTML de l'éditeur avant toute injection innerHTML.
+  safeSourceHtml() {
+    return (window.AnonRich && window.AnonRich.sanitizePastedHtml)
+      ? window.AnonRich.sanitizePastedHtml(this.sourceHtml) : this.sourceHtml;
+  }
+
+  // Vie privée : efface TOUT (texte + table de correspondance) de ce navigateur (poste partagé).
+  forgetAll() {
+    this.sourceText = ''; this.sourceHtml = ''; this.anonPlain = ''; this.restoredPlain = '';
+    this.rules = []; this.candidates = []; this.overrides = []; this.lastSelection = '';
+    try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); } catch (e) {}
+    const src = document.getElementById('anonSource'); if (src) src.innerHTML = '';
+    const ai = document.getElementById('aiResponse'); if (ai) ai.value = '';
+    const ro = document.getElementById('restoredOutput'); if (ro) ro.textContent = '';
+    const rep = document.getElementById('restoreReport'); if (rep) rep.innerHTML = '';
+    this.setMode('edit'); this.renderAnnotated(); this.updateOutput();
+    this.toast('Données oubliées — la table de correspondance a été effacée de ce navigateur.', 'success');
   }
 
   // Étape 2 : affiche le texte restauré avec les vraies données SURLIGNÉES ; la valeur anonyme
@@ -168,7 +187,7 @@ class AnonymizerUI {
 
     // Base = HTML riche (préserve gras/italique/listes), sinon repli texte simple échappé.
     if (this.sourceHtml && this.sourceHtml.trim()) {
-      container.innerHTML = this.sourceHtml;
+      container.innerHTML = this.safeSourceHtml();
     } else {
       container.textContent = this.sourceText;
     }
@@ -618,6 +637,8 @@ class AnonymizerUI {
       this.updateOutput();
       this.toast('Réinitialisé — vous pouvez repartir à zéro.', 'info');
     });
+
+    on('btnForgetAll', 'click', () => this.forgetAll());
 
     on('btnCopyAnon', 'click', (e) => this.copyAnon(e.currentTarget));
     on('btnCopyAnonTop', 'click', (e) => this.copyAnon(e.currentTarget));

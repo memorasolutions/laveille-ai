@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.61] - 2026-06-06
+
+### Added / Fixed
+
+- **Anonymiseur — bouton « 🗑️ Oublier mes données » (vie privée, audit P0)** : nouvel item du menu ⋯ Actions qui efface TOUT de ce navigateur (texte, sortie, réponse IA, **table de correspondance** `lv_anon_rules_v3`/`overrides_v3` en localStorage). Note explicite ajoutée dans l'accordéon « 100 % local » (effacer sur un poste partagé). Répond au constat d'audit : les correspondances vraie↔fictive persistaient en localStorage.
+- **Anonymiseur — défense en profondeur XSS (audit P1)** : `renderAnnotated` et `updateOutput` re-sanitizent désormais le HTML de l'éditeur (`sanitizePastedHtml`) avant toute injection `innerHTML`, au lieu de se fier uniquement à la sanitisation au collage. Vérifié Playwright : le formatage (gras, listes) reste préservé.
+- **Constructeur de prompts — méta-description enrichie (SEO, audit P2)** : `tools.description` passe de 53 à ~165 car. (migration `2026_06_06_020000`, réversible) — décrit persona/tâche/audience/format/techniques + modèles cibles (ChatGPT, Claude, Gemini, Mistral).
+
 ## [1.65.60] - 2026-06-06
 
 ### Fixed
