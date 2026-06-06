@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.63] - 2026-06-06
+
+### Changed
+
+- **Anonymiseur — surlignage optimisé (fast-path) sur les longs documents** (audit P2, plan validé) : `highlightEntitiesInElement` ne lance plus chaque regex sur chaque nœud texte (O(N×M)). Pré-calcul du 1er mot normalisé de chaque entité ; pour un nœud, on saute une entité si son 1er mot n'y figure pas (`indexOf`) — skip **sûr** (le 1er mot doit être présent pour tout match, même avec espaces flexibles). **Vérifié Playwright** : surlignage identique (cas piège « Jean  Dubé » double espace OK), 200 paragraphes / 800 surlignages en **10 ms**, 0 régression.
+- **Anonymiseur — `execCommand('insertHTML')` conservé volontairement** (recherche juin 2026) : c'est le seul levier qui préserve l'annuler/refaire natif ; un remplacement par `Range.insertNode` casserait l'undo. Décision documentée en commentaire (pas de refactor à régression).
+
 ## [1.65.62] - 2026-06-06
 
 ### Changed

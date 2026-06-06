@@ -67,7 +67,10 @@
     const interactive = !opts || opts.interactive !== false; // false = vue d'affichage (colonne droite)
 
     const patterns = marks.map(function (m) {
+      // _firstWord : 1er mot normalisé (sans espace interne) pour un pré-filtre rapide et SÛR
+      // (le 1er mot doit être présent dans le nœud pour que la valeur entière puisse matcher).
       return { value: m.value, category: m.category, cls: m.cls, priority: m.priority || 0, replacement: m.replacement, tip: m.tip,
+               _firstWord: normFn(((m.value || '').split(/\s+/)[0]) || m.value),
                regex: window.AnonymizerCore.buildAccentInsensitiveBoundedRegex(m.value) };
     });
 
@@ -92,9 +95,11 @@
       if (insideHighlight(textNode)) return;
       const text = textNode.textContent;
       if (!text) return;
+      const ntext = normFn(text); // une seule normalisation par nœud (fast-path O(N) au lieu de O(N×M))
 
       const hits = [];
       patterns.forEach(function (p) {
+        if (p._firstWord && ntext.indexOf(p._firstWord) === -1) return; // skip sûr : 1er mot absent
         p.regex.lastIndex = 0;
         let m;
         while ((m = p.regex.exec(text)) !== null) {

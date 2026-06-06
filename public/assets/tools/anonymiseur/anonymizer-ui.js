@@ -433,6 +433,8 @@ class AnonymizerUI {
       const rawHtml = cb.getData('text/html');
       let clean = '';
       if (rawHtml && window.AnonRich) clean = window.AnonRich.sanitizePastedHtml(rawHtml);
+      // execCommand conservé VOLONTAIREMENT (déprécié mais seul à préserver l'annuler/refaire
+      // natif en 2026 ; Range.insertNode casserait l'undo — décision audit/recherche juin 2026).
       try {
         if (clean && clean.trim()) document.execCommand('insertHTML', false, clean);
         else document.execCommand('insertText', false, cb.getData('text/plain') || '');
