@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.67] - 2026-06-06
+
+### Changed
+
+- **Anonymiseur — « Tout anonymiser » remonte dans la barre d'outils** (demande utilisateur) : à droite de « 🔍 Détecter », le bouton est désormais « 🕵️ Tout anonymiser » (action la plus courante après détection). « ✍️ Anonymiser la sélection » est déplacé dans le menu ⋯ Actions (fonction inchangée). Aucun changement de logique (ids conservés).
+
 ## [1.65.66] - 2026-06-06
 
 ### Added
