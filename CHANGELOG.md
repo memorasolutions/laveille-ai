@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.71] - 2026-06-06
+
+### Changed
+- **DRY — éditeur d'anonymisation réutilisable** : extraction de l'éditeur de `/outils/anonymiseur`
+  (barre d'outils, bulle de sélection, surlignage/annotation, modes réaliste/jetons, popover d'occurrence)
+  dans un composant Blade unique `<x-tools::anonymizer-editor>` + un partial scripts partagé
+  `tools::partials.anonymizer-scripts`. Slot `previewActions` pour adapter les boutons à chaque page.
+- **Constructeur de prompts** : le panneau « 🛡️ Anonymiser un texte » réutilise désormais l'éditeur
+  COMPLET (même UX que l'anonymiseur : sélection, surligner, anonymiser) au lieu d'un mini-formulaire.
+  Le bouton « Insérer dans la tâche » lit le texte anonymisé partagé (`window.lvAnonUI.anonPlain`).
+- `anonymizer-ui.js` expose `window.lvAnonUI` (init défensif uniquement si l'éditeur est présent).
+- Aucune duplication de markup ni de logique entre les deux outils ; zéro régression sur l'anonymiseur.
+
 ## [1.65.70] - 2026-06-06
 
 ### Added

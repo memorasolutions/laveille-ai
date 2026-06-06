@@ -1,16 +1,17 @@
-// prompt-anon-panel.js — panneau « Anonymiser » in-page du constructeur de prompts.
-// Réutilise window.AnonymizerCore (moteur partagé, 100% local) + handoff sessionStorage
-// depuis l'anonymiseur. Vanilla, autonome. Aucune donnée ne quitte le navigateur.
+// prompt-anon-panel.js — pont du panneau « Anonymiser » du constructeur de prompts.
+// L'ÉDITEUR COMPLET (barre d'outils, bulle de sélection, surlignage, modes) est fourni par
+// <x-tools::anonymizer-editor> + window.lvAnonUI (anonymizer-core/rich/ui.js, 100% local) —
+// AUCUNE duplication. Ce script ne fait QUE :
+//   1) le toggle du panneau (progressive disclosure),
+//   2) l'insertion du texte anonymisé (lvAnonUI.anonPlain) dans le champ « Tâche »,
+//   3) le handoff sessionStorage depuis l'anonymiseur (compat. ascendante).
+// Auteur : MEMORA solutions, https://memora.solutions
 (function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
     const toggleBtn = document.getElementById('cpAnonToggle');
     const panel = document.getElementById('cpAnonPanel');
-    const input = document.getElementById('cpAnonInput');
-    const runBtn = document.getElementById('cpAnonRun');
-    const output = document.getElementById('cpAnonOutput');
-    const report = document.getElementById('cpAnonReport');
     const insertBtn = document.getElementById('cpAnonInsert');
     const taskField = document.getElementById('cpTaskObject');
 
@@ -20,21 +21,14 @@
 
     // HANDOFF : texte anonymisé importé de l'anonymiseur (sessionStorage, one-time, volatile).
     try {
-      const handoffKey = 'lv_handoff_prompt_text';
-      const handoffText = sessionStorage.getItem(handoffKey);
+      const handoffText = sessionStorage.getItem('lv_handoff_prompt_text');
       if (handoffText && handoffText.trim() !== '' && taskField) {
         taskField.value = handoffText;
         taskField.dispatchEvent(new Event('input', { bubbles: true })); // met à jour Alpine x-model
-        sessionStorage.removeItem(handoffKey);
+        sessionStorage.removeItem('lv_handoff_prompt_text');
         showToast('Texte anonymisé importé de l\'anonymiseur.', 'info');
       }
     } catch (e) { /* sessionStorage indisponible : on ignore */ }
-
-    // Garde : moteur non chargé → panneau désactivé (le handoff ci-dessus reste fonctionnel).
-    if (typeof window.AnonymizerCore === 'undefined') {
-      if (runBtn) { runBtn.disabled = true; runBtn.textContent = '🕵️ Anonymiser (indisponible)'; }
-      return;
-    }
 
     // Toggle du panneau (progressive disclosure).
     if (toggleBtn && panel) {
@@ -43,34 +37,23 @@
         toggleBtn.setAttribute('aria-expanded', String(!expanded));
         panel.style.display = expanded ? 'none' : 'block';
         panel.setAttribute('aria-hidden', String(expanded));
-        if (!expanded && input) input.focus();
+        if (!expanded) {
+          const src = document.getElementById('anonSource');
+          if (src) src.focus();
+        }
       });
     }
 
-    function runAnonymization() {
-      if (!input || !output || !report) return;
-      const txt = input.value.trim();
-      if (txt === '') { showToast('Veuillez saisir un texte à anonymiser.', 'warning'); return; }
-      try {
-        const ents = window.AnonymizerCore.detectEntities(txt);
-        const rules = window.AnonymizerCore.buildRules(
-          ents.map(e => ({ value: e.value, category: e.category })), { mode: 'pseudo' }
-        );
-        output.value = window.AnonymizerCore.anonymize(txt, rules, []);
-        report.textContent = ents.length > 0
-          ? ents.length + ' donnée(s) masquée(s).'
-          : 'Aucune donnée détectée — vous pouvez quand même insérer.';
-      } catch (err) {
-        report.textContent = 'Erreur lors de l\'anonymisation.';
-        showToast('Échec de l\'anonymisation.', 'danger');
-      }
-    }
-    if (runBtn) runBtn.addEventListener('click', runAnonymization);
-
+    // Insertion du texte anonymisé (produit par l'éditeur partagé) dans le champ « Tâche ».
     function insertIntoTask() {
-      if (!output || !taskField) return;
-      if (output.value.trim() === '') { runAnonymization(); if (output.value.trim() === '') return; }
-      taskField.value = output.value;
+      if (!taskField) return;
+      const ui = window.lvAnonUI;
+      const txt = ui && ui.anonPlain ? ui.anonPlain.trim() : '';
+      if (txt === '') {
+        showToast('Anonymisez d\'abord un texte (bouton « Détecter et anonymiser »).', 'warning');
+        return;
+      }
+      taskField.value = txt;
       taskField.dispatchEvent(new Event('input', { bubbles: true })); // Alpine x-model
       showToast('Texte anonymisé inséré dans la tâche.', 'success');
       if (toggleBtn && panel) {

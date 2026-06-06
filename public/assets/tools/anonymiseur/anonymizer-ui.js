@@ -728,4 +728,9 @@ class AnonymizerUI {
   }
 }
 
-new AnonymizerUI();
+// Expose l'instance pour les pages qui embarquent <x-tools::anonymizer-editor>
+// (ex. constructeur de prompts : lecture de window.lvAnonUI.anonPlain pour insertion).
+// Défensif : ne s'initialise que si l'éditeur est présent dans le DOM.
+if (document.getElementById('anonSource')) {
+  window.lvAnonUI = new AnonymizerUI();
+}
