@@ -21,6 +21,7 @@ class AnonymizerUI {
     document.addEventListener('DOMContentLoaded', () => {
       if (!window.AnonymizerCore) { console.error('AnonymizerCore manquant'); return; }
       this.loadRules();
+      this.loadSource(); // restaure le texte sauvegardé dans ce navigateur (100 % local)
       this.anonMode = localStorage.getItem('lv_anon_mode') || 'pseudo';
       this.setMode('edit');
       this.updateOutput();
@@ -54,6 +55,23 @@ class AnonymizerUI {
       localStorage.setItem('lv_anon_rules_v3', JSON.stringify(this.rules));
       localStorage.setItem('lv_anon_overrides_v3', JSON.stringify(this.overrides));
     } catch (e) { console.warn('save', e); }
+  }
+
+  // Persistance du TEXTE de l'éditeur (100 % local). Clé stable NON purgée au changement de
+  // version → le texte survit aux mises à jour de l'outil ; effacé seulement par Réinitialiser/Oublier.
+  saveSource() {
+    try { localStorage.setItem('lv_anon_source_v3', this.sourceHtml || ''); } catch (e) {}
+  }
+
+  loadSource() {
+    try {
+      const s = localStorage.getItem('lv_anon_source_v3');
+      if (s && s.trim()) {
+        this.sourceHtml = s;
+        const tmp = document.createElement('div'); tmp.innerHTML = s;
+        this.sourceText = this.richText(tmp);
+      }
+    } catch (e) {}
   }
 
   loadRules() {
@@ -109,7 +127,7 @@ class AnonymizerUI {
   forgetAll() {
     this.sourceText = ''; this.sourceHtml = ''; this.anonPlain = ''; this.restoredPlain = '';
     this.rules = []; this.candidates = []; this.overrides = []; this.lastSelection = '';
-    try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); } catch (e) {}
+    try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); localStorage.removeItem('lv_anon_source_v3'); } catch (e) {}
     const src = document.getElementById('anonSource'); if (src) src.innerHTML = '';
     const ai = document.getElementById('aiResponse'); if (ai) ai.value = '';
     const ro = document.getElementById('restoredOutput'); if (ro) ro.textContent = '';
@@ -423,7 +441,7 @@ class AnonymizerUI {
   bindRichEditor() {
     const src = document.getElementById('anonSource');
     if (!src) return;
-    const sync = () => { this.sourceHtml = src.innerHTML; this.sourceText = this.richText(src); };
+    const sync = () => { this.sourceHtml = src.innerHTML; this.sourceText = this.richText(src); this.saveSource(); };
     src.addEventListener('input', sync);
     src.addEventListener('blur', sync);
     src.addEventListener('paste', (e) => {
@@ -633,11 +651,13 @@ class AnonymizerUI {
 
     on('btnResetAll', 'click', () => {
       this.rules = []; this.candidates = []; this.lastSelection = ''; this.overrides = [];
-      try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); } catch (e) {}
+      this.sourceText = ''; this.sourceHtml = ''; this.anonPlain = '';
+      try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); localStorage.removeItem('lv_anon_source_v3'); } catch (e) {}
+      const src = document.getElementById('anonSource'); if (src) src.innerHTML = '';
       this.setMode('edit');
       this.renderAnnotated();
       this.updateOutput();
-      this.toast('Réinitialisé — vous pouvez repartir à zéro.', 'info');
+      this.toast('Réinitialisé — tout le contenu a été effacé.', 'info');
     });
 
     on('btnForgetAll', 'click', () => this.forgetAll());

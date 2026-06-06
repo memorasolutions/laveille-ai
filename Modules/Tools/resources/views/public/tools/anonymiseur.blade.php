@@ -65,7 +65,7 @@
                         <div id="infoBanner" class="mb-3">
                             <x-core::accordion id="anonymTrust" icon="🛡️" :title="__('100 % local')" :subtitle="__('Traitement dans votre navigateur — aucun contenu envoyé à un serveur')" :open="false">
                                 <p style="margin:0 0 .5rem;">{{ __('Votre texte, les règles et les correspondances vraie ↔ fictive restent sur votre appareil. Rien n\'est transmis : seul le texte déjà anonymisé sort, et uniquement si VOUS le copiez vers une IA externe.') }}</p>
-                                <p style="margin:0 0 .5rem;font-size:.88rem;color:#52586a;">{{ __('🗑️ Les correspondances restent dans CE navigateur (pour permettre la restauration de la réponse IA). Sur un poste partagé, utilisez « Oublier mes données » (menu ⋯ Actions) pour tout effacer.') }}</p>
+                                <p style="margin:0 0 .5rem;font-size:.88rem;color:#52586a;">{{ __('💾 Votre texte ET les correspondances sont enregistrés dans CE navigateur (jamais sur un serveur) pour les retrouver à votre retour — jusqu\'à « Réinitialiser » ou « Oublier mes données » (menu ⋯ Actions). Sur un poste partagé, effacez avant de partir.') }}</p>
                                 <p style="margin:0;font-size:.88rem;color:#52586a;">
                                     <a href="/glossaire/loi-25" target="_blank" rel="noopener">{{ __('Conforme Loi 25') }}</a> ·
                                     <a href="/glossaire/rgpd" target="_blank" rel="noopener">{{ __('Conforme RGPD') }}</a> ·

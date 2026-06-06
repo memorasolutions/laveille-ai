@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.65] - 2026-06-06
+
+### Added
+
+- **Anonymiseur — le texte de l'éditeur est conservé dans le navigateur (restauré à votre retour)** : demande utilisateur. Le contenu est sauvegardé en `localStorage` (clé `lv_anon_source_v3`, **stable et non purgée aux mises à jour** → survit aux déploiements ; **jamais envoyé à un serveur**) à chaque saisie, et restauré au chargement avec sa mise en forme. Effacé uniquement par « Réinitialiser » ou « 🗑️ Oublier mes données ». « Réinitialiser » efface désormais **tout le contenu** (texte + correspondances + sauvegarde). Note de confidentialité mise à jour (transparence + rappel d'effacer sur un poste partagé). **Vérifié Playwright** : saisie → rechargement → texte + format restaurés ; reset → vidé et persistant.
+
 ## [1.65.64] - 2026-06-06
 
 ### Fixed
