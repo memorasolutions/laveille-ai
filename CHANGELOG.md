@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.78] - 2026-06-06
+
+### Fixed
+- **Glossaire — « Duplicate key on x-for » (17×)** : le tableau `$categoriesForFilter` (filtre du
+  dictionnaire) ne contenait pas de champ `id`, alors que le `<template x-for="cat in categories"
+  :key="cat.id">` l'utilisait comme clé → clés `undefined` dupliquées. Ajout de `'id' => $c->id`.
+  Le filtrage par catégorie se fait par `slug` (inchangé) → zéro impact comportemental, 366 termes
+  rendus normalement. Découvert pendant la vérif Alpine (v1.65.77).
+
 ## [1.65.77] - 2026-06-06
 
 ### Fixed

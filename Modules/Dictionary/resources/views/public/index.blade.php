@@ -45,6 +45,7 @@
     })->values();
 
     $categoriesForFilter = $categories->map(fn($c) => [
+        'id' => $c->id, // requis par :key="cat.id" du x-for (sinon clés undefined → « Duplicate key on x-for »)
         'name' => $c->name, 'icon' => $c->icon, 'color' => $c->color,
         'slug' => \Illuminate\Support\Str::slug($c->name),
     ])->values();
