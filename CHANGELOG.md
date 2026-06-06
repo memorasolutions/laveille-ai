@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.75] - 2026-06-06
+
+### Fixed
+- **UX tablette éditeur d'anonymisation** (audit Playwright 768×1024 + 1024×768) : les correctifs tactiles
+  (bouton « Copier » en flux normal hors du texte + bascule de vue ≥44 px) passent du breakpoint mobile
+  (≤480 px) à **≤860 px** → couvre la tablette portrait, où le bouton « Copier » flottant chevauchait la
+  première ligne du texte anonymisé (overlap 8 px mesuré). À ≤860 px la grille est déjà empilée, donc
+  aucun impact sur l'alignement des volets en mode 2 colonnes (≥1024 px inchangé). Police 16 px reste
+  scoppée ≤480 px (anti-zoom iOS iPhone). CSS uniquement, desktop inchangé.
+
+### Notes
+- « Split » à 768 px portrait = les 2 volets empilés et visibles (comportement tablette voulu, lisible) —
+  pas un défaut. Forcer 2 colonnes à 768 px cramperait l'éditeur riche.
+
 ## [1.65.74] - 2026-06-06
 
 ### Changed
