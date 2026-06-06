@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.59] - 2026-06-05
+
+### Fixed
+
+- **Accessibilité — icônes SVG du bouton plein écran marquées décoratives** (audit WCAG de l'anonymiseur fraîchement publié). Le bouton porte déjà `aria-label="Plein écran"` ; ses 2 SVG reçoivent `aria-hidden="true" focusable="false"` (cohérent avec le bouton « partager »), ce qui lève le signalement WCAG 1.1.1 (« SVG missing accessible name ») sans double annonce pour les lecteurs d'écran. Passe qualité de mise en ligne : indexabilité OK (`robots: index,follow`, présent au sitemap, canonical), contraste du nouveau panneau d'anonymisation du constructeur conforme AA (6,77:1 et 7,34:1). Les autres signalements de l'audit headless sont des faux positifs connus (blanc/blanc = fond foncé du header / modale cachée non vus par le scanner ; « Tab » = éléments dans des panneaux volontairement masqués).
+
 ## [1.65.58] - 2026-06-05
 
 ### Fixed
