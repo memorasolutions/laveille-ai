@@ -44,8 +44,9 @@
         ];
     })->values();
 
-    $categoriesForFilter = $categories->map(fn($c) => [
+    $categoriesForFilter = $categories->unique(fn($c) => (string) $c->name)->map(fn($c) => [
         'id' => $c->id, // requis par :key="cat.id" du x-for (sinon clés undefined → « Duplicate key on x-for »)
+        // ->unique(name) : garde-fou anti-doublons d'affichage même si la table en contenait encore
         'name' => $c->name, 'icon' => $c->icon, 'color' => $c->color,
         'slug' => \Illuminate\Support\Str::slug($c->name),
     ])->values();

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.79] - 2026-06-06
+
+### Fixed
+- **Glossaire — dédoublonnage des catégories (données prod)** : la table `dictionary_categories`
+  contenait des lignes dupliquées (catégories ré-insérées), d'où un `<select>` de filtre avec chaque
+  catégorie en triple. Migration **réversible** `2026_06_06_030000_dedup_dictionary_categories` :
+  sauvegarde complète (`dict_categories_dedup_bak` + mapping `dict_terms_catmap_dedup_bak`),
+  groupe par `name` brut (ne fusionne QUE les doublons identiques), **réassigne** les termes des
+  doublons vers la catégorie canonique (icône non-nulle puis plus petit id) AVANT suppression
+  (FK `nullOnDelete`), puis supprime les doublons. **Zéro perte de termes**. `down()` restaure tout.
+  Garde-fou additionnel : `->unique('name')` sur le filtre du glossaire (anti-doublons d'affichage futurs).
+  Testé en local (up + down sans erreur). Réversible (tag `backup-pre-glossaire-dedup-v1.65.78`).
+
 ## [1.65.78] - 2026-06-06
 
 ### Fixed
