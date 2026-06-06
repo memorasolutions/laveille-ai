@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.80] - 2026-06-06
+
+### Added
+- **Glossaire — 3 termes fondamentaux d'entraînement ML** (batch P0 #1, audit des manques) :
+  **Rétropropagation**, **Descente de gradient**, **Fonction de perte** (catégorie « Concepts fondamentaux »).
+  Fiches complètes conformes au standard : définition, analogie, exemple chiffré, « le saviez-vous »,
+  réponse AEO (one_sentence_answer), FAQPage (2 Q/R), sources GEO vérifiées ({label,url} 200), image hero
+  `{slug}.webp` + og:image `{slug}.jpg` (1200×669, compressées). Migration réversible (anti-doublon par slug,
+  `down()` supprime par slug). Contenu via délégation MCP (gpt-4o-mini) + faits sourcés (sonar-pro),
+  images via multi-ai-mcp (gemini-2.5-flash-image, session Playwright indisponible), affiné par le superviseur.
+
 ## [1.65.79] - 2026-06-06
 
 ### Fixed
