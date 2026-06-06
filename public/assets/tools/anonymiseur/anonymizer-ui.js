@@ -248,7 +248,7 @@ class AnonymizerUI {
     }
   }
 
-  detect() {
+  detect(silent) {
     const source = document.getElementById('anonSource');
     if (source) { this.sourceHtml = source.innerHTML; this.sourceText = this.richText(source); }
     if (!this.sourceText.trim()) { this.toast('Collez d\'abord votre texte.', 'warning'); return; }
@@ -256,8 +256,19 @@ class AnonymizerUI {
     const existing = new Set(this.rules.map(r => _norm(r.original)));
     this.candidates = entities.filter(ent => !existing.has(_norm(ent.value)));
     this.setMode('annotate');
+    if (silent) return;
     if (this.candidates.length) this.toast(this.candidates.length + ' donnée(s) repérée(s) — cliquez pour anonymiser.', 'info');
     else this.toast('Aucune donnée repérée automatiquement. Sélectionnez un passage à anonymiser.', 'info');
+  }
+
+  // Bouton principal : détecte PUIS anonymise tout en un clic.
+  detectAndAnonymizeAll() {
+    this.detect(true);
+    if (!this.sourceText.trim()) return; // detect a déjà averti (texte vide)
+    const cands = [...this.candidates];
+    for (const c of cands) this.anonymizeValue(c.value, c.category);
+    if (cands.length) this.toast(cands.length + ' donnée(s) détectée(s) et anonymisée(s).', 'success');
+    else this.toast('Aucune donnée détectée — sélectionnez un passage à anonymiser (menu Actions).', 'info');
   }
 
   anonymizeValue(value, category) {
@@ -606,6 +617,7 @@ class AnonymizerUI {
     const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
 
     on('btnDetect', 'click', () => this.detect());
+    on('btnDetectAnonAll', 'click', () => this.detectAndAnonymizeAll());
     on('btnModeToggle', 'click', () => this.toggleAnonMode());
 
     on('btnEditText', 'click', () => {

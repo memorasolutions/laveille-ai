@@ -88,11 +88,12 @@
 
                             {{-- Barre d'outils : 1 action primaire + sélection + menu « Actions » (réduit la surcharge — tendance 2026) --}}
                             <div class="anon-toolbar" role="toolbar" aria-label="{{ __('Actions d\'anonymisation') }}">
-                                <button type="button" id="btnDetect" class="anon-btn">🔍 {{ __('Détecter') }}</button>
-                                <button type="button" id="btnAnonymizeAll" class="anon-btn secondary">🕵️ {{ __('Tout anonymiser') }}</button>
+                                <button type="button" id="btnDetectAnonAll" class="anon-btn">🕵️ {{ __('Détecter et anonymiser') }}</button>
                                 <div class="anon-menu-wrap">
                                     <button type="button" id="btnActionsMenu" class="anon-btn secondary" aria-haspopup="menu" aria-expanded="false">⋯ {{ __('Actions') }}</button>
                                     <div id="actionsMenu" class="anon-menu hidden" role="menu" aria-label="{{ __('Plus d\'actions') }}">
+                                        <button type="button" id="btnDetect" class="anon-menu-item" role="menuitem">🔍 {{ __('Détecter seulement') }}</button>
+                                        <button type="button" id="btnAnonymizeAll" class="anon-menu-item" role="menuitem">🕵️ {{ __('Tout anonymiser') }}</button>
                                         <button type="button" id="btnAnonymizeSelection" class="anon-menu-item" role="menuitem" title="{{ __('Sélectionnez un passage dans votre texte, puis cliquez') }}">✍️ {{ __('Anonymiser la sélection') }}</button>
                                         <button type="button" id="btnEditText" class="anon-menu-item" role="menuitem">✏️ {{ __('Modifier le texte') }}</button>
                                         <button type="button" id="btnModeToggle" class="anon-menu-item" role="menuitem" aria-pressed="false" title="{{ __('Basculer entre faux noms réalistes et jetons balisés stables') }}">🎭 {{ __('Réaliste') }}</button>

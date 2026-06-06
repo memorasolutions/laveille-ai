@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.68] - 2026-06-06
+
+### Changed
+
+- **Anonymiseur — un seul bouton « 🕵️ Détecter et anonymiser »** (demande utilisateur) : remplace les deux boutons séparés de la barre d'outils ; détecte puis anonymise tout en un clic. Les actions séparées « 🔍 Détecter seulement » et « 🕵️ Tout anonymiser » sont déplacées dans le menu ⋯ Actions (toujours disponibles). Nouvelle méthode `detectAndAnonymizeAll()` ; `detect(silent)` pour éviter le double toast. **Vérifié Playwright** : un clic → 3 entités détectées + anonymisées (0 candidat restant, données réelles absentes), 0 erreur console.
+
 ## [1.65.67] - 2026-06-06
 
 ### Changed
