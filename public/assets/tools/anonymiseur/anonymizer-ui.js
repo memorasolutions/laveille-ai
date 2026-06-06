@@ -264,6 +264,7 @@ class AnonymizerUI {
     const newRules = window.AnonymizerCore.buildRules([{ value, category }], { mode: this.anonMode, existing: this.rules });
     const normNew = new Set(newRules.map(r => _norm(r.original)));
     this.rules = [...this.rules.filter(r => !normNew.has(_norm(r.original))), ...newRules];
+    if (window.AnonymizerCore.relinkEmails) window.AnonymizerCore.relinkEmails(this.rules); // courriel ↔ faux nom cohérent
     const nv = _norm(value);
     this.candidates = this.candidates.filter(c => _norm(c.value) !== nv);
     this.saveRules();
@@ -377,6 +378,7 @@ class AnonymizerUI {
       const newRules = window.AnonymizerCore.buildRules([m], { mode: this.anonMode, existing: this.rules });
       this.rules = this.rules.concat(newRules);
     }
+    if (window.AnonymizerCore.relinkEmails) window.AnonymizerCore.relinkEmails(this.rules); // courriel ↔ faux nom cohérent
     this.saveRules();
     this.renderAnnotated();
     this.updateOutput();

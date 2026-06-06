@@ -365,6 +365,45 @@ function restore(aiText, rules, overrides = []) {
   return { text: result, found, notFound };
 }
 
-const AnonymizerCore = { detectEntities, generateFake, buildRules, anonymize, restore, buildAccentInsensitiveBoundedRegex, buildAccentInsensitiveUnboundedRegex };
+// Cohérence courriel ↔ nom : si le nom de la personne apparaît dans la partie locale d'un
+// courriel (« martin.rousseau@… »), on remplace ces jetons par le MÊME faux nom (« marc.fortin@… »)
+// au lieu d'un nom aléatoire. Réversibilité préservée (le replacement reste unique).
+function relinkEmails(rules) {
+  if (!Array.isArray(rules) || !rules.length) return rules;
+  const norm = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const map = new Map(); // jeton réel (prénom/nom) → faux jeton
+  for (const r of rules) {
+    if (r.category === 'firstName' || r.category === 'lastName') {
+      map.set(norm(r.original), r.replacement);
+    } else if (r.category === 'name') {
+      const o = String(r.original).split(/\s+/), f = String(r.replacement || '').split(/\s+/);
+      o.forEach((w, i) => { if (f[i]) map.set(norm(w), f[i]); });
+    }
+  }
+  if (!map.size) return rules;
+  const used = new Set(rules.map(r => norm(r.replacement)));
+  for (const r of rules) {
+    if (r.category !== 'email' || !String(r.original).includes('@')) continue;
+    const at = r.original.indexOf('@');
+    const local = r.original.slice(0, at);
+    const repAt = String(r.replacement || '').indexOf('@');
+    const fakeDomain = repAt >= 0 ? r.replacement.slice(repAt) : '@example.com';
+    let changed = false;
+    const newLocal = local.split(/([._+\-])/).map((tok) => {
+      const f = map.get(norm(tok));
+      if (f) { changed = true; return norm(f).replace(/\s+/g, ''); } // faux jeton sans accent/espace (courriel valide)
+      return tok;
+    }).join('');
+    if (!changed) continue;
+    used.delete(norm(r.replacement));
+    let candidate = newLocal + fakeDomain, n = 1;
+    while (used.has(norm(candidate))) { candidate = newLocal + n + fakeDomain; n++; }
+    r.replacement = candidate;
+    used.add(norm(candidate));
+  }
+  return rules;
+}
+
+const AnonymizerCore = { detectEntities, generateFake, buildRules, anonymize, restore, relinkEmails, buildAccentInsensitiveBoundedRegex, buildAccentInsensitiveUnboundedRegex };
 if (typeof module !== 'undefined' && module.exports) module.exports = AnonymizerCore;
 if (typeof window !== 'undefined') window.AnonymizerCore = AnonymizerCore;

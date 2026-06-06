@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.66] - 2026-06-06
+
+### Added
+
+- **Anonymiseur — le courriel reprend le MÊME faux nom que la personne (cohérence)** : quand le nom d'une personne apparaît dans la partie locale d'un courriel (« martin.rousseau@hexasoft.io »), le faux courriel utilise désormais le même faux nom que la personne (« Martin Rousseau » → « André Gauthier » ⇒ « andre.gauthier@… ») au lieu d'un nom aléatoire incohérent. Nouvelle fonction `relinkEmails()` (moteur) appelée après chaque anonymisation et changement de mode ; remplace les jetons du nom dans la partie locale, conserve les séparateurs (`.`/`_`/`-`) et le faux domaine, garantit l'unicité (réversibilité préservée). Les courriels sans nom lié restent aléatoires. **Vérifié** : test Node (round-trip 100 % sur cas variés) + Playwright UI (cohérence prénom.nom + restauration exacte).
+
 ## [1.65.65] - 2026-06-06
 
 ### Added
