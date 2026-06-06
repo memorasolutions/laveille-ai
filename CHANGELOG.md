@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.70] - 2026-06-06
+
+### Added
+
+- **Pied de page — crédit « Conçu et hébergé par MEMORA solutions · Entreprise canadienne 🍁 »** : ligne discrète sous le copyright (site-wide), d'après les best practices juin 2026 (sous le copyright, typo réduite, couleur atténuée WCAG, ancre = nom de marque). Lien `rel="nofollow noopener noreferrer" target="_blank"` vers https://memora.solutions (évite un profil de liens artificiel sur un lien site-wide).
+
 ## [1.65.69] - 2026-06-06
 
 ### Changed / Fixed
