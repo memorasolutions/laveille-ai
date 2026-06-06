@@ -306,8 +306,12 @@
     <script defer src="{{ fronttheme_asset('js/jquery.dlmenu.js') }}"></script>
     <script defer src="{{ fronttheme_asset('js/jquery-plugin-collection.js') }}"></script>
     <script defer src="{{ fronttheme_asset('js/script.js') }}?v={{ filemtime(public_path('themes/' . config('app.frontend_theme', 'bloggar') . '/js/script.js')) }}"></script>
+    {{-- Plugin Alpine « intersect » uniquement : il s'attache (via alpine:init) à l'instance Alpine
+         fournie par Livewire 4 (@livewireScripts ci-dessous embarque déjà Alpine + ses plugins).
+         Le CORE Alpine n'est volontairement PLUS chargé ici : le double-chargement causait le warning
+         « Detected multiple instances of Alpine running ». Les Alpine.data() du site sont tous
+         enregistrés via document.addEventListener('alpine:init', …) → compatibles. --}}
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
     @stack('scripts')
     {{-- #165 fix : Livewire scripts indispensables pour composants front (commentaires, etc.) --}}

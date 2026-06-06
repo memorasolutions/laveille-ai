@@ -151,6 +151,10 @@
   padding: .6rem 0; margin-bottom: .85rem; background: #fff; border-bottom: 1px solid var(--anon-line); }
 .anon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
 @media (max-width: 860px) { .anon-grid { grid-template-columns: 1fr; } }
+/* Dans le constructeur de prompts, l'éditeur est imbriqué dans une card étroite (col-lg-8) :
+   2 colonnes y donnaient ~39 ch/volet (serré). On empile (volets pleine largeur ~83 ch, plus lisibles).
+   Scoppé #cpAnonPanel → l'anonymiseur autonome garde son affichage 2 colonnes. */
+#cpAnonPanel .anon-grid { grid-template-columns: 1fr; }
 /* Bascule de vue : Éditeur pleine largeur / Split / Aperçu pleine largeur */
 .anon-grid.view-editor { grid-template-columns: 1fr; }
 .anon-grid.view-editor > .anon-pane-preview { display: none; }

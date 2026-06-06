@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.77] - 2026-06-06
+
+### Fixed
+- **Warning « Detected multiple instances of Alpine running » (site-wide)** : le thème chargeait Alpine 3
+  via CDN EN PLUS de Livewire 4 (qui embarque déjà Alpine + ses plugins). Le **core Alpine CDN est retiré**
+  du master ; seul le plugin `@alpinejs/intersect` reste (il s'attache à l'Alpine de Livewire via `alpine:init`).
+  Tous les `Alpine.data()` du site sont déjà enregistrés sous `alpine:init` → compatibles. Une seule instance
+  Alpine désormais. Sourcé pp_search (doc Livewire 4, juin 2026). Réversible (`backup-pre-p2-alpine-panel-v1.65.76`).
+- **Panneau d'anonymisation du constructeur trop serré (~39 ch/volet)** : l'éditeur imbriqué dans la card
+  étroite (col-lg-8) affichait 2 colonnes de ~309 px. Il est désormais **empilé** (`#cpAnonPanel .anon-grid`
+  en 1 colonne) → volets pleine largeur (~83 ch), bien plus lisibles. Scoppé au constructeur ; l'anonymiseur
+  autonome conserve son affichage 2 colonnes.
+
 ## [1.65.76] - 2026-06-06
 
 ### Fixed
