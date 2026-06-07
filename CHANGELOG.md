@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.95] - 2026-06-07
+
+### Added
+- Glossaire (batch #12) : 3 termes « calcul & métriques » — **CUDA** (Compute Unified Device Architecture, cat Acronymes et sigles), **F1-score** (score F1, cat Données et traitement), **Perplexité** (perplexity, cat Données et traitement). Fiches complètes (définition, analogie, exemple, le saviez-vous, réponse en une phrase, 2 FAQ, 2 sources vérifiées chacun), images hero générées via le compte Gemini de l'utilisateur (jpg + webp 1200×670). Migration réversible, anti-doublon par slug.
+
 ## [1.65.94] - 2026-06-07
 
 ### Added
