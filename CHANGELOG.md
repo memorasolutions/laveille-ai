@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.93] - 2026-06-07
+
+### Added
+- Glossaire (batch #10) : 3 termes « alignement / capacités IA » — **Sycophancy** (flagornerie de l'IA, cat Sécurité et éthique), **Reward hacking** (piratage de la récompense, cat Sécurité et éthique), **Frontière dentelée** (jagged frontier, cat IA). Fiches complètes (définition, analogie, exemple, le saviez-vous, réponse en une phrase, 2 FAQ, 2 sources vérifiées chacun), images hero générées via le compte Gemini de l'utilisateur (jpg + webp 1200×670). Migration réversible, anti-doublon par slug.
+
 ## [1.65.92] - 2026-06-07
 
 ### Added
