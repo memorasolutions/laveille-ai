@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.85] - 2026-06-07
+
+### Improved
+- **Élagage SEO des actualités — remédiations post-audit** (audit v1.65.84, note 78/100) :
+  - **R1** — la commande `news:prune-seo` **journalise** désormais chaque exécution (`Log::info`) et **notifie
+    IndexNow** (`IndexNowService::submitBatch`) des URLs passées en noindex → déindexation plus rapide + traçabilité
+    (corrige le bypass des observers par le mass-update + le cron muet).
+  - **R3** — **auto-healing** : une actualité noindex redevenue performante (`views_count >= max_views`) repasse
+    automatiquement en `index` (symétrie, évite de pénaliser un regain de trafic).
+  - **R5** — **test automatisé** (`PruneSeoCommandTest`, Pest) + validation fonctionnelle MySQL (noindex /
+    auto-healing / reset / dry-run / disabled = 5/5).
+  - `--dry-run` affiche maintenant aussi les candidats « ré-index ». Toujours 100 % réversible.
+  Différé (décisions structurelles) : R2 multi-signal GSC, R4 whitelist/maillage, R6 batchs+monitoring.
+
 ## [1.65.84] - 2026-06-07
 
 ### Added
