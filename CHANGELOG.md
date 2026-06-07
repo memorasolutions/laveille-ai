@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.101] - 2026-06-07
+
+### Fixed
+- Glossaire — **2 doublons supplémentaires consolidés** (révélés par un audit prod-wide après le cas MCP) : `differential-privacy` → canonique `confidentialite-differentielle`, et `hallucination-ia` → canonique `hallucination`. Même traitement réversible : alias uniques fusionnés dans la fiche canonique (« differential privacy », « hallucination IA », « Hallucination LLM »…), doublon **dépublié** (aucun DELETE), ancien slug **redirigé en 301**. Les fiches canoniques (originaux du seeder, contenu propre) sont conservées ; les doublons venaient d'ajouts manuels via l'admin (le doublon `hallucination-ia` avait des artefacts markdown bruts).
+
 ## [1.65.100] - 2026-06-07
 
 ### Fixed
