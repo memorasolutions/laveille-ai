@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.92] - 2026-06-07
+
+### Added
+- Blog — image éditoriale du **concentré IA hebdomadaire (semaine du 1 au 7 juin 2026)** générée via le compte Gemini de l'utilisateur (isométrique, charte Memora navy/orange, sans texte) ; jpg 1200×670 (89 Ko) + webp (60 Ko) dans `public/images/blog/`. L'article (20 actualités, catégorie LE CONCENTRÉ) est publié en base.
+
 ## [1.65.91] - 2026-06-07
 
 ### Added
