@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.86] - 2026-06-07
+
+### Improved
+- **Élagage SEO actualités — R4 : whitelist de rubriques protégées** (best-practice 2026 « hard-exclusions ») :
+  nouvelle clé `config/news/seo_prune.php` → `protect_categories` (liste de `category_tag` jamais élagués,
+  quelles que soient l'ancienneté/les vues). Défaut **vide** (aucun effet → 100 % additif et sûr). Les
+  `category_tag` NULL restent élageables. Validé MySQL (rubrique protégée → index, autre → noindex).
+  Rend la décision **multi-signal** (âge + vues + rubrique). R2 (signal GSC) et R6 restent différés.
+
 ## [1.65.85] - 2026-06-07
 
 ### Improved

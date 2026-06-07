@@ -50,6 +50,8 @@ class PruneSeoCommand extends Command
         $goneEnabled = (bool) ($config['gone']['enabled'] ?? false);
         $goneAgeMonths = (int) ($config['gone']['age_months'] ?? 24);
         $goneMaxViews = (int) ($config['gone']['max_views'] ?? 5);
+        // Rubriques jamais élaguées (hard-exclusion éditoriale, best-practice 2026).
+        $protectCats = array_values(array_filter((array) ($config['protect_categories'] ?? [])));
 
         // Requêtes de base (réutilisées pour compte ET application).
         $reindexBase = fn () => DB::table($table)
@@ -60,7 +62,11 @@ class PruneSeoCommand extends Command
             ->where('is_published', true)
             ->where('seo_status', 'index')
             ->where('pub_date', '<', now()->subMonths($minAgeMonths))
-            ->where('views_count', '<', $maxViews);
+            ->where('views_count', '<', $maxViews)
+            // Rubriques protégées exclues (les category_tag NULL restent élageables).
+            ->when(! empty($protectCats), fn ($q) => $q->where(
+                fn ($qq) => $qq->whereNotIn('category_tag', $protectCats)->orWhereNull('category_tag')
+            ));
 
         $goneBase = fn () => DB::table($table)
             ->whereIn('seo_status', ['index', 'noindex'])
