@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.82] - 2026-06-07
+
+### Added
+- **Glossaire — 3 termes fondamentaux ML/réseaux** (batch P0 #3) : **Sous-apprentissage** (complète la paire
+  avec Surapprentissage), **Généralisation**, **Fonction d'activation** (catégorie « Concepts fondamentaux »).
+  Fiches complètes au standard (définition, analogie, exemple, le saviez-vous, AEO, FAQPage, sources vérifiées,
+  image hero `.webp` + og:image `.jpg`). Migration réversible. Glossaire à 375 termes.
+
 ## [1.65.81] - 2026-06-07
 
 ### Added
