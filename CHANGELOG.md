@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.91] - 2026-06-07
+
+### Added
+- Glossaire (batch #9) : 3 termes « capacités IA 2026 » — **Computer use** (usage de l'ordinateur, cat IA), **Deep research** (recherche approfondie, cat IA), **Instruction tuning** (ajustement par instructions, cat Concepts fondamentaux). Fiches complètes (définition, analogie, exemple, le saviez-vous, réponse en une phrase, 2 FAQ, 2 sources vérifiées chacun), images hero générées via le compte Gemini de l'utilisateur (jpg + webp 1200×669). Migration réversible, anti-doublon par slug.
+
 ## [1.65.90] - 2026-06-07
 
 ### Added
