@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.83] - 2026-06-07
+
+### Added
+- **Glossaire — 3 termes « évaluation des modèles »** (batch P0 #4) : **Précision et rappel**,
+  **Matrice de confusion** (catégorie « Données et traitement »), **LLM-as-a-judge** (catégorie « IA »).
+  Fiches complètes au standard (définition, analogie, exemple chiffré, le saviez-vous, AEO, FAQPage,
+  sources vérifiées 200, image hero `.webp` + og:image `.jpg`). Migration réversible. Glossaire à 378 termes.
+
 ## [1.65.82] - 2026-06-07
 
 ### Added
