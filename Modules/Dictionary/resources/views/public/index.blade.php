@@ -285,6 +285,73 @@
     .gl-hero p { font-size: 1.05rem; color: rgba(255,255,255,0.95); margin: 0 0 12px; }
     .gl-stats-badge { background: rgba(255,255,255,0.25); color: #fff; padding: 4px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
 
+    /* === Toolbar sticky compacte (recherche + filtres dropdown + chips) === */
+    /* Le .page-wrapper du thème a overflow:hidden, ce qui crée un conteneur de défilement
+       et casse position:sticky. Scopé à cette page : on clipe seulement en X (anti scroll
+       horizontal), on rétablit l'axe Y en visible pour que le sticky fonctionne. */
+    .page-wrapper { overflow-x: clip !important; overflow-y: visible !important; }
+    .gl-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: #fff;
+        padding: 10px 0;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+        transition: top .25s ease;
+    }
+    .gl-toolbar.gl-header-visible { top: 90px; }
+    @media (max-width: 991px) { .gl-toolbar.gl-header-visible { top: 60px; } }
+    .gl-bar-inner { position: relative; }
+    .gl-toolbar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .gl-search-wrapper { flex: 1; min-width: 200px; margin: 0; }
+    .gl-search-input { height: 44px; }
+    .gl-filter-toggle {
+        height: 44px; min-width: 44px; border: 1px solid #E5E7EB;
+        border-radius: var(--r-btn, 8px); background: #fff; padding: 0 14px;
+        display: inline-flex; align-items: center; gap: 6px; font-weight: 600;
+        cursor: pointer; position: relative; color: var(--c-dark); font-size: 14px;
+    }
+    .gl-filter-toggle.active { border-color: var(--c-primary); color: var(--c-primary); }
+    .gl-filter-badge {
+        background: var(--c-primary, #0B7285); color: #fff; border-radius: 999px;
+        min-width: 18px; height: 18px; padding: 0 5px; font-size: 11px;
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .gl-reset {
+        height: 44px; min-width: 44px; background: none; border: none; color: #6B7280;
+        font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .gl-reset:hover { color: var(--c-dark); }
+    .gl-counter { margin: 0; white-space: nowrap; font-size: 14px; color: var(--c-dark); }
+    .gl-counter strong { color: var(--c-primary); }
+    .gl-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+    .gl-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--c-primary-badge, #e6f4f6); color: var(--c-primary, #0B7285);
+        border: none; border-radius: 999px; padding: 5px 12px; font-size: 13px;
+        font-weight: 600; cursor: pointer; min-height: 32px;
+    }
+    .gl-chip:hover { filter: brightness(.96); }
+    .gl-chip .x { font-weight: 700; font-size: 15px; line-height: 1; }
+    .gl-filter-panel {
+        position: absolute; left: 0; right: 0; top: calc(100% + 6px);
+        background: #fff; border: 1px solid #E5E7EB; border-radius: var(--r-base, 10px);
+        box-shadow: 0 12px 28px -8px rgba(0,0,0,.18); padding: 14px 16px;
+        z-index: 60; max-height: 70vh; overflow: auto;
+    }
+    .gl-filter-panel .gl-filters { margin-bottom: 12px; }
+    .gl-filter-panel .gl-az-nav { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .gl-filter-toggle:focus-visible, .gl-chip:focus-visible, .gl-reset:focus-visible {
+        outline: 2px solid var(--c-primary, #0B7285); outline-offset: 2px;
+    }
+    html { scroll-padding-top: 150px; }
+    @media (max-width: 991px) {
+        html { scroll-padding-top: 120px; }
+        .gl-counter { width: 100%; order: 5; }
+    }
+    @media (max-height: 480px) { .gl-toolbar { position: static; } }
+
     [x-cloak] { display: none !important; }
 </style>
 @endpush
@@ -324,7 +391,13 @@
             toggleType(type) { this.activeType = this.activeType === type ? '' : type; },
             toggleLetter(l) { this.activeLetter = this.activeLetter === l ? '' : l; },
             toggleCategory(c) { this.activeCategory = this.activeCategory === c ? '' : c; },
-            resetAll() { this.search = ''; this.activeType = ''; this.activeLetter = ''; this.activeCategory = ''; }
+            resetAll() { this.search = ''; this.activeType = ''; this.activeLetter = ''; this.activeCategory = ''; },
+
+            filtersOpen: false,
+            get hasActiveFilters() { return !!(this.search || this.activeType || this.activeLetter || this.activeCategory); },
+            get activeFilterCount() { return [this.search, this.activeType, this.activeLetter, this.activeCategory].filter(Boolean).length; },
+            typeLabels: { acronym: '🔤 Acronymes', ai_term: '🤖 Termes IA', explainer: '📖 Vulgarisations' },
+            get activeCategoryLabel() { const c = this.categories.find(x => x.slug === this.activeCategory); return c ? c.icon + ' ' + c.name : ''; }
          }"
          >
 
@@ -447,64 +520,94 @@
             @endauth
         </div>
 
-        {{-- Search + Category dropdown --}}
-        <div class="row" style="margin-bottom: 16px;">
-            <div class="col-md-7 col-sm-8 col-xs-12" style="margin-bottom: 10px;">
-                <div class="gl-search-wrapper" style="margin-bottom: 0;">
-                    <svg class="gl-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text"
-                           class="gl-search-input"
-                           placeholder="{{ __('Rechercher un terme (ex: LLM, prompt, transformer...)') }}"
-                           x-model="search"
-                           aria-label="{{ __('Rechercher dans le glossaire') }}">
+        {{-- Toolbar compacte sticky : recherche + bouton Filtres (dropdown) + chips d'état --}}
+        <div id="glToolbar" class="gl-toolbar">
+            <div class="gl-bar-inner">
+                <div class="gl-toolbar-row">
+                    <div class="gl-search-wrapper">
+                        <svg class="gl-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" class="gl-search-input"
+                               placeholder="{{ __('Rechercher un terme (ex: LLM, prompt, transformer...)') }}"
+                               x-model="search" aria-label="{{ __('Rechercher dans le glossaire') }}">
+                    </div>
+                    <button type="button" class="gl-filter-toggle" :class="{ active: filtersOpen || hasActiveFilters }"
+                            @click.stop="filtersOpen = !filtersOpen" :aria-expanded="filtersOpen" aria-controls="glFilterPanel">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"/>
+                        </svg>
+                        <span>{{ __('Filtres') }}</span>
+                        <span class="gl-filter-badge" x-show="activeFilterCount > 0" x-text="activeFilterCount" x-cloak></span>
+                    </button>
+                    <button type="button" class="gl-reset" x-show="hasActiveFilters" x-cloak
+                            @click="resetAll()" aria-label="{{ __('Tout réinitialiser') }}">✕</button>
+                    <div class="gl-counter" aria-live="polite">
+                        <strong x-text="visibleTerms.length"></strong> {{ __('sur') }} <strong x-text="filteredTerms.length"></strong> {{ __('termes') }}
+                    </div>
+                </div>
+
+                {{-- Chips d'état actif --}}
+                <div class="gl-chips" x-show="hasActiveFilters" x-cloak>
+                    <template x-if="search">
+                        <button type="button" class="gl-chip" @click="search = ''" aria-label="{{ __('Supprimer le filtre de recherche') }}">
+                            <span>«&nbsp;<span x-text="search"></span>&nbsp;»</span><span class="x">×</span>
+                        </button>
+                    </template>
+                    <template x-if="activeType">
+                        <button type="button" class="gl-chip" @click="activeType = ''" :aria-label="`{{ __('Supprimer le filtre') }} ${typeLabels[activeType]}`">
+                            <span x-text="typeLabels[activeType]"></span><span class="x">×</span>
+                        </button>
+                    </template>
+                    <template x-if="activeLetter">
+                        <button type="button" class="gl-chip" @click="activeLetter = ''" aria-label="{{ __('Supprimer le filtre alphabétique') }}">
+                            <span>{{ __('Lettre') }}&nbsp;:&nbsp;<span x-text="activeLetter"></span></span><span class="x">×</span>
+                        </button>
+                    </template>
+                    <template x-if="activeCategory">
+                        <button type="button" class="gl-chip" @click="activeCategory = ''" aria-label="{{ __('Supprimer le filtre de catégorie') }}">
+                            <span x-text="activeCategoryLabel"></span><span class="x">×</span>
+                        </button>
+                    </template>
+                </div>
+
+                {{-- Panneau de filtres (dropdown overlay) --}}
+                <div id="glFilterPanel" class="gl-filter-panel" x-show="filtersOpen" x-transition @click.outside="filtersOpen = false" x-cloak>
+                    <h2 class="sr-only">{{ __('Filtres') }}</h2>
+                    <select x-model="activeCategory" aria-label="{{ __('Filtrer par catégorie') }}"
+                            style="width: 100%; height: 48px; border-radius: var(--r-base); border: 2px solid #E5E7EB; padding: 0 36px 0 16px; font-size: 14px; font-weight: 600; color: var(--c-dark); background: #fff; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236B7280%22 stroke-width=%222%22%3E%3Cpath d=%22M6 9l6 6 6-6%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 14px center; margin-bottom: 12px;">
+                        <option value="">{{ __('Toutes les catégories') }}</option>
+                        <template x-for="cat in categories" :key="cat.id">
+                            <option :value="cat.slug" x-text="cat.icon + ' ' + cat.name"></option>
+                        </template>
+                    </select>
+                    <div class="gl-filters">
+                        <button type="button" class="gl-pill" :class="{ active: activeType === '' }" @click="activeType = ''">{{ __('Tous les types') }}</button>
+                        <button type="button" class="gl-pill" :class="{ active: activeType === 'acronym' }" @click="toggleType('acronym')">🔤 {{ __('Acronymes') }}</button>
+                        <button type="button" class="gl-pill" :class="{ active: activeType === 'ai_term' }" @click="toggleType('ai_term')">🤖 {{ __('Termes IA') }}</button>
+                        <button type="button" class="gl-pill" :class="{ active: activeType === 'explainer' }" @click="toggleType('explainer')">📖 {{ __('Vulgarisations') }}</button>
+                    </div>
+                    <nav class="gl-az-nav" aria-label="{{ __('Navigation alphabétique') }}">
+                        <button type="button" class="gl-az-btn gl-az-tous" :class="{ active: activeLetter === '' }" @click="activeLetter = ''">{{ __('Tous') }}</button>
+                        @foreach(range('A','Z') as $char)
+                            <button type="button" class="gl-az-btn" :class="{ active: activeLetter === '{{ $char }}' }" @click="toggleLetter('{{ $char }}')">{{ $char }}</button>
+                        @endforeach
+                    </nav>
                 </div>
             </div>
-            <div class="col-md-5 col-sm-4 col-xs-12">
-                <select x-model="activeCategory"
-                        aria-label="{{ __('Filtrer par catégorie') }}"
-                        style="width: 100%; height: 50px; border-radius: var(--r-base); border: 2px solid #E5E7EB; padding: 0 36px 0 16px; font-size: 14px; font-weight: 600; color: var(--c-dark); background: #fff; cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236B7280%22 stroke-width=%222%22%3E%3Cpath d=%22M6 9l6 6 6-6%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 14px center;">
-                    <option value="">{{ __('Toutes les catégories') }}</option>
-                    <template x-for="cat in categories" :key="cat.id">
-                        <option :value="cat.slug" x-text="cat.icon + ' ' + cat.name"></option>
-                    </template>
-                </select>
-            </div>
         </div>
 
-        {{-- Type filters --}}
-        <div class="gl-filters">
-            <button type="button" class="gl-pill" :class="{ active: activeType === '' }" @click="activeType = ''">
-                {{ __('Tous les types') }}
-            </button>
-            <button type="button" class="gl-pill" :class="{ active: activeType === 'acronym' }" @click="toggleType('acronym')">
-                🔤 {{ __('Acronymes') }}
-            </button>
-            <button type="button" class="gl-pill" :class="{ active: activeType === 'ai_term' }" @click="toggleType('ai_term')">
-                🤖 {{ __('Termes IA') }}
-            </button>
-            <button type="button" class="gl-pill" :class="{ active: activeType === 'explainer' }" @click="toggleType('explainer')">
-                📖 {{ __('Vulgarisations') }}
-            </button>
-        </div>
-
-        {{-- A-Z nav --}}
-        <nav class="gl-az-nav" aria-label="{{ __('Navigation alphabétique') }}">
-            <button type="button" class="gl-az-btn gl-az-tous" :class="{ active: activeLetter === '' }" @click="activeLetter = ''">
-                {{ __('Tous') }}
-            </button>
-            @foreach(range('A','Z') as $char)
-                <button type="button" class="gl-az-btn" :class="{ active: activeLetter === '{{ $char }}' }" @click="toggleLetter('{{ $char }}')">
-                    {{ $char }}
-                </button>
-            @endforeach
-        </nav>
-
-        {{-- Counter --}}
-        <div class="gl-counter" aria-live="polite">
-            <strong x-text="visibleTerms.length"></strong> {{ __('sur') }} <strong x-text="filteredTerms.length"></strong> {{ __('termes') }}
-        </div>
+        {{-- Sync : décale la toolbar sous le header sticky du site quand il est visible --}}
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var toolbar = document.getElementById('glToolbar');
+            var headerNav = document.querySelector('.wpo-site-header .navigation');
+            if (!toolbar || !headerNav) return;
+            var sync = function () { toolbar.classList.toggle('gl-header-visible', headerNav.classList.contains('sticky-on')); };
+            new MutationObserver(sync).observe(headerNav, { attributes: true, attributeFilter: ['class'] });
+            sync();
+        });
+        </script>
 
         {{-- Ad: glossary top --}}
         @if(class_exists(\Modules\Ads\Services\AdsRenderer::class))

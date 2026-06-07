@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.98] - 2026-06-07
+
+### Changed
+- Glossaire (/glossaire) — refonte de la zone recherche+filtres en **toolbar sticky compacte** (best practice UX 2026 : Baymard, NN/g, eBay, Material). La barre slim (recherche + bouton « Filtres » avec compteur d'actifs + compteur de résultats) suit désormais le scroll de façon non envahissante (~65px) ; les filtres (catégorie, type, A-Z) sont déplacés dans un **panneau dropdown** ouvert à la demande ; les filtres actifs s'affichent en **chips supprimables**. Synchronisation avec le header sticky du site (offset 90px desktop / 60px mobile, jamais de chevauchement) via MutationObserver sur `.sticky-on`. WCAG 2.2 : `scroll-padding-top` (focus non masqué), cibles ≥44px, focus visible, `position:static` en très faible hauteur (reflow). Correctif `position:sticky` (override `overflow` du `.page-wrapper`) **scopé à la seule page glossaire** (`!important`), zéro impact site-wide (vérifié sur /blog). Filtrage Alpine 100% client inchangé.
+
 ## [1.65.97] - 2026-06-07
 
 ### Added
