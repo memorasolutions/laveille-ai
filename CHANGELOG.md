@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.97] - 2026-06-07
+
+### Added
+- Glossaire : terme **Tokenpocalypse** (apocalypse des tokens, cat Intelligence artificielle) — néologisme 2026 décrivant l'explosion des coûts de tokens (agents IA, jusqu'à 1000×), le durcissement des limites de contexte/quotas et la fin des forfaits illimités. Fiche complète (définition, analogie, exemple, le saviez-vous, réponse en une phrase, 2 FAQ, 2 sources vérifiées : Stanford Digital Economy Lab, Yahoo Finance), image hero générée via le compte Gemini de l'utilisateur (jpg + webp 1200×670, sans texte). Migration réversible, anti-doublon par slug.
+
 ## [1.65.96] - 2026-06-07
 
 ### Added
