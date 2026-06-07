@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.99] - 2026-06-07
+
+### Added
+- Glossaire : terme **Latence** (latency, cat Concepts fondamentaux) — délai entre une demande et le début de la réponse ; distinction latence de bout en bout / TTFT (temps jusqu'au premier token), facteurs réseau et calcul, différence avec le débit (throughput). Fiche complète (définition, analogie, exemple, le saviez-vous, réponse en une phrase, 2 FAQ, 2 sources vérifiées : Wikipédia, NVIDIA), image hero générée via le compte Gemini de l'utilisateur (jpg + webp 1200×670, sans texte). Migration réversible, anti-doublon par slug.
+
 ## [1.65.98] - 2026-06-07
 
 ### Changed
