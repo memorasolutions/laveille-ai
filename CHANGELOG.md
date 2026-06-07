@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.90] - 2026-06-07
+
+### Added
+- **Glossaire — 3 termes « fiabilité LLM/RAG »** (batch #8) : **Reranking (reclassement)**, **Grounding
+  (ancrage)**, **Sortie structurée**. Fiches complètes au standard (sources vérifiées 200 : Pinecone, Jina,
+  Google Vertex, IBM, OpenAI, JSON Schema). Images via le compte Gemini de l'utilisateur. Migration
+  réversible. Glossaire à 390 termes.
+
 ## [1.65.89] - 2026-06-07
 
 ### Added
