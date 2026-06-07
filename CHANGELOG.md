@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.87] - 2026-06-07
+
+### Added
+- **Glossaire — 3 termes « tendances 2025-2026 »** (batch #5, catégorie « IA ») : **SLM (petit modèle de
+  langage)**, **Modèle frontière**, **Poids ouverts**. Fiches complètes au standard (définition, analogie,
+  exemple, le saviez-vous, AEO, FAQPage, sources vérifiées 200, image hero `.webp` + og:image `.jpg`).
+  **Images générées via le compte Gemini de l'utilisateur en Playwright** (méthode imposée, full-res via
+  « Télécharger en taille réelle »). Migration réversible. Glossaire à 381 termes.
+
 ## [1.65.86] - 2026-06-07
 
 ### Improved
