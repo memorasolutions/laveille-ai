@@ -1,0 +1,28 @@
+name: oneoff-seo-prune-firstrun
+on:
+  workflow_dispatch: {}
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts || true
+      - name: Dry-run (compter)
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && /usr/local/bin/ea-php84 artisan news:prune-seo --dry-run" || true
+      - name: Vérifier la planification mensuelle
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && /usr/local/bin/ea-php84 artisan schedule:list" 2>/dev/null | grep -i "prune-seo" || true
+      - name: Appliquer (noindex des vieilles news peu vues)
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && /usr/local/bin/ea-php84 artisan news:prune-seo" || true
+      - name: Dry-run post-apply (confirmer)
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && /usr/local/bin/ea-php84 artisan news:prune-seo --dry-run" || true
+      - name: Vider les caches
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && /usr/local/bin/ea-php84 artisan responsecache:clear; /usr/local/bin/ea-php84 artisan optimize:clear" || true
