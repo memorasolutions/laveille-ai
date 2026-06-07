@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.100] - 2026-06-07
+
+### Fixed
+- Glossaire — **consolidation du doublon « MCP »** : deux fiches existaient pour le même concept (`mcp`, acronyme issu du seeder d'origine, contenu propre ; et `mcp-model-context-protocol`, ajouté via l'admin sur prod, avec des artefacts markdown bruts). La fiche canonique `/glossaire/mcp` (slug court, contenu propre) est conservée et enrichie des alias uniques du doublon (« serveur MCP », « MCP server », « protocole MCP ») ; le doublon est **dépublié** (migration réversible, aucun DELETE) et son ancien slug **redirige en 301** vers `/glossaire/mcp` (préserve le SEO, évite le contenu dupliqué et tout 404). Cause : ajout manuel via l'admin sans voir l'acronyme existant.
+
 ## [1.65.99] - 2026-06-07
 
 ### Added

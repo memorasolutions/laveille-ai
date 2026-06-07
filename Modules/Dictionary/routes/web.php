@@ -14,6 +14,8 @@ use Modules\Dictionary\Http\Controllers\PublicDictionaryController;
 
 Route::middleware('web')->group(function () {
     Route::get('/glossaire', [PublicDictionaryController::class, 'index'])->name('dictionary.index')->middleware('cacheResponse:3600');
+    // Doublon consolidé : ancien slug (ajouté via admin) → fiche canonique 'mcp' (301, AVANT le wildcard)
+    Route::redirect('/glossaire/mcp-model-context-protocol', '/glossaire/mcp', 301);
     Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show')->middleware('cacheResponse:3600');
 });
 
