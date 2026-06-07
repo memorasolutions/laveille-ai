@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.89] - 2026-06-07
+
+### Added
+- **Glossaire — 3 termes « architecture Transformer »** (batch #7, catégorie « Concepts fondamentaux ») :
+  **Espace latent**, **Encodeur-décodeur**, **Encodage positionnel**. Fiches complètes au standard
+  (définition, analogie, exemple, le saviez-vous, AEO, FAQPage, sources vérifiées 200 : DataFranca, IBM,
+  Vaswani 2017, d2l). Images via le compte Gemini de l'utilisateur en Playwright. Migration réversible.
+  Glossaire à 387 termes.
+
 ## [1.65.88] - 2026-06-07
 
 ### Added
