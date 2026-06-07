@@ -2,6 +2,11 @@
 
 @php $ss = $article->structured_summary; @endphp
 
+{{-- Élagage SEO : vieille actualité peu vue → noindex,follow (le layout master lit cette section). --}}
+@if(($article->seo_status ?? 'index') === 'noindex')
+    @section('page_noindex', '1')
+@endif
+
 @section('title', ($article->seo_title ?? $article->title) . ' - ' . __('Actualités') . ' - ' . config('app.name'))
 @section('meta_description', $article->meta_description ?? Str::limit($article->summary ?? strip_tags($article->description), 155))
 @section('share_text')

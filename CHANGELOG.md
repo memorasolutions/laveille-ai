@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.84] - 2026-06-07
+
+### Added
+- **Élagage SEO automatique et réversible des anciennes actualités** (anti-index-bloat, best practice 2026) :
+  nouvelle colonne `news_articles.seo_status` (index|noindex|gone) + commande `news:prune-seo`
+  (`--dry-run`, `--reset`) planifiée **mensuellement** (scheduler Laravel existant — aucun cron ajouté).
+  Politique pilotée par `config/news/seo_prune.php` (zéro hardcode) : les actualités publiées depuis
+  > 12 mois ET vues < 30 fois passent en **`noindex, follow`** (sorties de l'index + du sitemap, mais
+  accessibles et l'autorité circule) ; les performantes restent indexées. Tier **410 Gone** disponible
+  mais **désactivé** par défaut. 100 % réversible (flag DB, aucune suppression ; `--reset` annule).
+  Évite la pénalité « index bloat » / Helpful Content tout en préservant le trafic longue traîne (données GSC).
+  Master layout : robots `noindex,follow` par page via `@section('page_noindex')`. Réversible (`down()` + tag git).
+
 ## [1.65.83] - 2026-06-07
 
 ### Added

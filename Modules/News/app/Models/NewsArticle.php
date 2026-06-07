@@ -35,6 +35,7 @@ class NewsArticle extends Model implements Searchable
         'relevance_score', 'score_justification', 'structured_summary',
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
         'short_url_id', 'views_count', 'canonical_url', 'is_potential_duplicate_of', 'dedup_score', 'dedup_reason',
+        'seo_status', // index | noindex | gone — élagage SEO réversible des vieilles news peu vues
     ];
 
     protected $casts = [

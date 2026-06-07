@@ -68,6 +68,8 @@ class PublicNewsController extends Controller
     public function show(NewsArticle $article): View
     {
         abort_if(! $article->is_published, 404);
+        // Élagage SEO : une actualité marquée "gone" renvoie 410 (contenu retiré définitivement).
+        abort_if(($article->seo_status ?? 'index') === 'gone', 410);
 
         $article->increment('views_count');
         $article->load('source');

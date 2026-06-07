@@ -33,6 +33,7 @@ class NewsSitemapController
         $xml = Cache::remember('news_sitemap_xml_v1', self::CACHE_TTL_SECONDS, function (): string {
             $articles = NewsArticle::query()
                 ->where('pub_date', '>=', now()->subHours(self::FRESHNESS_HOURS))
+                ->where('seo_status', 'index') // exclut les actualités élaguées (noindex/gone)
                 ->whereNotNull('slug')
                 ->orderByDesc('pub_date')
                 ->limit(self::MAX_URLS)

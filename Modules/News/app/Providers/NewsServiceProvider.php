@@ -54,6 +54,7 @@ class NewsServiceProvider extends ServiceProvider
             \Modules\News\Console\RegenerateSlugsCommand::class,
             \Modules\News\Console\RescrapeGoogleImagesCommand::class,
             \Modules\News\Console\ReprocessArticlesCommand::class,
+            \Modules\News\Console\PruneSeoCommand::class,
         ]);
     }
 
@@ -62,10 +63,15 @@ class NewsServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+            // Élagage SEO mensuel des vieilles actualités peu vues (1er du mois, 04:00 heure Québec).
+            // Réversible (flag DB) ; piloté par config('news.seo_prune').
+            $schedule->command('news:prune-seo')
+                ->monthlyOn(1, '04:00')
+                ->timezone('America/Toronto')
+                ->onOneServer();
+        });
     }
 
     /**

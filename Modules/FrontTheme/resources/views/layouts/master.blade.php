@@ -10,6 +10,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @if(config('app.noindex', false))
         <meta name="robots" content="noindex, nofollow">
+    @elseif(\Illuminate\Support\Facades\View::hasSection('page_noindex'))
+        {{-- Override par page : élagage SEO (vieille actualité peu vue). noindex mais follow (l'autorité circule). --}}
+        <meta name="robots" content="noindex, follow, max-image-preview:large">
     @else
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     @endif
