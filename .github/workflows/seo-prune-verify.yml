@@ -1,0 +1,19 @@
+name: oneoff-seo-prune-verify
+on:
+  workflow_dispatch: {}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H server.memora.pro >> ~/.ssh/known_hosts || true
+      - name: Dry-run (nouvelle commande R1/R3)
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && /usr/local/bin/ea-php84 artisan news:prune-seo --dry-run" || true
+      - name: Confirmer la planification mensuelle
+        run: |
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && /usr/local/bin/ea-php84 artisan schedule:list" 2>/dev/null | grep -i "prune-seo" || true
