@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.88] - 2026-06-07
+
+### Added
+- **Glossaire — 3 termes « agents & sûreté 2026 »** (batch #6, catégorie « IA ») : **Garde-fous (guardrails)**,
+  **A2A (Agent-to-Agent)**, **Effondrement de modèle (model collapse)**. Fiches complètes au standard
+  (définition, analogie, exemple, le saviez-vous, AEO, FAQPage, sources vérifiées 200 : IBM, Microsoft,
+  GitHub A2A, Nature 2024). Images générées via le compte Gemini de l'utilisateur en Playwright (full-res).
+  Migration réversible. Glossaire à 384 termes.
+
 ## [1.65.87] - 2026-06-07
 
 ### Added
