@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.81] - 2026-06-07
+
+### Added
+- **Glossaire — 3 termes « mécanique du RAG »** (batch P0 #2) : **Chunking**, **Recherche sémantique**,
+  **Similarité cosinus** (catégorie « Données et traitement »). Fiches complètes au standard (définition,
+  analogie, exemple chiffré, le saviez-vous, AEO, FAQPage 2 Q/R, sources GEO vérifiées 200, image hero
+  `.webp` + og:image `.jpg` 1200×669). Migration réversible (anti-doublon par slug, `down()`). Glossaire à 372 termes.
+
 ## [1.65.80] - 2026-06-06
 
 ### Added
