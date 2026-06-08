@@ -116,8 +116,12 @@
                            :data-row="r"
                            :data-col="c"
                            :style="'grid-row:' + (r + 1) + ';grid-column:' + (c + 1)"
+                           {{-- a11y : seules les cases EDITABLES sont des boutons focalisables/etiquetes
+                                (role=button = role valide pour aria-label, sans parent ARIA requis).
+                                Les cases-indices (donnees fixes) restent du texte simple. --}}
+                           :role="originalGrid[r][c] === 0 ? 'button' : null"
                            :tabindex="originalGrid[r][c] === 0 ? 0 : -1"
-                           :aria-label="cellAriaLabel(r, c)"
+                           :aria-label="originalGrid[r][c] === 0 ? cellAriaLabel(r, c) : null"
                            @click="selectCell(r, c)"
                            @keydown="handleKey($event, r, c)">
                         <template x-if="value !== 0">

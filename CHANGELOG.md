@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.111] - 2026-06-08
+
+### Fixed
+- Sudoku — **accessibilité WCAG 4.1.2** (suite v1.65.110). Le retrait de `role="gridcell"` avait laissé un `aria-label` sur des `<div>` sans rôle valide (invalide : « aria-label cannot be used on a div with no valid role »). Correctif : seules les **cases éditables** reçoivent `role="button"` (rôle valide pour `aria-label`, aucun parent ARIA requis, et elles sont réellement activables) + `tabindex=0` + `aria-label` ; les **cases-indices** (données fixes) deviennent du texte simple (sans rôle/aria-label/focus). Audit WCAG : `1.3.1` (grid/tablist) **et** `4.1.2` résolus ; layout 3×3 et ordre vertical intacts ; ne restent que les faux positifs documentés (blanc/blanc dû à l'en-tête foncé mal lu par le scanner, skip-link 1×1 site-wide, modale infolettre masquée).
+
 ## [1.65.110] - 2026-06-08
 
 ### Fixed
