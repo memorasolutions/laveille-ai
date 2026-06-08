@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.114] - 2026-06-08
+
+### Fixed
+- Sudoku — **2 bugs du mode notes** (retours utilisateur). **(1) Le crayon rouge cachait le chiffre** : l'icône ✎ (pseudo-élément `::after` au coin haut-droit de la case sélectionnée en mode notes) recouvrait la note affichée à cette position — la note « 3 » s'affiche justement en haut-droite de la mini-grille 3×3. C'est aussi ce qui donnait l'impression que « la note n'apparaît pas, mais est là après avoir changé de case » (le crayon suit la case sélectionnée). Vérifié : la note **s'affiche bien immédiatement** (la réactivité fonctionne — ce n'était pas un bug de rendu). Correctif : l'icône ✎ est **retirée** ; le mode notes reste clairement signalé par le contour + le fond rouges de la case, le pavé numérique rouge et le bouton « Notes » enfoncé. **(2) Le bouton « Notes » volait le focus** : après avoir cliqué « Notes », il fallait recliquer la case pour que le clavier fonctionne, car le clic plaçait le focus sur le bouton (hors de la grille) → la frappe n'atteignait plus la grille. Correctif : `toggleNotesMode()` bascule le mode notes **puis redonne le focus** à la case sélectionnée (helper `focusCell` partagé avec `selectCell`).
+
 ## [1.65.113] - 2026-06-08
 
 ### Fixed

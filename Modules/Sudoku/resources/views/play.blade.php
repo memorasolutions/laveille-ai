@@ -185,7 +185,7 @@
                         </span>
                       </button>
                       {{-- #180 + #208 : bouton Notes (toggle pencil marks) - couleurs WCAG AAA --}}
-                      <button type="button" class="btn" @click="notesMode = !notesMode" :disabled="completed||paused"
+                      <button type="button" class="btn" @click="toggleNotesMode()" :disabled="completed||paused"
                               :style="notesMode ? 'background:#7C2D12;color:#fff;font-weight:700;' : 'background:#fff;color:#7C2D12;border:1px solid #7C2D12;font-weight:600;'"
                               :aria-pressed="notesMode ? 'true' : 'false'">
                         <span class="d-inline-flex align-items-center gap-2 justify-content-center">
@@ -349,17 +349,11 @@
   outline: 3px solid #ef4444;
   background: #fef2f2;
 }
-/* Icone crayon coin haut-droit cellule selectionnee en mode notes */
-.sudoku-notes-mode .sudoku-cell.is-selected::after {
-  content: "✎";
-  position: absolute;
-  top: 1px;
-  right: 3px;
-  font-size: 0.6em;
-  color: #ef4444;
-  font-weight: 700;
-  pointer-events: none;
-}
+/* #198 : l'indication du mode notes sur la cellule selectionnee = contour + fond
+   rouges (ci-dessus). PAS d'icone crayon ::after : les notes occupent les 9
+   positions de la case (mini-grille 3x3), donc tout glyphe interne en recouvrirait
+   une (ex. la note « 3 » en haut-droite). Le mode notes reste signale par le pave
+   rouge et le bouton « Notes » enfonce. */
 .sudoku-cell.is-error {
   background: #fee2e2 !important;
   color: #991b1b;
@@ -589,16 +583,29 @@ document.addEventListener('alpine:init', () => {
       return 'Ligne ' + (r+1) + ', colonne ' + (c+1) + ', ' + (v === 0 ? 'vide' : 'valeur ' + v);
     },
 
+    // Pose le focus DOM sur une cellule éditable (helper DRY pour le clavier).
+    focusCell(r, c) {
+      if (this.originalGrid[r][c] === 0) {
+        this.$nextTick(() => {
+          const el = this.$root.querySelector('.sudoku-cell[data-row="' + r + '"][data-col="' + c + '"]');
+          el?.focus({ preventScroll: true });
+        });
+      }
+    },
+
     selectCell(r, c) {
       if (this.completed || this.paused) return;
       this.selectedCell = { row: r, col: c };
-      // Synchronise le focus DOM sur la cellule sélectionnée (clavier fiable,
-      // source de vérité unique) — uniquement si la case est éditable.
-      if (this.originalGrid[r][c] === 0) {
-        this.$nextTick(() => {
-          const el = this.$root.querySelector(`.sudoku-cell[data-row="${r}"][data-col="${c}"]`);
-          el?.focus({ preventScroll: true });
-        });
+      // Synchronise le focus DOM sur la cellule (clavier fiable, source unique).
+      this.focusCell(r, c);
+    },
+
+    // Bascule le mode notes ET redonne le focus à la case sélectionnée, sinon le
+    // clic sur le bouton « Notes » vole le focus → le clavier cesse de fonctionner.
+    toggleNotesMode() {
+      this.notesMode = !this.notesMode;
+      if (this.selectedCell.row >= 0) {
+        this.focusCell(this.selectedCell.row, this.selectedCell.col);
       }
     },
 
