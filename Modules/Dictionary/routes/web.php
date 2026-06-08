@@ -26,6 +26,7 @@ Route::middleware('web')->group(function () {
     Route::redirect('/glossaire/knowledge-distillation', '/glossaire/distillation-de-modele', 301);
     Route::redirect('/glossaire/affinage', '/glossaire/fine-tuning', 301);
     Route::redirect('/glossaire/edge-ai', '/glossaire/ia-embarquee', 301);
+    Route::redirect('/glossaire/spoiler', '/glossaire/data-poisoning', 301);
     Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show')->middleware('cacheResponse:3600');
 });
 

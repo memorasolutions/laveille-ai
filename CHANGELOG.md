@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.104] - 2026-06-08
+
+### Fixed
+- Glossaire — **arbitrage des 4 paires limites** (décision éditoriale finale). Après lecture du contenu réel : 3 paires sont des **concepts hiérarchiques distincts** (pas des synonymes) et sont **conservées séparées** — embeddings/vectorisation, ia-multimodale/modele-multimodal, llm/modele-de-langage (ex. : un LLM est un *type* de modèle de langage). Seule l'entrée **« spoiler »** — mal nommée (le vrai « Spoiler » est une faille CPU) et dont le contenu décrivait en réalité l'empoisonnement de données — est **fusionnée** vers `data-poisoning` (dépubliée + redirigée 301). `data-poisoning` reçoit la catégorie « Sécurité et éthique » et l'alias « empoisonnement de données ». Correction d'un lien taxonomique inversé : `embeddings` est désormais correctement rattaché comme sous-type de `vectorisation`. Migration réversible, aucun DELETE.
+
 ## [1.65.103] - 2026-06-08
 
 ### Fixed
