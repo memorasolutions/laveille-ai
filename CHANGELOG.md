@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.108] - 2026-06-08
+
+### Fixed
+- Sudoku — **bouton « Indice » pouvait remplir une mauvaise valeur** (bug trouvé pendant la simulation E2E complète des 5 niveaux). `useHint()` devinait côté client la première valeur **sans conflit** au lieu d'utiliser la vraie solution (jamais envoyée au navigateur pour empêcher la triche) → sur certaines cases à plusieurs candidats, l'indice posait un chiffre faux, puis générait des erreurs. Correctif : nouvel endpoint serveur `POST /api/sudoku/hint/{puzzle_id}` (corps `{row, col}`, throttle 60/min) qui révèle **une seule** case « trou » depuis `SudokuPuzzle::solution` (refuse une case-indice ou une valeur invalide → 422) ; `useHint()` devient asynchrone et appelle cet endpoint (jeton CSRF, message de repli si indisponible). **Anti-triche préservé** : la solution complète ne quitte jamais le serveur, une seule case par appel, compteur d'indices et pénalité de temps inchangés. Reproduit sur Facile/Difficile avant le correctif, indice correct après.
+
 ## [1.65.107] - 2026-06-08
 
 ### Fixed

@@ -16,6 +16,11 @@ Route::prefix('sudoku')->group(function () {
     Route::post('regenerate/{difficulty}', [PuzzleApiController::class, 'regenerate'])
         ->middleware('throttle:6,1');
 
+    // indice : revele UNE case correcte depuis la solution serveur (anti-triche)
+    Route::post('hint/{puzzle_id}', [PuzzleApiController::class, 'hint'])
+        ->where('puzzle_id', '\d+')
+        ->middleware('throttle:60,1');
+
     Route::post('score', [ScoreApiController::class, 'submit'])
         ->middleware('throttle:10,1');
     Route::get('leaderboards', [ScoreApiController::class, 'leaderboards']);

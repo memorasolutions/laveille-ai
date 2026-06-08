@@ -695,24 +695,40 @@ document.addEventListener('alpine:init', () => {
       return map[difficulty] || map.medium;
     },
 
-    useHint() {
+    async useHint() {
       if (this.completed || this.paused) return;
+      // Trouve la premiere case vide (non-indice) puis demande au SERVEUR la
+      // valeur correcte (la solution n'est jamais exposee au client = anti-triche).
       for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
           if (this.originalGrid[r][c] === 0 && this.grid[r][c] === 0) {
-            for (let n = 1; n <= 9; n++) {
-              if (this.checkLocal(r, c, n)) {
-                this.grid[r][c] = n;
-                this.hintsUsed++;
-                // #204 : ajout penalite temps
-                const penalty = this.hintPenaltySeconds();
-                this.timer = this.timer + penalty;
-                this.selectedCell = { row: r, col: c };
-                this.statusMessage = 'Indice : (' + (r+1) + ',' + (c+1) + ') = ' + n + ' · +' + penalty + 's pénalité.';
-                setTimeout(() => { this.statusMessage = ''; }, 3500);
-                return;
-              }
+            try {
+              const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+              const res = await fetch('/api/sudoku/hint/' + this.currentPuzzleId, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': csrf || '',
+                  'Accept': 'application/json',
+                },
+                body: JSON.stringify({ row: r, col: c }),
+              });
+              if (!res.ok) throw new Error('hint http ' + res.status);
+              const data = await res.json();
+              const n = data.value;
+              this.grid[r][c] = n;
+              this.hintsUsed++;
+              // #204 : ajout penalite temps
+              const penalty = this.hintPenaltySeconds();
+              this.timer = this.timer + penalty;
+              this.selectedCell = { row: r, col: c };
+              this.statusMessage = 'Indice : (' + (r+1) + ',' + (c+1) + ') = ' + n + ' · +' + penalty + 's pénalité.';
+              setTimeout(() => { this.statusMessage = ''; }, 3500);
+            } catch (e) {
+              this.statusMessage = 'Indice indisponible, réessayez.';
+              setTimeout(() => { this.statusMessage = ''; }, 3500);
             }
+            return;
           }
         }
       }

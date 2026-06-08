@@ -59,6 +59,36 @@ class PuzzleApiController extends Controller
         ]);
     }
 
+    /**
+     * Fournit un indice pour une case vide specifique du puzzle Sudoku.
+     * Revele UNE seule case « trou » depuis la solution serveur (anti-triche :
+     * la solution complete n'est jamais envoyee au client).
+     */
+    public function hint(Request $request, string $puzzle_id): JsonResponse
+    {
+        $validated = $request->validate([
+            'row' => 'required|integer|min:0|max:8',
+            'col' => 'required|integer|min:0|max:8',
+        ]);
+
+        $row = $validated['row'];
+        $col = $validated['col'];
+
+        $puzzle = SudokuPuzzle::findOrFail((int) $puzzle_id);
+
+        if ($puzzle->grid_init[$row][$col] !== 0) {
+            abort(422, 'La case demandee n\'est pas vide.');
+        }
+
+        $value = $puzzle->solution[$row][$col] ?? null;
+
+        if ($value === null || $value === 0) {
+            abort(422, 'La solution pour cette case est invalide.');
+        }
+
+        return response()->json(['row' => $row, 'col' => $col, 'value' => $value]);
+    }
+
     public function byDate(Request $request, string $date, string $difficulty): JsonResponse
     {
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
