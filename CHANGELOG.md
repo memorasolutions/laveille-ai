@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.116] - 2026-06-08
+
+### Fixed
+- Sudoku — **modale de victoire** (retours utilisateur). **(1) Contraste WCAG 2.2 AAA du titre « Bravo ! »** : l'en-tête utilisait un dégradé `#0B7285 → #053d4a` ; le blanc sur `#0B7285` (extrémité claire) ne donnait que **5.58:1** (AA, mais pas AAA). Nouveau dégradé `#064E5A → #053d4a` → blanc = **9.35:1** et **11.85:1** (≥ 7:1, AAA, vérifié). **(2) Pseudo prérempli avec le nom du compte si connecté** : le composant reçoit le nom de l'utilisateur authentifié (`auth()->user()->name`) ; à l'ouverture, le champ « Pseudo (pour le classement) » est prérempli avec ce nom. Hors connexion, comportement inchangé (dernier pseudo en localStorage).
+
 ## [1.65.115] - 2026-06-08
 
 ### Fixed

@@ -14,7 +14,7 @@
       <div class="col-lg-10 col-12">
         <div class="card shadow-sm" style="border-radius: var(--r-base);">
           <div class="card-body p-4 p-md-5"
-               x-data="sudokuApp({{ json_encode(collect($puzzles)->map(fn($p) => ['id' => $p->id, 'difficulty' => $p->difficulty, 'grid_init' => $p->grid_init, 'clues_count' => $p->clues_count, 'label' => $p->getDifficultyLabel(), 'color' => $p->getDifficultyColor()])->values()) }})"
+               x-data="sudokuApp({{ json_encode(collect($puzzles)->map(fn($p) => ['id' => $p->id, 'difficulty' => $p->difficulty, 'grid_init' => $p->grid_init, 'clues_count' => $p->clues_count, 'label' => $p->getDifficultyLabel(), 'color' => $p->getDifficultyColor()])->values()) }}, {{ \Illuminate\Support\Js::from(auth()->check() ? (auth()->user()->name ?? '') : '') }})"
                x-init="init()">
 
             <h1 class="h2 mb-2" style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ __('Sudoku quotidien') }}</h1>
@@ -223,7 +223,9 @@
             <div class="modal fade" id="winModal" tabindex="-1" aria-labelledby="winModalLabel" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="border-radius:12px;border:none;">
-                  <div class="modal-header" style="background:linear-gradient(135deg, #0B7285 0%, #053d4a 100%);color:#fff;border-bottom:none;">
+                  {{-- WCAG 2.2 AAA : blanc sur #064E5A = 9.35:1 et sur #053d4a = 11.85:1 (>= 7:1).
+                       L'ancien #0B7285 (extremite claire) ne donnait que 5.58:1 (AA, pas AAA). --}}
+                  <div class="modal-header" style="background:linear-gradient(135deg, #064E5A 0%, #053d4a 100%);color:#fff;border-bottom:none;">
                     <h2 class="modal-title h5" id="winModalLabel">🎉 {{ __('Bravo !') }}</h2>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
                   </div>
@@ -468,7 +470,7 @@
 
 <script>
 document.addEventListener('alpine:init', () => {
-  Alpine.data('sudokuApp', (puzzles) => ({
+  Alpine.data('sudokuApp', (puzzles, userName = '') => ({
     puzzles,
     activeIdx: 0,
     currentPuzzleId: puzzles[0].id,
@@ -499,7 +501,9 @@ document.addEventListener('alpine:init', () => {
     tooltipIdx: null,
 
     init() {
-      this.pseudo = localStorage.getItem('sudoku_pseudo') || '';
+      // Si connecté, préremplir le pseudo du classement avec le nom du compte ;
+      // sinon, reprendre le dernier pseudo saisi (localStorage).
+      this.pseudo = (userName && userName.trim()) ? userName.trim() : (localStorage.getItem('sudoku_pseudo') || '');
       const winEl = document.getElementById('winModal');
       const restartEl = document.getElementById('restartModal');
       const switchEl = document.getElementById('switchLevelModal');
