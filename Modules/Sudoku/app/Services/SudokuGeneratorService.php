@@ -16,22 +16,26 @@ namespace Modules\Sudoku\Services;
 class SudokuGeneratorService
 {
     /**
-     * #203 (2026-05-06) : Standards 2026 sonar-pro (NYT/Sudoku.com/Conceptis
-     * /Le Monde convergent). Plage A 95/100. Diabolical 18 evite spike
-     * frustration 17 (rare <1% chez leaders, prouve McGuire 2012).
+     * #232 (2026-06-08) : nombre de GIVENS (indices conservés) par niveau,
+     * désormais DISTINCTS et MONOTONES (best practices juin 2026, fourchettes
+     * NYT/Conceptis/Sudoku Coach). Le retrait multi-passes (digHoles) atteint
+     * ces cibles de façon fiable et stocke le compte RÉEL (et non la cible).
      *
-     * Easy : 32 (NYT 32 / Conceptis 33 / standard universel)
-     * Medium : 26 (Conceptis 26, transition fluide hidden pairs)
-     * Hard : 22 (Conceptis 22 / Brain Bashers 22, XY-Wings forces)
-     * Expert : 18 (consensus chains/forcing)
-     * Diabolical : 18 (vs 17 limite math = frustration spike rare 1%)
+     * Easy : 40 (fourchette facile 36-50, scanning + singles)
+     * Medium : 34 (paires nues, locked candidates)
+     * Hard : 30 (pointing pairs, tuples)
+     * Expert : 26 (techniques avancées, proche < 25)
+     * Diabolical : 22 (retrait maximal, proche du plancher pratique du greedy)
+     *
+     * NB : le clue-count reste un proxy de difficulté ; un classement par
+     * technique de résolution (Option B) est l'amélioration recommandée ensuite.
      */
-    protected const DIFFICULTY_RANGES = [
-        'easy' => [32, 32],
-        'medium' => [26, 26],
-        'hard' => [22, 22],
-        'expert' => [18, 18],
-        'diabolical' => [18, 18],
+    protected const DIFFICULTY_GIVENS = [
+        'easy' => 40,
+        'medium' => 34,
+        'hard' => 30,
+        'expert' => 26,
+        'diabolical' => 22,
     ];
 
     public function generate(string $difficulty): array
@@ -39,13 +43,13 @@ class SudokuGeneratorService
         $startTime = microtime(true);
 
         $solution = $this->generateSolvedGrid();
-        $cluesCount = random_int(...self::DIFFICULTY_RANGES[$difficulty]);
-        $gridInit = $this->removeNumbers($solution, 81 - $cluesCount);
+        $targetGivens = self::DIFFICULTY_GIVENS[$difficulty];
+        [$gridInit, $actualGivens] = $this->digHoles($solution, $targetGivens);
 
         return [
             'grid_init' => $gridInit,
             'solution' => $solution,
-            'clues_count' => $cluesCount,
+            'clues_count' => $actualGivens, // compte RÉEL d'indices conservés
             'time_ms' => (int) ((microtime(true) - $startTime) * 1000),
         ];
     }
@@ -121,31 +125,53 @@ class SudokuGeneratorService
         return true;
     }
 
-    protected function removeNumbers(array $grid, int $count): array
+    /**
+     * Creuse la grille en RETRAIT MULTI-PASSES jusqu'à atteindre la cible de givens,
+     * en garantissant l'unicité de la solution après chaque retrait.
+     * Le multi-passes permet d'atteindre des comptes bas (cases non retirables en
+     * début de passe le deviennent une fois d'autres cases vidées) — corrige le
+     * blocage du greedy 1-passe vers ~24 givens. Retourne [grille, givens réels].
+     */
+    protected function digHoles(array $grid, int $targetGivens): array
     {
+        $givens = 81; // grille initialement pleine
+        $maxPasses = 6; // borne le nombre de passes
+        $deadline = microtime(true) + 12.0; // garde-fou temps (anti-timeout cron)
         $positions = range(0, 80);
-        shuffle($positions);
 
-        $gridCopy = $grid;
-        $removed = 0;
-        foreach ($positions as $pos) {
-            if ($removed >= $count) break;
-            $row = intdiv($pos, 9);
-            $col = $pos % 9;
-            $backup = $gridCopy[$row][$col];
-            $gridCopy[$row][$col] = 0;
+        for ($pass = 0; $pass < $maxPasses; $pass++) {
+            if ($givens <= $targetGivens) break;
 
-            $solutionCount = 0;
-            $tempGrid = $gridCopy;
-            self::solveCount($tempGrid, $solutionCount, 2);
-            if ($solutionCount === 1) {
-                $removed++;
-            } else {
-                $gridCopy[$row][$col] = $backup;
+            $removedInPass = 0;
+            shuffle($positions); // ordre aléatoire à chaque passe
+
+            foreach ($positions as $pos) {
+                if ($givens <= $targetGivens) break;
+                if (microtime(true) > $deadline) break 2; // budget temps dépassé → on garde l'état courant
+
+                $row = intdiv($pos, 9);
+                $col = $pos % 9;
+                if ($grid[$row][$col] === 0) continue; // déjà vide
+
+                $backup = $grid[$row][$col];
+                $grid[$row][$col] = 0;
+
+                $count = 0;
+                $gridCopy = $grid;
+                self::solveCount($gridCopy, $count, 2);
+
+                if ($count === 1) {
+                    $givens--;
+                    $removedInPass++;
+                } else {
+                    $grid[$row][$col] = $backup; // retrait annulé (solution non unique)
+                }
             }
+
+            if ($removedInPass === 0) break; // plancher local atteint
         }
 
-        return $gridCopy;
+        return [$grid, $givens];
     }
 
     /**

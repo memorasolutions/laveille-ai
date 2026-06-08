@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.105] - 2026-06-08
+
+### Fixed
+- Sudoku — **les niveaux déterminent désormais un nombre de chiffres donnés (givens) DISTINCT et croissant** (« problème de cases » signalé). Avant : le retrait glouton en une seule passe se bloquait vers ~24 indices, donc Difficile/Expert/Diabolique étaient quasi identiques (24-25 indices) et `clues_count` stockait la cible et non le réel. Maintenant : nouveau `digHoles()` en **retrait multi-passes** (avec garantie d'unicité conservée) atteignant des cibles distinctes — **Facile 40 · Moyen 34 · Difficile 30 · Expert 26 · Diabolique ~22-24** — et stockage du **compte réel** d'indices. Garde-fou temps (budget 12 s) contre les pics de génération sur grilles très creuses. Cibles fondées sur les best practices juin 2026 (fourchettes NYT/Conceptis/Sudoku Coach). Aucune donnée touchée (les puzzles existants conservent scores/parties ; le nouveau barème s'applique aux puzzles à venir). Amélioration recommandée ensuite : classement par technique de résolution (gold standard).
+
 ## [1.65.104] - 2026-06-08
 
 ### Fixed
