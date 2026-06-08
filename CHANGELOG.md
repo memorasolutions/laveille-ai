@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.112] - 2026-06-08
+
+### Fixed
+- Sudoku — **accessibilité WCAG 1.3.1 (ordre des titres)** : les titres de **dialogue** créaient des sauts de niveau (overlay « Partie en pause » `<h3>` après le `<h1>` ; modale de victoire `<h5>` après le `<h3>`). Tous les titres de dialogue (pause, victoire, changement de niveau, nouvelle grille) sont passés à `<h2>`, avec la **taille visuelle préservée** via les classes utilitaires Bootstrap `.h3`/`.h5`. La hiérarchie de la page est désormais `<h1>` « Sudoku quotidien » puis uniquement des `<h2>` → plus aucun saut. L'`id="winModalLabel"` est conservé (`aria-labelledby` intact).
+
 ## [1.65.111] - 2026-06-08
 
 ### Fixed

@@ -143,7 +143,7 @@
                 <div class="sudoku-pause-overlay" x-show="paused" x-transition.opacity role="dialog" aria-label="{{ __('Partie en pause') }}" @click="togglePause()" style="display:none;">
                   <div class="sudoku-pause-content">
                     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
-                    <h3 class="mt-2 mb-1" style="font-weight:700;color:#fff;">{{ __('Partie en pause') }}</h3>
+                    <h2 class="h3 mt-2 mb-1" style="font-weight:700;color:#fff;">{{ __('Partie en pause') }}</h2>
                     <p style="color:rgba(255,255,255,0.85);margin-bottom:1rem;">{{ __('Cliquez sur la grille ou « Reprendre » pour continuer.') }}</p>
                     <button type="button" class="btn btn-light btn-sm fw-bold" @click.stop="togglePause()">{{ __('Reprendre') }}</button>
                   </div>
@@ -225,7 +225,7 @@
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="border-radius:12px;border:none;">
                   <div class="modal-header" style="background:linear-gradient(135deg, #0B7285 0%, #053d4a 100%);color:#fff;border-bottom:none;">
-                    <h5 class="modal-title" id="winModalLabel">🎉 {{ __('Bravo !') }}</h5>
+                    <h2 class="modal-title h5" id="winModalLabel">🎉 {{ __('Bravo !') }}</h2>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
                   </div>
                   <div class="modal-body p-4">
@@ -252,7 +252,7 @@
             <div class="modal fade" id="switchLevelModal" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="border-radius:12px;border:none;">
-                  <div class="modal-header"><h5 class="modal-title">{{ __('Changer de niveau ?') }}</h5></div>
+                  <div class="modal-header"><h2 class="modal-title h5">{{ __('Changer de niveau ?') }}</h2></div>
                   <div class="modal-body">
                     <p>{{ __('Vous avez une progression en cours sur') }} <strong x-text="puzzles[activeIdx]?.label"></strong>.</p>
                     <p class="mb-0">{{ __('Votre progression actuelle sera sauvegardée localement (vous la retrouverez si vous revenez à ce niveau). Continuer vers') }} <strong x-text="pendingSwitchIdx !== null ? puzzles[pendingSwitchIdx]?.label : ''"></strong> ?</p>
@@ -269,7 +269,7 @@
             <div class="modal fade" id="restartModal" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content" style="border-radius:12px;border:none;">
-                  <div class="modal-header"><h5 class="modal-title">{{ __('Nouvelle grille ?') }}</h5></div>
+                  <div class="modal-header"><h2 class="modal-title h5">{{ __('Nouvelle grille ?') }}</h2></div>
                   <div class="modal-body"><p>{{ __('Une nouvelle grille du même niveau sera générée à la demande (gratuit, instantané). Votre progression actuelle sera perdue. Confirmer ?') }}</p></div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
