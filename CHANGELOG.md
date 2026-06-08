@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.118] - 2026-06-08
+
+### Added
+- Sudoku — **avertissement de persistance locale + indicateur de grille terminée** (demande utilisateur : « le dernier sudoku reste dans le navigateur… ajouter un avertissement »). (1) Note permanente dans le panneau latéral : « Votre partie est enregistrée sur cet appareil et restaurée si vous rechargez la page (rien n'est envoyé au serveur tant que vous ne soumettez pas un score) ; elle disparaît si vous changez d'appareil/navigateur ou videz les données du site. » (2) Bandeau (visible quand la grille est terminée, y compris après rechargement d'une grille finie) : « ✅ Grille terminée. Cliquez « Nouvelle grille » pour rejouer. » — clarifie pourquoi la grille est verrouillée.
+
 ## [1.65.117] - 2026-06-08
 
 ### Fixed

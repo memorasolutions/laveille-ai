@@ -213,6 +213,20 @@
                     </div>
 
                     <div id="sudoku-status" class="mt-3 text-center small" style="min-height:1.5em;color:#053d4a;" aria-live="polite" x-text="statusMessage"></div>
+
+                    {{-- #252 : indicateur clair quand une grille TERMINÉE est affichée
+                         (y compris après rechargement de page) → on comprend pourquoi
+                         elle est verrouillée et qu'il faut « Nouvelle grille » pour rejouer. --}}
+                    <div x-show="completed" class="mt-2 alert alert-success py-2 px-3 small mb-0" role="status" style="display:none;">
+                      ✅ {{ __('Grille terminée. Cliquez « Nouvelle grille » pour rejouer.') }}
+                    </div>
+
+                    {{-- #252 : avertissement persistance locale (demande user). La partie
+                         est enregistrée dans CE navigateur et restaurée au rechargement. --}}
+                    <p class="mt-3 mb-0 small" style="line-height:1.45;color:#52586a;">
+                      <span aria-hidden="true">💾</span>
+                      {{ __('Votre partie est enregistrée sur cet appareil et restaurée si vous rechargez la page (rien n\'est envoyé au serveur tant que vous ne soumettez pas un score). Elle disparaît si vous changez d\'appareil ou de navigateur, ou videz les données du site.') }}
+                    </p>
                   </div>
                 </div>
               </aside>
