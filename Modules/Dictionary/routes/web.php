@@ -18,6 +18,14 @@ Route::middleware('web')->group(function () {
     Route::redirect('/glossaire/mcp-model-context-protocol', '/glossaire/mcp', 301);
     Route::redirect('/glossaire/differential-privacy', '/glossaire/confidentialite-differentielle', 301);
     Route::redirect('/glossaire/hallucination-ia', '/glossaire/hallucination', 301);
+    Route::redirect('/glossaire/tokens', '/glossaire/token', 301);
+    Route::redirect('/glossaire/moe', '/glossaire/mixture-of-experts', 301);
+    Route::redirect('/glossaire/context-window', '/glossaire/fenetre-de-contexte', 301);
+    Route::redirect('/glossaire/shadow-ai', '/glossaire/ia-fantome', 301);
+    Route::redirect('/glossaire/infiltration-de-requete', '/glossaire/prompt-injection', 301);
+    Route::redirect('/glossaire/knowledge-distillation', '/glossaire/distillation-de-modele', 301);
+    Route::redirect('/glossaire/affinage', '/glossaire/fine-tuning', 301);
+    Route::redirect('/glossaire/edge-ai', '/glossaire/ia-embarquee', 301);
     Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show')->middleware('cacheResponse:3600');
 });
 

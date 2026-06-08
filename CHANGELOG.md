@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.103] - 2026-06-08
+
+### Fixed
+- Glossaire — **8 doublons sémantiques consolidés** (audit prod-wide, fusion dans « Aussi appelé ») : `tokens`→`token`, `moe`→`mixture-of-experts`, `context-window`→`fenetre-de-contexte`, `shadow-ai`→`ia-fantome`, `infiltration-de-requete`→`prompt-injection`, `knowledge-distillation`→`distillation-de-modele`, `affinage`→`fine-tuning`, `edge-ai`→`ia-embarquee`. Pour chaque paire (même concept sous 2 fiches, le doublon étant l'entrée admin sans catégorie) : nom + alias uniques fusionnés dans « Aussi appelé » de la fiche canonique, doublon **dépublié** (réversible, aucun DELETE), liens broader/narrower nettoyés (self-refs retirés, `byoai.broader` shadow-ai→ia-fantome), ancien slug **redirigé 301**. Les paires limites (embeddings/vectorisation, ia-multimodale/modele-multimodal, llm/modele-de-langage) et l'entrée douteuse « spoiler » sont volontairement laissées pour décision éditoriale (concepts potentiellement distincts).
+
 ## [1.65.102] - 2026-06-08
 
 ### Fixed
