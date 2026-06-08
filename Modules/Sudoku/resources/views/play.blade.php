@@ -645,6 +645,8 @@ document.addEventListener('alpine:init', () => {
       } else {
         this.errorsCells.delete(row + '-' + col);
       }
+      // Auto-détection de fin : dès que la grille est pleine, on vérifie/félicite.
+      this.checkCompletion();
     },
 
     toggleNote(row, col, n) {
@@ -756,6 +758,8 @@ document.addEventListener('alpine:init', () => {
               this.selectedCell = { row: r, col: c };
               this.statusMessage = 'Indice : (' + (r+1) + ',' + (c+1) + ') = ' + n + ' · +' + penalty + 's pénalité.';
               setTimeout(() => { this.statusMessage = ''; }, 3500);
+              // Auto-détection de fin si l'indice complète la grille.
+              this.checkCompletion();
             } catch (e) {
               this.statusMessage = 'Indice indisponible, réessayez.';
               setTimeout(() => { this.statusMessage = ''; }, 3500);
@@ -901,6 +905,15 @@ document.addEventListener('alpine:init', () => {
       } finally {
         this.regenerating = false;
         this.restartModalEl?.hide();
+      }
+    },
+
+    // Vérifie automatiquement la complétion : appelée après chaque saisie/indice.
+    // Si la grille est pleine, déclenche verifyComplete (félicitations + classement).
+    checkCompletion() {
+      if (this.completed) return;
+      if (this.grid.every(row => row.every(v => v !== 0))) {
+        this.verifyComplete();
       }
     },
 

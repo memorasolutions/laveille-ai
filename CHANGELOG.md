@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.115] - 2026-06-08
+
+### Fixed
+- Sudoku — **auto-détection de fin de grille** (retour utilisateur : « quand j'ai terminé, pas de félicitation ? pas d'envoi au classement ? »). `verifyComplete()` n'était déclenché **que** par le bouton « Vérifier la grille » : un joueur qui remplissait sa grille sans cliquer ce bouton ne voyait jamais la modale de félicitations ni le classement. Nouvelle méthode `checkCompletion()` (si la grille est pleine → `verifyComplete` = félicitations + soumission au classement) appelée **après chaque saisie** (`inputValue`) **et chaque indice** (`useHint`). Grille pleine et valide → modale « Bravo ! » automatique ; pleine mais avec une erreur → message d'erreur ciblé (comportement inchangé). Le bouton « Vérifier la grille » reste disponible.
+
 ## [1.65.114] - 2026-06-08
 
 ### Fixed
