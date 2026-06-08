@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.110] - 2026-06-08
+
+### Fixed
+- Sudoku — **accessibilité WCAG 1.3.1 (structure ARIA)**, reco P2 issue du bilan de simulation. (1) **Grille** : `role="grid"` → `role="group"` et `role="gridcell"` retiré des cellules. Un `role="grid"` impose un maillage strict `grid > row > gridcell` ; sans conteneur `role="row"` intermédiaire, l'audit signalait « grid must contain row » + « gridcell must be contained by row ». La solution `display:contents` sur un `role="row"` n'étant **pas fiable cross-navigateur en 2026** (recherche), on retire la promesse ARIA invalide ; l'information de position reste portée par l'`aria-label` de chaque cellule (« Ligne X, colonne Y, vide/valeur N ») et la navigation aux flèches déjà fonctionnelle. **Zéro changement de CSS/layout** (blocs 3×3 et ordre vertical intacts). (2) **Navigation du haut** : `role="tablist"` + `role="presentation"` retirés (ce sont des **liens** entre pages — Jouer/Classements/Mes parties — pas un widget d'onglets) + `aria-current="page"` sur le lien actif. (3) **Pills de difficulté** : `role="tablist"` → `role="group"` (boutons bascule `aria-pressed` à tabulation indépendante, pas des onglets). Amélioration future possible : grille en `<table>` natif + roving tabindex.
+
 ## [1.65.109] - 2026-06-08
 
 ### Changed

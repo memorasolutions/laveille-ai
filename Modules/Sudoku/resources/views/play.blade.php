@@ -24,16 +24,18 @@
               <span class="badge bg-secondary mb-3">{{ __('Grilles du') }} {{ \Carbon\Carbon::parse($date)->isoFormat('LL') }}</span>
             @endisset
 
-            <ul class="nav nav-tabs mb-4" role="tablist" style="border-bottom:2px solid #053d4a;flex-wrap:wrap;">
-              <li class="nav-item" role="presentation">
-                <a class="nav-link active" href="{{ route('sudoku.play') }}" style="color:#053d4a;font-weight:600;border-bottom:3px solid #053d4a;background:rgba(11,114,133,.08);">
+            {{-- a11y : ce sont des LIENS de navigation entre pages (Jouer/Classements/Mes parties),
+                 pas un widget d'onglets → pas de role=tablist. aria-current=page sur le lien actif. --}}
+            <ul class="nav nav-tabs mb-4" style="border-bottom:2px solid #053d4a;flex-wrap:wrap;">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ route('sudoku.play') }}" style="color:#053d4a;font-weight:600;border-bottom:3px solid #053d4a;background:rgba(11,114,133,.08);">
                   <span class="d-inline-flex align-items-center gap-2">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 3l14 9-14 9V3z"/></svg>
                     {{ __('Jouer') }}
                   </span>
                 </a>
               </li>
-              <li class="nav-item" role="presentation">
+              <li class="nav-item">
                 <a class="nav-link" href="{{ route('sudoku.leaderboards') }}" style="color:#053d4a;font-weight:600;">
                   <span class="d-inline-flex align-items-center gap-2">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
@@ -42,7 +44,7 @@
                 </a>
               </li>
               @auth
-              <li class="nav-item" role="presentation">
+              <li class="nav-item">
                 <a class="nav-link" href="{{ route('sudoku.my-games') }}" style="color:#053d4a;font-weight:600;">
                   <span class="d-inline-flex align-items-center gap-2">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -54,7 +56,8 @@
             </ul>
 
             {{-- Pills 5 difficultes (#9 S84 Option F : tooltip hover premium NYT/Microsoft 2026 — label propre + info riche au hover) --}}
-            <div class="sudoku-pills d-flex flex-wrap gap-2 mb-4" role="tablist" aria-label="{{ __('Niveau de difficulté') }}">
+            {{-- a11y : groupe de boutons bascule (aria-pressed), pas un widget d'onglets → role=group. --}}
+            <div class="sudoku-pills d-flex flex-wrap gap-2 mb-4" role="group" aria-label="{{ __('Niveau de difficulté') }}">
               <template x-for="(puzzle, idx) in puzzles" :key="'pill-'+idx">
                 <div style="position: relative;" @mouseleave="tooltipIdx = null">
                   <button type="button"
@@ -102,7 +105,10 @@
             <div class="row g-4">
               <div class="col-lg-8 col-12">
                 <div class="sudoku-grid-wrapper" style="position:relative;">
-                <div class="sudoku-grid mx-auto" role="grid" :aria-label="'Grille Sudoku ' + currentDifficulty" :class="{ 'sudoku-paused': paused, 'sudoku-notes-mode': notesMode }">
+                {{-- a11y : role=group (PAS role=grid) — un role=grid impose un maillage strict grid>row>gridcell ;
+                     l'info de position est portee par cellAriaLabel (« Ligne X, colonne Y, … ») + nav fleches.
+                     Robuste cross-navigateur (cf. fragilite display:contents sur role=row, recherche juin 2026). --}}
+                <div class="sudoku-grid mx-auto" role="group" :aria-label="'Grille Sudoku 9 par 9 — ' + currentDifficulty" :class="{ 'sudoku-paused': paused, 'sudoku-notes-mode': notesMode }">
                   <template x-for="(row, r) in grid" :key="'r'+r">
                     <template x-for="(value, c) in row" :key="'c'+r+'-'+c">
                       <div class="sudoku-cell"
@@ -110,7 +116,6 @@
                            :data-row="r"
                            :data-col="c"
                            :style="'grid-row:' + (r + 1) + ';grid-column:' + (c + 1)"
-                           role="gridcell"
                            :tabindex="originalGrid[r][c] === 0 ? 0 : -1"
                            :aria-label="cellAriaLabel(r, c)"
                            @click="selectCell(r, c)"
