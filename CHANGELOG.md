@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.107] - 2026-06-08
+
+### Fixed
+- Sudoku — **VRAI « problème de cases » corrigé : les blocs 3×3 affichaient des bandes 4/3/2 au lieu de 3/3/3**. Diagnostic Playwright : la grille `display:grid` était rendue **verticalement inversée** (data-row 0 en bas, data-row 8 en haut) ; les bordures de blocs (correctement sur data-row 2 et 5) tombaient alors après les 4e et 7e rangées visuelles → grandes cases de 4, 3 puis 2 petites cases. Correctif robuste indépendant de la cause : **placement explicite** de chaque cellule via `grid-row`/`grid-column` (data-row 0 → rangée 1 = haut). Vérifié : data-row 0 en haut, 8 en bas, blocs parfaitement découpés en 3×3 (3/3/3). (Les diagnostics précédents — densité de givens v1.65.105, sauvegarde locale v1.65.106 — étaient des améliorations valides mais à côté du vrai défaut structurel.)
+
 ## [1.65.106] - 2026-06-08
 
 ### Fixed

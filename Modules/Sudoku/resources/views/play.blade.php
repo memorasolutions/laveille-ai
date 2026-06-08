@@ -109,6 +109,7 @@
                            :class="cellClass(r, c)"
                            :data-row="r"
                            :data-col="c"
+                           :style="'grid-row:' + (r + 1) + ';grid-column:' + (c + 1)"
                            role="gridcell"
                            :tabindex="originalGrid[r][c] === 0 ? 0 : -1"
                            :aria-label="cellAriaLabel(r, c)"
