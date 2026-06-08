@@ -16,10 +16,12 @@ Route::prefix('sudoku')->group(function () {
     Route::post('regenerate/{difficulty}', [PuzzleApiController::class, 'regenerate'])
         ->middleware('throttle:6,1');
 
-    // indice : revele UNE case correcte depuis la solution serveur (anti-triche)
+    // indice : revele UNE case correcte depuis la solution serveur (anti-triche).
+    // throttle 120/min : genereux (une partie resolue surtout par indices sur
+    // Diabolique ~57 trous ne doit jamais etre bloquee) tout en bornant l'abus.
     Route::post('hint/{puzzle_id}', [PuzzleApiController::class, 'hint'])
         ->where('puzzle_id', '\d+')
-        ->middleware('throttle:60,1');
+        ->middleware('throttle:120,1');
 
     Route::post('score', [ScoreApiController::class, 'submit'])
         ->middleware('throttle:10,1');

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.109] - 2026-06-08
+
+### Changed
+- Sudoku — endpoint indice : limite de débit **60 → 120 requêtes/min**. En vérifiant le correctif v1.65.108 dans le navigateur (remplir toute la grille uniquement avec « Indice »), le throttle de 60/min introduit en v108 pouvait s'épuiser sur une partie résolue surtout par indices (Diabolique ≈ 57 cases vides). 120/min reste anti-abus (la solution n'est jamais exposée, une seule case par appel, pénalité de temps par indice) sans jamais bloquer un joueur légitime. Vérification du correctif v108 : Facile = 41 indices sur 41 trous → grille **complète, 0 conflit, 0 erreur** (chaque indice pose la bonne valeur).
+
 ## [1.65.108] - 2026-06-08
 
 ### Fixed
