@@ -758,8 +758,25 @@ document.addEventListener('alpine:init', () => {
           errorsCount: this.errorsCount,
           paused: this.paused,
           completed: this.completed,
+          init: this.originalGrid, // #232 : signature des givens pour invalider une sauvegarde obsolète
         }));
       } catch (e) { /* ignore */ }
+    },
+
+    givensMatch(data) {
+      // #232 : la sauvegarde correspond-elle au puzzle serveur courant ?
+      if (data.init) {
+        return JSON.stringify(data.init) === JSON.stringify(this.originalGrid);
+      }
+      // Ancienne sauvegarde (sans 'init') : vérifier les givens un à un (un given ne change jamais en partie)
+      if (!data.grid || !Array.isArray(data.grid) || data.grid.length !== 9) return false;
+      for (let r = 0; r < 9; r++) {
+        if (!Array.isArray(data.grid[r]) || data.grid[r].length !== 9) return false;
+        for (let c = 0; c < 9; c++) {
+          if (this.originalGrid[r][c] !== 0 && data.grid[r][c] !== this.originalGrid[r][c]) return false;
+        }
+      }
+      return true;
     },
 
     restoreLocalState() {
@@ -767,6 +784,12 @@ document.addEventListener('alpine:init', () => {
         const raw = localStorage.getItem('sudoku_state_' + this.currentPuzzleId);
         if (!raw) return;
         const data = JSON.parse(raw);
+        // #232 : si le puzzle a été régénéré (même id, grille différente), la sauvegarde
+        // locale est obsolète → on l'efface et on repart de la grille serveur fraîche.
+        if (!this.givensMatch(data)) {
+          localStorage.removeItem('sudoku_state_' + this.currentPuzzleId);
+          return;
+        }
         if (data.grid) this.grid = data.grid;
         if (data.notes && Array.isArray(data.notes) && data.notes.length === 9) this.notes = data.notes;
         this.timer = data.timer || 0;

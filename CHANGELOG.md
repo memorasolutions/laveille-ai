@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.106] - 2026-06-08
+
+### Fixed
+- Sudoku — **la sauvegarde locale obsolète masquait un puzzle régénéré** (« rien n'a changé » côté joueur). La grille de jeu est sauvée en localStorage sous `sudoku_state_<puzzle_id>` ; quand un puzzle est régénéré côté serveur en gardant le même id, l'ancienne grille était restaurée, écrasant la nouvelle. Correctif : `saveLocalState()` enregistre désormais une **signature des givens** (`init`), et `restoreLocalState()` **invalide la sauvegarde** si la grille initiale serveur diffère (helper `givensMatch()`, avec repli de validation cellule par cellule pour les anciennes sauvegardes). Un puzzle régénéré force ainsi un repartir propre depuis le serveur. (Le service worker `sw.js` est déjà en mode cleanup ; non impliqué.)
+
 ## [1.65.105] - 2026-06-08
 
 ### Fixed
