@@ -108,7 +108,7 @@
                 {{-- a11y : role=group (PAS role=grid) — un role=grid impose un maillage strict grid>row>gridcell ;
                      l'info de position est portee par cellAriaLabel (« Ligne X, colonne Y, … ») + nav fleches.
                      Robuste cross-navigateur (cf. fragilite display:contents sur role=row, recherche juin 2026). --}}
-                <div class="sudoku-grid mx-auto" role="group" :aria-label="'Grille Sudoku 9 par 9 — ' + currentDifficulty" :class="{ 'sudoku-paused': paused, 'sudoku-notes-mode': notesMode }">
+                <div class="sudoku-grid mx-auto" role="group" tabindex="0" @keydown="handleGridKey($event)" :aria-label="'Grille Sudoku 9 par 9 — ' + currentDifficulty" :class="{ 'sudoku-paused': paused, 'sudoku-notes-mode': notesMode }">
                   <template x-for="(row, r) in grid" :key="'r'+r">
                     <template x-for="(value, c) in row" :key="'c'+r+'-'+c">
                       <div class="sudoku-cell"
@@ -122,8 +122,7 @@
                            :role="originalGrid[r][c] === 0 ? 'button' : null"
                            :tabindex="originalGrid[r][c] === 0 ? 0 : -1"
                            :aria-label="originalGrid[r][c] === 0 ? cellAriaLabel(r, c) : null"
-                           @click="selectCell(r, c)"
-                           @keydown="handleKey($event, r, c)">
+                           @click="selectCell(r, c)">
                         <template x-if="value !== 0">
                           <span x-text="value"></span>
                         </template>
@@ -593,6 +592,23 @@ document.addEventListener('alpine:init', () => {
     selectCell(r, c) {
       if (this.completed || this.paused) return;
       this.selectedCell = { row: r, col: c };
+      // Synchronise le focus DOM sur la cellule sélectionnée (clavier fiable,
+      // source de vérité unique) — uniquement si la case est éditable.
+      if (this.originalGrid[r][c] === 0) {
+        this.$nextTick(() => {
+          const el = this.$root.querySelector(`.sudoku-cell[data-row="${r}"][data-col="${c}"]`);
+          el?.focus({ preventScroll: true });
+        });
+      }
+    },
+
+    // Point d'entrée clavier UNIQUE au niveau de la grille : route les touches
+    // vers la cellule sélectionnée (selectedCell), quel que soit l'élément focalisé.
+    handleGridKey(e) {
+      if (this.completed || this.paused) return;
+      const { row, col } = this.selectedCell;
+      if (row < 0) return;
+      this.handleKey(e, row, col);
     },
 
     inputValue(n) {

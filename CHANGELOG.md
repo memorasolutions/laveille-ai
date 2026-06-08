@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.113] - 2026-06-08
+
+### Fixed
+- Sudoku — **saisie au clavier fiable dans les cases** (demande utilisateur : « pourquoi je ne peux pas utiliser mon clavier en plus des numéros en bas ? »). Le clavier ne fonctionnait que si la cellule **exacte** avait le focus DOM (le gestionnaire `handleKey` était attaché `@keydown` sur chaque cellule), or sélectionner une case ne déplaçait pas le focus → dès qu'on cliquait une case-indice, le pavé, ou ailleurs, la frappe ne faisait rien. Refonte selon la meilleure pratique de juin 2026 (widget composite, source de vérité unique `selectedCell`, périmètre = la grille, **pas** de gestionnaire global `window`) : (1) un **seul** gestionnaire `@keydown` au niveau du **conteneur de la grille** (rendu focusable, `tabindex=0`) qui route les touches vers la cellule sélectionnée ; (2) `selectCell` **synchronise désormais le focus DOM** sur la cellule sélectionnée (au clic **et** aux flèches) ; (3) retrait du `@keydown` par cellule (anti double-traitement). Chiffres 1-9 = saisie, Backspace/Suppr/0 = effacer, flèches = déplacer. **Notes** : via le bouton « Notes » existant (la saisie respecte le mode notes) + raccourci Maj+chiffre conservé. Pavé numérique du bas inchangé.
+
 ## [1.65.112] - 2026-06-08
 
 ### Fixed
