@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.102] - 2026-06-08
+
+### Fixed
+- Glossaire — **liens internes cassés corrigés** (audit prod-wide) : 8 références `broader_slugs`/`narrower_slugs` invalides. Les renvois vers des doublons dépubliés sont remappés vers la fiche canonique (`differential-privacy` → `confidentialite-differentielle` sur anonymisation et k-anonymity) ; les renvois vers des slugs inexistants sont retirés (`protection-vie-privee` ×4, `hash-sha-256`, `hallucination-ia`). Migration réversible, aucun terme supprimé. Audit confirme aussi : 0 fiche sans image hero (les alertes initiales étaient des faux positifs dus au suffixe `?v=` dans le champ hero_image).
+
 ## [1.65.101] - 2026-06-07
 
 ### Fixed
