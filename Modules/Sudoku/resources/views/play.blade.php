@@ -226,7 +226,10 @@
                   {{-- WCAG 2.2 AAA : blanc sur #064E5A = 9.35:1 et sur #053d4a = 11.85:1 (>= 7:1).
                        L'ancien #0B7285 (extremite claire) ne donnait que 5.58:1 (AA, pas AAA). --}}
                   <div class="modal-header" style="background:linear-gradient(135deg, #064E5A 0%, #053d4a 100%);color:#fff;border-bottom:none;">
-                    <h2 class="modal-title h5" id="winModalLabel">🎉 {{ __('Bravo !') }}</h2>
+                    {{-- color:#fff explicite sur le titre : la regle globale h2{color:#1A1D23}
+                         bat la couleur heritee du parent (.modal-header color:#fff) → sans ca,
+                         titre fonce sur fond teal fonce = illisible (depuis le passage h5→h2). --}}
+                    <h2 class="modal-title h5" id="winModalLabel" style="color:#fff;">🎉 {{ __('Bravo !') }}</h2>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
                   </div>
                   <div class="modal-body p-4">

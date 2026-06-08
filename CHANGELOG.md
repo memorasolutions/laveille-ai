@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.117] - 2026-06-08
+
+### Fixed
+- Sudoku — **vraie cause du titre « Bravo ! » illisible** : le titre s'affichait en **foncé** (`#1A1D23`) sur le fond teal foncé, et non en blanc. Cause = le passage du titre de `<h5>` à `<h2>` (v1.65.112) : la règle globale `h2 { color: #1A1D23 }` l'emportait sur la couleur `#fff` héritée de l'en-tête. Correctif : `color:#fff` explicite sur le `<h2>` du titre (l'inline bat la règle globale). Désormais blanc sur `#064E5A` = **9.35:1** (AAA). Complète le dégradé AAA de la v1.65.116.
+
 ## [1.65.116] - 2026-06-08
 
 ### Fixed
