@@ -63,6 +63,10 @@ class ScoreApiController extends Controller
         // Les scores anonymes restent enregistrés (rangs renvoyés dans réponse API) mais n'apparaissent pas
         // dans le leaderboard public — protège contre soumissions bots avec pseudo libre + solution récupérable.
         $isPublished = $data['time_seconds'] >= $minTime && $request->user() !== null;
+        // Raison de non-publication (message front-end honnete : « anonyme » != « temps trop court »).
+        $publishReason = $isPublished
+            ? 'published'
+            : ($request->user() === null ? 'anonymous' : 'too_fast');
         $ipHash = hash('sha256', $request->ip().date('Y-m-d'));
 
         // Anti-spam : 1 score validateur par puzzle + ip_hash sur 60s
@@ -120,6 +124,8 @@ class ScoreApiController extends Controller
                 'rank_today' => $rankToday,
                 'rank_week' => $rankWeek,
                 'is_published' => $isPublished,
+                'publish_reason' => $publishReason,
+                'min_time' => $minTime,
             ]);
         } finally {
             optional($lock)->release();

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.119] - 2026-06-08
+
+### Fixed
+- Sudoku — **message « non classé » honnête** (défaut trouvé en testant une partie Diabolique complète). La modale de victoire affichait **toujours** « non classé : temps trop court » dès qu'un score n'était pas publié, alors que la publication au classement exige **deux** conditions : temps ≥ minimum **ET** utilisateur **connecté**. Un joueur **anonyme** avec un bon temps voyait donc un message **faux** (« temps trop court » alors que son temps était suffisant). Correctif : l'API renvoie désormais `publish_reason` (`published` / `anonymous` / `too_fast`) et `min_time` ; la modale affiche le bon message — connecté mais trop rapide → « Non classé : temps trop court (minimum X s) » ; anonyme → « Connectez-vous pour apparaître au classement » ; publié → « Rang du jour : N ». (Le reste du test Diabolique complet est PASS : 24 indices de départ, saisie clavier, notes, erreur+correction, indice, pause, auto-détection de victoire, soumission.)
+
 ## [1.65.118] - 2026-06-08
 
 ### Added

@@ -985,7 +985,16 @@ document.addEventListener('alpine:init', () => {
         const data = await res.json();
         if (res.ok && data.success) {
           this.resultIsSuccess = true;
-          this.resultMessage = 'Score ' + data.score + ' ! Rang du jour : ' + (data.rank_today || '-') + (data.is_published === false ? ' (non classe : temps trop court)' : '');
+          this.resultMessage = 'Score ' + data.score + ' !';
+          if (data.is_published) {
+            this.resultMessage += ' · Rang du jour : ' + data.rank_today;
+          } else if (data.publish_reason === 'anonymous') {
+            this.resultMessage += ' · Connectez-vous pour apparaître au classement.';
+          } else if (data.publish_reason === 'too_fast') {
+            this.resultMessage += ' · Non classé : temps trop court (minimum ' + data.min_time + 's).';
+          } else {
+            this.resultMessage += ' · Non classé.';
+          }
         } else {
           this.resultIsSuccess = false;
           this.resultMessage = data.error || 'Erreur de soumission.';
