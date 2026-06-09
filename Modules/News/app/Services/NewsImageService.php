@@ -201,15 +201,29 @@ class NewsImageService
                 $gradient->annotateImage($draw, $w / 2, 340, 0, implode("\n", $lines));
             }
 
-            // Catégorie
+            // Catégorie — badge « pill » (fond accent semi-transparent, texte majuscules).
             $fontRegular = resource_path('fonts/Inter-Regular.ttf');
             if ($categoryTag && file_exists($fontRegular)) {
+                $txt = mb_strtoupper($categoryTag, 'UTF-8');
                 $drawCat = new \ImagickDraw();
                 $drawCat->setFont($fontRegular);
-                $drawCat->setFontSize(28);
-                $drawCat->setFillColor(new \ImagickPixel('rgba(255,255,255,0.6)'));
+                $drawCat->setFontSize(24);
+                $metrics = $gradient->queryFontMetrics($drawCat, $txt);
+                $pillWidth = $metrics['textWidth'] + 44;
+                $pillHeight = $metrics['textHeight'] + 16;
+                $pillX1 = ($w - $pillWidth) / 2;
+                $pillY1 = 500 - $pillHeight / 2;
+
+                $pill = new \ImagickDraw();
+                $pill->setFillColor(new \ImagickPixel($pal[0]));
+                $pill->setFillOpacity(0.85);
+                $pill->roundRectangle($pillX1, $pillY1, $pillX1 + $pillWidth, $pillY1 + $pillHeight, 14, 14);
+                $gradient->drawImage($pill);
+
+                $drawCat->setFillColor(new \ImagickPixel('white'));
                 $drawCat->setTextAlignment(\Imagick::ALIGN_CENTER);
-                $gradient->annotateImage($drawCat, $w / 2, 520, 0, $categoryTag);
+                $baseline = 500 - ($metrics['ascender'] + $metrics['descender']) / 2;
+                $gradient->annotateImage($drawCat, $w / 2, $baseline, 0, $txt);
             }
 
             // Sous-titre laveille.ai
@@ -256,33 +270,15 @@ class NewsImageService
             return $s / 0x7fffffff;
         };
 
-        $nodeCount = 14 + (int) ($rand01() * 5);
+        $nodeCount = 16 + (int) ($rand01() * 5); // 16 à 20
         $nodes = [];
         for ($i = 0; $i < $nodeCount; $i++) {
-            $x = $rand01() * $w;
-            $y = $rand01() * $h;
-            if ($y >= 250 && $y <= 560 && $x >= 80 && $x <= 1120) {
-                $y *= 0.3;
-            }
-            $nodes[] = [$x, $y, $rand01()];
-        }
-
-        $draw = new \ImagickDraw();
-        $draw->setStrokeWidth(1.5);
-        $draw->setFillOpacity(0.0);
-
-        foreach ($nodes as $i => $n1) {
-            foreach ($nodes as $j => $n2) {
-                if ($i >= $j) {
-                    continue;
-                }
-                $dx = $n1[0] - $n2[0];
-                $dy = $n1[1] - $n2[1];
-                if (sqrt($dx * $dx + $dy * $dy) < 320) {
-                    $draw->setStrokeColor('rgba(255,255,255,0.10)');
-                    $draw->line($n1[0], $n1[1], $n2[0], $n2[1]);
-                }
-            }
+            // Marges latérales uniquement : index pair => gauche, impair => droite.
+            // y borné à [20,470] pour épargner la bande du titre ET le footer (catégorie/laveille.ai).
+            $x = ($i % 2 === 0) ? 20 + $rand01() * 360 : 820 + $rand01() * 360;
+            $y = 20 + $rand01() * 450;
+            $r = 3 + $rand01() * 5;
+            $nodes[] = [$x, $y, $r];
         }
 
         $bigIndices = [];
@@ -290,12 +286,27 @@ class NewsImageService
             $bigIndices[] = (int) ($rand01() * $nodeCount);
         }
 
-        foreach ($nodes as $idx => [$x, $y, $rnorm]) {
+        $draw = new \ImagickDraw();
+        $draw->setStrokeWidth(1.5);
+        $draw->setStrokeColor(new \ImagickPixel('rgba(255,255,255,0.10)'));
+        $draw->setFillOpacity(0);
+
+        for ($i = 0; $i < $nodeCount; $i++) {
+            for ($j = $i + 1; $j < $nodeCount; $j++) {
+                $dx = $nodes[$i][0] - $nodes[$j][0];
+                $dy = $nodes[$i][1] - $nodes[$j][1];
+                if (sqrt($dx * $dx + $dy * $dy) < 300) {
+                    $draw->line($nodes[$i][0], $nodes[$i][1], $nodes[$j][0], $nodes[$j][1]);
+                }
+            }
+        }
+
+        foreach ($nodes as $idx => [$x, $y, $r]) {
             $isBig = in_array($idx, $bigIndices, true);
-            $radius = $isBig ? 12 + $rnorm * 4 : 3 + $rnorm * 5;
-            $useAccent = ($rand01() < 0.25);
-            $color = $useAccent ? $pal[0] : '#FFFFFF';
+            $radius = $isBig ? 9 + $rand01() * 2 : $r;
             $opacity = $isBig ? 0.16 : 0.22;
+            $usePal = ($rand01() < 0.25) && ! $isBig;
+            $color = $usePal ? $pal[0] : '#ffffff';
 
             $draw->setStrokeWidth(0);
             $draw->setStrokeColor(new \ImagickPixel('rgba(0,0,0,0)'));
@@ -306,7 +317,7 @@ class NewsImageService
             if ($isBig) {
                 $draw->setStrokeWidth(1.5);
                 $draw->setStrokeColor(new \ImagickPixel($color));
-                $draw->setFillOpacity(0.0);
+                $draw->setFillOpacity(0);
                 $draw->circle($x, $y, $x + $radius + 6, $y);
             }
         }

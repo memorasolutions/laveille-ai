@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.128] - 2026-06-09
+
+### Changed
+- **News — affinage du visuel « réseau de neurones » suite validation visuelle** (agent Playwright sur 6 témoins → 6,5/10, 3 défauts corrigés) : (1) **bloquant** — un nœud chevauchait « laveille.ai » → les nœuds sont désormais cantonnés aux **marges latérales** (index pair = gauche x[20,380], impair = droite x[820,1180]) avec y borné à [20,470] (épargne la bande du titre ET le footer) ; (2) **asymétrie** (motif massé dans un coin) → l'alternance gauche/droite garantit l'équilibre (2 grappes propres, arêtes < 300 px) ; (3) **gros nœuds** bornés à un rayon 9–11 (n'éclipsent plus le logo). Le label de catégorie devient un **badge « pill »** (roundRectangle couleur d'accent à 85 % + texte en majuscules blanc centré via `queryFontMetrics`) au lieu du texte gris brut. Imagick pur, déterministe.
+
 ## [1.65.127] - 2026-06-09
 
 ### Added

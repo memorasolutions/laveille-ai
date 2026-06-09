@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.128 · 2026-06-09 · refine(news) visuel « réseau de neurones » suite VALIDATION VISUELLE (agent Playwright 6 témoins, 6,5/10 → corrections). 3 défauts corrigés : (1) BLOQUANT un nœud chevauchait « laveille.ai » → nœuds désormais cantonnés aux MARGES latérales (pair=gauche x[20,380], impair=droite x[820,1180]) et y borné [20,470] (épargne titre ET footer) ; (2) asymétrie (motif dans un coin) → alternance gauche/droite garantit l'équilibre, 2 grappes propres (arêtes <300px) ; (3) gros nœuds bornés rayon 9-11 (n'éclipsent plus le logo). + label catégorie transformé en BADGE « pill » (roundRectangle accent $pal[0] opacité 0.85 + texte MAJUSCULES blanc centré via queryFontMetrics) au lieu du texte gris brut. Imagick pur, déterministe. Codename seo-piliers-veille-generative.
  *   1.65.127 · 2026-06-09 · feat(news) visuel auto « réseau de neurones » génératif (design choisi par l'utilisateur, veille pp_search juin 2026, noté 91/100). `generateFallbackImage` superpose `drawNeuralPattern($gradient,$w,$h,$title,$pal)` : motif déterministe nœuds+arêtes UNIQUE par titre (PRNG LCG seedé sur crc32 du titre), arêtes blanches 10% pour nœuds proches (<320px), nœuds 22% (3 « gros » 16% avec halo anneau), 1 nœud/4 en couleur d'accent de la palette ; évite la bande centrale du titre (y 250-560 repoussé). Thématique IA, subtil, lisible. Imagick pur (≤~30 primitives, ~0.2s), zéro dépendance, zéro droits d'auteur. Code délégué Hermes/qwen3-max, intégré + affiné (contour disques neutralisé, halo rayon+6). Sert au robot ET au rattrapage de masse. Codename seo-piliers-veille-generative.
  *   1.65.126 · 2026-06-09 · feat(news) image de marque à FOND VARIABLE par catégorie (suite anti-PicRights). `generateFallbackImage` : le dégradé teal→navy fixe devient une palette de 10 dégradés foncés tendance 2026 (ia/llm/hardware/finance/securite/science/robotique/startup/reglementation/default), choisi par `category_tag` (normalisé) avec fallback déterministe par id (variété même sans catégorie). Logo œil + titre + laveille.ai inchangés. Sert au robot (nouveaux articles) ET à la future régénération de masse. Codename seo-piliers-veille-generative.
  *   1.65.125 · 2026-06-09 · fix(news/DROITS D'AUTEUR) le robot d'actualités NE COLLECTE/RÉ-HÉBERGE PLUS les images de source (anti-récidive réclamation PicRights/Reuters réf. 7429-5217-7374). `NewsImageService::processFromUrl()` court-circuité par un early return → génère une IMAGE DE MARQUE libre (`generateFallbackImage`, fond La veille + titre de l'article) au lieu de télécharger la photo de la source. Couvre les 4 chemins (news:fetch via RssFetcherService + rescrape-images + rescrape-google-images + reprocess). Code de download conservé (neutralisé) pour rollback. Réversible (tag backup-pre-news-image-stop-2026-06-09). NB : article litigieux #2190 déjà corrigé (photo Reuters remplacée par image libre Pexels + crédit retiré). RESTE (validation user) : modernisation du générateur (tendances 2026, fond variable, SVG→raster) + remplacement ciblé des ~1003 anciennes images à crédit agence. Codename seo-piliers-veille-generative.
@@ -276,7 +277,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 127;
+$lvPatch = 128;
 
 return [
     'major' => $lvMajor,
