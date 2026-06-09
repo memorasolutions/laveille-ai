@@ -224,20 +224,25 @@ class NewsImageService
                 $drawCat->setFont($fontRegular);
                 $drawCat->setFontSize(24);
                 $metrics = $gradient->queryFontMetrics($drawCat, $txt);
-                $pillWidth = $metrics['textWidth'] + 44;
-                $pillHeight = $metrics['textHeight'] + 16;
+                $asc = abs($metrics['ascender']);
+                $desc = abs($metrics['descender']);
+                $pillCenterY = 500;
+                $pillWidth = $metrics['textWidth'] + 48;
+                $pillHeight = ($asc + $desc) + 26; // marge verticale pour accents majuscules (É, Ô…)
                 $pillX1 = ($w - $pillWidth) / 2;
-                $pillY1 = 500 - $pillHeight / 2;
+                $pillY1 = $pillCenterY - $pillHeight / 2;
 
                 $pill = new \ImagickDraw();
                 $pill->setFillColor(new \ImagickPixel($pal[0]));
                 $pill->setFillOpacity(0.85);
-                $pill->roundRectangle($pillX1, $pillY1, $pillX1 + $pillWidth, $pillY1 + $pillHeight, 14, 14);
+                $pill->roundRectangle($pillX1, $pillY1, $pillX1 + $pillWidth, $pillY1 + $pillHeight, 16, 16);
                 $gradient->drawImage($pill);
 
+                // Baseline pour centrer verticalement le texte sur $pillCenterY :
+                // centre du glyphe = baseline - (asc - desc)/2  =>  baseline = centre + (asc - desc)/2.
                 $drawCat->setFillColor(new \ImagickPixel('white'));
                 $drawCat->setTextAlignment(\Imagick::ALIGN_CENTER);
-                $baseline = 500 - ($metrics['ascender'] + $metrics['descender']) / 2;
+                $baseline = $pillCenterY + ($asc - $desc) / 2;
                 $gradient->annotateImage($drawCat, $w / 2, $baseline, 0, $txt);
             }
 

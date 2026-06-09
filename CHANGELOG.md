@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.130] - 2026-06-09
+
+### Fixed
+- **News — centrage du texte dans le badge « pill » de catégorie** (signalé par l'utilisateur : le texte débordait par le haut du badge, surtout avec les accents majuscules É/Ô). Cause : la formule de baseline avait le signe inversé (`500 - (asc+desc)/2`) → texte ~17 px trop haut. Correction : `$baseline = $pillCenterY + ($asc - $desc)/2` (valeurs absolues des métriques, robuste quel que soit le signe renvoyé par Imagick) → le centre du glyphe tombe exactement sur le centre du pill. La hauteur du pill passe à `(asc+desc)+26` (marge verticale pour les accents montants) et le rayon des coins à 16.
+
 ## [1.65.129] - 2026-06-09
 
 ### Changed
