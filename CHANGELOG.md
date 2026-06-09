@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.125] - 2026-06-09
+
+### Fixed
+- Actualités / **droits d'auteur** — le robot d'agrégation **ne télécharge/ré-héberge plus aucune image de source** (photos de presse). À la place, il génère une **image de marque libre de droits** (fond La veille + titre de l'article). Stoppe la récidive des réclamations type PicRights/Reuters. Couvre tous les chemins (fetch, rescrape, reprocess). Réversible (le code de téléchargement est conservé mais neutralisé). L'article litigieux a par ailleurs été corrigé (photo remplacée par une image libre + crédit retiré).
+
 ## [1.65.124] - 2026-06-09
 
 ### Added

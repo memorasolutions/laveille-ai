@@ -19,6 +19,12 @@ class NewsImageService
 
     public function processFromUrl(string $url, int $articleId): ?string
     {
+        // 2026-06-09 ANTI-RÉCIDIVE droits d'auteur (réf. PicRights 7429-5217-7374) : on NE télécharge /
+        // ré-héberge PLUS aucune image de source (presse). On génère une image de marque libre à la place.
+        // Le code de téléchargement ci-dessous est volontairement neutralisé (conservé pour rollback rapide).
+        $article = \Modules\News\Models\NewsArticle::find($articleId);
+        return self::generateFallbackImage($articleId, (string) ($article?->title ?? 'La veille IA'), $article?->category_tag ?? null);
+
         $maxBytes = 5 * 1024 * 1024; // 5 MB
         $maxPixels = 4000;
         $previousMemoryLimit = ini_get('memory_limit');
