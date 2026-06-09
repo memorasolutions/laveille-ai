@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.131 · 2026-06-09 · fix(news) LOGO ŒIL pixelisé dans le visuel auto (signalé par l'utilisateur). Cause : le logo `logo-eye-white.svg` (viewBox 52×52) était lu par Imagick à sa taille native (~52px) PUIS agrandi à 200px via resizeImage (×3,8 upscale) → bords pixelisés. Fix : `$logo->setResolution(1200,1200)` AVANT `readImage()` → le SVG est rasterisé à ~870px, puis downscale Lanczos à 200px = net. Imagick pur, 1 ligne. Codename seo-piliers-veille-generative.
  *   1.65.130 · 2026-06-09 · fix(news) CENTRAGE du texte dans le badge « pill » de catégorie (signalé par l'utilisateur : texte débordait par le haut du pill, surtout avec accents majuscules É/Ô). Cause : formule de baseline avec signe inversé (`500 - (asc+desc)/2`) → texte ~17px trop haut. Fix : `$baseline = $pillCenterY + ($asc - $desc)/2` (valeurs absolues des métriques, robuste quel que soit le signe Imagick) → centre du glyphe exactement sur le centre du pill. + hauteur pill = (asc+desc)+26 (marge verticale pour les accents montants) + rayon coins 16. Imagick pur. Codename seo-piliers-veille-generative.
  *   1.65.129 · 2026-06-09 · refine(news) palettes du visuel auto ALIGNÉES sur les VRAIES catégories d'articles (18 tags réels relevés en base : « IA générative » 3333, « Autre » 2956, « Cybersécurité » 888, « Infrastructure » 824, « Robotique », « Startup », « Cloud », « Données », « Éducation tech »…). Avant : clés palette inventées (ia/securite/…) ne matchaient quasi aucun tag réel → couleur quasi toujours tirée du fallback id%10. Maintenant : table $palettes ré-indexée sur les tags normalisés (IA générative=teal signature, Cybersécurité=rouge, Données=vert, Cloud=bleu ciel, Éducation tech=indigo, Énergie=vert nature…) + normalisation `$catKey` corrigée (translittération des accents via strtr mb_strtolower : « Cybersécurité »→cybersecurite, « Données »→donnees) pour que le match fonctionne. Le pill affiche le tag RÉEL accentué en majuscules (« CYBERSÉCURITÉ »). Couleur désormais sémantiquement liée à la catégorie. Codename seo-piliers-veille-generative.
  *   1.65.128 · 2026-06-09 · refine(news) visuel « réseau de neurones » suite VALIDATION VISUELLE (agent Playwright 6 témoins, 6,5/10 → corrections). 3 défauts corrigés : (1) BLOQUANT un nœud chevauchait « laveille.ai » → nœuds désormais cantonnés aux MARGES latérales (pair=gauche x[20,380], impair=droite x[820,1180]) et y borné [20,470] (épargne titre ET footer) ; (2) asymétrie (motif dans un coin) → alternance gauche/droite garantit l'équilibre, 2 grappes propres (arêtes <300px) ; (3) gros nœuds bornés rayon 9-11 (n'éclipsent plus le logo). + label catégorie transformé en BADGE « pill » (roundRectangle accent $pal[0] opacité 0.85 + texte MAJUSCULES blanc centré via queryFontMetrics) au lieu du texte gris brut. Imagick pur, déterministe. Codename seo-piliers-veille-generative.
@@ -279,7 +280,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 130;
+$lvPatch = 131;
 
 return [
     'major' => $lvMajor,

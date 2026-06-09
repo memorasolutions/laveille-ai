@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.131] - 2026-06-09
+
+### Fixed
+- **News — logo œil pixelisé dans le visuel auto** (signalé par l'utilisateur). Le logo `logo-eye-white.svg` (viewBox 52×52) était lu par Imagick à sa taille native (~52 px) puis agrandi à 200 px (`resizeImage`, ×3,8 upscale) → bords pixelisés. Correction : `$logo->setResolution(1200, 1200)` **avant** `readImage()` → le SVG est rasterisé à ~870 px puis réduit à 200 px (Lanczos) = rendu net.
+
 ## [1.65.130] - 2026-06-09
 
 ### Fixed

@@ -187,10 +187,13 @@ class NewsImageService
             $logoPath = public_path('images/logo-eye-white.svg');
             if (file_exists($logoPath)) {
                 $logo = new \Imagick();
-                $logo->setBackgroundColor('transparent');
+                $logo->setBackgroundColor(new \ImagickPixel('transparent'));
+                // Le logo est un SVG 52×52 : on le rasterise en haute résolution (~870px) AVANT
+                // lecture, sinon resizeImage(200) part d'un raster 52px et pixelise (×3,8 upscale).
+                $logo->setResolution(1200, 1200);
                 $logo->readImage($logoPath);
                 $logo->setImageAlphaChannel(\Imagick::ALPHACHANNEL_ACTIVATE);
-                $logo->resizeImage(200, 200, \Imagick::FILTER_LANCZOS, 1);
+                $logo->resizeImage(200, 200, \Imagick::FILTER_LANCZOS, 1); // downscale net
                 $gradient->compositeImage($logo, \Imagick::COMPOSITE_OVER, (int) (($w - 200) / 2), 50);
                 $logo->destroy();
             }
