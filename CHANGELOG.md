@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.124] - 2026-06-09
+
+### Added
+- Newsletter — **override HTML par édition** (`content.custom_html`). Une édition peut désormais figer un **HTML validé** envoyé tel quel aux abonnés (et au test), sans régénération par le gabarit. Le lien de désabonnement reste personnalisé par abonné. Sans `custom_html`, le comportement est strictement inchangé. Permet d'envoyer exactement l'aperçu approuvé.
+
 ## [1.65.123] - 2026-06-09
 
 ### Fixed

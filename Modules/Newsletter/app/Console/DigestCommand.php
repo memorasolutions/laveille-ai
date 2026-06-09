@@ -86,6 +86,11 @@ class DigestCommand extends Command
             'weekNumber' => $weekNumber,
         ])->render();
 
+        // Override « aperçu validé » (même logique que l'envoi réel) pour tester le rendu EXACT.
+        if (! empty($issue?->content['custom_html'] ?? null)) {
+            $htmlContent = $issue->content['custom_html'];
+        }
+
         $brevo = app(BrevoService::class);
         if (! $brevo->isConfigured()) {
             $this->components->error('BrevoService non configuré. Vérifiez BREVO_API_KEY dans .env.');
@@ -246,6 +251,13 @@ class DigestCommand extends Command
             'unsubscribeUrl' => '{{UNSUBSCRIBE_URL}}',
             'weekNumber' => $data['weekNumber'],
         ])->render();
+
+        // Override « aperçu validé » : si l'édition contient un HTML personnalisé (content.custom_html),
+        // on l'envoie TEL QUEL au lieu de régénérer. Le placeholder {{UNSUBSCRIBE_URL}} y reste remplacé
+        // par SendDigestJob pour chaque abonné. Défensif : sans custom_html, comportement inchangé.
+        if (! empty($issue?->content['custom_html'] ?? null)) {
+            $htmlContent = $issue->content['custom_html'];
+        }
 
         // Sauvegarder l'issue si elle n'existe pas encore
         if (! $issue && Schema::hasTable('newsletter_issues')) {
