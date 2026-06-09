@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.121] - 2026-06-08
+
+### Added
+- Glossaire — **nouveau terme « Bluetooth »**, catégorie « Concepts fondamentaux ». Fiche complète au gabarit standard (définition d'environ 270 mots, analogie, exemple, « le saviez-vous » [le nom vient du roi viking Harald Blåtand et le logo combine ses initiales runiques], réponse en une phrase, FAQ FAQPage, 2 sources Wikipédia vérifiées). Dérivés en `aliases` pour l'auto-liaison : Bluetooth Low Energy, BLE, Bluetooth LE. Image hero générée sur le compte Gemini de l'utilisateur (3D isométrique teal/orange, sans texte), fournie en `bluetooth.jpg` (og:image — réseaux sociaux refusent WebP/AVIF) + `bluetooth.webp`, 1200×669 compressées, nom de fichier = slug. Migration réversible.
+- Glossaire — **nouveau terme « PowerShell »**, catégorie « Outils ». Fiche complète au gabarit standard (définition d'environ 285 mots, analogie, exemple de pipeline `Get-Process | …`, « le saviez-vous » sur le pipeline d'objets .NET, réponse en une phrase, FAQ FAQPage, 2 sources vérifiées : Wikipédia + Microsoft Learn). Dérivés en `aliases` : pwsh, PowerShell Core, PowerShell 7, Windows PowerShell. Image hero générée sur le compte Gemini de l'utilisateur (console isométrique teal/orange, sans texte lisible), fournie en `powershell.jpg` (og:image) + `powershell.webp`, 1200×669 compressées, nom de fichier = slug. Migration réversible.
+
 ## [1.65.120] - 2026-06-08
 
 ### Added
