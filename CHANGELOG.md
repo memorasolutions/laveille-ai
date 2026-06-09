@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.127] - 2026-06-09
+
+### Added
+- **News — visuel auto « réseau de neurones » génératif (design choisi par l'utilisateur, veille pp_search juin 2026, 91/100)** : `NewsImageService::generateFallbackImage` superpose désormais `drawNeuralPattern()` sur le dégradé de marque — un motif déterministe **nœuds + arêtes unique par titre** (PRNG LCG seedé sur `crc32($title)` → même titre = même motif). Arêtes blanches 10 % entre nœuds proches (< 320 px), nœuds à 22 % d'opacité (3 « gros » à 16 % avec anneau-halo), 1 nœud sur 4 en couleur d'accent de la palette de catégorie. La bande centrale du titre (y 250–560) est préservée (nœuds repoussés vers le haut). Thématiquement IA, subtil, lisible, Imagick pur (≤ ~30 primitives, ~0,2 s), **zéro dépendance externe, zéro droit d'auteur**. Sert au robot (nouveaux articles) ET au rattrapage de masse des anciennes images. Code délégué à Hermes (qwen3-max), intégré + affiné (contour des disques neutralisé, halo des gros nœuds à rayon+6).
+
 ## [1.65.125] - 2026-06-09
 
 ### Fixed

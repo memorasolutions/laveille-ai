@@ -165,6 +165,9 @@ class NewsImageService
             $gradient->compositeImage($overlay, \Imagick::COMPOSITE_OVER, 0, 0);
             $overlay->destroy();
 
+            // Motif génératif « réseau de neurones » déterministe (unique selon le titre).
+            self::drawNeuralPattern($gradient, $w, $h, (string) $title, $pal);
+
             // Logo SVG (200x200, fond transparent, centré en haut)
             $logoPath = public_path('images/logo-eye-white.svg');
             if (file_exists($logoPath)) {
@@ -239,5 +242,75 @@ class NewsImageService
 
             return null;
         }
+    }
+
+    /**
+     * Superpose un motif génératif « réseau de neurones » déterministe (nœuds + arêtes).
+     * Même $seed (titre) => même motif. Subtil (faibles opacités), évite la bande du titre.
+     */
+    private static function drawNeuralPattern(\Imagick $canvas, int $w, int $h, string $seed, array $pal): void
+    {
+        $s = crc32($seed);
+        $rand01 = function () use (&$s): float {
+            $s = ($s * 1103515245 + 12345) & 0x7fffffff;
+            return $s / 0x7fffffff;
+        };
+
+        $nodeCount = 14 + (int) ($rand01() * 5);
+        $nodes = [];
+        for ($i = 0; $i < $nodeCount; $i++) {
+            $x = $rand01() * $w;
+            $y = $rand01() * $h;
+            if ($y >= 250 && $y <= 560 && $x >= 80 && $x <= 1120) {
+                $y *= 0.3;
+            }
+            $nodes[] = [$x, $y, $rand01()];
+        }
+
+        $draw = new \ImagickDraw();
+        $draw->setStrokeWidth(1.5);
+        $draw->setFillOpacity(0.0);
+
+        foreach ($nodes as $i => $n1) {
+            foreach ($nodes as $j => $n2) {
+                if ($i >= $j) {
+                    continue;
+                }
+                $dx = $n1[0] - $n2[0];
+                $dy = $n1[1] - $n2[1];
+                if (sqrt($dx * $dx + $dy * $dy) < 320) {
+                    $draw->setStrokeColor('rgba(255,255,255,0.10)');
+                    $draw->line($n1[0], $n1[1], $n2[0], $n2[1]);
+                }
+            }
+        }
+
+        $bigIndices = [];
+        for ($i = 0; $i < 3; $i++) {
+            $bigIndices[] = (int) ($rand01() * $nodeCount);
+        }
+
+        foreach ($nodes as $idx => [$x, $y, $rnorm]) {
+            $isBig = in_array($idx, $bigIndices, true);
+            $radius = $isBig ? 12 + $rnorm * 4 : 3 + $rnorm * 5;
+            $useAccent = ($rand01() < 0.25);
+            $color = $useAccent ? $pal[0] : '#FFFFFF';
+            $opacity = $isBig ? 0.16 : 0.22;
+
+            $draw->setStrokeWidth(0);
+            $draw->setStrokeColor(new \ImagickPixel('rgba(0,0,0,0)'));
+            $draw->setFillColor(new \ImagickPixel($color));
+            $draw->setFillOpacity($opacity);
+            $draw->circle($x, $y, $x + $radius, $y);
+
+            if ($isBig) {
+                $draw->setStrokeWidth(1.5);
+                $draw->setStrokeColor(new \ImagickPixel($color));
+                $draw->setFillOpacity(0.0);
+                $draw->circle($x, $y, $x + $radius + 6, $y);
+            }
+        }
+
+        $canvas->drawImage($draw);
     }
 }
