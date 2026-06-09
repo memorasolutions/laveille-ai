@@ -142,19 +142,34 @@ class NewsImageService
 
             // Fond dégradé qui VARIE par catégorie (tendances 2026) — couleurs foncées/saturées
             // pour garder le texte blanc lisible. Fallback déterministe par id si la catégorie est inconnue.
+            // Palettes alignées sur les VRAIES catégories d'articles (clés = tag normalisé
+            // sans accents). Dégradés foncés/saturés (texte blanc lisible). 2026.
             $palettes = [
-                'ia' => ['#064E5A', '#0B2838'],
-                'llm' => ['#3b0764', '#1e1b4b'],
-                'hardware' => ['#0e3a5f', '#0d1b2a'],
-                'finance' => ['#064e3b', '#0f2027'],
-                'securite' => ['#4c0519', '#1a1020'],
-                'science' => ['#1e3a8a', '#0b1020'],
-                'robotique' => ['#7c2d12', '#1a1208'],
-                'startup' => ['#701a45', '#1a0f1a'],
-                'reglementation' => ['#1e3a5f', '#111827'],
-                'default' => ['#0B7285', '#1a2332'],
+                'iagenerative' => ['#064E5A', '#0B2838'],   // IA générative — teal signature
+                'autre' => ['#334155', '#0f172a'],          // Autre — ardoise neutre
+                'cybersecurite' => ['#4c0519', '#1a1020'],  // Cybersécurité — rouge bordeaux
+                'infrastructure' => ['#0e3a5f', '#0d1b2a'], // Infrastructure — bleu acier
+                'robotique' => ['#7c2d12', '#1a1208'],      // Robotique — brun orangé
+                'startup' => ['#701a45', '#1a0f1a'],        // Startup — prune
+                'cloud' => ['#075985', '#0c1e2e'],          // Cloud — bleu ciel foncé
+                'donnees' => ['#064e3b', '#0f2027'],        // Données — vert
+                'educationtech' => ['#3730a3', '#0b1020'],  // Éducation tech — indigo
+                'cryptomonnaies' => ['#78350f', '#1a1208'], // Cryptomonnaies — ambre foncé
+                'automobile' => ['#1e3a5f', '#111827'],     // Automobile — bleu nuit
+                'fintech' => ['#065f46', '#0f2027'],        // Fintech — émeraude
+                'telecom' => ['#155e63', '#0c1e2e'],        // Télécom — cyan foncé
+                'hardware' => ['#374151', '#0d1117'],       // Hardware — graphite
+                'santetech' => ['#0f766e', '#0c1e2e'],      // Santé tech — turquoise
+                'sante' => ['#0f766e', '#0c1e2e'],          // Santé — turquoise
+                'energierenouvelable' => ['#14532d', '#0b1a10'], // Énergie — vert nature
+                'llm' => ['#3b0764', '#1e1b4b'],            // LLM — violet
+                'default' => ['#0B7285', '#1a2332'],        // Repli — teal clair
             ];
-            $catKey = $categoryTag ? strtolower(preg_replace('/[^a-z0-9]/i', '', $categoryTag)) : '';
+            $catKey = '';
+            if ($categoryTag) {
+                $accents = ['à'=>'a','â'=>'a','ä'=>'a','é'=>'e','è'=>'e','ê'=>'e','ë'=>'e','ï'=>'i','î'=>'i','ô'=>'o','ö'=>'o','ù'=>'u','û'=>'u','ü'=>'u','ç'=>'c'];
+                $catKey = preg_replace('/[^a-z0-9]/', '', strtr(mb_strtolower($categoryTag, 'UTF-8'), $accents));
+            }
             $pal = $palettes[$catKey] ?? array_values($palettes)[$articleId % count($palettes)];
             $gradient = new \Imagick();
             $gradient->newPseudoImage($w, $h, "gradient:{$pal[0]}-{$pal[1]}");

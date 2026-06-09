@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.129] - 2026-06-09
+
+### Changed
+- **News — palettes du visuel auto alignées sur les VRAIES catégories** : relevé des 18 tags réels en base (« IA générative » 3333, « Autre » 2956, « Cybersécurité » 888, « Infrastructure » 824, « Robotique », « Startup », « Cloud », « Données », « Éducation tech »…). Les anciennes clés de palette (`ia`, `securite`…) ne correspondaient à quasi aucun tag réel → la couleur tombait presque toujours sur le repli déterministe `id % 10`. Désormais la table `$palettes` est ré-indexée sur les tags normalisés (IA générative = teal signature, Cybersécurité = rouge, Données = vert, Cloud = bleu ciel, Éducation tech = indigo, Énergie renouvelable = vert nature…), et la normalisation `$catKey` translittère correctement les accents (`mb_strtolower` + `strtr` : « Cybersécurité » → `cybersecurite`). Le pill affiche le tag réel accentué en majuscules. La couleur du visuel est maintenant **sémantiquement liée** à la catégorie de l'article.
+
 ## [1.65.128] - 2026-06-09
 
 ### Changed
