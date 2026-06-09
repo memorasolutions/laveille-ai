@@ -128,6 +128,22 @@ function detectEntities(text) {
     }
     if (!STOPWORDS.has(w1) && !STOPWORDS.has(w2)) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.8);
   }
+  // 15. Prénoms / noms de famille VRAIMENT ISOLÉS des noms complets déjà détectés — couvre le mode
+  //     jetons et les occurrences seules (« Geneviève » seul après « Geneviève Côté-Pelletier »).
+  //     On ne pousse une composante que si elle apparaît HORS du nom complet ET HORS d'un courriel,
+  //     pour ne pas créer de sous-règles incohérentes avec le faux nom complet (préserve la cohérence courriel).
+  const _emailRe = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
+  for (const ent of entities.filter(e => e.category === 'name')) {
+    const parts = ent.value.split(/\s+/);
+    if (parts.length !== 2) continue;
+    const fullRe = new RegExp('(?<![A-Za-zÀ-ÿ])' + escapeRegex(ent.value).replace(/\s+/g, '\\s+') + '(?![A-Za-zÀ-ÿ])', 'gi');
+    const residual = text.replace(_emailRe, ' ').replace(fullRe, ' ');
+    parts.forEach((word, i) => {
+      if (word.length < 2 || STOPWORDS.has(normalize(word))) return;
+      const re = new RegExp('(?<![A-Za-zÀ-ÿ])' + escapeRegex(word) + '(?![A-Za-zÀ-ÿ])', 'i');
+      if (re.test(residual)) push(word, i === 0 ? 'firstName' : 'lastName', i === 0 ? 'Prénom' : 'Nom de famille', 0.7);
+    });
+  }
   return entities;
 }
 
@@ -246,7 +262,15 @@ function buildRules(selections, opts = {}) {
   const subDone = new Set();  // parties ayant déjà une sous-règle
   const used = new Set();     // faux déjà utilisés (unicité globale)
   for (const r of existing) { used.add(_normU(r.original)); used.add(_normU(r.replacement)); }
-  for (const sel of selections) { used.add(_normU(sel.value)); }
+  for (const sel of selections) {
+    used.add(_normU(sel.value));
+    // Anti-collision : un faux prénom/nom ne doit jamais réutiliser un VRAI composant de nom du texte.
+    if (['name', 'firstName', 'lastName'].includes(sel.category)) {
+      for (const token of String(sel.value).split(/[\s\-]+/)) {
+        if (_normU(token).length >= 2) used.add(_normU(token));
+      }
+    }
+  }
   for (const sel of selections) {
     const { value, category } = sel;
     const id = `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -271,6 +295,16 @@ function buildRules(selections, opts = {}) {
         if (!subDone.has(lk)) { subDone.add(lk); rules.push({ id: `${id}_last`, original: last, replacement: fakeLast, category: 'lastName' }); }
         continue;
       }
+    }
+    // Prénom/nom ISOLÉ (mode pseudo) : s'il est déjà une composante d'un nom complet (présent dans
+    // nameMap), la sous-règle correspondante le couvre DÉJÀ partout (y compris ses occurrences seules) ;
+    // on n'ajoute donc PAS de règle parasite (qui désynchroniserait le faux courriel). Corrige D1.
+    if (category === 'firstName' || category === 'lastName') {
+      const k = value.toLowerCase();
+      if (nameMap.has(k)) continue;
+      const fake = uniqueFake(category, value, used); nameMap.set(k, fake);
+      rules.push({ id, original: value, replacement: fake, category });
+      continue;
     }
     rules.push({ id, original: value, replacement: uniqueFake(category, value, used), category });
   }
@@ -371,13 +405,13 @@ function restore(aiText, rules, overrides = []) {
 function relinkEmails(rules) {
   if (!Array.isArray(rules) || !rules.length) return rules;
   const norm = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  const map = new Map(); // jeton réel (prénom/nom) → faux jeton
+  const map = new Map(); // jeton réel (prénom/nom + sous-composantes de noms composés) → faux jeton
   for (const r of rules) {
     if (r.category === 'firstName' || r.category === 'lastName') {
-      map.set(norm(r.original), r.replacement);
+      for (const part of String(r.original).split(/[\s\-]+/)) { if (norm(part).length >= 2) map.set(norm(part), r.replacement); }
     } else if (r.category === 'name') {
       const o = String(r.original).split(/\s+/), f = String(r.replacement || '').split(/\s+/);
-      o.forEach((w, i) => { if (f[i]) map.set(norm(w), f[i]); });
+      o.forEach((w, i) => { if (f[i]) { for (const sub of String(w).split(/[\s\-]+/)) { if (norm(sub).length >= 2) map.set(norm(sub), f[i]); } } });
     }
   }
   if (!map.size) return rules;

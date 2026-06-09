@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.123] - 2026-06-09
+
+### Fixed
+- Anonymiseur (moteur) — **qualité d'anonymisation** : trois défauts repérés par la simulation E2E sont corrigés. (1) **Anti-collision** : un faux nom ne peut plus réutiliser un vrai nom présent ailleurs dans le texte (qui créait une ambiguïté). (2) **Aucune fuite du vrai nom dans le faux courriel** : la partie locale d'un faux courriel ne laisse plus passer un vrai nom de famille, même abrégé ou accentué (ex. « Côté-Pelletier » → « cote »), et même en mode jetons. (3) **Prénom isolé** : un prénom employé seul (« Geneviève » après « Geneviève Côté-Pelletier ») est maintenant masqué dans les deux modes. (4) **Cohérence** : le faux courriel correspond toujours au faux nom complet affiché. Validé par banc d'essai (17/17 + 6/6 non-régression, restauration 100 % préservée). Réversible.
+
 ## [1.65.122] - 2026-06-09
 
 ### Changed
