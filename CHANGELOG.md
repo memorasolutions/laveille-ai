@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.120] - 2026-06-08
+
+### Added
+- Glossaire — **nouveau terme « Firmware » (micrologiciel)**, catégorie « Concepts fondamentaux ». Fiche complète au même gabarit que les autres termes (définition d'environ 290 mots, analogie, exemple concret, « le saviez-vous » [le mot a été forgé par Ascher Opler en 1967 dans Datamation], réponse en une phrase, FAQ avec balisage FAQPage, 2 sources Wikipédia vérifiées). Les dérivés et synonymes français (micrologiciel, microprogramme, firmwares) sont gérés en `aliases` pour l'auto-liaison automatique dans les articles. Image hero générée sur le compte Gemini de l'utilisateur (illustration 3D isométrique teal/orange, sans texte) et fournie en deux formats : `firmware.jpg` (og:image — les réseaux sociaux refusent WebP/AVIF) et `firmware.webp` (affichage), en 1200×669 compressées, nom de fichier = slug pour le référencement. Insertion via migration réversible.
+
 ## [1.65.119] - 2026-06-08
 
 ### Fixed
