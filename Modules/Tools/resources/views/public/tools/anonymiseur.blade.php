@@ -63,7 +63,7 @@
                         </div>
 
                         <div id="infoBanner" class="mb-3">
-                            <x-core::accordion id="anonymTrust" icon="🛡️" :title="__('100 % local')" :subtitle="__('Traitement dans votre navigateur — aucun contenu envoyé à un serveur')" :open="false">
+                            <x-core::accordion id="anonymTrust" icon="🛡️" :title="__('100 % local')" :subtitle="__('Traitement dans votre navigateur — aucun contenu envoyé à un serveur')" :open="true">
                                 <p style="margin:0 0 .5rem;">{{ __('Votre texte, les règles et les correspondances vraie ↔ fictive restent sur votre appareil. Rien n\'est transmis : seul le texte déjà anonymisé sort, et uniquement si VOUS le copiez vers une IA externe.') }}</p>
                                 <p style="margin:0 0 .5rem;font-size:.88rem;color:#52586a;">{{ __('💾 Votre texte ET les correspondances sont enregistrés dans CE navigateur (jamais sur un serveur) pour les retrouver à votre retour — jusqu\'à « Réinitialiser » ou « Oublier mes données » (menu ⋯ Actions). Sur un poste partagé, effacez avant de partir.') }}</p>
                                 <p style="margin:0;font-size:.88rem;color:#52586a;">
@@ -71,8 +71,32 @@
                                     <a href="/glossaire/rgpd" target="_blank" rel="noopener">{{ __('Conforme RGPD') }}</a> ·
                                     <a href="/glossaire/anonymisation" target="_blank" rel="noopener">{{ __('Comprendre l\'anonymisation') }}</a>
                                 </p>
+                                <div style="margin-top:.85rem;">
+                                    <button type="button" id="anonTrustAck" class="anon-btn">✓ {{ __('Je comprends') }}</button>
+                                </div>
                             </x-core::accordion>
                         </div>
+                        {{-- Accordéon confidentialité : ouvert au 1er affichage ; « Je comprends » le ferme + mémorise (localStorage), reste fermé au retour (rouvrable). Script inline = anti-flash (s'exécute avant le paint). --}}
+                        <script>
+                        (function () {
+                            var trigger = document.getElementById('anonymTrust-trigger');
+                            var panel = document.getElementById('anonymTrust-panel');
+                            var ackBtn = document.getElementById('anonTrustAck');
+                            function closeDisclosure() {
+                                if (trigger) trigger.setAttribute('aria-expanded', 'false');
+                                if (panel) panel.setAttribute('hidden', '');
+                            }
+                            try {
+                                if (localStorage.getItem('lv_anon_trust_ack') === '1') { closeDisclosure(); }
+                            } catch (e) {}
+                            if (ackBtn) {
+                                ackBtn.addEventListener('click', function () {
+                                    try { localStorage.setItem('lv_anon_trust_ack', '1'); } catch (e) {}
+                                    closeDisclosure();
+                                });
+                            }
+                        })();
+                        </script>
 
                         {{-- Navigation des 2 étapes --}}
                         <nav class="anon-steps" aria-label="{{ __('Étapes') }}">

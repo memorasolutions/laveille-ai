@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.122] - 2026-06-09
+
+### Changed
+- Anonymiseur — **accordéon de confidentialité « Je comprends »**. Le bloc « 🛡️ 100 % local » (rappel Loi 25 / RGPD, texte inchangé) s'affiche maintenant **ouvert au premier affichage**. Un bouton **« ✓ Je comprends »** à l'intérieur le **ferme et mémorise le choix** dans le navigateur (`localStorage`) : il **reste fermé** lors des visites suivantes, mais l'utilisateur peut le **rouvrir/refermer à volonté** via son en-tête. Un script inline (anti-flash) applique l'état mémorisé avant l'affichage, sans clignotement. Le composant générique `<x-core::accordion>` n'est pas modifié ; seule la page de l'anonymiseur l'est. Accessible (aria-expanded, clavier, focus visible). Réversible.
+
 ## [1.65.121] - 2026-06-08
 
 ### Added
