@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.133] - 2026-06-09
+
+### Added
+- **News — bouton « Admin » superadmin sur la page actualité** (barre de partage), ouvrant un menu de 3 actions de copie : (1) **Résumé pour NotebookLM** (`structured_summary` → Markdown avec titres de section, sans liens), (2) **Prompt NotebookLM** (consignes infographie fixes), (3) **Post réseaux sociaux** natif optimisé 2026 (hook + 3 points + CTA-question + hashtags ciblés, ton québécois, sans lien externe). Visible uniquement si `auth()->user()?->isSuperAdmin()`.
+- **Composant générique réutilisable `<x-core::admin-copy-menu>`** (`Modules/Core/.../components/admin-copy-menu.blade.php`) : bouton + menu Alpine + copie presse-papier multi-lignes (textarea ref + fallback `execCommand`), CSS `@once`. Zéro logique métier → réemployable sur d'autres sections. La génération du contenu vit dans `NewsArticle::adminShareContents()` (séparation UI / contenu, zéro duplication).
+
 ## [1.65.132] - 2026-06-09
 
 ### Added

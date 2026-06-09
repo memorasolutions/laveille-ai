@@ -243,6 +243,15 @@
                     {{-- Barre d'interactions --}}
                     @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\News\\Models\\NewsArticle'])
 
+                    {{-- Outils admin (superadmin seulement) : copies pour NotebookLM / réseaux sociaux --}}
+                    @auth
+                        @if(auth()->user()?->isSuperAdmin())
+                            <div class="nw-admin-share" style="margin:.5rem 0 1rem;">
+                                <x-core::admin-copy-menu :items="$article->adminShareContents()" label="Admin" />
+                            </div>
+                        @endif
+                    @endauth
+
                     @if($article->image_url)
                         <img src="{{ $article->image_url }}{{ str_contains($article->image_url, 'http') ? '' : '?v='.($article->updated_at?->timestamp ?? time()) }}" alt="{{ $article->seo_title ?? $article->title }}" class="nw-hero" loading="lazy">
                     @endif

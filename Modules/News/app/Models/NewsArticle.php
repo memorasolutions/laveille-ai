@@ -167,4 +167,87 @@ class NewsArticle extends Model implements Searchable
     {
         return route('news.show', $this->slug);
     }
+
+    /**
+     * Contenus de partage admin (superadmin) : résumé NotebookLM, prompt NotebookLM, post réseaux sociaux.
+     * Retourne un tableau d'items [label, icon, text] pour le composant <x-core::admin-copy-menu>.
+     * Logique générée Hermes, hashtag affiné (préserve la casse des acronymes).
+     */
+    public function adminShareContents(): array
+    {
+        $title = $this->seo_title ?: $this->title;
+        $structured = is_array($this->structured_summary) ? $this->structured_summary : null;
+
+        // 1. Résumé complet pour NotebookLM (titres de section, sans liens).
+        if ($structured) {
+            $resume = "# {$title}\n\n";
+            if ($hook = data_get($structured, 'hook')) {
+                $resume .= "## Accroche\n{$hook}\n\n";
+            }
+            $keyPoints = data_get($structured, 'key_points');
+            if (is_array($keyPoints) && $keyPoints !== []) {
+                $resume .= "## Points clés\n- " . implode("\n- ", $keyPoints) . "\n\n";
+            }
+            if ($why = data_get($structured, 'why_important')) {
+                $resume .= "## Pourquoi c'est important\n{$why}\n\n";
+            }
+            if ($tldr = data_get($structured, 'tldr')) {
+                $resume .= "## En bref\n{$tldr}\n\n";
+            }
+            if ($quote = data_get($structured, 'quote')) {
+                $resume .= "## Citation\n« {$quote} »\n\n";
+            }
+            if ($faqQ = data_get($structured, 'faq_question')) {
+                $resume .= "## Question\n{$faqQ}\n\n" . data_get($structured, 'faq_answer', '') . "\n\n";
+            }
+        } else {
+            $resume = "# {$title}\n\n" . strip_tags((string) $this->summary) . "\n\n" . strip_tags((string) $this->description);
+        }
+        $resume = trim((string) preg_replace('#https?://\S+#', '', $resume));
+
+        // 2. Prompt NotebookLM (texte fixe).
+        $prompt = <<<'PROMPT'
+Lien à mettre dans l'infographie en bas au centre de façon apparente: https://laveille.ai/actualites
+
+Langue : français québécois, tutoiement, ton conversationnel et accessible. Écris comme une vraie personne, pas comme une IA. Aucune majuscule à l'américaine (mais garder les majuscules des acronymes et en début de phrase). Pas de tiret cadratin.
+
+Vulgarise les points clés de tous les documents dans une infographie engageante. Public : étudiants sans connaissances préalables.
+
+Design : fond clair, style moderne et coloré, icônes simples. Bleu foncé pour les éléments importants, accents jaune ou orange pour les faits marquants. Beaucoup d'espace négatif.
+
+Hiérarchie : message principal en gros, détails en plus petit. Chaque section doit donner envie de lire la suite. Visuel chaleureux, jamais corporatif.
+PROMPT;
+
+        // 3. Post réseaux sociaux natif (format A, ton québécois, sans lien externe).
+        $hook = (string) (data_get($structured, 'hook') ?: $this->title);
+        $kp = data_get($structured, 'key_points');
+        $kp = is_array($kp) ? array_slice($kp, 0, 3) : [];
+        $points = '';
+        foreach ($kp as $point) {
+            $points .= '→ ' . mb_substr(trim((string) $point), 0, 140) . "\n";
+        }
+        $social = trim($hook) . "\n\n" . rtrim($points) . "\n\ntoi, t'en penses quoi ?\n\nPlus d'actualités IA, en français, sur La veille de Stef.\n\n";
+        $tags = ['#IA'];
+        if ($this->category_tag && ($h = $this->normalizeShareHashtag($this->category_tag)) !== '') {
+            $tags[] = '#' . $h;
+        }
+        $tags[] = '#Québec';
+        $tags[] = '#VeilleIA';
+        $social .= implode(' ', $tags);
+
+        return [
+            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'Prompt NotebookLM', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+        ];
+    }
+
+    private function normalizeShareHashtag(string $tag): string
+    {
+        $t = (string) iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $tag);
+        $t = (string) preg_replace('/[^a-zA-Z0-9\s]/', '', $t);
+        $words = array_filter(preg_split('/\s+/', trim($t)) ?: []);
+
+        return implode('', array_map('ucfirst', $words));
+    }
 }
