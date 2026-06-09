@@ -140,9 +140,24 @@ class NewsImageService
             $w = 1200;
             $h = 630;
 
-            // Gradient vertical teal → navy
+            // Fond dégradé qui VARIE par catégorie (tendances 2026) — couleurs foncées/saturées
+            // pour garder le texte blanc lisible. Fallback déterministe par id si la catégorie est inconnue.
+            $palettes = [
+                'ia' => ['#064E5A', '#0B2838'],
+                'llm' => ['#3b0764', '#1e1b4b'],
+                'hardware' => ['#0e3a5f', '#0d1b2a'],
+                'finance' => ['#064e3b', '#0f2027'],
+                'securite' => ['#4c0519', '#1a1020'],
+                'science' => ['#1e3a8a', '#0b1020'],
+                'robotique' => ['#7c2d12', '#1a1208'],
+                'startup' => ['#701a45', '#1a0f1a'],
+                'reglementation' => ['#1e3a5f', '#111827'],
+                'default' => ['#0B7285', '#1a2332'],
+            ];
+            $catKey = $categoryTag ? strtolower(preg_replace('/[^a-z0-9]/i', '', $categoryTag)) : '';
+            $pal = $palettes[$catKey] ?? array_values($palettes)[$articleId % count($palettes)];
             $gradient = new \Imagick();
-            $gradient->newPseudoImage($w, $h, 'gradient:#0B7285-#1a2332');
+            $gradient->newPseudoImage($w, $h, "gradient:{$pal[0]}-{$pal[1]}");
 
             // Overlay noir 40%
             $overlay = new \Imagick();
