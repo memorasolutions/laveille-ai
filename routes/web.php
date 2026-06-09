@@ -30,4 +30,8 @@ Route::get('/offline', [\Modules\Core\Http\Controllers\PwaController::class, 'of
 // Language switcher (module Translation)
 Route::match(['get', 'post'], '/locale/{locale}', \Modules\Translation\Http\Controllers\LocaleController::class)->name('locale.switch');
 
+// llms.txt / llms-full.txt — génération dynamique AEO/GEO (chiffres temps réel, cache 1h).
+Route::get('/llms.txt', [\App\Http\Controllers\LlmsController::class, 'index'])->name('llms.index');
+Route::get('/llms-full.txt', [\App\Http\Controllers\LlmsController::class, 'full'])->name('llms.full');
+
 // Legal pages moved to Modules/Privacy

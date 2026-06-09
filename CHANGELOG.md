@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.132] - 2026-06-09
+
+### Added
+- **SEO/AEO — `llms.txt` + `llms-full.txt` générés dynamiquement** (audit utilisateur : fichiers statiques périmés, chiffres contradictoires, `llms-full` faux « full » sans accents, contradiction training). Nouveau `App\Http\Controllers\LlmsController` (routes racine `/llms.txt` + `/llms-full.txt`, `Cache::remember` 1h) avec **compteurs en temps réel** (outils/termes/articles/acronymes/actualités publiés). `/llms.txt` = index AEO (pitch chiffré, sections, expertise, politique IA, ressources machines, date Québec). `/llms-full.txt` = **vrai dump** (glossaire complet + outils + articles + acronymes + 100 actualités récentes, Markdown, accents fr-CA). Politique tranchée : **entraînement ET citation autorisés** (aligné `robots.txt`). Modules désactivables gérés (`class_exists` + try/catch).
+
+### Removed
+- Fichiers statiques `public/llms.txt` et `public/llms-full.txt` (périmés, remplacés par la génération dynamique). Backup : `.rapports/llms-backup-2026-06-09/` + historique git.
+
 ## [1.65.131] - 2026-06-09
 
 ### Fixed
