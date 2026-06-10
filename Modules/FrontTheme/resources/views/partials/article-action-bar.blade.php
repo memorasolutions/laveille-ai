@@ -91,4 +91,12 @@
         </div>
     </div>
     @endauth
+
+    {{-- Actions admin optionnelles (superadmin only) — variable $adminShareItems passée par la vue.
+         Partial générique : si non fournie, rien ne s'affiche (blog non affecté). --}}
+    @if(!empty($adminShareItems ?? null) && auth()->user()?->isSuperAdmin())
+        <div style="margin-left:auto;">
+            <x-core::admin-copy-menu :items="$adminShareItems" label="Admin" />
+        </div>
+    @endif
 </div>
