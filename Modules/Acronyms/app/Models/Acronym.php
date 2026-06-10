@@ -39,7 +39,7 @@ class Acronym extends Model implements Searchable
 
     protected $table = 'acronyms';
 
-    public array $translatable = ['acronym', 'full_name', 'slug', 'description'];
+    public array $translatable = ['acronym', 'full_name', 'slug', 'description', 'one_sentence_answer', 'analogy', 'example', 'did_you_know'];
 
     protected $fillable = [
         'acronym',
@@ -54,11 +54,18 @@ class Acronym extends Model implements Searchable
         'match_strategy', // 2026-05-05 #145 WSD : loose | partial_case_sensitive | case_sensitive (défaut) | exact_phrase | never_auto
         'aliases', // 2026-05-05 #151 : variations d'écriture
         'sort_order',
+        // 2026-06-10 #304 — enrichissement parité glossaire (AEO/SEO/GEO)
+        'one_sentence_answer', 'analogy', 'example', 'did_you_know', 'faq', 'sources',
+        'icon', 'difficulty', 'reference_url', 'reference_label', 'broader_slugs', 'narrower_slugs',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
         'aliases' => 'array',
+        'faq' => 'array',
+        'sources' => 'array',
+        'broader_slugs' => 'array',
+        'narrower_slugs' => 'array',
     ];
 
     public function category(): BelongsTo

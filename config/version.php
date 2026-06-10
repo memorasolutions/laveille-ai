@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.141 · 2026-06-10 · feat(Acronyms) #304 enrichissement parité glossaire — migration RÉVERSIBLE ajoutant à la table acronyms 12 champs nullable (one_sentence_answer/analogy/example/did_you_know/faq/sources/icon/difficulty/reference_url/reference_label/broader_slugs/narrower_slugs) + modèle (fillable/casts array/translatable). Prépare la refonte de la page acronyme au niveau du glossaire (AEO/SEO/GEO) + l'enrichissement IA du contenu. Rétro-compatible (tous nullable). Codename seo-piliers-veille-generative.
  *   1.65.140 · 2026-06-10 · feat(Acronyms/admin) bouton Admin de partage AJOUTÉ aux acronymes (/acronymes-education) — 5e section. `Acronym` use HasAdminShareContents + adminShareContents() (résumé acronym+signification+description, prompt infographie pédagogique éducation, post explainer #Éducation #Acronymes). Branché via `adminShareItems` au @include article-action-bar (vue acronymes L200). Composant + trait réutilisés (zéro duplication). Codename seo-piliers-veille-generative.
  *   1.65.139 · 2026-06-10 · fix(admin) stripLinks retire aussi les URLs avec ESPACE INSÉCABLE (U+00A0/2007/202F) — ex. « https ://chat.openai.com » restait dans le résumé annuaire NotebookLM car `\s` ne matche pas l'espace insécable. Normalisation des espaces insécables avant les regex (trait HasAdminShareContents, DRY 4 types). Codename seo-piliers-veille-generative.
  *   1.65.138 · 2026-06-10 · chore(admin) signature post réseaux sociaux « La veille de Stef » → « LaVeille AI » (demande user) dans le trait HasAdminShareContents::buildSocialPost (DRY : s'applique aux 4 types). Codename seo-piliers-veille-generative.
@@ -289,7 +290,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 140;
+$lvPatch = 141;
 
 return [
     'major' => $lvMajor,
