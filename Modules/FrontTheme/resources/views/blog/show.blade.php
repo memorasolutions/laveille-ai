@@ -187,7 +187,7 @@
                                 </ul>
                             </div>
                             <h1 style="margin: 0 0 12px; font-size: 1.8rem;" data-editable="title">{{ $article->title }}</h1>
-                            @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\Blog\\Models\\Article'])
+                            @include('fronttheme::partials.article-action-bar', ['model' => $article, 'modelType' => 'Modules\\Blog\\Models\\Article', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $article->adminShareContents() : null])
 
                             {{-- Navigation série (détection automatique par slug "-partie-N") --}}
                             @include('fronttheme::partials.series-nav', ['article' => $article])

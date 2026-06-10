@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Modules\Community\Traits\HasComments;
 use Modules\Community\Traits\HasReports;
+use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
@@ -17,6 +18,7 @@ use Modules\Voting\Traits\HasCommunityVotes;
 
 class NewsArticle extends Model implements Searchable
 {
+    use HasAdminShareContents;
     use HasComments, HasReports, HasCommunityVotes;
     use HasPublishedState;
     use LogsActivityStandard;
@@ -203,37 +205,22 @@ class NewsArticle extends Model implements Searchable
         } else {
             $resume = "# {$title}\n\n" . strip_tags((string) $this->summary) . "\n\n" . strip_tags((string) $this->description);
         }
-        $resume = trim((string) preg_replace('#https?://\S+#', '', $resume));
+        $resume = $this->stripLinks($resume);
 
-        // 2. Prompt NotebookLM (texte fixe).
-        $prompt = <<<'PROMPT'
-Lien à mettre dans l'infographie en bas au centre de façon apparente: https://laveille.ai/actualites
+        // 2. Prompt NotebookLM (via trait HasAdminShareContents).
+        $prompt = $this->infographiePrompt('https://laveille.ai/actualites', 'Vulgarise les points clés de tous les documents dans une infographie engageante. Public : étudiants sans connaissances préalables.');
 
-Langue : français québécois, tutoiement, ton conversationnel et accessible. Écris comme une vraie personne, pas comme une IA. Aucune majuscule à l'américaine (mais garder les majuscules des acronymes et en début de phrase). Pas de tiret cadratin.
-
-Vulgarise les points clés de tous les documents dans une infographie engageante. Public : étudiants sans connaissances préalables.
-
-Design : fond clair, style moderne et coloré, icônes simples. Bleu foncé pour les éléments importants, accents jaune ou orange pour les faits marquants. Beaucoup d'espace négatif.
-
-Hiérarchie : message principal en gros, détails en plus petit. Chaque section doit donner envie de lire la suite. Visuel chaleureux, jamais corporatif.
-PROMPT;
-
-        // 3. Post réseaux sociaux natif (format A, ton québécois, sans lien externe).
-        $hook = (string) (data_get($structured, 'hook') ?: $this->title);
-        $kp = data_get($structured, 'key_points');
-        $kp = is_array($kp) ? array_slice($kp, 0, 3) : [];
-        $points = '';
-        foreach ($kp as $point) {
-            $points .= '→ ' . mb_substr(trim((string) $point), 0, 140) . "\n";
-        }
-        $social = trim($hook) . "\n\n" . rtrim($points) . "\n\ntoi, t'en penses quoi ?\n\nPlus d'actualités IA, en français, sur La veille de Stef.\n\n";
+        // 3. Post réseaux sociaux natif (via trait HasAdminShareContents).
         $tags = ['#IA'];
-        if ($this->category_tag && ($h = $this->normalizeShareHashtag($this->category_tag)) !== '') {
-            $tags[] = '#' . $h;
-        }
+        if ($this->category_tag) { $tags[] = '#' . $this->normalizeShareHashtag($this->category_tag); }
         $tags[] = '#Québec';
         $tags[] = '#VeilleIA';
-        $social .= implode(' ', $tags);
+        $social = $this->buildSocialPost(
+            (string) (data_get($structured, 'hook') ?: $this->title),
+            is_array(data_get($structured, 'key_points')) ? array_slice(data_get($structured, 'key_points'), 0, 3) : [],
+            "toi, t'en penses quoi ?",
+            $tags
+        );
 
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
@@ -242,12 +229,4 @@ PROMPT;
         ];
     }
 
-    private function normalizeShareHashtag(string $tag): string
-    {
-        $t = (string) iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $tag);
-        $t = (string) preg_replace('/[^a-zA-Z0-9\s]/', '', $t);
-        $words = array_filter(preg_split('/\s+/', trim($t)) ?: []);
-
-        return implode('', array_map('ucfirst', $words));
-    }
 }

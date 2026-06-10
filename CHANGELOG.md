@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.136] - 2026-06-10
+
+### Added
+- **Menu de partage admin étendu au glossaire, à l'annuaire et au blog** (superadmin only), avec **contenu adapté par type** pour maximiser les vues réseaux sociaux (veille juin 2026) : glossaire = explainer éducatif, annuaire = revue par cas d'usage, blog = teaser insight. Chaque type expose les 3 copies (Résumé NotebookLM, NotebookLM Infographie, Post réseaux sociaux).
+- **Trait partagé `Modules\Core\Concerns\HasAdminShareContents`** (zéro-duplication) : `infographiePrompt()`, `buildSocialPost()`, `stripLinks()`, `normalizeShareHashtag()`. Utilisé par `Term`, `Tool`, `Article` et **`NewsArticle` (refactorisé)**. Branché via `$adminShareItems` dans les 3 vues `show` (le composant `<x-core::admin-copy-menu>` est réutilisé tel quel).
+
 ## [1.65.133] - 2026-06-09
 
 ### Added

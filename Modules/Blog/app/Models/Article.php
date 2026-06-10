@@ -23,6 +23,7 @@ use Laravel\Scout\Searchable;
 use Mews\Purifier\Facades\Purifier;
 use Modules\Blog\Database\Factories\ArticleFactory;
 use Modules\Blog\States\ArticleState;
+use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable as SearchableContract;
 use Modules\Blog\States\DraftArticleState;
 use Modules\Blog\States\PublishedArticleState;
@@ -40,7 +41,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class Article extends Model implements SearchableContract
 {
-    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasStates, HasTranslations, LogsActivity, Searchable, SoftDeletes;
+    use BelongsToTenant, HasAdminShareContents, HasCustomFields, HasFactory, HasPreviewToken, HasStates, HasTranslations, LogsActivity, Searchable, SoftDeletes;
     use \Modules\SEO\Traits\NotifiesIndexNow;
 
     public function getPublicUrl(): string
@@ -311,5 +312,28 @@ class Article extends Model implements SearchableContract
     public function searchableResultUrl(): string
     {
         return route('blog.show', $this->slug);
+    }
+
+    public function adminShareContents(): array
+    {
+        $title = $this->title ?? '';
+        $excerpt = (string) ($this->excerpt ?? '');
+        $resume = $this->stripLinks("# {$title}\n\n" . $excerpt . "\n\n" . strip_tags((string) ($this->content ?? '')));
+        $prompt = $this->infographiePrompt('https://laveille.ai/blog', 'Vulgarise les idées clés de cet article dans une infographie engageante. Public : étudiants sans connaissances préalables.');
+        $hook = mb_substr(trim($excerpt !== '' ? $excerpt : $title), 0, 150, 'UTF-8');
+        $points = [];
+        if ($excerpt !== '') {
+            $s = preg_split('/(?<=[.!?])\s+/', $excerpt, -1, PREG_SPLIT_NO_EMPTY);
+            $points = is_array($s) ? array_slice($s, 0, 3) : [];
+        }
+        if ($points === []) { $points = [$excerpt !== '' ? $excerpt : $title]; }
+        $tags = is_array($this->tags) ? $this->tags : [];
+        $hashtags = array_merge(['#IA'], array_map(fn ($t) => '#' . $this->normalizeShareHashtag((string) $t), array_slice($tags, 0, 2)), ['#Québec', '#VeilleIA']);
+        $social = $this->buildSocialPost($hook, $points, "garde ce post comme mémo, l'idée vaut le détour.", $hashtags);
+        return [
+            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+        ];
     }
 }

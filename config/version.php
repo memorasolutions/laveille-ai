@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.136 · 2026-06-10 · feat(admin) menu de partage admin ÉTENDU au GLOSSAIRE, ANNUAIRE et BLOG (demande user), contenu adapté par type pour maximiser les vues (veille pp_search juin 2026). **DRY** : nouveau trait `Modules\Core\Concerns\HasAdminShareContents` (helpers partagés : `infographiePrompt`, `buildSocialPost`, `stripLinks`, `normalizeShareHashtag`) ; `NewsArticle` refactorisé pour l'utiliser (zéro duplication). 3 nouveaux `adminShareContents()` : Term (glossaire → fiche définition/analogie/exemple/saviez-vous/FAQ + prompt infographie pédagogique + post explainer éducatif), Tool (annuaire → description/fonctionnalités/cas d'usage/avantages/avis + post revue cas d'usage), Article (blog → titre/excerpt/contenu + post teaser insight). Branché via `$adminShareItems` dans les 3 vues show (Dictionary L255, Directory L334, Blog L190). Bouton superadmin only, composant `<x-core::admin-copy-menu>` inchangé (réutilisé). Code Hermes/qwen3-max, intégration agent. Codename seo-piliers-veille-generative.
  *   1.65.135 · 2026-06-10 · chore(News/admin) renomme l'action « Prompt NotebookLM » → « NotebookLM Infographie » (demande user) dans NewsArticle::adminShareContents(). Codename seo-piliers-veille-generative.
  *   1.65.134 · 2026-06-10 · refine(News/admin) bouton « Admin » DÉPLACÉ dans la barre d'actions à droite de « Signaler » (demande user, était sur une ligne séparée). DRY : le partial générique `fronttheme::partials.article-action-bar` accepte une variable optionnelle `$adminShareItems` ; si fournie + superadmin → rend `<x-core::admin-copy-menu>` en fin de barre (margin-left:auto). show.blade.php passe `adminShareItems = isSuperAdmin ? adminShareContents() : null` (généré seulement si superadmin). Blog non affecté (ne passe pas la variable). Codename seo-piliers-veille-generative.
  *   1.65.133 · 2026-06-09 · feat(News/admin) bouton SUPERADMIN « Admin » sur la page actualité (barre de partage) → menu 3 actions de COPIE : (1) Résumé pour NotebookLM (structured_summary → Markdown avec titres de section, sans liens), (2) Prompt NotebookLM (texte fixe consignes infographie), (3) Post réseaux sociaux natif optimisé 2026 (hook + 3 points + CTA-question + hashtags, ton québécois, sans lien externe — best practices pp_search). **Architecture zéro-duplication** : composant GÉNÉRIQUE réutilisable `Modules/Core/.../components/admin-copy-menu.blade.php` (`<x-core::admin-copy-menu :items>`, Alpine + copie presse-papier multi-lignes via textarea ref + fallback execCommand, CSS @once ct-acm-) + génération du contenu dans `NewsArticle::adminShareContents()` (spécifique News). Visible UNIQUEMENT `auth()->user()?->isSuperAdmin()`. Composant réemployable pour d'autres sections (sur demande). Code délégué Hermes/qwen3-max, corrigé à l'intégration. Codename seo-piliers-veille-generative.
@@ -284,7 +285,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 135;
+$lvPatch = 136;
 
 return [
     'major' => $lvMajor,

@@ -331,7 +331,7 @@
                         style="display: inline-block; background: none; border: none; cursor: pointer; color: var(--c-primary, #2563EB); font-size: 0.9rem; padding: 8px 0; min-height: 44px; text-decoration: underline; text-underline-offset: 2px; line-height: 1.4; margin-top: 4px;"
                     >{{ __('Lire la suite') }} →</button>
                 @endif
-                @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool'])
+                @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $tool->adminShareContents() : null])
             </div>
             @if($tool->url)
                 <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>

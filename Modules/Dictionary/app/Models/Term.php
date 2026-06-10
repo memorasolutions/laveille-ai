@@ -12,6 +12,7 @@ namespace Modules\Dictionary\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
@@ -20,6 +21,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Term extends Model implements Searchable
 {
+    use HasAdminShareContents;
     use HasPublishedState;
     use HasSuggestions;
     use HasTranslations;
@@ -125,5 +127,36 @@ class Term extends Model implements Searchable
     public function searchableResultUrl(): string
     {
         return route('dictionary.show', $this->slug);
+    }
+
+    public function adminShareContents(): array
+    {
+        $name = $this->name ?? '';
+        $resume = "# {$name}\n\n";
+        if (($v = $this->definition ?? '') !== '') { $resume .= "## Définition\n{$v}\n\n"; }
+        if (($v = $this->analogy ?? '') !== '') { $resume .= "## En termes simples\n{$v}\n\n"; }
+        if (($v = $this->example ?? '') !== '') { $resume .= "## Exemple\n{$v}\n\n"; }
+        if (($v = $this->did_you_know ?? '') !== '') { $resume .= "## Le saviez-vous\n{$v}\n\n"; }
+        if (($v = $this->one_sentence_answer ?? '') !== '') { $resume .= "## Réponse courte\n{$v}\n\n"; }
+        if (is_array($this->faq) && $this->faq !== []) {
+            $resume .= "## FAQ\n";
+            foreach ($this->faq as $item) {
+                $q = $item['question'] ?? ''; $a = $item['answer'] ?? '';
+                if ($q !== '' || $a !== '') { $resume .= "**{$q}**\n{$a}\n\n"; }
+            }
+        }
+        $resume = $this->stripLinks($resume);
+        $prompt = $this->infographiePrompt('https://laveille.ai/glossaire', 'Vulgarise le concept « ' . $name . ' » dans une infographie pédagogique. Public : débutants sans connaissances préalables.');
+        $social = $this->buildSocialPost(
+            "c'est quoi, {$name} ? on vulgarise.",
+            [(string) ($this->analogy ?? ''), (string) ($this->example ?? '')],
+            "garde ça pour plus tard, et partage à quelqu'un qui se pose la question.",
+            ['#IA', '#' . $this->normalizeShareHashtag((string) $name), '#Glossaire', '#Québec']
+        );
+        return [
+            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+        ];
     }
 }

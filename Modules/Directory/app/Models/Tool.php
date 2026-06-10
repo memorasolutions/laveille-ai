@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasLifecycleStatus;
 use Modules\Core\Traits\HasSponsorship;
@@ -26,6 +27,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Tool extends Model implements Searchable
 {
+    use HasAdminShareContents;
     use HasLifecycleStatus;
     use HasSponsorship;
     use HasSuggestions;
@@ -365,5 +367,36 @@ class Tool extends Model implements Searchable
     public function searchableResultUrl(): string
     {
         return route('directory.show', $this->slug);
+    }
+
+    public function adminShareContents(): array
+    {
+        $name = $this->name ?? '';
+        $resume = "# {$name}\n\n";
+        $desc = ($this->short_description ?? '') !== '' ? $this->short_description : ($this->description ?? '');
+        if ($desc !== '') { $resume .= "## Description\n{$desc}\n\n"; }
+        if (($v = $this->core_features ?? '') !== '' && ! is_array($v)) { $resume .= "## Fonctionnalités\n{$v}\n\n"; }
+        elseif (is_array($this->core_features) && $this->core_features !== []) { $resume .= "## Fonctionnalités\n- " . implode("\n- ", array_map('strval', $this->core_features)) . "\n\n"; }
+        if (($v = $this->use_cases ?? '') !== '' && ! is_array($v)) { $resume .= "## Cas d'usage\n{$v}\n\n"; }
+        elseif (is_array($this->use_cases) && $this->use_cases !== []) { $resume .= "## Cas d'usage\n- " . implode("\n- ", array_map('strval', $this->use_cases)) . "\n\n"; }
+        if (is_array($this->pros) && $this->pros !== []) { $resume .= "## Avantages\n- " . implode("\n- ", array_map('strval', $this->pros)) . "\n\n"; }
+        if (is_array($this->cons) && $this->cons !== []) { $resume .= "## Inconvénients\n- " . implode("\n- ", array_map('strval', $this->cons)) . "\n\n"; }
+        if (($v = $this->pricing ?? '') !== '' && ! is_array($v)) { $resume .= "## Tarification\n{$v}\n\n"; }
+        if (($v = $this->review ?? '') !== '') { $resume .= "## Avis\n{$v}\n\n"; }
+        $resume = $this->stripLinks($resume);
+        $prompt = $this->infographiePrompt('https://laveille.ai/annuaire', 'Présente l\'outil « ' . $name . ' » dans une infographie : à quoi il sert, pour qui, ses forces. Public : curieux sans connaissances préalables.');
+        $points = is_array($this->core_features) ? array_map('strval', $this->core_features) : (($this->core_features ?? '') !== '' ? [(string) $this->core_features] : []);
+        if ($points === [] && is_array($this->pros)) { $points = array_map('strval', $this->pros); }
+        $social = $this->buildSocialPost(
+            "tu cherches un outil pour gagner du temps ? regarde {$name}.",
+            array_slice(array_filter($points), 0, 3),
+            "tag quelqu'un qui magasine un outil en ce moment, et enregistre le post.",
+            ['#IA', '#OutilsIA', '#' . $this->normalizeShareHashtag((string) $name), '#Québec']
+        );
+        return [
+            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+        ];
     }
 }
