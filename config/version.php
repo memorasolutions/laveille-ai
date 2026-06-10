@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.142 · 2026-06-10 · feat(Acronyms) #305 REFONTE de la vue acronyme au niveau du glossaire (answer-first one_sentence_answer, définition vedette, bento analogy/example/did_you_know, FAQ <details>+FAQPage, sources, maillage broader/narrower + similaires, badges difficulté/catégorie, freshness, JSON-LD @graph DefinedTerm+BreadcrumbList+FAQPage, CSS acr- scopé). Affichage CONDITIONNEL (sections masquées si champ vide → rétro-compatible avant enrichissement). Bouton Admin (adminShareItems) + smart-share conservés. Délégué agent. Codename seo-piliers-veille-generative.
  *   1.65.141 · 2026-06-10 · feat(Acronyms) #304 enrichissement parité glossaire — migration RÉVERSIBLE ajoutant à la table acronyms 12 champs nullable (one_sentence_answer/analogy/example/did_you_know/faq/sources/icon/difficulty/reference_url/reference_label/broader_slugs/narrower_slugs) + modèle (fillable/casts array/translatable). Prépare la refonte de la page acronyme au niveau du glossaire (AEO/SEO/GEO) + l'enrichissement IA du contenu. Rétro-compatible (tous nullable). Codename seo-piliers-veille-generative.
  *   1.65.140 · 2026-06-10 · feat(Acronyms/admin) bouton Admin de partage AJOUTÉ aux acronymes (/acronymes-education) — 5e section. `Acronym` use HasAdminShareContents + adminShareContents() (résumé acronym+signification+description, prompt infographie pédagogique éducation, post explainer #Éducation #Acronymes). Branché via `adminShareItems` au @include article-action-bar (vue acronymes L200). Composant + trait réutilisés (zéro duplication). Codename seo-piliers-veille-generative.
  *   1.65.139 · 2026-06-10 · fix(admin) stripLinks retire aussi les URLs avec ESPACE INSÉCABLE (U+00A0/2007/202F) — ex. « https ://chat.openai.com » restait dans le résumé annuaire NotebookLM car `\s` ne matche pas l'espace insécable. Normalisation des espaces insécables avant les regex (trait HasAdminShareContents, DRY 4 types). Codename seo-piliers-veille-generative.
@@ -290,7 +291,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 141;
+$lvPatch = 142;
 
 return [
     'major' => $lvMajor,
