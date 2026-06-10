@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.143] - 2026-06-10
+
+### Added
+- **Acronymes — icônes emoji par catégorie** : chaque acronyme publié (312) reçoit l'emoji de sa catégorie (🏛️ ministères et organismes gouvernementaux, 🤝 associations et organismes professionnels, 🔧 formation professionnelle et technique, 🎓 formation générale et diplômes, 💻 technologies éducatives et numérique, 🧩 services aux élèves et adaptation, 🏫 centres de services scolaires, 📋 gestion et administration scolaire). Affiché dans l'en-tête de la fiche et sur les chips. Donnée seulement (la vue v1.65.142 lisait déjà `icon`).
+- **Acronymes — maillage broader/narrower (graphe de connaissances)** : ~82 relations hiérarchiques parent→enfant générées par IA (OpenRouter qwen3-max), **intra-catégorie**, avec garde-fou anti-hallucination (validation serveur des slugs contre la liste réelle + symétrisation broader↔narrower + `temperature` 0.1). 105 acronymes maillés (77 « Catégorie parente », 34 « Sous-acronymes »). Les associations professionnelles (catégorie sans hiérarchie) restent volontairement sans maillage. Affiché en chips « Acronymes liés » (la vue v1.65.142 lisait déjà `broader_slugs`/`narrower_slugs`).
+
+### Notes
+- Aucun code applicatif modifié (enrichissement de **données** uniquement) ; aucun cron ; backups conservés (`storage/app/backup-acronyms-icons`, `storage/app/backup-acronyms-mesh`). Rollback : remettre `icon`/`broader_slugs`/`narrower_slugs` à `NULL` (la migration #304 peut aussi `down()` ces colonnes).
+
 ## [1.65.136] - 2026-06-10
 
 ### Added

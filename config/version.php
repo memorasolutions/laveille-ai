@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.143 · 2026-06-10 · feat(Acronyms) #307+#308 ENRICHISSEMENT DATA des acronymes (2 améliorations, /go) — uniquement des DONNÉES (la vue v142 lit déjà icon/broader_slugs/narrower_slugs, aucun code applicatif modifié). (1) ICÔNES emoji par catégorie : mapping superviseur des 8 catégories → emoji (🏛️ ministères, 🤝 associations, 🔧 formation pro, 🎓 formation générale, 💻 techno éducatives, 🧩 services aux élèves, 🏫 centres de services, 📋 gestion) appliqué aux 312 acronymes publiés (icon vide → emoji de la catégorie, idempotent, backup storage/app/backup-acronyms-icons). (2) MAILLAGE broader/narrower (knowledge graph intra-catégorie) via OpenRouter qwen3-max (Option D notée 90/100 : 1 appel/catégorie, l'IA voit toute la catégorie et ne propose que des relations parent→enfant réelles ; garde-fou ANTI-HALLUCINATION = validation serveur des slugs contre la liste + symétrisation broader↔narrower + temperature 0.1) → ~82 relations sur 7 catégories (cat 2 associations = 0 légitime), 105 acronymes maillés (77 broader, 34 narrower), backup storage/app/backup-acronyms-mesh. Vérifié prod : /acronymes-education/fp = icône 🔧 + « Catégorie parente » (FPEA, FPT) + « Sous-acronymes » (DEP, AEP, AEC…) 12 chips cliquables. Scripts one-shot serveur supprimés (404). Rollback : icon→NULL / broader_slugs+narrower_slugs→NULL (down() de la migration #304 drop ces colonnes). Aucun cron. Codename seo-piliers-veille-generative.
  *   1.65.142 · 2026-06-10 · feat(Acronyms) #305 REFONTE de la vue acronyme au niveau du glossaire (answer-first one_sentence_answer, définition vedette, bento analogy/example/did_you_know, FAQ <details>+FAQPage, sources, maillage broader/narrower + similaires, badges difficulté/catégorie, freshness, JSON-LD @graph DefinedTerm+BreadcrumbList+FAQPage, CSS acr- scopé). Affichage CONDITIONNEL (sections masquées si champ vide → rétro-compatible avant enrichissement). Bouton Admin (adminShareItems) + smart-share conservés. Délégué agent. Codename seo-piliers-veille-generative.
  *   1.65.141 · 2026-06-10 · feat(Acronyms) #304 enrichissement parité glossaire — migration RÉVERSIBLE ajoutant à la table acronyms 12 champs nullable (one_sentence_answer/analogy/example/did_you_know/faq/sources/icon/difficulty/reference_url/reference_label/broader_slugs/narrower_slugs) + modèle (fillable/casts array/translatable). Prépare la refonte de la page acronyme au niveau du glossaire (AEO/SEO/GEO) + l'enrichissement IA du contenu. Rétro-compatible (tous nullable). Codename seo-piliers-veille-generative.
  *   1.65.140 · 2026-06-10 · feat(Acronyms/admin) bouton Admin de partage AJOUTÉ aux acronymes (/acronymes-education) — 5e section. `Acronym` use HasAdminShareContents + adminShareContents() (résumé acronym+signification+description, prompt infographie pédagogique éducation, post explainer #Éducation #Acronymes). Branché via `adminShareItems` au @include article-action-bar (vue acronymes L200). Composant + trait réutilisés (zéro duplication). Codename seo-piliers-veille-generative.
@@ -291,7 +292,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 142;
+$lvPatch = 143;
 
 return [
     'major' => $lvMajor,
