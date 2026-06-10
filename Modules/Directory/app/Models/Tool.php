@@ -385,7 +385,8 @@ class Tool extends Model implements Searchable
         if (($v = $this->review ?? '') !== '') { $resume .= "## Avis\n{$v}\n\n"; }
         $resume = $this->stripLinks($resume);
         $prompt = $this->infographiePrompt('https://laveille.ai/annuaire', 'Présente l\'outil « ' . $name . ' » dans une infographie : à quoi il sert, pour qui, ses forces. Public : curieux sans connaissances préalables.');
-        $points = is_array($this->core_features) ? array_map('strval', $this->core_features) : (($this->core_features ?? '') !== '' ? [(string) $this->core_features] : []);
+        $cf = $this->core_features;
+        $points = is_array($cf) ? array_map('strval', $cf) : array_values(array_filter(array_map('trim', explode(',', (string) $cf))));
         if ($points === [] && is_array($this->pros)) { $points = array_map('strval', $this->pros); }
         $social = $this->buildSocialPost(
             "tu cherches un outil pour gagner du temps ? regarde {$name}.",

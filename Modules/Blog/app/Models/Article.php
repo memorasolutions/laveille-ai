@@ -320,7 +320,7 @@ class Article extends Model implements SearchableContract
         $excerpt = (string) ($this->excerpt ?? '');
         $resume = $this->stripLinks("# {$title}\n\n" . $excerpt . "\n\n" . strip_tags((string) ($this->content ?? '')));
         $prompt = $this->infographiePrompt('https://laveille.ai/blog', 'Vulgarise les idées clés de cet article dans une infographie engageante. Public : étudiants sans connaissances préalables.');
-        $hook = mb_substr(trim($excerpt !== '' ? $excerpt : $title), 0, 150, 'UTF-8');
+        $hook = mb_substr(trim($title !== '' ? $title : $excerpt), 0, 150, 'UTF-8');
         $points = [];
         if ($excerpt !== '') {
             $s = preg_split('/(?<=[.!?])\s+/', $excerpt, -1, PREG_SPLIT_NO_EMPTY);

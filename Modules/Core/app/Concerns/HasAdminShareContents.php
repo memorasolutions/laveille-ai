@@ -50,7 +50,10 @@ trait HasAdminShareContents
      */
     protected function stripLinks(string $text): string
     {
-        return trim((string) preg_replace('#https?://\S+#', '', $text));
+        $text = (string) preg_replace('/\[([^\]]+)\]\([^)]*\)/', '$1', $text); // [texte](url) -> texte
+        $text = (string) preg_replace('#https?\s*:\s*//\S+#i', '', $text);     // URLs nues (gère « https :// » avec espaces)
+
+        return trim($text);
     }
 
     /**
