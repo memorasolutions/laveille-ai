@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.138 · 2026-06-10 · chore(admin) signature post réseaux sociaux « La veille de Stef » → « LaVeille AI » (demande user) dans le trait HasAdminShareContents::buildSocialPost (DRY : s'applique aux 4 types). Codename seo-piliers-veille-generative.
  *   1.65.137 · 2026-06-10 · refine(admin) qualité des contenus de partage (validation 3 types) : (1) trait `stripLinks` gère désormais les liens Markdown `[texte](url)`→texte ET « https :// » avec espaces (résumé annuaire ne fuit plus de lien) ; (2) Annuaire — `core_features` (string CSV) découpée en plusieurs points pour le post social (3 points distincts au lieu d'1 bloc) ; (3) Blog — hook = titre (au lieu de la 1re phrase de l'excerpt) pour éviter la redondance hook/point. DRY préservé (stripLinks dans le trait bénéficie à tous). Codename seo-piliers-veille-generative.
  *   1.65.136 · 2026-06-10 · feat(admin) menu de partage admin ÉTENDU au GLOSSAIRE, ANNUAIRE et BLOG (demande user), contenu adapté par type pour maximiser les vues (veille pp_search juin 2026). **DRY** : nouveau trait `Modules\Core\Concerns\HasAdminShareContents` (helpers partagés : `infographiePrompt`, `buildSocialPost`, `stripLinks`, `normalizeShareHashtag`) ; `NewsArticle` refactorisé pour l'utiliser (zéro duplication). 3 nouveaux `adminShareContents()` : Term (glossaire → fiche définition/analogie/exemple/saviez-vous/FAQ + prompt infographie pédagogique + post explainer éducatif), Tool (annuaire → description/fonctionnalités/cas d'usage/avantages/avis + post revue cas d'usage), Article (blog → titre/excerpt/contenu + post teaser insight). Branché via `$adminShareItems` dans les 3 vues show (Dictionary L255, Directory L334, Blog L190). Bouton superadmin only, composant `<x-core::admin-copy-menu>` inchangé (réutilisé). Code Hermes/qwen3-max, intégration agent. Codename seo-piliers-veille-generative.
  *   1.65.135 · 2026-06-10 · chore(News/admin) renomme l'action « Prompt NotebookLM » → « NotebookLM Infographie » (demande user) dans NewsArticle::adminShareContents(). Codename seo-piliers-veille-generative.
@@ -286,7 +287,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 137;
+$lvPatch = 138;
 
 return [
     'major' => $lvMajor,

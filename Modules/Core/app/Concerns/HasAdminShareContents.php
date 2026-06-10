@@ -41,7 +41,7 @@ trait HasAdminShareContents
         }
 
         return trim($hook) . "\n\n" . rtrim($body) . "\n\n" . trim($cta)
-            . "\n\nPlus de contenu IA, en français, sur La veille de Stef.\n\n"
+            . "\n\nPlus de contenu IA, en français, sur LaVeille AI\n\n"
             . implode(' ', array_filter($hashtags));
     }
 
