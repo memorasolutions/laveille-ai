@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.140 · 2026-06-10 · feat(Acronyms/admin) bouton Admin de partage AJOUTÉ aux acronymes (/acronymes-education) — 5e section. `Acronym` use HasAdminShareContents + adminShareContents() (résumé acronym+signification+description, prompt infographie pédagogique éducation, post explainer #Éducation #Acronymes). Branché via `adminShareItems` au @include article-action-bar (vue acronymes L200). Composant + trait réutilisés (zéro duplication). Codename seo-piliers-veille-generative.
  *   1.65.139 · 2026-06-10 · fix(admin) stripLinks retire aussi les URLs avec ESPACE INSÉCABLE (U+00A0/2007/202F) — ex. « https ://chat.openai.com » restait dans le résumé annuaire NotebookLM car `\s` ne matche pas l'espace insécable. Normalisation des espaces insécables avant les regex (trait HasAdminShareContents, DRY 4 types). Codename seo-piliers-veille-generative.
  *   1.65.138 · 2026-06-10 · chore(admin) signature post réseaux sociaux « La veille de Stef » → « LaVeille AI » (demande user) dans le trait HasAdminShareContents::buildSocialPost (DRY : s'applique aux 4 types). Codename seo-piliers-veille-generative.
  *   1.65.137 · 2026-06-10 · refine(admin) qualité des contenus de partage (validation 3 types) : (1) trait `stripLinks` gère désormais les liens Markdown `[texte](url)`→texte ET « https :// » avec espaces (résumé annuaire ne fuit plus de lien) ; (2) Annuaire — `core_features` (string CSV) découpée en plusieurs points pour le post social (3 points distincts au lieu d'1 bloc) ; (3) Blog — hook = titre (au lieu de la 1re phrase de l'excerpt) pour éviter la redondance hook/point. DRY préservé (stripLinks dans le trait bénéficie à tous). Codename seo-piliers-veille-generative.
@@ -288,7 +289,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 139;
+$lvPatch = 140;
 
 return [
     'major' => $lvMajor,

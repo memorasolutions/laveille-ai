@@ -197,7 +197,7 @@
 
                     {{-- Share --}}
                     <div class="acr-show-share">
-                        @include('fronttheme::partials.article-action-bar', ['model' => $acronym, 'modelType' => 'Modules\\Acronyms\\Models\\Acronym'])
+                        @include('fronttheme::partials.article-action-bar', ['model' => $acronym, 'modelType' => 'Modules\\Acronyms\\Models\\Acronym', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $acronym->adminShareContents() : null])
 
                         @php
                             $acronymCode = $acronym->getTranslation('acronym', 'fr_CA', false) ?: $acronym->acronym;

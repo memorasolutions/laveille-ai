@@ -10,6 +10,7 @@ namespace Modules\Acronyms\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
@@ -24,6 +25,7 @@ class Acronym extends Model implements Searchable
     use HasTranslations;
     use LogsActivityStandard;
     use \Modules\Voting\Traits\HasCommunityVotes;
+    use HasAdminShareContents;
 
     protected array $activitylogFields = ['acronym', 'full_name', 'description', 'website_url', 'is_published'];
     protected string $activitylogName = 'acronym';
@@ -109,5 +111,35 @@ class Acronym extends Model implements Searchable
     public function searchableResultUrl(): string
     {
         return route('acronyms.show', $this->slug);
+    }
+
+    public function adminShareContents(): array
+    {
+        $acr = (string) ($this->acronym ?? '');
+        $full = (string) ($this->full_name ?? '');
+        $desc = (string) ($this->description ?? '');
+
+        $resume = "# {$acr}\n\n";
+        if ($full !== '') { $resume .= "## Signification\n{$full}\n\n"; }
+        if ($desc !== '') { $resume .= "## Description\n{$desc}\n\n"; }
+        $resume = $this->stripLinks($resume);
+
+        $prompt = $this->infographiePrompt(
+            'https://laveille.ai/acronymes-education',
+            'Explique l\'acronyme « ' . $acr . ' » (' . $full . ') dans une infographie pédagogique simple. Public : débutants du milieu de l\'éducation.'
+        );
+
+        $social = $this->buildSocialPost(
+            "tu sais ce que veut dire {$acr} ?",
+            [$full, $desc],
+            'garde ça pour plus tard, ça va resservir.',
+            ['#Éducation', '#Acronymes', '#' . $this->normalizeShareHashtag($acr), '#Québec']
+        );
+
+        return [
+            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+        ];
     }
 }
