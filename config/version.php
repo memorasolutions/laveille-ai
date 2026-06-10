@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.135 · 2026-06-10 · chore(News/admin) renomme l'action « Prompt NotebookLM » → « NotebookLM Infographie » (demande user) dans NewsArticle::adminShareContents(). Codename seo-piliers-veille-generative.
  *   1.65.134 · 2026-06-10 · refine(News/admin) bouton « Admin » DÉPLACÉ dans la barre d'actions à droite de « Signaler » (demande user, était sur une ligne séparée). DRY : le partial générique `fronttheme::partials.article-action-bar` accepte une variable optionnelle `$adminShareItems` ; si fournie + superadmin → rend `<x-core::admin-copy-menu>` en fin de barre (margin-left:auto). show.blade.php passe `adminShareItems = isSuperAdmin ? adminShareContents() : null` (généré seulement si superadmin). Blog non affecté (ne passe pas la variable). Codename seo-piliers-veille-generative.
  *   1.65.133 · 2026-06-09 · feat(News/admin) bouton SUPERADMIN « Admin » sur la page actualité (barre de partage) → menu 3 actions de COPIE : (1) Résumé pour NotebookLM (structured_summary → Markdown avec titres de section, sans liens), (2) Prompt NotebookLM (texte fixe consignes infographie), (3) Post réseaux sociaux natif optimisé 2026 (hook + 3 points + CTA-question + hashtags, ton québécois, sans lien externe — best practices pp_search). **Architecture zéro-duplication** : composant GÉNÉRIQUE réutilisable `Modules/Core/.../components/admin-copy-menu.blade.php` (`<x-core::admin-copy-menu :items>`, Alpine + copie presse-papier multi-lignes via textarea ref + fallback execCommand, CSS @once ct-acm-) + génération du contenu dans `NewsArticle::adminShareContents()` (spécifique News). Visible UNIQUEMENT `auth()->user()?->isSuperAdmin()`. Composant réemployable pour d'autres sections (sur demande). Code délégué Hermes/qwen3-max, corrigé à l'intégration. Codename seo-piliers-veille-generative.
  *   1.65.132 · 2026-06-09 · feat(SEO/AEO) llms.txt + llms-full.txt DYNAMIQUES (audit user : fichiers statiques périmés du 9 avril/26 mai, chiffres contradictoires 128 vs 75 outils, llms-full faux « full » 559 mots sans accents, contradiction training robots.txt↔llms-full). Nouveau `App\Http\Controllers\LlmsController` (index + full, Cache::remember 1h) : compteurs TEMPS RÉEL (Tool::published()->notArchived(), Term, Article, Acronym, NewsArticle publiés) ; `/llms.txt` = index AEO (pitch chiffré + sections + expertise + politique IA + ressources machines + date Québec) ; `/llms-full.txt` = VRAI dump (glossaire complet + outils + articles + acronymes + 100 actualités récentes, en Markdown, accents fr-CA). Politique tranchée : entraînement ET citation AUTORISÉS (aligné robots.txt). Routes racine dans web.php. Fichiers statiques `public/llms*.txt` retirés de git (backup `.rapports/llms-backup-2026-06-09/` + historique git) pour que les routes prennent le relais (.htaccess sert les fichiers existants avant Laravel). Modules désactivables gérés (class_exists + try/catch). Note audit 68→~92/100. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
@@ -283,7 +284,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 134;
+$lvPatch = 135;
 
 return [
     'major' => $lvMajor,

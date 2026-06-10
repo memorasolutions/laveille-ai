@@ -237,7 +237,7 @@ PROMPT;
 
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
-            ['label' => 'Prompt NotebookLM', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
             ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
         ];
     }
