@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.156] - 2026-06-11
+
+### Fixed
+- **Liens en milieu de phrase** : quand une URL est introduite par un mot de liaison (« Accessible via https://…, il repose »), le retrait du lien ne laisse plus de mot orphelin — la phrase devient « Accessible, il repose ». Les tournures sans lien (« via une API », « sur le marché ») restent intactes.
+
 ## [1.65.155] - 2026-06-11
 
 ### Added

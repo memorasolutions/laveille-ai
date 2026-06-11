@@ -157,7 +157,9 @@ trait HasAdminShareContents
     {
         $text = (string) preg_replace('/[\x{00A0}\x{2007}\x{202F}]/u', ' ', $text); // espaces insécables -> espace normal
         $text = (string) preg_replace('/\[([^\]]+)\]\([^)]*\)/', '$1', $text); // [texte](url) -> texte
-        $text = (string) preg_replace('#https?\s*:\s*//[^\s)]+#i', '', $text); // URLs nues (gère « https :// » ; s'arrête avant « ) » pour ne pas manger la parenthèse fermante)
+        // lien introduit par une préposition de liaison en milieu de phrase (« via/sur/depuis/voir/cf … https://… ») -> retire le tout (évite « accessible via , il repose »)
+        $text = (string) preg_replace('/\b(?:via|sur|depuis|voir|cf\.?)\s+https?\s*:\s*\/\/[^\s),;:!?]+/iu', '', $text);
+        $text = (string) preg_replace('#https?\s*:\s*//[^\s)]+#i', '', $text); // URLs nues restantes (gère « https :// » ; s'arrête avant « ) » pour ne pas manger la parenthèse fermante)
         $text = (string) preg_replace('/\(\s*\)/', '', $text);                  // parenthèses vides résiduelles « ( ) » après retrait d'URL
         $text = (string) preg_replace('/[ \t]{2,}/', ' ', $text);              // espaces multiples -> un seul
         $text = (string) preg_replace('/\s+([.,…])/u', '$1', $text);           // espace parasite avant . , … -> collé (en français : ; ! ? gardent leur espace)
