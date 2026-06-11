@@ -76,6 +76,46 @@ trait HasAdminShareContents
     }
 
     /**
+     * Tronque proprement un texte en respectant les phrases et les mots (pour les posts sociaux).
+     */
+    protected function smartTrim(string $text, int $max): string
+    {
+        $text = trim($text);
+        if (mb_strlen($text) <= $max) {
+            return $text;
+        }
+
+        $slice = mb_substr($text, 0, $max);
+        $minPos = (int) ($max * 0.5);
+
+        // Chercher la fin d'une phrase complète
+        $lastDot = mb_strrpos($slice, '.');
+        $lastExcl = mb_strrpos($slice, '!');
+        $lastQues = mb_strrpos($slice, '?');
+
+        $sentenceEnd = false;
+        foreach ([$lastDot, $lastExcl, $lastQues] as $pos) {
+            if ($pos !== false && ($sentenceEnd === false || $pos > $sentenceEnd)) {
+                $sentenceEnd = $pos;
+            }
+        }
+
+        if ($sentenceEnd !== false && $sentenceEnd >= $minPos) {
+            return rtrim(mb_substr($text, 0, $sentenceEnd + 1));
+        }
+
+        // Sinon, couper au dernier espace
+        $lastSpace = mb_strrpos($slice, ' ');
+        if ($lastSpace !== false) {
+            $truncated = mb_substr($text, 0, $lastSpace);
+
+            return rtrim($truncated, " ,;:-") . '…';
+        }
+
+        return rtrim($slice) . '…';
+    }
+
+    /**
      * Retire toutes les URLs http(s) d'un texte (les liens n'ont pas leur place dans NotebookLM / posts).
      */
     protected function stripLinks(string $text): string

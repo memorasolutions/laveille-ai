@@ -137,22 +137,13 @@ class Acronym extends Model implements Searchable
         );
 
         // Post réseaux sociaux « 2026 » (option A) : curiosity-gap + définition + intérêt + CTA discussion, sans lien.
-        $plainDef = $this->one_sentence_answer ? $this->stripLinks((string) $this->one_sentence_answer) : $this->stripLinks($desc);
-        if (mb_strlen($plainDef) > 180) {
-            $plainDef = mb_substr($plainDef, 0, 180);
-            $cut = mb_strrpos($plainDef, ' ');
-            if ($cut !== false) {
-                $plainDef = mb_substr($plainDef, 0, $cut);
-            }
-        }
-        $interest = $this->did_you_know ? $this->stripLinks((string) $this->did_you_know) : "À connaître si tu touches de près ou de loin à l'éducation au Québec.";
-        if (mb_strlen($interest) > 150) {
-            $interest = mb_substr($interest, 0, 150);
-            $cut = mb_strrpos($interest, ' ');
-            if ($cut !== false) {
-                $interest = mb_substr($interest, 0, $cut);
-            }
-        }
+        $plainDef = $this->smartTrim(
+            $this->one_sentence_answer ? $this->stripLinks((string) $this->one_sentence_answer) : $this->stripLinks($desc),
+            200
+        );
+        $interest = $this->did_you_know
+            ? $this->smartTrim($this->stripLinks((string) $this->did_you_know), 180)
+            : "À connaître si tu touches de près ou de loin à l'éducation au Québec.";
         $hook = "{$acr}. Tu l'as sûrement déjà croisé dans le milieu de l'éducation au Québec… mais c'est quoi au juste ? 🤔";
         $cta = 'Tu connaissais, toi ? Dis-le-moi en commentaire 👇';
         $social = $this->buildEngagingSocialPost(
