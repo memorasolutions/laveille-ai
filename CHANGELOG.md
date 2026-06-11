@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.147] - 2026-06-11
+
+### Changed
+- **Acronymes — liste cohérente avec la fiche** : les cartes de la liste `/acronymes-education` affichent l'icône emoji de catégorie dans leur vignette (au lieu du favicon), pour un rendu net et cohérent avec la fiche.
+
 ## [1.65.146] - 2026-06-11
 
 ### Fixed

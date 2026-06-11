@@ -305,10 +305,10 @@
                     <a :href="'/acronymes-education/' + item.slug" class="acr-card">
                         <div class="acr-card-header">
                             <div class="acr-logo">
-                                <template x-if="item.logo_url">
-                                    <img :src="item.logo_url" :alt="item.acronym" loading="lazy">
+                                <template x-if="item.icon">
+                                    <span style="font-size: 22px; line-height: 1;" x-text="item.icon"></span>
                                 </template>
-                                <template x-if="!item.logo_url">
+                                <template x-if="!item.icon">
                                     <div class="acr-logo-fallback" :style="'background:' + (item.cat_color || '#6B7280')">
                                         <span x-text="item.acronym.charAt(0)"></span>
                                     </div>
