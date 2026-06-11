@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.160] - 2026-06-11
+
+### Changed
+- **Raccourcisseur — sélecteur de domaine plus distinct** : le bloc de choix d'adresse (membre) est désormais présenté dans un panneau au fond foncé (couleur du thème) avec le contenu en blanc, pour bien le démarquer du reste du formulaire. Champs (domaine + slug) en blanc, badge du nombre d'adresses et note « toutes ces adresses mènent au même lien » adaptés au fond foncé. Aucun changement de logique.
+
 ## [1.65.159] - 2026-06-11
 
 ### Added

@@ -178,24 +178,24 @@
             <div style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-muted, #6E7687); margin-bottom: 14px;">{{ __('Options membres') }}</div>
             {{-- Domaine + slug --}}
             @if(isset($domains) && $domains->count() > 1)
-            <div style="margin-bottom: 12px;">
-                <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; margin-bottom: 6px;">
-                    <label style="font-size: 13px; font-weight: 700; color: var(--c-dark, #1A1D23);">{{ __('Choisis ton adresse') }}</label>
-                    <span style="font-size: 11px; font-weight: 600; color: var(--c-primary, #064E5A); background: var(--c-primary-light, #F0FAFB); padding: 2px 8px; border-radius: 20px; white-space: nowrap;">{{ $domains->count() }} {{ __('adresses disponibles') }}</span>
+            <div style="background: var(--c-primary, #064E5A); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;">
+                <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; margin-bottom: 8px;">
+                    <label style="color: #fff; font-weight: 700; font-size: 13px;">{{ __('Choisis ton adresse') }}</label>
+                    <span style="background: #fff; color: var(--c-primary, #064E5A); font-weight: 700; font-size: 11px; padding: 2px 9px; border-radius: 20px; white-space: nowrap;">{{ $domains->count() }} {{ __('adresses disponibles') }}</span>
                 </div>
                 <div style="display: flex !important; align-items: center !important; gap: 0;">
-                    <select x-model="domain_id" style="height: 40px; padding: 0 10px; background: #fff; border: 2px solid var(--c-primary, #064E5A); border-right: none; border-radius: 8px 0 0 8px; font-size: 13px; color: var(--c-dark, #1A1D23); cursor: pointer; min-width: 110px; font-weight: 700;">
+                    <select x-model="domain_id" style="background: #fff; color: var(--c-dark, #1A1D23); border: none; border-radius: 8px 0 0 8px; height: 42px; min-width: 120px; font-weight: 700; font-size: 13px; cursor: pointer;">
                         @foreach($domains as $domain)
                             <option value="{{ $domain->id }}" {{ $domain->is_default ? 'selected' : '' }}>{{ $domain->domain }}/</option>
                         @endforeach
                     </select>
                     <input type="text" x-model="slug" placeholder="{{ __('slug-personnalise (optionnel)') }}"
                         @input="slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9_-]/g,'').replace(/-{2,}/g,'-').toLowerCase()"
-                        style="flex: 1 !important; height: 40px; border: 2px solid var(--c-primary, #064E5A); border-left: none; border-radius: 0 8px 8px 0; padding: 0 12px; font-size: 14px;">
+                        style="flex: 1 !important; height: 42px; border: none; border-left: 1px solid #E5E7EB; border-radius: 0 8px 8px 0; padding: 0 12px; font-size: 14px;">
                 </div>
                 <div x-show="twinDomains.length > 0" x-cloak x-transition
                     x-text="`💡 ${allDomains.find(d => d.id == domain_id)?.name || ''} et tes autres adresses (${twinDomains.join(', ')}) mènent toutes vers le même lien court.`"
-                    style="background: var(--c-primary-light, #F0FAFB); color: var(--c-primary, #064E5A); font-size: 12px; padding: 10px 12px; border-radius: 8px; margin-top: 8px; font-weight: 600;"></div>
+                    style="background: rgba(255,255,255,0.14); color: #fff; font-size: 12px; padding: 9px 12px; border-radius: 8px; margin-top: 10px; font-weight: 500; line-height: 1.45;"></div>
             </div>
             @else
             <div style="display: flex !important; align-items: center !important; gap: 0; margin-bottom: 12px;">
