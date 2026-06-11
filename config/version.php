@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.157 · 2026-06-11 · feat(ShortUrl) #325 UX — sélecteur de domaine ÉVIDENT sur le créateur de liens public (best practices pp_search juin 2026, option A 93/100) : quand ≥2 domaines actifs, label « Choisis ton adresse » + badge « N adresses disponibles » + `<select>` mis en avant (bordure primaire) raccordé au slug, + micro-note rassurante sans jargon « Adresse différente, même destination : toutes ces adresses mènent au même lien court ». 1 seul domaine → inchangé. Rappel technique : la résolution est par slug GLOBAL (indépendant du host) donc un lien créé sur un domaine résout sur tous les domaines actifs (alias natif). Page user inchangée (create() redirige vers le formulaire public, déjà amélioré). Code délégué agent Sonnet, changements de flux user revertés (ne rien casser). Codename seo-piliers-veille-generative.
  *   1.65.156 · 2026-06-11 · fix(Core) #320 stripLinks durci pour les liens EN MILIEU DE PHRASE — quand une URL inline était introduite par une préposition de liaison (« Accessible via https://…, il repose »), le retrait laissait « via » + ponctuation orpheline. Nouveau regex (AVANT le retrait des URL nues) qui retire en bloc « (via|sur|depuis|voir|cf) + URL » en PRÉSERVANT la ponctuation suivante (s'arrête avant ,;:!? ) → « Accessible, il repose ». SÛR : ne touche QUE les prépositions SUIVIES d'une URL (« via une API », « sur le marché » inchangés). Banc d'essai local 9/9 (milieu de phrase, parenthèses, markdown, préposition sans URL, fin). Helper partagé 5 sections + résumés NotebookLM. Codename seo-piliers-veille-generative.
  *   1.65.155 · 2026-06-11 · feat(Directory/Core) #319 post social annuaire — ligne PREUVE SOCIALE « nombre de tutoriels » (demande user, recherche pp_search juin 2026, option A 91/100, sans lien, masquée si 0). `buildEngagingSocialPost` accepte un 6e param optionnel `$bonus` (ligne insérée après le 👉, avant le CTA ; n'affecte pas les autres sections). `Tool::adminShareContents()` calcule `$tutoCount = resources()->where('is_approved',true)->count()` (même filtre que la fiche /annuaire) et, si > 0, ajoute « 🎓 {N} tutoriel(s) pour bien démarrer t'attend(ent) déjà sur la veille. » (accord singulier/pluriel). Dynamique, 0 si aucun tuto → ligne omise. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.154 · 2026-06-11 · fix(News/Core) #318 post social actualités — le « 👉 » (point clé) répétait parfois le « En clair » (résumé). Nouveau helper DRY `HasAdminShareContents::textsAreSimilar($a,$b,$threshold=65)` (normalise accents/ponctuation/casse + inclusion-préfixe ≥20 car OU similar_text % ≥ seuil). `NewsArticle::adminShareContents()` choisit désormais le PREMIER point clé/citation/why_important DISTINCT du résumé (sinon 👉 vide) → fin de la redondance. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
@@ -305,7 +306,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 156;
+$lvPatch = 157;
 
 return [
     'major' => $lvMajor,

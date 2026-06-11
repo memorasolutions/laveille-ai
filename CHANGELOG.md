@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.157] - 2026-06-11
+
+### Added
+- **Raccourcisseur — choix du domaine plus évident** : quand plusieurs adresses sont disponibles, le créateur de liens affiche clairement un sélecteur (« Choisis ton adresse » + nombre d'adresses disponibles) et une note rassurante « Adresse différente, même destination : toutes ces adresses mènent au même lien court ».
+
 ## [1.65.156] - 2026-06-11
 
 ### Fixed
