@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.148] - 2026-06-11
+
+### Changed
+- **Post réseaux sociaux du bouton Admin (acronymes) — refonte « 2026 »** : le post copié est désormais plus riche et attirant, selon les meilleures pratiques de juin 2026 (recherche Perplexity). Format : accroche qui ouvre une boucle de curiosité + « En clair : » (définition sans jargon) + « 👉 » (fait à retenir) + un appel à commenter (CTA conversationnel) + hashtags. **Aucun lien, aucune signature promotionnelle.** Nouvelle méthode réutilisable `buildEngagingSocialPost()` (les autres sections gardent leur format actuel pour l'instant).
+
 ## [1.65.147] - 2026-06-11
 
 ### Changed

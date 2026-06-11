@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.148 · 2026-06-11 · feat(Core/Acronyms) #312 POST RÉSEAUX SOCIAUX « 2026 » du bouton Admin (demande user, recherche pp_search juin 2026, option A notée 93/100). Nouvelle méthode DRY réutilisable `HasAdminShareContents::buildEngagingSocialPost(hook, plainDef, interest, cta, hashtags)` : hook curiosity-gap + « En clair : » (définition sans jargon) + « 👉 » (fait/intérêt) + CTA conversationnel + hashtags ; scannable, 1 idée, ton complice, AUCUN lien, AUCUNE signature promo (vs l'ancien buildSocialPost qui mettait « Plus de contenu IA… sur LaVeille AI »). `Acronym::adminShareContents()` génère désormais le post via cette méthode (En clair=one_sentence_answer|description tronquée ~180, 👉=did_you_know tronqué ~150 ou repli, hook éducation, CTA discussion, #Éducation #Acronymes #{ACR} #Québec). buildSocialPost conservé (News/Dictionary/Directory/Blog inchangés). Code délégué Hermes/qwen3-max, intégré + vérifié. Généralisation aux autres sections à proposer. Codename seo-piliers-veille-generative.
  *   1.65.147 · 2026-06-11 · refine(Acronyms) #311 cohérence — la LISTE /acronymes-education affiche aussi l'icône emoji de catégorie dans la vignette des cartes (au lieu du favicon), pour s'aligner sur la fiche (v146). PublicAcronymController::index expose `icon` dans $acronymsJson (remplace logo_url) ; le template Alpine x-for rend `item.icon` dans `.acr-logo` (repli initiale colorée si pas d'icône). Vignette ronde 44×44 nette et cohérente fiche↔liste. Codename seo-piliers-veille-generative.
  *   1.65.146 · 2026-06-11 · fix(Acronyms) #311 logos déformés — la fiche affiche désormais l'ICÔNE EMOJI de catégorie au lieu du logo. CAUSE : les fichiers public/images/acronymes/{slug}.webp sont des canevas CARRÉS 64×64 où les logos rectangulaires (wordmarks, ex ADGSQ) ont été ÉCRASÉS → déformation intrinsèque au fichier (incorrigeable en CSS), et tous pixelisés à l'affichage 90px. POC re-fetch prouvé NON VIABLE (og:image = photos/bannières hors-sujet, favicons 32×32 ou 404 sur les sites officiels). Décision « mieux pour la plateforme » (user « tu décides ») : emoji de catégorie vectoriel = net, cohérent, thématique, zéro déformation, aligné style glossaire. `logo_url` CONSERVÉ en DB (réversible : remettre la branche @if($acronym->logo_url) dans show.blade.php). Index (vignettes rondes 44×44, downscale net) inchangé pour l'instant. Codename seo-piliers-veille-generative.
  *   1.65.145 · 2026-06-11 · fix(Acronyms) #310 logo fiche — la HAUTEUR rendue n'atteignait que 76px (le padding 6px + img height:100% rognaient les 90px). Correctif : `.acr-show-logo` height auto + l'image porte `height:90px; width:auto; max-width:240px; object-fit:contain` (au lieu de height:100% du conteneur paddé) → hauteur de logo = 90px pile, ratio natif préservé, et object-fit:contain garantit l'absence de déformation MÊME pour un logo très large (letterbox au lieu d'étirement). Vérifié Playwright (grics/sofad : ratioRender == ratioNatural, 0 déformation). Codename seo-piliers-veille-generative.
@@ -296,7 +297,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 147;
+$lvPatch = 148;
 
 return [
     'major' => $lvMajor,

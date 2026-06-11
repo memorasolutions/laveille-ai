@@ -136,10 +136,30 @@ class Acronym extends Model implements Searchable
             'Explique l\'acronyme « ' . $acr . ' » (' . $full . ') dans une infographie pédagogique simple. Public : débutants du milieu de l\'éducation.'
         );
 
-        $social = $this->buildSocialPost(
-            "tu sais ce que veut dire {$acr} ?",
-            [$full, $desc],
-            'garde ça pour plus tard, ça va resservir.',
+        // Post réseaux sociaux « 2026 » (option A) : curiosity-gap + définition + intérêt + CTA discussion, sans lien.
+        $plainDef = $this->one_sentence_answer ? $this->stripLinks((string) $this->one_sentence_answer) : $this->stripLinks($desc);
+        if (mb_strlen($plainDef) > 180) {
+            $plainDef = mb_substr($plainDef, 0, 180);
+            $cut = mb_strrpos($plainDef, ' ');
+            if ($cut !== false) {
+                $plainDef = mb_substr($plainDef, 0, $cut);
+            }
+        }
+        $interest = $this->did_you_know ? $this->stripLinks((string) $this->did_you_know) : "À connaître si tu touches de près ou de loin à l'éducation au Québec.";
+        if (mb_strlen($interest) > 150) {
+            $interest = mb_substr($interest, 0, 150);
+            $cut = mb_strrpos($interest, ' ');
+            if ($cut !== false) {
+                $interest = mb_substr($interest, 0, $cut);
+            }
+        }
+        $hook = "{$acr}. Tu l'as sûrement déjà croisé dans le milieu de l'éducation au Québec… mais c'est quoi au juste ? 🤔";
+        $cta = 'Tu connaissais, toi ? Dis-le-moi en commentaire 👇';
+        $social = $this->buildEngagingSocialPost(
+            $hook,
+            $plainDef,
+            $interest,
+            $cta,
             ['#Éducation', '#Acronymes', '#' . $this->normalizeShareHashtag($acr), '#Québec']
         );
 

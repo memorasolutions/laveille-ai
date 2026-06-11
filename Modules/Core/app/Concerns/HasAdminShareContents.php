@@ -46,6 +46,36 @@ trait HasAdminShareContents
     }
 
     /**
+     * Post réseaux sociaux « 2026 » (best practices juin 2026) : hook curiosity-gap +
+     * « En clair : » (définition sans jargon) + « 👉 » (fait/intérêt) + CTA conversationnel + hashtags.
+     * Scannable, 1 idée, ton complice, AUCUN lien, AUCUNE signature promo. Blocs vides ignorés.
+     */
+    protected function buildEngagingSocialPost(string $hook, string $plainDef, string $interest, string $cta, array $hashtags): string
+    {
+        $hook = trim($hook);
+        $plainDef = trim($plainDef);
+        $interest = trim($interest);
+        $cta = trim($cta);
+        $hashtags = array_filter(array_map('trim', $hashtags));
+
+        $parts = [$hook];
+        if ($plainDef !== '') {
+            $parts[] = "En clair : {$plainDef}";
+        }
+        if ($interest !== '') {
+            $parts[] = "👉 {$interest}";
+        }
+        $parts[] = $cta;
+
+        $post = implode("\n\n", $parts);
+        if ($hashtags !== []) {
+            $post .= "\n\n" . implode(' ', $hashtags);
+        }
+
+        return trim($post);
+    }
+
+    /**
      * Retire toutes les URLs http(s) d'un texte (les liens n'ont pas leur place dans NotebookLM / posts).
      */
     protected function stripLinks(string $text): string
