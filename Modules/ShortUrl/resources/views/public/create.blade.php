@@ -308,10 +308,9 @@
                     <p style="font-size:12px;color:#16A34A;font-weight:600;margin:-4px 0 10px;">💡 <span x-text="selectedDomainNames.join(' et ')"></span> mènent au même endroit. Copie celle que tu préfères :</p>
                     <div style="display:flex !important;justify-content:center !important;flex-wrap:wrap !important;gap:8px;">
                         <template x-for="(u,i) in groupedUrls" :key="u">
-                            <a href="javascript:void(0)" @click="copyText(u)" :style="'background:'+(copiedUrl===u?'#10B981':'#1A1D23')+';color:#fff;padding:9px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;'">
-                                <span x-show="copiedUrl!==u">📋 {{ __('Copier') }} <span x-text="selectedDomainNames[i]"></span></span>
-                                <span x-show="copiedUrl===u" x-cloak>✅ {{ __('Copié !') }}</span>
-                            </a>
+                            <a href="javascript:void(0)" @click="copyText(u)"
+                                :style="'background:'+(copiedUrl===u?'#10B981':'#1A1D23')+';color:#fff;padding:9px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;'"
+                                x-text="copiedUrl===u ? '✅ {{ __('Copié !') }}' : '📋 {{ __('Copier') }} ' + selectedDomainNames[i]"></a>
                         </template>
                     </div>
                 </div>

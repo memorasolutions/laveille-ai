@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.163] - 2026-06-11
+
+### Fixed
+- **Raccourcisseur — boutons de copie des adresses jumelles** : au clic, le bouton affiche maintenant « ✅ Copié ! » (en plus du changement de couleur), comme le bouton de copie standard.
+
 ## [1.65.162] - 2026-06-11
 
 ### Added
