@@ -20,8 +20,10 @@ class ShortUrlDomain extends Model
 
     protected $fillable = [
         'domain',
+        'display_label',
         'is_default',
         'is_active',
+        'hidden_in_selector',
     ];
 
     protected function casts(): array
@@ -29,6 +31,7 @@ class ShortUrlDomain extends Model
         return [
             'is_default' => 'boolean',
             'is_active' => 'boolean',
+            'hidden_in_selector' => 'boolean',
         ];
     }
 

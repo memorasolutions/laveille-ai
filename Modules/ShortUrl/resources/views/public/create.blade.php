@@ -48,7 +48,7 @@
         og_description: '',
         og_image: '',
         domain_id: '',
-        allDomains: @js(isset($domains) ? $domains->map(fn($d) => ['id' => (string) $d->id, 'name' => $d->domain, 'isDefault' => $d->is_default])->all() : []),
+        allDomains: @js(isset($domains) ? $domains->map(fn($d) => ['id' => (string) $d->id, 'name' => $d->display_label ?? $d->domain, 'isDefault' => $d->is_default])->all() : []),
         optionsOpen: '',
         loading: false,
         result: null,
@@ -72,10 +72,6 @@
         removeFromHistory(index) {
             this.history.splice(index, 1);
             localStorage.setItem('shorturl_history', JSON.stringify(this.history));
-        },
-
-        get twinDomains() {
-            return this.allDomains.filter(d => d.id !== this.domain_id).map(d => d.name);
         },
 
         async shorten() {
@@ -186,16 +182,13 @@
                 <div style="display: flex !important; align-items: center !important; gap: 0;">
                     <select x-model="domain_id" style="background: #fff; color: var(--c-dark, #1A1D23); border: none; border-radius: 8px 0 0 8px; height: 42px; min-width: 120px; font-weight: 700; font-size: 13px; cursor: pointer;">
                         @foreach($domains as $domain)
-                            <option value="{{ $domain->id }}" {{ $domain->is_default ? 'selected' : '' }}>{{ $domain->domain }}/</option>
+                            <option value="{{ $domain->id }}" {{ $domain->is_default ? 'selected' : '' }}>{{ $domain->display_label ?? $domain->domain }}/</option>
                         @endforeach
                     </select>
                     <input type="text" x-model="slug" placeholder="{{ __('slug-personnalise (optionnel)') }}"
                         @input="slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9_-]/g,'').replace(/-{2,}/g,'-').toLowerCase()"
                         style="flex: 1 !important; height: 42px; border: none; border-left: 1px solid #E5E7EB; border-radius: 0 8px 8px 0; padding: 0 12px; font-size: 14px;">
                 </div>
-                <div x-show="twinDomains.length > 0" x-cloak x-transition
-                    x-text="`💡 ${allDomains.find(d => d.id == domain_id)?.name || ''} et tes autres adresses (${twinDomains.join(', ')}) mènent toutes vers le même lien court.`"
-                    style="background: rgba(255,255,255,0.14); color: #fff; font-size: 12px; padding: 9px 12px; border-radius: 8px; margin-top: 10px; font-weight: 500; line-height: 1.45;"></div>
             </div>
             @else
             <div style="display: flex !important; align-items: center !important; gap: 0; margin-bottom: 12px;">

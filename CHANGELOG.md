@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.161] - 2026-06-11
+
+### Changed
+- **Raccourcisseur — 1lien.ca et unlien.ca regroupés** : dans le sélecteur de domaine, les deux adresses jumelles « un lien » apparaissent comme une seule entrée « 1lien.ca / unlien.ca » ; les autres adresses (veille.la, go3.ca, lurl.ca) restent distinctes. Le lien créé via cette entrée utilise 1lien.ca (joignable partout), tandis qu'unlien.ca continue de rediriger normalement. Mise en place propre via deux champs en base (libellé d'affichage et masquage du menu), sans toucher à la résolution des liens.
+
 ## [1.65.160] - 2026-06-11
 
 ### Changed

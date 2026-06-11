@@ -25,7 +25,9 @@ class PublicShortUrlController
 
     public function create(): View
     {
-        $domains = \Modules\ShortUrl\Models\ShortUrlDomain::where('is_active', true)->get();
+        $domains = \Modules\ShortUrl\Models\ShortUrlDomain::where('is_active', true)
+            ->where('hidden_in_selector', false)
+            ->get();
 
         return view('shorturl::public.create', compact('domains'));
     }
