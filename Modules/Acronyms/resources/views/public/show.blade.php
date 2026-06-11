@@ -60,11 +60,11 @@
     .acr-show-icon { font-size: 3rem; line-height: 1; margin-bottom: 10px; text-align: center; }
     .acr-show-logo-wrap { text-align: center; margin-bottom: 14px; }
     .acr-show-logo {
-        height: 90px; width: auto; max-width: 240px; display: inline-flex; align-items: center; justify-content: center;
+        width: auto; max-width: 264px; display: inline-flex; align-items: center; justify-content: center;
         padding: 6px 12px; border-radius: var(--r-base); overflow: hidden; background: #F9FAFB; border: 1px solid #E5E7EB;
     }
-    /* Respecte le ratio natif du logo (hauteur fixe, largeur auto) → pas de déformation des logos non carrés */
-    .acr-show-logo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; display: block; }
+    /* Hauteur fixe 90px + largeur auto + object-fit:contain → ratio natif respecté (zéro déformation, même pour un logo large) */
+    .acr-show-logo img { height: 90px; width: auto; max-width: 240px; object-fit: contain; display: block; }
     .acr-show-h1 {
         font-family: var(--f-heading); font-size: 2.4rem; font-weight: 800;
         color: var(--c-primary); margin: 0 0 10px; line-height: 1.2; text-align: center;

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.145] - 2026-06-11
+
+### Fixed
+- **Acronymes — hauteur du logo portée à 90 px** : le logo de la fiche ne se rendait qu'à ~76 px (le padding interne rognait la hauteur). L'image porte maintenant `height: 90 px` avec `object-fit: contain`, ce qui garde la hauteur de mise en forme et garantit l'absence de déformation, y compris pour un logo très large.
+
 ## [1.65.144] - 2026-06-11
 
 ### Changed
