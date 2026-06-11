@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.158] - 2026-06-11
+
+### Changed
+- **Conditions d'utilisation — raccourcisseur** : renforcement de la clause de non-responsabilité (section 7). Trois ajouts conformes au droit québécois : statut d'intermédiaire technique (LCCJTI art. 22), responsabilité exclusive de l'utilisateur qui crée le lien quant au contenu de destination, et garantie/indemnisation de laveille.ai et MEMORA solutions par l'utilisateur. À faire valider par un juriste.
+
 ## [1.65.157] - 2026-06-11
 
 ### Added
