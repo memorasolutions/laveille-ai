@@ -60,10 +60,11 @@
     .acr-show-icon { font-size: 3rem; line-height: 1; margin-bottom: 10px; text-align: center; }
     .acr-show-logo-wrap { text-align: center; margin-bottom: 14px; }
     .acr-show-logo {
-        width: 90px; height: 90px; display: inline-flex; align-items: center; justify-content: center;
-        border-radius: var(--r-base); overflow: hidden; background: #F9FAFB; border: 1px solid #E5E7EB;
+        height: 90px; width: auto; max-width: 240px; display: inline-flex; align-items: center; justify-content: center;
+        padding: 6px 12px; border-radius: var(--r-base); overflow: hidden; background: #F9FAFB; border: 1px solid #E5E7EB;
     }
-    .acr-show-logo img { width: 100%; height: 100%; object-fit: contain; }
+    /* Respecte le ratio natif du logo (hauteur fixe, largeur auto) → pas de déformation des logos non carrés */
+    .acr-show-logo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; display: block; }
     .acr-show-h1 {
         font-family: var(--f-heading); font-size: 2.4rem; font-weight: 800;
         color: var(--c-primary); margin: 0 0 10px; line-height: 1.2; text-align: center;
@@ -223,7 +224,7 @@
                     @if($acronym->logo_url)
                         <div class="acr-show-logo-wrap">
                             <span class="acr-show-logo">
-                                <img src="{{ str_starts_with($acronym->logo_url, 'http') ? $acronym->logo_url : asset($acronym->logo_url) }}" alt="{{ __('Logo') }} {{ $acronym->acronym }}" width="90" height="90" loading="lazy">
+                                <img src="{{ str_starts_with($acronym->logo_url, 'http') ? $acronym->logo_url : asset($acronym->logo_url) }}" alt="{{ __('Logo') }} {{ $acronym->acronym }}" height="90" loading="lazy">
                             </span>
                         </div>
                     @else
@@ -297,6 +298,11 @@
                             {{ __('Mis à jour le') }} <time datetime="{{ $acronym->updated_at->toDateString() }}">{{ $acronym->updated_at->locale('fr_CA')->translatedFormat('j F Y') }}</time>
                         </p>
                     @endif
+
+                    {{-- Barre d'action (Sauvegarder/Copier/Signaler + bouton Admin superadmin) — en haut, comme glossaire/actualités --}}
+                    <div class="acr-show-actionbar" style="margin: 0.5rem 0 1.25rem;">
+                        @include('fronttheme::partials.article-action-bar', ['model' => $acronym, 'modelType' => 'Modules\\Acronyms\\Models\\Acronym', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $acronym->adminShareContents() : null])
+                    </div>
 
                     {{-- Answer-first (AEO) : phrase-réponse ≤40 mots --}}
                     @if(! empty($acronym->one_sentence_answer))
@@ -481,10 +487,8 @@
                         </div>
                     @endif
 
-                    {{-- Partage + barre d'action (bouton Admin superadmin conservé) --}}
+                    {{-- Partage social (la barre d'action + bouton Admin sont remontés en haut) --}}
                     <div class="acr-show-share">
-                        @include('fronttheme::partials.article-action-bar', ['model' => $acronym, 'modelType' => 'Modules\\Acronyms\\Models\\Acronym', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $acronym->adminShareContents() : null])
-
                         @php
                             $acronymCode = $acronym->getTranslation('acronym', 'fr_CA', false) ?: $acronym->acronym;
                             $acronymFull = $acronym->getTranslation('full_name', 'fr_CA', false) ?: $acronym->full_name;

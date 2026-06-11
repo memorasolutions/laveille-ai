@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.144] - 2026-06-11
+
+### Changed
+- **Acronymes — bouton « Admin » (NotebookLM) remonté en haut de la fiche** : les 3 copies superadmin (Résumé NotebookLM, NotebookLM Infographie, Post réseaux sociaux) sont désormais dans la barre d'action en haut, juste après l'en-tête — comme sur le glossaire et les actualités (auparavant en bas de page, donc peu visible). Zéro duplication, le partage social reste en bas.
+
+### Fixed
+- **Acronymes — logos non déformés** : la boîte de logo de la fiche n'est plus un carré figé 90×90 (qui écrasait les logos rectangulaires). Le logo respecte maintenant son ratio natif (largeur auto) avec une hauteur fixe de 90 px et une largeur max de 240 px, conservant la mise en forme. La vignette circulaire de la liste/index (44×44, `object-fit:contain`) est inchangée.
+
 ## [1.65.143] - 2026-06-10
 
 ### Added
