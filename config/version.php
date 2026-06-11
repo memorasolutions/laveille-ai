@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.154 · 2026-06-11 · fix(News/Core) #318 post social actualités — le « 👉 » (point clé) répétait parfois le « En clair » (résumé). Nouveau helper DRY `HasAdminShareContents::textsAreSimilar($a,$b,$threshold=65)` (normalise accents/ponctuation/casse + inclusion-préfixe ≥20 car OU similar_text % ≥ seuil). `NewsArticle::adminShareContents()` choisit désormais le PREMIER point clé/citation/why_important DISTINCT du résumé (sinon 👉 vide) → fin de la redondance. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.153 · 2026-06-11 · fix(Core) #315 typographie française — le nettoyage des espaces avant ponctuation collait AUSSI « : ; ! ? » (« objets : quand » → « objets: quand »), or en français ces ponctuations doubles prennent une espace AVANT. Restreint à « . , … » (les seules sans espace avant). Codename seo-piliers-veille-generative.
  *   1.65.152 · 2026-06-11 · fix(Core) #315 stripLinks — VRAIE cause de la parenthèse orpheline « Fathom ( » : le regex d'URL `\S+` était gourmand et MANGEAIT la parenthèse fermante (« (url) » → « ( »), donc « ( ) » n'était jamais détecté. Corrigé en `[^\s)]+` (l'URL s'arrête avant « ) ») → « (url) » → « () » → nettoyé. Testé : « Fathom (https://fathom.video) est un outil . » → « Fathom est un outil. ». Codename seo-piliers-veille-generative.
  *   1.65.151 · 2026-06-11 · fix(Core) #315 stripLinks durci — après retrait d'une URL nue entre parenthèses (« Fathom (https://…) est » → « Fathom ( est »), nettoie les parenthèses vides résiduelles « ( ) », réduit les espaces multiples et colle la ponctuation précédée d'un espace (« objets . » → « objets. »). Helper générique du trait HasAdminShareContents → bénéficie à tous les posts sociaux + résumés NotebookLM. Codename seo-piliers-veille-generative.
@@ -302,7 +303,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 153;
+$lvPatch = 154;
 
 return [
     'major' => $lvMajor,

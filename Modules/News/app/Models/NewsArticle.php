@@ -214,9 +214,27 @@ class NewsArticle extends Model implements Searchable
         // Post réseaux sociaux « 2026 » : hook structuré + En clair (tldr/résumé) + 👉 (point clé) + CTA (sans lien ni promo).
         $hook = $this->smartTrim((string) (data_get($structured, 'hook') ?: $this->title), 150);
         $plainDef = $this->smartTrim($this->stripLinks((string) (data_get($structured, 'tldr') ?: $this->summary)), 200);
-        $kp = data_get($structured, 'key_points');
-        $firstKp = (is_array($kp) && $kp !== []) ? (string) $kp[0] : (string) (data_get($structured, 'quote') ?: data_get($structured, 'why_important'));
-        $interest = $firstKp !== '' ? $this->smartTrim($this->stripLinks($firstKp), 180) : '';
+        // 👉 : un point clé DISTINCT du résumé (évite la redondance hook/En clair/👉).
+        $interest = '';
+        $candidates = [];
+        if (is_array($structured)) {
+            $keyPoints = data_get($structured, 'key_points');
+            if (is_array($keyPoints)) {
+                foreach ($keyPoints as $point) {
+                    $candidates[] = (string) $point;
+                }
+            }
+            $candidates[] = (string) data_get($structured, 'quote');
+            $candidates[] = (string) data_get($structured, 'why_important');
+        }
+        foreach ($candidates as $cand) {
+            $c = trim($this->stripLinks((string) $cand));
+            if ($c === '' || $this->textsAreSimilar($plainDef, $c)) {
+                continue;
+            }
+            $interest = $this->smartTrim($c, 180);
+            break;
+        }
         $tags = ['#IA'];
         if ($this->category_tag) { $tags[] = '#' . $this->normalizeShareHashtag($this->category_tag); }
         $tags[] = '#Québec';

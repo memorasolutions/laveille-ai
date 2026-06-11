@@ -116,6 +116,37 @@ trait HasAdminShareContents
     }
 
     /**
+     * Vérifie si deux textes sont suffisamment similaires après normalisation (anti-redondance).
+     */
+    protected function textsAreSimilar(string $a, string $b, int $threshold = 65): bool
+    {
+        $normalize = function (string $text): string {
+            $text = mb_strtolower($text, 'UTF-8');
+            $text = (string) iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+            $text = (string) preg_replace('/[^a-z0-9\s]/', ' ', $text);
+            $text = (string) preg_replace('/\s+/', ' ', $text);
+
+            return trim($text);
+        };
+
+        $aNorm = $normalize($a);
+        $bNorm = $normalize($b);
+
+        if ($aNorm === '' || $bNorm === '') {
+            return false;
+        }
+
+        if ((strlen($aNorm) >= 20 && str_starts_with($bNorm, $aNorm)) ||
+            (strlen($bNorm) >= 20 && str_starts_with($aNorm, $bNorm))) {
+            return true;
+        }
+
+        similar_text($aNorm, $bNorm, $pct);
+
+        return $pct >= $threshold;
+    }
+
+    /**
      * Retire toutes les URLs http(s) d'un texte (les liens n'ont pas leur place dans NotebookLM / posts).
      */
     protected function stripLinks(string $text): string

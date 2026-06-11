@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.154] - 2026-06-11
+
+### Fixed
+- **Post social des actualités — moins de redondance** : le « 👉 » (point clé) ne répète plus le « En clair » (résumé). Le post choisit automatiquement un point clé, une citation ou un « pourquoi c'est important » réellement distinct du résumé (sinon il est omis).
+
+## [1.65.153] - 2026-06-11
+
+### Fixed
+- **Typographie française dans les contenus de partage** : l'espace avant `: ; ! ?` est préservée (seuls les espaces parasites avant `. , …` sont retirés).
+
+## [1.65.152] - 2026-06-11
+
+### Fixed
+- **Liens entre parenthèses** : le retrait d'une URL ne laisse plus de parenthèse ouvrante orpheline (« Nom ( est… »).
+
 ## [1.65.151] - 2026-06-11
 
 ### Fixed
