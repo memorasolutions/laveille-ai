@@ -48,6 +48,7 @@
         og_description: '',
         og_image: '',
         domain_id: '',
+        allDomains: @js(isset($domains) ? $domains->map(fn($d) => ['id' => (string) $d->id, 'name' => $d->domain, 'isDefault' => $d->is_default])->all() : []),
         optionsOpen: '',
         loading: false,
         result: null,
@@ -71,6 +72,10 @@
         removeFromHistory(index) {
             this.history.splice(index, 1);
             localStorage.setItem('shorturl_history', JSON.stringify(this.history));
+        },
+
+        get twinDomains() {
+            return this.allDomains.filter(d => d.id !== this.domain_id).map(d => d.name);
         },
 
         async shorten() {
@@ -140,6 +145,11 @@
         },
 
         init() {
+            // Domaine par défaut (slug global : le lien résout sur toutes les adresses actives)
+            if (!this.domain_id && this.allDomains.length) {
+                const def = this.allDomains.find(d => d.isDefault);
+                this.domain_id = def ? def.id : this.allDomains[0].id;
+            }
             this.$watch('result', (val) => { if (val) this.$nextTick(() => this.generateQR()); });
             // Pré-remplir depuis localStorage (vient de l'outil liens Google)
             const pending = localStorage.getItem('pendingShortUrl');
@@ -183,7 +193,9 @@
                         @input="slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9_-]/g,'').replace(/-{2,}/g,'-').toLowerCase()"
                         style="flex: 1 !important; height: 40px; border: 2px solid var(--c-primary, #064E5A); border-left: none; border-radius: 0 8px 8px 0; padding: 0 12px; font-size: 14px;">
                 </div>
-                <p style="font-size: 12px; color: var(--c-text-muted, #6E7687); margin: 6px 0 0;">{{ __('Adresse différente, même destination : toutes ces adresses mènent au même lien court.') }}</p>
+                <div x-show="twinDomains.length > 0" x-cloak x-transition
+                    x-text="`💡 ${allDomains.find(d => d.id == domain_id)?.name || ''} et tes autres adresses (${twinDomains.join(', ')}) mènent toutes vers le même lien court.`"
+                    style="background: var(--c-primary-light, #F0FAFB); color: var(--c-primary, #064E5A); font-size: 12px; padding: 10px 12px; border-radius: 8px; margin-top: 8px; font-weight: 600;"></div>
             </div>
             @else
             <div style="display: flex !important; align-items: center !important; gap: 0; margin-bottom: 12px;">

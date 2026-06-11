@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.159] - 2026-06-11
+
+### Added
+- **Raccourcisseur — note « adresses jumelles » dynamique** : dans le créateur de liens, dès qu'un domaine est choisi dans le sélecteur, un message data-driven nomme les autres adresses actives et rappelle qu'elles mènent toutes au même lien court (la résolution se fait par slug global, donc un lien créé sur une adresse fonctionne sur toutes). Aucun nom de domaine codé en dur : la liste vient des domaines actifs ; toute nouvelle adresse (ex. unlien.ca) y apparaîtra automatiquement. Remplace l'ancienne note fixe (plus clair, se met à jour selon le domaine sélectionné).
+
 ## [1.65.158] - 2026-06-11
 
 ### Changed
