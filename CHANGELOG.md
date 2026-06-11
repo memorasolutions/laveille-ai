@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.146] - 2026-06-11
+
+### Fixed
+- **Acronymes — fin des logos déformés sur la fiche** : les fichiers de logos sont des canevas carrés 64×64 où les logos rectangulaires (wordmarks) avaient été écrasés (déformation dans le fichier, incorrigeable en CSS) et tous pixelisés à l'affichage. Le re-téléchargement depuis les sites officiels s'est révélé non fiable (og:image = photos/bannières, favicons 32×32 ou 404). La fiche affiche désormais l'**icône emoji de catégorie** (vectorielle, nette, cohérente, zéro déformation). `logo_url` est conservé en base (réversible).
+
 ## [1.65.145] - 2026-06-11
 
 ### Fixed

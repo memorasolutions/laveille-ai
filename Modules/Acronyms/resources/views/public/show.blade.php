@@ -220,16 +220,12 @@
             <div class="col-xs-12">
                 <article class="acr-show-card">
 
-                    {{-- En-tête : logo (si présent) sinon icône emoji sinon 🎓 --}}
-                    @if($acronym->logo_url)
-                        <div class="acr-show-logo-wrap">
-                            <span class="acr-show-logo">
-                                <img src="{{ str_starts_with($acronym->logo_url, 'http') ? $acronym->logo_url : asset($acronym->logo_url) }}" alt="{{ __('Logo') }} {{ $acronym->acronym }}" height="90" loading="lazy">
-                            </span>
-                        </div>
-                    @else
-                        <div class="acr-show-icon">{{ $acronym->icon ?: '🎓' }}</div>
-                    @endif
+                    {{-- En-tête : icône emoji de catégorie (rendu net, vectoriel et cohérent).
+                         Les logos sources étaient des fichiers 64×64 pixelisés/parfois déformés (wordmarks
+                         écrasés dans un carré) et le re-fetch des sites officiels n'est pas fiable
+                         (og:image = photos/bannières, favicons 32×32 ou 404). logo_url est conservé en DB
+                         (réversible) : pour réafficher les logos, remettre la branche @if($acronym->logo_url). --}}
+                    <div class="acr-show-icon">{{ $acronym->icon ?: '🎓' }}</div>
 
                     {{-- Titre (acronyme) --}}
                     <h1 class="acr-show-h1" data-editable="acronym">{{ $acronym->acronym }}</h1>
