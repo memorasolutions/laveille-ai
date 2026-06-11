@@ -120,6 +120,27 @@
             setTimeout(() => this.copied = false, 2000);
         },
 
+        copiedUrl: '',
+        get selectedDomain() {
+            return this.allDomains.find(d => d.id == this.domain_id);
+        },
+        get selectedDomainNames() {
+            return this.selectedDomain ? this.selectedDomain.name.split('/').map(s => s.trim()).filter(Boolean) : [];
+        },
+        get isGroupedSelection() {
+            return this.selectedDomainNames.length > 1;
+        },
+        get groupedUrls() {
+            return this.result ? this.selectedDomainNames.map(n => `https://${n}/${this.result.slug}`) : [];
+        },
+        copyText(text) {
+            navigator.clipboard.writeText(text);
+            this.copiedUrl = text;
+            setTimeout(() => {
+                if (this.copiedUrl === text) this.copiedUrl = '';
+            }, 2000);
+        },
+
         qrInstance: null,
 
         generateQR() {
@@ -189,6 +210,7 @@
                         @input="slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9_-]/g,'').replace(/-{2,}/g,'-').toLowerCase()"
                         style="flex: 1 !important; height: 42px; border: none; border-left: 1px solid #E5E7EB; border-radius: 0 8px 8px 0; padding: 0 12px; font-size: 14px;">
                 </div>
+                <div x-show="isGroupedSelection" x-cloak x-transition x-text="`💡 ${selectedDomainNames.join(' et ')} mènent au même endroit — tu pourras copier l'une ou l'autre.`" style="background:rgba(255,255,255,0.14);color:#fff;font-size:12px;padding:9px 12px;border-radius:8px;margin-top:10px;font-weight:500;line-height:1.45;"></div>
             </div>
             @else
             <div style="display: flex !important; align-items: center !important; gap: 0; margin-bottom: 12px;">
@@ -281,12 +303,26 @@
                 style="font-family: var(--f-heading, 'Plus Jakarta Sans', sans-serif); font-size: 1.5rem; font-weight: 800; color: var(--c-primary, #064E5A); text-decoration: none; word-break: break-all; display: block; margin-bottom: 16px;"
                 x-text="result?.short_url"></a>
 
+            <template x-if="isGroupedSelection">
+                <div style="margin-bottom:16px;">
+                    <p style="font-size:12px;color:#16A34A;font-weight:600;margin:-4px 0 10px;">💡 <span x-text="selectedDomainNames.join(' et ')"></span> mènent au même endroit. Copie celle que tu préfères :</p>
+                    <div style="display:flex !important;justify-content:center !important;flex-wrap:wrap !important;gap:8px;">
+                        <template x-for="(u,i) in groupedUrls" :key="u">
+                            <a href="javascript:void(0)" @click="copyText(u)" :style="'background:'+(copiedUrl===u?'#10B981':'#1A1D23')+';color:#fff;padding:9px 14px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;'">
+                                <span x-show="copiedUrl!==u">📋 {{ __('Copier') }} <span x-text="selectedDomainNames[i]"></span></span>
+                                <span x-show="copiedUrl===u" x-cloak>✅ {{ __('Copié !') }}</span>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
             {{-- QR code preview inline --}}
             <div x-ref="qrPreview" style="margin-bottom: 16px;"></div>
 
             <div style="display: flex !important; justify-content: center !important; flex-wrap: wrap !important; gap: 10px;">
                 {{-- Copier --}}
-                <a href="javascript:void(0)" @click="copyLink()"
+                <a href="javascript:void(0)" @click="copyLink()" x-show="!isGroupedSelection"
                     :style="'background:' + (copied ? '#10B981' : '#1A1D23') + ';color:#fff;-webkit-appearance:none;text-decoration:none;display:inline-block;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;font-family:var(--f-heading,\'Plus Jakarta Sans\',sans-serif);'"
                     onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                     <span x-show="!copied">📋 {{ __('Copier le lien') }}</span>

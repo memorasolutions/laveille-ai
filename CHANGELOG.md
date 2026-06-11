@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.162] - 2026-06-11
+
+### Added
+- **Raccourcisseur — adresses jumelles copiables** : quand l'entrée « 1lien.ca / unlien.ca » est choisie dans le sélecteur, un message rappelle que les deux adresses mènent au même endroit. Une fois le lien créé, chaque adresse (1lien.ca et unlien.ca) a son propre bouton de copie, pour partager celle qu'on préfère. Comportement inchangé pour les autres domaines.
+
 ## [1.65.161] - 2026-06-11
 
 ### Changed
