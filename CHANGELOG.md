@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.150] - 2026-06-11
+
+### Changed
+- **Post réseaux sociaux du bouton Admin — format « 2026 » partout** : le glossaire, l'annuaire, le blog et les actualités utilisent désormais le même format engageant que les acronymes (accroche curiosity-gap + « En clair : » + « 👉 » + appel à commenter + hashtags), **sans lien ni signature promotionnelle**, avec une accroche adaptée à chaque type. Réutilise `buildEngagingSocialPost()` + `smartTrim()` (zéro duplication). L'ancienne signature « Plus de contenu IA… sur LaVeille AI » est retirée de ces posts.
+
+## [1.65.149] - 2026-06-11
+
+### Fixed
+- **Post social — troncature propre** : les blocs « En clair : » et « 👉 » sont coupés à la fin d'une phrase complète (sinon au dernier mot + « … ») au lieu d'être tronqués en plein milieu d'un mot.
+
 ## [1.65.148] - 2026-06-11
 
 ### Changed

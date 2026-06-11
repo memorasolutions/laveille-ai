@@ -388,10 +388,33 @@ class Tool extends Model implements Searchable
         $cf = $this->core_features;
         $points = is_array($cf) ? array_map('strval', $cf) : array_values(array_filter(array_map('trim', explode(',', (string) $cf))));
         if ($points === [] && is_array($this->pros)) { $points = array_map('strval', $this->pros); }
-        $social = $this->buildSocialPost(
-            "tu cherches un outil pour gagner du temps ? regarde {$name}.",
-            array_slice(array_filter($points), 0, 3),
-            "tag quelqu'un qui magasine un outil en ce moment, et enregistre le post.",
+        // Post réseaux sociaux « 2026 » : curiosity-gap + En clair + 👉 + CTA discussion (sans lien ni promo).
+        $plainDef = $this->smartTrim($this->stripLinks((string) $desc), 200);
+        $firstFeature = '';
+        foreach ((is_array($points) ? $points : []) as $point) {
+            if ((string) $point !== '') {
+                $firstFeature = (string) $point;
+                break;
+            }
+        }
+        if ($firstFeature === '' && is_array($this->pros)) {
+            foreach ($this->pros as $pro) {
+                if ((string) $pro !== '') {
+                    $firstFeature = (string) $pro;
+                    break;
+                }
+            }
+        }
+        $interest = $firstFeature !== ''
+            ? $this->smartTrim($this->stripLinks($firstFeature), 180)
+            : "Le genre d'outil qui peut vite devenir indispensable dans ton coffre.";
+        $hook = "Tu cherches un outil IA pour te simplifier la vie ? Laisse-moi te parler de {$name}. 👀";
+        $cta = "Tu l'as déjà essayé ? Raconte en commentaire 👇";
+        $social = $this->buildEngagingSocialPost(
+            $hook,
+            $plainDef,
+            $interest,
+            $cta,
             ['#IA', '#OutilsIA', '#' . $this->normalizeShareHashtag((string) $name), '#Québec']
         );
         return [

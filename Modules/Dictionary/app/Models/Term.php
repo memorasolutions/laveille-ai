@@ -147,10 +147,22 @@ class Term extends Model implements Searchable
         }
         $resume = $this->stripLinks($resume);
         $prompt = $this->infographiePrompt('https://laveille.ai/glossaire', 'Vulgarise le concept « ' . $name . ' » dans une infographie pédagogique. Public : débutants sans connaissances préalables.');
-        $social = $this->buildSocialPost(
-            "c'est quoi, {$name} ? on vulgarise.",
-            [(string) ($this->analogy ?? ''), (string) ($this->example ?? '')],
-            "garde ça pour plus tard, et partage à quelqu'un qui se pose la question.",
+        // Post réseaux sociaux « 2026 » : curiosity-gap + En clair + 👉 + CTA discussion (sans lien ni promo).
+        $plainDef = $this->smartTrim($this->stripLinks((string) ($this->one_sentence_answer ?: ($this->analogy ?: $this->definition))), 200);
+        $interest = $this->smartTrim($this->stripLinks((string) ($this->did_you_know ?? '')), 180);
+        if ($interest === '') {
+            $interest = $this->smartTrim($this->stripLinks((string) ($this->example ?? '')), 180);
+        }
+        if ($interest === '') {
+            $interest = "Un terme clé à connaître pour suivre l'actualité de l'IA.";
+        }
+        $hook = "{$name}. Tu vois ce mot passer partout en IA… mais tu sais vraiment ce que ça veut dire ? 🤔";
+        $cta = "Tu le savais, toi ? Dis-le-moi en commentaire 👇";
+        $social = $this->buildEngagingSocialPost(
+            $hook,
+            $plainDef,
+            $interest,
+            $cta,
             ['#IA', '#' . $this->normalizeShareHashtag((string) $name), '#Glossaire', '#Québec']
         );
         return [

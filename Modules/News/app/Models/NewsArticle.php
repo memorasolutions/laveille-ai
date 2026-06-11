@@ -211,16 +211,17 @@ class NewsArticle extends Model implements Searchable
         $prompt = $this->infographiePrompt('https://laveille.ai/actualites', 'Vulgarise les points clés de tous les documents dans une infographie engageante. Public : étudiants sans connaissances préalables.');
 
         // 3. Post réseaux sociaux natif (via trait HasAdminShareContents).
+        // Post réseaux sociaux « 2026 » : hook structuré + En clair (tldr/résumé) + 👉 (point clé) + CTA (sans lien ni promo).
+        $hook = $this->smartTrim((string) (data_get($structured, 'hook') ?: $this->title), 150);
+        $plainDef = $this->smartTrim($this->stripLinks((string) (data_get($structured, 'tldr') ?: $this->summary)), 200);
+        $kp = data_get($structured, 'key_points');
+        $firstKp = (is_array($kp) && $kp !== []) ? (string) $kp[0] : (string) (data_get($structured, 'quote') ?: data_get($structured, 'why_important'));
+        $interest = $firstKp !== '' ? $this->smartTrim($this->stripLinks($firstKp), 180) : '';
         $tags = ['#IA'];
         if ($this->category_tag) { $tags[] = '#' . $this->normalizeShareHashtag($this->category_tag); }
         $tags[] = '#Québec';
         $tags[] = '#VeilleIA';
-        $social = $this->buildSocialPost(
-            (string) (data_get($structured, 'hook') ?: $this->title),
-            is_array(data_get($structured, 'key_points')) ? array_slice(data_get($structured, 'key_points'), 0, 3) : [],
-            "toi, t'en penses quoi ?",
-            $tags
-        );
+        $social = $this->buildEngagingSocialPost($hook, $plainDef, $interest, "Toi, t'en penses quoi ? 👇", $tags);
 
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
