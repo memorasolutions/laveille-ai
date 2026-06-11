@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.155 · 2026-06-11 · feat(Directory/Core) #319 post social annuaire — ligne PREUVE SOCIALE « nombre de tutoriels » (demande user, recherche pp_search juin 2026, option A 91/100, sans lien, masquée si 0). `buildEngagingSocialPost` accepte un 6e param optionnel `$bonus` (ligne insérée après le 👉, avant le CTA ; n'affecte pas les autres sections). `Tool::adminShareContents()` calcule `$tutoCount = resources()->where('is_approved',true)->count()` (même filtre que la fiche /annuaire) et, si > 0, ajoute « 🎓 {N} tutoriel(s) pour bien démarrer t'attend(ent) déjà sur la veille. » (accord singulier/pluriel). Dynamique, 0 si aucun tuto → ligne omise. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.154 · 2026-06-11 · fix(News/Core) #318 post social actualités — le « 👉 » (point clé) répétait parfois le « En clair » (résumé). Nouveau helper DRY `HasAdminShareContents::textsAreSimilar($a,$b,$threshold=65)` (normalise accents/ponctuation/casse + inclusion-préfixe ≥20 car OU similar_text % ≥ seuil). `NewsArticle::adminShareContents()` choisit désormais le PREMIER point clé/citation/why_important DISTINCT du résumé (sinon 👉 vide) → fin de la redondance. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.153 · 2026-06-11 · fix(Core) #315 typographie française — le nettoyage des espaces avant ponctuation collait AUSSI « : ; ! ? » (« objets : quand » → « objets: quand »), or en français ces ponctuations doubles prennent une espace AVANT. Restreint à « . , … » (les seules sans espace avant). Codename seo-piliers-veille-generative.
  *   1.65.152 · 2026-06-11 · fix(Core) #315 stripLinks — VRAIE cause de la parenthèse orpheline « Fathom ( » : le regex d'URL `\S+` était gourmand et MANGEAIT la parenthèse fermante (« (url) » → « ( »), donc « ( ) » n'était jamais détecté. Corrigé en `[^\s)]+` (l'URL s'arrête avant « ) ») → « (url) » → « () » → nettoyé. Testé : « Fathom (https://fathom.video) est un outil . » → « Fathom est un outil. ». Codename seo-piliers-veille-generative.
@@ -303,7 +304,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 154;
+$lvPatch = 155;
 
 return [
     'major' => $lvMajor,

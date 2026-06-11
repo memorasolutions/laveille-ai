@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.155] - 2026-06-11
+
+### Added
+- **Post social de l'annuaire — nombre de tutoriels** : le post d'un outil affiche désormais une ligne de preuve sociale dynamique « 🎓 {N} tutoriels pour bien démarrer t'attendent déjà sur la veille » (accord singulier/pluriel), uniquement si l'outil a au moins un tutoriel, sans lien. Le compte suit exactement celui de la fiche /annuaire.
+
 ## [1.65.154] - 2026-06-11
 
 ### Fixed

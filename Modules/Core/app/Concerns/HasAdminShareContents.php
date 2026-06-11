@@ -50,12 +50,13 @@ trait HasAdminShareContents
      * « En clair : » (définition sans jargon) + « 👉 » (fait/intérêt) + CTA conversationnel + hashtags.
      * Scannable, 1 idée, ton complice, AUCUN lien, AUCUNE signature promo. Blocs vides ignorés.
      */
-    protected function buildEngagingSocialPost(string $hook, string $plainDef, string $interest, string $cta, array $hashtags): string
+    protected function buildEngagingSocialPost(string $hook, string $plainDef, string $interest, string $cta, array $hashtags, string $bonus = ''): string
     {
         $hook = trim($hook);
         $plainDef = trim($plainDef);
         $interest = trim($interest);
         $cta = trim($cta);
+        $bonus = trim($bonus);
         $hashtags = array_filter(array_map('trim', $hashtags));
 
         $parts = [$hook];
@@ -64,6 +65,9 @@ trait HasAdminShareContents
         }
         if ($interest !== '') {
             $parts[] = "👉 {$interest}";
+        }
+        if ($bonus !== '') {
+            $parts[] = $bonus;
         }
         $parts[] = $cta;
 

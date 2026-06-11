@@ -410,12 +410,21 @@ class Tool extends Model implements Searchable
             : "Le genre d'outil qui peut vite devenir indispensable dans ton coffre.";
         $hook = "Tu cherches un outil IA pour te simplifier la vie ? Laisse-moi te parler de {$name}. 👀";
         $cta = "Tu l'as déjà essayé ? Raconte en commentaire 👇";
+        // Preuve sociale : nombre de tutoriels approuvés de l'outil (sans lien, masqué si 0) — best practice 2026.
+        $tutoCount = (int) $this->resources()->where('is_approved', true)->count();
+        $tutoBonus = '';
+        if ($tutoCount > 0) {
+            $mot = $tutoCount === 1 ? 'tutoriel' : 'tutoriels';
+            $verbe = $tutoCount === 1 ? "t'attend" : "t'attendent";
+            $tutoBonus = "🎓 {$tutoCount} {$mot} pour bien démarrer {$verbe} déjà sur la veille.";
+        }
         $social = $this->buildEngagingSocialPost(
             $hook,
             $plainDef,
             $interest,
             $cta,
-            ['#IA', '#OutilsIA', '#' . $this->normalizeShareHashtag((string) $name), '#Québec']
+            ['#IA', '#OutilsIA', '#' . $this->normalizeShareHashtag((string) $name), '#Québec'],
+            $tutoBonus
         );
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
