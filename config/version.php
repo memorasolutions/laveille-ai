@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.153 · 2026-06-11 · fix(Core) #315 typographie française — le nettoyage des espaces avant ponctuation collait AUSSI « : ; ! ? » (« objets : quand » → « objets: quand »), or en français ces ponctuations doubles prennent une espace AVANT. Restreint à « . , … » (les seules sans espace avant). Codename seo-piliers-veille-generative.
  *   1.65.152 · 2026-06-11 · fix(Core) #315 stripLinks — VRAIE cause de la parenthèse orpheline « Fathom ( » : le regex d'URL `\S+` était gourmand et MANGEAIT la parenthèse fermante (« (url) » → « ( »), donc « ( ) » n'était jamais détecté. Corrigé en `[^\s)]+` (l'URL s'arrête avant « ) ») → « (url) » → « () » → nettoyé. Testé : « Fathom (https://fathom.video) est un outil . » → « Fathom est un outil. ». Codename seo-piliers-veille-generative.
  *   1.65.151 · 2026-06-11 · fix(Core) #315 stripLinks durci — après retrait d'une URL nue entre parenthèses (« Fathom (https://…) est » → « Fathom ( est »), nettoie les parenthèses vides résiduelles « ( ) », réduit les espaces multiples et colle la ponctuation précédée d'un espace (« objets . » → « objets. »). Helper générique du trait HasAdminShareContents → bénéficie à tous les posts sociaux + résumés NotebookLM. Codename seo-piliers-veille-generative.
  *   1.65.150 · 2026-06-11 · feat(Dictionary/Directory/Blog/News) #315 GÉNÉRALISATION du post réseaux sociaux « 2026 » (demande user « applique-le partout ») aux 4 sections restantes : Glossaire (Term), Annuaire (Tool), Blog (Article), Actualités (NewsArticle). Chaque adminShareContents() génère désormais le « Post réseaux sociaux » via `buildEngagingSocialPost` + `smartTrim` (trait HasAdminShareContents, DRY) avec une accroche curiosity-gap ADAPTÉE par type + « En clair : » + « 👉 » + CTA conversationnel québécois + hashtags, SANS lien et SANS signature promo « Plus de contenu IA… » (retirée). Mapping : Glossaire En clair=one_sentence_answer|analogy|definition, 👉=did_you_know|example ; Annuaire En clair=short_description|description, 👉=1re fonctionnalité|pro ; Blog hook=titre, En clair=1re phrase excerpt, 👉=2e phrase ; Actualités hook=structured.hook, En clair=tldr|summary, 👉=key_points[0]|quote. `buildSocialPost` legacy conservé (plus utilisé). Code délégué Hermes/qwen3-max, intégré + php -l OK. Codename seo-piliers-veille-generative.
@@ -301,7 +302,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 152;
+$lvPatch = 153;
 
 return [
     'major' => $lvMajor,

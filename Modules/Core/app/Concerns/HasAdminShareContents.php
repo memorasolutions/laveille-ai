@@ -125,7 +125,7 @@ trait HasAdminShareContents
         $text = (string) preg_replace('#https?\s*:\s*//[^\s)]+#i', '', $text); // URLs nues (gère « https :// » ; s'arrête avant « ) » pour ne pas manger la parenthèse fermante)
         $text = (string) preg_replace('/\(\s*\)/', '', $text);                  // parenthèses vides résiduelles « ( ) » après retrait d'URL
         $text = (string) preg_replace('/[ \t]{2,}/', ' ', $text);              // espaces multiples -> un seul
-        $text = (string) preg_replace('/\s+([.,;:!?…])/u', '$1', $text);       // espace avant ponctuation -> collé
+        $text = (string) preg_replace('/\s+([.,…])/u', '$1', $text);           // espace parasite avant . , … -> collé (en français : ; ! ? gardent leur espace)
 
         return trim($text);
     }
