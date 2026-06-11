@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.151 · 2026-06-11 · fix(Core) #315 stripLinks durci — après retrait d'une URL nue entre parenthèses (« Fathom (https://…) est » → « Fathom ( est »), nettoie les parenthèses vides résiduelles « ( ) », réduit les espaces multiples et colle la ponctuation précédée d'un espace (« objets . » → « objets. »). Helper générique du trait HasAdminShareContents → bénéficie à tous les posts sociaux + résumés NotebookLM. Codename seo-piliers-veille-generative.
  *   1.65.150 · 2026-06-11 · feat(Dictionary/Directory/Blog/News) #315 GÉNÉRALISATION du post réseaux sociaux « 2026 » (demande user « applique-le partout ») aux 4 sections restantes : Glossaire (Term), Annuaire (Tool), Blog (Article), Actualités (NewsArticle). Chaque adminShareContents() génère désormais le « Post réseaux sociaux » via `buildEngagingSocialPost` + `smartTrim` (trait HasAdminShareContents, DRY) avec une accroche curiosity-gap ADAPTÉE par type + « En clair : » + « 👉 » + CTA conversationnel québécois + hashtags, SANS lien et SANS signature promo « Plus de contenu IA… » (retirée). Mapping : Glossaire En clair=one_sentence_answer|analogy|definition, 👉=did_you_know|example ; Annuaire En clair=short_description|description, 👉=1re fonctionnalité|pro ; Blog hook=titre, En clair=1re phrase excerpt, 👉=2e phrase ; Actualités hook=structured.hook, En clair=tldr|summary, 👉=key_points[0]|quote. `buildSocialPost` legacy conservé (plus utilisé). Code délégué Hermes/qwen3-max, intégré + php -l OK. Codename seo-piliers-veille-generative.
  *   1.65.149 · 2026-06-11 · refine(Core/Acronyms) #312 troncature PROPRE du post social — les blocs « En clair : » et « 👉 » coupaient en plein milieu d'une phrase (« …innover en », « …Il se »). Nouveau helper réutilisable `HasAdminShareContents::smartTrim($text,$max)` : coupe à la fin d'une phrase complète (./!/?) si possible (≥ 50 % de la limite), sinon au dernier mot + « … ». Acronym utilise smartTrim (En clair ~200, 👉 ~180) au lieu d'un mb_substr brut. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.148 · 2026-06-11 · feat(Core/Acronyms) #312 POST RÉSEAUX SOCIAUX « 2026 » du bouton Admin (demande user, recherche pp_search juin 2026, option A notée 93/100). Nouvelle méthode DRY réutilisable `HasAdminShareContents::buildEngagingSocialPost(hook, plainDef, interest, cta, hashtags)` : hook curiosity-gap + « En clair : » (définition sans jargon) + « 👉 » (fait/intérêt) + CTA conversationnel + hashtags ; scannable, 1 idée, ton complice, AUCUN lien, AUCUNE signature promo (vs l'ancien buildSocialPost qui mettait « Plus de contenu IA… sur LaVeille AI »). `Acronym::adminShareContents()` génère désormais le post via cette méthode (En clair=one_sentence_answer|description tronquée ~180, 👉=did_you_know tronqué ~150 ou repli, hook éducation, CTA discussion, #Éducation #Acronymes #{ACR} #Québec). buildSocialPost conservé (News/Dictionary/Directory/Blog inchangés). Code délégué Hermes/qwen3-max, intégré + vérifié. Généralisation aux autres sections à proposer. Codename seo-piliers-veille-generative.
@@ -299,7 +300,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 150;
+$lvPatch = 151;
 
 return [
     'major' => $lvMajor,

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.151] - 2026-06-11
+
+### Fixed
+- **Nettoyage des liens dans les contenus de partage** : après le retrait d'une URL entre parenthèses, on supprime la parenthèse vide laissée (« Nom ( est… » → « Nom est… »), on réduit les espaces multiples et on recolle la ponctuation isolée. S'applique à tous les posts sociaux et résumés NotebookLM.
+
 ## [1.65.150] - 2026-06-11
 
 ### Changed
