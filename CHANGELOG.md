@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.164] - 2026-06-12
+
+### Added
+- **Annuaire — tutoriels en français/anglais seulement** : l'enrichissement automatique de tutoriels YouTube écarte désormais les vidéos clairement dans une autre langue (titres en arabe, chinois, espagnol, etc.), pour ne garder que des tutoriels pertinents pour l'audience québécoise (FR/EN).
+
 ## [1.65.163] - 2026-06-11
 
 ### Fixed

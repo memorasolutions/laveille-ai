@@ -139,6 +139,9 @@ class YouTubeService
             if ($v['view_count'] < $minViews || $v['duration_seconds'] < 180 || $v['duration_seconds'] > 7200) {
                 return false;
             }
+            if (! $this->isLikelyFrOrEn($v['title'] ?? '')) {
+                return false;
+            }
             if ($toolName) {
                 $titleLower = mb_strtolower($v['title'] ?? '');
                 $nameLower = mb_strtolower($toolName);
@@ -183,6 +186,41 @@ class YouTubeService
         }
 
         return 'en';
+    }
+
+    /**
+     * Garde-fou langue : retourne false si le titre est clairement dans une langue
+     * autre que le français ou l'anglais (scripts non-latins, ou marqueurs forts ES/PT/DE/IT).
+     */
+    private function isLikelyFrOrEn(string $title): bool
+    {
+        if (preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{0590}-\x{05FF}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{4E00}-\x{9FFF}\x{3040}-\x{30FF}\x{AC00}-\x{D7AF}\x{0E00}-\x{0E7F}\x{0900}-\x{097F}]/u', $title)) {
+            return false;
+        }
+
+        $lower = mb_strtolower($title, 'UTF-8');
+        $nonFrEn = ['crea tus', 'cómo ', ' gratis', 'español', 'portugués', 'português', 'grátis', 'como usar', 'kostenlos', 'anleitung', 'deutsch', 'come usare', 'italiano', 'descargar', 'aprende', 'tutorial en español', 'para principiantes'];
+
+        $hasNonFrEn = false;
+        foreach ($nonFrEn as $m) {
+            if (str_contains($lower, $m)) {
+                $hasNonFrEn = true;
+                break;
+            }
+        }
+
+        if ($hasNonFrEn) {
+            $frEn = ['tutoriel', 'comment ', 'français', 'québec', 'how to', 'tutorial for', 'beginner', 'guide', 'review', 'utiliser', 'apprendre', 'démarrer'];
+            foreach ($frEn as $m) {
+                if (str_contains($lower, $m)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
