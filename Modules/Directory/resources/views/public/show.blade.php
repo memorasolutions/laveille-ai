@@ -332,6 +332,9 @@
                     >{{ __('Lire la suite') }} →</button>
                 @endif
                 @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $tool->adminShareContents() : null])
+                <div style="margin-top: 6px;">
+                    <a href="{{ route('directory.takedown.create', $tool->slug) }}" style="color:#9CA3AF; font-size:0.75rem; text-decoration:underline; text-underline-offset:2px;">⚖️ {{ __('Titulaire de droits ? Demander un retrait') }}</a>
+                </div>
             </div>
             @if($tool->url)
                 <a href="{{ $tool->getVisitUrl() }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>

@@ -12,6 +12,7 @@ use Modules\Directory\Http\Controllers\ProfileController;
 use Modules\Directory\Http\Controllers\CollectionController;
 use Modules\Directory\Http\Controllers\PublicDirectoryController;
 use Modules\Directory\Http\Controllers\RoadmapController;
+use Modules\Directory\Http\Controllers\TakedownController;
 
 Route::middleware('web')->group(function () {
     // CWV #238 — cache 10 min listes publiques (invalidées admin via cache:clear)
@@ -36,6 +37,9 @@ Route::middleware('web')->group(function () {
     Route::get('/annuaire/comparer/{categorySlug}', [PublicDirectoryController::class, 'compare'])->name('directory.compare')->middleware('cacheResponse:600');
     Route::get('/roadmap', [RoadmapController::class, 'index'])->name('directory.roadmap')->middleware('cacheResponse:3600');
     Route::get('/membre/{id}', [ProfileController::class, 'show'])->name('directory.profile');
+    // Demande de retrait (takedown) — PUBLIC (les titulaires de droits n'ont pas de compte). Déclaré AVANT /annuaire/{slug}.
+    Route::get('/annuaire/retrait/{slug?}', [TakedownController::class, 'create'])->name('directory.takedown.create');
+    Route::post('/annuaire/retrait', [TakedownController::class, 'store'])->name('directory.takedown.store')->middleware('throttle:5,60');
     Route::get('/annuaire/{slug}', [PublicDirectoryController::class, 'show'])->name('directory.show')->middleware('doNotCacheResponse');
 });
 
