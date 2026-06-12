@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.165] - 2026-06-12
+
+### Fixed
+- **Annuaire — doublons archivés redirigent vers l'outil canonique** : la fiche d'un outil marqué comme doublon (archivé avec remplaçant) redirige désormais en 301 vers l'outil conservé, au lieu d'afficher une page en double. Les autres outils archivés restent consultables comme avant.
+
 ## [1.65.164] - 2026-06-12
 
 ### Added

@@ -142,12 +142,20 @@ class PublicDirectoryController extends Controller
         return view('directory::public.compare', compact('tools', 'category', 'allCategories', 'pricingLabels', 'criteria', 'service', 'mismatch', 'classification'));
     }
 
-    public function show(string $slug): View
+    public function show(string $slug): View|RedirectResponse
     {
         $tool = Tool::published()
             ->where('slug->'.app()->getLocale(), $slug)
             ->with('categories', 'tags')
             ->firstOrFail();
+
+        // Doublon fusionné : rediriger définitivement vers l'outil canonique (évite le contenu dupliqué)
+        if ($tool->lifecycle_status === 'archived' && $tool->lifecycle_replacement_tool_id) {
+            $canonical = Tool::published()->find($tool->lifecycle_replacement_tool_id);
+            if ($canonical && $canonical->lifecycle_status !== 'archived') {
+                return redirect()->route('directory.show', $canonical->slug, 301);
+            }
+        }
 
         $tool->increment('clicks_count');
 
