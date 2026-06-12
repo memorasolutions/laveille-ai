@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.166 · 2026-06-12 · chore(Directory) `tools:enrich-tutorials` exclut désormais les outils archivés (`->notArchived()` dans la sélection) → ne gaspille plus d'appels YouTube API sur les doublons/junk archivés. Le cron quotidien en bénéficie. Codename seo-piliers-veille-generative.
  *   1.65.165 · 2026-06-12 · fix(Directory) fiche d'un doublon archivé → REDIRECTION 301 vers le canonique (évite le contenu dupliqué + consolide le SEO). `PublicDirectoryController::show()` : si l'outil trouvé a `lifecycle_status='archived'` ET `lifecycle_replacement_tool_id`, redirige `directory.show` vers le slug du canonique (301), sinon rend normalement. Ne touche PAS aux autres archivés (junk / crawler-errors #137) qui restent consultables via `?show_archived=1` (le toggle reste fonctionnel). Vérifié : /annuaire 200, fiches archivées ne cassaient déjà rien (status reste 'published', seul lifecycle_status change ; index filtre via notArchived()). Contexte : doublons fusionnés 2026-06-12 avaient le slug propre sur l'archivé → la 301 envoie ce slug vers le canonique. Codename seo-piliers-veille-generative.
  *   1.65.164 · 2026-06-12 · feat(Directory) garde-fou langue FR sur l'enrichissement de tutoriels YouTube : `YouTubeService::isLikelyFrOrEn($title)` rejette les titres dans une langue clairement autre que FR/EN (scripts non-latins : arabe/CJK/cyrillique/hébreu/grec/hangul/thaï/devanagari + marqueurs forts ES/PT/DE/IT, avec exception si marqueur FR/EN présent). Branché dans `scoreAndFilter` (rejet avant scoring). Évite d'auto-publier des tutos hors-langue (ex. Decktopus arabe/espagnol découverts pendant le re-scan). Vérifié 10/10 en test unitaire local (FR/EN gardés, arabe/espagnol/japonais rejetés). Code Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.163 · 2026-06-11 · fix(ShortUrl) boutons copie jumeaux — le texte passe à « ✅ Copié ! » au clic (avant : seule la couleur changeait). Cause : 2 `<span x-show>` + x-cloak ne togglaient pas de façon fiable dans le x-for ; remplacés par UN SEUL `x-text` réactif sur le `<a>` (même réactivité que le `:style` déjà fonctionnel) : `x-text="copiedUrl===u ? '✅ Copié !' : '📋 Copier ' + selectedDomainNames[i]"`. Vérif Playwright membre v162 PASS partiel (cet écart) → corrigé. Codename seo-piliers-veille-generative.
@@ -314,7 +315,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 165;
+$lvPatch = 166;
 
 return [
     'major' => $lvMajor,

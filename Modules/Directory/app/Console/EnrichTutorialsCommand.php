@@ -45,6 +45,7 @@ class EnrichTutorialsCommand extends Command
             'resources' => fn ($q) => $q->where('language', 'fr')->where('type', 'youtube'),
         ])
             ->where('status', 'published')
+            ->notArchived()
             ->having('resources_count', '<', 5)
             ->where(fn ($q) => $q->whereNull('tutorials_last_scanned_at')
                 ->orWhere('tutorials_last_scanned_at', '<', now()->subDays(14)))
