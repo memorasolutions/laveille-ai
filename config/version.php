@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.168 · 2026-06-12 · fix(Directory) garde-fou langue tutoriels RENFORCÉ (suite v167) : (1) signal API fiable d'abord — `getVideoDetails` extrait `defaultAudioLanguage`/`defaultLanguage`, `scoreAndFilter` rejette si ce code langue n'est ni fr ni en (catch les vidéos indonésiennes/allemandes/etc. que le titre ne trahit pas). (2) heuristique titre élargie (marqueurs ID/IT/DE/ES ajoutés : cara membuat, come risolvere, ultimatives, descubre, paso a paso, calculadora…) + exception réduite aux marqueurs FR sans ambiguïté (« tutorial » seul ne sauve plus un titre allemand). Testé 15/15 local sur titres réels. Codename seo-piliers-veille-generative.
  *   1.65.167 · 2026-06-12 · fix(Directory) enrichissement tutoriels — 2 corrections clés. (1) BUG DE PROGRESSION : la commande faisait `continue` sur « aucun tutoriel » AVANT de marquer `tutorials_last_scanned_at` → les outils à fort trafic sans tuto FR (Agent Card 245 clics, 3PL Hub…) revenaient à CHAQUE lot et bloquaient l'accès aux autres (Stable Diffusion jamais atteint). Fix : marquer scanned_at même quand 0 tuto trouvé. (2) ANTI-COLLISION : `scoreAndFilter` écarte le contenu non-tutoriel (walkthrough/gameplay/no commentary/full game/speedrun/lyrics/short movie/music video/official trailer) — évite les faux tutos par homonymie (ex. Fathom → jeu « Fears to Fathom »). Codename seo-piliers-veille-generative.
  *   1.65.166 · 2026-06-12 · chore(Directory) `tools:enrich-tutorials` exclut désormais les outils archivés (`->notArchived()` dans la sélection) → ne gaspille plus d'appels YouTube API sur les doublons/junk archivés. Le cron quotidien en bénéficie. Codename seo-piliers-veille-generative.
  *   1.65.165 · 2026-06-12 · fix(Directory) fiche d'un doublon archivé → REDIRECTION 301 vers le canonique (évite le contenu dupliqué + consolide le SEO). `PublicDirectoryController::show()` : si l'outil trouvé a `lifecycle_status='archived'` ET `lifecycle_replacement_tool_id`, redirige `directory.show` vers le slug du canonique (301), sinon rend normalement. Ne touche PAS aux autres archivés (junk / crawler-errors #137) qui restent consultables via `?show_archived=1` (le toggle reste fonctionnel). Vérifié : /annuaire 200, fiches archivées ne cassaient déjà rien (status reste 'published', seul lifecycle_status change ; index filtre via notArchived()). Contexte : doublons fusionnés 2026-06-12 avaient le slug propre sur l'archivé → la 301 envoie ce slug vers le canonique. Codename seo-piliers-veille-generative.
@@ -316,7 +317,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 167;
+$lvPatch = 168;
 
 return [
     'major' => $lvMajor,

@@ -106,6 +106,7 @@ class YouTubeService
                     'view_count' => (int) ($stats['viewCount'] ?? 0),
                     'like_count' => (int) ($stats['likeCount'] ?? 0),
                     'published_at' => $snippet['publishedAt'] ?? null,
+                    'api_lang' => $snippet['defaultAudioLanguage'] ?? $snippet['defaultLanguage'] ?? null,
                 ];
             }
 
@@ -139,7 +140,13 @@ class YouTubeService
             if ($v['view_count'] < $minViews || $v['duration_seconds'] < 180 || $v['duration_seconds'] > 7200) {
                 return false;
             }
-            if (! $this->isLikelyFrOrEn($v['title'] ?? '')) {
+            // Langue : signal API fiable (defaultAudioLanguage) en priorité, sinon heuristique sur le titre
+            $apiLang = strtolower((string) ($v['api_lang'] ?? ''));
+            if ($apiLang !== '') {
+                if (! str_starts_with($apiLang, 'fr') && ! str_starts_with($apiLang, 'en')) {
+                    return false;
+                }
+            } elseif (! $this->isLikelyFrOrEn($v['title'] ?? '')) {
                 return false;
             }
             // anti-collision : écarte le contenu manifestement non-tutoriel (jeux/films/musique)
@@ -206,7 +213,14 @@ class YouTubeService
         }
 
         $lower = mb_strtolower($title, 'UTF-8');
-        $nonFrEn = ['crea tus', 'cómo ', ' gratis', 'español', 'portugués', 'português', 'grátis', 'como usar', 'kostenlos', 'anleitung', 'deutsch', 'come usare', 'italiano', 'descargar', 'aprende', 'tutorial en español', 'para principiantes'];
+        $nonFrEn = [
+            'crea tus', 'cómo ', ' gratis', 'español', 'portugués', 'português', 'grátis', 'como usar',
+            'descargar', 'aprende', 'descubre', 'características', 'convierte', 'presentaciones', 'calculadora',
+            'paso a paso', 'domina', 'tutorial en español', 'para principiantes', 'en 3 minutos', 'desde cero',
+            'cara membuat', 'cara menggunakan', 'membuat', 'menggunakan',
+            'kostenlos', 'anleitung', 'deutsch', 'ultimatives', 'erstellst',
+            'come usare', 'come risolvere', 'esercizi', 'in classe', 'italiano',
+        ];
 
         $hasNonFrEn = false;
         foreach ($nonFrEn as $m) {
@@ -217,7 +231,7 @@ class YouTubeService
         }
 
         if ($hasNonFrEn) {
-            $frEn = ['tutoriel', 'comment ', 'français', 'québec', 'how to', 'tutorial for', 'beginner', 'guide', 'review', 'utiliser', 'apprendre', 'démarrer'];
+            $frEn = ['tutoriel', 'comment ', 'français', 'québec', 'utiliser', 'apprendre', 'démarrer', 'débutant'];
             foreach ($frEn as $m) {
                 if (str_contains($lower, $m)) {
                     return true;
