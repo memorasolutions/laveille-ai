@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.169] - 2026-06-12
+
+### Added
+- **Annuaire — alerte qualité des tutoriels** : une vérification automatique quotidienne contrôle que les tutoriels importés sont en français/anglais et pertinents, désapprouve automatiquement ceux qui ne le sont pas, et envoie un courriel récapitulatif d'alerte. Surveillance continue sans intervention.
+
 ## [1.65.167] - 2026-06-12
 
 ### Fixed

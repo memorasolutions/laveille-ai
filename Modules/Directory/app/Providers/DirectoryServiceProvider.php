@@ -82,6 +82,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\ExpireFeaturedToolsCommand::class,
             \Modules\Directory\Console\CheckImagesCommand::class,
             \Modules\Directory\Console\HealthCheckReportCommand::class,
+            \Modules\Directory\Console\AuditTutorialsCommand::class,
         ]);
     }
 
@@ -98,6 +99,7 @@ class DirectoryServiceProvider extends ServiceProvider
             $schedule->command('tools:dispatch-enrichment --type=metadata --limit=5')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('queue:work database --queue=screenshots --once --max-time=280 --timeout=270 --tries=1 --stop-when-empty')->everyThreeMinutes()->withoutOverlapping()->runInBackground();
             $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
+            $schedule->command('tools:audit-tutorials --fix')->dailyAt('06:00'); // alerte qualité quotidienne (langue FR/EN + pertinence) + auto-correction
             $schedule->command('resources:summarize-pending --batch=10')->dailyAt('05:30');
             $schedule->command('tools:discover-new')->dailyAt('04:00');
             $schedule->command('tools:reenrich-stale --batch=2 --months=3')->monthlyOn(1, '06:00');

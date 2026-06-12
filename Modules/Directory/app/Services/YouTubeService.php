@@ -134,6 +134,37 @@ class YouTubeService
         return ($h * 3600) + ($m * 60) + $s;
     }
 
+    /**
+     * Garde-fou partagé (filtre d'import + commande d'audit) : false si le titre est dans une
+     * langue clairement autre que FR/EN, ou s'il s'agit de contenu non-tutoriel (jeu/film/musique).
+     */
+    public static function titleIsAcceptable(string $title): bool
+    {
+        if (preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{0590}-\x{05FF}\x{0400}-\x{04FF}\x{0370}-\x{03FF}\x{4E00}-\x{9FFF}\x{3040}-\x{30FF}\x{AC00}-\x{D7AF}\x{0E00}-\x{0E7F}\x{0900}-\x{097F}]/u', $title)) {
+            return false;
+        }
+        $lower = mb_strtolower($title, 'UTF-8');
+        foreach (['walkthrough', 'gameplay', 'no commentary', 'full game', 'speedrun', 'lyrics', 'short movie', 'music video', 'official trailer'] as $junk) {
+            if (str_contains($lower, $junk)) {
+                return false;
+            }
+        }
+        $nonFrEn = ['crea tus', 'cómo ', ' gratis', 'español', 'portugués', 'português', 'grátis', 'como usar', 'descargar', 'aprende', 'descubre', 'características', 'convierte', 'presentaciones', 'calculadora', 'paso a paso', 'domina', 'tutorial en español', 'para principiantes', 'en 3 minutos', 'desde cero', 'cara membuat', 'cara menggunakan', 'membuat', 'menggunakan', 'kostenlos', 'anleitung', 'deutsch', 'ultimatives', 'erstellst', 'come usare', 'come risolvere', 'esercizi', 'in classe', 'italiano'];
+        foreach ($nonFrEn as $m) {
+            if (str_contains($lower, $m)) {
+                foreach (['tutoriel', 'comment ', 'français', 'québec', 'utiliser', 'apprendre', 'démarrer', 'débutant'] as $fr) {
+                    if (str_contains($lower, $fr)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public function scoreAndFilter(array $videos, ?string $toolName = null, int $minViews = 5000): array
     {
         $filtered = array_values(array_filter($videos, function (array $v) use ($toolName, $minViews) {
