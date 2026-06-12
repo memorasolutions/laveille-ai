@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.171 · 2026-06-12 · fix(Directory) l'alerte audit tutoriels planifiée envoie à stephane@memora.ca (avant : défaut config(mail.from)=info@laveille.ai → n'arrivait pas à l'admin). Test courriel serveur OK (mailer=workspace). Codename seo-piliers-veille-generative.
  *   1.65.170 · 2026-06-12 · fix(Directory) anti-collision tutoriels — retrait du marqueur « walkthrough » (trop ambigu : faux positif sur les vrais tutos logiciels, ex. « ElevenLabs SFX v2 Walkthrough »). Les jeux restent écartés via gameplay/full game/no commentary/speedrun. Test audit l'avait révélé. Codename seo-piliers-veille-generative.
  *   1.65.169 · 2026-06-12 · feat(Directory) ALERTE QUALITÉ tutoriels (demande user) : commande `tools:audit-tutorials --fix` planifiée quotidiennement à 06:00 (après l'enrichissement de 05:00) → audite tous les tutos approuvés via `YouTubeService::titleIsAcceptable()` (méthode statique partagée DRY : langue FR/EN + anti-jeu/film), DÉSAPPROUVE auto les non conformes (garde-fou ≤200, réversible) et ENVOIE une alerte courriel récap à config(mail.from)/stephane@memora.ca (try/catch). Zéro token Opus : 100% serveur. Commande enregistrée dans DirectoryServiceProvider. Codename seo-piliers-veille-generative.
  *   1.65.168 · 2026-06-12 · fix(Directory) garde-fou langue tutoriels RENFORCÉ (suite v167) : (1) signal API fiable d'abord — `getVideoDetails` extrait `defaultAudioLanguage`/`defaultLanguage`, `scoreAndFilter` rejette si ce code langue n'est ni fr ni en (catch les vidéos indonésiennes/allemandes/etc. que le titre ne trahit pas). (2) heuristique titre élargie (marqueurs ID/IT/DE/ES ajoutés : cara membuat, come risolvere, ultimatives, descubre, paso a paso, calculadora…) + exception réduite aux marqueurs FR sans ambiguïté (« tutorial » seul ne sauve plus un titre allemand). Testé 15/15 local sur titres réels. Codename seo-piliers-veille-generative.
@@ -319,7 +320,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 170;
+$lvPatch = 171;
 
 return [
     'major' => $lvMajor,
