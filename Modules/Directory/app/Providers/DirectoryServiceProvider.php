@@ -98,6 +98,7 @@ class DirectoryServiceProvider extends ServiceProvider
             $schedule->command('tools:dispatch-enrichment --type=pending --limit=5')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('tools:dispatch-enrichment --type=metadata --limit=5')->everyFifteenMinutes()->withoutOverlapping();
             $schedule->command('queue:work database --queue=screenshots --once --max-time=280 --timeout=270 --tries=1 --stop-when-empty')->everyThreeMinutes()->withoutOverlapping()->runInBackground();
+            $schedule->command('directory:capture-screenshots --missing')->dailyAt('04:30')->timezone('America/Toronto')->withoutOverlapping()->runInBackground(); // auto-remplissage screenshots des nouveaux outils
             $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
             $schedule->command('tools:audit-tutorials --fix --email=stephane@memora.ca')->dailyAt('06:00'); // alerte qualité quotidienne (langue FR/EN + pertinence) + auto-correction
             $schedule->command('resources:summarize-pending --batch=10')->dailyAt('05:30');

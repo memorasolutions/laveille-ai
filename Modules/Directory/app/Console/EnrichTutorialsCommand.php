@@ -13,7 +13,7 @@ class EnrichTutorialsCommand extends Command
 {
     use HasKillSwitch;
 
-    protected $signature = 'tools:enrich-tutorials {--batch=5} {--force : Forcer même si kill switch actif}';
+    protected $signature = 'tools:enrich-tutorials {--batch=5} {--force : Forcer même si kill switch actif} {--ids= : Liste d\'IDs séparés par virgules à enrichir en priorité (bypass batch)}';
 
     protected $description = 'Enrichit les outils publiés avec des tutoriels YouTube FR manquants';
 
@@ -41,19 +41,28 @@ class EnrichTutorialsCommand extends Command
 
         $this->info("Recherche des outils avec < 5 tutoriels FR (batch : {$batch})...");
 
-        $tools = Tool::withCount([
-            'resources' => fn ($q) => $q->where('language', 'fr')->where('type', 'youtube'),
-        ])
-            ->where('status', 'published')
-            ->notArchived()
-            ->having('resources_count', '<', 5)
-            ->where(fn ($q) => $q->whereNull('tutorials_last_scanned_at')
-                ->orWhere('tutorials_last_scanned_at', '<', now()->subDays(14)))
-            ->orderBy('resources_count', 'asc')
-            ->orderByDesc('clicks_count')
-            ->orderByDesc('is_featured')
-            ->limit($batch)
-            ->get();
+        if (! empty($this->option('ids'))) {
+            $ids = array_filter(array_map('intval', explode(',', (string) $this->option('ids'))));
+            $tools = Tool::withCount([
+                'resources' => fn ($q) => $q->where('language', 'fr')->where('type', 'youtube'),
+            ])
+                ->whereIn('id', $ids)
+                ->get();
+        } else {
+            $tools = Tool::withCount([
+                'resources' => fn ($q) => $q->where('language', 'fr')->where('type', 'youtube'),
+            ])
+                ->where('status', 'published')
+                ->notArchived()
+                ->having('resources_count', '<', 5)
+                ->where(fn ($q) => $q->whereNull('tutorials_last_scanned_at')
+                    ->orWhere('tutorials_last_scanned_at', '<', now()->subDays(14)))
+                ->orderBy('resources_count', 'asc')
+                ->orderByDesc('clicks_count')
+                ->orderByDesc('is_featured')
+                ->limit($batch)
+                ->get();
+        }
 
         if ($tools->isEmpty()) {
             $this->info('Tous les outils ont 5+ tutoriels FR. Rien à faire.');

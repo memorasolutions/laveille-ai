@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.172 · 2026-06-12 · feat(Directory) auto-remplissage médias des nouveaux outils : (1) `directory:capture-screenshots --missing` planifié quotidiennement à 04:30 (America/Toronto, background) → tout outil publié sans screenshot est capturé automatiquement. (2) `tools:enrich-tutorials` reçoit l'option `--ids=` pour cibler des outils précis (bypass du tri par clics qui reléguait les nouveaux outils en dernier). Sert à enrichir tutos+screenshots des 6 outils majeurs ajoutés (Hugging Face, Framer, Make, Pictory, Manus, Genspark). Codename seo-piliers-veille-generative.
  *   1.65.171 · 2026-06-12 · fix(Directory) l'alerte audit tutoriels planifiée envoie à stephane@memora.ca (avant : défaut config(mail.from)=info@laveille.ai → n'arrivait pas à l'admin). Test courriel serveur OK (mailer=workspace). Codename seo-piliers-veille-generative.
  *   1.65.170 · 2026-06-12 · fix(Directory) anti-collision tutoriels — retrait du marqueur « walkthrough » (trop ambigu : faux positif sur les vrais tutos logiciels, ex. « ElevenLabs SFX v2 Walkthrough »). Les jeux restent écartés via gameplay/full game/no commentary/speedrun. Test audit l'avait révélé. Codename seo-piliers-veille-generative.
  *   1.65.169 · 2026-06-12 · feat(Directory) ALERTE QUALITÉ tutoriels (demande user) : commande `tools:audit-tutorials --fix` planifiée quotidiennement à 06:00 (après l'enrichissement de 05:00) → audite tous les tutos approuvés via `YouTubeService::titleIsAcceptable()` (méthode statique partagée DRY : langue FR/EN + anti-jeu/film), DÉSAPPROUVE auto les non conformes (garde-fou ≤200, réversible) et ENVOIE une alerte courriel récap à config(mail.from)/stephane@memora.ca (try/catch). Zéro token Opus : 100% serveur. Commande enregistrée dans DirectoryServiceProvider. Codename seo-piliers-veille-generative.
@@ -320,7 +321,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 171;
+$lvPatch = 172;
 
 return [
     'major' => $lvMajor,
