@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.174 · 2026-06-12 · refine(Directory) page /annuaire/retrait conforme à la CHARTE du site (demande user : nouvelles pages = uniformité en tout point). Remplace les classes Tailwind génériques par les conventions maison : section .wpo-blog-single-section.section-padding + .container/.row/.col-lg-10.offset-lg-1/.wpo-blog-content/.post (comme la page légale privacy), breadcrumb @include fronttheme::partials.breadcrumb, champs .form-control + .is-invalid, bouton .ct-btn.ct-btn-primary, couleurs var(--c-primary #064E5A / --c-dark / --c-text-secondary / --c-danger), alertes .alert. Accessibilité conservée (fieldset/legend, label for/id, aria-describedby, honeypot). Codename seo-piliers-veille-generative.
  *   1.65.173 · 2026-06-12 · feat(Directory) DEMANDE DE RETRAIT (takedown légal anti-abus) : page publique dédiée /annuaire/retrait/{slug?} (form accessible WCAG, pas de modale — best practice 2026 pour form légal multi-sections) + table directory_takedown_requests (réversible) + TakedownController (validation anti-abus : identité, déclaration sous peine de responsabilité « accepted », preuve de droit, honeypot « website », throttle:5,60) + Mailable ToolTakedownRequestMail → config(app.superadmin_email). Liens discrets : contextuel pré-rempli sur la fiche (gris 0.75rem) + footer global « Demande de retrait » (guard Route::has). Régime canadien avis-et-avis (pas de retrait auto). ⚠️ Texte CGU/politique à valider par juriste. Code délégué Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.172 · 2026-06-12 · feat(Directory) auto-remplissage médias des nouveaux outils : (1) `directory:capture-screenshots --missing` planifié quotidiennement à 04:30 (America/Toronto, background) → tout outil publié sans screenshot est capturé automatiquement. (2) `tools:enrich-tutorials` reçoit l'option `--ids=` pour cibler des outils précis (bypass du tri par clics qui reléguait les nouveaux outils en dernier). Sert à enrichir tutos+screenshots des 6 outils majeurs ajoutés (Hugging Face, Framer, Make, Pictory, Manus, Genspark). Codename seo-piliers-veille-generative.
  *   1.65.171 · 2026-06-12 · fix(Directory) l'alerte audit tutoriels planifiée envoie à stephane@memora.ca (avant : défaut config(mail.from)=info@laveille.ai → n'arrivait pas à l'admin). Test courriel serveur OK (mailer=workspace). Codename seo-piliers-veille-generative.
@@ -322,7 +323,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 173;
+$lvPatch = 174;
 
 return [
     'major' => $lvMajor,
