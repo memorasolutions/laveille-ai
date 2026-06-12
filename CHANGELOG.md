@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.167] - 2026-06-12
+
+### Fixed
+- **Annuaire — enrichissement de tutoriels débloqué** : correction d'un blocage qui faisait re-scanner sans fin les mêmes outils populaires sans tutoriel, empêchant les autres outils d'être traités. De plus, l'enrichissement écarte désormais le contenu sans rapport (jeux, films, clips musicaux) pour éviter les faux tutoriels par homonymie de nom.
+
 ## [1.65.165] - 2026-06-12
 
 ### Fixed

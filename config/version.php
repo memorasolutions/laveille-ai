@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.167 · 2026-06-12 · fix(Directory) enrichissement tutoriels — 2 corrections clés. (1) BUG DE PROGRESSION : la commande faisait `continue` sur « aucun tutoriel » AVANT de marquer `tutorials_last_scanned_at` → les outils à fort trafic sans tuto FR (Agent Card 245 clics, 3PL Hub…) revenaient à CHAQUE lot et bloquaient l'accès aux autres (Stable Diffusion jamais atteint). Fix : marquer scanned_at même quand 0 tuto trouvé. (2) ANTI-COLLISION : `scoreAndFilter` écarte le contenu non-tutoriel (walkthrough/gameplay/no commentary/full game/speedrun/lyrics/short movie/music video/official trailer) — évite les faux tutos par homonymie (ex. Fathom → jeu « Fears to Fathom »). Codename seo-piliers-veille-generative.
  *   1.65.166 · 2026-06-12 · chore(Directory) `tools:enrich-tutorials` exclut désormais les outils archivés (`->notArchived()` dans la sélection) → ne gaspille plus d'appels YouTube API sur les doublons/junk archivés. Le cron quotidien en bénéficie. Codename seo-piliers-veille-generative.
  *   1.65.165 · 2026-06-12 · fix(Directory) fiche d'un doublon archivé → REDIRECTION 301 vers le canonique (évite le contenu dupliqué + consolide le SEO). `PublicDirectoryController::show()` : si l'outil trouvé a `lifecycle_status='archived'` ET `lifecycle_replacement_tool_id`, redirige `directory.show` vers le slug du canonique (301), sinon rend normalement. Ne touche PAS aux autres archivés (junk / crawler-errors #137) qui restent consultables via `?show_archived=1` (le toggle reste fonctionnel). Vérifié : /annuaire 200, fiches archivées ne cassaient déjà rien (status reste 'published', seul lifecycle_status change ; index filtre via notArchived()). Contexte : doublons fusionnés 2026-06-12 avaient le slug propre sur l'archivé → la 301 envoie ce slug vers le canonique. Codename seo-piliers-veille-generative.
  *   1.65.164 · 2026-06-12 · feat(Directory) garde-fou langue FR sur l'enrichissement de tutoriels YouTube : `YouTubeService::isLikelyFrOrEn($title)` rejette les titres dans une langue clairement autre que FR/EN (scripts non-latins : arabe/CJK/cyrillique/hébreu/grec/hangul/thaï/devanagari + marqueurs forts ES/PT/DE/IT, avec exception si marqueur FR/EN présent). Branché dans `scoreAndFilter` (rejet avant scoring). Évite d'auto-publier des tutos hors-langue (ex. Decktopus arabe/espagnol découverts pendant le re-scan). Vérifié 10/10 en test unitaire local (FR/EN gardés, arabe/espagnol/japonais rejetés). Code Hermes/qwen3-max. Codename seo-piliers-veille-generative.
@@ -315,7 +316,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 166;
+$lvPatch = 167;
 
 return [
     'major' => $lvMajor,

@@ -86,6 +86,7 @@ class EnrichTutorialsCommand extends Command
 
             if (empty($tutorials)) {
                 $this->line("  Aucun tutoriel trouvé.");
+                $tool->update(['tutorials_last_scanned_at' => now()]); // marquer scanné même sans résultat (évite de re-scanner en boucle et de bloquer les autres outils)
                 $totalProcessed++;
 
                 continue;

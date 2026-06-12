@@ -142,6 +142,13 @@ class YouTubeService
             if (! $this->isLikelyFrOrEn($v['title'] ?? '')) {
                 return false;
             }
+            // anti-collision : écarte le contenu manifestement non-tutoriel (jeux/films/musique)
+            $lowTitle = mb_strtolower($v['title'] ?? '', 'UTF-8');
+            foreach (['walkthrough', 'gameplay', 'no commentary', 'full game', 'speedrun', 'lyrics', 'short movie', 'music video', 'official trailer'] as $junk) {
+                if (str_contains($lowTitle, $junk)) {
+                    return false;
+                }
+            }
             if ($toolName) {
                 $titleLower = mb_strtolower($v['title'] ?? '');
                 $nameLower = mb_strtolower($toolName);
