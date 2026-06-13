@@ -10,6 +10,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\Core\Services\ScreenshotUploadService;
 use Modules\Directory\Models\ModerationLog;
+use Modules\Directory\Models\TakedownRequest;
 use Modules\Directory\Models\ToolPricingReport;
 use Modules\Directory\Models\ToolReport;
 use Modules\Directory\Models\ToolResource;
@@ -284,5 +285,30 @@ class ModerationController extends Controller
         ]);
 
         return redirect()->route('admin.directory.pricing-reports')->with('success', __('Signalement rejeté.'));
+    }
+
+    public function takedownRequests(): View
+    {
+        $requests = TakedownRequest::with('tool')
+            ->orderByRaw("FIELD(status,'pending','reviewed','actioned','rejected')")
+            ->orderByDesc('created_at')
+            ->get();
+        $pendingCount = $requests->where('status', 'pending')->count();
+
+        return view('directory::admin.takedown-requests', compact('requests', 'pendingCount'));
+    }
+
+    public function updateTakedownStatus(Request $request, int $id): RedirectResponse
+    {
+        $takedown = TakedownRequest::findOrFail($id);
+        $validated = $request->validate(['status' => 'required|in:pending,reviewed,actioned,rejected']);
+        $takedown->update(['status' => $validated['status']]);
+
+        activity('moderation')
+            ->performedOn($takedown)
+            ->causedBy(auth()->user())
+            ->log('takedown_status_updated');
+
+        return back()->with('success', __('Statut de la demande mis à jour.'));
     }
 }

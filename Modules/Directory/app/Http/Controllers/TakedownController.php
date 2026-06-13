@@ -61,4 +61,9 @@ class TakedownController extends Controller
         return redirect()->route('directory.takedown.create')
             ->with('success', 'Votre demande de retrait a été reçue. Vous recevrez une réponse par courriel sous quelques jours ouvrables.');
     }
+
+    public function policy()
+    {
+        return view('directory::public.takedown-policy');
+    }
 }

@@ -15,6 +15,9 @@
                         <p style="color: var(--c-text-secondary);">
                             {{ __('Ce formulaire s’adresse aux titulaires de droits (droit d\'auteur, marque) ou aux personnes concernées par leurs données personnelles. Toute demande sera traitée de bonne foi après vérification de votre identité et de la légitimité de votre requête. Une déclaration sous peine de responsabilité est requise.') }}
                         </p>
+                        <p style="margin-top:-10px;margin-bottom:24px;">
+                            <a href="{{ route('directory.takedown.policy') }}" style="color:var(--c-primary);font-size:14px;">{{ __('Consulter la politique de retrait') }} →</a>
+                        </p>
 
                         @if(session('success'))
                             <div class="alert alert-success" role="alert" style="border-radius:8px;margin-bottom:20px;">

@@ -216,6 +216,14 @@
                         @endphp
                         <li class="nav-item"><a href="{{ route('admin.directory.moderation') }}" class="nav-link {{ request()->routeIs('admin.directory.moderation') ? 'active' : '' }}">{{ __('Modération') }} @if($modCount > 0)<span class="badge bg-danger rounded-pill ms-1">{{ $modCount }}</span>@endif</a></li>
                         @endif
+                        @if(Route::has('admin.directory.takedown-requests'))
+                        @php
+                            $takedownCount = class_exists(\Modules\Directory\Models\TakedownRequest::class)
+                                ? \Modules\Directory\Models\TakedownRequest::where('status', 'pending')->count()
+                                : 0;
+                        @endphp
+                        <li class="nav-item"><a href="{{ route('admin.directory.takedown-requests') }}" class="nav-link {{ request()->routeIs('admin.directory.takedown-requests*') ? 'active' : '' }}">{{ __('Demandes de retrait') }} @if($takedownCount > 0)<span class="badge bg-danger rounded-pill ms-1">{{ $takedownCount }}</span>@endif</a></li>
+                        @endif
                         @if(Route::has('admin.directory.resources'))
                         <li class="nav-item"><a href="{{ route('admin.directory.resources') }}" class="nav-link {{ request()->routeIs('admin.directory.resources*') ? 'active' : '' }}">{{ __('Tutoriels') }}</a></li>
                         @endif

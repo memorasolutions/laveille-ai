@@ -40,6 +40,7 @@ Route::middleware('web')->group(function () {
     // Demande de retrait (takedown) — PUBLIC (les titulaires de droits n'ont pas de compte). Déclaré AVANT /annuaire/{slug}.
     Route::get('/annuaire/retrait/{slug?}', [TakedownController::class, 'create'])->name('directory.takedown.create');
     Route::post('/annuaire/retrait', [TakedownController::class, 'store'])->name('directory.takedown.store')->middleware('throttle:5,60');
+    Route::get('/annuaire/politique-retrait', [TakedownController::class, 'policy'])->name('directory.takedown.policy');
     Route::get('/annuaire/{slug}', [PublicDirectoryController::class, 'show'])->name('directory.show')->middleware('doNotCacheResponse');
 });
 
@@ -117,6 +118,8 @@ Route::middleware(['web', 'auth', \Modules\Core\Http\Middleware\EnsureIsAdmin::c
     Route::post('/moderation/resource/{id}/approve', [ModerationController::class, 'approveResource'])->name('moderation.resource.approve');
     Route::post('/moderation/resource/{id}/reject', [ModerationController::class, 'rejectResource'])->name('moderation.resource.reject');
     Route::post('/moderation/resource/{id}/delete', [ModerationController::class, 'deleteResource'])->name('moderation.resource.delete');
+    Route::get('/takedown-requests', [ModerationController::class, 'takedownRequests'])->name('takedown-requests');
+    Route::post('/takedown-requests/{id}/status', [ModerationController::class, 'updateTakedownStatus'])->name('takedown-requests.status');
     Route::post('/moderation/resource/{id}/upload-screenshot', [ModerationController::class, 'uploadResourceScreenshot'])->name('moderation.resource.upload-screenshot');
     Route::post('/moderation/report/{id}/resolve', [ModerationController::class, 'resolveReport'])->name('moderation.report.resolve');
     Route::post('/moderation/report/{id}/delete', [ModerationController::class, 'deleteReported'])->name('moderation.report.delete');
