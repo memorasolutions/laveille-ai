@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.183 · 2026-06-13 · refine(Tools) QT — carte de rang remplacée par une MÉDAILLE CSS (au lieu des badges Envato « croches »/anglais, abandonnés) : médaillon 150px rond, fond dégradé du rang, anneau doré 6px #E9B949, reflet (::before), ombre, animation d'apparition (qt-medal-in scale+rotate). Emoji centré + libellé FR sous le médaillon. Pur CSS, zéro image, charte. Dossier .envato/badges/laveille_badges CONSERVÉ (essai recolor, non utilisé sur le site). Codename seo-piliers-veille-generative.
  *   1.65.182 · 2026-06-13 · feat(Tools) QT « glow-up » UX (en construction/admin-only) — refonte vue qt.blade.php en 3 écrans Alpine : (1) ÉCRAN D'ACCUEIL accrocheur (titre, 3 badges réassurance, aperçu échelle 🐣→🏆, gros CTA « Découvre ton QT »), (2) QUIZ avec barre de progression animée + transitions + gros boutons tactiles + micro-animations (correct ✓ vert / incorrect shake rouge), (3) RÉSULTAT = compteur animé du QT (0→score) + carte persona dégradée par rang + CONFETTIS CSS si QT≥120 + QUESTION HUMORISTIQUE « 🤖 as-tu utilisé l'IA ? » (3 choix, zéro impact score, ajuste le badge de partage) + révision. PAS de minuteur (décision : chercher=apprendre, aligné mission éducative). Code Hermes (payload @php ajouté + .ct-btn-outline). Recherche pp_search/sonar-pro : no-timer pour quiz éducatif + honor-system IA humoristique + embrasser l'IA pour un site IA. Codename seo-piliers-veille-generative.
  *   1.65.181 · 2026-06-13 · chore(Tools) RETRAIT de Motdle (remplacé par QT) — réversible : route /outils/motdle → redirect 301 vers /outils (name tools.motdle conservé), 3 liens menu Détente retirés (desktop+mobile+mini-nav), migration tools slug=motdle is_active=false (down réactive). Fichiers controller/service/vue Motdle conservés dormants (récupérables git ; purge complète sur demande). Codename seo-piliers-veille-generative.
  *   1.65.180 · 2026-06-13 · feat(Tools) JEU « QT — Quotient Techno » (Phase 1 MVP, EN CONSTRUCTION/admin-only) — quiz quotidien-rejouable alimenté par le contenu du site. Banque 36 QCM (12/12/12 facile/moyen/difficile, 5 thèmes IA/numérique/sécurité/web/données) en fichier de données. QtService : tirage 10 par quota difficulté + mélange questions ET réponses + lien fiche glossaire (résolu via term→Dictionary). Route /outils/qt (PublicQtController gaté superadmin → sinon under-construction). Vue Alpine à la charte : déroulé 10 Q, feedback immédiat (✓/✗ + explication + « 📖 Lire la fiche → » NOUVEL onglet), écran résultat = QT centré 100 (55-145, courbe fixe) + rang Set A (🐣 Curieux→🏆 Super Geek) + message encourageant + carte partage emoji (toast) + rejouer, + écran révision complet. Disclaimer ludique. Entrée table tools (slug qt, is_under_construction=true). Code Hermes/qwen3-max (service corrigé). Évolutions futures : percentile/leaderboard, défi du jour, banque 50-80, table DB+CRUD. Codename seo-piliers-veille-generative.
@@ -331,7 +332,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 182;
+$lvPatch = 183;
 
 return [
     'major' => $lvMajor,

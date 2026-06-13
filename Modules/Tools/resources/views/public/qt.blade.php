@@ -25,6 +25,9 @@
     .ct-btn-outline:hover { background: var(--c-primary); color: #fff; }
     @keyframes qt-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
     @keyframes qt-fall { to { transform: translateY(105vh) rotate(540deg); opacity: 0.2; } }
+    .qt-medal { width: 150px; height: 150px; border-radius: 50%; margin: 1rem auto 0; display: flex; align-items: center; justify-content: center; color: #fff; border: 6px solid #E9B949; box-shadow: 0 0 0 3px rgba(255,255,255,.35) inset, 0 10px 28px rgba(0,0,0,.22); position: relative; overflow: hidden; animation: qt-medal-in .6s cubic-bezier(.18,.89,.32,1.28); }
+    .qt-medal::before { content: ''; position: absolute; top: -40%; left: -45%; width: 70%; height: 180%; background: linear-gradient(115deg, rgba(255,255,255,.42), rgba(255,255,255,0)); transform: rotate(18deg); pointer-events: none; }
+    @keyframes qt-medal-in { 0% { transform: scale(.4) rotate(-12deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
     [x-cloak] { display: none !important; }
 </style>
 <section class="wpo-blog-single-section section-padding">
@@ -87,10 +90,10 @@
                             <p style="font-size:1.125rem;color:var(--c-text-secondary);margin-bottom:0.25rem;">Ton Quotient Techno</p>
                             <p style="font-size:3.5rem;font-weight:800;color:var(--c-primary);line-height:1;" x-text="displayQt"></p>
 
-                            <div style="border-radius:16px;padding:18px;margin-top:1rem;" :style="'background:'+rank.bg+';color:#fff;'">
-                                <span x-text="rank.emoji" style="font-size:2.2rem;display:block;margin-bottom:0.25rem;"></span>
-                                <div x-text="rank.label" style="font-weight:800;font-size:1.3rem;"></div>
+                            <div class="qt-medal" :style="'background:'+rank.bg+';'">
+                                <span x-text="rank.emoji" style="font-size:3rem;line-height:1;"></span>
                             </div>
+                            <div x-text="rank.label" style="font-weight:800;font-size:1.4rem;color:var(--c-dark);margin-top:0.75rem;"></div>
 
                             <p style="font-size:1.05rem;color:var(--c-text-secondary);margin-top:0.75rem;">
                                 <span x-text="correctCount"></span> / 10 bonnes réponses
