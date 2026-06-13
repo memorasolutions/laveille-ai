@@ -7,6 +7,17 @@ declare(strict_types=1);
  * Champs : theme (ia|numerique|securite|web|donnees), difficulty (facile|moyen|difficile),
  *          question, choices[4], correct (index), explanation, term (slug glossaire ou null).
  * MVP : fichier de données (cible 50-80 questions ; table DB + CRUD admin = évolution future).
+ *
+ * ⚠️ RÈGLES DE CRÉATION (obligatoires) :
+ *  1. UNE seule bonne réponse incontestable. AUCUN distracteur synonyme/équivalent de la bonne réponse
+ *     (ex. « requête »/« invite » ≠ distracteur de « prompt » ; « cloud » ≠ distracteur de « nuage » ;
+ *      toute paire FR↔EN du même concept est interdite comme mauvais choix).
+ *  2. Faits exacts et vérifiables. 3. Distracteurs clairement faux mais plausibles.
+ *  4. Question sans ambiguïté. 5. Français québécois ; si la réponse est un anglicisme (prompt, token),
+ *     mentionner l'équivalent FR dans l'explication. 6. Explication pédagogique (1-2 phrases).
+ *  7. `term` = slug glossaire (lien fiche). 8. Équilibrer difficulty + theme. 9. Le service mélange
+ *     questions ET réponses (position du correct sans importance). 10. Après édition : vider le cache `qt.bank`.
+ *  Détail → mémoire `qt-question-standards`.
  */
 
 return [
@@ -22,10 +33,10 @@ return [
     [
         'theme' => 'numerique',
         'difficulty' => 'facile',
-        'question' => 'Quel mot désigne le stockage de fichiers sur Internet plutôt que sur un disque dur local ?',
-        'choices' => ['Nuage', 'Réseau', 'Serveur', 'Cloud'],
-        'correct' => 0,
-        'explanation' => 'Au Québec, on utilise couramment le terme « nuage » pour traduire « cloud », qui désigne le stockage et l’accès à des données via Internet.',
+        'question' => 'Comment appelle-t-on (en français) le stockage de fichiers sur Internet plutôt que sur un disque local ?',
+        'choices' => ['La clé USB', 'Le nuage', 'Le disque dur', 'La mémoire vive'],
+        'correct' => 1,
+        'explanation' => 'Au Québec, « le nuage » (cloud en anglais) désigne le stockage et l’accès aux données via Internet, par opposition au stockage local (disque dur, clé USB, mémoire vive).',
         'term' => 'nuage',
     ],
     [
@@ -40,10 +51,10 @@ return [
     [
         'theme' => 'ia',
         'difficulty' => 'facile',
-        'question' => 'Quel terme désigne une instruction donnée à une intelligence artificielle pour obtenir une réponse ?',
-        'choices' => ['Commande', 'Requête', 'Prompt', 'Signal'],
-        'correct' => 2,
-        'explanation' => 'Le « prompt » est l’ensemble des instructions ou questions que l’utilisateur soumet à un modèle d’IA pour guider sa réponse.',
+        'question' => 'En IA générative, comment appelle-t-on couramment l’instruction qu’on donne à un modèle pour obtenir une réponse ?',
+        'choices' => ['Un cookie', 'Un prompt', 'Un algorithme', 'Un pixel'],
+        'correct' => 1,
+        'explanation' => 'Le « prompt » est l’instruction (ou la question) soumise à un modèle d’IA pour guider sa réponse. En français, « requête » ou « invite » sont des équivalents acceptés.',
         'term' => 'prompt',
     ],
     [
