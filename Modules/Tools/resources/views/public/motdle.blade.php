@@ -2,7 +2,7 @@
 @section('title','Motdle — le mot tech du jour - '.config('app.name'))
 @section('meta_description','Devinez le mot tech/IA du jour en 6 essais. Jeu de mots quotidien gratuit en français.')
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb',['breadcrumbTitle'=>'Motdle'])
+    @include('fronttheme::partials.breadcrumb',['breadcrumbTitle'=>'Motdle','breadcrumbItems'=>[__('Outils'),'Motdle']])
 @endsection
 @section('content')
 @php $payload = base64_encode(json_encode($word)); @endphp

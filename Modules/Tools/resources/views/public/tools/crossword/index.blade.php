@@ -6,7 +6,7 @@
 @section('og_type', 'website')
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Mots-croisés en ligne')])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Mots-croisés en ligne'), 'breadcrumbItems' => [__('Outils'), __('Mots-croisés en ligne')]])
 @endsection
 
 @push('head')

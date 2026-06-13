@@ -25,6 +25,11 @@ class PublicQtController extends Controller
             ]);
         }
 
-        return view('tools::public.qt', ['round' => QtService::newRound()]);
+        $tool = \Modules\Tools\Models\Tool::where('slug', 'qt')->first();
+
+        return view('tools::public.qt', [
+            'round' => QtService::newRound(),
+            'share' => $tool?->getShareData(),
+        ]);
     }
 }

@@ -4,8 +4,11 @@
 
 @section('meta_description', 'Testez votre culture techno avec ce quiz ludique sur l’IA, le web et la cybersécurité. Découvrez votre Quotient Techno (QT) en 2 minutes !')
 
+@section('og_type', 'article')
+@section('og_image', ($share['og_image'] ?? asset('images/tools/qt.jpg')))
+
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'QT — Quotient Techno'])
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => 'QT — Quotient Techno', 'breadcrumbItems' => [__('Outils'), 'QT — Quotient Techno']])
 @endsection
 
 @section('content')
