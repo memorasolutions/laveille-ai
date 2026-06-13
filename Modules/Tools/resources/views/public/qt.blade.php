@@ -50,12 +50,16 @@
                                 <span style="background:var(--c-primary-light,#F0FAFB);color:var(--c-primary);padding:0.5rem 1rem;font-weight:600;border-radius:99px;">⏱️ ~2 min</span>
                                 <span style="background:var(--c-primary-light,#F0FAFB);color:var(--c-primary);padding:0.5rem 1rem;font-weight:600;border-radius:99px;">❓ 10 questions</span>
                                 <span style="background:var(--c-primary-light,#F0FAFB);color:var(--c-primary);padding:0.5rem 1rem;font-weight:600;border-radius:99px;">⚡ résultat instantané</span>
+                                <span style="background:var(--c-primary-light,#F0FAFB);color:var(--c-primary);padding:0.5rem 1rem;font-weight:600;border-radius:99px;">🔄 renouvelé à chaque partie</span>
                             </div>
                             <div style="font-size:1.6rem;letter-spacing:6px;margin-bottom:1.75rem;">🐣 🔌 💡 🤓 🦾 🏆</div>
                             <button class="ct-btn ct-btn-primary" style="height:52px;font-size:1.1rem;padding:0 28px;border-radius:8px;" @click="phase='quiz'">
                                 Découvre ton QT 🚀
                             </button>
-                            <p style="color:var(--c-text-muted);font-size:0.875rem;margin-top:1.5rem;">
+                            <p style="color:var(--c-primary);font-weight:600;font-size:0.95rem;margin-top:1.5rem;max-width:520px;margin-left:auto;margin-right:auto;">
+                                🔄 Les 10 questions sont pigées au hasard dans une grande banque : <strong>elles changent à chaque partie</strong>. Refais le test autant de fois que tu veux pour découvrir de nouvelles notions… et faire grimper ton QT !
+                            </p>
+                            <p style="color:var(--c-text-muted);font-size:0.875rem;margin-top:0.75rem;">
                                 Score ludique de culture techno — pas un vrai test de QI 😉
                             </p>
                         </div>
@@ -118,6 +122,9 @@
                                 <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:44px;padding:0 20px;" @click="share()">📣 Partager mon QT</button>
                                 <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="replay()">🔄 Rejouer</button>
                             </div>
+                            <p style="color:var(--c-primary);font-weight:600;font-size:0.9rem;margin-top:0.85rem;">
+                                🔄 Chaque partie pige 10 <strong>nouvelles</strong> questions au hasard — rejoue pour apprendre d'autres notions et faire grimper ton QT !
+                            </p>
 
                             {{-- Panneau de partage (repli quand le partage natif n'est pas dispo, ex. ordinateur) --}}
                             <div x-show="shareOpen" style="margin-top:1rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
