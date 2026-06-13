@@ -1,0 +1,97 @@
+[
+  {
+    "slug": "hameconnage",
+    "name": "Hameçonnage (phishing)",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🎣",
+    "aliases": ["phishing", "hameçonnage", "harponnage", "spear phishing", "smishing"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "L'hameçonnage, qu'on appelle « phishing » en anglais, est une technique de fraude numérique où un attaquant se fait passer pour une entité de confiance — comme ta banque, un fournisseur de services ou un organisme gouvernemental — dans le but de voler tes informations personnelles. Le fraudeur communique généralement par courriel, par SMS ou même par téléphone (on parle alors de vishing). Il t'invite à cliquer sur un lien qui mène vers un faux site Web, conçu pour ressembler trait pour trait à celui de l'organisation imitée. Une fois sur ce site piégé, on te demande de saisir ton mot de passe, ton numéro de carte de crédit ou d'autres données sensibles. Il existe des variantes plus ciblées : le harponnage (spear phishing) vise une personne ou une entreprise en particulier, tandis que le smishing passe par les textos. Les signes qui doivent t'alerter sont un sentiment d'urgence (« Agissez immédiatement, votre compte sera fermé ! »), des fautes d'orthographe, une adresse d'expéditeur suspecte, ou un lien qui ne correspond pas au site officiel. Au Québec, le terme « hameçonnage » est recommandé par l'Office québécois de la langue française. Vérifie toujours l'expéditeur et ne clique pas sur un lien sans t'être assuré de sa légitimité.",
+    "analogy": "C'est comme un pêcheur qui lance un appât (un faux courriel alléchant) en espérant qu'un poisson — toi — morde à l'hameçon.",
+    "example": "Tu reçois un courriel qui semble venir de ton institution financière, t'avisant que ton compte est bloqué et te demandant de cliquer pour le réactiver. En réalité, le lien mène à un faux site qui vole ton mot de passe.",
+    "did_you_know": "L'hameçonnage est l'un des points de départ les plus fréquents des cyberattaques en entreprise : la grande majorité des intrusions commencent par un simple courriel piégé.",
+    "one_sentence_answer": "L'hameçonnage est une fraude où un imposteur se fait passer pour une entité fiable, par courriel ou faux site, afin de voler tes données personnelles.",
+    "faq": [
+      {"question": "Comment reconnaître un courriel d'hameçonnage ?", "answer": "Méfie-toi des fautes d'orthographe, d'un ton urgent, d'un expéditeur inconnu ou d'un lien qui ne correspond pas au site officiel."},
+      {"question": "Que faire si j'ai cliqué sur un lien d'hameçonnage ?", "answer": "Change immédiatement tes mots de passe, contacte ta banque ou l'organisme concerné, et analyse ton appareil avec un logiciel de sécurité."}
+    ],
+    "sources": [
+      {"label": "Hameçonnage — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Hame%C3%A7onnage"},
+      {"label": "Combattre le pourriel — Gouvernement du Canada", "url": "https://combattrelepourriel.gc.ca/"}
+    ]
+  },
+  {
+    "slug": "navigateur",
+    "name": "Navigateur Web (fureteur)",
+    "cat": 5,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🧭",
+    "aliases": ["fureteur", "navigateur web", "browser"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Un navigateur Web, aussi appelé « fureteur » au Québec, est un logiciel qui te permet d'accéder à Internet et de consulter des sites Web. Concrètement, il télécharge les pages que tu demandes (écrites en HTML, CSS et JavaScript), puis il les interprète et les affiche à l'écran sous une forme visuelle compréhensible : textes, images, vidéos, boutons. Pour cela, il utilise un moteur de rendu (comme Blink pour Chrome ou Gecko pour Firefox). Les navigateurs modernes offrent toutes sortes de fonctions pratiques : les onglets pour ouvrir plusieurs sites à la fois, les favoris pour retrouver tes pages préférées, les extensions pour ajouter des fonctionnalités (bloqueur de publicité, traducteur), et la navigation privée qui ne conserve pas ton historique localement. Les exemples les plus connus sont Google Chrome, Mozilla Firefox, Safari (sur les appareils Apple) et Microsoft Edge. Chaque navigateur a ses forces et ses faiblesses en matière de vitesse, de sécurité et de respect de la vie privée. Au Québec, l'Office québécois de la langue française recommande le terme « fureteur », mais « navigateur » est aussi très employé. Peu importe comment tu l'appelles, c'est ta porte d'entrée vers le Web.",
+    "analogy": "Un navigateur, c'est comme une fenêtre magique qui te permet de regarder et d'interagir avec tout ce qui se trouve sur Internet, sans avoir à comprendre le code derrière.",
+    "example": "Quand tu tapes l'adresse d'un site météo dans la barre d'adresse de Chrome, le navigateur va chercher la page sur le serveur du site et l'affiche avec les prévisions du jour.",
+    "did_you_know": "Le navigateur Mosaic, lancé en 1993, a popularisé l'affichage des images à côté du texte, ce qui a contribué à transformer le Web en média grand public.",
+    "one_sentence_answer": "Un navigateur (ou fureteur) est un logiciel qui télécharge et affiche les pages Web pour que tu puisses naviguer sur Internet.",
+    "faq": [
+      {"question": "Quelle est la différence entre un navigateur et un moteur de recherche ?", "answer": "Le navigateur (Chrome, Firefox) est le logiciel qui affiche les pages ; le moteur de recherche (Google, Bing) est un site qui trouve des pages pour toi."},
+      {"question": "Est-ce que la navigation privée me rend invisible ?", "answer": "Non, elle empêche seulement ton navigateur de sauvegarder ton historique localement ; ton fournisseur Internet et les sites visités peuvent toujours te voir."}
+    ],
+    "sources": [
+      {"label": "Navigateur Web — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Navigateur_web"},
+      {"label": "Navigateur — MDN Web Docs", "url": "https://developer.mozilla.org/fr/docs/Glossary/Browser"}
+    ]
+  },
+  {
+    "slug": "vpn",
+    "name": "VPN (réseau privé virtuel)",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🔏",
+    "aliases": ["réseau privé virtuel", "rpv", "vpn"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Un VPN, ou réseau privé virtuel (RPV en français), est un service qui crée un tunnel chiffré entre ton appareil (ordinateur, téléphone, tablette) et un serveur distant géré par le fournisseur du VPN. Quand tu actives le VPN, tout ton trafic Internet passe par ce tunnel sécurisé. Cela a deux effets principaux. D'abord, ton adresse IP réelle est masquée et remplacée par celle du serveur VPN, ce qui rend plus difficile pour les sites Web de te localiser ou de tracer ton activité. Ensuite, les données que tu envoies et reçois sont chiffrées, donc illisibles pour quiconque pourrait les intercepter, par exemple sur un réseau Wi-Fi public dans un café ou un aéroport. Les usages courants du VPN incluent la protection de ta vie privée en ligne, l'accès sécurisé au réseau de ton entreprise quand tu travailles à distance, et le contournement de certaines restrictions géographiques. Attention toutefois : un VPN ne te rend pas totalement anonyme. Ton fournisseur de VPN peut voir ton trafic (certains conservent des journaux), et les sites que tu visites peuvent encore t'identifier par d'autres moyens (témoins, empreinte du navigateur). Choisis un fournisseur de confiance avec une politique stricte de non-conservation des données.",
+    "analogy": "C'est comme emprunter un tunnel privé et fermé pour te rendre sur Internet, au lieu de la route principale où tout le monde peut voir où tu vas.",
+    "example": "À la bibliothèque, tu te connectes au Wi-Fi gratuit. En activant ton VPN, tu chiffres toutes tes données, ce qui empêche un autre usager du réseau de les espionner.",
+    "did_you_know": "Les VPN ont d'abord été conçus pour les entreprises, afin de permettre à leurs employés de se connecter de façon sécurisée au réseau interne depuis l'extérieur.",
+    "one_sentence_answer": "Un VPN crée un tunnel chiffré qui masque ton adresse IP et protège ton trafic Internet, surtout sur les réseaux Wi-Fi publics.",
+    "faq": [
+      {"question": "Un VPN me rend-il complètement anonyme ?", "answer": "Non, car ton fournisseur de VPN peut voir ton trafic, et les sites peuvent encore te suivre par d'autres moyens comme les témoins de connexion."},
+      {"question": "Est-ce légal d'utiliser un VPN au Québec ?", "answer": "Oui, c'est tout à fait légal, tant que tu ne t'en sers pas pour commettre des actes illégaux."}
+    ],
+    "sources": [
+      {"label": "Réseau privé virtuel — Wikipédia", "url": "https://fr.wikipedia.org/wiki/R%C3%A9seau_priv%C3%A9_virtuel"},
+      {"label": "Pensez cybersécurité — Gouvernement du Canada", "url": "https://www.pensezcybersecurite.gc.ca/fr"}
+    ]
+  },
+  {
+    "slug": "algorithme",
+    "name": "Algorithme",
+    "cat": 2,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "⚙️",
+    "aliases": ["algorithmes"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Un algorithme, c'est un peu une recette de cuisine, mais pour un ordinateur : une suite finie et ordonnée d'instructions précises, conçues pour résoudre un problème ou accomplir une tâche donnée. Par exemple, un algorithme de tri prend une liste de nombres en désordre et produit, étape par étape, une liste ordonnée du plus petit au plus grand. Les algorithmes sont le cœur de tout programme informatique : sans eux, un ordinateur ne saurait pas quoi faire. Tu en croises partout sans t'en rendre compte : quand ton application de cartes calcule le meilleur itinéraire pour éviter le trafic, quand une plateforme te suggère une série à regarder, ou quand un moteur de recherche classe les résultats de ta requête. En intelligence artificielle, on utilise des algorithmes d'apprentissage (comme les réseaux de neurones) qui permettent au modèle d'apprendre à partir de données, plutôt que de suivre des règles écrites à l'avance par un humain. Le mot « algorithme » vient du nom du mathématicien persan Al-Khwârizmî, qui a vécu au IXe siècle. Un algorithme n'est ni bon ni mauvais en soi : tout dépend de la façon dont il est conçu et des données qu'on lui fournit.",
+    "analogy": "Un algorithme, c'est comme une recette de tarte aux pommes : une liste d'étapes précises à suivre dans l'ordre pour obtenir un résultat fiable.",
+    "example": "Quand tu cherches le chemin le plus rapide entre deux villes sur une application de cartes, un algorithme analyse des milliers de routes et de données de circulation pour te proposer le meilleur trajet.",
+    "did_you_know": "Le mot « algorithme » est une déformation du nom du mathématicien persan Al-Khwârizmî, dont les travaux du IXe siècle ont aussi donné le mot « algèbre ».",
+    "one_sentence_answer": "Un algorithme est une suite d'instructions précises qui indique à un ordinateur comment résoudre un problème, étape par étape.",
+    "faq": [
+      {"question": "Les algorithmes des réseaux sociaux sont-ils dangereux ?", "answer": "Ils peuvent créer des bulles de filtres en te montrant surtout du contenu qui renforce tes opinions, mais tout dépend de leur conception et de ton usage."},
+      {"question": "Est-ce qu'un algorithme peut se tromper ?", "answer": "Oui : s'il est mal conçu ou si les données qu'on lui donne sont erronées ou biaisées, le résultat sera incorrect ou injuste."}
+    ],
+    "sources": [
+      {"label": "Algorithme — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Algorithme"}
+    ]
+  }
+]

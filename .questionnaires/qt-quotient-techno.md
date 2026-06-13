@@ -17,7 +17,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Sabotage
 
 *Explication* : L’hameçonnage (ou « phishing » en anglais) consiste à tromper l’utilisateur avec un faux courriel ou site web pour voler ses identifiants ou données sensibles.
-*Fiche glossaire* : https://laveille.ai/glossaire/phishing
+*Fiche glossaire* : https://laveille.ai/glossaire/hameconnage
 
 ### 2. [NUMERIQUE · Facile] Comment appelle-t-on (en français) le stockage de fichiers sur Internet plutôt que sur un disque local ?
 
@@ -27,7 +27,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ La mémoire vive
 
 *Explication* : Au Québec, « le nuage » (cloud en anglais) désigne le stockage et l’accès aux données via Internet, par opposition au stockage local (disque dur, clé USB, mémoire vive).
-*Fiche glossaire* : https://laveille.ai/glossaire/nuage
+*Fiche glossaire* : https://laveille.ai/glossaire/cloud-computing
 
 ### 3. [WEB · Facile] Quel logiciel permet de naviguer sur Internet en affichant des pages web ?
 
@@ -77,7 +77,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Données sensibles
 
 *Explication* : Les métadonnées sont des informations contextuelles sur des données, comme l’auteur, la date ou le format d’un fichier.
-*Fiche glossaire* : https://laveille.ai/glossaire/metadonnee
+*Fiche glossaire* : https://laveille.ai/glossaire/metadonnees
 
 ### 8. [WEB · Facile] Qu’est-ce qu’un « pourriel » ?
 
@@ -307,7 +307,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un bogue dans les réseaux de neurones
 
 *Explication* : Le biais algorithmique survient quand les données utilisées pour entraîner une IA contiennent des stéréotypes ou des inégalités, que le modèle reproduit ensuite.
-*Fiche glossaire* : https://laveille.ai/glossaire/biais
+*Fiche glossaire* : https://laveille.ai/glossaire/biais-algorithmique
 
 ### 31. [DONNEES · Difficile] Qu’est-ce qu’un « embedding » (plongement) en traitement du langage naturel ?
 
@@ -317,7 +317,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un type de base de données relationnelle
 
 *Explication* : Un embedding transforme un mot ou une phrase en un vecteur de nombres qui capture son sens, permettant aux modèles d’IA de comparer et de raisonner sur le langage.
-*Fiche glossaire* : https://laveille.ai/glossaire/embedding
+*Fiche glossaire* : https://laveille.ai/glossaire/vectorisation
 
 ### 32. [SECURITE · Difficile] Qu’est-ce que le « zero trust » en cybersécurité ?
 

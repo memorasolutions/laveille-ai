@@ -28,7 +28,7 @@ return [
         'choices' => ['Hameçonnage', 'Piratage', 'Espionnage', 'Sabotage'],
         'correct' => 0,
         'explanation' => 'L’hameçonnage (ou « phishing » en anglais) consiste à tromper l’utilisateur avec un faux courriel ou site web pour voler ses identifiants ou données sensibles.',
-        'term' => 'phishing',
+        'term' => 'hameconnage',
     ],
     [
         'theme' => 'numerique',
@@ -37,7 +37,7 @@ return [
         'choices' => ['La clé USB', 'Le nuage', 'Le disque dur', 'La mémoire vive'],
         'correct' => 1,
         'explanation' => 'Au Québec, « le nuage » (cloud en anglais) désigne le stockage et l’accès aux données via Internet, par opposition au stockage local (disque dur, clé USB, mémoire vive).',
-        'term' => 'nuage',
+        'term' => 'cloud-computing',
     ],
     [
         'theme' => 'web',
@@ -82,7 +82,7 @@ return [
         'choices' => ['Données brutes', 'Métadonnées', 'Données personnelles', 'Données sensibles'],
         'correct' => 1,
         'explanation' => 'Les métadonnées sont des informations contextuelles sur des données, comme l’auteur, la date ou le format d’un fichier.',
-        'term' => 'metadonnee',
+        'term' => 'metadonnees',
     ],
     [
         'theme' => 'web',
@@ -289,7 +289,7 @@ return [
         'choices' => ['Une erreur de programmation qui ralentit l’IA', 'La tendance d’un algorithme à reproduire ou amplifier des préjugés présents dans ses données d’entraînement', 'L’incapacité d’une IA à traiter des images', 'Un bogue dans les réseaux de neurones'],
         'correct' => 1,
         'explanation' => 'Le biais algorithmique survient quand les données utilisées pour entraîner une IA contiennent des stéréotypes ou des inégalités, que le modèle reproduit ensuite.',
-        'term' => 'biais',
+        'term' => 'biais-algorithmique',
     ],
     [
         'theme' => 'donnees',
@@ -298,7 +298,7 @@ return [
         'choices' => ['Un fichier joint à un courriel', 'Une représentation vectorielle d’un mot ou d’une phrase dans un espace multidimensionnel', 'Une méthode de chiffrement de données', 'Un type de base de données relationnelle'],
         'correct' => 1,
         'explanation' => 'Un embedding transforme un mot ou une phrase en un vecteur de nombres qui capture son sens, permettant aux modèles d’IA de comparer et de raisonner sur le langage.',
-        'term' => 'embedding',
+        'term' => 'vectorisation',
     ],
     [
         'theme' => 'securite',
