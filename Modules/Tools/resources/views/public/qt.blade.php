@@ -115,8 +115,20 @@
                             <p x-show="aiAnswered" style="font-weight:600;color:var(--c-primary);margin-top:0.75rem;" x-text="aiBadge"></p>
 
                             <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:1.25rem;">
-                                <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:44px;padding:0 20px;" @click="share()">Partager mon QT</button>
-                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="replay()">Rejouer</button>
+                                <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:44px;padding:0 20px;" @click="share()">📣 Partager mon QT</button>
+                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="replay()">🔄 Rejouer</button>
+                            </div>
+
+                            {{-- Panneau de partage (repli quand le partage natif n'est pas dispo, ex. ordinateur) --}}
+                            <div x-show="shareOpen" style="margin-top:1rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
+                                <p style="font-weight:600;margin-bottom:0.6rem;color:var(--c-dark);">Partage ton défi 👇</p>
+                                <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('x')" aria-label="Partager sur X">𝕏 X</button>
+                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('whatsapp')">💬 WhatsApp</button>
+                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('linkedin')">💼 LinkedIn</button>
+                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('facebook')">📘 Facebook</button>
+                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="copyShareLink()">🔗 Copier le lien</button>
+                                </div>
                             </div>
 
                             {{-- Révision --}}
@@ -231,18 +243,49 @@ function qtApp(payload) {
             setTimeout(() => { c.innerHTML = ''; }, 3500);
         },
 
-        share() {
-            const url = window.location.origin + '/outils/qt';
+        shareOpen: false,
+
+        shareUrl(source) {
+            return window.location.origin + '/outils/qt?utm_source=' + source + '&utm_medium=social&utm_campaign=qt';
+        },
+
+        shareText() {
             let tag = '';
             if (this.aiUsage === 'brain') tag = ' (100 % cerveau 🧠)';
             else if (this.aiUsage === 'ai') tag = " (avec l'aide d'une IA 🤖)";
             else if (this.aiUsage === 'hint') tag = ' (un peu aidé 🤝)';
-            const text = '🧠 Mon Quotient Techno : ' + this.qt + ' — ' + this.rank.label + ' ' + this.rank.emoji + tag + '\nJusqu\'où ira le tien ? ' + url;
+            return '🧠 Mon Quotient Techno : ' + this.qt + ' — ' + this.rank.label + ' ' + this.rank.emoji + tag + ". Et toi, c'est quoi ton QT ? 👉";
+        },
+
+        async share() {
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'QT — Quotient Techno', text: this.shareText(), url: this.shareUrl('webshare') });
+                } catch (e) { /* partage annulé par l'utilisateur */ }
+            } else {
+                this.shareOpen = true;
+            }
+        },
+
+        shareNetwork(net) {
+            const text = this.shareText();
+            const url = this.shareUrl(net);
+            let u = '';
+            if (net === 'x') u = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text + ' #QuotientTechno') + '&url=' + encodeURIComponent(url);
+            else if (net === 'whatsapp') u = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
+            else if (net === 'linkedin') u = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+            else if (net === 'facebook') u = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+            else return;
+            window.open(u, '_blank', 'noopener');
+        },
+
+        copyShareLink() {
+            const full = this.shareText() + ' ' + this.shareUrl('copie');
             const toast = (m, v) => window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: m, variant: v, duration: 3000 } }));
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => toast('Résultat copié !', 'success')).catch(() => toast('Copie impossible', 'error'));
+                navigator.clipboard.writeText(full).then(() => toast('Copié ! Tu peux le coller où tu veux 📋', 'success')).catch(() => toast('Copie impossible', 'danger'));
             } else {
-                toast('Copie non supportée', 'warning');
+                toast('Copie non disponible sur ce navigateur', 'warning');
             }
         },
 
