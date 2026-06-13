@@ -63,7 +63,7 @@ return [
         'question' => 'Qu’est-ce qu’un mot de passe fort ?',
         'choices' => ['Un mot de passe facile à retenir', 'Un mot de passe composé uniquement de chiffres', 'Un mot de passe long, avec lettres, chiffres et symboles', 'Un mot de passe identique pour tous les comptes'],
         'correct' => 2,
-        'explanation' => 'Un mot de passe fort combine majuscules, minuscules, chiffres et caractères spéciaux, et est suffisamment long pour résister aux attaques.',
+        'explanation' => 'Un mot de passe fort combine majuscules, minuscules, chiffres et caractères spéciaux, et est suffisamment long pour résister aux attaques. En anglais : « strong password ».',
         'term' => 'mot-de-passe-fort',
     ],
     [
@@ -81,7 +81,7 @@ return [
         'question' => 'Quel terme désigne les données qui décrivent d’autres données, comme la date de création d’un fichier ?',
         'choices' => ['Données brutes', 'Métadonnées', 'Données personnelles', 'Données sensibles'],
         'correct' => 1,
-        'explanation' => 'Les métadonnées sont des informations contextuelles sur des données, comme l’auteur, la date ou le format d’un fichier.',
+        'explanation' => 'Les métadonnées sont des informations contextuelles sur des données, comme l’auteur, la date ou le format d’un fichier. En anglais : « metadata ».',
         'term' => 'metadonnees',
     ],
     [
@@ -90,7 +90,7 @@ return [
         'question' => 'Qu’est-ce qu’un « pourriel » ?',
         'choices' => ['Un logiciel malveillant', 'Un courriel non sollicité', 'Un site web piraté', 'Un mot de passe oublié'],
         'correct' => 1,
-        'explanation' => 'Au Québec, « pourriel » est le terme francisé pour désigner les courriels indésirables ou publicitaires envoyés en masse.',
+        'explanation' => 'Au Québec, « pourriel » est le terme francisé pour désigner les courriels indésirables ou publicitaires envoyés en masse. En anglais : « spam ».',
         'term' => 'pourriel',
     ],
     [
@@ -108,7 +108,7 @@ return [
         'question' => 'Quel principe consiste à ne collecter que les données strictement nécessaires à un service ?',
         'choices' => ['Minimisation des données', 'Maximisation des profits', 'Accès universel', 'Partage illimité'],
         'correct' => 0,
-        'explanation' => 'La minimisation des données est un principe fondamental de la protection de la vie privée : on ne recueille que ce qui est utile et pertinent.',
+        'explanation' => 'La minimisation des données est un principe fondamental de la protection de la vie privée : on ne recueille que ce qui est utile et pertinent. En anglais : « data minimization ».',
         'term' => 'minimisation-des-donnees',
     ],
     [
@@ -117,7 +117,7 @@ return [
         'question' => 'Qu’est-ce qu’un mot de passe maître dans un gestionnaire de mots de passe ?',
         'choices' => ['Le mot de passe du compte courriel', 'Le mot de passe unique pour accéder à tous vos autres mots de passe', 'Le mot de passe par défaut d’un routeur', 'Le mot de passe d’un site bancaire'],
         'correct' => 1,
-        'explanation' => 'Le mot de passe maître est le seul mot de passe que vous devez retenir : il déverrouille votre gestionnaire, qui stocke tous vos autres mots de passe de façon sécurisée.',
+        'explanation' => 'Le mot de passe maître est le seul mot de passe que vous devez retenir : il déverrouille votre gestionnaire, qui stocke tous vos autres mots de passe de façon sécurisée. En anglais : « master password ».',
         'term' => 'mot-de-passe-maitre',
     ],
     [
@@ -153,7 +153,7 @@ return [
         'question' => 'Qu’est-ce qu’un cookie dans le contexte du web ?',
         'choices' => ['Un fichier malveillant qui efface vos données', 'Un petit fichier texte stocké par votre navigateur pour retenir des préférences ou une session', 'Un type de virus informatique', 'Un outil de compression d’images'],
         'correct' => 1,
-        'explanation' => 'Les cookies permettent aux sites web de mémoriser des informations comme votre langue, votre panier d’achat ou votre statut de connexion.',
+        'explanation' => 'Les cookies permettent aux sites web de mémoriser des informations comme votre langue, votre panier d’achat ou votre statut de connexion. Au Québec, on dit aussi « témoin ».',
         'term' => 'cookie',
     ],
     [
@@ -162,7 +162,7 @@ return [
         'question' => 'Qu’est-ce qu’un « token » dans le traitement du langage naturel ?',
         'choices' => ['Un jeton de sécurité pour accéder à une API', 'Une unité de texte (mot, sous-mot ou caractère) utilisée par un modèle d’IA', 'Un type de cryptomonnaie', 'Un badge d’identification numérique'],
         'correct' => 1,
-        'explanation' => 'Un token est la plus petite unité de texte qu’un modèle d’IA traite. Par exemple, le mot « incontournable » peut être découpé en plusieurs tokens.',
+        'explanation' => 'Un token est la plus petite unité de texte qu’un modèle d’IA traite. Par exemple, le mot « incontournable » peut être découpé en plusieurs tokens. En français : « jeton ».',
         'term' => 'token',
     ],
     [
@@ -207,7 +207,7 @@ return [
         'question' => 'Qu’est-ce qu’un algorithme ?',
         'choices' => ['Un type de virus informatique', 'Un ensemble d’instructions pour résoudre un problème ou accomplir une tâche', 'Un format de stockage de données', 'Un langage de balisage'],
         'correct' => 1,
-        'explanation' => 'Un algorithme est une suite logique d’étapes qu’un ordinateur suit pour traiter des données, faire des calculs ou prendre des décisions.',
+        'explanation' => 'Un algorithme est une suite logique d’étapes qu’un ordinateur suit pour traiter des données, faire des calculs ou prendre des décisions. En anglais : « algorithm ».',
         'term' => 'algorithme',
     ],
     [
@@ -225,7 +225,7 @@ return [
         'question' => 'Qu’est-ce qu’un réseau de neurones artificiels ?',
         'choices' => ['Un câblage physique entre ordinateurs', 'Un modèle informatique inspiré du cerveau humain pour apprendre à partir de données', 'Un système de stockage en nuage', 'Un logiciel de dessin vectoriel'],
         'correct' => 1,
-        'explanation' => 'Les réseaux de neurones artificiels sont des systèmes d’apprentissage automatique composés de couches de « neurones » qui traitent des informations complexes.',
+        'explanation' => 'Les réseaux de neurones artificiels sont des systèmes d’apprentissage automatique composés de couches de « neurones » qui traitent des informations complexes. En anglais : « neural network ».',
         'term' => 'reseau de neurones',
     ],
     [
@@ -243,7 +243,7 @@ return [
         'question' => 'Qu’est-ce que le « few-shot learning » en intelligence artificielle ?',
         'choices' => ['L’entraînement d’un modèle avec des millions d’exemples', 'La capacité d’un modèle à apprendre une tâche à partir de très peu d’exemples', 'L’apprentissage sans aucune donnée d’entraînement', 'L’utilisation de plusieurs GPU pour accélérer l’entraînement'],
         'correct' => 1,
-        'explanation' => 'Le few-shot learning permet à un modèle d’IA de généraliser une tâche à partir de seulement quelques exemples, contrairement à l’apprentissage traditionnel qui en nécessite des milliers.',
+        'explanation' => 'Le few-shot learning permet à un modèle d’IA de généraliser une tâche à partir de seulement quelques exemples, contrairement à l’apprentissage traditionnel qui en nécessite des milliers. En français : « apprentissage par quelques exemples ».',
         'term' => 'apprentissage-few-shot',
     ],
     [
@@ -252,7 +252,7 @@ return [
         'question' => 'Qu’est-ce que l’entropie dans le contexte de la théorie de l’information ?',
         'choices' => ['La vitesse de traitement d’un processeur', 'Une mesure de l’incertitude ou de l’imprévisibilité d’une source d’information', 'Le nombre de bits utilisés pour stocker un fichier', 'La température d’un serveur de données'],
         'correct' => 1,
-        'explanation' => 'L’entropie quantifie le degré de désordre ou d’imprévisibilité dans un ensemble de données. Plus l’entropie est élevée, plus l’information est « surprenante ».',
+        'explanation' => 'L’entropie quantifie le degré de désordre ou d’imprévisibilité dans un ensemble de données. Plus l’entropie est élevée, plus l’information est « surprenante ». En anglais : « entropy ».',
         'term' => 'entropie',
     ],
     [
@@ -288,7 +288,7 @@ return [
         'question' => 'Qu’est-ce que le biais algorithmique ?',
         'choices' => ['Une erreur de programmation qui ralentit l’IA', 'La tendance d’un algorithme à reproduire ou amplifier des préjugés présents dans ses données d’entraînement', 'L’incapacité d’une IA à traiter des images', 'Un bogue dans les réseaux de neurones'],
         'correct' => 1,
-        'explanation' => 'Le biais algorithmique survient quand les données utilisées pour entraîner une IA contiennent des stéréotypes ou des inégalités, que le modèle reproduit ensuite.',
+        'explanation' => 'Le biais algorithmique survient quand les données utilisées pour entraîner une IA contiennent des stéréotypes ou des inégalités, que le modèle reproduit ensuite. En anglais : « algorithmic bias ».',
         'term' => 'biais-algorithmique',
     ],
     [
@@ -306,7 +306,7 @@ return [
         'question' => 'Qu’est-ce que le « zero trust » en cybersécurité ?',
         'choices' => ['Ne jamais utiliser Internet', 'Une approche qui suppose qu’aucun utilisateur ou appareil n’est de confiance par défaut, même à l’intérieur du réseau', 'Un antivirus gratuit', 'Un protocole de chiffrement obsolète'],
         'correct' => 1,
-        'explanation' => 'Le modèle « zero trust » repose sur le principe « ne jamais faire confiance, toujours vérifier », ce qui renforce la sécurité même contre les menaces internes.',
+        'explanation' => 'Le modèle « zero trust » repose sur le principe « ne jamais faire confiance, toujours vérifier », ce qui renforce la sécurité même contre les menaces internes. En français : « confiance zéro ».',
         'term' => 'zero-trust',
     ],
     [
@@ -398,7 +398,7 @@ return [
         'question' => 'Quel type de système d’IA planifie des actions, utilise des outils et agit de façon autonome pour atteindre un objectif ?',
         'choices' => ['Un assistant vocal', 'Un agent IA', 'Un SLM', 'Une IA conversationnelle'],
         'correct' => 1,
-        'explanation' => 'Un agent IA est un système autonome qui planifie, utilise des outils et exécute des actions pour atteindre un objectif.',
+        'explanation' => 'Un agent IA est un système autonome qui planifie, utilise des outils et exécute des actions pour atteindre un objectif. En anglais : « AI agent ».',
         'term' => 'agent-ia',
     ],
     [
@@ -406,7 +406,7 @@ return [
         'question' => 'Quel programme d’IA interagit avec l’utilisateur par la voix grâce au traitement du langage naturel ?',
         'choices' => ['Un agent IA', 'Un assistant vocal', 'Un jumeau numérique', 'Khanmigo'],
         'correct' => 1,
-        'explanation' => 'Un assistant vocal utilise le traitement du langage naturel pour comprendre et produire de la parole afin d’interagir avec l’utilisateur.',
+        'explanation' => 'Un assistant vocal utilise le traitement du langage naturel pour comprendre et produire de la parole afin d’interagir avec l’utilisateur. En anglais : « voice assistant ».',
         'term' => 'assistant-vocal',
     ],
     [
@@ -430,7 +430,7 @@ return [
         'question' => 'Quel terme désigne les technologies permettant à une machine de dialoguer naturellement, par texte ou par la parole ?',
         'choices' => ['Un agent IA', 'Un assistant vocal', 'L’IA conversationnelle', 'Un SLM'],
         'correct' => 2,
-        'explanation' => 'L’IA conversationnelle regroupe les technologies qui permettent à une machine de dialoguer de façon fluide et naturelle, en texte ou en voix.',
+        'explanation' => 'L’IA conversationnelle regroupe les technologies qui permettent à une machine de dialoguer de façon fluide et naturelle, en texte ou en voix. En anglais : « conversational AI ».',
         'term' => 'ia-conversationnelle',
     ],
     [
@@ -446,7 +446,7 @@ return [
         'question' => 'Quel type d’entraînement utilise des données déjà étiquetées, où la bonne réponse est fournie à l’avance ?',
         'choices' => ['L’apprentissage non supervisé', 'L’apprentissage supervisé', 'L’apprentissage par renforcement', 'Le clustering'],
         'correct' => 1,
-        'explanation' => 'L’apprentissage supervisé entraîne un modèle avec des données étiquetées, c’est-à-dire accompagnées de la réponse attendue.',
+        'explanation' => 'L’apprentissage supervisé entraîne un modèle avec des données étiquetées, c’est-à-dire accompagnées de la réponse attendue. En anglais : « supervised learning ».',
         'term' => 'apprentissage-supervise',
     ],
     [
@@ -454,7 +454,7 @@ return [
         'question' => 'Dans quel type d’apprentissage l’IA découvre-t-elle seule des structures dans des données SANS étiquettes ?',
         'choices' => ['L’apprentissage supervisé', 'L’apprentissage par transfert', 'L’apprentissage non supervisé', 'La classification'],
         'correct' => 2,
-        'explanation' => 'L’apprentissage non supervisé permet à l’IA de trouver seule des structures ou des regroupements dans des données non étiquetées.',
+        'explanation' => 'L’apprentissage non supervisé permet à l’IA de trouver seule des structures ou des regroupements dans des données non étiquetées. En anglais : « unsupervised learning ».',
         'term' => 'apprentissage-non-supervise',
     ],
     [
@@ -478,7 +478,7 @@ return [
         'question' => 'Quel terme décrit un système d’IA dont les processus internes sont opaques, rendant ses décisions difficiles à expliquer ?',
         'choices' => ['Un SLM', 'Une boîte noire', 'Un modèle frontière', 'Un agent IA'],
         'correct' => 1,
-        'explanation' => 'Une « boîte noire » désigne un système d’IA dont le fonctionnement interne est opaque, ce qui complique l’explication de ses décisions.',
+        'explanation' => 'Une « boîte noire » désigne un système d’IA dont le fonctionnement interne est opaque, ce qui complique l’explication de ses décisions. En anglais : « black box ».',
         'term' => 'boite-noire',
     ],
     [
@@ -486,7 +486,7 @@ return [
         'question' => 'Quel concept désigne une réplique virtuelle dynamique d’un objet ou système physique, alimentée par des données en temps réel ?',
         'choices' => ['Un jumeau numérique', 'Un agent IA', 'L’hyperautomatisation', 'Le computer use'],
         'correct' => 0,
-        'explanation' => 'Un jumeau numérique est une réplique virtuelle dynamique d’un objet ou système physique, mise à jour en temps réel par des données.',
+        'explanation' => 'Un jumeau numérique est une réplique virtuelle dynamique d’un objet ou système physique, mise à jour en temps réel par des données. En anglais : « digital twin ».',
         'term' => 'jumeau-numerique',
     ],
     [
@@ -502,7 +502,7 @@ return [
         'question' => 'Quelles techniques d’IA analysent des données passées pour anticiper des événements futurs ?',
         'choices' => ['Le clustering', 'La classification', 'L’IA prédictive', 'L’apprentissage non supervisé'],
         'correct' => 2,
-        'explanation' => 'L’IA prédictive utilise l’apprentissage automatique sur des données historiques pour anticiper des événements ou comportements futurs.',
+        'explanation' => 'L’IA prédictive utilise l’apprentissage automatique sur des données historiques pour anticiper des événements ou comportements futurs. En anglais : « predictive AI ».',
         'term' => 'ia-predictive',
     ],
     [
@@ -518,7 +518,7 @@ return [
         'question' => 'Quel concept combine IA, apprentissage automatique et automatisation robotisée pour automatiser un maximum de processus ?',
         'choices' => ['Le jumeau numérique', 'L’hyperautomatisation', 'Le computer use', 'L’agent IA'],
         'correct' => 1,
-        'explanation' => 'L’hyperautomatisation combine plusieurs technologies (IA, apprentissage automatique, automatisation robotisée) pour automatiser le plus de processus possible.',
+        'explanation' => 'L’hyperautomatisation combine plusieurs technologies (IA, apprentissage automatique, automatisation robotisée) pour automatiser le plus de processus possible. En anglais : « hyperautomation ».',
         'term' => 'hyperautomatisation',
     ],
     [
@@ -542,7 +542,7 @@ return [
         'question' => 'Quel procédé réutilise les connaissances d’un modèle acquises sur une tâche générale pour une nouvelle tâche ?',
         'choices' => ['L’apprentissage supervisé', 'L’apprentissage par transfert', 'Le grounding', 'La descente de gradient'],
         'correct' => 1,
-        'explanation' => 'L’apprentissage par transfert réutilise les connaissances d’un modèle pré-entraîné sur une tâche générale pour accélérer une tâche spécifique.',
+        'explanation' => 'L’apprentissage par transfert réutilise les connaissances d’un modèle pré-entraîné sur une tâche générale pour accélérer une tâche spécifique. En anglais : « transfer learning ».',
         'term' => 'apprentissage-par-transfert',
     ],
     [
@@ -590,7 +590,7 @@ return [
         'question' => 'Quel terme désigne un modèle d’IA généraliste parmi les plus avancés, qui justifie une gouvernance de sécurité renforcée ?',
         'choices' => ['Un SLM', 'Un modèle frontière', 'Une boîte noire', 'Un agent IA'],
         'correct' => 1,
-        'explanation' => 'Un modèle frontière est un modèle d’IA généraliste de pointe dont les capacités justifient une gouvernance et une évaluation de sécurité spécifiques.',
+        'explanation' => 'Un modèle frontière est un modèle d’IA généraliste de pointe dont les capacités justifient une gouvernance et une évaluation de sécurité spécifiques. En anglais : « frontier model ».',
         'term' => 'modele-frontiere',
     ],
     [

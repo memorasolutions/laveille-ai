@@ -57,7 +57,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ✅ Un mot de passe long, avec lettres, chiffres et symboles
 - ◻️ Un mot de passe identique pour tous les comptes
 
-*Explication* : Un mot de passe fort combine majuscules, minuscules, chiffres et caractères spéciaux, et est suffisamment long pour résister aux attaques.
+*Explication* : Un mot de passe fort combine majuscules, minuscules, chiffres et caractères spéciaux, et est suffisamment long pour résister aux attaques. En anglais : « strong password ».
 *Fiche glossaire* : https://laveille.ai/glossaire/mot-de-passe-fort
 
 ### 6. [SECURITE · Facile] Quel outil permet de chiffrer votre connexion Internet pour la rendre plus sécurisée, notamment sur les réseaux publics ?
@@ -77,7 +77,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Données personnelles
 - ◻️ Données sensibles
 
-*Explication* : Les métadonnées sont des informations contextuelles sur des données, comme l’auteur, la date ou le format d’un fichier.
+*Explication* : Les métadonnées sont des informations contextuelles sur des données, comme l’auteur, la date ou le format d’un fichier. En anglais : « metadata ».
 *Fiche glossaire* : https://laveille.ai/glossaire/metadonnees
 
 ### 8. [WEB · Facile] Qu’est-ce qu’un « pourriel » ?
@@ -87,7 +87,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un site web piraté
 - ◻️ Un mot de passe oublié
 
-*Explication* : Au Québec, « pourriel » est le terme francisé pour désigner les courriels indésirables ou publicitaires envoyés en masse.
+*Explication* : Au Québec, « pourriel » est le terme francisé pour désigner les courriels indésirables ou publicitaires envoyés en masse. En anglais : « spam ».
 *Fiche glossaire* : https://laveille.ai/glossaire/pourriel
 
 ### 9. [IA · Facile] Quel est le principal risque lorsqu’une IA génère une information fausse mais plausible ?
@@ -107,7 +107,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Accès universel
 - ◻️ Partage illimité
 
-*Explication* : La minimisation des données est un principe fondamental de la protection de la vie privée : on ne recueille que ce qui est utile et pertinent.
+*Explication* : La minimisation des données est un principe fondamental de la protection de la vie privée : on ne recueille que ce qui est utile et pertinent. En anglais : « data minimization ».
 *Fiche glossaire* : https://laveille.ai/glossaire/minimisation-des-donnees
 
 ### 11. [SECURITE · Facile] Qu’est-ce qu’un mot de passe maître dans un gestionnaire de mots de passe ?
@@ -117,7 +117,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Le mot de passe par défaut d’un routeur
 - ◻️ Le mot de passe d’un site bancaire
 
-*Explication* : Le mot de passe maître est le seul mot de passe que vous devez retenir : il déverrouille votre gestionnaire, qui stocke tous vos autres mots de passe de façon sécurisée.
+*Explication* : Le mot de passe maître est le seul mot de passe que vous devez retenir : il déverrouille votre gestionnaire, qui stocke tous vos autres mots de passe de façon sécurisée. En anglais : « master password ».
 *Fiche glossaire* : https://laveille.ai/glossaire/mot-de-passe-maitre
 
 ### 12. [NUMERIQUE · Facile] Quel format de fichier est couramment utilisé pour les images compressées sur le web ?
@@ -157,7 +157,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un type de virus informatique
 - ◻️ Un outil de compression d’images
 
-*Explication* : Les cookies permettent aux sites web de mémoriser des informations comme votre langue, votre panier d’achat ou votre statut de connexion.
+*Explication* : Les cookies permettent aux sites web de mémoriser des informations comme votre langue, votre panier d’achat ou votre statut de connexion. Au Québec, on dit aussi « témoin ».
 *Fiche glossaire* : https://laveille.ai/glossaire/cookie
 
 ### 16. [DONNEES · Moyen] Qu’est-ce qu’un « token » dans le traitement du langage naturel ?
@@ -167,7 +167,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un type de cryptomonnaie
 - ◻️ Un badge d’identification numérique
 
-*Explication* : Un token est la plus petite unité de texte qu’un modèle d’IA traite. Par exemple, le mot « incontournable » peut être découpé en plusieurs tokens.
+*Explication* : Un token est la plus petite unité de texte qu’un modèle d’IA traite. Par exemple, le mot « incontournable » peut être découpé en plusieurs tokens. En français : « jeton ».
 *Fiche glossaire* : https://laveille.ai/glossaire/token
 
 ### 17. [NUMERIQUE · Moyen] Qu’est-ce que la latence dans un réseau ?
@@ -217,7 +217,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un format de stockage de données
 - ◻️ Un langage de balisage
 
-*Explication* : Un algorithme est une suite logique d’étapes qu’un ordinateur suit pour traiter des données, faire des calculs ou prendre des décisions.
+*Explication* : Un algorithme est une suite logique d’étapes qu’un ordinateur suit pour traiter des données, faire des calculs ou prendre des décisions. En anglais : « algorithm ».
 *Fiche glossaire* : https://laveille.ai/glossaire/algorithme
 
 ### 22. [NUMERIQUE · Moyen] Qu’est-ce que la 5G ?
@@ -237,7 +237,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un système de stockage en nuage
 - ◻️ Un logiciel de dessin vectoriel
 
-*Explication* : Les réseaux de neurones artificiels sont des systèmes d’apprentissage automatique composés de couches de « neurones » qui traitent des informations complexes.
+*Explication* : Les réseaux de neurones artificiels sont des systèmes d’apprentissage automatique composés de couches de « neurones » qui traitent des informations complexes. En anglais : « neural network ».
 *Fiche glossaire* : https://laveille.ai/glossaire/reseau de neurones
 
 ### 24. [SECURITE · Moyen] Qu’est-ce qu’un rançongiciel (ransomware) ?
@@ -257,7 +257,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ L’apprentissage sans aucune donnée d’entraînement
 - ◻️ L’utilisation de plusieurs GPU pour accélérer l’entraînement
 
-*Explication* : Le few-shot learning permet à un modèle d’IA de généraliser une tâche à partir de seulement quelques exemples, contrairement à l’apprentissage traditionnel qui en nécessite des milliers.
+*Explication* : Le few-shot learning permet à un modèle d’IA de généraliser une tâche à partir de seulement quelques exemples, contrairement à l’apprentissage traditionnel qui en nécessite des milliers. En français : « apprentissage par quelques exemples ».
 *Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-few-shot
 
 ### 26. [DONNEES · Difficile] Qu’est-ce que l’entropie dans le contexte de la théorie de l’information ?
@@ -267,7 +267,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Le nombre de bits utilisés pour stocker un fichier
 - ◻️ La température d’un serveur de données
 
-*Explication* : L’entropie quantifie le degré de désordre ou d’imprévisibilité dans un ensemble de données. Plus l’entropie est élevée, plus l’information est « surprenante ».
+*Explication* : L’entropie quantifie le degré de désordre ou d’imprévisibilité dans un ensemble de données. Plus l’entropie est élevée, plus l’information est « surprenante ». En anglais : « entropy ».
 *Fiche glossaire* : https://laveille.ai/glossaire/entropie
 
 ### 27. [SECURITE · Difficile] Qu’est-ce qu’une attaque par déni de service (DoS) ?
@@ -307,7 +307,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ L’incapacité d’une IA à traiter des images
 - ◻️ Un bogue dans les réseaux de neurones
 
-*Explication* : Le biais algorithmique survient quand les données utilisées pour entraîner une IA contiennent des stéréotypes ou des inégalités, que le modèle reproduit ensuite.
+*Explication* : Le biais algorithmique survient quand les données utilisées pour entraîner une IA contiennent des stéréotypes ou des inégalités, que le modèle reproduit ensuite. En anglais : « algorithmic bias ».
 *Fiche glossaire* : https://laveille.ai/glossaire/biais-algorithmique
 
 ### 31. [DONNEES · Difficile] Qu’est-ce qu’un « embedding » (plongement) en traitement du langage naturel ?
@@ -327,7 +327,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un antivirus gratuit
 - ◻️ Un protocole de chiffrement obsolète
 
-*Explication* : Le modèle « zero trust » repose sur le principe « ne jamais faire confiance, toujours vérifier », ce qui renforce la sécurité même contre les menaces internes.
+*Explication* : Le modèle « zero trust » repose sur le principe « ne jamais faire confiance, toujours vérifier », ce qui renforce la sécurité même contre les menaces internes. En français : « confiance zéro ».
 *Fiche glossaire* : https://laveille.ai/glossaire/zero-trust
 
 ### 33. [WEB · Difficile] Qu’est-ce que le Web sémantique ?
@@ -437,7 +437,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un SLM
 - ◻️ Une IA conversationnelle
 
-*Explication* : Un agent IA est un système autonome qui planifie, utilise des outils et exécute des actions pour atteindre un objectif.
+*Explication* : Un agent IA est un système autonome qui planifie, utilise des outils et exécute des actions pour atteindre un objectif. En anglais : « AI agent ».
 *Fiche glossaire* : https://laveille.ai/glossaire/agent-ia
 
 ### 44. [IA · Facile] Quel programme d’IA interagit avec l’utilisateur par la voix grâce au traitement du langage naturel ?
@@ -447,7 +447,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un jumeau numérique
 - ◻️ Khanmigo
 
-*Explication* : Un assistant vocal utilise le traitement du langage naturel pour comprendre et produire de la parole afin d’interagir avec l’utilisateur.
+*Explication* : Un assistant vocal utilise le traitement du langage naturel pour comprendre et produire de la parole afin d’interagir avec l’utilisateur. En anglais : « voice assistant ».
 *Fiche glossaire* : https://laveille.ai/glossaire/assistant-vocal
 
 ### 45. [IA · Facile] Quel laboratoire chinois développe des modèles d’IA réputés très efficaces en codage et en mathématiques ?
@@ -477,7 +477,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ✅ L’IA conversationnelle
 - ◻️ Un SLM
 
-*Explication* : L’IA conversationnelle regroupe les technologies qui permettent à une machine de dialoguer de façon fluide et naturelle, en texte ou en voix.
+*Explication* : L’IA conversationnelle regroupe les technologies qui permettent à une machine de dialoguer de façon fluide et naturelle, en texte ou en voix. En anglais : « conversational AI ».
 *Fiche glossaire* : https://laveille.ai/glossaire/ia-conversationnelle
 
 ### 48. [IA · Moyen] Quelle sous-catégorie de l’apprentissage automatique utilise des réseaux de neurones à plusieurs couches ?
@@ -497,7 +497,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ L’apprentissage par renforcement
 - ◻️ Le clustering
 
-*Explication* : L’apprentissage supervisé entraîne un modèle avec des données étiquetées, c’est-à-dire accompagnées de la réponse attendue.
+*Explication* : L’apprentissage supervisé entraîne un modèle avec des données étiquetées, c’est-à-dire accompagnées de la réponse attendue. En anglais : « supervised learning ».
 *Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-supervise
 
 ### 50. [DONNEES · Moyen] Dans quel type d’apprentissage l’IA découvre-t-elle seule des structures dans des données SANS étiquettes ?
@@ -507,7 +507,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ✅ L’apprentissage non supervisé
 - ◻️ La classification
 
-*Explication* : L’apprentissage non supervisé permet à l’IA de trouver seule des structures ou des regroupements dans des données non étiquetées.
+*Explication* : L’apprentissage non supervisé permet à l’IA de trouver seule des structures ou des regroupements dans des données non étiquetées. En anglais : « unsupervised learning ».
 *Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-non-supervise
 
 ### 51. [SECURITE · Moyen] Quel terme désigne les mécanismes qui filtrent les entrées/sorties d’un modèle d’IA pour bloquer le contenu dangereux ou interdit ?
@@ -537,7 +537,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un modèle frontière
 - ◻️ Un agent IA
 
-*Explication* : Une « boîte noire » désigne un système d’IA dont le fonctionnement interne est opaque, ce qui complique l’explication de ses décisions.
+*Explication* : Une « boîte noire » désigne un système d’IA dont le fonctionnement interne est opaque, ce qui complique l’explication de ses décisions. En anglais : « black box ».
 *Fiche glossaire* : https://laveille.ai/glossaire/boite-noire
 
 ### 54. [NUMERIQUE · Moyen] Quel concept désigne une réplique virtuelle dynamique d’un objet ou système physique, alimentée par des données en temps réel ?
@@ -547,7 +547,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ L’hyperautomatisation
 - ◻️ Le computer use
 
-*Explication* : Un jumeau numérique est une réplique virtuelle dynamique d’un objet ou système physique, mise à jour en temps réel par des données.
+*Explication* : Un jumeau numérique est une réplique virtuelle dynamique d’un objet ou système physique, mise à jour en temps réel par des données. En anglais : « digital twin ».
 *Fiche glossaire* : https://laveille.ai/glossaire/jumeau-numerique
 
 ### 55. [IA · Moyen] Quel type de modèle de langage est léger, rapide et conçu pour fonctionner localement sur des appareils modestes ?
@@ -567,7 +567,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ✅ L’IA prédictive
 - ◻️ L’apprentissage non supervisé
 
-*Explication* : L’IA prédictive utilise l’apprentissage automatique sur des données historiques pour anticiper des événements ou comportements futurs.
+*Explication* : L’IA prédictive utilise l’apprentissage automatique sur des données historiques pour anticiper des événements ou comportements futurs. En anglais : « predictive AI ».
 *Fiche glossaire* : https://laveille.ai/glossaire/ia-predictive
 
 ### 57. [IA · Moyen] Quelle technique force un modèle d’IA à répondre selon un format strict (souvent JSON) exploitable par du code ?
@@ -587,7 +587,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Le computer use
 - ◻️ L’agent IA
 
-*Explication* : L’hyperautomatisation combine plusieurs technologies (IA, apprentissage automatique, automatisation robotisée) pour automatiser le plus de processus possible.
+*Explication* : L’hyperautomatisation combine plusieurs technologies (IA, apprentissage automatique, automatisation robotisée) pour automatiser le plus de processus possible. En anglais : « hyperautomation ».
 *Fiche glossaire* : https://laveille.ai/glossaire/hyperautomatisation
 
 ### 59. [IA · Moyen] Quelle entreprise française développe des modèles d’IA axés sur l’efficacité, l’ouverture et la souveraineté ?
@@ -617,7 +617,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Le grounding
 - ◻️ La descente de gradient
 
-*Explication* : L’apprentissage par transfert réutilise les connaissances d’un modèle pré-entraîné sur une tâche générale pour accélérer une tâche spécifique.
+*Explication* : L’apprentissage par transfert réutilise les connaissances d’un modèle pré-entraîné sur une tâche générale pour accélérer une tâche spécifique. En anglais : « transfer learning ».
 *Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-par-transfert
 
 ### 62. [DONNEES · Moyen] Quelle tâche d’apprentissage automatique assigne une étiquette ou une catégorie prédéfinie à une donnée ?
@@ -677,7 +677,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Une boîte noire
 - ◻️ Un agent IA
 
-*Explication* : Un modèle frontière est un modèle d’IA généraliste de pointe dont les capacités justifient une gouvernance et une évaluation de sécurité spécifiques.
+*Explication* : Un modèle frontière est un modèle d’IA généraliste de pointe dont les capacités justifient une gouvernance et une évaluation de sécurité spécifiques. En anglais : « frontier model ».
 *Fiche glossaire* : https://laveille.ai/glossaire/modele-frontiere
 
 ### 68. [IA · Difficile] Quel terme désigne un modèle qui publie ses paramètres entraînés (téléchargeables, ajustables) sans forcément ouvrir son code ni ses données ?
