@@ -107,6 +107,30 @@
                             </p>
                             <p style="color:var(--c-text-muted);margin-top:0.25rem;" x-text="rank.message"></p>
 
+                            {{-- A : diagnostic par thème (forces / faiblesses + fiches ciblées) --}}
+                            <div style="max-width:560px;margin:1.5rem auto 0;text-align:left;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:16px 18px;">
+                                <p style="font-weight:800;font-size:1.05rem;color:var(--c-dark);margin-bottom:1rem;text-align:center;">📊 Ton profil par thème</p>
+                                <template x-for="t in themeStats()" :key="t.key">
+                                    <div style="margin-bottom:0.85rem;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                            <span style="font-weight:600;color:var(--c-dark);"><span x-text="t.emoji"></span> <span x-text="t.label"></span></span>
+                                            <span style="font-weight:700;color:var(--c-dark);" x-text="t.correct + '/' + t.total"></span>
+                                        </div>
+                                        <div style="height:8px;border-radius:999px;background:#E5E7EB;overflow:hidden;" role="progressbar" :aria-valuenow="t.pct" aria-valuemin="0" aria-valuemax="100">
+                                            <div style="height:100%;border-radius:999px;transition:width .6s ease;" :style="'width:'+t.pct+'%;background:'+barColor(t.pct)+';'"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="weakFiches().length > 0" style="margin-top:1.1rem;">
+                                    <p style="font-weight:700;color:var(--c-dark);margin-bottom:0.6rem;">📚 Pour progresser, (re)lis :</p>
+                                    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                        <template x-for="f in weakFiches()" :key="f.url">
+                                            <a :href="f.url" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:999px;background:#fff;color:var(--c-primary);font-weight:600;font-size:0.9rem;text-decoration:none;border:1px solid var(--c-primary);">📖 <span x-text="f.label"></span></a>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
                             {{-- Question IA humoristique --}}
                             <div x-show="!aiAnswered" style="margin-top:16px;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
                                 <p style="font-weight:600;margin-bottom:0.75rem;color:var(--c-dark);">🤖 Avoue… un petit coup de main d'une IA ?</p>
@@ -125,6 +149,15 @@
                             <p style="color:var(--c-primary);font-weight:600;font-size:0.9rem;margin-top:0.85rem;">
                                 🔄 Chaque partie pige 10 <strong>nouvelles</strong> questions au hasard — rejoue pour apprendre d'autres notions et faire grimper ton QT !
                             </p>
+
+                            {{-- B : carte de résultat partageable (générée en canvas) --}}
+                            <div style="margin-top:1rem;display:flex;flex-direction:column;align-items:center;gap:10px;">
+                                <p style="margin:0;font-weight:600;color:var(--c-dark);">📸 Crée ta carte à partager</p>
+                                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+                                    <button type="button" class="ct-btn ct-btn-primary" style="border-radius:999px;padding:8px 18px;" @click="shareCard('9:16')">📲 Story (9:16)</button>
+                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:8px 18px;" @click="shareCard('1:1')">⬜ Carré (1:1)</button>
+                                </div>
+                            </div>
 
                             {{-- Panneau de partage (repli quand le partage natif n'est pas dispo, ex. ordinateur) --}}
                             <div x-show="shareOpen" style="margin-top:1rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
@@ -248,6 +281,102 @@ function qtApp(payload) {
                 c.appendChild(d);
             }
             setTimeout(() => { c.innerHTML = ''; }, 3500);
+        },
+
+        themeStats() {
+            const map = {
+                ia: { key: 'ia', label: 'IA', emoji: '🧠' },
+                numerique: { key: 'numerique', label: 'Numérique', emoji: '📱' },
+                securite: { key: 'securite', label: 'Sécurité', emoji: '🔒' },
+                web: { key: 'web', label: 'Web', emoji: '🌐' },
+                donnees: { key: 'donnees', label: 'Données', emoji: '📊' }
+            };
+            const stats = {};
+            this.questions.forEach((q, i) => {
+                if (!map[q.theme]) return;
+                if (!stats[q.theme]) stats[q.theme] = { ...map[q.theme], correct: 0, total: 0 };
+                stats[q.theme].total++;
+                if (this.answers[i] === q.correct) stats[q.theme].correct++;
+            });
+            return Object.values(stats)
+                .map(t => ({ ...t, pct: t.total > 0 ? Math.round((t.correct / t.total) * 100) : 0 }))
+                .sort((a, b) => b.pct - a.pct);
+        },
+
+        barColor(pct) {
+            if (pct >= 67) return '#2E7D32';
+            if (pct >= 34) return '#B7791F';
+            return '#C0392B';
+        },
+
+        weakFiches() {
+            const seen = new Set();
+            const fiches = [];
+            this.questions.forEach((q, i) => {
+                if (q.fiche && this.answers[i] !== q.correct && !seen.has(q.fiche)) {
+                    seen.add(q.fiche);
+                    try {
+                        const slug = new URL(q.fiche).pathname.split('/').pop().split('?')[0];
+                        const label = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        fiches.push({ label, url: q.fiche });
+                    } catch (e) {}
+                }
+            });
+            return fiches.slice(0, 6);
+        },
+
+        buildCardCanvas(ratio) {
+            const sizes = ratio === '9:16' ? { width: 1080, height: 1920 } : { width: 1080, height: 1080 };
+            const canvas = Object.assign(document.createElement('canvas'), sizes);
+            const ctx = canvas.getContext('2d');
+            const cols = [...this.rank.bg.matchAll(/#([0-9a-fA-F]{6})/g)].map(m => m[0]);
+            const c1 = cols[0] || '#0B7285', c2 = cols[1] || '#064E5A';
+            const g = ctx.createLinearGradient(0, 0, sizes.width, sizes.height);
+            g.addColorStop(0, c1); g.addColorStop(1, c2);
+            ctx.fillStyle = g; ctx.fillRect(0, 0, sizes.width, sizes.height);
+            ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            const ff = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+            const h = sizes.height;
+            const draw = (text, y, size, weight = 'normal', alpha = 1) => {
+                ctx.globalAlpha = alpha;
+                ctx.font = weight + ' ' + Math.round(size) + 'px ' + ff;
+                ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 2;
+                ctx.fillText(text, sizes.width / 2, y);
+                ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.globalAlpha = 1;
+            };
+            draw('QT — Quotient Techno', h * 0.12, h * 0.04, 'bold');
+            draw(this.rank.emoji, h * 0.28, h * 0.14);
+            draw(String(this.qt), h * 0.48, h * 0.22, 'bold');
+            draw(this.rank.label, h * 0.66, h * 0.06, 'bold');
+            draw(this.correctCount + ' / 10', h * 0.74, h * 0.035);
+            draw("Et toi, c'est quoi ton QT ?", h * 0.88, h * 0.035);
+            draw('laveille.ai/outils/qt', h * 0.93, h * 0.03, 'normal', 0.8);
+            return canvas;
+        },
+
+        downloadCard(ratio) {
+            this.buildCardCanvas(ratio).toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'mon-quotient-techno.png';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        },
+
+        async shareCard(ratio) {
+            const canvas = this.buildCardCanvas(ratio);
+            const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+            const file = new File([blob], 'mon-quotient-techno.png', { type: 'image/png' });
+            const toast = (m) => window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: m, variant: 'success', duration: 3000 } }));
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], title: 'QT — Quotient Techno', text: '🧠 Mon Quotient Techno : ' + this.qt + ' — ' + this.rank.label + ' ' + this.rank.emoji + '. Et toi ?' });
+                } catch (e) {}
+            } else {
+                this.downloadCard(ratio);
+                toast('Image téléchargée 📸');
+            }
         },
 
         shareOpen: false,
