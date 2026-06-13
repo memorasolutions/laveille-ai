@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.179 · 2026-06-13 · feat(Tools) Motdle — améliorations UX avant publication : (1) bouton d'aide « ? » (`.ct-help-btn` + registre `window.HELP_CONTENT['motdle-rules']`, design réutilisé de l'anonymiseur) ouvrant la modale globale `x-core::help-modal` avec règles simples + exemple coloré (CHAT/CAFE) + pastilles vert/jaune/gris ; (2) AUTO-OUVERTURE de l'aide à la 1re visite (localStorage motdle-help-seen, dispatch open-help-modal) ; (3) légende couleurs visible sous la grille ; (4) animation flip/pop des cases à la révélation ; (5) message « Résultat copié ! » via toast global (`toast-show`). Tout réutilise les composants thème existants (help-modal/alert-toast). Codename seo-piliers-veille-generative.
  *   1.65.178 · 2026-06-13 · chore(Tools) Motdle EN CONSTRUCTION — jouable seulement par le superadmin pour l'instant (demande user : le jeu devait être suggéré, pas publié). `PublicMotdleController@play` gate : non-superadmin → vue `tools::public.under-construction` ; superadmin → le jeu. Carte `tools` motdle `is_under_construction=true` (badge). Réutilise le pattern Avatar. Réversible (down migration + retrait du gate). Codename seo-piliers-veille-generative.
  *   1.65.177 · 2026-06-13 · feat(Tools) JEU « MOTDLE » — Wordle FR quotidien du vocabulaire tech/IA dans la section outils gratuits. Route /outils/motdle (PublicMotdleController) + MotdleWordService (mot du jour déterministe par date, pool de ~68 mots FR curés 4-8 lettres style Sutom, croisement glossaire → lien fiche + définition en fin de partie quand le mot y figure). Vue Alpine à la charte : grille 6 essais longueur variable, 1re lettre indice, feedback couleur AA (vert/jaune/gris), clavier virtuel+physique, fin de partie (définition + lien glossaire), série (localStorage), partage grille emoji sans spoiler, responsive, WCAG (aria-live/labels). Entrée table tools (slug motdle, cat jeux) + menu Détente (desktop+mobile). 0 table puzzles/cron (mots gratuits). Pool glossaire pur trop inégal (acronymes/marques) → liste curée + lien glossaire où applicable. Code Hermes/qwen3-max. Codename seo-piliers-veille-generative.
  *   1.65.176 · 2026-06-13 · fix(SEO) IndexNowService résilient — `submit()`/`submitBatch()` enveloppés dans try/catch(\Throwable) → un échec réseau (cURL 28 timeout / DNS vers api.indexnow.org) journalise discrètement (Log::warning) au lieu de propager une exception et déclencher une alerte. Timeouts raccourcis (connectTimeout 3s + timeout 5s au lieu de 10s). Ping SEO NON critique : ne casse jamais la publication d'article. Corrige l'alerte automation du 2026-06-13. Codename seo-piliers-veille-generative.
@@ -327,7 +328,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 178;
+$lvPatch = 179;
 
 return [
     'major' => $lvMajor,

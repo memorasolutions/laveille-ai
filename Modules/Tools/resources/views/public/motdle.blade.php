@@ -12,6 +12,8 @@
 .motdle-correct{background:#2E7D32 !important;color:#fff !important;border-color:#2E7D32 !important;}
 .motdle-present{background:#B7791F !important;color:#fff !important;border-color:#B7791F !important;}
 .motdle-absent{background:#6B7280 !important;color:#fff !important;border-color:#6B7280 !important;}
+@keyframes motdle-reveal{0%{transform:scale(.82);}60%{transform:scale(1.06);}100%{transform:scale(1);}}
+.motdle-correct,.motdle-present,.motdle-absent{animation:motdle-reveal .3s ease;}
 .motdle-key{min-width:34px;height:48px;margin:2px;border:none;border-radius:6px;background:#e5e7eb;font-weight:600;cursor:pointer;color:var(--c-dark);}
 .motdle-key-correct{background:#2E7D32;color:#fff;}
 .motdle-key-present{background:#B7791F;color:#fff;}
@@ -31,6 +33,7 @@
                         <p style="text-align:center;color:var(--c-text-secondary);">
                             Le mot tech du jour en <span x-text="length"></span> lettres, en 6 essais.
                             Indice : commence par <strong x-text="first"></strong>.
+                            <button type="button" class="ct-help-btn" data-help-key="motdle-rules" aria-label="Aide : comment jouer">?</button>
                         </p>
 
                         <p role="status" aria-live="polite" x-text="message" style="text-align:center;min-height:1.5em;color:var(--c-primary);font-weight:600;"></p>
@@ -50,6 +53,10 @@
                                 </div>
                             </template>
                         </div>
+
+                        <p style="text-align:center;font-size:12px;color:var(--c-text-muted,#6E7687);margin-top:8px;margin-bottom:0;">
+                            🟩 bien placée · 🟨 mal placée · ⬜ absente
+                        </p>
 
                         <div style="margin-top:24px;">
                             <div style="display:flex;justify-content:center;flex-wrap:nowrap;margin-bottom:6px;">
@@ -131,6 +138,15 @@ function motdleApp(payload) {
             this.record = streakData.record || 0;
 
             window.addEventListener('keydown', (e) => this.onKey(e));
+
+            // Aide : auto-ouverte à la 1re visite (puis mémorisée)
+            if (!localStorage.getItem('motdle-help-seen')) {
+                localStorage.setItem('motdle-help-seen', '1');
+                setTimeout(() => {
+                    const help = (window.HELP_CONTENT || {})['motdle-rules'];
+                    if (help) { window.dispatchEvent(new CustomEvent('open-help-modal', { detail: help })); }
+                }, 500);
+            }
         },
 
         onKey(e) {
@@ -270,14 +286,32 @@ function motdleApp(payload) {
                 grid += line + '\n';
             }
             const text = 'Motdle #' + this.day + ' ' + (this.won ? this.current : 'X') + '/6\n' + grid + window.location.href;
+            const toast = (msg, variant) => window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: msg, variant: variant, duration: 3000 } }));
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => { this.message = 'Résultat copié !'; })
-                    .catch(() => { this.message = 'Copie impossible'; });
+                navigator.clipboard.writeText(text).then(() => { this.message = 'Résultat copié !'; toast('Résultat copié !', 'success'); })
+                    .catch(() => { this.message = 'Copie impossible'; toast('Copie impossible', 'error'); });
             } else {
                 this.message = 'Copie non supportée';
+                toast('Copie non supportée', 'warning');
             }
         }
     };
 }
+</script>
+<script>
+window.HELP_CONTENT = Object.assign(window.HELP_CONTENT || {}, {
+  "motdle-rules": {
+    "title": "Comment jouer à Motdle",
+    "body": "<p>Devinez le <strong>mot tech du jour</strong> en 6 essais. Chaque proposition doit avoir le bon nombre de lettres.</p>"
+      + "<p>Après chaque essai, la couleur de chaque case vous guide :</p>"
+      + "<ul style='line-height:1.9;list-style:none;padding-left:0;'>"
+      + "<li><span style='display:inline-block;width:16px;height:16px;background:#2E7D32;border-radius:3px;vertical-align:middle;margin-right:8px;'></span><strong>Vert</strong> : bonne lettre, à la bonne place.</li>"
+      + "<li><span style='display:inline-block;width:16px;height:16px;background:#B7791F;border-radius:3px;vertical-align:middle;margin-right:8px;'></span><strong>Jaune</strong> : la lettre est dans le mot, mais ailleurs.</li>"
+      + "<li><span style='display:inline-block;width:16px;height:16px;background:#6B7280;border-radius:3px;vertical-align:middle;margin-right:8px;'></span><strong>Gris</strong> : la lettre n'est pas dans le mot.</li>"
+      + "</ul>"
+      + "<p><strong>Exemple</strong> — si le mot à trouver est CHAT et que vous proposez CAFE : le C devient vert (bien placé), le A devient jaune (présent mais ailleurs), et F et E deviennent gris (absents).</p>"
+      + "<p>Un nouveau mot tech chaque jour. La première lettre est donnée en indice, et les accents ne comptent pas.</p>"
+  }
+});
 </script>
 @endsection
