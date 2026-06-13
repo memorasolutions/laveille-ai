@@ -5,6 +5,7 @@
 **Difficulté** : facile 23 · moyen 27 · difficile 22  
 **Thèmes** : securite 9 · numerique 10 · web 6 · ia 35 · donnees 12
 
+Ordre : **chronologique** (ordre d'ajout). Les questions les plus récentes sont à la fin — vérifie-les au fur et à mesure.  
 Légende : ✅ bonne réponse · ◻️ distracteur.
 
 ---
