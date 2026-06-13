@@ -115,6 +115,10 @@
                                                 <span style="font-size:18px;line-height:1;">🧩</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Sudoku quotidien') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Nouvelle grille chaque jour') }}</div></div>
                                             </a>
+                                            <a href="{{ url('/outils/motdle') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🟩</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Motdle') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Le mot tech du jour') }}</div></div>
+                                            </a>
                                             <a href="{{ url('/jeumc') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🎯</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Grilles partagées') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Mots croisés à jouer en ligne') }}</div></div>
@@ -148,6 +152,7 @@
                                     @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">🆚 {{ __("Comparateur d'outils IA") }}</a></li>@endif
                                     <li><a href="{{ url('/outils/mots-croises') }}">🔤 {{ __('Mots croisés') }}</a></li>
                                     <li><a href="{{ url('/outils/sudoku') }}">🧩 {{ __('Sudoku') }}</a></li>
+                                    <li><a href="{{ url('/outils/motdle') }}">🟩 {{ __('Motdle') }}</a></li>
                                     <li><a href="{{ url('/outils/simulateur-fiscal') }}">💰 {{ __('Calculatrice taxes QC') }}</a></li>
                                     @if(Route::has('tools.quest.index') && config('tools.quest.enabled', false))<li><a href="{{ route('tools.quest.index') }}">🎮 {{ __('Quête narrative') }}</a></li>@endif
                                     @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">→ {{ __('Tous les outils') }}</a></li>@endif
@@ -379,6 +384,10 @@
                                             <a href="{{ url('/outils/sudoku') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🧩</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Sudoku quotidien') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Une nouvelle grille chaque jour') }}</div></div>
+                                            </a>
+                                            <a href="{{ url('/outils/motdle') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🟩</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Motdle') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Le mot tech du jour') }}</div></div>
                                             </a>
                                             <a href="{{ url('/outils/mots-croises') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🔤</span>

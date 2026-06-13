@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
 use Modules\Tools\Http\Controllers\PublicCrosswordController;
+use Modules\Tools\Http\Controllers\PublicMotdleController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 use Modules\Tools\Http\Controllers\UserCrosswordController;
 use Modules\Tools\Http\Middleware\EnsureCrosswordTester;
@@ -109,9 +110,12 @@ Route::middleware('web')->group(function () {
     // Alias FR pur : /outils/vide-cerveau → redirect 301 → /outils/brain-dump
     Route::get('/outils/vide-cerveau', fn () => redirect('/outils/brain-dump', 301));
 
-    // #163 : exclure 'sudoku' + #177 'avatar' (routes fournies par modules dédiés).
+    // Motdle — jeu quotidien (Wordle FR du vocabulaire tech/IA, mots du glossaire). Déclaré AVANT /outils/{slug}.
+    Route::get('/outils/motdle', [PublicMotdleController::class, 'play'])->name('tools.motdle');
+
+    // #163 : exclure 'sudoku' + #177 'avatar' + 'motdle' (routes fournies par modules/contrôleurs dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
-        ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/).+')
+        ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/|motdle$|motdle/).+')
         ->middleware('cacheResponse:600')
         ->name('tools.show');
 });
