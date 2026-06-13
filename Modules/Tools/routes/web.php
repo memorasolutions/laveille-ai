@@ -112,7 +112,8 @@ Route::middleware('web')->group(function () {
     Route::get('/outils/vide-cerveau', fn () => redirect('/outils/brain-dump', 301));
 
     // Motdle — jeu quotidien (Wordle FR du vocabulaire tech/IA, mots du glossaire). Déclaré AVANT /outils/{slug}.
-    Route::get('/outils/motdle', [PublicMotdleController::class, 'play'])->name('tools.motdle');
+    // Motdle RETIRÉ 2026-06-13 (remplacé par QT) — redirection 301 réversible ; controller/service/vue conservés dormants.
+    Route::redirect('/outils/motdle', '/outils', 301)->name('tools.motdle');
     // QT — Quotient Techno (quiz). Déclaré AVANT /outils/{slug}.
     Route::get('/outils/qt', [PublicQtController::class, 'play'])->name('tools.qt');
 
