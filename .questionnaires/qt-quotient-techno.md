@@ -57,7 +57,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un mot de passe identique pour tous les comptes
 
 *Explication* : Un mot de passe fort combine majuscules, minuscules, chiffres et caractères spéciaux, et est suffisamment long pour résister aux attaques.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/mot-de-passe-fort
 
 ### 6. [SECURITE · Facile] Quel outil permet de chiffrer votre connexion Internet pour la rendre plus sécurisée, notamment sur les réseaux publics ?
 
@@ -87,7 +87,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un mot de passe oublié
 
 *Explication* : Au Québec, « pourriel » est le terme francisé pour désigner les courriels indésirables ou publicitaires envoyés en masse.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/pourriel
 
 ### 9. [IA · Facile] Quel est le principal risque lorsqu’une IA génère une information fausse mais plausible ?
 
@@ -107,7 +107,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Partage illimité
 
 *Explication* : La minimisation des données est un principe fondamental de la protection de la vie privée : on ne recueille que ce qui est utile et pertinent.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/minimisation-des-donnees
 
 ### 11. [SECURITE · Facile] Qu’est-ce qu’un mot de passe maître dans un gestionnaire de mots de passe ?
 
@@ -117,7 +117,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Le mot de passe d’un site bancaire
 
 *Explication* : Le mot de passe maître est le seul mot de passe que vous devez retenir : il déverrouille votre gestionnaire, qui stocke tous vos autres mots de passe de façon sécurisée.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/mot-de-passe-maitre
 
 ### 12. [NUMERIQUE · Facile] Quel format de fichier est couramment utilisé pour les images compressées sur le web ?
 
@@ -127,7 +127,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ DOCX
 
 *Explication* : Le format JPEG est très répandu pour les photos sur Internet car il permet une bonne compression tout en conservant une qualité visuelle acceptable.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/jpeg
 
 ### 13. [IA · Moyen] Qu’est-ce que le « fine-tuning » d’un modèle d’IA ?
 
@@ -157,7 +157,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un outil de compression d’images
 
 *Explication* : Les cookies permettent aux sites web de mémoriser des informations comme votre langue, votre panier d’achat ou votre statut de connexion.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/cookie
 
 ### 16. [DONNEES · Moyen] Qu’est-ce qu’un « token » dans le traitement du langage naturel ?
 
@@ -197,7 +197,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un pare-feu open source
 
 *Explication* : Un cheval de Troie se fait passer pour un logiciel utile (ex. : un jeu ou un utilitaire) mais installe en secret des fonctions malveillantes.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/cheval-de-troie
 
 ### 20. [WEB · Moyen] Qu’est-ce que le protocole HTTPS ?
 
@@ -207,7 +207,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un service de messagerie instantanée
 
 *Explication* : HTTPS (HTTP Secure) utilise le chiffrement pour protéger les données échangées entre votre navigateur et le site web, empêchant l’espionnage.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/https
 
 ### 21. [DONNEES · Moyen] Qu’est-ce qu’un algorithme ?
 
@@ -227,7 +227,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un protocole de transfert de fichiers
 
 *Explication* : La 5G est la dernière génération de réseau cellulaire, offrant des débits plus élevés, une latence réduite et une capacité accrue pour connecter plus d’appareils.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/5g
 
 ### 23. [IA · Moyen] Qu’est-ce qu’un réseau de neurones artificiels ?
 
@@ -247,7 +247,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un antivirus gratuit
 
 *Explication* : Le rançongiciel est un type de logiciel malveillant qui bloque l’accès à vos données en les chiffrant, puis exige un paiement pour les restaurer.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/rancongiciel
 
 ### 25. [IA · Difficile] Qu’est-ce que le « few-shot learning » en intelligence artificielle ?
 
@@ -267,7 +267,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ La température d’un serveur de données
 
 *Explication* : L’entropie quantifie le degré de désordre ou d’imprévisibilité dans un ensemble de données. Plus l’entropie est élevée, plus l’information est « surprenante ».
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/entropie
 
 ### 27. [SECURITE · Difficile] Qu’est-ce qu’une attaque par déni de service (DoS) ?
 
@@ -277,7 +277,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Le décryptage d’un message chiffré
 
 *Explication* : Une attaque DoS inonde un serveur ou un réseau avec trop de demandes, ce qui l’empêche de répondre aux utilisateurs légitimes.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/deni-de-service
 
 ### 28. [WEB · Difficile] Qu’est-ce que le DOM (Document Object Model) ?
 
@@ -287,7 +287,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un format de compression d’images vectorielles
 
 *Explication* : Le DOM est une représentation programmable d’une page HTML, que les scripts (comme JavaScript) peuvent modifier pour créer des interfaces dynamiques.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/dom
 
 ### 29. [NUMERIQUE · Difficile] Qu’est-ce que la loi de Moore ?
 
@@ -297,7 +297,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Le prix des ordinateurs augmente avec la performance
 
 *Explication* : Énoncée par Gordon Moore en 1965, cette observation (devenue une loi empirique) prédisait que la densité des transistors doublerait tous les 18 à 24 mois.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/loi-de-moore
 
 ### 30. [IA · Difficile] Qu’est-ce que le biais algorithmique ?
 
@@ -327,7 +327,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un protocole de chiffrement obsolète
 
 *Explication* : Le modèle « zero trust » repose sur le principe « ne jamais faire confiance, toujours vérifier », ce qui renforce la sécurité même contre les menaces internes.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/zero-trust
 
 ### 33. [WEB · Difficile] Qu’est-ce que le Web sémantique ?
 
@@ -337,7 +337,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un protocole de messagerie instantanée
 
 *Explication* : Le Web sémantique, imaginé par Tim Berners-Lee, utilise des standards (comme RDF ou OWL) pour lier les données de façon intelligible aux ordinateurs.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/web-semantique
 
 ### 34. [NUMERIQUE · Difficile] Qu’est-ce que l’informatique en périphérie (edge computing) ?
 
@@ -347,7 +347,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Une méthode de compression vidéo
 
 *Explication* : L’edge computing réduit la latence en traitant les données localement (à la « périphérie » du réseau), ce qui est crucial pour les applications en temps réel comme les voitures autonomes.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/edge-computing
 
 ### 35. [IA · Difficile] Qu’est-ce que l’apprentissage par renforcement (reinforcement learning) ?
 

@@ -64,7 +64,7 @@ return [
         'choices' => ['Un mot de passe facile à retenir', 'Un mot de passe composé uniquement de chiffres', 'Un mot de passe long, avec lettres, chiffres et symboles', 'Un mot de passe identique pour tous les comptes'],
         'correct' => 2,
         'explanation' => 'Un mot de passe fort combine majuscules, minuscules, chiffres et caractères spéciaux, et est suffisamment long pour résister aux attaques.',
-        'term' => null,
+        'term' => 'mot-de-passe-fort',
     ],
     [
         'theme' => 'securite',
@@ -91,7 +91,7 @@ return [
         'choices' => ['Un logiciel malveillant', 'Un courriel non sollicité', 'Un site web piraté', 'Un mot de passe oublié'],
         'correct' => 1,
         'explanation' => 'Au Québec, « pourriel » est le terme francisé pour désigner les courriels indésirables ou publicitaires envoyés en masse.',
-        'term' => null,
+        'term' => 'pourriel',
     ],
     [
         'theme' => 'ia',
@@ -109,7 +109,7 @@ return [
         'choices' => ['Minimisation des données', 'Maximisation des profits', 'Accès universel', 'Partage illimité'],
         'correct' => 0,
         'explanation' => 'La minimisation des données est un principe fondamental de la protection de la vie privée : on ne recueille que ce qui est utile et pertinent.',
-        'term' => null,
+        'term' => 'minimisation-des-donnees',
     ],
     [
         'theme' => 'securite',
@@ -118,7 +118,7 @@ return [
         'choices' => ['Le mot de passe du compte courriel', 'Le mot de passe unique pour accéder à tous vos autres mots de passe', 'Le mot de passe par défaut d’un routeur', 'Le mot de passe d’un site bancaire'],
         'correct' => 1,
         'explanation' => 'Le mot de passe maître est le seul mot de passe que vous devez retenir : il déverrouille votre gestionnaire, qui stocke tous vos autres mots de passe de façon sécurisée.',
-        'term' => null,
+        'term' => 'mot-de-passe-maitre',
     ],
     [
         'theme' => 'numerique',
@@ -127,7 +127,7 @@ return [
         'choices' => ['MP3', 'PDF', 'JPEG', 'DOCX'],
         'correct' => 2,
         'explanation' => 'Le format JPEG est très répandu pour les photos sur Internet car il permet une bonne compression tout en conservant une qualité visuelle acceptable.',
-        'term' => null,
+        'term' => 'jpeg',
     ],
     [
         'theme' => 'ia',
@@ -154,7 +154,7 @@ return [
         'choices' => ['Un fichier malveillant qui efface vos données', 'Un petit fichier texte stocké par votre navigateur pour retenir des préférences ou une session', 'Un type de virus informatique', 'Un outil de compression d’images'],
         'correct' => 1,
         'explanation' => 'Les cookies permettent aux sites web de mémoriser des informations comme votre langue, votre panier d’achat ou votre statut de connexion.',
-        'term' => null,
+        'term' => 'cookie',
     ],
     [
         'theme' => 'donnees',
@@ -190,7 +190,7 @@ return [
         'choices' => ['Un logiciel qui chiffre vos fichiers et demande une rançon', 'Un programme malveillant déguisé en logiciel légitime', 'Un outil de sauvegarde automatique', 'Un pare-feu open source'],
         'correct' => 1,
         'explanation' => 'Un cheval de Troie se fait passer pour un logiciel utile (ex. : un jeu ou un utilitaire) mais installe en secret des fonctions malveillantes.',
-        'term' => null,
+        'term' => 'cheval-de-troie',
     ],
     [
         'theme' => 'web',
@@ -199,7 +199,7 @@ return [
         'choices' => ['Un format de page web', 'Une version sécurisée du protocole HTTP qui chiffre les échanges', 'Un langage de programmation pour les sites dynamiques', 'Un service de messagerie instantanée'],
         'correct' => 1,
         'explanation' => 'HTTPS (HTTP Secure) utilise le chiffrement pour protéger les données échangées entre votre navigateur et le site web, empêchant l’espionnage.',
-        'term' => null,
+        'term' => 'https',
     ],
     [
         'theme' => 'donnees',
@@ -217,7 +217,7 @@ return [
         'choices' => ['Une norme de sécurité pour les réseaux Wi-Fi', 'La cinquième génération de réseaux mobiles, plus rapide et réactive que la 4G', 'Un type de processeur pour smartphones', 'Un protocole de transfert de fichiers'],
         'correct' => 1,
         'explanation' => 'La 5G est la dernière génération de réseau cellulaire, offrant des débits plus élevés, une latence réduite et une capacité accrue pour connecter plus d’appareils.',
-        'term' => null,
+        'term' => '5g',
     ],
     [
         'theme' => 'ia',
@@ -235,7 +235,7 @@ return [
         'choices' => ['Un logiciel qui surveille vos habitudes de navigation', 'Un programme qui chiffre vos fichiers et exige une rançon pour les déchiffrer', 'Un outil de récupération de mot de passe', 'Un antivirus gratuit'],
         'correct' => 1,
         'explanation' => 'Le rançongiciel est un type de logiciel malveillant qui bloque l’accès à vos données en les chiffrant, puis exige un paiement pour les restaurer.',
-        'term' => null,
+        'term' => 'rancongiciel',
     ],
     [
         'theme' => 'ia',
@@ -253,7 +253,7 @@ return [
         'choices' => ['La vitesse de traitement d’un processeur', 'Une mesure de l’incertitude ou de l’imprévisibilité d’une source d’information', 'Le nombre de bits utilisés pour stocker un fichier', 'La température d’un serveur de données'],
         'correct' => 1,
         'explanation' => 'L’entropie quantifie le degré de désordre ou d’imprévisibilité dans un ensemble de données. Plus l’entropie est élevée, plus l’information est « surprenante ».',
-        'term' => null,
+        'term' => 'entropie',
     ],
     [
         'theme' => 'securite',
@@ -262,7 +262,7 @@ return [
         'choices' => ['Le vol de mots de passe via un faux site web', 'L’envoi massif de requêtes pour rendre un service indisponible', 'L’installation d’un logiciel espion sur un ordinateur', 'Le décryptage d’un message chiffré'],
         'correct' => 1,
         'explanation' => 'Une attaque DoS inonde un serveur ou un réseau avec trop de demandes, ce qui l’empêche de répondre aux utilisateurs légitimes.',
-        'term' => null,
+        'term' => 'deni-de-service',
     ],
     [
         'theme' => 'web',
@@ -271,7 +271,7 @@ return [
         'choices' => ['Un protocole de transfert de fichiers sécurisé', 'Une structure arborescente représentant une page web en mémoire, manipulable par JavaScript', 'Un langage de requête pour bases de données', 'Un format de compression d’images vectorielles'],
         'correct' => 1,
         'explanation' => 'Le DOM est une représentation programmable d’une page HTML, que les scripts (comme JavaScript) peuvent modifier pour créer des interfaces dynamiques.',
-        'term' => null,
+        'term' => 'dom',
     ],
     [
         'theme' => 'numerique',
@@ -280,7 +280,7 @@ return [
         'choices' => ['La vitesse d’Internet double tous les 18 mois', 'Le nombre de transistors sur une puce double environ tous les deux ans', 'La consommation d’énergie des centres de données diminue chaque année', 'Le prix des ordinateurs augmente avec la performance'],
         'correct' => 1,
         'explanation' => 'Énoncée par Gordon Moore en 1965, cette observation (devenue une loi empirique) prédisait que la densité des transistors doublerait tous les 18 à 24 mois.',
-        'term' => null,
+        'term' => 'loi-de-moore',
     ],
     [
         'theme' => 'ia',
@@ -307,7 +307,7 @@ return [
         'choices' => ['Ne jamais utiliser Internet', 'Une approche qui suppose qu’aucun utilisateur ou appareil n’est de confiance par défaut, même à l’intérieur du réseau', 'Un antivirus gratuit', 'Un protocole de chiffrement obsolète'],
         'correct' => 1,
         'explanation' => 'Le modèle « zero trust » repose sur le principe « ne jamais faire confiance, toujours vérifier », ce qui renforce la sécurité même contre les menaces internes.',
-        'term' => null,
+        'term' => 'zero-trust',
     ],
     [
         'theme' => 'web',
@@ -316,7 +316,7 @@ return [
         'choices' => ['Une version du web uniquement textuelle', 'Un projet visant à rendre les données du web compréhensibles par les machines grâce à des métadonnées structurées', 'Un navigateur open source', 'Un protocole de messagerie instantanée'],
         'correct' => 1,
         'explanation' => 'Le Web sémantique, imaginé par Tim Berners-Lee, utilise des standards (comme RDF ou OWL) pour lier les données de façon intelligible aux ordinateurs.',
-        'term' => null,
+        'term' => 'web-semantique',
     ],
     [
         'theme' => 'numerique',
@@ -325,7 +325,7 @@ return [
         'choices' => ['Le stockage de données exclusivement dans le nuage', 'Le traitement des données près de leur source (ex. : sur un appareil ou une borne locale) plutôt que dans un centre de données central', 'Un type de câble réseau', 'Une méthode de compression vidéo'],
         'correct' => 1,
         'explanation' => 'L’edge computing réduit la latence en traitant les données localement (à la « périphérie » du réseau), ce qui est crucial pour les applications en temps réel comme les voitures autonomes.',
-        'term' => null,
+        'term' => 'edge-computing',
     ],
     [
         'theme' => 'ia',

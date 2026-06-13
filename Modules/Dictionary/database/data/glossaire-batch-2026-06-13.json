@@ -1,0 +1,404 @@
+[
+  {
+    "slug": "https",
+    "name": "HTTPS",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🔒",
+    "aliases": ["https", "http sécurisé"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "HTTPS signifie HyperText Transfer Protocol Secure. C'est la version sécurisée du protocole HTTP utilisé pour naviguer sur le Web. Le chiffrement est assuré par TLS (Transport Layer Security), anciennement appelé SSL. Lorsque tu vois un cadenas dans la barre d'adresse de ton navigateur, cela indique que la connexion est chiffrée via HTTPS. Le site utilise un certificat numérique délivré par une autorité de certification, qui prouve son identité. Le trafic transite sur le port 443. Sans HTTPS, les données que tu envoies (mots de passe, numéros de carte de crédit, messages) voyagent en clair et peuvent être interceptées par des pirates sur le même réseau (Wi-Fi public par exemple). HTTPS empêche cette interception en chiffrant les échanges entre ton navigateur et le serveur. Aujourd'hui, la grande majorité des sites sérieux utilisent HTTPS. Même les moteurs de recherche pénalisent les sites en HTTP simple. Vérifie toujours la présence du cadenas avant de saisir des informations sensibles.",
+    "analogy": "C'est comme envoyer une lettre dans une enveloppe scellée plutôt que sur une carte postale lisible par tout le monde.",
+    "example": "Quand tu te connectes à ta banque en ligne, tu vois un cadenas et l'adresse commence par https://. Cela signifie que personne ne peut espionner ton mot de passe ou tes transactions.",
+    "did_you_know": "Le chiffrement du Web (SSL, ancêtre de TLS) a été introduit par Netscape en 1994. Aujourd'hui, plus de 90 % du temps de navigation mondial se fait via HTTPS.",
+    "one_sentence_answer": "HTTPS est le protocole web sécurisé par chiffrement TLS, identifié par un cadenas, qui protège tes données contre l'interception.",
+    "faq": [
+      {"question": "Comment savoir si un site utilise HTTPS ?", "answer": "Regarde la barre d'adresse : si elle commence par https:// et affiche un cadenas, c'est bon. Si un triangle d'avertissement apparaît, méfie-toi."},
+      {"question": "Est-ce que HTTPS garantit qu'un site est fiable ?", "answer": "Non, il garantit seulement que la connexion est chiffrée. Un site malveillant peut aussi avoir un certificat. Vérifie toujours l'adresse et le contenu."}
+    ],
+    "sources": [
+      {"label": "HTTPS — Wikipédia", "url": "https://fr.wikipedia.org/wiki/HyperText_Transfer_Protocol_Secure"},
+      {"label": "HTTPS — MDN Web Docs", "url": "https://developer.mozilla.org/fr/docs/Glossary/HTTPS"}
+    ]
+  },
+  {
+    "slug": "zero-trust",
+    "name": "Confiance zéro (zero trust)",
+    "cat": 4,
+    "difficulty": "intermediate",
+    "type": "concept",
+    "icon": "🛡️",
+    "aliases": ["zero trust", "confiance zéro", "zéro confiance"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Le modèle de confiance zéro (zero trust) est une approche de cybersécurité qui part du principe qu'aucune entité, à l'intérieur ou à l'extérieur du réseau, ne doit être considérée comme fiable par défaut. Contrairement au modèle traditionnel du « château fort », où tout ce qui se trouve à l'intérieur du périmètre de l'entreprise est considéré comme sûr, la confiance zéro exige une vérification systématique pour chaque tentative d'accès à une ressource. Avant d'autoriser l'accès, on vérifie l'identité de l'utilisateur, l'état de sécurité de son appareil (antivirus, mises à jour), le contexte (localisation, heure) et on applique le principe du moindre privilège : l'utilisateur n'obtient que les droits strictement nécessaires à sa tâche. La micro-segmentation découpe le réseau en petites zones isolées, limitant la propagation d'une attaque. Ce modèle est devenu essentiel avec le télétravail et l'infonuagique, où les limites du réseau d'entreprise ont disparu. Des solutions comme l'authentification multifacteur, la gestion des identités et des accès, et les pare-feux d'application sont souvent utilisées.",
+    "analogy": "C'est comme un immeuble où chaque pièce a sa propre serrure et où tu dois montrer ta carte d'identité à chaque porte, même si tu es déjà à l'intérieur.",
+    "example": "Dans une entreprise, un employé peut accéder à son courriel mais pas aux fichiers comptables sans une demande supplémentaire et une vérification de son poste de travail.",
+    "did_you_know": "Le terme « zero trust » a été popularisé par John Kindervag, un analyste de Forrester Research, en 2010. Aujourd'hui, des gouvernements (comme celui des États-Unis) exigent l'adoption de ce modèle pour leurs agences.",
+    "one_sentence_answer": "La confiance zéro est un modèle de sécurité qui vérifie chaque accès, partout, sans confiance implicite, pour limiter les risques.",
+    "faq": [
+      {"question": "Qu'est-ce qui différencie la confiance zéro du modèle classique ?", "answer": "Le modèle classique fait confiance à l'intérieur du réseau ; la confiance zéro ne fait confiance à personne et vérifie tout, même de l'intérieur."},
+      {"question": "Dois-je appliquer la confiance zéro chez moi ?", "answer": "Oui, en partie : active l'authentification à deux facteurs, limite les privilèges des comptes, et ne fais pas confiance aux appareils inconnus sur ton réseau."}
+    ],
+    "sources": [
+      {"label": "Zero trust — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Zero_trust"},
+      {"label": "Qu'est-ce que la confiance zéro ? — IBM", "url": "https://www.ibm.com/fr-fr/topics/zero-trust"}
+    ]
+  },
+  {
+    "slug": "pourriel",
+    "name": "Pourriel",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "📧",
+    "aliases": ["spam", "pourriels", "courriel indésirable"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Un pourriel (mot-valise formé de « poubelle » et « courriel », terme recommandé par l'Office québécois de la langue française) est un courriel non sollicité, envoyé en masse à un grand nombre de destinataires, souvent à des fins publicitaires ou frauduleuses. L'équivalent anglais est « spam ». Les pourriels peuvent être agaçants, mais ils représentent aussi un risque sérieux, car ils peuvent servir de vecteurs pour l'hameçonnage, le rançongiciel ou d'autres maliciels. Les caractéristiques typiques : objet accrocheur, offre trop belle pour être vraie, fautes d'orthographe, demande d'informations personnelles, liens suspects. Les filtres anti-pourriel (dans les services de courriel comme Gmail ou Outlook) bloquent une grande partie de ces messages, mais certains passent. Il ne faut jamais répondre à un pourriel, cliquer sur un lien ou ouvrir une pièce jointe douteuse. Signale-le comme pourriel pour aider à améliorer les filtres. Légalement, au Canada, la Loi canadienne anti-pourriel (LCAP) interdit l'envoi de messages électroniques commerciaux sans consentement.",
+    "analogy": "C'est comme recevoir une pile de circulaires dans ta boîte aux lettres chaque jour, mais en version numérique.",
+    "example": "Tu reçois un courriel d'une « banque » inconnue te demandant de cliquer pour valider ton compte, avec une adresse d'expéditeur bizarre : c'est un pourriel d'hameçonnage.",
+    "did_you_know": "Selon les estimations, une large part des courriels échangés dans le monde sont des pourriels. Le tout premier pourriel connu a été envoyé en 1978 sur ARPANET, l'ancêtre d'Internet.",
+    "one_sentence_answer": "Un pourriel est un courriel non désiré, envoyé en masse, souvent publicitaire ou frauduleux, à ne jamais ouvrir.",
+    "faq": [
+      {"question": "Je reçois beaucoup de pourriels, que faire ?", "answer": "Utilise les filtres anti-pourriel de ton fournisseur, ne réponds jamais, et signale-les comme pourriel. Évite aussi d'afficher ton adresse courriel publiquement."},
+      {"question": "Est-ce que tous les pourriels sont dangereux ?", "answer": "Non, certains ne sont que de la publicité agaçante, mais beaucoup contiennent des liens malveillants. Mieux vaut tous les traiter comme suspects."}
+    ],
+    "sources": [
+      {"label": "Pourriel — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Pourriel"},
+      {"label": "Combattre le pourriel — Gouvernement du Canada", "url": "https://combattrelepourriel.gc.ca/"}
+    ]
+  },
+  {
+    "slug": "cheval-de-troie",
+    "name": "Cheval de Troie",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🐴",
+    "aliases": ["trojan", "cheval de troie"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Un cheval de Troie (ou trojan) est un type de logiciel malveillant (maliciel) qui se fait passer pour un programme légitime ou utile afin d'inciter la victime à l'installer volontairement. Contrairement à un virus ou à un ver, il ne se reproduit pas tout seul : il attend que l'utilisateur l'exécute. Une fois installé, il peut ouvrir une « porte dérobée » pour permettre à un pirate de prendre le contrôle à distance, voler des informations personnelles (mots de passe, données bancaires), installer d'autres maliciels (rançongiciel, enregistreur de frappe) ou transformer l'ordinateur en machine zombie pour des attaques. Le nom vient du mythe grec du cheval de Troie, où des soldats se cachaient à l'intérieur d'un cheval de bois. Les chevaux de Troie se propagent souvent via des téléchargements de logiciels piratés, des pièces jointes de courriels infectées, des liens malveillants ou de fausses mises à jour. Pour t'en protéger, télécharge uniquement des logiciels de sources officielles, utilise un antivirus à jour, et n'ouvre jamais un fichier suspect.",
+    "analogy": "C'est comme un cadeau empoisonné : tu l'ouvres joyeusement, et il libère un danger caché à l'intérieur.",
+    "example": "Tu télécharges un « crack » pour un jeu, mais en réalité c'est un cheval de Troie qui vole tes identifiants de connexion et les envoie à un pirate.",
+    "did_you_know": "Le concept de cheval de Troie informatique est aussi vieux que l'informatique personnelle : on en trouve des traces dès les années 1970. C'est aujourd'hui l'une des familles de maliciels les plus répandues.",
+    "one_sentence_answer": "Un cheval de Troie est un maliciel déguisé en logiciel légitime, que tu installes toi-même, ouvrant une porte aux pirates.",
+    "faq": [
+      {"question": "Comment reconnaître un cheval de Troie avant de l'installer ?", "answer": "Vérifie la source (site officiel), lis les avis, analyse le fichier avec un antivirus, et méfie-toi des offres trop belles (gratuites, cracks)."},
+      {"question": "Un antivirus peut-il supprimer un cheval de Troie ?", "answer": "Oui, la plupart des antivirus les détectent. Mais certains chevaux de Troie avancés savent se cacher : une analyse complète régulière est conseillée."}
+    ],
+    "sources": [
+      {"label": "Cheval de Troie (informatique) — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Cheval_de_Troie_(informatique)"},
+      {"label": "Logiciel malveillant — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Logiciel_malveillant"}
+    ]
+  },
+  {
+    "slug": "mot-de-passe-fort",
+    "name": "Mot de passe fort",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🔑",
+    "aliases": ["mot de passe robuste", "mot de passe sécuritaire"],
+    "broader_slugs": [],
+    "narrower_slugs": ["mot-de-passe-maitre"],
+    "definition": "Un mot de passe fort est une combinaison de caractères qui résiste aux tentatives de devinette ou de cassage par des programmes automatisés. Les critères : une longueur d'au moins 12 à 16 caractères, voire plus ; un mélange de majuscules, minuscules, chiffres et symboles ; l'absence de mots du dictionnaire, de suites logiques (123456, abcdef), de dates ou d'informations personnelles (nom, date de naissance). Idéalement, chaque compte doit avoir un mot de passe unique. Pour faciliter la mémorisation, utilise une phrase de passe : une suite de mots qui est longue et facile à retenir mais difficile à deviner. Les gestionnaires de mots de passe permettent de générer et de stocker des mots de passe forts sans avoir à les mémoriser. Active aussi l'authentification à deux facteurs (2FA) pour une couche de sécurité supplémentaire. Un bon mot de passe est ta première ligne de défense contre le vol de tes comptes en ligne.",
+    "analogy": "C'est comme une serrure à 12 goupilles plutôt qu'une serrure basique à 3 goupilles : beaucoup plus difficile à crocheter.",
+    "example": "Au lieu du mot de passe « MonChien2019 », utilise une phrase de passe comme « Café!Vélo42Tulipe#Rivière ». Et ne la réutilise jamais sur un autre site.",
+    "did_you_know": "Année après année, le mot de passe le plus répandu dans le monde reste « 123456 », qui se casse en moins d'une seconde. À l'inverse, une phrase de passe de plusieurs mots peut demander des millions d'années à deviner.",
+    "one_sentence_answer": "Un mot de passe fort est long, unique et imprévisible : il combine des caractères variés ou forme une longue phrase de passe, idéalement gérée par un gestionnaire.",
+    "faq": [
+      {"question": "Quelle est la longueur minimale recommandée ?", "answer": "Au moins 12 caractères, mais 16 ou plus est encore mieux. Les phrases de passe de 20 caractères et plus sont excellentes."},
+      {"question": "Dois-je changer mon mot de passe régulièrement ?", "answer": "Pas nécessairement, si tu utilises un mot de passe fort et unique. Change-le seulement si tu soupçonnes une compromission ou après une fuite signalée."}
+    ],
+    "sources": [
+      {"label": "Mot de passe — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Mot_de_passe"},
+      {"label": "Pensez cybersécurité — Gouvernement du Canada", "url": "https://www.pensezcybersecurite.gc.ca/fr"}
+    ]
+  },
+  {
+    "slug": "rancongiciel",
+    "name": "Rançongiciel",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🔐",
+    "aliases": ["ransomware", "rançongiciels"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Un rançongiciel (ou ransomware en anglais) est un logiciel malveillant qui, une fois exécuté, chiffre les fichiers et les systèmes de la victime, les rendant inaccessibles. Les pirates demandent ensuite une rançon, souvent en cryptomonnaie (comme le bitcoin), en échange de la clé de déchiffrement. Le rançongiciel peut se propager via des courriels d'hameçonnage, des téléchargements malveillants, des failles logicielles ou des chevaux de Troie. L'attaque WannaCry, en mai 2017, a touché plus de 200 000 ordinateurs dans 150 pays en exploitant une faille de Windows. Les conséquences peuvent être graves : perte de données, interruption des activités, coûts de rançon et de récupération. La meilleure protection est de faire des sauvegardes régulières de tes fichiers importants sur un support hors ligne (disque dur externe, infonuagique avec versionnage), de maintenir tes logiciels à jour, d'utiliser un antivirus, et de ne jamais cliquer sur des liens ou ouvrir des pièces jointes suspects. Si tu es victime, ne paie pas la rançon : cela ne garantit pas la récupération des données et encourage les criminels.",
+    "analogy": "C'est comme si un cambrioleur mettait tous tes biens dans un coffre verrouillé, puis te réclamait de l'argent pour la clé.",
+    "example": "Tu ouvres une pièce jointe dans un courriel qui prétend venir d'une compagnie de livraison, et soudain tous tes documents deviennent illisibles. Un message s'affiche : « Payez 500 $ en bitcoins pour récupérer vos données. »",
+    "did_you_know": "Le rançongiciel ne vise plus seulement les particuliers : des attaques ont paralysé des hôpitaux, des écoles et des municipalités, interrompant des services essentiels pendant des jours.",
+    "one_sentence_answer": "Un rançongiciel est un maliciel qui chiffre tes fichiers et exige une rançon pour les déchiffrer ; la meilleure défense est de sauvegarder tes données hors ligne.",
+    "faq": [
+      {"question": "Que faire si mon ordinateur est infecté par un rançongiciel ?", "answer": "Débranche immédiatement Internet, ne paie pas la rançon, contacte un professionnel en cybersécurité et tente de restaurer tes fichiers à partir d'une sauvegarde."},
+      {"question": "Les sauvegardes infonuagiques sont-elles suffisantes ?", "answer": "Oui, si elles sont automatiques et conservent des versions historiques. Mais un rançongiciel peut aussi chiffrer les fichiers synchronisés : une sauvegarde hors ligne (disque déconnecté) est plus sûre."}
+    ],
+    "sources": [
+      {"label": "Rançongiciel — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Ran%C3%A7ongiciel"},
+      {"label": "Pensez cybersécurité — Gouvernement du Canada", "url": "https://www.pensezcybersecurite.gc.ca/fr"}
+    ]
+  },
+  {
+    "slug": "deni-de-service",
+    "name": "Déni de service (DoS)",
+    "cat": 4,
+    "difficulty": "intermediate",
+    "type": "concept",
+    "icon": "🚫",
+    "aliases": ["dos", "ddos", "déni de service distribué", "attaque par déni de service"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Une attaque par déni de service (DoS) est une manœuvre malveillante qui vise à rendre un site Web, un serveur ou un service en ligne complètement indisponible pour les utilisateurs légitimes. Le principe est simple : l'attaquant submerge la cible d'un déluge de requêtes ou de trafic jusqu'à ce que ses ressources (bande passante, mémoire, processeur) soient saturées. Résultat : le service ralentit ou plante, et les vrais visiteurs ne peuvent plus y accéder. Il existe une version distribuée, le DDoS (déni de service distribué), bien plus redoutable : l'attaquant utilise un réseau de milliers d'ordinateurs ou d'objets connectés infectés à l'insu de leurs propriétaires — ce qu'on appelle un botnet — pour lancer l'attaque en même temps. L'objectif est de paralyser l'activité, pas de voler des données. Les motivations varient : cyberchantage, concurrence déloyale, militantisme ou simple vandalisme numérique. Pour se protéger, on utilise des filtres de trafic, des réseaux de diffusion de contenu (CDN) qui absorbent la charge, ou des services spécialisés anti-DDoS qui détectent et bloquent le trafic malveillant avant qu'il n'atteigne le serveur.",
+    "analogy": "Imagine un guichet unique où des milliers de personnes font la queue en même temps sans raison, bloquant l'entrée aux vrais clients.",
+    "example": "Un site de nouvelles subit une attaque DDoS le jour d'une élection : les lecteurs ne peuvent plus accéder aux résultats en direct, ce qui nuit à la crédibilité du média.",
+    "did_you_know": "Les plus grosses attaques DDoS jamais mesurées dépassent plusieurs térabits par seconde : elles sont souvent lancées depuis d'immenses botnets d'objets connectés mal sécurisés, comme des caméras de surveillance et des routeurs domestiques.",
+    "one_sentence_answer": "Une attaque par déni de service (DoS) rend un site ou un service inaccessible en le submergeant de trafic ; sa version distribuée (DDoS) utilise un réseau de machines infectées.",
+    "faq": [
+      {"question": "Est-ce qu'une attaque DoS peut voler mes données ?", "answer": "Non, son but est de paralyser le service, pas de voler des informations. Elle peut toutefois servir de diversion pour une autre attaque qui, elle, vise les données."},
+      {"question": "Que faire si mon site est victime d'un déni de service ?", "answer": "Contacte immédiatement ton hébergeur ou un service anti-DDoS, active le filtrage de trafic, et redirige les requêtes via un CDN pour absorber la charge."}
+    ],
+    "sources": [
+      {"label": "Attaque par déni de service — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Attaque_par_d%C3%A9ni_de_service"},
+      {"label": "Pensez cybersécurité — Gouvernement du Canada", "url": "https://www.pensezcybersecurite.gc.ca/fr"}
+    ]
+  },
+  {
+    "slug": "mot-de-passe-maitre",
+    "name": "Mot de passe maître",
+    "cat": 4,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🗝️",
+    "aliases": ["mot de passe maître"],
+    "broader_slugs": ["mot-de-passe-fort"],
+    "narrower_slugs": [],
+    "definition": "Le mot de passe maître est l'unique clé qui déverrouille ton gestionnaire de mots de passe — un coffre-fort numérique où sont stockés tous tes autres mots de passe, identifiants et informations sensibles. Au lieu de retenir des dizaines de combinaisons complexes, tu n'as besoin que d'un seul mot de passe, très fort et long, pour accéder à l'ensemble de ton trousseau. Le gestionnaire chiffre tes données avant de les stocker. Le principe fondamental est dit « à divulgation nulle » (zéro connaissance) : le fournisseur du gestionnaire ne connaît jamais ton mot de passe maître ni le contenu de ton coffre. Si tu perds ce mot de passe, personne — pas même l'entreprise — ne peut le récupérer ni déchiffrer tes données. C'est pourquoi il est crucial de le choisir avec soin : au moins 12 à 16 caractères, incluant majuscules, minuscules, chiffres et symboles, sans lien avec ta vie personnelle. Tu peux aussi utiliser une longue phrase de passe, facile à mémoriser mais difficile à deviner. Pour éviter de le perdre, conserve-le sur un support physique sécurisé ou utilise la méthode de récupération offerte par ton gestionnaire.",
+    "analogy": "C'est comme une clé unique qui ouvre un coffre contenant toutes les clés de ta maison, de ta voiture et de ton bureau. Perds cette clé, et tout reste verrouillé.",
+    "example": "Avec un gestionnaire comme Bitwarden ou 1Password, tu crées un mot de passe maître très long (par exemple une phrase de passe de 20 caractères), et tu n'as plus qu'à retenir celui-là pour te connecter automatiquement à tous tes sites.",
+    "did_you_know": "Certains gestionnaires de mots de passe offrent un « accès d'urgence » : tu désignes un contact de confiance qui peut demander l'accès à ton coffre après une période d'inactivité, sans jamais connaître ton mot de passe maître.",
+    "one_sentence_answer": "Le mot de passe maître est l'unique clé qui déverrouille ton gestionnaire de mots de passe ; il protège tous tes autres mots de passe et ne peut pas être récupéré si tu le perds.",
+    "faq": [
+      {"question": "Que se passe-t-il si j'oublie mon mot de passe maître ?", "answer": "Aucune récupération n'est possible à cause du chiffrement « à divulgation nulle ». Tu dois absolument le sauvegarder hors ligne ou utiliser la clé de secours fournie à la création du coffre."},
+      {"question": "Est-ce sécuritaire de stocker tous mes mots de passe au même endroit ?", "answer": "Oui, si le mot de passe maître est très fort et que le gestionnaire utilise un chiffrement robuste. Le risque est bien moindre que de réutiliser le même mot de passe partout."}
+    ],
+    "sources": [
+      {"label": "Gestionnaire de mots de passe — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Gestionnaire_de_mots_de_passe"},
+      {"label": "Pensez cybersécurité — Gouvernement du Canada", "url": "https://www.pensezcybersecurite.gc.ca/fr"}
+    ]
+  },
+  {
+    "slug": "minimisation-des-donnees",
+    "name": "Minimisation des données",
+    "cat": 4,
+    "difficulty": "intermediate",
+    "type": "concept",
+    "icon": "🗜️",
+    "aliases": ["minimisation"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "La minimisation des données est un principe fondamental de protection de la vie privée selon lequel une organisation ne doit collecter, traiter et conserver que les renseignements personnels strictement nécessaires pour atteindre la finalité qu'elle a annoncée. Concrètement, si un site de commerce en ligne a besoin de ton adresse pour te livrer un colis, il peut la demander, mais il n'a pas à exiger ton numéro d'assurance sociale ou ta date de naissance. Ce principe est au cœur de plusieurs lois, notamment la Loi 25 au Québec et le Règlement général sur la protection des données (RGPD) en Europe. En pratique, cela signifie que les organisations doivent limiter la quantité de données récoltées, définir une durée de conservation minimale, et supprimer les informations qui ne sont plus utiles. Moins il y a de données stockées, plus les risques sont faibles en cas de fuite, de piratage ou d'usage abusif. Pour toi, c'est un droit : tu peux refuser de fournir des informations superflues. Certains services vont plus loin avec la « protection de la vie privée dès la conception », où la minimisation est intégrée dès la conception du logiciel.",
+    "analogy": "C'est comme donner au livreur seulement ton adresse pour livrer un colis, sans lui remettre le plan complet de ta maison ni ton horaire de la semaine.",
+    "example": "Une application d'entraînement te demande ton âge et ton poids pour estimer tes calories brûlées, mais elle n'a pas besoin de ton adresse exacte ni de ton numéro de carte de crédit pour fonctionner.",
+    "did_you_know": "Au Québec, la Loi 25 oblige les organisations non seulement à minimiser les données collectées, mais aussi à évaluer les facteurs relatifs à la vie privée pour les projets qui traitent des renseignements personnels sensibles.",
+    "one_sentence_answer": "La minimisation des données est le principe de ne collecter que les renseignements strictement nécessaires à un service, réduisant les risques de fuite et respectant la vie privée.",
+    "faq": [
+      {"question": "Que faire si un site me demande plus d'informations que nécessaire ?", "answer": "Tu peux refuser de fournir ce qui n'est pas obligatoire. Au Québec, si une organisation abuse, tu peux le signaler à la Commission d'accès à l'information."},
+      {"question": "La minimisation s'applique-t-elle aux entreprises québécoises ?", "answer": "Oui, la Loi 25 l'impose à toutes les organisations qui recueillent des renseignements personnels au Québec, avec des obligations de transparence et de consentement."}
+    ],
+    "sources": [
+      {"label": "Règlement général sur la protection des données — Wikipédia", "url": "https://fr.wikipedia.org/wiki/R%C3%A8glement_g%C3%A9n%C3%A9ral_sur_la_protection_des_donn%C3%A9es"},
+      {"label": "Minimisation — CNIL", "url": "https://www.cnil.fr/fr/definition/minimisation"}
+    ]
+  },
+  {
+    "slug": "cookie",
+    "name": "Témoin de connexion (cookie)",
+    "cat": 6,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🍪",
+    "aliases": ["cookie", "cookies", "témoin", "témoin de connexion"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Un cookie, qu'on appelle aussi « témoin » en français québécois (terme recommandé par l'Office québécois de la langue française), est un petit fichier texte qu'un site Web dépose et stocke dans ton navigateur lorsque tu le visites. Ce fichier contient des informations que le site peut relire lors de tes visites suivantes : par exemple, le fait que tu sois déjà connecté, ta langue préférée, les articles de ton panier d'achat, ou encore des données de suivi pour la publicité ciblée. Il existe plusieurs types de témoins : les témoins de session, effacés quand tu fermes le navigateur, et les témoins persistants, qui restent plus longtemps ; les témoins propriétaires, placés par le site que tu consultes, et les témoins tiers, déposés par d'autres domaines (régies publicitaires, réseaux sociaux) pour suivre ta navigation d'un site à l'autre. Au Québec, la Loi 25 et le RGPD en Europe exigent que les sites obtiennent ton consentement avant de placer des témoins non essentiels. Tu as donc le droit d'accepter ou de refuser chaque catégorie. Les témoins essentiels, eux, permettent des fonctions de base comme la connexion. Ces petits fichiers améliorent ton expérience, mais peuvent aussi porter atteinte à ta vie privée.",
+    "analogy": "C'est comme un billet de vestiaire qu'on te remet : il permet de se souvenir de ton manteau et de te le redonner. Mais si plusieurs vestiaires partagent le même billet, ils peuvent suivre tous tes déplacements.",
+    "example": "Quand tu ajoutes un livre à ton panier sur une librairie en ligne et que tu reviens le lendemain avec le panier encore rempli, c'est grâce à un témoin persistant déposé lors de ta première visite.",
+    "did_you_know": "Le terme « cookie » vient de l'informatique des années 1970, où un « magic cookie » désignait un petit paquet de données échangé entre programmes — rien à voir avec la pâtisserie.",
+    "one_sentence_answer": "Un cookie (ou témoin) est un petit fichier texte qu'un site dépose dans ton navigateur pour mémoriser tes préférences ou suivre ta navigation ; son usage non essentiel requiert ton consentement.",
+    "faq": [
+      {"question": "Dois-je accepter tous les témoins pour utiliser un site ?", "answer": "Non, tu peux refuser les témoins non essentiels (publicitaires, analytiques). Le site doit rester fonctionnel avec seulement les témoins nécessaires à son service de base."},
+      {"question": "Comment supprimer les témoins déjà installés ?", "answer": "Dans les paramètres de ton navigateur (Chrome, Firefox, Safari), tu peux effacer les témoins manuellement ou configurer leur suppression automatique à la fermeture."}
+    ],
+    "sources": [
+      {"label": "Cookie (informatique) — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Cookie_(informatique)"},
+      {"label": "Cookies et autres traceurs — CNIL", "url": "https://www.cnil.fr/fr/cookies-et-autres-traceurs"}
+    ]
+  },
+  {
+    "slug": "jpeg",
+    "name": "JPEG",
+    "cat": 6,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "🖼️",
+    "aliases": ["jpg", "jpeg"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Le format JPEG (prononcé « ji-peg ») est l'un des formats d'image les plus répandus sur le Web, notamment pour les photos et les images réalistes comme les paysages ou les portraits. Son nom vient du Joint Photographic Experts Group, le comité d'experts qui a normalisé ce format en 1992. La caractéristique principale du JPEG est qu'il utilise une compression dite « avec perte » : pour réduire la taille du fichier, l'algorithme supprime des détails visuels que l'œil humain perçoit difficilement, comme de subtiles variations de couleur. Cela permet d'obtenir des images beaucoup plus légères (quelques centaines de kilo-octets contre plusieurs mégaoctets pour un fichier non compressé) tout en conservant un rendu acceptable. Plus le taux de compression est élevé, plus la qualité se dégrade, avec l'apparition d'artefacts (blocs, flous). Les fichiers JPEG portent l'extension .jpg ou .jpeg. C'est un excellent compromis entre qualité et poids, mais il n'est pas adapté à tout : pour des logos, des graphismes avec du texte ou des images avec transparence, on préfère le PNG ; pour des animations, le GIF. Le JPEG a été conçu spécifiquement pour les photographies, où les petites imperfections passent inaperçues.",
+    "analogy": "C'est un peu comme réduire la résolution d'une photo de vacances pour l'envoyer par courriel : l'image est moins détaillée, mais tu vois encore bien le paysage et le fichier est beaucoup plus petit.",
+    "example": "Tu téléverses une photo de 10 Mo de ton chat sur un réseau social : le site la convertit automatiquement en JPEG compressé pour afficher une version de 300 Ko, qui se charge vite sans perdre trop de qualité.",
+    "did_you_know": "Le JPEG n'est pas idéal pour les retouches répétées : chaque réenregistrement applique de nouveau la compression avec perte et dégrade un peu plus l'image. Pour retravailler une photo, mieux vaut un format sans perte comme le PNG ou le TIFF.",
+    "one_sentence_answer": "Le JPEG est un format d'image compressé avec perte, idéal pour les photos sur le Web, car il réduit le poids du fichier en échange d'une légère baisse de qualité souvent imperceptible.",
+    "faq": [
+      {"question": "Quelle est la différence entre .jpg et .jpeg ?", "answer": "Aucune différence technique. L'extension .jpg vient des anciens systèmes qui limitaient les noms de fichiers à trois caractères ; .jpeg est l'extension complète. Les deux sont identiques."},
+      {"question": "Le JPEG gère-t-il la transparence ?", "answer": "Non, le JPEG ne gère pas la transparence. Pour une image avec un fond transparent, il faut utiliser le PNG ou le GIF."}
+    ],
+    "sources": [
+      {"label": "JPEG — Wikipédia", "url": "https://fr.wikipedia.org/wiki/JPEG"}
+    ]
+  },
+  {
+    "slug": "entropie",
+    "name": "Entropie (information)",
+    "cat": 6,
+    "difficulty": "advanced",
+    "type": "concept",
+    "icon": "🎲",
+    "aliases": ["entropie de shannon"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "En théorie de l'information, l'entropie est une mesure de l'incertitude ou de l'imprévisibilité d'une information. Elle a été formalisée par Claude Shannon en 1948 dans son article fondateur « Une théorie mathématique de la communication ». Exprimée en bits, l'entropie indique le nombre moyen de bits nécessaires pour représenter une information de façon optimale, sans redondance. Par exemple, une pièce de monnaie équilibrée (pile ou face) a une entropie de 1 bit, car chaque résultat est aussi imprévisible l'un que l'autre. Une pièce truquée qui tombe toujours sur pile a une entropie nulle, car il n'y a aucune incertitude. Dans le domaine de la sécurité informatique, l'entropie sert à évaluer la force d'un mot de passe : un mot de passe court, composé uniquement de lettres minuscules, a une faible entropie, tandis qu'un mot de passe long mêlant majuscules, chiffres et symboles a une entropie élevée, donc bien plus difficile à deviner par force brute. L'entropie limite aussi la compression : on ne peut pas compresser un fichier en dessous de son entropie sans perdre de l'information.",
+    "analogy": "C'est comme le nombre de faces d'un dé : un dé à six faces a une entropie plus élevée qu'une pièce à deux faces, car le résultat est moins prévisible et demande plus de bits pour le décrire.",
+    "example": "Un mot de passe de 8 caractères en minuscules seulement a une entropie d'environ 38 bits, tandis qu'un mot de passe de 16 caractères mêlant majuscules, minuscules, chiffres et symboles dépasse 100 bits, ce qui le rend pratiquement incassable.",
+    "did_you_know": "L'unité élémentaire de l'entropie de l'information, le « shannon » (équivalent au bit), porte le nom de Claude Shannon, considéré comme le père de la théorie de l'information.",
+    "one_sentence_answer": "L'entropie mesure l'imprévisibilité d'une information en bits : plus elle est élevée, plus un mot de passe est fort et plus les données sont difficiles à compresser sans perte.",
+    "faq": [
+      {"question": "À quoi sert l'entropie pour les mots de passe ?", "answer": "Elle quantifie combien un mot de passe est imprévisible. Plus l'entropie (en bits) est élevée, plus il faut d'essais pour le deviner par force brute, donc plus il est sûr."},
+      {"question": "Une entropie élevée est-elle toujours souhaitable ?", "answer": "Oui pour la sécurité (mots de passe, clés de chiffrement), mais pas pour la compression : un fichier à haute entropie est déjà très dense et se comprime mal."}
+    ],
+    "sources": [
+      {"label": "Entropie de Shannon — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Entropie_de_Shannon"}
+    ]
+  },
+  {
+    "slug": "5g",
+    "name": "5G",
+    "cat": 2,
+    "difficulty": "beginner",
+    "type": "concept",
+    "icon": "📶",
+    "aliases": ["5g", "cinquième génération"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "La 5G est la cinquième génération des réseaux de téléphonie mobile, déployée commercialement à partir de 2019-2020. Elle succède à la 4G LTE et transforme la connectivité sans fil. Concrètement, la 5G offre des débits de téléchargement nettement plus rapides que la 4G, ce qui permet de télécharger un film en haute définition en quelques secondes. Mais son vrai atout, c'est la latence ultra-faible (le temps de réponse entre l'envoi et la réception d'un signal), qui peut descendre sous la milliseconde dans les meilleures conditions, contre plusieurs dizaines de millisecondes pour la 4G. Cette réactivité est cruciale pour des applications comme la chirurgie à distance, les voitures autonomes ou le jeu vidéo en nuage sans décalage. La 5G peut aussi connecter un très grand nombre d'objets simultanément sur une même zone, ce qui la rend incontournable pour l'Internet des objets (IoT) et les villes intelligentes. Pour y arriver, elle utilise plusieurs bandes de fréquences, dont les ondes millimétriques (très hautes fréquences) qui transportent beaucoup de données mais sur de courtes distances, d'où le besoin d'installer plus d'antennes. La couverture n'est pas encore universelle, surtout en dehors des grands centres.",
+    "analogy": "Imagine la 4G comme une autoroute à deux voies, fluide mais sujette aux bouchons. La 5G, c'est une autoroute à voies multiples où chaque véhicule file sans jamais freiner.",
+    "example": "Quand tu regardes un match en direct sur ton cellulaire en 5G, l'image reste fluide même dans un stade bondé où des milliers de personnes utilisent leur téléphone en même temps.",
+    "did_you_know": "Le nom technique officiel de la 5G est « IMT-2020 », car ses spécifications ont été coordonnées par l'Union internationale des télécommunications, avec une finalisation visée pour 2020.",
+    "one_sentence_answer": "La 5G est la cinquième génération de réseau mobile : plus rapide et plus réactive que la 4G, elle est idéale pour le streaming, le jeu en ligne et l'Internet des objets.",
+    "faq": [
+      {"question": "Est-ce que la 5G est dangereuse pour la santé ?", "answer": "Selon l'Organisation mondiale de la santé et Santé Canada, les ondes de la 5G respectent les normes de sécurité et ne présentent pas de risque avéré pour la santé."},
+      {"question": "Mon cellulaire 4G fonctionne-t-il avec la 5G ?", "answer": "Pour profiter de la 5G, il te faut un téléphone compatible. Un appareil 4G continue de fonctionner, mais sur le réseau 4G uniquement."}
+    ],
+    "sources": [
+      {"label": "5G — Wikipédia", "url": "https://fr.wikipedia.org/wiki/5G"}
+    ]
+  },
+  {
+    "slug": "dom",
+    "name": "DOM (Document Object Model)",
+    "cat": 5,
+    "difficulty": "intermediate",
+    "type": "technique",
+    "icon": "🌳",
+    "aliases": ["dom", "document object model"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Le DOM, ou Document Object Model en anglais, est une représentation en arbre de la structure d'une page Web que le navigateur construit automatiquement en mémoire quand tu charges un site. Chaque élément de ta page — un titre, un paragraphe, une image, un bouton — devient un « nœud » dans cet arbre. Le navigateur relie ces nœuds entre eux comme les branches d'un arbre généalogique : le nœud « body » est le parent de tous les éléments visibles, et chaque balise HTML a des enfants ou des frères. Ce qui rend le DOM puissant, c'est que tu peux le manipuler en temps réel avec du JavaScript pour changer le contenu, le style ou même la structure de la page sans avoir à la recharger entièrement. Par exemple, quand tu ajoutes un article à ton panier d'achat et que le compteur se met à jour instantanément, c'est le JavaScript qui modifie le DOM. Le DOM est un standard officiel du World Wide Web Consortium (W3C), ce qui signifie qu'il fonctionne de la même manière dans tous les navigateurs modernes. Sans le DOM, les pages Web seraient des documents statiques, impossibles à animer ou à rendre interactives.",
+    "analogy": "Imagine une page Web comme une maison en blocs de construction. Le DOM, c'est le plan qui montre où chaque bloc est placé, et JavaScript te permet de déplacer les blocs sans démolir la maison.",
+    "example": "Quand tu cliques sur « J'aime » et que le bouton change de couleur et que le compteur augmente sans que la page se recharge, c'est du JavaScript qui modifie le DOM en direct.",
+    "did_you_know": "Le DOM n'est pas propre au HTML : il existe aussi pour les documents XML et les images vectorielles SVG. Son concept a été standardisé par le W3C à la fin des années 1990 pour unifier la façon de manipuler les pages.",
+    "one_sentence_answer": "Le DOM est la structure en arbre d'une page Web que le navigateur crée en mémoire et que JavaScript peut modifier pour rendre le site interactif.",
+    "faq": [
+      {"question": "Le DOM et le code source HTML, est-ce la même chose ?", "answer": "Pas exactement. Le code source est le fichier original ; le DOM est la version en mémoire du navigateur, qui peut être modifiée en direct par JavaScript."},
+      {"question": "Peut-on voir le DOM d'une page ?", "answer": "Oui, ouvre les outils de développement de ton navigateur (touche F12, ou Cmd+Option+I sur Mac) et va dans l'onglet « Inspecteur » ou « Éléments »."}
+    ],
+    "sources": [
+      {"label": "Document Object Model — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Document_Object_Model"},
+      {"label": "Le modèle objet de document (DOM) — MDN", "url": "https://developer.mozilla.org/fr/docs/Web/API/Document_Object_Model"}
+    ]
+  },
+  {
+    "slug": "loi-de-moore",
+    "name": "Loi de Moore",
+    "cat": 2,
+    "difficulty": "intermediate",
+    "type": "concept",
+    "icon": "📈",
+    "aliases": ["loi de moore"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "La loi de Moore n'est pas une loi physique comme la gravité, mais une observation visionnaire faite en 1965 par Gordon Moore, cofondateur d'Intel. Il a remarqué que le nombre de transistors — ces minuscules interrupteurs qui font fonctionner les puces électroniques — doublait environ tous les deux ans, et ce, sans que le coût de fabrication d'une puce n'augmente. Concrètement, cela signifie que la puissance de calcul des ordinateurs a progressé de façon exponentielle pendant des décennies : ce qui occupait une salle entière en 1970 tient maintenant dans ton téléphone. Cette tendance a guidé toute l'industrie technologique, des fabricants de processeurs aux développeurs de logiciels, qui pouvaient compter sur des machines deux fois plus puissantes à prix égal tous les 18 à 24 mois. Cependant, depuis le milieu des années 2010, la loi de Moore ralentit sérieusement, car on se heurte à des limites physiques : les transistors sont devenus si petits (quelques atomes d'épaisseur) que des effets quantiques perturbent leur fonctionnement, et la chaleur dégagée devient difficile à dissiper. Les fabricants innovent maintenant sur d'autres fronts, comme l'architecture des puces ou l'empilement en 3D, pour continuer à gagner en performance.",
+    "analogy": "C'est comme si, tous les deux ans, le moteur de ta voiture devenait deux fois plus puissant sans que le prix ni la taille du véhicule ne changent.",
+    "example": "En 1971, le premier microprocesseur Intel 4004 comptait 2 300 transistors. Aujourd'hui, un processeur moderne en contient des milliards : la loi de Moore s'est vérifiée pendant un demi-siècle.",
+    "did_you_know": "Gordon Moore n'a pas énoncé sa loi dans un article scientifique, mais dans un article de magazine intitulé « Cramming more components onto integrated circuits », paru dans la revue Electronics en 1965.",
+    "one_sentence_answer": "La loi de Moore observe que le nombre de transistors d'une puce double environ tous les deux ans à coût égal, d'où une croissance exponentielle de la puissance de calcul ; ce rythme ralentit aujourd'hui.",
+    "faq": [
+      {"question": "La loi de Moore est-elle encore vraie aujourd'hui ?", "answer": "Pas tout à fait. Le doublement pur et simple des transistors ralentit, mais la performance continue d'augmenter grâce à d'autres innovations comme l'architecture 3D et les puces spécialisées."},
+      {"question": "Qui a énoncé la loi de Moore ?", "answer": "Gordon Moore, cofondateur d'Intel, en 1965 — bien avant la création du premier microprocesseur en 1971."}
+    ],
+    "sources": [
+      {"label": "Loi de Moore — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Loi_de_Moore"}
+    ]
+  },
+  {
+    "slug": "web-semantique",
+    "name": "Web sémantique",
+    "cat": 2,
+    "difficulty": "advanced",
+    "type": "concept",
+    "icon": "🕸️",
+    "aliases": ["web sémantique", "web 3.0"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "Le Web sémantique est une vision du World Wide Web proposée par son inventeur lui-même, Tim Berners-Lee, au tournant des années 2000. L'idée est ambitieuse : et si les données sur le Web étaient structurées de façon à ce que les machines puissent les comprendre et les traiter intelligemment, et pas seulement les afficher pour les humains ? Aujourd'hui, quand tu cherches « meilleur restaurant italien à Montréal », un moteur de recherche analyse surtout des mots-clés, sans vraiment saisir le sens de ta requête. Avec le Web sémantique, les données seraient reliées entre elles par des liens logiques et des métadonnées standardisées — grâce à des technologies comme RDF (Resource Description Framework), les ontologies (des dictionnaires de concepts) et les données liées (linked data). Les machines pourraient alors raisonner : « cet usager cherche un restaurant, qui sert des pâtes, situé à Montréal, bien noté et ouvert le dimanche. » Ce concept est parfois appelé Web 3.0 dans son sens original — à ne pas confondre avec la chaîne de blocs ou les jetons non fongibles. Le Web sémantique est déjà utilisé en partie (par exemple dans les graphes de connaissances des moteurs de recherche), mais son adoption complète reste un défi, car elle demande de structurer les données de façon rigoureuse.",
+    "analogy": "Aujourd'hui, le Web ressemble à une immense bibliothèque où les livres sont empilés sans étiquettes. Le Web sémantique, c'est ranger chaque livre avec des codes, des résumés et des renvois, pour qu'un robot bibliothécaire trouve exactement ce que tu cherches.",
+    "example": "Quand tu demandes à un moteur de recherche « combien d'habitants à Québec ? » et qu'il t'affiche directement le nombre dans une boîte en haut des résultats, c'est une application des principes du Web sémantique (graphe de connaissances).",
+    "did_you_know": "L'expression « Web sémantique » a été popularisée par un article fondateur de Tim Berners-Lee et de ses collègues, paru dans le magazine Scientific American en 2001.",
+    "one_sentence_answer": "Le Web sémantique est une vision du Web où les données sont structurées pour que les machines les comprennent et les relient entre elles de façon intelligente.",
+    "faq": [
+      {"question": "Le Web sémantique, est-ce la même chose que l'intelligence artificielle ?", "answer": "Pas directement. Le Web sémantique fournit des données bien structurées que les IA peuvent ensuite exploiter pour raisonner et répondre à des questions complexes."},
+      {"question": "Est-ce que le Web sémantique est déjà utilisé partout ?", "answer": "Non, il reste sous-exploité sur la majorité des sites, mais des géants comme Google et Wikipédia s'appuient sur ses principes en coulisses."}
+    ],
+    "sources": [
+      {"label": "Web sémantique — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Web_s%C3%A9mantique"}
+    ]
+  },
+  {
+    "slug": "edge-computing",
+    "name": "Informatique en périphérie (edge computing)",
+    "cat": 2,
+    "difficulty": "intermediate",
+    "type": "concept",
+    "icon": "🌐",
+    "aliases": ["edge computing", "informatique en périphérie", "calcul en périphérie"],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "definition": "L'edge computing, qu'on appelle aussi « informatique en périphérie » en français, est une façon de traiter les données le plus près possible de l'endroit où elles sont produites — un capteur, une caméra, une voiture ou un appareil connecté — plutôt que de les envoyer vers un centre de données distant dans le nuage. Pourquoi faire cela ? Principalement pour gagner du temps et réduire la charge sur le réseau. Imagine un véhicule autonome qui doit décider en une fraction de seconde s'il freine ou contourne un obstacle : s'il devait envoyer les images à un serveur lointain et attendre la réponse, l'accident serait déjà arrivé. Avec l'edge computing, le traitement se fait directement dans la voiture ou sur une petite unité locale, ce qui réduit la latence à quelques millisecondes. Cette approche est aussi cruciale pour l'Internet des objets (IoT) : des milliers de capteurs dans une usine intelligente génèrent énormément de données, et il serait inefficace de tout envoyer dans le nuage. L'edge computing filtre, regroupe et analyse les données sur place, et n'envoie au nuage que ce qui est vraiment utile. En prime, cela améliore la confidentialité, car les données sensibles restent sur l'appareil local.",
+    "analogy": "Au lieu d'envoyer chaque photo dans un labo à l'autre bout du monde pour la développer, tu l'imprimes directement chez toi en deux secondes : plus rapide, et tes données ne voyagent pas.",
+    "example": "Quand ta sonnette connectée détecte un visiteur et t'envoie la vidéo en direct sur ton cellulaire sans délai, c'est l'edge computing qui traite l'image localement avant de t'alerter.",
+    "did_you_know": "L'idée de rapprocher le traitement des utilisateurs n'est pas nouvelle : dès les années 1990, les réseaux de diffusion de contenu (CDN) plaçaient des serveurs proches des internautes pour accélérer le chargement des sites.",
+    "one_sentence_answer": "L'edge computing traite les données localement, près de leur source, pour réduire la latence et la dépendance au nuage ; il est essentiel aux objets connectés et aux voitures autonomes.",
+    "faq": [
+      {"question": "L'edge computing va-t-il remplacer le nuage ?", "answer": "Non, les deux se complètent. L'edge fait le traitement rapide sur place, tandis que le nuage garde la puissance pour l'analyse lourde et le stockage à long terme."},
+      {"question": "Est-ce que mon cellulaire fait de l'edge computing ?", "answer": "Oui, en partie. Quand ton téléphone fait de la reconnaissance faciale sans envoyer tes données sur Internet, c'est une forme de traitement en périphérie."}
+    ],
+    "sources": [
+      {"label": "Edge computing — Wikipédia", "url": "https://fr.wikipedia.org/wiki/Edge_computing"}
+    ]
+  }
+]
