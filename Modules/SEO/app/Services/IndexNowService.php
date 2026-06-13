@@ -15,24 +15,31 @@ class IndexNowService
             return false;
         }
 
-        $response = Http::timeout(10)->post('https://api.indexnow.org/indexnow', [
-            'host' => parse_url(config('app.url'), PHP_URL_HOST),
-            'key' => self::getKey(),
-            'keyLocation' => config('app.url').'/'.self::getKey().'.txt',
-            'urlList' => [$url],
-        ]);
-
-        if (! $response->successful()) {
-            Log::warning('IndexNow submission failed', [
-                'url' => $url,
-                'status' => $response->status(),
-                'body' => $response->body(),
+        try {
+            $response = Http::connectTimeout(3)->timeout(5)->post('https://api.indexnow.org/indexnow', [
+                'host' => parse_url(config('app.url'), PHP_URL_HOST),
+                'key' => self::getKey(),
+                'keyLocation' => config('app.url').'/'.self::getKey().'.txt',
+                'urlList' => [$url],
             ]);
+
+            if (! $response->successful()) {
+                Log::warning('IndexNow submission failed', [
+                    'url' => $url,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return false;
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            // Ping SEO non critique : un échec réseau (timeout, DNS) ne doit jamais propager ni alerter.
+            Log::warning('IndexNow submission network error', ['url' => $url, 'message' => $e->getMessage()]);
 
             return false;
         }
-
-        return true;
     }
 
     public static function submitBatch(array $urls): bool
@@ -41,24 +48,31 @@ class IndexNowService
             return false;
         }
 
-        $response = Http::timeout(10)->post('https://api.indexnow.org/indexnow', [
-            'host' => parse_url(config('app.url'), PHP_URL_HOST),
-            'key' => self::getKey(),
-            'keyLocation' => config('app.url').'/'.self::getKey().'.txt',
-            'urlList' => $urls,
-        ]);
-
-        if (! $response->successful()) {
-            Log::warning('IndexNow batch submission failed', [
-                'urls' => $urls,
-                'status' => $response->status(),
-                'body' => $response->body(),
+        try {
+            $response = Http::connectTimeout(3)->timeout(5)->post('https://api.indexnow.org/indexnow', [
+                'host' => parse_url(config('app.url'), PHP_URL_HOST),
+                'key' => self::getKey(),
+                'keyLocation' => config('app.url').'/'.self::getKey().'.txt',
+                'urlList' => $urls,
             ]);
+
+            if (! $response->successful()) {
+                Log::warning('IndexNow batch submission failed', [
+                    'urls' => $urls,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return false;
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            // Ping SEO non critique : un échec réseau (timeout, DNS) ne doit jamais propager ni alerter.
+            Log::warning('IndexNow batch submission network error', ['urls' => $urls, 'message' => $e->getMessage()]);
 
             return false;
         }
-
-        return true;
     }
 
     public static function getKey(): string
