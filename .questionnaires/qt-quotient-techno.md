@@ -147,7 +147,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Avoir deux comptes sur le même service
 
 *Explication* : La 2FA renforce la sécurité en exigeant deux types de preuves : par exemple, un mot de passe (connu) et un code reçu par SMS ou une appli (possédé).
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/2fa
 
 ### 15. [WEB · Moyen] Qu’est-ce qu’un cookie dans le contexte du web ?
 
@@ -257,7 +257,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ L’utilisation de plusieurs GPU pour accélérer l’entraînement
 
 *Explication* : Le few-shot learning permet à un modèle d’IA de généraliser une tâche à partir de seulement quelques exemples, contrairement à l’apprentissage traditionnel qui en nécessite des milliers.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-few-shot
 
 ### 26. [DONNEES · Difficile] Qu’est-ce que l’entropie dans le contexte de la théorie de l’information ?
 
@@ -357,7 +357,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ La traduction automatique de documents
 
 *Explication* : Dans l’apprentissage par renforcement, un agent apprend à prendre des décisions en essayant différentes actions et en recevant un retour (récompense ou punition) de son environnement.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-par-renforcement
 
 ### 36. [DONNEES · Difficile] Qu’est-ce que la confidentialité différentielle (differential privacy) ?
 
@@ -367,7 +367,7 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 - ◻️ Un logiciel de gestion de consentement
 
 *Explication* : La confidentialité différentielle permet de publier des statistiques sur un ensemble de données sans révéler d’informations identifiables sur des individus spécifiques.
-*Fiche glossaire* : (aucune)
+*Fiche glossaire* : https://laveille.ai/glossaire/confidentialite-differentielle
 
 ### 37. [IA · Facile] Quel assistant conversationnel d’OpenAI génère du texte, du code et des analyses à partir d’instructions en langage naturel ?
 

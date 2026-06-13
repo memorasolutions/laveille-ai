@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.186 · 2026-06-13 · refine(Tools) QT — maillage fiches : 4 anciennes questions sans lien désormais ancrées à leur fiche du glossaire (2FA→2fa, few-shot→apprentissage-few-shot, renforcement→apprentissage-par-renforcement, confidentialité différentielle→confidentialite-differentielle). 55/72 questions pointent maintenant vers une fiche (« rester et apprendre ») ; les 17 restantes visent des notions générales web/sécurité absentes du glossaire (centré IA) → term=null (mieux que lien cassé). Slugs vérifiés sur la base prod. MD régénéré. Cache qt.bank à vider. Codename seo-piliers-veille-generative.
  *   1.65.185 · 2026-06-13 · feat(Tools) QT — banque ÉTOFFÉE 36 → 72 questions (cible user 50-80), toutes ANCRÉES dans le contenu vérifié de la veille (« rester et apprendre »). 36 nouvelles QCM générées via Hermes/qwen3-max à partir des DÉFINITIONS vérifiées du glossaire (one_sentence_answer de 36 termes publiés : ChatGPT, Gemini, Claude, Grok, Midjourney, Mistral, Llama, DeepSeek, Bluetooth, agent IA, apprentissage profond/supervisé/non-supervisé/par transfert, garde-fous, grounding, boîte noire, jumeau numérique, SLM, classification, clustering, descente de gradient, mécanisme d'attention, auto-encodeur, modèle frontière, poids ouverts, superintelligence, effondrement de modèle, computer use, A2A…). Chaque question pointe vers sa fiche (term=slug) — les 36 slugs VÉRIFIÉS résolvent à 100 % sur la base prod (script self-delete). Règles qualité appliquées : 1 bonne réponse incontestable, AUCUN distracteur synonyme (« Modèle ouvert » retiré comme distracteur de « Poids ouverts »), explication = reformulation de la définition. Équilibre facile 23/moyen 27/difficile 22 ; thèmes ia 35/donnees 12/numerique 10/securite 9/web 6. MD de vérification régénéré (.questionnaires/qt-quotient-techno.md). Cache qt.bank à vider. Codename seo-piliers-veille-generative.
  *   1.65.184 · 2026-06-13 · fix(Tools) QT — 2 questions ambiguës corrigées (user) : un distracteur ne doit JAMAIS être un synonyme/équivalent de la bonne réponse. « prompt » (« Requête » retiré — c'est un équivalent FR de prompt) + « nuage » (« Cloud » retiré — synonyme). Distracteurs remplacés par des choix clairement faux + équivalent FR mentionné dans l'explication. Règles de création documentées (en-tête qt-questions.php + mémoire qt-question-standards). Cache qt.bank à vider. Codename seo-piliers-veille-generative.
  *   1.65.183 · 2026-06-13 · refine(Tools) QT — carte de rang remplacée par une MÉDAILLE CSS (au lieu des badges Envato « croches »/anglais, abandonnés) : médaillon 150px rond, fond dégradé du rang, anneau doré 6px #E9B949, reflet (::before), ombre, animation d'apparition (qt-medal-in scale+rotate). Emoji centré + libellé FR sous le médaillon. Pur CSS, zéro image, charte. Dossier .envato/badges/laveille_badges CONSERVÉ (essai recolor, non utilisé sur le site). Codename seo-piliers-veille-generative.
@@ -334,7 +335,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 185;
+$lvPatch = 186;
 
 return [
     'major' => $lvMajor,

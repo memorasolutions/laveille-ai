@@ -145,7 +145,7 @@ return [
         'choices' => ['Utiliser deux mots de passe différents', 'Fournir deux éléments d’identification : quelque chose que vous connaissez et quelque chose que vous possédez', 'Changer de mot de passe deux fois par mois', 'Avoir deux comptes sur le même service'],
         'correct' => 1,
         'explanation' => 'La 2FA renforce la sécurité en exigeant deux types de preuves : par exemple, un mot de passe (connu) et un code reçu par SMS ou une appli (possédé).',
-        'term' => null,
+        'term' => '2fa',
     ],
     [
         'theme' => 'web',
@@ -244,7 +244,7 @@ return [
         'choices' => ['L’entraînement d’un modèle avec des millions d’exemples', 'La capacité d’un modèle à apprendre une tâche à partir de très peu d’exemples', 'L’apprentissage sans aucune donnée d’entraînement', 'L’utilisation de plusieurs GPU pour accélérer l’entraînement'],
         'correct' => 1,
         'explanation' => 'Le few-shot learning permet à un modèle d’IA de généraliser une tâche à partir de seulement quelques exemples, contrairement à l’apprentissage traditionnel qui en nécessite des milliers.',
-        'term' => null,
+        'term' => 'apprentissage-few-shot',
     ],
     [
         'theme' => 'donnees',
@@ -334,7 +334,7 @@ return [
         'choices' => ['L’entraînement d’une IA avec des paires question-réponse', 'Un modèle qui apprend en recevant des récompenses ou des pénalités selon ses actions', 'L’utilisation de réseaux de neurones convolutifs pour le texte', 'La traduction automatique de documents'],
         'correct' => 1,
         'explanation' => 'Dans l’apprentissage par renforcement, un agent apprend à prendre des décisions en essayant différentes actions et en recevant un retour (récompense ou punition) de son environnement.',
-        'term' => null,
+        'term' => 'apprentissage-par-renforcement',
     ],
     [
         'theme' => 'donnees',
@@ -343,7 +343,7 @@ return [
         'choices' => ['Une méthode pour supprimer toutes les données personnelles d’une base', 'Une technique qui ajoute du bruit statistique aux données pour protéger la vie privée des individus tout en permettant des analyses utiles', 'Un protocole de chiffrement de bout en bout', 'Un logiciel de gestion de consentement'],
         'correct' => 1,
         'explanation' => 'La confidentialité différentielle permet de publier des statistiques sur un ensemble de données sans révéler d’informations identifiables sur des individus spécifiques.',
-        'term' => null,
+        'term' => 'confidentialite-differentielle',
     ],
     [
         'theme' => 'ia', 'difficulty' => 'facile',
