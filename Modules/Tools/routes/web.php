@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Tools\Http\Controllers\Admin\ToolAdminController;
 use Modules\Tools\Http\Controllers\PublicCrosswordController;
 use Modules\Tools\Http\Controllers\PublicMotdleController;
+use Modules\Tools\Http\Controllers\PublicQtController;
 use Modules\Tools\Http\Controllers\PublicToolController;
 use Modules\Tools\Http\Controllers\UserCrosswordController;
 use Modules\Tools\Http\Middleware\EnsureCrosswordTester;
@@ -112,10 +113,12 @@ Route::middleware('web')->group(function () {
 
     // Motdle — jeu quotidien (Wordle FR du vocabulaire tech/IA, mots du glossaire). Déclaré AVANT /outils/{slug}.
     Route::get('/outils/motdle', [PublicMotdleController::class, 'play'])->name('tools.motdle');
+    // QT — Quotient Techno (quiz). Déclaré AVANT /outils/{slug}.
+    Route::get('/outils/qt', [PublicQtController::class, 'play'])->name('tools.qt');
 
-    // #163 : exclure 'sudoku' + #177 'avatar' + 'motdle' (routes fournies par modules/contrôleurs dédiés).
+    // #163 : exclure 'sudoku' + #177 'avatar' + 'motdle' + 'qt' (routes fournies par modules/contrôleurs dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
-        ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/|motdle$|motdle/).+')
+        ->where('slug', '^(?!sudoku$|sudoku/|avatar$|avatar/|motdle$|motdle/|qt$|qt/).+')
         ->middleware('cacheResponse:600')
         ->name('tools.show');
 });
