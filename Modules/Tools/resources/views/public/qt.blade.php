@@ -176,7 +176,8 @@
 
                             {{-- Panneau de partage (repli quand le partage natif n'est pas dispo, ex. ordinateur) --}}
                             <div x-show="shareOpen" style="margin-top:1rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
-                                <p style="font-weight:600;margin-bottom:0.6rem;color:var(--c-dark);">Partage ton défi 👇</p>
+                                <p x-show="pasteHint" style="font-weight:700;margin-bottom:0.6rem;color:var(--c-primary);">✅ Copié ! Ouvre un réseau et colle (Ctrl/Cmd&nbsp;+&nbsp;V) ton résultat 👇</p>
+                                <p x-show="!pasteHint" style="font-weight:600;margin-bottom:0.6rem;color:var(--c-dark);">Partage ton défi 👇</p>
                                 <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
                                     <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('x')" aria-label="Partager sur X">𝕏 X</button>
                                     <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('whatsapp')">💬 WhatsApp</button>
@@ -412,7 +413,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             }
         },
 
-        shareOpen: false,
+        shareOpen: false, pasteHint: false,
 
         shareUrl(source) {
             return window.location.origin + '/outils/qt?utm_source=' + source + '&utm_medium=social&utm_campaign=qt';
@@ -431,19 +432,20 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         },
 
         aiTag() {
-            if (this.aiUsage === 'brain') return ' (100 % cerveau 🧠)';
-            if (this.aiUsage === 'ai') return " (avec l'aide d'une IA 🤖)";
-            if (this.aiUsage === 'hint') return ' (un peu aidé 🤝)';
+            if (this.aiUsage === 'ai') return ' · 🤖';
+            if (this.aiUsage === 'hint') return ' · 🤝';
+            if (this.aiUsage === 'brain') return ' · 🧠';
             return '';
         },
 
         resultBlock() {
             const head = this.isDefi
-                ? '🏆 QT — Défi du jour #' + this.defiNumber + ' : '
-                : '🧠 QT — Quotient Techno : ';
-            return head + this.qt + ' ' + this.rank.emoji + ' ' + this.rank.label + this.aiTag()
-                + '\n' + this.emojiGrid() + '  (' + this.correctCount + '/10)'
-                + "\nEt toi, c'est quoi ton QT ? 👉 " + this.shareUrl('copie')
+                ? '🏆 QT — Défi du jour #' + this.defiNumber
+                : '🧠 QT — Quotient Techno';
+            return head
+                + '\n' + this.qt + ' ' + this.rank.emoji + ' ' + this.rank.label
+                + '\n' + this.emojiGrid() + '  ' + this.correctCount + '/10' + this.aiTag()
+                + '\n\nEt toi, ton QT ? 👉 lurl.ca/qt'
                 + '\n#QuotientTechno';
         },
 
@@ -452,7 +454,9 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             if (!navigator.clipboard || !navigator.clipboard.writeText) { toast('Copie non disponible sur ce navigateur', 'warning'); return; }
             try {
                 await navigator.clipboard.writeText(this.resultBlock());
-                toast('Résultat copié ! Colle-le partout 📋', 'success');
+                toast('Résultat copié ! 📋', 'success');
+                this.pasteHint = true;
+                this.shareOpen = true;
             } catch (e) {
                 toast('Copie impossible', 'danger');
             }
@@ -471,6 +475,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
                     await navigator.share({ title: 'QT — Quotient Techno', text: this.resultBlock() });
                 } catch (e) {}
             } else {
+                this.pasteHint = false;
                 this.shareOpen = true;
             }
         },
