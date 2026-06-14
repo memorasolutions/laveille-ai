@@ -167,7 +167,8 @@ class QtService
         if ($text === '') {
             return '';
         }
-        $verbs = 'est|sont|désigne|désignent|consiste à|consiste en|représente|représentent|correspond à|fait référence à|se réfère à|se définit comme|qualifie|décrit|renvoie à';
+        $verbs = 'est|sont|désigne|désignent|consiste à|consiste en|représente|représentent|correspond à|fait référence à|se réfère à|se définit comme|qualifie|décrit|décrivent|renvoie à'
+            .'|regroupe|regroupent|permet|permettent|fournit|fournissent|vise à|visent à|crée|créent|utilise|utilisent|combine|combinent|repose sur|reposent sur|sert à|servent à|englobe|désigné comme|fait partie';
         $art = '(?:l[\'’]\s*|d[\'’]\s*|(?:le|la|les|un|une|des)\s+)';
         $pattern = '/^\s*(?:'.$art.')?'.preg_quote($name, '/').'(?:\s*\([^)]*\))?\s+(?:'.$verbs.')\s+/iu';
         $cleaned = preg_replace($pattern, '', $text, 1);
