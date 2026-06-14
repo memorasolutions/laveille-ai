@@ -144,8 +144,8 @@ class SitemapController
             });
         }
 
-        // Boutique (si module Shop actif)
-        if (Route::has('shop.index') && class_exists(\Modules\Shop\Models\Product::class)) {
+        // Boutique (si module Shop actif ET pas en maintenance — sinon /boutique renvoie 503 et pollue le sitemap)
+        if (Route::has('shop.index') && class_exists(\Modules\Shop\Models\Product::class) && ! config('shop.maintenance', false)) {
             $sitemap->add(Url::create(route('shop.index'))->setPriority(0.7)->setChangeFrequency('weekly'));
 
             if (Route::has('shop.show')) {
