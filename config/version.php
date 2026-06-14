@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.206 · 2026-06-14 · feat(FrontTheme) Accueil — CARTE VEDETTE « QT — Quotient Techno » ajoutée EN TÊTE de la section « Outils interactifs gratuits » (demande user, suite de la publication v205). Vignette d'aperçu = image de marque QT recadrée 1200×675 (`images/tools-preview/qt.jpg`, ~64 Ko, même format que sudoku/mots-croisés/constructeur ; recadrage cover depuis le hero Gemini déjà sur le compte user — adapté car les autres aperçus sont des captures, mais l'illustration de marque fait ressortir le nouveau jeu et remplit le 16:9 sans recadrage moche du screenshot portrait). Carte à la charte hp-card (image cover, titre, accroche « Quel est ton Quotient Techno ?… défie ta gang », badges Gratuit + Nouveau, lien /outils/qt). Rangée passée de 3 à 4 cartes équilibrées : les 4 col-md-4 → `col-lg-3 col-md-6 col-sm-6 col-xs-12` (4-up sur grand écran, 2×2 sur tablette/mobile) — additif, aucune carte retirée. Codename seo-piliers-veille-generative.
  *   1.65.205 · 2026-06-14 · feat(Tools) QT — PUBLIÉ POUR TOUS (fin de la phase « En construction »). (1) PublicQtController@play : retrait du gate superadmin (le public voit désormais le jeu, plus la page « En construction »). (2) Migration réversible 2026_06_14_140000 : tools slug=qt is_under_construction=false + is_active=true (la carte /annuaire perd le badge « en construction »). (3) Menu : « 🧠 QT — Quotient Techno » → /outils/qt ajouté EN TÊTE du groupe Détente dans les 5 zones du header (mega desktop, mega tablette, + 3 listes de repli mobile/footer). Jeu vedette viral (96 questions reliées au glossaire, score QT 55-145, défi du jour, partage façon Wordle, percentile honnête). down() de la migration remet le « En construction » → publication RÉVERSIBLE. Codename seo-piliers-veille-generative.
  *   1.65.204 · 2026-06-14 · ux(Tools) QT — RETRAIT de la question « 🤖 Avoue… un petit coup de main d'une IA ? » (retour user : « je comprends pas ça sert à quoi ? » + esprit ménage). Elle n'ajoutait qu'un petit badge d'honnêteté au partage, peu clair → écran résultat plus épuré. Code setAi()/aiTag()/aiUsage CONSERVÉ dormant (aiUsage reste null → aiTag '' → aucun badge) = retrait RÉVERSIBLE (remettre le bloc HTML suffit). Codename seo-piliers-veille-generative.
  *   1.65.203 · 2026-06-14 · ux(Tools) QT — le nudge « 😏 Qui peut battre ton QT ? » est masqué dès que le panneau réseaux s'ouvre (`x-show="!shareOpen"`) → le panneau apparaît DIRECTEMENT sous le bouton « 📋 Copier mon résultat », sans texte intercalé (finalise le retour user « panneau trop bas »). Codename seo-piliers-veille-generative.
@@ -354,7 +355,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 205;
+$lvPatch = 206;
 
 return [
     'major' => $lvMajor,

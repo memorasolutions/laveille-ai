@@ -429,8 +429,25 @@
                     <a href="{{ route('tools.index') }}" class="hp-link-all">{{ __('Voir tous les outils') }} →</a>
                 </div>
                 <div class="row hp-row-flex">
+                    {{-- QT — Quotient Techno (nouveau jeu vedette viral, publié v1.65.205) --}}
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                        <a href="{{ url('/outils/qt') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
+                            <div class="hp-card-img" style="min-height: 160px; overflow: hidden; position: relative;">
+                                <img src="{{ asset('images/tools-preview/qt.jpg') }}" alt="{{ __('Aperçu QT — Quotient Techno') }}" loading="lazy" style="width: 100%; height: 100%; min-height: 160px; object-fit: cover; display: block;">
+                            </div>
+                            <div class="hp-card-body" style="flex: 1; display: flex; flex-direction: column;">
+                                <h3>{{ __('QT — Quotient Techno') }}</h3>
+                                <p style="flex: 1;">{{ __('Quel est ton Quotient Techno ? 10 questions sur l\'IA, le web et la cybersécurité. Découvre ton rang, de Curieux à Super Geek, et défie ta gang.') }}</p>
+                                <div class="hp-badges">
+                                    <span class="hp-badge" style="background: #065f46;">{{ __('Gratuit') }}</span>
+                                    <span class="hp-badge" style="background: #9A2A06;">{{ __('Nouveau') }}</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
                     {{-- Sudoku quotidien (record 36:10 avg duration GA4 30j) --}}
-                    <div class="col-md-4 col-sm-6 col-xs-12">
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                         <a href="{{ Route::has('sudoku.play') ? route('sudoku.play') : url('/outils/sudoku') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
                             <div class="hp-card-img" style="min-height: 160px; overflow: hidden; position: relative;">
                                 <img src="{{ asset('images/tools-preview/sudoku.jpg') }}" alt="{{ __('Aperçu Sudoku quotidien') }}" loading="lazy" style="width: 100%; height: 100%; min-height: 160px; object-fit: cover; display: block;">
@@ -447,7 +464,7 @@
                     </div>
 
                     {{-- Mots croisés IA (record 17:42 avg duration GA4 30j) --}}
-                    <div class="col-md-4 col-sm-6 col-xs-12">
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                         <a href="{{ url('/outils/mots-croises') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
                             <div class="hp-card-img" style="min-height: 160px; overflow: hidden; position: relative;">
                                 <img src="{{ asset('images/tools-preview/mots-croises.jpg') }}" alt="{{ __('Aperçu Générateur de mots croisés') }}" loading="lazy" style="width: 100%; height: 100%; min-height: 160px; object-fit: cover; display: block;">
@@ -464,7 +481,7 @@
                     </div>
 
                     {{-- Constructeur de prompts (top page GA4 30j 516 vues) --}}
-                    <div class="col-md-4 col-sm-6 col-xs-12">
+                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
                         <a href="{{ url('/outils/constructeur-prompts') }}" class="hp-card" style="display: flex; flex-direction: column; height: 100%;">
                             <div class="hp-card-img" style="min-height: 160px; overflow: hidden; position: relative;">
                                 <img src="{{ asset('images/tools-preview/constructeur-prompts.jpg') }}" alt="{{ __('Aperçu Constructeur de prompts') }}" loading="lazy" style="width: 100%; height: 100%; min-height: 160px; object-fit: cover; display: block;">
