@@ -114,6 +114,17 @@
                             </p>
                             <p style="color:var(--c-text-muted);margin-top:0.25rem;" x-text="rank.message"></p>
 
+                            {{-- Phase 2 : streak + preuve sociale (honnête : affichée seulement quand il y a des données) --}}
+                            <div x-show="streak >= 2 || socialProof" style="margin-top:0.85rem;">
+                                <div x-show="streak >= 2" style="display:inline-block;background:#FFF4E5;color:#9A3412;font-weight:700;border-radius:999px;padding:5px 14px;margin-bottom:0.4rem;">🔥 Série de <span x-text="streak"></span> jours&nbsp;!</div>
+                                <template x-if="socialProof && socialProof.percentile !== null">
+                                    <div>
+                                        <p style="color:var(--c-primary);font-weight:700;font-size:1.05rem;margin:0;">🏆 Tu bats <span x-text="socialProof.percentile"></span>&nbsp;% des joueurs&nbsp;!</p>
+                                        <p x-show="socialProof.today >= 5" style="color:var(--c-text-muted);font-size:0.85rem;margin:0.15rem 0 0;"><span x-text="socialProof.today"></span> parties jouées aujourd'hui</p>
+                                    </div>
+                                </template>
+                            </div>
+
                             {{-- A : diagnostic par thème (forces / faiblesses + fiches ciblées) --}}
                             <div style="max-width:560px;margin:1.5rem auto 0;text-align:left;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:16px 18px;">
                                 <p style="font-weight:800;font-size:1.05rem;color:var(--c-dark);margin-bottom:1rem;text-align:center;">📊 Ton profil par thème</p>
@@ -219,6 +230,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         answers: [], qt: 0, displayQt: 0, correctCount: 0, rank: {},
         aiAnswered: false, aiBadge: '', aiUsage: '',
         isDefi: false, defiNumber: dailyNumber || 0, defiDoneToday: false, bestToday: 0,
+        socialProof: null, streak: 0,
 
         init() {
             this.questions = JSON.parse(atob(payload));
@@ -280,6 +292,8 @@ function qtApp(payload, dailyPayload, dailyNumber) {
                     this.defiDoneToday = true; this.bestToday = this.qt;
                 }
             } catch (e) {}
+            this.computeStreak();
+            this.recordAttempt();
         },
 
         animateQt() {
@@ -501,6 +515,31 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             } else {
                 toast('Copie non disponible sur ce navigateur', 'warning');
             }
+        },
+
+        recordAttempt() {
+            try {
+                const t = document.querySelector('meta[name=csrf-token]')?.content;
+                fetch('/outils/qt/attempt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': t || '' },
+                    body: JSON.stringify({ qt: this.qt, mode: this.isDefi ? 'defi' : 'libre', defi_number: this.defiNumber, correct: this.correctCount })
+                }).then(r => r.json()).then(d => { if (d && d.ok) { this.socialProof = d; } }).catch(() => {});
+            } catch (e) {}
+        },
+
+        computeStreak() {
+            if (!this.isDefi) return;
+            try {
+                const last = parseInt(localStorage.getItem('qt-streak-day'));
+                const count = parseInt(localStorage.getItem('qt-streak')) || 0;
+                let streak = 1;
+                if (last === this.defiNumber) { streak = count; }
+                else if (last === this.defiNumber - 1) { streak = count + 1; }
+                localStorage.setItem('qt-streak-day', String(this.defiNumber));
+                localStorage.setItem('qt-streak', String(streak));
+                this.streak = streak;
+            } catch (e) {}
         },
 
         replay() { window.location.reload(); }

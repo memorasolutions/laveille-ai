@@ -116,6 +116,7 @@ Route::middleware('web')->group(function () {
     Route::redirect('/outils/motdle', '/outils', 301)->name('tools.motdle');
     // QT — Quotient Techno (quiz). Déclaré AVANT /outils/{slug}.
     Route::get('/outils/qt', [PublicQtController::class, 'play'])->name('tools.qt');
+    Route::post('/outils/qt/attempt', [PublicQtController::class, 'attempt'])->name('tools.qt.attempt')->middleware('throttle:20,1');
 
     // #163 : exclure 'sudoku' + #177 'avatar' + 'motdle' + 'qt' (routes fournies par modules/contrôleurs dédiés).
     Route::get('/outils/{slug}', [PublicToolController::class, 'show'])
