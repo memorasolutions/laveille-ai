@@ -149,16 +149,7 @@
                                 </div>
                             </div>
 
-                            {{-- Question IA humoristique --}}
-                            <div x-show="!aiAnswered" style="margin-top:16px;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
-                                <p style="font-weight:600;margin-bottom:0.75rem;color:var(--c-dark);">🤖 Avoue… un petit coup de main d'une IA ?</p>
-                                <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
-                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;" @click="setAi('brain')">🧠 100 % cerveau !</button>
-                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;" @click="setAi('hint')">🤝 un petit coup de pouce</button>
-                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;" @click="setAi('ai')">🤖 à fond l'IA 😅</button>
-                                </div>
-                            </div>
-                            <p x-show="aiAnswered" style="font-weight:600;color:var(--c-primary);margin-top:0.75rem;" x-text="aiBadge"></p>
+                            {{-- (Question IA humoristique retirée v1.65.204 — peu claire, allège l'écran. setAi/aiTag conservés dormants : réversible.) --}}
 
                             {{-- Résultat copiable « façon Wordle » (action principale, surtout sur ordinateur) --}}
                             <div style="max-width:420px;margin:1.5rem auto 0.75rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px 16px;text-align:center;">

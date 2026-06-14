@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.204 · 2026-06-14 · ux(Tools) QT — RETRAIT de la question « 🤖 Avoue… un petit coup de main d'une IA ? » (retour user : « je comprends pas ça sert à quoi ? » + esprit ménage). Elle n'ajoutait qu'un petit badge d'honnêteté au partage, peu clair → écran résultat plus épuré. Code setAi()/aiTag()/aiUsage CONSERVÉ dormant (aiUsage reste null → aiTag '' → aucun badge) = retrait RÉVERSIBLE (remettre le bloc HTML suffit). Codename seo-piliers-veille-generative.
  *   1.65.203 · 2026-06-14 · ux(Tools) QT — le nudge « 😏 Qui peut battre ton QT ? » est masqué dès que le panneau réseaux s'ouvre (`x-show="!shareOpen"`) → le panneau apparaît DIRECTEMENT sous le bouton « 📋 Copier mon résultat », sans texte intercalé (finalise le retour user « panneau trop bas »). Codename seo-piliers-veille-generative.
  *   1.65.202 · 2026-06-14 · ux(Tools) QT — écran résultat ALLÉGÉ + panneau réseaux remonté (retour user : « le panneau apparaît trop bas, c'est trop lourd à la fin »). Le panneau de boutons réseaux s'ouvre désormais JUSTE SOUS le bouton « 📋 Copier mon résultat » (au lieu de tout en bas, invisible sans scroller) — carte blanche bordée. Ménage : retrait du paragraphe redondant « 🔄 Chaque partie pige 10 nouvelles questions… » (déjà sur l'accueil) ; les boutons « 📲 Story / ⬜ Carré » fusionnés dans UNE rangée d'actions secondaires compacte (📣 Partager · 📸 Carte story · ⬜ Carré · 🔄 Rejouer) ; nudge de défi raccourci. Codename seo-piliers-veille-generative.
  *   1.65.201 · 2026-06-14 · feat(Tools) QT — PHASE 2 : preuve sociale chiffrée HONNÊTE + percentile + streak. Table `qt_attempts` (qt/mode/defi_number/correct_count/created_at, AUCUNE PII) + modèle QtAttempt. Route POST /outils/qt/attempt (throttle:20,1, CSRF via meta) → PublicQtController@attempt : valide (qt 55-145, mode defi/libre, correct 0-10), enregistre la partie, calcule sur l'échantillon (mode + défi #N) : parties du jour + percentile = round(beats/total*100) UNIQUEMENT si total≥20 (seuil anti-démarrage à froid → zéro faux chiffre). finish() POST en arrière-plan (non bloquant) → affiche « 🏆 Tu bats X% des joueurs » + « N parties aujourd'hui » (si N≥5) quand des données existent (sinon RIEN, honnête). STREAK : jours consécutifs sur le défi (localStorage qt-streak/qt-streak-day) → « 🔥 Série de N jours ! ». Code Hermes + intégration superviseur. Codename seo-piliers-veille-generative.
@@ -352,7 +353,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 203;
+$lvPatch = 204;
 
 return [
     'major' => $lvMajor,
