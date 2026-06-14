@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.205 · 2026-06-14 · feat(Tools) QT — PUBLIÉ POUR TOUS (fin de la phase « En construction »). (1) PublicQtController@play : retrait du gate superadmin (le public voit désormais le jeu, plus la page « En construction »). (2) Migration réversible 2026_06_14_140000 : tools slug=qt is_under_construction=false + is_active=true (la carte /annuaire perd le badge « en construction »). (3) Menu : « 🧠 QT — Quotient Techno » → /outils/qt ajouté EN TÊTE du groupe Détente dans les 5 zones du header (mega desktop, mega tablette, + 3 listes de repli mobile/footer). Jeu vedette viral (96 questions reliées au glossaire, score QT 55-145, défi du jour, partage façon Wordle, percentile honnête). down() de la migration remet le « En construction » → publication RÉVERSIBLE. Codename seo-piliers-veille-generative.
  *   1.65.204 · 2026-06-14 · ux(Tools) QT — RETRAIT de la question « 🤖 Avoue… un petit coup de main d'une IA ? » (retour user : « je comprends pas ça sert à quoi ? » + esprit ménage). Elle n'ajoutait qu'un petit badge d'honnêteté au partage, peu clair → écran résultat plus épuré. Code setAi()/aiTag()/aiUsage CONSERVÉ dormant (aiUsage reste null → aiTag '' → aucun badge) = retrait RÉVERSIBLE (remettre le bloc HTML suffit). Codename seo-piliers-veille-generative.
  *   1.65.203 · 2026-06-14 · ux(Tools) QT — le nudge « 😏 Qui peut battre ton QT ? » est masqué dès que le panneau réseaux s'ouvre (`x-show="!shareOpen"`) → le panneau apparaît DIRECTEMENT sous le bouton « 📋 Copier mon résultat », sans texte intercalé (finalise le retour user « panneau trop bas »). Codename seo-piliers-veille-generative.
  *   1.65.202 · 2026-06-14 · ux(Tools) QT — écran résultat ALLÉGÉ + panneau réseaux remonté (retour user : « le panneau apparaît trop bas, c'est trop lourd à la fin »). Le panneau de boutons réseaux s'ouvre désormais JUSTE SOUS le bouton « 📋 Copier mon résultat » (au lieu de tout en bas, invisible sans scroller) — carte blanche bordée. Ménage : retrait du paragraphe redondant « 🔄 Chaque partie pige 10 nouvelles questions… » (déjà sur l'accueil) ; les boutons « 📲 Story / ⬜ Carré » fusionnés dans UNE rangée d'actions secondaires compacte (📣 Partager · 📸 Carte story · ⬜ Carré · 🔄 Rejouer) ; nudge de défi raccourci. Codename seo-piliers-veille-generative.
@@ -353,7 +354,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 204;
+$lvPatch = 205;
 
 return [
     'major' => $lvMajor,
