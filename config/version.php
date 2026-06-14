@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.215 · 2026-06-14 · fix(Tools) QT appariement glisser-déposer — TAP-pour-placer réparé : retrait du e.preventDefault()/stopPropagation() au pointerdown (qui supprimait le « click » du tap dans certains navigateurs) ; preventDefault déplacé dans onPointerMove (pendant le glissement seulement) + user-select:none sur les blocs. Le glisser ET le tap fonctionnent sans interférence. Codename seo-piliers-veille-generative.
  *   1.65.214 · 2026-06-14 · feat(Tools) QT — APPARIEMENT en GLISSER-DÉPOSER (demande user « blocs à déplacer »). Remplace les <select> par des blocs de définitions déplaçables vers les emplacements des termes. Recherche pp_search juin 2026 → approche n°1 notée 92/100 : pointer events maison (souris+tactile unifiés) + TAP-POUR-PLACER (tape un bloc puis un emplacement) + clavier (Entrée/Espace) = alternative accessible WCAG 2.5.7 OBLIGATOIRE, ZÉRO dépendance externe (vs SortableJS 80 / @shopify/draggable 78 / HTML5 natif 55). Implémentation déléguée Hermes/gpt-5 : réserve (poolDefs) + slots par terme + ghost flottant en drag + détection slot via elementFromPoint, matchSel reste la source de vérité (validateMatch/isCorrect/matchAllChosen inchangés). touch-action:none, cibles ≥44px, focus-visible, aria-label slots. Charte (qt-mblock/qt-mslot/qt-mghost). QCM/VF/court inchangés. Admin-only (en construction). Codename seo-piliers-veille-generative.
  *   1.65.213 · 2026-06-14 · polish(Tools) QT — `cleanMatchDef` gère le parenthétique « (acronyme) » après le terme (ex. « La superintelligence (ASI) est… » → « Un niveau théorique d'IA surpassant… » ; « Le DSA (Digital Services Act) est… » → « Un règlement européen… »). Ajout de `(?:\s*\([^)]*\))?` au pattern, avant le verbe d'état. Couvre les nombreux termes du glossaire avec acronyme (ASI, DSA, DMA, 2FA…). Vérifié serveur : 0 spoiler, 0 « … » de masquage. Codename seo-piliers-veille-generative.
  *   1.65.212 · 2026-06-14 · polish(Tools) QT — qualité des définitions d'APPARIEMENT. Avant : `matchingPool` masquait le terme par « … » puis tronquait `one_sentence_answer` (médiane 190 car.) à 110 → coupe mid-mot + double « … » bancal (ex. « Une … introduit… ne serait… »). Après : nouvelle méthode `cleanMatchDef()` qui RETIRE le préambule « [Article] <terme> est/désigne/consiste/… » pour ne garder que la définition lisible (ex. « L'IA générative est une forme d'IA capable de créer… » → « Une forme d'IA capable de créer… »), gère les articles élidés `l'`/`d'` (sans espace), repli masquage si le préambule n'est pas détecté, troncature à la 1re phrase complète. `one_sentence_answer` présent sur 100 % des 419 termes (curé, on-topic) → source unique. Vérifié local (6/6 propres) + serveur. QCM/VF/court inchangés. Cache qt.matchpool à vider. Codename seo-piliers-veille-generative.
@@ -363,7 +364,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 214;
+$lvPatch = 215;
 
 return [
     'major' => $lvMajor,

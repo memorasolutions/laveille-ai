@@ -32,7 +32,7 @@
     .qt-medal::before { content: ''; position: absolute; top: -40%; left: -45%; width: 70%; height: 180%; background: linear-gradient(115deg, rgba(255,255,255,.42), rgba(255,255,255,0)); transform: rotate(18deg); pointer-events: none; }
     @keyframes qt-medal-in { 0% { transform: scale(.4) rotate(-12deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
     /* Appariement — blocs déplaçables */
-    .qt-mblock { display:block; background:#fff; border:2px solid #e5e7eb; border-radius:10px; padding:12px 14px; color:var(--c-dark); font-size:0.98rem; line-height:1.35; cursor:grab; min-height:44px; touch-action:none; box-shadow:0 1px 3px rgba(0,0,0,.08); transition:border-color .15s ease, box-shadow .15s ease; }
+    .qt-mblock { display:block; background:#fff; border:2px solid #e5e7eb; border-radius:10px; padding:12px 14px; color:var(--c-dark); font-size:0.98rem; line-height:1.35; cursor:grab; min-height:44px; touch-action:none; user-select:none; -webkit-user-select:none; box-shadow:0 1px 3px rgba(0,0,0,.08); transition:border-color .15s ease, box-shadow .15s ease; }
     .qt-mblock:hover { border-color:var(--c-primary); }
     .qt-mblock:focus-visible { outline:none; border-color:var(--c-primary); box-shadow:0 0 0 .2rem rgba(6,78,90,.2); }
     .qt-mblock.is-picked { border-color:var(--c-primary); box-shadow:0 0 0 .2rem rgba(6,78,90,.18); }
@@ -428,7 +428,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             this._boundUp = (ev) => this.onPointerUp(ev);
             window.addEventListener('pointermove', this._boundMove, { passive: false });
             window.addEventListener('pointerup', this._boundUp, { passive: false });
-            e.preventDefault(); e.stopPropagation();
+            // NE PAS preventDefault ici : sinon le « click » du tap-pour-placer est supprimé dans certains navigateurs.
         },
         onPointerMove(e, sourceEl) {
             if (!this._dragStarted) {
@@ -436,6 +436,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
                 else { return; }
             }
             if (!this.dragActive || !this.dragGhost) return;
+            if (e.cancelable) e.preventDefault(); // pendant le glissement seulement : évite sélection de texte / scroll
             this.dragGhost.style.transform = 'translate(' + (e.clientX - this.dragOffsetX) + 'px,' + (e.clientY - this.dragOffsetY) + 'px)';
         },
         startDrag(e, sourceEl) {
