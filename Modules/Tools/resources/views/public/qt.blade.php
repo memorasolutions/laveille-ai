@@ -167,27 +167,10 @@
                                 <div x-text="correctCount + '/10'" style="font-size:0.85rem;color:var(--c-dark);opacity:0.7;margin-top:0.25rem;"></div>
                             </div>
                             <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:46px;padding:0 24px;font-weight:700;" @click="copyResult()">📋 Copier mon résultat</button>
-                            <p style="margin:0.6rem auto 0;max-width:440px;color:var(--c-text-muted);font-size:0.9rem;">😏 Qui dans ton entourage peut battre ton QT ? Copie-le et <strong>défie-les</strong> !<span x-show="isDefi"> ⏳ Le défi #<span x-text="defiNumber"></span> se termine ce soir.</span></p>
+                            <p style="margin:0.5rem auto 0;max-width:440px;color:var(--c-text-muted);font-size:0.9rem;">😏 Qui peut battre ton QT ? Copie-le et <strong>défie ta gang</strong> !<span x-show="isDefi"> ⏳ Défi #<span x-text="defiNumber"></span> jusqu'à ce soir.</span></p>
 
-                            <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:1.25rem;">
-                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="share()">📣 Partager</button>
-                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="replay()">🔄 Rejouer</button>
-                            </div>
-                            <p style="color:var(--c-primary);font-weight:600;font-size:0.9rem;margin-top:0.85rem;">
-                                🔄 Chaque partie pige 10 <strong>nouvelles</strong> questions au hasard — rejoue pour apprendre d'autres notions et faire grimper ton QT !
-                            </p>
-
-                            {{-- B : carte de résultat partageable (générée en canvas) --}}
-                            <div style="margin-top:1rem;display:flex;flex-direction:column;align-items:center;gap:10px;">
-                                <p style="margin:0;font-weight:600;color:var(--c-dark);">📸 Crée ta carte à partager</p>
-                                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-                                    <button type="button" class="ct-btn ct-btn-primary" style="border-radius:999px;padding:8px 18px;" @click="shareCard('9:16')">📲 Story (9:16)</button>
-                                    <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:8px 18px;" @click="shareCard('1:1')">⬜ Carré (1:1)</button>
-                                </div>
-                            </div>
-
-                            {{-- Panneau de partage (repli quand le partage natif n'est pas dispo, ex. ordinateur) --}}
-                            <div x-show="shareOpen" style="margin-top:1rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
+                            {{-- Panneau réseaux : s'ouvre juste ICI, sous le bouton « Copier » --}}
+                            <div x-show="shareOpen" style="max-width:460px;margin:0.85rem auto 0;background:#fff;border:1px solid var(--c-primary);border-radius:12px;padding:14px;">
                                 <p x-show="pasteHint" style="font-weight:700;margin-bottom:0.6rem;color:var(--c-primary);">✅ Copié ! Maintenant <strong>défie ta gang</strong> : colle-le et tague quelqu'un qui se croit plus techno 😏 👇</p>
                                 <p x-show="!pasteHint" style="font-weight:600;margin-bottom:0.6rem;color:var(--c-dark);">Partage ton défi 👇</p>
                                 <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
@@ -197,6 +180,14 @@
                                     <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('facebook')">📘 Facebook</button>
                                     <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="copyShareLink()">🔗 Copier le lien</button>
                                 </div>
+                            </div>
+
+                            {{-- Actions secondaires compactes (partage natif / carte / rejouer) --}}
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:1rem;">
+                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:40px;padding:0 16px;" @click="share()">📣 Partager</button>
+                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:40px;padding:0 16px;" @click="shareCard('9:16')">📸 Carte story</button>
+                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:40px;padding:0 16px;" @click="shareCard('1:1')">⬜ Carré</button>
+                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:40px;padding:0 16px;" @click="replay()">🔄 Rejouer</button>
                             </div>
 
                             {{-- Révision --}}
