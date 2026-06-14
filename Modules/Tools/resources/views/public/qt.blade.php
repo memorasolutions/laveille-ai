@@ -142,8 +142,16 @@
                             </div>
                             <p x-show="aiAnswered" style="font-weight:600;color:var(--c-primary);margin-top:0.75rem;" x-text="aiBadge"></p>
 
+                            {{-- Résultat copiable « façon Wordle » (action principale, surtout sur ordinateur) --}}
+                            <div style="max-width:420px;margin:1.5rem auto 0.75rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px 16px;text-align:center;">
+                                <div style="font-weight:700;color:var(--c-dark);margin-bottom:0.5rem;">🧠 Mon QT : <span x-text="qt"></span> <span x-text="rank.emoji"></span> <span x-text="rank.label"></span></div>
+                                <div x-text="emojiGrid()" style="font-size:1.5rem;letter-spacing:2px;line-height:1.3;"></div>
+                                <div x-text="correctCount + '/10'" style="font-size:0.85rem;color:var(--c-dark);opacity:0.7;margin-top:0.25rem;"></div>
+                            </div>
+                            <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:46px;padding:0 24px;font-weight:700;" @click="copyResult()">📋 Copier mon résultat</button>
+
                             <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:1.25rem;">
-                                <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:44px;padding:0 20px;" @click="share()">📣 Partager mon QT</button>
+                                <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="share()">📣 Partager</button>
                                 <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="replay()">🔄 Rejouer</button>
                             </div>
                             <p style="color:var(--c-primary);font-weight:600;font-size:0.9rem;margin-top:0.85rem;">
@@ -393,11 +401,47 @@ function qtApp(payload) {
             return '🧠 Mon Quotient Techno : ' + this.qt + ' — ' + this.rank.label + ' ' + this.rank.emoji + tag + ". Et toi, c'est quoi ton QT ? 👉";
         },
 
+        emojiGrid() {
+            return this.questions.map((q, i) => this.answers[i] === q.correct ? '✅' : '❌').join('');
+        },
+
+        aiTag() {
+            if (this.aiUsage === 'brain') return ' (100 % cerveau 🧠)';
+            if (this.aiUsage === 'ai') return " (avec l'aide d'une IA 🤖)";
+            if (this.aiUsage === 'hint') return ' (un peu aidé 🤝)';
+            return '';
+        },
+
+        resultBlock() {
+            return '🧠 QT — Quotient Techno : ' + this.qt + ' ' + this.rank.emoji + ' ' + this.rank.label + this.aiTag()
+                + '\n' + this.emojiGrid() + '  (' + this.correctCount + '/10)'
+                + "\nEt toi, c'est quoi ton QT ? 👉 " + this.shareUrl('copie')
+                + '\n#QuotientTechno';
+        },
+
+        async copyResult() {
+            const toast = (m, v) => window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: m, variant: v, duration: 3000 } }));
+            if (!navigator.clipboard || !navigator.clipboard.writeText) { toast('Copie non disponible sur ce navigateur', 'warning'); return; }
+            try {
+                await navigator.clipboard.writeText(this.resultBlock());
+                toast('Résultat copié ! Colle-le partout 📋', 'success');
+            } catch (e) {
+                toast('Copie impossible', 'danger');
+            }
+        },
+
+        isMobileShare() {
+            if (!navigator.share) return false;
+            if (navigator.userAgentData && navigator.userAgentData.mobile) return true;
+            if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return true;
+            return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        },
+
         async share() {
-            if (navigator.share) {
+            if (this.isMobileShare()) {
                 try {
-                    await navigator.share({ title: 'QT — Quotient Techno', text: this.shareText(), url: this.shareUrl('webshare') });
-                } catch (e) { /* partage annulé par l'utilisateur */ }
+                    await navigator.share({ title: 'QT — Quotient Techno', text: this.resultBlock() });
+                } catch (e) {}
             } else {
                 this.shareOpen = true;
             }
