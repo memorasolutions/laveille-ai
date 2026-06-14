@@ -29,6 +29,7 @@ class PublicQtController extends Controller
 
         return view('tools::public.qt', [
             'round' => QtService::newRound(),
+            'daily' => QtService::dailyRound(),
             'share' => $tool?->getShareData(),
         ]);
     }

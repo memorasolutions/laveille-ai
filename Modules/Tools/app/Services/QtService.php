@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tools\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Dictionary\Models\Term;
@@ -126,5 +127,79 @@ class QtService
         }
 
         return $output;
+    }
+
+    /**
+     * « Défi du jour » : les 10 MÊMES questions (et le même ordre de choix) pour tous
+     * les joueurs un jour donné, de façon déterministe (seed = numéro du jour).
+     * Retourne ['number' => N, 'questions' => [...]].
+     */
+    public static function dailyRound(): array
+    {
+        $today = Carbon::now('America/Toronto')->startOfDay();
+        $epoch = Carbon::create(2026, 6, 14, 0, 0, 0, 'America/Toronto');
+        $number = $epoch->diffInDays($today) + 1;
+
+        return Cache::remember('qt.daily.'.$number, now()->addHours(26), function () use ($number) {
+            mt_srand($number);
+
+            $bank = self::bank();
+            $grouped = ['facile' => [], 'moyen' => [], 'difficile' => []];
+            foreach ($bank as $item) {
+                if (isset($grouped[$item['difficulty']])) {
+                    $grouped[$item['difficulty']][] = $item;
+                }
+            }
+            $quotas = ['facile' => 4, 'moyen' => 3, 'difficile' => 3];
+            $selected = [];
+            $used = [];
+            foreach ($quotas as $diff => $quota) {
+                $pool = $grouped[$diff];
+                shuffle($pool);
+                foreach (array_slice($pool, 0, $quota) as $item) {
+                    $selected[] = $item;
+                    $used[$item['question']] = true;
+                }
+            }
+            if (count($selected) < 10) {
+                $rest = array_values(array_filter($bank, fn ($it) => ! isset($used[$it['question']])));
+                shuffle($rest);
+                foreach (array_slice($rest, 0, 10 - count($selected)) as $item) {
+                    $selected[] = $item;
+                }
+            }
+            $selected = array_slice($selected, 0, 10);
+            shuffle($selected);
+            $pointsMap = ['facile' => 1, 'moyen' => 2, 'difficile' => 3];
+            $output = [];
+            foreach ($selected as $q) {
+                $pairs = [];
+                foreach ($q['choices'] as $i => $choice) {
+                    $pairs[] = ['t' => $choice, 'ok' => ($i === $q['correct'])];
+                }
+                shuffle($pairs);
+                $correct = 0;
+                foreach ($pairs as $i => $p) {
+                    if ($p['ok']) {
+                        $correct = $i;
+                        break;
+                    }
+                }
+                $output[] = [
+                    'theme' => $q['theme'],
+                    'difficulty' => $q['difficulty'],
+                    'question' => $q['question'],
+                    'choices' => array_column($pairs, 't'),
+                    'correct' => $correct,
+                    'explanation' => $q['explanation'],
+                    'points' => $pointsMap[$q['difficulty']],
+                    'fiche' => self::ficheUrl($q['term'] ?? null),
+                ];
+            }
+
+            mt_srand();
+
+            return ['number' => $number, 'questions' => $output];
+        });
     }
 }

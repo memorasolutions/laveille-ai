@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-@php $payload = base64_encode(json_encode($round)); @endphp
+@php $payload = base64_encode(json_encode($round)); $dailyPayload = base64_encode(json_encode($daily['questions'])); $dailyNumber = (int) $daily['number']; @endphp
 <style>
     .qt-choice {
         display: block; width: 100%; text-align: left; margin: 8px 0; padding: 12px 16px;
@@ -38,7 +38,7 @@
         <div class="row">
             <div class="col col-lg-10 offset-lg-1">
                 <div class="wpo-blog-content">
-                    <div class="post" style="max-width:640px;margin:0 auto;" x-data="qtApp('{{ $payload }}')">
+                    <div class="post" style="max-width:640px;margin:0 auto;" x-data="qtApp('{{ $payload }}', '{{ $dailyPayload }}', {{ $dailyNumber }})">
                         {{-- Écran Intro --}}
                         <div x-show="phase==='intro'" style="padding:2rem 1rem;text-align:center;">
                             <h1 style="font-size:2.25rem;font-weight:800;color:var(--c-primary);margin-bottom:1rem;">Quel est ton Quotient Techno ?</h1>
@@ -53,9 +53,15 @@
                                 <span style="background:var(--c-primary-light,#F0FAFB);color:var(--c-primary);padding:0.5rem 1rem;font-weight:600;border-radius:99px;">🔄 renouvelé à chaque partie</span>
                             </div>
                             <div style="font-size:1.6rem;letter-spacing:6px;margin-bottom:1.75rem;">🐣 🔌 💡 🤓 🦾 🏆</div>
-                            <button class="ct-btn ct-btn-primary" style="height:52px;font-size:1.1rem;padding:0 28px;border-radius:8px;" @click="phase='quiz'">
-                                Découvre ton QT 🚀
-                            </button>
+                            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                                <button class="ct-btn ct-btn-primary" style="height:52px;font-size:1.1rem;padding:0 28px;border-radius:8px;" @click="begin('defi')">
+                                    🏆 Défi du jour <span x-text="'#' + defiNumber"></span> 🚀
+                                </button>
+                                <button class="ct-btn ct-btn-outline" style="height:44px;padding:0 22px;border-radius:8px;" @click="begin('libre')">
+                                    🎲 Partie libre (10 questions au hasard)
+                                </button>
+                                <p x-show="defiDoneToday" style="font-size:0.85rem;color:var(--c-text-muted);margin:0.25rem 0 0;">✅ Tu as déjà fait le défi d'aujourd'hui (QT : <span x-text="bestToday"></span>) — tu peux le refaire ou jouer en partie libre.</p>
+                            </div>
                             <p style="color:var(--c-primary);font-weight:600;font-size:0.95rem;margin-top:1.5rem;max-width:520px;margin-left:auto;margin-right:auto;">
                                 🔄 Les 10 questions sont pigées au hasard dans une grande banque : <strong>elles changent à chaque partie</strong>. Refais le test autant de fois que tu veux pour découvrir de nouvelles notions… et faire grimper ton QT !
                             </p>
@@ -94,6 +100,7 @@
 
                         {{-- Écran Résultat --}}
                         <div x-show="phase==='result'" x-cloak style="padding:1.5rem 0;text-align:center;">
+                            <div x-show="isDefi" style="display:inline-block;background:var(--c-primary);color:#fff;font-weight:700;border-radius:999px;padding:4px 14px;margin-bottom:0.75rem;font-size:0.95rem;"><span x-text="'🏆 Défi du jour #' + defiNumber"></span></div>
                             <p style="font-size:1.125rem;color:var(--c-text-secondary);margin-bottom:0.25rem;">Ton Quotient Techno</p>
                             <p style="font-size:3.5rem;font-weight:800;color:var(--c-primary);line-height:1;" x-text="displayQt"></p>
 
@@ -204,15 +211,29 @@
 </section>
 
 <script>
-function qtApp(payload) {
+function qtApp(payload, dailyPayload, dailyNumber) {
     return {
         phase: 'intro', questions: [], index: 0, answered: false, selected: null,
         answers: [], qt: 0, displayQt: 0, correctCount: 0, rank: {},
         aiAnswered: false, aiBadge: '', aiUsage: '',
+        isDefi: false, defiNumber: dailyNumber || 0, defiDoneToday: false, bestToday: 0,
 
         init() {
             this.questions = JSON.parse(atob(payload));
             this.answers = Array(this.questions.length).fill(null);
+            try {
+                const done = localStorage.getItem('qt-defi-' + (dailyNumber || 0));
+                if (done) { this.defiDoneToday = true; this.bestToday = parseInt(done) || 0; }
+            } catch (e) {}
+        },
+
+        begin(mode) {
+            this.isDefi = (mode === 'defi');
+            this.questions = JSON.parse(atob(this.isDefi ? dailyPayload : payload));
+            this.answers = Array(this.questions.length).fill(null);
+            this.index = 0; this.answered = false; this.selected = null;
+            this.aiAnswered = false; this.aiBadge = ''; this.aiUsage = '';
+            this.phase = 'quiz';
         },
 
         q() { return this.questions[this.index] || { choices: [] }; },
@@ -252,6 +273,10 @@ function qtApp(payload) {
             try {
                 const best = localStorage.getItem('qt-best');
                 if (!best || this.qt > parseInt(best)) { localStorage.setItem('qt-best', this.qt.toString()); }
+                if (this.isDefi) {
+                    localStorage.setItem('qt-defi-' + this.defiNumber, this.qt.toString());
+                    this.defiDoneToday = true; this.bestToday = this.qt;
+                }
             } catch (e) {}
         },
 
@@ -413,7 +438,10 @@ function qtApp(payload) {
         },
 
         resultBlock() {
-            return '🧠 QT — Quotient Techno : ' + this.qt + ' ' + this.rank.emoji + ' ' + this.rank.label + this.aiTag()
+            const head = this.isDefi
+                ? '🏆 QT — Défi du jour #' + this.defiNumber + ' : '
+                : '🧠 QT — Quotient Techno : ';
+            return head + this.qt + ' ' + this.rank.emoji + ' ' + this.rank.label + this.aiTag()
                 + '\n' + this.emojiGrid() + '  (' + this.correctCount + '/10)'
                 + "\nEt toi, c'est quoi ton QT ? 👉 " + this.shareUrl('copie')
                 + '\n#QuotientTechno';
