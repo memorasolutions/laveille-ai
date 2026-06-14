@@ -97,15 +97,14 @@ class QtService
                     if ($name === '') {
                         continue;
                     }
-                    $def = trim((string) $t->getTranslation('one_sentence_answer', 'fr_CA', false));
-                    if ($def === '') {
-                        $def = trim((string) $t->getTranslation('definition', 'fr_CA', false));
+                    $src = trim((string) $t->getTranslation('one_sentence_answer', 'fr_CA', false));
+                    if ($src === '') {
+                        $src = trim((string) $t->getTranslation('definition', 'fr_CA', false));
                     }
-                    $def = strip_tags($def);
-                    if ($def !== '') {
-                        $def = self::maskName($def, $name);
+                    if ($src === '') {
+                        continue;
                     }
-                    $def = self::truncateSmart($def, 110);
+                    $def = self::cleanMatchDef($src, $name);
                     if (mb_strlen($def) < 25) {
                         continue;
                     }
@@ -155,6 +154,43 @@ class QtService
         }
 
         return rtrim($cut, ".,;:!? \t").'…';
+    }
+
+    /**
+     * Transforme un one_sentence_answer en définition COURTE et LISIBLE pour l'appariement :
+     * retire le préambule « [Article] <terme> est/désigne/… » pour ne garder que la définition
+     * (repli : masque le terme), puis tronque proprement à la 1re phrase.
+     */
+    private static function cleanMatchDef(string $osa, string $name): string
+    {
+        $text = trim(preg_replace('/\s+/u', ' ', strip_tags($osa)) ?? '');
+        if ($text === '') {
+            return '';
+        }
+        $verbs = 'est|sont|désigne|désignent|consiste à|consiste en|représente|représentent|correspond à|fait référence à|se réfère à|se définit comme|qualifie|décrit|renvoie à';
+        $art = '(?:l[\'’]\s*|d[\'’]\s*|(?:le|la|les|un|une|des)\s+)';
+        $pattern = '/^\s*(?:'.$art.')?'.preg_quote($name, '/').'\s+(?:'.$verbs.')\s+/iu';
+        $cleaned = preg_replace($pattern, '', $text, 1);
+        if ($cleaned === null || $cleaned === $text) {
+            // Repli : masque le terme (anti-spoiler) si le préambule n'a pu être retiré.
+            $cleaned = str_ireplace([$name, Str::ascii($name)], '…', $text);
+        }
+        $cleaned = trim($cleaned);
+        if ($cleaned !== '') {
+            $cleaned = mb_strtoupper(mb_substr($cleaned, 0, 1)).mb_substr($cleaned, 1);
+        }
+        // Troncature lisible : garde la 1re phrase complète si > 150, sinon coupe au mot.
+        if (mb_strlen($cleaned) > 150) {
+            if (preg_match('/^.{30,150}?[.!?]/u', $cleaned, $m)) {
+                $cleaned = $m[0];
+            } else {
+                $cut = mb_substr($cleaned, 0, 130);
+                $sp = mb_strrpos($cut, ' ');
+                $cleaned = ($sp !== false ? mb_substr($cut, 0, $sp) : $cut).'…';
+            }
+        }
+
+        return trim($cleaned);
     }
 
     private static function pointsFromDifficulty(string $difficulty): int
