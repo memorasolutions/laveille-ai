@@ -169,7 +169,7 @@ class QtService
         }
         $verbs = 'est|sont|désigne|désignent|consiste à|consiste en|représente|représentent|correspond à|fait référence à|se réfère à|se définit comme|qualifie|décrit|renvoie à';
         $art = '(?:l[\'’]\s*|d[\'’]\s*|(?:le|la|les|un|une|des)\s+)';
-        $pattern = '/^\s*(?:'.$art.')?'.preg_quote($name, '/').'\s+(?:'.$verbs.')\s+/iu';
+        $pattern = '/^\s*(?:'.$art.')?'.preg_quote($name, '/').'(?:\s*\([^)]*\))?\s+(?:'.$verbs.')\s+/iu';
         $cleaned = preg_replace($pattern, '', $text, 1);
         if ($cleaned === null || $cleaned === $text) {
             // Repli : masque le terme (anti-spoiler) si le préambule n'a pu être retiré.

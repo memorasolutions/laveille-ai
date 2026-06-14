@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.213 · 2026-06-14 · polish(Tools) QT — `cleanMatchDef` gère le parenthétique « (acronyme) » après le terme (ex. « La superintelligence (ASI) est… » → « Un niveau théorique d'IA surpassant… » ; « Le DSA (Digital Services Act) est… » → « Un règlement européen… »). Ajout de `(?:\s*\([^)]*\))?` au pattern, avant le verbe d'état. Couvre les nombreux termes du glossaire avec acronyme (ASI, DSA, DMA, 2FA…). Vérifié serveur : 0 spoiler, 0 « … » de masquage. Codename seo-piliers-veille-generative.
  *   1.65.212 · 2026-06-14 · polish(Tools) QT — qualité des définitions d'APPARIEMENT. Avant : `matchingPool` masquait le terme par « … » puis tronquait `one_sentence_answer` (médiane 190 car.) à 110 → coupe mid-mot + double « … » bancal (ex. « Une … introduit… ne serait… »). Après : nouvelle méthode `cleanMatchDef()` qui RETIRE le préambule « [Article] <terme> est/désigne/consiste/… » pour ne garder que la définition lisible (ex. « L'IA générative est une forme d'IA capable de créer… » → « Une forme d'IA capable de créer… »), gère les articles élidés `l'`/`d'` (sans espace), repli masquage si le préambule n'est pas détecté, troncature à la 1re phrase complète. `one_sentence_answer` présent sur 100 % des 419 termes (curé, on-topic) → source unique. Vérifié local (6/6 propres) + serveur. QCM/VF/court inchangés. Cache qt.matchpool à vider. Codename seo-piliers-veille-generative.
  *   1.65.211 · 2026-06-14 · fix(SEO) Sitemap — exclure la BOUTIQUE du sitemap quand elle est en maintenance (corrige l'erreur GSC « server error 5xx » sur /boutique : SHOP_MAINTENANCE=true → /boutique renvoie 503, mais le sitemap la listait quand même). Ajout de `&& ! config('shop.maintenance', false)` à la condition du bloc Shop dans SitemapController. (Le « /page 404 » du diagnostic précédent était un FAUX positif : la route est /page/{slug} ; tester /page sans slug renvoie 404 normalement — l'URL réelle du sitemap /page/{slug} est valide, 1 seule StaticPage publiée.) Codename seo-piliers-veille-generative.
  *   1.65.210 · 2026-06-14 · fix(SEO) Sitemap principal — exclure les actualités ÉLAGUÉES du sitemap.xml (corrige 2 courriels GSC « New reasons prevent… on laveille.ai » : « Exclue par la balise noindex » + pages mortes). Bug : SitemapController listait `NewsArticle::where('is_published', true)` SANS filtrer `seo_status`, donc les actualités élaguées par PruneSeoCommand (seo_status `noindex` = balise noindex, `gone` = HTTP 410) restaient DANS le sitemap → conflit « URL du sitemap en noindex / page retirée ». Correctif : ajout de `->where('seo_status', 'index')` (mirror exact du filtre déjà présent dans NewsSitemapController). Le sitemap ne liste plus que les actualités indexables. (Le « 403 » signalé n'est reproductible sur AUCUNE page publique testée → probablement transitoire : Googlebot tombé sur une fenêtre de blocage serveur/Cloudflare ; à revalider dans GSC après recrawl.) NB connexe à corriger : /boutique = 503, /page = 404 dans le sitemap. Codename seo-piliers-veille-generative.
@@ -361,7 +362,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 212;
+$lvPatch = 213;
 
 return [
     'major' => $lvMajor,
