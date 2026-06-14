@@ -111,10 +111,6 @@
                                         {{-- Détente --}}
                                         <div>
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">🎲 {{ __('Détente') }}</div>
-                                            <a href="{{ url('/outils/qt') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
-                                                <span style="font-size:18px;line-height:1;">🧠</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('QT — Quotient Techno') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Teste ton quotient techno') }}</div></div>
-                                            </a>
                                             <a href="{{ url('/outils/sudoku') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🧩</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Sudoku quotidien') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Nouvelle grille chaque jour') }}</div></div>
@@ -150,7 +146,6 @@
                                     <li><a href="{{ url('/outils/brain-dump') }}">🧠 {{ __('Brain Dump 2026') }}</a></li>
                                     <li><a href="{{ url('/outils/constructeur-prompts') }}">✏️ {{ __('Constructeur de prompts') }}</a></li>
                                     @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">🆚 {{ __("Comparateur d'outils IA") }}</a></li>@endif
-                                    <li><a href="{{ url('/outils/qt') }}">🧠 {{ __('QT — Quotient Techno') }}</a></li>
                                     <li><a href="{{ url('/outils/mots-croises') }}">🔤 {{ __('Mots croisés') }}</a></li>
                                     <li><a href="{{ url('/outils/sudoku') }}">🧩 {{ __('Sudoku') }}</a></li>
                                     <li><a href="{{ url('/outils/simulateur-fiscal') }}">💰 {{ __('Calculatrice taxes QC') }}</a></li>
@@ -381,10 +376,6 @@
                                         </div>
                                         <div style="flex:1!important;">
                                             <div style="font-family:var(--f-heading, 'Plus Jakarta Sans', sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--c-text-muted, #6E7687);margin-bottom:12px;">{{ __('Détente') }}</div>
-                                            <a href="{{ url('/outils/qt') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
-                                                <span style="font-size:18px;line-height:1;">🧠</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('QT — Quotient Techno') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Teste ton quotient techno') }}</div></div>
-                                            </a>
                                             <a href="{{ url('/outils/sudoku') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🧩</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Sudoku quotidien') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Une nouvelle grille chaque jour') }}</div></div>
@@ -417,7 +408,6 @@
                                     @if(Route::has('tools.quest.index') && config('tools.quest.enabled', false))<li><a href="{{ route('tools.quest.index') }}">{{ __('Les Sentiers de l\'IA') }}</a></li>@endif
                                     <li><a href="{{ url('/outils/constructeur-prompts') }}">{{ __('Constructeur de prompts') }}</a></li>
                                     @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">{{ __('Comparateur d\'outils IA') }}</a></li>@endif
-                                    <li><a href="{{ url('/outils/qt') }}">{{ __('QT — Quotient Techno') }}</a></li>
                                     <li><a href="{{ url('/outils/sudoku') }}">{{ __('Sudoku quotidien') }}</a></li>
                                     <li><a href="{{ url('/outils/mots-croises') }}">{{ __('Mots croisés IA') }}</a></li>
                                     @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">{{ __('Raccourcir un lien') }}</a></li>@endif
@@ -575,7 +565,6 @@
                                                 @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">🆚 {{ __('Comparateur d\'outils IA') }}</a></li>@endif
                                                 <li><a href="{{ url('/outils/mots-croises') }}">🔤 {{ __('Générateur mots croisés') }}</a></li>
                                                 <li><a href="{{ url('/outils/code-qr') }}">📱 {{ __('Code QR') }}</a></li>
-                                                <li><a href="{{ url('/outils/qt') }}">🧠 {{ __('QT — Quotient Techno') }}</a></li>
                                                 <li><a href="{{ url('/outils/sudoku') }}">🧩 {{ __('Sudoku quotidien') }}</a></li>
                                                 <li><a href="{{ url('/jeumc') }}">🎯 {{ __('Grilles partagées') }}</a></li>
                                                 @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">🔗 {{ __('Raccourcir un lien') }}</a></li>@endif

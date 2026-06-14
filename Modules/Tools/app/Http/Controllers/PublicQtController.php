@@ -13,10 +13,21 @@ use Modules\Tools\Services\QtService;
 class PublicQtController extends Controller
 {
     /**
-     * Jeu « QT — Quotient Techno ». Publié pour tous (v1.65.205).
+     * Jeu « QT — Quotient Techno ».
+     * REMIS EN CONSTRUCTION (v1.65.208) le temps de développer les nouveaux types de
+     * questions : jouable seulement par un superadmin ; le public voit « En construction ».
      */
     public function play(Request $request)
     {
+        $user = $request->user();
+        $isAdmin = $user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin();
+
+        if (! $isAdmin) {
+            return view('tools::public.under-construction', [
+                'tool' => (object) ['name' => 'QT — Quotient Techno'],
+            ]);
+        }
+
         $tool = \Modules\Tools\Models\Tool::where('slug', 'qt')->first();
 
         return view('tools::public.qt', [
