@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.200 · 2026-06-14 · ux(Tools) QT — ENCOURAGER le partage après copie (recherche pp_search : le cadrage « défie un ami » est le levier n°1, honnête, zéro infra). (A) En-tête du panneau réseaux après copie = cadrage défi : « ✅ Copié ! Maintenant défie ta gang : colle-le et tague quelqu'un qui se croit plus techno 😏 👇 ». Ligne sous « Copier mon résultat » : « 😏 Qui dans ton entourage peut battre ton QT ? Copie-le et défie-les ! ». (D) Urgence douce en mode défi : « ⏳ Le défi #N se termine ce soir. ». Micro-copie FR québécois, parle à « tu » (focus sur l'ami, pas la vantardise). Preuve sociale chiffrée (compteur/percentile) = Phase 2 (table DB des parties, pour rester honnête). Codename seo-piliers-veille-generative.
  *   1.65.199 · 2026-06-14 · feat(Tools/ShortUrl) QT — partage v2 (recherche pp_search juin 2026). (Point 2) BLOC COPIABLE AÉRÉ : titre (🏆 Défi #N / 🧠 Quotient Techno) / ligne score (QT + rang) / grille emoji + N/10 + tag IA court (· 🤖/🤝/🧠) / LIGNE VIDE / « Et toi, ton QT ? 👉 lurl.ca/qt » / #QuotientTechno — lignes courtes, lisible une fois collé. URL longue+UTM remplacée par un LIEN COURT DE MARQUE : nouveau short_urls slug « qt » → laveille.ai/outils/qt?utm_source=partage&utm_medium=social&utm_campaign=qt (résolution slug GLOBAL → lurl.ca/qt + tous domaines actifs ; migration réversible, permanent user_id null/is_anonymous false, redirect 301). UTM conservé via la redirection (tracking d'acquisition). (Point 1) après « 📋 Copier mon résultat », le PANNEAU RÉSEAUX s'ouvre automatiquement (shareOpen) avec l'instruction « ✅ Copié ! Ouvre un réseau et colle (Ctrl/Cmd+V) ton résultat 👇 » (flag pasteHint ; share() desktop garde « Partage ton défi »). Codename seo-piliers-veille-generative.
  *   1.65.198 · 2026-06-14 · fix(Tools) QT — `dailyRound()` plantait (HTTP 500 sur la page superadmin) : `Carbon::diffInDays()` retourne un FLOAT en Carbon 3/Laravel 11, donc `mt_srand(1.0)` levait un TypeError en PHP 8.4 (argument strict ?int). Correctif : `(int) $epoch->diffInDays($today) + 1`. Le mode « Défi du jour » (v197) est maintenant fonctionnel. Codename seo-piliers-veille-generative.
  *   1.65.197 · 2026-06-14 · feat(Tools) QT — MODE « DÉFI DU JOUR » (le levier de comparaison viral, pp_search 90/100). `QtService::dailyRound()` : 10 questions IDENTIQUES pour tous un jour donné (tirage DÉTERMINISTE seedé par le numéro de jour America/Toronto, epoch 2026-06-14 → « #N »), quota 4/3/3, choix mélangés déterministes, mt_srand($N) puis mt_srand() pour restaurer l'aléa, cache qt.daily.{N} 26h. Écran d'accueil = 2 modes : « 🏆 Défi du jour #N » (principal) + « 🎲 Partie libre » (aléatoire, conservé) ; Alpine begin(mode) charge le bon payload. Résultat : badge « 🏆 Défi du jour #N » + le bloc copiable devient « 🏆 QT — Défi du jour #N : … » (grille emoji COMPARABLE entre joueurs → « j'ai battu le #N, et toi ? »). localStorage qt-defi-{N} = 1 partie classée/jour (rejouable en libre, note « déjà fait aujourd'hui »). Code Hermes (dailyRound) + intégration superviseur. Controller passe 'daily'. Codename seo-piliers-veille-generative.
@@ -348,7 +349,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 199;
+$lvPatch = 200;
 
 return [
     'major' => $lvMajor,

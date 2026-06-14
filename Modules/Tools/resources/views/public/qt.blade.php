@@ -156,6 +156,7 @@
                                 <div x-text="correctCount + '/10'" style="font-size:0.85rem;color:var(--c-dark);opacity:0.7;margin-top:0.25rem;"></div>
                             </div>
                             <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:46px;padding:0 24px;font-weight:700;" @click="copyResult()">📋 Copier mon résultat</button>
+                            <p style="margin:0.6rem auto 0;max-width:440px;color:var(--c-text-muted);font-size:0.9rem;">😏 Qui dans ton entourage peut battre ton QT ? Copie-le et <strong>défie-les</strong> !<span x-show="isDefi"> ⏳ Le défi #<span x-text="defiNumber"></span> se termine ce soir.</span></p>
 
                             <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:1.25rem;">
                                 <button type="button" class="ct-btn ct-btn-outline" style="border-radius:8px;height:44px;padding:0 20px;" @click="share()">📣 Partager</button>
@@ -176,7 +177,7 @@
 
                             {{-- Panneau de partage (repli quand le partage natif n'est pas dispo, ex. ordinateur) --}}
                             <div x-show="shareOpen" style="margin-top:1rem;background:var(--c-primary-light,#F0FAFB);border-radius:12px;padding:14px;">
-                                <p x-show="pasteHint" style="font-weight:700;margin-bottom:0.6rem;color:var(--c-primary);">✅ Copié ! Ouvre un réseau et colle (Ctrl/Cmd&nbsp;+&nbsp;V) ton résultat 👇</p>
+                                <p x-show="pasteHint" style="font-weight:700;margin-bottom:0.6rem;color:var(--c-primary);">✅ Copié ! Maintenant <strong>défie ta gang</strong> : colle-le et tague quelqu'un qui se croit plus techno 😏 👇</p>
                                 <p x-show="!pasteHint" style="font-weight:600;margin-bottom:0.6rem;color:var(--c-dark);">Partage ton défi 👇</p>
                                 <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
                                     <button type="button" class="ct-btn ct-btn-outline" style="border-radius:999px;padding:6px 16px;" @click="shareNetwork('x')" aria-label="Partager sur X">𝕏 X</button>
