@@ -16,11 +16,34 @@ class QtService
         return strtolower(preg_replace('/[^a-z0-9]/i', '', Str::ascii($s)) ?: '');
     }
 
+    private static function loadData(string $file): array
+    {
+        try {
+            $path = function_exists('module_path') ? module_path('Tools', 'resources/data/'.$file) : null;
+            if (! $path || ! is_file($path)) {
+                return [];
+            }
+            $data = require $path;
+
+            return is_array($data) ? $data : [];
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
     private static function bank(): array
     {
-        return Cache::remember('qt.bank', now()->addHours(24), function () {
-            return require module_path('Tools', 'resources/data/qt-questions.php');
-        });
+        return Cache::remember('qt.bank', now()->addHours(24), fn () => self::loadData('qt-questions.php'));
+    }
+
+    private static function trueFalseBank(): array
+    {
+        return Cache::remember('qt.truefalse', now()->addHours(24), fn () => self::loadData('qt-truefalse.php'));
+    }
+
+    private static function shortAnswerBank(): array
+    {
+        return Cache::remember('qt.shortanswer', now()->addHours(24), fn () => self::loadData('qt-shortanswer.php'));
     }
 
     private static function glossaryMap(): array
@@ -58,81 +81,312 @@ class QtService
     }
 
     /**
-     * Construit une partie de 10 questions : tirage par quota de difficulté,
-     * mélange des questions ET des choix, points + lien fiche glossaire.
+     * Pool de paires terme → définition courte (one_sentence_answer, repli definition),
+     * pour les questions d'appariement. Définition nettoyée + terme masqué.
      */
-    public static function newRound(): array
+    private static function matchingPool(): array
+    {
+        return Cache::remember('qt.matchpool', now()->addHours(6), function () {
+            $out = [];
+            try {
+                if (! class_exists(Term::class)) {
+                    return [];
+                }
+                foreach (Term::where('is_published', true)->get() as $t) {
+                    $name = trim((string) $t->getTranslation('name', 'fr_CA', false));
+                    if ($name === '') {
+                        continue;
+                    }
+                    $def = trim((string) $t->getTranslation('one_sentence_answer', 'fr_CA', false));
+                    if ($def === '') {
+                        $def = trim((string) $t->getTranslation('definition', 'fr_CA', false));
+                    }
+                    $def = strip_tags($def);
+                    if ($def !== '') {
+                        $def = self::maskName($def, $name);
+                    }
+                    $def = self::truncateSmart($def, 110);
+                    if (mb_strlen($def) < 25) {
+                        continue;
+                    }
+                    $slug = (string) $t->getTranslation('slug', 'fr_CA', false);
+                    if ($slug === '') {
+                        continue;
+                    }
+                    $out[] = ['term' => $name, 'def' => $def, 'slug' => $slug];
+                }
+            } catch (\Throwable $e) {
+                return [];
+            }
+
+            return $out;
+        });
+    }
+
+    private static function maskName(string $text, string $name): string
+    {
+        if ($text === '' || $name === '') {
+            return $text;
+        }
+        $out = str_ireplace($name, '…', $text);
+        if ($out !== $text) {
+            return $out;
+        }
+        if (stripos(Str::ascii($text), Str::ascii($name)) !== false) {
+            $replaced = @preg_replace('/'.preg_quote($name, '/').'/iu', '…', $text);
+            if (is_string($replaced)) {
+                return $replaced;
+            }
+        }
+
+        return $text;
+    }
+
+    private static function truncateSmart(string $text, int $limit): string
+    {
+        $text = trim(preg_replace('/\s+/u', ' ', $text) ?? '');
+        if (mb_strlen($text) <= $limit) {
+            return $text;
+        }
+        $cut = mb_substr($text, 0, $limit);
+        $lastSpace = mb_strrpos($cut, ' ');
+        if ($lastSpace !== false && $lastSpace > (int) floor($limit * 0.6)) {
+            $cut = mb_substr($cut, 0, $lastSpace);
+        }
+
+        return rtrim($cut, ".,;:!? \t").'…';
+    }
+
+    private static function pointsFromDifficulty(string $difficulty): int
+    {
+        $d = strtolower($difficulty);
+
+        return $d === 'facile' ? 1 : ($d === 'moyen' ? 2 : 3);
+    }
+
+    private static function safeShuffle(array &$arr): void
+    {
+        if (count($arr) > 1) {
+            shuffle($arr);
+        }
+    }
+
+    /** Mélange les choix d'un QCM et renvoie [choix, nouvel index correct]. */
+    private static function mixChoicesWithCorrect(array $choices, int $correct): array
+    {
+        $indexed = [];
+        foreach ($choices as $i => $c) {
+            $indexed[] = ['i' => $i, 'v' => $c];
+        }
+        self::safeShuffle($indexed);
+        $newChoices = [];
+        $newCorrect = 0;
+        foreach ($indexed as $idx => $pair) {
+            $newChoices[] = $pair['v'];
+            if ((int) $pair['i'] === $correct) {
+                $newCorrect = $idx;
+            }
+        }
+
+        return [$newChoices, $newCorrect];
+    }
+
+    private static function makeQcmItem(array $q): array
+    {
+        $difficulty = (string) ($q['difficulty'] ?? 'moyen');
+        $choices = array_values((array) ($q['choices'] ?? []));
+        $correct = (int) ($q['correct'] ?? 0);
+        if (count($choices) < 2) {
+            $choices = ['A', 'B', 'C', 'D'];
+            $correct = 0;
+        } else {
+            [$choices, $correct] = self::mixChoicesWithCorrect($choices, $correct);
+        }
+
+        return [
+            'type' => 'qcm',
+            'theme' => (string) ($q['theme'] ?? 'general'),
+            'difficulty' => $difficulty,
+            'question' => (string) ($q['question'] ?? ''),
+            'choices' => $choices,
+            'correct' => $correct,
+            'explanation' => (string) ($q['explanation'] ?? ''),
+            'points' => self::pointsFromDifficulty($difficulty),
+            'fiche' => self::ficheUrl(isset($q['term']) ? (string) $q['term'] : null),
+        ];
+    }
+
+    /** Tire jusqu'à $limit QCM (quotas par difficulté), sans doublon. */
+    private static function pickQcm(int $limit, array $quotas): array
     {
         $bank = self::bank();
-
-        $grouped = ['facile' => [], 'moyen' => [], 'difficile' => []];
-        foreach ($bank as $item) {
-            if (isset($grouped[$item['difficulty']])) {
-                $grouped[$item['difficulty']][] = $item;
+        if (empty($bank)) {
+            return [];
+        }
+        $groups = ['facile' => [], 'moyen' => [], 'difficile' => []];
+        $others = [];
+        foreach ($bank as $q) {
+            $d = strtolower((string) ($q['difficulty'] ?? ''));
+            if (isset($groups[$d])) {
+                $groups[$d][] = $q;
+            } else {
+                $others[] = $q;
             }
         }
+        foreach ($groups as &$g) {
+            self::safeShuffle($g);
+        }
+        unset($g);
+        self::safeShuffle($others);
 
-        $quotas = ['facile' => 4, 'moyen' => 3, 'difficile' => 3];
-        $selected = [];
-        $used = [];
-
-        foreach ($quotas as $diff => $quota) {
-            $pool = $grouped[$diff];
-            shuffle($pool);
-            foreach (array_slice($pool, 0, $quota) as $item) {
-                $selected[] = $item;
-                $used[$item['question']] = true;
+        $picked = [];
+        foreach ($quotas as $d => $n) {
+            if (! isset($groups[$d]) || (int) $n <= 0) {
+                continue;
             }
+            $take = array_splice($groups[$d], 0, (int) $n);
+            $picked = array_merge($picked, $take);
         }
 
-        // Compléter à 10 si une catégorie manquait.
-        if (count($selected) < 10) {
-            $rest = array_values(array_filter($bank, fn ($it) => ! isset($used[$it['question']])));
-            shuffle($rest);
-            foreach (array_slice($rest, 0, 10 - count($selected)) as $item) {
-                $selected[] = $item;
-            }
+        $leftovers = array_merge($groups['facile'], $groups['moyen'], $groups['difficile'], $others);
+        self::safeShuffle($leftovers);
+        while (count($picked) < $limit && ! empty($leftovers)) {
+            $picked[] = array_shift($leftovers);
         }
 
-        $selected = array_slice($selected, 0, 10);
-        shuffle($selected);
+        self::safeShuffle($picked);
+        $picked = array_slice($picked, 0, $limit);
 
-        $pointsMap = ['facile' => 1, 'moyen' => 2, 'difficile' => 3];
-        $output = [];
+        return array_map(fn ($q) => self::makeQcmItem(is_array($q) ? $q : []), $picked);
+    }
 
-        foreach ($selected as $q) {
-            $pairs = [];
-            foreach ($q['choices'] as $i => $choice) {
-                $pairs[] = ['t' => $choice, 'ok' => ($i === $q['correct'])];
+    private static function buildVraiFauxItems(): array
+    {
+        $items = [];
+        foreach (self::trueFalseBank() as $q) {
+            if (! is_array($q)) {
+                continue;
             }
-            shuffle($pairs);
-            $correct = 0;
-            foreach ($pairs as $i => $p) {
-                if ($p['ok']) {
-                    $correct = $i;
-                    break;
-                }
-            }
-
-            $output[] = [
-                'theme' => $q['theme'],
-                'difficulty' => $q['difficulty'],
-                'question' => $q['question'],
-                'choices' => array_column($pairs, 't'),
+            $choices = ['Vrai', 'Faux'];
+            $correct = ((bool) ($q['answer'] ?? false)) ? 0 : 1;
+            [$choices, $correct] = self::mixChoicesWithCorrect($choices, $correct);
+            $items[] = [
+                'type' => 'vraifaux',
+                'theme' => (string) ($q['theme'] ?? 'general'),
+                'difficulty' => (string) ($q['difficulty'] ?? 'facile'),
+                'question' => (string) ($q['statement'] ?? ($q['question'] ?? '')),
+                'choices' => $choices,
                 'correct' => $correct,
-                'explanation' => $q['explanation'],
-                'points' => $pointsMap[$q['difficulty']],
-                'fiche' => self::ficheUrl($q['term'] ?? null),
+                'explanation' => (string) ($q['explanation'] ?? ''),
+                'points' => 1,
+                'fiche' => self::ficheUrl(isset($q['term']) ? (string) $q['term'] : null),
             ];
         }
 
-        return $output;
+        return $items;
+    }
+
+    private static function buildShortItems(): array
+    {
+        $items = [];
+        foreach (self::shortAnswerBank() as $q) {
+            if (! is_array($q)) {
+                continue;
+            }
+            $accepted = array_values(array_filter((array) ($q['accepted'] ?? []), fn ($v) => is_string($v) && $v !== ''));
+            if (empty($accepted)) {
+                continue;
+            }
+            $items[] = [
+                'type' => 'court',
+                'theme' => (string) ($q['theme'] ?? 'general'),
+                'difficulty' => (string) ($q['difficulty'] ?? 'moyen'),
+                'question' => (string) ($q['question'] ?? ''),
+                'accepted' => $accepted,
+                'display' => (string) ($q['display'] ?? ''),
+                'explanation' => (string) ($q['explanation'] ?? ''),
+                'points' => 2,
+                'fiche' => self::ficheUrl(isset($q['term']) ? (string) $q['term'] : null),
+            ];
+        }
+
+        return $items;
+    }
+
+    /** Construit une question d'appariement (4 paires) ou null si pool insuffisant. */
+    private static function buildMatching(): ?array
+    {
+        $pool = self::matchingPool();
+        if (count($pool) < 4) {
+            return null;
+        }
+        self::safeShuffle($pool);
+        $picked = array_slice($pool, 0, 4);
+
+        $terms = array_map(fn ($p) => (string) ($p['term'] ?? ''), $picked);
+        $defs = array_map(fn ($p) => (string) ($p['def'] ?? ''), $picked);
+
+        $defsShuffled = $defs;
+        self::safeShuffle($defsShuffled);
+
+        $answer = [];
+        foreach ($defs as $d) {
+            $idx = array_search($d, $defsShuffled, true);
+            $answer[] = ($idx === false) ? 0 : (int) $idx;
+        }
+
+        return [
+            'type' => 'appariement',
+            'theme' => 'ia',
+            'difficulty' => 'moyen',
+            'question' => 'Associe chaque terme à sa définition.',
+            'terms' => $terms,
+            'defs' => $defsShuffled,
+            'answer' => $answer,
+            'explanation' => 'Chaque terme correspond à une seule définition.',
+            'points' => 3,
+            'fiche' => null,
+        ];
+    }
+
+    /** Assemble un round mixte de 10 items (6 QCM + 2 V/F + 1 court + 1 appariement). */
+    private static function assembleRound(): array
+    {
+        $items = self::pickQcm(6, ['facile' => 2, 'moyen' => 2, 'difficile' => 2]);
+
+        $vf = self::buildVraiFauxItems();
+        self::safeShuffle($vf);
+        $items = array_merge($items, array_slice($vf, 0, 2));
+
+        $short = self::buildShortItems();
+        self::safeShuffle($short);
+        if (! empty($short)) {
+            $items[] = $short[0];
+        }
+
+        $match = self::buildMatching();
+        if ($match !== null) {
+            $items[] = $match;
+        }
+
+        // Compléter à 10 avec des QCM si une source manquait.
+        if (count($items) < 10) {
+            $needed = 10 - count($items);
+            $items = array_merge($items, self::pickQcm($needed, ['facile' => $needed, 'moyen' => 0, 'difficile' => 0]));
+        }
+
+        self::safeShuffle($items);
+
+        return array_slice($items, 0, 10);
+    }
+
+    public static function newRound(): array
+    {
+        return self::assembleRound();
     }
 
     /**
-     * « Défi du jour » : les 10 MÊMES questions (et le même ordre de choix) pour tous
-     * les joueurs un jour donné, de façon déterministe (seed = numéro du jour).
-     * Retourne ['number' => N, 'questions' => [...]].
+     * « Défi du jour » : round MIXTE identique pour tous un jour donné (seed = numéro du jour).
      */
     public static function dailyRound(): array
     {
@@ -142,64 +396,10 @@ class QtService
 
         return Cache::remember('qt.daily.'.$number, now()->addHours(26), function () use ($number) {
             mt_srand($number);
-
-            $bank = self::bank();
-            $grouped = ['facile' => [], 'moyen' => [], 'difficile' => []];
-            foreach ($bank as $item) {
-                if (isset($grouped[$item['difficulty']])) {
-                    $grouped[$item['difficulty']][] = $item;
-                }
-            }
-            $quotas = ['facile' => 4, 'moyen' => 3, 'difficile' => 3];
-            $selected = [];
-            $used = [];
-            foreach ($quotas as $diff => $quota) {
-                $pool = $grouped[$diff];
-                shuffle($pool);
-                foreach (array_slice($pool, 0, $quota) as $item) {
-                    $selected[] = $item;
-                    $used[$item['question']] = true;
-                }
-            }
-            if (count($selected) < 10) {
-                $rest = array_values(array_filter($bank, fn ($it) => ! isset($used[$it['question']])));
-                shuffle($rest);
-                foreach (array_slice($rest, 0, 10 - count($selected)) as $item) {
-                    $selected[] = $item;
-                }
-            }
-            $selected = array_slice($selected, 0, 10);
-            shuffle($selected);
-            $pointsMap = ['facile' => 1, 'moyen' => 2, 'difficile' => 3];
-            $output = [];
-            foreach ($selected as $q) {
-                $pairs = [];
-                foreach ($q['choices'] as $i => $choice) {
-                    $pairs[] = ['t' => $choice, 'ok' => ($i === $q['correct'])];
-                }
-                shuffle($pairs);
-                $correct = 0;
-                foreach ($pairs as $i => $p) {
-                    if ($p['ok']) {
-                        $correct = $i;
-                        break;
-                    }
-                }
-                $output[] = [
-                    'theme' => $q['theme'],
-                    'difficulty' => $q['difficulty'],
-                    'question' => $q['question'],
-                    'choices' => array_column($pairs, 't'),
-                    'correct' => $correct,
-                    'explanation' => $q['explanation'],
-                    'points' => $pointsMap[$q['difficulty']],
-                    'fiche' => self::ficheUrl($q['term'] ?? null),
-                ];
-            }
-
+            $questions = self::assembleRound();
             mt_srand();
 
-            return ['number' => $number, 'questions' => $output];
+            return ['number' => $number, 'questions' => $questions];
         });
     }
 }

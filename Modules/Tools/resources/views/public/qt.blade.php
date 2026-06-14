@@ -82,14 +82,51 @@
                             </div>
 
                             <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:1rem;">
+                                <p style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-primary);margin-bottom:0.5rem;" x-text="typeLabel()"></p>
                                 <p x-text="q().question" style="font-size:1.2rem;font-weight:600;color:var(--c-dark);margin-bottom:1.25rem;"></p>
-                                <template x-for="(c, i) in q().choices" :key="i">
-                                    <button type="button" class="qt-choice" :class="choiceClass(i)" @click="choose(i)" :disabled="answered" x-text="c"></button>
-                                </template>
+
+                                {{-- QCM + Vrai/Faux : boutons de choix --}}
+                                <div x-show="isChoiceType()">
+                                    <template x-for="(c, i) in q().choices" :key="i">
+                                        <button type="button" class="qt-choice" :class="choiceClass(i)" @click="choose(i)" :disabled="answered" x-text="c"></button>
+                                    </template>
+                                </div>
+
+                                {{-- Réponse courte : champ texte --}}
+                                <div x-show="q().type==='court'">
+                                    <input type="text" class="form-control" x-model="courtInput" :disabled="answered" @keydown.enter.prevent="validateCourt()"
+                                           placeholder="Écris ta réponse…" autocomplete="off" autocapitalize="off" spellcheck="false"
+                                           aria-label="Ta réponse" style="font-size:1.1rem;height:48px;margin-bottom:0.75rem;">
+                                    <button type="button" class="ct-btn ct-btn-primary" @click="validateCourt()" :disabled="answered || !courtInput.trim()"
+                                            style="border-radius:8px;height:44px;padding:0 22px;">Valider</button>
+                                </div>
+
+                                {{-- Appariement : un menu déroulant par terme (alternative accessible au glisser-déposer) --}}
+                                <div x-show="q().type==='appariement'">
+                                    <template x-for="(t, ti) in q().terms" :key="ti">
+                                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px;">
+                                            <span style="font-weight:700;color:var(--c-dark);min-width:120px;flex:0 0 auto;" x-text="t"></span>
+                                            <select class="form-control" x-model="matchSel[ti]" :disabled="answered" :aria-label="'Définition pour '+t" style="flex:1 1 220px;min-width:0;">
+                                                <option value="">— choisir une définition —</option>
+                                                <template x-for="(d, di) in q().defs" :key="di">
+                                                    <option :value="di" x-text="d"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </template>
+                                    <button type="button" class="ct-btn ct-btn-primary" @click="validateMatch()"
+                                            :disabled="answered || !matchAllChosen()" style="border-radius:8px;height:44px;padding:0 22px;margin-top:0.5rem;">Valider l'association</button>
+                                </div>
                             </div>
 
                             <div x-show="answered" x-transition style="padding:1.25rem;background:#f3f4f6;border-radius:12px;">
-                                <p style="font-size:1.1rem;font-weight:600;margin-bottom:0.5rem;" :style="selected===q().correct?'color:#2E7D32;':'color:#B91C1C;'" x-text="selected===q().correct?'✅ Bonne réponse !':'❌ Pas tout à fait.'"></p>
+                                <p style="font-size:1.1rem;font-weight:600;margin-bottom:0.5rem;" :style="lastCorrect?'color:#2E7D32;':'color:#B91C1C;'" x-text="lastCorrect?'✅ Bonne réponse !':'❌ Pas tout à fait.'"></p>
+                                <p x-show="q().type==='court' && !lastCorrect" style="margin-bottom:0.5rem;color:#2E7D32;" x-text="'Réponse attendue : '+(q().display||'')"></p>
+                                <div x-show="q().type==='appariement'" style="margin-bottom:0.5rem;">
+                                    <template x-for="(t, ti) in q().terms" :key="ti">
+                                        <p style="margin-bottom:0.25rem;font-size:0.95rem;color:var(--c-dark);"><strong x-text="t"></strong><span x-text="' → '+q().defs[q().answer[ti]]"></span></p>
+                                    </template>
+                                </div>
                                 <p x-text="q().explanation" style="color:var(--c-text-secondary);margin-bottom:0.75rem;"></p>
                                 <p x-show="q().fiche" style="margin-bottom:0.75rem;">
                                     <a :href="q().fiche" target="_blank" rel="noopener noreferrer" style="color:var(--c-primary);font-weight:600;">📖 Lire la fiche →</a>
@@ -187,8 +224,8 @@
                                 <template x-for="(item, i) in questions" :key="i">
                                     <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:1rem;text-align:left;">
                                         <p style="font-weight:600;color:var(--c-dark);margin-bottom:0.5rem;" x-text="(i+1)+'. '+item.question"></p>
-                                        <p style="margin-bottom:0.5rem;" :style="answers[i]===item.correct?'color:#2E7D32;':'color:#B91C1C;'" x-text="answers[i]!==null ? ((answers[i]===item.correct?'✅ ':'❌ ')+'Ta réponse : '+item.choices[answers[i]]) : '—'"></p>
-                                        <p x-show="answers[i]!==item.correct" style="color:#2E7D32;margin-bottom:0.5rem;" x-text="'Bonne réponse : '+item.choices[item.correct]"></p>
+                                        <p style="margin-bottom:0.5rem;" :style="isCorrect(i)?'color:#2E7D32;':'color:#B91C1C;'" x-text="reviewMy(i)"></p>
+                                        <p x-show="!isCorrect(i)" style="color:#2E7D32;margin-bottom:0.5rem;" x-text="reviewSol(i)"></p>
                                         <p x-text="item.explanation" style="color:var(--c-text-secondary);font-size:0.95rem;margin-bottom:0.5rem;"></p>
                                         <p x-show="item.fiche">
                                             <a :href="item.fiche" target="_blank" rel="noopener noreferrer" style="color:var(--c-primary);font-weight:600;">📖 Lire la fiche →</a>
@@ -209,6 +246,7 @@
 function qtApp(payload, dailyPayload, dailyNumber) {
     return {
         phase: 'intro', questions: [], index: 0, answered: false, selected: null,
+        lastCorrect: false, courtInput: '', matchSel: [],
         answers: [], qt: 0, displayQt: 0, correctCount: 0, rank: {},
         aiAnswered: false, aiBadge: '', aiUsage: '',
         isDefi: false, defiNumber: dailyNumber || 0, defiDoneToday: false, bestToday: 0,
@@ -229,6 +267,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             this.answers = Array(this.questions.length).fill(null);
             this.index = 0; this.answered = false; this.selected = null;
             this.aiAnswered = false; this.aiBadge = ''; this.aiUsage = '';
+            this.prepInput();
             this.phase = 'quiz';
         },
 
@@ -237,6 +276,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         choose(i) {
             if (this.answered) return;
             this.selected = i;
+            this.lastCorrect = (i === this.q().correct);
             this.answered = true;
             this.answers[this.index] = i;
         },
@@ -248,8 +288,73 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             return 'qt-dim';
         },
 
+        // --- Types de questions (Phase 1) ---
+        isChoiceType() { const t = this.q().type; return t === 'qcm' || t === 'vraifaux' || t === undefined; },
+        typeLabel() {
+            const t = this.q().type;
+            if (t === 'vraifaux') return 'Vrai ou Faux';
+            if (t === 'court') return 'Réponse courte';
+            if (t === 'appariement') return 'Appariement';
+            return 'Choix multiple';
+        },
+        normCourt(s) {
+            return (s || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+        },
+        validateCourt() {
+            if (this.answered) return;
+            if (!this.courtInput.trim()) return;
+            const ok = (this.q().accepted || []).includes(this.normCourt(this.courtInput));
+            this.lastCorrect = ok;
+            this.answers[this.index] = this.courtInput;
+            this.answered = true;
+        },
+        matchAllChosen() {
+            const q = this.q();
+            if (q.type !== 'appariement') return false;
+            const n = (q.terms || []).length;
+            if (this.matchSel.length < n) return false;
+            for (let k = 0; k < n; k++) { const v = this.matchSel[k]; if (v === '' || v === null || v === undefined) return false; }
+            return true;
+        },
+        validateMatch() {
+            if (this.answered || !this.matchAllChosen()) return;
+            const ans = this.q().answer || [];
+            this.lastCorrect = ans.every((a, k) => parseInt(this.matchSel[k]) === a);
+            this.answers[this.index] = this.matchSel.slice();
+            this.answered = true;
+        },
+        isCorrect(i) {
+            const q = this.questions[i]; const a = this.answers[i];
+            if (a === null || a === undefined) return false;
+            if (q.type === 'court') return (q.accepted || []).includes(this.normCourt(a));
+            if (q.type === 'appariement') {
+                const ans = q.answer || [];
+                return Array.isArray(a) && a.length === ans.length && ans.every((x, k) => parseInt(a[k]) === x);
+            }
+            return a === q.correct;
+        },
+        prepInput() {
+            this.lastCorrect = false; this.courtInput = '';
+            const q = this.q();
+            this.matchSel = (q.type === 'appariement') ? Array((q.terms || []).length).fill('') : [];
+        },
+        reviewMy(i) {
+            const q = this.questions[i]; const a = this.answers[i];
+            if (a === null || a === undefined) return '—';
+            const mark = this.isCorrect(i) ? '✅ ' : '❌ ';
+            if (q.type === 'court') return mark + 'Ta réponse : ' + a;
+            if (q.type === 'appariement') return mark + (this.isCorrect(i) ? 'Toutes les paires correctes' : 'Certaines associations sont fausses');
+            return mark + 'Ta réponse : ' + (q.choices ? q.choices[a] : a);
+        },
+        reviewSol(i) {
+            const q = this.questions[i];
+            if (q.type === 'court') return 'Bonne réponse : ' + (q.display || '');
+            if (q.type === 'appariement') return (q.terms || []).map((t, k) => t + ' → ' + q.defs[q.answer[k]]).join(' · ');
+            return 'Bonne réponse : ' + (q.choices ? q.choices[q.correct] : '');
+        },
+
         next() {
-            if (this.index < 9) { this.index++; this.answered = false; this.selected = null; }
+            if (this.index < 9) { this.index++; this.answered = false; this.selected = null; this.prepInput(); }
             else { this.finish(); }
         },
 
@@ -257,7 +362,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             let earned = 0, total = 0, correct = 0;
             this.questions.forEach((q, i) => {
                 total += q.points;
-                if (this.answers[i] === q.correct) { earned += q.points; correct++; }
+                if (this.isCorrect(i)) { earned += q.points; correct++; }
             });
             const frac = total > 0 ? earned / total : 0;
             this.qt = Math.min(145, Math.max(55, Math.round(55 + frac * 90)));
@@ -327,7 +432,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
                 if (!map[q.theme]) return;
                 if (!stats[q.theme]) stats[q.theme] = { ...map[q.theme], correct: 0, total: 0 };
                 stats[q.theme].total++;
-                if (this.answers[i] === q.correct) stats[q.theme].correct++;
+                if (this.isCorrect(i)) stats[q.theme].correct++;
             });
             return Object.values(stats)
                 .map(t => ({ ...t, pct: t.total > 0 ? Math.round((t.correct / t.total) * 100) : 0 }))
@@ -344,7 +449,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             const seen = new Set();
             const fiches = [];
             this.questions.forEach((q, i) => {
-                if (q.fiche && this.answers[i] !== q.correct && !seen.has(q.fiche)) {
+                if (q.fiche && !this.isCorrect(i) && !seen.has(q.fiche)) {
                     seen.add(q.fiche);
                     try {
                         const slug = new URL(q.fiche).pathname.split('/').pop().split('?')[0];
@@ -425,7 +530,7 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         },
 
         emojiGrid() {
-            return this.questions.map((q, i) => this.answers[i] === q.correct ? '✅' : '❌').join('');
+            return this.questions.map((q, i) => this.isCorrect(i) ? '✅' : '❌').join('');
         },
 
         aiTag() {
