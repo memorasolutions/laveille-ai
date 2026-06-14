@@ -1,9 +1,9 @@
 # QT — Quotient Techno : banque de questions
 
-> Fichier de **vérification** (généré). Banque complète : **72 questions**. Chaque partie tire **10 questions** au hasard (4 faciles / 3 moyennes / 3 difficiles), avec questions ET choix mélangés. Toutes les questions sont ancrées dans une fiche du glossaire de la veille (« Lire la fiche » → nouvel onglet).
+> Fichier de **vérification** (généré). Banque complète : **96 questions**. Chaque partie tire **10 questions** au hasard (4 faciles / 3 moyennes / 3 difficiles), avec questions ET choix mélangés. Toutes les questions sont ancrées dans une fiche du glossaire de la veille (« Lire la fiche » → nouvel onglet).
 
-**Difficulté** : facile 23 · moyen 27 · difficile 22  
-**Thèmes** : securite 9 · numerique 10 · web 6 · ia 35 · donnees 12
+**Difficulté** : facile 31 · moyen 35 · difficile 30  
+**Thèmes** : securite 12 · numerique 14 · web 7 · ia 48 · donnees 15
 
 Ordre : **chronologique** (ordre d'ajout). Les questions les plus récentes sont à la fin — vérifie-les au fur et à mesure.  
 Légende : ✅ bonne réponse · ◻️ distracteur.
@@ -729,4 +729,244 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 *Explication* : A2A (Agent-to-Agent) est un protocole ouvert (Google, 2025) qui permet à des agents IA de fournisseurs différents de communiquer et de collaborer.
 *Fiche glossaire* : https://laveille.ai/glossaire/a2a
+
+### 73. [IA · Facile] Qu'est-ce que l'apprentissage automatique (machine learning) ?
+
+- ◻️ Un domaine de l'IA où les algorithmes sont programmés règle par règle
+- ✅ Un domaine de l'IA où les algorithmes améliorent leurs performances à partir de données ou d'exemples, sans être programmés explicitement
+- ◻️ Un type de base de données pour stocker des données d'entraînement
+- ◻️ Un langage de programmation conçu pour créer des IA
+
+*Explication* : L'apprentissage automatique (machine learning) est un domaine de l'IA où les algorithmes améliorent leurs performances à partir de données ou d'exemples, sans être programmés explicitement règle par règle.
+*Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-automatique
+
+### 74. [IA · Facile] Qu'est-ce qu'un chatbot ?
+
+- ◻️ Un logiciel de cybersécurité qui bloque les attaques
+- ◻️ Un modèle d'IA qui crée des images à partir de texte
+- ✅ Une interface de conversation automatisée conçue pour dialoguer avec des humains en langage naturel
+- ◻️ Un langage de balisage pour structurer des pages web
+
+*Explication* : Un chatbot est une interface de conversation automatisée conçue pour dialoguer avec des humains en langage naturel, souvent propulsée par une IA.
+*Fiche glossaire* : https://laveille.ai/glossaire/chatbot
+
+### 75. [NUMERIQUE · Facile] Qu'est-ce que l'automatisation ?
+
+- ◻️ La création d'images par intelligence artificielle
+- ✅ L'utilisation de technologies pour exécuter des tâches répétitives avec une intervention humaine minimale
+- ◻️ La protection des systèmes contre les accès non autorisés
+- ◻️ L'entraînement d'un modèle d'IA avec des données
+
+*Explication* : L'automatisation est l'utilisation de technologies pour exécuter des tâches répétitives avec une intervention humaine minimale.
+*Fiche glossaire* : https://laveille.ai/glossaire/automatisation
+
+### 76. [DONNEES · Facile] Que sont les données d'entraînement ?
+
+- ◻️ Les résultats finaux produits par un modèle d'IA
+- ◻️ Les instructions de sécurité d'un système
+- ✅ L'ensemble des informations utilisées pour entraîner un modèle d'IA à accomplir une tâche
+- ◻️ Le code source d'un logiciel libre
+
+*Explication* : Les données d'entraînement (training data) sont l'ensemble des informations (textes, images, sons) utilisées pour entraîner un modèle d'IA à accomplir une tâche.
+*Fiche glossaire* : https://laveille.ai/glossaire/donnees-dentrainement
+
+### 77. [IA · Facile] Quel est le rôle principal de DALL-E ?
+
+- ◻️ Générer des conversations automatisées
+- ✅ Créer des images originales à partir de descriptions textuelles
+- ◻️ Protéger les systèmes contre les cyberattaques
+- ◻️ Analyser des données pour améliorer des algorithmes
+
+*Explication* : DALL-E est un modèle d'IA d'OpenAI spécialisé dans la création d'images originales à partir de descriptions textuelles.
+*Fiche glossaire* : https://laveille.ai/glossaire/dall-e
+
+### 78. [SECURITE · Facile] Qu'est-ce que la cybersécurité ?
+
+- ◻️ Un langage de balisage pour pages web
+- ✅ L'ensemble des mesures visant à protéger les systèmes, les données et les infrastructures contre les attaques et accès non autorisés
+- ◻️ Un modèle de distribution de logiciels libres
+- ◻️ La création d'images par IA
+
+*Explication* : La cybersécurité est l'ensemble des mesures visant à protéger les systèmes, les données et les infrastructures contre les attaques et les accès non autorisés.
+*Fiche glossaire* : https://laveille.ai/glossaire/cybersecurite
+
+### 79. [WEB · Facile] Qu'est-ce que le code HTML ?
+
+- ◻️ Un langage de programmation pour créer des IA
+- ✅ Un langage de balisage universel utilisé pour structurer et afficher le contenu des pages web
+- ◻️ Un logiciel de cybersécurité
+- ◻️ Un type de données d'entraînement
+
+*Explication* : Le code HTML est un langage de balisage universel utilisé pour structurer et afficher le contenu des pages web.
+*Fiche glossaire* : https://laveille.ai/glossaire/code-html
+
+### 80. [NUMERIQUE · Facile] Qu'est-ce qu'un logiciel à code source ouvert (open source) ?
+
+- ◻️ Un logiciel dont le code source est caché et propriétaire
+- ✅ Un logiciel dont le code source est librement accessible, qu'on peut consulter, modifier et partager
+- ◻️ Un outil de cybersécurité contre les intrusions
+- ◻️ Un modèle d'IA qui génère des images
+
+*Explication* : L'open source désigne un modèle de distribution où le code source d'un logiciel est librement accessible, permettant de le consulter, le modifier et le partager.
+*Fiche glossaire* : https://laveille.ai/glossaire/open-source
+
+### 81. [IA · Moyen] Qu'est-ce que l'AGI (intelligence artificielle générale) ?
+
+- ◻️ Une IA spécialisée dans une seule tâche, comme la reconnaissance d'images
+- ✅ Une IA hypothétique capable de comprendre et d'apprendre n'importe quelle tâche intellectuelle qu'un humain peut accomplir
+- ◻️ Un modèle entraîné à prédire des séquences de mots
+- ◻️ Un système qui traite plusieurs types de données à la fois
+
+*Explication* : L'AGI (Artificial General Intelligence) est une IA hypothétique capable de comprendre et d'apprendre n'importe quelle tâche intellectuelle qu'un humain peut accomplir, contrairement à l'IA étroite et spécialisée.
+*Fiche glossaire* : https://laveille.ai/glossaire/agi
+
+### 82. [IA · Moyen] Qu'est-ce qu'un modèle de langage ?
+
+- ✅ Un système d'IA entraîné à prédire la probabilité d'une séquence de mots pour générer et comprendre du texte
+- ◻️ Un modèle d'IA qui crée des images à partir de texte
+- ◻️ Un ensemble de données d'entraînement
+- ◻️ Un langage de programmation pour les pages web
+
+*Explication* : Un modèle de langage (language model) est un système d'IA entraîné à prédire la probabilité d'une séquence de mots, ce qui lui permet de générer et de comprendre du texte.
+*Fiche glossaire* : https://laveille.ai/glossaire/modele-de-langage
+
+### 83. [IA · Moyen] Qu'est-ce qu'une IA multimodale ?
+
+- ◻️ Une IA qui ne traite que du texte
+- ✅ Un système d'IA capable de traiter et de générer simultanément plusieurs types de données : texte, image, audio, vidéo
+- ◻️ Une IA hypothétique aussi polyvalente qu'un humain
+- ◻️ Un modèle de distribution de logiciels
+
+*Explication* : Une IA multimodale (multimodal AI) est un système capable de traiter et de générer simultanément plusieurs types de données : texte, image, audio et vidéo.
+*Fiche glossaire* : https://laveille.ai/glossaire/ia-multimodale
+
+### 84. [IA · Moyen] Qu'est-ce que l'anthropomorphisme appliqué à l'IA ?
+
+- ◻️ La capacité d'une IA à ressentir réellement des émotions
+- ◻️ Une technique d'entraînement des modèles de langage
+- ✅ La tendance humaine à attribuer des émotions, une conscience ou une intention à une IA qui n'en a pas
+- ◻️ Un modèle d'IA qui génère des images réalistes
+
+*Explication* : L'anthropomorphisme est la tendance humaine à attribuer des émotions, une conscience ou une intention à une IA qui n'en a pas.
+*Fiche glossaire* : https://laveille.ai/glossaire/anthropomorphisme
+
+### 85. [IA · Moyen] Quelle IA de DeepMind a marqué l'histoire en 2016 en battant un champion du monde au jeu de go ?
+
+- ✅ AlphaGo
+- ◻️ ChatGPT
+- ◻️ Deep Blue
+- ◻️ Watson
+
+*Explication* : AlphaGo est l'IA de DeepMind qui a battu Lee Sedol, champion du monde de go, en 2016. (Deep Blue, lui, avait battu Kasparov aux échecs en 1997.)
+*Fiche glossaire* : https://laveille.ai/glossaire/alphago
+
+### 86. [NUMERIQUE · Moyen] Quelle entreprise domine la fabrication des processeurs graphiques (GPU) et des puces devenues essentielles pour entraîner les IA ?
+
+- ◻️ AMD
+- ◻️ Intel
+- ✅ NVIDIA
+- ◻️ Qualcomm
+
+*Explication* : NVIDIA est l'entreprise dominante dans la fabrication de processeurs graphiques (GPU) et de puces spécialisées pour l'entraînement des IA.
+*Fiche glossaire* : https://laveille.ai/glossaire/nvidia
+
+### 87. [IA · Moyen] Quel cadre vise à concevoir des systèmes d'IA éthiques, transparents, équitables et respectueux des droits ?
+
+- ◻️ L'IA générative
+- ✅ L'IA responsable
+- ◻️ L'IA embarquée
+- ◻️ L'IA prédictive
+
+*Explication* : L'IA responsable (responsible AI) est un cadre de développement qui vise à concevoir des systèmes d'IA éthiques, transparents et équitables.
+*Fiche glossaire* : https://laveille.ai/glossaire/ia-responsable
+
+### 88. [IA · Moyen] Quel institut québécois de recherche en intelligence artificielle a été fondé par Yoshua Bengio à Montréal ?
+
+- ◻️ Element AI
+- ✅ Mila
+- ◻️ OpenAI
+- ◻️ DeepMind
+
+*Explication* : Le Mila est l'institut québécois de recherche en IA fondé par Yoshua Bengio à Montréal, reconnu mondialement.
+*Fiche glossaire* : https://laveille.ai/glossaire/mila
+
+### 89. [IA · Difficile] Quel domaine de recherche vise à s'assurer que les objectifs et comportements d'une IA correspondent aux valeurs et intentions humaines ?
+
+- ✅ L'alignement IA
+- ◻️ L'IA explicable
+- ◻️ L'hyperautomatisation
+- ◻️ La vision par ordinateur
+
+*Explication* : L'alignement IA (AI alignment) est le domaine de recherche visant à aligner les objectifs et comportements d'une IA sur les valeurs et intentions humaines.
+*Fiche glossaire* : https://laveille.ai/glossaire/alignement-ia
+
+### 90. [IA · Difficile] Quel ensemble de méthodes permet de rendre compréhensibles les décisions d'un modèle d'IA souvent qualifié de « boîte noire » ?
+
+- ✅ L'IA explicable
+- ◻️ L'apprentissage profond
+- ◻️ La descente de gradient
+- ◻️ Le réseau de neurones
+
+*Explication* : L'IA explicable (explainable AI, XAI) regroupe les méthodes permettant de rendre compréhensibles les décisions et le fonctionnement d'un modèle d'IA.
+*Fiche glossaire* : https://laveille.ai/glossaire/ia-explicable
+
+### 91. [IA · Difficile] Quelle plateforme communautaire est la référence pour partager, héberger et collaborer sur des modèles d'IA ouverts ?
+
+- ◻️ GitHub
+- ✅ Hugging Face
+- ◻️ Kaggle
+- ◻️ Stack Overflow
+
+*Explication* : Hugging Face est la plateforme communautaire de référence pour partager, héberger et collaborer sur des modèles d'IA ouverts.
+*Fiche glossaire* : https://laveille.ai/glossaire/hugging-face
+
+### 92. [SECURITE · Difficile] Quel terme désigne les techniques visant à forcer une IA à ignorer ses garde-fous et ses règles de sécurité ?
+
+- ◻️ L'hameçonnage
+- ✅ Le jailbreak
+- ◻️ Le chiffrement
+- ◻️ Le déni de service
+
+*Explication* : Le jailbreak (débridage d'IA) désigne les techniques de manipulation visant à forcer une IA à contourner ses garde-fous et ses règles de sécurité.
+*Fiche glossaire* : https://laveille.ai/glossaire/jailbreak
+
+### 93. [SECURITE · Difficile] Quel est le premier cadre réglementaire complet de l'Union européenne qui classifie et encadre les systèmes d'IA selon leur niveau de risque ?
+
+- ◻️ Le RGPD
+- ✅ L'AI Act
+- ◻️ Le DSA
+- ◻️ La Loi 25
+
+*Explication* : L'AI Act est le premier cadre réglementaire complet de l'Union européenne qui classifie et encadre les systèmes d'IA selon leur niveau de risque.
+*Fiche glossaire* : https://laveille.ai/glossaire/ai-act
+
+### 94. [DONNEES · Difficile] Quel processus vise à rendre impossible, de façon irréversible, l'identification d'une personne dans un jeu de données ?
+
+- ◻️ La pseudonymisation
+- ✅ L'anonymisation
+- ◻️ Le chiffrement
+- ◻️ L'agrégation
+
+*Explication* : L'anonymisation (anonymization) est un processus qui vise à rendre impossible, de façon irréversible, l'identification d'une personne dans un jeu de données (contrairement à la pseudonymisation, réversible).
+*Fiche glossaire* : https://laveille.ai/glossaire/anonymisation
+
+### 95. [NUMERIQUE · Difficile] Quel processeur spécialisé est conçu pour accélérer les tâches d'IA et s'intègre de plus en plus aux ordinateurs et téléphones récents ?
+
+- ◻️ Le CPU
+- ◻️ Le GPU
+- ✅ Le NPU
+- ◻️ La RAM
+
+*Explication* : Le NPU (Neural Processing Unit) est un processeur spécialisé conçu pour accélérer les tâches d'intelligence artificielle, de plus en plus intégré aux appareils récents.
+*Fiche glossaire* : https://laveille.ai/glossaire/npu
+
+### 96. [DONNEES · Difficile] Quel processus décrit le fait que les sorties d'un système, ou les réactions des utilisateurs, sont réinjectées comme entrées et influencent son comportement futur ?
+
+- ✅ La boucle de rétroaction
+- ◻️ L'apprentissage supervisé
+- ◻️ La rétropropagation
+- ◻️ La descente de gradient
+
+*Explication* : La boucle de rétroaction (feedback loop) désigne le processus où les sorties d'un système, ou les réactions des utilisateurs, sont réinjectées comme entrées et influencent son comportement futur.
+*Fiche glossaire* : https://laveille.ai/glossaire/boucle-de-retroaction
 
