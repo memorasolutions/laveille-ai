@@ -31,6 +31,19 @@
     .qt-medal { width: 150px; height: 150px; border-radius: 50%; margin: 1rem auto 0; display: flex; align-items: center; justify-content: center; color: #fff; border: 6px solid #E9B949; box-shadow: 0 0 0 3px rgba(255,255,255,.35) inset, 0 10px 28px rgba(0,0,0,.22); position: relative; overflow: hidden; animation: qt-medal-in .6s cubic-bezier(.18,.89,.32,1.28); }
     .qt-medal::before { content: ''; position: absolute; top: -40%; left: -45%; width: 70%; height: 180%; background: linear-gradient(115deg, rgba(255,255,255,.42), rgba(255,255,255,0)); transform: rotate(18deg); pointer-events: none; }
     @keyframes qt-medal-in { 0% { transform: scale(.4) rotate(-12deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+    /* Appariement — blocs déplaçables */
+    .qt-mblock { display:block; background:#fff; border:2px solid #e5e7eb; border-radius:10px; padding:12px 14px; color:var(--c-dark); font-size:0.98rem; line-height:1.35; cursor:grab; min-height:44px; touch-action:none; box-shadow:0 1px 3px rgba(0,0,0,.08); transition:border-color .15s ease, box-shadow .15s ease; }
+    .qt-mblock:hover { border-color:var(--c-primary); }
+    .qt-mblock:focus-visible { outline:none; border-color:var(--c-primary); box-shadow:0 0 0 .2rem rgba(6,78,90,.2); }
+    .qt-mblock.is-picked { border-color:var(--c-primary); box-shadow:0 0 0 .2rem rgba(6,78,90,.18); }
+    .qt-mblock.is-drag { opacity:.45; }
+    .qt-mblock.qt-mdisabled { cursor:default; opacity:.7; }
+    .qt-mslot { min-height:56px; border:2px dashed #cbd5e1; border-radius:10px; background:#f9fafb; display:flex; align-items:center; padding:4px; transition:border-color .15s ease, background .15s ease; }
+    .qt-mslot.is-empty:hover, .qt-mslot:focus-visible { outline:none; border-color:var(--c-primary); background:#f0fafb; }
+    .qt-mslot:not(.is-empty) { border-style:solid; border-color:#cbd5e1; background:#fff; }
+    .qt-mslot-ph { color:var(--c-text-muted,#6E7687); font-size:0.9rem; padding:0 10px; }
+    .qt-mslot .qt-mblock { width:100%; margin:0; }
+    .qt-mghost { position:fixed; top:0; left:0; z-index:1080; pointer-events:none; opacity:.92; box-shadow:0 8px 20px rgba(0,0,0,.22); }
     [x-cloak] { display: none !important; }
 </style>
 <section class="wpo-blog-single-section section-padding">
@@ -101,21 +114,43 @@
                                             style="border-radius:8px;height:44px;padding:0 22px;">Valider</button>
                                 </div>
 
-                                {{-- Appariement : un menu déroulant par terme (alternative accessible au glisser-déposer) --}}
+                                {{-- Appariement : blocs déplaçables (glisser-déposer souris+tactile + tap/clavier — WCAG 2.5.7) --}}
                                 <div x-show="q().type==='appariement'">
-                                    <template x-for="(t, ti) in q().terms" :key="ti">
-                                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px;">
-                                            <span style="font-weight:700;color:var(--c-dark);min-width:120px;flex:0 0 auto;" x-text="t"></span>
-                                            <select class="form-control" x-model="matchSel[ti]" :disabled="answered" :aria-label="'Définition pour '+t" style="flex:1 1 220px;min-width:0;">
-                                                <option value="">— choisir une définition —</option>
-                                                <template x-for="(d, di) in q().defs" :key="di">
-                                                    <option :value="di" x-text="d"></option>
+                                    <div class="d-flex flex-column gap-3">
+                                        {{-- Réserve --}}
+                                        <div>
+                                            <div style="font-weight:700;color:var(--c-text-muted,#6E7687);font-size:0.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Réserve · glisse ou tape un bloc</div>
+                                            <div class="d-grid gap-2">
+                                                <template x-for="def in poolDefs()" :key="'pool-'+def.idx">
+                                                    <div class="qt-mblock" :class="{'is-picked': pickedDef===def.idx, 'is-drag': dragActive && dragIdx===def.idx, 'qt-mdisabled': answered}"
+                                                         role="button" :tabindex="answered ? -1 : 0" :aria-pressed="pickedDef===def.idx" :data-def-index="def.idx"
+                                                         @pointerdown="onPointerDownDef($event, def.idx, null)" @click.prevent="pickDef(def.idx)"
+                                                         @keydown.enter.prevent="onKeyDef(def.idx, null)" @keydown.space.prevent="onKeyDef(def.idx, null)" x-text="def.text"></div>
                                                 </template>
-                                            </select>
+                                                <template x-if="poolDefs().length===0"><div style="font-size:0.85rem;color:var(--c-text-muted,#6E7687);">Tous les blocs sont placés.</div></template>
+                                            </div>
                                         </div>
-                                    </template>
-                                    <button type="button" class="ct-btn ct-btn-primary" @click="validateMatch()"
-                                            :disabled="answered || !matchAllChosen()" style="border-radius:8px;height:44px;padding:0 22px;margin-top:0.5rem;">Valider l'association</button>
+                                        {{-- Termes + emplacements --}}
+                                        <div class="d-grid gap-2">
+                                            <template x-for="(term, k) in q().terms" :key="'term-'+k">
+                                                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+                                                    <span style="font-weight:700;color:var(--c-dark);min-width:130px;flex:0 0 auto;" x-text="term"></span>
+                                                    <div class="qt-mslot" :class="{'is-empty': matchSel[k]===''}" role="button" :tabindex="answered ? -1 : 0"
+                                                         :data-slot-index="k" :aria-label="slotAria(k)" @click.prevent="placeOnSlot(k)"
+                                                         @keydown.enter.prevent="onKeySlot(k)" @keydown.space.prevent="onKeySlot(k)" style="flex:1 1 220px;min-width:0;">
+                                                        <template x-if="matchSel[k]===''"><span class="qt-mslot-ph">Dépose ici</span></template>
+                                                        <template x-if="matchSel[k]!==''">
+                                                            <div class="qt-mblock" :class="{'is-drag': dragActive && dragIdx===matchSel[k], 'qt-mdisabled': answered}"
+                                                                 role="button" :tabindex="answered ? -1 : 0" aria-label="Définition placée, appuyez pour retirer." :data-def-index="matchSel[k]"
+                                                                 @pointerdown="onPointerDownDef($event, matchSel[k], k)" @click.prevent="returnToPool(k)"
+                                                                 @keydown.enter.prevent="returnToPool(k)" @keydown.space.prevent="returnToPool(k)" x-text="q().defs[matchSel[k]]"></div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <button type="button" class="ct-btn ct-btn-primary" @click="validateMatch()" :disabled="answered || !matchAllChosen()" style="border-radius:8px;height:44px;padding:0 22px;margin-top:0.25rem;align-self:flex-start;">Valider l'association</button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -335,8 +370,103 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         },
         prepInput() {
             this.lastCorrect = false; this.courtInput = '';
+            this.pickedDef = null; this.cleanupDrag();
             const q = this.q();
             this.matchSel = (q.type === 'appariement') ? Array((q.terms || []).length).fill('') : [];
+        },
+
+        // --- Appariement : glisser-déposer (pointer events) + tap-pour-placer + clavier (WCAG 2.5.7) ---
+        pickedDef: null,
+        dragActive: false, dragIdx: null, dragOriginSlot: null, dragGhost: null,
+        dragStartX: 0, dragStartY: 0, dragOffsetX: 0, dragOffsetY: 0,
+        _dragStarted: false, _boundMove: null, _boundUp: null, ignoreNextClick: false,
+
+        poolDefs() {
+            const placed = new Set(this.matchSel.filter(v => v !== ''));
+            return (this.q().defs || []).map((text, idx) => ({ idx, text })).filter(d => !placed.has(d.idx));
+        },
+        slotAria(k) {
+            const term = this.q().terms[k];
+            const has = this.matchSel[k] !== '';
+            return 'Emplacement pour ' + term + (has ? ', contient : ' + this.q().defs[this.matchSel[k]] : ', vide') + '.';
+        },
+        pickDef(defIdx) {
+            if (this.answered) return;
+            if (this.ignoreNextClick) { this.ignoreNextClick = false; return; }
+            this.pickedDef = (this.pickedDef === defIdx) ? null : defIdx;
+        },
+        onKeyDef(defIdx, originSlot) {
+            if (this.answered) return;
+            if (originSlot === null) { this.pickDef(defIdx); } else { this.returnToPool(originSlot); }
+        },
+        placeOnSlot(termIdx) {
+            if (this.answered) return;
+            if (this.pickedDef === null || this.pickedDef === '') return;
+            this.placeDefOnSlot(this.pickedDef, termIdx);
+        },
+        placeDefOnSlot(defIdx, termIdx) {
+            if (this.answered) return;
+            const prev = this.matchSel.findIndex(v => v === defIdx);
+            if (prev !== -1 && prev !== termIdx) this.matchSel[prev] = '';
+            this.matchSel[termIdx] = defIdx;
+            this.pickedDef = null;
+        },
+        returnToPool(termIdx) {
+            if (this.answered) return;
+            if (this.ignoreNextClick) { this.ignoreNextClick = false; return; }
+            if (this.matchSel[termIdx] === '') return;
+            if (this.pickedDef === this.matchSel[termIdx]) this.pickedDef = null;
+            this.matchSel[termIdx] = '';
+        },
+        onKeySlot(termIdx) { if (!this.answered) this.placeOnSlot(termIdx); },
+        onPointerDownDef(e, defIdx, originSlot) {
+            if (this.answered) return;
+            const srcEl = e.currentTarget;
+            this.dragIdx = defIdx; this.dragOriginSlot = originSlot;
+            this.dragStartX = e.clientX; this.dragStartY = e.clientY; this._dragStarted = false;
+            this._boundMove = (ev) => this.onPointerMove(ev, srcEl);
+            this._boundUp = (ev) => this.onPointerUp(ev);
+            window.addEventListener('pointermove', this._boundMove, { passive: false });
+            window.addEventListener('pointerup', this._boundUp, { passive: false });
+            e.preventDefault(); e.stopPropagation();
+        },
+        onPointerMove(e, sourceEl) {
+            if (!this._dragStarted) {
+                if (Math.hypot(e.clientX - this.dragStartX, e.clientY - this.dragStartY) > 6) { this.startDrag(e, sourceEl); }
+                else { return; }
+            }
+            if (!this.dragActive || !this.dragGhost) return;
+            this.dragGhost.style.transform = 'translate(' + (e.clientX - this.dragOffsetX) + 'px,' + (e.clientY - this.dragOffsetY) + 'px)';
+        },
+        startDrag(e, sourceEl) {
+            this._dragStarted = true; this.dragActive = true;
+            const rect = sourceEl && sourceEl.getBoundingClientRect ? sourceEl.getBoundingClientRect() : { width: 220, left: e.clientX - 16, top: e.clientY - 16 };
+            this.dragGhost = document.createElement('div');
+            this.dragGhost.className = 'qt-mghost qt-mblock';
+            this.dragGhost.textContent = this.q().defs[this.dragIdx];
+            this.dragGhost.style.width = rect.width + 'px';
+            document.body.appendChild(this.dragGhost);
+            this.dragOffsetX = e.clientX - rect.left; this.dragOffsetY = e.clientY - rect.top;
+            this.dragGhost.style.transform = 'translate(' + (e.clientX - this.dragOffsetX) + 'px,' + (e.clientY - this.dragOffsetY) + 'px)';
+        },
+        onPointerUp(e) {
+            window.removeEventListener('pointermove', this._boundMove, { passive: false });
+            window.removeEventListener('pointerup', this._boundUp, { passive: false });
+            if (this._dragStarted) {
+                const el = document.elementFromPoint(e.clientX, e.clientY);
+                const slotEl = el && el.closest ? el.closest('[data-slot-index]') : null;
+                if (slotEl && !this.answered) {
+                    const termIdx = parseInt(slotEl.getAttribute('data-slot-index'));
+                    if (!Number.isNaN(termIdx)) this.placeDefOnSlot(this.dragIdx, termIdx);
+                }
+                this.ignoreNextClick = true;
+                this.cleanupDrag();
+            }
+        },
+        cleanupDrag() {
+            this.dragActive = false; this._dragStarted = false; this.dragIdx = null; this.dragOriginSlot = null;
+            if (this.dragGhost && this.dragGhost.remove) this.dragGhost.remove();
+            this.dragGhost = null;
         },
         reviewMy(i) {
             const q = this.questions[i]; const a = this.answers[i];
