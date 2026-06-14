@@ -199,7 +199,7 @@ class SitemapController
         if (Route::has('news.index')) {
             $sitemap->add(Url::create(route('news.index'))->setPriority(0.7)->setChangeFrequency('daily'));
             if (class_exists(\Modules\News\Models\NewsArticle::class)) {
-                \Modules\News\Models\NewsArticle::where('is_published', true)->get()->each(function ($article) use ($sitemap) {
+                \Modules\News\Models\NewsArticle::where('is_published', true)->where('seo_status', 'index')->get()->each(function ($article) use ($sitemap) {
                     $url = Url::create(url('/actualites/'.$article->slug))
                         ->setLastModificationDate($article->updated_at)
                         ->setPriority(0.6)
