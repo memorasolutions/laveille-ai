@@ -138,7 +138,7 @@ class QtService
     {
         $today = Carbon::now('America/Toronto')->startOfDay();
         $epoch = Carbon::create(2026, 6, 14, 0, 0, 0, 'America/Toronto');
-        $number = $epoch->diffInDays($today) + 1;
+        $number = (int) $epoch->diffInDays($today) + 1;
 
         return Cache::remember('qt.daily.'.$number, now()->addHours(26), function () use ($number) {
             mt_srand($number);
