@@ -114,8 +114,8 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 - ◻️ Le mot de passe du compte courriel
 - ✅ Le mot de passe unique pour accéder à tous vos autres mots de passe
-- ◻️ Le mot de passe par défaut d’un routeur
-- ◻️ Le mot de passe d’un site bancaire
+- ◻️ Le code d’accès par défaut inscrit au dos d’un routeur neuf
+- ◻️ L’identifiant confidentiel exigé pour consulter votre relevé bancaire en ligne
 
 *Explication* : Le mot de passe maître est le seul mot de passe que vous devez retenir : il déverrouille votre gestionnaire, qui stocke tous vos autres mots de passe de façon sécurisée. En anglais : « master password ».
 *Fiche glossaire* : https://laveille.ai/glossaire/mot-de-passe-maitre
@@ -134,58 +134,58 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 - ◻️ L’entraînement initial sur des milliards de textes
 - ✅ L’ajustement du modèle à une tâche spécifique avec des données spécialisées
-- ◻️ La suppression des biais dans les réponses
-- ◻️ La traduction automatique du modèle en plusieurs langues
+- ◻️ L’élimination systématique de tous les préjugés présents dans les corpus d’apprentissage
+- ◻️ L’adaptation linguistique du système à plusieurs langues par traduction automatique intégrée
 
 *Explication* : Le fine-tuning consiste à adapter un modèle d’IA pré-entraîné à un domaine ou une tâche précise (ex. : médecine, droit) en l’entraînant davantage sur des données pertinentes.
 *Fiche glossaire* : https://laveille.ai/glossaire/fine-tuning
 
 ### 14. [SECURITE · Moyen] Qu’est-ce qu’une authentification à deux facteurs (2FA) ?
 
-- ◻️ Utiliser deux mots de passe différents
-- ✅ Fournir deux éléments d’identification : quelque chose que vous connaissez et quelque chose que vous possédez
-- ◻️ Changer de mot de passe deux fois par mois
-- ◻️ Avoir deux comptes sur le même service
+- ◻️ Utiliser deux mots de passe différents pour deux services distincts
+- ✅ Fournir deux éléments d’authentification : un connu et un possédé physiquement
+- ◻️ Changer de mot de passe au moins deux fois par mois pour plus de sécurité
+- ◻️ Créer deux comptes séparés sur un même service en ligne pour doubler la protection
 
 *Explication* : La 2FA renforce la sécurité en exigeant deux types de preuves : par exemple, un mot de passe (connu) et un code reçu par SMS ou une appli (possédé).
 *Fiche glossaire* : https://laveille.ai/glossaire/2fa
 
 ### 15. [WEB · Moyen] Qu’est-ce qu’un cookie dans le contexte du web ?
 
-- ◻️ Un fichier malveillant qui efface vos données
-- ✅ Un petit fichier texte stocké par votre navigateur pour retenir des préférences ou une session
-- ◻️ Un type de virus informatique
-- ◻️ Un outil de compression d’images
+- ◻️ Fichier malveillant conçu pour effacer les documents personnels
+- ✅ Petit fichier texte stocké par le navigateur pour mémoriser une session
+- ◻️ Programme nuisible qui se duplique pour se propager sur d’autres systèmes
+- ◻️ Logiciel conçu pour compresser les fichiers image sans perte notable
 
 *Explication* : Les cookies permettent aux sites web de mémoriser des informations comme votre langue, votre panier d’achat ou votre statut de connexion. Au Québec, on dit aussi « témoin ».
 *Fiche glossaire* : https://laveille.ai/glossaire/cookie
 
 ### 16. [DONNEES · Moyen] Qu’est-ce qu’un « token » dans le traitement du langage naturel ?
 
-- ◻️ Un jeton de sécurité pour accéder à une API
+- ◻️ Un jeton de sécurité temporaire utilisé pour accéder à une interface de programmation
 - ✅ Une unité de texte (mot, sous-mot ou caractère) utilisée par un modèle d’IA
-- ◻️ Un type de cryptomonnaie
-- ◻️ Un badge d’identification numérique
+- ◻️ Une monnaie virtuelle reposant sur la technologie blockchain
+- ◻️ Un badge numérique servant à authentifier l’identité d’un utilisateur
 
 *Explication* : Un token est la plus petite unité de texte qu’un modèle d’IA traite. Par exemple, le mot « incontournable » peut être découpé en plusieurs tokens. En français : « jeton ».
 *Fiche glossaire* : https://laveille.ai/glossaire/token
 
 ### 17. [NUMERIQUE · Moyen] Qu’est-ce que la latence dans un réseau ?
 
-- ◻️ La quantité de données transférées par seconde
+- ◻️ Le volume total de données transférées chaque seconde sur un réseau
 - ✅ Le temps de réponse entre l’envoi d’une requête et la réception d’une réponse
-- ◻️ La capacité de stockage d’un serveur
-- ◻️ Le nombre d’utilisateurs connectés simultanément
+- ◻️ L’espace de stockage disponible sur un serveur informatique
+- ◻️ Le nombre maximal d’utilisateurs pouvant être connectés en même temps
 
 *Explication* : La latence mesure le délai (en millisecondes) entre une action (ex. : clic) et la réponse du système. Une faible latence signifie une réactivité élevée.
 *Fiche glossaire* : https://laveille.ai/glossaire/latence
 
 ### 18. [IA · Moyen] Qu’est-ce que le RAG (Retrieval-Augmented Generation) ?
 
-- ◻️ Une méthode pour accélérer l’entraînement des IA
+- ◻️ Une approche visant à réduire la durée d’entraînement des systèmes d’intelligence artificielle
 - ✅ Une technique qui combine recherche d’information et génération de texte pour améliorer la précision
-- ◻️ Un type de réseau neuronal pour la reconnaissance d’images
-- ◻️ Un algorithme de compression de données
+- ◻️ Un réseau neuronal spécialisé dans l’analyse et la reconnaissance d’images
+- ◻️ Un algorithme conçu pour compresser efficacement les données numériques
 
 *Explication* : Le RAG permet à une IA de consulter des sources externes (comme une base de données) avant de générer une réponse, ce qui réduit les hallucinations.
 *Fiche glossaire* : https://laveille.ai/glossaire/rag
@@ -202,70 +202,70 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 ### 20. [WEB · Moyen] Qu’est-ce que le protocole HTTPS ?
 
-- ◻️ Un format de page web
+- ◻️ Un standard de mise en page pour les sites internet
 - ✅ Une version sécurisée du protocole HTTP qui chiffre les échanges
-- ◻️ Un langage de programmation pour les sites dynamiques
-- ◻️ Un service de messagerie instantanée
+- ◻️ Un langage informatique servant à créer des pages web interactives
+- ◻️ Un service permettant d’échanger des messages en temps réel sur Internet
 
 *Explication* : HTTPS (HTTP Secure) utilise le chiffrement pour protéger les données échangées entre votre navigateur et le site web, empêchant l’espionnage.
 *Fiche glossaire* : https://laveille.ai/glossaire/https
 
 ### 21. [DONNEES · Moyen] Qu’est-ce qu’un algorithme ?
 
-- ◻️ Un type de virus informatique
+- ◻️ Un logiciel malveillant conçu pour infecter les systèmes informatiques
 - ✅ Un ensemble d’instructions pour résoudre un problème ou accomplir une tâche
-- ◻️ Un format de stockage de données
-- ◻️ Un langage de balisage
+- ◻️ Un format structuré utilisé pour conserver des informations numériques
+- ◻️ Un langage servant à définir la structure d’un document web
 
 *Explication* : Un algorithme est une suite logique d’étapes qu’un ordinateur suit pour traiter des données, faire des calculs ou prendre des décisions. En anglais : « algorithm ».
 *Fiche glossaire* : https://laveille.ai/glossaire/algorithme
 
 ### 22. [NUMERIQUE · Moyen] Qu’est-ce que la 5G ?
 
-- ◻️ Une norme de sécurité pour les réseaux Wi-Fi
-- ✅ La cinquième génération de réseaux mobiles, plus rapide et réactive que la 4G
-- ◻️ Un type de processeur pour smartphones
-- ◻️ Un protocole de transfert de fichiers
+- ◻️ Protocole de communication dédié aux appareils de l’Internet des objets
+- ✅ Cinquième génération de réseaux mobiles, plus rapide et réactive que la 4G
+- ◻️ Technologie permettant la recharge sans fil des appareils portables
+- ◻️ Norme de chiffrement sécurisant les communications vocales mobiles
 
 *Explication* : La 5G est la dernière génération de réseau cellulaire, offrant des débits plus élevés, une latence réduite et une capacité accrue pour connecter plus d’appareils.
 *Fiche glossaire* : https://laveille.ai/glossaire/5g
 
 ### 23. [IA · Moyen] Qu’est-ce qu’un réseau de neurones artificiels ?
 
-- ◻️ Un câblage physique entre ordinateurs
-- ✅ Un modèle informatique inspiré du cerveau humain pour apprendre à partir de données
-- ◻️ Un système de stockage en nuage
-- ◻️ Un logiciel de dessin vectoriel
+- ◻️ Architecture informatique répartie permettant le traitement simultané de multiples calculs
+- ✅ Modèle inspiré du fonctionnement du cerveau humain pour apprendre à partir de données
+- ◻️ Technique de réduction de la taille des fichiers image grâce à l’apprentissage automatique
+- ◻️ Algorithme optimisé pour trier efficacement de très grandes quantités de données
 
 *Explication* : Les réseaux de neurones artificiels sont des systèmes d’apprentissage automatique composés de couches de « neurones » qui traitent des informations complexes. En anglais : « neural network ».
 *Fiche glossaire* : https://laveille.ai/glossaire/reseau de neurones
 
 ### 24. [SECURITE · Moyen] Qu’est-ce qu’un rançongiciel (ransomware) ?
 
-- ◻️ Un logiciel qui surveille vos habitudes de navigation
-- ✅ Un programme qui chiffre vos fichiers et exige une rançon pour les déchiffrer
-- ◻️ Un outil de récupération de mot de passe
-- ◻️ Un antivirus gratuit
+- ◻️ Logiciel espion enregistrant discrètement les frappes au clavier
+- ✅ Programme chiffrant vos fichiers et exigeant une rançon pour les déverrouiller
+- ◻️ Application frauduleuse qui simule un dysfonctionnement du système afin de soutirer des paiements
+- ◻️ Composant malveillant qui s’infiltre dans le navigateur pour rediriger vers des sites d’hameçonnage
 
 *Explication* : Le rançongiciel est un type de logiciel malveillant qui bloque l’accès à vos données en les chiffrant, puis exige un paiement pour les restaurer.
 *Fiche glossaire* : https://laveille.ai/glossaire/rancongiciel
 
 ### 25. [IA · Difficile] Qu’est-ce que le « few-shot learning » en intelligence artificielle ?
 
-- ◻️ L’entraînement d’un modèle avec des millions d’exemples
-- ✅ La capacité d’un modèle à apprendre une tâche à partir de très peu d’exemples
-- ◻️ L’apprentissage sans aucune donnée d’entraînement
-- ◻️ L’utilisation de plusieurs GPU pour accélérer l’entraînement
+- ◻️ Adaptation précise d’un modèle pré-entraîné à une tâche particulière
+- ✅ Capacité d’un modèle à apprendre efficacement avec très peu d’exemples
+- ◻️ Entraînement simultané de plusieurs modèles sans interaction entre eux
+- ◻️ Apprentissage supervisé utilisant des étiquettes partiellement erronées
 
 *Explication* : Le few-shot learning permet à un modèle d’IA de généraliser une tâche à partir de seulement quelques exemples, contrairement à l’apprentissage traditionnel qui en nécessite des milliers. En français : « apprentissage par quelques exemples ».
 *Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-few-shot
 
 ### 26. [DONNEES · Difficile] Qu’est-ce que l’entropie dans le contexte de la théorie de l’information ?
 
-- ◻️ La vitesse de traitement d’un processeur
-- ✅ Une mesure de l’incertitude ou de l’imprévisibilité d’une source d’information
-- ◻️ Le nombre de bits utilisés pour stocker un fichier
-- ◻️ La température d’un serveur de données
+- ◻️ Capacité maximale de transfert de données d’un réseau local en un temps donné
+- ✅ Mesure du degré d’imprévisibilité ou d’incertitude d’une source d’information
+- ◻️ Nombre de bits utilisés pour représenter la couleur de chaque pixel dans une image
+- ◻️ Débit maximal auquel un disque dur peut lire ou écrire des données sur le stockage
 
 *Explication* : L’entropie quantifie le degré de désordre ou d’imprévisibilité dans un ensemble de données. Plus l’entropie est élevée, plus l’information est « surprenante ». En anglais : « entropy ».
 *Fiche glossaire* : https://laveille.ai/glossaire/entropie
@@ -282,10 +282,10 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 ### 28. [WEB · Difficile] Qu’est-ce que le DOM (Document Object Model) ?
 
-- ◻️ Un protocole de transfert de fichiers sécurisé
-- ✅ Une structure arborescente représentant une page web en mémoire, manipulable par JavaScript
-- ◻️ Un langage de requête pour bases de données
-- ◻️ Un format de compression d’images vectorielles
+- ◻️ Un format structuré de données fondé sur le langage XML standardisé
+- ✅ Une représentation arborescente en mémoire d’une page web, modifiable via JavaScript
+- ◻️ Un protocole conçu pour synchroniser les horloges sur un réseau informatique
+- ◻️ Un outil logiciel permettant de suivre les différentes versions d’un code source
 
 *Explication* : Le DOM est une représentation programmable d’une page HTML, que les scripts (comme JavaScript) peuvent modifier pour créer des interfaces dynamiques.
 *Fiche glossaire* : https://laveille.ai/glossaire/dom
@@ -302,70 +302,70 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 ### 30. [IA · Difficile] Qu’est-ce que le biais algorithmique ?
 
-- ◻️ Une erreur de programmation qui ralentit l’IA
-- ✅ La tendance d’un algorithme à reproduire ou amplifier des préjugés présents dans ses données d’entraînement
-- ◻️ L’incapacité d’une IA à traiter des images
-- ◻️ Un bogue dans les réseaux de neurones
+- ◻️ Phénomène où un modèle d’IA produit des réponses incohérentes ou absurdes
+- ✅ Tendance d’un algorithme à reproduire ou amplifier les biais présents dans ses données
+- ◻️ Limitation des modèles à traiter uniquement une seule langue à la fois
+- ◻️ Défaut d’alignement entre les objectifs humains et ceux de l’intelligence artificielle
 
 *Explication* : Le biais algorithmique survient quand les données utilisées pour entraîner une IA contiennent des stéréotypes ou des inégalités, que le modèle reproduit ensuite. En anglais : « algorithmic bias ».
 *Fiche glossaire* : https://laveille.ai/glossaire/biais-algorithmique
 
 ### 31. [DONNEES · Difficile] Qu’est-ce qu’un « embedding » (plongement) en traitement du langage naturel ?
 
-- ◻️ Un fichier joint à un courriel
-- ✅ Une représentation vectorielle d’un mot ou d’une phrase dans un espace multidimensionnel
-- ◻️ Une méthode de chiffrement de données
-- ◻️ Un type de base de données relationnelle
+- ◻️ Code unique attribué à chaque transaction effectuée sur Internet
+- ✅ Représentation numérique d’un mot ou d’une phrase dans un espace à plusieurs dimensions
+- ◻️ Fonction de hachage assurant la sécurité cryptographique des données
+- ◻️ Protocole standardisé pour la communication entre services informatiques distincts
 
 *Explication* : Un embedding transforme un mot ou une phrase en un vecteur de nombres qui capture son sens, permettant aux modèles d’IA de comparer et de raisonner sur le langage.
 *Fiche glossaire* : https://laveille.ai/glossaire/vectorisation
 
 ### 32. [SECURITE · Difficile] Qu’est-ce que le « zero trust » en cybersécurité ?
 
-- ◻️ Ne jamais utiliser Internet
-- ✅ Une approche qui suppose qu’aucun utilisateur ou appareil n’est de confiance par défaut, même à l’intérieur du réseau
-- ◻️ Un antivirus gratuit
-- ◻️ Un protocole de chiffrement obsolète
+- ◻️ Politique imposant des mots de passe complexes et fréquemment changés
+- ✅ Approche où aucun utilisateur ni appareil n’est jugé digne de confiance par défaut
+- ◻️ Pare-feu de nouvelle génération avec inspection approfondie du trafic
+- ◻️ Système de détection d’intrusion utilisant des algorithmes d’intelligence artificielle
 
 *Explication* : Le modèle « zero trust » repose sur le principe « ne jamais faire confiance, toujours vérifier », ce qui renforce la sécurité même contre les menaces internes. En français : « confiance zéro ».
 *Fiche glossaire* : https://laveille.ai/glossaire/zero-trust
 
 ### 33. [WEB · Difficile] Qu’est-ce que le Web sémantique ?
 
-- ◻️ Une version du web uniquement textuelle
-- ✅ Un projet visant à rendre les données du web compréhensibles par les machines grâce à des métadonnées structurées
-- ◻️ Un navigateur open source
-- ◻️ Un protocole de messagerie instantanée
+- ◻️ Protocole sécurisé utilisé pour le transfert de fichiers sur Internet
+- ✅ Rendre les données web lisibles par les machines grâce aux métadonnées
+- ◻️ Moteur de recherche spécialisé dans l’indexation de contenus scientifiques
+- ◻️ Format de codage utilisé pour structurer des pages web statiques simples
 
 *Explication* : Le Web sémantique, imaginé par Tim Berners-Lee, utilise des standards (comme RDF ou OWL) pour lier les données de façon intelligible aux ordinateurs.
 *Fiche glossaire* : https://laveille.ai/glossaire/web-semantique
 
 ### 34. [NUMERIQUE · Difficile] Qu’est-ce que l’informatique en périphérie (edge computing) ?
 
-- ◻️ Le stockage de données exclusivement dans le nuage
-- ✅ Le traitement des données près de leur source (ex. : sur un appareil ou une borne locale) plutôt que dans un centre de données central
-- ◻️ Un type de câble réseau
-- ◻️ Une méthode de compression vidéo
+- ◻️ Sauvegarde automatisée répartie sur plusieurs serveurs distants
+- ✅ Traiter les données près de leur source, pas dans un centre central
+- ◻️ Architecture de réseau local sans fil offrant un très haut débit
+- ◻️ Méthode de virtualisation des serveurs dans un environnement nuagique
 
 *Explication* : L’edge computing réduit la latence en traitant les données localement (à la « périphérie » du réseau), ce qui est crucial pour les applications en temps réel comme les voitures autonomes.
 *Fiche glossaire* : https://laveille.ai/glossaire/edge-computing
 
 ### 35. [IA · Difficile] Qu’est-ce que l’apprentissage par renforcement (reinforcement learning) ?
 
-- ◻️ L’entraînement d’une IA avec des paires question-réponse
+- ◻️ L’apprentissage d’un modèle à partir d’exemples étiquetés fournis par des humains
 - ✅ Un modèle qui apprend en recevant des récompenses ou des pénalités selon ses actions
-- ◻️ L’utilisation de réseaux de neurones convolutifs pour le texte
-- ◻️ La traduction automatique de documents
+- ◻️ Une approche d’entraînement utilisant des simulations interactives
+- ◻️ Un système expert basé sur des règles logiques fixes
 
 *Explication* : Dans l’apprentissage par renforcement, un agent apprend à prendre des décisions en essayant différentes actions et en recevant un retour (récompense ou punition) de son environnement.
 *Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-par-renforcement
 
 ### 36. [DONNEES · Difficile] Qu’est-ce que la confidentialité différentielle (differential privacy) ?
 
-- ◻️ Une méthode pour supprimer toutes les données personnelles d’une base
-- ✅ Une technique qui ajoute du bruit statistique aux données pour protéger la vie privée des individus tout en permettant des analyses utiles
-- ◻️ Un protocole de chiffrement de bout en bout
-- ◻️ Un logiciel de gestion de consentement
+- ◻️ Suppression totale des identifiants pour anonymiser des données
+- ✅ Ajouter du bruit statistique pour protéger la vie privée
+- ◻️ Cadre légal régissant l’usage des données personnelles sensibles
+- ◻️ Algorithme de hachage irréversible appliqué aux bases de données
 
 *Explication* : La confidentialité différentielle permet de publier des statistiques sur un ensemble de données sans révéler d’informations identifiables sur des individus spécifiques.
 *Fiche glossaire* : https://laveille.ai/glossaire/confidentialite-differentielle
@@ -722,130 +722,130 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 ### 72. [IA · Difficile] Quel protocole ouvert (Google, 2025) permet à des agents d’IA de fournisseurs différents de collaborer ?
 
-- ◻️ L’API REST
+- ◻️ MCP (Model Context Protocol)
 - ✅ A2A (Agent-to-Agent)
-- ◻️ Le RAG
-- ◻️ Le SLM
+- ◻️ RAG (Retrieval-Augmented Generation)
+- ◻️ SLM (Small Language Model)
 
 *Explication* : A2A (Agent-to-Agent) est un protocole ouvert (Google, 2025) qui permet à des agents IA de fournisseurs différents de communiquer et de collaborer.
 *Fiche glossaire* : https://laveille.ai/glossaire/a2a
 
 ### 73. [IA · Facile] Qu'est-ce que l'apprentissage automatique (machine learning) ?
 
-- ◻️ Un domaine de l'IA où les algorithmes sont programmés règle par règle
-- ✅ Un domaine de l'IA où les algorithmes améliorent leurs performances à partir de données ou d'exemples, sans être programmés explicitement
-- ◻️ Un type de base de données pour stocker des données d'entraînement
-- ◻️ Un langage de programmation conçu pour créer des IA
+- ◻️ Sous-domaine de l’IA fondé sur la logique symbolique et les systèmes experts
+- ✅ Domaine où les algorithmes apprennent à partir de données sans programmation explicite
+- ◻️ Plateforme collaborative dédiée au partage de modèles d’apprentissage automatique
+- ◻️ Environnement de développement pour créer des agents intelligents autonomes
 
 *Explication* : L'apprentissage automatique (machine learning) est un domaine de l'IA où les algorithmes améliorent leurs performances à partir de données ou d'exemples, sans être programmés explicitement règle par règle.
 *Fiche glossaire* : https://laveille.ai/glossaire/apprentissage-automatique
 
 ### 74. [IA · Facile] Qu'est-ce qu'un chatbot ?
 
-- ◻️ Un logiciel de cybersécurité qui bloque les attaques
-- ◻️ Un modèle d'IA qui crée des images à partir de texte
-- ✅ Une interface de conversation automatisée conçue pour dialoguer avec des humains en langage naturel
-- ◻️ Un langage de balisage pour structurer des pages web
+- ◻️ Un pare-feu de nouvelle génération utilisant l’intelligence artificielle
+- ◻️ Un modèle d’IA générant des images à partir de descriptions textuelles
+- ✅ Une interface conversationnelle automatisée dialoguant en langage naturel
+- ◻️ Un protocole d’échange de données entre applications sur le web
 
 *Explication* : Un chatbot est une interface de conversation automatisée conçue pour dialoguer avec des humains en langage naturel, souvent propulsée par une IA.
 *Fiche glossaire* : https://laveille.ai/glossaire/chatbot
 
 ### 75. [NUMERIQUE · Facile] Qu'est-ce que l'automatisation ?
 
-- ◻️ La création d'images par intelligence artificielle
-- ✅ L'utilisation de technologies pour exécuter des tâches répétitives avec une intervention humaine minimale
-- ◻️ La protection des systèmes contre les accès non autorisés
-- ◻️ L'entraînement d'un modèle d'IA avec des données
+- ◻️ Création automatisée de contenus variés (texte, image, vidéo) par une intelligence artificielle
+- ✅ Exécution automatisée de tâches répétitives avec très peu ou pas d’intervention humaine
+- ◻️ Protocole sécurisé permettant la communication entre robots dans un environnement industriel
+- ◻️ Technique d’ajustement dynamique des ressources informatiques selon la charge en temps réel
 
 *Explication* : L'automatisation est l'utilisation de technologies pour exécuter des tâches répétitives avec une intervention humaine minimale.
 *Fiche glossaire* : https://laveille.ai/glossaire/automatisation
 
 ### 76. [DONNEES · Facile] Que sont les données d'entraînement ?
 
-- ◻️ Les résultats finaux produits par un modèle d'IA
-- ◻️ Les instructions de sécurité d'un système
-- ✅ L'ensemble des informations utilisées pour entraîner un modèle d'IA à accomplir une tâche
-- ◻️ Le code source d'un logiciel libre
+- ◻️ Prédictions produites par un système d’intelligence artificielle
+- ◻️ Directives de sécurité appliquées par un système informatique
+- ✅ Données utilisées pour entraîner un modèle d’IA à une tâche précise
+- ◻️ Collection de bibliothèques dédiées au traitement automatique du langage
 
 *Explication* : Les données d'entraînement (training data) sont l'ensemble des informations (textes, images, sons) utilisées pour entraîner un modèle d'IA à accomplir une tâche.
 *Fiche glossaire* : https://laveille.ai/glossaire/donnees-dentrainement
 
 ### 77. [IA · Facile] Quel est le rôle principal de DALL-E ?
 
-- ◻️ Générer des conversations automatisées
+- ◻️ Simuler des dialogues entre utilisateurs humains
 - ✅ Créer des images originales à partir de descriptions textuelles
-- ◻️ Protéger les systèmes contre les cyberattaques
-- ◻️ Analyser des données pour améliorer des algorithmes
+- ◻️ Empêcher l’accès non autorisé aux réseaux informatiques
+- ◻️ Transformer des données brutes en prédictions utiles
 
 *Explication* : DALL-E est un modèle d'IA d'OpenAI spécialisé dans la création d'images originales à partir de descriptions textuelles.
 *Fiche glossaire* : https://laveille.ai/glossaire/dall-e
 
 ### 78. [SECURITE · Facile] Qu'est-ce que la cybersécurité ?
 
-- ◻️ Un langage de balisage pour pages web
-- ✅ L'ensemble des mesures visant à protéger les systèmes, les données et les infrastructures contre les attaques et accès non autorisés
-- ◻️ Un modèle de distribution de logiciels libres
-- ◻️ La création d'images par IA
+- ◻️ Format standard pour structurer le contenu sur le web
+- ✅ Protéger systèmes et données contre les cyberattaques
+- ◻️ Méthode de partage de logiciels sans contraintes légales
+- ◻️ Procédé automatisé pour générer des illustrations numériques
 
 *Explication* : La cybersécurité est l'ensemble des mesures visant à protéger les systèmes, les données et les infrastructures contre les attaques et les accès non autorisés.
 *Fiche glossaire* : https://laveille.ai/glossaire/cybersecurite
 
 ### 79. [WEB · Facile] Qu'est-ce que le code HTML ?
 
-- ◻️ Un langage de programmation pour créer des IA
-- ✅ Un langage de balisage universel utilisé pour structurer et afficher le contenu des pages web
-- ◻️ Un logiciel de cybersécurité
-- ◻️ Un type de données d'entraînement
+- ◻️ Un outil servant à créer des intelligences artificielles autonomes
+- ✅ Langage de balisage standard pour structurer le contenu des pages web
+- ◻️ Logiciel conçu pour détecter et bloquer les intrusions informatiques
+- ◻️ Ensemble structuré de données utilisé pour entraîner des modèles d’IA
 
 *Explication* : Le code HTML est un langage de balisage universel utilisé pour structurer et afficher le contenu des pages web.
 *Fiche glossaire* : https://laveille.ai/glossaire/code-html
 
 ### 80. [NUMERIQUE · Facile] Qu'est-ce qu'un logiciel à code source ouvert (open source) ?
 
-- ◻️ Un logiciel dont le code source est caché et propriétaire
-- ✅ Un logiciel dont le code source est librement accessible, qu'on peut consulter, modifier et partager
-- ◻️ Un outil de cybersécurité contre les intrusions
-- ◻️ Un modèle d'IA qui génère des images
+- ◻️ Logiciel dont le fonctionnement interne est secret et inaccessible
+- ✅ Logiciel dont le code source est librement consultable et modifiable
+- ◻️ Solution logicielle conçue pour prévenir les attaques de piratage
+- ◻️ Algorithme d’IA spécialisé dans la génération d’images synthétiques
 
 *Explication* : L'open source désigne un modèle de distribution où le code source d'un logiciel est librement accessible, permettant de le consulter, le modifier et le partager.
 *Fiche glossaire* : https://laveille.ai/glossaire/open-source
 
 ### 81. [IA · Moyen] Qu'est-ce que l'AGI (intelligence artificielle générale) ?
 
-- ◻️ Une IA spécialisée dans une seule tâche, comme la reconnaissance d'images
-- ✅ Une IA hypothétique capable de comprendre et d'apprendre n'importe quelle tâche intellectuelle qu'un humain peut accomplir
-- ◻️ Un modèle entraîné à prédire des séquences de mots
-- ◻️ Un système qui traite plusieurs types de données à la fois
+- ◻️ IA conçue pour exécuter une seule tâche spécifique de manière optimale
+- ✅ IA hypothétique capable de toute tâche intellectuelle humaine
+- ◻️ Système prédictif fondé sur l’analyse de séquences linguistiques
+- ◻️ Plateforme multimodale traitant simultanément texte, image, son et vidéo
 
 *Explication* : L'AGI (Artificial General Intelligence) est une IA hypothétique capable de comprendre et d'apprendre n'importe quelle tâche intellectuelle qu'un humain peut accomplir, contrairement à l'IA étroite et spécialisée.
 *Fiche glossaire* : https://laveille.ai/glossaire/agi
 
 ### 82. [IA · Moyen] Qu'est-ce qu'un modèle de langage ?
 
-- ✅ Un système d'IA entraîné à prédire la probabilité d'une séquence de mots pour générer et comprendre du texte
-- ◻️ Un modèle d'IA qui crée des images à partir de texte
-- ◻️ Un ensemble de données d'entraînement
-- ◻️ Un langage de programmation pour les pages web
+- ✅ Système d’IA prédisant la probabilité des mots pour comprendre et produire du texte
+- ◻️ Modèle générant des images à partir de descriptions textuelles fournies par l’usager
+- ◻️ Ensemble structuré de données utilisé pour entraîner des algorithmes d’apprentissage
+- ◻️ Langage de programmation employé principalement pour créer des sites web interactifs
 
 *Explication* : Un modèle de langage (language model) est un système d'IA entraîné à prédire la probabilité d'une séquence de mots, ce qui lui permet de générer et de comprendre du texte.
 *Fiche glossaire* : https://laveille.ai/glossaire/modele-de-langage
 
 ### 83. [IA · Moyen] Qu'est-ce qu'une IA multimodale ?
 
-- ◻️ Une IA qui ne traite que du texte
-- ✅ Un système d'IA capable de traiter et de générer simultanément plusieurs types de données : texte, image, audio, vidéo
-- ◻️ Une IA hypothétique aussi polyvalente qu'un humain
-- ◻️ Un modèle de distribution de logiciels
+- ◻️ IA conçue uniquement pour analyser et produire du langage humain de façon spécialisée
+- ✅ Système d’IA traitant simultanément texte, image, son et vidéo de manière intégrée
+- ◻️ Concept théorique d’une intelligence artificielle dotée d’une conscience égale à celle de l’humain
+- ◻️ Protocole de partage et de distribution de logiciels libres au sein d’une communauté
 
 *Explication* : Une IA multimodale (multimodal AI) est un système capable de traiter et de générer simultanément plusieurs types de données : texte, image, audio et vidéo.
 *Fiche glossaire* : https://laveille.ai/glossaire/ia-multimodale
 
 ### 84. [IA · Moyen] Qu'est-ce que l'anthropomorphisme appliqué à l'IA ?
 
-- ◻️ La capacité d'une IA à ressentir réellement des émotions
-- ◻️ Une technique d'entraînement des modèles de langage
-- ✅ La tendance humaine à attribuer des émotions, une conscience ou une intention à une IA qui n'en a pas
-- ◻️ Un modèle d'IA qui génère des images réalistes
+- ◻️ Capacité d’une machine à ressentir véritablement des émotions comme un être humain
+- ◻️ Approche pédagogique utilisée pour améliorer les performances des modèles de langage
+- ✅ Tendance à croire qu’une IA possède des intentions ou des émotions qu’elle n’a pas
+- ◻️ Outil générant des images hyper-réalistes à l’aide de réseaux neuronaux profonds
 
 *Explication* : L'anthropomorphisme est la tendance humaine à attribuer des émotions, une conscience ou une intention à une IA qui n'en a pas.
 *Fiche glossaire* : https://laveille.ai/glossaire/anthropomorphisme
@@ -969,4 +969,3 @@ Légende : ✅ bonne réponse · ◻️ distracteur.
 
 *Explication* : La boucle de rétroaction (feedback loop) désigne le processus où les sorties d'un système, ou les réactions des utilisateurs, sont réinjectées comme entrées et influencent son comportement futur.
 *Fiche glossaire* : https://laveille.ai/glossaire/boucle-de-retroaction
-
