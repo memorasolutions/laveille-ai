@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.203 · 2026-06-14 · ux(Tools) QT — le nudge « 😏 Qui peut battre ton QT ? » est masqué dès que le panneau réseaux s'ouvre (`x-show="!shareOpen"`) → le panneau apparaît DIRECTEMENT sous le bouton « 📋 Copier mon résultat », sans texte intercalé (finalise le retour user « panneau trop bas »). Codename seo-piliers-veille-generative.
  *   1.65.202 · 2026-06-14 · ux(Tools) QT — écran résultat ALLÉGÉ + panneau réseaux remonté (retour user : « le panneau apparaît trop bas, c'est trop lourd à la fin »). Le panneau de boutons réseaux s'ouvre désormais JUSTE SOUS le bouton « 📋 Copier mon résultat » (au lieu de tout en bas, invisible sans scroller) — carte blanche bordée. Ménage : retrait du paragraphe redondant « 🔄 Chaque partie pige 10 nouvelles questions… » (déjà sur l'accueil) ; les boutons « 📲 Story / ⬜ Carré » fusionnés dans UNE rangée d'actions secondaires compacte (📣 Partager · 📸 Carte story · ⬜ Carré · 🔄 Rejouer) ; nudge de défi raccourci. Codename seo-piliers-veille-generative.
  *   1.65.201 · 2026-06-14 · feat(Tools) QT — PHASE 2 : preuve sociale chiffrée HONNÊTE + percentile + streak. Table `qt_attempts` (qt/mode/defi_number/correct_count/created_at, AUCUNE PII) + modèle QtAttempt. Route POST /outils/qt/attempt (throttle:20,1, CSRF via meta) → PublicQtController@attempt : valide (qt 55-145, mode defi/libre, correct 0-10), enregistre la partie, calcule sur l'échantillon (mode + défi #N) : parties du jour + percentile = round(beats/total*100) UNIQUEMENT si total≥20 (seuil anti-démarrage à froid → zéro faux chiffre). finish() POST en arrière-plan (non bloquant) → affiche « 🏆 Tu bats X% des joueurs » + « N parties aujourd'hui » (si N≥5) quand des données existent (sinon RIEN, honnête). STREAK : jours consécutifs sur le défi (localStorage qt-streak/qt-streak-day) → « 🔥 Série de N jours ! ». Code Hermes + intégration superviseur. Codename seo-piliers-veille-generative.
  *   1.65.200 · 2026-06-14 · ux(Tools) QT — ENCOURAGER le partage après copie (recherche pp_search : le cadrage « défie un ami » est le levier n°1, honnête, zéro infra). (A) En-tête du panneau réseaux après copie = cadrage défi : « ✅ Copié ! Maintenant défie ta gang : colle-le et tague quelqu'un qui se croit plus techno 😏 👇 ». Ligne sous « Copier mon résultat » : « 😏 Qui dans ton entourage peut battre ton QT ? Copie-le et défie-les ! ». (D) Urgence douce en mode défi : « ⏳ Le défi #N se termine ce soir. ». Micro-copie FR québécois, parle à « tu » (focus sur l'ami, pas la vantardise). Preuve sociale chiffrée (compteur/percentile) = Phase 2 (table DB des parties, pour rester honnête). Codename seo-piliers-veille-generative.
@@ -351,7 +352,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 202;
+$lvPatch = 203;
 
 return [
     'major' => $lvMajor,

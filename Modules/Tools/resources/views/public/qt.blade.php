@@ -167,7 +167,7 @@
                                 <div x-text="correctCount + '/10'" style="font-size:0.85rem;color:var(--c-dark);opacity:0.7;margin-top:0.25rem;"></div>
                             </div>
                             <button type="button" class="ct-btn ct-btn-primary" style="border-radius:8px;height:46px;padding:0 24px;font-weight:700;" @click="copyResult()">📋 Copier mon résultat</button>
-                            <p style="margin:0.5rem auto 0;max-width:440px;color:var(--c-text-muted);font-size:0.9rem;">😏 Qui peut battre ton QT ? Copie-le et <strong>défie ta gang</strong> !<span x-show="isDefi"> ⏳ Défi #<span x-text="defiNumber"></span> jusqu'à ce soir.</span></p>
+                            <p x-show="!shareOpen" style="margin:0.5rem auto 0;max-width:440px;color:var(--c-text-muted);font-size:0.9rem;">😏 Qui peut battre ton QT ? Copie-le et <strong>défie ta gang</strong> !<span x-show="isDefi"> ⏳ Défi #<span x-text="defiNumber"></span> jusqu'à ce soir.</span></p>
 
                             {{-- Panneau réseaux : s'ouvre juste ICI, sous le bouton « Copier » --}}
                             <div x-show="shareOpen" style="max-width:460px;margin:0.85rem auto 0;background:#fff;border:1px solid var(--c-primary);border-radius:12px;padding:14px;">
