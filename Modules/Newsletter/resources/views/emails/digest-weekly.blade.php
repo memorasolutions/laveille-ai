@@ -651,14 +651,14 @@
     <tr><td height="1" bgcolor="#e5e7eb"></td></tr>
     @endif
 
-    {{-- 9. LE SAVIEZ-VOUS? (promo veille.la) --}}
+    {{-- 9. LE SAVIEZ-VOUS? (promo raccourcisseur de liens — domaines au choix) --}}
     <tr>
         <td style="padding:25px 30px;background-color:#0c1427;" class="mobile-p">
             <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr><td>
                     <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;font-weight:bold;">Le saviez-vous ?</p>
                     <p style="margin:0 0 14px;font-size:16px;color:#e2e8f0;line-height:1.6;">
-                        <a href="{{ config('app.url') }}/raccourcir" style="color:#3dc9d8;font-weight:bold;text-decoration:underline;">veille.la</a> est le domaine utilisé pour notre raccourcisseur de liens. Créez des liens courts avec code QR, statistiques de clics et aperçu social, le tout gratuitement et sans inscription.
+                        Notre <a href="{{ config('app.url') }}/raccourcir" style="color:#3dc9d8;font-weight:bold;text-decoration:underline;">raccourcisseur de liens</a> te laisse choisir ton domaine : lurl.ca, veille.la, 1lien.ca, unlien.ca ou go3.ca. Crée des liens courts avec code QR, statistiques de clics et aperçu social, gratuitement et sans inscription.
                     </p>
                     <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
                 </td></tr>

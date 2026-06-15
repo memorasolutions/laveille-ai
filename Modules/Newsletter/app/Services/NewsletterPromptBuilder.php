@@ -40,7 +40,18 @@ class NewsletterPromptBuilder
                 'auto_source'  => 'EditorialBank::getNextEditorial() ou DigestContentService::generateEditorial() (deepseek via OpenRouter)',
                 'field_type'   => 'textarea',
                 'placeholder'  => "ex: Cette semaine, l'IA sort des labos pour entrer dans nos cuisines — littéralement.\n- Stef",
-                'shape'        => "content['editorial'] = chaîne HTML (ex: '<p>…</p><p>— Stef</p>'). Rendue via {!! !!} dans le gabarit. Maximum 50 mots. Terminer par '— Stef' ou '- Stef'. INTERDIT : pas de Markdown, pas de **, pas de *, pas de #.",
+                'shape'        => <<<'SHAPE'
+content['editorial'] = chaîne HTML (ex: '<p>…</p><p>— Stef</p>'), rendue via {!! !!} dans le gabarit.
+STRUCTURE (best practices 2026, plaisant à lire, pas une simple affirmation) :
+  1. Hook concret et humain (1-2 phrases) : un moment vécu, une petite scène (ex. « Lundi matin, tu colles le courriel d'un client dans ChatGPT… »). Éviter les ouvertures génériques (« Cette semaine, nous allons parler de… »).
+  2. L'enjeu / le contexte en 1-2 phrases (pourquoi ça compte pour le lecteur).
+  3. La leçon à retenir (1 phrase).
+  4. Un pont vers le défi de la semaine ou un contenu de l'infolettre.
+Ton conversationnel, tutoiement, « tu » et « je », phrases courtes. 50 à 80 mots.
+Loi 25 : la nommer UNE seule fois, et seulement si le sujet touche la vie privée / les données personnelles.
+Terminer par '— Stef' ou '- Stef'. INTERDIT : pas de Markdown, pas de **, pas de *, pas de #.
+SHAPE
+
             ],
             'challenge' => [
                 'label'        => 'Défi de la semaine',
@@ -53,11 +64,12 @@ Choisir UNE des deux structures selon la nature de la consigne :
 
 OPTION A — Défi action/bien-être (essaie un outil, fais une action concrète) :
   content['wellness_challenge'] = [
-      'hook'      => 'phrase d\'accroche expliquant le défi (HTML permis)',
+      'title'     => 'titre clair du défi (PAS « Défi de la semaine » : le bandeau est déjà posé par le gabarit)',
+      'hook'      => 'phrase d'accroche concrète qui plante le décor (HTML permis)',
       'subtitle'  => 'optionnel — sous-titre court',
-      'steps'     => ['étape 1', 'étape 2', '...'],  // au moins 2 étapes, HTML permis par étape
-      'cta_url'   => 'optionnel — URL vers l\'outil ou la ressource',
-      'cta_label' => 'optionnel — libellé du bouton CTA',
+      'steps'     => ['étape 1', 'étape 2', '…'],  // 3 à 4 étapes GUIDÉES pas-à-pas : une seule action concrète par étape, sans surcharger ; HTML permis par étape
+      'cta_url'   => 'URL vers l'outil ou la ressource',
+      'cta_label' => 'libellé du bouton CTA',
   ];
   Laisser content['weekly_prompt'] à null (ou ne pas l'écrire).
 

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.225 · 2026-06-15 · feat(Newsletter) NOUVELLE NORME éditoriale (best practices pp_search juin 2026), appliquée au gabarit + au prompt-builder backend pour TOUTES les futures newsletters : (1) Éditorial = hook concret/humain → enjeu → leçon → pont vers le défi (plus une simple affirmation), ton conversationnel tutoiement, 50-80 mots — `NewsletterPromptBuilder::sectionsMap()` clé `shape` éditorial réécrite. (2) Défi (Option A) = 3-4 étapes GUIDÉES pas-à-pas + `title` clair — shape mise à jour. (3) Bloc « Le saviez-vous » du gabarit `digest-weekly.blade.php` nomme désormais les 5 domaines actifs du raccourcisseur (lurl.ca défaut, veille.la, 1lien.ca, unlien.ca, go3.ca) au lieu de veille.la seul, en tutoiement. Contenu de l'issue W25 mis à jour en conséquence. Codename seo-piliers-veille-generative.
  *   1.65.224 · 2026-06-15 · fix(UI/admin) MENUS DÉROULANTS clippés / en dessous (capture user). Cause : conteneurs overflow:hidden qui clippent les menus position:absolute + z-index trop bas (50). Corrigé : (1) prompt-builder « Concentré/Digest » — `.pb-section-card` overflow:hidden RETIRÉ (coupait la liste d'autocomplétion « Chercher un outil interactif »), coins arrondis remontés aux enfants (header coins HAUT, body coins BAS — header top-only AUSSI en mode auto car un body reste toujours affiché → pas de défaut), `.pb-section-body` overflow:visible, `.pb-listbox` z-index 1050→1080. (2) `.ct-acm-menu` (admin-copy-menu) et menu kebab (admin-action-menu) z-index 50→1080. Aligné sur la convention admin (.dropdown-menu z-index:1080, .table-responsive overflow-y:visible déjà en place). Grep de contrôle : aucun autre overflow:hidden n'enferme un menu critique. Codename seo-piliers-veille-generative.
  *   1.65.223 · 2026-06-15 · feat(Newsletter/admin) Bouton « Renvoyer la confirmation » aux abonnés EN ATTENTE (individuel + en masse) dans la table Livewire backoffice, AVEC garde-fous légaux (recherche pp_search : LCAP/CRTC tolère 1 rappel fonctionnel ; Loi 25 = consentement spécifique + purge). canResendConfirmation() = pending + inscrit <7j (avant purge) + reminder_count<2 (max 2 rappels : cron J+1 + 1 manuel) + 24h d'écart. Réutilise WelcomeNewsletterNotification (déjà conforme : identité + désabonnement, zéro marketing). Colonnes reminder_count + last_reminded_at (migration). RemindPendingCommand marque aussi le compteur (cohérence). L'envoi reste une action MANUELLE admin. Codename seo-piliers-veille-generative.
  *   1.65.222 · 2026-06-15 · fix(Core/admin) Post LinkedIn — RETRAIT de la mention « lien en commentaire » (recherche pp_search juin 2026 : LinkedIn pénalise le « bridge behaviour » = post qui pousse vers un commentaire-lien ; le « lien en 1er commentaire » N'EST PLUS sans pénalité). Post LinkedIn = 100 % valeur, le lien se met à la main dans un 1er commentaire substantiel. Facebook CONSERVE « 🔗 lien en commentaire 👇 » (Meta le recommande, sans pénalité distincte). Codename seo-piliers-veille-generative.
@@ -372,7 +373,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 224;
+$lvPatch = 225;
 
 return [
     'major' => $lvMajor,
