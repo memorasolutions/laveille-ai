@@ -54,8 +54,9 @@ trait HasAdminShareContents
 
     /**
      * Post LinkedIn (best practices juin 2026) : hook fort + « En clair » + « 👉 » + bonus +
-     * CTA + « 🔗 lien en commentaire » (AUCUN lien dans le corps = pas de pénalité de portée) +
-     * jusqu'à 5 hashtags. Ton insight professionnel, format long structuré.
+     * CTA + jusqu'à 5 hashtags. AUCUN lien NI mention « lien en commentaire » dans le corps :
+     * LinkedIn pénalise le « bridge behaviour » (post qui pousse vers un commentaire-lien) en 2026.
+     * Le lien se met à la main dans un 1er commentaire substantiel (pas un lien nu). Format long structuré.
      */
     protected function buildLinkedInPost(string $hook, string $plainDef, string $interest, string $cta, array $hashtags, string $bonus = ''): string
     {
@@ -77,7 +78,6 @@ trait HasAdminShareContents
             $parts[] = $bonus;
         }
         $parts[] = $cta;
-        $parts[] = "🔗 Le lien complet est en commentaire.";
         $post = implode("\n\n", $parts);
 
         $tags = array_slice($hashtags, 0, 5);
