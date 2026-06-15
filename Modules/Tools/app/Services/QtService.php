@@ -386,20 +386,21 @@ class QtService
         ];
     }
 
-    /** Assemble un round mixte de 10 items (6 QCM + 2 V/F + 1 court + 1 appariement). */
+    /**
+     * Assemble un round mixte de 10 items : 7 QCM + 2 V/F + 1 appariement.
+     * NB : le type « Réponse courte » (champ texte libre) est volontairement EXCLU des rounds
+     * publics — sa correction par liste accepted[] risque des faux négatifs (variante/synonyme/
+     * FR-EN non listés) sur un quiz viral où le score doit être incontestable. Tous les types
+     * conservés sont FERMÉS (correction déterministe). Le code (buildShortItems) et la banque
+     * (qt-shortanswer.php) restent DORMANTS et réactivables si une correction robuste est ajoutée.
+     */
     private static function assembleRound(): array
     {
-        $items = self::pickQcm(6, ['facile' => 2, 'moyen' => 2, 'difficile' => 2]);
+        $items = self::pickQcm(7, ['facile' => 3, 'moyen' => 2, 'difficile' => 2]);
 
         $vf = self::buildVraiFauxItems();
         self::safeShuffle($vf);
         $items = array_merge($items, array_slice($vf, 0, 2));
-
-        $short = self::buildShortItems();
-        self::safeShuffle($short);
-        if (! empty($short)) {
-            $items[] = $short[0];
-        }
 
         $match = self::buildMatching();
         if ($match !== null) {
