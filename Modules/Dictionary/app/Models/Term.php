@@ -159,18 +159,15 @@ class Term extends Model implements Searchable
         }
         $hook = "{$name}. Tu vois ce mot passer partout en IA… mais tu sais vraiment ce que ça veut dire ? 🤔";
         $cta = "Tu le savais, toi ? Dis-le-moi en commentaire 👇";
-        $social = $this->buildEngagingSocialPost(
-            $hook,
-            $plainDef,
-            $interest,
-            $cta,
-            ['#IA', '#' . $this->normalizeShareHashtag((string) $name), '#Glossaire', '#Québec']
-        );
+        $hashtags = ['#IA', '#' . $this->normalizeShareHashtag((string) $name), '#Glossaire', '#Québec'];
+        $linkedin = $this->buildLinkedInPost($hook, $plainDef, $interest, $cta, $hashtags);
+        $facebook = $this->buildFacebookPost($hook, $plainDef, $interest, $cta, $hashtags);
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
             ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
-            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+            ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
+            ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
         ];
     }
 }

@@ -329,12 +329,14 @@ class Article extends Model implements SearchableContract
         $cta = "Ça résonne avec ton expérience ? Dis-moi ce que t'en penses 👇";
         $tags = is_array($this->tags) ? $this->tags : [];
         $hashtags = array_merge(['#IA'], array_map(fn ($t) => '#' . $this->normalizeShareHashtag((string) $t), array_slice($tags, 0, 2)), ['#Québec', '#VeilleIA']);
-        $social = $this->buildEngagingSocialPost($hook, $plainDef, $interest, $cta, $hashtags);
+        $linkedin = $this->buildLinkedInPost($hook, $plainDef, $interest, $cta, $hashtags);
+        $facebook = $this->buildFacebookPost($hook, $plainDef, $interest, $cta, $hashtags);
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
             ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
-            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+            ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
+            ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
         ];
     }
 }

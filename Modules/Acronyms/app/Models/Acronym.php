@@ -150,19 +150,16 @@ class Acronym extends Model implements Searchable
             : "À connaître si tu touches de près ou de loin à l'éducation au Québec.";
         $hook = "{$acr}. Tu l'as sûrement déjà croisé dans le milieu de l'éducation au Québec… mais c'est quoi au juste ? 🤔";
         $cta = 'Tu connaissais, toi ? Dis-le-moi en commentaire 👇';
-        $social = $this->buildEngagingSocialPost(
-            $hook,
-            $plainDef,
-            $interest,
-            $cta,
-            ['#Éducation', '#Acronymes', '#' . $this->normalizeShareHashtag($acr), '#Québec']
-        );
+        $hashtags = ['#Éducation', '#Acronymes', '#' . $this->normalizeShareHashtag($acr), '#Québec'];
+        $linkedin = $this->buildLinkedInPost($hook, $plainDef, $interest, $cta, $hashtags);
+        $facebook = $this->buildFacebookPost($hook, $plainDef, $interest, $cta, $hashtags);
 
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
             ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
-            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+            ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
+            ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
         ];
     }
 }

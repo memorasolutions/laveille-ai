@@ -419,19 +419,15 @@ class Tool extends Model implements Searchable
             $verbe = $tutoCount === 1 ? "t'attend" : "t'attendent";
             $tutoBonus = "🎓 {$tutoCount} {$mot} pour bien démarrer {$verbe} déjà sur la veille.";
         }
-        $social = $this->buildEngagingSocialPost(
-            $hook,
-            $plainDef,
-            $interest,
-            $cta,
-            ['#IA', '#OutilsIA', '#' . $this->normalizeShareHashtag((string) $name), '#Québec'],
-            $tutoBonus
-        );
+        $hashtags = ['#IA', '#OutilsIA', '#' . $this->normalizeShareHashtag((string) $name), '#Québec'];
+        $linkedin = $this->buildLinkedInPost($hook, $plainDef, $interest, $cta, $hashtags, $tutoBonus);
+        $facebook = $this->buildFacebookPost($hook, $plainDef, $interest, $cta, $hashtags, $tutoBonus);
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
             ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
-            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+            ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
+            ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
         ];
     }
 }

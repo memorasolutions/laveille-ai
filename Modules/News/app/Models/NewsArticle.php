@@ -240,13 +240,15 @@ class NewsArticle extends Model implements Searchable
         if ($this->category_tag) { $tags[] = '#' . $this->normalizeShareHashtag($this->category_tag); }
         $tags[] = '#Québec';
         $tags[] = '#VeilleIA';
-        $social = $this->buildEngagingSocialPost($hook, $plainDef, $interest, "Toi, t'en penses quoi ? 👇", $tags);
+        $linkedin = $this->buildLinkedInPost($hook, $plainDef, $interest, "Toi, t'en penses quoi ? 👇", $tags);
+        $facebook = $this->buildFacebookPost($hook, $plainDef, $interest, "Toi, t'en penses quoi ? 👇", $tags);
 
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
             ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
-            ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
+            ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
+            ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
         ];
     }
 

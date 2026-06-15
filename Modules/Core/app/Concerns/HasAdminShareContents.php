@@ -35,7 +35,8 @@ trait HasAdminShareContents
     /**
      * Assemble le prompt « NotebookLM Diapositives » (Slide Deck) : consigne/objectif propre au
      * type + structure pédagogique fixe (best practices juin 2026 : 1 idée + 1 « à retenir » par
-     * diapo, titres-phrases, ≤4 puces, plan d'abord puis deck). Le lien de section ferme le deck.
+     * diapo, titres-phrases, ≤4 puces, plan d'abord puis deck) + bloc Références/marque
+     * (pied de page « La veille de Stef — laveille.ai », micro-sources, lien de section sur la diapo finale).
      */
     protected function slidesPrompt(string $sectionUrl, string $consigne): string
     {
@@ -43,11 +44,75 @@ trait HasAdminShareContents
             "Crée un jeu de diapositives (Slide Deck) clair et pédagogique à partir UNIQUEMENT de cette source.",
             trim($consigne),
             "Langue : français québécois, tutoiement, ton d'une vraie personne (pas une IA). Garde les majuscules des acronymes et en début de phrase. Pas de tiret cadratin.",
-            "Structure (8 à 12 diapositives) :\n1. Titre accrocheur + pourquoi ça te concerne\n2. Ce que tu vas comprendre, en une phrase\n3. Le concept clé, expliqué simplement\n4 et suivantes. Le cœur du sujet, une seule idée par diapo, du plus simple au plus nuancé, avec un exemple ou une analogie quand c'est abstrait\nAvant-dernière. Récap des points à retenir\nDernière. À retenir en une phrase + invite à aller plus loin, avec le lien " . $sectionUrl . " affiché en clair",
+            "Structure (8 à 12 diapositives) :\n1. Titre accrocheur + pourquoi ça te concerne\n2. Ce que tu vas comprendre, en une phrase\n3. Le concept clé, expliqué simplement\n4 et suivantes. Le cœur du sujet, une seule idée par diapo, du plus simple au plus nuancé, avec un exemple ou une analogie quand c'est abstrait\nAvant-dernière. Récap des points à retenir\nDernière. La phrase à retenir + invite à visiter La veille de Stef, avec le lien " . $sectionUrl . " et l'adresse laveille.ai affichés en clair",
             "Règles par diapositive :\n- Une seule idée et un seul message à retenir par diapo.\n- Le titre est une phrase qui dit le point (ex. « L'IA générative crée du contenu, elle ne le copie pas », pas « Introduction »).\n- Maximum 4 puces de 12 mots ; mets les explications détaillées dans les notes du présentateur, pas sur la diapo.\n- Mets en évidence le chiffre ou le fait le plus marquant.\n- Si une diapo contient plus d'une idée, sépare-la en deux.",
+            "Références et marque (à ne pas oublier) :\n- En pied de chaque diapositive, en petit et lisible : « La veille de Stef — laveille.ai ».\n- Quand tu cites un chiffre, une donnée ou une citation, indique la source en petit sur la même diapositive (ex. « Source : laveille.ai »).\n- Sur la dernière diapositive, répète bien en évidence le lien de la source : " . $sectionUrl . " (et l'adresse courte laveille.ai).",
             "Design : sobre et lisible, bleu foncé pour l'essentiel, accents jaune ou orange pour les faits marquants, beaucoup d'espace. Contraste élevé ; n'encode jamais une information uniquement par la couleur.",
             "Procède en deux temps : propose d'abord le plan (le titre de chaque diapositive), puis génère le deck final. Corrige les faits dès le plan, car les révisions diapo par diapo ne reconsultent pas la source.",
         ]);
+    }
+
+    /**
+     * Post LinkedIn (best practices juin 2026) : hook fort + « En clair » + « 👉 » + bonus +
+     * CTA + « 🔗 lien en commentaire » (AUCUN lien dans le corps = pas de pénalité de portée) +
+     * jusqu'à 5 hashtags. Ton insight professionnel, format long structuré.
+     */
+    protected function buildLinkedInPost(string $hook, string $plainDef, string $interest, string $cta, array $hashtags, string $bonus = ''): string
+    {
+        $hook = trim($hook);
+        $plainDef = trim($plainDef);
+        $interest = trim($interest);
+        $cta = trim($cta);
+        $bonus = trim($bonus);
+        $hashtags = array_filter(array_map('trim', $hashtags));
+
+        $parts = [$hook];
+        if ($plainDef !== '') {
+            $parts[] = "En clair : {$plainDef}";
+        }
+        if ($interest !== '') {
+            $parts[] = "👉 {$interest}";
+        }
+        if ($bonus !== '') {
+            $parts[] = $bonus;
+        }
+        $parts[] = $cta;
+        $parts[] = "🔗 Le lien complet est en commentaire.";
+        $post = implode("\n\n", $parts);
+
+        $tags = array_slice($hashtags, 0, 5);
+        if ($tags !== []) {
+            $post .= "\n\n" . implode(' ', $tags);
+        }
+
+        return trim($post);
+    }
+
+    /**
+     * Post page Facebook (best practices juin 2026) : court et conversationnel, hook + micro-valeur +
+     * CTA-question + « 🔗 lien en commentaire » (AUCUN lien dans le corps) + 1 à 2 hashtags.
+     */
+    protected function buildFacebookPost(string $hook, string $plainDef, string $interest, string $cta, array $hashtags, string $bonus = ''): string
+    {
+        $hook = trim($hook);
+        $plainDef = trim($plainDef);
+        $cta = trim($cta);
+        $hashtags = array_filter(array_map('trim', $hashtags));
+
+        $parts = [$hook];
+        if ($plainDef !== '') {
+            $parts[] = $this->smartTrim($plainDef, 180);
+        }
+        $parts[] = $cta;
+        $parts[] = "🔗 Lien en commentaire 👇";
+        $post = implode("\n\n", $parts);
+
+        $tags = array_slice($hashtags, 0, 2);
+        if ($tags !== []) {
+            $post .= "\n\n" . implode(' ', $tags);
+        }
+
+        return trim($post);
     }
 
     /**
