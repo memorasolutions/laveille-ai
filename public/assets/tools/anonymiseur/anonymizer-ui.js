@@ -50,20 +50,25 @@ class AnonymizerUI {
     return el ? (el.innerText || '') : '';
   }
 
+  // Enregistre les règles et les remplacements, puis met à jour l'horodatage TTL.
   saveRules() {
     try {
       localStorage.setItem('lv_anon_rules_v3', JSON.stringify(this.rules));
       localStorage.setItem('lv_anon_overrides_v3', JSON.stringify(this.overrides));
+      this._touchTs();
     } catch (e) { console.warn('save', e); }
   }
 
-  // Persistance du TEXTE de l'éditeur (100 % local). Clé stable NON purgée au changement de
-  // version → le texte survit aux mises à jour de l'outil ; effacé seulement par Réinitialiser/Oublier.
+  // Persistance du TEXTE de l'éditeur (100 % local) + horodatage TTL.
   saveSource() {
-    try { localStorage.setItem('lv_anon_source_v3', this.sourceHtml || ''); } catch (e) {}
+    try {
+      localStorage.setItem('lv_anon_source_v3', this.sourceHtml || '');
+      this._touchTs();
+    } catch (e) {}
   }
 
   loadSource() {
+    if (this._purgeIfStale()) return;
     try {
       const s = localStorage.getItem('lv_anon_source_v3');
       if (s && s.trim()) {
@@ -75,6 +80,7 @@ class AnonymizerUI {
   }
 
   loadRules() {
+    if (this._purgeIfStale()) return;
     try {
       // Anti règles fantômes : si la version de l'outil a changé, on repart propre
       const ver = window.LV_ANON_VERSION || '';
@@ -88,6 +94,32 @@ class AnonymizerUI {
       const s = localStorage.getItem('lv_anon_rules_v3'); if (s) this.rules = JSON.parse(s);
       const o = localStorage.getItem('lv_anon_overrides_v3'); if (o) this.overrides = JSON.parse(o);
     } catch (e) { console.warn('load', e); this.rules = []; this.overrides = []; }
+  }
+
+  // Horodatage de dernière activité (pour l'auto-purge TTL).
+  _touchTs() {
+    try { localStorage.setItem('lv_anon_ts', String(Date.now())); } catch (e) {}
+  }
+
+  // Auto-purge des données sensibles (mapping + source) après 7 j d'inactivité : borne l'exposition
+  // sur poste partagé tout en préservant le « reviens plus tard » dans la fenêtre. Retourne true si purgé.
+  _purgeIfStale() {
+    try {
+      const tsStr = localStorage.getItem('lv_anon_ts');
+      if (tsStr) {
+        const ts = Number(tsStr);
+        if (Date.now() - ts > 7 * 24 * 60 * 60 * 1000) {
+          localStorage.removeItem('lv_anon_rules_v3');
+          localStorage.removeItem('lv_anon_overrides_v3');
+          localStorage.removeItem('lv_anon_source_v3');
+          localStorage.removeItem('lv_anon_ts');
+          this.rules = []; this.overrides = [];
+          this.sourceHtml = ''; this.sourceText = '';
+          return true;
+        }
+      }
+      return false;
+    } catch (e) { return false; }
   }
 
   updateOutput() {
