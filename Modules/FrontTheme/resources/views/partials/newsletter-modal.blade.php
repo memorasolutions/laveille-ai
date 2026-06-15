@@ -16,8 +16,6 @@
             <div style="padding: 20px 30px;">
                 <form id="newsletterModalForm">
                     @csrf
-                    <x-honeypot />
-                    @if(config('services.turnstile.site_key'))<div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="invisible" data-action="newsletter"></div>@once @push('scripts')<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>@endpush @endonce @endif
                     <input type="email" name="email" placeholder="{{ __('Votre courriel *') }}" required aria-label="{{ __('Courriel') }}" autocomplete="email"
                            style="width: 100%; border: 1px solid #dee2e6; border-radius: 8px; padding: 12px 16px; font-size: 16px; font-family: var(--f-body); margin-bottom: 12px; outline: none; transition: border-color 0.2s; box-sizing: border-box;">
                     <input type="text" name="name" placeholder="{{ __('Votre prénom (optionnel)') }}" aria-label="{{ __('Prénom') }}" autocomplete="given-name"

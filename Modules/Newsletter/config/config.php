@@ -46,30 +46,4 @@ return [
         'DeepSeek',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Domaines de courriels JETABLES (anti-bot, rejet silencieux)
-    |--------------------------------------------------------------------------
-    |
-    | Liste MINIMALE et extensible de domaines d'adresses jetables. Une inscription
-    | avec l'un de ces domaines est rejetée SILENCIEUSEMENT (même message de succès,
-    | aucun subscriber créé). Garder court pour ne JAMAIS bloquer de vrais utilisateurs.
-    | Le double opt-in reste le garde-fou principal.
-    |
-    */
-    'disposable_domains' => [
-        'mailinator.com',
-        'guerrillamail.com',
-        'guerrillamail.info',
-        'sharklasers.com',
-        'yopmail.com',
-        'trashmail.com',
-        'tempmail.com',
-        '10minutemail.com',
-        'getnada.com',
-        'maildrop.cc',
-        'dispostable.com',
-        'fakeinbox.com',
-    ],
-
 ];

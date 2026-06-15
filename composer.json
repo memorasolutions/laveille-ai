@@ -46,7 +46,6 @@
         "spatie/laravel-activitylog": "^4.11",
         "spatie/laravel-backup": "^9.4",
         "spatie/laravel-health": "^1.37",
-        "spatie/laravel-honeypot": "^4.7",
         "spatie/laravel-medialibrary": "^11.0",
         "spatie/laravel-model-states": "^2.12",
         "spatie/laravel-passkeys": "dev-support-laravel-13",

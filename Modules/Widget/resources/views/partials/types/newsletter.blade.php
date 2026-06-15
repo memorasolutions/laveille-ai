@@ -7,8 +7,6 @@
     @if(Route::has('newsletter.subscribe'))
         <form action="{{ route('newsletter.subscribe') }}" method="POST">
             @csrf
-            <x-honeypot />
-            @if(config('services.turnstile.site_key'))<div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="invisible" data-action="newsletter"></div>@once @push('scripts')<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>@endpush @endonce @endif
             <div class="input-group mb-2">
                 <input type="email" name="email" class="form-control" placeholder="{{ __('Votre courriel') }}" required autocomplete="email">
                 <button type="submit" class="btn btn-primary">{{ __('S\'inscrire') }}</button>
