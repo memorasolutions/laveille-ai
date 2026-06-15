@@ -36,7 +36,7 @@
     })();
     </script>
     @endif
-    @if(env('GA_MEASUREMENT_ID') && env('PRIVACY_GA_ENABLED', false))
+    @if(env('GA_MEASUREMENT_ID') && env('PRIVACY_GA_ENABLED', false) && ! \Illuminate\Support\Facades\View::hasSection('no_analytics'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ env('GA_MEASUREMENT_ID') }}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];

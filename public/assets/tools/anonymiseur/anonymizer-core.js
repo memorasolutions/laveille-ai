@@ -92,8 +92,29 @@ function detectEntities(text) {
   // 7. Courriel
   const email = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
   while ((m = email.exec(text))) push(m[0], 'email', 'Courriel', 0.99);
+  // 7.5 Carte bancaire / PAN (13-19 chiffres, validés Luhn) — AVANT le téléphone pour éviter qu'il capte un sous-segment.
+  const luhnValid = (str) => {
+    const digits = str.replace(/\D/g, '');
+    if (digits.length < 2) return false;
+    let sum = 0, isEven = false;
+    for (let i = digits.length - 1; i >= 0; i--) {
+      let d = parseInt(digits.charAt(i), 10);
+      if (isEven) { d *= 2; if (d > 9) d -= 9; }
+      sum += d; isEven = !isEven;
+    }
+    return sum % 10 === 0;
+  };
+  const card = /(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)/g;
+  while ((m = card.exec(text))) { if (luhnValid(m[0])) push(m[0], 'id', 'Carte bancaire', 0.95); }
+  // 7.6 IBAN
+  const iban = /\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b/g;
+  while ((m = iban.exec(text))) push(m[0], 'id', 'IBAN', 0.9);
+  // 7.7 Adresse IP v4 (octets 0-255)
+  const octet = '(?:25[0-5]|2[0-4]\\d|[01]?\\d?\\d)';
+  const ip = new RegExp(`(?<![\\d.])${octet}\\.${octet}\\.${octet}\\.${octet}(?![\\d.])`, 'g');
+  while ((m = ip.exec(text))) push(m[0], 'id', 'Adresse IP', 0.85);
   // 8. Téléphone CA
-  const phone = /(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}/g;
+  const phone = /(?<!\d)(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)/g;
   while ((m = phone.exec(text))) push(m[0], 'phone', 'Téléphone', 0.9);
   // 9. Numéro de dossier
   const dossier = /(?:#|dossier\s*(?:n[°o]\s*)?)\d+/gi;

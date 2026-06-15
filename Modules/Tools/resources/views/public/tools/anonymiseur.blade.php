@@ -1,6 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 @section('no_ads', '1') {{-- Aucune pub : outil traitant des données personnelles (posture Loi 25) --}}
+@section('no_analytics', '1') {{-- Aucune analytics tierce (GA) : outil de confidentialité, cohérence « rien n'est transmis » --}}
 
 @php $shareData = $tool->getShareData(); @endphp
 @section('title', $tool->name . ' - ' . config('app.name'))
@@ -55,6 +56,7 @@
                             <div>
                                 <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->icon }} {{ $tool->name }}</h1>
                                 <p class="text-muted mb-0">{{ __('Anonymisez vos données pour l\'IA, puis remettez vos vraies données dans sa réponse. 100 % local.') }}</p>
+                                <p class="text-muted small mb-0" style="margin-top:6px;">{{ __('⚠️ Outil d\'aide : relisez toujours le résultat avant de l\'envoyer. Certaines données peuvent échapper à la détection automatique (cartes, organisations, texte en minuscules). Vous restez responsable de vos données.') }}</p>
                             </div>
                             <div class="d-flex gap-1 align-items-center" style="flex-shrink:0;">
                                 @include('tools::partials.fullscreen-btn')
