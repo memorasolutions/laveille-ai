@@ -41,6 +41,7 @@
     .qt-mslot { min-height:56px; border:2px dashed #cbd5e1; border-radius:10px; background:#f9fafb; display:flex; align-items:center; padding:4px; transition:border-color .15s ease, background .15s ease; }
     .qt-mslot.is-empty:hover, .qt-mslot:focus-visible { outline:none; border-color:var(--c-primary); background:#f0fafb; }
     .qt-mslot:not(.is-empty) { border-style:solid; border-color:#cbd5e1; background:#fff; }
+    .qt-mslot.is-over { border-style:solid; border-color:var(--c-primary); background:#e8f6f8; box-shadow:0 0 0 .15rem rgba(6,78,90,.15); }
     .qt-mslot-ph { color:var(--c-text-muted,#6E7687); font-size:0.9rem; padding:0 10px; }
     .qt-mslot .qt-mblock { width:100%; margin:0; }
     .qt-mghost { position:fixed; top:0; left:0; z-index:1080; pointer-events:none; opacity:.92; box-shadow:0 8px 20px rgba(0,0,0,.22); }
@@ -122,9 +123,9 @@
                                             <div style="font-weight:700;color:var(--c-text-muted,#6E7687);font-size:0.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Réserve · glisse ou tape un bloc</div>
                                             <div class="d-grid gap-2">
                                                 <template x-for="def in poolDefs()" :key="'pool-'+def.idx">
-                                                    <div class="qt-mblock" :class="{'is-picked': pickedDef===def.idx, 'is-drag': dragActive && dragIdx===def.idx, 'qt-mdisabled': answered}"
+                                                    <div class="qt-mblock" :class="{'is-picked': pickedDef===def.idx, 'is-drag': dragIdx===def.idx, 'qt-mdisabled': answered}"
                                                          role="button" :tabindex="answered ? -1 : 0" :aria-pressed="pickedDef===def.idx" :data-def-index="def.idx"
-                                                         @pointerdown="onPointerDownDef($event, def.idx, null)" @click.prevent="pickDef(def.idx)"
+                                                         :draggable="!answered" @dragstart="onDragStart($event, def.idx)" @dragend="onDragEnd()" @click.prevent="pickDef(def.idx)"
                                                          @keydown.enter.prevent="onKeyDef(def.idx, null)" @keydown.space.prevent="onKeyDef(def.idx, null)" x-text="def.text"></div>
                                                 </template>
                                                 <template x-if="poolDefs().length===0"><div style="font-size:0.85rem;color:var(--c-text-muted,#6E7687);">Tous les blocs sont placés.</div></template>
@@ -135,14 +136,15 @@
                                             <template x-for="(term, k) in q().terms" :key="'term-'+k">
                                                 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
                                                     <span style="font-weight:700;color:var(--c-dark);min-width:130px;flex:0 0 auto;" x-text="term"></span>
-                                                    <div class="qt-mslot" :class="{'is-empty': matchSel[k]===''}" role="button" :tabindex="answered ? -1 : 0"
+                                                    <div class="qt-mslot" :class="{'is-empty': matchSel[k]==='', 'is-over': dragOverSlot===k}" role="button" :tabindex="answered ? -1 : 0"
                                                          :data-slot-index="k" :aria-label="slotAria(k)" @click.prevent="placeOnSlot(k)"
-                                                         @keydown.enter.prevent="onKeySlot(k)" @keydown.space.prevent="onKeySlot(k)" style="flex:1 1 220px;min-width:0;">
+                                                         @keydown.enter.prevent="onKeySlot(k)" @keydown.space.prevent="onKeySlot(k)"
+                                                         @dragover.prevent @dragenter.prevent="dragOverSlot=k" @dragleave="dragOverSlot=null" @drop.prevent="onDrop($event, k)" style="flex:1 1 220px;min-width:0;">
                                                         <template x-if="matchSel[k]===''"><span class="qt-mslot-ph">Dépose ici</span></template>
                                                         <template x-if="matchSel[k]!==''">
-                                                            <div class="qt-mblock" :class="{'is-drag': dragActive && dragIdx===matchSel[k], 'qt-mdisabled': answered}"
+                                                            <div class="qt-mblock" :class="{'is-drag': dragIdx===matchSel[k], 'qt-mdisabled': answered}"
                                                                  role="button" :tabindex="answered ? -1 : 0" aria-label="Définition placée, appuyez pour retirer." :data-def-index="matchSel[k]"
-                                                                 @pointerdown="onPointerDownDef($event, matchSel[k], k)" @click.prevent="returnToPool(k)"
+                                                                 :draggable="!answered" @dragstart="onDragStart($event, matchSel[k])" @dragend="onDragEnd()" @click.prevent="returnToPool(k)"
                                                                  @keydown.enter.prevent="returnToPool(k)" @keydown.space.prevent="returnToPool(k)" x-text="q().defs[matchSel[k]]"></div>
                                                         </template>
                                                     </div>
@@ -375,11 +377,8 @@ function qtApp(payload, dailyPayload, dailyNumber) {
             this.matchSel = (q.type === 'appariement') ? Array((q.terms || []).length).fill('') : [];
         },
 
-        // --- Appariement : glisser-déposer (pointer events) + tap-pour-placer + clavier (WCAG 2.5.7) ---
-        pickedDef: null,
-        dragActive: false, dragIdx: null, dragOriginSlot: null, dragGhost: null,
-        dragStartX: 0, dragStartY: 0, dragOffsetX: 0, dragOffsetY: 0,
-        _dragStarted: false, _boundMove: null, _boundUp: null, ignoreNextClick: false,
+        // --- Appariement : glisser-déposer NATIF HTML5 (fiable desktop) + tap-pour-placer + clavier (WCAG 2.5.7) ---
+        pickedDef: null, dragIdx: null, dragOverSlot: null,
 
         poolDefs() {
             const placed = new Set(this.matchSel.filter(v => v !== ''));
@@ -392,7 +391,6 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         },
         pickDef(defIdx) {
             if (this.answered) return;
-            if (this.ignoreNextClick) { this.ignoreNextClick = false; return; }
             this.pickedDef = (this.pickedDef === defIdx) ? null : defIdx;
         },
         onKeyDef(defIdx, originSlot) {
@@ -413,62 +411,26 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         },
         returnToPool(termIdx) {
             if (this.answered) return;
-            if (this.ignoreNextClick) { this.ignoreNextClick = false; return; }
             if (this.matchSel[termIdx] === '') return;
             if (this.pickedDef === this.matchSel[termIdx]) this.pickedDef = null;
             this.matchSel[termIdx] = '';
         },
         onKeySlot(termIdx) { if (!this.answered) this.placeOnSlot(termIdx); },
-        onPointerDownDef(e, defIdx, originSlot) {
+        onDragStart(e, defIdx) {
+            if (this.answered) { e.preventDefault(); return; }
+            this.dragIdx = defIdx;
+            try { e.dataTransfer.setData('text/plain', String(defIdx)); e.dataTransfer.effectAllowed = 'move'; } catch (err) {}
+        },
+        onDragEnd() { this.dragIdx = null; this.dragOverSlot = null; },
+        onDrop(e, termIdx) {
             if (this.answered) return;
-            const srcEl = e.currentTarget;
-            this.dragIdx = defIdx; this.dragOriginSlot = originSlot;
-            this.dragStartX = e.clientX; this.dragStartY = e.clientY; this._dragStarted = false;
-            this._boundMove = (ev) => this.onPointerMove(ev, srcEl);
-            this._boundUp = (ev) => this.onPointerUp(ev);
-            window.addEventListener('pointermove', this._boundMove, { passive: false });
-            window.addEventListener('pointerup', this._boundUp, { passive: false });
-            // NE PAS preventDefault ici : sinon le « click » du tap-pour-placer est supprimé dans certains navigateurs.
+            let defIdx = NaN;
+            try { defIdx = parseInt(e.dataTransfer.getData('text/plain')); } catch (err) {}
+            if (Number.isNaN(defIdx)) defIdx = this.dragIdx;
+            if (defIdx !== null && !Number.isNaN(defIdx)) this.placeDefOnSlot(defIdx, termIdx);
+            this.dragOverSlot = null; this.dragIdx = null;
         },
-        onPointerMove(e, sourceEl) {
-            if (!this._dragStarted) {
-                if (Math.hypot(e.clientX - this.dragStartX, e.clientY - this.dragStartY) > 6) { this.startDrag(e, sourceEl); }
-                else { return; }
-            }
-            if (!this.dragActive || !this.dragGhost) return;
-            if (e.cancelable) e.preventDefault(); // pendant le glissement seulement : évite sélection de texte / scroll
-            this.dragGhost.style.transform = 'translate(' + (e.clientX - this.dragOffsetX) + 'px,' + (e.clientY - this.dragOffsetY) + 'px)';
-        },
-        startDrag(e, sourceEl) {
-            this._dragStarted = true; this.dragActive = true;
-            const rect = sourceEl && sourceEl.getBoundingClientRect ? sourceEl.getBoundingClientRect() : { width: 220, left: e.clientX - 16, top: e.clientY - 16 };
-            this.dragGhost = document.createElement('div');
-            this.dragGhost.className = 'qt-mghost qt-mblock';
-            this.dragGhost.textContent = this.q().defs[this.dragIdx];
-            this.dragGhost.style.width = rect.width + 'px';
-            document.body.appendChild(this.dragGhost);
-            this.dragOffsetX = e.clientX - rect.left; this.dragOffsetY = e.clientY - rect.top;
-            this.dragGhost.style.transform = 'translate(' + (e.clientX - this.dragOffsetX) + 'px,' + (e.clientY - this.dragOffsetY) + 'px)';
-        },
-        onPointerUp(e) {
-            window.removeEventListener('pointermove', this._boundMove, { passive: false });
-            window.removeEventListener('pointerup', this._boundUp, { passive: false });
-            if (this._dragStarted) {
-                const el = document.elementFromPoint(e.clientX, e.clientY);
-                const slotEl = el && el.closest ? el.closest('[data-slot-index]') : null;
-                if (slotEl && !this.answered) {
-                    const termIdx = parseInt(slotEl.getAttribute('data-slot-index'));
-                    if (!Number.isNaN(termIdx)) this.placeDefOnSlot(this.dragIdx, termIdx);
-                }
-                this.ignoreNextClick = true;
-                this.cleanupDrag();
-            }
-        },
-        cleanupDrag() {
-            this.dragActive = false; this._dragStarted = false; this.dragIdx = null; this.dragOriginSlot = null;
-            if (this.dragGhost && this.dragGhost.remove) this.dragGhost.remove();
-            this.dragGhost = null;
-        },
+        cleanupDrag() { this.dragIdx = null; this.dragOverSlot = null; },
         reviewMy(i) {
             const q = this.questions[i]; const a = this.answers[i];
             if (a === null || a === undefined) return '—';

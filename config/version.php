@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.216 · 2026-06-15 · fix(Tools) QT appariement — GLISSER-DÉPOSER passé en HTML5 NATIF (draggable + dragstart/dragover/drop) au lieu de la mécanique pointer-events maison (qui bloquait l'utilisateur sur Chrome bureau). Plus fiable desktop, gère nativement la distinction drag↔click (zéro conflit avec le tap-pour-placer). Conserve tap-pour-placer (clic) + clavier (Entrée/Espace) = alternative WCAG 2.5.7 + mobile. matchSel reste la source de vérité. Surbrillance .is-over au survol d'un emplacement. Codename seo-piliers-veille-generative.
  *   1.65.215 · 2026-06-14 · fix(Tools) QT appariement glisser-déposer — TAP-pour-placer réparé : retrait du e.preventDefault()/stopPropagation() au pointerdown (qui supprimait le « click » du tap dans certains navigateurs) ; preventDefault déplacé dans onPointerMove (pendant le glissement seulement) + user-select:none sur les blocs. Le glisser ET le tap fonctionnent sans interférence. Codename seo-piliers-veille-generative.
  *   1.65.214 · 2026-06-14 · feat(Tools) QT — APPARIEMENT en GLISSER-DÉPOSER (demande user « blocs à déplacer »). Remplace les <select> par des blocs de définitions déplaçables vers les emplacements des termes. Recherche pp_search juin 2026 → approche n°1 notée 92/100 : pointer events maison (souris+tactile unifiés) + TAP-POUR-PLACER (tape un bloc puis un emplacement) + clavier (Entrée/Espace) = alternative accessible WCAG 2.5.7 OBLIGATOIRE, ZÉRO dépendance externe (vs SortableJS 80 / @shopify/draggable 78 / HTML5 natif 55). Implémentation déléguée Hermes/gpt-5 : réserve (poolDefs) + slots par terme + ghost flottant en drag + détection slot via elementFromPoint, matchSel reste la source de vérité (validateMatch/isCorrect/matchAllChosen inchangés). touch-action:none, cibles ≥44px, focus-visible, aria-label slots. Charte (qt-mblock/qt-mslot/qt-mghost). QCM/VF/court inchangés. Admin-only (en construction). Codename seo-piliers-veille-generative.
  *   1.65.213 · 2026-06-14 · polish(Tools) QT — `cleanMatchDef` gère le parenthétique « (acronyme) » après le terme (ex. « La superintelligence (ASI) est… » → « Un niveau théorique d'IA surpassant… » ; « Le DSA (Digital Services Act) est… » → « Un règlement européen… »). Ajout de `(?:\s*\([^)]*\))?` au pattern, avant le verbe d'état. Couvre les nombreux termes du glossaire avec acronyme (ASI, DSA, DMA, 2FA…). Vérifié serveur : 0 spoiler, 0 « … » de masquage. Codename seo-piliers-veille-generative.
@@ -364,7 +365,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 215;
+$lvPatch = 216;
 
 return [
     'major' => $lvMajor,
