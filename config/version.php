@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.221 · 2026-06-15 · fix(Core/admin) Posts LinkedIn/Facebook — anti-redondance : la ligne « En clair »/micro-valeur est OMISE quand elle est trop proche du hook (via textsAreSimilar), surtout pour les actualités où le hook = le résumé. Générique aux 2 builders (5 sections). Codename seo-piliers-veille-generative.
  *   1.65.220 · 2026-06-15 · feat(Core/admin) MENU PARTAGE — (1) « NotebookLM Diapositives » enrichi de RÉFÉRENCES vers le site (best practices slides juin 2026 via pp_search : pied de page « La veille de Stef — laveille.ai » sur chaque diapo, micro-source sur les données, lien de section affiché en clair sur la diapo finale) puisque les liens sont permis dans les diapos. (2) « Post réseaux sociaux » SÉPARÉ en « Post LinkedIn » 💼 et « Post Facebook » 📘 (best practices juin 2026) : LinkedIn = format long structuré (hook + En clair + 👉 + bonus + CTA + jusqu'à 5 hashtags), Facebook = court conversationnel (hook + micro-valeur + CTA-question + 1-2 hashtags). Les DEUX SANS lien dans le corps (−30 à −60 % de portée si lien) + mention « 🔗 lien en commentaire » (le lien va en 1er commentaire, pas dans la publication = pas de pénalité). Helpers DRY buildLinkedInPost()/buildFacebookPost() ; buildEngagingSocialPost conservé (legacy). 5 sections (News/Term/Acronym/Tool/Article). Menu = Résumé · Infographie · Diapositives · LinkedIn · Facebook. Codename seo-piliers-veille-generative.
  *   1.65.219 · 2026-06-15 · feat(Core/admin) MENU PARTAGE — nouveau prompt « NotebookLM Diapositives » (Slide Deck) ajouté PARTOUT (News, Term, Acronym, Tool, Article) via helper DRY HasAdminShareContents::slidesPrompt(). Best practices NotebookLM juin 2026 (pp_search) : 1 idée + 1 « à retenir » par diapo, titres-phrases, ≤4 puces/12 mots, plan d'abord puis deck (les révisions diapo ne reconsultent pas la source), structure 8-12 diapos, consigne propre au type. Prompt « Infographie » AMÉLIORÉ au passage : + Structure narrative (1 message + 3-5 sections, data storytelling), + Accessibilité (contraste AA, info jamais codée que par la couleur), + Format vertical. 1 seule entrée par modèle (le menu rend la liste). Codename seo-piliers-veille-generative.
  *   1.65.218 · 2026-06-15 · feat(Newsletter) ANTI-BOT v2 SANS dépendance (après que v217 ait causé un 500 global : la CI ne lance pas composer install → la classe spatie ProtectAgainstSpam était absente → route fatale. v217 revert, site restauré). Nouvelle approche déploie-safe : (1) HONEYPOT MAISON = champ caché hp_url (nom NON auto-rempli, autocomplete=off, hors écran) sur 5 forms → un humain ne le remplit jamais = ZÉRO faux positif ; vérif DANS le contrôleur (jamais de classe fatale au chargement des routes). (2) DOMAINES JETABLES (config newsletter.disposable_domains, 12) → rejet SILENCIEUX. (3) Double opt-in INCHANGÉ. PAS de time-trap (risque de bloquer un inscrit rapide), PAS de Turnstile pour l'instant (éviterait la landmine clés-sans-widget), throttle gardé à 5/min (pas resserré → ne bloque pas une IP partagée). Priorité user : NE JAMAIS bloquer un vrai inscrit. Codename seo-piliers-veille-generative.
@@ -368,7 +369,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 220;
+$lvPatch = 221;
 
 return [
     'major' => $lvMajor,

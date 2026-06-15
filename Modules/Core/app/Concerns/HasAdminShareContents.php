@@ -67,7 +67,7 @@ trait HasAdminShareContents
         $hashtags = array_filter(array_map('trim', $hashtags));
 
         $parts = [$hook];
-        if ($plainDef !== '') {
+        if ($plainDef !== '' && ! $this->textsAreSimilar($hook, $plainDef)) {
             $parts[] = "En clair : {$plainDef}";
         }
         if ($interest !== '') {
@@ -100,7 +100,7 @@ trait HasAdminShareContents
         $hashtags = array_filter(array_map('trim', $hashtags));
 
         $parts = [$hook];
-        if ($plainDef !== '') {
+        if ($plainDef !== '' && ! $this->textsAreSimilar($hook, $plainDef)) {
             $parts[] = $this->smartTrim($plainDef, 180);
         }
         $parts[] = $cta;
