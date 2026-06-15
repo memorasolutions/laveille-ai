@@ -10,12 +10,16 @@ declare(strict_types=1);
 
 namespace Modules\Backoffice\Livewire;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Traits\HasBulkActions;
 use Modules\Newsletter\Models\Subscriber;
+use Modules\Newsletter\Notifications\WelcomeNewsletterNotification;
 use Modules\Settings\Facades\Settings;
+use Throwable;
 
 class SubscribersTable extends Component
 {
@@ -46,14 +50,64 @@ class SubscribersTable extends Component
         $this->resetPage();
     }
 
+    /**
+     * Surcharge de la méthode du trait HasBulkActions.
+     * L'action 'resend' gère son propre toast récapitulatif ;
+     * les autres actions gardent le toast générique du trait.
+     */
+    public function executeBulkAction(): void
+    {
+        if (empty($this->bulkAction) || empty($this->selected)) {
+            $this->dispatch('toast', type: 'error', message: __('Sélectionnez des éléments et une action.'));
+
+            return;
+        }
+
+        if ($this->bulkAction === 'resend') {
+            $this->bulkResendConfirmation($this->selected);
+            $this->resetBulkSelection();
+
+            return;
+        }
+
+        // Pour les autres actions : déléguer puis toast générique (comportement du trait).
+        $this->handleBulkAction($this->bulkAction, $this->selected);
+        $this->resetBulkSelection();
+        $this->dispatch('toast', type: 'success', message: __('Action effectuée.'));
+    }
+
     public function delete(int $id): void
     {
         Subscriber::find($id)?->delete();
     }
 
+    public function resendConfirmation(int $id): void
+    {
+        $subscriber = Subscriber::find($id);
+
+        if (! $subscriber || ! $subscriber->canResendConfirmation()) {
+            $this->dispatch('toast', type: 'warning', message: __('Cet abonné n\'est pas éligible au renvoi (déjà confirmé, désabonné, limite atteinte ou délai non écoulé).'));
+
+            return;
+        }
+
+        try {
+            Notification::route('mail', $subscriber->email)
+                ->notify(new WelcomeNewsletterNotification($subscriber));
+
+            $subscriber->markReminded();
+
+            $this->dispatch('toast', type: 'success', message: __('Courriel de confirmation renvoyé à ') . $subscriber->email . '.');
+        } catch (Throwable $e) {
+            Log::error('Échec du renvoi de confirmation à ' . $subscriber->email, ['exception' => $e]);
+            $this->dispatch('toast', type: 'error', message: __('Échec de l\'envoi. Veuillez réessayer.'));
+        }
+    }
+
     protected function getBulkActions(): array
     {
         return [
+            'resend' => __('Renvoyer la confirmation'),
             'delete' => __('Supprimer'),
         ];
     }
@@ -62,8 +116,42 @@ class SubscribersTable extends Component
     {
         match ($action) {
             'delete' => Subscriber::whereIn('id', $ids)->delete(),
+            'resend' => $this->bulkResendConfirmation($ids),
             default => null,
         };
+    }
+
+    private function bulkResendConfirmation(array $ids): void
+    {
+        $sent = 0;
+        $skipped = 0;
+
+        foreach ($ids as $id) {
+            $subscriber = Subscriber::find((int) $id);
+
+            if (! $subscriber || ! $subscriber->canResendConfirmation()) {
+                $skipped++;
+
+                continue;
+            }
+
+            try {
+                Notification::route('mail', $subscriber->email)
+                    ->notify(new WelcomeNewsletterNotification($subscriber));
+
+                $subscriber->markReminded();
+                $sent++;
+            } catch (Throwable $e) {
+                Log::error('Échec du renvoi de confirmation (bulk) à ' . $subscriber->email, ['exception' => $e]);
+                $skipped++;
+            }
+        }
+
+        $this->dispatch(
+            'toast',
+            type: $sent > 0 ? 'success' : 'warning',
+            message: __("{$sent} confirmation(s) renvoyée(s), {$skipped} ignorée(s) (non éligibles ou erreur).")
+        );
     }
 
     protected function getBulkPageIds(): array

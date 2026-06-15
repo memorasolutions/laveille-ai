@@ -46,12 +46,16 @@ class Subscriber extends Model
         'unsubscribe_feedback',
         'paused_until',
         'frequency_preference',
+        'reminder_count',
+        'last_reminded_at',
     ];
 
     protected $casts = [
         'confirmed_at' => 'datetime',
         'unsubscribed_at' => 'datetime',
         'paused_until' => 'datetime',
+        'last_reminded_at' => 'datetime',
+        'reminder_count' => 'integer',
     ];
 
     protected static function boot(): void
@@ -68,6 +72,35 @@ class Subscriber extends Model
     public function isConfirmed(): bool
     {
         return ! is_null($this->confirmed_at);
+    }
+
+    /**
+     * Détermine si un abonné est éligible au renvoi manuel de la confirmation.
+     *
+     * Garde-fous :
+     *  - Doit être en attente (non confirmé, non désabonné)
+     *  - Inscrit il y a moins de 7 jours (avant purge planifiée)
+     *  - Maximum 2 rappels (cron J+1 + 1 renvoi manuel)
+     *  - Délai minimal de 24 h entre deux envois
+     */
+    public function canResendConfirmation(): bool
+    {
+        return is_null($this->confirmed_at)
+            && is_null($this->unsubscribed_at)
+            && $this->created_at >= now()->subDays(7)
+            && ((int) $this->reminder_count) < 2
+            && (is_null($this->last_reminded_at) || $this->last_reminded_at <= now()->subDay());
+    }
+
+    /**
+     * Incrémente le compteur de rappels et horodate le dernier envoi.
+     */
+    public function markReminded(): void
+    {
+        $this->forceFill([
+            'reminder_count' => ((int) $this->reminder_count) + 1,
+            'last_reminded_at' => now(),
+        ])->save();
     }
 
     public function isActive(): bool

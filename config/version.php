@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.223 · 2026-06-15 · feat(Newsletter/admin) Bouton « Renvoyer la confirmation » aux abonnés EN ATTENTE (individuel + en masse) dans la table Livewire backoffice, AVEC garde-fous légaux (recherche pp_search : LCAP/CRTC tolère 1 rappel fonctionnel ; Loi 25 = consentement spécifique + purge). canResendConfirmation() = pending + inscrit <7j (avant purge) + reminder_count<2 (max 2 rappels : cron J+1 + 1 manuel) + 24h d'écart. Réutilise WelcomeNewsletterNotification (déjà conforme : identité + désabonnement, zéro marketing). Colonnes reminder_count + last_reminded_at (migration). RemindPendingCommand marque aussi le compteur (cohérence). L'envoi reste une action MANUELLE admin. Codename seo-piliers-veille-generative.
  *   1.65.222 · 2026-06-15 · fix(Core/admin) Post LinkedIn — RETRAIT de la mention « lien en commentaire » (recherche pp_search juin 2026 : LinkedIn pénalise le « bridge behaviour » = post qui pousse vers un commentaire-lien ; le « lien en 1er commentaire » N'EST PLUS sans pénalité). Post LinkedIn = 100 % valeur, le lien se met à la main dans un 1er commentaire substantiel. Facebook CONSERVE « 🔗 lien en commentaire 👇 » (Meta le recommande, sans pénalité distincte). Codename seo-piliers-veille-generative.
  *   1.65.221 · 2026-06-15 · fix(Core/admin) Posts LinkedIn/Facebook — anti-redondance : la ligne « En clair »/micro-valeur est OMISE quand elle est trop proche du hook (via textsAreSimilar), surtout pour les actualités où le hook = le résumé. Générique aux 2 builders (5 sections). Codename seo-piliers-veille-generative.
  *   1.65.220 · 2026-06-15 · feat(Core/admin) MENU PARTAGE — (1) « NotebookLM Diapositives » enrichi de RÉFÉRENCES vers le site (best practices slides juin 2026 via pp_search : pied de page « La veille de Stef — laveille.ai » sur chaque diapo, micro-source sur les données, lien de section affiché en clair sur la diapo finale) puisque les liens sont permis dans les diapos. (2) « Post réseaux sociaux » SÉPARÉ en « Post LinkedIn » 💼 et « Post Facebook » 📘 (best practices juin 2026) : LinkedIn = format long structuré (hook + En clair + 👉 + bonus + CTA + jusqu'à 5 hashtags), Facebook = court conversationnel (hook + micro-valeur + CTA-question + 1-2 hashtags). Les DEUX SANS lien dans le corps (−30 à −60 % de portée si lien) + mention « 🔗 lien en commentaire » (le lien va en 1er commentaire, pas dans la publication = pas de pénalité). Helpers DRY buildLinkedInPost()/buildFacebookPost() ; buildEngagingSocialPost conservé (legacy). 5 sections (News/Term/Acronym/Tool/Article). Menu = Résumé · Infographie · Diapositives · LinkedIn · Facebook. Codename seo-piliers-veille-generative.
@@ -370,7 +371,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 222;
+$lvPatch = 223;
 
 return [
     'major' => $lvMajor,

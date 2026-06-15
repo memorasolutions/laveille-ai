@@ -82,6 +82,7 @@
             <span class="small fw-medium text-body">{{ count($selected) }} {{ __('sélectionné(s)') }}</span>
             <select wire:model.live="bulkAction" class="form-select form-select-sm w-auto" aria-label="Action groupée">
                 <option value="">{{ __('Choisir une action') }}</option>
+                <option value="resend">{{ __('Renvoyer la confirmation') }}</option>
                 <option value="delete">{{ __('Supprimer') }}</option>
             </select>
             <button wire:click="executeBulkAction" wire:confirm="{{ __('Confirmer l\'action en masse ?') }}"
@@ -156,7 +157,13 @@
                             </button>
                             <div x-show="open" x-cloak
                                  class="position-absolute end-0 bg-white border rounded shadow py-1"
-                                 style="top:100%;margin-top:4px;min-width:140px;z-index:50;">
+                                 style="top:100%;margin-top:4px;min-width:200px;z-index:50;">
+                                @if(is_null($sub->confirmed_at) && is_null($sub->unsubscribed_at))
+                                <button wire:click="resendConfirmation({{ $sub->id }})" @click="open = false"
+                                        class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-warning text-decoration-none text-start">
+                                    <i data-lucide="send" style="width:14px;height:14px;"></i> {{ __('Renvoyer la confirmation') }}
+                                </button>
+                                @endif
                                 <button wire:click="delete({{ $sub->id }})"
                                         wire:confirm="{{ __('Supprimer cet abonné ?') }}"
                                         class="btn btn-link w-100 d-flex align-items-center gap-2 px-3 py-2 small text-danger text-decoration-none text-start">

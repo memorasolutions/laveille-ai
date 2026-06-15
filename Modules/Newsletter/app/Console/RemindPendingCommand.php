@@ -40,6 +40,7 @@ class RemindPendingCommand extends Command
             try {
                 Notification::route('mail', $subscriber->email)
                     ->notify(new WelcomeNewsletterNotification($subscriber));
+                $subscriber->markReminded();
                 $ok++;
             } catch (Throwable $e) {
                 Log::error('Failed to send reminder to '.$subscriber->email, [
