@@ -10,7 +10,7 @@
 .ct-acm-trigger { display:inline-flex; align-items:center; gap:.375rem; padding:.375rem .75rem; min-height:44px; border:1px solid #e2e8f0; background:rgba(255,255,255,.7); border-radius:.5rem; font-size:.875rem; line-height:1.2; color:#064E5A; cursor:pointer; transition:background-color .2s, border-color .2s; }
 .ct-acm-trigger:hover { background:rgba(241,245,249,.95); border-color:#cbd5e1; }
 .ct-acm-trigger:focus-visible { outline:2px solid #0B7285; outline-offset:2px; }
-.ct-acm-menu { position:absolute; top:100%; right:0; z-index:50; display:flex; flex-direction:column; width:max-content; min-width:240px; max-width:330px; margin-top:.375rem; padding:.375rem 0; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.14); }
+.ct-acm-menu { position:absolute; top:100%; right:0; z-index:1080; display:flex; flex-direction:column; width:max-content; min-width:240px; max-width:330px; margin-top:.375rem; padding:.375rem 0; background:#fff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.14); }
 .ct-acm-item { display:flex; align-items:center; gap:.5rem; width:100%; padding:.625rem 1rem; background:none; border:none; text-align:left; font-size:.875rem; line-height:1.3; color:#064E5A; cursor:pointer; transition:background-color .15s; }
 .ct-acm-item:hover { background:#f8fafc; }
 .ct-acm-item:focus-visible { outline:2px solid #0B7285; outline-offset:-2px; }

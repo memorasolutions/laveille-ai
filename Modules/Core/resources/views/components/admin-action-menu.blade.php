@@ -15,7 +15,7 @@
         &#8942;
     </button>
     <div x-show="open" x-cloak x-transition.opacity.duration.150ms
-         style="position: absolute; right: 0; top: 100%; margin-top: 4px; min-width: 180px; background: #fff; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid #e5e7eb; padding: 4px 0; z-index: 50;">
+         style="position: absolute; right: 0; top: 100%; margin-top: 4px; min-width: 180px; background: #fff; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid #e5e7eb; padding: 4px 0; z-index: 1080;">
         @foreach($actions as $action)
             @if(isset($action['divider']) && $action['divider'])
                 <div style="border-top: 1px solid #f3f4f6; margin: 4px 0;"></div>

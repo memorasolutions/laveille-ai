@@ -33,7 +33,8 @@
     border: 1px solid #dee2e6;
     border-radius: 8px;
     margin-bottom: .75rem;
-    overflow: hidden;
+    /* overflow:hidden retiré — il coupait la liste d'autocomplétion .pb-listbox (position:absolute).
+       Les coins arrondis sont désormais portés par le header (haut) et le body (bas) directement. */
     transition: border-color .2s;
 }
 .pb-section-card[data-custom="true"] {
@@ -48,9 +49,18 @@
     cursor: pointer;
     user-select: none;
     min-height: 52px;
+    /* Coins haut arrondis (le header est toujours le premier enfant visible) */
+    border-radius: 7px 7px 0 0;
+}
+/* En mode AUTO comme en mode CUSTOM, un body reste TOUJOURS affiché sous le header
+   (body auto x-show=auto OU body custom x-show=custom) → header = coins HAUT seulement,
+   le body fournit les coins BAS. Évite un header à bas arrondi posé sur un body à haut carré. */
+.pb-section-card[data-custom="false"] .pb-section-header {
+    border-radius: 7px 7px 0 0;
 }
 .pb-section-card[data-custom="true"] .pb-section-header {
     background: #f0fafa;
+    border-radius: 7px 7px 0 0;
 }
 .pb-section-header:focus-visible {
     outline: 2px solid var(--sys-action-accent, #9A2A06);
@@ -103,6 +113,10 @@
     padding: .75rem 1rem 1rem;
     border-top: 1px solid #dee2e6;
     background: #fafafa;
+    /* Coins bas arrondis (le body est toujours le dernier enfant visible) */
+    border-radius: 0 0 7px 7px;
+    /* overflow visible pour laisser passer la liste d'autocomplétion */
+    overflow: visible;
 }
 .pb-section-card[data-custom="true"] .pb-section-body {
     background: #f5fffe;
@@ -159,7 +173,7 @@
     top: calc(100% + 2px);
     left: 0;
     right: 0;
-    z-index: 1050;
+    z-index: 1080; /* aligné sur la convention admin (.dropdown-menu { z-index:1080 }) */
     background: #fff;
     border: 1px solid #dee2e6;
     border-radius: .375rem;
