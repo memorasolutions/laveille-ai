@@ -5,7 +5,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:js": "node tests/js/anonymizer-detect.test.cjs"
     },
     "devDependencies": {
         "@fontsource/inter": "^5.2.8",
