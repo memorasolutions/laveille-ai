@@ -555,6 +555,10 @@
                     <p style="margin:0 0 4px;font-size:13px;font-weight:bold;color:#0B7285;">Pourquoi l'essayer ?</p>
                     <p style="margin:0 0 14px;font-size:14px;color:#555;">{{ Str::limit(strip_tags($toolOfWeek->pros), 100) }}</p>
                     @endif
+                    @php $tutoCount = method_exists($toolOfWeek, 'resources') ? (int) $toolOfWeek->resources()->where('is_approved', true)->count() : 0; @endphp
+                    @if($tutoCount > 0)
+                    <p style="margin:0 0 14px;font-size:14px;color:#0B7285;font-weight:bold;">🎓 {{ $tutoCount }} {{ $tutoCount === 1 ? 'tutoriel' : 'tutoriels' }} pour bien démarrer {{ $tutoCount === 1 ? 't\'attend' : 't\'attendent' }} déjà sur la veille.</p>
+                    @endif
                     <a href="{{ route('directory.show', $toolOfWeek->slug) }}" target="_blank" style="display:inline-block;background-color:#0B7285;color:#fff;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:14px;text-decoration:none;">Découvrir sur laveille.ai &rarr;</a>
                 </td></tr>
             </table>
@@ -658,7 +662,7 @@
                 <tr><td>
                     <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#3dc9d8;font-weight:bold;">Le saviez-vous ?</p>
                     <p style="margin:0 0 14px;font-size:16px;color:#e2e8f0;line-height:1.6;">
-                        Notre <a href="{{ config('app.url') }}/raccourcir" style="color:#3dc9d8;font-weight:bold;text-decoration:underline;">raccourcisseur de liens</a> te laisse choisir ton domaine : lurl.ca, veille.la, 1lien.ca, unlien.ca ou go3.ca. Crée des liens courts avec code QR, statistiques de clics et aperçu social, gratuitement et sans inscription.
+                        Notre <a href="{{ config('app.url') }}/raccourcir" style="color:#3dc9d8;font-weight:bold;text-decoration:underline;">raccourcisseur de liens</a> te laisse choisir ton domaine : lurl.ca, veille.la, 1lien.ca, unlien.ca ou go3.ca. Un même lien fonctionne sur tous ces domaines, et comme 1lien.ca et unlien.ca s'écrivent presque pareil, ton contact le retrouve même s'il l'écrit autrement. Crée des liens courts avec code QR, statistiques de clics et aperçu social, gratuitement et sans inscription.
                     </p>
                     <a href="{{ config('app.url') }}/raccourcir" style="display:inline-block;background-color:#3dc9d8;color:#0c1427;padding:10px 22px;border-radius:4px;font-weight:bold;font-size:13px;text-decoration:none;">Raccourcir un lien &rarr;</a>
                 </td></tr>

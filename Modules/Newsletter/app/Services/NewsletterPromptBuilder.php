@@ -287,6 +287,9 @@ SHAPE
         $lines[] = '- Loi 25 QC : mentionne-la UNE SEULE FOIS si le sujet touche la vie privée/données personnelles';
         $lines[] = '- Ne réinvente pas DigestCommand, DigestContentService ni le gabarit — utilise-les';
         $lines[] = '- Variables dynamiques {{ $weekNumber }}, {{ $subject }}, etc. sont injectées au runtime';
+        $lines[] = "- Outil de la semaine : le nombre de tutoriels approuvés de l'outil s'affiche AUTOMATIQUEMENT dans le courriel (« 🎓 N tutoriels pour bien démarrer »), masqué si 0 — rien à écrire.";
+        $lines[] = "- Bloc « Le saviez-vous » (raccourcisseur) : le gabarit nomme les domaines et rappelle que 1lien.ca et unlien.ca (et les autres) mènent au même lien (partage résilient). Géré automatiquement.";
+        $lines[] = "- ENVOI OFFICIEL : c'est TOUJOURS la dernière version travaillée du brouillon (content de l'issue) qui part aux abonnés via --send ; ne jamais régénérer en AUTO par-dessus un contenu déjà personnalisé.";
         $lines[] = '';
 
         if ($extraNotes !== '') {
