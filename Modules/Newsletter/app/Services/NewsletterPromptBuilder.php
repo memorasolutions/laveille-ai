@@ -290,6 +290,8 @@ SHAPE
         $lines[] = "- Outil de la semaine : le nombre de tutoriels approuvés de l'outil s'affiche AUTOMATIQUEMENT dans le courriel (« 🎓 N tutoriels pour bien démarrer »), masqué si 0 — rien à écrire.";
         $lines[] = "- Bloc « Le saviez-vous » (raccourcisseur) : le gabarit nomme les domaines et rappelle que 1lien.ca et unlien.ca (et les autres) mènent au même lien (partage résilient). Géré automatiquement.";
         $lines[] = "- ENVOI OFFICIEL : c'est TOUJOURS la dernière version travaillée du brouillon (content de l'issue) qui part aux abonnés via --send ; ne jamais régénérer en AUTO par-dessus un contenu déjà personnalisé.";
+        $lines[] = "- OBJET (subject) : écris TOUJOURS un objet court (28-50 caractères, 6-10 mots) qui encourage à OUVRIR et qui est LIÉ À L'ÉDITORIAL de la semaine (idéalement une question = open loop). Évite « newsletter / digest / hebdo / La veille IA #N ». Stocke-le dans content['subject'] : c'est lui qui sert d'objet à l'envoi (repli automatique sur le titre de la vedette si absent).";
+        $lines[] = "- VERROUILLAGE : une fois le contenu ACCEPTÉ, mettre status='ready' sur l'issue. Le --preview du mardi ne régénère alors PLUS par-dessus, et c'est exactement cette version (objet + contenu) qui part aux abonnés le mercredi.";
         $lines[] = '';
 
         if ($extraNotes !== '') {

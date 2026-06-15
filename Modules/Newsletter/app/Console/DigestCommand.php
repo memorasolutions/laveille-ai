@@ -68,7 +68,8 @@ class DigestCommand extends Command
             : DigestContentService::gatherFreshContent();
 
         $weekNumber = (int) ($data['weekNumber'] ?? $week);
-        $subject = '[TEST] La veille IA #'.$weekNumber.' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Test newsletter');
+        $customSubject = $issue?->content['subject'] ?? null;
+        $subject = '[TEST] '.($customSubject ?: ('La veille IA #'.$weekNumber.' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Test newsletter')));
 
         $htmlContent = View::make('newsletter::emails.digest-weekly', [
             'subject' => $subject,
@@ -116,37 +117,52 @@ class DigestCommand extends Command
     {
         $this->components->info("Génération du brouillon semaine #$week...");
 
-        $data = DigestContentService::gatherFreshContent();
+        // Vérifier si une issue existe déjà et est verrouillée (status 'ready' = contenu accepté).
+        $existingIssue = Schema::hasTable('newsletter_issues')
+            ? NewsletterIssue::where('year', $year)
+                ->where('week_number', $week)
+                ->where('status', 'ready')
+                ->first()
+            : null;
 
-        if (! $data['highlight'] && $data['topNews']->isEmpty()) {
-            $this->components->info('Pas d\'actualités cette semaine. Brouillon non créé.');
+        if ($existingIssue) {
+            // Contenu accepté/verrouillé : NE PAS régénérer ni écraser le travail validé.
+            $data = DigestContentService::gatherFromIssue($existingIssue);
+            $this->components->info("Contenu verrouillé trouvé (status ready). Aperçu renvoyé sans régénération.");
+        } else {
+            // Générer un nouveau brouillon
+            $data = DigestContentService::gatherFreshContent();
 
-            return self::SUCCESS;
+            if (! $data['highlight'] && $data['topNews']->isEmpty()) {
+                $this->components->info('Pas d\'actualités cette semaine. Brouillon non créé.');
+
+                return self::SUCCESS;
+            }
+
+            // Sauvegarder le nouveau brouillon en statut 'draft'
+            if (Schema::hasTable('newsletter_issues')) {
+                NewsletterIssue::updateOrCreate(
+                    ['year' => $year, 'week_number' => $week],
+                    [
+                        'subject' => 'La veille IA #'.$week.' - '.config('app.name'),
+                        'status' => 'draft',
+                        'content' => [
+                            'highlight_id' => $data['highlight']?->id,
+                            'top_news_ids' => $data['topNews']->pluck('id')->toArray(),
+                            'tool_id' => $data['toolOfWeek']?->id,
+                            'article_id' => $data['featuredArticle']?->id,
+                            'term_id' => $data['aiTerm']?->id,
+                            'interactive_tool_id' => $data['interactiveTool']?->id,
+                            'weekly_prompt' => $data['weeklyPrompt'],
+                            'wellness_challenge' => $data['wellnessChallenge'] ?? null,
+                            'editorial' => $data['editorial'] ?? null,
+                        ],
+                    ]
+                );
+            }
         }
 
-        // Sauvegarder le brouillon
-        if (Schema::hasTable('newsletter_issues')) {
-            NewsletterIssue::updateOrCreate(
-                ['year' => $year, 'week_number' => $week],
-                [
-                    'subject' => 'La veille IA #'.$week.' - '.config('app.name'),
-                    'status' => 'draft',
-                    'content' => [
-                        'highlight_id' => $data['highlight']?->id,
-                        'top_news_ids' => $data['topNews']->pluck('id')->toArray(),
-                        'tool_id' => $data['toolOfWeek']?->id,
-                        'article_id' => $data['featuredArticle']?->id,
-                        'term_id' => $data['aiTerm']?->id,
-                        'interactive_tool_id' => $data['interactiveTool']?->id,
-                        'weekly_prompt' => $data['weeklyPrompt'],
-                        'wellness_challenge' => $data['wellnessChallenge'] ?? null,
-                        'editorial' => $data['editorial'] ?? null,
-                    ],
-                ]
-            );
-        }
-
-        // Envoyer l'aperçu à l'admin
+        // Envoyer l'aperçu à l'admin dans TOUS les cas
         $adminEmail = env('SUPER_ADMIN_EMAIL');
         if ($adminEmail) {
             Notification::route('mail', $adminEmail)->notify(
@@ -165,7 +181,9 @@ class DigestCommand extends Command
         $this->components->twoColumnDetail('Terme IA', $data['aiTerm']?->name ?? 'aucun');
         $this->components->twoColumnDetail('Outil semaine', $data['toolOfWeek']?->name ?? 'aucun');
         $this->components->twoColumnDetail('Éditorial', $data['editorial'] ? 'généré' : 'non');
-        $this->components->info("Brouillon #$week sauvegardé. Modifiable dans le backend avant lundi 8h.");
+        $this->components->info($existingIssue
+            ? "Contenu #$week verrouillé (ready) — c'est cette version qui sera envoyée."
+            : "Brouillon #$week sauvegardé. Modifiable dans le backend avant l'envoi.");
 
         return self::SUCCESS;
     }
@@ -234,7 +252,7 @@ class DigestCommand extends Command
         }
 
         // Pré-rendre le HTML une seule fois (placeholder pour unsubscribe)
-        $subject = 'La veille IA #'.$data['weekNumber'].' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Votre veille hebdomadaire');
+        $subject = ($issue?->content['subject'] ?? null) ?: ('La veille IA #'.$data['weekNumber'].' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Votre veille hebdomadaire'));
 
         $htmlContent = View::make('newsletter::emails.digest-weekly', [
             'subject' => $subject,
