@@ -433,11 +433,12 @@ function qtApp(payload, dailyPayload, dailyNumber) {
         cleanupDrag() { this.dragIdx = null; this.dragOverSlot = null; },
         reviewMy(i) {
             const q = this.questions[i]; const a = this.answers[i];
-            if (a === null || a === undefined) return '—';
+            if (a === null || a === undefined || a === '') return '➖ Question passée (aucune réponse)';
             const mark = this.isCorrect(i) ? '✅ ' : '❌ ';
             if (q.type === 'court') return mark + 'Ta réponse : ' + a;
             if (q.type === 'appariement') return mark + (this.isCorrect(i) ? 'Toutes les paires correctes' : 'Certaines associations sont fausses');
-            return mark + 'Ta réponse : ' + (q.choices ? q.choices[a] : a);
+            const choiceText = (q.choices && q.choices[a] !== undefined && q.choices[a] !== null) ? q.choices[a] : '(aucune)';
+            return mark + 'Ta réponse : ' + choiceText;
         },
         reviewSol(i) {
             const q = this.questions[i];
