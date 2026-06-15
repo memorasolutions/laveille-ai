@@ -58,6 +58,7 @@
 
     <form id="newsletterScrollForm" method="POST" action="{{ route('newsletter.subscribe') }}">
         @csrf
+        <input type="text" name="hp_url" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;">
         <input type="hidden" name="source" value="scroll_trigger">
 
         <div style="margin-bottom: 10px;">

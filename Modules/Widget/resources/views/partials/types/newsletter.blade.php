@@ -7,6 +7,7 @@
     @if(Route::has('newsletter.subscribe'))
         <form action="{{ route('newsletter.subscribe') }}" method="POST">
             @csrf
+            <input type="text" name="hp_url" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;">
             <div class="input-group mb-2">
                 <input type="email" name="email" class="form-control" placeholder="{{ __('Votre courriel') }}" required autocomplete="email">
                 <button type="submit" class="btn btn-primary">{{ __('S\'inscrire') }}</button>

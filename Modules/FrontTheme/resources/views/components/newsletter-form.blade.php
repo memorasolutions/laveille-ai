@@ -17,6 +17,7 @@
 
 <form action="{{ route('newsletter.subscribe') }}" method="POST" {{ $attributes }}>
     @csrf
+    <input type="text" name="hp_url" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;">{{-- anti-bot honeypot (ne pas remplir) --}}
 
     @if($source)
         <input type="hidden" name="source" value="{{ $source }}">

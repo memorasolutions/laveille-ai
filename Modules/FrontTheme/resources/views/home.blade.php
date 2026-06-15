@@ -603,6 +603,7 @@
                     <div class="subscribe-form">
                         <form action="{{ Route::has('newsletter.subscribe') ? route('newsletter.subscribe') : '#' }}" method="POST">
                             @csrf
+                            <input type="text" name="hp_url" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;">
                             <div class="input-field">
                                 <input type="email" name="email" placeholder="{{ __('Entrez votre courriel') }}" required autocomplete="email" aria-label="{{ __('Adresse courriel pour l\'infolettre') }}">
                                 <button type="submit"><i class="fi flaticon-send"></i> {{ __('S\'inscrire') }}</button>

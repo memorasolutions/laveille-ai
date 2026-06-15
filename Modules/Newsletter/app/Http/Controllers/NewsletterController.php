@@ -22,12 +22,29 @@ class NewsletterController extends Controller
 {
     public function subscribe(Request $request): JsonResponse|RedirectResponse
     {
+        $message = __('Vérifiez votre courriel pour confirmer votre abonnement ! Pensez à regarder dans vos courriers indésirables (spams) si vous ne le voyez pas dans quelques minutes.');
+        $silentSuccess = fn () => $request->expectsJson()
+            ? response()->json(['message' => $message])
+            : back()->with('newsletter_success', $message);
+
+        // Anti-bot — honeypot maison : champ caché 'hp_url' (un humain ne le remplit JAMAIS → zéro faux positif).
+        // Graceful : si le champ est absent (form sans honeypot), aucun blocage. Rejet SILENCIEUX (le bot n'apprend rien).
+        if ($request->filled('hp_url')) {
+            return $silentSuccess();
+        }
+
         $validated = $request->validate([
             'email' => 'required|email:rfc,dns|max:255',
             'name' => 'nullable|string|max:100',
         ], [
             'email.email' => __('L\'adresse courriel n\'est pas valide ou son domaine n\'existe pas.'),
         ]);
+
+        // Anti-bot — domaines de courriels jetables connus → rejet SILENCIEUX (liste minimale, jamais de vrais domaines).
+        $domain = strtolower((string) substr((string) strrchr($validated['email'], '@'), 1));
+        if (in_array($domain, (array) config('newsletter.disposable_domains', []), true)) {
+            return $silentSuccess();
+        }
 
         $subscriber = Subscriber::firstOrCreate(
             ['email' => $validated['email']],
@@ -38,8 +55,6 @@ class NewsletterController extends Controller
             \Illuminate\Support\Facades\Notification::route('mail', $subscriber->email)
                 ->notify(new WelcomeNewsletterNotification($subscriber));
         }
-
-        $message = __('Vérifiez votre courriel pour confirmer votre abonnement ! Pensez à regarder dans vos courriers indésirables (spams) si vous ne le voyez pas dans quelques minutes.');
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);

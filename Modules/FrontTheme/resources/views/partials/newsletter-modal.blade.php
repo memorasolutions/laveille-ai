@@ -16,6 +16,7 @@
             <div style="padding: 20px 30px;">
                 <form id="newsletterModalForm">
                     @csrf
+                    <input type="text" name="hp_url" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;">
                     <input type="email" name="email" placeholder="{{ __('Votre courriel *') }}" required aria-label="{{ __('Courriel') }}" autocomplete="email"
                            style="width: 100%; border: 1px solid #dee2e6; border-radius: 8px; padding: 12px 16px; font-size: 16px; font-family: var(--f-body); margin-bottom: 12px; outline: none; transition: border-color 0.2s; box-sizing: border-box;">
                     <input type="text" name="name" placeholder="{{ __('Votre prénom (optionnel)') }}" aria-label="{{ __('Prénom') }}" autocomplete="given-name"
