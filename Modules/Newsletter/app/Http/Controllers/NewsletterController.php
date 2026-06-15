@@ -22,12 +22,35 @@ class NewsletterController extends Controller
 {
     public function subscribe(Request $request): JsonResponse|RedirectResponse
     {
+        // (1) Vérification Turnstile (DRY : réutilise le service existant ; portable via class_exists ;
+        //     bypass gracieux tant que les clés Turnstile sont vides → ne bloque personne).
+        if (class_exists(\Modules\Authors\Services\TurnstileVerificationService::class)) {
+            $svc = app(\Modules\Authors\Services\TurnstileVerificationService::class);
+            if (! $svc->verify($request->input('cf-turnstile-response'), $request->ip())) {
+                $err = __('Validation anti-robot échouée. Réessaie.');
+
+                return $request->expectsJson()
+                    ? response()->json(['message' => $err], 422)
+                    : back()->withErrors(['captcha' => $err]);
+            }
+        }
+
         $validated = $request->validate([
             'email' => 'required|email:rfc,dns|max:255',
             'name' => 'nullable|string|max:100',
         ], [
             'email.email' => __('L\'adresse courriel n\'est pas valide ou son domaine n\'existe pas.'),
         ]);
+
+        $message = __('Vérifiez votre courriel pour confirmer votre abonnement ! Pensez à regarder dans vos courriers indésirables (spams) si vous ne le voyez pas dans quelques minutes.');
+
+        // (2) Rejet SILENCIEUX des domaines jetables (le bot reçoit le même message de succès, sans rien apprendre).
+        $domain = strtolower((string) substr((string) strrchr($validated['email'], '@'), 1));
+        if (in_array($domain, (array) config('newsletter.disposable_domains', []), true)) {
+            return $request->expectsJson()
+                ? response()->json(['message' => $message])
+                : back()->with('newsletter_success', $message);
+        }
 
         $subscriber = Subscriber::firstOrCreate(
             ['email' => $validated['email']],
@@ -38,8 +61,6 @@ class NewsletterController extends Controller
             \Illuminate\Support\Facades\Notification::route('mail', $subscriber->email)
                 ->notify(new WelcomeNewsletterNotification($subscriber));
         }
-
-        $message = __('Vérifiez votre courriel pour confirmer votre abonnement ! Pensez à regarder dans vos courriers indésirables (spams) si vous ne le voyez pas dans quelques minutes.');
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);

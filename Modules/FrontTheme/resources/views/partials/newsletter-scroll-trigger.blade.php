@@ -58,6 +58,8 @@
 
     <form id="newsletterScrollForm" method="POST" action="{{ route('newsletter.subscribe') }}">
         @csrf
+        <x-honeypot />
+        @if(config('services.turnstile.site_key'))<div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="invisible" data-action="newsletter"></div>@once @push('scripts')<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>@endpush @endonce @endif
         <input type="hidden" name="source" value="scroll_trigger">
 
         <div style="margin-bottom: 10px;">

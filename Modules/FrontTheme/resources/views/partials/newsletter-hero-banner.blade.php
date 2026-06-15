@@ -3,19 +3,18 @@
              submitted: false,
              submitting: false,
              email: '',
-             async submit() {
+             async submit(e) {
                  if (this.submitting) return;
                  this.submitting = true;
                  try {
                      const res = await fetch('{{ route('newsletter.subscribe') }}', {
                          method: 'POST',
                          headers: {
-                             'Content-Type': 'application/json',
                              'Accept': 'application/json',
                              'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                              'X-Requested-With': 'XMLHttpRequest'
                          },
-                         body: JSON.stringify({ email: this.email, source: 'hero-homepage' })
+                         body: new FormData(e.target)
                      });
                      const data = await res.json().catch(() => ({}));
                      if (res.ok) {
@@ -60,10 +59,12 @@
         <p style="font-size: 1.1rem; margin-bottom: 24px;">{{ __('Rejoignez 50+ professionnels qui suivent la transformation IA du Québec - 5 min de lecture hebdo, 0 spam, gratuit') }}</p>
 
         <template x-if="!submitted">
-            <form @submit.prevent="submit"
+            <form @submit.prevent="submit($event)"
                   action="{{ route('newsletter.subscribe') }}" method="POST"
                   style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
                 @csrf
+                <x-honeypot />
+                @if(config('services.turnstile.site_key'))<div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="invisible" data-action="newsletter"></div>@once @push('scripts')<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>@endpush @endonce @endif
                 <input type="hidden" name="source" value="hero-homepage">
                 <input type="email" name="email" x-model="email" required
                        aria-label="{{ __('Votre adresse e-mail') }}"

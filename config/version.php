@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.217 · 2026-06-15 · feat(Newsletter) ANTI-BOT additif (spam-signup → bounces/délivrabilité). (1) spatie/laravel-honeypot ^4.7 : <x-honeypot/> (champ piège + time-trap) ajouté aux 6 formulaires d'inscription (composant, home, hero-banner, scroll-trigger, modal, widget) + middleware ProtectAgainstSpam sur la route POST. Le hero-banner (AJAX JSON) converti en FormData pour transmettre le honeypot. (2) Rate limiting resserré 5,1 → 3,1. (3) Turnstile DRY : réutilise le TurnstileVerificationService existant (guard class_exists, bypass gracieux tant que les clés sont vides) + widget invisible guardé par config sur les 6 forms (dormant). (4) Domaines jetables : config newsletter.disposable_domains (liste minimale), rejet SILENCIEUX (même message succès, aucun subscriber). (5) Double opt-in, Loi 25, accessibilité INCHANGÉS. IMPORTANT : protections POST-only → n'affectent PAS les crawlers/IA (Googlebot/GPTBot/ClaudeBot crawlent en GET) → indexation intacte. Codename seo-piliers-veille-generative.
  *   1.65.216 · 2026-06-15 · fix(Tools) QT appariement — GLISSER-DÉPOSER passé en HTML5 NATIF (draggable + dragstart/dragover/drop) au lieu de la mécanique pointer-events maison (qui bloquait l'utilisateur sur Chrome bureau). Plus fiable desktop, gère nativement la distinction drag↔click (zéro conflit avec le tap-pour-placer). Conserve tap-pour-placer (clic) + clavier (Entrée/Espace) = alternative WCAG 2.5.7 + mobile. matchSel reste la source de vérité. Surbrillance .is-over au survol d'un emplacement. Codename seo-piliers-veille-generative.
  *   1.65.215 · 2026-06-14 · fix(Tools) QT appariement glisser-déposer — TAP-pour-placer réparé : retrait du e.preventDefault()/stopPropagation() au pointerdown (qui supprimait le « click » du tap dans certains navigateurs) ; preventDefault déplacé dans onPointerMove (pendant le glissement seulement) + user-select:none sur les blocs. Le glisser ET le tap fonctionnent sans interférence. Codename seo-piliers-veille-generative.
  *   1.65.214 · 2026-06-14 · feat(Tools) QT — APPARIEMENT en GLISSER-DÉPOSER (demande user « blocs à déplacer »). Remplace les <select> par des blocs de définitions déplaçables vers les emplacements des termes. Recherche pp_search juin 2026 → approche n°1 notée 92/100 : pointer events maison (souris+tactile unifiés) + TAP-POUR-PLACER (tape un bloc puis un emplacement) + clavier (Entrée/Espace) = alternative accessible WCAG 2.5.7 OBLIGATOIRE, ZÉRO dépendance externe (vs SortableJS 80 / @shopify/draggable 78 / HTML5 natif 55). Implémentation déléguée Hermes/gpt-5 : réserve (poolDefs) + slots par terme + ghost flottant en drag + détection slot via elementFromPoint, matchSel reste la source de vérité (validateMatch/isCorrect/matchAllChosen inchangés). touch-action:none, cibles ≥44px, focus-visible, aria-label slots. Charte (qt-mblock/qt-mslot/qt-mghost). QCM/VF/court inchangés. Admin-only (en construction). Codename seo-piliers-veille-generative.
@@ -365,7 +366,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 216;
+$lvPatch = 217;
 
 return [
     'major' => $lvMajor,

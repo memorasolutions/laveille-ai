@@ -17,6 +17,8 @@
 
 <form action="{{ route('newsletter.subscribe') }}" method="POST" {{ $attributes }}>
     @csrf
+    <x-honeypot />
+    @if(config('services.turnstile.site_key'))<div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="invisible" data-action="newsletter"></div>@once @push('scripts')<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>@endpush @endonce @endif
 
     @if($source)
         <input type="hidden" name="source" value="{{ $source }}">

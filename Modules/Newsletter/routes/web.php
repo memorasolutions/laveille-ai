@@ -19,7 +19,9 @@ use Modules\Newsletter\Http\Controllers\Admin\WorkflowController;
 use Modules\Newsletter\Http\Controllers\NewsletterController;
 
 Route::middleware('web')->group(function () {
-    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
+    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
+        ->middleware(['throttle:3,1', \Spatie\Honeypot\ProtectAgainstSpam::class]) // anti-bot : honeypot + time-trap + rafales (POST-only, n'affecte pas les crawlers/IA)
+        ->name('newsletter.subscribe');
     Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
     Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
     Route::post('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribeOneClick'])
