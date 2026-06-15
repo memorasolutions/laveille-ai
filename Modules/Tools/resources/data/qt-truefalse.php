@@ -112,7 +112,7 @@ return array (
   array (
     'theme' => 'securite',
     'difficulty' => 'difficile',
-    'statement' => 'L\'authentification à deux facteurs (2FA) repose uniquement sur un mot de passe et un code envoyé par SMS.',
+    'statement' => 'L\'authentification à deux facteurs (2FA) n\'utilise que des codes envoyés par SMS comme second facteur.',
     'answer' => false,
     'explanation' => 'Le 2FA peut utiliser une appli d\'authentification ou une clé physique, pas seulement un SMS.',
     'term' => '2fa',

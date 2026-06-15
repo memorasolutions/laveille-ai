@@ -13,11 +13,12 @@ return array (
     'theme' => 'ia',
     'difficulty' => 'facile',
     'question' => 'Quel terme désigne un programme conçu pour dialoguer avec un humain en langage naturel ?',
-    'accepted' => 
+    'accepted' =>
     array (
       0 => 'chatbot',
       1 => 'agent conversationnel',
       2 => 'robot conversationnel',
+      3 => 'assistant vocal',
     ),
     'display' => 'Chatbot',
     'explanation' => 'Un chatbot simule une conversation avec un humain, par texte ou par la voix.',
@@ -117,9 +118,10 @@ return array (
     'theme' => 'numerique',
     'difficulty' => 'facile',
     'question' => 'Quelle technologie sans fil à courte portée relie souvent un téléphone à des écouteurs ?',
-    'accepted' => 
+    'accepted' =>
     array (
       0 => 'bluetooth',
+      1 => 'bt',
     ),
     'display' => 'Bluetooth',
     'explanation' => 'Le Bluetooth connecte des appareils proches, comme des écouteurs ou un clavier.',
@@ -276,9 +278,11 @@ return array (
     'theme' => 'web',
     'difficulty' => 'facile',
     'question' => 'Quel protocole sécurise (chiffre) les échanges entre ton navigateur et un site web ?',
-    'accepted' => 
+    'accepted' =>
     array (
       0 => 'https',
+      1 => 'tls',
+      2 => 'ssl',
     ),
     'display' => 'HTTPS',
     'explanation' => 'HTTPS chiffre les données échangées entre le navigateur et le site.',
@@ -286,14 +290,15 @@ return array (
   ),
   19 => 
   array (
-    'theme' => 'web',
+    'theme' => 'ia',
     'difficulty' => 'moyen',
     'question' => 'Comment appelle-t-on l\'instruction qu\'on donne à une IA générative pour obtenir une réponse ?',
-    'accepted' => 
+    'accepted' =>
     array (
       0 => 'prompt',
       1 => 'invite',
       2 => 'requete',
+      3 => 'instruction',
     ),
     'display' => 'Prompt',
     'explanation' => 'Un prompt est l\'instruction fournie au modèle pour orienter sa réponse.',
@@ -333,10 +338,11 @@ return array (
   array (
     'theme' => 'donnees',
     'difficulty' => 'moyen',
-    'question' => 'Quel processus rend impossible, de façon irréversible, l\'identification d\'une personne dans des données ?',
-    'accepted' => 
+    'question' => 'Quel processus cherche à rendre l\'identification d\'une personne dans des données le plus difficile possible, idéalement irréversible ?',
+    'accepted' =>
     array (
       0 => 'anonymisation',
+      1 => 'anonymization',
     ),
     'display' => 'Anonymisation',
     'explanation' => 'L\'anonymisation transforme les données pour empêcher l\'identification des personnes.',
@@ -347,10 +353,11 @@ return array (
     'theme' => 'ia',
     'difficulty' => 'moyen',
     'question' => 'Quelle technique combine la recherche de documents et la génération par un modèle pour améliorer la précision ?',
-    'accepted' => 
+    'accepted' =>
     array (
       0 => 'rag',
       1 => 'retrieval augmented generation',
+      2 => 'generation augmentee par recuperation',
     ),
     'display' => 'RAG',
     'explanation' => 'Le RAG combine recherche d\'information et génération de texte pour ancrer les réponses.',

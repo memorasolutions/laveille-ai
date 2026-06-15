@@ -331,7 +331,7 @@ return [
         'theme' => 'ia',
         'difficulty' => 'difficile',
         'question' => 'Qu’est-ce que l’apprentissage par renforcement (reinforcement learning) ?',
-        'choices' => ['L’apprentissage d’un modèle à partir d’exemples étiquetés fournis par des humains', 'Un modèle qui apprend en recevant des récompenses ou des pénalités selon ses actions', 'Une approche d’entraînement utilisant des simulations interactives', 'Un système expert basé sur des règles logiques fixes'],
+        'choices' => ['L’apprentissage d’un modèle à partir d’exemples étiquetés fournis par des humains', 'Un modèle qui apprend en recevant des récompenses ou des pénalités selon ses actions', 'Un apprentissage où le modèle prédit une valeur numérique continue à partir de données', 'Un système expert basé sur des règles logiques fixes'],
         'correct' => 1,
         'explanation' => 'Dans l’apprentissage par renforcement, un agent apprend à prendre des décisions en essayant différentes actions et en recevant un retour (récompense ou punition) de son environnement.',
         'term' => 'apprentissage-par-renforcement',
@@ -387,7 +387,7 @@ return [
     ],
     [
         'theme' => 'numerique', 'difficulty' => 'facile',
-        'question' => 'Quelle technologie sans fil à courte portée (bande 2,4 GHz) relie des appareils proches après un appairage ?',
+        'question' => 'Quelle technologie sans fil à courte portée relie des appareils proches après un appairage ?',
         'choices' => ['Le Wi-Fi', 'Le NFC', 'Le Bluetooth', 'La 5G'],
         'correct' => 2,
         'explanation' => 'Le Bluetooth est une technologie sans fil à courte portée (2,4 GHz) qui relie des appareils proches après un appairage.',
@@ -396,7 +396,7 @@ return [
     [
         'theme' => 'ia', 'difficulty' => 'facile',
         'question' => 'Quel type de système d’IA planifie des actions, utilise des outils et agit de façon autonome pour atteindre un objectif ?',
-        'choices' => ['Un assistant vocal', 'Un agent IA', 'Un SLM', 'Une IA conversationnelle'],
+        'choices' => ['Un assistant vocal', 'Un agent IA', 'Un modèle frontière', 'Une IA conversationnelle'],
         'correct' => 1,
         'explanation' => 'Un agent IA est un système autonome qui planifie, utilise des outils et exécute des actions pour atteindre un objectif. En anglais : « AI agent ».',
         'term' => 'agent-ia',
@@ -630,7 +630,7 @@ return [
         'question' => 'Quel protocole ouvert (Google, 2025) permet à des agents d’IA de fournisseurs différents de collaborer ?',
         'choices' => ['MCP (Model Context Protocol)', 'A2A (Agent-to-Agent)', 'RAG (Retrieval-Augmented Generation)', 'SLM (Small Language Model)'],
         'correct' => 1,
-        'explanation' => 'A2A (Agent-to-Agent) est un protocole ouvert (Google, 2025) qui permet à des agents IA de fournisseurs différents de communiquer et de collaborer.',
+        'explanation' => 'A2A (Agent-to-Agent) est un protocole ouvert (Google, 2025) qui permet à des agents IA de fournisseurs différents de communiquer et de collaborer. Contrairement au MCP (qui relie un agent à des outils/ressources), l\'A2A définit comment des agents de fournisseurs différents se coordonnent entre eux.',
         'term' => 'a2a',
     ],
     [
@@ -803,10 +803,10 @@ return [
     ],
     [
         'theme' => 'donnees', 'difficulty' => 'difficile',
-        'question' => 'Quel processus vise à rendre impossible, de façon irréversible, l\'identification d\'une personne dans un jeu de données ?',
+        'question' => 'Quel processus cherche à rendre l\'identification d\'une personne dans un jeu de données le plus difficile possible, idéalement irréversible ?',
         'choices' => ['La pseudonymisation', 'L\'anonymisation', 'Le chiffrement', 'L\'agrégation'],
         'correct' => 1,
-        'explanation' => 'L\'anonymisation (anonymization) est un processus qui vise à rendre impossible, de façon irréversible, l\'identification d\'une personne dans un jeu de données (contrairement à la pseudonymisation, réversible).',
+        'explanation' => 'L\'anonymisation (anonymization) cherche à rendre l\'identification d\'une personne dans un jeu de données le plus difficile possible, idéalement irréversible. En pratique, une réidentification reste parfois possible ; l\'irréversibilité totale est l\'objectif visé, pas toujours garanti.',
         'term' => 'anonymisation',
     ],
     [
