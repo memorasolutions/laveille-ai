@@ -209,6 +209,7 @@ class NewsArticle extends Model implements Searchable
 
         // 2. Prompt NotebookLM (via trait HasAdminShareContents).
         $prompt = $this->infographiePrompt('https://laveille.ai/actualites', 'Vulgarise les points clés de tous les documents dans une infographie engageante. Public : étudiants sans connaissances préalables.');
+        $slides = $this->slidesPrompt('https://laveille.ai/actualites', 'Objectif : décrypter cette actualité et ce qu\'elle change concrètement. Public : étudiants, sans connaissances préalables.');
 
         // 3. Post réseaux sociaux natif (via trait HasAdminShareContents).
         // Post réseaux sociaux « 2026 » : hook structuré + En clair (tldr/résumé) + 👉 (point clé) + CTA (sans lien ni promo).
@@ -244,6 +245,7 @@ class NewsArticle extends Model implements Searchable
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
             ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
         ];
     }

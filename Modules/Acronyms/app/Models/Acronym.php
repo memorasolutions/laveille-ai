@@ -135,6 +135,10 @@ class Acronym extends Model implements Searchable
             'https://laveille.ai/acronymes-education',
             'Explique l\'acronyme « ' . $acr . ' » (' . $full . ') dans une infographie pédagogique simple. Public : débutants du milieu de l\'éducation.'
         );
+        $slides = $this->slidesPrompt(
+            'https://laveille.ai/acronymes-education',
+            'Objectif : expliquer l\'acronyme « ' . $acr . ' » (' . $full . ') et son rôle dans le milieu de l\'éducation. Public : débutants du milieu de l\'éducation.'
+        );
 
         // Post réseaux sociaux « 2026 » (option A) : curiosity-gap + définition + intérêt + CTA discussion, sans lien.
         $plainDef = $this->smartTrim(
@@ -157,6 +161,7 @@ class Acronym extends Model implements Searchable
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
             ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
         ];
     }

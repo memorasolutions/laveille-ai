@@ -147,6 +147,7 @@ class Term extends Model implements Searchable
         }
         $resume = $this->stripLinks($resume);
         $prompt = $this->infographiePrompt('https://laveille.ai/glossaire', 'Vulgarise le concept « ' . $name . ' » dans une infographie pédagogique. Public : débutants sans connaissances préalables.');
+        $slides = $this->slidesPrompt('https://laveille.ai/glossaire', 'Objectif : faire comprendre le terme « ' . $name . ' » et son utilité au quotidien. Public : débutants, sans connaissances préalables.');
         // Post réseaux sociaux « 2026 » : curiosity-gap + En clair + 👉 + CTA discussion (sans lien ni promo).
         $plainDef = $this->smartTrim($this->stripLinks((string) ($this->one_sentence_answer ?: ($this->analogy ?: $this->definition))), 200);
         $interest = $this->smartTrim($this->stripLinks((string) ($this->did_you_know ?? '')), 180);
@@ -168,6 +169,7 @@ class Term extends Model implements Searchable
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
             ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
         ];
     }

@@ -16,15 +16,38 @@ trait HasAdminShareContents
 {
     /**
      * Assemble le prompt « NotebookLM Infographie » : lien de section + consigne de
-     * vulgarisation propre au type + bloc Langue/Design/Hiérarchie commun (fixe).
+     * vulgarisation propre au type + blocs Langue/Structure/Design/Accessibilité/Hiérarchie
+     * (best practices juin 2026 : structure narrative, data storytelling, contraste AA, format vertical).
      */
     protected function infographiePrompt(string $sectionUrl, string $consigneVulgarisation): string
     {
-        return "Lien à mettre dans l'infographie en bas au centre de façon apparente: {$sectionUrl}\n\n"
-            . "Langue : français québécois, tutoiement, ton conversationnel et accessible. Écris comme une vraie personne, pas comme une IA. Aucune majuscule à l'américaine (mais garder les majuscules des acronymes et en début de phrase). Pas de tiret cadratin.\n\n"
-            . trim($consigneVulgarisation) . "\n\n"
-            . "Design : fond clair, style moderne et coloré, icônes simples. Bleu foncé pour les éléments importants, accents jaune ou orange pour les faits marquants. Beaucoup d'espace négatif.\n\n"
-            . "Hiérarchie : message principal en gros, détails en plus petit. Chaque section doit donner envie de lire la suite. Visuel chaleureux, jamais corporatif.";
+        return implode("\n\n", [
+            "Lien à mettre dans l'infographie en bas au centre de façon apparente: " . $sectionUrl,
+            "Langue : français québécois, tutoiement, ton conversationnel et accessible. Écris comme une vraie personne, pas comme une IA. Aucune majuscule à l'américaine (mais garder les majuscules des acronymes et en début de phrase). Pas de tiret cadratin.",
+            trim($consigneVulgarisation),
+            "Structure : un seul message principal, puis 3 à 5 sections qui s'enchaînent logiquement. Mets le chiffre ou le fait le plus marquant très en évidence (data storytelling), sans surcharger.",
+            "Design : fond clair, style moderne et coloré, icônes simples. Bleu foncé pour les éléments importants, accents jaune ou orange pour les faits marquants. Beaucoup d'espace négatif. Format vertical (idéal mobile et réseaux sociaux).",
+            "Accessibilité : contraste élevé et texte lisible par tous ; n'encode jamais une information uniquement par la couleur (ajoute une icône, un libellé ou une forme).",
+            "Hiérarchie : message principal en gros, détails en plus petit. Chaque section doit donner envie de lire la suite. Visuel chaleureux, jamais corporatif.",
+        ]);
+    }
+
+    /**
+     * Assemble le prompt « NotebookLM Diapositives » (Slide Deck) : consigne/objectif propre au
+     * type + structure pédagogique fixe (best practices juin 2026 : 1 idée + 1 « à retenir » par
+     * diapo, titres-phrases, ≤4 puces, plan d'abord puis deck). Le lien de section ferme le deck.
+     */
+    protected function slidesPrompt(string $sectionUrl, string $consigne): string
+    {
+        return implode("\n\n", [
+            "Crée un jeu de diapositives (Slide Deck) clair et pédagogique à partir UNIQUEMENT de cette source.",
+            trim($consigne),
+            "Langue : français québécois, tutoiement, ton d'une vraie personne (pas une IA). Garde les majuscules des acronymes et en début de phrase. Pas de tiret cadratin.",
+            "Structure (8 à 12 diapositives) :\n1. Titre accrocheur + pourquoi ça te concerne\n2. Ce que tu vas comprendre, en une phrase\n3. Le concept clé, expliqué simplement\n4 et suivantes. Le cœur du sujet, une seule idée par diapo, du plus simple au plus nuancé, avec un exemple ou une analogie quand c'est abstrait\nAvant-dernière. Récap des points à retenir\nDernière. À retenir en une phrase + invite à aller plus loin, avec le lien " . $sectionUrl . " affiché en clair",
+            "Règles par diapositive :\n- Une seule idée et un seul message à retenir par diapo.\n- Le titre est une phrase qui dit le point (ex. « L'IA générative crée du contenu, elle ne le copie pas », pas « Introduction »).\n- Maximum 4 puces de 12 mots ; mets les explications détaillées dans les notes du présentateur, pas sur la diapo.\n- Mets en évidence le chiffre ou le fait le plus marquant.\n- Si une diapo contient plus d'une idée, sépare-la en deux.",
+            "Design : sobre et lisible, bleu foncé pour l'essentiel, accents jaune ou orange pour les faits marquants, beaucoup d'espace. Contraste élevé ; n'encode jamais une information uniquement par la couleur.",
+            "Procède en deux temps : propose d'abord le plan (le titre de chaque diapositive), puis génère le deck final. Corrige les faits dès le plan, car les révisions diapo par diapo ne reconsultent pas la source.",
+        ]);
     }
 
     /**

@@ -385,6 +385,7 @@ class Tool extends Model implements Searchable
         if (($v = $this->review ?? '') !== '') { $resume .= "## Avis\n{$v}\n\n"; }
         $resume = $this->stripLinks($resume);
         $prompt = $this->infographiePrompt('https://laveille.ai/annuaire', 'Présente l\'outil « ' . $name . ' » dans une infographie : à quoi il sert, pour qui, ses forces. Public : curieux sans connaissances préalables.');
+        $slides = $this->slidesPrompt('https://laveille.ai/annuaire', 'Objectif : présenter l\'outil « ' . $name . ' » : à quoi il sert, pour qui, ses forces et limites. Public : curieux, sans connaissances préalables.');
         $cf = $this->core_features;
         $points = is_array($cf) ? array_map('strval', $cf) : array_values(array_filter(array_map('trim', explode(',', (string) $cf))));
         if ($points === [] && is_array($this->pros)) { $points = array_map('strval', $this->pros); }
@@ -429,6 +430,7 @@ class Tool extends Model implements Searchable
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
             ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
         ];
     }

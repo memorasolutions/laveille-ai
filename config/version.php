@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.219 · 2026-06-15 · feat(Core/admin) MENU PARTAGE — nouveau prompt « NotebookLM Diapositives » (Slide Deck) ajouté PARTOUT (News, Term, Acronym, Tool, Article) via helper DRY HasAdminShareContents::slidesPrompt(). Best practices NotebookLM juin 2026 (pp_search) : 1 idée + 1 « à retenir » par diapo, titres-phrases, ≤4 puces/12 mots, plan d'abord puis deck (les révisions diapo ne reconsultent pas la source), structure 8-12 diapos, consigne propre au type. Prompt « Infographie » AMÉLIORÉ au passage : + Structure narrative (1 message + 3-5 sections, data storytelling), + Accessibilité (contraste AA, info jamais codée que par la couleur), + Format vertical. 1 seule entrée par modèle (le menu rend la liste). Codename seo-piliers-veille-generative.
  *   1.65.218 · 2026-06-15 · feat(Newsletter) ANTI-BOT v2 SANS dépendance (après que v217 ait causé un 500 global : la CI ne lance pas composer install → la classe spatie ProtectAgainstSpam était absente → route fatale. v217 revert, site restauré). Nouvelle approche déploie-safe : (1) HONEYPOT MAISON = champ caché hp_url (nom NON auto-rempli, autocomplete=off, hors écran) sur 5 forms → un humain ne le remplit jamais = ZÉRO faux positif ; vérif DANS le contrôleur (jamais de classe fatale au chargement des routes). (2) DOMAINES JETABLES (config newsletter.disposable_domains, 12) → rejet SILENCIEUX. (3) Double opt-in INCHANGÉ. PAS de time-trap (risque de bloquer un inscrit rapide), PAS de Turnstile pour l'instant (éviterait la landmine clés-sans-widget), throttle gardé à 5/min (pas resserré → ne bloque pas une IP partagée). Priorité user : NE JAMAIS bloquer un vrai inscrit. Codename seo-piliers-veille-generative.
  *   1.65.216 · 2026-06-15 · fix(Tools) QT appariement — GLISSER-DÉPOSER passé en HTML5 NATIF (draggable + dragstart/dragover/drop) au lieu de la mécanique pointer-events maison (qui bloquait l'utilisateur sur Chrome bureau). Plus fiable desktop, gère nativement la distinction drag↔click (zéro conflit avec le tap-pour-placer). Conserve tap-pour-placer (clic) + clavier (Entrée/Espace) = alternative WCAG 2.5.7 + mobile. matchSel reste la source de vérité. Surbrillance .is-over au survol d'un emplacement. Codename seo-piliers-veille-generative.
  *   1.65.215 · 2026-06-14 · fix(Tools) QT appariement glisser-déposer — TAP-pour-placer réparé : retrait du e.preventDefault()/stopPropagation() au pointerdown (qui supprimait le « click » du tap dans certains navigateurs) ; preventDefault déplacé dans onPointerMove (pendant le glissement seulement) + user-select:none sur les blocs. Le glisser ET le tap fonctionnent sans interférence. Codename seo-piliers-veille-generative.
@@ -366,7 +367,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 218;
+$lvPatch = 219;
 
 return [
     'major' => $lvMajor,

@@ -320,6 +320,7 @@ class Article extends Model implements SearchableContract
         $excerpt = (string) ($this->excerpt ?? '');
         $resume = $this->stripLinks("# {$title}\n\n" . $excerpt . "\n\n" . strip_tags((string) ($this->content ?? '')));
         $prompt = $this->infographiePrompt('https://laveille.ai/blog', 'Vulgarise les idées clés de cet article dans une infographie engageante. Public : étudiants sans connaissances préalables.');
+        $slides = $this->slidesPrompt('https://laveille.ai/blog', 'Objectif : vulgariser les idées clés de cet article et ce qu\'il faut en retenir. Public : étudiants, sans connaissances préalables.');
         // Post réseaux sociaux « 2026 » : titre en accroche + En clair (1re phrase) + 👉 (2e phrase) + CTA (sans lien ni promo).
         $sent = preg_split('/(?<=[.!?])\s+/', $excerpt, -1, PREG_SPLIT_NO_EMPTY) ?: [];
         $plainDef = isset($sent[0]) ? $this->smartTrim($this->stripLinks((string) $sent[0]), 200) : $this->smartTrim($this->stripLinks((string) $excerpt), 200);
@@ -332,6 +333,7 @@ class Article extends Model implements SearchableContract
         return [
             ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
             ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
             ['label' => 'Post réseaux sociaux', 'icon' => '📣', 'text' => $social],
         ];
     }
