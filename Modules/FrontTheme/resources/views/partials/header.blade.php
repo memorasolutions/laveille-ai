@@ -83,6 +83,10 @@
                                                 <span style="font-size:18px;line-height:1;">✏️</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Constructeur de prompts') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __("Maîtrisez l'art du prompt IA") }}</div></div>
                                             </a>
+                                            <a href="{{ url('/outils/anonymiseur') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🛡️</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Anonymiseur') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Masque tes infos avant de les confier à une IA') }}</div></div>
+                                            </a>
                                             @if(Route::has('directory.compare-by-ids'))
                                             <a href="{{ route('directory.compare-by-ids') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🆚</span>
@@ -149,6 +153,7 @@
                                 <ul class="sub-menu">
                                     <li><a href="{{ url('/outils/brain-dump') }}">🧠 {{ __('Brain Dump 2026') }}</a></li>
                                     <li><a href="{{ url('/outils/constructeur-prompts') }}">✏️ {{ __('Constructeur de prompts') }}</a></li>
+                                    <li><a href="{{ url('/outils/anonymiseur') }}">🛡️ {{ __('Anonymiseur') }}</a></li>
                                     @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">🆚 {{ __("Comparateur d'outils IA") }}</a></li>@endif
                                     <li><a href="{{ url('/outils/mots-croises') }}">🔤 {{ __('Mots croisés') }}</a></li>
                                     <li><a href="{{ url('/outils/sudoku') }}">🧩 {{ __('Sudoku') }}</a></li>
@@ -371,6 +376,10 @@
                                                 <span style="font-size:18px;line-height:1;">🧠</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Constructeur de prompts') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Maîtrisez l\'art du prompt IA') }}</div></div>
                                             </a>
+                                            <a href="{{ url('/outils/anonymiseur') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">🛡️</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark, #1A1D23);">{{ __('Anonymiseur') }}</div><div style="font-size:12px;color:var(--c-text-muted, #6E7687);">{{ __('Masque tes infos avant de les confier à une IA') }}</div></div>
+                                            </a>
                                             @if(Route::has('directory.compare-by-ids'))
                                             <a href="{{ route('directory.compare-by-ids') }}" style="display:flex!important;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;transition:background .15s;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">🆚</span>
@@ -416,6 +425,7 @@
                                 <ul class="sub-menu">
                                     @if(Route::has('tools.quest.index') && config('tools.quest.enabled', false))<li><a href="{{ route('tools.quest.index') }}">{{ __('Les Sentiers de l\'IA') }}</a></li>@endif
                                     <li><a href="{{ url('/outils/constructeur-prompts') }}">{{ __('Constructeur de prompts') }}</a></li>
+                                    <li><a href="{{ url('/outils/anonymiseur') }}">{{ __('Anonymiseur') }}</a></li>
                                     @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">{{ __('Comparateur d\'outils IA') }}</a></li>@endif
                                     <li><a href="{{ url('/outils/sudoku') }}">{{ __('Sudoku quotidien') }}</a></li>
                                     <li><a href="{{ url('/outils/qt') }}">{{ __('QT — Quotient Techno') }}</a></li>
@@ -572,6 +582,7 @@
                                             <ul>
                                                 <li><a href="{{ url('/outils/brain-dump') }}">🧠 {{ __('Brain Dump 2026') }}</a></li>
                                                 <li><a href="{{ url('/outils/constructeur-prompts') }}">✏️ {{ __('Constructeur de prompts') }}</a></li>
+                                                <li><a href="{{ url('/outils/anonymiseur') }}">🛡️ {{ __('Anonymiseur') }}</a></li>
                                                 @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">🆚 {{ __('Comparateur d\'outils IA') }}</a></li>@endif
                                                 <li><a href="{{ url('/outils/mots-croises') }}">🔤 {{ __('Générateur mots croisés') }}</a></li>
                                                 <li><a href="{{ url('/outils/code-qr') }}">📱 {{ __('Code QR') }}</a></li>
