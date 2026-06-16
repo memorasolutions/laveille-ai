@@ -245,7 +245,17 @@ class DigestCommand extends Command
             $data['editorial'] = $issue->editorial_edited;
         }
 
-        $subscribers = Subscriber::active()->get();
+        // Honore la PAUSE et la PRÉFÉRENCE DE FRÉQUENCE (sinon « en pause » / « recevoir moins souvent »
+        // = promesses non tenues offertes sur la page de désabo). Défaut (weekly / null / inconnu) =
+        // toujours inclus → aucun changement pour les abonnés sans préférence.
+        $nlNow = \Illuminate\Support\Carbon::now('America/Toronto');
+        $subscribers = Subscriber::active()->notPaused()->get()->filter(function ($s) use ($week, $nlNow) {
+            return match ($s->frequency_preference) {
+                'biweekly' => $week % 2 === 0,
+                'monthly' => $nlNow->day <= 7,
+                default => true,
+            };
+        })->values();
         if ($subscribers->isEmpty()) {
             $this->components->info('Aucun abonné actif.');
 
