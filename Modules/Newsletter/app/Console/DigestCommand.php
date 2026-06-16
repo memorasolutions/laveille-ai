@@ -69,7 +69,8 @@ class DigestCommand extends Command
 
         $weekNumber = (int) ($data['weekNumber'] ?? $week);
         $customSubject = $issue?->content['subject'] ?? null;
-        $subject = '[TEST] '.($customSubject ?: ('La veille IA #'.$weekNumber.' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Test newsletter')));
+        // Objet orienté bénéfice : on mène par le titre de la vedette (pas « #N »), sauf objet custom.
+        $subject = '[TEST] '.($customSubject ?: ($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Votre veille IA de la semaine'));
 
         $htmlContent = View::make('newsletter::emails.digest-weekly', [
             'subject' => $subject,
@@ -144,7 +145,7 @@ class DigestCommand extends Command
                 NewsletterIssue::updateOrCreate(
                     ['year' => $year, 'week_number' => $week],
                     [
-                        'subject' => 'La veille IA #'.$week.' - '.config('app.name'),
+                        'subject' => ($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Votre veille IA de la semaine'),
                         'status' => 'draft',
                         'content' => [
                             'highlight_id' => $data['highlight']?->id,
@@ -252,7 +253,8 @@ class DigestCommand extends Command
         }
 
         // Pré-rendre le HTML une seule fois (placeholder pour unsubscribe)
-        $subject = ($issue?->content['subject'] ?? null) ?: ('La veille IA #'.$data['weekNumber'].' — '.($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Votre veille hebdomadaire'));
+        // Objet orienté bénéfice : on mène par le titre de la vedette (pas « #N »), sauf objet custom.
+        $subject = ($issue?->content['subject'] ?? null) ?: ($data['highlight']?->seo_title ?? $data['highlight']?->title ?? 'Votre veille IA de la semaine');
 
         $htmlContent = View::make('newsletter::emails.digest-weekly', [
             'subject' => $subject,
