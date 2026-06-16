@@ -12,5 +12,6 @@ use Illuminate\Support\Facades\Route;
 use Modules\Newsletter\Http\Controllers\BrevoWebhookController;
 
 Route::middleware('api')->group(function () {
-    Route::post('/webhooks/brevo', BrevoWebhookController::class)->name('webhooks.brevo');
+    // Secret dans l'URL (convention déjà utilisée par ai/webhooks/email/{secret}) = auth simple compatible Brevo.
+    Route::post('/webhooks/brevo/{secret}', BrevoWebhookController::class)->name('webhooks.brevo');
 });

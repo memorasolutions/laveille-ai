@@ -22,11 +22,14 @@ class NewsletterEvent extends Model
         'link',
         'ip',
         'metadata',
+        'event_key',
+        'occurred_at',
     ];
 
     protected $casts = [
         'metadata' => 'array',
         'created_at' => 'datetime',
+        'occurred_at' => 'datetime',
     ];
 
     protected static function boot(): void

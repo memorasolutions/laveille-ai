@@ -99,6 +99,7 @@ return [
 
     'brevo' => [
         'api_key' => env('BREVO_API_KEY'),
+        'webhook_secret' => env('BREVO_WEBHOOK_SECRET'),
     ],
 
     'openrouter' => [

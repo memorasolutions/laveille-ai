@@ -15,4 +15,7 @@ use Modules\Core\Providers\BaseRouteServiceProvider;
 class RouteServiceProvider extends BaseRouteServiceProvider
 {
     protected string $name = 'Newsletter';
+
+    // Active le chargement de routes/api.php (webhook Brevo). Sans ça, la route n'était jamais enregistrée (cause du 0 événement).
+    protected bool $mapApi = true;
 }
