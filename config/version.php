@@ -17,6 +17,7 @@ declare(strict_types=1);
  *   chore/test/refactor/docs/style/ci -> pas de bump
  *
  * Historique :
+ *   1.65.234 · 2026-06-16 · fix(Tools/QT a11y) WCAG 1.3.1 — l'écran « Révision » utilisait un h3 directement après le h1 de la page (saut de niveau de titre). Passé en h2 (styles inline conservés → visuel identique) = hiérarchie séquentielle h1→h2. Seul item WCAG RÉELLEMENT propre à la vue QT (audit wcag_audit_full /outils/qt) ; les autres « non conformes » du scan sont des faux positifs connus (contraste blanc-sur-blanc = texte sur fond dégradé/héros/modale que le moteur ne résout pas ; ~150 « non atteignable au Tab » = liens des méga-menus repliés, atteignables à l'ouverture ; honeypot aria-hidden ; taille de cible du hamburger/skip-link = thème global) — non spécifiques à QT. Codename seo-piliers-veille-generative.
  *   1.65.233 · 2026-06-15 · fix(Tools/QT) POLISH révision — une question passée sans réponse affichait « Ta réponse : undefined » (détecté au test Playwright anonyme post-publication). `reviewMy()` : garde élargi (null/undefined/'' → « ➖ Question passée (aucune réponse) ») + rendu de choix défensif (index hors-plage → « (aucune) » au lieu de « undefined »). Cosmétique, aucun changement de comportement pour une question répondue. Codename seo-piliers-veille-generative.
  *   1.65.232 · 2026-06-15 · fix(Tools/QT) FIABILITÉ correction — RETRAIT du type « Réponse courte » (champ texte libre) des rounds PUBLICS. Raison (signalée par user juste après publication) : c'est le SEUL type à correction non déterministe (compare la saisie à une liste accepted[] normalisée) → risque ÉNORME de faux négatif sur un quiz viral (variante/synonyme/FR-EN/réponse partielle non listés → joueur marqué « faux » à tort → score faussé + perte de crédibilité). Les 3 types conservés (QCM, Vrai/Faux, appariement) sont FERMÉS = correction 100 % déterministe, zéro faux négatif. assembleRound() : composition 6 QCM+2 V/F+1 court+1 appariement → **7 QCM+2 V/F+1 appariement** (10 items, difficulté 3/2/2). buildShortItems() + banque qt-shortanswer.php + rendu vue CONSERVÉS DORMANTS (réactivables si une correction robuste/tolérante est ajoutée plus tard). Réversible. Codename seo-piliers-veille-generative.
  *   1.65.231 · 2026-06-15 · feat(Tools/QT) PUBLICATION du jeu « QT — Quotient Techno » (sortie de construction). Après audit exhaustif (code + serveur 12 rounds + Playwright live admin + correctifs banque v230) confirmant l'outil fonctionnel et performant (4 types jouables, round 6 QCM+2 V/F+1 court+1 appariement, scoring/échelle 55-145, résultat/partage/rejouer/révision, mobile, 0 erreur console, anonyme/Loi 25) : (1) retrait du gate `isSuperAdmin()` dans PublicQtController::play() → le quiz est servi à TOUS les visiteurs (la page « en construction » n'apparaît plus) ; (2) Tool slug='qt' is_under_construction=false (apparaît dans la grille /outils, plus de badge construction) ; (3) liens « QT — Quotient Techno » ajoutés au menu Détente (desktop + mobile + mini-nav, calqués sur Sudoku). Réversible (git revert + migration down). Codename seo-piliers-veille-generative.
@@ -381,7 +382,7 @@ declare(strict_types=1);
 
 $lvMajor = 1;
 $lvMinor = 65;
-$lvPatch = 233;
+$lvPatch = 234;
 
 return [
     'major' => $lvMajor,

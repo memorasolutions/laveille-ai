@@ -257,7 +257,7 @@
 
                             {{-- Révision --}}
                             <div x-show="questions.length > 0" style="margin-top:2rem;">
-                                <h3 style="text-align:left;margin-bottom:1.25rem;font-weight:700;color:var(--c-dark);">Révision</h3>
+                                <h2 style="text-align:left;margin-bottom:1.25rem;font-weight:700;color:var(--c-dark);font-size:1.35rem;">Révision</h2>
                                 <template x-for="(item, i) in questions" :key="i">
                                     <div style="background:#f9fafb;border-radius:12px;padding:16px;margin-bottom:1rem;text-align:left;">
                                         <p style="font-weight:600;color:var(--c-dark);margin-bottom:0.5rem;" x-text="(i+1)+'. '+item.question"></p>
