@@ -121,10 +121,24 @@ class NewsletterController extends Controller
             'feedback' => 'nullable|string|max:1000',
         ]);
 
-        $subscriber->update([
-            'unsubscribe_reason' => $validated['reason'],
-            'unsubscribe_feedback' => $validated['feedback'] ?? null,
-        ]);
+        // Le sondage vit uniquement sur la page de confirmation : le retour n'est collecté
+        // qu'APRÈS un désabonnement effectif (garde-fou défensif, ne bloque jamais le désabo).
+        if ($subscriber->unsubscribed_at === null) {
+            $message = __('Le sondage est disponible une fois le désabonnement effectué.');
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => $message], 422);
+            }
+
+            return back()->with('error', $message);
+        }
+
+        // Idempotent : on conserve la première réponse, on n'écrase pas un retour déjà fourni.
+        if ($subscriber->unsubscribe_reason === null) {
+            $subscriber->update([
+                'unsubscribe_reason' => $validated['reason'],
+                'unsubscribe_feedback' => $validated['feedback'] ?? null,
+            ]);
+        }
 
         if ($request->expectsJson()) {
             return response()->json(['ok' => true, 'message' => __('Merci pour votre retour.')]);
