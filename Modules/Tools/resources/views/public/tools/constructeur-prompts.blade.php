@@ -36,7 +36,7 @@
                                         x-text="saving ? '{{ __('Sauvegarde...') }}' : (_editingId ? '{{ __('Mettre à jour') }}' : '{{ __('Sauvegarder') }}')"></button>
                             </div>
                             <div class="small mt-2 mb-0" style="font-size: 0.8rem; color: var(--c-text-muted);">
-                                {{ __('Retrouvez vos prompts dans') }} <a href="{{ route('user.saved') }}?tab=prompts" style="color: var(--c-primary); text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
+                                {{ __('Retrouvez vos prompts dans') }} <a href="{{ route('user.saved') }}?tab=prompts" style="color: #0A3A42; font-weight: 600; text-decoration: underline;">{{ __('vos sauvegardes') }}</a>.
                             </div>
                             <template x-if="saveError">
                                 <div class="alert alert-danger small p-1 mt-2 mb-0" style="font-size: 0.8rem; border-radius: 6px;" x-text="saveError"></div>
@@ -68,16 +68,16 @@
                         {{-- Étape 1 : Persona --}}
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('1. Définir la persona') }} <span style="color: #DC2626;">*</span></h3>
+                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('1. Définir la persona') }} <span style="color: #DC2626;">*</span></h2>
                                 <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.persona = !showHelp.persona" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <p class="text-muted small mb-1">{{ __('Quel rôle l\'IA doit-elle jouer ?') }}</p>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
                             <div class="d-flex gap-3 mb-3">
-                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
+                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 24px; padding: 4px 6px;">
                                     <input type="radio" name="personaType" value="preset" x-model="personaType"> {{ __('Prédéfinie') }}
                                 </label>
-                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
+                                <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 24px; padding: 4px 6px;">
                                     <input type="radio" name="personaType" value="custom" x-model="personaType"> {{ __('Personnalisée') }}
                                 </label>
                             </div>
@@ -97,7 +97,7 @@
                         {{-- Étape 2 : Tâche --}}
                         <div x-show="step === 2" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('2. Définir la tâche') }} <span style="color: #DC2626;">*</span></h3>
+                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('2. Définir la tâche') }} <span style="color: #DC2626;">*</span></h2>
                                 <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.task = !showHelp.task" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <p class="text-muted small mb-1">{{ __('Que doit faire l\'IA ?') }}</p>
@@ -124,6 +124,7 @@
                                 <input type="text" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
                             </div>
                             <div class="form-group mb-3">
+                                <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: rgba(11,114,133,0.05); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Ton texte contient un vrai nom, courriel, numéro ou adresse ? Ne mets jamais tes vraies infos dans une IA. Masque-les d\'abord avec le bouton ci-dessous.') }}</p>
                                 <label class="form-label fw-medium">{{ __('Objet de la tâche') }} <span style="color: #DC2626;">*</span></label>
                                 <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la tâche') }}"></textarea>
                                 <small class="text-muted">{{ __('Décrivez précisément ce que l\'IA doit produire.') }}</small>
@@ -131,7 +132,7 @@
 
                             {{-- Liaison anonymiseur (pattern « module partagé in-page », 100% local) --}}
                             <div class="form-group mb-3">
-                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" aria-expanded="false" aria-controls="cpAnonPanel">🛡️ {{ __('Anonymiser un texte (optionnel)') }}</button>
+                                <button id="cpAnonToggle" type="button" class="ct-btn ct-btn-outline ct-btn-sm" aria-expanded="false" aria-controls="cpAnonPanel">🛡️ {{ __('Masquer mes infos personnelles d\'abord') }}</button>
                                 <a href="/outils/anonymiseur" class="ct-btn ct-btn-ghost ct-btn-sm ms-1" title="{{ __('Ouvrir l\'anonymiseur complet (restauration des réponses IA)') }}">↗ {{ __('Anonymiseur complet') }}</a>
                                 <div id="cpAnonPanel" class="anon-wrap" style="display:none; border:1px solid var(--anon-line,#e2e6ea); border-radius:12px; padding:1rem; margin-top:.75rem; background:#f8fafb;" aria-hidden="true">
                                     <p style="font-size:.85rem; color:#52586a; margin:0 0 .5rem;">🔒 {{ __('100 % local — aucune donnée ne quitte votre navigateur. Sélectionnez un passage, surlignez, anonymisez, puis insérez le texte masqué dans votre tâche.') }}</p>
@@ -149,7 +150,7 @@
                         {{-- Étape 3 : Audience --}}
                         <div x-show="step === 3" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('3. Définir l\'audience') }}</h3>
+                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('3. Définir l\'audience') }}</h2>
                                 <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.audience = !showHelp.audience" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <p class="text-muted small mb-1">{{ __('À qui s\'adresse le contenu ?') }}</p>
@@ -178,7 +179,7 @@
                         {{-- Étape 4 : Options --}}
                         <div x-show="step === 4" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-2">
-                                <h3 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('4. Options avancées') }}</h3>
+                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('4. Options avancées') }}</h2>
                                 <button class="ct-btn ct-btn-ghost ct-btn-xs" @click="showHelp.options = !showHelp.options" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;">?</button>
                             </div>
                             <div x-show="showHelp.options" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;">
