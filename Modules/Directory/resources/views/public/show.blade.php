@@ -869,7 +869,8 @@
                     {{-- Miniature --}}
                     @if($thumbUrl)
                     <div style="position:relative;flex-shrink:0;width:140px;height:80px;border-radius:10px;overflow:hidden;background:#f1f5f9;">
-                        <img src="{{ $thumbUrl }}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+                        <img src="{{ $thumbUrl }}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy"
+                             @if($isYt) onerror="this.onerror=null; this.src='https://img.youtube.com/vi/{{ $res->video_id }}/hqdefault.jpg';" @endif>
                         @if($isYt)
                             <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);">
                                 <div style="width:32px;height:32px;background:rgba(255,0,0,0.9);border-radius:6px;display:flex;align-items:center;justify-content:center;">
