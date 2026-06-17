@@ -50,6 +50,14 @@ class GlossaryLinkifier
     ];
 
     /**
+     * 2026-06-17 #163 : homographes EMPRUNTÉS (token, pipeline) dont la forme MINUSCULE est le terme
+     * légitime (≠ mot/verbe FR courant). On NE force PAS la casse stricte pour eux : la minuscule garde
+     * son lien (intention éditoriale, alias minuscules curés). Distingue « token » (terme) de
+     * « transformer » (verbe FR à ne PAS lier en minuscule).
+     */
+    public const HOMOGRAPH_LOWERCASE_OK = ['token', 'tokens', 'pipeline', 'pipelines'];
+
+    /**
      * 2026-05-05 #141 b : tracking cumulatif inter-appels.
      * Une page peut appeler @glossarize() plusieurs fois (hook, key_points, why_important, etc.).
      * On veut first-occurrence GLOBAL et accumulation des matched terms pour Schema.org.
@@ -333,7 +341,8 @@ class GlossaryLinkifier
         $firstChar = mb_substr($clean, 0, 1);
         $isUpperInitialHomograph = $firstChar !== ''
             && mb_strtolower($firstChar) !== $firstChar
-            && in_array(mb_strtolower($clean), self::STOP_LIST_FR, true);
+            && in_array(mb_strtolower($clean), self::STOP_LIST_FR, true)
+            && ! in_array(mb_strtolower($clean), self::HOMOGRAPH_LOWERCASE_OK, true);
 
         // Capitalisations
         $lower = mb_strtolower($clean);
@@ -399,7 +408,9 @@ class GlossaryLinkifier
         }
 
         $firstChar = mb_substr($name, 0, 1);
-        if ($firstChar !== '' && mb_strtolower($firstChar) !== $firstChar) {
+        $isUpperInitial = $firstChar !== '' && mb_strtolower($firstChar) !== $firstChar;
+        // Casse stricte SAUF pour les emprunts dont la minuscule est le terme légitime (token, pipeline).
+        if ($isUpperInitial && ! in_array($lowered, self::HOMOGRAPH_LOWERCASE_OK, true)) {
             return 'case_sensitive';
         }
 
