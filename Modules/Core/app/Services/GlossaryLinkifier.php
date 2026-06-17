@@ -327,11 +327,20 @@ class GlossaryLinkifier
         // Skip acronymes tout-cap (CNN, RNN, XAI, IoT) — pas de pluriel/casse à dériver
         if (preg_match('/^[A-Z0-9]{2,8}$/u', $clean)) return [];
 
+        // Garde-fou #163 : un homographe à initiale MAJUSCULE (nom propre type « Transformer » dont la
+        // forme minuscule « transformer » est un mot/verbe FR courant de STOP_LIST_FR) ne doit JAMAIS
+        // dériver sa forme minuscule, sinon cette variante re-matche le verbe partout dans les textes.
+        $firstChar = mb_substr($clean, 0, 1);
+        $isUpperInitialHomograph = $firstChar !== ''
+            && mb_strtolower($firstChar) !== $firstChar
+            && in_array(mb_strtolower($clean), self::STOP_LIST_FR, true);
+
         // Capitalisations
         $lower = mb_strtolower($clean);
         $titled = mb_convert_case($clean, MB_CASE_TITLE, 'UTF-8');
         $ucfirst = mb_strtoupper(mb_substr($clean, 0, 1)).mb_substr($lower, 1);
         foreach ([$lower, $titled, $ucfirst] as $v) {
+            if ($isUpperInitialHomograph && $v === $lower) continue; // pas de forme minuscule pour un nom propre homographe
             if ($v !== $clean && ! in_array($v, $out, true)) $out[] = $v;
         }
 
@@ -358,9 +367,9 @@ class GlossaryLinkifier
             foreach ($plurals as $p) {
                 if ($p && $p !== $clean && ! in_array($p, $out, true)) {
                     $out[] = $p;
-                    // Aussi version lowercase du pluriel
+                    // Aussi version lowercase du pluriel — sauf pour un homographe à initiale majuscule (#163)
                     $pLower = mb_strtolower($p);
-                    if ($pLower !== $p && ! in_array($pLower, $out, true)) $out[] = $pLower;
+                    if (! $isUpperInitialHomograph && $pLower !== $p && ! in_array($pLower, $out, true)) $out[] = $pLower;
                 }
             }
         }
