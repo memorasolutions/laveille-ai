@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.254] - 2026-06-17
+
+### Fixed
+- **Formulaire de contact — répondre facilement** : le courriel reçu affiche maintenant clairement le nom, l'adresse et le sujet de la personne, avec un rappel que « Répondre » écrit directement au visiteur. L'expéditeur reste l'adresse du site (pour la livraison), mais on voit enfin d'un coup d'œil qui a écrit et on peut lui répondre.
+
 ## [1.65.253] - 2026-06-17
 
 ### Fixed

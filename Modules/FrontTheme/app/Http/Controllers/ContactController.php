@@ -54,7 +54,16 @@ class ContactController extends Controller
             return $success();
         }
 
-        Mail::raw($validated['message'], function ($message) use ($validated) {
+        // Corps enrichi : qui a écrit + comment répondre (l'expéditeur reste l'adresse du site
+        // pour la délivrabilité ; le Reply-To pointe vers le visiteur → « Répondre » lui écrit).
+        $body = 'Nouveau message reçu via le formulaire de contact de '.config('app.name').'.'."\n\n"
+            .'De : '.$validated['name'].' <'.$validated['email'].'>'."\n"
+            .'Sujet : '.$validated['subject']."\n"
+            .'Date : '.now()->timezone('America/Toronto')->format('Y-m-d H:i').' (Québec)'."\n\n"
+            .'Message :'."\n".$validated['message']."\n\n"
+            .'— Pour lui répondre, utilisez simplement « Répondre » : votre réponse ira directement à '.$validated['email'].'.';
+
+        Mail::raw($body, function ($message) use ($validated) {
             $message->from(config('mail.from.address'), config('mail.from.name'))
                 ->to(config('mail.from.address'))
                 ->subject('Contact: '.$validated['subject'])
