@@ -276,6 +276,35 @@
 </style>
 @endpush
 
+{{-- #166 GEO/AEO : JSON-LD SoftwareApplication fait main (défensif, n'invente aucun prix) --}}
+@php
+  $__sa = [
+    '@context' => 'https://schema.org',
+    '@type' => 'SoftwareApplication',
+    '@id' => url('/annuaire/'.$tool->slug).'#software',
+    'name' => $tool->name,
+    'applicationCategory' => 'WebApplication',
+    'operatingSystem' => 'Web',
+    'url' => filled($tool->url) ? $tool->url : url('/annuaire/'.$tool->slug),
+    'inLanguage' => 'fr-CA',
+  ];
+  $__desc = $tool->short_description ?: strip_tags((string) $tool->description);
+  if (filled($__desc)) { $__sa['description'] = \Illuminate\Support\Str::limit(trim($__desc), 300, ''); }
+  if (filled($tool->screenshot)) { $__sa['image'] = \Illuminate\Support\Str::startsWith($tool->screenshot, 'http') ? $tool->screenshot : url($tool->screenshot); }
+  $__pr = \Illuminate\Support\Str::lower((string) ($tool->pricing_type ?? '').' '.(string) ($tool->pricing ?? ''));
+  if (\Illuminate\Support\Str::contains($__pr, ['free','gratuit','freemium'])) { $__sa['offers'] = ['@type'=>'Offer','price'=>'0','priceCurrency'=>'CAD']; }
+  try { $__avg = (float) $tool->averageRating(); $__cnt = (int) $tool->reviews()->approved()->count(); if ($__avg > 0 && $__cnt > 0) { $__sa['aggregateRating'] = ['@type'=>'AggregateRating','ratingValue'=>round($__avg,1),'reviewCount'=>$__cnt,'bestRating'=>5,'worstRating'=>1]; } } catch (\Throwable $e) {}
+  $__sa['publisher'] = ['@type'=>'Organization','name'=>config('app.name'),'url'=>url('/')];
+  $__toolJsonLd = filled($tool->name) ? json_encode($__sa, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) : null;
+@endphp
+@if($__toolJsonLd)
+@push('head')
+<script type="application/ld+json">
+{!! $__toolJsonLd !!}
+</script>
+@endpush
+@endif
+
 @section('content')
 @php
     $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
