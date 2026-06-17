@@ -143,6 +143,11 @@
                                     <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.index') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.index') ? 'aria-current=page' : '' }}>{{ __('Vue d\'ensemble') }}</a></li>
                                     @endcan
                                     @endif
+                                    @if(Route::has('admin.newsletter.stats'))
+                                    @can('view_newsletter')
+                                    <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.stats') }}" class="nav-link {{ request()->routeIs('admin.newsletter.stats') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.stats') ? 'aria-current=page' : '' }}>📊 {{ __('Statistiques') }}</a></li>
+                                    @endcan
+                                    @endif
                                     @if(Route::has('admin.newsletter.campaigns.index'))
                                     @can('view_campaigns')
                                     <li class="nav-item ps-2"><a href="{{ route('admin.newsletter.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'active' : '' }}" {{ request()->routeIs('admin.newsletter.campaigns.*') ? 'aria-current=page' : '' }}>{{ __('Campagnes') }}</a></li>
