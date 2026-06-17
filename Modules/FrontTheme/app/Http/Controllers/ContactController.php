@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\FrontTheme\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -23,8 +24,22 @@ class ContactController extends Controller
         return view('fronttheme::contact');
     }
 
-    public function send(Request $request): RedirectResponse
+    public function send(Request $request): RedirectResponse|JsonResponse
     {
+        $success = function () use ($request) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => true, 'message' => __('Votre message a bien été envoyé.')]);
+            }
+
+            return back()->with('success', __('Votre message a bien été envoyé.'));
+        };
+
+        // Anti-bot — honeypot maison : champ caché 'hp_url' qu'un humain ne remplit jamais.
+        // Rejet SILENCIEUX (on renvoie le succès, le bot n'apprend rien) sans envoyer le courriel.
+        if ($request->filled('hp_url')) {
+            return $success();
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -32,16 +47,20 @@ class ContactController extends Controller
             'message' => ['required', 'string', 'min:10'],
         ]);
 
+        // Anti-pourriel de liens SEO : compte les URL (http(s)://, www. ou domaine.tld/chemin).
+        // 4 liens ou plus dans le message → rejet silencieux (cas typique du spam de backlinks).
+        $urlCount = preg_match_all('~(?:https?://|www\.|\b[a-z0-9][a-z0-9.-]*\.[a-z]{2,}/)\S*~i', (string) $validated['message']);
+        if ($urlCount >= 4) {
+            return $success();
+        }
+
         Mail::raw($validated['message'], function ($message) use ($validated) {
-            $message->to(config('mail.from.address'))
+            $message->from(config('mail.from.address'), config('mail.from.name'))
+                ->to(config('mail.from.address'))
                 ->subject('Contact: '.$validated['subject'])
                 ->replyTo($validated['email'], $validated['name']);
         });
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => __('Votre message a bien été envoyé.')]);
-        }
-
-        return back()->with('success', __('Votre message a bien été envoyé.'));
+        return $success();
     }
 }

@@ -10,6 +10,7 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
 @endsection
 @section('content')
+                    @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">

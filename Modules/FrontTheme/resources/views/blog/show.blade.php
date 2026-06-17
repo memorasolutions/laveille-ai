@@ -228,6 +228,24 @@
                                 :updated="$article->updated_at ? $article->updated_at->timezone('America/Toronto')->format('Y-m-d') : null"
                             />
 
+                            {{-- #166 GEO/rebond : liens connexes au-dessus du pli (maillage vers le pilier + outils + reliés) --}}
+                            <nav aria-label="{{ __('Liens connexes') }}" style="background-color:#f3f8f9;border-left:3px solid var(--c-primary,#064E5A);border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:0.95rem;">
+                                <strong style="color:var(--c-primary,#064E5A);">💡 {{ __('Pour aller plus loin') }}</strong>
+                                <span style="display:block;margin-top:6px;line-height:1.9;">
+                                    <a href="{{ url('/outils/constructeur-prompts') }}" style="color:var(--c-primary,#064E5A);text-decoration:underline;">{{ __('Constructeur de prompts') }}</a>
+                                    ·
+                                    <a href="{{ url('/outils') }}" style="color:var(--c-primary,#064E5A);text-decoration:underline;">{{ __('Tous nos outils IA') }}</a>
+                                    @isset($relatedArticles)
+                                        @if($relatedArticles->isNotEmpty())
+                                            @foreach($relatedArticles->take(2) as $r)
+                                                ·
+                                                <a href="{{ route('blog.show', $r->slug) }}" style="color:var(--c-primary,#064E5A);text-decoration:underline;">{{ $r->title }}</a>
+                                            @endforeach
+                                        @endif
+                                    @endisset
+                                </span>
+                            </nav>
+
                             <div class="entry-details">
                                 @php
                                     $articleContent = $article->content;

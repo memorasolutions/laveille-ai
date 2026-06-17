@@ -45,6 +45,7 @@
 @endpush
 
 @section('content')
+                    @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <div class="row justify-content-center">

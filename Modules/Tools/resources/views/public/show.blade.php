@@ -27,6 +27,7 @@
                                 @include('tools::partials.share-btn', ['tool' => $tool])
                             </div>
                             <p class="text-muted mb-4">{{ $tool->description }}</p>
+                            @include('tools::public.partials.tool-geo')
                             <div class="alert alert-info">
                                 {{ __('Cet outil sera bientôt disponible.') }}
                             </div>

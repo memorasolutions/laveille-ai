@@ -52,6 +52,24 @@
 
             <div class="card mt-3">
                 <div class="card-header">
+                    <h6 class="mb-0">Réponse rapide (GEO/AEO)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="answer_summary" class="form-label">Résumé « réponse d'abord »</label>
+                        <textarea name="answer_summary" id="answer_summary" class="form-control" rows="3" maxlength="600">{{ old('answer_summary', $article->answer_summary ?? '') }}</textarea>
+                        <div class="form-text">40 à 80 mots, répond directement à la question principale ; laissez vide pour masquer le bloc</div>
+                    </div>
+                    <div class="mb-0">
+                        <label for="answer_points_text" class="form-label">Points clés (une puce par ligne)</label>
+                        <textarea name="answer_points_text" id="answer_points_text" class="form-control" rows="5">{{ old('answer_points_text', isset($article) && is_array($article->answer_points) ? implode("\n", $article->answer_points) : '') }}</textarea>
+                        <div class="form-text">3 à 5 puces factuelles et autonomes, 12 à 25 mots chacune</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
                     <h6 class="mb-0">FAQ de l'article</h6>
                 </div>
                 <div class="card-body">

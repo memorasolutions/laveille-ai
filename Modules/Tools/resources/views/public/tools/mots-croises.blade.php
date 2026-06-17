@@ -10,6 +10,7 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
 @endsection
 @section('content')
+                    @include('tools::public.partials.tool-geo')
 {{-- 2026-05-05 #106 : helper WCAG contrast global (window.WcagContrast.ratio) - DRY --}}
 @include('core::partials.wcag-contrast-helper')
 {{-- 2026-05-05 #108 : helper slugify global (window.SlugHelper.slugify) - DRY --}}

@@ -39,6 +39,11 @@
                 <div style="background: #f9fafb; border: 1px solid rgba(0,0,0,.06); border-radius: 12px; padding: 24px;">
                     <form method="POST" action="{{ route('contact.send') }}" id="contact-form-main">
                         @csrf
+                        {{-- Anti-bot : champ piège (honeypot). Invisible et ignoré des humains ; seuls les robots le remplissent. --}}
+                        <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;overflow:hidden;">
+                            <label for="hp_url">{{ __('Ne pas remplir ce champ') }}</label>
+                            <input type="text" id="hp_url" name="hp_url" value="" tabindex="-1" autocomplete="off">
+                        </div>
 
                         <div class="row" style="margin-left: -8px; margin-right: -8px;">
                             <div class="col-sm-6" style="padding-left: 8px; padding-right: 8px;">

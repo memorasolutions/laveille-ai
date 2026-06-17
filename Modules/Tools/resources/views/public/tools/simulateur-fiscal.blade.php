@@ -120,6 +120,7 @@ function fiscalSim(cfg) {
 </script>
 @endpush
 @section('content')
+                    @include('tools::public.partials.tool-geo')
 <section class="wpo-blog-single-section section-padding">
     <div class="container">
         <script>window.__fiscalConfig = @json($toolConfig);</script>

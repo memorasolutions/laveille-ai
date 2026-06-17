@@ -21,6 +21,8 @@ class Tool extends Model
         'name',
         'slug',
         'description',
+        'answer_summary',
+        'answer_points',
         'icon',
         'featured_image',
         'is_active',
@@ -34,6 +36,7 @@ class Tool extends Model
         'is_active' => 'boolean',
         'is_under_construction' => 'boolean',
         'views_count' => 'integer',
+        'answer_points' => 'array',
     ];
 
     public function scopeActive($query)

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.253] - 2026-06-17
+
+### Fixed
+- **Formulaire de contact — anti-pourriel** : ajout d'une protection invisible (piège à robots) et d'un filtre qui bloque silencieusement les messages bourrés de liens. Cela met fin aux courriels indésirables reçus via le formulaire de contact, qui semblaient « venir de votre propre adresse » alors qu'il s'agissait du formulaire du site (pas d'un piratage).
+
+## [1.65.252] - 2026-06-17
+
+### Added
+- **Outils mieux compris par les IA (GEO/AEO)** : chaque outil interactif publie désormais des données structurées (Schema.org WebApplication) et peut afficher un encadré « réponse rapide » au-dessus du contenu, pour être mieux cité par ChatGPT, Perplexity et les aperçus IA de Google.
+- **Constructeur de prompts — ouvrir dans une IA** : nouveaux boutons « Ouvrir dans ChatGPT / Claude / Perplexity » qui copient le prompt et l'ouvrent directement dans l'assistant choisi.
+- **Articles — éditeur « réponse rapide »** : le tableau de bord permet maintenant de rédiger un résumé direct et des points clés pour chaque article, pour une meilleure visibilité dans les réponses des IA.
+- **Blogue — liens utiles en haut d'article** : un encadré « Pour aller plus loin » oriente vers le constructeur de prompts et des articles reliés, dès le haut de la page (réduit le rebond).
+
 ## [1.65.169] - 2026-06-12
 
 ### Added

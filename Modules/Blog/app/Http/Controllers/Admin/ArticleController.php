@@ -54,8 +54,10 @@ class ArticleController extends Controller
             'format' => 'nullable|in:standard,video,gallery,audio,quote,link',
             'is_featured' => 'nullable',
             'content_password' => 'nullable|string|max:100',
+            'answer_summary' => 'nullable|string|max:600',
         ]);
 
+        $validated['answer_points'] = $this->parseAnswerPoints($request->input('answer_points_text'));
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['user_id'] = auth()->id();
         $validated['status'] = $validated['status'] ?? 'draft';
@@ -101,8 +103,10 @@ class ArticleController extends Controller
             'format' => 'nullable|in:standard,video,gallery,audio,quote,link',
             'is_featured' => 'nullable',
             'content_password' => 'nullable|string|max:100',
+            'answer_summary' => 'nullable|string|max:600',
         ]);
 
+        $validated['answer_points'] = $this->parseAnswerPoints($request->input('answer_points_text'));
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['tags'] = $this->parseTagsInput($validated['tags_input'] ?? '');
         unset($validated['tags_input']);
@@ -120,6 +124,38 @@ class ArticleController extends Controller
 
         return redirect()->route('admin.blog.articles.index')
             ->with('success', 'Article mis à jour.');
+    }
+
+    private function parseAnswerPoints(?string $raw): ?array
+    {
+        if ($raw === null || trim($raw) === '') {
+            return null;
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $raw);
+        $points = [];
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            if ($trimmed === '') {
+                continue;
+            }
+
+            // Supprime les puces courantes au début
+            $trimmed = preg_replace('/^[\-\*\x{2022}]\s*/u', '', $trimmed);
+            $trimmed = trim($trimmed);
+
+            if ($trimmed !== '') {
+                $points[] = $trimmed;
+            }
+        }
+
+        if (empty($points)) {
+            return null;
+        }
+
+        // Limite à 8 puces maximum
+        return array_values(array_slice($points, 0, 8));
     }
 
     private function syncFaqs(Article $article, array $faqsInput): void

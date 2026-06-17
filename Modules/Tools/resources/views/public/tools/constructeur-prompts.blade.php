@@ -28,6 +28,7 @@
                                 <button class="ct-btn ct-btn-primary ct-btn-icon" @click="jQuery('#promptHelpModal').modal('show')" style="border-radius:50%;width:32px;height:32px;padding:0;line-height:32px;flex-shrink:0;" title="{{ __('Aide') }}">?</button>
                             </div>
                         </div>
+                        @include('tools::public.partials.tool-geo')
                         {{-- Barre sauvegarde (visible avant les étapes) --}}
                         <div class="mt-3 mb-3 p-3 rounded" x-show="isAuthenticated" x-cloak style="background: rgba(11,114,133,0.04); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
                             <div class="d-flex gap-2 align-items-center">
@@ -369,6 +370,13 @@
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
                             <button class="ct-btn ct-btn-outline" @click="exportPrompt()" :disabled="!isValid">{{ __('Exporter .txt') }}</button>
+                        </div>
+                        {{-- #166 GEO/UX : ouvrir le prompt directement dans une IA (le prompt est aussi copié) --}}
+                        <div class="d-flex gap-2 mb-4 flex-wrap align-items-center">
+                            <span class="text-muted small">{{ __('Ouvrir dans') }} :</span>
+                            <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'" @click="openIn('chatgpt')">ChatGPT</button>
+                            <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'" @click="openIn('claude')">Claude</button>
+                            <button class="ct-btn ct-btn-outline ct-btn-sm" :disabled="!isValid" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'" @click="openIn('perplexity')">Perplexity</button>
                         </div>
 
                         {{-- Historique (visible seulement pour les non-connectes, les connectes ont "Mes prompts") --}}
@@ -755,8 +763,45 @@ document.addEventListener('alpine:init', function() {
             copy: function() {
                 var self = this;
                 navigator.clipboard.writeText(this.prompt);
+                this.track('prompt_copy', { tool: 'constructeur-prompts' });
                 this.copied = true;
                 setTimeout(function() { self.copied = false; }, 2000);
+            },
+
+            track: function(event, params) {
+                try {
+                    if (typeof window.gtag === 'function') {
+                        window.gtag('event', event, params || {});
+                    }
+                } catch (e) {}
+            },
+
+            openIn: function(target) {
+                if (!this.prompt) return;
+                try {
+                    navigator.clipboard.writeText(this.prompt);
+                } catch (e) {}
+                var baseUrl = '';
+                switch (target) {
+                    case 'chatgpt':
+                        baseUrl = 'https://chatgpt.com/?q=';
+                        break;
+                    case 'claude':
+                        baseUrl = 'https://claude.ai/new?q=';
+                        break;
+                    case 'perplexity':
+                        baseUrl = 'https://www.perplexity.ai/search?q=';
+                        break;
+                    default:
+                        return;
+                }
+                var encodedPrompt = encodeURIComponent(this.prompt);
+                var url = baseUrl;
+                if (encodedPrompt.length <= 1800) {
+                    url += encodedPrompt;
+                }
+                this.track('prompt_open_in', { tool: 'constructeur-prompts', target: target });
+                window.open(url, '_blank', 'noopener');
             },
 
             copyText: function(text) { navigator.clipboard.writeText(text); },

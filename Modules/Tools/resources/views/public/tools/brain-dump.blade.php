@@ -84,6 +84,7 @@
 @endpush
 
 @section('content')
+                    @include('tools::public.partials.tool-geo')
 <style>
 [x-cloak] { display: none !important; }
 .bd-page { --c-bg: #F0F4F8; --c-surface: #fff; --c-dark: #1a1d23; --c-muted: #52586a; }
