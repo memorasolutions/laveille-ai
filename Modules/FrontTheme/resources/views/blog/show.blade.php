@@ -221,6 +221,13 @@
                                 </div>
                             @endif
 
+                            {{-- #165 GEO/AEO : answer-box « réponse d'abord » (rendu seulement si answer_summary rempli) --}}
+                            <x-core::answer-box
+                                :summary="$article->answer_summary ?? null"
+                                :points="$article->answer_points ?? []"
+                                :updated="$article->updated_at ? $article->updated_at->timezone('America/Toronto')->format('Y-m-d') : null"
+                            />
+
                             <div class="entry-details">
                                 @php
                                     $articleContent = $article->content;

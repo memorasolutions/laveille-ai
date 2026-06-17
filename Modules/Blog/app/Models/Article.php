@@ -73,6 +73,8 @@ class Article extends Model implements SearchableContract
         'featured_image',
         'video_url',
         'video_summary',
+        'answer_summary',
+        'answer_points',
         'status',
         'published_at',
         'category',
@@ -96,6 +98,7 @@ class Article extends Model implements SearchableContract
         'status' => ArticleState::class,
         'tags' => 'array',
         'meta' => 'array',
+        'answer_points' => 'array',
         'is_featured' => 'boolean',
     ];
 
