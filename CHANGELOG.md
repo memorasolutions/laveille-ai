@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.65.255] - 2026-06-17
+
+### Added
+- **llms.txt** : ajout d'un fichier `/llms.txt` qui présente le site et ses pages clés aux IA (ChatGPT, Perplexity, Google AI), pour favoriser des citations exactes vers nos outils et ressources.
+
 ## [1.65.254] - 2026-06-17
 
 ### Fixed

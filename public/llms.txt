@@ -1,0 +1,19 @@
+# La veille de Stef
+
+> Média et outils d'intelligence artificielle en français québécois : actualités vulgarisées, outils interactifs gratuits, annuaire et glossaire, le tout conçu pour respecter la vie privée et la Loi 25.
+
+## Outils interactifs
+
+- [Constructeur de prompts](https://laveille.ai/outils/constructeur-prompts) : Bâtissez des prompts optimisés pour ChatGPT, Claude ou Gemini, étape par étape.
+- [Anonymiseur](https://laveille.ai/outils/anonymiseur) : Masquez vos données personnelles avant de les soumettre à une IA; fonctionne 100 % en local et respecte la Loi 25.
+- [Tous les outils IA gratuits](https://laveille.ai/outils) : Accédez à l'ensemble des outils interactifs offerts gratuitement.
+
+## Ressources
+
+- [Annuaire](https://laveille.ai/annuaire) : Découvrez des centaines d'outils d'IA, présentés en fiches claires et en français.
+- [Glossaire](https://laveille.ai/glossaire) : Lexique simple des termes liés à l'IA et au numérique, en français québécois.
+- [Blog](https://laveille.ai/blog) : Actualités et analyses sur l'IA, expliquées de façon accessible.
+
+## Contact
+
+- [Contactez-nous](https://laveille.ai/contact) pour toute question, suggestion ou collaboration.
