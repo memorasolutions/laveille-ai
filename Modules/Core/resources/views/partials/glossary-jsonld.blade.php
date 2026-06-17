@@ -2,6 +2,9 @@
 {{-- Usage : @include('core::partials.glossary-jsonld') APRÈS @glossarize() pour récupérer matched terms --}}
 @php
     $matchedTerms = \Modules\Core\Services\GlossaryLinkifier::getLastMatchedTerms();
+    // #164 : les outils de l'annuaire (type 'tool') gardent l'infobulle, mais ne sont PAS des « DefinedTerm »
+    // du glossaire → on les exclut du Schema.org DefinedTermSet (ce sont des produits, pas des définitions).
+    $definedTerms = array_values(array_filter($matchedTerms, fn ($t) => ($t['type'] ?? '') !== 'tool'));
 @endphp
 @if(! empty($matchedTerms))
     {{-- 2026-05-05 #142 : CSS tooltip stylé charte Memora (pur CSS, apparition 150ms) --}}
@@ -225,7 +228,7 @@
                 'termCode' => $t['slug'],
                 'url' => url($t['url']),
                 'inDefinedTermSet' => url($t['type'] === 'glossary' ? '/glossaire' : '/acronymes-education'),
-            ], $matchedTerms),
+            ], $definedTerms),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     @endphp
     <script type="application/ld+json">

@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v8.'; // #158 bump cache après multi-occurrence par terme
+    public const CACHE_KEY = 'glossary.terms.v9.'; // #164 bump : ajout de la 3e source (outils de l'annuaire)
     public const CACHE_TTL = 3600; // 1h
     public const MIN_LENGTH = 3; // #153 bump : 4→3 pour permettre TPU/GPU/NPU. Garde 2 chars rejetés via acronyme tout-cap check
     public const MAX_LINKS_PER_PAGE = 120; // #158 bump 60→120 : articles longs (S90 concentré 20 URLs) saturent à 60. 120 couvre 80%+ occurrences
@@ -56,6 +56,13 @@ class GlossaryLinkifier
      * « transformer » (verbe FR à ne PAS lier en minuscule).
      */
     public const HOMOGRAPH_LOWERCASE_OK = ['token', 'tokens', 'pipeline', 'pipelines'];
+
+    /**
+     * 2026-06-17 #164 : noms d'outils de l'annuaire qui sont aussi des mots courants / prénoms
+     * (« Claude », « Avec », « Tome », « Make »…) → JAMAIS auto-liés, sinon faux positifs en prose FR.
+     * Les ~330 autres outils (noms distinctifs) sont auto-liés en casse stricte vers /annuaire/{slug}.
+     */
+    public const TOOL_NEVER_AUTO = ['claude', 'avec', 'tome', 'caribou', 'make', 'motion', 'gamma', 'gemini', 'mistral', 'consensus', 'intent', 'dust', 'soar', 'remind', 'spinach', 'grok', 'aqua', 'handy', 'lounge', 'willow', 'poe', 'pika', 'noa', 'deduce'];
 
     /**
      * 2026-05-05 #141 b : tracking cumulatif inter-appels.
@@ -271,6 +278,55 @@ class GlossaryLinkifier
                         });
                 } catch (\Throwable $e) {
                     Log::warning('GlossaryLinkifier - Acronym load fail', ['e' => $e->getMessage()]);
+                }
+            }
+
+            // 2026-06-17 #164 : 3e source — OUTILS DE L'ANNUAIRE (Directory). Auto-lien vers /annuaire/{slug}.
+            // Glossaire + acronymes ont la PRIORITÉ (déjà dans $terms) ; on ne double pas un nom déjà pris.
+            $takenLower = [];
+            foreach ($terms as $tt) {
+                $takenLower[mb_strtolower($tt['name'])] = true;
+            }
+
+            if (class_exists(\Modules\Directory\Models\Tool::class)) {
+                try {
+                    \Modules\Directory\Models\Tool::query()
+                        ->where('status', 'published')
+                        ->get(['id', 'name', 'slug', 'short_description'])
+                        ->each(function ($tool) use (&$terms, &$takenLower, $locale) {
+                            try {
+                                $name = $tool->getTranslation('name', $locale, false) ?: $tool->name;
+                                $slug = $tool->getTranslation('slug', $locale, false) ?: $tool->slug;
+                                if (! $name || ! $slug) {
+                                    return;
+                                }
+                                if (mb_strlen($name) < self::MIN_LENGTH) {
+                                    return;
+                                }
+                                $lower = mb_strtolower($name);
+                                if (in_array($lower, self::TOOL_NEVER_AUTO, true)) {
+                                    return; // mot courant / prénom → jamais auto-lié
+                                }
+                                if (isset($takenLower[$lower])) {
+                                    return; // précédence glossaire/acronyme (ou doublon outil)
+                                }
+                                $desc = $tool->getTranslation('short_description', $locale, false) ?: $tool->short_description;
+                                $shortDesc = Str::limit(self::stripMarkdownInline(strip_tags((string) $desc)), 180);
+                                $terms[] = [
+                                    'name' => $name,
+                                    'slug' => $slug,
+                                    'definition' => $shortDesc,
+                                    'type' => 'tool',
+                                    'url' => '/annuaire/'.$slug,
+                                    'match_strategy' => 'case_sensitive',
+                                ];
+                                $takenLower[$lower] = true;
+                            } catch (\Throwable $e) {
+                                return;
+                            }
+                        });
+                } catch (\Throwable $e) {
+                    Log::warning('GlossaryLinkifier - Tool load fail', ['e' => $e->getMessage()]);
                 }
             }
 

@@ -65,6 +65,11 @@ class CoreServiceProvider extends ServiceProvider
             \Modules\Acronyms\Models\Acronym::saved(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
             \Modules\Acronyms\Models\Acronym::deleted(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
         }
+        // 2026-06-17 #164 : outils de l'annuaire = 3e source auto-liée → invalider le cache à leur modification.
+        if (class_exists(\Modules\Directory\Models\Tool::class)) {
+            \Modules\Directory\Models\Tool::saved(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
+            \Modules\Directory\Models\Tool::deleted(fn () => \Modules\Core\Services\GlossaryLinkifier::flushCache());
+        }
     }
 
     /**
