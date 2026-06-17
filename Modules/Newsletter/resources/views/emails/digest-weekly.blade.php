@@ -610,6 +610,22 @@
         </td>
     </tr>
 
+    {{-- 9.9 MICRO-ENGAGEMENT : sondage 1 clic (clics trackés via le webhook Brevo, lien distinguable nl_avis) --}}
+    <tr>
+        <td style="padding:26px 30px;text-align:center;border-top:1px solid #eeeeee;" class="mobile-p">
+            <p style="margin:0 0 14px;font-size:15px;color:#1A1D23;font-weight:bold;">Ce numéro t'a été utile ?</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center"><tr>
+                <td style="padding:0 6px;">
+                    <a href="https://laveille.ai/?nl_avis=utile&utm_source=newsletter&utm_medium=email&utm_campaign=avis" style="display:inline-block;background-color:#e8f7f4;color:#064E5A;border:1px solid #3dc9d8;padding:10px 20px;border-radius:6px;font-size:14px;font-weight:bold;text-decoration:none;">&#128077; Oui, utile</a>
+                </td>
+                <td style="padding:0 6px;">
+                    <a href="https://laveille.ai/?nl_avis=bof&utm_source=newsletter&utm_medium=email&utm_campaign=avis" style="display:inline-block;background-color:#f4f4f4;color:#666666;border:1px solid #dddddd;padding:10px 20px;border-radius:6px;font-size:14px;font-weight:bold;text-decoration:none;">&#128078; Bof</a>
+                </td>
+            </tr></table>
+            <p style="margin:14px 0 0;font-size:12px;color:#999999;">Un seul clic, ça nous aide à améliorer l'infolettre.</p>
+        </td>
+    </tr>
+
     {{-- 10. FOOTER --}}
     <tr>
         <td style="padding:30px;text-align:center;background-color:#fafafa;" class="mobile-p">

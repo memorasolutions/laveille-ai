@@ -70,7 +70,7 @@ class BrevoWebhookController extends Controller
                     'subscriber_id' => $subscriber->id,
                     'event' => $event,
                     'message_id' => $payload['message-id'] ?? null,
-                    'link' => $event === 'clicked' ? ($payload['link'] ?? null) : null,
+                    'link' => $payload['link'] ?? null, // Brevo n'envoie 'link' que sur un clic (event 'click'/'clicked') → on le garde tel quel.
                     'ip' => $request->ip(),
                     'metadata' => $payload,
                     'occurred_at' => $occurredAt,
