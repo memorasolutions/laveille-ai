@@ -369,20 +369,32 @@ class GlossaryLinkifier
     }
 
     /**
-     * 2026-05-05 #145 WSD : auto-escalade strategy si terme dans STOP_LIST_FR.
-     * Escalade vers partial_case_sensitive (#150) qui matche 1ère lettre tolérante mais reste strict.
-     * Plus permissif que case_sensitive tout en évitant les faux positifs verbe/nom.
+     * 2026-05-05 #145 WSD : auto-escalade strategy si terme dans STOP_LIST_FR (mots/verbes FR courants).
+     * Fix #163 2026-06-17 : l'escalade visait case_sensitive dès l'origine (le docblock STOP_LIST le dit),
+     * mais le code retournait partial_case_sensitive (1re lettre tolérante) ET ne se déclenchait que sur 'loose'.
+     * Résultat : « Transformer » (stocké partial) surlignait le verbe minuscule « transformer ».
+     * Désormais : un homographe à initiale MAJUSCULE (nom propre type « Transformer ») exige la casse stricte
+     * (seule la forme capitalisée est liée, jamais le mot/verbe minuscule), même si déjà stocké en 'partial'.
+     * Un homographe canonique en minuscule conserve l'escalade tolérante #150 depuis 'loose'.
+     * Stratégies déjà strictes/neutralisées (case_sensitive, exact_phrase, never_auto) ne sont jamais modifiées.
      */
     protected static function escalateStrategyIfStopList(string $name, string $currentStrategy): string
     {
-        if ($currentStrategy !== 'loose') {
+        if (in_array($currentStrategy, ['case_sensitive', 'exact_phrase', 'never_auto'], true)) {
             return $currentStrategy;
         }
+
         $lowered = mb_strtolower($name);
-        if (in_array($lowered, self::STOP_LIST_FR, true)) {
-            return 'partial_case_sensitive';
+        if (! in_array($lowered, self::STOP_LIST_FR, true)) {
+            return $currentStrategy;
         }
-        return 'loose';
+
+        $firstChar = mb_substr($name, 0, 1);
+        if ($firstChar !== '' && mb_strtolower($firstChar) !== $firstChar) {
+            return 'case_sensitive';
+        }
+
+        return $currentStrategy === 'loose' ? 'partial_case_sensitive' : $currentStrategy;
     }
 
     /**
