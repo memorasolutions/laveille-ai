@@ -7,7 +7,10 @@ declare(strict_types=1);
  *
  * @project laveille.ai
  *
- * Défis bien-être hebdomadaires pour la newsletter dimanche.
+ * Défis hebdomadaires de la newsletter, orientés IA et numérique (et bien-être).
+ * Recadrage 2.2 : le bandeau « Défi bien-être » devient « Défi IA et numérique »
+ * (titre + intro on-promise dans digest-weekly.blade.php). Les défis ci-dessous
+ * restent compatibles : title + hook + steps suffisent.
  *
  * Structure d'un défi :
  * - week_iso        : numéro ISO de semaine assigné (optionnel — si absent, rotation auto)
@@ -75,7 +78,57 @@ return [
         ],
     ],
 
-    // À enrichir : 19 autres défis bien-être + IA depuis le doc Google user.
-    // Structure identique. Champs minimum requis : title + hook + steps.
+    // --- Défis IA et numérique (recadrage 2.2, on-promise) -----------------------
+    // Pas de week_iso : ils entrent dans la rotation modulo. Structure identique.
+    // Champ « score » omis volontairement (aucune statistique de satisfaction inventée).
+
+    [
+        'title' => 'Résume un long texte en 30 secondes avec l\'IA',
+        'subtitle' => 'Transforme un pavé en cinq points clés que tu retiens vraiment.',
+        'hook' => 'On reçoit tous des courriels, des comptes rendus ou des articles trop longs. Cette semaine, laisse l\'IA faire le tri : tu gardes l\'essentiel sans tout relire.',
+        'steps' => [
+            '<strong>Choisis un texte.</strong> Un courriel long, un compte rendu de réunion ou un article que tu as mis de côté.',
+            '<strong>Retire le sensible.</strong> Avant de coller, enlève les noms, les montants et les renseignements personnels que tu ne veux pas partager.',
+            '<strong>Demande un résumé.</strong> Colle le texte dans ChatGPT, Claude ou Gemini avec : « Résume ce texte en 5 points clés, puis donne-moi la prochaine action à faire. »',
+            '<strong>Garde ton esprit critique.</strong> Compare le résumé au texte d\'origine : l\'IA peut se tromper ou oublier un détail important.',
+        ],
+        'privacy' => 'Le texte que tu colles est envoyé au service d\'IA choisi. Pour respecter la Loi 25, ne colle jamais de renseignements personnels de tes clients ou collègues sans leur accord.',
+        'bonus' => 'Demande ensuite : <em>« Reformule ce résumé pour quelqu\'un qui n\'y connaît rien. »</em> Un bon test pour vérifier que tu as vraiment compris.',
+        'cta_url' => 'https://www.laveille.ai/outils/constructeur-prompts',
+        'cta_label' => 'Construire mon prompt de résumé',
+    ],
+
+    [
+        'title' => 'Active la double authentification sur un compte important',
+        'subtitle' => 'Cinq minutes aujourd\'hui pour éviter un piratage demain.',
+        'hook' => 'Un mot de passe seul ne suffit plus en 2026. La double authentification (2FA) ajoute une deuxième barrière : même si quelqu\'un vole ton mot de passe, il ne peut pas entrer.',
+        'steps' => [
+            '<strong>Choisis un compte clé.</strong> Ton courriel principal, ta banque, tes réseaux sociaux ou ton infonuagique : commence par le plus important.',
+            '<strong>Ouvre les réglages de sécurité.</strong> Cherche « Authentification à deux facteurs » ou « Vérification en deux étapes ».',
+            '<strong>Privilégie une application.</strong> Une appli d\'authentification (Google Authenticator, Microsoft Authenticator) est plus sûre que le code reçu par texto.',
+            '<strong>Note tes codes de secours.</strong> Range-les dans un endroit sûr au cas où tu perdrais ton téléphone.',
+        ],
+        'privacy' => 'La 2FA protège tes données personnelles et celles de tes contacts. C\'est une mesure de sécurité concrète, dans l\'esprit de la Loi 25.',
+        'bonus' => 'Profite de ton élan : active aussi la 2FA sur un deuxième compte cette semaine. L\'habitude se prend vite.',
+        'cta_url' => 'https://www.laveille.ai/glossaire',
+        'cta_label' => 'Comprendre les termes de sécurité',
+    ],
+
+    [
+        'title' => 'Repère une fausse image générée par IA',
+        'subtitle' => 'Aiguise ton œil avant de partager.',
+        'hook' => 'Les images générées par IA sont partout, et certaines servent à désinformer. Cette semaine, entraîne ton œil à reconnaître les indices qui trahissent une image artificielle.',
+        'steps' => [
+            '<strong>Observe les détails qui clochent.</strong> Mains à six doigts, textes illisibles, bijoux ou dents asymétriques, arrière-plans qui se déforment.',
+            '<strong>Vérifie la source.</strong> D\'où vient l\'image ? Un compte fiable ou un profil anonyme créé hier ?',
+            '<strong>Fais une recherche inversée.</strong> Colle l\'image dans Google Images ou TinEye pour voir où elle est apparue en premier.',
+            '<strong>Doute avant de partager.</strong> Dans le doute, ne partage pas : une fausse image se propage en quelques clics.',
+        ],
+        'bonus' => 'Demande à une IA : <em>« Quels sont les signes typiques d\'une image générée par IA en 2026 ? »</em> et compare avec ta propre liste.',
+        'cta_url' => 'https://www.laveille.ai/glossaire',
+        'cta_label' => 'Explorer le glossaire IA',
+    ],
+
+    // À enrichir : autres défis IA, numériques et bien-être. Structure identique.
 
 ];
